@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸCookie = go.net.http_package.ΔCookie;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,7 +59,7 @@ using static go.net.http.cookiejar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AE2gAcKmgpQAGjqSrLKssoKUqJKClIKCgoKmrLKUppSmgpSCgpTmgoKClKiSrLKo8oKUgoKUlIKUgoKmgoKCpoKCooKCgpSClIKCgpSCgpTcgoCCpICCpJSCltyyqPKClIKUgoKUgpSClJSCgoKClIKCgoKCppSCpoKClIKClIKCpoKClMaoooKCgoK4goKCpoKqooKClIKUqJKCpoKCgoKmgoKUgqbcgqiSypSqooKmgoKUAAoYAA0ClIKUpoKCuIKCgoKUgoKUgpSCuIKCgpSUtLS2qILMlpKmpgAQIoIACxjclKamgpSm7riCgqaU3IKm", "247-255:1")]
+[assembly: GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AE6gAcKmgpQAHDqSrLKssoKUqJKClIKCgoKmrLKUppSmgpSCgpQACAaCgoKUqJLMsqjygpSCgpSUgpSCgqaCgoKmgoKigoKClIKUgoKClIKClNyCgIKkgIKklIKW3LKo8oKUgpSCgpSClIKUlIKCgoKUgoKCgoKmlIKmgoKUgoKUgoKmgoKUxsiigoKCgriCgoKmgqqigoKUgpSokoKmgoKCgqaCgpSCptyCqJLKlKqigqaCgpQADBgADQKUgpSmgoK4goKCgpSCgpSClIK4goKClJS0tLbIgsy2kqamABAiggALGNyUpqaClKbuuIKCppTcgqY=", "247-255:1")]
 [assembly: GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ABtG8oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgoKClIKUgpSCgoKClIKUpoKUpJSokoKUlIKCgoKUAAkYsoKUgoKCgoKUpg==")]
 // </GoSourcePositionMaps>
 
@@ -105,3 +102,14 @@ public static partial class cookiejar_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cookiejar_package.Jar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejarᴛJar;
+[GoMethodHost(typeof(cookiejar_package.entry)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejarᴛentry;
+// </MethodHolders>

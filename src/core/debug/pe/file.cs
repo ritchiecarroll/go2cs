@@ -27,6 +27,7 @@ using strings = strings_package;
 using compress;
 using encoding;
 using go.debug;
+using static pe_package;
 
 partial class pe_package {
 
@@ -34,7 +35,7 @@ partial class pe_package {
 partial struct File {
     /*embed*/ public FileHeader FileHeader;
     public any OptionalHeader; // of type *OptionalHeader32 or *OptionalHeader64
-    public slice<ж<ΔSection>> Sections;
+    public slice<ж<Section>> Sections;
     public slice<ж<Symbol>> Symbols;      // COFF symbols with auxiliary symbol records removed
     public slice<COFFSymbol> COFFSymbols; // all COFF symbols (including auxiliary symbol records)
     public StringTable StringTable;
@@ -56,6 +57,8 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
+} partial class peᴛFile {
+
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
@@ -67,6 +70,8 @@ public static error Close(this ref File f) {
     }
     return err;
 }
+
+} partial class pe_package {
 
 // TODO(brainman): add Load function, as a replacement for NewFile, that does not call removeAuxSymbols (for performance)
 
@@ -135,7 +140,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
 
     // Process sections.
-    f.Sections = new slice<ж<ΔSection>>(f.FileHeader.NumberOfSections);
+    f.Sections = new slice<ж<Section>>(f.FileHeader.NumberOfSections);
     for (nint i = 0; i < (nint)f.FileHeader.NumberOfSections; i++) {
         var sh = @new<SectionHeader32>();
         var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.LittleEndian, sh.OrTypedNil()); if (errΔ3 != nil) {
@@ -145,7 +150,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         if (errΔ4 != nil) {
             return (default, errΔ4);
         }
-        var s = @new<ΔSection>();
+        var s = @new<Section>();
         s.SectionHeader = new SectionHeader(
             Name: name,
             VirtualSize: sh.VirtualSize,
@@ -180,6 +185,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 partial struct nobitsSectionReader {
 }
 
+} partial class peᴛnobitsSectionReader {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedReadFromˢ => ref unexpectedReadFromˢᵇ;
 private static readonly @string unexpectedReadFromˢᵇ = "unexpected read from section with uninitialized data"u8;
@@ -187,6 +194,8 @@ private static readonly @string unexpectedReadFromˢᵇ = "unexpected read from 
 internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromˢ));
 }
+
+} partial class pe_package {
 
 // getString extracts a string from symbol string table.
 internal static (@string, bool) getString(slice<byte> section, nint start) {
@@ -202,9 +211,11 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     return ("", false);
 }
 
+} partial class peᴛFile {
+
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<Section> Section(this ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -230,7 +241,7 @@ internal static ref readonly @string strˢ => ref strˢᵇ;
 private static readonly @string strˢᵇ = "str"u8;
 
 public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
-    @string dwarfSuffix(ж<ΔSection> s) {
+    @string dwarfSuffix(ж<Section> s) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(s.Name, debugˢ): {
             return s.Name[7..];
@@ -244,7 +255,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     }
 
     // sectionData gets the data for s and checks its size.
-    (slice<byte>, error) sectionData(ж<ΔSection> s) {
+    (slice<byte>, error) sectionData(ж<Section> s) {
         var (b, errΔ1) = s.Data();
         if (errΔ1 != nil && (uint32)len(b) < s.Size) {
             return (default, errΔ1);
@@ -326,6 +337,8 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     return (d, default);
 }
 
+} partial class pe_package {
+
 // TODO(brainman): document ImportDirectory once we decide what to do with it.
 partial struct ImportDirectory {
     public uint32 OriginalFirstThunk;
@@ -335,6 +348,8 @@ partial struct ImportDirectory {
     public uint32 FirstThunk;
     internal @string dll;
 }
+
+} partial class peᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string optionalHeaderDataˢ => ref optionalHeaderDataˢᵇ;
@@ -380,7 +395,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     }
 
     // figure out which section contains the import directory table
-    ж<ΔSection> ds = default;
+    ж<Section> ds = default;
     ds = default;
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Offset == 0) {
@@ -494,10 +509,14 @@ public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     return (default, default);
 }
 
+} partial class pe_package {
+
 // FormatError is unused.
 // The type is retained for compatibility.
 partial struct FormatError {
 }
+
+} partial class peᴛFormatError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownErrorˢ => ref unknownErrorˢᵇ;
@@ -506,6 +525,8 @@ private static readonly @string unknownErrorˢᵇ = "unknown error"u8;
 public static @string Error(this ref FormatError e) {
     return unknownErrorˢ;
 }
+
+} partial class pe_package {
 
 // readOptionalHeader accepts an io.ReadSeeker pointing to optional header in the PE file
 // and its size as seen in the file header.

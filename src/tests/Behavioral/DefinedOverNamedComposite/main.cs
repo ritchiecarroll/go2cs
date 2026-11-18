@@ -3,12 +3,17 @@ namespace go;
 using fmt = fmt_package;
 using fslike = DefinedOverNamedComposite.fslike_package;
 using DefinedOverNamedComposite;
+using static main_package;
 
 partial class main_package {
 
 partial struct shuffledFS /*global::go.DefinedOverNamedComposite.fslike_package.MapFS*/;
 
+} partial class mainᴛshuffledFS {
+
 internal static nint get(this shuffledFS f, @string k) { return ((fslike.MapFS)f).Get(k); }
+
+} partial class main_package {
 
 partial struct shuffledList /*global::go.DefinedOverNamedComposite.fslike_package.List*/;
 
@@ -37,7 +42,7 @@ internal static void main() {
     fmt.Println(((fslike.List)sl).Sum(), (((fslike.List)sl))[0], len((fslike.List)sl));
 
     var b = new fslike.Buf(new nint[]{7, 8}.array());
-    var sb = (shuffledBuf)b;
+    var sb = ((shuffledBuf)b).Clone();
     fmt.Println(((fslike.Buf)sb).First(), (((fslike.Buf)sb))[1]);
 
     var ha = new headerA(new map<@string, nint>{["x"] = 9});

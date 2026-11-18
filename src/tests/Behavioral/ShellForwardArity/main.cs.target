@@ -1,10 +1,13 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct calc /*num:nint*/;
+
+} partial class mainᴛcalc {
 
 internal static @string Zero(this calc c) { return fmt.Sprintf("z(%d)"u8, (nint)c); }
 
@@ -29,6 +32,8 @@ internal static nint Sum(this calc c, nint a, nint b, nint d, nint e, nint f) {
 internal static @string Mixed(this calc c, @string name, bool flag, nint n) {
     return fmt.Sprintf("m(%d,%s,%t,%d)"u8, (nint)c, name, flag, n);
 }
+
+} partial class main_package {
 
 internal partial interface main_type /*dyn*/ {
     @string Zero();

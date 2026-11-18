@@ -17,11 +17,15 @@
 // started.
 namespace go.vendor.golang.org.x.crypto;
 
+using static cryptobyte_package;
+
 partial class cryptobyte_package {
 
 // String represents a string of bytes. It provides methods for parsing
 // fixed-length and length-prefixed values from it.
 partial struct String /*[]byte*/;
+
+} partial class cryptobyteᴛString {
 
 // read advances a String by n bytes and returns them. If less than n bytes
 // remain, it returns nil.
@@ -202,4 +206,4 @@ public static bool Empty(this String s) {
     return len(s) == 0;
 }
 
-} // end cryptobyte_package
+} // end cryptobyteᴛString

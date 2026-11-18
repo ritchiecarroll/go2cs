@@ -24,7 +24,7 @@ internal static void main() {
 
     var b = time.NewTimer(1 * time.Millisecond);
     time.Sleep(25 * time.Millisecond);
-    var bPending = b.Reset(time.ΔHour);
+    var bPending = b.Reset(time.Hour);
     fmt.Println("B reset-after-fire pending:", bPending, "stale:", tryRecv(b.C));
 
     var c = time.NewTimer(1 * time.Millisecond);
@@ -48,7 +48,7 @@ internal static void main() {
     var tk = time.NewTicker(period);
     for (nint iΔ2 = 0; iΔ2 < 300; iΔ2++) {
         time.Sleep(((time.Duration)(int64)(iΔ2 % 9)) * period / 4);
-        tk.Reset(time.ΔHour);
+        tk.Reset(time.Hour);
         if (tryRecv(tk.C)) {
             eStale++;
         }
@@ -59,7 +59,7 @@ internal static void main() {
 
     nint fDelivered = 0;
     for (nint iΔ3 = 0; iΔ3 < 200; iΔ3++) {
-        var t = time.NewTimer(time.ΔHour);
+        var t = time.NewTimer(time.Hour);
         t.Reset(time.Millisecond);
         ᐸꟷ(t.C);
         fDelivered++;
@@ -100,7 +100,7 @@ internal static void main() {
         foreach (var (_, t) in range(timers)) {
             bool was = default;
             if (reset) {
-                was = t.Reset(time.ΔHour);
+                was = t.Reset(time.Hour);
             } else {
                 was = t.Stop();
             }

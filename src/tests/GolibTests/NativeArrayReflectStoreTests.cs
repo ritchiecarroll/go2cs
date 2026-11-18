@@ -42,7 +42,7 @@ public unsafe class NativeArrayReflectStoreTests
 
         try
         {
-            reflect.ΔValue elem = reflect.ValueOf(NativeArrayPointer<ushort>((nuint)memory, 4)).Elem();
+            reflect.Value elem = reflect.ValueOf(NativeArrayPointer<ushort>((nuint)memory, 4)).Elem();
 
             elem.Set(reflect.ValueOf(values(1, 2, 3, 4)));
 
@@ -85,7 +85,7 @@ public unsafe class NativeArrayReflectStoreTests
 
         try
         {
-            reflect.ΔValue elem = reflect.ValueOf(NativeArrayPointer<ushort>((nuint)memory, 4)).Elem();
+            reflect.Value elem = reflect.ValueOf(NativeArrayPointer<ushort>((nuint)memory, 4)).Elem();
 
             elem.Index(2).Set(reflect.ValueOf((ushort)9));
 

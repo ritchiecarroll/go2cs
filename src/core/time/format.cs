@@ -7,6 +7,8 @@ using errors = errors_package;
 using stringslite = @internal.stringslite_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
+using time = time_package;
+using static time_package;
 
 partial class time_package {
 
@@ -563,6 +565,8 @@ internal static slice<byte> appendNano(slice<byte> b, nint nanosec, nint std) {
     return b;
 }
 
+} partial class timeᴛTime {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mstˢ => ref mstˢᵇ;
 private static readonly @string mstˢᵇ = "2006-01-02 15:04:05.999999999 -0700 MST"u8;
@@ -644,11 +648,11 @@ public static @string GoString(this Time t) {
     buf = append(buf, ((@string)", ").ꓸꓸꓸ);
     var loc = t.Location();
     switch (loc) {
-    case var ᴛ when ᴛ == ΔUTC || ᴛ == default: {
+    case var ᴛ when ᴛ == time.UTC || ᴛ == default: {
         buf = append(buf, ((@string)"time.UTC").ꓸꓸꓸ);
         break;
     }
-    case var ᴛ when ᴛ == ΔLocal: {
+    case var ᴛ when ᴛ == time.Local: {
         buf = append(buf, ((@string)"time.Local").ꓸꓸꓸ);
         break;
     }
@@ -719,7 +723,7 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
     var days = abs.days();
 
     nint year = -1;
-    ΔMonth month = default;
+    Month month = default;
     nint day = default;
     nint yday = -1;
     nint hour = -1;
@@ -931,6 +935,8 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
     return b;
 }
 
+} partial class time_package {
+
 internal static error errBad = errors.New("bad value for field"); // placeholder not passed to user
 
 // ParseError describes a problem parsing a time string.
@@ -995,6 +1001,8 @@ internal static @string quote(@string s) {
     return (@string)buf;
 }
 
+} partial class timeᴛParseError {
+
 // Error returns the string representation of a ParseError.
 public static @string Error(this ref ParseError e) {
     if (e.Message == ""u8) {
@@ -1002,6 +1010,8 @@ public static @string Error(this ref ParseError e) {
     }
     return "parsing time "u8 + quote(e.Value) + e.Message;
 }
+
+} partial class time_package {
 
 // isDigit reports whether s[i] is in range and is a decimal digit.
 internal static bool isDigit<bytes>(bytes s, nint i)
@@ -1118,11 +1128,11 @@ internal static (@string, error) skip(@string value, @string prefix) {
 public static (Time, error) Parse(@string layout, @string value) {
     // Optimize for RFC3339 as it accounts for over half of all representations.
     if (layout == RFC3339 || layout == RFC3339Nano) {
-        var (t, ok) = parseRFC3339(value, ΔLocal); if (ok) {
+        var (t, ok) = parseRFC3339(value, Local); if (ok) {
             return (t, default);
         }
     }
-    return parse(layout, value, ΔUTC, ΔLocal);
+    return parse(layout, value, UTC, Local);
 }
 
 // ParseInLocation is like Parse but differs in two important ways.
@@ -1130,7 +1140,7 @@ public static (Time, error) Parse(@string layout, @string value) {
 // ParseInLocation interprets the time as in the given location.
 // Second, when given a zone offset or abbreviation, Parse tries to match it
 // against the Local location; ParseInLocation uses the given location.
-public static (Time, error) ParseInLocation(@string layout, @string value, ж<ΔLocation> loc) {
+public static (Time, error) ParseInLocation(@string layout, @string value, ж<Location> loc) {
     // Optimize for RFC3339 as it accounts for over half of all representations.
     if (layout == RFC3339 || layout == RFC3339Nano) {
         var (t, ok) = parseRFC3339(value, loc); if (ok) {
@@ -1164,7 +1174,7 @@ private static readonly @string dayOfYearDoesNotMatchDayˢᵇ = ": day-of-year d
 internal static ref readonly @string dayOutOfRangeˢ => ref dayOutOfRangeˢᵇ;
 private static readonly @string dayOutOfRangeˢᵇ = ": day out of range"u8;
 
-internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation> defaultLocation, ж<ΔLocation> local) {
+internal static (Time, error) parse(@string layout, @string value, ж<Location> defaultLocation, ж<Location> local) {
     @string alayout = layout;
     @string avalue = value;
     @string rangeErrString = ""u8; // set if a value is out of range
@@ -1180,7 +1190,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     nint min = default;
     nint sec = default;
     nint nsec = default;
-    ж<ΔLocation> z = default;
+    ж<Location> z = default;
     nint zoneOffset = -1;
     @string zoneName = default;
 
@@ -1367,7 +1377,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             do {
                 if (len(value) >= 1 && value[0] == 'Z') {
                     value = value[1..];
-                    z = ΔUTC;
+                    z = UTC;
                     break;
                 }
                 fallthrough = true;
@@ -1461,7 +1471,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             do {
                 // Does it look like a time zone?
                 if (len(value) >= 3 && value[0..3] == "UTC") {
-                    z = ΔUTC;
+                    z = UTC;
                     value = value[3..];
                     break;
                 }
@@ -1532,10 +1542,10 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
         }
         if (m == 0) {
             m = (yday - 1) / 31 + 1;
-            if (daysBefore((ΔMonth)(m + 1)) < yday) {
+            if (daysBefore((Month)(m + 1)) < yday) {
                 m++;
             }
-            d = yday - daysBefore((ΔMonth)m);
+            d = yday - daysBefore((Month)m);
         }
         // If month, day already seen, yday's m, d must match.
         // Otherwise, set them from m, d.
@@ -1557,16 +1567,16 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     }
 
     // Validate the day of the month.
-    if (day < 1 || day > daysIn((ΔMonth)month, year)) {
+    if (day < 1 || day > daysIn((Month)month, year)) {
         return (new Time(), new ParseErrorжerror(newParseError(alayout, avalue, ""u8, value, dayOutOfRangeˢ)));
     }
 
     if (z != nil) {
-        return (Date(year, (ΔMonth)month, day, hour, min, sec, nsec, z), default);
+        return (Date(year, (Month)month, day, hour, min, sec, nsec, z), default);
     }
 
     if (zoneOffset != -1) {
-        var t = Date(year, (ΔMonth)month, day, hour, min, sec, nsec, ΔUTC);
+        var t = Date(year, (Month)month, day, hour, min, sec, nsec, UTC);
         t.addSec(-(int64)zoneOffset);
 
         // Look for local zone with the given offset.
@@ -1584,7 +1594,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     }
 
     if (zoneName != ""u8) {
-        var t = Date(year, (ΔMonth)month, day, hour, min, sec, nsec, ΔUTC);
+        var t = Date(year, (Month)month, day, hour, min, sec, nsec, UTC);
         // Look for local zone with the given offset.
         // If that zone was in effect at the given time, use it.
         var (offset, ok) = local.lookupName(zoneName, t.unixSec());
@@ -1605,7 +1615,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     }
 
     // Otherwise, fall back to default.
-    return (Date(year, (ΔMonth)month, day, hour, min, sec, nsec, defaultLocation), default);
+    return (Date(year, (Month)month, day, hour, min, sec, nsec, defaultLocation), default);
 }
 
 // parseTimeZone parses a time zone string and returns its length. Time zones
@@ -1811,19 +1821,23 @@ partial struct parseDurationError {
     internal @string value;
 }
 
+} partial class timeᴛparseDurationError {
+
 internal static @string Error(this ref parseDurationError e) {
     return "time: "u8 + e.message + " "u8 + quote(e.value);
 }
 
+} partial class time_package {
+
 [GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{
-    ["ns"] = (uint64)ΔNanosecond,
+    ["ns"] = (uint64)Nanosecond,
     ["us"] = (uint64)Microsecond,
     ["µs"] = (uint64)Microsecond, // U+00B5 = micro symbol
     ["μs"] = (uint64)Microsecond, // U+03BC = Greek letter mu
     ["ms"] = (uint64)Millisecond,
-    ["s"] = (uint64)ΔSecond,
-    ["m"] = (uint64)ΔMinute,
-    ["h"] = (uint64)ΔHour
+    ["s"] = (uint64)Second,
+    ["m"] = (uint64)Minute,
+    ["h"] = (uint64)Hour
 }; }
 
 // ParseDuration parses a duration string.

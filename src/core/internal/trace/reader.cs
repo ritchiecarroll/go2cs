@@ -14,6 +14,7 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
 using go.@internal.trace.@internal;
+using static trace_package;
 
 partial class trace_package {
 
@@ -25,7 +26,7 @@ partial class trace_package {
 partial struct Reader {
     internal version.Version version;
     internal ж<bufio.Reader> r;
-    internal ΔTime lastTs;
+    internal Time lastTs;
     internal ж<generation> gen;
     internal slice<ж<batchCursor>> frontier;
     internal slice<cpuSample> cpuSamples;
@@ -84,11 +85,13 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     }}
 }
 
+} partial class traceᴛReader {
+
 // ReadEvent reads a single event from the stream.
 //
 // If the stream has been exhausted, it returns an invalid event and io.EOF.
-public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
-    ΔEvent e = new();
+public static (Event e, error err) ReadEvent(this ж<Reader> Ꮡr) {
+    Event e = new();
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -96,7 +99,7 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
 
         // Return only io.EOF if we're done.
         if (r.done) {
-            (e, err) = (new ΔEvent(), io.EOF); goto ᒐdone;
+            (e, err) = (new Event(), io.EOF); goto ᒐdone;
         }
 
         // Handle v1 execution traces.
@@ -106,7 +109,7 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
                 var (evΔ1, okΔ1) = r.v1Events.Ꮡevents.Peek();
                 if (okΔ1) {
                     r.syncs++;
-                    (e, err) = (syncEvent(r.v1Events.evt, (ΔTime)(int64)(evΔ1.Ts - 1), r.syncs), default); goto ᒐdone;
+                    (e, err) = (syncEvent(r.v1Events.evt, (Time)(int64)(evΔ1.Ts - 1), r.syncs), default); goto ᒐdone;
                 }
             }
             var (evΔ2, errΔ1) = r.v1Events.next();
@@ -116,7 +119,7 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
                 r.syncs++;
                 (e, err) = (syncEvent(nil, r.v1Events.lastTs + 1, r.syncs), default); goto ᒐdone;
             } else if (errΔ1 != nil) {
-                (e, err) = (new ΔEvent(), errΔ1); goto ᒐdone;
+                (e, err) = (new Event(), errΔ1); goto ᒐdone;
             }
             (e, err) = (evΔ2.ΔClone(), default); goto ᒐdone;
         }
@@ -162,7 +165,7 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
                 (e, err) = r.nextGenWithSpill(); goto ᒐdone;
             }
             if (r.readGenErr != nil) {
-                (e, err) = (new ΔEvent(), r.readGenErr); goto ᒐdone;
+                (e, err) = (new Event(), r.readGenErr); goto ᒐdone;
             }
             var (gen, errΔ2) = readGeneration(r.r, r.version);
             if (errΔ2 != nil) {
@@ -208,29 +211,29 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
         // Try to advance the head of the frontier, which should have the minimum timestamp.
         // This should be by far the most common case
         if (len(r.frontier) == 0) {
-            (e, err) = (new ΔEvent(), fmt.Errorf("broken trace: frontier is empty:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); goto ᒐdone;
+            (e, err) = (new Event(), fmt.Errorf("broken trace: frontier is empty:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); goto ᒐdone;
         }
         {
             var (okΔ5, errΔ5) = tryAdvance(0); if (errΔ5 != nil) {
-                (e, err) = (new ΔEvent(), errΔ5); goto ᒐdone;
+                (e, err) = (new Event(), errΔ5); goto ᒐdone;
             } else if (!okΔ5) {
                 // Try to advance the rest of the frontier, in timestamp order.
                 //
                 // To do this, sort the min-heap. A sorted min-heap is still a
                 // min-heap, but now we can iterate over the rest and try to
                 // advance in order. This path should be rare.
-                slices.SortFunc<slice<ж<batchCursor>>, ж<batchCursor>>(r.frontier, ((Func<ж<batchCursor>, ж<batchCursor>, nint>)(compare)));
+                slices.SortFunc<slice<ж<batchCursor>>, ж<batchCursor>>(r.frontier, ((Func<ж<batchCursor>, ж<batchCursor>, nint>)(traceᴛbatchCursor.compare)));
                 var success = false;
                 for (nint i = 1; i < len(r.frontier); i++) {
                     (okΔ5, errΔ5) = tryAdvance(i); if (errΔ5 != nil) {
-                        (e, err) = (new ΔEvent(), errΔ5); goto ᒐdone;
+                        (e, err) = (new Event(), errΔ5); goto ᒐdone;
                     } else if (okΔ5) {
                         success = true;
                         break;
                     }
                 }
                 if (!success) {
-                    (e, err) = (new ΔEvent(), fmt.Errorf("broken trace: failed to advance: frontier:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); goto ᒐdone;
+                    (e, err) = (new Event(), fmt.Errorf("broken trace: failed to advance: frontier:\n[gen=%d]\n\n%s\n%s\n"u8, r.gen.gen, dumpFrontier(r.frontier), dumpOrdering(ref nonnil(ref r).order))); goto ᒐdone;
                 }
             }
         }
@@ -253,13 +256,13 @@ private static readonly @string internalErrorˢ4ᵇ = "internal error: nextGenWi
 
 // nextGenWithSpill reads the generation and calls nextGen while
 // also handling any spilled batches.
-internal static (ΔEvent, error) nextGenWithSpill(this ref Reader r) {
+internal static (Event, error) nextGenWithSpill(this ref Reader r) {
     if (r.version >= version.Go126) {
-        return (new ΔEvent(), errors.New(internalErrorˢ4));
+        return (new Event(), errors.New(internalErrorˢ4));
     }
     if (r.spillErr != nil) {
         if (r.spillErrSync) {
-            return (new ΔEvent(), r.spillErr);
+            return (new Event(), r.spillErr);
         }
         r.spillErrSync = true;
         r.syncs++;
@@ -290,7 +293,7 @@ internal static (ΔEvent, error) nextGenWithSpill(this ref Reader r) {
 
 // installGen installs the new generation into the Reader and returns
 // a Sync event for the new generation.
-internal static (ΔEvent, error) installGen(this ref Reader r, ж<generation> Ꮡgen) {
+internal static (Event, error) installGen(this ref Reader r, ж<generation> Ꮡgen) {
     ref var gen = ref Ꮡgen.DerefOrNull();
 
     if (Ꮡgen == nil) {
@@ -314,7 +317,7 @@ internal static (ΔEvent, error) installGen(this ref Reader r, ж<generation> �
         var bc = Ꮡ(new batchCursor(m: m));
         var (ok, err) = bc.nextEvent(batches, r.gen.freq);
         if (err != nil) {
-            return (new ΔEvent(), err);
+            return (new Event(), err);
         }
         if (!ok) {
             // Turns out there aren't actually any events in these batches.
@@ -327,6 +330,8 @@ internal static (ΔEvent, error) installGen(this ref Reader r, ж<generation> �
     // Always emit a sync event at the beginning of the generation.
     return (syncEvent(r.gen.evTable, r.gen.freq.mul(r.gen.minTs), r.syncs), default);
 }
+
+} partial class trace_package {
 
 internal static @string dumpFrontier(slice<ж<batchCursor>> frontier) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);

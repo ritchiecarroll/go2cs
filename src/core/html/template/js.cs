@@ -142,7 +142,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
     ["yield"] = true
 }; }
 
-internal static reflectꓸType jsonMarshalType = reflect.TypeFor<json.Marshaler>();
+internal static reflect.Type jsonMarshalType = reflect.TypeFor<json.Marshaler>();
 
 // indirectToJSONMarshaler returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil) or an implementation of json.Marshal.
@@ -156,7 +156,7 @@ internal static any indirectToJSONMarshaler(any a) {
     }
 
     var v = reflect.ValueOf(a);
-    while (!v.Type().Implements(jsonMarshalType) && v.Kind() == reflect.ΔPointer && !v.IsNil()) {
+    while (!v.Type().Implements(jsonMarshalType) && v.Kind() == reflect.Pointer && !v.IsNil()) {
         v = v.Elem();
     }
     return v.Interface();

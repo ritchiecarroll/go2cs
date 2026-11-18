@@ -194,7 +194,7 @@ private static readonly @string addˢᵇ = "add"u8;
 //	lo1, carry = bits.Add(lo1, addsrc[i], 0)
 //	a = a + carry
 //	z[i] = lo1
-internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nint mulIndex) {
+internal static void addMul(ж<Func> Ꮡf, @string addsrc, @string mulsrc, nint mulIndex) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
@@ -202,8 +202,8 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
     if (a.Arch == Arch386 && addsrc != ""u8) {
         mh = HintMemOK; // too few registers otherwise
     }
-    ref var m = ref heap<ΔReg>(f.ArgHint("m", mh), out var Ꮡm);
-    ref var c = ref heap<ΔReg>(f.Arg("a"), out var Ꮡc);
+    ref var m = ref heap<Reg>(f.ArgHint("m", mh), out var Ꮡm);
+    ref var c = ref heap<Reg>(f.Arg("a"), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     var p = Ꮡf.Pipe();
@@ -233,30 +233,30 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
     var cʗ1 = c;
     var mʗ1 = m;
     var pʗ1 = p;
-    p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
+    p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
         aʗ1.Comment(multiplyˢ);
         var prev = cʗ1;
-        ΔCarry flag = SetCarry;
+        Carry flag = SetCarry;
         foreach (var (i, x) in range(@in[mulIndex])) {
             var hi = aʗ1.RegHint(HintMulHi);
             aʗ1.MulWide(mʗ1, x, x, hi);
             aʗ1.Add(prev, x, x, flag);
-            flag = (ΔCarry)(UseCarry | SetCarry);
+            flag = (Carry)(UseCarry | SetCarry);
             if (prev != cʗ1) {
                 aʗ1.Free(prev);
             }
             @out[0][i] = x;
             prev = hi;
         }
-        aʗ1.Add(aʗ1.Imm(0), prev, cʗ1, (ΔCarry)(UseCarry | SmashCarry));
+        aʗ1.Add(aʗ1.Imm(0), prev, cʗ1, (Carry)(UseCarry | SmashCarry));
         if (addsrc != ""u8) {
             aʗ1.Comment(addˢ);
-            ΔCarry flagΔ1 = SetCarry;
+            Carry flagΔ1 = SetCarry;
             foreach (var (i, x) in range(@in[0])) {
                 aʗ1.Add(x, @out[0][i], @out[0][i], flagΔ1);
-                flagΔ1 = (ΔCarry)(UseCarry | SetCarry);
+                flagΔ1 = (Carry)(UseCarry | SetCarry);
             }
-            aʗ1.Add(aʗ1.Imm(0), cʗ1, cʗ1, (ΔCarry)(UseCarry | SmashCarry));
+            aʗ1.Add(aʗ1.Imm(0), cʗ1, cʗ1, (Carry)(UseCarry | SmashCarry));
         }
         pʗ1.StoreN(@out);
     });
@@ -271,16 +271,16 @@ private static readonly @string altˢᵇ = "alt"u8;
 internal static ref readonly @string multiplyAndAddˢ => ref multiplyAndAddˢᵇ;
 private static readonly @string multiplyAndAddˢᵇ = "multiply and add"u8;
 
-internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
+internal static void addMulAlt(ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
-    ref var m = ref heap<ΔReg>(f.ArgHint("m", HintMulSrc), out var Ꮡm);
-    ref var c = ref heap<ΔReg>(f.Arg("a"), out var Ꮡc);
+    ref var m = ref heap<Reg>(f.ArgHint("m", HintMulSrc), out var Ꮡm);
+    ref var c = ref heap<Reg>(f.Arg("a"), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     // On amd64, we need a non-immediate for the AtUnrollEnd adds.
-    ref var r0 = ref heap<ΔReg>(a.ZR(), out var Ꮡr0);
+    ref var r0 = ref heap<Reg>(a.ZR(), out var Ꮡr0);
     if (!r0.Valid()) {
         r0 = a.Reg();
         a.Mov(a.Imm(0), r0);
@@ -296,13 +296,13 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
 
     // See the large comment above for an explanation of the code being generated.
     // This is optimization strategy (2).
-    ref var hi = ref heap(new ΔReg(), out var Ꮡhi);
-    ref var prev = ref heap<ΔReg>(c, out var Ꮡprev);
+    ref var hi = ref heap(new Reg(), out var Ꮡhi);
+    ref var prev = ref heap<Reg>(c, out var Ꮡprev);
     p.Start(n, 1, 8);
     var aʗ1 = a;
     p.AtUnrollStart(() => {
         aʗ1.Comment(multiplyAndAddˢ);
-        aʗ1.ClearCarry((ΔCarry)(AddCarry | ΔAltCarry));
+        aʗ1.ClearCarry((Carry)(AddCarry | AltCarry));
         aʗ1.ClearCarry(AddCarry);
         Ꮡhi.Value = aʗ1.Reg();
     });
@@ -310,14 +310,14 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
     var cʗ1 = c;
     var r0ʗ1 = r0;
     p.AtUnrollEnd(() => {
-        aʗ2.Add(r0ʗ1, Ꮡprev.Value, cʗ1, (ΔCarry)(UseCarry | SmashCarry));
-        aʗ2.Add(r0ʗ1, cʗ1, cʗ1, (ΔCarry)((ΔCarry)(UseCarry | SmashCarry) | ΔAltCarry));
+        aʗ2.Add(r0ʗ1, Ꮡprev.Value, cʗ1, (Carry)(UseCarry | SmashCarry));
+        aʗ2.Add(r0ʗ1, cʗ1, cʗ1, (Carry)((Carry)(UseCarry | SmashCarry) | AltCarry));
         Ꮡprev.Value = cʗ1;
     });
     var aʗ3 = a;
     var mʗ1 = m;
     var pʗ1 = p;
-    p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
+    p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
         foreach (var (i, y) in range(@in[1])) {
             var x = @in[0][i];
             var lo = y;
@@ -325,8 +325,8 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
                 lo = aʗ3.Reg();
             }
             aʗ3.MulWide(mʗ1, y, lo, Ꮡhi.Value);
-            aʗ3.Add(Ꮡprev.Value, lo, lo, (ΔCarry)(UseCarry | SetCarry));
-            aʗ3.Add(x, lo, lo, (ΔCarry)((ΔCarry)(UseCarry | SetCarry) | ΔAltCarry));
+            aʗ3.Add(Ꮡprev.Value, lo, lo, (Carry)(UseCarry | SetCarry));
+            aʗ3.Add(x, lo, lo, (Carry)((Carry)(UseCarry | SetCarry) | AltCarry));
             @out[0][i] = lo;
             (Ꮡprev.Value, Ꮡhi.Value) = (Ꮡhi.Value, Ꮡprev.Value);
         }
@@ -341,12 +341,12 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
 internal static ref readonly @string syntheticCarryOneColumnˢ => ref syntheticCarryOneColumnˢᵇ;
 private static readonly @string syntheticCarryOneColumnˢᵇ = "synthetic carry, one column at a time"u8;
 
-internal static void addMulVirtualCarry(ж<ΔFunc> Ꮡf, nint mulIndex) {
+internal static void addMulVirtualCarry(ж<Func> Ꮡf, nint mulIndex) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
-    ref var m = ref heap<ΔReg>(f.Arg("m"), out var Ꮡm);
-    ref var c = ref heap<ΔReg>(f.Arg("a"), out var Ꮡc);
+    ref var m = ref heap<Reg>(f.Arg("m"), out var Ꮡm);
+    ref var c = ref heap<Reg>(f.Arg("a"), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     // See the large comment above for an explanation of the code being generated.
@@ -357,17 +357,17 @@ internal static void addMulVirtualCarry(ж<ΔFunc> Ꮡf, nint mulIndex) {
     var cʗ1 = c;
     var mʗ1 = m;
     var pʗ1 = p;
-    p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
+    p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
         aʗ1.Comment(syntheticCarryOneColumnˢ);
         var (lo, hi) = (aʗ1.Reg(), aʗ1.Reg());
         foreach (var (i, x) in range(@in[mulIndex])) {
             aʗ1.MulWide(mʗ1, x, lo, hi);
             if (mulIndex == 1) {
                 aʗ1.Add(@in[0][i], lo, lo, SetCarry);
-                aʗ1.Add(aʗ1.Imm(0), hi, hi, (ΔCarry)(UseCarry | SmashCarry));
+                aʗ1.Add(aʗ1.Imm(0), hi, hi, (Carry)(UseCarry | SmashCarry));
             }
             aʗ1.Add(cʗ1, lo, x, SetCarry);
-            aʗ1.Add(aʗ1.Imm(0), hi, cʗ1, (ΔCarry)(UseCarry | SmashCarry));
+            aʗ1.Add(aʗ1.Imm(0), hi, cʗ1, (Carry)(UseCarry | SmashCarry));
             @out[0][i] = x;
         }
         pʗ1.StoreN(@out);

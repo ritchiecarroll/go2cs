@@ -64,12 +64,12 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/cast.go", "cast.cs", "AA4cuIK4uNyCgpSCgpQ=", "18-42:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/cmac.go", "cmac.cs", "ABgwooKCpqKCgpSCgqaigoKClIKCgpSCgpSUgpSUgoKClKiygoKU")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/ctrkdf.go", "ctrkdf.cs", "ABo2kqiygpSCgpSClIKUgoI=")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm.go", "gcm.cs", "ABYslAAKDvKClIKUgpSCgoKCAAcUgqaCpoKCpqKClIKUgqaCgpSCpoKmlKKCuIKmgpSCpoKClIKmgsqClK7ygpSClII=")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/cmac.go", "cmac.cs", "ABkwooKCxqKCgpSCgqaigoKClIKCgpSCgpSUgpSUgoKClMiygoKU")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/ctrkdf.go", "ctrkdf.cs", "ABs2ksiygpSCgpSClIKUgoI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm.go", "gcm.cs", "ABcslAAKDvKClIKUgpSCgoKCAAkUgqaCpoKCpqKClIKUgqaCgpSCpoLGtKKCuIKmgpSCpoKClIKmgsqClM7ygpSClII=")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_generic.go", "gcm_generic.cs", "AA0agqKCgpSUgoKmoqKCgpSClIKCgqaUrAALDoKClIKCvtKUgoKUgoKmgoKCvMKCqsKCgoKCgoI=")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_noasm.go", "gcm_noasm.cs", "AAgSyJSCpoI=")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABIyAAgCgpSClIKUgpSClIKCAAIWAAgCgoKUAAIQ0oKCpq7CgoKUAAsYlJzigqaClIKUgqaClIKUpoKUgpSmgqaCggACGgAKAoKClK7CgoKUrsKCgpQAAhwACwKCgpSCgpQAECgACQKClIKUgoKCppSc4oKmgoK4goKUgpSmgpSClKaCpoKC")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABMyAAgCgpSClIKUgpSClIKCAAIWAAgCgoKUAAIQ0oKCpq7CgoKUAA0YlJzigqaClIKUgqaClIKUpoKUgpSmgqaCggAEGgAKAoKClK7CgoKUrsKCgpQAAhwACwKCgpSCgpQAEigACQKClIKUgoKCppSc4oKmgoK4goKUgpSmgpSClKaCpoKC")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/gcm/ghash.go", "ghash.cs", "ABg20oKCgq4ACAYACA64lIKCpoKCpoKokoKCqKSosqaCggAIEoKmpsySlIKCgsqCgoKCgriUgoK4qqKCgoKCvKKClIKCgg==", "", "", "55=BEUint64/1/2/1,BEUint64/2/2/2")]
 // </GoSourcePositionMaps>
 
@@ -110,3 +110,17 @@ public static partial class gcm_package
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gcm_package.CMAC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛCMAC;
+[GoMethodHost(typeof(gcm_package.CounterKDF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛCounterKDF;
+[GoMethodHost(typeof(gcm_package.GCM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛGCM;
+[GoMethodHost(typeof(gcm_package.GCMWithCounterNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛGCMWithCounterNonce;
+[GoMethodHost(typeof(gcm_package.GCMWithXORCounterNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛGCMWithXORCounterNonce;
+// </MethodHolders>

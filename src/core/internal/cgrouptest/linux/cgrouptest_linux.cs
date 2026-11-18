@@ -19,6 +19,7 @@ using fs = io.fs_package;
 using go;
 using go.@internal.runtime;
 using path;
+using static cgrouptest_package;
 
 partial class cgrouptest_package {
 
@@ -26,6 +27,8 @@ partial struct CgroupV2 {
     internal @string orig;
     internal @string path;
 }
+
+} partial class cgrouptestᴛCgroupV2 {
 
 public static @string Path(this ref CgroupV2 c) {
     return c.path;
@@ -53,6 +56,8 @@ public static error SetCPUMax(this ref CgroupV2 c, int64 quota, int64 period) {
     @string buf = fmt.Sprintf("%s %d"u8, q, period);
     return os.WriteFile(c.CPUMaxPath(), slice<byte>(buf), 0);
 }
+
+} partial class cgrouptest_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cgroupSubtreeControlˢ => ref cgroupSubtreeControlˢᵇ;

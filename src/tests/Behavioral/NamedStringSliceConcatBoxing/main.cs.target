@@ -3,12 +3,17 @@ namespace go;
 using json = encoding.json_package;
 using fmt = fmt_package;
 using encoding;
+using static main_package;
 
 partial class main_package {
 
 partial struct Token /*@string*/;
 
+} partial class mainᴛToken {
+
 public static @string Kind(this Token t) { return "token:"u8 + ((@string)t); }
+
+} partial class main_package {
 
 internal static any negate(any v) {
     switch (v.type()) {

@@ -9,6 +9,7 @@ using static global::go.@internal.types.errors_package;
 using constant = global::go.go.constant_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
@@ -17,33 +18,41 @@ partial class types_package {
 
 // A Union represents a union of terms embedded in an interface.
 partial struct Union {
-    internal slice<ж<ΔTerm>> terms; // list of syntactical terms (not a canonicalized termlist)
+    internal slice<ж<Term>> terms; // list of syntactical terms (not a canonicalized termlist)
 }
 
 // NewUnion returns a new [Union] type with the given terms.
 // It is an error to create an empty union; they are syntactically not possible.
-public static ж<Union> NewUnion(slice<ж<ΔTerm>> terms) {
+public static ж<Union> NewUnion(slice<ж<Term>> terms) {
     if (len(terms) == 0) {
         throw panic("empty union");
     }
     return Ꮡ(new Union(terms));
 }
 
-public static nint Len(this ref Union u) { return len(u.terms); }
-public static ж<ΔTerm> Term(this ref Union u, nint i) { return u.terms[i]; }
+} partial class typesᴛUnion {
 
-public static ΔType Underlying(this ж<Union> Ꮡu) { return new UnionжΔType(Ꮡu); }
-public static @string String(this ж<Union> Ꮡu) { return TypeString(new UnionжΔType(Ꮡu), default); }
+public static nint Len(this ref Union u) { return len(u.terms); }
+public static ж<Term> Term(this ref Union u, nint i) { return u.terms[i]; }
+
+public static Type Underlying(this ж<Union> Ꮡu) { return new UnionжType(Ꮡu); }
+public static @string String(this ж<Union> Ꮡu) { return TypeString(new UnionжType(Ꮡu), default); }
+
+} partial class types_package {
 
 // A Term represents a term in a [Union].
-partial struct ΔTerm /*Δterm*/;
+partial struct Term /*term*/;
 
 // NewTerm returns a new union term.
-public static ж<ΔTerm> NewTerm(bool tilde, ΔType typ) { return Ꮡ(new ΔTerm(new Δterm(tilde, typ))); }
+public static ж<Term> NewTerm(bool tilde, Type typ) { return Ꮡ(new Term(new term(tilde, typ))); }
 
-public static bool Tilde(this ref ΔTerm t) { return t.tilde; }
-public static ΔType Type(this ref ΔTerm t) { return t.typ; }
-public static @string String(this ж<ΔTerm> Ꮡt) { return (Ꮡt.Reinterpret<ΔTerm, Δterm>()).String(); }
+} partial class typesᴛTerm {
+
+public static bool Tilde(this ref Term t) { return t.tilde; }
+public static Type Type(this ref Term t) { return t.typ; }
+public static @string String(this ж<Term> Ꮡt) { return (Ꮡt.Reinterpret<Term, term>()).String(); }
+
+} partial class types_package {
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -57,31 +66,31 @@ private static readonly @string cannotUseComparableInˢᵇ = "cannot use compara
 
 // parseUnion parses uexpr as a union of expressions.
 // The result is a Union type, or Typ[Invalid] for some errors.
-internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
+internal static Type parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var (blist, tlist) = flattenUnion(default, uexpr);
     assert(len(blist) == len(tlist) - 1);
 
-    slice<ж<ΔTerm>> terms = default;
+    slice<ж<Term>> terms = default;
 
-    ΔType u = default;
+    Type u = default;
     foreach (var (i, x) in range(tlist)) {
-        var Δterm = parseTilde(Ꮡcheck, x);
-        if (len(tlist) == 1 && !(~Δterm).tilde) {
+        var term = parseTilde(Ꮡcheck, x);
+        if (len(tlist) == 1 && !(~term).tilde) {
             // Single type. Ok to return early because all relevant
             // checks have been performed in parseTilde (no need to
             // run through term validity check below).
-            return (~Δterm).typ; // typ already recorded through check.typ in parseTilde
+            return (~term).typ; // typ already recorded through check.typ in parseTilde
         }
         if (len(terms) >= maxTermCount) {
             if (isValid(u)) {
                 Ꮡcheck.errorf(new ast_Exprᴠpositioner(x), InvalidUnion, "cannot handle more than %d union terms (implementation limitation)", (nint)(maxTermCount));
-                u = new BasicжΔType(Typ[Invalid]);
+                u = new BasicжType(Typ[Invalid]);
             }
         } else {
-            terms = append(terms, Δterm);
-            u = new UnionжΔType(Ꮡ(new Union(terms)));
+            terms = append(terms, term);
+            u = new UnionжType(Ꮡ(new Union(terms)));
         }
 
         if (i > 0) {
@@ -155,7 +164,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
 internal static ref readonly @string termCannotBeATypeˢ => ref termCannotBeATypeˢᵇ;
 private static readonly @string termCannotBeATypeˢᵇ = "term cannot be a type parameter"u8;
 
-internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
+internal static ж<Term> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var x = tx;
@@ -176,20 +185,20 @@ internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
         } else {
             Ꮡcheck.error(new ast_Exprᴠpositioner(x), MisplacedTypeParam, termCannotBeATypeˢ);
         }
-        typ = new BasicжΔType(Typ[Invalid]);
+        typ = new BasicжType(Typ[Invalid]);
     }
-    var Δterm = NewTerm(tilde, typ);
+    var term = NewTerm(tilde, typ);
     if (tilde) {
-        check.recordTypeAndValue(tx, typexpr, new UnionжΔType(Ꮡ(new Union([Δterm]))), default);
+        check.recordTypeAndValue(tx, typexpr, new UnionжType(Ꮡ(new Union([term]))), default);
     }
-    return Δterm;
+    return term;
 }
 
 // overlappingTerm reports the index of the term x in terms which is
 // overlapping (not disjoint) from y. The result is < 0 if there is no
 // such term. The type of term y must not be an interface, and terms
 // with an interface type are ignored in the terms list.
-internal static nint overlappingTerm(slice<ж<ΔTerm>> terms, ж<ΔTerm> Ꮡy) {
+internal static nint overlappingTerm(slice<ж<Term>> terms, ж<Term> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     assert(!IsInterface(y.typ));
@@ -204,7 +213,7 @@ internal static nint overlappingTerm(slice<ж<ΔTerm>> terms, ж<ΔTerm> Ꮡy) {
                 throw panic("empty or top union term");
             }
         }
-        if (!(x.Reinterpret<ΔTerm, Δterm>()).disjoint(Ꮡy.Reinterpret<ΔTerm, Δterm>())) {
+        if (!(x.Reinterpret<Term, term>()).disjoint(Ꮡy.Reinterpret<Term, term>())) {
             return i;
         }
     }

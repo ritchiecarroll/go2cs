@@ -61,7 +61,7 @@ the two groups is dropped and leaves no extra blank behind:
 	fmt.Println(r.h(21)) // 42
 ```
 
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:111-121 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:112-122 -->
 ```csharp
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
@@ -131,7 +131,7 @@ func ratioString(vals ...int) string {
 	}
 ```
 
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:79-85 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:80-86 -->
 ```csharp
 internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
@@ -154,7 +154,7 @@ func (r *Reader) Read(b []byte) (n int, err error) {
 	}
 ```
 
-<!-- source: src/core/strings/reader.cs:38-45 -->
+<!-- source: src/core/strings/reader.cs:41-48 -->
 ```csharp
 // Read implements the [io.Reader] interface.
 public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
@@ -289,10 +289,12 @@ func (embeddedImpl) Close() error { return nil }
 func (embeddedImpl) Flush() error { return nil }
 ```
 
-<!-- source: src/tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.cs.target:78-82 -->
+<!-- source: src/tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.cs.target:79-85 -->
 ```csharp
 partial struct embeddedImpl {
 }
+
+} partial class mainᴛembeddedImpl {
 
 internal static error Close(this embeddedImpl _) { return default; }
 internal static error Flush(this embeddedImpl _) { return default; }
@@ -322,7 +324,7 @@ even when that statement is the converter's own, such as `{ v = v.Clone(); }` fo
 func byName(a, b *item) bool { return a.name < b.name }
 ```
 
-<!-- source: src/tests/Behavioral/NamedFuncTypeStructuralField/main.cs.target:35-40 -->
+<!-- source: src/tests/Behavioral/NamedFuncTypeStructuralField/main.cs.target:44-49 -->
 ```csharp
 internal static bool byName(ж<item> Ꮡa, ж<item> Ꮡb) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -363,7 +365,7 @@ var (
 )
 ```
 
-<!-- source: src/core/encoding/csv/reader.cs:87-93 -->
+<!-- source: src/core/encoding/csv/reader.cs:92-98 -->
 ```csharp
 // These are the errors that can be returned in [ParseError.Err].
 public static error ErrBareQuote = errors.New("bare \" in non-quoted-field");
@@ -389,7 +391,7 @@ its C# declaration, as a struct's is.
 type IntSlice []int
 ```
 
-<!-- source: src/core/sort/sort.cs:116-119 -->
+<!-- source: src/core/sort/sort.cs:126-129 -->
 ```csharp
 // Convenience types for common cases
 
@@ -416,7 +418,7 @@ is used. Its doc is written directly above the converter's line that says so:
 type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, err error)
 ```
 
-<!-- source: src/core/bufio/scan.cs:60-67 -->
+<!-- source: src/core/bufio/scan.cs:61-68 -->
 ```csharp
 // scanning lines, a [SplitFunc] can return (0, nil, nil) to signal the
 // [Scanner] to read more data into the slice and try again with a
@@ -467,7 +469,7 @@ emitted C# line: after one space, or at the column of its gofmt-aligned run (bel
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1167-1169 -->
+<!-- source: src/core/strings/strings.cs:1172-1174 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -517,7 +519,7 @@ tree:
 			}
 ```
 
-<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:696-702 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:721-727 -->
 ```csharp
             if (t == L) {
                 // no change
@@ -576,7 +578,7 @@ Above a label:
 	case exp > 0 && exp <= 15+22: // int * 10^k
 ```
 
-<!-- source: src/core/internal/strconv/atof.cs:483-490 -->
+<!-- source: src/core/internal/strconv/atof.cs:493-500 -->
 ```csharp
     switch (ᐧ) {
     case {} when exp is 0: {
@@ -638,7 +640,7 @@ An empty block:
 		}
 ```
 
-<!-- source: src/core/encoding/xml/xml.cs:1196-1202 -->
+<!-- source: src/core/encoding/xml/xml.cs:1239-1245 -->
 ```csharp
         if (b == '\r') {
             d.buf.WriteByte((byte)'\n');
@@ -666,7 +668,7 @@ indented deeper than the label stay at the end of that body.
 	}
 ```
 
-<!-- source: src/core/internal/runtime/maps/table.cs:1145-1151 -->
+<!-- source: src/core/internal/runtime/maps/table.cs:1152-1158 -->
 ```csharp
             it.key = key;
             it.elem = elem;
@@ -704,10 +706,10 @@ var unitMap = map[string]uint64{
 	"μs": uint64(Microsecond), // U+03BC = Greek letter mu
 ```
 
-<!-- source: src/core/time/format.cs:1818-1822 -->
+<!-- source: src/core/time/format.cs:1832-1836 -->
 ```csharp
 [GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{
-    ["ns"] = (uint64)ΔNanosecond,
+    ["ns"] = (uint64)Nanosecond,
     ["us"] = (uint64)Microsecond,
     ["µs"] = (uint64)Microsecond, // U+00B5 = micro symbol
     ["μs"] = (uint64)Microsecond, // U+03BC = Greek letter mu
@@ -715,8 +717,9 @@ var unitMap = map[string]uint64{
 
 `unitMap` is pure data, so its declaration sits inside a `[GoLazy]` holder class and is
 [built on its first read](variable-initialization-order.md#a-pure-data-var-is-built-on-its-first-read-never-in-the-static-constructor).
-`ΔNanosecond` is `Nanosecond` with the `Δ` prefix go2cs gives a name that `Time`'s `Nanosecond()` method
-also uses in the package class.
+`Nanosecond` keeps its Go name although `Time` has a `Nanosecond()` method: the method is a member of `Time`'s
+method holder, `timeᴛTime`, not of the package class.
+<!-- Until 2026-11-11 the constant read `ΔNanosecond` here (the type-vs-method rename); read at master 4efe149858. -->
 
 After the last element, above the closing bracket:
 
@@ -729,7 +732,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3176-3180 -->
+<!-- source: src/core/database/sql/sql.cs:3291-3295 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,
@@ -764,7 +767,7 @@ func appendLines(x, y []byte) []byte {
 }
 ```
 
-<!-- source: src/core/go/printer/gobuild.cs:144-150 -->
+<!-- source: src/core/go/printer/gobuild.cs:149-155 -->
 ```csharp
 internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     if (len(y) > 0 && isNL(y[0]) && // y starts in blank line
@@ -782,7 +785,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 		clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */)
 ```
 
-<!-- source: src/core/crypto/tls/handshake_client.cs:937 -->
+<!-- source: src/core/crypto/tls/handshake_client.cs:950 -->
 ```csharp
         clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */);
 ```
@@ -808,7 +811,7 @@ own line at the next place it can. The comment is then misplaced, never lost:
 				// underflow to ±0
 ```
 
-<!-- source: src/core/math/big/float.cs:931-933 -->
+<!-- source: src/core/math/big/float.cs:950-952 -->
 ```csharp
             if (p < 0 /* m <= 0.25 */ || p == 0 && x.mant.sticky((nuint)len(x.mant) * (nuint)_W - 1) == 0) {
                 /* m == 0.5 */

@@ -25,20 +25,20 @@ A converted program can run three ways. All three run the same converted code; t
 | **ReadyToRun** | `dotnet publish -c Release` of a converted program, which turns it on | golib and the standard library ahead of time, then the JIT can still recompile hot methods; the program's own code as it runs |
 | **Native AOT** | `dotnet publish -r <rid> -p:PublishAot=true` | entirely ahead of time, to a native executable with no JIT |
 
-For a program that `go2cs -recurse` converted, put `<PublishAot>true</PublishAot>` in the program's own project file and
-run `dotnet publish <program>.csproj -r <rid>`. A `-p:PublishAot=true` on the command line reaches every project the
-program references: a local conversion then stops at the go2cs-gen analyzer with error NETSDK1207, and in a
-`-recurse=nuget` folder, where `dotnet publish` with no project named takes the folder's `.slnx`, each converted library
-is also published as its own native library.
+In a folder that `go2cs -recurse` wrote, run that command in the program's own folder or name the program's project
+file: the converted libraries are compiled into the program and are not published on their own.
 
-<!-- Source: P1's AOT reproduction, 2026-11-16, a linux-x64 cloud box (4 cores, SDK 10.0.403, ILCompiler 10.0.14).
-     Local -recurse at master 0c1d295ea8, a strings/fmt hello: -p:PublishAot=true on the named project failed in 3 s with
-     NETSDK1207 on src/gen/go2cs-gen/go2cs-gen.csproj (netstandard2.0); <PublishAot>true</PublishAot> in the program's
-     csproj published in 1146 s and the executable ran. The README walkthrough's colordemo (fatih/color v1.18.0), same
-     route and master: published in 1545 s, 0 'will always throw' lines, executable ran. -recurse=nuget with the go2cs
-     tool and go.* 1.26.10.3 from nuget.org: the table's command in the program's folder took the .slnx and published
-     the four libraries as .so files (P3 run A, 2026-11-15, reproduced); naming the project with the property in it
-     published no library. Both 1.26.10.3 runs then failed in ILC at the object string table
+<!-- Source: P1's AOT reproduction and its seat, 2026-11-16, a linux-x64 cloud box (4 cores, SDK 10.0.403, ILCompiler
+     10.0.14). Before the seat the table's command failed on both -recurse routes: a local conversion stopped with
+     NETSDK1207 on the netstandard2.0 analyzer projects the global property reached through their analyzer references
+     (src/gen/go2cs-gen/go2cs-gen.csproj for a strings/fmt hello, and also
+     src/gen/go2cs-arrays-gen/go2cs-arrays-gen.csproj for colordemo; the i9 read both on win-x64); a -recurse=nuget
+     folder's .slnx was taken and each converted library was published as its own .so (P3 run A, 2026-11-15,
+     reproduced). The seat: both analyzer projects keep PublishAot false (TreatAsLocalProperty; repoguard's
+     TestAnalyzerProjectsKeepPublishAotOff), and the -recurse root's Directory.Build.targets sets IsPublishable false on
+     a Library. After it the table's command published the hello and colordemo and ran them, and the nuget folder
+     published no library. The README walkthrough's colordemo (fatih/color v1.18.0) published at master 0c1d295ea8 in
+     1545 s with 0 'will always throw' lines and ran; at go.* 1.26.10.3 it fails in ILC at the object string table
      (StringTableBuilder.CreateIndex, 6,188 'will always throw' lines), the generic expansion batch 308 removed. -->
 
 A Native AOT publish also needs the platform's native toolchain: on Linux, `clang` and `zlib1g-dev` (Debian and

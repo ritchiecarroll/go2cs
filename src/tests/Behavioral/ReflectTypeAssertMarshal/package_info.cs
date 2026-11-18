@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("ReflectTypeAssertMarshal.go", "ReflectTypeAssertMarshal.cs", "AAwkggAUIpSCgpSClIKClIKUgpSigpSCgpSClII=")]
+[assembly: GoPositionMap("ReflectTypeAssertMarshal.go", "ReflectTypeAssertMarshal.cs", "AA8kggAYIrSCgpSClIKClIKUgpSigpSCgpSClII=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -86,3 +85,14 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.celsius)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcelsius;
+[GoMethodHost(typeof(main_package.thing)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛthing;
+// </MethodHolders>

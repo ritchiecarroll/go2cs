@@ -11,6 +11,7 @@ using tracev2 = @internal.trace.tracev2_package;
 using @internal;
 using @internal.runtime;
 using @internal.trace;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -40,7 +41,7 @@ internal static void traceSnapshotMemory(uintptr gen) {
     }
 
     // Emit info.
-    w.varint(runtime_package.Δtrace.minPageHeapAddr);
+    w.varint(runtime_package.trace.minPageHeapAddr);
     w.varint((uint64)pageSize);
     w.varint((uint64)gc.MinHeapAlign);
     w.varint((uint64)fixedStack);
@@ -95,6 +96,8 @@ internal static traceArg traceSpanTypeAndClass(ж<mspan> Ꮡs) {
     return (traceArg)1;
 }
 
+} partial class runtimeᴛtraceLocker {
+
 // SpanExists records an event indicating that the span exists.
 internal static void SpanExists(this traceLocker tl, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -114,12 +117,16 @@ internal static void SpanFree(this traceLocker tl, ж<mspan> s) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpanFree, traceSpanID(s));
 }
 
+} partial class runtime_package {
+
 // traceSpanID creates a trace ID for the span s for the trace.
 internal static traceArg traceSpanID(ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    return ((traceArg)((uint64)s.@base() - Δtrace.minPageHeapAddr)) / (uint64)pageSize;
+    return ((traceArg)((uint64)s.@base() - trace.minPageHeapAddr)) / (uint64)pageSize;
 }
+
+} partial class runtimeᴛtraceLocker {
 
 // HeapObjectExists records that an object already exists at addr with the provided type.
 // The type is optional, and the size of the slot occupied the object is inferred from the
@@ -140,10 +147,14 @@ internal static void HeapObjectFree(this traceLocker tl, uintptr addr) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapObjectFree, traceHeapObjectID(addr));
 }
 
+} partial class runtime_package {
+
 // traceHeapObjectID creates a trace ID for a heap object at address addr.
 internal static traceArg traceHeapObjectID(uintptr addr) {
-    return ((traceArg)((uint64)addr - Δtrace.minPageHeapAddr)) / (uint64)gc.MinHeapAlign;
+    return ((traceArg)((uint64)addr - trace.minPageHeapAddr)) / (uint64)gc.MinHeapAlign;
 }
+
+} partial class runtimeᴛtraceLocker {
 
 // GoroutineStackExists records that a goroutine stack already exists at address base with the provided size.
 internal static void GoroutineStackExists(this traceLocker tl, uintptr @base, uintptr size) {
@@ -162,9 +173,11 @@ internal static void GoroutineStackFree(this traceLocker tl, uintptr @base) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoroutineStackFree, traceGoroutineStackID(@base));
 }
 
+} partial class runtime_package {
+
 // traceGoroutineStackID creates a trace ID for the goroutine stack from its base address.
 internal static traceArg traceGoroutineStackID(uintptr @base) {
-    return ((traceArg)((uint64)@base - Δtrace.minPageHeapAddr)) / (uint64)fixedStack;
+    return ((traceArg)((uint64)@base - trace.minPageHeapAddr)) / (uint64)fixedStack;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

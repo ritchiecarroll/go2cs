@@ -5,8 +5,11 @@ namespace go.@internal;
 
 using Δsyscall = syscall_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+using static poll_package;
 
 partial class poll_package {
+
+} partial class pollᴛFD {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fdopendirˢ => ref fdopendirˢᵇ;
@@ -35,6 +38,8 @@ public static (uintptr, @string, error) OpenDir(this ж<FD> Ꮡfd) {
     }
     return (dir, "", default);
 }
+
+} partial class poll_package {
 
 // Implemented in syscall/syscall_darwin.go.
 //

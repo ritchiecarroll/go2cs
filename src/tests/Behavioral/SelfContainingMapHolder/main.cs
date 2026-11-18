@@ -4,12 +4,17 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
 using sort = sort_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct Direct /*map[nint, Direct]*/;
 
+} partial class mainᴛDirect {
+
 public static @string String(this Direct d) { return fmt.Sprintf("Direct(%d)"u8, len(d)); }
+
+} partial class main_package {
 
 partial struct DirectStr /*map[@string, DirectStr]*/;
 

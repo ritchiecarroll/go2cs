@@ -79,7 +79,7 @@ internal static void bound() {
     @unsafe.Pointer.StoreArray<bound_v>(bp, 2, v);
     v[0].lo = 9;
     var back = @unsafe.Pointer.LoadArray<bound_v>(bp, 2);
-    v = back.Clone();
+    v.Assign(back);
     fmt.Println("bound:", buf, v[0].lo, back[1].hi);
 }
 

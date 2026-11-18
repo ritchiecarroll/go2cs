@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,6 +14,8 @@ partial struct @decimal {
     internal nint d;
 }
 
+} partial class mainᴛdecimal {
+
 internal static @string String(this ref @decimal a) {
     return fmt.Sprint(a.d);
 }
@@ -20,6 +23,8 @@ internal static @string String(this ref @decimal a) {
 internal static void Assign(this ref @decimal a, nint v) {
     a.d = v;
 }
+
+} partial class main_package {
 
 internal static void main() {
     nint @base = default;

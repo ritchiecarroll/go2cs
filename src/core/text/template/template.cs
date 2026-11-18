@@ -8,6 +8,7 @@ using reflect = reflect_package;
 using sync = sync_package;
 using parse = go.text.template.parse_package;
 using go.text.template;
+using static template_package;
 
 partial class template_package {
 
@@ -21,7 +22,7 @@ partial struct common {
     // expose reflection to the client.
     internal sync.RWMutex muFuncs; // protects parseFuncs and execFuncs
     internal FuncMap parseFuncs;
-    internal map<@string, reflectꓸValue> execFuncs;
+    internal map<@string, reflect.Value> execFuncs;
 }
 
 // Template is the representation of a parsed template. The *parse.Tree
@@ -43,6 +44,8 @@ public static ж<Template> New(@string name) {
     t.init();
     return t;
 }
+
+} partial class templateᴛTemplate {
 
 // Name returns the name of the template.
 public static @string Name(this ref Template t) {
@@ -73,7 +76,7 @@ internal static void init(this ref Template t) {
         var c = @new<common>();
         c.tmpl = new map<@string, ж<Template>>();
         c.parseFuncs = new FuncMap(0);
-        c.execFuncs = new map<@string, reflectꓸValue>();
+        c.execFuncs = new map<@string, reflect.Value>();
         t.common = c;
     }
 }
@@ -111,7 +114,7 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
         Ꮡt.of(Template.ᏑmuFuncs).RLock();
         ᒐd2 = true;
         maps.Copy<FuncMap, FuncMap, @string, any>(nt.parseFuncs, t.parseFuncs);
-        maps.Copy<map<@string, reflectꓸValue>, map<@string, reflectꓸValue>, @string, reflectꓸValue>(nt.execFuncs, t.execFuncs);
+        maps.Copy<map<@string, reflect.Value>, map<@string, reflect.Value>, @string, reflect.Value>(nt.execFuncs, t.execFuncs);
         return (nt, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -283,4 +286,4 @@ internal static bool associate(this ref Template t, ж<Template> Ꮡnew, ж<pars
     return true;
 }
 
-} // end template_package
+} // end templateᴛTemplate

@@ -28,7 +28,6 @@ using static go.regexp.syntax_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6f6e63652073796e632e4f6e63653b206d206d61705b737472696e675d737472696e677d", "categoryAliasesᴛ1")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -38,8 +37,8 @@ using static go.regexp.syntax_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Error, error>(Pointer = true)]
 [assembly: GoImplement<ranges, sort_package.Interface>]
-[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -66,13 +65,13 @@ using static go.regexp.syntax_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("regexp/syntax/compile.go", "compile.cs", "ABcugqaigoKCgoKUgsqigpSCpoKClJQADSCigoKCgoKmgoKCpoKUopSkpIKUgoKCgpSmpKSkpKSkpKSkpIKCgqSkpKSClIKCgpSmpIKClJSmlIKCpoKCgqaCpoKCgpSClKaUgsqCppSClIKmgoKCgoKCpoKCgoKClIKUggACENKCgoKClIKUgqaCppSmgqaCgoKCpoKCgoKCgpSUgqaUtLS2")]
-[assembly: GoPositionMap("regexp/syntax/op_string.go", "op_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCggAHEpaClIKkpA==")]
-[assembly: GoPositionMap("regexp/syntax/parse.go", "parse.cs", "ABUsggApOIIAULIBgoKCgpSClIKmooKUgqaCgpSCpqLcgpSCgoKUgpSClKaC3IKCuIK4ooKCuIKUxrS0gsaClILGgoKClJSmtoKCpoKClIKCgqaCuKKCgqaCgoKCpoKs0oKUgpSCgoIAARKCuIKCpqaCggACGAAJAoKCpoKCgrimgoKCgqaCgqiSgoKClIKCqJKClIKCgpSqooKCrsKCgoKClLimgoKUgoKmgoKCgoKCgpSCpgACGAAJAoKCgpSClIKUgqaCgqaokqaCgpSCpoKmqLaCgpSCuILKgqaospSCgoKClIKCgpSmAAUSwoKUgoKCgoKUpoKCgoKCpgACJAAPAoKokoKCgo7igoKCgoKClKaCAAkUlJSmgoKUgoKUlIKCuIKClAAJFIKCgozSgoKmAAcQlJSmgoKCgpSUgoK4gpSmgoLugsqUgriCgoKmlIKClIK4gpSUpoKCgoKUlJSqwoKUgpSqwqaCgoKCgqaCtIKCtIK2poKCgqaqwoKUgoKClJSs0oKClIKUgrSCgqSUgpSmgoKCgoKUgpSUAAIQ0qbCgqT4tMiUgpSozIKCgoKCgpSClLaUgpSUgoK0grSClLSClJS0gpSUtIKUlLSCxoKUtLSkgoKUgrSCgoKUgoKUlJSClIK0gpSCgrSCgrSCgsamkoKCgoKUgpS0goLIgqaCgoKUgoKCgsqAgoKCgqSmgpS0poKUlJSCgpTsAAgCgpSCgoKUgpSClIKClIKCgIKClLaClIKCrNIAECKClJSCgriCgoKUpoKCgpSCuIKCgoKokoKCgoKCgoKUlMiCtIK0grSCyIKUpoLIgoKUlJSUgtgAAhDSgpSCgqao0oKmgpSCgpSClIKUgoKUlKqirpKUpIKCpqSklKiS3IK+suqC2IKU2IKUgoLO1oKCgpSCgpSCgoKmgoKCgqaUgoKmqJKClJSUgoKUgoKCgqaClJSCgoKUqtKCgpSCgqaCtMrsgpTGgoKClIKUyIKUgpTKgoKCgpSClIKUgoKUgoKUlIKUuIKClIKClAAJEqSkpKSkpKqigsqCpgAHGgAJAoKUgoKUrPKCpoKClIKigoKUpqKCgpSmgoKCgoKUpqbKuAAQIJKCggADEvKCgoKClLSClLSCtoKUlIKUgpSUgpSssrikpKSklICCpICC7IKCgpSsAAgCgriCgpSCgoKUkpSCpoKCgpSUgoKCyoKCpoKClIKmgoKU3IKCgoKCgpSmqsKCgoKUgoKCuIK4goKmgoKUpoKCgpSCgsqCgpSCgriAgoLIgpKClJSCgoKUgoKmgpSmpoKCgpSCgqrWlIKCuIKCgpSClKaCgqaqopKCgpSClJSokoKUqNqCgoKCgoKUgpTKAAcYtJSUlJSUgpSUgriCgoKCgqaqooKUqJKClKqigoKCgpSUgpSokoKCgoKUgqaCgoKClIKmqJKCgoKCgpSClIKClKaCgoKClIKUgoKUpoKUqqKCgoKCgoKClJSCppQAChaCgoKCpoKmgoKCgqaCgoKClJSmooKClKaCpoKClIKUgpQ=", "892-903:1;1956-1965:1", "", "701=isCharClass/1/2/2,isCharClass/2/2/2", "", "935:21,936:13")]
+[assembly: GoPositionMap("regexp/syntax/compile.go", "compile.cs", "ABgugsaigoKCgoKUgsqigpSCpoKClJQADyCigoKCgoLGgoKCxoK0opSkpIKUgoKCgpSmpKSkpKSkpKSkpIKCgqSkpKSClIKCgpSmpIKClJSmlIKCpoKCgqaCpoKCgpSClKaUgsqCppSClIKmgoKCgoKCpoKCgoKClIKUggACENKCgoKClIKUgqaCppSmgqaCgoKCpoKCgoKCgpSUgqaUtLS2")]
+[assembly: GoPositionMap("regexp/syntax/op_string.go", "op_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCAAcStoKUgqSk")]
+[assembly: GoPositionMap("regexp/syntax/parse.go", "parse.cs", "ABgsggAtOIIAVLIBgoKCgpSClIKmooKUgqaCgpSCpqLcgpSCgoKUgpSClKaC3IKCuIK4ooKCuIKUxrS0gsaClILGgoKClJSmtoKCpoKClIKCgqaCuKKCgqaCgoKCpoKs0oKUgpSCgoIAARKCuIKCpqaCggACGAAJAoKCpoKCgrimgoKCgqaCgqiSgoKClIKCyJKClIKCgpTKooKCrsKCgoKClLimgoKUgoKmgoKCgoKCgpSCpgAEGAAJAoKCgpSClIKUgqaCgqbIkqaCgpSCpoKmqLaCgpSCuILKgqbIspSCgoKClIKCgpSmAAcSwoKUgoKCgoKUpoKCgoKCpgACJAAPAoKokoKCgo7igoKCgoKClKaCAAkUlJSmgoKUgoKUlIKCuIKClAAJFIKCgozSgoKmAAcQlJSmgoKCgpSUgoK4gpSmgoLugsqUgriCgoKmlIKClIK4gpSUpoKCgoKUlJSqwoKUgpSqwqaCgoKCgqaCtIKCtIK2poKCgqaqwoKUgoKClJSs0oKClIKUgrSCgqSUgpTGgoKCgoKUgpSUAAIQ0qbCgqT4tMiUgpSozIKCgoKCgpSClLaUgpSUgoK0grSClLSClJS0gpSUtIKUlLSCxoKUtLSkgoKUgrSCgoKUgoKUlJSClIK0gpSCgrSCgrSCgsamkoKCgoKUgpS0goLIgqaCgoKUgoKCgsqAgoKCgqSmgpS0poKUlJSCgpQACAwACAKClIKCgpSClIKUgoKUgoKAgoKUtoKUgoKs0gAQIoKUlIKCuIKCgpSmgoKClIK4goKCgqiSgoKCgoKCgpSUyIK0grSCtILIgpSmgsiCgpSUlJSC2AAEENKClIKCpsjSgqaClIKClIKUgpSCgpSUyqKukpSkgoKmpKSUyJLcgt6y6oLYgpTYgpSCgu7WgoKClIKClIKCgqaCgoKCppSCgqaokoKUlJSCgpSCgoKCpoKUlIKCgpSq0oKClIKCpoK0yuyClMaCgoKUgpTIgpSClMqCgoKClIKUgpSCgpSCgpSUgpS4goKUgoKUAAkSpKSkpKSkqqKCyoKmAAsaAAkCgpSCgpSs8oKmgoKUgqKCgpSmooKClKaCgoKCgpSmxsq4ABAgkoKCAAMS8oKCgoKUtIKUtIK2gpSUgpSClJSClKyyuKSkpKSUgIKkgILsgoKClMwACAKCuIKClIKCgpSSlIKmgoKClJSCgoLKgoKmgoKUgqaCgpTcgoKCgoKClKaqwoKCgpSCgoK4griCgqaCgpSmgoKClIKCyoKClIKCuICCgsiCkoKUlIKCgpSCgqaClKamgoKClIKCytaUgoK4goKClIKUpoKCpqqikoKClIKUlKiSgpSo2oKCgoKCgpSClMoABxi0lJSUlJSClJSCuIKCgoKCpqqigpSokoKUqqKCgoKClJSClKiSgoKCgpSCpoKCgoKUgqaokoKCgoKClIKUgoKUpoKCgoKUgpSCgpSmgpSqooKCgoKCgoKUlIKmlAAMFoKCgoKmgqaCgoKCxoKCgoKUlKaigoKUpoKmgoKUgpSClA==", "892-903:1;1956-1965:1", "", "724=isCharClass/1/2/2,isCharClass/2/2/2", "", "960:21,961:13")]
 [assembly: GoPositionMap("regexp/syntax/perl_groups.go", "perl_groups.cs", "AAgSuNzuAAcQ3Mq4ysq4uLi47sq47tw=")]
-[assembly: GoPositionMap("regexp/syntax/prog.go", "prog.cs", "ACdSAA0cgoKUAAwq4oKClLS0pJS0tKSClKzWAAoWgoKCqJKCgpSokoKUpKyypoKokoKClKqigoKCgoKUtOikgrTOogACENKUlLiCgpSCgoK4poKUyoKClIKmuIKCgoKCgpSUpqyylKSkpKSklKaCgoKmooK4ooKCgoKUgpSCgriCABwGgpS0tLS0tLS0lJSCgpS0tLQ=")]
-[assembly: GoPositionMap("regexp/syntax/regexp.go", "regexp.cs", "ADmAAcKClIKUpoLIpqaCyILIgrYADCKigpSCAAIQ0pTcgoKClLjKgoKCgoKCyqampqaClKas0oKCgoKCgoKUgoKClIKCgoKUgqaUlJSUAAsK0oKUlIKCgpSClIKUgoKClIKmlIKUgoKmlLS0tILGgoKUgoKCpoKCgoKCgpS4goKCgoKUuLS0tLS0gpTGtLSCgoKUlIKUtIKCgpSUlLS0tIKCgoKCpqSCxoKCgpTGgoKU1qSCgoKCgoKUgtqCgoKUgqaUtLS0tLS0goKCgpSClIKCypKCgpSCgqaokoKCpoKClII=")]
-[assembly: GoPositionMap("regexp/syntax/simplify.go", "simplify.cs", "AAccAAkCgpSmgoKClIKCgpSCpqaCyoK4ppSCuIK4goKClILcggAGEJKCgoKCyoKCgoKClIKUlILKpgACJAAUBoKmgpSCpoKC")]
+[assembly: GoPositionMap("regexp/syntax/prog.go", "prog.cs", "AChSAA8cgoKUAA4q4oKClLS0pJS0tKSClKzWAAwWgoKCqJKCgpTIkoKUpMyypoKokoKClKqigoKCgoKUtOikgrQACA6iAAIQ0pSUuIKClIKCgrimgpTKgoKUgqa4goKCgoKClJSmrLKUpKSkpKSUpoKCgsaigriigoKCgpSClIKCuIIAHAaClLS0tLS0tLSUlIKClLS0tA==")]
+[assembly: GoPositionMap("regexp/syntax/regexp.go", "regexp.cs", "ADyAAcKClIKUpoLIpqaCyILIgrYADiKigpSCAAIQ0pTcgoKClLjKgoKCgoKCyqampqaClKas0oKCgoKCgoKUgoKClIKCgoKUgqaUlJSUAAsK0oKUlIKCgpSClIKUgoKClIKmlIKUgoKmlLS0tILGgoKUgoKCpoKCgoKCgpS4goKCgoKUuLS0tLS0gpTGtLSCgoKUlIKUtIKCgpSUlLS0tIKCgoKCpqSCxoKCgpTGgoKU1sSCgoKCgoKUgvqCgoKUgqaUtLS0tLS0goKCgpSClIKC6pKCgpSCgqaokoKCpoKClII=")]
+[assembly: GoPositionMap("regexp/syntax/simplify.go", "simplify.cs", "AAscAAkCgpSmgoKClIKCgpSCpqaCyoK4ppSCuIK4goKClILcggAGEJKCgoKCyoKCgoKClIKUlILKpgAEJAAUBoKmgpSCpoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.regexp;
@@ -96,6 +95,7 @@ public static partial class syntax_package
     internal partial struct printFlags {}
     internal partial struct ranges {}
     public partial struct EmptyOp {}
+    public partial struct Error {}
     public partial struct ErrorCode {}
     public partial struct Flags {}
     public partial struct Inst {}
@@ -103,7 +103,6 @@ public static partial class syntax_package
     public partial struct Op {}
     public partial struct Prog {}
     [GoValueClone("Sub0", "Rune0")] public partial struct Regexp {}
-    public partial struct ΔError {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -122,3 +121,23 @@ public static partial class syntax_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(syntax_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛError;
+[GoMethodHost(typeof(syntax_package.ErrorCode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛErrorCode;
+[GoMethodHost(typeof(syntax_package.Inst)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛInst;
+[GoMethodHost(typeof(syntax_package.InstOp)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛInstOp;
+[GoMethodHost(typeof(syntax_package.Op)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛOp;
+[GoMethodHost(typeof(syntax_package.Prog)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛProg;
+[GoMethodHost(typeof(syntax_package.Regexp)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛRegexp;
+[GoMethodHost(typeof(syntax_package.compiler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛcompiler;
+[GoMethodHost(typeof(syntax_package.parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛparser;
+[GoMethodHost(typeof(syntax_package.patchList)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛpatchList;
+[GoMethodHost(typeof(syntax_package.ranges)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syntaxᴛranges;
+// </MethodHolders>

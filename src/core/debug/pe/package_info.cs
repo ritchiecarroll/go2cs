@@ -27,7 +27,6 @@ using static go.debug.pe_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Section", "ΔSection")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -37,11 +36,11 @@ using static go.debug.pe_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Section, io_package.ReaderAt>(Promoted = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<nobitsSectionReader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
-[assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -58,8 +57,8 @@ using static go.debug.pe_package;
 [assembly: GoFieldAccess(typeof(File))]
 [assembly: GoFieldAccess(typeof(OptionalHeader32))]
 [assembly: GoFieldAccess(typeof(OptionalHeader64))]
+[assembly: GoFieldAccess(typeof(Section))]
 [assembly: GoFieldAccess(typeof(SectionHeader32))]
-[assembly: GoFieldAccess(typeof(ΔSection))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -69,10 +68,10 @@ using static go.debug.pe_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/pe/file.go", "file.cs", "ACtWkoKClIKCgpSCrLKCgoKUrLKClIKClIKCgoKCgpSUlIKClAAFFqamgoK4goKUgoK4goK4goK4goKCgpSCgpSCAAsYgoKUgoKUgoKCgrgACQqCqJKCpoKCpqqigoKmABIGgoKUpKTMgoKCpoKmgoKCgoKUgpSClJSssoKCgpSCpoKClKaCgriCgoKUlKaCgqaClJSCuAAWJsKCppaSgpTKgqiSgpSokoKCgsqCgsqCpoKCuIKClJaSgoKCgoKCgoKClAAHEIKCooKUgoKUgoKCgpSCgoKUpoKmgpSCgoKUuILcrNYACxCCrtSCpgAGEoKokoKCpoKolM6CuIIAADqmgoKmlKTOgriCAAA4poKCppSkvrKCgqaCgqY=", "215-225:1;228-254:2;502-505:1", "", "555=Invoke/2/29/1,Invoke/3/29/2,Invoke/4/29/3,Invoke/5/29/4,Invoke/6/29/5,Invoke/7/29/6,Invoke/8/29/7,Invoke/9/29/8,Invoke/10/29/9,Invoke/11/29/10,Invoke/12/29/11,Invoke/13/29/12,Invoke/14/29/13,Invoke/15/29/14,Invoke/16/29/15,Invoke/17/29/16,Invoke/18/29/17,Invoke/19/29/18,Invoke/20/29/19,Invoke/21/29/20,Invoke/22/29/21,Invoke/23/29/22,Invoke/24/29/23,Invoke/25/29/24,Invoke/26/29/25,Invoke/27/29/26,Invoke/28/29/27,Invoke/29/29/28;580=Invoke/2/28/1,Invoke/3/28/2,Invoke/4/28/3,Invoke/5/28/4,Invoke/6/28/5,Invoke/7/28/6,Invoke/8/28/7,Invoke/9/28/8,Invoke/10/28/9,Invoke/11/28/10,Invoke/12/28/11,Invoke/13/28/12,Invoke/14/28/13,Invoke/15/28/14,Invoke/16/28/15,Invoke/17/28/16,Invoke/18/28/17,Invoke/19/28/18,Invoke/20/28/19,Invoke/21/28/20,Invoke/22/28/21,Invoke/23/28/22,Invoke/24/28/23,Invoke/25/28/24,Invoke/26/28/25,Invoke/27/28/26,Invoke/28/28/27")]
-[assembly: GoPositionMap("debug/pe/section.go", "section.cs", "AB1AsoKUgoKUAAwaooKUgoKUgoKClAAfSsKuwg==")]
-[assembly: GoPositionMap("debug/pe/string.go", "string.cs", "AA8iooKClNyUgpSCgoKUgoKCpoKUlIKClKzEgpSCgpQ=")]
-[assembly: GoPositionMap("debug/pe/symbol.go", "symbol.cs", "AB7GAbKCgpSUlKyygpSmgoKUgoKigoKUkoKUgu6U")]
+[assembly: GoPositionMap("debug/pe/file.go", "file.cs", "ACxWkoKClIKCgpSCzLKCgoKUzLKClIKClIKCgoKCgpSUlIKClAAFFqamgoK4goKUgoK4goK4goK4goKCgpSCgpSCAAsYgoKUgoKUgoKCgrgACwqCyJKCpoKCpsqigoKmABIGgoKUpKTMgoKCpoKmgoKCgoKUgpSClJSssoKCgpSCpoKClKaCgriCgoKUlKaCgqaClJSCuAAaJsKCppaSgpTKgqiSgpSokoKCgsqCgsqCpoKCuIKClJaSgoKCgoKCgoKClAAHEIKCooKUgoKUgoKCgpSCgoKUpoKmgpSCgoKUuILcrNYADxCCztSCpgAGEoKokoKCpoKolM6CuIIAADqmgoKmlKTOgriCAAA4poKCppSkvrKCgqaCgqY=", "215-225:1;228-254:2;502-505:1", "", "576=Invoke/2/29/1,Invoke/3/29/2,Invoke/4/29/3,Invoke/5/29/4,Invoke/6/29/5,Invoke/7/29/6,Invoke/8/29/7,Invoke/9/29/8,Invoke/10/29/9,Invoke/11/29/10,Invoke/12/29/11,Invoke/13/29/12,Invoke/14/29/13,Invoke/15/29/14,Invoke/16/29/15,Invoke/17/29/16,Invoke/18/29/17,Invoke/19/29/18,Invoke/20/29/19,Invoke/21/29/20,Invoke/22/29/21,Invoke/23/29/22,Invoke/24/29/23,Invoke/25/29/24,Invoke/26/29/25,Invoke/27/29/26,Invoke/28/29/27,Invoke/29/29/28;601=Invoke/2/28/1,Invoke/3/28/2,Invoke/4/28/3,Invoke/5/28/4,Invoke/6/28/5,Invoke/7/28/6,Invoke/8/28/7,Invoke/9/28/8,Invoke/10/28/9,Invoke/11/28/10,Invoke/12/28/11,Invoke/13/28/12,Invoke/14/28/13,Invoke/15/28/14,Invoke/16/28/15,Invoke/17/28/16,Invoke/18/28/17,Invoke/19/28/18,Invoke/20/28/19,Invoke/21/28/20,Invoke/22/28/21,Invoke/23/28/22,Invoke/24/28/23,Invoke/25/28/24,Invoke/26/28/25,Invoke/27/28/26,Invoke/28/28/27")]
+[assembly: GoPositionMap("debug/pe/section.go", "section.cs", "ACBAsoKUgoKUAA4aooKUgoKUgoKClAAhSsKuwg==")]
+[assembly: GoPositionMap("debug/pe/string.go", "string.cs", "ABAiooKClNyUgpSCgoKUgoKCpoKUlIKClMzEgpSCgpQ=")]
+[assembly: GoPositionMap("debug/pe/symbol.go", "symbol.cs", "AB/GAbKCgpSUlMyygpTGgoKUgoKigoKUkoKUgu6U")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
@@ -98,11 +97,11 @@ public static partial class pe_package
     [GoValueClone("DataDirectory")] public partial struct OptionalHeader32 {}
     [GoValueClone("DataDirectory")] public partial struct OptionalHeader64 {}
     public partial struct Reloc {}
+    public partial struct Section {}
     public partial struct SectionHeader {}
     [GoValueClone("Name")] public partial struct SectionHeader32 {}
     public partial struct StringTable {}
     public partial struct Symbol {}
-    public partial struct ΔSection {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -125,3 +124,19 @@ public static partial class pe_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(pe_package.COFFSymbol)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛCOFFSymbol;
+[GoMethodHost(typeof(pe_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛFile;
+[GoMethodHost(typeof(pe_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛFormatError;
+[GoMethodHost(typeof(pe_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛSection;
+[GoMethodHost(typeof(pe_package.SectionHeader32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛSectionHeader32;
+[GoMethodHost(typeof(pe_package.StringTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛStringTable;
+[GoMethodHost(typeof(pe_package.nobitsSectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛnobitsSectionReader;
+// </MethodHolders>

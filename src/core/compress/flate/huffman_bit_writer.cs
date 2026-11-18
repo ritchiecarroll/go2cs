@@ -4,6 +4,7 @@
 namespace go.compress;
 
 using io = io_package;
+using static flate_package;
 
 partial class flate_package {
 
@@ -102,6 +103,8 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
         offsetEncoding: newHuffmanEncoder(offsetCodeCount)
     ));
 }
+
+} partial class flateᴛhuffmanBitWriter {
 
 internal static void reset(this ref huffmanBitWriter w, io.Writer writer) {
     w.writer = writer;
@@ -609,6 +612,8 @@ internal static void writeTokens(this ref huffmanBitWriter w, slice<token> token
     }
 }
 
+} partial class flate_package {
+
 // huffOffset is a static offset encoder used for huffman only encoding.
 // It can be reused since we will not be encoding offset values.
 internal static ж<huffmanEncoder> huffOffset;
@@ -619,6 +624,8 @@ internal static ж<huffmanEncoder> huffOffset;
     huffOffset = newHuffmanEncoder(offsetCodeCount);
     huffOffset.generate(offsetFreq, 15);
 }
+
+} partial class flateᴛhuffmanBitWriter {
 
 // writeBlockHuff encodes a block of bytes as either
 // Huffman encoded literals or uncompressed bytes if the
@@ -695,6 +702,8 @@ internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice
     w.nbytes = n;
     w.writeCode(encoding[endBlockMarker]);
 }
+
+} partial class flate_package {
 
 // histogram accumulates a histogram of b in h.
 //

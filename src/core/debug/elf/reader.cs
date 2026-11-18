@@ -5,6 +5,7 @@ namespace go.debug;
 
 using io = io_package;
 using os = os_package;
+using static elf_package;
 
 partial class elf_package {
 
@@ -12,6 +13,8 @@ partial class elf_package {
 partial struct errorReader {
     /*embed*/ internal error error;
 }
+
+} partial class elfᴛerrorReader {
 
 internal static (nint n, error err) Read(this errorReader r, slice<byte> p) {
     return (0, r.error);
@@ -29,6 +32,8 @@ internal static error Close(this errorReader r) {
     return r.error;
 }
 
+} partial class elf_package {
+
 // readSeekerFromReader converts an io.Reader into an io.ReadSeeker.
 // In general Seek may not be efficient, but it is optimized for
 // common cases such as seeking to the end to find the length of the
@@ -39,6 +44,8 @@ partial struct readSeekerFromReader {
     internal int64 size;
     internal int64 offset;
 }
+
+} partial class elfᴛreadSeekerFromReader {
 
 internal static void start(this ref readSeekerFromReader r) {
     var (x, err) = r.reset();
@@ -118,4 +125,4 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
     return (r.offset, default);
 }
 
-} // end elf_package
+} // end elfᴛreadSeekerFromReader

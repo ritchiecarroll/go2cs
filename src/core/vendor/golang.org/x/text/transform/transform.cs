@@ -15,6 +15,7 @@ using io = io_package;
 using utf8 = unicode.utf8_package;
 using unicode;
 using ꓸꓸꓸTransformer = Span<transform_package.Transformer>;
+using static transform_package;
 
 partial class transform_package {
 
@@ -104,8 +105,12 @@ partial interface SpanningTransformer :
 partial struct NopResetter {
 }
 
+} partial class transformᴛNopResetter {
+
 // Reset implements the Reset method of the Transformer interface.
 public static void Reset(this NopResetter _) { }
+
+} partial class transform_package {
 
 // Reader wraps another io.Reader by transforming the bytes read.
 partial struct Reader {
@@ -138,6 +143,8 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
         src: new slice<byte>(defaultBufSize)
     ));
 }
+
+} partial class transformᴛReader {
 
 // Read implements the io.Reader interface.
 public static (nint, error) Read(this ref Reader r, slice<byte> p) {
@@ -207,6 +214,8 @@ public static (nint, error) Read(this ref Reader r, slice<byte> p) {
     }
 }
 
+} partial class transform_package {
+
 // TODO: implement ReadByte (and ReadRune??).
 
 // Writer wraps another io.Writer by transforming the bytes read.
@@ -232,6 +241,8 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
         src: new slice<byte>(defaultBufSize)
     ));
 }
+
+} partial class transformᴛWriter {
 
 // Write implements the io.Writer interface. If there are not enough
 // bytes available to complete a Transform, the bytes will be buffered
@@ -319,9 +330,13 @@ public static error Close(this ref Writer w) {
     }
 }
 
+} partial class transform_package {
+
 partial struct nop {
     /*embed*/ public NopResetter NopResetter;
 }
+
+} partial class transformᴛnop {
 
 internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default;
@@ -337,13 +352,19 @@ internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF
     return (len(src), default);
 }
 
+} partial class transform_package {
+
 partial struct discard {
     /*embed*/ public NopResetter NopResetter;
 }
 
+} partial class transformᴛdiscard {
+
 internal static (nint nDst, nint nSrc, error err) Transform(this discard _, slice<byte> dst, slice<byte> src, bool atEOF) {
     return (0, len(src), default);
 }
+
+} partial class transform_package {
 
 // Discard is a Transformer for which all Transform calls succeed
 // by consuming all bytes and writing nothing.
@@ -367,12 +388,16 @@ partial struct chain {
     internal nint errStart;
 }
 
+} partial class transformᴛchain {
+
 internal static void fatalError(this ref chain c, nint errIndex, error err) {
     nint i = errIndex + 1; if (i > c.errStart) {
         c.errStart = i;
         c.err = err;
     }
 }
+
+} partial class transform_package {
 
 partial struct link {
     internal Transformer t;
@@ -382,6 +407,8 @@ partial struct link {
     internal nint n;
 }
 
+} partial class transformᴛlink {
+
 internal static slice<byte> src(this ref link l) {
     return l.b.slice(l.p, l.n);
 }
@@ -389,6 +416,8 @@ internal static slice<byte> src(this ref link l) {
 internal static slice<byte> dst(this ref link l) {
     return l.b.slice(l.n);
 }
+
+} partial class transform_package {
 
 // Chain returns a Transformer that applies t in sequence.
 public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
@@ -408,6 +437,8 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
     }
     return new chainжTransformer(c);
 }
+
+} partial class transformᴛchain {
 
 // Reset resets the state of Chain. It calls Reset on all the Transformers.
 internal static void Reset(this ref chain c) {
@@ -520,12 +551,16 @@ internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, sl
     return (dstL.n, srcL.p, err);
 }
 
+} partial class transform_package {
+
 // Deprecated: Use runes.Remove instead.
 public static Transformer RemoveFunc(Func<rune, bool> f) {
     return new removeFᴠTransformer(NilSafeDelegateConversion<removeF, Func<rune, bool>>(f));
 }
 
 internal delegate bool removeF(rune r);
+
+} partial class transformᴛremoveF {
 
 internal static void Reset(this removeF _) { }
 
@@ -574,6 +609,8 @@ internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slic
     }
     return (nDst, nSrc, err);
 }
+
+} partial class transform_package {
 
 // grow returns a new []byte that is longer than b, and copies the first n bytes
 // of b to the start of the new slice.

@@ -58,10 +58,10 @@ using static go.mime_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABo6nLKClKaCgoKmqJK4lIKClJSUAAkYlpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClIK6koKktLSCgtySgoKCgqiSqJKCguaCABAitoKUpoKClIKCpoKCpoKClKq0goKmlIKUgoKCgpSUgoKUgpSClIKUgpSUgoKUgpSCgoKCgsqCpoKmgqaCpqaClKSkAAsIgpS0gsaCgpTYgpSCgpSCtqqiguqmqJKCgoKktIKUgoKUgrS0lKaokpKCgpSClKaClKS2lA==")]
+[assembly: GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABs6vLKClMaCgoKmyJK4lIKClJSUAAsYtpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClILakoKktLSCgvySgoKCgsiSyJKCggAIBoIAEiK2gpSmgoKUgoKmgoKmgoKUqrSCgqaUgpSCgoKClJSCgpSClIKUgpSClJSCgpSClIKCgoKCyoKmgqaCpoKmxoKUpKQADQiClLSCxoKClNiClIKClIK2yqKC6qaokoKCgqS0gpSCgpSCtLSUpqiSkoKClIKUpoKUpLaU")]
 [assembly: GoPositionMap("mime/grammar.go", "grammar.cs", "AAsSAAISABgg7AACEAAcKqyigpSCgqY=")]
 [assembly: GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABMq0oKCgpSUgpSCgqaCgoKCgpSUgpSUlIKUgoKmiIKUgoKmgqaCgqaCgoKCgoKCpoKUpoKCgpSClIKClIKClIKUqIKCgswAARgADgKClIKCpprEgoKCgpSCgqampoKCgpSCgqaUlIKqooKCgoKUpoKCgoKCgoKUgoKClIKCgqaCpoK4ppSCgoLKgoKUguiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgqaCgoKCpoKClIKCgpSCppSCgoKClIKClJSCpoKCgpSCgrSCgramgpSkpJSmgpSkpJQ=", "", "", "65=isTSpecial/1/1/2")]
-[assembly: GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgpS0AA0aAEiOAYKClIIAAzAAFgKmgqyygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSCAAgGooKClIKClJSClIKCgoKUgoKmgg==")]
+[assembly: GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgpS0AA0aAEiOAYKClIIAAzAAFgKmgqyygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSCAAoGooKClIKClJSClIKCgoKUgoKmgg==")]
 [assembly: GoPositionMap("mime/type_unix.go", "type_unix.cs", "AA0egsrc7qKCgpSkgpSCgoKCpoIACRSUuKaUgpTWooKClKSCgoKClIKCgpSmgrSkgoKCyoK4goKC", "", "", "", "41:21,92:21")]
 // </GoSourcePositionMaps>
 
@@ -103,3 +103,14 @@ public static partial class mime_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(mime_package.WordDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mimeᴛWordDecoder;
+[GoMethodHost(typeof(mime_package.WordEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mimeᴛWordEncoder;
+// </MethodHolders>

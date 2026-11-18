@@ -15,12 +15,13 @@ using strings = strings_package;
 using unicode = unicode_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
 // A declInfo describes a package-level const, type, var, or func declaration.
 partial struct declInfo {
-    internal ж<ΔScope> @file;       // scope of file containing this declaration
+    internal ж<Scope> @file;        // scope of file containing this declaration
     internal goVersion version;     // Go version of file containing this declaration
     internal slice<ж<Var>> lhs;     // lhs of n:1 variable declarations, or nil
     internal ast.Expr vtyp;         // type, or nil (for const and var declarations only)
@@ -31,6 +32,8 @@ partial struct declInfo {
     // The deps field tracks initialization expression dependencies.
     internal map<Object, bool> deps; // lazily initialized
 }
+
+} partial class typesᴛdeclInfo {
 
 // hasInitializer reports whether the declared object has an initialization
 // expression or function body.
@@ -47,6 +50,8 @@ internal static void addDep(this ref declInfo d, Object obj) {
     }
     m[obj] = true;
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string missingTypeOrInitExprˢ => ref missingTypeOrInitExprˢᵇ;
@@ -96,6 +101,8 @@ internal static void arityMatch(this ж<Checker> Ꮡcheck, ж<ast.ValueSpec> Ꮡ
     }}
 }
 
+} partial class types_package {
+
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string illegalCharsᶜ => ref illegalCharsᶜᵇ;
 private static readonly @string illegalCharsᶜᵇ = "!\"#$%&'()*,:;<=>?[\\]^{|}`�";
@@ -116,6 +123,8 @@ internal static (@string, error) validatedImportPath(@string path) {
     }
     return (s, default);
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cannotDeclareInitMustBeˢ => ref cannotDeclareInitMustBeˢᵇ;
@@ -153,7 +162,7 @@ internal static void declarePkgObj(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡi
 // filename returns a filename suitable for debugging output.
 internal static @string filename(this ref Checker check, nint fileNo) {
     var @file = check.files[fileNo];
-    tokenꓸPos pos = @file.Pos(); if (pos.IsValid()) {
+    token.Pos pos = @file.Pos(); if (pos.IsValid()) {
         return check.fset.File(pos).Name();
     }
     return fmt.Sprintf("file[%d]"u8, fileNo);
@@ -246,6 +255,16 @@ internal static ж<Package> importPackage(this ж<Checker> Ꮡcheck, positioner 
     return default;
 }
 
+} partial class types_package {
+
+internal partial struct collectObjects_methodInfo /*dyn*/ {
+    internal ж<Func> obj;       // method
+    internal bool ptr;          // true if pointer receiver
+    internal ж<ast.Ident> recv; // receiver type name
+}
+
+} partial class typesᴛChecker {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cannotRenameImportCˢ => ref cannotRenameImportCˢᵇ;
 private static readonly @string cannotRenameImportCˢᵇ = @"cannot rename import ""C"""u8;
@@ -253,12 +272,6 @@ internal static ref readonly @string cannotImportPackageAsˢ => ref cannotImport
 private static readonly @string cannotImportPackageAsˢᵇ = "cannot import package as init - init must be a func"u8;
 internal static ref readonly @string methodHasNoReceiverˢ => ref methodHasNoReceiverˢᵇ;
 private static readonly @string methodHasNoReceiverˢᵇ = "method has no receiver"u8;
-
-internal partial struct collectObjects_methodInfo /*dyn*/ {
-    internal ж<Func> obj;       // method
-    internal bool ptr;          // true if pointer receiver
-    internal ж<ast.Ident> recv; // receiver type name
-}
 
 // collectObjects collects all file and package objects and inserts them
 // into their respective scopes. It also performs imports and associates
@@ -280,7 +293,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     }
     ref var methods = ref heap<slice<collectObjects_methodInfo>>(out var Ꮡmethods); // collected methods with valid receivers and non-blank _ names
 
-    var fileScopes = new slice<ж<ΔScope>>(len(check.files)); // fileScopes[i] corresponds to check.files[i]
+    var fileScopes = new slice<ж<Scope>>(len(check.files)); // fileScopes[i] corresponds to check.files[i]
     foreach (var (fileNo, @file) in range(check.files)) {
         check.version = asGoVersion(check.versions[@file]);
 
@@ -291,10 +304,10 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
         // Use the actual source file extent rather than *ast.File extent since the
         // latter doesn't include comments which appear at the start or end of the file.
         // Be conservative and use the *ast.File extent if we don't have a *token.File.
-        tokenꓸPos pos = @file.Pos();
-        tokenꓸPos end = @file.End();
+        token.Pos pos = @file.Pos();
+        token.Pos end = @file.End();
         var f = check.fset.File(@file.Pos()); if (f != nil) {
-            (pos, end) = ((tokenꓸPos)f.Base(), f.End());
+            (pos, end) = ((token.Pos)f.Base(), f.End());
         }
         var fileScope = NewScope(pkg.scope, pos, end, check.filename(fileNo));
         fileScopes[fileNo] = fileScope;
@@ -401,7 +414,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                 }
                 break;
             }
-            case ΔconstDecl dΔ1: {
+            case constDecl dΔ1: {
                 // declare all constants
                 foreach (var (i, name) in range(dΔ1.spec.Names)) {
                     var obj = NewConst(name.Pos(), pkgʗ1, name.Name, default, constant.MakeInt64((int64)dΔ1.iota));
@@ -416,7 +429,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                 }
                 break;
             }
-            case ΔvarDecl dΔ1: {
+            case varDecl dΔ1: {
                 var lhs = new slice<ж<Var>>(len(dΔ1.spec.Names));
                 // If there's exactly one rhs initializer, use
                 // the same declInfo d1 for all lhs variables
@@ -449,12 +462,12 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                 }
                 break;
             }
-            case ΔtypeDecl dΔ1: {
+            case typeDecl dΔ1: {
                 var obj = NewTypeName(dΔ1.spec.Name.Pos(), pkgʗ1, dΔ1.spec.Name.Name, default);
                 Ꮡcheck.declarePkgObj(dΔ1.spec.Name, new TypeNameжObject(obj), Ꮡ(new declInfo(@file: fileScopeʗ1, version: Ꮡcheck.Value.version, tdecl: dΔ1.spec)));
                 break;
             }
-            case ΔfuncDecl dΔ1: {
+            case funcDecl dΔ1: {
                 @string name = dΔ1.decl.Name.Name;
                 var obj = NewFunc(dΔ1.decl.Name.Pos(), pkgʗ1, name, nil); // signature set later
                 var hasTParamError = false;                               // avoid duplicate type parameter errors
@@ -567,7 +580,7 @@ internal static void sortObjects(this ref Checker check) {
         check.objList[i] = obj;
         i++;
     }
-    slices.SortFunc(check.objList, (Object a, Object b) => cmp_package.Compare(a.order(), b.order()));
+    slices.SortFunc(check.objList, (Object a, Object b) => cmp.Compare(a.order(), b.order()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -824,6 +837,8 @@ internal static void errorUnusedPkg(this ж<Checker> Ꮡcheck, ж<PkgName> Ꮡob
         Ꮡcheck.softErrorf(new PkgNameжpositioner(Ꮡobj), UnusedImport, "%q imported as %s and not used", path, obj.name);
     }
 }
+
+} partial class types_package {
 
 // dir makes a good-faith attempt to return the directory
 // portion of path. If path is empty, the result is ".".

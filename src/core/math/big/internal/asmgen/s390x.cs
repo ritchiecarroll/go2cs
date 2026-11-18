@@ -51,7 +51,7 @@ partial class asmgen_package {
     jmpNonZero: "CMPBNE %s, $0, %s"
 )); }
 
-internal static void s390xSetup(ж<ΔFunc> Ꮡf) {
+internal static void s390xSetup(ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
@@ -92,7 +92,7 @@ internal static @string s390xHint(ж<Asm> _, Hint h) {
     return ""u8;
 }
 
-internal static void s390MulWide(ж<Asm> a, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
+internal static void s390MulWide(ж<Asm> a, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
     if (src1.name != "R11"u8 && src2.name != "R11"u8) {
         a.Fatalf("mulWide src1 or src2 must be R11");
     }

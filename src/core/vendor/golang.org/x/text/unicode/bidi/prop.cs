@@ -5,6 +5,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static bidi_package;
 
 partial class bidi_package {
 
@@ -15,6 +16,8 @@ partial struct Properties {
 }
 
 internal static ж<bidiTrie> trie = newBidiTrie(0);
+
+} partial class bidiᴛProperties {
 
 // TODO: using this for bidirule reduces the running time by about 5%. Consider
 // if this is worth exposing or if we can find a way to speed up the Class
@@ -27,8 +30,8 @@ internal static ж<bidiTrie> trie = newBidiTrie(0);
 // }
 
 // Class returns the Bidi class for p.
-public static ΔClass Class(this Properties p) {
-    ΔClass c = (ΔClass)(nuint)((uint8)(p.entry & 0x0F));
+public static Class Class(this Properties p) {
+    Class c = (Class)(nuint)((uint8)(p.entry & 0x0F));
     if (c == Control) {
         c = controlByteToClass[(uint8)(p.last & 0xF)];
     }
@@ -47,7 +50,9 @@ internal static rune reverseBracket(this Properties p, rune r) {
     return xorMasks[(p.entry >> (int)(xorMaskShift))] ^ r;
 }
 
-[GoLazy] partial class lazyᴛcontrolByteToClass { internal static array<ΔClass> controlByteToClass = new array<ΔClass>(16){
+} partial class bidi_package {
+
+[GoLazy] partial class lazyᴛcontrolByteToClass { internal static array<Class> controlByteToClass = new array<Class>(16){
     [0xD] = LRO, // U+202D LeftToRightOverride,
     [0xE] = RLO, // U+202E RightToLeftOverride,
     [0xA] = LRE, // U+202A LeftToRightEmbedding,

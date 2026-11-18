@@ -28,15 +28,15 @@ internal static void reads(@string label, namer n) {
     var v = reflect.ValueOf(n);
     fmt.Println(label, v.Kind(), v.Type(), v.NumMethod(), v.IsZero());
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt: {
+    case var ᴛ when ᴛ == reflect.Int: {
         fmt.Println(v.Int(), v.CanInt());
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         fmt.Println(v.String(), v.Len(), v.Index(1).Uint());
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         fmt.Println(v.Len(), v.Cap(), v.Index(1).Int(), v.Slice(1, 3).Len(), v.IsNil());
         break;
     }
@@ -52,7 +52,7 @@ internal static void reads(@string label, namer n) {
         fmt.Println(v.NumField(), v.Field(0).String());
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         fmt.Println(v.IsNil(), v.Elem().Field(0).String());
         break;
     }}

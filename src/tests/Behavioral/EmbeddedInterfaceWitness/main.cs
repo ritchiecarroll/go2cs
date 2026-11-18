@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using iolike = EmbeddedInterfaceWitness.iolike_package;
 using EmbeddedInterfaceWitness;
+using static main_package;
 
 partial class main_package {
 
@@ -12,21 +13,33 @@ partial struct wrapper {
     internal @string prefix;
 }
 
+} partial class mainᴛwrapper {
+
 internal static @string Write(this wrapper w, @string s) { return w.prefix + s; }
+
+} partial class main_package {
 
 partial struct plain {
     internal @string tag;
 }
 
+} partial class mainᴛplain {
+
 internal static @string Read(this plain p) { return "read:"u8 + p.tag; }
 internal static @string Write(this plain p, @string s) { return "p:"u8 + s; }
+
+} partial class main_package {
 
 partial struct holder {
     public iolike.Reader Reader;
     internal @string prefix;
 }
 
+} partial class mainᴛholder {
+
 internal static @string Write(this holder h, @string s) { return h.prefix + s; }
+
+} partial class main_package {
 
 internal static void check(@string label, any value) {
     if (value._<iolike.ReadWriter>(out var rw)) {
@@ -91,18 +104,26 @@ partial struct pointerBase {
     internal @string tag;
 }
 
+} partial class mainᴛpointerBase {
+
 internal static @string Write(this ref pointerBase b, @string s) { return "pb:"u8 + s + b.tag; }
+
+} partial class main_package {
 
 partial struct pointerOnly {
     /*embed*/ public EmbeddedInterfaceWitness.iolike_package.ReadWriter ReadWriter;
     /*embed*/ internal pointerBase pointerBase;
 }
 
+} partial class mainᴛpointerOnly {
+
 // Go method set entry for the promoted 'ReadWriter.Read()' - provided ONLY by the embedded
 // interface field in *pointerOnly's method set; see the pointer-only satisfaction record.
 internal static @string Read(this pointerOnly recvᴛ) => recvᴛ.ReadWriter.Read();
 
 internal static @string Write(this ref pointerOnly p, @string s) { return "po:"u8 + s; }
+
+} partial class main_package {
 
 internal static void checkPointerOnly() {
     any ptr = Ꮡ(new pointerOnly());

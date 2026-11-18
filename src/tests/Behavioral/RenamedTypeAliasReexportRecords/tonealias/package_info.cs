@@ -27,8 +27,8 @@ using static go.RenamedTypeAliasReexportRecords.tonealias_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Pitch", "go.RenamedTypeAliasReexportRecords.tone_package.ΔPitch")]
-[assembly: GoTypeAlias("Tone", "go.RenamedTypeAliasReexportRecords.tone_package.ΔTone")]
+[assembly: GoTypeAlias("Pitch", "go.RenamedTypeAliasReexportRecords.tone_package.Pitch")]
+[assembly: GoTypeAlias("Tone", "go.RenamedTypeAliasReexportRecords.tone_package.Tone")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter

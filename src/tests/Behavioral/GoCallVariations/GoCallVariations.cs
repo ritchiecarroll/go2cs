@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -44,10 +45,14 @@ partial struct accum {
     internal nint total;
 }
 
+} partial class mainᴛaccum {
+
 internal static nint add(this ref accum a, nint n) {
     a.total += n;
     return a.total;
 }
+
+} partial class main_package {
 
 internal static void bindAdd(ж<accum> a) {
     var add = (nint p1) => a.add(p1);

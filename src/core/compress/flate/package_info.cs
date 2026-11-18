@@ -71,13 +71,13 @@ using static go.compress.flate_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/flate/deflate.go", "deflate.cs", "ADuCAQA0eoKUgoKCgpSUgoKCgriCgpSmgoKUyoKCpoKCgoKUgoKUrtSClIK4gqamgoKCgoKUgpSCpoKCgoKmlLiCquKCgqamgoK4goKCpoKClIKClIKCgoKUlKaUlIKCpqaCgpSCAAQQsqqigpSCgoKCgr6ygoKCgqasxIKCuIKUpLSCpIKCuqaClJSCpoKCgoKCgoKCgqaCgqaUgoKClIKCgpSClJSUgpSCgpSUppSCgoKClIKCgoKCgqaGgoKmqIKU3IKCgpSUgoKCpoKUppSCgsqUlIKUpoKCgpSCgoKUpoKC/IKCgqaCgoK+soKUgoKmsoKUgoKCgoKmpqKClIKCgoKClIKmgpSUgoKkgoKkgoKCgoKkgqSCgoKklKaCgoKClLSCgrSCgoKCgoKCgoLIooKUgpSCgoKUgpSCgpSCAAIeAAwCgoKUAAIS4oKCgpSCgu6CpgAIFqIAAhgACwaokqyylIKCpg==")]
-[assembly: GoPositionMap("compress/flate/deflatefast.go", "deflatefast.cs", "ABc0goKmgoKoggAWMoKqtILKgoKC3KaCgoKUAA8glIKCgoKCgoKClIKCgpSClIKU3AAJFNyCgqaCgoKCAAgSgoKCgoKClIKCgoKCyoKClIKCgqaCgpSssoKCuIKCgpSCgqa4goK4goKClIKCgtyCgriCgoKCpqqipqaCAAMQwpSCgriCgsqUlA==")]
-[assembly: GoPositionMap("compress/flate/dict_decoder.go", "dict_decoder.cs", "ACNOspSClJSClIKCgpSokoKUqJKokqyyrLKssoIAAhDSgoKCgoIACRSCgoIAECKCpoIAAhLigoKClIKmgqaCrLKCgoKClA==")]
-[assembly: GoPositionMap("compress/flate/huffman_bit_writer.go", "huffman_bit_writer.cs", "ACJMAAsQ7twACRQAFzKCAAoWgoKmgoKClIKCgoKClJSUgoKmgoKUpoKClIKCgoKCgoKCgoKCgoKCgoKClPiCgpSCgoKUgoKCgpSClIIAAh4ADwLKlIKCpoKClJSCgoKmgoKCpoKCgoKCgoKClIKCgoKCpoKCgpSCgoKCgpSUgoKCgoKmgoKCgqaCpqjigoKUipqokgACErKClIKUpoKClIKCgoKCgoKCgoKCgoKCgoKClAADEtKClIKClIKCgpSCgqaCgoKCgpSUlIK0grSC2oKClIKClIKCgqaCgpaSgpQAAhDygqaClIKCypSUlLyigpbIgoKUgoKCuIKCgriClLgAAhDygqaCuIKCpoKCgrimrvKClIKCgpSCgoK4goKmgoKUpoKUgoKqooKUgoKCpoKCgoKCgqaCgoKCgoIACBKCgoKCrLKCuKaUlIKClJjYgoKmgoKCuIKCgpSCgoKCpoKCgoKCgoKCgoKCgpSCgpSUgqyygoI=", "", "", "95=newHuffmanEncoder/1/3/5,newHuffmanEncoder/2/3/6,newHuffmanEncoder/3/3/7;303=bitLength/1/1/1;304=bitLength/1/2/1,bitLength/2/2/2;311=bitLength/1/2/1,bitLength/2/2/2")]
-[assembly: GoPositionMap("compress/flate/huffman_code.go", "huffman_code.cs", "AC5okoKmlIKokoKCgoKCgqaCxoLGgsaCpJSmgoKCgpSmgpSCgoKCpgAEJgAOAoKUgoK4gq7K1KbcgoLKlIKCgsqCgoKmgpSClILKlIKmypSUgqaC7oKmgoKCpoKUqsKCgoKC3JSCgoKUAAMQ4riUlJSCgoKUuIKmlJSUppTKooKmlIKmuKKCppSCgpSmlII=")]
-[assembly: GoPositionMap("compress/flate/inflate.go", "inflate.cs", "ACNGgtwACRSCAAoWggApZtjEgqqikoKClIKUgpQACRSCpoKCgoKCAAcQgqaCgoKmgoKCgoKCgpSCuIKClIKCgoKCgtyClKaCppSCgoKCgpTKuIK4gpSmgoKC3AApXqKCgqaCgoKCgpTGgoLGgpSCgsbIooKCgoKClJSClIKCyoKClMzUtIKCpoKClIKCgpSClIKmgoKCpoKClIKUgsqCgoKUlIKClpKCgpSkgoKClLSCgrSCgqSCgqaCgoKClIKCuILugqauwqqUtLaEkoKCgpSCgpSCgoKCgpS0graCtIK0grSCtIK0grSCtIKUgoKCgqaCgqaCgoKCgqaCgpSCgriUtJSCgoKCpoKCgrSCuIKCpoKmhJKCgpSUgoKCgpS6toKmgoKCgpSCgoKCpoKCgqaCqqKCgqaCgoKCgoKmgoKClKaCgoKUlKiSgpSmgoKClIKCgqj6uJKCgoKCgoKUgoKUgoKCgpSCgoKCgpSCgsqCgoKCpoKmlKaChJKClIKUgpSClLiC7oKCAAIWAAgClIKCgoKCggACFPKUgoKCgoKC", "767-783:1")]
-[assembly: GoPositionMap("compress/flate/token.go", "token.cs", "ABIoABw6ABQsgJaSqICWgJSUlpKClIKU")]
+[assembly: GoPositionMap("compress/flate/deflate.go", "deflate.cs", "ADyCAQA2eoKUgoKCgpSUgoKCgriCgpSmgoKUyoKCpoKCgoKUgoKUrtSClIK4gqamgoKCgoKUgpSCpoKCgoKmlLiCquKCgqamgoK4goKCpoKClIKClIKCgoKUlKaUlIKCpqaCgpSCAAYQsqqigpSCgoKCgr6ygoKCgqbMxIKCuIKUpLSCpIKCuqaClJSCpoKCgoKCgoKCgqaCgqaUgoKClIKCgpSClJSUgpSCgpSUppSCgoKClIKCgoKCgqaGgoKmqIKU3IKCgpSUgoKCpoKUppSCgsqUlIKUpoKCgpSCgoKUpoKC/IKCgqaCgoK+soKUgoKmsoKUgoKCgoKmpqKClIKCgoKClIKmgpSUgoKkgoKkgoKCgoKkgqSCgoKklKaCgoKClLSCgrSCgoKCgoKCgoLIooKUgpSCgoKUgpSCgpSCAAQeAAwCgoKUAAIS4oKCgpSCggAIDoLGAAoWogACGAALBqiSrLKUgoKm")]
+[assembly: GoPositionMap("compress/flate/deflatefast.go", "deflatefast.cs", "ABg0goKmgoKoggAWMoLKtILKgoKC3KaCgoKUAA8glIKCgoKCgoKClIKCgpSClIKU3AAJFNyCgqaCgoKCAAgSgoKCgoKClIKCgoKCyoKClIKCgsaCgpTMsoKCuIKCgpSCgqa4goK4goKClIKCgtyCgriCgoKCpqqipqaCAAMQwpSCgriCgsqUlA==")]
+[assembly: GoPositionMap("compress/flate/dict_decoder.go", "dict_decoder.cs", "ACdOspSClJSClIKCgpSokoKUqJKokqyyrLKssoIAAhDSgoKCgoIACRSCgoIAECKCpoIAAhLigoKClIKmgqaCrLKCgoKClA==")]
+[assembly: GoPositionMap("compress/flate/huffman_bit_writer.go", "huffman_bit_writer.cs", "ACNMAAsQ7twACRQAFzKCAAwWgoKmgoKClIKCgoKClJSUgoKmgoKUpoKClIKCgoKCgoKCgoKCgoKCgoKClPiCgpSCgoKUgoKCgpSClIIAAh4ADwLKlIKCpoKClJSCgoKmgoKCpoKCgoKCgoKClIKCgoKCpoKCgpSCgoKCgpSUgoKCgoKmgoKCgqaCpqjigoKUipqokgACErKClIKUpoKClIKCgoKCgoKCgoKCgoKCgoKClAADEtKClIKClIKCgpSCgqaCgoKCgpSUlIK0grSC2oKClIKClIKCgqaCgpaSgpQAAhDygqaClIKCypSUlLyigpbIgoKUgoKCuIKCgriClLgAAhDygqaCuIKCpoKCgrimrvKClIKCgpSCgoK4goKmgoKUpoKUgoKqooKUgoKCpoKCgoKCgqaCgoKCgoIAChKCgoKCzLKCuKaUlIKClJjYgoKmgoKCuIKCgpSCgoKCpoKCgoKCgoKCgoKCgpSCgpSUgsyygoI=", "", "", "96=newHuffmanEncoder/1/3/5,newHuffmanEncoder/2/3/6,newHuffmanEncoder/3/3/7;306=bitLength/1/1/1;307=bitLength/1/2/1,bitLength/2/2/2;314=bitLength/1/2/1,bitLength/2/2/2")]
+[assembly: GoPositionMap("compress/flate/huffman_code.go", "huffman_code.cs", "ADFokoLGlIKokoKCgoKCgqaCxoLGgsaCpJSmgoKCgpSmgrSCgoKCpgAIJgAOAoKUgoK4gq7K1KbcgoLKlIKCgsqCgoKmgpSClILKlIKmypSUgqaC7oKmgoKCpoKUqsKCgoKC3JSCgoKUAAMQ4riUlJSCgoKUuIKmlJSUppQACAqigqaUgqb4ooKmlIKClKa0gg==")]
+[assembly: GoPositionMap("compress/flate/inflate.go", "inflate.cs", "ACZGggAJDAANFIIADhaCAC1m2MSCqqKSgoKUgpSClAAJFIKmgoKCgoIABxCCpoKCgqaCgoKCgoKClIK4goKUgoKCgoKC3IKUpoKmlIKCgoKClMq4griClKaCgoLcAC1eooKCpoKCgoKClMaCgsaClIKCxsiigoKCgoKUlIKUgoLKgoKU7PS0goKmgoKUgoKClIKUgqaCgoKmgoKUgpSCyoKCgpSUgoKWkoKClKSCgoKUtIKCtIKCpIKCpoKCgoKUgoK4gu6Cpq7CqpS0toSSgoKClIKClIKCgoKClLSCtoK0grSCtIK0grSCtIK0gpSCgoKCpoKCpoKCgoKCpoKClIKCuJS0lIKCgoKmgoKCtIK4goKmgqaEkoKClJSCgoKClLq2gqaCgoKClIKCgoKmgoKCpoKqooKCpoKCgoKCgqaCgoKUpoKCgpSUyJKClMaCgoKUgoKCqPq4koKCgoKCgpSCgpSCgoKClIKCgoKClIKCyoKCgoKmgqaUxoKEkoKUgpSClIKU2ILugoIABBYACAKUgoKCgoKCAAIU8pSCgoKCgoI=", "767-783:1")]
+[assembly: GoPositionMap("compress/flate/token.go", "token.cs", "ABQoABw6ABQsgJaSyICWgJS0lpKClIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
@@ -135,3 +135,29 @@ public static partial class flate_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(flate_package.CorruptInputError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛCorruptInputError;
+[GoMethodHost(typeof(flate_package.InternalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛInternalError;
+[GoMethodHost(typeof(flate_package.ReadError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛReadError;
+[GoMethodHost(typeof(flate_package.WriteError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛWriteError;
+[GoMethodHost(typeof(flate_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛWriter;
+[GoMethodHost(typeof(flate_package.byFreq)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛbyFreq;
+[GoMethodHost(typeof(flate_package.byLiteral)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛbyLiteral;
+[GoMethodHost(typeof(flate_package.compressor)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛcompressor;
+[GoMethodHost(typeof(flate_package.decompressor)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛdecompressor;
+[GoMethodHost(typeof(flate_package.deflateFast)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛdeflateFast;
+[GoMethodHost(typeof(flate_package.dictDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛdictDecoder;
+[GoMethodHost(typeof(flate_package.dictWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛdictWriter;
+[GoMethodHost(typeof(flate_package.hcode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛhcode;
+[GoMethodHost(typeof(flate_package.huffmanBitWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛhuffmanBitWriter;
+[GoMethodHost(typeof(flate_package.huffmanDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛhuffmanDecoder;
+[GoMethodHost(typeof(flate_package.huffmanEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛhuffmanEncoder;
+[GoMethodHost(typeof(flate_package.token)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flateᴛtoken;
+// </MethodHolders>

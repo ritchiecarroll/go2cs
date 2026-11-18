@@ -24,6 +24,7 @@ using regexp = regexp_package;
 using slices = slices_package;
 using sort = sort_package;
 using encoding;
+using static suffixarray_package;
 
 partial class suffixarray_package {
 
@@ -45,6 +46,8 @@ partial struct ints {
     internal slice<int32> int32;
     internal slice<int64> int64;
 }
+
+} partial class suffixarrayᴛints {
 
 internal static nint len(this ref ints a) {
     return builtin.len(a.int32) + builtin.len(a.int64);
@@ -72,15 +75,17 @@ internal static ints Δslice(this ref ints a, nint i, nint j) {
     return new ints(default, a.int64.slice(i, j));
 }
 
+} partial class suffixarray_package {
+
 // New creates a new [Index] for data.
 // [Index] creation time is O(N) for N = len(data).
 public static ж<Index> New(slice<byte> data) {
     var ix = Ꮡ(new Index(data: data));
-    if (builtin.len(data) <= maxData32) {
-        ix.sa.int32 = new slice<int32>(builtin.len(data));
+    if (len(data) <= maxData32) {
+        ix.sa.int32 = new slice<int32>(len(data));
         text_32(data, ix.sa.int32);
     } else {
-        ix.sa.int64 = new slice<int64>(builtin.len(data));
+        ix.sa.int64 = new slice<int64>(len(data));
         text_64(data, ix.sa.int64);
     }
     return ix;
@@ -109,7 +114,7 @@ internal static (nint n, error err) writeSlice(io.Writer w, slice<byte> buf, int
     // encode as many elements as fit into buf
     nint p = binary.MaxVarintLen64;
     nint m = data.len();
-    for (; n < m && p + (nint)binary.MaxVarintLen64 <= builtin.len(buf); n++) {
+    for (; n < m && p + (nint)binary.MaxVarintLen64 <= len(buf); n++) {
         p += binary.PutUvarint(buf.slice(p), (uint64)data.get(n));
     }
 
@@ -157,6 +162,8 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
 }
 
 internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for BenchmarkSaveRestore
+
+} partial class suffixarrayᴛIndex {
 
 // Read reads the index from r into x; x must not be nil.
 public static error Read(this ref Index x, io.Reader r) {
@@ -215,7 +222,7 @@ public static error Write(this ref Index x, io.Writer w) {
 
     // write length
     {
-        var err = writeInt(w, buf, builtin.len(x.data)); if (err != nil) {
+        var err = writeInt(w, buf, len(x.data)); if (err != nil) {
             return err;
         }
     }
@@ -272,7 +279,7 @@ internal static ints lookupAll(this ж<Index> Ꮡx, slice<byte> s) {
 public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, nint n) {
     slice<nint> result = default;
 
-    if (builtin.len(s) > 0 && n != 0) {
+    if (len(s) > 0 && n != 0) {
         var matches = Ꮡx.lookupAll(s);
         nint count = matches.len();
         if (n < 0 || count < n) {
@@ -282,11 +289,11 @@ public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, 
         if (n > 0) {
             result = new slice<nint>(n);
             if (matches.int32 != nil) {
-                foreach (var i in range(builtin.len(result))) {
+                foreach (var i in range(len(result))) {
                     result[i] = (nint)matches.int32[i];
                 }
             } else {
-                foreach (var i in range(builtin.len(result))) {
+                foreach (var i in range(len(result))) {
                     result[i] = (nint)matches.int64[i];
                 }
             }
@@ -325,15 +332,15 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
         // increased value n1, but only if Lookup returned all the requested
         // indices in the first place (if it returned fewer than that then
         // there cannot be more).
-        for (nint n1 = n; ; n1 += 2 * (n - builtin.len(result))) {
+        for (nint n1 = n; ; n1 += 2 * (n - len(result))) {
             /* overflow ok */
             var indices = Ꮡx.Lookup(lit, n1);
-            if (builtin.len(indices) == 0) {
+            if (len(indices) == 0) {
                 return result;
             }
             slices.Sort<slice<nint>, nint>(indices);
-            var pairs = new slice<nint>(2 * builtin.len(indices));
-            result = new slice<slice<nint>>(builtin.len(indices));
+            var pairs = new slice<nint>(2 * len(indices));
+            result = new slice<slice<nint>>(len(indices));
             nint count = 0;
             nint prev = 0;
             foreach (var (_, i) in range(indices)) {
@@ -344,20 +351,20 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
                 if (prev <= i) {
                     nint j = 2 * count;
                     pairs[j + 0] = i;
-                    pairs[j + 1] = i + builtin.len(lit);
+                    pairs[j + 1] = i + len(lit);
                     result[count] = pairs.slice(j, j + 2);
                     count++;
-                    prev = i + builtin.len(lit);
+                    prev = i + len(lit);
                 }
             }
             result = result.slice(0, count);
-            if (builtin.len(result) >= n || builtin.len(indices) != n1) {
+            if (len(result) >= n || len(indices) != n1) {
                 // found all matches or there's no chance to find more
                 // (n and n1 can be negative)
                 break;
             }
         }
-        if (builtin.len(result) == 0) {
+        if (len(result) == 0) {
             result = default;
         }
         return result;
@@ -370,17 +377,17 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
     Ꮡr = regexp.MustCompile("^"u8 + r.String()); r = ref Ꮡr.DerefOrNull(); // compiles because r compiled
 
     // same comment about Lookup applies here as in the loop above
-    for (nint n1 = n; ; n1 += 2 * (n - builtin.len(result))) {
+    for (nint n1 = n; ; n1 += 2 * (n - len(result))) {
         /* overflow ok */
         var indices = Ꮡx.Lookup(lit, n1);
-        if (builtin.len(indices) == 0) {
+        if (len(indices) == 0) {
             return result;
         }
         slices.Sort<slice<nint>, nint>(indices);
         result = result[0..0];
         nint prev = 0;
         foreach (var (_, i) in range(indices)) {
-            if (builtin.len(result) == n) {
+            if (len(result) == n) {
                 break;
             }
             var m = Ꮡr.FindIndex(x.data.slice(i)); // anchored search - will not run off
@@ -392,16 +399,16 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
                 prev = m[1];
             }
         }
-        if (builtin.len(result) >= n || builtin.len(indices) != n1) {
+        if (len(result) >= n || len(indices) != n1) {
             // found all matches or there's no chance to find more
             // (n and n1 can be negative)
             break;
         }
     }
-    if (builtin.len(result) == 0) {
+    if (len(result) == 0) {
         result = default;
     }
     return result;
 }
 
-} // end suffixarray_package
+} // end suffixarrayᴛIndex

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,9 +15,13 @@ partial struct harness {
     internal nint deadline;
 }
 
+} partial class mainᴛharness {
+
 internal static @string Name(this harness h) { return h.name; }
 internal static void @private(this harness h) { }
 internal static (nint, bool) Deadline(this harness h) { return (h.deadline, true); }
+
+} partial class main_package {
 
 internal partial interface commandContext_type /*dyn*/ :
     TB
@@ -37,8 +42,12 @@ partial struct gate {
     internal @string name;
 }
 
+} partial class mainᴛgate {
+
 internal static void @private(this gate g) { fmt.Println("sealed:", g.name); }
 internal static @string Kind(this gate g) { return "gate:"u8 + g.name; }
+
+} partial class main_package {
 
 internal partial interface direct_type /*dyn*/ {
     void @private();

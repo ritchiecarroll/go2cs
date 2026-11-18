@@ -1,6 +1,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.runtime;
 using static go.builtin;
 using static go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -116,7 +117,7 @@ public class RuntimeGCPacerKnobTests
         samples[0].Name = name;
         metrics.Read(samples);
 
-        Assert.AreEqual(metrics.KindUint64, metrics.Kind(samples[0].Value), name);
-        return metrics.Uint64(samples[0].Value);
+        Assert.AreEqual(metrics.KindUint64, samples[0].Value.Kind(), name);
+        return samples[0].Value.Uint64();
     }
 }

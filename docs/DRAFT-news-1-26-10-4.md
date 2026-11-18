@@ -1123,8 +1123,8 @@ beside the standard-library roster.
      1.26.11.1, built from Go 1.26.11 (2026-11-12, the 1.26.11 patch hop). -->
 
 **NuGet 1.26.11.1.** PENDING. The fourth release on the Go 1.26 line, and the first built from Go 1.26.11, a Go patch
-release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a promoted
-method through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
+release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a method
+through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
 
 **Upgrading from 1.26.10.3.**
 
@@ -1140,9 +1140,10 @@ method through `using static` alone; they are first under *Upgrading from 1.26.1
   1.26.11.1 revision.
   <!-- source: the promoted-forwarder seat (docs/phase4/DESIGN-promoted-forwarder-placement.md; owner ruling
        2026-11-10: "better breaking changes now than before we're deep with users"). The moved members are announced
-       to the binary-compatibility guard as generated CP0002 entries, 900 entries in 20 suppression files
-       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.11.1. The nugetgo
-       rebuild wave ships with this release (the owner's hands). -->
+       to the binary-compatibility guard as generated CP0002 entries
+       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1; 900 entries in 20 files when this seat landed,
+       generated since together with the method-holder moves and the U+0394 renames below), and <GoBreakFloor> is
+       1.26.11.1. The nugetgo rebuild wave ships with this release (the owner's hands). -->
 - **Standard-library assemblies are named after their packages.** PENDING. Package `go.fmt` now ships `go.fmt.dll`,
   not `fmt.dll`, and likewise every converted standard-library assembly (`go.net.dll`, `go.crypto.tls.dll`,
   `go.go.ast.dll` for package `go.go.ast`, `go.testing.dll`). The package IDs do not change, nor do `golib.dll`
@@ -1154,13 +1155,52 @@ method through `using static` alone; they are first under *Upgrading from 1.26.1
   <!-- source: OQ4, docs/PLAN-public-surface-stability.md (ruled), the design docs/phase4/DESIGN-assembly-identity.md;
        src/go2cs/assemblyIdentity.go. The binary-compatibility guard compares each renamed assembly with its 1.26.10.3
        baseline through a rename map keyed to this release (src/tools/pushnuget/GoApiCompat.psm1). -->
-- **`using static` alone no longer brings promoted methods.** PENDING. C# that calls into a converted package with
-  only `using static go.bufio_package;` still sees the package's types, functions and the methods its types declare.
-  A method a struct promotes from an embedded struct of the same package now needs the namespace as well:
-  add `using go;` (or `using go.<path>;` for a package below the root). Converted code already has it.
-  [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
+- **`using static` alone no longer brings methods.** PENDING. C# that calls into a converted package with only
+  `using static go.bufio_package;` still sees the package's types, functions, constants and variables, but no method:
+  neither the methods its types declare nor a method a struct promotes from an embedded struct of the same package.
+  Add the namespace as well: `using go;` (or `using go.<path>;` for a package below the root). Converted code already
+  has it. [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
   <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
        (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
+- **Every Go method is in its receiver type's method holder.** PENDING. Through 1.26.10.3 the methods a package
+  declares were members of the package class (`time_package`); from 1.26.11.1 the methods of each type are in a class
+  of their own beside the package class, in the same namespace (`timeᴛTime` holds `time.Time`'s methods). A method is
+  still an extension method on its receiver, so `t.Add(d)` reads as before once the namespace is imported (`using go;`,
+  or `using go.<path>;` for a package below the root); `using static go.time_package;` alone no longer brings any
+  method. A call written in static form through the package class, `time_package.Add(t, d)`, is now
+  `t.Add(d)`. In the standard library more than eight thousand public methods moved, counted once for each assembly
+  a package ships, in over two hundred packages, about 120 of which a program can import. An assembly compiled
+  against 1.26.10.3 that calls a Go method fails under 1.26.11.1 with `MissingMethodException`, and the break floor
+  refuses that combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+  <!-- source: the method-holder seat (OQ2, P1; docs/phase4/SCOUT-method-holder.md on
+       claude/p1-oq2-method-holder-scout). The moved members are announced to the binary-compatibility guard by
+       New-GoApiCompatMoveSuppressions.ps1 over the OQ2 cut's release-smoke pack (2026-11-15): 8,273 CP0002 move
+       entries across all assets, promoted forwarders included, in 230 suppression files that also carry the renames
+       below (13,234 entries in all). The package counts are read from those files: 213 carry a CP0002 entry, 120 of
+       them reachable (no internal segment, not vendored). -->
+- **Names that carried a `Δ` prefix keep their Go names.** PENDING. Through 1.26.10.3 a type, constant or variable
+  whose Go name a method of its package also used was emitted with a `Δ` prefix: `go/doc/comment`'s interface `Text`
+  was `ΔText`, because `Printer` has a method `Text`. With each method in its receiver's holder the two names no
+  longer meet, and from 1.26.11.1 every such name is its Go name. In the standard library this renames over two hundred
+  types and dozens of constants and variables, and changes well over a thousand members that name them (fields,
+  parameters, return types, interface members), in about a hundred packages, two thirds of which a program can
+  import. C# source that names the prefixed form uses the Go name instead (`ΔText` becomes `Text`). An assembly
+  compiled against 1.26.10.3 that binds a prefixed name fails under 1.26.11.1, and the break floor refuses that
+  combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+  <!-- source: the method-holder seat (OQ2, P1); the converter's ShadowVarMarker no longer applies once methods leave
+       the package class. Announced to the binary-compatibility guard as generated rename entries
+       (New-GoApiCompatMoveSuppressions.ps1, the U+0394 drop, COORD ruling 2026-11-15 10:14Z: a removed member is a
+       rename only when its documentation id with every U+0394 dropped is in the current surface exactly, or a move
+       once its receiver and signature drop theirs): 4,961 entries across all assets, CP0001 369, CP0002 4,515, CP0006
+       59, CP0008 16, CP0021 2. On the lib asset alone: 241 types (CP0001), 1,713 members whose id names a prefixed
+       form, in 102 packages, 67 of them reachable. -->
+- **A type, constant or variable named like a method keeps its Go name.** PENDING. A package-level name that shared
+  its spelling with a method of the package took a `Δ` prefix in C#, because both were members of the package class:
+  `time.Second` was `time.ΔSecond`, `reflect.Type` was `reflect.ΔType`, `syscall.Handle` was `syscall.ΔHandle`. With
+  the methods in their holders the names no longer meet, and each keeps its Go spelling. C# source that wrote a `Δ`
+  name writes the Go name.
+  <!-- source: the same seat; behavioral fixtures MethodHolderNames and MethodHolderAlias, and every golden that named
+       a renamed element (goldens: re-baseline). -->
 
 **A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
 than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,

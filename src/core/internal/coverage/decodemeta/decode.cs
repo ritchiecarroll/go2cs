@@ -16,6 +16,7 @@ using os = os_package;
 using encoding;
 using go.@internal;
 using go.@internal.coverage;
+using static decodemeta_package;
 
 partial class decodemeta_package {
 
@@ -46,6 +47,8 @@ public static (ж<CoverageMetaDataDecoder>, error) NewCoverageMetaDataDecoder(sl
     }
     return (x, default);
 }
+
+} partial class decodemetaᴛCoverageMetaDataDecoder {
 
 internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
@@ -147,4 +150,4 @@ public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж
     return default;
 }
 
-} // end decodemeta_package
+} // end decodemetaᴛCoverageMetaDataDecoder

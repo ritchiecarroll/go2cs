@@ -64,9 +64,9 @@ using static go.testing.iotest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/iotest/logger.go", "logger.cs", "AA8isoKClJSssgAHELKCgpSUrLI=")]
-[assembly: GoPositionMap("testing/iotest/reader.go", "reader.cs", "AA4ikNyCgpSqkNyCAAIQwAAHENaCgoKClIKUgpS4mJDugoKClKiS7oIACBKCgpSCgoKUgoKUggAIFPKCgoK4goKUgpSCgqaUgILagoKAgqSAgqSAgtqAgsiCgpSCuICCpICCyIKClIK4gIKkgoKUgriCgoKUgoKUgqaCgqaClIKClIKmgpSCgoKCgpSUgrg=")]
-[assembly: GoPositionMap("testing/iotest/writer.go", "writer.cs", "AAkWogAHELKCpoKClIKCgpQ=")]
+[assembly: GoPositionMap("testing/iotest/logger.go", "logger.cs", "ABIisoKClJTMsgAJELKCgpSUzLI=")]
+[assembly: GoPositionMap("testing/iotest/reader.go", "reader.cs", "AA8ikPyCgpTKkPyCAAQQwAAJENaCgoKClIKUgpTYmJAACA6CgoKUyJIACA6CAAwSgoKUgoKClIKClIIAChTygoKCuIKClIKUgoKmlICC2oKCgIKkgIKkgILagILIgoKUgriAgqSAgsiCgpSCuICCpIKClIK4goKClIKClIKmgoKmgpSCgpSCpoKUgoKCgoKUlIK4")]
+[assembly: GoPositionMap("testing/iotest/writer.go", "writer.cs", "AAoWogAJELKCpoKClIKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;
@@ -106,3 +106,21 @@ public static partial class iotest_package
     [GoInit] internal static void initᴛᴛimportꓸlog() => builtin.initPackage(typeof(log_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(iotest_package.dataErrReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛdataErrReader;
+[GoMethodHost(typeof(iotest_package.errReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛerrReader;
+[GoMethodHost(typeof(iotest_package.halfReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛhalfReader;
+[GoMethodHost(typeof(iotest_package.oneByteReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛoneByteReader;
+[GoMethodHost(typeof(iotest_package.readLogger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛreadLogger;
+[GoMethodHost(typeof(iotest_package.smallByteReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛsmallByteReader;
+[GoMethodHost(typeof(iotest_package.timeoutReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛtimeoutReader;
+[GoMethodHost(typeof(iotest_package.truncateWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛtruncateWriter;
+[GoMethodHost(typeof(iotest_package.writeLogger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛwriteLogger;
+// </MethodHolders>

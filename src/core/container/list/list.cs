@@ -11,6 +11,8 @@
 //	}
 namespace go.container;
 
+using static list_package;
+
 partial class list_package {
 
 // Element is an element of a linked list.
@@ -26,6 +28,8 @@ partial struct Element {
     // The value stored with this element.
     public any Value;
 }
+
+} partial class listᴛElement {
 
 // Next returns the next list element or nil.
 public static ж<Element> Next(this ref Element e) {
@@ -43,12 +47,16 @@ public static ж<Element> Prev(this ref Element e) {
     return default;
 }
 
+} partial class list_package {
+
 // List represents a doubly linked list.
 // The zero value for List is an empty list ready to use.
 partial struct List {
     internal Element root; // sentinel list element, only &root, root.prev, and root.next are used
     internal nint len;     // current list length excluding (this) sentinel element
 }
+
+} partial class listᴛList {
 
 // Init initializes or clears list l.
 public static ж<List> Init(this ж<List> Ꮡl) {
@@ -60,8 +68,12 @@ public static ж<List> Init(this ж<List> Ꮡl) {
     return Ꮡl;
 }
 
+} partial class list_package {
+
 // New returns an initialized list.
 public static ж<List> New() { return @new<List>().Init(); }
+
+} partial class listᴛList {
 
 // Len returns the number of elements of list l.
 // The complexity is O(1).
@@ -275,4 +287,4 @@ public static void PushFrontList(this ж<List> Ꮡl, ж<List> Ꮡother) {
     }
 }
 
-} // end list_package
+} // end listᴛList

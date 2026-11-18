@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 // </ImportedTypeAliases>
 
 using go;
@@ -69,18 +67,18 @@ using static go.@internal.poll_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/poll/errno_windows.go", "errno_windows.cs", "AA4oopSkyg==")]
-[assembly: GoPositionMap("internal/poll/fd.go", "fd.cs", "ABgwsJSCuMi4lpKClMoACRKwgoK4lpKCgoKClIKCyg==")]
-[assembly: GoPositionMap("internal/poll/fd_fsync_windows.go", "fd_fsync_windows.cs", "AAkU4oKUgg==")]
-[assembly: GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "ACdqAA4CgoKClIKClIIABkyigoKClIKCAAisAZKYwoKUrLKClKrCgpSs0oK8woKUrNKCvMKClKzSgoK6kg==")]
-[assembly: GoPositionMap("internal/poll/fd_poll_runtime.go", "fd_poll_runtime.cs", "AA8oxIKCgoKCgoKCAAgQooKCgpSCpoKClIKokoKUpoKClIKmgqaC5oKClIKmgqaCpoKClKaCAAkYgpSkpKSUgqiSqJKokqbCgoKCgqaClJSClIIABR4ADAI=", "", "", "", "168:21")]
-[assembly: GoPositionMap("internal/poll/fd_posix.go", "fd_posix.cs", "AAsgooKUqOKClILYwoKUgtzCgpSC3vKClIKCAAUU8oKCgsySgoKC", "38-40:1;49-51:1")]
-[assembly: GoPositionMap("internal/poll/fd_windows.go", "fd_windows.cs", "ACNMwoKClIKCgoKClIKCptyCgoKClAANHILKlKaCppSCyIKCgqKCgpSCgpSCpqa0goIABxCClLgABxYACg6CgoKCyoKCgpSmtIKCgoKCggALGMyCgoKCps7CgpS4gqaC2KSowoKmlJSUqqKClIKUvOKClKaCgpSCggAIEriClKaClIKSpqaClLiClIKmypSCuNiUtgAwkgEADQKokqrCAAsoAAgCgqaktLS0xqSClIKmhqLcgpTcgoKUlJaUAAQ2ooK4goKmtKSCgqrCgqaCpoKmggAHEvKCgpSUgpSmgqaCpoKClLSygpSClMaC6LKCgpSCtoKU1qqygqa4gqaCgoKUgoKClIKCgoKCgoKUgoKUlIKCuJSCgoK4goKCgoKClJSUgqjSlKaClJSCpoKmgoKClILugpSCsoKUgpSClNjSgpSClIKUlJSCgsKCgpSCgpSC2NKClIKUgpSUlIKCwoKClIKClILY0oKUgpSClJSUgoLCgoKUgoKUgtjygoKUlIKUpoKUgoKCgpSCgoKUtLKClLSClLKCtoKClIL+woKCgoKWgoKClIKCmrKCgoKUgoKCgoKCgpSmqNKUpoCCpJSCpoKCgpSC7oKmgoKCgpSCsoKUgpSClIL80oKUgpSCgpSCgrKClIKC2OKAgqSUlKKClKaUgoKCgpSigpSCgpSU2OKAgqSUlKKClKaUgoKCgpSigpSCgpSU2OKAgqSUlKKClKaUgoKCgpSigpSCgpSU3LKGAAgGlIKygpaCgriCgoKmqtKAgqSUgoKCgqaCggAHEIKClNj84oKUgpSUhqKUtLSCgpS0lIKUgpSCgtjigIKklIKAgqSCgpSUgqaCgtjigpSC2OKClILY4oKUgtjigIKkgoKCyqKCgpSClJSC/OKClJSCuAANUoKUgqSCtLrSgpSUgqaCgoKCsoKUgoKClNjSgpSUgqaCgoKCsoKUgoKU2NKClJSCpoKCgoKygpSCgpQACQiygqaClJSCgoKCgoKCpoKCsoKU2LKCpoKUlIKCgoKUgoKygpTYsoKmgpSUgoKCgpSCgrKClAALBoKCgqaCgoKU", "605-608:1;620-624:2;746-749:1;776-780:1;806-810:1;836-840:1;879-882:1;888-891:2;986-989:1;1016-1019:1;1034-1037:1;1049-1052:2;1071-1074:1;1086-1089:2;1108-1111:1;1123-1126:2;1140-1142:1;1149-1153:1;1312-1319:1;1409-1412:1;1436-1439:1;1462-1465:1;1496-1499:1;1522-1525:1;1548-1551:1")]
+[assembly: GoPositionMap("internal/poll/fd.go", "fd.cs", "ABswsJSC2Mi4lpKClMoACxKwgoLYlpKCgoKClIKCyg==")]
+[assembly: GoPositionMap("internal/poll/fd_fsync_windows.go", "fd_fsync_windows.cs", "AAwU4oKUgg==")]
+[assembly: GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "ACpqAA4CgoKClIKClIIABkyigoKClIKCAAqsAZK4woKUrLKClKrCgpSs0oK8woKUrNKCvMKClKzSgoK6kg==")]
+[assembly: GoPositionMap("internal/poll/fd_poll_runtime.go", "fd_poll_runtime.cs", "ABAoxIKCgoKCgoKCAAoQooKCgpSCpoKClIKokoKUpoKClIKmgqaC5oKClIKmgqaCpoKClKaCAAsYgpSkpKSUgsiSqJKoksbCgoKCgqaClJSClIIABR4ADAI=", "", "", "", "177:21")]
+[assembly: GoPositionMap("internal/poll/fd_posix.go", "fd_posix.cs", "AA4gooKUqOKClILYwoKUgtzCgpSC3vKClIKCAAcU8oKCgsySgoKC", "38-40:1;49-51:1")]
+[assembly: GoPositionMap("internal/poll/fd_windows.go", "fd_windows.cs", "ACRMwoKClIKCgoKClIKCptyCgoKClAAPHILKlMaCppSCyIKCgqKCgpSCgpSCpqa0goIABxCClLgABxYACg6CgoKCyoKCgpSmtIKCgoKCggALGMyCgoKCpu7CgpS4gqaC2KSowoKmlJSUqqKClIKUvOKClKaCgpSCggAIEriClKaClIKSpqaClLiClIKmypSCuNiUtgA0kgEADQKokqrCAA8oAAgCgqaktLS0xqSClIKmhqLcgpTcgoKUlJaUAAQ2ooK4goKmtKSCgqrCgqaCpoKmggALEvKCgpSUgpSmgqaCpoKClLSygpSClMaC6LKCgpSCtoKU9sqygqa4gqaCgoKUgoKClIKCgoKCgoKUgoKUlIKCuJSCgoK4goKCgoKClJSUgqjSlKaClJSCpoKmgoKClILugpSCsoKUgpSClNjSgpSClIKUlJSCgsKCgpSCgpSC2NKClIKUgpSUlIKCwoKClIKClILY0oKUgpSClJSUgoLCgoKUgoKUgtjygoKUlIKUpoKUgoKCgpSCgoKUtLKClLSClLKCtoKClIL+woKCgoKWgoKClIKCmrKCgoKUgoKCgoKCgpSmqNKUpoCCpJSCpoKCgpSC7oKmgoKCgpSCsoKUgpSClIL80oKUgpSCgpSCgrKClIKC2OKAgqSUlKKClKaUgoKCgpSigpSCgpSU2OKAgqSUlKKClKaUgoKCgpSigpSCgpSU2OKAgqSUlKKClKaUgoKCgpSigpSCgpSU3LKGAAgGlIKygpaCgriCgoKmqtKAgqSUgoKCgqaCggAHEIKClNj84oKUgpSUhqKUtLSCgpS0lIKUgpSCgtjigIKklIKAgqSCgpSUgqaCgtjigpSC2OKClILY4oKUgtjigIKkgoKCyqKCgpSClJSC/OKClJSCuAAPUoKUgqSCtNrSgpSUgqaCgoKCsoKUgoKClNjSgpSUgqaCgoKCsoKUgoKU2NKClJSCpoKCgoKygpSCgpQACQiygqaClJSCgoKCgoKCpoKCsoKU2LKCpoKUlIKCgoKUgoKygpTYsoKmgpSUgoKCgpSCgrKClAANBoKCgqaCgoKU", "605-608:1;620-624:2;746-749:1;776-780:1;806-810:1;836-840:1;879-882:1;888-891:2;986-989:1;1016-1019:1;1034-1037:1;1049-1052:2;1071-1074:1;1086-1089:2;1108-1111:1;1123-1126:2;1140-1142:1;1149-1153:1;1312-1319:1;1409-1412:1;1436-1439:1;1462-1465:1;1496-1499:1;1522-1525:1;1548-1551:1")]
 [assembly: GoPositionMap("internal/poll/hook_windows.go", "hook_windows.cs", "AAoUtrY=")]
 [assembly: GoPositionMap("internal/poll/sendfile.go", "sendfile.cs", "/g==")]
 [assembly: GoPositionMap("internal/poll/sendfile_windows.go", "sendfile_windows.cs", "AAoaAAkCgpSUlIKCpoKUlpKClIKCgpSCgpSmgriCggAEEMSCgoKmgoKCgoKClJSCpoKm", "14-16:1;48-58:2;71-80:3", "", "", "", "21:21,22:13,55:21,56:13")]
-[assembly: GoPositionMap("internal/poll/sockopt.go", "sockopt.cs", "AAoY4oKUgtjygpSC2OKClILY4oKUgg==")]
-[assembly: GoPositionMap("internal/poll/sockopt_windows.go", "sockopt_windows.cs", "AAkU4oKUgg==")]
-[assembly: GoPositionMap("internal/poll/sockoptip.go", "sockoptip.cs", "AAoY4oKUgtjigpSC")]
+[assembly: GoPositionMap("internal/poll/sockopt.go", "sockopt.cs", "AA0Y4oKUgtjygpSC2OKClILY4oKUgg==")]
+[assembly: GoPositionMap("internal/poll/sockopt_windows.go", "sockopt_windows.cs", "AAwU4oKUgg==")]
+[assembly: GoPositionMap("internal/poll/sockoptip.go", "sockoptip.cs", "AA0Y4oKUgtjigpSC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -125,3 +123,17 @@ public static partial class poll_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(poll_package.DeadlineExceededError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛDeadlineExceededError;
+[GoMethodHost(typeof(poll_package.FD)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛFD;
+[GoMethodHost(typeof(poll_package.errNetClosing)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛerrNetClosing;
+[GoMethodHost(typeof(poll_package.fdMutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛfdMutex;
+[GoMethodHost(typeof(poll_package.pollDesc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛpollDesc;
+// </MethodHolders>

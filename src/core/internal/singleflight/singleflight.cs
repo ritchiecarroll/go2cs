@@ -8,6 +8,7 @@ namespace go.@internal;
 
 using sync = go.sync_package;
 using go;
+using static singleflight_package;
 
 partial class singleflight_package {
 
@@ -39,6 +40,8 @@ partial struct Result {
     public error Err;
     public bool Shared;
 }
+
+} partial class singleflightᴛGroup {
 
 // Do executes and returns the results of the given function, making
 // sure that only one execution is in-flight for a given key at a
@@ -138,4 +141,4 @@ public static bool ForgetUnshared(this ж<Group> Ꮡg, @string key) {
     finally { if (ᒐd1) Ꮡg.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-} // end singleflight_package
+} // end singleflightᴛGroup

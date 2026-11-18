@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using tokenꓸPos = go.go.token_package.ΔPos;
 // </ImportedTypeAliases>
 
 using go;
@@ -96,12 +95,12 @@ using static go.go.doc_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("go/doc/comment.go", "comment.cs", "AAtAABQCgoKCggACNAAXAoLK")]
-[assembly: GoPositionMap("go/doc/doc.go", "doc.cs", "AHDyAeKCgoKCABAigoKClKaCgoLKgoKUlIKCgoKCgriCgoKCgpSUAAQcAAsCgoKClIKClIKC3KKCgoKUgoKUgoIACTgAGgSClILogoKUtLi6goKClKS0grQACRSCgoIAAhTygpQAAhTygoKUlIKUrsIABRTmAAIQ8gACEPIAAhQACQI=", "", "", "124=sortedKeys/1/1/4,noteBodies/1/1/7,sortedValues/1/2/8,sortedTypes/1/1/9,sortedValues/2/2/10,sortedFuncs/1/1/11")]
+[assembly: GoPositionMap("go/doc/doc.go", "doc.cs", "AHHyAeKCgoKCABAigoKClMaCgoLKgoKUlIKCgoKCgriCgoKCgpSUAAQcAAsCgoKClIKClIKC3KKCgoKUgoKUgoIACzgAGgSClILogoKUtLi6goKClKS0grQACRSCgoIABBTygpQAAhTygoKUlIKUrsIABRTmAAIQ8gACEPIAAhQACQI=", "", "", "125=sortedKeys/1/1/4,noteBodies/1/1/7,sortedValues/1/2/8,sortedTypes/1/1/9,sortedValues/2/2/10,sortedFuncs/1/1/11")]
 [assembly: GoPositionMap("go/doc/example.go", "example.cs", "AC9kABICgoKCgoKCgoKUgoKUgoKCgpSClIKUgpSClIKClKIACxi4gpSmhqaWspSCgoKUlIKClKassoKUgpSCAAgKwpSmuIKUgpSClIKCgtiClLSCAAkQmrLKgpKCgqamgoKClKaUgoKCpILGppSCgoKCgsqCgtyCqJKCgsqCgtymgpSCxoLsyqbcgoKClIaqAAYcAAwMgoKClILClIKChIKCgqbagtqClKaCgoLcpoKmlIKmgsaClIKCtIKUggAIHgAIAoKUtISSgpSCxoLugoKUgoKCgoKCgriCyJSCpoKClJTapoKmgqaqooKCgpSoxIKUiqKCgoKUlIKm+tSCgqiSopSCgoKUuIKCkoKq1IKCuMqCgoKo0oKUkoKClIKUlAACHAANAoKmgoKCgpSUgoKUgoKClJSCgpTK7oKCgpSCgpSCgsqCAAMW0oKClIKUlAACEgAJAoKUgpSCpoKCrNKCgoI=", "110-112:1;207-214:1;315-317:2;318-320:3;349-377:1;379-385:2;523-525:1;680-682:1", "", "106=playExample/1/1/4;343=NewIdent/1/1/1;358=NewIdent/1/1/1;647=Pos/1/1/3")]
-[assembly: GoPositionMap("go/doc/exports.go", "exports.cs", "AAwgooKCgoKmppSCgoKCuIKCgpS0gpSCtoKUqsKCgpSmqJKCgqaokoKCgoKUgqaCgqaClK7ygpSCgoKClIKCgoK4ggAHEKaCgpSCpoKCgqaClIKosoKCAAQQsti0tILGgoLGtILGgoK0gsaCtMiCpqSC7oKCpoKCgvyCgoKCgpS2rLKUpJTspoKGooKClJSUlMqCgoKCpqaClILslKiygoKCgqY=", "", "", "295=NewIdent/1/1/1")]
-[assembly: GoPositionMap("go/doc/filter.go", "filter.cs", "AAwWooKCgoLKpoKClIKC2IK4lILGguqmgoKCgoKmpoKCgoKCpqaCgoKCgqaCgoKClIKCpqqigoKCgg==")]
-[assembly: GoPositionMap("go/doc/reader.go", "reader.cs", "ACNAopSktraCgoKCgoKClIK25oKClK7igtymgoKUgpSU7oK+0oKCgpSUAAYY0pSkpKSmxqSUADJygq7CgpSCptyCrvKCgpSCgoKUpqaCgoKUpoKClKaCgpSCpqgACAqCgoKCgoKClIKmguqklKaClIKUgriCuIKClIK43ILcqMKClIK0pIKUqMKCgsqmgpSUgoKUmrKCgoLMkqjEgriUppSCppSC7sqCgoKCgoCmpIKmlIKCgoLugoLKqsKClIKCgri6gprCgoKCgoKUgoK4gpSokoLKgoKCAAke0oKCgoKCgpSmgszUgoKCyoKUpoKCgoKCgoKCpoKClIKCgoIACRDG3IKUlILKAAoWAAkQgoK4xIKCgoKCgriCgoKUpoKCgpSmgoLKgoKCAAUSwoK4goKCgoKCgpSmgqaCpoKClJSosoLcgpSCpoKmqJKUlAAIEoKCAAQSwoKClO6UpqaClILcggAEEKKCgoKClIKokoKCpqaCgoKCgoKmlIKCgpSmpoKCgoIACBKmmKaCgpSmgoKClPyCtoKGqqKCgpSuwqYAGDIAFCoABhSynoKCgoKCuIKClA==", "852-858:1;879-881:1;909-911:1;990-995:1", "", "106=Text/1/1/1;357=Text/1/1/1,specNames/1/1/2;570=Pos/1/1/1,End/1/1/2;674=Pos/1/1/7;923=sortedValues/1/2/4,sortedValues/2/2/5,sortedFuncs/1/2/6,sortedFuncs/2/2/7")]
-[assembly: GoPositionMap("go/doc/synopsis.go", "synopsis.cs", "AAwgsqKigpSClIKUlK7CggAHEAAGGAAIAoKCgoKmgoKCgpSClII=")]
+[assembly: GoPositionMap("go/doc/exports.go", "exports.cs", "AA0gooKCgoKmppSCgoKCuIKCgpS0gpSCtoKUqsKCgpSmqJKCgqaokoKCgoKUgqaCgqaClM7ygpSCgoKClIKCgoK4ggAHEKaCgpSCpoKCgqaClIKosoKCAAQQsti0tILGgoLGtILGgoK0gsaCtMiCpqSC7oKCpoKCgvyCgoKCgpS2zLKUpJTsxoKGooKClJSUlMqCgoKCpqaClILslKiygoKCgqY=", "", "", "300=NewIdent/1/1/1")]
+[assembly: GoPositionMap("go/doc/filter.go", "filter.cs", "AA0WooKCgoLKpoKClIKC2IK4lILGguqmgoKCgoKmpoKCgoKCpqaCgoKCgqaCgoKClIKCpsqigoKCgg==")]
+[assembly: GoPositionMap("go/doc/reader.go", "reader.cs", "ACRAopSktraCgoKCgoKClIK25oKClM7igtymgoKUgpSU7oK+0oKCgpSUAAgY0pSkpKSmxqSUADRygq7CgpSCptyCrvKCgpSCgoKUpqaCgoKUpoKClMaCgpSCpsgACAqCgoKCgoKClIKmguqklKaClIKUgriCuIKClIK43ILcyMKClIK0pIKUyMKCgsqmgpSUgoKUmrKCgoLMkqjEgriUppSCppSC7sqCgoKCgoCmpIKmlIKCgoLugoLKysKClIKCgri6gprCgoKCgoKUgoK4gpTIkoLKgoKCAAke0oKCgoKCgpSmgszUgoKCyoKUpoKCgoKCgoKCpoKClIKCgoIACRDG3IKUlILKAAoWAAkQgoK4xIKCgoKCgriCgoKUpoKCgpSmgoLKgoKCAAcSwoK4goKCgoKCgpSmgqaCpoKClJTIsoLcgpSCpoKmqJKUlAAIEoKCAAQSwoKClO6UpqaClILcggAGEKKCgoKClIKokoKCpqaCgoKCgoKmlIKCgpSmpoKCgoIACBKmmKaCgpSmgoKClPyCtoKGqqKCgpSuwqYAGDIAFCoABhSynoKCgoKCuIKClA==", "852-858:1;879-881:1;909-911:1;990-995:1", "", "109=Text/1/1/1;368=Text/1/1/1,specNames/1/1/2;589=Pos/1/1/1,End/1/1/2;693=Pos/1/1/7;948=sortedValues/1/2/4,sortedValues/2/2/5,sortedFuncs/1/2/6,sortedFuncs/2/2/7")]
+[assembly: GoPositionMap("go/doc/synopsis.go", "synopsis.cs", "AA0gsqKigpSClIKUlK7CggAHEAAIGAAIAoKCgoKmgoKCgpSClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -150,3 +149,15 @@ public static partial class doc_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(global::go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(doc_package.Package)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class docᴛPackage;
+[GoMethodHost(typeof(doc_package.methodSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class docᴛmethodSet;
+[GoMethodHost(typeof(doc_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class docᴛreader;
+// </MethodHolders>

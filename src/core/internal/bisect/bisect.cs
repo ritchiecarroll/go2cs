@@ -182,6 +182,7 @@ using atomic = go.sync.atomic_package;
 using go;
 using go.sync;
 using ꓸꓸꓸany = Span<any>;
+using static bisect_package;
 
 partial class bisect_package {
 
@@ -331,6 +332,8 @@ partial struct cond {
     internal bool result;
 }
 
+} partial class bisectᴛMatcher {
+
 // MarkerOnly reports whether it is okay to print only the marker for
 // a given change, omitting the identifying information.
 // MarkerOnly returns true when bisect is using the printed reports
@@ -395,6 +398,8 @@ internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, ni
     return Ꮡm.ShouldEnable(h);
 }
 
+} partial class bisect_package {
+
 // printFileLine prints a non-marker-only report for file:line to w.
 internal static error printFileLine(Writer w, uint64 h, @string @file, nint line) {
     const nint markerLen = 40; // overestimate
@@ -425,6 +430,8 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
     dst = appendꓸꓸꓸ(dst, buf.slice(i));
     return dst;
 }
+
+} partial class bisectᴛMatcher {
 
 // MatchStack assigns the current call stack a change ID.
 // If the stack should be printed, MatchStack prints it.
@@ -485,6 +492,8 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
     }
     return Ꮡm.ShouldEnable(h);
 }
+
+} partial class bisect_package {
 
 // Writer is the same interface as io.Writer.
 // It is duplicated here to avoid importing io.
@@ -764,7 +773,11 @@ partial struct parseError {
     internal @string text;
 }
 
+} partial class bisectᴛparseError {
+
 internal static @string Error(this ref parseError e) { return e.text; }
+
+} partial class bisect_package {
 
 // FNV-1a implementation. See Go's hash/fnv/fnv.go.
 // Copied here for simplicity (can handle integers more directly)
@@ -819,6 +832,8 @@ partial struct dedup {
     internal map<uint64, bool> m;
 }
 
+} partial class bisectᴛdedup {
+
 // seen records that h has now been seen and reports whether it was seen before.
 // When seen returns false, the caller is expected to print a report for h.
 internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
@@ -855,4 +870,4 @@ internal static bool seenLossy(this ref dedup d, uint64 h) {
     return false;
 }
 
-} // end bisect_package
+} // end bisectᴛdedup

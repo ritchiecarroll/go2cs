@@ -11,6 +11,7 @@ using runtime = runtime_package;
 using syscall = syscall_package;
 using @internal;
 using time = time_package;
+using static net_package;
 
 partial class net_package {
 
@@ -40,6 +41,8 @@ internal static (ж<netFD>, error) newFD(nint sysfd, nint family, nint sotype, @
     ));
     return (ret, default);
 }
+
+} partial class netᴛnetFD {
 
 internal static error init(this ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
@@ -223,10 +226,14 @@ internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) {
     return (netfd, default);
 }
 
+} partial class net_package {
+
 // Defined in os package.
 /*linkname*/ internal static partial ж<os.File> newUnixFile(nint fd, @string name) {
     return os.net_newUnixFile(fd, name);
 }
+
+} partial class netᴛnetFD {
 
 internal static (ж<os.File> f, error err) dup(this ж<netFD> Ꮡfd) {
     error err = default;
@@ -243,4 +250,4 @@ internal static (ж<os.File> f, error err) dup(this ж<netFD> Ꮡfd) {
     return (newUnixFile(ns, fd.name()), default);
 }
 
-} // end net_package
+} // end netᴛnetFD

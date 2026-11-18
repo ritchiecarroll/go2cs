@@ -1,10 +1,13 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct closeWaiter /*chan EmptyStruct*/;
+
+} partial class mainᴛcloseWaiter {
 
 internal static void Init(this ref closeWaiter cw) {
     cw = new closeWaiter(0);
@@ -17,6 +20,8 @@ internal static void Close(this closeWaiter cw) {
 internal static void Wait(this closeWaiter cw) {
     ᐸꟷ<EmptyStruct>(cw);
 }
+
+} partial class main_package {
 
 partial struct intQueue /*chan nint*/;
 

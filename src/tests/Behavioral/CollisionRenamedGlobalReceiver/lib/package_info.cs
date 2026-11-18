@@ -27,7 +27,6 @@ using static go.CollisionRenamedGlobalReceiver.lib_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Tid", "const:ΔTid")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -50,7 +49,7 @@ using static go.CollisionRenamedGlobalReceiver.lib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA4Wlg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "ABEWtg==")]
 // </GoSourcePositionMaps>
 
 namespace go.CollisionRenamedGlobalReceiver;
@@ -78,3 +77,13 @@ public static partial class lib_package
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(sync.atomic_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(lib_package.T)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class libᴛT;
+// </MethodHolders>

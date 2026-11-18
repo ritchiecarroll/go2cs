@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using go;
 using sync = go.sync_package;
+using @unsafe = go.unsafe_package;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GolibTests;
@@ -57,7 +58,9 @@ public unsafe class NativeBoxDereferenceCensusControlTests
 
         try
         {
-            _ = new NativeBox<Func<long, long>>(memory).Value;
+            // A value kind (B2a's population behind the reference floor) and a B2b struct: the two classes that still count.
+            // This arm read Func<long, long> before the reference floor (NativeBoxReferenceFloorTests), which now refuses it.
+            _ = new NativeBox<@string>(memory).Value;
             _ = new NativeBox<Unsized>(memory).Value;
 
             Assert.AreEqual((0L, 0L, 0L, 0L), NativeBoxDereferenceCensus.Snapshot());
@@ -94,8 +97,11 @@ public unsafe class NativeBoxDereferenceCensusControlTests
         }
     }
 
+    // B2a behind the reference floor: a pointee that is a value kind whose CLR form holds a reference (a string, an
+    // array value). A pointee that is ITSELF a reference (a func, a Go pointer) was B2a before the floor and is now
+    // refused before the census, by APointeeThatIsItselfAReferenceIsRefusedAndNotCounted below.
     [TestMethod]
-    public void APointeeThatIsItselfAReferenceIsB2a()
+    public void AValueKindPointeeThatHoldsAReferenceIsB2a()
     {
         RequireTheCensus();
 
@@ -104,23 +110,81 @@ public unsafe class NativeBoxDereferenceCensusControlTests
         try
         {
             long counter = NativeBoxDereferenceCensus.Snapshot().b2a;
-            long func = NativeBoxDereferenceCensus.Rows("B2a", "System.Func<System.Int64,System.Int64>", "source=none");
-            long pointer = NativeBoxDereferenceCensus.Rows("B2a", "go.ж<System.Int64>", "source=none");
             long text = NativeBoxDereferenceCensus.Rows("B2a", "kind=String", "T=go.string", "source=none");
             long array = NativeBoxDereferenceCensus.Rows("B2a", "kind=Array", "T=go.array<System.Int16>", "source=none");
 
-            Assert.IsNull(new NativeBox<Func<long, long>>(memory).Value);
-            Assert.IsNull(new NativeBox<ж<long>>(memory).Value);
             _ = new NativeBox<@string>(memory).Value;
 
             // An array VALUE: Go has its elements inline, the CLR form holds them by reference. Counted here by kind.
             _ = new NativeBox<array<short>>(memory).Value;
 
-            Assert.AreEqual(counter + 4, NativeBoxDereferenceCensus.Snapshot().b2a);
-            Assert.AreEqual(func + 1, NativeBoxDereferenceCensus.Rows("B2a", "System.Func<System.Int64,System.Int64>", "source=none"));
-            Assert.AreEqual(pointer + 1, NativeBoxDereferenceCensus.Rows("B2a", "go.ж<System.Int64>", "source=none"));
+            Assert.AreEqual(counter + 2, NativeBoxDereferenceCensus.Snapshot().b2a);
             Assert.AreEqual(text + 1, NativeBoxDereferenceCensus.Rows("B2a", "kind=String", "T=go.string", "source=none"));
             Assert.AreEqual(array + 1, NativeBoxDereferenceCensus.Rows("B2a", "kind=Array", "T=go.array<System.Int16>", "source=none"));
+        }
+        finally
+        {
+            NativeMemory.Free((void*)memory);
+        }
+    }
+
+    // The twin of ARefusedDereferenceIsNotCounted for the reference floor (NativeBoxReferenceFloorTests): before the
+    // floor these two reads were counted as B2a rows; now each is refused by name and moves no counter and no row.
+    [TestMethod]
+    public void APointeeThatIsItselfAReferenceIsRefusedAndNotCounted()
+    {
+        RequireTheCensus();
+
+        nuint memory = Zeroed();
+
+        try
+        {
+            var before = NativeBoxDereferenceCensus.Snapshot();
+            long func = NativeBoxDereferenceCensus.Rows("B2a", "System.Func<System.Int64,System.Int64>");
+            long pointer = NativeBoxDereferenceCensus.Rows("B2a", "go.ж<System.Int64>");
+            long word = NativeBoxDereferenceCensus.Rows("B2a", "kind=UnsafePointer", "source=none");
+
+            PanicException refusedFunc = Assert.ThrowsException<PanicException>(() => _ = new NativeBox<Func<long, long>>(memory).Value);
+            PanicException refusedPointer = Assert.ThrowsException<PanicException>(() => _ = new NativeBox<ж<long>>(memory).Value);
+
+            // unsafe.Pointer over C memory (no source): the cgo void* field, refused like every other reference.
+            PanicException refusedWord = Assert.ThrowsException<PanicException>(() => _ = new NativeBox<@unsafe.Pointer>(memory).Value);
+
+            StringAssert.Contains(refusedFunc.Message, $"cannot read native memory as {GoReflect.GoTypeName(typeof(Func<long, long>))}:");
+            StringAssert.Contains(refusedPointer.Message, $"cannot read native memory as {GoReflect.GoTypeName(typeof(ж<long>))}:");
+            StringAssert.Contains(refusedWord.Message, $"cannot read native memory as {GoReflect.GoTypeName(typeof(@unsafe.Pointer))}:");
+
+            Assert.AreEqual(before, NativeBoxDereferenceCensus.Snapshot());
+            Assert.AreEqual(func, NativeBoxDereferenceCensus.Rows("B2a", "System.Func<System.Int64,System.Int64>"));
+            Assert.AreEqual(pointer, NativeBoxDereferenceCensus.Rows("B2a", "go.ж<System.Int64>"));
+            Assert.AreEqual(word, NativeBoxDereferenceCensus.Rows("B2a", "kind=UnsafePointer", "source=none"));
+        }
+        finally
+        {
+            NativeMemory.Free((void*)memory);
+        }
+    }
+
+    // The reference floor's one exemption: unsafe.Pointer over MANAGED Go storage (a box that retains its source). It is
+    // still a reference read out of a word, so the census keeps counting it as B2a, and that row is the population of the
+    // managed-word hazard on the BOARD. The memory read is C memory; the census reads only what the box retains.
+    [TestMethod]
+    public void AnUnsafePointerOverManagedStorageIsExemptAndStillCountedAsB2a()
+    {
+        RequireTheCensus();
+
+        nuint memory = Zeroed();
+
+        try
+        {
+            object source = new StandardBox<uintptr>(0);
+            long counter = NativeBoxDereferenceCensus.Snapshot().b2a;
+            long retained = NativeBoxDereferenceCensus.Rows("B2a", "kind=UnsafePointer", "T=go.unsafe_package+Pointer", "source=retained");
+
+            Assert.IsNull(new NativeBox<@unsafe.Pointer>(memory, retainedSource: source).Value);
+
+            Assert.AreEqual(counter + 1, NativeBoxDereferenceCensus.Snapshot().b2a);
+            Assert.AreEqual(retained + 1, NativeBoxDereferenceCensus.Rows("B2a", "kind=UnsafePointer", "T=go.unsafe_package+Pointer", "source=retained"));
         }
         finally
         {
@@ -166,14 +230,15 @@ public unsafe class NativeBoxDereferenceCensusControlTests
 
         try
         {
+            // A value kind: this arm read Func<int> before the reference floor, which now refuses it.
             object source = new StandardBox<long>(1);
-            long retained = NativeBoxDereferenceCensus.Rows("B2a", "System.Func<System.Int32>", "source=retained");
-            long none = NativeBoxDereferenceCensus.Rows("B2a", "System.Func<System.Int32>", "source=none");
+            long retained = NativeBoxDereferenceCensus.Rows("B2a", "kind=String", "T=go.string", "source=retained");
+            long none = NativeBoxDereferenceCensus.Rows("B2a", "kind=String", "T=go.string", "source=none");
 
-            _ = new NativeBox<Func<int>>(memory, retainedSource: source).Value;
+            _ = new NativeBox<@string>(memory, retainedSource: source).Value;
 
-            Assert.AreEqual(retained + 1, NativeBoxDereferenceCensus.Rows("B2a", "System.Func<System.Int32>", "source=retained"));
-            Assert.AreEqual(none, NativeBoxDereferenceCensus.Rows("B2a", "System.Func<System.Int32>", "source=none"));
+            Assert.AreEqual(retained + 1, NativeBoxDereferenceCensus.Rows("B2a", "kind=String", "T=go.string", "source=retained"));
+            Assert.AreEqual(none, NativeBoxDereferenceCensus.Rows("B2a", "kind=String", "T=go.string", "source=none"));
         }
         finally
         {
@@ -282,7 +347,8 @@ public unsafe class NativeBoxDereferenceCensusControlTests
 
         try
         {
-            _ = new NativeBox<Func<short>>(memory).Value;
+            // A value kind: this arm read Func<short> before the reference floor, which now refuses it.
+            _ = new NativeBox<array<short>>(memory).Value;
 
             if (System.IO.File.Exists(path))
                 System.IO.File.Delete(path);
@@ -292,7 +358,7 @@ public unsafe class NativeBoxDereferenceCensusControlTests
             string[] lines = System.IO.File.ReadAllLines(path);
 
             StringAssert.StartsWith(lines[0], "NBCENSUS dereferences=", "the totals line is first");
-            Assert.IsTrue(Array.Exists(lines, line => line.StartsWith("NBCENSUS-ROW", StringComparison.Ordinal) && line.Contains("B2a  kind=Func  T=System.Func<System.Int16>  source=none", StringComparison.Ordinal)), string.Join("\n", lines));
+            Assert.IsTrue(Array.Exists(lines, line => line.StartsWith("NBCENSUS-ROW", StringComparison.Ordinal) && line.Contains("B2a  kind=Array  T=go.array<System.Int16>  source=none", StringComparison.Ordinal)), string.Join("\n", lines));
             Assert.IsTrue(Array.Exists(lines, line => line.StartsWith("NBCENSUS-FOLD", StringComparison.Ordinal)));
             Assert.IsFalse(Array.Exists(lines, line => line.StartsWith("NBCENSUS-BROKEN", StringComparison.Ordinal)), string.Join("\n", lines));
 

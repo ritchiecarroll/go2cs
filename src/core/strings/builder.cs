@@ -9,6 +9,7 @@ using utf8 = go.unicode.utf8_package;
 using @unsafe = unsafe_package;
 using @internal;
 using go.unicode;
+using static strings_package;
 
 partial class strings_package {
 
@@ -22,6 +23,8 @@ partial struct Builder {
     // data between len(buf) and cap(buf) might be uninitialized.
     internal slice<byte> buf;
 }
+
+} partial class stringsᴛBuilder {
 
 // copyCheck implements a dynamic check to prevent modification after
 // copying a non-zero Builder, which would be unsafe (see #25907, #47276).
@@ -127,4 +130,4 @@ public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s) {
     return (len(s), default);
 }
 
-} // end strings_package
+} // end stringsᴛBuilder

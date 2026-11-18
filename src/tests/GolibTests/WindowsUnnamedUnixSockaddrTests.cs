@@ -24,7 +24,7 @@ public class WindowsUnnamedUnixSockaddrTests
         *(ushort*)buffer = (ushort)syscall.AF_UNIX;
 
         object? result = decode.Invoke(null, [Pointer.Box(buffer, typeof(byte*)), 2]);
-        (syscall.ΔSockaddr sa, error err) = ((syscall.ΔSockaddr, error))result!;
+        (syscall.Sockaddr sa, error err) = ((syscall.Sockaddr, error))result!;
 
         Assert.IsNull(err, "an unnamed AF_UNIX address is a valid answer, not an error");
         Assert.IsNotNull(sa, "the decode must answer a SockaddrUnix for the AF_UNIX family");

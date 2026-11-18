@@ -5,6 +5,7 @@ namespace go.crypto.@internal.fips140deps;
 
 using godebug = go.@internal.godebug_package;
 using go.@internal;
+using static godebug_package;
 
 partial class godebug_package {
 
@@ -14,9 +15,13 @@ public static ж<Setting> New(@string name) {
     return godebug.New(name).Reinterpret<godebug.Setting, Setting>();
 }
 
+} partial class godebugᴛSetting {
+
 public static @string Value(this ж<Setting> Ꮡs) {
     return (Ꮡs.Reinterpret<Setting, godebug.Setting>()).Value();
 }
+
+} partial class godebug_package {
 
 public static @string Value(@string name) {
     return godebug.New(name).Value();

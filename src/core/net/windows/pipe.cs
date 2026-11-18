@@ -7,6 +7,7 @@ using Δio = io_package;
 using os = os_package;
 using Δsync = sync_package;
 using time = time_package;
+using static net_package;
 
 partial class net_package {
 
@@ -20,6 +21,8 @@ partial struct pipeDeadline {
 internal static pipeDeadline makePipeDeadline() {
     return new pipeDeadline(cancel: new channel<EmptyStruct>(0));
 }
+
+} partial class netᴛpipeDeadline {
 
 // set sets the point in time when the deadline will time out.
 // A timeout event is signaled by closing the channel returned by waiter.
@@ -57,7 +60,7 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
                     d.cancel = new channel<EmptyStruct>(0);
                 }
                 d.timer = time.AfterFunc(dur, () => {
-                    builtin.close(Ꮡd.Value.cancel);
+                    close(Ꮡd.Value.cancel);
                 });
                 return;
             }
@@ -65,7 +68,7 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
 
         // Time in the past, so close immediately.
         if (!closed) {
-            builtin.close(d.cancel);
+            close(d.cancel);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -87,6 +90,8 @@ internal static channel<EmptyStruct> wait(this ж<pipeDeadline> Ꮡd) {
     finally { if (ᒐd1) Ꮡd.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class net_package {
+
 internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
     var selᴛ20 = c;
     switch (trySelect(ᐸꟷ(selᴛ20, ꓸꓸꓸ))) {
@@ -101,12 +106,16 @@ internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
 partial struct pipeAddr {
 }
 
+} partial class netᴛpipeAddr {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pipeˢ => ref pipeˢᵇ;
 private static readonly @string pipeˢᵇ = "pipe"u8;
 
 internal static @string Network(this pipeAddr _) { return pipeˢ; }
 internal static @string String(this pipeAddr _) { return pipeˢ; }
+
+} partial class net_package {
 
 partial struct pipe {
     internal Δsync.Mutex wrMu; // Serialize Write operations
@@ -155,8 +164,10 @@ public static (Conn, Conn) Pipe() {
     return (new pipeжConn(p1), new pipeжConn(p2));
 }
 
-internal static ΔAddr LocalAddr(this ref pipe _) { return new pipeAddr(); }
-internal static ΔAddr RemoteAddr(this ref pipe _) { return new pipeAddr(); }
+} partial class netᴛpipe {
+
+internal static Addr LocalAddr(this ref pipe _) { return new pipeAddr(); }
+internal static Addr RemoteAddr(this ref pipe _) { return new pipeAddr(); }
 
 internal static (nint, error) Read(this ж<pipe> Ꮡp, slice<byte> b) {
     var (n, err) = Ꮡp.read(b);
@@ -292,9 +303,9 @@ internal static error SetWriteDeadline(this ж<pipe> Ꮡp, time.Time t) {
 
 internal static error Close(this ж<pipe> Ꮡp) {
     Ꮡp.Ꮡonce.Do(() => {
-        builtin.close(Ꮡp.Value.localDone);
+        close(Ꮡp.Value.localDone);
     });
     return default;
 }
 
-} // end net_package
+} // end netᴛpipe

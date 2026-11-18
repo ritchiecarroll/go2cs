@@ -24,7 +24,7 @@ internal static holder typedCastDerefIntoStruct(ж<Row> p) {
 }
 
 internal static void typedCastDerefAssign(ж<Row> p) {
-    (p).Value = new Row(new nint[]{40, 50, 60}.array());
+    (p).Value.Assign(new Row(new nint[]{40, 50, 60}.array()));
 }
 
 internal static Row castDerefReturn(@unsafe.Pointer p) {

@@ -4,10 +4,13 @@
 namespace go;
 
 using os = os_package;
+using static net_package;
 
 partial class net_package {
 
 partial struct fileAddr /*@string*/;
+
+} partial class netᴛfileAddr {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fileNetˢ => ref fileNetˢᵇ;
@@ -17,6 +20,8 @@ private static readonly @string fileNetˢᵇ = "file+net"u8;
 // FilePacketConn functions are not implemented.
 internal static @string Network(this fileAddr _) { return fileNetˢ; }
 internal static @string String(this fileAddr f) { return (@string)f; }
+
+} partial class net_package {
 
 // FileConn returns a copy of the network connection corresponding to
 // the open file f.

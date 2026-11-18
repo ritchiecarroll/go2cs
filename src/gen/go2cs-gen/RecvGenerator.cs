@@ -117,6 +117,8 @@ public class RecvGenerator : ISourceGenerator
             {
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
+                HostClassName = HostClassOf(methodSyntax),
+                HostStaticUsings = HostStaticUsingsOf(methodSyntax, semanticModel),
                 Scope = scope,
                 Method = method,
                 ReceiverTypeIsPublic = receiverTypeIsPublic,
@@ -157,6 +159,10 @@ public class RecvGenerator : ISourceGenerator
             if (HasDeclaredPointerTwin(semanticModel, methodSyntax))
                 continue;
 
+            // Only a Go method: one the package class or a type's method holder declares.
+            if (!methodSymbol.ContainingType.Name.EndsWith(PackageSuffix, StringComparison.Ordinal) && !GoMethodHosts.IsMethodHost(methodSymbol.ContainingType))
+                continue;
+
             string packageNamespace = methodSyntax.GetNamespaceName();
             string packageClassName = methodSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
@@ -168,6 +174,8 @@ public class RecvGenerator : ISourceGenerator
             {
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
+                HostClassName = HostClassOf(methodSyntax),
+                HostStaticUsings = HostStaticUsingsOf(methodSyntax, semanticModel),
                 Scope = scope,
                 Method = method,
                 ReceiverTypeIsPublic = EffectiveScopeIsPublic(receiverType, GetSimpleName(method.Parameters[0].type)),
@@ -181,6 +189,47 @@ public class RecvGenerator : ISourceGenerator
 
             context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.value.g.cs")), generatedSource);
         }
+    }
+
+    // The class a forwarder is written into: the method's own, which every part of it then shares, so the twin
+    // overloads the method where it is declared and a private method stays reachable. A class that is not declared
+    // partial cannot be reopened (CS0260), so its forwarder keeps the separate `<class>_package` class it had before
+    // methods moved to their holders (null, TemplateBase's default).
+    internal static string? HostClassOf(MethodDeclarationSyntax methodSyntax) =>
+        methodSyntax.Parent is ClassDeclarationSyntax { Parent: not TypeDeclarationSyntax } host && host.Modifiers.Any(SyntaxKind.PartialKeyword)
+            ? host.Identifier.Text
+            : null;
+
+    // The classes of this assembly that the file of a method in a method holder reads through `using static`
+    // (TemplateBase.HostStaticUsings); null for a method of any other class.
+    internal static string[]? HostStaticUsingsOf(MethodDeclarationSyntax methodSyntax, SemanticModel semanticModel)
+    {
+        if (methodSyntax.Parent is not ClassDeclarationSyntax host ||
+            semanticModel.GetDeclaredSymbol(host) is not INamedTypeSymbol hostSymbol || !GoMethodHosts.IsMethodHost(hostSymbol))
+        {
+            return null;
+        }
+
+        List<string> targets = [];
+
+        foreach (SyntaxNode node in methodSyntax.SyntaxTree.GetRoot().DescendantNodes(node => node is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax))
+        {
+            if (node is not UsingDirectiveSyntax { Alias: null, Name: not null } directive || !directive.StaticKeyword.IsKind(SyntaxKind.StaticKeyword))
+                continue;
+
+            if (semanticModel.GetSymbolInfo(directive.Name).Symbol is not INamedTypeSymbol { IsStatic: true } target ||
+                !SymbolEqualityComparer.Default.Equals(target.ContainingAssembly, hostSymbol.ContainingAssembly))
+            {
+                continue;
+            }
+
+            string name = target.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            if (!targets.Contains(name))
+                targets.Add(name);
+        }
+
+        return targets.Count == 0 ? null : [.. targets];
     }
 
     // Whether the method's own class DECLARES its pointer twin: a same-named method whose receiver is
@@ -225,8 +274,9 @@ public class RecvGenerator : ISourceGenerator
     {
         public List<MethodDeclarationSyntax> Methods { get; } = [];
 
-        // The Go VALUE-receiver methods: an extension in a package class whose receiver is not in the pointer
-        // set (no ref/in, or a by-ref receiver marked [GoCopyBound]).
+        // The Go VALUE-receiver methods: an extension in a top-level static class whose receiver is not in the
+        // pointer set (no ref/in, or a by-ref receiver marked [GoCopyBound]). Execute keeps those the package class
+        // or a method holder declares, which only the class's attributes can tell.
         public List<MethodDeclarationSyntax> ValueMethods { get; } = [];
 
         public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
@@ -242,7 +292,7 @@ public class RecvGenerator : ISourceGenerator
             if (modifiers.Any(SyntaxKind.RefKeyword) && method.IsPointerSetMethod(handOwnedPackage: false))
                 Methods.Add(method);
             else if (!method.IsPointerSetMethod(handOwnedPackage: false) && method.Modifiers.Any(SyntaxKind.StaticKeyword) &&
-                     method.Parent is ClassDeclarationSyntax { Identifier.Text: var className } && className.EndsWith(PackageSuffix, StringComparison.Ordinal))
+                     method.Parent is ClassDeclarationSyntax { Parent: not TypeDeclarationSyntax })
                 ValueMethods.Add(method);
         }
     }

@@ -2,10 +2,13 @@ namespace go;
 
 using fmt = fmt_package;
 using slices = slices_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct V /*[]byte*/;
+
+} partial class mainᴛV {
 
 public static V Clone(this V v) {
     var r = new V(len(v) + 1);
@@ -14,7 +17,11 @@ public static V Clone(this V v) {
     return r;
 }
 
+} partial class main_package {
+
 partial struct W /*[]nint*/;
+
+} partial class mainᴛW {
 
 public static (W, error) Clone(this ref W w) {
     if (w == nil) {
@@ -23,15 +30,23 @@ public static (W, error) Clone(this ref W w) {
     return (appendꓸꓸꓸ(new W(new nint[]{-1}.slice()), (w)), default);
 }
 
+} partial class main_package {
+
 partial interface Cloner {
     V Clone();
 }
 
 partial struct GS<T> /*[]T*/;
 
+} partial class mainᴛGS {
+
 public static GS<T> Clone<T>(this GS<T> g) { return appendꓸꓸꓸ(appendꓸꓸꓸ(new GS<T>(new T[]{}.slice()), g), g); }
 
+} partial class main_package {
+
 partial struct M /*map[@string, nint]*/;
+
+} partial class mainᴛM {
 
 public static M Clone(this M m) {
     var r = new M(new map<@string, nint>{["cloned"] = 1});
@@ -40,6 +55,8 @@ public static M Clone(this M m) {
     }
     return r;
 }
+
+} partial class main_package {
 
 partial struct U /*[]@string*/;
 

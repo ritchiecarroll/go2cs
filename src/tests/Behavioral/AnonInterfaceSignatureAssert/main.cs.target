@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,19 +9,31 @@ partial struct simpleErr {
     internal @string msg;
 }
 
+} partial class mainᴛsimpleErr {
+
 internal static @string Error(this simpleErr e) { return e.msg; }
+
+} partial class main_package {
 
 partial struct multiWrap {
     internal slice<error> errs;
 }
 
+} partial class mainᴛmultiWrap {
+
 internal static slice<error> Unwrap(this multiWrap m) { return m.errs; }
+
+} partial class main_package {
 
 partial struct singleWrap {
     internal error err;
 }
 
+} partial class mainᴛsingleWrap {
+
 internal static error Unwrap(this singleWrap s) { return s.err; }
+
+} partial class main_package {
 
 internal partial interface classify_type /*dyn*/ {
     error Unwrap();

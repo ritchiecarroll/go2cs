@@ -101,6 +101,8 @@ global using Symbol = object;
 
 namespace go;
 
+using static plugin_package;
+
 partial class plugin_package {
 
 // Plugin is a loaded Go plugin.
@@ -118,6 +120,8 @@ public static (ж<Plugin>, error) Open(@string path) {
     return open(path);
 }
 
+} partial class pluginᴛPlugin {
+
 // Lookup searches for a symbol named symName in plugin p.
 // A symbol is any exported variable or function.
 // It reports an error if the symbol is not found.
@@ -126,4 +130,4 @@ public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) {
     return lookup(ref (Ꮡp).DerefOrNull(), symName);
 }
 
-} // end plugin_package
+} // end pluginᴛPlugin

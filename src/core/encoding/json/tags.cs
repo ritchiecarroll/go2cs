@@ -5,6 +5,7 @@
 namespace go.encoding;
 
 using strings = strings_package;
+using static json_package;
 
 partial class json_package {
 
@@ -18,6 +19,8 @@ internal static (@string, tagOptions) parseTag(@string tag) {
     (tag, var opt, _) = strings.Cut(tag, ",");
     return (tag, (tagOptions)opt);
 }
+
+} partial class jsonᴛtagOptions {
 
 // Contains reports whether a comma-separated list of options
 // contains a particular substr flag. substr must be surrounded by a
@@ -37,4 +40,4 @@ internal static bool Contains(this tagOptions o, @string optionName) {
     return false;
 }
 
-} // end json_package
+} // end jsonᴛtagOptions
