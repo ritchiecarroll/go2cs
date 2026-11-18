@@ -46,21 +46,20 @@ public static void TestEd25519Vectors(ж<testing.T> t) {
     foreach (var (i, v) in range(vectors)) {
         var expectedToVerify = true;
         foreach (var (_, f) in range(v.Flags)) {
-            var exprᴛ1 = f;
             switch (ᐧ) {
             // We use the simplified verification formula that doesn't multiply
             // by the cofactor, so any low order residue will cause the
             // signature not to verify.
             //
             // This is allowed, but not required, by RFC 8032.
-            case {} when exprᴛ1 == "LowOrderResidue"u8: {
+            case {} when f == "LowOrderResidue"u8: {
                 expectedToVerify = false;
                 break;
             }
             // Our point decoding allows non-canonical encodings (in violation
             // of RFC 8032) but R is not decoded: instead, R is recomputed and
             // compared bytewise against the canonical encoding.
-            case {} when exprᴛ1 == "NonCanonicalR"u8: {
+            case {} when f == "NonCanonicalR"u8: {
                 expectedToVerify = false;
                 break;
             }}

@@ -611,6 +611,14 @@ var internalTestDynamicTypeNames map[string]string
 // nil for every other conversion, so no other emission changes.
 var testAmbiguousLocalTypeNames hashset.HashSet[string]
 
+// testInternalDeclaredNames holds the package-level names the package under test's internal `_test.go`
+// files declare, which its internal-test class (`<pkg>_internal_test_package`) holds and every external
+// test file names in a `using static`. A method holder of the external variant writes an own name in
+// this set through its own class (usingStaticAlsoDeclares). Session-scoped to one `-tests` conversion,
+// computed in convertTestVariants beside testAmbiguousLocalTypeNames, and read only while the external
+// variant converts.
+var testInternalDeclaredNames hashset.HashSet[string]
+
 // whiteboxInternalTestObjects is the object-identity set contributed by the internal `_test.go`
 // half of the one go/packages load. External-variant selector and type rendering consult it when
 // export data carries no usable declaration position.

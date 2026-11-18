@@ -15,7 +15,7 @@ using static global::go.go.token_package;
 
 partial class token_internal_test_package {
 
-internal static void checkPos(ж<testing.T> t, @string msg, global::go.go.token_package.ΔPosition got, global::go.go.token_package.ΔPosition want) {
+internal static void checkPos(ж<testing.T> t, @string msg, global::go.go.token_package.Position got, global::go.go.token_package.Position want) {
     if (got.Filename != want.Filename) {
         t.Errorf("%s: got filename = %q; want %q", msg, got.Filename, want.Filename);
     }
@@ -41,9 +41,9 @@ public static void TestNoPos(ж<testing.T> t) {
         t.Errorf("NoPos should not be valid");
     }
     ж<global::go.go.token_package.FileSet> fset = default;
-    checkPos(t, nilNoPosˢ, fset.Position(NoPos), new ΔPosition());
+    checkPos(t, nilNoPosˢ, fset.Position(NoPos), new Position());
     fset = NewFileSet();
-    checkPos(t, fsetNoPosˢ, fset.Position(NoPos), new ΔPosition());
+    checkPos(t, fsetNoPosˢ, fset.Position(NoPos), new Position());
 }
 
 partial struct testsᴛ1 /*dyn*/ {
@@ -74,19 +74,19 @@ internal static (nint, nint) linecol(slice<nint> lines, nint offs) {
     return (len(lines), offs - prevLineOffs + 1);
 }
 
-internal static void verifyPositions(ж<testing.T> t, ж<global::go.go.token_package.FileSet> fset, ж<global::go.go.token_package.ΔFile> Ꮡf, slice<nint> lines) {
+internal static void verifyPositions(ж<testing.T> t, ж<global::go.go.token_package.FileSet> fset, ж<global::go.go.token_package.File> Ꮡf, slice<nint> lines) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     for (nint offs = 0; offs < f.Size(); offs++) {
-        global::go.go.token_package.ΔPos p = f.Pos(offs);
+        global::go.go.token_package.Pos p = f.Pos(offs);
         nint offs2 = f.Offset(p);
         if (offs2 != offs) {
             t.Errorf("%s, Offset: got offset %d; want %d", f.Name(), offs2, offs);
         }
         var (line, col) = linecol(lines, offs);
         @string msg = fmt.Sprintf("%s (offs = %d, p = %d)"u8, f.Name(), offs, p);
-        checkPos(t, msg, Ꮡf.Position(f.Pos(offs)), new ΔPosition(f.Name(), offs, line, col));
-        checkPos(t, msg, fset.Position(p), new ΔPosition(f.Name(), offs, line, col));
+        checkPos(t, msg, Ꮡf.Position(f.Pos(offs)), new Position(f.Name(), offs, line, col));
+        checkPos(t, msg, fset.Position(p), new Position(f.Name(), offs, line, col));
     }
 }
 
@@ -178,11 +178,11 @@ public static void TestLineInfo(ж<testing.T> t) {
     }
     // verify positions for all offsets
     for (nint offs = 0; offs <= f.Size(); offs++) {
-        global::go.go.token_package.ΔPos p = f.Pos(offs);
+        global::go.go.token_package.Pos p = f.Pos(offs);
         var (_, col) = linecol(lines, offs);
         @string msg = fmt.Sprintf("%s (offs = %d, p = %d)"u8, f.Name(), offs, p);
-        checkPos(t, msg, f.Position(f.Pos(offs)), new ΔPosition("bar", offs, 42, col));
-        checkPos(t, msg, fset.Position(p), new ΔPosition("bar", offs, 42, col));
+        checkPos(t, msg, f.Position(f.Pos(offs)), new Position("bar", offs, 42, col));
+        checkPos(t, msg, fset.Position(p), new Position("bar", offs, 42, col));
     }
 }
 
@@ -197,7 +197,7 @@ public static void TestFiles(ж<testing.T> t) {
         }
         fset.AddFile(test.filename, @base, test.size);
         nint j = 0;
-        fset.Iterate((ж<global::go.go.token_package.ΔFile> f) => {
+        fset.Iterate((ж<global::go.go.token_package.File> f) => {
             if (f.Name() != tests[j].filename) {
                 t.Errorf("got filename = %s; want %s", f.Name(), tests[j].filename);
             }
@@ -216,7 +216,7 @@ public static void TestFileSetPastEnd(ж<testing.T> t) {
     foreach (var (_, test) in range(tests)) {
         fset.AddFile(test.filename, fset.Base(), test.size);
     }
-    var f = fset.File((global::go.go.token_package.ΔPos)fset.Base()); if (f != nil) {
+    var f = fset.File((global::go.go.token_package.Pos)fset.Base()); if (f != nil) {
         t.Errorf("got %v, want nil", f.OrTypedNil());
     }
 }
@@ -229,7 +229,7 @@ public static void TestFileSetCacheUnlikely(ж<testing.T> t) {
         fset.AddFile(test.filename, fset.Base(), test.size);
     }
     foreach (var (@file, pos) in offsets) {
-        var f = fset.File((global::go.go.token_package.ΔPos)pos);
+        var f = fset.File((global::go.go.token_package.Pos)pos);
         if (f.Name() != @file) {
             t.Errorf("got %q at position %d, want %q", f.Name(), pos, @file);
         }
@@ -253,7 +253,7 @@ public static partial void TestFileSetRace(ж<testing.T> t) {
         var rʗ1 = rΔ1;
         goǃ(() => {
             for (nint iΔ1 = 0; iΔ1 < 1000; iΔ1++) {
-                fsetʗ1.Position((global::go.go.token_package.ΔPos)(nint)rʗ1.Int31n(max));
+                fsetʗ1.Position((global::go.go.token_package.Pos)(nint)rʗ1.Int31n(max));
             }
             Ꮡstop.Done();
         });
@@ -266,7 +266,7 @@ public static partial void TestFileSetRace(ж<testing.T> t) {
 public static partial void TestFileSetRace2(ж<testing.T> t) {
     const nint N = 1000;
     ж<global::go.go.token_package.FileSet> fset = NewFileSet();
-    ж<global::go.go.token_package.ΔFile> @file = fset.AddFile(""u8, -1, N);
+    ж<global::go.go.token_package.File> @file = fset.AddFile(""u8, -1, N);
     channel<nint> ch = new channel<nint>(2);
 
     var chʗ1 = ch;
@@ -282,7 +282,7 @@ public static partial void TestFileSetRace2(ж<testing.T> t) {
     var fileʗ2 = @file;
     var fsetʗ1 = fset;
     goǃ(() => {
-        global::go.go.token_package.ΔPos pos = fileʗ2.Pos(0);
+        global::go.go.token_package.Pos pos = fileʗ2.Pos(0);
         for (nint i = 0; i < N; i++) {
             fsetʗ1.PositionFor(pos, false);
         }
@@ -334,7 +334,7 @@ done
         var got1 = f.PositionFor(f.Pos(offs), false);
         var got2 = f.PositionFor(f.Pos(offs), true);
         var got3 = f.Position(f.Pos(offs));
-        var want = new ΔPosition(filename, offs, i + 1, 1);
+        var want = new Position(filename, offs, i + 1, 1);
         checkPos(t, positionForUnadjustedˢ, got1, want);
         checkPos(t, positionForAdjustedˢ, got2, want);
         checkPos(t, positionˢ, got3, want);
@@ -349,7 +349,7 @@ done
     // unadjusted position info must remain unchanged
     foreach (var (i, offs) in range(f.lines)) {
         var got1 = f.PositionFor(f.Pos(offs), false);
-        var want = new ΔPosition(filename, offs, i + 1, 1);
+        var want = new Position(filename, offs, i + 1, 1);
         checkPos(t, positionForUnadjustedˢ2, got1, want);
     }
 
@@ -357,7 +357,7 @@ done
     foreach (var (i, offs) in range(f.lines)) {
         var got2 = f.PositionFor(f.Pos(offs), true);
         var got3 = f.Position(f.Pos(offs));
-        var want = new ΔPosition(filename, offs, i + 1, 1);
+        var want = new Position(filename, offs, i + 1, 1);
         // manually compute wanted filename and line
         nint line = want.Line;
         if (i + 1 >= l1) {
@@ -388,7 +388,7 @@ public static void TestLineStart(ж<testing.T> t) {
     f.SetLinesForContent(slice<byte>(src));
 
     for (nint line = 1; line <= 3; line++) {
-        global::go.go.token_package.ΔPos pos = f.LineStart(line);
+        global::go.go.token_package.Pos pos = f.LineStart(line);
         var position = fset.Position(pos);
         if (position.Line != line || position.Column != 1) {
             t.Errorf("LineStart(%d) returned wrong pos %d: %s", line, pos, position);
@@ -416,7 +416,7 @@ public static void TestRemoveFile(ж<testing.T> t) {
     b.SetLinesForContent(contentB);
 
     var fsetʗ1 = fset;
-    void checkPos(global::go.go.token_package.ΔPos pos, @string want) {
+    void checkPos(global::go.go.token_package.Pos pos, @string want) {
         @string got = fsetʗ1.Position(pos).String(); if (got != want) {
             t.Errorf("Position(%d) = %s, want %s", pos, got, want);
         }
@@ -424,7 +424,7 @@ public static void TestRemoveFile(ж<testing.T> t) {
     var fsetʗ2 = fset;
     void checkNumFiles(nint want) {
         nint got = 0;
-        fsetʗ2.Iterate((ж<global::go.go.token_package.ΔFile> _) => {
+        fsetʗ2.Iterate((ж<global::go.go.token_package.File> _) => {
             got++;
             return true;
         });
@@ -433,8 +433,8 @@ public static void TestRemoveFile(ж<testing.T> t) {
         }
     }
 
-    global::go.go.token_package.ΔPos apos3 = a.Pos(3);
-    global::go.go.token_package.ΔPos bpos3 = b.Pos(3);
+    global::go.go.token_package.Pos apos3 = a.Pos(3);
+    global::go.go.token_package.Pos bpos3 = b.Pos(3);
     checkPos(apos3, fileA14ˢ);
     checkPos(bpos3, fileB14ˢ);
     checkNumFiles(2);
@@ -578,24 +578,24 @@ public static void TestIssue57490(ж<testing.T> t) {
             }
         }
         {
-            nint got = f.Offset((global::go.go.token_package.ΔPos)(-1)); if (got != 0) {
+            nint got = f.Offset((global::go.go.token_package.Pos)(-1)); if (got != 0) {
                 t.Errorf("offset = %d, want %d", got, (nint)0);
             }
         }
         {
-            nint got = f.Offset((global::go.go.token_package.ΔPos)(@base + (nint)fsize + 1)); if (got != fsize) {
+            nint got = f.Offset((global::go.go.token_package.Pos)(@base + (nint)fsize + 1)); if (got != fsize) {
                 t.Errorf("offset = %d, want %d", got, (nint)(fsize));
             }
         }
 
         // out-of-bounds offsets must not lead to a panic when calling f.Pos
         {
-            global::go.go.token_package.ΔPos got = f.Pos(-1); if (got != ((global::go.go.token_package.ΔPos)@base)) {
+            global::go.go.token_package.Pos got = f.Pos(-1); if (got != ((global::go.go.token_package.Pos)@base)) {
                 t.Errorf("pos = %d, want %d", got, @base);
             }
         }
         {
-            global::go.go.token_package.ΔPos got = f.Pos(fsize + 1); if (got != ((global::go.go.token_package.ΔPos)(@base + (nint)fsize))) {
+            global::go.go.token_package.Pos got = f.Pos(fsize + 1); if (got != ((global::go.go.token_package.Pos)(@base + (nint)fsize))) {
                 t.Errorf("pos = %d, want %d", got, @base + (nint)fsize);
             }
         }
@@ -603,13 +603,13 @@ public static void TestIssue57490(ж<testing.T> t) {
         // out-of-bounds Pos values must not lead to a panic when calling f.Position
         @string want = fmt.Sprintf("%s:1:1"u8, f.Name());
         {
-            @string got = f.Position((global::go.go.token_package.ΔPos)(-1)).String(); if (got != want) {
+            @string got = f.Position((global::go.go.token_package.Pos)(-1)).String(); if (got != want) {
                 t.Errorf("position = %s, want %s", got, want);
             }
         }
         want = fmt.Sprintf("%s:1:%d"u8, f.Name(), (nint)(fsize + 1));
         {
-            @string got = f.Position((global::go.go.token_package.ΔPos)(fsize + 1)).String(); if (got != want) {
+            @string got = f.Position((global::go.go.token_package.Pos)(fsize + 1)).String(); if (got != want) {
                 t.Errorf("position = %s, want %s", got, want);
             }
         }
@@ -617,16 +617,16 @@ public static void TestIssue57490(ж<testing.T> t) {
         // check invariants
         UntypedInt xsize = /* fsize + 5 */ 10;
         for (nint offset = -xsize; offset < xsize; offset++) {
-            nint want1 = f.Offset((global::go.go.token_package.ΔPos)(f.@base + offset));
+            nint want1 = f.Offset((global::go.go.token_package.Pos)(f.@base + offset));
             {
                 nint got = f.Offset(f.Pos(offset)); if (got != want1) {
                     t.Errorf("offset = %d, want %d", got, want1);
                 }
             }
 
-            global::go.go.token_package.ΔPos want2 = f.Pos(offset);
+            global::go.go.token_package.Pos want2 = f.Pos(offset);
             {
-                global::go.go.token_package.ΔPos got = f.Pos(f.Offset(want2)); if (got != want2) {
+                global::go.go.token_package.Pos got = f.Pos(f.Offset(want2)); if (got != want2) {
                     t.Errorf("pos = %d, want %d", got, want2);
                 }
             }
@@ -685,7 +685,7 @@ internal static @string fsetString(ж<global::go.go.token_package.FileSet> fset)
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡbuf.WriteRune('{');
     @string sep = ""u8;
-    fset.Iterate((ж<global::go.go.token_package.ΔFile> f) => {
+    fset.Iterate((ж<global::go.go.token_package.File> f) => {
         fmt.Fprintf(new token_test_package.strings_BuilderжWriter(Ꮡbuf), "%s%s:%d-%d"u8, sep, f.Name(), f.Base(), f.End());
         sep = " ";
         return true;
@@ -699,14 +699,14 @@ public static partial void TestRemoveFileRace(ж<testing.T> t) {
     var fset = NewFileSet();
 
     // Create bunch of files.
-    slice<ж<global::go.go.token_package.ΔFile>> files = default;
+    slice<ж<global::go.go.token_package.File>> files = default;
     foreach (var i in range(20000)) {
         var f = fset.AddFile("f", -1, (i + 1) * 10);
         files = append(files, f);
     }
 
     // governor goroutine
-    var (race1, race2) = (new channel<ж<global::go.go.token_package.ΔFile>>(0), new channel<ж<global::go.go.token_package.ΔFile>>(0));
+    var (race1, race2) = (new channel<ж<global::go.go.token_package.File>>(0), new channel<ж<global::go.go.token_package.File>>(0));
     var start = new channel<EmptyStruct>(0);
     var filesʗ1 = files;
     var race1ʗ1 = race1;
@@ -727,14 +727,14 @@ public static partial void TestRemoveFileRace(ж<testing.T> t) {
     var race1ʗ2 = race1;
     goǃ(() => {
         foreach (var f in race1ʗ2) {
-            fsetʗ1.File(((global::go.go.token_package.ΔPos)f.Base()) + 5); // populates s.last with f
+            fsetʗ1.File(((global::go.go.token_package.Pos)f.Base()) + 5); // populates s.last with f
         }
     });
 
     start.ᐸꟷ(new EmptyStruct());
     foreach (var f in race2) {
         fset.RemoveFile(f);
-        var got = fset.File(((global::go.go.token_package.ΔPos)f.Base()) + 5);
+        var got = fset.File(((global::go.go.token_package.Pos)f.Base()) + 5);
         if (got != nil) {
             t.Fatalf("file was not removed correctly");
         }
@@ -743,12 +743,12 @@ public static partial void TestRemoveFileRace(ж<testing.T> t) {
 }
 
 public static void TestRemovedFileFileReturnsNil(ж<testing.T> t) {
-    var filesᴷ = new stackAppend<ж<global::go.go.token_package.ΔFile>>();
+    var filesᴷ = new stackAppend<ж<global::go.go.token_package.File>>();
 
     var fset = NewFileSet();
 
     // Create bunch of files.
-    slice<ж<global::go.go.token_package.ΔFile>> files = default;
+    slice<ж<global::go.go.token_package.File>> files = default;
     foreach (var i in range(1000)) {
         var f = fset.AddFile("f", -1, (i + 1) * 100);
         files = append(filesᴷ, files, f);
@@ -761,7 +761,7 @@ public static void TestRemovedFileFileReturnsNil(ж<testing.T> t) {
 
     foreach (var (_, f) in range(files)) {
         fset.RemoveFile(f);
-        var got = fset.File(((global::go.go.token_package.ΔPos)f.Base()) + 10); if (got != nil) {
+        var got = fset.File(((global::go.go.token_package.Pos)f.Base()) + 10); if (got != nil) {
             t.Fatalf("file was not removed correctly; got file with base: %v", got.Base());
         }
     }

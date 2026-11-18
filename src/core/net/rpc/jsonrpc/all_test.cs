@@ -15,6 +15,7 @@ using testing = testing_package;
 using encoding;
 using global::go.net;
 using static global::go.net.rpc.jsonrpc_package;
+using static jsonrpc_internal_test_package;
 
 partial class jsonrpc_internal_test_package {
 
@@ -33,6 +34,8 @@ public partial struct ArithAddResp {
     public Reply Result; /*`json:"result"`*/
     public any Error; /*`json:"error"`*/
 }
+
+} partial class jsonrpc_internal_testᴛArith {
 
 public static error Add(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
@@ -69,8 +72,12 @@ public static error Error(this ref Arith t, ж<Args> args, ж<Reply> reply) {
     throw panic("ERROR");
 }
 
+} partial class jsonrpc_internal_test_package {
+
 public partial struct BuiltinTypes {
 }
+
+} partial class jsonrpc_internal_testᴛBuiltinTypes {
 
 public static error Map(this BuiltinTypes _, nint i, ж<map<nint, nint>> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
@@ -92,6 +99,8 @@ public static error Array(this BuiltinTypes _, nint i, /*[1]*/ ж<array<nint>> �
     (reply)[0] = i;
     return default;
 }
+
+} partial class jsonrpc_internal_test_package {
 
 [GoInit] internal static void init() {
     rpc.Register(@new<Arith>());
@@ -418,6 +427,8 @@ internal partial struct pipe {
 
 internal partial struct pipeAddr /*num:nint*/;
 
+} partial class jsonrpc_internal_testᴛpipeAddr {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pipeˢ => ref pipeˢᵇ;
 private static readonly @string pipeˢᵇ = "pipe"u8;
@@ -430,6 +441,8 @@ internal static @string String(this pipeAddr _) {
     return pipeˢ;
 }
 
+} partial class jsonrpc_internal_testᴛpipe {
+
 internal static error Close(this ref pipe p) {
     var err = p.PipeReader.Close();
     var err1 = p.PipeWriter.Close();
@@ -439,11 +452,11 @@ internal static error Close(this ref pipe p) {
     return err;
 }
 
-internal static netꓸAddr LocalAddr(this ref pipe p) {
+internal static net.Addr LocalAddr(this ref pipe p) {
     return ((pipeAddr)0);
 }
 
-internal static netꓸAddr RemoteAddr(this ref pipe p) {
+internal static net.Addr RemoteAddr(this ref pipe p) {
     return ((pipeAddr)0);
 }
 
@@ -463,4 +476,4 @@ internal static error SetWriteTimeout(this ref pipe p, int64 nsec) {
     return errors.New(netPipeDoesNotSupportˢ);
 }
 
-} // end jsonrpc_internal_test_package
+} // end jsonrpc_internal_testᴛpipe

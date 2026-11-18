@@ -8,7 +8,6 @@ global using static global::go.@internal.pkgbits_package;
 
 // <ImportedTypeAliases>
 global using pkgbitsꓸRelElemIdx = go.@internal.pkgbits_package.Index;
-global using pkgbitsꓸVersion = go.@internal.pkgbits_package.ΔVersion;
 // </ImportedTypeAliases>
 
 using go;

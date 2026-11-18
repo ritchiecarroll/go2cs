@@ -20,13 +20,13 @@ internal partial struct reqTest {
     public @string Raw;
     public ж<global::go.net.http_package.Request> Req;
     public @string Body;
-    public global::go.net.http_package.ΔHeader Trailer;
+    public global::go.net.http_package.Header Trailer;
     public @string Error;
 }
 
 internal static @string noError = "";
 internal static @string noBodyStr = "";
-internal static global::go.net.http_package.ΔHeader noTrailer = default;
+internal static global::go.net.http_package.Header noTrailer = default;
 
 internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<reqTest>>([
     // Baseline test; All Request fields included for template use
@@ -43,7 +43,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Accept"] = ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
                 ["Accept-Language"] = ["en-us,en;q=0.5"],
                 ["Accept-Encoding"] = ["gzip,deflate"],
@@ -77,7 +77,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: 0,
             Host: "foo.com",
@@ -102,7 +102,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: 0,
             Host: "test",
@@ -144,14 +144,14 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             ContentLength: -1,
             Host: "foo.com",
             RequestURI: "/"
         )),
 
         "foobar",
-        new ΔHeader(new map<@string, slice<@string>>{
+        new Header(new map<@string, slice<@string>>{
             ["Trailer-Key"] = ["Trailer-Value"]
         }),
         noError
@@ -170,7 +170,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             ContentLength: -1,
             Host: "foo.com",
             RequestURI: "/"
@@ -203,7 +203,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: 0,
             Host: "www.google.com:443",
@@ -227,7 +227,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: 0,
             Host: "127.0.0.1:6060",
@@ -251,7 +251,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: 0,
             Host: "",
@@ -274,7 +274,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Server"] = ["foo"]
             }),
             Close: false,
@@ -298,7 +298,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Server"] = ["foo"]
             }),
             Close: false,
@@ -319,7 +319,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             URL: Ꮡ(new url.URL(
                 Path: "/"
             )),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 // This wasn't removed from Go 1.0 to
                 // Go 1.3, so locking it in that we
                 // keep this:
@@ -347,7 +347,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             URL: Ꮡ(new url.URL(
                 Path: "/"
             )),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Connection"] = ["close"],
                 ["Content-Length"] = ["0"]
             }),
@@ -372,7 +372,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
             URL: Ꮡ(new url.URL(
                 Path: "*"
             )),
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Proto: "HTTP/2.0",
             ProtoMajor: 2,
             ProtoMinor: 0,
@@ -388,7 +388,7 @@ internal static readonly ж<slice<reqTest>> ᏑreqTests = new StaticBox<slice<re
 internal static ref slice<reqTest> reqTests => ref ((StaticBox<slice<reqTest>>)ᏑreqTests).ValueSlot;
 
 public static void TestReadRequest(ж<testing.T> t) {
-    foreach (var i in range(builtin.len(reqTests))) {
+    foreach (var i in range(len(reqTests))) {
         var tt = Ꮡ(reqTests, i);
         var (req, err) = ReadRequest(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(tt.Raw))));
         if (err != nil) {

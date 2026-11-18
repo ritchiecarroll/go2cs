@@ -568,7 +568,7 @@ public static void TestBSSHasZeros(ж<testing.T> t) {
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
-        ж<global::go.debug.pe_package.ΔSection> bss = default;
+        ж<global::go.debug.pe_package.Section> bss = default;
         foreach (var (_, sect) in range(f.Sections)) {
             if (sect.Name == ".bss"u8) {
                 bss = sect;

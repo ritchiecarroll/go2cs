@@ -31,7 +31,7 @@ public static void TestProcessLiteral(ж<Δtesting.T> t) {
             t.Skip(signalsSendNotifyNotˢ);
         }
 
-        var c = new channel<osꓸSignal>(1);
+        var c = new channel<Δos.Signal>(1);
         signal.Notify(c.AsSendOnly(), Δos.Interrupt);
         defer(signal.Stop, c.AsSendOnly(), ref ᒐ);
 
@@ -41,14 +41,14 @@ public static void TestProcessLiteral(ж<Δtesting.T> t) {
         }
 
         // Verify we actually received the signal.
-        var selᴛ1 = time.After(1 * time.ΔSecond);
-        var selᴛ2 = c;
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        var selᴛ1 = time.After(1 * time.Second);
+        var cᴛ1 = c;
+        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out _): {
             t.Error(timeoutWaitingForSignalˢ);
             break;
         }
-        case 1 when selᴛ2.ꟷᐳ(out _): {
+        case 1 when cᴛ1.ꟷᐳ(out _): {
             // Good
             break;
         }}

@@ -37,7 +37,7 @@ using static go.net.url_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/url/url_test.go", "url_test.cs", "ABw2APAE5AmykoKCgqa4ooKCgoKCgpSClIKCgpSCgsqCgoKCgpSCAAsOADl6goKCgoKCuIKClIL4ACJMgoKCgoKUgoKUgoK4ooIAEAqCADNwspKSAAsYAEeIAYKCgoKmgoKCgoKClIKCgpSCuIKCygAeOIKCgoK4goLKACVMgoKCgriCggAOIAAWLoKCgsqCspKCggAIDAAOIoKCgoIADgqCgoKmgoKCgoKmgoKCgoL6AIgBjgKCgoKClJSCgoKCgoCCtoKmgoKCgIKClLaCgqaCgoKCgpQAEgqCgoKClICStoCSpICSpICSpICCpICCpICCpICCpIKAkgAKFABaqgGCspKCgoKClJSClIKCgoKUgoKUgoIAERCCABIsgoKCgoKUgoKUgoKClIKUkgAJFAB06gGCgoKCAAgKhJKCgoIACAiCADBogoKCgpSUgsySgoKUkgAJFAA3cIKCggAMEoIACQyCAAoO5AAmVpKCgoKClIKClIIACgqCABo+goKSgpSCyoKC1IKCgpSCggAJFIKCgpSCuIKCgpSCgoKmgoKClIL4ooKCuJSCpoCCtoCCtoCCxOSCgpL4gsqCgoKCyoCCAAkKAB5GgrKSgoKClIKC3oKykoKCgpSCgt6CspKCgoKUgoLegrKSgoKClIKCABEOggB3+AGigoKUgoKmgoKClJSUlIKCAAwKgpQABRCykoKC", "904-908:1;1158-1163:1;1194-1198:1;1199-1206:2;1207-1214:3;1353-1359:1;1530-1558:1;2077-2081:1;2167-2178:1;2184-2195:1;2201-2212:1;2218-2229:1;2398-2403:1", "", "29=User/1/3/48,User/2/3/59,User/3/3/180,UserPassword/1/7/203,UserPassword/2/7/213,UserPassword/3/7/223,UserPassword/4/7/232,UserPassword/5/7/315,UserPassword/6/7/607,UserPassword/7/7/617;871=UserPassword/1/2/11,User/1/1/21,UserPassword/2/2/31;2298=Repeat/1/3/29,Repeat/2/3/30,Repeat/3/3/31", "", "2221:21,2222:13")]
+[assembly: GoPositionMap("net/url/url_test.go", "url_test.cs", "AB02APAE5AmykoKCgqa4ooKCgoKCgpSClIKCgpSCgsqCgoKCgpSCAAsOADl6goKCgoKCuIKClIL4ACJMgoKCgoKUgoKUgoK4ooIAEAqCADNwspKSAAsYAEeIAYKCgoKmgoKCgoKClIKCgpSCuIKCygAeOIKCgoK4goLKACVMgoKCgriCggAOIAAWLoKCgsqCspKCggAIDAAOIoKCgoIADgqCgoKmgoKCgoKmgoKCgoL6AIgBjgKCgoKClJSCgoKCgoCCtoKmgoKCgIKClLaCgqaCgoKCgpQAEgqCgoKClICStoCSpICSpICSpICCpICCpICCpICCpIKAkgAKFABaqgGCspKCgoKClJSClIKCgoKUgoKUgoIAERCCABIsgoKCgoKUgoKUgoKClIKUkgAJFAB06gGCgoKCAAgKhJKCgoIACAiCADBogoKCgpSUgsySgoKUkgAJFAA3cIKCggAOEoIADQyCAA4OAAgEACZWkoKCgoKUgoKUggAKCoIAGj6CgpKClILKgoLUgoKClIKCAAkUgoKClIK4goKClIKCgqaCgoKUgviigoK4lIKmgIK2gIK2gILE5IKCkviCyoKCgoLKgIIACQoAHkaCspKCgoKUgoLegrKSgoKClIKC3oKykoKCgpSCgt6CspKCgoKUgoIAEQ6CAHf4AaKCgpSCgqaCgoKUlJSUgoIADAqClAAFELKSgoI=", "904-908:1;1158-1163:1;1194-1198:1;1199-1206:2;1207-1214:3;1353-1359:1;1530-1558:1;2077-2081:1;2167-2178:1;2184-2195:1;2201-2212:1;2218-2229:1;2398-2403:1", "", "30=User/1/3/48,User/2/3/59,User/3/3/180,UserPassword/1/7/203,UserPassword/2/7/213,UserPassword/3/7/223,UserPassword/4/7/232,UserPassword/5/7/315,UserPassword/6/7/607,UserPassword/7/7/617;872=UserPassword/1/2/11,User/1/1/21,UserPassword/2/2/31;2311=Repeat/1/3/29,Repeat/2/3/30,Repeat/3/3/31", "", "2234:21,2235:13")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -75,3 +75,15 @@ public static partial class url_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(url_internal_test_package.temporaryError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class url_internal_testᴛtemporaryError;
+[GoMethodHost(typeof(url_internal_test_package.timeoutError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class url_internal_testᴛtimeoutError;
+[GoMethodHost(typeof(url_internal_test_package.timeoutTemporaryError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class url_internal_testᴛtimeoutTemporaryError;
+// </MethodHolders>

@@ -34,17 +34,17 @@ internal static slice<scalarMultTest> p256MultTests = [
 ];
 
 public static void TestP256BaseMult(ж<testing.T> t) {
-    var scalarsᴷ = new stackAppend<ж<bigꓸInt>>();
+    var scalarsᴷ = new stackAppend<ж<big.Int>>();
 
     var p256 = P256();
     var p256Generic = genericParamsForCurve(p256);
 
-    var scalars = new slice<ж<bigꓸInt>>(0, len(p224BaseMultTests) + 1);
+    var scalars = new slice<ж<big.Int>>(0, len(p224BaseMultTests) + 1);
     foreach (var (_, e) in range(p224BaseMultTests)) {
-        var (kΔ1, _) = @new<bigꓸInt>().SetString(e.k, 10);
+        var (kΔ1, _) = @new<big.Int>().SetString(e.k, 10);
         scalars = append(scalarsᴷ, scalars, kΔ1);
     }
-    var k = @new<bigꓸInt>().SetInt64(1);
+    var k = @new<big.Int>().SetInt64(1);
     k.Lsh(k, 500);
     scalars = append(scalars, k);
 
@@ -64,11 +64,11 @@ public static void TestP256BaseMult(ж<testing.T> t) {
 public static void TestP256Mult(ж<testing.T> t) {
     var p256 = P256();
     foreach (var (i, e) in range(p256MultTests)) {
-        var (x, _) = @new<bigꓸInt>().SetString(e.xIn, 16);
-        var (y, _) = @new<bigꓸInt>().SetString(e.yIn, 16);
-        var (k, _) = @new<bigꓸInt>().SetString(e.k, 16);
-        var (expectedX, _) = @new<bigꓸInt>().SetString(e.xOut, 16);
-        var (expectedY, _) = @new<bigꓸInt>().SetString(e.yOut, 16);
+        var (x, _) = @new<big.Int>().SetString(e.xIn, 16);
+        var (y, _) = @new<big.Int>().SetString(e.yIn, 16);
+        var (k, _) = @new<big.Int>().SetString(e.k, 16);
+        var (expectedX, _) = @new<big.Int>().SetString(e.xOut, 16);
+        var (expectedY, _) = @new<big.Int>().SetString(e.yOut, 16);
 
         var (xx, yy) = p256.ScalarMult(x, y, k.Bytes());
         if (xx.Cmp(expectedX) != 0 || yy.Cmp(expectedY) != 0) {

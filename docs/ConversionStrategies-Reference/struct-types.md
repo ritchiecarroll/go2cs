@@ -518,7 +518,7 @@ records an interface pair from a type's *use*, and that use can be entirely impl
 os/signal's test does `cmd.Stdout = &buf`, whose os/exec field type is `io.Writer`, so
 `package_test_info.cs` carries
 
-<!-- source: src/core/flag/package_test_info.cs:27 -->
+<!-- source: src/core/flag/package_test_info.cs:25 -->
 ```csharp
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 ```

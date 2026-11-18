@@ -9,6 +9,7 @@ using log = log_package;
 using strings = strings_package;
 using go.encoding;
 using static go.encoding.xml_internal_test_package;
+using static xml_test_package;
 
 partial class xml_test_package {
 
@@ -17,6 +18,8 @@ partial struct Animal /*num:nint*/;
 public static Animal Unknown => /* iota */ 0;
 public static Animal Gopher => 1;
 public static Animal Zebra => 2;
+
+} partial class xml_testᴛAnimal {
 
 public static error UnmarshalXML(this ref Animal a, ж<xml.Decoder> d, xml.StartElement startʗp) {
     ref var start = ref heap(startʗp, out var Ꮡstart);
@@ -68,6 +71,8 @@ public static error MarshalXML(this Animal a, ж<xml.Encoder> e, xml.StartElemen
     }}
     return e.EncodeElement(s, start);
 }
+
+} partial class xml_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string animalsAnimalGopherˢ => ref animalsAnimalGopherˢᵇ;

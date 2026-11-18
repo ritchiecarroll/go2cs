@@ -12,6 +12,7 @@ using strings = strings_package;
 using testing = testing_package;
 using static go.encoding.base32_package;
 using ꓸꓸꓸany = Span<any>;
+using static base32_internal_test_package;
 
 partial class base32_internal_test_package {
 
@@ -233,6 +234,8 @@ internal partial struct badReader {
     internal nint limit;
 }
 
+} partial class base32_internal_testᴛbadReader {
+
 // Populates p with data, returns a count of the bytes written and an
 // error.  The error returned is taken from badReader.errs, with each
 // invocation of Read returning the next error in this slice, or io.EOF,
@@ -259,6 +262,8 @@ internal static (nint, error) Read(this ref badReader b, slice<byte> p) {
     b.called++;
     return (lim, err);
 }
+
+} partial class base32_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badReaderErrorˢ => ref badReaderErrorˢᵇ;

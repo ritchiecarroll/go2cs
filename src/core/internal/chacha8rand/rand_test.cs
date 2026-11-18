@@ -40,7 +40,7 @@ public static void TestMarshal(ж<testing.T> t) {
     foreach (var i in range(len(output))) {
         for (;;) {
             var b = Marshal(Ꮡs);
-            s = new State();
+            s.AssignFrom(new State());
             var err = Unmarshal(Ꮡs, b);
             if (err != nil) {
                 t.Fatalf("#%d: Unmarshal: %v", i, err);

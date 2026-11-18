@@ -9,6 +9,7 @@ using strings = strings_package;
 using testing = testing_package;
 using io = io_package;
 using static go.encoding.csv_package;
+using static csv_internal_test_package;
 
 partial class csv_internal_test_package {
 
@@ -74,6 +75,8 @@ public static void TestWrite(ж<testing.T> t) {
 internal partial struct errorWriter {
 }
 
+} partial class csv_internal_testᴛerrorWriter {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testˢ => ref testˢᵇ;
 private static readonly @string testˢᵇ = "Test"u8;
@@ -81,6 +84,8 @@ private static readonly @string testˢᵇ = "Test"u8;
 internal static (nint, error) Write(this errorWriter e, slice<byte> b) {
     return (0, errors.New(testˢ));
 }
+
+} partial class csv_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorShouldNotBeNilˢ = (@string)"Error should not be nil"u8;

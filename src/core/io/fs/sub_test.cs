@@ -8,6 +8,7 @@ using static go.io.fs_package;
 using testing = testing_package;
 using fs = go.io.fs_package;
 using go.io;
+using static fs_test_package;
 
 partial class fs_test_package {
 
@@ -15,7 +16,11 @@ partial struct subOnly {
     /*embed*/ public go.io.fs_package.SubFS SubFS;
 }
 
+} partial class fs_testᴛsubOnly {
+
 internal static (fs.File, error) Open(this subOnly _, @string name) { return (default, ErrNotExist); }
+
+} partial class fs_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string goodbyeTxtˢ => ref goodbyeTxtˢᵇ;

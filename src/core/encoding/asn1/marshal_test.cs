@@ -27,7 +27,7 @@ internal partial struct twoIntStruct {
 }
 
 internal partial struct bigIntStruct {
-    public ж<bigꓸInt> A;
+    public ж<big.Int> A;
 }
 
 internal partial struct nestedStruct {
@@ -97,7 +97,7 @@ internal partial struct numericStringTest {
 
 internal partial struct testSET /*[]nint*/;
 
-public static ж<timeꓸLocation> PST = time.FixedZone("PST", -8 * 60 * 60);
+public static ж<time.Location> PST = time.FixedZone("PST", -8 * 60 * 60);
 
 internal partial struct marshalTest {
     internal any @in;

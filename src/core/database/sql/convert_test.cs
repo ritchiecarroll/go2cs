@@ -16,6 +16,7 @@ using @internal;
 using go.database.sql;
 using static go.database.sql_package;
 using ꓸꓸꓸany = Span<any>;
+using static sql_internal_test_package;
 
 partial class sql_internal_test_package {
 
@@ -470,11 +471,17 @@ public static void TestUserDefinedBytes(ж<testing.T> t) {
 
 public partial struct Valuer_V /*@string*/;
 
+} partial class sql_internal_testᴛValuer_V {
+
 public static (driverꓸValue, error) Value(this Valuer_V v) {
     return (strings.ToUpper((@string)v), default);
 }
 
+} partial class sql_internal_test_package {
+
 public partial struct Valuer_P /*@string*/;
+
+} partial class sql_internal_testᴛValuer_P {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object nilToStrˢ = (@string)"nil-to-str"u8;
@@ -488,8 +495,11 @@ public static (driverꓸValue, error) Value(this ж<Valuer_P> Ꮡp) {
     return (strings.ToUpper((@string)(p)), default);
 }
 
+} partial class sql_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object fooˢ2 = (@string)"FOO"u8;
+internal static readonly object nilToStrˢ = (@string)"nil-to-str"u8;
 internal static readonly object plainStrˢ = (@string)"plain-str"u8;
 
 internal partial struct TestDriverArgs_tests /*dyn*/ {
@@ -568,6 +578,8 @@ internal partial struct dec {
     internal int32 exponent;
 }
 
+} partial class sql_internal_testᴛdec {
+
 internal static (byte form, bool negative, slice<byte> coefficient, int32 exponent) Decompose(this dec d, slice<byte> buf) {
     d = d.ΔClone();
 
@@ -603,11 +615,15 @@ internal static error Compose(this ref dec d, byte form, bool negative, slice<by
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct decFinite {
     internal bool neg;
     internal array<byte> coefficient = new(16);
     internal int32 exponent;
 }
+
+} partial class sql_internal_testᴛdecFinite {
 
 internal static (byte form, bool negative, slice<byte> coefficient, int32 exponent) Decompose(this decFinite d, slice<byte> buf) {
     d = d.ΔClone();
@@ -640,6 +656,8 @@ internal static error Compose(this ref decFinite d, byte form, bool negative, sl
 
     return default;
 }
+
+} partial class sql_internal_test_package {
 
 internal partial struct TestDecimal_list /*dyn*/ {
     internal @string name;

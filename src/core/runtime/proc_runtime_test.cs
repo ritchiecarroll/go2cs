@@ -18,7 +18,7 @@ public static void RunStealOrderTest() {
         for (nint co = 0; co < len(ord.coprimes); co++) {
             var @enum = ord.start((uint32)co);
             var @checked = new slice<bool>(procs);
-            for (nint Δp = 0; Δp < procs; Δp++) {
+            for (nint p = 0; p < procs; p++) {
                 var x = @enum.position();
                 if (@checked[x]) {
                     println((@string)"procs:", procs, (@string)"inc:", @enum.inc);

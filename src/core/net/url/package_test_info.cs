@@ -8,8 +8,6 @@ global using static global::go.net.url_package;
 global using static global::go.net.url_internal_test_package;
 
 // <ImportedTypeAliases>
-global using netꓸError = go.net_package.ΔError;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -22,7 +20,6 @@ using static global::go.net.url_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b756e6573636170656420737472696e673b20717565727920737472696e673b207061746820737472696e677d", "escapeBenchmarksᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b75726c206e65742f75726c2e55524c3b2077616e7420737472696e677d", "stringURLTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b75726c20737472696e673b20657870656374656456616c696420626f6f6c7d", "parseRequestURLTestsᴛ1")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -32,7 +29,6 @@ using static global::go.net.url_test_package;
 [assembly: GoImplement<global::go.net.url_package.URL, encoding_package.BinaryAppender>(Pointer = true)]
 [assembly: GoImplement<global::go.net.url_package.URL, encoding_package.BinaryMarshaler>(Pointer = true)]
 [assembly: GoImplement<global::go.net.url_package.URL, encoding_package.BinaryUnmarshaler>(Pointer = true)]
-[assembly: GoImplement<global::go.net.url_package.ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

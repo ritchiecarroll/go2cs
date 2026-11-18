@@ -12,6 +12,7 @@ using slices = slices_package;
 using iter = iter_package;
 using static global::go.net.http_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
@@ -30,7 +31,7 @@ public static void TestRoutingFirstSegment(ж<testing.T> t) {
     ]))) {
         slice<@string> got = default;
         @string rest = test.@in;
-        while (builtin.len(rest) > 0) {
+        while (len(rest) > 0) {
             @string seg = default;
             (seg, rest) = firstSegment(rest);
             got = append(got, seg);
@@ -336,6 +337,8 @@ public static void TestMatchingMethods(ж<testing.T> t) {
     }
 }
 
+} partial class http_internal_testᴛroutingNode {
+
 internal static void print(this ж<global::go.net.http_package.routingNode> Ꮡn, io.Writer w, nint level) {
     ref var n = ref Ꮡn.DerefOrNull();
 
@@ -367,4 +370,4 @@ internal static void print(this ж<global::go.net.http_package.routingNode> Ꮡn
     }
 }
 
-} // end http_internal_test_package
+} // end http_internal_testᴛroutingNode

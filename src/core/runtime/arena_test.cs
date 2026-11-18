@@ -121,7 +121,7 @@ public static void TestUserArena(ж<testing.T> t) {
 
             var mpos = GoReflect.WithElemDims(new slice<mediumPointerOdd>(5), 1023);
             foreach (var i in range(len(mpos))) {
-                mpos[i] = mpo.Value.Clone();
+                mpos[i].Assign(mpo.Value);
             }
             runSubTestUserArenaSlice(tΔ1, mpos, true);
 
@@ -347,7 +347,7 @@ internal static void testUserArenaLiveness(ж<testing.T> t, bool useArenaFinaliz
 
             // In order for the finalizer we actually want to run to execute,
             // we need to make sure this one runs first.
-            if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.ΔSecond))) {
+            if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.Second))) {
                 t.Fatal(finalizerQueueWasNeverˢ);
             }
         } else {
@@ -359,7 +359,7 @@ internal static void testUserArenaLiveness(ж<testing.T> t, bool useArenaFinaliz
         GC();
         GC();
 
-        if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.ΔSecond))) {
+        if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.Second))) {
             t.Fatal(finalizerQueueWasNeverˢ);
         }
         if (!Ꮡfinalized.Load()) {
@@ -422,7 +422,7 @@ public static void TestUserArenaClearsPointerBits(ж<testing.T> t) {
     GC();
     GC();
 
-    if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.ΔSecond))) {
+    if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.Second))) {
         t.Fatal(finalizerQueueWasNeverˢ);
     }
     if (!Ꮡfinalized.Load()) {

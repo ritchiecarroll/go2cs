@@ -1309,6 +1309,8 @@ public static void TestNoSectionOverlaps(ж<testing.T> t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string unexpectedReadFromShtˢ => ref unexpectedReadFromShtˢᵇ;
+private static readonly @string unexpectedReadFromShtˢᵇ = "unexpected read from SHT_NOBITS section"u8;
 internal static ref readonly @string bssˢ => ref bssˢᵇ;
 private static readonly @string bssˢᵇ = ".bss"u8;
 

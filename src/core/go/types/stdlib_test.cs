@@ -32,6 +32,7 @@ using io = io_package;
 using static global::go.go.types_internal_test_package;
 using types = global::go.go.types_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static types_test_package;
 
 partial class types_test_package {
 
@@ -128,6 +129,8 @@ partial struct futurePackage {
     internal error err;
 }
 
+} partial class types_testᴛstdlibChecker {
+
 internal static (ж<types.Package>, error) Import(this ref stdlibChecker c, @string path) {
     throw panic("unimplemented: use ImportFrom");
 }
@@ -185,6 +188,8 @@ internal static (ж<types.Package>, error) getDirPackage(this ж<stdlibChecker> 
     }
     return (fut.pkg, fut.err);
 }
+
+} partial class types_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string goBuildˢ => ref goBuildˢᵇ;
@@ -556,7 +561,7 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
         },
         Importer: importer
     ), out var Ꮡconf);
-    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Uses: new map<ж<ast.Ident>, types.Object>()), out var Ꮡinfo);
+    ref var info = ref heap<types.Info>(new Info(Uses: new map<ж<ast.Ident>, types.Object>()), out var Ꮡinfo);
     var (pkg, _) = Ꮡconf.Check(path, fset, files, Ꮡinfo);
     var err = errors.Join(errs.ꓸꓸꓸ);
     if (err != nil) {
@@ -627,6 +632,8 @@ partial struct walker {
     internal Actionꓸꓸꓸ<any> errh;
 }
 
+} partial class types_testᴛwalker {
+
 internal static void walk(this ref walker w, @string dir) {
     var (files, err) = os.ReadDir(dir);
     if (err != nil) {
@@ -654,4 +661,4 @@ internal static void walk(this ref walker w, @string dir) {
     }
 }
 
-} // end types_test_package
+} // end types_testᴛwalker

@@ -21,7 +21,7 @@ using static go.net.smtp_internal_test_package;
 [assembly: GoImplement<faker, io_package.ReadWriteCloser>]
 [assembly: GoImplement<faker, io_package.ReadWriter>(Promoted = true)]
 [assembly: GoImplement<faker, net_package.Conn>]
-[assembly: GoImplement<toServerEmptyAuth, global::go.net.smtp_package.ΔAuth>]
+[assembly: GoImplement<toServerEmptyAuth, global::go.net.smtp_package.Auth>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -35,7 +35,7 @@ using static go.net.smtp_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/smtp/smtp_test.go", "smtp_test.cs", "ACA83IKCgoKClIKUgpSCgoKCgoKUgoIAFQyEABtAgoKCgoKUggAPDJKEgoK+goKUgoKCgpIADhSCpoLugoKCgoIAJQSCgpSCgoKClIKUgpSCpoKAgqSAgraCpoKUgpSCuIKCgqaClIKUgpSClI6CgpSClIKmgqaCgoIAQFSCiJqCgoKCgoKUgIKkgIKkgoKCAHMIgrKUgoKCgpSmkgADGJSAgqSCgIKkgIK2goKCgriSAAMalICCpICCpICCpICCpICCtoKCgoK4kgADHJSAgqSAgqSAgqSAgqSAgraCgoKCuJIAAxyUgIKkgIKkgIKkgIKkgIK2goKCgriSAAMelICCpIKAgqSAgqSAgqSAgraCgoKCyqKClIKCkoKUgoKCgpSSgIKkgIKkgqaCgrQAEhyigpSCgoKCgoKUkoKUgqaCgoK0ABQgooKCppSCgoKCuLKCgoKUpIKCgrSkgoKClKSCgpSCtAAMBKSCpoKCgoKCgoKCgpSSgpSUgoKUtIKCxrSCgrS0goLGtLSCgoKC2LS2gqaCgoLGAAoQABIiABcaooKCgoKCgpSmktSUgoKClKSCgoKCgpSClIKCgoKCgoKUgtikjIKmnoKmgoKCgrQAKTSigoKUpILCgoKCgpSkgoKCgoKUgoKClIKCgrSkjIKUgpSCgrTkooKCgoKCgoKClKSCgpSCgoKmgoKCtAAUIKKClIKSgqKUgoKUkoKUgrSkooKSgoLCgoKCgpSSgrSSwoKCgoKUkoKCgoKUkoKClIK0koKi5IKCgpSClO6CAAwIspKCgoKkgoK0goKClIKCgqS2AAsGgpKCgqS0tLSCAA8MgqS2poKCgpKC+IKCggAJFAAYLgAfPA==", "323-333:1;335-367:2;369-407:3;409-448:4;450-489:5;491-532:6;541-544:1;637-650:1;793-828:1;891-917:1;988-990:1;1009-1020:1;1021-1043:2;1126-1129:1;1128-1128:1.1", "1069=net/smtp.smtpSender.send;1096=net/smtp.smtpSender.send", "33=PlainAuth/1/2/1,PlainAuth/2/2/2,CRAMMD5Auth/1/1/3;142=NewReader/1/1/4", "755:21,810:21,874:29,892:21,935:25,1081:21,1091:29,1099:29,1199:21,1207:29,1214:29,1272:21,1320:21,1332:21,1349:21,1357:29,1364:29,1377:29,1384:29,1469:29")]
+[assembly: GoPositionMap("net/smtp/smtp_test.go", "smtp_test.cs", "ACE83IKCgoKClIKUgpSCgoKCgoKUgoIAFQyEABtAgoKCgoKUggAPDJKEgoK+goKUgoKCgpIAEBSCpoIACg6CgoKCggAnBIKClIKCgoKUgpSClIKmgoCCpICCtoKmgpSClIK4goKCpoKUgpSClIKUjoKClIKUgqaCpoKCggBAVIKImoKCgoKCgpSAgqSAgqSCgoIAdQiCspSCgoKClKaSAAMYlICCpIKAgqSAgraCgoKCuJIAAxqUgIKkgIKkgIKkgIKkgIK2goKCgriSAAMclICCpICCpICCpICCpICCtoKCgoK4kgADHJSAgqSAgqSAgqSAgqSAgraCgoKCuJIAAx6UgIKkgoCCpICCpICCpICCtoKCgoLKooKUgoKSgpSCgoKClJKAgqSAgqSCpoKCtAASHKKClIKCgoKCgpSSgpSCpoKCgrQAFCCigoKmlIKCgoK4soKCgpSkgoKCtKSCgoKUpIKClIK0AAwEpIKmgoKCgoKCgoKClJKClJSCgpS0goLGtIKCtLSCgsa0tIKCgoLYtLaCpoKCgsYAChAAEiIAFxqigoKCgoKClKaS1JSCgoKUpIKCgoKClIKUgoKCgoKCgpSC2KSMgqaegqaCgoKCtAApNKKCgpSkgsKCgoKClKSCgoKCgpSCgoKUgoKCtKSMgpSClIKCtOSigoKCgoKCgoKUpIKClIKCgqaCgoK0ABQgooKUgpKCopSCgpSSgpSCtKSigpKCgsKCgoKClJKCtJLCgoKCgpSSgoKCgpSSgoKUgrSSgqLkgoKClIKUAAgOggAOCLKSgoKCpIKCtIKCgpSCgoKktgALBoKSgoKktLS0ggAPDIKktqaCgoKSgviCgoIACRQAGC4AHzw=", "323-333:1;335-367:2;369-407:3;409-448:4;450-489:5;491-532:6;541-544:1;637-650:1;793-828:1;891-917:1;988-990:1;1009-1020:1;1021-1043:2;1126-1129:1;1128-1128:1.1", "1069=net/smtp.smtpSender.send;1096=net/smtp.smtpSender.send", "34=PlainAuth/1/2/1,PlainAuth/2/2/2,CRAMMD5Auth/1/1/3;143=NewReader/1/1/4", "766:21,821:21,885:29,903:21,946:25,1092:21,1102:29,1110:29,1210:21,1218:29,1225:29,1283:21,1331:21,1343:21,1360:21,1368:29,1375:29,1388:29,1395:29,1484:29")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -76,3 +76,15 @@ public static partial class smtp_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(smtp_internal_test_package.faker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtp_internal_testᴛfaker;
+[GoMethodHost(typeof(smtp_internal_test_package.smtpSender)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtp_internal_testᴛsmtpSender;
+[GoMethodHost(typeof(smtp_internal_test_package.toServerEmptyAuth)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtp_internal_testᴛtoServerEmptyAuth;
+// </MethodHolders>

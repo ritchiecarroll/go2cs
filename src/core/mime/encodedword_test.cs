@@ -12,6 +12,8 @@ using static go.mime_package;
 partial class mime_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string iso88591ˢ => ref iso88591ˢᵇ;
+private static readonly @string iso88591ˢᵇ = "iso-8859-1"u8;
 internal static ref readonly @string c3A9ˢ => ref c3A9ˢᵇ;
 private static readonly @string c3A9ˢᵇ = "=C3=A9"u8;
 internal static ref readonly @string gICAˢ => ref gICAˢᵇ;

@@ -13,7 +13,6 @@ using go;
 using static global::go.net.textproto_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -35,7 +34,7 @@ using static global::go.net.textproto_internal_test_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: GoFieldAccess(typeof(global::go.net.textproto_package.ΔError))]
+[assembly: GoFieldAccess(typeof(global::go.net.textproto_package.Error))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -46,7 +45,7 @@ using static global::go.net.textproto_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/textproto/header_test.go", "header_test.cs", "AA4aABYugoKCAAgMkqaCgoI=")]
-[assembly: GoPositionMap("net/textproto/reader_test.go", "reader_test.cs", "ABMoguaCgoKClIKClIKCuIKCgoKClIL4goKCgpSCgpSCgpSCgviCgoKClIKClIKClIKUgoL4goKCgoKmgoKC+IKCgoKCpoKCgviCgoK4gviCgoKCggAIDKIAFjKCgoIACAqCgoKCgviCgoKUgoKCgpSCgry0ioLugriCAA0cgoKCyoKCgoKClLS0tMa0pIKCpoKCgoKUtLS0pIKCzMiegoKUyoK6koKCgoKSgoKClIK4ggAHEJSUyoKUpoKCAAoWABk6koKCgoKClIKUggAIDJKcnJSCgpSClIKUgviCgoKCpoKCkoKmgujcgsqCpJSmlIK4AA4aABIYooLukoKClIKCggANDqKCgoKCgoKCgpSC", "359-364:1;465-469:1;488-491:1;536-547:1", "", "404=NewReader/1/3/2,MultiReader/1/1/1")]
+[assembly: GoPositionMap("net/textproto/reader_test.go", "reader_test.cs", "ABQoguaCgoKClIKClIKCuIKCgoKClIL4goKCgpSCgpSCgpSCgviCgoKClIKClIKClIKUgoL4goKCgoKmgoKC+IKCgoKCpoKCgviCgoK4gviCgoKCggAIDKIAFjKCgoIACAqCgoKCgviCgoKUgoKCgpSCgry0ioLugriCAA0cgoKCyoKCgoKClLS0tMa0pIKCpoKCgoKUtLS0pIKCzMiegoKUyoK6koKCgoKSgoKClIK4ggAJELSUyoKUpoKCAAoWABk6koKCgoKClIKUggAIDJKcnJSCgpSClIKUgviCgoKCpoKCkoKmgujcgsqCpJSmlIK4AA4aABIYooLukoKClIKCggANDqKCgoKCgoKCgpSC", "359-364:1;465-469:1;488-491:1;536-547:1", "", "409=NewReader/1/3/2,MultiReader/1/1/1")]
 [assembly: GoPositionMap("net/textproto/writer_test.go", "writer_test.cs", "ABEagoKCgoL4goKCgoKClIKCgriCgoKCgoKUgoKCuIKCgoKCgoI=")]
 // </GoSourcePositionMaps>
 
@@ -90,3 +89,13 @@ public static partial class textproto_internal_test_package
         builtin.initPackage(typeof(global::go.net.textproto_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(textproto_internal_test_package.testReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textproto_internal_testᴛtestReader;
+// </MethodHolders>

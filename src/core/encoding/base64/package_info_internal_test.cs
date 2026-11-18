@@ -29,7 +29,7 @@ using static go.encoding.base64_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/base64/base64_test.go", "base64_test.cs", "ABwyABk2kqiSgoKokqiS/JSCAAgQAAwayqKCgoKUAAgGgoKCgoKCyoKCgoKCggANCIKCgoKCgoKClIKClIKCABUIgoKCgoKCgoKUgoKUgoKUgoKCggAODIKCgoKCgpSCgoKU+IKCgoKCgoKCgpSClAAOCIIAGTqCgoKCgpSUlMTaooKCgoKmgoK0AAgEogANJpSCtIKkgoIACgqiAAoglIK0gqSCggAICoKCgoKClIKCgoKUgoKUgoKmgoKCgqb4hJIADBqCgoKClIIAECKCgoKUgoLokoKCgoKCuIKigpS0gsYAGgiCAAAglIKCgqaCgoKCpoL4goKCgpSCAAkIgoKCgpSCgpSCgriigoKCuIKCgoKCgoKmgpLKooKCgoIACAqCgqaCgriCgoK4goKC", "269-273:1;442-445:1;530-537:1;539-541:2", "", "94=Strict/1/5/6,Strict/2/5/7,Strict/3/5/8,Strict/4/5/9,Strict/5/5/10", "", "339:64,340:13")]
+[assembly: GoPositionMap("encoding/base64/base64_test.go", "base64_test.cs", "AB0yABk2kqiSgoKokqiS/JSCAAgQAAwayqKCgoKUAAgGgoKCgoKCyoKCgoKCggANCIKCgoKCgoKClIKClIKCABUIgoKCgoKCgoKUgoKUgoKUgoKCggAODIKCgoKCgpSCgoKU+IKCgoKCgoKCgpSClAAOCIIAGTqCgoKCgpSUlMTaooKCgoKmgoK0AAgEogANJpSCtIKkgoIACgqiAAoglIK0gqSCggAICoKCgoKClIKCgoKUgoKUgoKmgoKCgqb4hJIADBqCgoKClIIAEiKCgoKUgoIACAiSgoKCgoK4gqKClLSCxgAaCIIAACCUgoKCpoKCgoKmgviCgoKClIIACQiCgoKClIKClIKCuKKCgoK4goKCgoKCgqaCksqigoKCggAICoKCpoKCuIKCgriCgoI=", "269-273:1;442-445:1;530-537:1;539-541:2", "", "95=Strict/1/5/6,Strict/2/5/7,Strict/3/5/8,Strict/4/5/9,Strict/5/5/10", "", "340:64,341:13")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -68,3 +68,13 @@ public static partial class base64_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(base64_internal_test_package.faultInjectReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64_internal_testᴛfaultInjectReader;
+// </MethodHolders>

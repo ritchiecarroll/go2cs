@@ -8,16 +8,12 @@ global using static global::go.net.smtp_package;
 global using static global::go.net.smtp_internal_test_package;
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using smtpꓸAuth = go.net.smtp_package.ΔAuth;
-global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.net.smtp_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Auth", "ΔAuth")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

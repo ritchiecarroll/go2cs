@@ -862,6 +862,12 @@ internal static @string depsRules = """
 
 """u8.Raw();
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string srcˢ => ref srcˢᵇ;
+private static readonly @string srcˢᵇ = "src"u8;
+internal static ref readonly @string vendorˢ => ref vendorˢᵇ;
+private static readonly @string vendorˢᵇ = "vendor/"u8;
+
 // listStdPkgs returns the same list of packages as "go list std".
 internal static (slice<@string>, error) listStdPkgs(@string goroot) {
     // Based on cmd/go's matchPackages function.
@@ -883,11 +889,11 @@ internal static (slice<@string>, error) listStdPkgs(@string goroot) {
             return filepath.SkipDir;
         }
 
-        Ꮡpkgs.ValueSlot = append(Ꮡpkgs.ValueSlot, strings.TrimPrefix(name, vendorˢ2));
+        Ꮡpkgs.ValueSlot = append(Ꮡpkgs.ValueSlot, strings.TrimPrefix(name, vendorˢ));
         return default;
     };
     {
-        var err = filepath.WalkDir(src, new Func<@string, fs.DirEntry, error, error>(walkFn)); if (err != nil) {
+        var err = filepath.WalkDir(src, walkFn); if (err != nil) {
             return (default, err);
         }
     }
@@ -934,6 +940,8 @@ internal static slice<byte> buildIgnore = slice<byte>("\n//go:build ignore"u8);
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string golangOrgˢ => ref golangOrgˢᵇ;
 private static readonly @string golangOrgˢᵇ = "golang.org"u8;
+internal static ref readonly @string testGoˢ => ref testGoˢᵇ;
+private static readonly @string testGoˢᵇ = "_test.go"u8;
 
 internal static (slice<@string>, error) findImports(@string pkg) {
     @string vpkg = pkg;

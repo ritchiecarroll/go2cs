@@ -345,7 +345,7 @@ public static void TestGCTestIsReachable(ж<testing.T> t) {
         // call below), but isn't reported as such.
         t.Fatalf("live object not in reachable set; want %b, got %b", want, got);
     }
-    if (global::go.math.bits_package.OnesCount64(got & ~want) > 1) {
+    if (bits.OnesCount64(got & ~want) > 1) {
         // Note: we can occasionally have a value that is retained even though
         // it isn't live, due to conservative scanning of stack frames.
         // See issue 67204. For now, we allow a "slop" of 1 unintentionally
@@ -444,9 +444,9 @@ public static partial void TestPrintGC(ж<testing.T> t) {
         var doneʗ1 = done;
         goǃ(() => {
             for (;;) {
-                var selᴛ68 = doneʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ68, ꓸꓸꓸ))) {
-                case 0 when selᴛ68.ꟷᐳ(out _): {
+                var doneᴛ1 = doneʗ1;
+                switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+                case 0 when doneᴛ1.ꟷᐳ(out _): {
                     return;
                 }
                 default: {
@@ -459,7 +459,7 @@ public static partial void TestPrintGC(ж<testing.T> t) {
             func(() => {
                 GoFrame ᒐ = default;
                 try {
-                    defer(ᴛ1 => builtin.print(ᴛ1), (@string)"", ref ᒐ);
+                    defer(ᴛ1 => print(ᴛ1), (@string)"", ref ᒐ);
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
@@ -546,10 +546,10 @@ public static void TestReadMemStats(ж<testing.T> t) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object notImplementedLogDiffForˢ = (@string)"not implemented: logDiff for map"u8;
 
-internal static void logDiff(ж<testing.T> t, @string prefix, reflectꓸValue got, reflectꓸValue want) {
+internal static void logDiff(ж<testing.T> t, @string prefix, reflect.Value got, reflect.Value want) {
     var typ = got.Type();
     switch (typ.Kind()) {
-    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Slice: {
         if (got.Len() != want.Len()) {
             t.Logf("len(%s): got %v, want %v", prefix, got, want);
             return;
@@ -638,9 +638,9 @@ internal static partial Action applyGCLoad(ж<testing.B> b) {
 loop:
                 for (;;) {
                     hold = ᏑbuildTree.ValueSlot(5);
-                    var selᴛ69 = doneʗ1;
-                    switch (trySelect(ᐸꟷ(selᴛ69, ꓸꓸꓸ))) {
-                    case 0 when selᴛ69.ꟷᐳ(out _): {
+                    var doneᴛ1 = doneʗ1;
+                    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+                    case 0 when doneᴛ1.ꟷᐳ(out _): {
                         goto break_loop;
                         break;
                     }

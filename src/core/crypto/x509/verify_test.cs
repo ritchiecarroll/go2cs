@@ -496,7 +496,7 @@ internal static void testVerify(ж<testing.T> t, verifyTest test, bool useSystem
     }
 
     bool doesMatch(slice<@string> expectedChain, slice<ж<global::go.crypto.x509_package.Certificate>> chain) {
-        if (builtin.len(chain) != builtin.len(expectedChain)) {
+        if (len(chain) != len(expectedChain)) {
             return false;
         }
 
@@ -580,7 +580,7 @@ public static void TestSystemVerify(ж<testing.T> t) {
 internal static @string chainToDebugString(slice<ж<global::go.crypto.x509_package.Certificate>> chain) {
     @string chainStr = default;
     foreach (var (_, cert) in range(chain)) {
-        if (builtin.len(chainStr) > 0) {
+        if (len(chainStr) > 0) {
             chainStr += " -> "u8;
         }
         chainStr += nameToKey(cert.ᏑSubject);
@@ -1687,7 +1687,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
         }
     }
 
-    var serialNumberLimit = @new<bigꓸInt>().Lsh(big.NewInt(1), 128);
+    var serialNumberLimit = @new<big.Int>().Lsh(big.NewInt(1), 128);
     var (serialNumber, _) = rand.Int(rand.Reader, serialNumberLimit);
 
     var template = Ꮡ(new Certificate(
@@ -1868,7 +1868,7 @@ internal static (nint, error) macosMajorVersion(ж<testing.T> t) {
     var cmd = testenv.Command(new x509_test_package.testing_TжTB(t), swVersˢ, productVersionˢ);
     var (@out, err) = cmd.Output();
     if (err != nil) {
-        var (ee, okΔ1) = err._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && builtin.len(ee.Stderr) > 0) {
+        var (ee, okΔ1) = err._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && len(ee.Stderr) > 0) {
             return (0, fmt.Errorf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, ee.Stderr));
         }
         return (0, fmt.Errorf("%v: %v"u8, cmd.OrTypedNil(), err));
@@ -1984,8 +1984,8 @@ internal static ж<global::go.crypto.x509_package.Certificate> genCertEdge(ж<te
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: serial,
         Subject: new pkix.Name(CommonName: subject),
-        NotBefore: time.Now().Add(-time.ΔHour),
-        NotAfter: time.Now().Add(time.ΔHour)
+        NotBefore: time.Now().Add(-time.Hour),
+        NotAfter: time.Now().Add(time.Hour)
     ));
     if (certType == rootCertificate || certType == intermediateCertificate) {
         (tmpl.IsCA, tmpl.BasicConstraintsValid) = (true, true);
@@ -2622,7 +2622,7 @@ public static void TestPathBuilding(ж<testing.T> t) {
             if (err != nil && err.Error() != tcʗ1.expectedErr) {
                 tΔ11.Fatalf("unexpected error: got %q, want %q", err, tcʗ1.expectedErr);
             }
-            if (builtin.len(tcʗ1.expectedChains) == 0) {
+            if (len(tcʗ1.expectedChains) == 0) {
                 return;
             }
             var gotChains = chainsToStrings(chains);
@@ -2825,8 +2825,8 @@ public static void TestVerifyEKURootAsLeaf(ж<testing.T> t) {
             var tmpl = Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
                 Subject: new pkix.Name(CommonName: "root"),
-                NotBefore: time.Now().Add(-time.ΔHour),
-                NotAfter: time.Now().Add(time.ΔHour),
+                NotBefore: time.Now().Add(-time.Hour),
+                NotAfter: time.Now().Add(time.Hour),
                 DNSNames: ["localhost"],
                 ExtKeyUsage: tcʗ1.rootEKUs
             ));
@@ -2882,8 +2882,8 @@ public static void TestVerifyBareWildcard(ж<testing.T> t) {
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(CommonName: "test"),
-        NotBefore: time.Now().Add(-time.ΔHour),
-        NotAfter: time.Now().Add(time.ΔHour),
+        NotBefore: time.Now().Add(-time.Hour),
+        NotAfter: time.Now().Add(time.Hour),
         DNSNames: ["*"]
     ));
     (var cDER, err) = CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
@@ -2948,7 +2948,7 @@ private static readonly @string testdataPolicyLeafˢ2ᵇ = "testdata/policy_leaf
 
 internal partial struct TestPoliciesValid_testCase /*dyn*/ {
     internal slice<ж<global::go.crypto.x509_package.Certificate>> chain;
-    internal slice<global::go.crypto.x509_package.ΔOID> policies;
+    internal slice<global::go.crypto.x509_package.OID> policies;
     internal bool requireExplicitPolicy;
     internal bool inhibitPolicyMapping;
     internal bool inhibitAnyPolicy;
@@ -3375,7 +3375,7 @@ public static void TestCertificateChainSignedByECDSA(ж<testing.T> t) {
     var root = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(CommonName: "X"),
-        NotBefore: time.Now().Add(-time.ΔHour),
+        NotBefore: time.Now().Add(-time.Hour),
         NotAfter: time.Now().Add((time.Duration)(31536000000000000L)),
         IsCA: true,
         KeyUsage: (global::go.crypto.x509_package.KeyUsage)(KeyUsageCertSign | KeyUsageCRLSign),
@@ -3426,7 +3426,7 @@ public static void TestCertificateChainSignedByECDSA(ж<testing.T> t) {
 }
 
 internal partial struct dsaSelfSignedCNX_dsaParams /*dyn*/ {
-    public ж<bigꓸInt> P, Q, G;
+    public ж<big.Int> P, Q, G;
 }
 
 // dsaSelfSignedCNX produces DER-encoded
@@ -3463,7 +3463,7 @@ internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> t) {
             Algorithm: oidPublicKeyDSA,
             Parameters: new asn1.RawValue(FullBytes: paramDER)
         ),
-        PublicKey: new asn1.BitString(Bytes: yDER, BitLength: 8 * builtin.len(yDER))
+        PublicKey: new asn1.BitString(Bytes: yDER, BitLength: 8 * len(yDER))
     );
 
     var rdn = new pkix.Name(CommonName: "X").ToRDNSequence();
@@ -3479,7 +3479,7 @@ internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> t) {
         SerialNumber: big.NewInt(1002),
         SignatureAlgorithm: algoIdent,
         Issuer: rawName,
-        Validity: new validity(NotBefore: time.Now().Add(-time.ΔHour), NotAfter: time.Now().Add((time.Duration)(86400000000000L))),
+        Validity: new validity(NotBefore: time.Now().Add(-time.Hour), NotAfter: time.Now().Add((time.Duration)(86400000000000L))),
         Subject: rawName,
         PublicKey: spki
     );

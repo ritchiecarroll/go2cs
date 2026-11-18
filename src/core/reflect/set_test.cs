@@ -14,6 +14,7 @@ using @unsafe = unsafe_package;
 using global::go.go;
 using static global::go.reflect_internal_test_package;
 using Δreflect = reflect_package;
+using static reflect_test_package;
 
 partial class reflect_test_package {
 
@@ -85,7 +86,7 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (!AreEqual(x, b2)) {
             t.Errorf("#5 after SetMapIndex(b1, b2): %p (!= %p), %t (map=%v)", x, b2.OrTypedNil(), ok, m);
         }
-        @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(b1.OrTypedNil())).Elem().UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
+        @unsafe.Pointer p = mv.MapIndex(ValueOf(b1.OrTypedNil())).Elem().UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
             t.Errorf("#5 MapIndex(b1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), b2.OrTypedNil());
         }
     }
@@ -100,7 +101,7 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (x != c2) {
             t.Errorf("#6 after SetMapIndex(c1, c2): %p (!= %p), %t (map=%v)", x, c2, ok, m);
         }
-        @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(c1)).UnsafePointer(); if (p != (uintptr)ValueOf(c2).UnsafePointer()) {
+        @unsafe.Pointer p = mv.MapIndex(ValueOf(c1)).UnsafePointer(); if (p != ValueOf(c2).UnsafePointer()) {
             t.Errorf("#6 MapIndex(c1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), c2);
         }
     }
@@ -114,7 +115,7 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> t) {
         if (x != b2) {
             t.Errorf("#7 after SetMapIndex(b1, b2): %p (!= %p), %t (map=%v)", x.OrTypedNil(), b2.OrTypedNil(), ok, m);
         }
-        @unsafe.Pointer p = (uintptr)mv.MapIndex(ValueOf(b1.OrTypedNil())).UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
+        @unsafe.Pointer p = mv.MapIndex(ValueOf(b1.OrTypedNil())).UnsafePointer(); if (p != @unsafe.Pointer.FromPinnedBox(b2)) {
             t.Errorf("#7 MapIndex(b1) = %#x want %p", @unsafe.Pointer.OrTypedNil(p), b2.OrTypedNil());
         }
     }
@@ -143,9 +144,9 @@ public static void TestImplicitSendConversion(ж<Δtesting.T> t) {
 
 public static void TestImplicitCallConversion(ж<Δtesting.T> t) {
     // Arguments must be assignable to parameter types.
-    var fv = ValueOf((Func<Δio.Writer, @string, (nint, error)>)(Δio.WriteString));
+    var fv = ValueOf(Δio.WriteString);
     var b = @new<strings.Builder>();
-    fv.Call(slice<reflectꓸValue>([ValueOf(b.OrTypedNil()), ValueOf(helloWorldˢ)]));
+    fv.Call(slice<Δreflect.Value>([ValueOf(b.OrTypedNil()), ValueOf(helloWorldˢ)]));
     if (b.String() != "hello world"u8) {
         t.Errorf("After call: string=%q want %q", b.String(), helloWorldˢ);
     }
@@ -182,9 +183,13 @@ internal static slice<implementsTestsᴛ1> implementsTests = slice<implementsTes
 partial struct notAnExpr {
 }
 
-internal static tokenꓸPos Pos(this notAnExpr _) { return token.NoPos; }
-internal static tokenꓸPos End(this notAnExpr _) { return token.NoPos; }
+} partial class reflect_testᴛnotAnExpr {
+
+internal static token.Pos Pos(this notAnExpr _) { return token.NoPos; }
+internal static token.Pos End(this notAnExpr _) { return token.NoPos; }
 internal static void exprNode(this notAnExpr _) { }
+
+} partial class reflect_test_package {
 
 partial interface notASTExpr :
     ast.Node

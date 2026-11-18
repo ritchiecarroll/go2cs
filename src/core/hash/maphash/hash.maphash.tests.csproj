@@ -132,7 +132,6 @@
     <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/asan/internal.asan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/maps/internal.runtime.maps.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testhash/internal.testhash.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />

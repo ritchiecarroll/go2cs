@@ -14,6 +14,7 @@ using global::go.@internal;
 using global::go.go;
 using static global::go.go.types_internal_test_package;
 using types = global::go.go.types_package;
+using static types_test_package;
 
 partial class types_test_package {
 
@@ -22,6 +23,8 @@ partial struct resolveTestImporter {
     internal types.ImporterFrom importer;
     internal map<@string, bool> imported;
 }
+
+} partial class types_testᴛresolveTestImporter {
 
 internal static (ж<types.Package>, error) Import(this ref resolveTestImporter imp, @string _) {
     throw panic("should not be called");
@@ -42,6 +45,8 @@ internal static (ж<types.Package>, error) ImportFrom(this ref resolveTestImport
     imp.imported[path] = true;
     return (pkg, default);
 }
+
+} partial class types_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testResolveIdentsˢ => ref testResolveIdentsˢᵇ;
@@ -148,7 +153,7 @@ public static void TestResolveIdents(ж<testing.T> t) {
     ref var conf = ref heap<types.Config>(new Config(Importer: new types_test_package.resolveTestImporterжImporter(importer)), out var Ꮡconf);
     var uses = new map<ж<ast.Ident>, types.Object>();
     var defs = new map<ж<ast.Ident>, types.Object>();
-    var (_, err) = Ꮡconf.Check(testResolveIdentsˢ, fset, files, Ꮡ(new typesꓸInfo(Defs: defs, Uses: uses)));
+    var (_, err) = Ꮡconf.Check(testResolveIdentsˢ, fset, files, Ꮡ(new Info(Defs: defs, Uses: uses)));
     if (err != nil) {
         t.Fatal(err);
     }

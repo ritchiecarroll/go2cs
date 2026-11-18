@@ -31,30 +31,29 @@ private static readonly @string underscoreˢᵇ = "underscore"u8;
 
 // testGetenv gives us a controlled set of variables for testing Expand.
 internal static @string testGetenv(@string s) {
-    var exprᴛ1 = s;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "*"u8: {
+    case {} when s == "*"u8: {
         return allTheArgsˢ;
     }
-    case {} when exprᴛ1 == "#"u8: {
+    case {} when s == "#"u8: {
         return nargsˢ;
     }
-    case {} when exprᴛ1 == "$"u8: {
+    case {} when s == "$"u8: {
         return pidˢ;
     }
-    case {} when exprᴛ1 == "1"u8: {
+    case {} when s == "1"u8: {
         return argument1ˢ;
     }
-    case {} when exprᴛ1 == "HOME"u8: {
+    case {} when s == "HOME"u8: {
         return usrGopherˢ;
     }
-    case {} when exprᴛ1 == "H"u8: {
+    case {} when s == "H"u8: {
         return valueOfHˢ;
     }
-    case {} when exprᴛ1 == "home_1"u8: {
+    case {} when s == "home_1"u8: {
         return usrFooˢ;
     }
-    case {} when exprᴛ1 == "_"u8: {
+    case {} when s == "_"u8: {
         return underscoreˢ;
     }}
     return ""u8;

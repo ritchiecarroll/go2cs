@@ -62,7 +62,7 @@ func main() {}
         t.Fatalf("nm: %v, %s", err, nm);
     }
     @string want = wantᶜ;
-    if (!bytes_package.Contains(nm, slice<byte>(want))) {
+    if (!bytes.Contains(nm, slice<byte>(want))) {
         // Test the test.
         t.Errorf("expected symbol %q not found", want);
     }
@@ -72,7 +72,7 @@ func main() {}
         "math/big.(*Int)"
     ]);
     foreach (var (_, sym) in range(bad)) {
-        if (bytes_package.Contains(nm, slice<byte>(sym))) {
+        if (bytes.Contains(nm, slice<byte>(sym))) {
             t.Errorf("unexpected symbol %q found", sym);
         }
     }

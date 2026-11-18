@@ -134,7 +134,7 @@ public static void FuzzParse(ж<testing.F> Ꮡf) {
 
     Ꮡf.Fuzz((ж<testing.T> t, @string s) => {
         var (ip, _) = ParseAddr(s);
-        checkStringParseRoundTrip<netipꓸAddr>(t, ip, ParseAddr);
+        checkStringParseRoundTrip<netip.Addr>(t, ip, ParseAddr);
         checkEncoding(t, ip);
 
         // Check that we match the net's IP parser, modulo zones.
@@ -205,11 +205,11 @@ public static void FuzzParse(ж<testing.F> Ꮡf) {
 
         (var ipp, err) = ParsePrefix(s);
         if (err == nil) {
-            checkStringParseRoundTrip<netipꓸPrefix>(t, ipp, ParsePrefix);
+            checkStringParseRoundTrip<netip.Prefix>(t, ipp, ParsePrefix);
             checkEncoding(t, ipp);
         }
         ipp = PrefixFrom(ip, 8);
-        checkStringParseRoundTrip<netipꓸPrefix>(t, ipp, ParsePrefix);
+        checkStringParseRoundTrip<netip.Prefix>(t, ipp, ParsePrefix);
         checkEncoding(t, ipp);
     });
 }

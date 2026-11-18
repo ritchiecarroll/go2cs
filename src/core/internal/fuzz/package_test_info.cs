@@ -8,8 +8,6 @@ global using static global::go.@internal.fuzz_package;
 
 // <ImportedTypeAliases>
 global using CorpusEntry = go.@internal.fuzz_package.CorpusEntryᴛ1;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -45,7 +43,7 @@ using static global::go.@internal.fuzz_internal_test_package;
 [assembly: GoPositionMap("internal/fuzz/encoding_test.go", "encoding_test.cs", "ACQcggDgAfgClKioAAoUspKCgoKUlIKUgoKmgoKUgoKCAAUSsoKCppKSgoIABRKygoKmkoKSgoLcgoKCgoKClIKCyoKCgoKCgpSCgsqigoKCgoKCgpSClIKUgoKUgpSCgoLKooKCgoKCgoKCgpSCgpSCgpSClIKCyqKCgpSCgpSCgpSClIKC", "202-215:1;224-249:2;263-268:1;283-288:1;332-350:1;365-380:1;388-403:1")]
 [assembly: GoPositionMap("internal/fuzz/minimize_test.go", "minimize_test.cs", "ACAqggADFIKCgoKmgpQABxCCgpSClAAHEIKClIKUAAcQgoKUAAcQgoKCgqaClAAHEIKClAAHEIKCgpTuspKCuoKCgoKUgpSClIIAChKyloKCgoKClIKUgg==", "31-43:1;49-58:2;64-73:3;79-85:4;91-103:5;109-115:6;121-128:7;135-157:8;138-140:8.1;165-167:1")]
 [assembly: GoPositionMap("internal/fuzz/mutator_test.go", "mutator_test.cs", "AA8eooKAkoKUAAcQkoKUlIKC2KSigoCSgpQABxCSgpSUgoLYpKKCgJKClAAQIoKigoLY1IKCgoKCgoKClII=", "17-17:1;29-39:2;45-45:1;57-67:2;73-73:1;95-100:2", "", "", "", "20:21,21:13,56:21,57:13,92:21,93:13")]
-[assembly: GoPositionMap("internal/fuzz/mutators_byteslice_test.go", "mutators_byteslice_test.cs", "ABImgoKCpoKCgqaCgoKmgoKCpoKmggAKBoIAceoBkoKClIKCggAKDIIAFDCykpKSgoKC", "169-179:1;209-219:1;211-217:1.1")]
+[assembly: GoPositionMap("internal/fuzz/mutators_byteslice_test.go", "mutators_byteslice_test.cs", "ABUmgoKCpoKCgqaCgoKmgoKCpoKmggAMBoIAceoBkoKClIKCggAKDIIAFDCykpKSgoKC", "169-179:1;209-219:1;211-217:1.1")]
 [assembly: GoPositionMap("internal/fuzz/queue_test.go", "queue_test.cs", "AAoSpJKAgqSAgsiCgoKClIKCgtyCgoKCgoKClJSCgqaCgoI=")]
 [assembly: GoPositionMap("internal/fuzz/worker_test.go", "worker_test.cs", "ABgslIKCgoKU1sKClIKAkpTKgoKUkoK4goKUlIKCgoKUtKjCgpSCgoKC/sKClIKCgoKCuIKClIKUgpQAAxDCgriClIKCgoKCgpSSgqaClJKCpqaigpKCgrTkooKmuJKClIKCppSCgpKCgoKCgqKCgoKClJSCgtg=", "38-38:1;42-42:2;50-54:3;137-141:1;145-149:2;156-156:1;175-179:1;190-203:2;192-198:2.1", "", "145=TypeOf/1/1/1", "183:21", "48:21,49:13,63:21,64:13,213:21,214:13")]
 // </GoSourcePositionMaps>
@@ -97,3 +95,13 @@ public static partial class fuzz_internal_test_package
         builtin.initPackage(typeof(global::go.@internal.fuzz_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fuzz_internal_test_package.mockRand)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzz_internal_testᴛmockRand;
+// </MethodHolders>

@@ -106,10 +106,10 @@ public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> t) {
     p = default;
     Δruntime.GC();
     Δruntime.GC();
-    var selᴛ75 = done;
+    var doneᴛ1 = done;
     var selᴛ76 = time.After(time.Millisecond * 10);
-    switch (select(ᐸꟷ(selᴛ75, ꓸꓸꓸ), ᐸꟷ(selᴛ76, ꓸꓸꓸ))) {
-    case 0 when selᴛ75.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ76, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out _): {
         t.Fatal(pinDidnTKeepObjectAliveˢ);
         break;
     }
@@ -120,10 +120,10 @@ public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> t) {
     pinner.Unpin();
     Δruntime.GC();
     Δruntime.GC();
-    var selᴛ77 = done;
-    var selᴛ78 = time.After(time.ΔSecond);
-    switch (select(ᐸꟷ(selᴛ77, ꓸꓸꓸ), ᐸꟷ(selᴛ78, ꓸꓸꓸ))) {
-    case 0 when selᴛ77.ꟷᐳ(out _): {
+    var doneᴛ2 = done;
+    var selᴛ78 = time.After(time.Second);
+    switch (select(ᐸꟷ(doneᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ78, ꓸꓸꓸ))) {
+    case 0 when doneᴛ2.ꟷᐳ(out _): {
         break;
         break;
     }
@@ -341,10 +341,10 @@ public static void TestPinnerLeakPanics(ж<testing.T> t) {
     })();
     Δruntime.GC();
     Δruntime.GC();
-    var selᴛ79 = done;
-    var selᴛ80 = time.After(time.ΔSecond);
-    switch (select(ᐸꟷ(selᴛ79, ꓸꓸꓸ), ᐸꟷ(selᴛ80, ꓸꓸꓸ))) {
-    case 0 when selᴛ79.ꟷᐳ(out _): {
+    var doneᴛ1 = done;
+    var selᴛ80 = time.After(time.Second);
+    switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ80, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out _): {
         break;
         break;
     }

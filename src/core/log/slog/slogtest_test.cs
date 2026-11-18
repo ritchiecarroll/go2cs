@@ -21,14 +21,14 @@ partial class slog_test_package {
 
 internal partial struct TestSlogtest_type /*dyn*/ {
     internal @string name;
-    internal Func<io.Writer, slogꓸHandler> @new;
+    internal Func<io.Writer, Δslog.Handler> @new;
     internal Func<slice<byte>, (map<@string, any>, error)> parse;
 }
 
 public static void TestSlogtest(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in range(slice<TestSlogtest_type>([
-        new("JSON", (io.Writer w) => new Δslog.JSONHandlerжΔHandler(Δslog.NewJSONHandler(w, nil)), parseJSON),
-        new("Text", (io.Writer w) => new Δslog.TextHandlerжΔHandler(Δslog.NewTextHandler(w, nil)), parseText)
+        new("JSON", (io.Writer w) => new Δslog.JSONHandlerжHandler(Δslog.NewJSONHandler(w, nil)), parseJSON),
+        new("Text", (io.Writer w) => new Δslog.TextHandlerжHandler(Δslog.NewTextHandler(w, nil)), parseText)
     ]))) {
         ref var test = ref heap(new TestSlogtest_type(), out var Ꮡtest);
         test = vᴛ1;

@@ -8,6 +8,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using testing = testing_package;
 using static global::go.net.http_package;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
@@ -19,9 +20,13 @@ internal partial struct externalStreamError {
     public error Cause;
 }
 
+} partial class http_internal_testᴛexternalStreamError {
+
 internal static @string Error(this externalStreamError e) {
     return fmt.Sprintf("ID %v, code %v"u8, e.StreamID, e.Code);
 }
+
+} partial class http_internal_test_package {
 
 public static void TestStreamError(ж<testing.T> t) {
     var streamErr = http2streamError(42, http2ErrCodeProtocol);

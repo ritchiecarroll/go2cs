@@ -51,7 +51,7 @@ public static void XTestInlineUnwinder(TestingT t) {
     // Iterate over the PCs in tiuTest and walk the inline stack for each.
     @string prevStack = "x";
     for (var pc = pc1; pc < pc1 + 1024 && findfunc(pc) == f; pc += sys.PCQuantum) {
-        @string Δstack = ""u8;
+        @string stack = ""u8;
         var (u, uf) = newInlineUnwinder(f, pc);
         {
             var (@file, _) = u.fileLine(uf); if (@file == "?"u8) {
@@ -91,27 +91,27 @@ public static void XTestInlineUnwinder(TestingT t) {
                 t.Errorf("tiuTest+%#x: bad funcID %v", pc - pc1, sf.funcID);
             }
 
-            if (len(Δstack) > 0) {
-                Δstack += " "u8;
+            if (len(stack) > 0) {
+                stack += " "u8;
             }
-            Δstack += FmtSprintf("%s:%d", name, line - tiuStart);
+            stack += FmtSprintf("%s:%d", name, line - tiuStart);
         }
 
-        if (Δstack != prevStack) {
-            prevStack = Δstack;
+        if (stack != prevStack) {
+            prevStack = stack;
 
-            t.Logf("tiuTest+%#x: %s", pc - pc1, Δstack);
+            t.Logf("tiuTest+%#x: %s", pc - pc1, stack);
 
-            var (_, ok) = want[Δstack, ꟷ]; if (ok) {
-                want[Δstack]++;
+            var (_, ok) = want[stack, ꟷ]; if (ok) {
+                want[stack]++;
             }
         }
     }
 
     // Check that we got all the stacks we wanted.
-    foreach (var (Δstack, count) in want) {
+    foreach (var (stack, count) in want) {
         if (count == 0) {
-            t.Errorf("missing stack %s", Δstack);
+            t.Errorf("missing stack %s", stack);
         }
     }
 }

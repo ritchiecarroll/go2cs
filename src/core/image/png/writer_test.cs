@@ -16,6 +16,7 @@ using compress;
 using encoding;
 using go.image;
 using static go.image.png_package;
+using static png_internal_test_package;
 
 partial class png_internal_test_package {
 
@@ -174,16 +175,15 @@ public static void TestWriterPaletted(ж<testing.T> t) {
                 var length = binary.BigEndian.Uint32(data.slice(i, i + 4));
                 @string name = (@string)(data.slice(i + 4, i + 8));
 
-                var exprᴛ1 = name;
                 switch (ᐧ) {
-                case {} when exprᴛ1 == "IHDR"u8: {
+                case {} when name == "IHDR"u8: {
                     var bitdepth = data[i + 8 + 8];
                     if (bitdepth != tcʗ1.bitdepth) {
                         tΔ1.Errorf("got bitdepth %d, want %d", bitdepth, tcʗ1.bitdepth);
                     }
                     break;
                 }
-                case {} when exprᴛ1 == "IDAT"u8: {
+                case {} when name == "IDAT"u8: {
                     // Uncompress the image data
                     var (r, err) = zlib.NewReader(new png_test_package.bytes_ReaderжReader(bytes.NewReader(data.slice(i + 8, i + 8 + (nint)length))));
                     if (err != nil) {
@@ -247,16 +247,16 @@ public static void TestSubImage(ж<testing.T> t) {
     var m0 = image.NewRGBA(image.Rect(0, 0, 256, 256));
     for (nint y = 0; y < 256; y++) {
         for (nint x = 0; x < 256; x++) {
-            m0.Set(x, y, new colorꓸRGBA((uint8)x, (uint8)y, 0, 255));
+            m0.Set(x, y, new color.RGBA((uint8)x, (uint8)y, 0, 255));
         }
     }
-    m0 = m0.SubImage(image.Rect(50, 30, 250, 130))._<ж<imageꓸRGBA>>();
-    var (m1, err) = encodeDecode(new image.ΔRGBAжImage(m0));
+    m0 = m0.SubImage(image.Rect(50, 30, 250, 130))._<ж<image.RGBA>>();
+    var (m1, err) = encodeDecode(new image.RGBAжImage(m0));
     if (err != nil) {
         t.Error(err);
         return;
     }
-    err = diff(new image.ΔRGBAжImage(m0), m1);
+    err = diff(new image.RGBAжImage(m0), m1);
     if (err != nil) {
         t.Error(err);
         return;
@@ -277,8 +277,8 @@ public static void TestWriteRGBA(ж<testing.T> t) {
     var translucentImg = image.NewRGBA(image.Rect(0, 0, width, height));
     for (nint y = 0; y < height; y++) {
         for (nint x = 0; x < width; x++) {
-            var opaqueColor = new colorꓸRGBA((uint8)x, (uint8)y, (uint8)(y + x), 255);
-            var translucentColor = new colorꓸRGBA((uint8)((uint8)x % 128), (uint8)((uint8)y % 128), (uint8)((uint8)(y + x) % 128), 128);
+            var opaqueColor = new color.RGBA((uint8)x, (uint8)y, (uint8)(y + x), 255);
+            var translucentColor = new color.RGBA((uint8)((uint8)x % 128), (uint8)((uint8)y % 128), (uint8)((uint8)(y + x) % 128), 128);
             opaqueImg.Set(x, y, opaqueColor);
             translucentImg.Set(x, y, translucentColor);
             if (y % 2 == 0) {
@@ -288,10 +288,10 @@ public static void TestWriteRGBA(ж<testing.T> t) {
     }
 
     var testCases = slice<TestWriteRGBA_testCases>([
-        new("Transparent RGBA", new image.ΔRGBAжImage(transparentImg)),
-        new("Opaque RGBA", new image.ΔRGBAжImage(opaqueImg)),
-        new("50/50 Transparent/Opaque RGBA", new image.ΔRGBAжImage(mixedImg)),
-        new("RGBA with variable alpha", new image.ΔRGBAжImage(translucentImg))
+        new("Transparent RGBA", new image.RGBAжImage(transparentImg)),
+        new("Opaque RGBA", new image.RGBAжImage(opaqueImg)),
+        new("50/50 Transparent/Opaque RGBA", new image.RGBAжImage(mixedImg)),
+        new("RGBA with variable alpha", new image.RGBAжImage(translucentImg))
     ]);
 
     foreach (var (_, vᴛ1) in range(testCases)) {
@@ -329,6 +329,8 @@ internal partial struct pool {
     internal ж<global::go.image.png_package.EncoderBuffer> b;
 }
 
+} partial class png_internal_testᴛpool {
+
 internal static ж<global::go.image.png_package.EncoderBuffer> Get(this ref pool p) {
     return p.b;
 }
@@ -338,6 +340,8 @@ internal static void Put(this ref pool p, ж<global::go.image.png_package.Encode
 
     p.b = Ꮡb;
 }
+
+} partial class png_internal_test_package {
 
 public static void BenchmarkEncodeGrayWithBufferPool(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -400,7 +404,7 @@ public static void BenchmarkEncodeNRGBA(ж<testing.B> Ꮡb) {
 public static void BenchmarkEncodePaletted(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var img = image.NewPaletted(image.Rect(0, 0, 640, 480), new color.Palette(new color.Color[]{new colorꓸRGBA(0, 0, 0, 255), new colorꓸRGBA(255, 255, 255, 255)
+    var img = image.NewPaletted(image.Rect(0, 0, 640, 480), new color.Palette(new color.Color[]{new color.RGBA(0, 0, 0, 255), new color.RGBA(255, 255, 255, 255)
     }.slice()));
     b.SetBytes(640 * 480 * 1);
     b.ReportAllocs();
@@ -418,7 +422,7 @@ public static void BenchmarkEncodeRGBOpaque(ж<testing.B> Ꮡb) {
     var bo = img.Bounds();
     for (nint y = bo.Min.Y; y < bo.Max.Y; y++) {
         for (nint x = bo.Min.X; x < bo.Max.X; x++) {
-            img.Set(x, y, new colorꓸRGBA(0, 0, 0, 255));
+            img.Set(x, y, new color.RGBA(0, 0, 0, 255));
         }
     }
     if (!img.Opaque()) {
@@ -428,7 +432,7 @@ public static void BenchmarkEncodeRGBOpaque(ж<testing.B> Ꮡb) {
     b.ReportAllocs();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        Encode(io.Discard, new image.ΔRGBAжImage(img));
+        Encode(io.Discard, new image.RGBAжImage(img));
     }
 }
 
@@ -463,7 +467,7 @@ public static void BenchmarkEncodeRGBA(ж<testing.B> Ꮡb) {
     b.ReportAllocs();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        Encode(io.Discard, new image.ΔRGBAжImage(img));
+        Encode(io.Discard, new image.RGBAжImage(img));
     }
 }
 

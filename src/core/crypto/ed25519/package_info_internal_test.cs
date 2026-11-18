@@ -29,7 +29,7 @@ using static go.crypto.ed25519_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ed25519/ed25519_test.go", "ed25519_test.cs", "AB0sgoKCppSmgqamuJSCgqaClIKUgpSCgqaCgpSCpoKClIK4goKCgpSCguyCgqaCgpSCgoKmgoLolIKClIKCgoKClIKUgoKUgpSCpoKmgoKmgoKUgoKCyoKClIKUgpSC+JSCgoKUgoKCgpSClIKmgpSCpoKClIKCgriCgpSUgoKCpoKmgoKCgqaCgpSCpoK4gpSClIKUgqaCgpSC+MaCgpSSgoKUpIKUgpSCgoKmgoKCppSCpoKClIKCpoKmgoKmgqaCuIK01LiCAAcQ3ILogoKCgoCSgoKCgqbIooKCgsqigoK4ooKCgpSCgoK4ooKCgpSCgoKC", "374-381:1", "", "", "306:21,312:21")]
+[assembly: GoPositionMap("crypto/ed25519/ed25519_test.go", "ed25519_test.cs", "AB4sgoKCppSmgqamuJSCgqaClIKUgpSCgqaCgpSCpoKClIK4goKCgpSCggAIDIKCxoKClIKCgqaCguiUgoKUgoKCgoKUgpSCgpSClIKmgqaCgqaCgpSCgoLKgoKUgpSClIL4lIKCgpSCgoKClIKUgqaClIKmgoKUgoKCuIKClJSCgoKmgqaCgoKCpoKClIKmgriClIKUgpSCpoKClIL4xoKClJKCgpSkgpSClIKCgqaCgoKmlIKmgoKUgoKmgqaCgqaCpoK4grTUuIIABxDcguiCgoKCgJKCgoKCpsiigoKCyqKCgriigoKClIKCgriigoKClIKCgoI=", "374-381:1", "", "", "311:21,317:21")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -70,3 +70,13 @@ public static partial class ed25519_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ed25519_internal_test_package.zeroReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519_internal_testᴛzeroReader;
+// </MethodHolders>

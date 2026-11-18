@@ -204,7 +204,7 @@ public static void TestFIPS140(ж<testing.T> t) {
     }
 
     var aesKey = new slice<byte>(128 / 8);
-    var aesIV = new slice<byte>(aes.ΔBlockSize);
+    var aesIV = new slice<byte>(aes.BlockSize);
     var plaintext = slice<byte>("Go Cryptographic Module TestFIPS140 plaintext..."u8);
     var plaintextSHA256 = decodeHex(t, "06b2614e2ef315832b23f5d0ff70294d8ddd3889527dfbe75707fe41da929325");
     var plaintextSHA384 = decodeHex(t, "ad20990965f6caec69e016072881f80f049c0687554809901ec4c0988c3fec678c0926fe5661742185be968de6c4d9b2");

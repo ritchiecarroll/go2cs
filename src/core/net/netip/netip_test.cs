@@ -28,8 +28,8 @@ partial class netip_test_package {
 
 internal static ж<bool> @long = flag.Bool("long", false, "run long tests");
 
-internal static Func<@string, netipꓸPrefix> mustPrefix = MustParsePrefix;
-internal static Func<@string, netipꓸAddr> mustIP = MustParseAddr;
+internal static Func<@string, netip.Prefix> mustPrefix = MustParsePrefix;
+internal static Func<@string, netip.Addr> mustIP = MustParseAddr;
 internal static Func<@string, netip.AddrPort> mustIPPort = MustParseAddrPort;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -40,7 +40,7 @@ private static readonly @string eth1ˢᵇ = "eth1"u8;
 
 internal partial struct TestParseAddr_type /*dyn*/ {
     internal @string @in;
-    internal netipꓸAddr ip; // output of ParseAddr()
+    internal netip.Addr ip; // output of ParseAddr()
     internal @string str;   // output of String(). If "", use in.
     internal @string wantErr;
 }
@@ -211,7 +211,7 @@ public static void TestParseAddr(ж<testing.T> t) {
             // marshal-specific behavior that's not common with
             // ParseAddr/String).
             @string js = @""""u8 + testʗ1.@in + @""""u8;
-            ref var jsgot = ref heap(new netipꓸAddr(), out var Ꮡjsgot);
+            ref var jsgot = ref heap(new netip.Addr(), out var Ꮡjsgot);
             var errΔ1 = json.Unmarshal(slice<byte>(js), Ꮡjsgot); if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
@@ -316,7 +316,7 @@ public static void TestParseAddr(ж<testing.T> t) {
                 // IPMarshalUnmarshal.
                 return;
             }
-            ref var jsgot = ref heap(new netipꓸAddr(), out var Ꮡjsgot);
+            ref var jsgot = ref heap(new netip.Addr(), out var Ꮡjsgot);
             var js = slice<byte>(@"""" + s + @"""");
             var errΔ1 = json.Unmarshal(js, Ꮡjsgot); if (errΔ1 == nil) {
                 tΔ2.Errorf("json.Unmarshal(%q) = %#v, want error", s, jsgot);
@@ -331,7 +331,7 @@ private static readonly @string fe8001ˢᵇ = "fe80::01"u8;
 
 internal partial struct TestAddrFromSlice_tests /*dyn*/ {
     internal slice<byte> ip;
-    internal netipꓸAddr wantAddr;
+    internal netip.Addr wantAddr;
     internal bool wantOK;
 }
 
@@ -349,12 +349,12 @@ public static void TestAddrFromSlice(ж<testing.T> t) {
         ),
         new(
             ip: [0, 1, 2],
-            wantAddr: new netipꓸAddr(),
+            wantAddr: new Addr(),
             wantOK: false
         ),
         new(
             ip: default,
-            wantAddr: new netipꓸAddr(),
+            wantAddr: new Addr(),
             wantOK: false
         )
     ]);
@@ -381,13 +381,13 @@ internal static ref readonly @string ffff192168140255En0ˢ => ref ffff1921681402
 private static readonly @string ffff192168140255En0ˢᵇ = "::ffff:192.168.140.255%en0"u8;
 
 internal partial struct TestAddrAppendText_tests /*dyn*/ {
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal @string want;
 }
 
 public static void TestAddrAppendText(ж<testing.T> t) {
     var tests = slice<TestAddrAppendText_tests>([
-        new(new netipꓸAddr(), ""), // zero IP
+        new(new Addr(), ""), // zero IP
         new(mustIP("1.2.3.4"), "1.2.3.4"),
         new(mustIP(fd7a115cA1e0Ab124843Cd96ˢ), "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b"),
         new(mustIP(ffff192168140255ˢ), "::ffff:192.168.140.255"),
@@ -422,7 +422,7 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> t) {
         new("::ffff:c000:0280%eth0", 20)
     ]);
     foreach (var (_, tc) in range(tests)) {
-        netipꓸAddr ip = default;
+        netip.Addr ip = default;
         if (len(tc.ip) > 0) {
             ip = mustIP(tc.ip);
         }
@@ -433,7 +433,7 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> t) {
         if (len(b) != tc.wantSize) {
             t.Fatalf("%q encoded to size %d; want %d", tc.ip, len(b), tc.wantSize);
         }
-        netipꓸAddr ip2 = default;
+        netip.Addr ip2 = default;
         var errΔ1 = ip2.UnmarshalBinary(b); if (errΔ1 != nil) {
             t.Fatal(errΔ1);
         }
@@ -450,7 +450,7 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> t) {
         if (len(bAppend) != tc.wantSize) {
             t.Fatalf("%q encoded to size %d; want %d", tc.ip, len(bAppend), tc.wantSize);
         }
-        netipꓸAddr ip3 = default;
+        netip.Addr ip3 = default;
         var errΔ2 = ip3.UnmarshalBinary(bAppend); if (errΔ2 != nil) {
             t.Fatal(errΔ2);
         }
@@ -461,7 +461,7 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> t) {
 
     // Cannot unmarshal from unexpected IP length.
     foreach (var (_, n) in range(slice<nint>([3, 5]))) {
-        netipꓸAddr ip2 = default;
+        netip.Addr ip2 = default;
         var err = ip2.UnmarshalBinary(bytes.Repeat([1], n)); if (err == nil) {
             t.Fatalf("unmarshaled from unexpected IP length %d", n);
         }
@@ -588,7 +588,7 @@ internal static ref readonly @string ffffC0000280ˢ => ref ffffC0000280ˢᵇ;
 private static readonly @string ffffC0000280ˢᵇ = "::ffff:c000:0280"u8;
 
 internal partial struct TestPrefixMarshalTextString_tests /*dyn*/ {
-    internal netipꓸPrefix @in;
+    internal netip.Prefix @in;
     internal @string want;
 }
 
@@ -627,7 +627,7 @@ public static void TestPrefixMarshalTextString(ж<testing.T> t) {
 }
 
 internal partial struct TestPrefixMarshalUnmarshalBinary_testCase /*dyn*/ {
-    internal netipꓸPrefix prefix;
+    internal netip.Prefix prefix;
     internal nint wantSize;
 }
 
@@ -650,7 +650,7 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> t) {
         if (len(b) != tc.wantSize) {
             t.Fatalf("%q encoded to size %d; want %d", tc.prefix, len(b), tc.wantSize);
         }
-        netipꓸPrefix prefix2 = default;
+        netip.Prefix prefix2 = default;
         var errΔ1 = prefix2.UnmarshalBinary(b); if (errΔ1 != nil) {
             t.Fatal(errΔ1);
         }
@@ -667,7 +667,7 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> t) {
         if (len(bAppend) != tc.wantSize) {
             t.Fatalf("%q encoded to size %d; want %d", tc.prefix, len(bAppend), tc.wantSize);
         }
-        netipꓸPrefix prefix3 = default;
+        netip.Prefix prefix3 = default;
         var errΔ2 = prefix3.UnmarshalBinary(bAppend); if (errΔ2 != nil) {
             t.Fatal(errΔ2);
         }
@@ -678,7 +678,7 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> t) {
 
     // Cannot unmarshal from unexpected lengths.
     foreach (var (_, n) in range(slice<nint>([3, 6]))) {
-        netipꓸPrefix prefix2 = default;
+        netip.Prefix prefix2 = default;
         var err = prefix2.UnmarshalBinary(bytes.Repeat([1], n)); if (err == nil) {
             t.Fatalf("unmarshaled from unexpected length %d", n);
         }
@@ -690,11 +690,11 @@ public static void TestAddrMarshalUnmarshal(ж<testing.T> t) {
     // the behavior of ParseAddr/String. For the rest of the test cases,
     // see TestParseAddr above.
     @string orig = @"""""";
-    ref var ip = ref heap(new netipꓸAddr(), out var Ꮡip);
+    ref var ip = ref heap(new netip.Addr(), out var Ꮡip);
     var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡip); if (errΔ1 != nil) {
         t.Fatalf("Unmarshal(%q) got error %v", orig, errΔ1);
     }
-    if (ip != (new netipꓸAddr())) {
+    if (ip != (new Addr())) {
         t.Errorf("Unmarshal(%q) is not the zero Addr", orig);
     }
 
@@ -711,7 +711,7 @@ public static void TestAddrMarshalUnmarshal(ж<testing.T> t) {
 internal partial struct TestAddrFrom16_tests /*dyn*/ {
     internal @string name;
     internal array<byte> @in = new(16);
-    internal netipꓸAddr want;
+    internal netip.Addr want;
 }
 
 public static void TestAddrFrom16(ж<testing.T> t) {
@@ -771,7 +771,7 @@ private static readonly @string ffff19216811ˢᵇ = "::ffff:192.168.1.1"u8;
 
 internal partial struct TestIPProperties_tests /*dyn*/ {
     internal @string name;
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal bool globalUnicast;
     internal bool interfaceLocalMulticast;
     internal bool linkLocalMulticast;
@@ -783,34 +783,34 @@ internal partial struct TestIPProperties_tests /*dyn*/ {
 }
 
 public static void TestIPProperties(ж<testing.T> t) {
-    netipꓸAddr nilIP = default;
+    netip.Addr nilIP = default;
 
-    netipꓸAddr unicast4 = mustIP("192.0.2.1");
-    netipꓸAddr unicast6 = mustIP(db81ˢ);
-    netipꓸAddr unicastZone6 = mustIP(db81Eth0ˢ);
-    netipꓸAddr unicast6Unassigned = mustIP("4000::1"); // not in 2000::/3.
+    netip.Addr unicast4 = mustIP("192.0.2.1");
+    netip.Addr unicast6 = mustIP(db81ˢ);
+    netip.Addr unicastZone6 = mustIP(db81Eth0ˢ);
+    netip.Addr unicast6Unassigned = mustIP("4000::1"); // not in 2000::/3.
 
-    netipꓸAddr multicast4 = mustIP("224.0.0.1");
-    netipꓸAddr multicast6 = mustIP(ff021ˢ);
-    netipꓸAddr multicastZone6 = mustIP(ff021Eth0ˢ);
+    netip.Addr multicast4 = mustIP("224.0.0.1");
+    netip.Addr multicast6 = mustIP(ff021ˢ);
+    netip.Addr multicastZone6 = mustIP(ff021Eth0ˢ);
 
-    netipꓸAddr llu4 = mustIP("169.254.0.1");
-    netipꓸAddr llu6 = mustIP(fe801ˢ);
-    netipꓸAddr llu6Last = mustIP(febfFfffFfffFfffFfffFfffˢ);
-    netipꓸAddr lluZone6 = mustIP(fe801Eth0ˢ);
+    netip.Addr llu4 = mustIP("169.254.0.1");
+    netip.Addr llu6 = mustIP(fe801ˢ);
+    netip.Addr llu6Last = mustIP(febfFfffFfffFfffFfffFfffˢ);
+    netip.Addr lluZone6 = mustIP(fe801Eth0ˢ);
 
-    netipꓸAddr loopback4 = mustIP("127.0.0.1");
+    netip.Addr loopback4 = mustIP("127.0.0.1");
 
-    netipꓸAddr ilm6 = mustIP(ff011ˢ);
-    netipꓸAddr ilmZone6 = mustIP(ff011Eth0ˢ);
+    netip.Addr ilm6 = mustIP(ff011ˢ);
+    netip.Addr ilmZone6 = mustIP(ff011Eth0ˢ);
 
-    netipꓸAddr private4a = mustIP("10.0.0.1");
-    netipꓸAddr private4b = mustIP("172.16.0.1");
-    netipꓸAddr private4c = mustIP("192.168.1.1");
-    netipꓸAddr private6 = mustIP(fd001ˢ);
-    netipꓸAddr private6mapped4a = mustIP(ffff10001ˢ);
-    netipꓸAddr private6mapped4b = mustIP(ffff1721601ˢ);
-    netipꓸAddr private6mapped4c = mustIP(ffff19216811ˢ);
+    netip.Addr private4a = mustIP("10.0.0.1");
+    netip.Addr private4b = mustIP("172.16.0.1");
+    netip.Addr private4c = mustIP("192.168.1.1");
+    netip.Addr private6 = mustIP(fd001ˢ);
+    netip.Addr private6mapped4a = mustIP(ffff10001ˢ);
+    netip.Addr private6mapped4b = mustIP(ffff1721601ˢ);
+    netip.Addr private6mapped4c = mustIP(ffff19216811ˢ);
 
     var tests = slice<TestIPProperties_tests>([
         new(
@@ -1023,7 +1023,7 @@ public static void TestIPProperties(ж<testing.T> t) {
 
 internal partial struct TestAddrWellKnown_tests /*dyn*/ {
     internal @string name;
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal net.IP std;
 }
 
@@ -1081,15 +1081,15 @@ internal static ref readonly @string invalidIp1234888811Foo2ˢ => ref invalidIp1
 private static readonly @string invalidIp1234888811Foo2ˢᵇ = @"[invalid IP 1.2.3.4 8.8.8.8 ::1 ::1%foo ::2]"u8;
 
 internal partial struct TestAddrLessCompare_tests /*dyn*/ {
-    internal netipꓸAddr a, b;
+    internal netip.Addr a, b;
     internal bool want;
 }
 
 public static void TestAddrLessCompare(ж<testing.T> t) {
     var tests = slice<TestAddrLessCompare_tests>([
-        new(new netipꓸAddr(), new netipꓸAddr(), false),
-        new(new netipꓸAddr(), mustIP("1.2.3.4"), true),
-        new(mustIP("1.2.3.4"), new netipꓸAddr(), false),
+        new(new Addr(), new Addr(), false),
+        new(new Addr(), mustIP("1.2.3.4"), true),
+        new(mustIP("1.2.3.4"), new Addr(), false),
 
         new(mustIP("1.2.3.4"), mustIP("0102:0304::0"), true),
         new(mustIP("0102:0304::0"), mustIP("1.2.3.4"), false),
@@ -1151,15 +1151,15 @@ public static void TestAddrLessCompare(ж<testing.T> t) {
     }
 
     // And just sort.
-    var values = slice<netipꓸAddr>([
+    var values = slice<netip.Addr>([
         mustIP("::1"),
         mustIP("::2"),
-        new netipꓸAddr(),
+        new Addr(),
         mustIP("1.2.3.4"),
         mustIP("8.8.8.8"),
         mustIP(fooˢ)
     ]);
-    slices.SortFunc<slice<netipꓸAddr>, netipꓸAddr>(values, ((Func<netipꓸAddr, netipꓸAddr, nint>)(netip.Compare)));
+    slices.SortFunc<slice<netip.Addr>, netip.Addr>(values, ((Func<netip.Addr, netip.Addr, nint>)(global::go.net.netipᴛAddr.Compare)));
     @string got = fmt.Sprintf("%s"u8, values);
     @string want = invalidIp1234888811Foo2ˢ;
     if (got != want) {
@@ -1218,7 +1218,7 @@ public static void TestAddrPortCompare(ж<testing.T> t) {
         mustIPPort("8.8.8.8:8080"),
         mustIPPort(foo1024ˢ)
     ]);
-    slices.SortFunc<slice<netip.AddrPort>, netip.AddrPort>(values, ((Func<netip.AddrPort, netip.AddrPort, nint>)(netip.Compare)));
+    slices.SortFunc<slice<netip.AddrPort>, netip.AddrPort>(values, ((Func<netip.AddrPort, netip.AddrPort, nint>)(global::go.net.netipᴛAddrPort.Compare)));
     @string got = fmt.Sprintf("%s"u8, values);
     @string want = invalidAddrPort123444388ˢ;
     if (got != want) {
@@ -1261,14 +1261,14 @@ internal static ref readonly @string a0003C0003E0004F0005F800ˢ => ref a0003C000
 private static readonly @string a0003C0003E0004F0005F800ˢᵇ = @"[0.0.0.0/8 0.0.0.0/32 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.0.0.0/24 192.0.0.0/29 192.0.0.8/32 192.0.0.9/32 192.0.0.10/32 192.0.0.170/32 192.0.2.0/24 192.31.196.0/24 192.52.193.0/24 192.88.99.0/24 192.168.0.0/16 192.175.48.0/24 198.18.0.0/15 198.51.100.0/24 203.0.113.0/24 240.0.0.0/4 255.255.255.255/32 ::/8 100::/8 200::/7 400::/6 800::/5 1000::/4 2000::/3 4000::/3 6000::/3 8000::/3 a000::/3 c000::/3 e000::/4 f000::/5 f800::/6 fc00::/7 fe00::/9 fe80::/10 fec0::/10 ff00::/8]"u8;
 
 internal partial struct TestPrefixCompare_tests /*dyn*/ {
-    internal netipꓸPrefix a, b;
+    internal netip.Prefix a, b;
     internal nint want;
 }
 
 public static void TestPrefixCompare(ж<testing.T> t) {
     var tests = slice<TestPrefixCompare_tests>([
-        new(new netipꓸPrefix(), new netipꓸPrefix(), 0),
-        new(new netipꓸPrefix(), mustPrefix("1.2.3.0/24"), -1),
+        new(new Prefix(), new Prefix(), 0),
+        new(new Prefix(), mustPrefix("1.2.3.0/24"), -1),
 
         new(mustPrefix("1.2.3.0/24"), mustPrefix("1.2.3.0/24"), 0),
         new(mustPrefix(fe8064ˢ), mustPrefix(fe8064ˢ), 0),
@@ -1300,18 +1300,18 @@ public static void TestPrefixCompare(ж<testing.T> t) {
     }
 
     // And just sort.
-    var values = slice<netipꓸPrefix>([
+    var values = slice<netip.Prefix>([
         mustPrefix("1.2.3.0/24"),
         mustPrefix(fe9064ˢ),
         mustPrefix(fe8064ˢ),
         mustPrefix("1.2.0.0/16"),
-        new netipꓸPrefix(),
+        new Prefix(),
         mustPrefix(fe8048ˢ),
         mustPrefix("1.2.0.0/24"),
         mustPrefix("1.2.3.4/24"),
         mustPrefix("1.2.3.0/28")
     ]);
-    slices.SortFunc<slice<netipꓸPrefix>, netipꓸPrefix>(values, ((Func<netipꓸPrefix, netipꓸPrefix, nint>)(netip.Compare)));
+    slices.SortFunc<slice<netip.Prefix>, netip.Prefix>(values, ((Func<netip.Prefix, netip.Prefix, nint>)(global::go.net.netipᴛPrefix.Compare)));
     @string got = fmt.Sprintf("%s"u8, values);
     @string want = invalidPrefix1200161200ˢ;
     if (got != want) {
@@ -1323,7 +1323,7 @@ public static void TestPrefixCompare(ж<testing.T> t) {
     // https://www.iana.org/assignments/ipv6-address-space/ipv6-address-space.xhtml,
     // to verify that the sort order matches IANA's conventional
     // ordering.
-    values = slice<netipꓸPrefix>([
+    values = slice<netip.Prefix>([
         mustPrefix("0.0.0.0/8"),
         mustPrefix("127.0.0.0/8"),
         mustPrefix("10.0.0.0/8"),
@@ -1369,7 +1369,7 @@ public static void TestPrefixCompare(ж<testing.T> t) {
         mustPrefix(f0005ˢ),
         mustPrefix("2000::/3")
     ]);
-    slices.SortFunc(values, (netipꓸPrefix a, netipꓸPrefix b) => a.Compare(b));
+    slices.SortFunc(values, (netip.Prefix a, netip.Prefix b) => a.Compare(b));
     got = fmt.Sprintf("%s"u8, values);
     want = a0003C0003E0004F0005F800ˢ;
     if (got != want) {
@@ -1382,14 +1382,14 @@ internal static ref readonly @string ffff192021ˢ => ref ffff192021ˢᵇ;
 private static readonly @string ffff192021ˢᵇ = "::ffff:192.0.2.1"u8;
 
 internal partial struct TestIPStringExpanded_tests /*dyn*/ {
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal @string s;
 }
 
 public static void TestIPStringExpanded(ж<testing.T> t) {
     var tests = slice<TestIPStringExpanded_tests>([
         new(
-            ip: new netipꓸAddr(),
+            ip: new Addr(),
             s: "invalid IP"
         ),
         new(
@@ -1436,9 +1436,9 @@ private static readonly @string a0004ˢᵇ = "a000::/4"u8;
 internal static readonly object expectedAnErrorButNoneˢ = (@string)"expected an error, but none occurred"u8;
 
 internal partial struct TestPrefixMasking_subtest /*dyn*/ {
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal uint8 bits;
-    internal netipꓸPrefix p;
+    internal netip.Prefix p;
     internal bool ok;
 }
 
@@ -1595,7 +1595,7 @@ public static void TestPrefixMarshalUnmarshal(ж<testing.T> t) {
             // sane by entering quoted input.
             @string orig = @""""u8 + s + @""""u8;
 
-            ref var p = ref heap(new netipꓸPrefix(), out var Ꮡp);
+            ref var p = ref heap(new netip.Prefix(), out var Ꮡp);
             var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡp); if (errΔ1 != nil) {
                 tΔ1.Fatalf("failed to unmarshal: %v", errΔ1);
             }
@@ -1632,14 +1632,14 @@ internal static ref readonly @string eth0ˢ2 => ref eth0ˢ2ᵇ;
 private static readonly @string eth0ˢ2ᵇ = "::1%eth0"u8;
 
 internal partial struct TestIs4AndIs6_tests /*dyn*/ {
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal bool is4;
     internal bool is6;
 }
 
 public static void TestIs4AndIs6(ж<testing.T> t) {
     var tests = slice<TestIs4AndIs6_tests>([
-        new(new netipꓸAddr(), false, false),
+        new(new Addr(), false, false),
         new(mustIP("1.2.3.4"), true, false),
         new(mustIP("127.0.0.2"), true, false),
         new(mustIP("::1"), false, true),
@@ -1673,14 +1673,14 @@ internal static ref readonly @string ffff127123ˢ3 => ref ffff127123ˢ3ᵇ;
 private static readonly @string ffff127123ˢ3ᵇ = "0:0:0:0::ffff:127.1.2.3"u8;
 
 internal partial struct TestIs4In6_tests /*dyn*/ {
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal bool want;
-    internal netipꓸAddr wantUnmap;
+    internal netip.Addr wantUnmap;
 }
 
 public static void TestIs4In6(ж<testing.T> t) {
     var tests = slice<TestIs4In6_tests>([
-        new(new netipꓸAddr(), false, new netipꓸAddr()),
+        new(new Addr(), false, new Addr()),
         new(mustIP(ffffC0000280ˢ), true, mustIP("192.0.2.128")),
         new(mustIP(ffff19202128ˢ), true, mustIP("192.0.2.128")),
         new(mustIP(ffff19202128Eth0ˢ), true, mustIP("192.0.2.128")),
@@ -1705,8 +1705,8 @@ public static void TestIs4In6(ж<testing.T> t) {
 }
 
 internal partial struct TestPrefixMasked_tests /*dyn*/ {
-    internal netipꓸPrefix prefix;
-    internal netipꓸPrefix masked;
+    internal netip.Prefix prefix;
+    internal netip.Prefix masked;
 }
 
 public static void TestPrefixMasked(ж<testing.T> t) {
@@ -1721,11 +1721,11 @@ public static void TestPrefixMasked(ж<testing.T> t) {
         ),
         new(
             prefix: PrefixFrom(mustIP("2000::"), 129),
-            masked: new netipꓸPrefix()
+            masked: new Prefix()
         ),
         new(
             prefix: PrefixFrom(mustIP("1.2.3.4"), 33),
-            masked: new netipꓸPrefix()
+            masked: new Prefix()
         )
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
@@ -1754,11 +1754,11 @@ private static readonly @string db9ˢᵇ = "2001:db9::"u8;
 
 internal partial struct TestPrefix_tests /*dyn*/ {
     internal @string prefix;
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal nint bits;
     internal @string str;
-    internal slice<netipꓸAddr> contains;
-    internal slice<netipꓸAddr> notContains;
+    internal slice<netip.Addr> contains;
+    internal slice<netip.Addr> notContains;
 }
 
 public static void TestPrefix(ж<testing.T> t) {
@@ -1796,7 +1796,7 @@ public static void TestPrefix(ж<testing.T> t) {
             ip: mustIP("0.0.0.0"),
             bits: 0,
             contains: mustIPs("192.168.0.1", "1.1.1.1"),
-            notContains: append(mustIPs(db81ˢ), new netipꓸAddr())
+            notContains: append(mustIPs(db81ˢ), new Addr())
         ),
         new(
             prefix: "::/0",
@@ -1853,7 +1853,7 @@ public static void TestPrefix(ж<testing.T> t) {
 }
 
 internal partial struct TestPrefixFromInvalidBits_tests /*dyn*/ {
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal nint @in, want;
 }
 
@@ -1992,7 +1992,7 @@ public static void TestParsePrefixError(ж<testing.T> t) {
 }
 
 internal partial struct TestPrefixIsSingleIP_tests /*dyn*/ {
-    internal netipꓸPrefix ipp;
+    internal netip.Prefix ipp;
     internal bool want;
 }
 
@@ -2004,7 +2004,7 @@ public static void TestPrefixIsSingleIP(ж<testing.T> t) {
         new(ipp: mustPrefix("::1/128"), want: true),
         new(ipp: mustPrefix("::1/127"), want: false),
         new(ipp: mustPrefix("::1/0"), want: false),
-        new(ipp: new netipꓸPrefix(), want: false)
+        new(ipp: new Prefix(), want: false)
     ]);
     foreach (var (_, tt) in range(tests)) {
         var got = tt.ipp.IsSingleIP();
@@ -2014,10 +2014,10 @@ public static void TestPrefixIsSingleIP(ж<testing.T> t) {
     }
 }
 
-internal static slice<netipꓸAddr> mustIPs(params ꓸꓸꓸstring strsʗp) {
+internal static slice<netip.Addr> mustIPs(params ꓸꓸꓸstring strsʗp) {
     var strs = strsʗp.sslice();
 
-    slice<netipꓸAddr> res = default;
+    slice<netip.Addr> res = default;
     foreach (var (_, s) in range(strs)) {
         res = append(res, mustIP(s));
     }
@@ -2050,7 +2050,7 @@ public static void BenchmarkBinaryMarshalRoundTrip(ж<testing.B> Ꮡb) {
                 if (err != nil) {
                     bΔ1.Fatal(err);
                 }
-                netipꓸAddr ip2 = default;
+                netip.Addr ip2 = default;
                 var errΔ1 = ip2.UnmarshalBinary(bt); if (errΔ1 != nil) {
                     bΔ1.Fatal(errΔ1);
                 }
@@ -2076,10 +2076,10 @@ public static void BenchmarkStdIPv4(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkIPv4(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
-    var ipsᴷ = new stackAppend<netipꓸAddr>();
+    var ipsᴷ = new stackAppend<netip.Addr>();
 
     b.ReportAllocs();
-    var ips = slice<netipꓸAddr>([]);
+    var ips = slice<netip.Addr>([]);
     for (nint i = 0; i < b.N; i++) {
         var ip = IPv4(8, 8, 8, 8);
         ips = ips[..0];
@@ -2138,10 +2138,10 @@ public static void BenchmarkStdIPv6(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkIPv6(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
-    var ipsᴷ = new stackAppend<netipꓸAddr>();
+    var ipsᴷ = new stackAppend<netip.Addr>();
 
     b.ReportAllocs();
-    var ips = slice<netipꓸAddr>([]);
+    var ips = slice<netip.Addr>([]);
     for (nint i = 0; i < b.N; i++) {
         var ip = mustIP(db81ˢ);
         ips = ips[..0];
@@ -2218,7 +2218,7 @@ public static void BenchmarkStdParseIP(ж<testing.B> b) {
 
 public static void BenchmarkAddrString(ж<testing.B> b) {
     foreach (var (_, test) in range(parseBenchInputs)) {
-        ref var ip = ref heap<netipꓸAddr>(MustParseAddr(test.ip), out var Ꮡip);
+        ref var ip = ref heap<netip.Addr>(MustParseAddr(test.ip), out var Ꮡip);
         var ipʗ1 = ip;
         b.Run(test.name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
@@ -2231,7 +2231,7 @@ public static void BenchmarkAddrString(ж<testing.B> b) {
 
 public static void BenchmarkIPStringExpanded(ж<testing.B> b) {
     foreach (var (_, test) in range(parseBenchInputs)) {
-        ref var ip = ref heap<netipꓸAddr>(MustParseAddr(test.ip), out var Ꮡip);
+        ref var ip = ref heap<netip.Addr>(MustParseAddr(test.ip), out var Ꮡip);
         var ipʗ1 = ip;
         b.Run(test.name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
@@ -2244,7 +2244,7 @@ public static void BenchmarkIPStringExpanded(ж<testing.B> b) {
 
 public static void BenchmarkAddrMarshalText(ж<testing.B> b) {
     foreach (var (_, test) in range(parseBenchInputs)) {
-        ref var ip = ref heap<netipꓸAddr>(MustParseAddr(test.ip), out var Ꮡip);
+        ref var ip = ref heap<netip.Addr>(MustParseAddr(test.ip), out var Ꮡip);
         var ipʗ1 = ip;
         b.Run(test.name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
@@ -2285,7 +2285,7 @@ public static void BenchmarkAddrPortMarshalText(ж<testing.B> b) {
 
 internal partial struct BenchmarkPrefixMasking_tests /*dyn*/ {
     internal @string name;
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal nint bits;
 }
 
@@ -2382,7 +2382,7 @@ public static void BenchmarkParseAddrPort(ж<testing.B> b) {
 }
 
 internal partial struct TestAs4_tests /*dyn*/ {
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal array<byte> want = new(4);
     internal bool wantPanic;
 }
@@ -2402,7 +2402,7 @@ public static void TestAs4(ж<testing.T> t) {
             want: new byte[]{0, 0, 0, 0}.array()
         ),
         new(
-            ip: new netipꓸAddr(),
+            ip: new Addr(),
             wantPanic: true
         ),
         new(
@@ -2410,7 +2410,7 @@ public static void TestAs4(ж<testing.T> t) {
             wantPanic: true
         )
     ]);
-    (array<byte> v, bool gotPanic) as4(netipꓸAddr ip) {
+    (array<byte> v, bool gotPanic) as4(netip.Addr ip) {
         array<byte> v = new(4);
         bool gotPanic = default;
         GoFrame ᒐ = default;
@@ -2421,7 +2421,7 @@ public static void TestAs4(ж<testing.T> t) {
                     return;
                 }
             }, ref ᒐ);
-            v = ip.As4();
+            v.Assign(ip.As4());
             goto ᒐdone;
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2443,16 +2443,16 @@ public static void TestAs4(ж<testing.T> t) {
 }
 
 internal partial struct TestPrefixOverlaps_tests /*dyn*/ {
-    internal netipꓸPrefix a, b;
+    internal netip.Prefix a, b;
     internal bool want;
 }
 
 public static void TestPrefixOverlaps(ж<testing.T> t) {
     var pfx = mustPrefix;
     var tests = slice<TestPrefixOverlaps_tests>([
-        new(new netipꓸPrefix(), pfx("1.2.0.0/16"), false), // first zero
-        new(pfx("1.2.0.0/16"), new netipꓸPrefix(), false), // second zero
-        new(pfx("::0/3"), pfx("0.0.0.0/3"), false),        // different families
+        new(new Prefix(), pfx("1.2.0.0/16"), false), // first zero
+        new(pfx("1.2.0.0/16"), new Prefix(), false), // second zero
+        new(pfx("::0/3"), pfx("0.0.0.0/3"), false),  // different families
 
         new(pfx("1.2.0.0/16"), pfx("1.2.0.0/16"), true), // equal
 
@@ -2504,11 +2504,11 @@ public static void TestPrefixOverlaps(ж<testing.T> t) {
 // correctly deduce that foo() does nothing and doesn't need to be
 // called. By writing results to a global variable, we hide that fact
 // from the compiler and force it to keep the code under test.
-internal static netipꓸAddr sinkIP;
+internal static netip.Addr sinkIP;
 internal static net.IP sinkStdIP;
 internal static netip.AddrPort sinkAddrPort;
-internal static netipꓸPrefix sinkPrefix;
-internal static slice<netipꓸPrefix> sinkPrefixSlice;
+internal static netip.Prefix sinkPrefix;
+internal static slice<netip.Prefix> sinkPrefixSlice;
 internal static unique.Handle<AddrDetail> sinkInternValue;
 internal static array<byte> sinkIP16 = new(16);
 internal static array<byte> sinkIP4 = new(4);
@@ -2629,13 +2629,13 @@ public static void TestNoAllocs(ж<testing.T> t) {
 
     // Wrappers that panic on error, to prove that our alloc-free
     // methods are returning successfully.
-    netipꓸAddr panicIP(netipꓸAddr ip, error err) {
+    netip.Addr panicIP(netip.Addr ip, error err) {
         if (err != nil) {
             throw panic(err);
         }
         return ip;
     }
-    netipꓸPrefix panicPfx(netipꓸPrefix pfx, error err) {
+    netip.Prefix panicPfx(netip.Prefix pfx, error err) {
         if (err != nil) {
             throw panic(err);
         }
@@ -2768,10 +2768,10 @@ public static void TestNoAllocs(ж<testing.T> t) {
         sinkPrefix = panicPfxʗ2(ᴛ7, ᴛ8);
     });
     test(addrAs16ˢ, () => {
-        sinkIP16 = MustParseAddr("1.2.3.4").As16();
+        sinkIP16.Assign(MustParseAddr("1.2.3.4").As16());
     });
     test(addrAs4ˢ, () => {
-        sinkIP4 = MustParseAddr("1.2.3.4").As4();
+        sinkIP4.Assign(MustParseAddr("1.2.3.4").As4());
     });
     test(addrNextˢ, () => {
         sinkIP = MustParseAddr("1.2.3.4").Next();
@@ -2838,13 +2838,13 @@ private static readonly @string ipv4InIpv6ˢᵇ = "ipv4-in-ipv6"u8;
 
 internal partial struct TestAddrStringAllocs_tests /*dyn*/ {
     internal @string name;
-    internal netipꓸAddr ip;
+    internal netip.Addr ip;
     internal nint wantAllocs;
 }
 
 public static void TestAddrStringAllocs(ж<testing.T> t) {
     var tests = slice<TestAddrStringAllocs_tests>([
-        new("zero", new netipꓸAddr(), 0),
+        new("zero", new Addr(), 0),
         new("ipv4", MustParseAddr("192.168.1.1"), 1),
         new("ipv6", MustParseAddr(db81ˢ), 1),
         new("ipv6+zone", MustParseAddr(db81Eth0ˢ), 1),
@@ -2874,14 +2874,14 @@ public static void TestAddrStringAllocs(ж<testing.T> t) {
 }
 
 internal partial struct TestPrefixString_tests /*dyn*/ {
-    internal netipꓸPrefix ipp;
+    internal netip.Prefix ipp;
     internal @string want;
 }
 
 public static void TestPrefixString(ж<testing.T> t) {
     var tests = slice<TestPrefixString_tests>([
-        new(new netipꓸPrefix(), "invalid Prefix"),
-        new(PrefixFrom(new netipꓸAddr(), 8), "invalid Prefix"),
+        new(new Prefix(), "invalid Prefix"),
+        new(PrefixFrom(new Addr(), 8), "invalid Prefix"),
         new(PrefixFrom(MustParseAddr("1.2.3.4"), 88), "invalid Prefix")
     ]);
 
@@ -2907,7 +2907,7 @@ public static void TestAddrPortString(ж<testing.T> t) {
         new(MustParseAddrPort("[0000::0]:8080"), "[::]:8080"),
         new(MustParseAddrPort(ffff18080ˢ), "[ffff::1]:8080"),
         new(new AddrPort(), "invalid AddrPort"),
-        new(AddrPortFrom(new netipꓸAddr(), 80), "invalid AddrPort")
+        new(AddrPortFrom(new Addr(), 80), "invalid AddrPort")
     ]);
 
     foreach (var (_, tt) in range(tests)) {
@@ -2922,13 +2922,13 @@ internal static ref readonly @string ffff1ˢ => ref ffff1ˢᵇ;
 private static readonly @string ffff1ˢᵇ = "ffff::1"u8;
 
 internal partial struct TestAsSlice_tests /*dyn*/ {
-    internal netipꓸAddr @in;
+    internal netip.Addr @in;
     internal slice<byte> want;
 }
 
 public static void TestAsSlice(ж<testing.T> t) {
     var tests = slice<TestAsSlice_tests>([
-        new(@in: new netipꓸAddr(), want: default),
+        new(@in: new Addr(), want: default),
         new(@in: mustIP("1.2.3.4"), want: [1, 2, 3, 4]),
         new(@in: mustIP(ffff1ˢ), want: new slice<byte>(16){[0] = 0xff, [1] = 0xff, [15] = 1})
     ]);
@@ -2948,7 +2948,7 @@ public static void BenchmarkAs16(ж<testing.B> Ꮡb) {
 
     var addr = MustParseAddr("1::10");
     for (nint i = 0; i < b.N; i++) {
-        sink16 = addr.As16();
+        sink16.Assign(addr.As16());
     }
 }
 

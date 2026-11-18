@@ -16,6 +16,7 @@ using time = time_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using static go.net_package;
 using vendor.golang.org.x.net.dns;
+using static net_internal_test_package;
 
 partial class net_internal_test_package {
 
@@ -43,7 +44,7 @@ public static void TestResolverDialFunc(ж<testing.T> t) {
                 t.Logf("StartDial(%q, %q) ...", network, address);
                 return default;
             },
-            Question: (dnsmessage.Header h, dnsmessageꓸQuestion q) => {
+            Question: (dnsmessage.Header h, dnsmessage.Question q) => {
                 q = q.ΔClone();
                 t.Logf("Header: %+v for %q (type=%v, class=%v)", h,
                     q.Name.String(), q.Type, q.Class);
@@ -140,7 +141,7 @@ internal partial struct resolverDialHandler {
     // StartDial, if non-nil, is called when Go first calls Resolver.Dial.
     // Any error returned aborts the dial and is returned unwrapped.
     public Func<@string, @string, error> StartDial;
-    public Action<dnsmessage.Header, dnsmessageꓸQuestion> Question;
+    public Action<dnsmessage.Header, dnsmessage.Question> Question;
     // err may be ErrNotExist or ErrRefused; others map to SERVFAIL (RCode2).
     // A nil error means success.
     public Func<AWriter, @string, error> HandleA;
@@ -151,6 +152,8 @@ internal partial struct resolverDialHandler {
 public partial struct ResponseWriter {
     internal ж<resolverFuncConn> a;
 }
+
+} partial class net_internal_testᴛResponseWriter {
 
 internal static dnsmessage.ResourceHeader header(this ResponseWriter w) {
     var q = w.a.q.ΔClone();
@@ -179,37 +182,49 @@ public static void SetTTL(this ResponseWriter w, uint32 seconds) {
     w.a.ttl = seconds;
 }
 
+} partial class net_internal_test_package {
+
 public partial struct AWriter {
     /*embed*/ public ResponseWriter ResponseWriter;
 }
+
+} partial class net_internal_testᴛAWriter {
 
 public static void AddIP(this AWriter w, /*[4]*/ array<byte> v4) {
     v4 = v4.Clone();
 
     w.a.wrote = true;
-    var err = w.a.builder.AResource(w.header(), new dnsmessageꓸAResource(A: v4.Clone()));
+    var err = w.a.builder.AResource(w.header(), new dnsmessage.AResource(A: v4.Clone()));
     if (err != nil) {
         throw panic(err);
     }
 }
+
+} partial class net_internal_test_package {
 
 public partial struct AAAAWriter {
     /*embed*/ public ResponseWriter ResponseWriter;
 }
 
+} partial class net_internal_testᴛAAAAWriter {
+
 public static void AddIP(this AAAAWriter w, /*[16]*/ array<byte> v6) {
     v6 = v6.Clone();
 
     w.a.wrote = true;
-    var err = w.a.builder.AAAAResource(w.header(), new dnsmessageꓸAAAAResource(AAAA: v6.Clone()));
+    var err = w.a.builder.AAAAResource(w.header(), new dnsmessage.AAAAResource(AAAA: v6.Clone()));
     if (err != nil) {
         throw panic(err);
     }
 }
 
+} partial class net_internal_test_package {
+
 public partial struct SRVWriter {
     /*embed*/ public ResponseWriter ResponseWriter;
 }
+
+} partial class net_internal_testᴛSRVWriter {
 
 // AddSRV adds a SRV record. The target name must end in a period and
 // be 63 bytes or fewer.
@@ -219,7 +234,7 @@ public static error AddSRV(this SRVWriter w, uint16 priority, uint16 weight, uin
         return err;
     }
     w.a.wrote = true;
-    err = w.a.builder.SRVResource(w.header(), new dnsmessageꓸSRVResource(
+    err = w.a.builder.SRVResource(w.header(), new dnsmessage.SRVResource(
         Priority: priority,
         Weight: weight,
         Port: port,
@@ -231,6 +246,8 @@ public static error AddSRV(this SRVWriter w, uint16 priority, uint16 weight, uin
     return default;
 }
 
+} partial class net_internal_test_package {
+
 public static error ErrNotExist = errors.New("name does not exist"); // maps to RCode3, NXDOMAIN
 public static error ErrRefused = errors.New("refused");              // maps to RCode5, REFUSED
 
@@ -239,15 +256,17 @@ internal partial struct resolverFuncConn {
     internal @string network;
     internal @string address;
     internal ж<dnsmessage.Builder> builder;
-    internal dnsmessageꓸQuestion q;
+    internal dnsmessage.Question q;
     internal uint32 ttl;
     internal bool wrote;
     internal bytes.Buffer rbuf;
 }
 
+} partial class net_internal_testᴛresolverFuncConn {
+
 internal static error Close(this ref resolverFuncConn _) { return default; }
-internal static global::go.net_package.ΔAddr LocalAddr(this ref resolverFuncConn _) { return new someaddr(); }
-internal static global::go.net_package.ΔAddr RemoteAddr(this ref resolverFuncConn _) { return new someaddr(); }
+internal static global::go.net_package.Addr LocalAddr(this ref resolverFuncConn _) { return new someaddr(); }
+internal static global::go.net_package.Addr RemoteAddr(this ref resolverFuncConn _) { return new someaddr(); }
 internal static error SetDeadline(this ref resolverFuncConn _, time.Time t) { return default; }
 internal static error SetReadDeadline(this ref resolverFuncConn _, time.Time t) { return default; }
 internal static error SetWriteDeadline(this ref resolverFuncConn _, time.Time t) { return default; }
@@ -299,7 +318,7 @@ internal static (nint n, error err) Write(this ж<resolverFuncConn> Ꮡa, slice<
     ref var builder = ref heap<dnsmessage.Builder>(dnsmessage.NewBuilder(a.rbuf.Bytes(), resh), out var Ꮡbuilder);
     a.builder = Ꮡbuilder;
     if (hadQ) {
-        a.q = q.ΔClone();
+        a.q.AssignFrom(q);
         a.builder.StartQuestions();
         var errΔ1 = a.builder.Question(q);
         if (errΔ1 != nil) {
@@ -339,8 +358,12 @@ internal static (nint n, error err) Write(this ж<resolverFuncConn> Ꮡa, slice<
     return (len(packet), default);
 }
 
+} partial class net_internal_test_package {
+
 internal partial struct someaddr {
 }
+
+} partial class net_internal_testᴛsomeaddr {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unusedˢ => ref unusedˢᵇ;
@@ -352,6 +375,8 @@ internal static ref readonly @string unusedSomeaddrˢ => ref unusedSomeaddrˢᵇ
 private static readonly @string unusedSomeaddrˢᵇ = "unused-someaddr"u8;
 
 internal static @string String(this someaddr _) { return unusedSomeaddrˢ; }
+
+} partial class net_internal_test_package {
 
 internal static dnsmessage.RCode mapRCode(error err) {
     switch (err) {

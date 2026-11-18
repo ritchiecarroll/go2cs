@@ -25,6 +25,7 @@ using global::go.path;
 using io = io_package;
 using static global::go.go.types_internal_test_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static types_test_package;
 
 partial class types_test_package {
 
@@ -270,6 +271,8 @@ internal static renameMap makeRenameMap(params ꓸꓸꓸstring renamesʗp) {
     return m;
 }
 
+} partial class types_testᴛrenameMap {
+
 // rename renames the given string s if a corresponding rename exists in m.
 internal static void rename(this renameMap m, ж<@string> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -296,6 +299,8 @@ internal static void renameSel(this renameMap m, ж<ast.SelectorExpr> Ꮡn) {
         }
     }
 }
+
+} partial class types_test_package {
 
 // renameIdents renames identifiers: each renames entry is of the form "from->to".
 // Note: This doesn't change the use of the identifiers in comments.
@@ -454,7 +459,7 @@ internal static void fixInferSig(ж<ast.File> f) {
                 case {} when exprᴛ1 == "renameTParams"u8: {
                     // rewrite check.renameTParams(pos, ... ) to check.renameTParams(posn.Pos(), ... )
                     if (isIdent(nΔ1.Args[0], "pos")) {
-                        ref var pos = ref heap<tokenꓸPos>(nΔ1.Args[0].Pos(), out var Ꮡpos);
+                        ref var pos = ref heap<token.Pos>(nΔ1.Args[0].Pos(), out var Ꮡpos);
                         var fun = Ꮡ(new ast.SelectorExpr(X: new ast.IdentжExpr(newIdent(pos, "posn")), Sel: newIdent(pos, "Pos")));
                         var arg = Ꮡ(new ast.CallExpr(Fun: new ast.SelectorExprжExpr(fun), Lparen: pos, Args: default, Ellipsis: token.NoPos, Rparen: pos));
                         nΔ1.Args[0] = new ast.CallExprжExpr(arg);
@@ -465,7 +470,7 @@ internal static void fixInferSig(ж<ast.File> f) {
                 case {} when exprᴛ1 == "addf"u8: {
                     // rewrite err.addf(pos, ...) to err.addf(posn, ...)
                     if (isIdent(nΔ1.Args[0], "pos")) {
-                        tokenꓸPos pos = nΔ1.Args[0].Pos();
+                        token.Pos pos = nΔ1.Args[0].Pos();
                         var arg = newIdent(pos, "posn");
                         nΔ1.Args[0] = new ast.IdentжExpr(arg);
                         return false;
@@ -475,7 +480,7 @@ internal static void fixInferSig(ж<ast.File> f) {
                 case {} when exprᴛ1 == "allowVersion"u8: {
                     // rewrite check.allowVersion(pos, ...) to check.allowVersion(posn, ...)
                     if (isIdent(nΔ1.Args[0], "pos")) {
-                        tokenꓸPos pos = nΔ1.Args[0].Pos();
+                        token.Pos pos = nΔ1.Args[0].Pos();
                         var arg = newIdent(pos, "posn");
                         nΔ1.Args[0] = new ast.IdentжExpr(arg);
                         return false;
@@ -500,7 +505,7 @@ internal static void fixAtPosCall(ж<ast.File> f) {
                     var (call, _) = arg._<ж<ast.CallExpr>>(ᐧ); if (call != nil) {
                         // rewrite xxx.dump(..., atPos(x), ...) to xxx.dump(..., x.Pos(), ...)
                         if (isIdent(call.Fun, "atPos")) {
-                            ref var pos = ref heap<tokenꓸPos>(call.Args[0].Pos(), out var Ꮡpos);
+                            ref var pos = ref heap<token.Pos>(call.Args[0].Pos(), out var Ꮡpos);
                             var fun = Ꮡ(new ast.SelectorExpr(X: call.Args[0], Sel: newIdent(pos, "Pos")));
                             nΔ1.Args[i] = new ast.CallExprжExpr(Ꮡ(new ast.CallExpr(Fun: new ast.SelectorExprжExpr(fun), Lparen: pos, Rparen: pos)));
                             return false;
@@ -532,7 +537,7 @@ internal static void fixErrErrorfCall(ж<ast.File> f) {
                     case {} when exprᴛ1 == "errorf"u8: {
                         // rewrite err.addf(obj, ... ) to err.addf(obj.Pos(), ... )
                         var (ident, _) = nΔ1.Args[0]._<ж<ast.Ident>>(ᐧ); if (ident != nil && ident.Name == "obj"u8) {
-                            ref var pos = ref heap<tokenꓸPos>(nΔ1.Args[0].Pos(), out var Ꮡpos);
+                            ref var pos = ref heap<token.Pos>(nΔ1.Args[0].Pos(), out var Ꮡpos);
                             var fun = Ꮡ(new ast.SelectorExpr(X: new ast.IdentжExpr(ident), Sel: newIdent(pos, posˢ)));
                             nΔ1.Args[0] = new ast.CallExprжExpr(Ꮡ(new ast.CallExpr(Fun: new ast.SelectorExprжExpr(fun), Lparen: pos, Rparen: pos)));
                             return false;
@@ -559,7 +564,7 @@ internal static void fixCheckErrorfCall(ж<ast.File> f) {
                     case {} when exprᴛ1 == "errorf"u8: {
                         // rewrite check.errorf(pos, ... ) to check.errorf(atPos(pos), ... )
                         var ident = asIdent(nΔ1.Args[0], "pos"); if (ident != nil) {
-                            ref var pos = ref heap<tokenꓸPos>(nΔ1.Args[0].Pos(), out var Ꮡpos);
+                            ref var pos = ref heap<token.Pos>(nΔ1.Args[0].Pos(), out var Ꮡpos);
                             var fun = newIdent(pos, "atPos");
                             nΔ1.Args[0] = new ast.CallExprжExpr(Ꮡ(new ast.CallExpr(Fun: new ast.IdentжExpr(fun), Lparen: pos, Args: [new ast.IdentжExpr(ident)], Rparen: pos)));
                             return false;
@@ -622,7 +627,7 @@ internal static bool isIdent(ast.Node x, @string name) {
 }
 
 // newIdent returns a new identifier with the given position and name.
-internal static ж<ast.Ident> newIdent(tokenꓸPos pos, @string name) {
+internal static ж<ast.Ident> newIdent(token.Pos pos, @string name) {
     var id = ast.NewIdent(name);
     id.NamePos = pos;
     return id;

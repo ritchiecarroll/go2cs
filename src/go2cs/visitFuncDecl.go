@@ -1297,7 +1297,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// (internal) -- otherwise a public method returning that method's own unexported
 					// types is CS0050 (inconsistent accessibility). A PUBLICIZED unexported receiver
 					// type is emitted `public`, so its exported methods count as public here.
-					if (getAccess(recvTypeName) == "public" || receiverTypeIsPublicized(param.Type())) && getAccess(goFunctionName) == "public" {
+					if (getAccess(holderUnqualifiedTypeName(recvTypeName)) == "public" || receiverTypeIsPublicized(param.Type())) && getAccess(goFunctionName) == "public" {
 						functionAccess = "public"
 					} else {
 						functionAccess = "internal"
@@ -2076,7 +2076,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			// Update function access to match receiver type. A PUBLICIZED unexported receiver
 			// type is emitted `public`, so it does not restrict the method's access.
-			receiverAccess = getAccess(recvTypeName)
+			receiverAccess = getAccess(holderUnqualifiedTypeName(recvTypeName))
 
 			if receiverAccess != "public" && receiverTypeIsPublicized(param.Type()) {
 				receiverAccess = "public"

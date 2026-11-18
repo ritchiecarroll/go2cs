@@ -322,7 +322,6 @@
     <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/poll/internal.poll.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/registry/internal.syscall.windows.registry.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />

@@ -13,6 +13,7 @@ using hex = go.encoding.hex_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
+using big = go.math.big_package;
 using go.crypto;
 using go.encoding;
 using static go.crypto.x509_package;
@@ -60,7 +61,7 @@ internal static @string pkcs8X25519PrivateKeyHex = @"302e020100300506032b656e042
 internal partial struct TestPKCS8_tests /*dyn*/ {
     internal @string name;
     internal @string keyHex;
-    internal reflectꓸType keyType;
+    internal reflect.Type keyType;
     internal elliptic.Curve curve;
 }
 

@@ -1128,7 +1128,7 @@ decls in at the statement's own start — it records that offset before conversi
 afterwards (`spliceOutput`, the positional twin of `replaceMarker`), because the `foreach` header is
 emitted much further down through a dozen different arms:
 
-<!-- source: src/core/context/x_test.cs:386-387, 391, 394, 421-430, 441 -->
+<!-- source: src/core/context/x_test.cs:391-392, 396, 399, 426-435, 446 -->
 ```csharp
     var bg = Background();
             var bgʗ1 = bg;

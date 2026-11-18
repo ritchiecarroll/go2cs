@@ -35,7 +35,7 @@ using static go.go.printer_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("go/printer/performance_test.go", "performance_test.cs", "ABo6goL6kpSCgqaCgqaCgoKmgpS4goKCzKKClIKCgriigpSCgoI=")]
-[assembly: GoPositionMap("go/printer/printer_test.go", "printer_test.cs", "AB44lAAJHsSCgriCgriCgpSCqJKCuIKCpqiSgoKUqJKClKaCgoKCpoKCgriCgpS4goKCuIKCpriCgoKUgsqUgpKCuMYADhgAGDKCgoKCgoKCggAQFLKcgoKCpoKClIKCgriCgoK6koKCgriCAA4KkoKCgoKUgoKCvNKCgoKmgIKkgILIABsOsoIAASKCgqaCgoKmgoKCyoKClKiSgpKClKiSgoKUABgMsgACHIKCqJKCgsqCgu6CgoKUgriCgpSCuIKCgriCACcMogABFgACHIKCqJKCgpSmgrjcgoKCgqaCgoKmgoLK3IKCgoKmgoKCpoKCAAgKgoiygoKmgoKmoqKCgpSCgoKUgoKUgqaCABASogAIFIKClJSagv6yAAkUgoKUkgAIErKCgoKClIIACgiSgoKCgpSCgpSigoKCpoIADg6iiIKCACYIggAFKoKCgqaUgoKmgqaUgoKmggALCIKCgoKCpoKCgoKCuIKC/KSSgoKCqJKCgpSmgpSCgoKUlIIAEQyijoKCgriCgpSCgpSCggAJCO6CgoKCgqa4goKUgr7CsoKCgoKC", "151-154:1;203-208:1;347-350:1;551-573:1")]
+[assembly: GoPositionMap("go/printer/printer_test.go", "printer_test.cs", "AB84lAAJHsSCgriCgriCgpSCqJKCuIKCpqiSgoKUqJKClKaCgoKCpoKCgriCgpS4goKCuIKCpriCgoKUgsqUgpKCuMYADhgAGDKCgoKCgoKCggAQFLKcgoKCpoKClIKCgriCgoK6koKCgriCAA4KkoKCgoKUgoKCvNKCgoKmgIKkgILIABsOsoIAASKCgqaCgoKmgoKC6oKClMiSgpKClKiSgoKUABgMsgACHIKCqJKCgsqCgu6CgoKUgriCgpSCuIKCgriCACcMogABFgACHIKCqJKCgpSmgrjcgoKCgqaCgoKmgoLK3IKCgoKmgoKCpoKCAAgKgoiygoKmgoKmoqKCgpSCgoKUgoKUgqaCABASogAIFIKClJSagv6yAAkUgoKUkgAKErKCgoKClIIADAiSgoKCgpSCgpSigoKCpoIADg6iiIKCACYIggAFKoKCgqaUgoKmgqaUgoKmggALCIKCgoKCpoKCgoKCuIKC/KSSgoKCqJKCgpSmgpSCgoKUlIIAEQyijoKCgriCgpSCgpSCggAJCO6CgoKCgqa4goKUgr7CsoKCgoKC", "151-154:1;203-208:1;347-350:1;551-573:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -77,3 +77,14 @@ public static partial class printer_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(printer_internal_test_package.limitWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class printer_internal_testᴛlimitWriter;
+[GoMethodHost(typeof(printer_internal_test_package.visitor)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class printer_internal_testᴛvisitor;
+// </MethodHolders>

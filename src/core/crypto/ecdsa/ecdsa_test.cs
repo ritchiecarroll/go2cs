@@ -27,6 +27,7 @@ using go.crypto;
 using go.crypto.@internal;
 using math;
 using static go.crypto.ecdsa_package;
+using static ecdsa_internal_test_package;
 
 partial class ecdsa_internal_test_package {
 
@@ -171,7 +172,11 @@ internal static void testNonceSafety(ж<testing.T> t, elliptic.Curve c) {
 
 internal delegate (nint, error) readerFunc(slice<byte> _Δp0);
 
+} partial class ecdsa_internal_testᴛreaderFunc {
+
 internal static (nint, error) Read(this readerFunc f, slice<byte> b) { return f(b); }
+
+} partial class ecdsa_internal_test_package {
 
 internal static readerFunc zeroReader = new readerFunc((slice<byte> b) => {
     clear(b);
@@ -207,8 +212,8 @@ internal static void testINDCCA(ж<testing.T> t, elliptic.Curve c) {
     }
 }
 
-internal static ж<bigꓸInt> fromHex(@string s) {
-    var (r, ok) = @new<bigꓸInt>().SetString(s, 16);
+internal static ж<big.Int> fromHex(@string s) {
+    var (r, ok) = @new<big.Int>().SetString(s, 16);
     if (!ok) {
         throw panic("bad hex");
     }
@@ -249,8 +254,8 @@ internal static void testVectors(ж<testing.T> t) {
     hash.Hash h = default;
     slice<byte> msg = default;
     slice<byte> hashed = default;
-    ж<bigꓸInt> r = default;
-    ж<bigꓸInt> s = default;
+    ж<big.Int> r = default;
+    ж<big.Int> s = default;
     var pub = @new<global::go.crypto.ecdsa_package.PublicKey>();
 
     for (;;) {
@@ -276,21 +281,20 @@ internal static void testVectors(ж<testing.T> t) {
             line = line.slice(1, len(line) - 1);
             var (curve, hashΔ1, _) = strings.Cut(line, ",");
 
-            var exprᴛ1 = curve;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "P-224"u8: {
+            case {} when curve == "P-224"u8: {
                 pub.Curve = elliptic.P224();
                 break;
             }
-            case {} when exprᴛ1 == "P-256"u8: {
+            case {} when curve == "P-256"u8: {
                 pub.Curve = elliptic.P256();
                 break;
             }
-            case {} when exprᴛ1 == "P-384"u8: {
+            case {} when curve == "P-384"u8: {
                 pub.Curve = elliptic.P384();
                 break;
             }
-            case {} when exprᴛ1 == "P-521"u8: {
+            case {} when curve == "P-521"u8: {
                 pub.Curve = elliptic.P521();
                 break;
             }
@@ -299,25 +303,24 @@ internal static void testVectors(ж<testing.T> t) {
                 break;
             }}
 
-            var exprᴛ2 = hashΔ1;
             switch (ᐧ) {
-            case {} when exprᴛ2 == "SHA-1"u8: {
+            case {} when hashΔ1 == "SHA-1"u8: {
                 h = sha1.New();
                 break;
             }
-            case {} when exprᴛ2 == "SHA-224"u8: {
+            case {} when hashΔ1 == "SHA-224"u8: {
                 h = sha256.New224();
                 break;
             }
-            case {} when exprᴛ2 == "SHA-256"u8: {
+            case {} when hashΔ1 == "SHA-256"u8: {
                 h = sha256.New();
                 break;
             }
-            case {} when exprᴛ2 == "SHA-384"u8: {
+            case {} when hashΔ1 == "SHA-384"u8: {
                 h = sha512.New384();
                 break;
             }
-            case {} when exprᴛ2 == "SHA-512"u8: {
+            case {} when hashΔ1 == "SHA-512"u8: {
                 h = sha512.New();
                 break;
             }
@@ -384,7 +387,7 @@ internal static void testNegativeInputs(ж<testing.T> t, elliptic.Curve curve) {
     }
 
     array<byte> hash = new(32);
-    var r = @new<bigꓸInt>().SetInt64(1);
+    var r = @new<big.Int>().SetInt64(1);
     r.Lsh(r, 550 /* larger than any supported curve */);
     r.Neg(r);
 
@@ -788,7 +791,7 @@ internal static void testInvalidPrivateKeys(ж<testing.T> t, elliptic.Curve curv
         }
     });
     t.Run(overflowˢ, (ж<testing.T> tΔ2) => {
-        var d = @new<bigꓸInt>().Add(curve.Params().N, big.NewInt(5));
+        var d = @new<big.Int>().Add(curve.Params().N, big.NewInt(5));
         var (x, y) = curve.ScalarBaseMult(d.Bytes());
         var k = Ꮡ(new PrivateKey(new PublicKey(curve, x, y), d));
         {

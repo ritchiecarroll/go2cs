@@ -65,7 +65,7 @@ public static partial void Example_openDBCLI() {
         var stopʗ1 = stop;
         defer(() => stopʗ1(), ref ᒐ);
 
-        var appSignal = new channel<osꓸSignal>(3);
+        var appSignal = new channel<os.Signal>(3);
         signal.Notify(appSignal.AsSendOnly(), os.Interrupt);
 
         var appSignalʗ1 = appSignal;
@@ -88,7 +88,7 @@ public static partial void Example_openDBCLI() {
 public static void Ping(context.Context ctx) {
     GoFrame ᒐ = default;
     try {
-        (ctx, var cancel) = context.WithTimeout(ctx, 1 * time.ΔSecond);
+        (ctx, var cancel) = context.WithTimeout(ctx, 1 * time.Second);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
 

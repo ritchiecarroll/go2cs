@@ -68,11 +68,11 @@ public static void TestParseRange(ж<testing.T> t) {
         if (err != nil && r != nil) {
             t.Errorf("parseRange(%q) returned error %q", test.s, err);
         }
-        if (builtin.len(ranges) != builtin.len(r)) {
-            t.Errorf("len(parseRange(%q)) = %d, want %d", test.s, builtin.len(ranges), builtin.len(r));
+        if (len(ranges) != len(r)) {
+            t.Errorf("len(parseRange(%q)) = %d, want %d", test.s, len(ranges), len(r));
             continue;
         }
-        foreach (var i in range(builtin.len(r))) {
+        foreach (var i in range(len(r))) {
             if (ranges[i].start != r[i].start) {
                 t.Errorf("parseRange(%q)[%d].start = %d, want %d", test.s, i, ranges[i].start, r[i].start);
             }
@@ -175,7 +175,7 @@ public static void TestParseRangeLimit(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Fatalf("parseRange(%q): %v", rangeHeader, err);
             }
-            nint got = builtin.len(ranges); if (got != tcʗ1.want) {
+            nint got = len(ranges); if (got != tcʗ1.want) {
                 tΔ1.Errorf("len(ranges) = %v, want %v", got, tcʗ1.want);
             }
 

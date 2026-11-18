@@ -45,7 +45,7 @@ using static global::go.testing.fstest_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("testing/fstest/mapfs_test.go", "mapfs_test.cs", "ABkcgriCuIK4gpKCgpSClOqCggAJCIKmgoKCggAPCIKC3IKmgoKUgoCCpIKClICSpICCtoKClICSpICCtoKClICSpICCtoKClICSpICC", "30-37:1")]
-[assembly: GoPositionMap("testing/fstest/testfs_test.go", "testfs_test.cs", "ABokgpSClICCtoCCpICCtoCCAAgIgqaC3IKCgpTqgtyGAAoGgsqC/oKClAANBoKCgpSUgpqKgpSmgg==", "68-70:1")]
+[assembly: GoPositionMap("testing/fstest/testfs_test.go", "testfs_test.cs", "ABskgpSClICCtoCCpICCtoCCAAgIgqaC/IKCgpQACgqC3IYADAaCyoIACQ6CgpQADwaCgoKUlIKaioKUpoI=", "68-70:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;
@@ -88,3 +88,15 @@ public static partial class fstest_internal_test_package
         builtin.initPackage(typeof(global::go.testing.fstest_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fstest_internal_test_package.failPermFS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstest_internal_testᴛfailPermFS;
+[GoMethodHost(typeof(fstest_internal_test_package.shuffledFS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstest_internal_testᴛshuffledFS;
+[GoMethodHost(typeof(fstest_internal_test_package.shuffledFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstest_internal_testᴛshuffledFile;
+// </MethodHolders>
