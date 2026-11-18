@@ -1,0 +1,16 @@
+row	moved_tracked	untracked
+archive.zip	1	0
+crypto.dsa	1	0
+crypto.internal.fips140.mlkem	1	0
+crypto.mlkem	1	0
+crypto.tls	5	2
+go.parser	1	0
+hash.maphash	1	0
+index.suffixarray	1	0
+internal.poll	7	3
+internal.runtime.gc.scan	4	1
+net	19	23
+net.http	0	0
+runtime	0	0
+sync.atomic	1	0
+time	6	1

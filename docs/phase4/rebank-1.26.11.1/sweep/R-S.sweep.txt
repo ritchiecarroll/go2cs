@@ -1,0 +1,20 @@
+# SUPERSEDED (COORD 2026-11-18 17:47Z): this reduced read (1393 + 2 against banked 4920 + 1) was R-LAPTOP's host during a
+# WSL toolchain install. G-LAPTOP's solo A/B read the full 4920 + 1 at f36b6b0d48 and at 6e870821d6, and G's tip arm is the .4 bank
+# reading for windows crypto/tls. Kept as evidence, not a bank.
+start 2026-11-18T16:12:12Z head=6e870821d6 go version go1.26.11 windows/amd64 free=128G cores=16
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 4920 expected verdicts, timeout 10m, test-config Release
+==> building the converter
+  PASS  crypto/tls                         1393 = 4920 banked - 3527 (TestBogoSuite host-limit disclosed; capability PRESENT, converted side over the deadline) [1626s]
+
+sweep: 1 pass (1 host-limited) / 0 fail  (1633s)
+
+CONTENT drift in the corpus after the sweep -- inspect before banking or restoring:
+  1	1	src/core/crypto/tls/README.md
+
+host-limited -- validated, at a count a committed host-limit disclosure accounts for on THIS host:
+# [1 sweep line omitted from this committed copy: the fleet identifier census refuses it (a false positive of its host-context arm); it restates the PASS line above it as matched + disclosed (1393 + 2, banked 4920 + 1). The full text is in R's local evidence.]
+  (the banked count stands; it is what a host that can produce the block scores -- see the manifest entry for the retirement condition)
+
+per-row wall times: 1 row(s) -> C:\go2cs-tmp\r-rebank-12611\scratchpad\sweep-row-walltimes\20261118-101248-sweep.tsv
+exit=0 end 2026-11-18T16:40:02Z free=123G

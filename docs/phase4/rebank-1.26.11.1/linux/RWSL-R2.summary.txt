@@ -1,0 +1,15 @@
+2026-11-18 18:49:42Z HOST uid=0 TMPDIR=/tmp(4 bytes) GOROOT=/root/sdk/go1.26.11 test/=3460 files toolchain: go1.26.11 linux/amd64 go=/root/sdk/go1.26.11/bin/go VERSION=go1.26.11 .NET sdk=10.0.400 runtime=10.0.11 nslookup=NXDOMAIN free=894G nproc=10 mem=19G
+2026-11-18 18:49:44Z PRE lane=R shard=RWSL-R2 head=8a86140f79 clean: tracked 0, untracked-under-tracked 0; residue=0
+2026-11-18 18:49:44Z rows: 2 from /root/rebank-kit-12611/RWSL-R2.txt: runtime net/http 
+2026-11-18 18:49:58Z converter built: /root/go2cs/src/go2cs/go2cs mtime=1795027798
+runtime: floor=120m timeout=120m test-deadline=60m pin=- inRoster=True
+net/http: floor=60m timeout=60m test-deadline=15m pin=- inRoster=True
+derived 2 row(s); roster rows 238; package floors 14; per-test floors 6
+2026-11-18 18:50:03Z row 1 runtime: start (timeout 120m, deadline 60m) argv: -tests -test-action all -test-config Release -test-deadline 60m -test-timeout 120m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/runtime /root/go2cs/src/core/runtime
+2026-11-18 20:00:40Z row 1 runtime: rc=0 word=PASS wall=4237s (11094	True	73	0)
+2026-11-18 20:00:44Z row 1 runtime: restored moved=21 untracked=23 tracked-dirty=0 deleted=0 free=889G
+2026-11-18 20:00:44Z row 2 net/http: start (timeout 60m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 60m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/net/http /root/go2cs/src/core/net/http
+2026-11-18 20:14:05Z row 2 net/http: rc=0 word=PASS wall=801s (1538	True	0	0)
+2026-11-18 20:14:08Z row 2 net/http: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=886G
+2026-11-18 20:14:18Z END rows=2 of 2 residue-before-purge=11082 residue-after=0 tracked-deleted=0
+RWSL-R2-DONE rc=0

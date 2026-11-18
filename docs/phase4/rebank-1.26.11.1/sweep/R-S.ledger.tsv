@@ -1,0 +1,7 @@
+# SUPERSEDED (COORD 2026-11-18 17:47Z): this host-limited read (1393 + 2 against banked 4920 + 1) was R-LAPTOP's host during a
+# WSL toolchain install. G-LAPTOP's solo A/B read the full 4920 + 1 at f36b6b0d48 and at 6e870821d6, and G's tip arm is the .4 bank
+# reading for windows crypto/tls. Kept as evidence, not a bank.
+6e870821d67c9221e09ed1e019d4c65e328e0f26
+# 1.26.11.1 RE-BANK at 6e870821d6, the crypto/tls windows full-count read on R-LAPTOP (COORD FLEET 2026-11-18 16:05Z). go1.26.11 windows/amd64, GOTOOLCHAIN=local, CGO_ENABLED=0; 16 logical cores; run-validated-sweep.ps1 -Filter crypto/tls
+utc	row	rc	word	count	wall_s	real_drift	oracle_rerun	disk_gb	drift_files
+2026-11-18T16:40:02Z	crypto/tls	0	PASS(host-limited)	1393	1626	0	no	123	src/core/crypto/tls/README.md (badge 4920/1 -> 1393/2), docs/validation/current/crypto.tls.md (restored, not banked)
