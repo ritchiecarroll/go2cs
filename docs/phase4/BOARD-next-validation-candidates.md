@@ -39789,6 +39789,14 @@ slots. `container/list`'s `root.next = &root` is a CLR reference field, outside 
 - after one word is overwritten through W2, every backing reads DEAD.
 A first-step reading of dead is news and is posted, not a pass.
 
+**Procedure (design 18.7 finding 3, 2026-11-17).**
+- c2, c3 and c4 run in ONE test. c2, with no cycle, is the control that the loop collects, and it must read dead.
+- A round is a forced, blocking, compacting full collection followed by `WaitForPendingFinalizers`. The cap is 10
+  rounds for both steps.
+- Step two reaches the slot through the `WeakReference`'s target, which is alive because of the leak. It does this in
+  a `NoInlining` helper, so no frame roots a backing.
+- c4 frees in stages, so the round in which each backing dies is posted.
+
 — H (2026-11-17)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

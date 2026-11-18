@@ -2026,3 +2026,118 @@ reach `runtime.memmove` if called, and are listed beside `maps_typedmemmove` as 
 - c3 or c4 read dead without an overwrite (news, posted).
 
 — H (2026-11-17)
+
+### 18.7 Revision 2026-11-17: P3's re-review of 18.6 answered (text only, before code)
+
+P3 re-read 18.6 at `ede548ea41` (COORD inbox `20261118T000620Z-P3.md`): APPROVE WITH CHANGES, TEXT ONLY.
+- CLEAR: the pin, ruling (B), the one named leak for c3 and c4, the bag-lock miss, the door nit and the BOARD row.
+- COORD accepted the three findings below as worded.
+This block AMENDS the parts of 18.6 it names, and the rest of 18.6 stands. The numbers here are the re-review's.
+Every code cite below was read at master `b2eaf5290a`.
+
+**1. Every number W2 writes and W3 compares is taken through the PINNING projection (MUST-FIX; amends 18.6
+finding 1's "the box keeps its own pin-only hold" and 18.3's "W2 writes `v`'s NUMBER").**
+- The hole is real. The converter mints `unsafe.Pointer(p)` as `FromBox` (`convCallExpr.go:1128`). Over a managed box
+  that is the TRANSIENT address of the box's value slot, read under a `fixed` that has already ended
+  (`unsafe/unsafe.cs:550`). The box rides along as the referent, and nothing pins it. If W2 wrote that carried number,
+  the word would be stale after the first compaction, and the entry would hold an unpinned box. 18.3 to 18.6 did not
+  say which number W2 writes, so P3 could not tell. They say it now.
+- **The rule.** W2 writes, and W3 compares, `BaseOf(v)` (`unsafe/unsafe.cs:1114`, design 10.1), never `v`'s carried
+  number. `BaseOf` already exists and is what `unsafe.Add` derives from (`Pointer.Moved`, `:1138`):
+  - for a pointer that names a managed box by address (`NamesAManagedSourceByAddress`, `:1102`: a `FromBox`,
+    `FromBoxObject` or `FromPinnedBox` mint), it asks the box's own number NOW, through
+    `IGoReflectBox.NativeArgumentAddress`, which is the box-to-`uintptr` operator (`ж.cs:1379`). That operator:
+    - for a reference-free pointee, PINS the storage (`EnsureStableAddress`, `ж.cs:1455`, a pin-only hold for the
+      box's lifetime), registers the address, and answers it;
+    - for a reference-bearing pointee (`PointerStorage.None`, `ж.cs:1446`), registers and answers the box's ORDER
+      TOKEN;
+  - it uses the carried number as it is when the box is already pinned there (every `FromPinnedBox` mint), and for every
+    other pointer: a native alias, the zerobase, a token, and a derived pointer, which `Moved` already built from
+    `BaseOf`.
+- **The check after the projection.** The word must be 0, a native alias, the zerobase address, a tagged token, or an
+  address the referent box `IsPinnedAt`. The one kind that is none of these is `PointerStorage.Unpinnable`
+  (`ж.cs:78`, an interior reference with no pinnable slot). For it the operator answers a transient address with no
+  pin. W2 REFUSES that store by name: "unsafe.Pointer store: the stored pointer's storage can be neither pinned nor
+  tokened". No silent store remains.
+- **CAS.** W3 projects `old` the same way before it compares. Two `FromBox` mints of different boxes can carry
+  coinciding transient addresses (`unsafe.cs:368`). Their projections cannot coincide: two live pinned objects never
+  share an address, and two live boxes never share a token (`AllocationBase`, `ж.cs:710`: the id is unique below
+  its 2^29 wrap). One cost is named: projecting an `old` that was never stored pins its box for that box's
+  life, as any `uintptr(unsafe.Pointer(p))` conversion does today.
+- **Can the number rule tell an order token from an address? YES, by the tag.** `IsTaggedToken`
+  (`ж.PointerTokens.cs:424`, with `TagBit` and `TagMask` at `:255-256`) reads bit 63 set and bit 47 clear. No
+  canonical x86-64 user address has that shape, so W1 takes a tagged word as a token (resolved through the registry,
+  or held by its entry) and never dereferences it raw. The 3.2 doors already rely on the same predicate
+  (`GoCgoArgs.cs:272`, `:292`).
+  - The predicate states its own limit: it is x86-64's rule, and ARM64 owes its own derivation. 18.7 adds two readers
+    of the predicate, W1 and W2, and no new assumption. B-12's arm64 legs measure it on the hosted arm64 runners.
+- **ARM B-12, new.**
+  - `x := new(struct{a, b int})` is stored through W2 as `*(*unsafe.Pointer)(slot) = unsafe.Pointer(x)`. Every other
+    reference to `x` is dropped, and forced compacting collections run.
+  - W1 reads the same box, and `x.a` is intact. The word in the slot is an address `x`'s box `IsPinnedAt`.
+  - Then `CompareAndSwap(slot, unsafe.Pointer(y), z)`, with a second such box `y`, FAILS and leaves the word unchanged.
+  - A third leg stores a reference-bearing `new(struct{s string})`: the word is a tagged token.
+  - A fourth leg stores an `Unpinnable` pointer and asserts the refusal text.
+- **STOP LINE:** a W2 word equal to a `FromBox` transient address that its box is not pinned at.
+
+**2. Every GoCgoArgs door that hands over a Go backing's bytes, with its decision (SHOULD-FIX; extends 18.6 finding
+3).** The lookup is the one 18.6 finding 3 defines: the destination bag table's entries over the backing.
+- **`VoidPointer`** (`GoCgoArgs.cs:122`): the whole backing is looked up, and any entry is refused with cgocheck's text
+  (18.6 finding 3, unchanged).
+- **`HelperVoidPointer`** (`:137`, `C.GoBytes`) and **`HelperPointer`** (`:152`, `C.GoString`, `C.GoStringN`): the
+  same lookup and the same text, as P3 worded it.
+  - Named for the confirm read: these helpers run in Go, and cgocheck does not apply to them, so Go itself accepts a
+    Go backing that holds a Go pointer here. The refusal is therefore STRICTER than Go. It is a NAMED DEVIATION that
+    fails closed. P3's confirm read may drop it to "no lookup: the bytes are copied as numbers, and Go keeps nothing
+    alive by them".
+- **`StructPointer`** (`:42`, the mirror copy). `PointerMember` (`:88`) refuses typed pointer members, but a by-value
+  array field or `uintptr` field copies its words RAW. The SOURCE backing is looked up over the copied range, and any
+  entry there is refused with cgocheck's text. The copy-back after the call is an overwrite of that range: it drops the
+  range's entries, as a clear door does (18.5 finding 5). Because the call was refused otherwise, that set is empty
+  unless another thread stored into the range during the call.
+- **`CopyBytes`** (`:190`, `C.CBytes`) copies the words into C-owned memory, where no entry follows. A source range
+  holding an entry is REFUSED, with W2(a)'s text, consistent with W2(a): no Go pointer is stored into C memory.
+  `CopyString` (`:182`, `C.CString`) takes the same lookup over the string's bytes.
+- **Callbacks** (Go exports called from C) are Phase 5 and OUT of 3.2. A Go export reachable from C in 3.2's tree is a
+  stop line.
+- **B-10** gains one arm per door: `VoidPointer`; `HelperVoidPointer`; `HelperPointer`; `StructPointer` with an array
+  field and with a `uintptr` field; `CopyBytes`; and `CopyString`. Each stores a Go pointer through W2 into the
+  backing, crosses the door, and asserts the refusal text.
+
+**3. The c3 and c4 procedure (SHOULD-FIX; amends 18.6 finding 2 and the BOARD row's "Measured by").**
+- **One test, three arms, one loop.** c2 (no cycle), c3 (self) and c4 (mutual) run in the same test method:
+  - **c2 is the CONTROL** that the loop collects. Its backing must read dead within the cap.
+  - If c2 does not read dead, the test FAILS as an instrument failure. That run says nothing about c3 or c4.
+- **The loop.** One round is `GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting:
+  true)` followed by `GC.WaitForPendingFinalizers()`.
+  - The cap is **10 rounds**, the same for both steps.
+  - Each step runs all 10 rounds and records the round in which each backing first read dead, so the cap's margin is
+    posted.
+  - c4 needs several rounds by construction:
+    1. the overwrite drops `A`'s entry;
+    2. a finalizer frees `B`'s pin, and `B` dies;
+    3. `B`'s table value, which holds `A`'s box, is released;
+    4. that box's finalizer frees `A`'s pin, and `A` dies.
+- **Step one (the leak).** The test keeps ONLY a `WeakReference` to each backing. Every store runs inside a
+  `[MethodImpl(MethodImplOptions.NoInlining)]` helper, so no local in the test frame roots a backing, under Debug
+  lifetimes too. After the 10 rounds, c3's and c4's backings read ALIVE, and c2's reads dead.
+- **Step two (the bound) reaches the slot through the `WeakReference`'s target, which is alive BECAUSE of the leak.**
+  - A `NoInlining` helper calls `TryGetTarget`; a false there is news, posted, and not a pass.
+  - The helper overwrites one word of the cycle through W2 with nil and returns nothing, so the strong reference dies
+    with its frame.
+  - After 10 more rounds, every backing in the cycle reads DEAD.
+
+**Predictions, revised.**
+- B-4 runs as finding 3's single test: c2 dead in step one; c3 and c4 alive after step one and dead after step two, all
+  within 10 rounds.
+- B-10 is seven arms (finding 2).
+- B-12 is new (finding 1). Before the cure, a W2 that wrote the carried number would fail its `IsPinnedAt` leg.
+
+**Stop lines, added.**
+- A W2 or W3 number not taken through `BaseOf`.
+- An `Unpinnable` store accepted silently.
+- A GoCgoArgs door that hands over a backing's bytes without the lookup, other than a helper door that P3's confirm
+  read releases.
+- c2 not dead within the cap.
+
+— H (2026-11-17)
