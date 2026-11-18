@@ -33,6 +33,7 @@
 
 namespace go;
 
+using global::go.@internal;
 using abi = global::go.@internal.abi_package;
 using static global::go.runtime_package;
 
@@ -44,11 +45,11 @@ partial class runtime_internal_test_package
     {
         ж<abi.Type> typ = abi.TypeOf(Ꮡout.Value);
 
-        if (typ == nil || abi.Kind(typ) != abi.Pointer) {
+        if (typ == nil || typ.Kind() != abi.Pointer) {
             throw panic("new result of non-ptr type");
         }
 
-        Ꮡout.Value = userArenaNew(ref a.arena.Value, abi.Elem(typ));
+        Ꮡout.Value = userArenaNew(ref a.arena.Value, typ.Elem());
     }
 
     public static void KeepNArenaHints(nint n) =>
