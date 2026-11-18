@@ -1,0 +1,18 @@
+DECL KEPT        type internal/runtime/gc/internal/gen.Ptr | generic named type | exported: declaration-level | witness-param=true forwarders=1
+DECL KEPT        func internal/runtime/gc/internal/gen.Deref | param internal/runtime/gc/internal/gen.Ptr[W] | exported: declaration-level | witness-param=false forwarders=0
+DECL KEPT        type internal/runtime/gc/internal/gen.Array | generic named type | exported: declaration-level | witness-param=true forwarders=1
+DECL KEPT        func internal/runtime/gc/internal/gen.ConstArray | result internal/runtime/gc/internal/gen.Array[T] | exported: declaration-level | witness-param=false forwarders=0
+EAGER open-record     E-assembly internal/runtime/gc/internal/gen.Array -> internal/runtime/gc/internal/gen.Value
+EAGER nominal         n/a        internal/runtime/gc/internal/gen.Mask64 -> internal/runtime/gc/internal/gen.Value
+EAGER nominal         n/a        internal/runtime/gc/internal/gen.Mask8 -> internal/runtime/gc/internal/gen.Value
+EAGER open-record     E-assembly internal/runtime/gc/internal/gen.Ptr -> internal/runtime/gc/internal/gen.Value
+EAGER nominal         n/a        internal/runtime/gc/internal/gen.Uint64x8 -> internal/runtime/gc/internal/gen.Value
+EAGER record          E-assembly internal/runtime/gc/internal/gen.Uint64 -> internal/runtime/gc/internal/gen.Value
+EAGER nominal         n/a        internal/runtime/gc/internal/gen.Uint8x64 -> internal/runtime/gc/internal/gen.Value
+EAGER nominal         n/a        internal/runtime/gc/internal/gen.Word -> internal/runtime/gc/internal/gen.Value
+EAGER nominal         n/a        internal/runtime/gc/internal/gen.void -> internal/runtime/gc/internal/gen.Value
+EAGER-TOTAL pairs 9 | nominal 6 record 1 open-record 2 value-witness 0 open-witness 0 pointer-witness 0 iface-witness 0 | E-assembly 3 I-assembly 0 UNNAMEABLE 0 REFUSED 0
+EAGER-TEST-ONLY-TOTAL pairs 0 | nominal 0 record 0 open-record 0 value-witness 0 open-witness 0 pointer-witness 0 iface-witness 0 | E-assembly 0 I-assembly 0 UNNAMEABLE 0 REFUSED 0
+INST nominal         n/a        internal/runtime/gc/internal/gen.void -> internal/runtime/gc/internal/gen.Value
+INST-TOTAL pairs 1 | nominal 1 record 0 open-record 0 value-witness 0 open-witness 0 pointer-witness 0 iface-witness 0 | E-assembly 0 I-assembly 0 UNNAMEABLE 0 REFUSED 0
+TOTAL target linux/arm64 selected 4 closure-added 0 [] kept 4 uses 10 use-files 1

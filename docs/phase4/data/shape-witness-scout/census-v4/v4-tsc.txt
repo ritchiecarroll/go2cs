@@ -1,0 +1,91 @@
+DECL KEPT        type github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Index | generic named type | exported: declaration-level | witness-param=true forwarders=1
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/ls.combineLocationArray | result []T | in-package non-nominal github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.Location | witness-param=false forwarders=0
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/ls.combineResponseLocations | param iter.Seq[T] | in-package non-nominal github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.ImplementationResponse | witness-param=false forwarders=0
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.FromLSPRange | result []github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.MappedSpan[T] | exported: declaration-level | witness-param=false forwarders=0
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.lspRangeToVirtual | result []github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.MappedSpan[T] | in-package non-nominal *github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile | witness-param=false forwarders=1
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.FromLSPPosition | result []github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.MappedPosition[T] | exported: declaration-level | witness-param=false forwarders=0
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.lspPositionToVirtual | result []github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.MappedPosition[T] | in-package non-nominal *github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile | witness-param=false forwarders=1
+DECL KEPT        type github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.MappedSpan | generic named type | exported: declaration-level | witness-param=false forwarders=2
+DECL KEPT        type github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.MappedPosition | generic named type | exported: declaration-level | witness-param=false forwarders=2
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/lsp.registerLanguageServiceDocumentRequestHandler | param github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.RequestInfo[Req, Resp] | in-package non-nominal *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.DocumentDiagnosticParams | witness-param=false forwarders=0
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/lsp.registerLanguageServiceWithAutoImportsRequestHandler | param github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.RequestInfo[Req, Resp] | in-package non-nominal *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.CompletionParams | witness-param=false forwarders=0
+DECL KEPT        func github.com/microsoft/TypeScript/tsc/internal/lsp.registerMultiProjectReferenceRequestHandler | param github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.RequestInfo[Req, Resp] | in-package non-nominal *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.ReferenceParams | witness-param=false forwarders=0
+EAGER pointer-witness UNNAMEABLE *embed.file -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness I-assembly *flag.FlagSet -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness UNNAMEABLE *github.com/microsoft/TypeScript/tsc/internal/bundled.fileInfo -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Export -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness UNNAMEABLE *github.com/microsoft/TypeScript/tsc/internal/vfs.walkDirEntry -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness UNNAMEABLE *github.com/microsoft/TypeScript/tsc/internal/vfs.walkDirFileInfo -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness I-assembly *internal/godebug.Setting -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness I-assembly *os.File -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness I-assembly *os.Root -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness UNNAMEABLE *os.fileStat -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness UNNAMEABLE *os.root -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness UNNAMEABLE *reflect.rtype -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness I-assembly *runtime.Func -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness I-assembly *testing.B -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness I-assembly *testing.F -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness I-assembly *testing.T -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER pointer-witness UNNAMEABLE *testing.common -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER value-witness   I-assembly github.com/microsoft/TypeScript/tsc/internal/diagnostics.Category -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER value-witness   I-assembly internal/abi.Name -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER iface-witness   I-assembly internal/reflectlite.Type -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER value-witness   UNNAMEABLE internal/reflectlite.rtype -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER iface-witness   I-assembly io/fs.DirEntry -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER iface-witness   I-assembly io/fs.FileInfo -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER value-witness   UNNAMEABLE io/fs.dirInfo -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER value-witness   UNNAMEABLE os.dirEntry -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER value-witness   UNNAMEABLE os.fileWithoutReadFrom -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER value-witness   UNNAMEABLE os.fileWithoutWriteTo -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER iface-witness   I-assembly reflect.Type -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER iface-witness   I-assembly testing.TB -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TOTAL pairs 29 | nominal 0 record 0 open-record 0 value-witness 7 open-witness 0 pointer-witness 17 iface-witness 5 | E-assembly 1 I-assembly 15 UNNAMEABLE 13 REFUSED 0
+EAGER-TEST-ONLY pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.testEntry -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY pointer-witness UNNAMEABLE *github.com/microsoft/TypeScript/tsc/internal/vfs/vfstest.fileInfo -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY pointer-witness I-assembly *go/token.File -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY pointer-witness UNNAMEABLE *testing/fstest.mapDir -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY pointer-witness UNNAMEABLE *testing/fstest.mapFileInfo -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY pointer-witness UNNAMEABLE *testing/fstest.openMapFile -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY pointer-witness I-assembly *text/template.Template -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY value-witness   I-assembly github.com/google/go-cmp/cmp.StructField -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY value-witness   I-assembly github.com/google/go-cmp/cmp.Transform -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+EAGER-TEST-ONLY-TOTAL pairs 9 | nominal 0 record 0 open-record 0 value-witness 2 open-witness 0 pointer-witness 7 iface-witness 0 | E-assembly 1 I-assembly 4 UNNAMEABLE 4 REFUSED 0
+INST pointer-witness I-assembly *github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile -> github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.Script
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/fourslash.scriptInfo -> github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.Script
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Export -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.testEntry -> github.com/microsoft/TypeScript/tsc/internal/ls/autoimport.Named
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/ls/lsconv_test.testScript -> github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.Script
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.CallHierarchyPrepareParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.CodeActionParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.CodeLensParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.CompletionParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.DefinitionParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.DocumentDiagnosticParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.DocumentFormattingParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.DocumentHighlightParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.DocumentOnTypeFormattingParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.DocumentRangeFormattingParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.DocumentSymbolParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.FoldingRangeParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HoverParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.ImplementationParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentPosition
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.InlayHintParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.LinkedEditingRangeParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.LocationLink -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasLocation
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.MultiDocumentHighlightParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.PrepareRenameParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.ReferenceParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentPosition
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.SelectionRangeParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.SemanticTokensParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.SemanticTokensRangeParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.SignatureHelpParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.TextDocumentPositionParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.TypeDefinitionParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.VSOnAutoInsertParams -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasTextDocumentURI
+INST pointer-witness E-assembly *github.com/microsoft/TypeScript/tsc/internal/project.Overlay -> github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.Script
+INST nominal         n/a        github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.Script -> github.com/microsoft/TypeScript/tsc/internal/ls/lsconv.Script
+INST nominal         n/a        github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.LocationOrLocationsOrDefinitionLinksOrNull -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasLocations
+INST nominal         n/a        github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.LocationsOrNull -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasLocations
+INST nominal         n/a        github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.Location -> github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.HasLocation
+INST-TOTAL pairs 37 | nominal 4 record 0 open-record 0 value-witness 0 open-witness 0 pointer-witness 33 iface-witness 0 | E-assembly 32 I-assembly 1 UNNAMEABLE 0 REFUSED 0
+TOTAL target windows/amd64 selected 12 closure-added 0 [] kept 12 uses 116 use-files 11

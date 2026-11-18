@@ -1,0 +1,32 @@
+DECL KEPT        type closurefixture.MappedSpan | generic named type | forwarded from kept Holder | witness-param=false forwarders=2
+DECL KEPT        func closurefixture.FromLSPRange | result []closurefixture.MappedSpan[T] | forwarded from kept Holder | witness-param=false forwarders=1
+DECL KEPT        type closurefixture.Index | generic named type | in-package non-nominal *closurefixture.named2[T] | witness-param=true forwarders=2
+DECL KEPT        type closurefixture.Cache | closure: generic named type field or embed | in-package non-nominal *closurefixture.Export | witness-param=true forwarders=0
+DECL KEPT        type closurefixture.Holder | closure: method of a generic type | in-package non-nominal *closurefixture.SourceFile | witness-param=true forwarders=0
+DECL DROPPED(P3) func closurefixture.wrapAll | closure: generic function body or signature |  | witness-param=false forwarders=0
+EAGER pointer-witness E-assembly *closurefixture.Export -> closurefixture.Named
+EAGER pointer-witness E-assembly *closurefixture.named2 -> closurefixture.Named
+EAGER pointer-witness I-assembly *internal/godebug.Setting -> closurefixture.Named
+EAGER pointer-witness I-assembly *os.File -> closurefixture.Named
+EAGER pointer-witness I-assembly *os.Root -> closurefixture.Named
+EAGER pointer-witness UNNAMEABLE *os.fileStat -> closurefixture.Named
+EAGER pointer-witness UNNAMEABLE *os.root -> closurefixture.Named
+EAGER pointer-witness UNNAMEABLE *reflect.rtype -> closurefixture.Named
+EAGER pointer-witness I-assembly *runtime.Func -> closurefixture.Named
+EAGER value-witness   I-assembly internal/abi.Name -> closurefixture.Named
+EAGER iface-witness   I-assembly internal/reflectlite.Type -> closurefixture.Named
+EAGER value-witness   UNNAMEABLE internal/reflectlite.rtype -> closurefixture.Named
+EAGER iface-witness   I-assembly io/fs.DirEntry -> closurefixture.Named
+EAGER iface-witness   I-assembly io/fs.FileInfo -> closurefixture.Named
+EAGER value-witness   UNNAMEABLE io/fs.dirInfo -> closurefixture.Named
+EAGER value-witness   UNNAMEABLE os.dirEntry -> closurefixture.Named
+EAGER value-witness   UNNAMEABLE os.fileWithoutReadFrom -> closurefixture.Named
+EAGER value-witness   UNNAMEABLE os.fileWithoutWriteTo -> closurefixture.Named
+EAGER iface-witness   I-assembly reflect.Type -> closurefixture.Named
+EAGER-TOTAL pairs 19 | nominal 0 record 0 open-record 0 value-witness 6 open-witness 0 pointer-witness 9 iface-witness 4 | E-assembly 2 I-assembly 9 UNNAMEABLE 8 REFUSED 0
+EAGER-TEST-ONLY-TOTAL pairs 0 | nominal 0 record 0 open-record 0 value-witness 0 open-witness 0 pointer-witness 0 iface-witness 0 | E-assembly 0 I-assembly 0 UNNAMEABLE 0 REFUSED 0
+INST pointer-witness E-assembly *closurefixture.Export -> <inline>
+INST pointer-witness E-assembly *closurefixture.SourceFile -> <inline>
+INST pointer-witness E-assembly *closurefixture.named2 -> closurefixture.Named
+INST-TOTAL pairs 3 | nominal 0 record 0 open-record 0 value-witness 0 open-witness 0 pointer-witness 3 iface-witness 0 | E-assembly 3 I-assembly 0 UNNAMEABLE 0 REFUSED 0
+TOTAL target windows/amd64 selected 3 closure-added 3 [generic function body or signature=1, generic named type field or embed=1, method of a generic type=1] kept 5 uses 11 use-files 1

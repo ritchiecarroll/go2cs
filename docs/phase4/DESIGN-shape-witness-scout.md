@@ -9,7 +9,8 @@
 >
 > **Revised 2026-11-18 after P3's review (APPROVE WITH CHANGES): see section 7. It supersedes sections 2, 5 and 6 where
 > they differ; the earlier text stays visible. Revised again the same day after P3's re-read: see section 8, which
-> supersedes section 7 where they differ.**
+> supersedes section 7 where they differ. Revised a third time after P3's second re-read: see section 9, which supersedes
+> 8.4 and section 8's tsc prediction where they differ.**
 
 ## 1. Verdict
 
@@ -387,3 +388,74 @@ and sees the types that satisfy it.
 - **Public surface:** 0.
 - **tsc:** the 12 kept declarations convert. autoimport emits up to 38 eager witnesses (36 there under I's-assembly
   placement, 2 in E's assemblies), and 0 instantiations are refused.
+
+## 9. Revision 2026-11-18 (third): P3's second re-read, answered by number
+
+P3 re-read 72c908b20c as APPROVE WITH CHANGES and closed 8.1-8.3 (COORD inbox 20261118T034551Z-P3.md); COORD accepted
+every finding (03:47Z). Every number below is from census v4 (`data/shape-witness-scout/census-v4/`). It is census v3 with
+these four fixes, and its source is in the record verbatim. Section 9 supersedes 8.4 and 8's tsc prediction where they
+differ.
+
+### 1. MUST: I's assembly takes only an E it can NAME, and eager pairs are counted per assembly
+
+- **Nameability.** A placement now needs the placing assembly to NAME the other type: exported, or declared in that same
+  package. An unexported Go type is emitted `internal`, and no consumer has an InternalsVisibleTo grant.
+- **An unexported foreign E** is NEITHER eager NOR refused (column UNNAMEABLE). If inference ever produces such a pair
+  at a use site, that instantiation is refused by name.
+- **Per assembly.** Eager pairs are computed from the production package's own import closure. The test assembly's
+  EXTRA pairs (testing, fstest, vfstest, go-cmp) are a separate row, and the production assembly emits none of them.
+
+### 2. MUST: classify AFTER location; a value E that cannot see I is a witness in I's assembly
+
+- **Location comes first** (8.4's rule, now with nameability), and the class follows from it:
+  - a value E placed in E's assembly takes a declaration-driven record (`GoImplement<E, I>`);
+  - placed in I's assembly, it takes a per-pair VALUE witness, `[pkg_]EᴠIΔshape`, beside the pointer form
+    `[pkg_]EжIΔshape`. The spellings follow go2cs-gen's adapter names (ValueAdapterInfix `ᴠ`, PointerPrefix `ж`, the
+    foreign `pkg_` prefix).
+- **No record is ever placed in an assembly that cannot see I**, so the footprint stays inside the assemblies that hold
+  the witnesses: gen for std, autoimport's side for tsc.
+- **The tsc row, restated.** The 9 rows section 8 called "cut-adds" are now 2 value witnesses in I's assembly plus 5
+  UNNAMEABLE in production, and 2 value witnesses in the test assembly. None of them is a record.
+
+### 3. SHOULD: three tighter reads
+
+- **(a)** A package's records come from ITS OWN folder only: the flat `package_info.cs`, or the target GOOS's per-GOOS
+  folder. Never every subfolder.
+- **(b)** A `Pointer = true` record (open or closed) is kept apart from value-nominal. In the eager test, an implementer
+  whose POINTER alone satisfies I is a pointer pair, open generics included.
+- **(c)** A record's interface argument is matched QUALIFIED: bare only when I is the record's own package, otherwise
+  `go.<path>_package.Name`.
+
+### 4. NIT: the emitted text of the open record
+
+- Today the converter emits a one-parameter open record, `GoImplement(typeof(Ptr<>), typeof(Value))`. Once a cut gives
+  Ptr its witness parameter, the same line reads `typeof(Ptr<,>)`.
+- The +3 count is of lines: `GoImplement<Uint64, Value>` plus the two open records. Their text follows whichever arity
+  Ptr and Array have when the cut emits them.
+
+### The census, v4 (std identical on all 4 targets)
+
+| population | pairs | nominal | record | open-record | value-witness | pointer-witness | iface-witness | E-assembly | I-assembly | UNNAMEABLE | REFUSED |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| std eager (gen, Value) | 9 | 6 | 1 | 2 | 0 | 0 | 0 | 3 | 0 | 0 | 0 |
+| std test-assembly extra | 0 | - | - | - | - | - | - | - | - | - | - |
+| tsc eager, production (autoimport.Index, Named) | 29 | 0 | 0 | 0 | 7 | 17 | 5 | 1 | 15 | 13 | 0 |
+| tsc test-assembly extra | 9 | 0 | 0 | 0 | 2 | 7 | 0 | 1 | 4 | 4 | 0 |
+| tsc instantiated (use sites of the 12) | 37 | 4 | 0 | 0 | 0 | 33 | 0 | 32 | 1 | 0 | 0 |
+| behavioral (107 + class B's) | 0 | - | - | - | - | - | - | - | - | - | - |
+
+- **P3's 17 unnameable rows** are 13 in production plus 4 in the test assembly.
+- **Of tsc production's 29 eager pairs, 16 are emitted:** 15 in autoimport (8 pointer, 2 value, 5 structural-interface
+  witnesses) and 1 pointer witness in its element type's own assembly. The other 13 are unnameable.
+- **Every pair a use site actually names is placeable:** 32 in E's assembly, 1 in I's, 0 unnameable, 0 refused.
+
+### Predictions for the eventual cut, REVISED (scored only when it runs)
+
+- **stdlib:** gen's 3-4 .cs on 4 targets, `package_info.cs` +3 lines among them, 0 per-pair witnesses, 0 unnameable,
+  0 refused.
+- **CNR:** 0 behavioral lines.
+- **Public surface:** 0.
+- **tsc:** the 12 kept declarations convert.
+  - autoimport's production assembly emits 15 eager witnesses, and 1 more is emitted in E's assembly.
+  - autoimport's test assembly emits its 5 extra.
+  - Use sites need 33 pointer witnesses (32 of them in E's assemblies), and nothing is refused.
