@@ -1362,6 +1362,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	// class-qualified. Computed from the loaded variants before either converts, and session-scoped
 	// — resetPackageState does not clear it.
 	testAmbiguousLocalTypeNames = ambiguousVariantTypeNames(internal, external)
+	testInternalDeclaredNames = internalTestDeclaredNames(internal)
 
 	// Cleared for every package, filled only by the recompile-model seed below: the alias bindings a
 	// variant must yield to are the ones the seeded production metadata already carries into this
@@ -1784,6 +1785,26 @@ func ambiguousVariantTypeNames(internal, external *packages.Package) hashset.Has
 	}
 
 	return ambiguous
+}
+
+// internalTestDeclaredNames answers the package-level names the internal variant's `_test.go` files
+// declare (see testInternalDeclaredNames).
+func internalTestDeclaredNames(internal *packages.Package) hashset.HashSet[string] {
+	names := hashset.HashSet[string]{}
+
+	if internal == nil || internal.Types == nil || internal.Fset == nil {
+		return names
+	}
+
+	scope := internal.Types.Scope()
+
+	for _, name := range scope.Names() {
+		if strings.HasSuffix(strings.ToLower(internal.Fset.Position(scope.Lookup(name).Pos()).Filename), "_test.go") {
+			names.Add(name)
+		}
+	}
+
+	return names
 }
 
 // referenceModelTestPackageInfoSeed composes package_test_info.cs for a production-reference test

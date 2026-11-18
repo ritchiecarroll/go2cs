@@ -815,3 +815,68 @@ func TestPromotedForwarderIsEmittedInItsStructsHolder(t *testing.T) {
 		"[GoMethodHost(typeof(main_package.counting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
 	}, nil)
 }
+
+const dotImportHolderLibSource = `package lib
+
+const size = 64
+
+var shared = 1
+
+type pair struct{ a, b int }
+
+func Exported() int { return size + shared + pair{1, 2}.a }
+`
+
+const dotImportHolderMainSource = `package main
+
+import (
+	"fmt"
+
+	. "example.com/app/lib"
+)
+
+const size = 32
+
+var shared = 2
+
+var alone = 3
+
+type Set struct{ n int }
+
+type pair struct{ x int }
+
+type single struct{ y int }
+
+func (s Set) Bits() int { return s.n + size + shared + alone }
+
+func (p pair) Sum(q single) int { return p.x + q.y + pair{x: 1}.x }
+
+func plain() int { return size + shared + alone }
+
+func main() {
+	fmt.Println(Set{n: 1}.Bits(), plain(), Exported(), pair{}.Sum(single{}))
+}
+`
+
+// A dot import (`. "runtime"`) is written `using static runtime_package;`, which in C# brings in every name
+// of the class the assembly can see, unexported ones included, where Go brings in none of them. In the
+// package class the class's own member wins; a method holder is not nested in the package class, so there
+// the two using-statics supply a name both packages declare with equal standing (CS0229, runtime's
+// hashSize in hash_test.go; for a type, net/http's dumpConn, CS0104). The holder writes such a name through
+// its own package's class, which is the binding Go gives it. A name only the package declares, and every
+// name outside a holder, stays bare.
+func TestHolderQualifiesAnOwnNameADotImportedPackageAlsoDeclares(t *testing.T) {
+	emitted := convertMethodHolderTree(t, "example.com/app",
+		map[string]string{"main.go": dotImportHolderMainSource},
+		map[string]string{"lib/lib.go": dotImportHolderLibSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"using static go.example.com.app.lib_package;\n",
+		"return s.n + (nint)main.size + main.shared + alone;",
+		"return (nint)size + shared + alone;",
+		"Sum(this main_package.pair p, single q) { return p.x + q.y + new main_package.pair(x: 1).x; }",
+	}, []string{
+		"main.alone",
+		"lib_package.size",
+	})
+}
