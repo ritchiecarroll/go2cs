@@ -973,7 +973,7 @@ and the site calls it:
 fmt.Println("overloads:", lib.Pitch(o).Hz, lib.Pitch(twin).Hz, lib.Pitch(other.Tagged{Hz: 55}).Hz)
 ```
 
-<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:59 -->
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:64 -->
 ```csharp
 fmt.Println("overloads:", libꓸPitch(o).Hz, libꓸPitch(twin).Hz, libꓸPitch(new other.Tagged(Hz: 55)).Hz);
 ```
