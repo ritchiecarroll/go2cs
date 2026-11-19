@@ -97,29 +97,27 @@ there. Each standard-library package's README now leads its badges with a "conve
        entries across all assets, promoted forwarders included, in 230 suppression files that also carry the renames
        below (13,234 entries in all). The package counts are read from those files: 213 carry a CP0002 entry, 120 of
        them reachable (no internal segment, not vendored). -->
-- **Names that carried a `Δ` prefix keep their Go names.** Through 1.26.10.3 a type, constant or variable
-  whose Go name a method of its package also used was emitted with a `Δ` prefix: `go/doc/comment`'s interface `Text`
-  was `ΔText`, because `Printer` has a method `Text`. With each method in its receiver's holder the two names no
-  longer meet, and from 1.26.11.1 every such name is its Go name. In the standard library this renames over two hundred
-  types and dozens of constants and variables, and changes well over a thousand members that name them (fields,
-  parameters, return types, interface members), in about a hundred packages, two thirds of which a program can
-  import. C# source that names the prefixed form uses the Go name instead (`ΔText` becomes `Text`). An assembly
-  compiled against 1.26.10.3 that binds a prefixed name fails under 1.26.11.1, and the break floor refuses that
-  combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+- **Names that carried a `Δ` prefix keep their Go names.** Through 1.26.10.3 a type, constant or variable whose
+  Go name a method of its package also used took a `Δ` prefix in C#, because both were members of the package class:
+  `time.Second` was `time.ΔSecond`, `reflect.Type` was `reflect.ΔType`, `syscall.Handle` was `syscall.ΔHandle`, and
+  `go/doc/comment`'s interface `Text` was `ΔText`, because `Printer` has a method `Text`. With each method in its
+  receiver's holder the two names no longer meet, and from 1.26.11.1 every such name is its Go name. In the standard
+  library this renames over two hundred types and dozens of constants and variables, and changes well over a thousand
+  members that name them (fields, parameters, return types, interface members), in about a hundred packages, two
+  thirds of which a program can import. C# source that names the prefixed form uses the Go name instead (`ΔText`
+  becomes `Text`). An assembly compiled against 1.26.10.3 that binds a prefixed name fails under 1.26.11.1, and the
+  break floor refuses that combination first (`GO2CS3002`): rebuild against 1.26.11.1.
   <!-- source: the method-holder seat (OQ2, P1); the converter's ShadowVarMarker no longer applies once methods leave
        the package class. Announced to the binary-compatibility guard as generated rename entries
        (New-GoApiCompatMoveSuppressions.ps1, the U+0394 drop, COORD ruling 2026-11-15 10:14Z: a removed member is a
        rename only when its documentation id with every U+0394 dropped is in the current surface exactly, or a move
        once its receiver and signature drop theirs): 4,961 entries across all assets, CP0001 369, CP0002 4,515, CP0006
        59, CP0008 16, CP0021 2. On the lib asset alone: 241 types (CP0001), 1,713 members whose id names a prefixed
-       form, in 102 packages, 67 of them reachable. -->
-- **A type, constant or variable named like a method keeps its Go name.** A package-level name that shared
-  its spelling with a method of the package took a `Δ` prefix in C#, because both were members of the package class:
-  `time.Second` was `time.ΔSecond`, `reflect.Type` was `reflect.ΔType`, `syscall.Handle` was `syscall.ΔHandle`. With
-  the methods in their holders the names no longer meet, and each keeps its Go spelling. C# source that wrote a `Δ`
-  name writes the Go name.
-  <!-- source: the same seat; behavioral fixtures MethodHolderNames and MethodHolderAlias, and every golden that named
-       a renamed element (goldens: re-baseline). -->
+       form, in 102 packages, 67 of them reachable.
+       Merged at the release cut (COORD ruling 2026-11-19 09:32Z) with the seat's second bullet on the same mechanism,
+       "A type, constant or variable named like a method keeps its Go name", whose source note was: the same seat;
+       behavioral fixtures MethodHolderNames and MethodHolderAlias, and every golden that named a renamed element
+       (goldens: re-baseline). -->
 - **A struct whose only array has length zero no longer has `ΔClone`.** Through 1.26.10.3 a struct with a
   fixed-size array field implemented `go.IGoValueClone` and had a generated `ΔClone()`, because a C# copy of the
   struct shares the array where Go copies it, and every Go value copy called the clone. A zero-length array holds
