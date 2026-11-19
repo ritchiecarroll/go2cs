@@ -25,9 +25,20 @@
 package main
 
 import (
+	"errors"
+	"io/fs"
+	"log"
 	"os"
 	"strings"
 )
+
+// refuseMarkerPass ends the conversion when a deferred-marker pass cannot leave a file free of markers. A file that
+// still holds one is uncompilable, and a pass that only warned let the run exit 0 over it: a harness gating on the
+// exit code read the row green (i9, F1: encoding/json's encode_test.cs kept five adapter markers when a write hit
+// "user-mapped section open"). A variable so a test can observe the refusal without ending the process.
+var refuseMarkerPass = func(format string, a ...any) {
+	log.Fatalf(format, a...)
+}
 
 // rewriteDeferredMarkers replaces every `prefix…suffix` marker in the given output files with the
 // text resolve returns for its payload, then writes each changed file back.
@@ -45,13 +56,19 @@ import (
 // resolver that warns per marker report each one rather than collapsing them into a single warning.
 // Either way the final content is the same — only the diagnostics differ.
 //
-// Files are handled independently and best-effort: an unreadable file is skipped rather than
-// failing the whole conversion, since a marker left in one file cannot corrupt another.
+// A file that does not exist is skipped: a faulted visit writes nothing, and that loss is reported where it happens.
+// A file the pass cannot read or write back, or one that still holds a marker afterwards, REFUSES the conversion
+// (refuseMarkerPass): the marker would otherwise reach the emitted C# under an exit code of 0.
 func rewriteDeferredMarkers(outputFileNames []string, description, prefix, suffix string, resolve func(fileName string, line int, payload string) (replacement string, replaceEvery bool)) {
 	for _, fileName := range outputFileNames {
 		contentBytes, err := os.ReadFile(fileName)
 
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+
 		if err != nil {
+			refuseMarkerPass("Refusing to convert: cannot read \"%s\" to resolve its %s markers: %s\n", fileName, description, err)
 			continue
 		}
 
@@ -102,8 +119,13 @@ func rewriteDeferredMarkers(outputFileNames []string, description, prefix, suffi
 			showWarning("Resolving %s markers in \"%s\" changed the file's line count; the position map recorded for it is now offset (positionMapOperations.go)", description, fileName)
 		}
 
+		// A marker whose closing sentinel never arrives ends the loop above with the marker still in the file.
+		if start := strings.Index(content, prefix); start != -1 {
+			refuseMarkerPass("Refusing to convert: \"%s\"(%d) still holds a %s marker with no closing sentinel\n", fileName, strings.Count(content[:start], "\n")+1, description)
+		}
+
 		if err := os.WriteFile(fileName, uniformLineEndings([]byte(content)), 0644); err != nil {
-			showWarning("Failed to resolve %s markers in \"%s\": %s", description, fileName, err)
+			refuseMarkerPass("Refusing to convert: failed to resolve %s markers in \"%s\": %s\n", description, fileName, err)
 		}
 	}
 }
