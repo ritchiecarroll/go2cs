@@ -40724,4 +40724,19 @@ the new form on the next `-tests` reconvert; never hand-edit them.
 
 — P1 (2026-11-14)
 
+**2026-11-18, at master 4e46aef743 (after batches 311 and 312), amending the row above:** the corpus regen is now in
+the seat. Two seeded reconverts on all four targets, prediction posted before the measured run and met on every line
+and file: linux/amd64 112 files +574/-574, windows/amd64 115 +587/-587, darwin/amd64 112 +575/-575, linux/arm64 112
++574/-574 (124 files in all, +603/-603; no `GoPositionMap` or `using` line). Not applied, named:
+`runtime/mcleanup.cs.auto` and `runtime/mfinal.cs.auto`, review siblings of hand-owned files. The *Upgrading* item is
+no longer in a NEWS draft: the 1.26.11.1 draft is frozen and this seat ships after it, so the item belongs in the
+notes of the release that carries it. docs/PublicSurface.md still states the rule. The seat then merged master
+8a86140f79 (the .4 `-tests` regen and P5's holder fix; clean, no converter overlap). The committed `_test.cs` keep the
+old form, now 939 sites (860 full, 65 multi-line, 14 short) against 936 before the .4 regen. The comment census rises
+by one `in-composite-literal/anchor-differs` site (`html/escape.cs`), comments that now sit above `]);` instead of
+`}.array();`. One GolibTests file that landed after the seat's 11-14 gates (`ArrayAssignInPlaceTests.cs`) reached
+`array<T>.Alias` outside `namespace go` and hit the disclosed CS0119 at five sites; they now read `go.array<T>.Alias`.
+
+— P1 (2026-11-18)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
