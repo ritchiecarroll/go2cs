@@ -3666,7 +3666,9 @@ uncontended pair touches no bucket and allocates nothing. Only an acquirer that 
 takes a bucket, and it re-reads the count under the bucket's lock after publishing it, so a release whose
 add came later finds the bucket and the waiter. A handoff takes the added permit for the waiter by the
 same compare-and-swap; if an acquirer took it first, the waiter is only readied and competes again, as in
-Go. Retiring a bucket on every uncontended pair had cost 240 bytes a pair, and `runtime.ReadMemStats`,
+Go. It competes from the head of the queue when it has waited before: `lifo` reaches the primitive, and
+`sync.Mutex` passes it for a re-waiter (`queueLifo`, `waitStartTime != 0`), so a starving Mutex's longest
+waiter that loses a handoff to a newcomer is still woken first in the next round<!-- 2026-11-19, P3's review of 7cd3a7d5d4, ruled by COORD: the queue had been FIFO only, so that waiter went behind every later waiter. GolibTests.RuntimeSemaphoreLifoTests. -->. Retiring a bucket on every uncontended pair had cost 240 bytes a pair, and `runtime.ReadMemStats`,
 which stops the world on this table and is held to zero allocations, read 240 bytes a call.
 
 Measured on one linux-x64 box with 4 CPUs, against Go 1.26.11 on the same box:

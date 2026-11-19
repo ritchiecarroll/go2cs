@@ -72,6 +72,9 @@ namespace go.golib;
         // The goroutine parked on this waiter (Go's sudog.g): the acquirer constructs it on its own
         // thread, just before parking. Release readies it before signalling.
         internal readonly Goroutine? Parker = Goroutine.Current;
+
+        // The next waiter in this word's queue (Go's sudog.waitlink). Written only under the bucket lock.
+        internal SemaWaiter? Next;
     }
 
     // The bucket carries the LOCK and the waiter queue only. The COUNT lives where Go keeps it —
@@ -82,7 +85,44 @@ namespace go.golib;
     // field is zero and behaves exactly as before.
     private sealed class SemaBucket
     {
-        internal readonly Queue<SemaWaiter> Waiters = new();
+        // The word's waiters, first to be woken at the head (Go's per-address list in semaRoot: a sudog chain
+        // through waitlink, with waittail). Every member is read and written only under this bucket's lock.
+        private SemaWaiter? head, tail;
+        internal int Count;
+
+        // Go's semaRoot.queue(addr, s, lifo): a lifo waiter takes the head ("Substitute s in t's place"),
+        // any other waiter the tail.
+        internal void Queue(SemaWaiter w, bool lifo)
+        {
+            if (head is null)
+                head = tail = w;
+            else if (lifo)
+            {
+                w.Next = head;
+                head = w;
+            }
+            else
+            {
+                tail!.Next = w;
+                tail = w;
+            }
+
+            Count++;
+        }
+
+        // Go's semaRoot.dequeue: the head leaves first.
+        internal SemaWaiter Dequeue()
+        {
+            SemaWaiter w = head!;
+            head = w.Next;
+            w.Next = null;
+
+            if (head is null)
+                tail = null;
+
+            Count--;
+            return w;
+        }
 
         // Set, under this bucket's lock, by whoever removed it from the table. A thread that fetched the
         // bucket before then reads it under the same lock and fetches the word's current bucket instead.
@@ -121,7 +161,7 @@ namespace go.golib;
     // and value pair, so a newer bucket for the same word is never touched.
     private static void retireIfIdle(ж<uint32> s, SemaBucket b)
     {
-        if (b.Waiters.Count != 0)
+        if (b.Count != 0)
             return;
 
         b.Retired = true;
@@ -138,7 +178,19 @@ namespace go.golib;
     // it one: ONE semaphore serves four different Go-level waits, and a traceback has to name which
     // (sema.go's sync_runtime_Semacquire / SemacquireMutex / SemacquireRWMutexR / SemacquireRWMutex
     // pass waitReasonSemacquire, SyncMutexLock, SyncRWMutexRLock and SyncRWMutexLock respectively).
-    public static void Acquire(ж<uint32> s, WaitReason reason)
+    // This form queues at the tail: Go's callers that pass lifo = false (Semacquire, WaitGroup, RWMutex).
+    public static void Acquire(ж<uint32> s, WaitReason reason) => Acquire(s, lifo: false, reason);
+
+    /// <summary>
+    /// Acquires the semaphore addressed by <paramref name="s"/>, parking until a permit is available; a
+    /// waiter that parks goes to the head of the word's queue when <paramref name="lifo"/> is set.
+    /// </summary>
+    // Go's semacquire1(addr, lifo, ...). sync.Mutex passes lifo for a waiter that has already waited
+    // (lockSlow's queueLifo, waitStartTime != 0), so that waiter is woken before every waiter queued after
+    // it. That half belongs with the conditional handoff in Release: a starving Mutex's longest waiter that
+    // is readied but loses the permit to a newcomer's easy case re-queues at the head, and wins the next
+    // round, as in Go.
+    public static void Acquire(ж<uint32> s, bool lifo, WaitReason reason)
     {
         while (true)
         {
@@ -167,8 +219,9 @@ namespace go.golib;
                     return;
                 }
 
+                // Every pass queues with the caller's lifo, as Go's semacquire1 loop does.
                 w = new SemaWaiter();
-                b.Waiters.Enqueue(w);
+                b.Queue(w, lifo);
 
                 // Go's commit order (semacquire1 -> goparkunlock(&root.lock)): the park is entered
                 // while the bucket lock that publishes the waiter is still held, so Release can only
@@ -210,7 +263,7 @@ namespace go.golib;
             return 0;
 
         lock (b)
-            return b.Waiters.Count;
+            return b.Count;
     }
 
     /// <summary>
@@ -235,9 +288,9 @@ namespace go.golib;
                 if (b.Retired)
                     continue; // removed after we fetched it; look again
 
-                if (b.Waiters.Count > 0)
+                if (b.Count > 0)
                 {
-                    w = b.Waiters.Dequeue();
+                    w = b.Dequeue();
 
                     // Go: `if handoff && cansemacquire(addr) { s.ticket = 1 }`. The permit just added may
                     // already have been taken by an acquirer's easy case; then w is only readied and

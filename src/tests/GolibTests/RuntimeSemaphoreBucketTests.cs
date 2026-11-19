@@ -96,6 +96,9 @@ public class RuntimeSemaphoreBucketTests
     }
 
     // The owner of a word that blocked once must be collectable once nothing else holds it.
+    // This arm depends on the GC collecting the owner within three passes. BlockOnceInAFreshOwner is NoInlining so
+    // no local of this frame keeps the word alive; if the arm ever flakes (tiered JIT, a Debug build), look there
+    // before at the table.
     [TestMethod]
     public void TheOwnerOfAWordThatBlockedOnceIsCollected()
     {
@@ -111,13 +114,14 @@ public class RuntimeSemaphoreBucketTests
     }
 
     // Removal must not lose a permit or a waiter: a word seeded with one permit, used as a lock by several
-    // threads, keeps an unguarded counter exact, and has no bucket at the end.
+    // threads, keeps an unguarded counter exact, and has no bucket at the end. One round releases with handoff,
+    // which takes Release's conditional arm (handoff && cansemacquire) under contention.
     [TestMethod]
     public void RemovalLosesNoPermitAndNoWaiterUnderContention()
     {
         const int Rounds = 20000;
 
-        foreach (int threads in new[] { 2, 4, 8 })
+        foreach ((int threads, bool handoff) in new[] { (2, false), (4, false), (8, false), (4, true) })
         {
             heap<uint32>(out var word);
             word.Value = 1;
@@ -135,7 +139,7 @@ public class RuntimeSemaphoreBucketTests
                     {
                         RuntimeSemaphore.Acquire(word, WaitReason.Semacquire);
                         total++;
-                        RuntimeSemaphore.Release(word, handoff: false);
+                        RuntimeSemaphore.Release(word, handoff);
                     }
                 }) { IsBackground = true };
                 workers[t].Start();
@@ -144,11 +148,11 @@ public class RuntimeSemaphoreBucketTests
             start.Set();
 
             foreach (Thread worker in workers)
-                Assert.IsTrue(worker.Join(TimeSpan.FromMinutes(2)), $"a worker did not finish: a lost wakeup ({threads} threads)");
+                Assert.IsTrue(worker.Join(TimeSpan.FromMinutes(2)), $"a worker did not finish: a lost wakeup ({threads} threads, handoff {handoff})");
 
-            Assert.AreEqual((long)threads * Rounds, total, $"{threads} threads incrementing under the semaphore");
-            Assert.AreEqual(1u, word.Value, "the one permit is back in the word");
-            Assert.IsFalse(SemaTable().Contains(word), $"the word kept a bucket after every waiter left ({threads} threads)");
+            Assert.AreEqual((long)threads * Rounds, total, $"{threads} threads incrementing under the semaphore (handoff {handoff})");
+            Assert.AreEqual(1u, word.Value, $"the one permit is back in the word (handoff {handoff})");
+            Assert.IsFalse(SemaTable().Contains(word), $"the word kept a bucket after every waiter left ({threads} threads, handoff {handoff})");
         }
     }
 

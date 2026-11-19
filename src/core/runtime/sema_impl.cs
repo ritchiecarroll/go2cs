@@ -21,9 +21,9 @@
 //
 // WHAT IS DROPPED, AND WHY. The sudog, the per-P sudog cache and the semaRoot treap exist to park a g on
 // a P-less queue and to find it again by address; RuntimeSemaphore's pointer-keyed bucket is that queue.
-// Named, not modelled -- the same three internal/sync's bodies name: `lifo` (the queue is FIFO; a
-// fairness difference, not a correctness one), `skipframes`, and the block/mutex profile flags (the
-// structural "no contention samples" class). Go's "semacquire not on the G stack" check has no subject:
+// `lifo` reaches the primitive: a lifo waiter parks at the head of its word's queue, as Go's semaRoot.queue
+// puts it. Named, not modelled -- the same two internal/sync's bodies name: `skipframes`, and the
+// block/mutex profile flags (the structural "no contention samples" class). Go's "semacquire not on the G stack" check has no subject:
 // there is no g0 to be on.
 //
 // SemNwait. export_test.go's SemNwait reads semtable.rootFor(addr).nwait, the treap's waiter count, which
@@ -44,9 +44,9 @@ namespace go;
 partial class runtime_package
 {
     // sema.go:142. Go's harder case (sudog, semaRoot queue, goparkunlock) is RuntimeSemaphore.Acquire;
-    // the easy case, cansemacquire, is its first step under the bucket lock.
+    // the easy case, cansemacquire, is its first step, before any bucket.
     internal static void semacquire1(ж<uint32> Ꮡaddr, bool lifo, semaProfileFlags profile, nint skipframes, waitReason reason) =>
-        RuntimeSemaphore.Acquire(Ꮡaddr, golibWaitReasonOf(reason));
+        RuntimeSemaphore.Acquire(Ꮡaddr, lifo, golibWaitReasonOf(reason));
 
     // sema.go:203. Go's xadd, the waiter search and readyWithTime are RuntimeSemaphore.Release; with
     // handoff the released permit goes to the first waiter rather than back to the count.
