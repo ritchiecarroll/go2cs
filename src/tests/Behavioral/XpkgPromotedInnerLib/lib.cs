@@ -27,4 +27,4 @@ public static partial bool Where(this Inner i) {
     return ok;
 }
 
-} // end XpkgPromotedInnerLibᴛInner
+}

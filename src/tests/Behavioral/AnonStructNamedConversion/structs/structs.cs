@@ -12,4 +12,4 @@ partial struct AssignB {
 
 public static nint Sum(this AssignB x) { return x.A * 10; }
 
-} // end structsᴛAssignB
+}
