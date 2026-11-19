@@ -455,4 +455,4 @@ internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilW
     return new linkedUtilWindow(ui, fmt.Sprintf("%s#%v:%v"u8, r.URL(ViewProc), (float64)ui.Time / 1e6D, (float64)(ui.Time + (int64)window) / 1e6D));
 }
 
-} // end traceviewerᴛmmu
+}

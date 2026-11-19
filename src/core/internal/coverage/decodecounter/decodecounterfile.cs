@@ -431,4 +431,4 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
     return (true, default);
 }
 
-} // end decodecounterᴛCounterDataReader
+}

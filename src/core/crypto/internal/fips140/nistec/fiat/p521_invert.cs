@@ -92,4 +92,4 @@ public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> 
     return Ꮡe.Set(z);
 }
 
-} // end fiatᴛP521Element
+}

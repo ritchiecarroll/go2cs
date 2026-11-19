@@ -36,4 +36,4 @@ public static void StoreRelease(this ж<Uint64> Ꮡu, uint64 value) {
     StoreRel64(Ꮡu.Ꮡvalue, value);
 }
 
-} // end atomicᴛUint64
+}

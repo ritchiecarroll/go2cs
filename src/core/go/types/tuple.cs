@@ -45,4 +45,4 @@ public static ж<Var> At(this ref Tuple t, nint i) { return t.vars[i]; }
 public static Type Underlying(this ж<Tuple> Ꮡt) { return new TupleжType(Ꮡt); }
 public static @string String(this ж<Tuple> Ꮡt) { return TypeString(new TupleжType(Ꮡt), default); }
 
-} // end typesᴛTuple
+}

@@ -262,4 +262,4 @@ internal static (nint n, error err) Write(this ref part p, slice<byte> d) {
     return (n, err);
 }
 
-} // end multipartᴛpart
+}

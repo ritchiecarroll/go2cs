@@ -410,4 +410,4 @@ internal static bool hasReusableNoscan(this ref mcache c, spanClass spc) {
     return c.reusableNoscan[spc] != 0;
 }
 
-} // end runtimeᴛmcache
+}

@@ -651,4 +651,4 @@ internal static slice<Type> typeList(this ж<Checker> Ꮡcheck, slice<ast.Expr> 
     return res;
 }
 
-} // end typesᴛChecker
+}

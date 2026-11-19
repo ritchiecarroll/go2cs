@@ -139,4 +139,4 @@ public static (slice<byte>, error) MarshalBinary(this ж<ChaCha8> Ꮡc) {
     return Ꮡc.AppendBinary(new slice<byte>(0, 64));
 }
 
-} // end randᴛChaCha8
+}

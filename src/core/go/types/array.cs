@@ -31,4 +31,4 @@ public static Type Elem(this ref Array a) { return a.elem; }
 public static Type Underlying(this ж<Array> Ꮡa) { return new ArrayжType(Ꮡa); }
 public static @string String(this ж<Array> Ꮡa) { return TypeString(new ArrayжType(Ꮡa), default); }
 
-} // end typesᴛArray
+}

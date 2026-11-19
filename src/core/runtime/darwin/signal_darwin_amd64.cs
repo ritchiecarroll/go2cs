@@ -101,4 +101,4 @@ internal static void fixsigcode(this ref sigctxt c, uint32 sig) {
     }}
 }
 
-} // end runtimeᴛsigctxt
+}

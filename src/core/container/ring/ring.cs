@@ -161,4 +161,4 @@ public static void Do(this ж<Ring> Ꮡr, Action<any> f) {
     }
 }
 
-} // end ringᴛRing
+}

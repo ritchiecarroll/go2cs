@@ -109,4 +109,4 @@ public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) {
     return (byte)(p.Value & (((uint8)1).Lsh((int64)(i % 8)))) != 0;
 }
 
-} // end abiᴛIntArgRegBitmap
+}

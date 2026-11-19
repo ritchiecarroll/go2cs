@@ -33,4 +33,4 @@ internal static @string String(this attr i) {
     return _attr_name.slice(_attr_index[i], _attr_index[i + 1]);
 }
 
-} // end templateᴛattr
+}

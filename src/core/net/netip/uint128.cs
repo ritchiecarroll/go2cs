@@ -85,4 +85,4 @@ internal static uint128 bitsClearedFrom(this uint128 u, uint8 bit) {
     return u.and(mask6((nint)bit));
 }
 
-} // end netipᴛuint128
+}

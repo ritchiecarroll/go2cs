@@ -37,4 +37,4 @@ internal static bool As(this http2StreamError e, any target) {
     return true;
 }
 
-} // end httpᴛhttp2StreamError
+}

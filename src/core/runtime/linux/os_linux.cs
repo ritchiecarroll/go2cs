@@ -835,4 +835,4 @@ internal static bool GE(this kernelVersion kv, nint x, nint y) {
     return kv.major > x || (kv.major == x && kv.minor >= y);
 }
 
-} // end runtimeᴛkernelVersion
+}

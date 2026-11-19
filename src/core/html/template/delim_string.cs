@@ -30,4 +30,4 @@ internal static @string String(this delim i) {
     return _delim_name.slice(_delim_index[i], _delim_index[i + 1]);
 }
 
-} // end templateᴛdelim
+}

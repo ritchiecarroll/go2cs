@@ -1356,4 +1356,4 @@ internal static ж<table> clone(this ж<table> Ꮡt, ж<abi.MapType> typ) {
     return Ꮡt;
 }
 
-} // end mapsᴛtable
+}

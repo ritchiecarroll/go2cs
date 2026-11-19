@@ -154,4 +154,4 @@ public static @string String(this ClientAuthType i) {
     return _ClientAuthType_name.slice(_ClientAuthType_index[i], _ClientAuthType_index[i + 1]);
 }
 
-} // end tlsᴛClientAuthType
+}

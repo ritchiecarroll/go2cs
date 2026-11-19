@@ -102,4 +102,4 @@ partial struct exitError /*@string*/;
 
 internal static @string Error(this exitError e) { return (@string)e; }
 
-} // end exithookᴛexitError
+}

@@ -636,4 +636,4 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
     return (domain, false, default);
 }
 
-} // end cookiejarᴛJar
+}

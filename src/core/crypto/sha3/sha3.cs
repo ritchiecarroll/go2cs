@@ -293,4 +293,4 @@ public static error UnmarshalBinary(this ref SHAKE s, slice<byte> data) {
     return s.s.UnmarshalBinary(data);
 }
 
-} // end sha3ᴛSHAKE
+}

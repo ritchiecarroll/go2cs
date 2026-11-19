@@ -1115,4 +1115,4 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
     return (list, default);
 }
 
-} // end zipᴛopenDir
+}

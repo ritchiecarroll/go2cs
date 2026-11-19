@@ -267,4 +267,4 @@ public static ж<Source> Source(this Record r) {
     ));
 }
 
-} // end slogᴛRecord
+}

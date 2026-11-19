@@ -187,4 +187,4 @@ internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<
     byteorder.BEPutUint64(dst, permuteFinalBlock(preOutput));
 }
 
-} // end desᴛtripleDESCipher
+}

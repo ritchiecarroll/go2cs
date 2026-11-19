@@ -40,4 +40,4 @@ internal static bool Contains(this tagOptions o, @string optionName) {
     return false;
 }
 
-} // end jsonᴛtagOptions
+}

@@ -27,4 +27,4 @@ public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

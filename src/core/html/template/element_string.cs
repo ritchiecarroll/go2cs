@@ -32,4 +32,4 @@ internal static @string String(this element i) {
     return _element_name.slice(_element_index[i], _element_index[i + 1]);
 }
 
-} // end templateᴛelement
+}

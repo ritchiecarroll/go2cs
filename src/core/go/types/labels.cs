@@ -325,4 +325,4 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
     return fwdJumps;
 }
 
-} // end typesᴛChecker
+}

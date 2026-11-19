@@ -178,4 +178,4 @@ public static iter.Seq<Type> Types(this ж<TypeList> Ꮡl) {
     };
 }
 
-} // end typesᴛTypeList
+}

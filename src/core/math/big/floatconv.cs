@@ -328,4 +328,4 @@ public static error Scan(this ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
     return err;
 }
 
-} // end bigᴛFloat
+}

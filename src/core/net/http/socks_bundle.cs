@@ -613,4 +613,4 @@ internal static error Authenticate(this ref socksUsernamePassword up, context.Co
     return errors.New("unsupported authentication method "u8 + strconv.Itoa((nint)auth));
 }
 
-} // end httpᴛsocksUsernamePassword
+}

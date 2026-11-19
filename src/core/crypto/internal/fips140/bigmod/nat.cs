@@ -1356,4 +1356,4 @@ public static nuint DivShortVarTime(this ref Nat x, nuint y) {
     return r;
 }
 
-} // end bigmodᴛNat
+}
