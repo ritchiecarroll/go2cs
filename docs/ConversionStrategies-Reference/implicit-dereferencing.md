@@ -19,7 +19,7 @@ func PrintValPtr(ptr *int) {
 }
 ```
 becomes:
-<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:75-80 -->
+<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:70-75 -->
 ```csharp
 public static void PrintValPtr(ж<nint> Ꮡptr) {
     ref var ptr = ref Ꮡptr.DerefOrNull();

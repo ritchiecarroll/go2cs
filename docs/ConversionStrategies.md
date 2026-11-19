@@ -165,7 +165,7 @@ func (r *reg) add(name string) string {
 	return name + "-added"
 }
 ```
-<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:7-22 -->
+<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5-18 -->
 ```csharp
 partial struct reg {
     internal slice<@string> entries;
@@ -175,8 +175,6 @@ partial struct reg {
 internal static ж<reg> newReg() {
     return Ꮡ(new reg());
 }
-
-} partial class mainᴛreg {
 
 internal static @string add(this ref reg r, @string name) {
     r.entries = append(r.entries, name);
@@ -1151,7 +1149,7 @@ var registry = newReg()
 internal static @string entryName;
 internal static void initᴛentryName() { entryName = registry.add("alpha"); }
 ```
-<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:26 -->
+<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:20 -->
 ```csharp
 internal static ж<reg> registry = newReg();
 ```
@@ -1198,7 +1196,7 @@ var stdinName = describe(0)
 internal static @string stdinName;
 internal static void initᴛstdinName() { stdinName = describe(0); }
 ```
-<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:28 -->
+<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22 -->
 ```csharp
 internal static slice<@string> names = ["stdin", "stdout"];
 ```
@@ -1240,7 +1238,7 @@ const labelPipe label = "pipe"
 ```go
 var pipeLabel = string(labelPipe) + "!"
 ```
-<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:54-56 -->
+<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:48-50 -->
 ```csharp
 partial struct label /*@string*/;
 
@@ -1709,7 +1707,7 @@ func PrintValPtr(ptr *int) {
 	*ptr++
 }
 ```
-<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:8-80 -->
+<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-75 -->
 ```csharp
 partial struct Buffer {
     internal slice<byte> buf;
@@ -2044,7 +2042,7 @@ An untyped boolean constant is a plain `const bool`, with the Go expression in a
 ```go
 	const c = 3 < 4 // c is the untyped boolean constant true
 ```
-<!-- source: src/tests/Behavioral/TypeInference/TypeInference.cs.target:29 -->
+<!-- source: src/tests/Behavioral/TypeInference/TypeInference.cs.target:24 -->
 ```csharp
     const bool c = /* 3 < 4 */ true;
 ```
@@ -2180,7 +2178,7 @@ type is a field of that named type in the same way:
 ```go
 const prefix = "op"
 ```
-<!-- source: src/tests/Behavioral/NamedStringConsts/main.cs.target:18 -->
+<!-- source: src/tests/Behavioral/NamedStringConsts/main.cs.target:17 -->
 ```csharp
 internal static readonly @string prefix = "op"u8;
 ```
@@ -2196,7 +2194,7 @@ func main() {
 	const plain = "plain"
 	fmt.Println(plain)
 ```
-<!-- source: src/tests/Behavioral/NamedStringConsts/main.cs.target:40-51 -->
+<!-- source: src/tests/Behavioral/NamedStringConsts/main.cs.target:35-46 -->
 ```csharp
 internal static void main() {
 …
@@ -2548,7 +2546,7 @@ bounds check sees all of it. Here `s.pos` is a Go `int` field:
 ```go
 n := copy(p, s.data[s.pos:])
 ```
-<!-- source: src/tests/Behavioral/AdapterNameInterfaceCollision/main.cs.target:26 -->
+<!-- source: src/tests/Behavioral/AdapterNameInterfaceCollision/main.cs.target:23 -->
 ```csharp
 nint n = copy(p, s.data.slice(s.pos));
 ```
@@ -2644,7 +2642,7 @@ func maskFor(s uint) word {
 	return m
 }
 ```
-<!-- source: src/tests/Behavioral/NamedTypeBitwiseConst/main.cs.target:20-54 -->
+<!-- source: src/tests/Behavioral/NamedTypeBitwiseConst/main.cs.target:15-45 -->
 ```csharp
 partial struct word /*num:uint64*/;
 …
@@ -2735,14 +2733,12 @@ const classContext = 0x80
 func (t Tag) Constructed() Tag { return t | classConstructed }
 func (t Tag) Context() Tag     { return t | classContext }
 ```
-<!-- source: src/tests/Behavioral/NamedTypeBitwiseConst/main.cs.target:8-16 -->
+<!-- source: src/tests/Behavioral/NamedTypeBitwiseConst/main.cs.target:7-13 -->
 ```csharp
 partial struct Tag /*num:uint8*/;
 
 internal static UntypedInt classConstructed => 0x20;
 internal static UntypedInt classContext => 0x80;
-
-} partial class mainᴛTag {
 
 public static Tag Constructed(this Tag t) { return (Tag)(t | (uint8)classConstructed); }
 public static Tag Context(this Tag t) { return (Tag)(t | (uint8)classContext); }
@@ -3011,7 +3007,7 @@ prints `*int`. A C# `null` carries no type, so the converter stores the shared n
 	fmt.Printf("%T\n", x)
 	fmt.Println("x==nil", x == nil)
 ```
-<!-- source: src/tests/Behavioral/TypedNilInterface/TypedNilInterface.cs.target:46-48 -->
+<!-- source: src/tests/Behavioral/TypedNilInterface/TypedNilInterface.cs.target:37-39 -->
 ```csharp
 …
     any x = ((ж<nint>)nil);
@@ -3036,7 +3032,7 @@ interface passes through golib's `OrTypedNil()`, which swaps a C# `null` for the
 	var dpi any = dp
 	fmt.Println("dpi==nil", dpi == nil, "dpi==x", dpi == x)
 ```
-<!-- source: src/tests/Behavioral/TypedNilInterface/TypedNilInterface.cs.target:85, 93-94 -->
+<!-- source: src/tests/Behavioral/TypedNilInterface/TypedNilInterface.cs.target:76, 84-85 -->
 ```csharp
 …
     ж<nint> dp = default;
@@ -3274,7 +3270,7 @@ func Scale[S ~[]E, E Integer](s S, c E) S {
 	return r
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:33-42 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:28-37 -->
 ```csharp
 public static S Scale<S, E>(S s, E c)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
@@ -3353,8 +3349,8 @@ The `"a"` is a plain C# literal, the form go2cs uses for a Go string literal in 
 ([Strings](#strings-string-and-sstring)).
 
 **A method named like a built-in makes calls inside its own holder write `builtin.<name>`.** A Go
-type's methods are members of one static C# class per receiver type, its method holder
-([Functions and Methods](#functions-and-methods)). C# looks in that class before it looks at
+type with such a method keeps its methods in a static C# class of its own, its method holder, even in
+package `main` ([Functions and Methods](#functions-and-methods)). C# looks in that class before it looks at
 `using static go.builtin`, so a method named `len` hides the built-in `len` inside that holder only.
 The converter writes `builtin.len(…)` there, and leaves the plain `len(…)` everywhere else, such as in
 `freeLen`, which lives in the package class
@@ -3558,7 +3554,7 @@ func keep(q *pp) { poolPut(q) }
 	got.id = 200
 	fmt.Println(c.id) // 200 — proves got IS c
 ```
-<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs.target:8-60 -->
+<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs.target:7-55 -->
 ```csharp
 partial struct pp {
     internal nint id;
@@ -3775,20 +3771,16 @@ func readThenBump() (int, int) {
 	return c.n, c.bump()
 }
 ```
-<!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.cs.target:27-44 -->
+<!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.cs.target:22-35 -->
 ```csharp
 partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static nint bump(this ref counter c) {
     c.n++;
     return c.n;
 }
-
-} partial class main_package {
 
 internal static (nint, nint) readThenBump() {
     counter c = default;
@@ -3812,7 +3804,7 @@ func unrelatedOperand() (int, int) {
 	return a.n, b.bump()
 }
 ```
-<!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.cs.target:80-84 -->
+<!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.cs.target:71-75 -->
 ```csharp
 internal static (nint, nint) unrelatedOperand() {
     counter a = default;
@@ -3899,7 +3891,7 @@ func f(x int) int {
 	return z
 }
 ```
-<!-- source: src/tests/Behavioral/NestedVarShadow/main.cs.target:9-21 -->
+<!-- source: src/tests/Behavioral/NestedVarShadow/main.cs.target:8-20 -->
 ```csharp
 internal static nint f(nint x) {
     if (x >= 2) {
@@ -3948,7 +3940,7 @@ func forwardOk() int {
 	return total
 }
 ```
-<!-- source: src/tests/Behavioral/NestedVarShadow/main.cs.target:104-123 -->
+<!-- source: src/tests/Behavioral/NestedVarShadow/main.cs.target:95-114 -->
 ```csharp
 internal static nint forwardOk() {
     var m = new map<@string, nint>{["a"] = 1, ["b"] = 2, ["c"] = 3};
@@ -4059,7 +4051,7 @@ func classify(x any) string {
 		return "name " + l.Name()
 	}
 ```
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:72-78 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:63-69 -->
 ```csharp
 internal static @string classify(any x) {
     if (x._<Shape>(out var s)) {
@@ -4233,7 +4225,7 @@ func raise(n *int) int {
 	return *n
 }
 ```
-<!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.cs.target:58-67 -->
+<!-- source: src/tests/Behavioral/MultiValueReturnOrder/main.cs.target:49-58 -->
 ```csharp
 internal static (nint, nint) addressArgument() {
     nint n = 0;
@@ -5018,7 +5010,7 @@ func makeGreeting(who string) string {
 	return hello + who
 }
 ```
-<!-- source: src/tests/Behavioral/LocalStringConstHoist/main.cs.target:16-19 -->
+<!-- source: src/tests/Behavioral/LocalStringConstHoist/main.cs.target:15-18 -->
 ```csharp
 internal static @string makeGreeting(@string who) {
     @string hello = "hello, ";
@@ -5040,15 +5032,11 @@ func (v version) tag() string { return string(v) + "!" }
 
 func bump(v version) version { return v + "-next" }
 ```
-<!-- source: src/tests/Behavioral/NamedStringConcat/main.cs.target:8-16 -->
+<!-- source: src/tests/Behavioral/NamedStringConcat/main.cs.target:7-11 -->
 ```csharp
 partial struct version /*@string*/;
 
-} partial class mainᴛversion {
-
 internal static @string tag(this version v) { return ((@string)v) + "!"u8; }
-
-} partial class main_package {
 
 internal static version bump(version v) { return v + "-next"u8; }
 ```
@@ -5545,7 +5533,7 @@ func totalArea[S Shape](shapes []S) float64 {
 	return sum
 }
 ```
-<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:8-63 -->
+<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:7-54 -->
 ```csharp
 partial interface Shape {
     float64 Area();
@@ -5600,13 +5588,11 @@ func (c *Circle) Area() float64 {
 …
 	fmt.Printf("shapes: %.2f\n", totalArea(shapes))
 ```
-<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:19-116 -->
+<!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:18-107 -->
 ```csharp
 partial struct Circle {
     public float64 R;
 }
-
-} partial class mainᴛCircle {
 
 public static float64 Area(this ref Circle c) {
     return 3.0D * c.R * c.R;
@@ -5681,7 +5667,7 @@ unconstrained, and `==` becomes `AreEqual` as under every other constraint:
 ```go
 func eq[T comparable](a, b T) bool { return a == b }
 ```
-<!-- source: src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:67 -->
+<!-- source: src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:58 -->
 ```csharp
 internal static bool eq<T>(T a, T b) { return AreEqual(a, b); }
 ```
@@ -5713,15 +5699,13 @@ func (s *Stack[T]) Pop() (T, bool) {
 	return element, true
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:8-34 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:7-31 -->
 ```csharp
 partial struct Stack<T>
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     internal slice<T> elements;
 }
-
-} partial class mainᴛStack {
 
 public static void Push<T>(this ref Stack<T> s, T element)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
@@ -5770,7 +5754,7 @@ the source generator adds for the zero value, which takes golib's `nil` as its a
 	val, _ := intStack.Pop()
 	fmt.Printf("Popped from int stack: %d\n", val)
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:68-72 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:63-67 -->
 ```csharp
     var intStack = new Stack<nint>();
     intStack.Push(10);
@@ -5868,7 +5852,7 @@ func describe[T any](label string) string {
 …
 	fmt.Println(describe[fmt.Stringer]("stringer"))
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:56-83 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:51-78 -->
 ```csharp
 internal static @string describe<T>(@string label) {
     T zero = GoZero<T>();
@@ -5893,7 +5877,7 @@ func halveN[Int ~int32 | ~int64](n Int) Int {
 	return Int(uint64(n) / 2)
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:246-253 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:241-248 -->
 ```csharp
 internal static Int halveN<Int>(Int n)
     where Int : /* ~int32 | ~int64 */ IAdditionOperators<Int, Int, Int>, ISubtractionOperators<Int, Int, Int>, IMultiplyOperators<Int, Int, Int>, IDivisionOperators<Int, Int, Int>, IIncrementOperators<Int>, IDecrementOperators<Int>, IUnaryNegationOperators<Int, Int>, IModulusOperators<Int, Int, Int>, IBitwiseOperators<Int, Int, Int>, IShiftOperators<Int, int, Int>, IEqualityOperators<Int, Int, bool>, IComparisonOperators<Int, Int, bool>, new()
@@ -5996,7 +5980,7 @@ func main() {
 	fmt.Println(n.String())
 }
 ```
-<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:1-51 -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:1-46 -->
 ```csharp
 global using Token = object;
 global using Named = go.main_package.Stringer;
@@ -6004,7 +5988,6 @@ global using Named = go.main_package.Stringer;
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 …
@@ -6015,8 +5998,6 @@ partial interface Stringer {
 partial struct point {
     internal nint x, y;
 }
-
-} partial class mainᴛpoint {
 
 internal static @string String(this point p) { return fmt.Sprintf("(%d,%d)"u8, p.x, p.y); }
 …
@@ -6063,7 +6044,7 @@ type (
 …
 )
 ```
-<!-- source: src/tests/Behavioral/PackageAliasRootedTypeArgs/main.cs.target:1-38 -->
+<!-- source: src/tests/Behavioral/PackageAliasRootedTypeArgs/main.cs.target:1-37 -->
 ```csharp
 global using names = go.slice<go.@string>;
 …
@@ -6224,11 +6205,12 @@ A Go package becomes a C# `partial class` named `<name>_package` ([Package Conve
 Each Go function becomes a `static` method of that class. Each Go method becomes a C# extension method:
 the receiver is the first parameter, marked `this`, so a call such as `d.speak()` reads the same in both languages.
 
-**A type's methods live in its method holder.** The holder is a static partial class beside the package
-class, named for the package and the receiver type: `mainᴛdog` holds the methods of `main`'s `dog`, and
-`timeᴛTime` those of `time.Time`. `package_info.cs` declares each holder, and a converted file closes the
-package class and opens the holder where the type's methods begin (`} partial class mainᴛdog {`), so the
-methods stay in Go's order. A file with a holder also has `using static <pkg>_package;`, so a method body
+**A library type's methods live in its method holder.** The holder is a static partial class beside the
+package class, named for the package and the receiver type: `timeᴛTime` holds the methods of `time.Time`.
+`package_info.cs` declares each holder, and a converted file closes the package class and opens the holder
+where the type's methods begin (`} partial class timeᴛTime {`), so the methods stay in Go's order. A holder
+that the file's last method leaves open closes with a bare `}`; the package class closes with
+`} // end time_package`. A file with a holder also has `using static <pkg>_package;`, so a method body
 names the package's functions, types and variables as Go does. Go keeps a method in its type's method set
 and never in the package scope, so a method can share its name with a package-level type, constant,
 variable or function; the holder gives C# the same separation, and none of those names is renamed. Where a
@@ -6236,6 +6218,15 @@ method body names a package-level declaration that one of its holder's methods s
 would find the method first. The converter then gives the file an alias of its own package and writes the
 name through it, as Go code outside the package would (`using time = time_package;` and `time.Now()`),
 or through the package class (`time_package.Now()`) where a local of the alias's name hides it.
+
+**Package `main` keeps its methods in the package class.** A program has no consumer of its classes, so a
+type of `main` has its methods beside the package's functions, as the Go file reads, and a method expression
+names the method bare, under the delegate cast that picks its receiver (`((Func<ж<counter>, nint, nint>)(add))`).
+A type of `main` keeps a holder, `mainᴛ<Type>`, only where one of its methods is named like something the
+package's files read bare, which the method would hide from the whole package: a package-level name of
+`main`, a universe name such as `len`, the name of an import or a name a dot-imported package declares, or a
+member of golib's `builtin` class. In the package class, `func (w words) len() int { return len(w) }` would
+call itself; in its holder the call is written `builtin.len(w)`.
 
 The receiver's C# form shows how the method uses it:
 
@@ -6272,25 +6263,19 @@ func (c *cat) speak() string {
 	return "meow:" + c.name
 }
 ```
-<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:12-32 -->
+<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:11-25 -->
 ```csharp
 partial struct dog {
     internal @string name;
 }
 
-} partial class mainᴛdog {
-
 internal static @string speak(this dog d) {
     return "woof:"u8 + d.name;
 }
 
-} partial class main_package {
-
 partial struct cat {
     internal @string name;
 }
-
-} partial class mainᴛcat {
 
 internal static @string speak(this ref cat c) {
     return "meow:"u8 + c.name;
@@ -6327,15 +6312,13 @@ func (d digest) show() string {
 	return fmt.Sprintf("%v %v %d", d.h, d.x, d.nx)
 }
 ```
-<!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:8-28 -->
+<!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:7-25 -->
 ```csharp
 partial struct digest {
     internal array<nint> h = new(4);
     internal array<byte> x = new(2);
     internal nint nx;
 }
-
-} partial class mainᴛdigest {
 
 internal static void bump(this ref digest d) {
     foreach (var i in range(len(d.h))) {
@@ -6381,13 +6364,11 @@ func (b Box) ReadOnlyRecv() (int, int) {
 	return p.R.Min, p.Tag
 }
 ```
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:68-107 -->
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:67-98 -->
 ```csharp
 internal static void bumpBox(ref Box b) {
     b.Tag += 10;
 }
-
-} partial class mainᴛBox {
 
 public static nint BumpedRecv(this Box b) {
     bumpBox(ref b);
@@ -6427,14 +6408,12 @@ func (r *ring) linkTo(other *ring) {
 	r.next = other
 }
 ```
-<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:8-23 -->
+<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:7-20 -->
 ```csharp
 partial struct ring {
     internal nint data;
     internal ж<ring> next;
 }
-
-} partial class mainᴛring {
 
 internal static void initSelf(this ж<ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -6467,7 +6446,7 @@ A box method such as `initSelf` takes the box directly. A `this ref` method such
 	c := &ring{data: 3}
 	b.linkTo(c)
 ```
-<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:53-62 -->
+<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:48-57 -->
 ```csharp
     var a = Ꮡ(new ring(data: 1));
     a.initSelf();
@@ -6490,7 +6469,7 @@ after the call's arguments are evaluated, which is when Go takes the copy. golib
 	…
 	fmt.Println(pb.Len()) // 3
 ```
-<!-- source: src/tests/Behavioral/SortArrayType/SortArrayType.cs.target:219-221 -->
+<!-- source: src/tests/Behavioral/SortArrayType/SortArrayType.cs.target:215-217 -->
 ```csharp
     var pb = @new<PeopleByAge>();
     …
@@ -6525,7 +6504,7 @@ func main() {
 	fmt.Println("final:", c.Get())       // 115
 }
 ```
-<!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:8-37 -->
+<!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:7-32 -->
 ```csharp
 partial struct Counter {
     internal int32 n;
@@ -6536,8 +6515,6 @@ internal static int32 bump(ref int32 p, int32 delta) {
     return p;
 }
 
-} partial class mainᴛCounter {
-
 public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -6546,8 +6523,6 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) { (Ꮡc.Ꮡn).Value = v; }
 public static int32 Get(this ref Counter c) { return c.n; }
-
-} partial class main_package {
 
 internal static void main() {
     ref var c = ref heap(new Counter(), out var Ꮡc);
@@ -6661,7 +6636,7 @@ Otherwise they become `_Δp0`, `_Δp1` and so on, and an unnamed variadic pack i
 ```go
 func variadic(string, ...int)             {}
 ```
-<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:53 -->
+<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:48 -->
 ```csharp
 internal static void variadic(@string _Δp0, params ꓸꓸꓸnint ʗp) { }
 ```
@@ -6734,7 +6709,7 @@ func applyPush(f func(int)) {
 	f(3)
 }
 ```
-<!-- source: src/tests/Behavioral/MethodValueReceiverEscape/main.cs.target:37-43 -->
+<!-- source: src/tests/Behavioral/MethodValueReceiverEscape/main.cs.target:28-34 -->
 ```csharp
 internal static nint applyInt(Func<nint, nint> f, nint a, nint b) { return f(a) + f(b); }
 
@@ -6759,7 +6734,7 @@ func apply(f func(prefix string, vals ...int) string) {
 	fmt.Println(f("spread", nums...))
 }
 ```
-<!-- source: src/tests/Behavioral/VariadicFuncValues/main.cs.target:22-28 -->
+<!-- source: src/tests/Behavioral/VariadicFuncValues/main.cs.target:21-27 -->
 ```csharp
 internal static void apply(Funcꓸꓸꓸ<@string, nint, @string> f) {
     fmt.Println(f("loose", 1, 2, 3));
@@ -6783,11 +6758,9 @@ type reader func() int
 
 func (f reader) sum(extra int) int { return f() + extra }
 ```
-<!-- source: src/tests/Behavioral/MethodExpression/main.cs.target:71-75 -->
+<!-- source: src/tests/Behavioral/MethodExpression/main.cs.target:62-64 -->
 ```csharp
 internal delegate nint reader();
-
-} partial class mainᴛreader {
 
 internal static nint sum(this reader f, nint extra) { return f() + extra; }
 ```
@@ -6915,7 +6888,7 @@ func probeA1() {
 	fmt.Println("A1:", t.total, t.log)
 }
 ```
-<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:8-30 -->
+<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:7-25 -->
 ```csharp
 partial struct Tally {
     internal nint total;
@@ -6950,7 +6923,7 @@ func probeA3() {
 	fmt.Println("A3:", get())
 }
 ```
-<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:39-45 -->
+<!-- source: src/tests/Behavioral/ClosureWriteVisibility/main.cs.target:34-40 -->
 ```csharp
 internal static void probeA3() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);
@@ -6983,19 +6956,15 @@ func main() {
 	f1()
 }
 ```
-<!-- source: src/tests/Behavioral/VariableCapture/VariableCapture.cs.target:8-28 -->
+<!-- source: src/tests/Behavioral/VariableCapture/VariableCapture.cs.target:7-23 -->
 ```csharp
 partial struct data {
     internal @string name;
 }
 
-} partial class mainᴛdata {
-
 internal static void printName(this data d) {
     fmt.Println("Name =", d.name);
 }
-
-} partial class main_package {
 
 internal static void main() {
     var d = new data(name: "James");
@@ -7037,14 +7006,12 @@ func viaLocal() (int, int) {
 	return c.n, sum
 }
 ```
-<!-- source: src/tests/Behavioral/MethodValueReceiverEscape/main.cs.target:8-49 -->
+<!-- source: src/tests/Behavioral/MethodValueReceiverEscape/main.cs.target:7-40 -->
 ```csharp
 partial struct counter {
     internal nint n;
     internal nint calls;
 }
-
-} partial class mainᴛcounter {
 
 internal static nint dec(this ref counter c, nint step) {
     c.n -= step;
@@ -7377,7 +7344,7 @@ func countdown(n int) Seq[int] {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:118-130 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:113-125 -->
 ```csharp
 public delegate void Seq<V>(Func<V, bool> yield);
 …
@@ -7409,7 +7376,7 @@ for v := range countdown(5) {
 }
 fmt.Println(sum)
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:177-184 -->
+<!-- source: src/tests/Behavioral/GenericTypeInference/GenericTypeInference.cs.target:172-179 -->
 ```csharp
 nint sum = 0;
 foreach (var v in range<nint>(countdown(5).Invoke)) {
@@ -7884,7 +7851,7 @@ whatAmI(uint64(2))
 whatAmI("hey")
 whatAmI(nil)
 ```
-<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:9, 12-40 (the function body is shown without the four spaces of its enclosing Main) -->
+<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:8, 11-39 (the function body is shown without the four spaces of its enclosing Main) -->
 ```csharp
 private static readonly object heyˢ = (@string)"hey"u8;
 …
@@ -7960,7 +7927,7 @@ func sizeOf(v any) int {
 	return 0
 }
 ```
-<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:159-170 -->
+<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:154-165 -->
 ```csharp
 internal static nint sizeOf(any v) {
     switch (v.type()) {
@@ -7998,7 +7965,7 @@ func scanInto(v any) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:147-157 -->
+<!-- source: src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:142-152 -->
 ```csharp
 internal static void scanInto(any v) {
     switch (v.type()) {
@@ -8277,7 +8244,7 @@ func deferNamedWithPointer() (err error) {
 	panic("three")
 }
 ```
-<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:77-98 -->
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:76-97 -->
 ```csharp
 internal static void catchError(ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
@@ -8392,7 +8359,7 @@ func pick(kind int) Shape {
 	return Square{S: 5}
 }
 ```
-<!-- source: src/tests/Behavioral/DeferInterfaceReturn/main.cs.target:32-45 -->
+<!-- source: src/tests/Behavioral/DeferInterfaceReturn/main.cs.target:23-36 -->
 ```csharp
 internal static Shape pick(nint kind) {
     GoFrame ᒐ = default;
@@ -8838,7 +8805,7 @@ ch <- 2
 fmt.Println(<-ch)
 fmt.Println(<-ch)
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:98-104 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:93-99 -->
 ```csharp
 var ch = new channel<nint>(2);
 
@@ -8903,7 +8870,7 @@ func sendOnly(s chan<- string) {
 	s <- "output"
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:44-46 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:43-45 -->
 ```csharp
 internal static void sendOnly(channel/*<-*/<@string> s) {
     s.ᐸꟷ("output");
@@ -8924,7 +8891,7 @@ mychanl := make(chan string)
 // function converts bidirectional channel to send only channel
 go sendOnly(mychanl)
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:193-195 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:188-190 -->
 ```csharp
 var mychanl = new channel<@string>(0);
 
@@ -8946,7 +8913,7 @@ func filter(src <-chan int, dst chan<- int, prime int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:69-75 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:64-70 -->
 ```csharp
 internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, nint prime) {
     foreach (var i in src) {
@@ -8994,7 +8961,7 @@ func fibonacci(f, quit chan int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:26-42 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:25-41 -->
 ```csharp
 internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
@@ -9038,7 +9005,7 @@ func firstMsg(a, b chan string) string {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:217-228 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:212-223 -->
 ```csharp
 internal static @string firstMsg(channel<@string> a, channel<@string> b) {
     var aᴛ1 = a;
@@ -9070,7 +9037,7 @@ func poll(done chan struct{}) string {
 	return "pending"
 }
 ```
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:230-240 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:225-235 -->
 ```csharp
 internal static @string poll(channel<EmptyStruct> done) {
     var doneᴛ1 = done;
@@ -9229,7 +9196,7 @@ func plainFunc() int {
 	return x.val
 }
 ```
-<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs.target:8-22 -->
+<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs.target:7-21 -->
 ```csharp
 partial struct Thing {
     internal nint val;
@@ -9341,15 +9308,13 @@ func identCopy() {
 	fmt.Println("ident:      ", d.show(), "|", c.show())
 }
 ```
-<!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:8-28, 50-52, 62-67 -->
+<!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:7-25, 45-47, 57-62 -->
 ```csharp
 partial struct digest {
     internal array<nint> h = new(4);
     internal array<byte> x = new(2);
     internal nint nx;
 }
-
-} partial class mainᴛdigest {
 
 internal static void bump(this ref digest d) {
     foreach (var i in range(len(d.h))) {
@@ -9409,7 +9374,7 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:14-37 -->
+<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:13-36 -->
 ```csharp
 internal partial struct main_a /*dyn*/ {
     public nint X;
@@ -9535,14 +9500,12 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:9-102 -->
+<!-- source: src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:8-81 -->
 ```csharp
 partial struct Person {
     internal @string name;
     internal int32 age;
 }
-
-} partial class mainᴛPerson {
 
 public static bool IsDr(this Person p) {
     return strings.HasPrefix(p.name, "Dr");
@@ -9552,26 +9515,18 @@ public static bool IsAdult(this Person p) {
     return p.age >= 18;
 }
 
-} partial class main_package {
-
 partial struct Employee {
     internal @string position;
 }
-
-} partial class mainᴛEmployee {
 
 public static bool IsManager(this Employee e) {
     return e.position == "manager"u8;
 }
 
-} partial class main_package {
-
 partial struct Record {
     /*embed*/ public Person Person;
     /*embed*/ public Employee Employee;
 }
-
-} partial class mainᴛRecord {
 
 public static bool IsDr(this Record p) {
     return strings.HasPrefix(p.name, "Dr") && p.age > 18;
@@ -9712,18 +9667,14 @@ func main() {
 	fmt.Println(t.get(), t.n, t.label) // 11 11 t
 }
 ```
-<!-- source: src/tests/Behavioral/PointerEmbeddingPromotion/main.cs.target:8-42 -->
+<!-- source: src/tests/Behavioral/PointerEmbeddingPromotion/main.cs.target:7-37 -->
 ```csharp
 partial struct leaf {
     internal nint n;
 }
 
-} partial class mainᴛleaf {
-
 internal static void bump(this ref leaf l) { l.n++; }
 internal static nint get(this ref leaf l) { return l.n; }
-
-} partial class main_package {
 
 partial struct holder {
     /*embed*/ internal ж<leaf> leaf;
@@ -9779,13 +9730,11 @@ type outer struct {
 	o.bump(5)           // promoted: (&o.inner).bump(5)
 	o.bump(3)
 ```
-<!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.cs.target:8-67 -->
+<!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.cs.target:8-59 -->
 ```csharp
 partial struct inner {
     internal nint n;
 }
-
-} partial class mainᴛinner {
 
 internal static void bump(this ref inner i, nint d) { i.n += d; }
 …
@@ -9844,7 +9793,7 @@ func Reverse(data Interface) Interface {
 	return &reverse{data}
 }
 ```
-<!-- source: src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:9-43 -->
+<!-- source: src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:8-34 -->
 ```csharp
 partial interface Interface {
     nint Len();
@@ -9856,13 +9805,9 @@ partial struct reverse {
     /*embed*/ public Interface Interface;
 }
 
-} partial class mainᴛreverse {
-
 internal static bool Less(this reverse r, nint i, nint j) {
     return r.Interface.Less(j, i);
 }
-
-} partial class main_package {
 
 public static Interface Reverse(Interface data) {
     return new reverseжInterface(Ꮡ(new reverse(data)));
@@ -9920,7 +9865,7 @@ type rdCloser interface {
 	clsr
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:273-284 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:241-252 -->
 ```csharp
 partial interface rdr {
     @string read();
@@ -9960,19 +9905,15 @@ func f() error {
 	return MyError{"foo"}
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:8-22 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:8-18 -->
 ```csharp
 partial struct MyError {
     internal @string description;
 }
 
-} partial class mainᴛMyError {
-
 public static @string Error(this MyError err) {
     return fmt.Sprintf("error: %s"u8, err.description);
 }
-
-} partial class main_package {
 
 internal static error f() {
     return new MyError("foo");
@@ -10009,23 +9950,15 @@ type valued interface {
 	gv := valued(gauge(4))
 	fmt.Println("func-source:", mv.Value(), "numeric-source:", gv.Value())
 ```
-<!-- source: src/tests/Behavioral/LocalValueIfaceCallConversion/main.cs.target:55-73, 96-98 -->
+<!-- source: src/tests/Behavioral/LocalValueIfaceCallConversion/main.cs.target:38-48, 71-73 -->
 ```csharp
 internal delegate nint meter();
 
-} partial class mainᴛmeter {
-
 internal static nint Value(this meter m) { return m(); }
-
-} partial class main_package {
 
 partial struct gauge /*num:nint*/;
 
-} partial class mainᴛgauge {
-
 internal static nint Value(this gauge g) { return (nint)g * 2; }
-
-} partial class main_package {
 
 partial interface valued {
     nint Value();
@@ -10083,7 +10016,7 @@ type Incrementer interface {
 	Total() int
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:72-102 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:52-78 -->
 ```csharp
 partial struct Counter {
     internal nint n;
@@ -10092,8 +10025,6 @@ partial struct Counter {
 internal static void addTo(ref nint p, nint delta) {
     p += delta;
 }
-
-} partial class mainᴛCounter {
 
 public static @string Inc(this ж<Counter> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -10138,7 +10069,7 @@ back, ok := inc.(*Counter) // assert back to the pointer
 back.Inc()
 fmt.Println("assert-back:", ok, c.Total(), back == c) // true 11 true
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:158-169 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:130-141 -->
 ```csharp
 …
 var c = Ꮡ(new Counter());
@@ -10222,17 +10153,13 @@ func checkErr(n int) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:62-106 -->
+<!-- source: src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:61-101 -->
 ```csharp
 partial struct errno /*num:uintptr*/;
-
-} partial class mainᴛerrno {
 
 internal static @string Error(this errno e) {
     return "errno";
 }
-
-} partial class main_package {
 
 internal static errno errAgain => 11;
 
@@ -10408,7 +10335,7 @@ length in its type, so a comment in Go's array-prefix form records it wherever `
 ```go
 func bumpParamElem(a [3]int) [3]int {
 ```
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:44 -->
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:43 -->
 ```csharp
 internal static array<nint> bumpParamElem(/*[3]*/ array<nint> a) {
 ```
@@ -10634,7 +10561,7 @@ address that only feeds a `ref T` parameter, comes later in this section.
 	pptr = &ptr
 	ppptr = &pptr
 ```
-<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:18-28 -->
+<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17-27 -->
 ```csharp
     ref var a = ref heap(new nint(), out var Ꮡa);
     ref var ptr = ref heap<ж<nint>>(out var Ꮡptr);
@@ -10912,7 +10839,7 @@ func (c *Counter) Add(delta int32) int32 { return bump(&c.n, delta) }
 func (c *Counter) Set(v int32)           { *(&c.n) = v }
 func (c *Counter) Get() int32            { return c.n }
 ```
-<!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:8-26 -->
+<!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:7-23 -->
 ```csharp
 partial struct Counter {
     internal int32 n;
@@ -10922,8 +10849,6 @@ internal static int32 bump(ref int32 p, int32 delta) {
     p += delta;
     return p;
 }
-
-} partial class mainᴛCounter {
 
 public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -10957,7 +10882,7 @@ func main() {
 	fmt.Println("final:", c.Get())       // 115
 }
 ```
-<!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:30-37 -->
+<!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:25-32 -->
 ```csharp
 internal static void main() {
     ref var c = ref heap(new Counter(), out var Ꮡc);
@@ -10990,7 +10915,7 @@ func bump(c *coord) {
 	bump(&xy)
 	fmt.Println(xy.X, xy.Y) // 3 4
 ```
-<!-- source: src/tests/Behavioral/NamedNumericPointerReinterpret/main.cs.target:53-88 -->
+<!-- source: src/tests/Behavioral/NamedNumericPointerReinterpret/main.cs.target:41-76 -->
 ```csharp
 partial struct coord {
     public nint X, Y;
@@ -11092,7 +11017,7 @@ func bump(p *int) {
 	*p += 10
 }
 ```
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:30-32 -->
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:29-31 -->
 ```csharp
 internal static void bump(ref nint p) {
     p += 10;
@@ -11229,13 +11154,11 @@ func main() {
 	…
 }
 ```
-<!-- source: src/tests/Behavioral/ForMethodInitPost/main.cs.target:8-43 -->
+<!-- source: src/tests/Behavioral/ForMethodInitPost/main.cs.target:7-38 -->
 ```csharp
 partial struct iter {
     internal nint i, n;
 }
-
-} partial class mainᴛiter {
 
 internal static void start(this ref iter it, nint n) {
     it.i = 0;
@@ -11298,14 +11221,12 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:8-74 -->
+<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:7-69 -->
 ```csharp
 partial struct ring {
     internal nint data;
     internal ж<ring> next;
 }
-
-} partial class mainᴛring {
 
 internal static void initSelf(this ж<ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -11757,7 +11678,7 @@ func PrintValPtr(ptr *int) {
 	*ptr++
 }
 ```
-<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:8-80 -->
+<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-75 -->
 ```csharp
 partial struct Buffer {
     internal slice<byte> buf;
@@ -11805,7 +11726,7 @@ func (m *Mixed) Bump() { m.n++ }
 	pm := &Mixed{n: 41}
 	pm.Bump()
 ```
-<!-- source: src/tests/Behavioral/NamedInterfacePointerMethodSet/main.cs.target:30-92 -->
+<!-- source: src/tests/Behavioral/NamedInterfacePointerMethodSet/main.cs.target:21-71 -->
 ```csharp
 partial struct Mixed {
     internal nint n;
@@ -11841,7 +11762,7 @@ func (c *mc) wrapped() wrap {
 	return wrap{c, 7} // positional: the receiver into a pointer field
 }
 ```
-<!-- source: src/tests/Behavioral/DirectBoxReceiverPassedWhole/main.cs.target:8-36 -->
+<!-- source: src/tests/Behavioral/DirectBoxReceiverPassedWhole/main.cs.target:7-29 -->
 ```csharp
 partial struct mc {
     internal nint n;
@@ -11851,8 +11772,6 @@ partial struct wrap {
     internal ж<mc> p;
     internal nint tag;
 }
-
-} partial class mainᴛmc {
 
 internal static wrap wrapped(this ж<mc> Ꮡc) {
     return new wrap(Ꮡc, 7);
@@ -11901,7 +11820,7 @@ func here() string {
 // plain is a thin forwarder to here: the closure marks it, and only the mark keeps its frame.
 func plain() string { return here() }
 ```
-<!-- source: src/tests/Behavioral/NoInlinePartial/main.cs.target:12-20 -->
+<!-- source: src/tests/Behavioral/NoInlinePartial/main.cs.target:10-18 -->
 ```csharp
 internal static partial @string here() {
     var (pc, _, _, ok) = runtime.Caller(1);
@@ -11980,7 +11899,7 @@ func assignDescriber(h *holder, s *Setting) {
 	replacement := Setting{name: "assigned", value: 11}
 	assignDescriber(h, &replacement)
 ```
-<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:8-46 -->
+<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:7-41 -->
 ```csharp
 partial interface Describer {
     @string Describe();
@@ -11991,13 +11910,9 @@ partial struct Setting {
     internal nint value;
 }
 
-} partial class mainᴛSetting {
-
 public static @string Describe(this ref Setting s) {
     return fmt.Sprintf("%s=%d"u8, s.name, s.value);
 }
-
-} partial class main_package {
 
 partial struct holder {
     internal Describer d;
@@ -12805,7 +12720,7 @@ const (
 	gamesPerSeries = 10  // The number of games per series to simulate
 )
 ```
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:1-16 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:1-15 -->
 ```csharp
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -12817,7 +12732,6 @@ using fmt = fmt_package;
 using rand = math.rand_package;
 using math;
 using ꓸꓸꓸnint = Span<nint>;
-using static main_package;
 
 partial class main_package {
 
@@ -12837,7 +12751,7 @@ type action func(current score) (result score, turnIsOver bool)
 // A strategy chooses an action for any given score.
 type strategy func(score) action
 ```
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:22-36 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:21-35 -->
 ```csharp
 // type action is a methodless func type — rendered inline as its base delegate
 …
@@ -12857,7 +12771,7 @@ func joinPair(s string, err error) string {
 	return "got:" + s
 }
 ```
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:163-168 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:162-167 -->
 ```csharp
 internal static @string joinPair(@string s, error err) {
     if (err != nil) {

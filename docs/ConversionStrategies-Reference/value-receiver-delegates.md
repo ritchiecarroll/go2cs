@@ -324,7 +324,7 @@ _ = sink          // func(int)
 _ = lexText       // matches the named func type stateFn
 _ = c.bump        // method value
 ```
-<!-- source: src/tests/Behavioral/BlankIdentifierCollision/main.cs:73-74, 76, 84 -->
+<!-- source: src/tests/Behavioral/BlankIdentifierCollision/main.cs:68-69, 71, 79 -->
 ```csharp
 _ = (Func<@string, nint, (@string, error)>)(pair);
 _ = (Action<nint>)(sink);

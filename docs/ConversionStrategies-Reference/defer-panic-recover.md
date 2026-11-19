@@ -179,7 +179,7 @@ or `defer` beside the thunk, numbered `ᴛ1`, `ᴛ2`, … in order:
 	f := report
 	go f("via func value")
 ```
-<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:115-127 -->
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:110-122 -->
 ```csharp
     nint n = 3;
     goǃ(ᴛ1 => pair("square:", ᴛ1), n * n);
@@ -221,7 +221,7 @@ effects included:
 	x = 2
 	seq = 100
 ```
-<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:134-141 -->
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:129-136 -->
 ```csharp
         nint x = 1;
         defer(ᴛ1 => showPair("x was", ᴛ1), x, ref ᒐ);
@@ -259,7 +259,7 @@ func (x *box) two() {
 
 converts to:
 
-<!-- source: src/tests/Behavioral/DeferFinallyLowering/main.cs.target:31-46 -->
+<!-- source: src/tests/Behavioral/DeferFinallyLowering/main.cs.target:24-39 -->
 ```csharp
 internal static void two(this ж<box> Ꮡx) {
     GoFrame ᒐ = default;
@@ -461,7 +461,7 @@ func two() (int, string)              //  Go:
 defer show(two())                     //      two() runs at the defer; show runs at unwind
 ```
 
-<!-- source: src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.cs.target:70 -->
+<!-- source: src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.cs.target:65 -->
 ```csharp
 defer(ᴛ1 => show(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
 ```
@@ -621,7 +621,7 @@ function depends on how it was called, not where it was written: `defer catchErr
 `defer func() { catchError(&err) }()` reads nil in `catchError` and the panic continues. So the decision is made at
 run time, and the converter marks its two ends:
 
-<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:77-83 -->
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:76-82 -->
 ```csharp
 internal static void catchError(ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
@@ -632,7 +632,7 @@ internal static void catchError(ж<error> Ꮡerr) {
         var e = recover(calledByDefer); if (e != nil) {
 ```
 
-<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:97 -->
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:96 -->
 ```csharp
         defer(catchError, Ꮡerr, ref ᒐ, recovers: true);
 ```
@@ -960,7 +960,7 @@ not only for the func-literal-callee case, so `convFuncLit` (reached via convCal
 the argument's `LambdaContext`) routes any argument literal's captures to it, and they are emitted before
 the call — the guard's `defer run(func(){ pf.x = 77 })` shape:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:75-78 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:69-72 -->
 ```csharp
 var pfʗ1 = pf;
 defer(run, () => {
@@ -985,7 +985,7 @@ literal's capture copies were then written inside the call (`goǃ((` `var doneʗ
 CS1002/CS1003/CS1026/CS1513, with `doneʗ1` never declared). All three unwrap the parentheses, so
 the copy is a statement before the call and the deferred literal reads its variables by reference:
 
-<!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:18-30 -->
+<!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:15-27 -->
 ```csharp
     var doneʗ1 = done;
     goǃ(() => {
@@ -1019,7 +1019,7 @@ every other read in that body uses. `visitDeferStmt`/`visitGoStmt` enter through
 variant (`enterDeferGoLambdaConversion`) that copies the enclosing lambda's renames into the fresh
 state, so the arguments render exactly like any other expression in the enclosing body:
 
-<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:43-53 -->
+<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:37-47 -->
 ```csharp
 var baseʗ1 = @base;
 func(() => {
@@ -1090,7 +1090,7 @@ a 4-error cascade in traceviewer). `visitReturnStmt` provides the same hoist buf
 `visitExprStmt`/`visitIfStmt`/`visitForStmt` and splices it before the `return` through its existing
 `DeferredDeclsMarker` slot (ahead of any deferred tuple-deconstruction temps):
 
-<!-- source: src/tests/Behavioral/ReturnTupleFuncLitArg/main.cs.target:20-23 -->
+<!-- source: src/tests/Behavioral/ReturnTupleFuncLitArg/main.cs.target:15-18 -->
 ```csharp
     var allowedʗ1 = allowed;
     return (new handler((@string msg) => {
@@ -1232,7 +1232,7 @@ Because a named result lives in the literal's OWN scope, a reference to it in th
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
-<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:73 -->
+<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:69 -->
 ```csharp
 defer(() => hʗ1.close(), ref ᒐ);
 ```
