@@ -530,6 +530,15 @@ public class TwinBoxTests
                 bump(ref dc);
             }
 
+            public static void runLoopRecv(nint n)
+            {
+                for (nint i = 0; i < n; i++)
+                {
+                    var tr = new T();
+                    tr.b();
+                }
+            }
+
             public static void runNameTaken()
             {
                 nint nm = default;
@@ -1259,6 +1268,16 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.IsFalse(twins.Contains("Ꮡdc", StringComparison.Ordinal), "not a single local declaration");
         StringAssert.Contains(twins, "|bump|dc (declaration)", "named, with the reason");
+    }
+
+    [TestMethod]
+    public void P39_ARefusedReceiverLocalNamesItsReasonToo()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡtr", StringComparison.Ordinal), "a loop-body receiver stays a stack local");
+        StringAssert.Contains(twins, "|b|tr (loop)", "the receiver's P row names the reason as an argument's does");
     }
 
     [TestMethod]

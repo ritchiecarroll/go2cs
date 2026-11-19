@@ -743,7 +743,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
             // N2: the box a `this ref` call can name for its receiver, whatever the target becomes after the fixpoint.
             if (site is { ViaBoxOverload: false, Target: { IsExtensionMethod: true, Parameters.Length: > 0 } target } && target.Parameters[0].RefKind == RefKind.Ref)
+            {
                 site.BoxOf = run.BoxExpression(node, model, candidate, m_aliases ??= new RefAliases(candidate.Syntax));
+
+                // PB-5 (12.5): a receiver local refused promotion names its reason in the call's `// P` row.
+                if (site.BoxOf is null && node.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax receiverName } &&
+                    candidate.PromoteRefused.TryGetValue(receiverName.Identifier.ValueText, out string? refusal))
+                {
+                    site.ArgPlain = receiverName.Identifier.ValueText + " (" + refusal + ")";
+                }
+            }
 
             // byref-param: the boxes a call to a function with plain `ref` parameters can hand (12.1), whatever the target
             // becomes after the fixpoint.
