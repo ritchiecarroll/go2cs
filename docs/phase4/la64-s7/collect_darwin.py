@@ -69,7 +69,13 @@ for row in names:
         agree = 'yes' if (word, count) == other[:2] else 'no'
         doc = docs.get(row)
         if doc is None:
-            sys.exit(f'{row} {rid}: no comparison record in the artifact')
+            # A row with no record (a build failure, a void row) is printed and counted, never the end of the read:
+            # stopping here dropped every later row of the shard from the evidence.
+            print(f'NO-RECORD {row} {rid}: no comparison record in the artifact', file=sys.stderr)
+            failed += 1
+            print('\t'.join([shard, row, rid, '-', '-1', '-', '-', '-', word, agree, win_e, win_d, '-', '-', run,
+                             str(wall), 'no-record', '-']))
+            continue
         go, cs = doc.get('go') or {}, doc.get('csharp') or {}
         verdict_names = set(go) | set(cs)
         disclosed_names = {re.match(r'(\S+)', s).group(1) for s in (doc.get('disclosed') or []) if s and re.match(r'(\S+)', s)}

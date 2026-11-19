@@ -5851,6 +5851,123 @@ func TestHandOwnHostBridgedNameTheHostDeclaresIsNotGone(t *testing.T) {
 	}
 }
 
+// An external test package's method holders are declared in its own unit,
+// package_info_external_test.cs, and never again in package_test_info.cs: both files compile into
+// the one tests assembly, so a second declaration is CS0579 (a duplicate [GoMethodHost]). The
+// white-box writer has always split them; the external writer wrote packageMethodHolders into both
+// files, and text/tabwriter's tests, whose external package declares methods on buffer and
+// panicWriter, failed to build at the first -tests regen under the method-holder rule. The
+// production holder already in package_test_info.cs (written by the production-model pass) stays.
+func TestExternalVariantHoldersAreDeclaredOnlyInTheExternalUnit(t *testing.T) {
+	dir := t.TempDir()
+	testInfoPath := filepath.Join(dir, testPackageInfoFileName)
+	productionHolder := methodHolderLine("valueᴛWriter", "value_package.Writer")
+
+	seed := strings.Join([]string{
+		"// <ImportedTypeAliases>",
+		"// </ImportedTypeAliases>",
+		"",
+		"using go;",
+		"using static go.value_package;",
+		"",
+		"// <ExportedTypeAliases>",
+		"// </ExportedTypeAliases>",
+		"",
+		"// <InterfaceImplementations>",
+		"// </InterfaceImplementations>",
+		"",
+		"// <ImplicitConversions>",
+		"// </ImplicitConversions>",
+		"",
+		"// <" + MethodHolderSection + ">",
+		productionHolder,
+		"// </" + MethodHolderSection + ">",
+		"",
+		"namespace go;",
+		"",
+		"[GoPackage(\"value\")]",
+		"public static partial class value_package",
+		"{",
+		"}",
+	}, "\r\n")
+
+	if err := os.WriteFile(testInfoPath, []byte(seed), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resetPackageState(&packages.Package{})
+	packageName = "value_test"
+	packageNamespace = "go"
+	interfaceImplementations["io.Writer"] = hashset.NewHashSet([]string{"buffer"}) // bare => test anchor
+	packageMethodHolders["value_testᴛbuffer"] = "value_test_package.buffer"
+
+	unitName, err := writeExternalVariantMetadata(testInfoPath, dir, "value", metadataClassPrefix("go", "value"), metadataClassPrefix("go", "value_test"), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unitName != externalTestPackageInfoFileName {
+		t.Fatalf("unit name = %q, want %q", unitName, externalTestPackageInfoFileName)
+	}
+
+	unitData, err := os.ReadFile(filepath.Join(dir, externalTestPackageInfoFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	testInfoData, err := os.ReadFile(testInfoPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unit, testInfo := string(unitData), string(testInfoData)
+
+	if !strings.Contains(unit, "public static partial class value_testᴛbuffer;") {
+		t.Fatalf("the external unit must declare the external holder value_testᴛbuffer:\n%s", unit)
+	}
+	if strings.Contains(testInfo, "value_testᴛbuffer") {
+		t.Fatalf("package_test_info.cs declares the external holder value_testᴛbuffer a second time (CS0579):\n%s", testInfo)
+	}
+	if !strings.Contains(testInfo, productionHolder) {
+		t.Fatalf("package_test_info.cs must keep the production holder valueᴛWriter:\n%s", testInfo)
+	}
+
+	// Control: a variant that writes no unit (no test-anchored record, no declared type) still
+	// declares its holders in package_test_info.cs, exactly once.
+	controlDir := t.TempDir()
+	controlPath := filepath.Join(controlDir, testPackageInfoFileName)
+
+	if err := os.WriteFile(controlPath, []byte(seed), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resetPackageState(&packages.Package{})
+	packageName = "value_test"
+	packageNamespace = "go"
+	packageMethodHolders["value_testᴛbuffer"] = "value_test_package.buffer"
+
+	unitName, err = writeExternalVariantMetadata(controlPath, controlDir, "value", metadataClassPrefix("go", "value"), metadataClassPrefix("go", "value_test"), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unitName != "" {
+		t.Fatalf("control: unit name = %q, want none", unitName)
+	}
+	if _, err := os.Stat(filepath.Join(controlDir, externalTestPackageInfoFileName)); !os.IsNotExist(err) {
+		t.Fatalf("control: no external unit may be written (stat err %v)", err)
+	}
+
+	controlData, err := os.ReadFile(controlPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n := strings.Count(string(controlData), "public static partial class value_testᴛbuffer;"); n != 1 {
+		t.Fatalf("control: package_test_info.cs declares value_testᴛbuffer %d times, want 1:\n%s", n, controlData)
+	}
+	if !strings.Contains(string(controlData), productionHolder) {
+		t.Fatalf("control: package_test_info.cs must keep the production holder valueᴛWriter:\n%s", controlData)
+	}
+
+	resetPackageState(&packages.Package{})
+}
+
 // Every external test file names the package under test's internal-test class in a `using static`, and
 // that class compiles into the same assembly. In the package class the external variant's own member
 // wins; a method holder is not nested in it, so there a name both classes declare ties (CS0229 for a
