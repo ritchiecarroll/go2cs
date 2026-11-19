@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	stdio "io"
 	"strings"
 )
 
@@ -161,4 +162,26 @@ func main() {
 	var asValue Value = Array[u8]{vals: []u8{{5}}}
 	explicit := FromLSPRange[*SourceFile](a, 3)
 	fmt.Println("written instantiations:", asValue.kind(), explicit[0].Start, explicit[0].Script == a)
+
+	srcs, n := Readers([]*memSrc{{"abc"}, {"de"}})
+	fmt.Println("foreign type in the signature:", len(srcs), n, srcs[1].data)
+}
+
+// ---- a constraint whose method names ANOTHER package's type, imported under an ALIAS ----
+
+// The witness declarations live in package_info.cs, where `stdio` is not in scope: they must name io.Reader by its
+// package class, not by this file's alias.
+type Source interface{ Open() stdio.Reader }
+
+type memSrc struct{ data string }
+
+func (m *memSrc) Open() stdio.Reader { return strings.NewReader(m.data) }
+
+func Readers[T Source](srcs []T) ([]T, int) {
+	n := 0
+	for _, s := range srcs {
+		b, _ := stdio.ReadAll(s.Open())
+		n += len(b)
+	}
+	return srcs, n
 }

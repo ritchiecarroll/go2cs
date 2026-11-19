@@ -42,6 +42,7 @@ using static go.main_package;
 [assembly: GoImplement<SourceFile, Script>(Pointer = true)]
 [assembly: GoImplement<go.main_package.Array<u8, ValueΔshapeOf<u8>>, Value>]
 [assembly: GoImplement<memFile, Script>]
+[assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<u8, Value>]
 // </InterfaceImplementations>
 
@@ -53,6 +54,7 @@ using static go.main_package;
 [assembly: GoFieldAccess(typeof(Export))]
 [assembly: GoFieldAccess(typeof(SourceFile))]
 [assembly: GoFieldAccess(typeof(boxed))]
+[assembly: GoFieldAccess(typeof(memSrc))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,7 +64,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABMqggAIEKKmooKClKiCqJAACxAACQyQtKKCgoKmppAAERQACwiggAAMCKCAxMKCAAgQggAJDLSCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClJSClIKClIKCgpiCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABUsggAIEKKmooKClKiCqJAACxAACQyQtKKCgoKmppAAERQACwiggAAMCKCAxMKCAAgQggAJDLSCgoKCgpSCgpSClIKCgoKCgpSCgoKClIKClJSClIKClIKCgpiCgpSCAAwWtKKCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -80,14 +82,16 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial struct boxed {}
     internal partial struct memFile {}
+    internal partial struct memSrc {}
     internal partial struct registry {}
     internal partial struct u8 {}
     public partial interface Named {}
     public partial interface Script {}
+    public partial interface Source {}
     public partial interface Value {}
-    public partial struct Array<T, TValue> {}
+    public partial struct Array<T, TΔValue> {}
     public partial struct Export {}
-    public partial struct Index<T, TNamed> {}
+    public partial struct Index<T, TΔNamed> {}
     public partial struct MappedSpan<T> {}
     public partial struct Ptr<T> {}
     public partial struct SourceFile {}
@@ -101,6 +105,7 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 
@@ -110,13 +115,16 @@ public static partial class main_package
 
     // <ShapeWitnesses>
     internal readonly struct boxedжValueΔshape : ValueΔshape<ж<boxed>> { public static @string kind(ж<boxed> self) => self.kind(); }
+    internal readonly struct memSrcжSourceΔshape : SourceΔshape<ж<memSrc>> { public static io_package.Reader Open(ж<memSrc> self) => self.Open(); }
     public interface NamedΔshape<T> { static abstract @string Name(T self); }
     public interface ScriptΔshape<T> { static abstract @string FileName(T self); static abstract @string Text(T self); }
+    public interface SourceΔshape<T> { static abstract io_package.Reader Open(T self); }
     public interface ValueΔshape<T> { static abstract @string kind(T self); }
     public readonly struct ExportжNamedΔshape : NamedΔshape<ж<Export>> { public static @string Name(ж<Export> self) => self.Name(); }
     public readonly struct NamedΔshapeOf<T> : NamedΔshape<T> where T : Named { public static @string Name(T self) => self.Name(); }
     public readonly struct ScriptΔshapeOf<T> : ScriptΔshape<T> where T : Script { public static @string FileName(T self) => self.FileName(); public static @string Text(T self) => self.Text(); }
     public readonly struct SourceFileжScriptΔshape : ScriptΔshape<ж<SourceFile>> { public static @string FileName(ж<SourceFile> self) => self.FileName(); public static @string Text(ж<SourceFile> self) => self.Text(); }
+    public readonly struct SourceΔshapeOf<T> : SourceΔshape<T> where T : Source { public static io_package.Reader Open(T self) => self.Open(); }
     public readonly struct ValueΔshapeOf<T> : ValueΔshape<T> where T : Value { public static @string kind(T self) => self.kind(); }
     // </ShapeWitnesses>
 }
@@ -135,5 +143,6 @@ public static partial class main_package
 [GoMethodHost(typeof(main_package.SourceFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛSourceFile;
 [GoMethodHost(typeof(main_package.boxed)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛboxed;
 [GoMethodHost(typeof(main_package.memFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmemFile;
+[GoMethodHost(typeof(main_package.memSrc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmemSrc;
 [GoMethodHost(typeof(main_package.u8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛu8;
 // </MethodHolders>

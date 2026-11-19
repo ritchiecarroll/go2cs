@@ -1,7 +1,9 @@
 namespace go;
 
 using fmt = fmt_package;
+using stdio = io_package;
 using strings = strings_package;
+using Δio = io_package;
 using static main_package;
 
 partial class main_package {
@@ -27,18 +29,18 @@ partial struct MappedSpan<T> {
     public nint Start;
 }
 
-public static slice<MappedSpan<T>> FromLSPRange<T, TScript>(T script, nint start)
-    where TScript : struct, ScriptΔshape<T>
+public static slice<MappedSpan<T>> FromLSPRange<T, TΔScript>(T script, nint start)
+    where TΔScript : struct, ScriptΔshape<T>
 {
-    return lspRangeToVirtual<T, TScript>(slice<T>([script]), start);
+    return lspRangeToVirtual<T, TΔScript>(slice<T>([script]), start);
 }
 
-internal static slice<MappedSpan<T>> lspRangeToVirtual<T, TScript>(slice<T> scripts, nint start)
-    where TScript : struct, ScriptΔshape<T>
+internal static slice<MappedSpan<T>> lspRangeToVirtual<T, TΔScript>(slice<T> scripts, nint start)
+    where TΔScript : struct, ScriptΔshape<T>
 {
     slice<MappedSpan<T>> @out = default;
     foreach (var (i, s) in range(scripts)) {
-        @out = append(@out, new MappedSpan<T>(s, start + i + len(TScript.Text(s))));
+        @out = append(@out, new MappedSpan<T>(s, start + i + len(TΔScript.Text(s))));
     }
     return @out;
 }
@@ -47,9 +49,9 @@ public static slice<MappedSpan<ж<SourceFile>>> FromLSPRangeForSourceFile(slice<
     return lspRangeToVirtual<ж<SourceFile>, SourceFileжScriptΔshape>(files, start);
 }
 
-internal static any dump<T, TScript>(T x)
-    where TScript : struct, ScriptΔshape<T>
-{ return FromLSPRange<T, TScript>(x, 0); }
+internal static any dump<T, TΔScript>(T x)
+    where TΔScript : struct, ScriptΔshape<T>
+{ return FromLSPRange<T, TΔScript>(x, 0); }
 
 partial interface Named {
     @string Name();
@@ -65,32 +67,32 @@ public static @string Name(this ref Export e) { return e.name; }
 
 } partial class main_package {
 
-partial struct Index<T, TNamed>
-    where TNamed : struct, NamedΔshape<T>
+partial struct Index<T, TΔNamed>
+    where TΔNamed : struct, NamedΔshape<T>
 {
     internal slice<T> entries;
 }
 
-internal static @string nameOf<T, TNamed>(T x)
-    where TNamed : struct, NamedΔshape<T>
-{ return TNamed.Name(x); }
+internal static @string nameOf<T, TΔNamed>(T x)
+    where TΔNamed : struct, NamedΔshape<T>
+{ return TΔNamed.Name(x); }
 
 } partial class mainᴛIndex {
 
-public static slice<T> Find<T, TNamed>(this ref Index<T, TNamed> idx, @string name)
-    where TNamed : struct, NamedΔshape<T>
+public static slice<T> Find<T, TΔNamed>(this ref Index<T, TΔNamed> idx, @string name)
+    where TΔNamed : struct, NamedΔshape<T>
 {
     slice<T> @out = default;
     foreach (var (_, e) in range(idx.entries)) {
-        if (nameOf<T, TNamed>(e) == name) {
+        if (nameOf<T, TΔNamed>(e) == name) {
             @out = append(@out, e);
         }
     }
     return @out;
 }
 
-public static void Add<T, TNamed>(this ref Index<T, TNamed> idx, T e)
-    where TNamed : struct, NamedΔshape<T>
+public static void Add<T, TΔNamed>(this ref Index<T, TΔNamed> idx, T e)
+    where TΔNamed : struct, NamedΔshape<T>
 { idx.entries = append(idx.entries, e); }
 
 } partial class main_package {
@@ -130,27 +132,27 @@ internal static @string kind<T>(this Ptr<T> _)
 
 } partial class main_package {
 
-partial struct Array<T, TValue>
-    where TValue : struct, ValueΔshape<T>
+partial struct Array<T, TΔValue>
+    where TΔValue : struct, ValueΔshape<T>
 {
     internal slice<T> vals;
 }
 
 } partial class mainᴛArray {
 
-internal static @string kind<T, TValue>(this Array<T, TValue> _)
-    where TValue : struct, ValueΔshape<T>
+internal static @string kind<T, TΔValue>(this Array<T, TΔValue> _)
+    where TΔValue : struct, ValueΔshape<T>
 {
     T x = GoZero<T>();
-    return "Array["u8 + TValue.kind(x) + "]"u8;
+    return "Array["u8 + TΔValue.kind(x) + "]"u8;
 }
 
 } partial class main_package {
 
-public static Array<T, TValue> /*y*/ ConstArray<T, TValue>(slice<T> vals, @string name)
-    where TValue : struct, ValueΔshape<T>
+public static Array<T, TΔValue> /*y*/ ConstArray<T, TΔValue>(slice<T> vals, @string name)
+    where TΔValue : struct, ValueΔshape<T>
 {
-    Array<T, TValue> y = default;
+    Array<T, TΔValue> y = default;
 
     y.vals = vals;
     return y;
@@ -226,6 +228,34 @@ internal static void main() {
     Value asValue = new Array<u8, ValueΔshapeOf<u8>>(vals: [new(5)]);
     var @explicit = FromLSPRange<ж<SourceFile>, SourceFileжScriptΔshape>(a, 3);
     fmt.Println("written instantiations:", asValue.kind(), @explicit[0].Start, @explicit[0].Script == a);
+
+    var (srcs, n) = Readers<ж<memSrc>, memSrcжSourceΔshape>(slice<ж<memSrc>>([Ꮡ(new memSrc("abc")), Ꮡ(new memSrc("de"))]));
+    fmt.Println("foreign type in the signature:", len(srcs), n, srcs[1].data);
+}
+
+partial interface Source {
+    stdio.Reader Open();
+}
+
+partial struct memSrc {
+    internal @string data;
+}
+
+} partial class mainᴛmemSrc {
+
+internal static stdio.Reader Open(this ref memSrc m) { return new strings_ReaderжReader(strings.NewReader(m.data)); }
+
+} partial class main_package {
+
+public static (slice<T>, nint) Readers<T, TΔSource>(slice<T> srcs)
+    where TΔSource : struct, SourceΔshape<T>
+{
+    nint n = 0;
+    foreach (var (_, s) in range(srcs)) {
+        var (b, _) = stdio.ReadAll(TΔSource.Open(s));
+        n += len(b);
+    }
+    return (srcs, n);
 }
 
 } // end main_package

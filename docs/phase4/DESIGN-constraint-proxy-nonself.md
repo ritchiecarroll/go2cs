@@ -283,7 +283,7 @@ walkList, 0 mixed; the behavioral corpus, 3 sites, all `[]T`-only, 0 mixed; the 
 Ruling 1 (a generic NAMED type) and section 5 (T in a result, map, channel, pointer or nested slice) are no longer
 refused for a declaration the narrow shape witness selects (DESIGN-shape-witness-scout, P3 CLEAR 05e789558d). There T
 is the box itself, so a result, a slice and a named type keep Go's own element type and aliasing, and every method
-call through T goes through a witness type parameter, `TScript.Text(s)`. The proxy routes and the GO2CS2005/2006
+call through T goes through a witness type parameter, `TΔScript.Text(s)`. The proxy routes and the GO2CS2005/2006
 passes decline a witnessed position (`shapeWitnessed`); every other shape this document refuses still is.
 
 Stage 1 is the same-package route: the constraint must be an interface declared in the type parameter's own package,
@@ -297,3 +297,18 @@ function whose clause would be kept (`nameOf[U Named](x U)` calling `x.Name()`) 
 meets `where U : Named`, which it cannot satisfy (CS0311). And a TYPE whose methods forward its T into a carrier
 carries the witness itself. Both run in the same fixed point, and P3's predicate keeps the callee exactly as long as a
 kept caller forwards into it. ShapeWitnessSamePackage holds the shape (`Index.Find` calling `nameOf`).
+
+**P3's review and COORD's stage-1 rulings (2026-11-19).** The governing rule: stage 1 must not turn Go that converts
+today, or is refused by name today, into a C# error or a NEW refusal. So:
+- A declaration is kept only where its own package instantiates a selected position with a POINTER, or a kept
+  declaration forwards into it. Exported declarations take the same predicate until stage 2 (finding 3). A pointer is
+  exactly what GO2CS2005 refuses for these shapes, so GO2CS2013 only ever stands where master already refuses by name.
+- The refusal scope covers every selected position, carrier or not (1). There is one closure scope per spec of a
+  `type ( ... )` group (2). The body pass descends into function literals with their own results (5), and reads
+  composite-literal elements and channel sends (8). A comparison `x == iface` cannot occur: T under a method-set
+  constraint is not comparable.
+- The witness declarations in package_info.cs use that file's spelling, so a foreign type is named by its package class,
+  never by a converted file's import alias (4). ShapeWitnessSamePackage holds an aliased `io` in a constraint.
+- A -tests variant refuses a production declaration whose selection its _test.go files change (6). A value of another
+  package's carrier that reaches a package without an instantiating identifier is refused by name (7).
+- Witness parameters are spelled `TΔScript`, with the reserved marker, so they cannot meet a name the Go source declares.

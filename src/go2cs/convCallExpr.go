@@ -4251,7 +4251,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 
 			// A method call through a WITNESSED type parameter goes through its witness, receiver first: `s.Text()` is
-			// `TScript.Text(s)` (shapeWitness.go).
+			// `TΔScript.Text(s)` (shapeWitness.go).
 			if witnessFunc, receiver, ok := v.shapeWitnessCallParts(callExpr); ok {
 				funcName = witnessFunc
 

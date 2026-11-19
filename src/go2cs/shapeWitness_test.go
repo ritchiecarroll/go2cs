@@ -10,6 +10,7 @@ package main
 
 import (
 	"fmt"
+	"go/types"
 	"sort"
 	"strings"
 	"testing"
@@ -45,6 +46,15 @@ type Index[T Script] struct{ all []T } // SELECTED carrier
 
 func (x *Index[T]) First() string { return x.all[0].Text() }
 
+var _ Index[*file]
+
+type ( // SELECTED group
+	GIndex[T Script]  struct{ all []T }
+	GHolder[T Script] struct{ idx GIndex[T] }
+)
+
+var _ GHolder[*file]
+
 func Spans[T Script](s T) []Span[T] { return nil } // SELECTED result
 
 func forward[T Script](s T) any { return Spans(s) } // SELECTED closure
@@ -62,6 +72,10 @@ func ViaForeign[T fmt.Stringer](s T) []T { s.String(); return nil } // NOT forei
 func onlyValue[T Script](s T) []T { s.Text(); return nil } // NOT only a nominal instantiation
 
 var _ = onlyValue(mem{})
+
+func ExportedNominal[T Script](s T) []T { s.Text(); return nil } // NOT exported, used only nominally
+
+var _ = ExportedNominal(mem{})
 
 func keptByPointer[T Script](s T) []T { s.Text(); helperText(s); idOf(s); return nil } // SELECTED pointer instantiation
 
@@ -128,6 +142,32 @@ func labels[T stringish](x T) []T {
 }
 
 var _ = labels(&tag{})
+
+type Box[T Named] struct{ v T }
+
+func (b Box[T]) Get() Named { return b.v } // REFUSED non-carrier
+
+var _ Box[*item]
+
+func closure[T Named](x T) []T {
+	x.Name()
+	go func() {
+		var n Named = x // REFUSED funclit
+		_ = n
+	}()
+	return []T{x}
+}
+
+var _ = closure(&item{})
+
+func positions[T Named](x T, ch chan Named) []T {
+	x.Name()
+	_ = []Named{x} // REFUSED composite
+	ch <- x // REFUSED send
+	return []T{x}
+}
+
+var _ = positions(&item{}, nil)
 `
 
 func loadShapeWitnessFixture(t *testing.T, module, fixture string) *packages.Package {
@@ -177,7 +217,7 @@ func TestShapeWitnessSelection(t *testing.T) {
 
 	sort.Strings(got)
 
-	want := []string{"Index carrier=true", "Span carrier=false", "Spans carrier=true", "forward carrier=true", "helperText carrier=true", "keptByPointer carrier=true"}
+	want := []string{"GHolder carrier=false", "GIndex carrier=false", "Index carrier=true", "Span carrier=false", "Spans carrier=true", "forward carrier=true", "helperText carrier=true", "keptByPointer carrier=true"}
 
 	if fmt.Sprint(got) != fmt.Sprint(want) {
 		t.Fatalf("selected %v\nwant     %v", got, want)
@@ -199,6 +239,10 @@ func TestShapeWitnessRefusalsFireBySite(t *testing.T) {
 		"REFUSED method-value":    "needs a witness delegate",
 		"REFUSED to-interface":    "converts to the interface",
 		"REFUSED onward":          "keeps its C# constraint",
+		"REFUSED non-carrier":     "converts to the interface",
+		"REFUSED funclit":         "converts to the interface",
+		"REFUSED composite":       "converts to the interface",
+		"REFUSED send":            "converts to the interface",
 	}
 
 	got := map[int]string{}
@@ -264,5 +308,129 @@ func TestShapeWitnessLiftsNonSelfRefusals(t *testing.T) {
 		if line := nonSelfFixtureLine(t, marker); !refused[line] {
 			t.Errorf("line %d (%s) is no longer refused; the shape witness does not select it", line, marker)
 		}
+	}
+}
+
+// Package a witnesses Set (its own pointer instantiation); the importing package refuses, by name, both a written
+// instantiation of a.Set and a value of a carrier reaching it with no instantiating identifier (findings 7 and 9).
+const shapeWitnessForeignA = `package a
+
+type Elem interface{ Name() string }
+
+type Item struct{ n string }
+
+func (i *Item) Name() string { return i.n }
+
+type Set[T Elem] struct{ all []T }
+
+func (s *Set[T]) First() string { return s.all[0].Name() }
+
+var _ Set[*Item]
+
+func Default() Set[*Item] { return Set[*Item]{} }
+`
+
+const shapeWitnessForeignRoot = `package swf
+
+import "example/swf/a"
+
+type mine struct{}
+
+func (*mine) Name() string { return "" }
+
+var _ a.Set[*mine] // REFUSED foreign-decl
+
+var d = a.Default() // REFUSED foreign-flow
+`
+
+// TestShapeWitnessForeignRefusals: another package's witness declaration is refused by name where it is instantiated,
+// and where a value of one of its carriers arrives without an instantiating identifier.
+func TestShapeWitnessForeignRefusals(t *testing.T) {
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/swf\n\ngo 1.23\n",
+		"swf.go": shapeWitnessForeignRoot,
+		"a/a.go": shapeWitnessForeignA,
+	})
+
+	t.Cleanup(resetShapeWitnessState)
+	t.Cleanup(func() { shapeWitnessForeign = map[string]map[types.Object]*shapeWitnessDecl{} })
+
+	pkg := loadProductionForDir(t, dir)
+	refusal := prepareShapeWitness(pkg)
+
+	if refusal == nil {
+		t.Fatal("no site was refused; the fixture instantiates a foreign witness declaration and takes a foreign carrier's value")
+	}
+
+	got := map[int]string{}
+
+	for _, site := range refusal.sites {
+		got[site.position.Line] += site.text + "\n"
+	}
+
+	for marker, reason := range map[string]string{
+		"REFUSED foreign-decl": "is a shape-witness declaration of package example/swf/a",
+		"REFUSED foreign-flow": "a shape-witness carrier of another package",
+	} {
+		line := shapeWitnessFixtureLine(t, shapeWitnessForeignRoot, marker)
+
+		if !strings.Contains(got[line], reason) {
+			t.Errorf("line %d (%s): want a refusal naming %q, got %q", line, marker, reason, got[line])
+		}
+	}
+}
+
+// TestShapeWitnessTestVariantDivergence: a production declaration only a _test.go file instantiates with a pointer is
+// witnessed in the -tests variant and not in production; the variant refuses it by name (finding 6), and a production
+// conversion of the same package refuses nothing.
+func TestShapeWitnessTestVariantDivergence(t *testing.T) {
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/swt\n\ngo 1.23\n",
+		"swt.go": `package swt
+
+type Named interface{ Name() string }
+
+type item struct{ n string }
+
+func (i *item) Name() string { return i.n }
+
+func values[T Named](xs []T) []T { xs[0].Name(); return xs } // DIVERGES
+`,
+		"swt_test.go": `package swt
+
+import "testing"
+
+func TestValues(t *testing.T) { _ = values([]*item{{"x"}}) }
+`,
+	})
+
+	t.Cleanup(resetShapeWitnessState)
+
+	production, internal := loadTestVariantForDir(t, dir)
+
+	if refusal := prepareShapeWitness(production); refusal != nil {
+		t.Fatalf("the production conversion refused %d site(s); nothing in production instantiates values with a pointer:\n%s", len(refusal.sites), refusal.Error())
+	}
+
+	refusal := prepareShapeWitness(internal)
+
+	if refusal == nil {
+		t.Fatal("the -tests variant refused nothing; its _test.go file changes values's selection")
+	}
+
+	found := false
+
+	for _, site := range refusal.sites {
+		if strings.Contains(site.text, "change values's shape-witness selection") && strings.HasSuffix(site.position.Filename, "swt.go") {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Fatalf("no divergence refusal named values at its production declaration:\n%v", refusal.sites)
 	}
 }
