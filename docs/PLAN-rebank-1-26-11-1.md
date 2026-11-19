@@ -134,3 +134,80 @@ delta.**
 2. **The darwin collector must not stop at a void row.** In the first pass at `6e870821d6`, `collect_darwin.py` exited
    at the first row with no comparison record, and every later row of that shard lost its evidence line. Fixed in
    batch 314 (`f5e51abe33`): the row is printed as `no-record` and the read goes on.
+
+## 10. Release day (release controls, P4, 2026-11-19)
+
+The runbooks lead on procedure (GoCorpusMigration.md's release ritual and *Release day*; DotNetMigration.md). This
+section is the 1.26.11.1 instance, on the .3 precedent (PLAN-rebank-1-26-10-3.md section 9, batch 260): what is already
+true at the release tree, the CI runs COORD dispatches, and the owner's hands. **`<REL>`** is master once the .4 bank
+batch (P5, `claude/p5-bank-12611-assembly`) and this release-controls batch (`claude/p4-release-controls-12611`) have
+landed, **without** this batch's last commit, the NEWS entry. That commit lands just before the tag mints (ritual
+item 1), as the .2 and .3 entries did (`e665f4ea51`, `2ed9f54759`), so nothing announces unpublished packages on
+go2cs.net. The NEWS commit also deletes `docs/DRAFT-news-1-26-10-4.md`, which matters for the arm H citation in 10.2.
+
+### 10.1 What the release-controls batch settled
+
+| Item | State at `<REL>` | Why |
+|:--|:--|:--|
+| `src/version.props` | **unchanged**: `GoStdLibVersion` 1.26.11, `GoBuildNumber` 0 | `GoBuildNumber` is the LAST-PUBLISHED build, and nothing is published at 1.26.11 yet. `release-nuget.ps1` Phase 1 bumps it to 1 at the publish; a bump here would double-bump |
+| `src/go2cs/corpus-release.txt` | **unchanged**: 1.26.10.3 | MUST-NOT-CHANGE until Phase 4's record commit regenerates it (`TestCorpusReleaseMatchesThePublishedStamp`) |
+| package IDs | **0 new, 0 removed** against `nuget-1.26.10.3`: 362 packable IDs at both, read from `src/go2cs-stdlib.slnx` (363 projects at the tag, 364 at the tree) with each project's `PackageId` and `AssemblyName` resolved | the one new project, `core/go.arrays`, is `IsPackable=false` (packed inside go.lib). OQ4 changed every std project's `PackageId` expression from `go.$(AssemblyName)` to `$(AssemblyName)` and its `AssemblyName` to `go.<pkg>`, so the IDs resolve unchanged. No go.* deprecation is owed for a removed ID, and no new go.* ID needs the API key's scope |
+| README Tests badges | **0 stale** of 235 valued badges (plus 118 `none_to_validate` and 7 `not_yet_validated`), at `280a01952c` | a value scan: each badge against `docs/validation/current/<id>.md`'s headline. check-roster-format 2b3 checks presence, not values. **Re-run on the bank's tree**, because the bank re-renders `docs/validation/current` (P4 owes that read when P5 posts READY) |
+| README Docs and Go Source badges | **all 360 name 1.26.11** after this batch | `unsafe` and `testing`, the two hand-owned packages, still named go1.26.10: the hop regenerated only converted READMEs. Fixed here; `release-nuget.ps1` retargets only the C# Source badge |
+| the Tests link and the C# Source badge | still `validation/1.26.10.3` and `nuget-1.26.10.3` | release-nuget retargets both at the publish |
+| binary-compatibility suppressions | 231 files, 13,248 entries at `280a01952c`, every one an announced 1.26.11.1 break (the promoted-forwarder and method-holder moves, the `Δ` renames, `InotifyEvent`'s clone); golib's file from .3 is gone | the NEWS entry's *Upgrading from 1.26.10.3* announces each kind (PLAN-rebank-1-26-10-3 section 8's policy: announce, ship the nugetgo wave, deprecate). `release-nuget.ps1 -VerifyOnly` reads them against the published 1.26.10.3 baseline |
+| `GoBreakFloor` | 1.26.11.1 (`src/core/golib/buildTransitive/go.lib.targets`) | the release lists breaks, so the floor moved above 1.26.10.3; arm H's override cites it (10.2) |
+| NEWS | the 1.26.11.1 entry at the top of `docs/NEWS.md` and the README block, dated **November XX**, in the batch's LAST commit, which also removes the draft | ritual item 1; the date, the README block's first line and its link anchor all become the publish date |
+
+### 10.2 The CI runs COORD dispatches (none run by the release-controls lane)
+
+All on `os-matrix.yml`, at `<REL>` unless stated. Every consumer stage now runs **five** RIDs from one pack:
+win-x64, linux-x64, linux-arm64 (`ubuntu-24.04-arm`, added by seat S5c), osx-x64 and osx-arm64.
+
+1. **`stage=release-smoke`**, with the deliberate-break override for arm H. The default arm H builds the
+   1.26.10.3 consumer (`src/tests/CSharpConsumer` at the `nuget-1.26.10.3` tag) unchanged against the new packages,
+   and it is red by design: OQ2 moved the methods it calls into their holders (`76b2986149`, the consumer updated
+   at the tree). So dispatch with
+   `consumer_ref=<the branch or tag of <REL>>` and
+   `consumer_override=floor=1.26.11.1;news=docs/DRAFT-news-1-26-10-4.md`.
+   At `<REL>` the "Upgrading from 1.26.10.3" entry is in the draft, because the NEWS commit is held; arm H refuses a
+   citation of `docs/NEWS.md` there (`Test-ConsumerOverride` reads the checked-out tree). Arm H's verdict line reads
+   OVERRIDE. Arms A-D on every leg, darwin's D (the README walkthrough on a Mac) gating.
+2. **`stage=aot-smoke`**: the same pack, then one Native AOT publish and run of the package consumer on all five RIDs.
+3. **`stage=census goos=darwin`**, and **`stage=census goos=linux arch=both`**, at `<REL>` if the daily census ran
+   before `<REL>` landed: this release ships macOS assets, and linux-arm64 assets for the first time.
+4. **After the publish and indexing**: `stage=release-smoke` with `published_version=1.26.11.1` (no pack), all five
+   RIDs restoring from nuget.org, D gating, at the tag's tree. The NEWS commit is in that tree and the draft is not, so
+   the override there cites `news=docs/NEWS.md`. A partial index fails restore loudly (NU1102), so wait until every
+   ID in the walkthrough's restore closure is listed.
+
+### 10.3 The owner's hands, in order
+
+1. **The NuGet API key**: confirm it is LIVE before Phase 0. A key expires 30 days after it is created; the .3 go.*
+   publish ran on November 8 and its nugetgo wave on November 9. Its glob must be `*`: the go.* IDs are unchanged, but
+   a key scoped to existing IDs refuses any new `nugetgo.*` ID the wave pushes (P2's wave table names them). Set it
+   as `NUGET_API_KEY`; Phase 0 refuses to start without it.
+2. **The environment read-back**, at the release machine's console, from a checkout with empty porcelain: the .NET 10
+   SDK admitted by `global.json` (floor 10.0.400) and go1.26.11 first on PATH under `GOTOOLCHAIN=local`. No GPG
+   signing during Phase 2 (or `disable-scdaemon`).
+3. **The NEWS date**: land the held NEWS commit, then set "November XX" to the publish date in all three places (the
+   NEWS heading, the README block's first line, its link anchor `november-xx-2026--…`), as the last change before
+   the tag. `TestDocsFragmentLinksResolve` catches a mismatched anchor.
+4. **`release-nuget.ps1`**, and the **signing PIN**, entered once at the signer. Resume rules from .2:
+   - a failed Phase 2 NEVER re-runs release-nuget (it would re-bump): run the signer's census, then the signer with
+     `-Apply -Overwrite` (one PIN), then Phase 3's exact push;
+   - a Phase 3 stopped by nuget.org's quota (.2: 403 Quota Exceeded on push 351 of 362) resumes with `-ResumePush`,
+     which neither bumps nor packs.
+5. **The record**: Phase 4's commit (counter 1, the snapshot `docs/validation/1.26.11.1/`, `corpus-release.txt` =
+   1.26.11.1) lands on master. That commit is `T`. `TestCorpusReleaseMatchesThePublishedStamp` and
+   `TestPublishedCounterMatchesTheRecordedReleases` go green at the record.
+6. **The nugetgo wave** at `T`: every published module is rebuilt on 1.26.11.1 right after the go.* publish, because
+   the release lists breaks (PLAN-rebank-1-26-10-3 section 8's policy, step 2). P2 prepares the module table, the
+   guard branches and the per-module dry runs (NugetgoPublish.md); the publish stays the owner's hand.
+7. **Deprecate the published 1.26.10.3 nugetgo revisions** once the wave is live, each naming its 1.26.11.1 revision
+   as the alternate (section 8's policy, step 3; the owner's standing yes from 2026-11-07, "Can deprecate existing
+   published modules, no prob"). P2's table carries the exact package and version list.
+8. **`cmd/sitegen/go2cs-releases.txt`** in the nugetgo registry repository lists `1.26.11.1`, in its own pull request
+   and before any row that needs it (NugetgoPublish section 5, step 1). Check 4(b) refuses a package built against an
+   unlisted release.
+9. **The GitHub Release** for tag `nuget-1.26.11.1`: its body is the NEWS entry from "NuGet 1.26.11.1" down.
