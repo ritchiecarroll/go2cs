@@ -510,6 +510,53 @@ byte-identical to M-N's. Every prediction of both posts was met (S2 at its band'
 **Base, for the record.** Step 2's O band came from the 11-16 O arm at 1ac7dcf40f, before param boxes; one discriminating
 arm at the pre-merge tip read 3,102 / 7,615, as predicted for that reading. The merged O baseline is 3,142 / 7,818 / 584.
 
+### 12.5 PB-5: a stack local becomes a heap local in the twin (dated block, 2026-11-19)
+
+COORD's GO (2026-11-19 20:05Z): twin-only, as Go heap-allocates an address that escapes. A STACK local whose reference
+reaches a box twin, as an argument of a byref-param twin or as a receiver, is declared in the twin the way the
+converter declares a heap local: `ref var x = ref global::go.builtin.heap<T>(init, out var Ꮡx);`. The call hands Ꮡx,
+and Rule R derives x again after each await (`x = ref Ꮡx.ValueSlot;`). The plain method is untouched: the generator
+adds twin files and never edits a source body. Gated on GoTwinsBoxParam, so arm N is unchanged (T-N's 185 reports
+byte-identical to R-N's).
+
+**Refused, named-plain with the reason in the `// P` row's argument text:** `captured` (a lambda or local function names
+it; a ref local cannot be captured), `declaration` (not the one variable of a local declaration directly in a block of
+the function), `loop` (declared in a loop body; fresh-per-iteration aliasing is refused in this first cut), `name` (Ꮡx
+is taken), and `shadow` (another local of the same name: the promotion is keyed by name). `shadow` is a fifth reason
+beyond the four in the plan; it guards the name key. On MnHttpClosure `loop` fires 3 times (dnsmessage message.cs
+GoString `a`) and `declaration` 5 times (runtime's deconstructed `sΔ` in mcentral, mgcsweep and mheap). Two defects were
+found by the arms and fixed, each with a unit red first: a receiver row carried no reason (0b03ace1fc, P39; arm T2-P
+showed the 8 reasons with every count unchanged), and the loop test missed the converter's range loops,
+`foreach (var (_, v) in range(…))`, a ForEachVariableStatement (5303b1777e, P40; T2-P read `a (shadow)`, arm T3-P reads
+`a (loop)`, every count unchanged, only dnsmessage's report changed, as predicted before the run).
+
+**Cost (named as nit 9 is):** one box allocation per twinned call of each function that declares a promoted local.
+Plain paths are unchanged. `testing.AllocsPerRun` would see it only on a twinned path. M:N is opt-in, so no banked row
+moves.
+
+**Units** P33-P38, red first. Four older fixtures used an uncaptured stack local as their unboxable example (P3's
+runStack, P3's review runMixed, P28's runStack, OnlyUnboxed's onlyF); each now captures it in a lambda, so they keep
+their intent. **Probe row** `param-stack`: a stack cell handed to bumpCell, which parks and then adds 20. Go 21; twins
+21 (3 of 3 equal to Go's whole output); plain 21; GoTwinsBoxCopy and GoTwinsBoxArgCopy 1. Before PB-5 the call was plain
+and the controls could not reach it.
+
+**Arm T-P** (ea5cae22f7) against R-P: twinned 3,946 -> 3,960; await 10,171 -> 10,207; refused 109 unchanged; box twins
+632 -> 633, calls 1,203 -> 1,219, P rows 31 -> 16; rc 0, 0 errors. The prediction (P rows 22, calls +9+-2, twinned +0 to
++6) MISSED on all three counts, for one reason: it counted only PB-5's 9 byref-param rows, while the rule covers every
+stack local a box twin is handed, receivers included. Six more rows moved, all stack locals: net dial.cs Listen and
+ListenPacket `lc` (a receiver), crypto/x509 oid.cs `o`, net/http transport.cs cleanFrontNotWaiting `q` x2 (a copy of a
+map value, as Go's `q := m[k]` is), and runtime mcentral.cs sweep `ss`. The 14 new twins are functions that parked only
+through those calls: choosePivot, DeepEqual, deepValueEqual, ParseOID, net Listen, ListenPacket, tls Listen, traceback,
+tracebacktrap, traceback1, and x/text bidi's resolvePairedBrackets, newParagraph, run and Line. The 16 rows left are
+casLoop x3 (ruled no code), chunked.cs `bw.Value.Writer.Value`, filetransport.cs `t.fh`, runtime mcache x3 (an element
+under a package variable), and the 8 refused above.
+
+**The seat's disclosure list (as of 2026-11-19; M:N is opt-in, so none moves a banked row):**
+- PB-5's box per twinned call of a function that declares a promoted stack local (this block).
+- 12.1 nit 9's box per call for a field or element pointer the twin builds.
+- The f(p, <-ch) divergence (MnLaterArg): gc reads p after the receive, the converter before; byref-param equals plain.
+- RecvGenerator CS1620 on a hand-written `this ref` method with another `ref` parameter (byref-mixed).
+
 ## 13. HANDOFF to P4, a brief (dated block, 2026-11-16)
 
 Owner ruling, as amended: M:N works on account B until account A's reset (2026-11-20 06:00Z), then comes back to G,
