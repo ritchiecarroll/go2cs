@@ -240,7 +240,7 @@ func TestResolvedViaProductionRegistryLeavesTheGateGreen(t *testing.T) {
 // TestUndecodableDynamicTypeMarkerFailsTheConversion covers the resolver's OTHER unresolvable
 // arm. A payload that is not valid hex names no signature, so the marker is replaced by the raw
 // payload — which is no more compilable than a Go type signature is. Same class, same verdict.
-// Since P3's review of the godebug seat (2026-11-19) the arm also refuses at once as GO2CS2013; the refusal is observed
+// Since P3's review of the godebug seat (2026-11-19) the arm also refuses at once as GO2CS2014; the refusal is observed
 // here so the exit-time gate it still records can be read.
 func TestUndecodableDynamicTypeMarkerFailsTheConversion(t *testing.T) {
 	refusals := observeMarkerRefusals(t)

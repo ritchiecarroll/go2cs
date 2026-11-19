@@ -181,7 +181,7 @@ const (
 	// diagnosticDeferredMarkerUnresolved: a deferred-marker pass (deferredMarkerOperations.go) could not leave a written
 	// file free of markers: the file cannot be read or written back, a marker has no closing sentinel, or a marker's
 	// payload does not decode. A refusal: the file would not compile, and the run used to exit 0 over it.
-	diagnosticDeferredMarkerUnresolved = "GO2CS2013"
+	diagnosticDeferredMarkerUnresolved = "GO2CS2014"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST

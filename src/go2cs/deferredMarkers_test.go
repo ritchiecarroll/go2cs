@@ -57,7 +57,7 @@ func TestDynamicTypeMarkerSignatureRejectsUndecodablePayload(t *testing.T) {
 func TestRewriteDeferredMarkersReplacesUndecodablePayload(t *testing.T) {
 	// P3's review of the godebug seat (2026-11-19): this guard used a scaffold resolver that warned and returned the
 	// payload, which is what the real dynamic-type resolver did. It now drives the real resolver, whose undecodable arm
-	// refuses as GO2CS2013 naming file and line, and still replaces the marker so the rewrite loop ends.
+	// refuses as GO2CS2014 naming file and line, and still replaces the marker so the rewrite loop ends.
 	isolateConverterPathGlobals(t)
 	refusals := observeMarkerRefusals(t)
 	t.Cleanup(func() { takeUnresolvedDynamicTypes() })
@@ -180,7 +180,7 @@ func observeMarkerRefusals(t *testing.T) *[]string {
 }
 
 // P3's review of the godebug seat (2026-11-19): the adapter-name resolver's undecodable-payload arm warned and went on,
-// so `new «ADAPTER:..»(x)` became `new (x)` under an exit code of 0. It now refuses as GO2CS2013, naming file and line,
+// so `new «ADAPTER:..»(x)` became `new (x)` under an exit code of 0. It now refuses as GO2CS2014, naming file and line,
 // and still replaces the marker so the rewrite loop ends. The dynamic-type arm's twin is
 // TestRewriteDeferredMarkersReplacesUndecodablePayload.
 func TestResolveAdapterNameMarkersRefusesAnUndecodablePayload(t *testing.T) {
