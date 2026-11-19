@@ -235,7 +235,7 @@ on an embedded interface, an embedded predeclared type, and a pointer to one. Pr
 type's methods, and `reflect`'s `Anonymous`, follow from it. An embedded struct value needs no comment: it is
 a `partial ref` property (`public partial ref Inner Inner { get; }`).
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:41-42 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:42-43 -->
 ```csharp
     /*embed*/ public Reader Reader;
     /*embed*/ internal nint @int;
@@ -248,7 +248,7 @@ that contains a backquote, a `*/`, or any character Go does not count as printab
 is not valid UTF-8. Inside the quoted spelling a `*/` is written `*\x2f`, so the tag cannot end the comment
 early. A grouped declaration carries the tag once, as Go does.
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:46-50 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:47-51 -->
 ```csharp
     public @string Plain; /*`json:"plain"`*/
     public nint Grouped, Pair; /*`json:"g"`*/
@@ -261,7 +261,7 @@ becomes `array<byte>` and the length would be lost. The comment `/*[32]*/` keeps
 prefix, on a parameter, on a field, on a map's key type argument, and on a defined type whose inner lengths
 its definition does not spell. Nested arrays list each length in order.
 
-<!-- source: src/go2cs/testdata/markercomments/main.cs:68-83 -->
+<!-- source: src/go2cs/testdata/markercomments/main.cs:69-84 -->
 ```csharp
     internal /*[3]*/ ж<array<nint>> p;
 …

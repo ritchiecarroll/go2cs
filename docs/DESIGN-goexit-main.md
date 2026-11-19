@@ -60,8 +60,8 @@ Every converted function that defers already has such a frame. Its emitted shape
 by `GoFrame.IsPanic` and whose `finally` ends in `ᒐ.Run()`, the call that runs the frame's deferred calls. A deferred
 receiver-field call that the converter lowers into plain code sits in that same `finally`, so it is covered too.
 
-<!-- src/tests/Behavioral/DeferFinallyLowering/main.cs.target:44 (`catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }`),
-:45 (`finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }`). -->
+<!-- src/tests/Behavioral/DeferFinallyLowering/main.cs.target:37 (`catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }`),
+:38 (`finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }`). -->
 
 The design uses those frames as the chain of catch points:
 

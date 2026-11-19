@@ -2,7 +2,7 @@
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#generic-constraints)
 A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `[N]E` array-core to `IArray<E>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` emits no C# constraint at all (see [The `comparable` constraint](#the-comparable-constraint)).
-<!-- src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:67 `internal static bool eq<T>(T a, T b) {`
+<!-- src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:58 `internal static bool eq<T>(T a, T b) {`
 (Go: `func eq[T comparable](a, b T) bool`). history: comparable once mapped to golib's CRTP comparable<T>. -->
 
 ## An array-core constraint `~[N]E` lifts to `IArray<E>`
