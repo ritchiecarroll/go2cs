@@ -7,7 +7,7 @@
 
 // A Token is an interface holding one of the token types:
 // [StartElement], [EndElement], [CharData], [Comment], [ProcInst], or [Directive].
-global using ΔToken = object;
+global using Token = object;
 
 namespace go.encoding;
 
@@ -24,6 +24,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static xml_package;
 
 partial class xml_package {
 
@@ -33,9 +34,13 @@ partial struct SyntaxError {
     public nint Line;
 }
 
+} partial class xmlᴛSyntaxError {
+
 public static @string Error(this ref SyntaxError e) {
     return "XML syntax error on line "u8 + strconv.Itoa(e.Line) + ": "u8 + e.Msg;
 }
+
+} partial class xml_package {
 
 // A Name represents an XML name (Local) annotated
 // with a name space identifier (Space).
@@ -58,6 +63,8 @@ partial struct StartElement {
     public slice<Attr> Attr;
 }
 
+} partial class xmlᴛStartElement {
+
 // Copy creates a new copy of StartElement.
 public static StartElement Copy(this StartElement e) {
     var attrs = new slice<Attr>(len(e.Attr));
@@ -71,6 +78,8 @@ public static EndElement End(this StartElement e) {
     return new EndElement(e.Name);
 }
 
+} partial class xml_package {
+
 // An EndElement represents an XML end element.
 partial struct EndElement {
     public Name Name;
@@ -81,15 +90,23 @@ partial struct EndElement {
 // the characters they represent.
 partial struct CharData /*[]byte*/;
 
+} partial class xmlᴛCharData {
+
 // Copy creates a new copy of CharData.
 public static CharData Copy(this CharData c) { return (CharData)bytes.Clone(c); }
+
+} partial class xml_package {
 
 // A Comment represents an XML comment of the form <!--comment-->.
 // The bytes do not include the <!-- and --> comment markers.
 partial struct Comment /*[]byte*/;
 
+} partial class xmlᴛComment {
+
 // Copy creates a new copy of Comment.
 public static Comment Copy(this Comment c) { return (Comment)bytes.Clone(c); }
+
+} partial class xml_package {
 
 // A ProcInst represents an XML processing instruction of the form <?target inst?>
 partial struct ProcInst {
@@ -97,21 +114,29 @@ partial struct ProcInst {
     public slice<byte> Inst;
 }
 
+} partial class xmlᴛProcInst {
+
 // Copy creates a new copy of ProcInst.
 public static ProcInst Copy(this ProcInst p) {
     p.Inst = bytes.Clone(p.Inst);
     return p;
 }
 
+} partial class xml_package {
+
 // A Directive represents an XML directive of the form <!text>.
 // The bytes do not include the <! and > markers.
 partial struct Directive /*[]byte*/;
 
+} partial class xmlᴛDirective {
+
 // Copy creates a new copy of Directive.
 public static Directive Copy(this Directive d) { return (Directive)bytes.Clone(d); }
 
+} partial class xml_package {
+
 // CopyToken returns a copy of a Token.
-public static ΔToken CopyToken(ΔToken t) {
+public static Token CopyToken(Token t) {
     switch (t.type()) {
     case CharData v: {
         return v.Copy();
@@ -145,7 +170,7 @@ public static ΔToken CopyToken(ΔToken t) {
 // nil error. Callers should treat a return of nil, nil as indicating that
 // nothing happened; in particular it does not indicate EOF.
 partial interface TokenReader {
-    (ΔToken, error) Token();
+    (Token, error) Token();
 }
 
 // A Decoder represents an XML parser reading a particular input stream.
@@ -206,7 +231,7 @@ partial struct Decoder {
     internal ж<stack> free;
     internal bool needClose;
     internal Name toClose;
-    internal ΔToken nextToken;
+    internal Token nextToken;
     internal nint nextByte;
     internal map<@string, @string> ns;
     internal error err;
@@ -246,6 +271,8 @@ public static ж<Decoder> NewTokenDecoder(TokenReader t) {
     return d;
 }
 
+} partial class xmlᴛDecoder {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedEofˢ => ref unexpectedEofˢᵇ;
 private static readonly @string unexpectedEofˢᵇ = "unexpected EOF"u8;
@@ -276,8 +303,8 @@ private static readonly @string unexpectedEofˢᵇ = "unexpected EOF"u8;
 // set to the URL identifying its name space when known.
 // If Token encounters an unrecognized name space prefix,
 // it uses the prefix as the Space rather than report an error.
-public static (ΔToken, error) Token(this ref Decoder d) {
-    ΔToken t = default;
+public static (Token, error) Token(this ref Decoder d) {
+    Token t = default;
     error err = default;
     if (d.stk != nil && d.stk.kind == stkEOF) {
         return (default, io.EOF);
@@ -342,12 +369,16 @@ public static (ΔToken, error) Token(this ref Decoder d) {
     return (t, err);
 }
 
+} partial class xml_package {
+
 internal static ref readonly @string xmlURL => ref xmlURLᵇ;
 private static readonly @string xmlURLᵇ = "http://www.w3.org/XML/1998/namespace"u8;
 internal static ref readonly @string xmlnsPrefix => ref xmlnsPrefixᵇ;
 private static readonly @string xmlnsPrefixᵇ = "xmlns"u8;
 internal static ref readonly @string xmlPrefix => ref xmlPrefixᵇ;
 private static readonly @string xmlPrefixᵇ = "xml"u8;
+
+} partial class xmlᴛDecoder {
 
 // Apply name space translation to name n.
 // The default name space (for Space=="")
@@ -388,6 +419,8 @@ internal static void switchToReader(this ref Decoder d, io.Reader r) {
     }
 }
 
+} partial class xml_package {
+
 // Parsing state - stack holds old name space translations
 // and the current set of open elements. The translations to pop when
 // ending a given tag are *below* it on the stack, which is
@@ -402,6 +435,8 @@ partial struct stack {
 internal static UntypedInt stkStart => iota;
 internal static UntypedInt stkNs => 1;
 internal static UntypedInt stkEOF => 2;
+
+} partial class xmlᴛDecoder {
 
 internal static ж<stack> push(this ref Decoder d, nint kind) {
     var s = d.free;
@@ -542,7 +577,7 @@ internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
 
 // If the top element on the stack is autoclosing and
 // t is not the end tag, invent the end tag.
-internal static (ΔToken, bool) autoClose(this ref Decoder d, ΔToken t) {
+internal static (Token, bool) autoClose(this ref Decoder d, Token t) {
     if (d.stk == nil || d.stk.kind != stkStart) {
         return (default, false);
     }
@@ -559,12 +594,16 @@ internal static (ΔToken, bool) autoClose(this ref Decoder d, ΔToken t) {
     return (default, false);
 }
 
+} partial class xml_package {
+
 internal static error errRawToken = errors.New("xml: cannot use RawToken from UnmarshalXML method");
+
+} partial class xmlᴛDecoder {
 
 // RawToken is like [Decoder.Token] but does not verify that
 // start and end elements match and does not translate
 // name space prefixes to their corresponding URLs.
-public static (ΔToken, error) RawToken(this ref Decoder d) {
+public static (Token, error) RawToken(this ref Decoder d) {
     if (d.inUnmarshalXML) {
         return (default, errRawToken);
     }
@@ -597,7 +636,7 @@ private static readonly @string expectedAttributeNameInˢᵇ = "expected attribu
 internal static ref readonly @string attributeNameWithoutInˢ => ref attributeNameWithoutInˢᵇ;
 private static readonly @string attributeNameWithoutInˢᵇ = "attribute name without = in element"u8;
 
-internal static (ΔToken, error) rawToken(this ref Decoder d) {
+internal static (Token, error) rawToken(this ref Decoder d) {
     if (d.t != nil) {
         return d.t.Token();
     }
@@ -1038,6 +1077,8 @@ internal static void ungetc(this ref Decoder d, byte b) {
     d.offset--;
 }
 
+} partial class xml_package {
+
 internal static map<@string, rune> entity = new map<@string, rune>{
     ["lt"] = '<',
     ["gt"] = '>',
@@ -1045,6 +1086,8 @@ internal static map<@string, rune> entity = new map<@string, rune>{
     ["apos"] = '\'',
     ["quot"] = '"'
 };
+
+} partial class xmlᴛDecoder {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedEofInCdataˢ => ref unexpectedEofInCdataˢᵇ;
@@ -1226,12 +1269,16 @@ break_Input:;
     return data;
 }
 
+} partial class xml_package {
+
 // Decide whether the given rune is in the XML Character Range, per
 // the Char production of https://www.xml.com/axml/testaxml.htm,
 // Section 2.2 Characters.
 internal static bool /*inrange*/ isInCharacterRange(rune r) {
     return r == 0x09 || r == 0x0A || r == 0x0D || r >= 0x20 && r <= 0xD7FF || r >= 0xE000 && r <= 0xFFFD || r >= 0x10000 && r <= 0x10FFFF;
 }
+
+} partial class xmlᴛDecoder {
 
 // Get name space name: name with a : stuck in the middle.
 // The part before the : is the name space identifier.
@@ -1300,6 +1347,8 @@ internal static bool /*ok*/ readName(this ref Decoder d) {
     }
     return true;
 }
+
+} partial class xml_package {
 
 internal static bool isNameByte(byte c) {
     return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '_' || c == ':' || c == '.' || c == '-';
@@ -2048,6 +2097,8 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
     return err;
 }
 
+} partial class xmlᴛprinter {
+
 // EscapeString writes to p the properly escaped XML equivalent
 // of the plain text data s.
 internal static void EscapeString(this ref printer p, @string s) {
@@ -2103,6 +2154,8 @@ internal static void EscapeString(this ref printer p, @string s) {
     }
     p.WriteString(s.slice(last));
 }
+
+} partial class xml_package {
 
 // Escape is like [EscapeText] but omits the error return value.
 // It is provided for backwards compatibility with Go 1.0.

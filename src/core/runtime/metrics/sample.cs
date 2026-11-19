@@ -98,7 +98,7 @@ internal static void writeValues(slice<Sample> m, slice<nint> kinds, slice<uint6
         // DIVERGENCE, stated: Go reuses a Value's existing histogram storage "when possible"; this
         // builds a fresh one per sample, as the crossing already computed a fresh runtime value.
         if (m[i].Value.kind == KindFloat64Histogram) {
-            var hist = @new<ΔFloat64Histogram>();
+            var hist = @new<Float64Histogram>();
             hist.Value.Counts = histCounts[i];
             hist.Value.Buckets = histBuckets[i];
             m[i].Value.pointer = @unsafe.Pointer.FromPinnedBox(hist);

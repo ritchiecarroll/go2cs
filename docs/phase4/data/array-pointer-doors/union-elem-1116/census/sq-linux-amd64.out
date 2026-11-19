@@ -1,0 +1,14 @@
+roots: 1, errors: 0
+packages with a module: 13, files: 311
+     8  W19: managed only by its arrays, a nonzero array among them
+    11  W19: managed only by its arrays, every one a [0]T carrier
+  1011  control: (*A)(x), x an unsafe.Pointer
+    37  struct element, unmanaged in both readings (the door takes it)
+     4  W19: managed only by its arrays, a nonzero array among them	Taddress
+     4  W19: managed only by its arrays, a nonzero array among them	struct {
+	Fsin6		[0]Tsockaddr_in6
+	Fsin		Tsockaddr_in
+	F__ccgo_pad2	[12]byte
+}
+     7  W19: managed only by its arrays, every one a [0]T carrier	TExpr
+     4  W19: managed only by its arrays, every one a [0]T carrier	TRtreeCoord

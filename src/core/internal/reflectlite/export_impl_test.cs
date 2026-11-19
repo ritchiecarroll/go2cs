@@ -72,7 +72,7 @@ partial class reflectlite_internal_test_package
     // reached the field table by the prefix-downcast idiom; this hands the literal
     // StructFieldType the SYNTHESIZED specialization instead, so the type-side walk and the
     // value-side walk read one projection.
-    public static global::go.@internal.reflectlite_package.ΔType TField(global::go.@internal.reflectlite_package.ΔType typ, nint i)
+    public static global::go.@internal.reflectlite_package.Type TField(global::go.@internal.reflectlite_package.Type typ, nint i)
     {
         var t = typ._<rtype>();
 
@@ -87,7 +87,7 @@ partial class reflectlite_internal_test_package
     // canonical typed-nil box, slice/map/chan kinds their nil container default, array kinds a
     // dims-sized backing. The literal form built the Value over unsafe_New's null and answered
     // the INVALID Value for every type.
-    public static global::go.@internal.reflectlite_package.Value Zero(global::go.@internal.reflectlite_package.ΔType typ)
+    public static global::go.@internal.reflectlite_package.Value Zero(global::go.@internal.reflectlite_package.Type typ)
     {
         if (typ == default!)
             throw panic("reflect: Zero(nil)");

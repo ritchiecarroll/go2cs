@@ -447,6 +447,43 @@ public unsafe class StringHeaderNumberTests
         return (view, h, n);
     }
 
+    // W13c: HostnameView's count, where a page boundary falls inside the backing. The index gives a pin one node per 4 KiB
+    // page its bytes cover; a count of nodes read one pin as two whenever the allocator put the backing across a page
+    // (the flake first seen at GoCgoArgsTests.NamedArrayPin.cs). A 4000-byte backing crosses a page almost every time, so
+    // the arm reads the crossing on every run, and the element box's pin-only hold is still ONE entry over it.
+    [TestMethod]
+    public void W13c_AnElementBoxPinOverABackingThatCrossesAPageIsOneIndexEntry()
+    {
+        Assert.IsNotNull(PinExtents.Current, "GolibTests is a cgo process: the index is on");
+
+        // Each header box keeps its element box's pin, so a tried backing is not reused by the next.
+        System.Collections.Generic.List<ж<NumberStringHeader>> kept = new();
+
+        for (int i = 0; i < 1000; i++)
+        {
+            (ж<NumberStringHeader> sh, nuint h, nint n) = HeaderOverNewBacking(new string('x', 4000));
+            kept.Add(sh);
+
+            if (h >> 12 == (h + (nuint)n - 1) >> 12)
+                continue;
+
+            Assert.AreEqual(1, PinExtents.EntriesOver(h, h + (nuint)n), "the element box's pin over a backing that crosses a page is one index entry");
+            GC.KeepAlive(kept);
+            return;
+        }
+
+        Assert.Fail("the premise: a 4000-byte string backing whose bytes cross a 4 KiB page");
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static (ж<NumberStringHeader> sh, nuint h, nint n) HeaderOverNewBacking(string text)
+    {
+        ref @string s = ref heap(new @string(System.Text.Encoding.ASCII.GetBytes(text)), out ж<@string> Ꮡs);
+        ж<NumberStringHeader> sh = Ꮡs.Reinterpret<@string, NumberStringHeader>();
+
+        return (sh, (nuint)sh.Value.Data, sh.Value.Len);
+    }
+
     // W16 (P3's item 2): a header built field by field is a PLAIN struct box; FromHeaderData answers exactly today's
     // number pointer for it: the same number, carrying nothing.
     [TestMethod]

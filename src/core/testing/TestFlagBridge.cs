@@ -357,7 +357,11 @@ internal static class TestFlagBridge
         if (commandLine is null)
             return false;
 
-        MethodInfo? parse = flagPackage
+        // FlagSet.Parse is a method: it stands in the FlagSet type's method holder, not in the package class.
+        if (BoxedElementType(commandLine.GetType()) is not { } setType)
+            return false;
+
+        MethodInfo? parse = MethodHolderOf(setType)?
             .GetMethods(BindingFlags.Public | BindingFlags.Static)
             .FirstOrDefault(candidate => candidate.Name == "Parse" &&
                                          candidate.GetParameters() is [{ } receiver, { } arguments] &&
@@ -535,6 +539,11 @@ internal static class TestFlagBridge
     // A nil map or slice: golib's are reference or value types depending on the kind.
     private static void ZeroField(FieldInfo field, object target) =>
         field.SetValue(target, field.FieldType.IsValueType ? Activator.CreateInstance(field.FieldType) : null);
+
+    // The [GoMethodHost] class that holds the methods Go declares on receiver, or null when there is none.
+    private static Type? MethodHolderOf(Type receiver) =>
+        receiver.Assembly.GetTypes().FirstOrDefault(type =>
+            type.GetCustomAttribute<GoMethodHostAttribute>() is { } host && host.Receiver == receiver);
 
     private static MethodInfo BindLookup(Type flagPackage) =>
         Bind(flagPackage, "Lookup", typeof(@string));

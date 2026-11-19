@@ -19,6 +19,7 @@ using @internal;
 using go.os;
 using go.runtime;
 using path;
+using static debug_test_package;
 
 partial class debug_test_package {
 
@@ -55,12 +56,16 @@ public static void TestMain(ж<testing.M> m) {
 
 partial struct T /*num:nint*/;
 
+} partial class debug_testᴛT {
+
 internal static partial slice<byte> ptrmethod(this ref T t) {
     return Stack();
 }
 internal static partial slice<byte> method(this T t) {
     return t.ptrmethod();
 }
+
+} partial class debug_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object tooFewLinesˢ = (@string)"too few lines"u8;

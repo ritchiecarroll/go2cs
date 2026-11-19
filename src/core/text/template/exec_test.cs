@@ -18,6 +18,7 @@ using parse = go.text.template.parse_package;
 using static go.text.template_package;
 using ꓸꓸꓸnint = Span<nint>;
 using ꓸꓸꓸstring = Span<@string>;
+using static template_internal_test_package;
 
 partial class template_internal_test_package {
 
@@ -100,9 +101,13 @@ public partial struct T {
 
 public partial struct S /*[]@string*/;
 
+} partial class template_internal_testᴛS {
+
 public static @string Method0(this S _) {
     return "M0";
 }
+
+} partial class template_internal_test_package {
 
 public partial struct U {
     public @string V;
@@ -111,6 +116,8 @@ public partial struct U {
 public partial struct V {
     internal nint j;
 }
+
+} partial class template_internal_testᴛV {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilVˢ => ref nilVˢᵇ;
@@ -125,9 +132,13 @@ public static @string String(this ж<V> Ꮡv) {
     return fmt.Sprintf("<%d>"u8, v.j);
 }
 
+} partial class template_internal_test_package {
+
 public partial struct W {
     internal nint k;
 }
+
+} partial class template_internal_testᴛW {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilWˢ => ref nilWˢᵇ;
@@ -141,6 +152,8 @@ public static @string Error(this ж<W> Ꮡw) {
     }
     return fmt.Sprintf("[%d]"u8, w.k);
 }
+
+} partial class template_internal_test_package {
 
 internal static readonly ж<I> ᏑsiVal = new StaticBox<I>(((I)new S(new @string[]{"a", "b"}.slice())));
 internal static ref I siVal => ref ((StaticBox<I>)ᏑsiVal).ValueSlot;
@@ -190,7 +203,7 @@ internal static void initᴛtVal() {
     PI: newInt(23),
     PS: newString("a string"),
     PSI: newIntSlice(21, 22, 23),
-    UPI: (uintptr)newUnsafePointer(23),
+    UPI: newUnsafePointer(23),
     BinaryFunc: (@string a, @string b) => fmt.Sprintf("[%s=%s]"u8, a, b),
     VariadicFunc: (params ꓸꓸꓸstring sʗp) => {
         var s = sʗp.slice();
@@ -248,9 +261,11 @@ internal static ж<slice<nint>> newIntSlice(params ꓸꓸꓸnint nʗp) {
 
     var p = @new<slice<nint>>();
     p.ValueSlot = new slice<nint>(len(n));
-    builtin.copy(p.ValueSlot, n);
+    copy(p.ValueSlot, n);
     return p;
 }
+
+} partial class template_internal_testᴛT {
 
 // Simple methods with and without arguments.
 public static @string Method0(this ref T t) {
@@ -271,7 +286,7 @@ public static @string Method3(this ref T t, any v) {
 
 public static ж<T> Copy(this ref T t) {
     var n = @new<T>();
-    n.Value = t.ΔClone();
+    n.Value.AssignFrom(t);
     return n;
 }
 
@@ -283,7 +298,11 @@ public static slice<nint> MAdd(this ref T t, nint a, slice<nint> b) {
     return v;
 }
 
+} partial class template_internal_test_package {
+
 internal static error myError = errors.New("my error");
+
+} partial class template_internal_testᴛT {
 
 // MyError returns a value and an error according to its argument.
 public static (bool, error) MyError(this ref T t, bool error) {
@@ -298,6 +317,8 @@ public static ж<U> GetU(this ref T t) {
     return t.U;
 }
 
+} partial class template_internal_testᴛU {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string trueˢ => ref trueˢᵇ;
 private static readonly @string trueˢᵇ = "true"u8;
@@ -308,6 +329,8 @@ public static @string TrueFalse(this ref U u, bool b) {
     }
     return ""u8;
 }
+
+} partial class template_internal_test_package {
 
 internal static @string typeOf(any arg) {
     return fmt.Sprintf("%T"u8, arg);
@@ -1114,11 +1137,15 @@ public static void TestExecError(ж<testing.T> t) {
 public partial struct CustomError {
 }
 
+} partial class template_internal_testᴛCustomError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string heyoˢ => ref heyoˢᵇ;
 private static readonly @string heyoˢᵇ = "heyo !"u8;
 
 public static @string Error(this ref CustomError _) { return heyoˢ; }
+
+} partial class template_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string errˢ => ref errˢᵇ;
@@ -1614,9 +1641,13 @@ internal static error alwaysError = errors.New(alwaysErrorText);
 
 public partial struct ErrorWriter /*num:nint*/;
 
+} partial class template_internal_testᴛErrorWriter {
+
 public static (nint, error) Write(this ErrorWriter e, slice<byte> p) {
     return (0, alwaysError);
 }
+
+} partial class template_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string helloˢ => ref helloˢᵇ;

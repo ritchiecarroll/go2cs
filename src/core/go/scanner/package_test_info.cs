@@ -8,9 +8,6 @@ global using static global::go.go.scanner_package;
 global using static global::go.go.scanner_internal_test_package;
 
 // <ImportedTypeAliases>
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -19,7 +16,6 @@ using static global::go.go.scanner_test_package;
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b696e70757420737472696e673b2077616e7420737472696e677d", "semicolonTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b73726320737472696e673b20746f6b20676f2f746f6b656e2e546f6b656e3b20706f7320696e743b206c697420737472696e673b2065727220737472696e677d", "errorsᴛ1")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

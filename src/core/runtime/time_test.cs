@@ -133,7 +133,7 @@ public static void TestTimeTimerType(ж<testing.T> t) {
     var runtimeTimeTimer = reflect.TypeOf(new TimeTimer());
 
     var runtimeTimeTimerʗ1 = runtimeTimeTimer;
-    void check(@string name, reflectꓸType typ) {
+    void check(@string name, reflect.Type typ) {
         nint n1 = runtimeTimeTimerʗ1.NumField();
         nint n2 = typ.NumField();
         if (n1 != n2 + 1) {
@@ -145,7 +145,7 @@ public static void TestTimeTimerType(ж<testing.T> t) {
             var f2 = typ.Field(i);
             var t1 = f1.Type;
             var t2 = f2.Type;
-            if (!AreEqual(t1, t2) && !(t1.Kind() == reflect.ΔUnsafePointer && t2.Kind() == reflect.Chan)) {
+            if (!AreEqual(t1, t2) && !(t1.Kind() == reflect.UnsafePointer && t2.Kind() == reflect.Chan)) {
                 t.Errorf("runtime.Timer field %s %v incompatible with %s field %s %v", f1.Name, t1, name, f2.Name, t2);
             }
             if (f1.Offset != f2.Offset) {

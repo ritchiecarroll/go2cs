@@ -17,7 +17,7 @@ var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx")
 
 In `syscall_windows.cs` the variable is a bare field beside the method that sets it:
 
-<!-- source: src/core/syscall/windows/syscall_windows.cs:554-555 -->
+<!-- source: src/core/syscall/windows/syscall_windows.cs:563-564 -->
 ```csharp
 internal static ж<LazyProc> procSetFilePointerEx;
 internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"); }
@@ -108,7 +108,7 @@ internal static @string pipeLabel;
 internal static void initᴛpipeLabel() { pipeLabel = ((@string)labelPipe) + "!"u8; }
 ```
 
-**Where the edge came from, and what it kept.** The defect that exposed it was `regexp/syntax`'s `opNames` — a 19-entry table index-keyed by the `Op` constants declared in a later file, every key read as zero, the whole table collapsing to one slot so `Parse("a").Dump()` printed the numeric fallback `op3{a}` where Go prints `lit{a}`. `Op` is a named `uint8`, so the property rule removes *that* hazard at the source, and an over-broad predicate naming every non-`const` form would draw an edge for a shape that no longer has one. Scoped to the residue, the edge relocates `internal/buildcfg`'s initializers that read a string const in `zbootstrap.go` (`GOARCH`, `GOOS` and `GO386`, each `envOr("…", default…)`, and `GO_LDSO` and `Version`, each a plain read) and `net/http`'s `timeFormats`.<!-- Re-cited at the end regen: src/core/internal/buildcfg/cfg.cs:30 (`internal static void initᴛGOARCH() { GOARCH = envOr("GOARCH", defaultGOARCH); }`), :66 (`internal static void initᴛGO_LDSO() { GO_LDSO = defaultGO_LDSO; }`), :72 (`internal static void initᴛVersion() { Version = version; }`); src/core/net/http/header.cs:123 (`internal static void initᴛtimeFormats() { timeFormats = [`). --> Both were latent zero-value const reads that compiled cleanly.
+**Where the edge came from, and what it kept.** The defect that exposed it was `regexp/syntax`'s `opNames` — a 19-entry table index-keyed by the `Op` constants declared in a later file, every key read as zero, the whole table collapsing to one slot so `Parse("a").Dump()` printed the numeric fallback `op3{a}` where Go prints `lit{a}`. `Op` is a named `uint8`, so the property rule removes *that* hazard at the source, and an over-broad predicate naming every non-`const` form would draw an edge for a shape that no longer has one. Scoped to the residue, the edge relocates `internal/buildcfg`'s initializers that read a string const in `zbootstrap.go` (`GOARCH`, `GOOS` and `GO386`, each `envOr("…", default…)`, and `GO_LDSO` and `Version`, each a plain read) and `net/http`'s `timeFormats`.<!-- Re-cited at the end regen: src/core/internal/buildcfg/cfg.cs:31 (`internal static void initᴛGOARCH() { GOARCH = envOr("GOARCH", defaultGOARCH); }`), :67 (`internal static void initᴛGO_LDSO() { GO_LDSO = defaultGO_LDSO; }`), :73 (`internal static void initᴛVersion() { Version = version; }`); src/core/net/http/header.cs:128 (`internal static void initᴛtimeFormats() { timeFormats = [`). --> Both were latent zero-value const reads that compiled cleanly.
 
 Guarded by the `PackageVarInitOrder` behavioral test, which carries both halves: neutering the predicate collapses `pipeLabel` onto an empty `@string` (stdout mismatch), and neutering the property rule allocates a fixed-array field at length 0 and panics on the first indexed write (exit code 2). Neither is redundant.
 
@@ -152,8 +152,8 @@ internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallo
 A holder must hold exactly one static field, named for the holder, or for a var whose address is taken its box,
 `Ꮡ<name>` (below). The generator refuses any other holder by name (GO2CS0009) and generates nothing for it. `collectMovedInitVars` skips a lazy var, so it gets no `initᴛ` method and
 the package's static constructor never builds it.
-<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:576 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
-     its name :606 (`return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")`), and for a var whose address is taken :593 (`func (v *Visitor) writeLazyAddressedPackageVar(`). The accessor is generated, so it is shown uncited:
+<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:579 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
+     its name :609 (`return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")`), and for a var whose address is taken :596 (`func (v *Visitor) writeLazyAddressedPackageVar(`). The accessor is generated, so it is shown uncited:
      src/gen/go2cs-gen/LazyHolderGenerator.cs:134 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`),
      pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:165 (`"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`);
      a readonly box's by-value accessor src/gen/go2cs-gen/LazyHolderGenerator.cs:132 (`source.Append($"{memberIndent}{Accessibility(field)} static {type} {fieldName} => {holderName}.{fieldName};\r\n");`).
@@ -224,7 +224,7 @@ field instead of the var:
 An exported var such an initializer reads always has a holder of its own, so the snapshot has somewhere to live; a
 reader of an exported var with a constant initializer, which has no holder, stays eager.
 <!-- the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:137 (`source.Append($"{memberIndent}partial class {holderName} `, which adds `internal static readonly T initial` and sets it in the holder's static constructor);
-     the marker argument: src/go2cs/lazyPackageVarOperations.go:580 (`marker = "GoLazy(Initial = true)"`). The importer's
+     the marker argument: src/go2cs/lazyPackageVarOperations.go:583 (`marker = "GoLazy(Initial = true)"`). The importer's
      assignment is the LazyPackageVars behavioral test's case: tables.Heavy, assigned before tables.ByName is first read. -->
 
 **runtime's malloc tables are always built on their first read.** The converter lists runtime's two malloc dispatch

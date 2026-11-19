@@ -13,7 +13,6 @@ using go;
 using static global::go.@internal.trace.@internal.tracev1_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("STWReason", "ΔSTWReason")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

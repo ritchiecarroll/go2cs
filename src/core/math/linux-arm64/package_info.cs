@@ -84,7 +84,7 @@ using static go.math_package;
 [assembly: GoPositionMap("math/j1.go", "j1.cs", "AAuWAQBDAgANHpSkpoKCgpSCgoKmgoKClO6CgpSCgpSClJSClIKCgoKCgpQABhYACAIADR6UpKSmgoKCpoKCgpQADRyCgpSCgpSUgpSCgoIADBoACBAACRIACBAACRIACBAACRIACBAACBCCgoKCgoKCgoKCgoKCgpSCgoIADBoACBAAChQACBAAChQACBAAChQACBAACRKCkoKCgoKCgoKCgoKClIKCgg==")]
 [assembly: GoPositionMap("math/jn.go", "jn.cs", "AAtsAC4CupSkyoKUgpSClIKUgoKCgqaClAANHoKktLS0pJSCgri4gpSCgoKCgpQAH0CCgoKCgoKCgoKUgoKClIIACBKCgoKCgoKmgoKUgoKCuKaClAAGGAAJAqSUpKaClIKClJSCgoKCpoKClJSCAA0cgqS0tLSklIKUgqaClA==")]
 [assembly: GoPositionMap("math/ldexp.go", "ldexp.cs", "AAceAAgCgpSmlJSklIKCgoKClIKClJSCgoKUgoI=")]
-[assembly: GoPositionMap("math/lgamma.go", "lgamma.cs", "AFm2AQANHAAIEgAIEgAQIgAHEAAHEAAJJgAMAgAJGIKUgqSCpIKmgoKCpoKClIKUgoKCgpSCgoKUgoK4lIKkgoKCgpSCtIK0graClIK0grSCtpSCgoKCtIKCgoKCgrSCgtaCgoKCgoKkgqSCpIKkgqSCxoKCgoK0pIKUqJKYgriCgoKClIKClIKUgoKmlLS0tLSk")]
+[assembly: GoPositionMap("math/lgamma.go", "lgamma.cs", "AFm2AQANHAAIEgAIEgAQIgAHEAAHEAAJJgAMAgAJGIKUgqSCpIKmgoKCpoKClIKUgoKCgpSCgoKUgoK4lIKkgoKCgpSCtIK0graClIK0grSCtpSCgoKCtIKCgoKCgrSCgtaCgoKCgoKUgqSCpIKkgqSCxoKCgoK0pIKUqJKYgriCgoKClIKClIKUgoKmlLS0tLSk")]
 [assembly: GoPositionMap("math/log.go", "log.cs", "AAeiAQBJAoKUpoIAChqUpKS4goKClIKmgoKCgoKCgg==")]
 [assembly: GoPositionMap("math/log10.go", "log10.cs", "AAcSooKUpoKqooKUpoKmgpQ=")]
 [assembly: GoPositionMap("math/log1p.go", "log1p.cs", "AAfAAQBZAoKUpoIADySUpKSmlIKCgoKCgpSUlIKCpoKCgoKCgpSClJSUgoKClIKClIKClJSCooKCgpSClIKClJSCgoKClA==")]

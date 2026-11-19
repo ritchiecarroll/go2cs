@@ -9,11 +9,12 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
+using static maps_package;
 
 partial class maps_package {
 
 //go:linkname runtime_mapaccess1_fast64 runtime.mapaccess1_fast64
-internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint64 key) {
+internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint64 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -87,7 +88,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡt
 }
 
 //go:linkname runtime_mapaccess2_fast64 runtime.mapaccess2_fast64
-internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint64 key) {
+internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint64 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -161,7 +162,9 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapTy
     }
 }
 
-internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abiꓸMapType> typ, uintptr hash, uint64 key) {
+} partial class mapsᴛMap {
+
+internal static @unsafe.Pointer putSlotSmallFast64(this ref Map m, ж<abi.MapType> typ, uintptr hash, uint64 key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -201,8 +204,10 @@ internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abiꓸMa
     return slotElem;
 }
 
+} partial class maps_package {
+
 //go:linkname runtime_mapassign_fast64 runtime.mapassign_fast64
-internal static @unsafe.Pointer runtime_mapassign_fast64(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint64 key) {
+internal static @unsafe.Pointer runtime_mapassign_fast64(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint64 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -343,7 +348,9 @@ break_outer:;
     return slotElem;
 }
 
-internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abiꓸMapType> typ, uintptr hash, @unsafe.Pointer key) {
+} partial class mapsᴛMap {
+
+internal static @unsafe.Pointer putSlotSmallFastPtr(this ref Map m, ж<abi.MapType> typ, uintptr hash, @unsafe.Pointer key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -383,10 +390,12 @@ internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abiꓸM
     return slotElem;
 }
 
+} partial class maps_package {
+
 // Key is a 64-bit pointer (only called on 64-bit GOARCH).
 //
 //go:linkname runtime_mapassign_fast64ptr runtime.mapassign_fast64ptr
-internal static @unsafe.Pointer runtime_mapassign_fast64ptr(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+internal static @unsafe.Pointer runtime_mapassign_fast64ptr(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -523,7 +532,7 @@ break_outer:;
 }
 
 //go:linkname runtime_mapdelete_fast64 runtime.mapdelete_fast64
-internal static void runtime_mapdelete_fast64(ж<abiꓸMapType> typ, ж<ΔMap> Ꮡm, uint64 keyʗp) {
+internal static void runtime_mapdelete_fast64(ж<abi.MapType> typ, ж<Map> Ꮡm, uint64 keyʗp) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 

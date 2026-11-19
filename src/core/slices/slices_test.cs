@@ -1777,8 +1777,8 @@ public static void TestNilness(ж<testing.T> t) {
     // The update functions
     //    Insert, AppendSeq, Delete, DeleteFunc, Clone, Compact, CompactFunc
     // preserve nilness, like s[i:j].
-    wantNil(AppendSeq(nilSlice, new iter.Seq<nint>(emptySeq)), appendSeqNilEmptyˢ);
-    wantNonNil(AppendSeq(emptySlice, new iter.Seq<nint>(emptySeq)), appendSeqNilEmptyˢ);
+    wantNil(AppendSeq(nilSlice, NilSafeDelegateConversion<iter.Seq<nint>, Action<Func<nint, bool>>>(emptySeq)), appendSeqNilEmptyˢ);
+    wantNonNil(AppendSeq(emptySlice, NilSafeDelegateConversion<iter.Seq<nint>, Action<Func<nint, bool>>>(emptySeq)), appendSeqNilEmptyˢ);
 
     wantNil(Insert<slice<nint>, nint>(nilSlice, 0), insertNil0ˢ);
     wantNonNil(Insert<slice<nint>, nint>(emptySlice, 0), insertEmpty0ˢ);
@@ -1826,11 +1826,11 @@ public static void TestNilness(ж<testing.T> t) {
     // The collection functions
     //     Collect, Sorted, SortedFunc, SortedStableFunc
     // return nil given an empty sequence.
-    wantNil(Collect(new iter.Seq<nint>(emptySeq)), collectEmptyˢ);
+    wantNil(Collect(NilSafeDelegateConversion<iter.Seq<nint>, Action<Func<nint, bool>>>(emptySeq)), collectEmptyˢ);
 
-    wantNil(Sorted(new iter.Seq<nint>(emptySeq)), sortedEmptyˢ);
-    wantNil(SortedFunc<nint>(new iter.Seq<nint>(emptySeq), cmp.Compare<nint>), sortedFuncEmptyˢ);
-    wantNil(SortedStableFunc<nint>(new iter.Seq<nint>(emptySeq), cmp.Compare<nint>), sortedStableFuncEmptyˢ);
+    wantNil(Sorted(NilSafeDelegateConversion<iter.Seq<nint>, Action<Func<nint, bool>>>(emptySeq)), sortedEmptyˢ);
+    wantNil(SortedFunc<nint>(NilSafeDelegateConversion<iter.Seq<nint>, Action<Func<nint, bool>>>(emptySeq), cmp.Compare<nint>), sortedFuncEmptyˢ);
+    wantNil(SortedStableFunc<nint>(NilSafeDelegateConversion<iter.Seq<nint>, Action<Func<nint, bool>>>(emptySeq), cmp.Compare<nint>), sortedStableFuncEmptyˢ);
 }
 
 } // end slices_test_package

@@ -296,9 +296,9 @@ internal static error processBatch(ж<generation> Ꮡg, batch b, version.Version
     }
     default: {
         var (_, ok) = g.batches[b.m, ꟷ]; if (!ok) {
-            g.batchMs = builtin.append(g.batchMs, b.m);
+            g.batchMs = append(g.batchMs, b.m);
         }
-        g.batches[b.m] = builtin.append(g.batches[b.m], b);
+        g.batches[b.m] = append(g.batches[b.m], b);
         break;
     }}
     return default;
@@ -454,7 +454,7 @@ internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map
             if (errΔ2 != nil) {
                 return fmt.Errorf("reading frame %d's line for stack %d: %w"u8, i + 1, id, errΔ2);
             }
-            frames = builtin.append(frames, pc);
+            frames = append(frames, pc);
 
             var (_, ok) = pcs[pc, ꟷ]; if (!ok) {
                 pcs[pc] = new frame(
@@ -534,13 +534,13 @@ internal static (slice<cpuSample>, error) addCPUSamples(slice<cpuSample> samples
         }
 
         // Add the sample to the slice.
-        samples = builtin.append(samples, new cpuSample(
+        samples = append(samples, new cpuSample(
             schedCtx: new schedCtx(
                 M: mid,
                 P: pid,
                 G: goid
             ),
-            time: ((ΔTime)(int64)ts), // N.B. this is really a "timestamp," not a Time.
+            time: ((Time)(int64)ts), // N.B. this is really a "timestamp," not a Time.
             stack: ((stackID)s)
         ));
     }
@@ -634,7 +634,7 @@ internal static error addExperimentalBatch(map<tracev2.Experiment, slice<Experim
     if (b.exp == tracev2.NoExperiment) {
         return fmt.Errorf("internal error: addExperimentalBatch called on non-experimental batch"u8);
     }
-    expBatches[b.exp] = builtin.append(expBatches[b.exp], new ExperimentalBatch(
+    expBatches[b.exp] = append(expBatches[b.exp], new ExperimentalBatch(
         Thread: b.m,
         Data: b.data
     ));

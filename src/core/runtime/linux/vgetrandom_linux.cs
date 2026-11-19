@@ -58,13 +58,13 @@ internal static uintptr vgetrandomGetState() {
         var stateSizeCacheAligned = (uintptr)((vgetrandomAlloc.stateSize + cpu.CacheLineSize - 1) & ~(cpu.CacheLineSize - 1));
         var allocSize = (uintptr)((num * stateSizeCacheAligned + physPageSize - 1) & ~(physPageSize - 1));
         num = (physPageSize / stateSizeCacheAligned) * (allocSize / physPageSize);
-        var (Δp, err) = mmap(nil, allocSize, vgetrandomAlloc.mmapProt, vgetrandomAlloc.mmapFlags, -1, 0);
+        var (p, err) = mmap(nil, allocSize, vgetrandomAlloc.mmapProt, vgetrandomAlloc.mmapFlags, -1, 0);
         if (err != 0) {
             unlock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
             return 0;
         }
-        setVMAName(Δp, allocSize, getrandomStatesˢ);
-        var newBlock = (uintptr)Δp;
+        setVMAName(p, allocSize, getrandomStatesˢ);
+        var newBlock = (uintptr)p;
         if (vgetrandomAlloc.states == nil) {
             vgetrandomAlloc.states = new slice<uintptr>(0, (nint)(num));
         }
@@ -98,7 +98,7 @@ internal static void vgetrandomDestroy(ref m mp) {
 // This is exported for use in internal/syscall/unix as well as x/sys/unix.
 //
 //go:linkname vgetrandom
-public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flags) {
+public static (nint ret, bool supported) vgetrandom(slice<byte> p, uint32 flags) {
     if (vgetrandomAlloc.stateSize == 0) {
         return (-1, false);
     }
@@ -131,7 +131,7 @@ public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flag
         }
         mp.Value.vgetrandomState = state;
     }
-    return (vgetrandom1(@unsafe.SliceData(Δp), (uintptr)len(Δp), flags, (~mp).vgetrandomState, vgetrandomAlloc.stateSize), true);
+    return (vgetrandom1(@unsafe.SliceData(p), (uintptr)len(p), flags, (~mp).vgetrandomState, vgetrandomAlloc.stateSize), true);
 }
 
 } // end runtime_package

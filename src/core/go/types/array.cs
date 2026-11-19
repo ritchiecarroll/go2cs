@@ -5,26 +5,30 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using static types_package;
+
 partial class types_package {
 
 // An Array represents an array type.
 partial struct Array {
     internal int64 len;
-    internal ΔType elem;
+    internal Type elem;
 }
 
 // NewArray returns a new array type for the given element type and length.
 // A negative length indicates an unknown length.
-public static ж<Array> NewArray(ΔType elem, int64 len) { return Ꮡ(new Array(len: len, elem: elem)); }
+public static ж<Array> NewArray(Type elem, int64 len) { return Ꮡ(new Array(len: len, elem: elem)); }
+
+} partial class typesᴛArray {
 
 // Len returns the length of array a.
 // A negative result indicates an unknown length.
 public static int64 Len(this ref Array a) { return a.len; }
 
 // Elem returns element type of array a.
-public static ΔType Elem(this ref Array a) { return a.elem; }
+public static Type Elem(this ref Array a) { return a.elem; }
 
-public static ΔType Underlying(this ж<Array> Ꮡa) { return new ArrayжΔType(Ꮡa); }
-public static @string String(this ж<Array> Ꮡa) { return TypeString(new ArrayжΔType(Ꮡa), default); }
+public static Type Underlying(this ж<Array> Ꮡa) { return new ArrayжType(Ꮡa); }
+public static @string String(this ж<Array> Ꮡa) { return TypeString(new ArrayжType(Ꮡa), default); }
 
-} // end types_package
+} // end typesᴛArray

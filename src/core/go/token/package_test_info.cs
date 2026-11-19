@@ -15,9 +15,6 @@ using static global::go.go.token_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b66696c656e616d6520737472696e673b20736f75726365205b5d627974653b2073697a6520696e743b206c696e6573205b5d696e747d", "testsᴛ1")]
-[assembly: GoTypeAlias("File", "ΔFile")]
-[assembly: GoTypeAlias("Pos", "ΔPos")]
-[assembly: GoTypeAlias("Position", "ΔPosition")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -37,9 +34,9 @@ using static global::go.go.token_test_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.go.token_package.File))]
 [assembly: GoFieldAccess(typeof(global::go.go.token_package.FileSet))]
 [assembly: GoFieldAccess(typeof(global::go.go.token_package.node))]
-[assembly: GoFieldAccess(typeof(global::go.go.token_package.ΔFile))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

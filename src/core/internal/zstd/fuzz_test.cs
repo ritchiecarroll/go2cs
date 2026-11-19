@@ -137,9 +137,9 @@ public static void FuzzReverse(ж<testing.F> Ꮡf) {
                 // to determine.
                 // So we just check the prefix.
 
-                nint c = builtin.len(goExp);
-                if (c > builtin.len(zstdExp)) {
-                    c = builtin.len(zstdExp);
+                nint c = len(goExp);
+                if (c > len(zstdExp)) {
+                    c = len(zstdExp);
                 }
                 goExp = goExp.slice(0, c);
                 zstdExp = zstdExp.slice(0, c);

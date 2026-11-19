@@ -88,9 +88,9 @@ internal static void unsetenv_c(@string k) {
 }
 
 internal static @unsafe.Pointer cstring(@string s) {
-    var Δp = new slice<byte>(len(s) + 1);
-    copy(Δp, s);
-    return @unsafe.Pointer.FromPinnedBox(Ꮡ(Δp, 0));
+    var p = new slice<byte>(len(s) + 1);
+    copy(p, s);
+    return @unsafe.Pointer.FromPinnedBox(Ꮡ(p, 0));
 }
 
 } // end runtime_package

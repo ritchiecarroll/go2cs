@@ -40,10 +40,11 @@ using static go.main_package;
 
 // The struct types whose arrays this package holds inline (the go.arrays family), as the converter
 // admitted them: a `GoInlineArrayType` record per named type, a `GoInlineArrayKeys` record with the
-// count and a digest of every admitted type (anonymous ones included), and a `GoInlineArrays` record
-// naming the rule when it is not the default. A -tests conversion applies the same rule rather than
-// deciding again, and refuses a production set that admits differently. The section exists only while
-// there is a record to hold.
+// count and a digest of every admitted type (anonymous ones included), a `GoInlineArrayAnonymous`
+// record per admitted anonymous type, a `GoInlineArraySeed` record per -inline-arrays seed, and a
+// `GoInlineArrays` record naming the rule when it is not the default. A -tests conversion applies the
+// same rule and seeds rather than deciding again, and refuses a production set that admits differently.
+// The section exists only while there is a record to hold.
 // <InlineArrays>
 [assembly: go.golib.GoInlineArrayKeys(1, "166c62f7b298c686")]
 [assembly: go.golib.GoInlineArrayType("wire")]
@@ -70,7 +71,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AB5oAAsagoKCABYwlKKCgpSClIKmgrimgoKCgoKCgpSCgoKClIKCgpSClIKUgoKClIKClIKUgoKCgpSCgpSCgoKCgoKClKKApIKipKKApIKi", "171-176:1;172-172:1.1;178-183:2;179-179:2.1", "", "", "", "153:25,154:17,167:25,168:17")]
+[assembly: GoPositionMap("main.go", "main.cs", "ACNoAA0agoKCABYwlKKCgpSClIKmgrimgoKCgoKCgpSCgoKClIKCgpSClIKUgoKClIKClIKUgoKCgpSCgpSCgoKCgoKClKKApIKipKKApIKi", "171-176:1;172-172:1.1;178-183:2;179-179:2.1", "", "", "", "160:25,161:17,174:25,175:17")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -110,3 +111,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.@base)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbase;
+// </MethodHolders>

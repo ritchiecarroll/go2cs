@@ -158,15 +158,15 @@ internal static void testGoldenMarshal(ж<testing.T> t) {
 
 public static void TestSize(ж<testing.T> t) {
     var c = New();
-    nint got = c.Size(); if (got != ΔSize) {
-        t.Errorf("Size = %d; want %d", got, (nint)(ΔSize));
+    nint got = c.Size(); if (got != Size) {
+        t.Errorf("Size = %d; want %d", got, (nint)(Size));
     }
 }
 
 public static void TestBlockSize(ж<testing.T> t) {
     var c = New();
-    nint got = c.BlockSize(); if (got != ΔBlockSize) {
-        t.Errorf("BlockSize = %d; want %d", got, (nint)(ΔBlockSize));
+    nint got = c.BlockSize(); if (got != BlockSize) {
+        t.Errorf("BlockSize = %d; want %d", got, (nint)(BlockSize));
     }
 }
 
@@ -240,7 +240,7 @@ internal static void testLargeHashes(ж<testing.T> t) {
 public static void TestAllocations(ж<testing.T> t) {
     cryptotest.SkipTestAllocations(t);
     var @in = slice<byte>("hello, world!"u8);
-    ref var @out = ref heap<slice<byte>>(new slice<byte>(0, ΔSize), out var Ꮡout);
+    ref var @out = ref heap<slice<byte>>(new slice<byte>(0, Size), out var Ꮡout);
     var h = New();
     var hʗ1 = h;
     var inʗ1 = @in;

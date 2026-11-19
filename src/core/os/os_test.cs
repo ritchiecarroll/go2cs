@@ -1729,19 +1729,19 @@ internal static void testChtimesOmit(ж<Δtesting.T> t, bool omitAt, bool omitMt
     var exprᴛ1 = Δruntime.GOOS;
     switch (ᐧ) {
     case {} when exprᴛ1 == "js"u8: {
-        wantAtime = wantAtime.Truncate(time.ΔSecond);
-        wantMtime = wantMtime.Truncate(time.ΔSecond);
+        wantAtime = wantAtime.Truncate(time.Second);
+        wantMtime = wantMtime.Truncate(time.Second);
         break;
     }}
 
     time.Time setAtime = default; // Zero value means omit.
     time.Time setMtime = default;
     if (!omitAt) {
-        wantAtime = wantAtime.Add(-1 * time.ΔSecond);
+        wantAtime = wantAtime.Add(-1 * time.Second);
         setAtime = wantAtime;
     }
     if (!omitMt) {
-        wantMtime = wantMtime.Add(-1 * time.ΔSecond);
+        wantMtime = wantMtime.Add(-1 * time.Second);
         setMtime = wantMtime;
     }
 
@@ -1838,7 +1838,7 @@ internal static void testChtimes(ж<Δtesting.T> t, @string name) {
     // Move access and modification time back a second
     var at = os_internal_test_package.Atime(preStat);
     var mt = preStat.ModTime();
-    err = Chtimes(name, at.Add(-time.ΔSecond), mt.Add(-time.ΔSecond));
+    err = Chtimes(name, at.Add(-time.Second), mt.Add(-time.Second));
     if (err != nil) {
         t.Fatalf("Chtimes %s: %s", name, err);
     }
@@ -2121,13 +2121,13 @@ public static partial void TestProgWideChdir(ж<Δtesting.T> t) {
                         // See issue 9428.
                         Δruntime.LockOSThread();
                     }
-                    var selᴛ3 = doneʗ1;
-                    var selᴛ4 = holdʗ1;
-                    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-                    case 0 when selᴛ3.ꟷᐳ(out _): {
+                    var doneᴛ1 = doneʗ1;
+                    var holdᴛ1 = holdʗ1;
+                    switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(holdᴛ1, ꓸꓸꓸ))) {
+                    case 0 when doneᴛ1.ꟷᐳ(out _): {
                         return;
                     }
-                    case 1 when selᴛ4.ꟷᐳ(out _): {
+                    case 1 when holdᴛ1.ꟷᐳ(out _): {
                         break;
                     }}
                     // Getwd might be wrong
@@ -3350,7 +3350,7 @@ public static void TestLongPath(ж<Δtesting.T> t) {
                     tΔ1.Fatalf("Rename failed: %v", err);
                 }
             }
-            var mtime = time.Now().Truncate(time.ΔMinute);
+            var mtime = time.Now().Truncate(time.Minute);
             {
                 var err = Chtimes(sizedTempDir + "/bar.txt"u8, mtime, mtime); if (err != nil) {
                     tΔ1.Fatalf("Chtimes failed: %v", err);
@@ -4885,13 +4885,12 @@ public static void TestCopyFSWithSymlinks(ж<Δtesting.T> t) {
 
             @string target = default;
             @string fileName = filepath.Base(path);
-            var exprᴛ1 = fileName;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "file.abs.out.link"u8 || exprᴛ1 == "file.rel.out.link"u8: {
+            case {} when fileName == "file.abs.out.link"u8 || fileName == "file.rel.out.link"u8: {
                 target = outsideFile;
                 break;
             }
-            case {} when exprᴛ1 == "file.rel.in.link"u8: {
+            case {} when fileName == "file.rel.in.link"u8: {
                 target = insideFile;
                 break;
             }}

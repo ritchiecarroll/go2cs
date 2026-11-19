@@ -230,6 +230,12 @@ internal sealed class PinExtents
     /// TEST DIAGNOSTIC: how many live index entries describe some byte of [<paramref name="start"/>,
     /// <paramref name="end"/>). What a pin costs the index is the arm that reads it.
     /// </summary>
+    /// <remarks>
+    /// A pin is one entry however many pages its bytes cover. Add gives it a node per page, each carrying the whole extent,
+    /// so a node is counted only on the first page of the window it covers: counting every node read a pin that crosses a
+    /// page boundary once per page (GoCgoArgsTests.NamedArrayPin.cs read 2 whenever the allocator put its 64-byte backing
+    /// across a page). Only tests call this; Add, Find and Remove are unchanged.
+    /// </remarks>
     internal static int EntriesOver(nuint start, nuint end)
     {
         PinExtents? index = Volatile.Read(ref s_current);
@@ -245,7 +251,7 @@ internal sealed class PinExtents
 
             for (Node? node = page.Head; node is not null; node = node.Next)
             {
-                if (node.Dead == 0 && node.Base < end && node.End > start)
+                if (node.Dead == 0 && node.Base < end && node.End > start && Math.Max(node.Base, start) >> PageShift == number)
                     count++;
             }
         }

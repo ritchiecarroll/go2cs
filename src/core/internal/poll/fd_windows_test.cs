@@ -103,7 +103,7 @@ partial struct _TCP_INFO_v0 {
     public uint8 SynRetrans;
 }
 
-internal static ж<poll.FD> newFD(testing.TB t, syscallꓸHandle h, @string kind, bool overlapped) {
+internal static ж<poll.FD> newFD(testing.TB t, Δsyscall.Handle h, @string kind, bool overlapped) {
     ref var fd = ref heap<poll.FD>(new poll.FD(
         Sysfd: h,
         IsStream: true,

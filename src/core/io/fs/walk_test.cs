@@ -99,7 +99,7 @@ public static void TestWalkDir(ж<testing.T> t) {
     var clear = true;
     var markFn = (@string path, fs.DirEntry entry, error errΔ1) => mark(entry, errΔ1, Ꮡerrors, clear);
     // Expect no errors.
-    var err = WalkDir(fsys, ".", new Func<@string, fs.DirEntry, error, error>(markFn));
+    var err = WalkDir(fsys, ".", markFn);
     if (err != nil) {
         t.Fatalf("no error expected, found: %s", err);
     }
@@ -146,7 +146,7 @@ public static void TestWalkDirSymlink(ж<testing.T> t) {
     };
 
     // Expect no errors.
-    var err = WalkDir(new fstest_MapFSᴠFS(fsys), linkˢ, new Func<@string, fs.DirEntry, error, error>(walkFn));
+    var err = WalkDir(new fstest_MapFSᴠFS(fsys), linkˢ, walkFn);
     if (err != nil) {
         t.Fatalf("no error expected, found: %s", err);
     }

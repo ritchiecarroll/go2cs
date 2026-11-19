@@ -9,7 +9,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 partial struct ITab {
-    public ж<ΔInterfaceType> Inter;
+    public ж<InterfaceType> Inter;
     public ж<Type> Type;
     public uint32 Hash;
     public array<uintptr> Fun = new(1);

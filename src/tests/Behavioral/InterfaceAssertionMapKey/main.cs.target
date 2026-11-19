@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -18,21 +19,33 @@ partial struct myVar {
     internal @string n;
 }
 
+} partial class mainᴛmyVar {
+
 internal static @string Name(this ref myVar o) { return o.n; }
 internal static void isDependency(this ref myVar o) { }
+
+} partial class main_package {
 
 partial struct myConst {
     internal @string n;
 }
 
+} partial class mainᴛmyConst {
+
 internal static @string Name(this myConst o) { return o.n; }
 internal static void isDependency(this myConst o) { }
+
+} partial class main_package {
 
 partial struct myFunc {
     internal @string n;
 }
 
+} partial class mainᴛmyFunc {
+
 internal static @string Name(this ref myFunc o) { return o.n; }
+
+} partial class main_package {
 
 internal static void main() {
     var objMap = new map<Object, nint>();

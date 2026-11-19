@@ -12,10 +12,13 @@ using slices = slices_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.@internal;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
-internal static void declare(this ж<Checker> Ꮡcheck, ж<ΔScope> scope, ж<ast.Ident> id, Object obj, tokenꓸPos pos) {
+} partial class typesᴛChecker {
+
+internal static void declare(this ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.Ident> id, Object obj, token.Pos pos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // spec: "The blank identifier, represented by the underscore
@@ -37,6 +40,8 @@ internal static void declare(this ж<Checker> Ꮡcheck, ж<ΔScope> scope, ж<as
     }
 }
 
+} partial class types_package {
+
 // pathString returns a string of the form a->b-> ... ->g for a path [a, b, ... g].
 internal static @string pathString(slice<Object> path) {
     @string s = default;
@@ -48,6 +53,8 @@ internal static @string pathString(slice<Object> path) {
     }
     return s;
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string checkingSObjPathSˢ => ref checkingSObjPathSˢᵇ;
@@ -117,13 +124,13 @@ internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
             case ж<Var> _: {
                 var objΔ1 = obj;
                 if (!Ꮡcheck.validCycle(objΔ1) || objΔ1.Type() == nil) {
-                    objΔ1.setType(new BasicжΔType(Typ[Invalid]));
+                    objΔ1.setType(new BasicжType(Typ[Invalid]));
                 }
                 break;
             }
             case ж<TypeName> objΔ1: {
                 if (!Ꮡcheck.validCycle(new TypeNameжObject(objΔ1))) {
-                    objΔ1.of(TypeName.Ꮡobject).setType(new BasicжΔType(Typ[Invalid]));
+                    objΔ1.of(TypeName.Ꮡobject).setType(new BasicжType(Typ[Invalid]));
                 }
                 break;
             }
@@ -355,11 +362,11 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
     if (tname != nil) {
         if (check.conf._EnableAlias) {
             var (a, ok) = tname.of(TypeName.Ꮡobject).Type()._<ж<Alias>>(ᐧ); if (ok) {
-                a.fromRHS = new BasicжΔType(Typ[Invalid]);
+                a.fromRHS = new BasicжType(Typ[Invalid]);
             }
         } else {
             if (tname.IsAlias()) {
-                check.validAlias(tname, new BasicжΔType(Typ[Invalid]));
+                check.validAlias(tname, new BasicжType(Typ[Invalid]));
             }
         }
     }
@@ -389,11 +396,13 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
     err.report();
 }
 
+} partial class types_package {
+
 // firstInSrc reports the index of the object with the "smallest"
 // source position in path. path must not be empty.
 internal static nint firstInSrc(slice<Object> path) {
     nint fst = 0;
-    tokenꓸPos pos = path[0].Pos();
+    token.Pos pos = path[0].Pos();
     foreach (var (i, t) in range(path[1..])) {
         if (cmpPos(t.Pos(), pos) < 0) {
             (fst, pos) = (i + 1, t.Pos());
@@ -410,7 +419,7 @@ partial struct importDecl {
     internal ж<ast.ImportSpec> spec;
 }
 
-partial struct ΔconstDecl {
+partial struct constDecl {
     internal ж<ast.ValueSpec> spec;
     internal nint iota;
     internal ast.Expr typ;
@@ -418,23 +427,39 @@ partial struct ΔconstDecl {
     internal bool inherited;
 }
 
-partial struct ΔvarDecl {
+partial struct varDecl {
     internal ж<ast.ValueSpec> spec;
 }
 
-partial struct ΔtypeDecl {
+partial struct typeDecl {
     internal ж<ast.TypeSpec> spec;
 }
 
-partial struct ΔfuncDecl {
+partial struct funcDecl {
     internal ж<ast.FuncDecl> decl;
 }
 
+} partial class typesᴛimportDecl {
+
 internal static ast.Node node(this importDecl d) { return new ast.ImportSpecжNode(d.spec); }
-internal static ast.Node node(this ΔconstDecl d) { return new ast.ValueSpecжNode(d.spec); }
-internal static ast.Node node(this ΔvarDecl d) { return new ast.ValueSpecжNode(d.spec); }
-internal static ast.Node node(this ΔtypeDecl d) { return new ast.TypeSpecжNode(d.spec); }
-internal static ast.Node node(this ΔfuncDecl d) { return new ast.FuncDeclжNode(d.decl); }
+
+} partial class typesᴛconstDecl {
+
+internal static ast.Node node(this constDecl d) { return new ast.ValueSpecжNode(d.spec); }
+
+} partial class typesᴛvarDecl {
+
+internal static ast.Node node(this varDecl d) { return new ast.ValueSpecжNode(d.spec); }
+
+} partial class typesᴛtypeDecl {
+
+internal static ast.Node node(this typeDecl d) { return new ast.TypeSpecжNode(d.spec); }
+
+} partial class typesᴛfuncDecl {
+
+internal static ast.Node node(this funcDecl d) { return new ast.FuncDeclжNode(d.decl); }
+
+} partial class typesᴛChecker {
 
 internal static void walkDecls(this ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
     foreach (var (_, d) in range(decls)) {
@@ -473,12 +498,12 @@ internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl
                         break;
                     }}
                     Ꮡcheck.arityMatch(sΔ1, last);
-                    f(new ΔconstDecl(spec: sΔ1, iota: iota, typ: last.Type, init: last.Values, inherited: inherited));
+                    f(new constDecl(spec: sΔ1, iota: iota, typ: last.Type, init: last.Values, inherited: inherited));
                     break;
                 }
                 case var ᴛ when ᴛ == token.VAR: {
                     Ꮡcheck.arityMatch(sΔ1, nil);
-                    f(new ΔvarDecl(sΔ1));
+                    f(new varDecl(sΔ1));
                     break;
                 }
                 default: {
@@ -488,7 +513,7 @@ internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl
                 break;
             }
             case ж<ast.TypeSpec> sΔ1: {
-                f(new ΔtypeDecl(sΔ1));
+                f(new typeDecl(sΔ1));
                 break;
             }
             default: {
@@ -500,7 +525,7 @@ internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl
         break;
     }
     case ж<ast.FuncDecl> dΔ1: {
-        f(new ΔfuncDecl(dΔ1));
+        f(new funcDecl(dΔ1));
         break;
     }
     default: {
@@ -538,7 +563,7 @@ internal static void constDecl(this ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.
                 if (isValid(t.Underlying())) {
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(typ), InvalidConstType, "invalid constant type %s", t);
                 }
-                obj.typ = new BasicжΔType(Typ[Invalid]);
+                obj.typ = new BasicжType(Typ[Invalid]);
                 return;
             }
             obj.typ = t;
@@ -590,7 +615,7 @@ internal static void varDecl(this ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж
     if (init == nil) {
         if (typ == nil) {
             // error reported before by arityMatch
-            obj.typ = new BasicжΔType(Typ[Invalid]);
+            obj.typ = new BasicжType(Typ[Invalid]);
         }
         return;
     }
@@ -624,7 +649,7 @@ internal static void varDecl(this ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж
 }
 
 // isImportedConstraint reports whether typ is an imported type constraint.
-internal static bool isImportedConstraint(this ref Checker check, ΔType typ) {
+internal static bool isImportedConstraint(this ref Checker check, Type typ) {
     var named = asNamed(typ);
     if (named == nil || named.obj.pkg == check.pkg || named.obj.pkg == nil) {
         return false;
@@ -655,7 +680,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
         // Only report a version error if we have not reported one already.
         var versionErr = false;
 
-        ref var rhs = ref heap<ΔType>(out var Ꮡrhs);
+        ref var rhs = ref heap<Type>(out var Ꮡrhs);
         check.later(() => {
             var t = asNamed(Ꮡobj.Value.typ); if (t != nil) { // type may be invalid
                 Ꮡcheck.validType(t);
@@ -689,7 +714,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
                 var aliasʗ1 = alias;
                 defer(() => {
                     if (aliasʗ1.fromRHS == nil) {
-                        aliasʗ1.fromRHS = new BasicжΔType(Typ[Invalid]);
+                        aliasʗ1.fromRHS = new BasicжType(Typ[Invalid]);
                         unalias(aliasʗ1);
                     }
                 }, ref ᒐ);
@@ -709,7 +734,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
                 // (see also go.dev/issue/75884, go.dev/issue/#75885)
                 var (tpar, ok) = rhs._<ж<TypeParam>>(ᐧ); if (ok && alias.tparams != nil && slices.Index(alias.tparams.list(), tpar) >= 0) {
                     Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseTypeParameterˢ);
-                    alias.fromRHS = new BasicжΔType(Typ[Invalid]);
+                    alias.fromRHS = new BasicжType(Typ[Invalid]);
                 }
             } else {
                 // With Go1.23, the default behavior is to use Alias nodes,
@@ -767,7 +792,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
         // (See also go.dev/issue/45639.)
         if (isTypeParam(rhs)) {
             Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseATypeParameterˢ);
-            named.fromRHS = new BasicжΔType(Typ[Invalid]);
+            named.fromRHS = new BasicжType(Typ[Invalid]);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -789,7 +814,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
         // Declare type parameters up-front, with empty interface as type bound.
         // The scope of type parameters starts at the beginning of the type parameter
         // list (so we can have mutually recursive parameterized interfaces).
-        tokenꓸPos scopePos = list.Pos();
+        token.Pos scopePos = list.Pos();
         foreach (var (_, f) in range(list.List)) {
             foreach (var (_, name) in range(f.Names)) {
                 tparams = append(tparams, Ꮡcheck.declareTypeParam(name, scopePos));
@@ -816,7 +841,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
 
         nint index = 0;
         foreach (var (_, f) in range(list.List)) {
-            ΔType bound = default;
+            Type bound = default;
             // NOTE: we may be able to assert that f.Type != nil here, but this is not
             // an invariant of the AST, so we are cautious.
             if (f.Type != nil) {
@@ -827,10 +852,10 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
                     // But we may need some additional form of cycle detection within
                     // type parameter lists.
                     Ꮡcheck.error(new ast_Exprᴠpositioner(f.Type), MisplacedTypeParam, cannotUseATypeParameterˢ2);
-                    bound = new BasicжΔType(Typ[Invalid]);
+                    bound = new BasicжType(Typ[Invalid]);
                 }
             } else {
-                bound = new BasicжΔType(Typ[Invalid]);
+                bound = new BasicжType(Typ[Invalid]);
             }
             foreach (var i in range(len(f.Names))) {
                 tparams[index + i].bound = bound;
@@ -842,7 +867,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
     finally { ᒐ.Run(); }
 }
 
-internal static ΔType bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
+internal static Type bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
     // A type set literal of the form ~T and A|B may only appear as constraint;
     // embed it in an implicit interface so that only interface type-checking
     // needs to take care of such type expressions.
@@ -868,7 +893,7 @@ internal static ΔType bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
     return Ꮡcheck.typ(x);
 }
 
-internal static ж<TypeParam> declareTypeParam(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡname, tokenꓸPos scopePos) {
+internal static ж<TypeParam> declareTypeParam(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡname, token.Pos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var name = ref Ꮡname.DerefOrNull();
 
@@ -879,7 +904,7 @@ internal static ж<TypeParam> declareTypeParam(this ж<Checker> Ꮡcheck, ж<ast
     //           constraints to make sure we don't rely on them if they
     //           are not properly set yet.
     var tname = NewTypeName(name.Pos(), check.pkg, name.Name, default);
-    var tpar = Ꮡcheck.newTypeParam(tname, new BasicжΔType(Typ[Invalid])); // assigns type to tname as a side-effect
+    var tpar = Ꮡcheck.newTypeParam(tname, new BasicжType(Typ[Invalid])); // assigns type to tname as a side-effect
     Ꮡcheck.declare(check.scope, Ꮡname, new TypeNameжObject(tname), scopePos);
     return tpar;
 }
@@ -985,8 +1010,8 @@ internal static void funcDecl(this ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<dec
     // func declarations cannot use iota
     assert(check.iota == nil);
 
-    var sig = @new<ΔSignature>();
-    obj.typ = new ΔSignatureжΔType(sig); // guard against cycles
+    var sig = @new<Signature>();
+    obj.typ = new SignatureжType(sig); // guard against cycles
 
     var fdecl = decl.fdecl;
     Ꮡcheck.funcType(sig, fdecl.Recv, fdecl.Type);
@@ -1019,7 +1044,7 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
     var pkgʗ1 = pkg;
     Ꮡcheck.walkDecl(d, (decl dΔ1) => {
         switch (dΔ1.type()) {
-        case ΔconstDecl dΔ2: {
+        case constDecl dΔ2: {
             nint top = len(Ꮡcheck.Value.delayed);
 
             // declare all constants
@@ -1043,13 +1068,13 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
             // inside a function begins at the end of the ConstSpec or VarSpec
             // (ShortVarDecl for short variable declarations) and ends at the
             // end of the innermost containing block."
-            tokenꓸPos scopePos = dΔ2.spec.End();
+            token.Pos scopePos = dΔ2.spec.End();
             foreach (var (i, name) in range(dΔ2.spec.Names)) {
                 Ꮡcheck.declare(Ꮡcheck.Value.scope, name, new ConstжObject(lhs[i]), scopePos);
             }
             break;
         }
-        case ΔvarDecl dΔ2: {
+        case varDecl dΔ2: {
             nint top = len(Ꮡcheck.Value.delayed);
 
             var lhs0 = new slice<ж<Var>>(len(dΔ2.spec.Names));
@@ -1100,19 +1125,19 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
 
             // declare all variables
             // (only at this point are the variable scopes (parents) set)
-            tokenꓸPos scopePos = dΔ2.spec.End(); // see constant declarations
+            token.Pos scopePos = dΔ2.spec.End(); // see constant declarations
             foreach (var (i, name) in range(dΔ2.spec.Names)) {
                 // see constant declarations
                 Ꮡcheck.declare(Ꮡcheck.Value.scope, name, new VarжObject(lhs0[i]), scopePos);
             }
             break;
         }
-        case ΔtypeDecl dΔ2: {
+        case typeDecl dΔ2: {
             var obj = NewTypeName(dΔ2.spec.Name.Pos(), pkgʗ1, dΔ2.spec.Name.Name, default);
             // spec: "The scope of a type identifier declared inside a function
             // begins at the identifier in the TypeSpec and ends at the end of
             // the innermost containing block."
-            tokenꓸPos scopePos = dΔ2.spec.Name.Pos();
+            token.Pos scopePos = dΔ2.spec.Name.Pos();
             Ꮡcheck.declare(Ꮡcheck.Value.scope, dΔ2.spec.Name, new TypeNameжObject(obj), scopePos);
             Ꮡcheck.Value.push(new TypeNameжObject(obj)); // mark as grey
             Ꮡcheck.typeDecl(obj, dΔ2.spec);
@@ -1127,4 +1152,4 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
     });
 }
 
-} // end types_package
+} // end typesᴛChecker

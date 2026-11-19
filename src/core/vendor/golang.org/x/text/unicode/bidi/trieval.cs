@@ -4,37 +4,37 @@ namespace go.vendor.golang.org.x.text.unicode;
 partial class bidi_package {
 
 // Class is the Unicode BiDi class. Each rune has a single class.
-partial struct ΔClass /*num:nuint*/;
+partial struct Class /*num:nuint*/;
 
-public static ΔClass L => /* iota */ 0; // LeftToRight
-public static ΔClass R => 1;            // RightToLeft
-public static ΔClass EN => 2;           // EuropeanNumber
-public static ΔClass ES => 3;           // EuropeanSeparator
-public static ΔClass ET => 4;           // EuropeanTerminator
-public static ΔClass AN => 5;           // ArabicNumber
-public static ΔClass CS => 6;           // CommonSeparator
-public static ΔClass B => 7;            // ParagraphSeparator
-public static ΔClass S => 8;            // SegmentSeparator
-public static ΔClass WS => 9;           // WhiteSpace
-public static ΔClass ON => 10;          // OtherNeutral
-public static ΔClass BN => 11;          // BoundaryNeutral
-public static ΔClass NSM => 12;         // NonspacingMark
-public static ΔClass AL => 13;          // ArabicLetter
-public static ΔClass Control => 14;     // Control LRO - PDI
+public static Class L => /* iota */ 0; // LeftToRight
+public static Class R => 1;            // RightToLeft
+public static Class EN => 2;           // EuropeanNumber
+public static Class ES => 3;           // EuropeanSeparator
+public static Class ET => 4;           // EuropeanTerminator
+public static Class AN => 5;           // ArabicNumber
+public static Class CS => 6;           // CommonSeparator
+public static Class B => 7;            // ParagraphSeparator
+public static Class S => 8;            // SegmentSeparator
+public static Class WS => 9;           // WhiteSpace
+public static Class ON => 10;          // OtherNeutral
+public static Class BN => 11;          // BoundaryNeutral
+public static Class NSM => 12;         // NonspacingMark
+public static Class AL => 13;          // ArabicLetter
+public static Class Control => 14;     // Control LRO - PDI
 
-internal static ΔClass numClass => 15;
+internal static Class numClass => 15;
 
-public static ΔClass LRO => 16; // LeftToRightOverride
-public static ΔClass RLO => 17; // RightToLeftOverride
-public static ΔClass LRE => 18; // LeftToRightEmbedding
-public static ΔClass RLE => 19; // RightToLeftEmbedding
-public static ΔClass PDF => 20; // PopDirectionalFormat
-public static ΔClass LRI => 21; // LeftToRightIsolate
-public static ΔClass RLI => 22; // RightToLeftIsolate
-public static ΔClass FSI => 23; // FirstStrongIsolate
-public static ΔClass PDI => 24; // PopDirectionalIsolate
+public static Class LRO => 16; // LeftToRightOverride
+public static Class RLO => 17; // RightToLeftOverride
+public static Class LRE => 18; // LeftToRightEmbedding
+public static Class RLE => 19; // RightToLeftEmbedding
+public static Class PDF => 20; // PopDirectionalFormat
+public static Class LRI => 21; // LeftToRightIsolate
+public static Class RLI => 22; // RightToLeftIsolate
+public static Class FSI => 23; // FirstStrongIsolate
+public static Class PDI => 24; // PopDirectionalIsolate
 
-internal static ΔClass unknownClass => /* ^Class(0) */ unchecked((ΔClass)18446744073709551615);
+internal static Class unknownClass => /* ^Class(0) */ unchecked((Class)18446744073709551615);
 
 // A trie entry has the following bits:
 // 7..5  XOR mask for brackets

@@ -52,7 +52,7 @@ public static void TestDecimalInit(ж<testing.T> t) {
         new(1953125, 9, "1000000000")
     ]))) {
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
-        Ꮡd.init(new Δnat(new global::go.math.big_package.Word[]{test.x}.slice()).norm(), test.shift);
+        Ꮡd.init(new nat(new global::go.math.big_package.Word[]{test.x}.slice()).norm(), test.shift);
         @string got = d.String(); if (got != test.want) {
             t.Errorf("%d << %d == %s; want %s", test.x, test.shift, got, test.want);
         }
@@ -93,7 +93,7 @@ public static void TestDecimalRounding(ж<testing.T> t) {
         new(12995000, 4, "12990000", "13000000", "13000000"),
         new(12999999, 4, "12990000", "13000000", "13000000")
     ]))) {
-        var x = ((global::go.math.big_package.Δnat)default).setUint64(test.x);
+        var x = ((global::go.math.big_package.nat)default).setUint64(test.x);
 
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
         Ꮡd.init(x, 0);

@@ -203,7 +203,7 @@ internal static void testRE2(ж<testing.T> t, @string @file) {
                         }
                         continue;
                     }
-                    (var b, suffix) = Δmatch[i](re, refull, text);
+                    (var b, suffix) = match[i](re, refull, text);
                     if (b != (want != nil)) {
                         t.Errorf("%s:%d: %#q%s.MatchString(%#q) = %v, want %v", @file, linenoΔ1, re.OrTypedNil(), suffix, text, b, !b);
                         nfail++; if (nfail >= 100) {
@@ -267,8 +267,8 @@ internal static (slice<nint>, @string) runPartialLongest(ж<global::go.regexp_pa
     return (Ꮡre.FindStringSubmatchIndex(text), "[longest]");
 }
 
-internal static slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (bool, @string)>> Δmatch;
-internal static void initᴛΔmatch() { Δmatch = [
+internal static slice<Func<ж<global::go.regexp_package.Regexp>, ж<global::go.regexp_package.Regexp>, @string, (bool, @string)>> match;
+internal static void initᴛmatch() { match = [
     matchFull,
     matchPartial,
     matchFullLongest,
@@ -601,14 +601,14 @@ Testing:
                     t.Errorf("%s:%d: %#q should not compile", @file, lineno, pattern);
                     goto continue_Testing;
                 }
-                var Δmatch = re.MatchString(text);
-                if (Δmatch != shouldMatch) {
-                    t.Errorf("%s:%d: %#q.Match(%#q) = %v, want %v", @file, lineno, pattern, text, Δmatch, shouldMatch);
+                var match = re.MatchString(text);
+                if (match != shouldMatch) {
+                    t.Errorf("%s:%d: %#q.Match(%#q) = %v, want %v", @file, lineno, pattern, text, match, shouldMatch);
                     goto continue_Testing;
                 }
                 var have = re.FindStringSubmatchIndex(text);
-                if ((len(have) > 0) != Δmatch) {
-                    t.Errorf("%s:%d: %#q.Match(%#q) = %v, but %#q.FindSubmatchIndex(%#q) = %v", @file, lineno, pattern, text, Δmatch, pattern, text, have);
+                if ((len(have) > 0) != match) {
+                    t.Errorf("%s:%d: %#q.Match(%#q) = %v, but %#q.FindSubmatchIndex(%#q) = %v", @file, lineno, pattern, text, match, pattern, text, have);
                     goto continue_Testing;
                 }
                 if (len(have) > len(pos)) {

@@ -9,7 +9,7 @@ partial class main_package {
 partial struct InterfaceSwitch {
     public ж<InterfaceSwitchCache> Cache;
     public nint NCases;
-    public array<ж<ΔInterfaceType>> Cases = new(1);
+    public array<ж<InterfaceType>> Cases = new(1);
 }
 
 partial struct InterfaceSwitchCache {
@@ -29,9 +29,8 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
     if (!go122InterfaceSwitchCache) {
         return false;
     }
-    var exprᴛ1 = goarch;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "s390x"u8: {
+    case {} when goarch == "amd64"u8 || goarch == "arm64"u8 || goarch == "loong64"u8 || goarch == "mips"u8 || goarch == "mipsle"u8 || goarch == "mips64"u8 || goarch == "mips64le"u8 || goarch == "ppc64"u8 || goarch == "ppc64le"u8 || goarch == "riscv64"u8 || goarch == "s390x"u8: {
         return true;
     }
     default: {
@@ -42,7 +41,7 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
 
 partial struct TypeAssert {
     public ж<TypeAssertCache> Cache;
-    public ж<ΔInterfaceType> Inter;
+    public ж<InterfaceType> Inter;
     public bool CanFail;
 }
 partial struct TypeAssertCache {

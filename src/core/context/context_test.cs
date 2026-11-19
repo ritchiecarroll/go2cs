@@ -11,6 +11,7 @@ using time = time_package;
 using go.sync;
 using static go.context_package;
 using ꓸꓸꓸany = Span<any>;
+using static context_internal_test_package;
 
 partial class context_internal_test_package {
 
@@ -320,6 +321,8 @@ internal partial struct myDoneCtx {
     /*embed*/ public global::go.context_package.Context Context;
 }
 
+} partial class context_internal_testᴛmyDoneCtx {
+
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *myDoneCtx's method set; see the pointer-only satisfaction record.
 internal static (time.Time, bool) Deadline(this myDoneCtx recvᴛ) => recvᴛ.Context.Deadline();
@@ -336,6 +339,9 @@ internal static /*<-*/channel<EmptyStruct> Done(this ref myDoneCtx d) {
     var c = new channel<EmptyStruct>(0);
     return c.AsRecvOnly();
 }
+
+} partial class context_internal_test_package {
+
 public static void XTestCustomContextGoroutines(testingT t) {
     GoFrame ᒐ = default;
     try {

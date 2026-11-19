@@ -16,6 +16,7 @@ using strings = strings_package;
 using encoding;
 using global::go.go;
 using math;
+using static pkgbits_package;
 
 partial class pkgbits_package {
 
@@ -23,7 +24,7 @@ partial class pkgbits_package {
 // export data.
 partial struct PkgDecoder {
     // version is the file format version.
-    internal ΔVersion version;
+    internal Version version;
     // sync indicates whether the file uses sync markers.
     internal bool sync;
     // pkgPath is the package path for the package to be decoded.
@@ -53,6 +54,8 @@ partial struct PkgDecoder {
     internal slice<RefTableEntry> scratchRelocEnt;
 }
 
+} partial class pkgbitsᴛPkgDecoder {
+
 // PkgPath returns the package path for the package
 //
 // TODO(mdempsky): Remove; unneeded since CL 391014.
@@ -60,6 +63,8 @@ public static @string PkgPath(this ref PkgDecoder pr) { return pr.pkgPath; }
 
 // SyncMarkers reports whether pr uses sync markers.
 public static bool SyncMarkers(this ref PkgDecoder pr) { return pr.sync; }
+
+} partial class pkgbits_package {
 
 // NewPkgDecoder returns a PkgDecoder initialized to read the Unified
 // IR export data from input. pkgPath is the package path for the
@@ -76,7 +81,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 
     ref var ver = ref heap(new uint32(), out var Ꮡver);
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, Ꮡver) == nil);
-    pr.version = (ΔVersion)ver;
+    pr.version = (Version)ver;
 
     if (pr.version >= numVersions) {
         throw panic(fmt.Errorf("cannot decode %q, export data version %d is greater than maximum supported version %d"u8, pkgPath, pr.version, (nint)(numVersions - 1)));
@@ -103,6 +108,8 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 
     return pr.ΔClone();
 }
+
+} partial class pkgbitsᴛPkgDecoder {
 
 // NumElems returns the number of elements in section k.
 public static nint NumElems(this ref PkgDecoder pr, SectionKind k) {
@@ -231,6 +238,8 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, R
     return r;
 }
 
+} partial class pkgbits_package {
+
 // A Decoder provides methods for decoding an individual element's
 // bitstream data.
 partial struct Decoder {
@@ -240,6 +249,8 @@ partial struct Decoder {
     internal SectionKind k;
     public RelElemIdx Idx;
 }
+
+} partial class pkgbitsᴛDecoder {
 
 internal static void checkErr(this ref Decoder r, error err) {
     if (err != nil) {
@@ -254,6 +265,8 @@ internal static uint64 rawUvarint(this ж<Decoder> Ꮡr) {
     r.checkErr(err);
     return x;
 }
+
+} partial class pkgbits_package {
 
 // readUvarint is a type-specialized copy of encoding/binary.ReadUvarint.
 // This avoids the interface conversion and thus has better escape properties,
@@ -284,6 +297,8 @@ internal static (uint64, error) readUvarint(ж<strings.Reader> Ꮡr) {
 }
 
 internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64-bit integer");
+
+} partial class pkgbitsᴛDecoder {
 
 internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
     var ux = Ꮡr.rawUvarint();
@@ -484,15 +499,15 @@ internal static constant.Value scalar(this ж<Decoder> Ꮡr) {
     case var ᴛ when ᴛ == ValBigRat: {
         var num = Ꮡr.bigInt();
         var denom = Ꮡr.bigInt();
-        return constant.Make(@new<bigꓸRat>().SetFrac(num, denom).OrTypedNil());
+        return constant.Make(@new<big.Rat>().SetFrac(num, denom).OrTypedNil());
     }
     case var ᴛ when ᴛ == ValBigFloat: {
         return constant.Make(Ꮡr.bigFloat().OrTypedNil());
     }}
 }
 
-internal static ж<bigꓸInt> bigInt(this ж<Decoder> Ꮡr) {
-    var v = @new<bigꓸInt>().SetBytes(slice<byte>(Ꮡr.String()));
+internal static ж<big.Int> bigInt(this ж<Decoder> Ꮡr) {
+    var v = @new<big.Int>().SetBytes(slice<byte>(Ꮡr.String()));
     if (Ꮡr.Bool()) {
         v.Neg(v);
     }
@@ -504,6 +519,8 @@ internal static ж<big.Float> bigFloat(this ж<Decoder> Ꮡr) {
     assert(v.UnmarshalText(slice<byte>(Ꮡr.String())) == nil);
     return v;
 }
+
+} partial class pkgbitsᴛPkgDecoder {
 
 // @@@ Helpers
 // TODO(mdempsky): These should probably be removed. I think they're a
@@ -552,7 +569,9 @@ public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, Rel
     return (path, name, tag);
 }
 
-// Version reports the version of the bitstream.
-public static ΔVersion Version(this ref Decoder w) { return w.common.version; }
+} partial class pkgbitsᴛDecoder {
 
-} // end pkgbits_package
+// Version reports the version of the bitstream.
+public static Version Version(this ref Decoder w) { return w.common.version; }
+
+} // end pkgbitsᴛDecoder

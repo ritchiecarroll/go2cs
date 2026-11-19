@@ -13,6 +13,7 @@ using math = math_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
+using static gcm_package;
 
 partial class gcm_package {
 
@@ -58,7 +59,7 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMWithCounterNonce(ж<aes.Blo
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 // NewGCMForTLS12 returns a new AEAD that works like GCM, but enforces the
@@ -72,7 +73,7 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMForTLS12(ж<aes.Block> ciph
         return (default, err);
     }
     // TLS 1.2 counters always start at zero.
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value, startReady: true)), default);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value.ΔClone(), startReady: true)), default);
 }
 
 // NewGCMForSSH returns a new AEAD that works like GCM, but enforces the
@@ -84,7 +85,7 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMForSSH(ж<aes.Block> cipher
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 partial struct GCMWithCounterNonce {
@@ -95,6 +96,8 @@ partial struct GCMWithCounterNonce {
     internal uint64 start;
     internal uint64 next;
 }
+
+} partial class gcmᴛGCMWithCounterNonce {
 
 public static nint NonceSize(this ref GCMWithCounterNonce g) { return gcmStandardNonceSize; }
 
@@ -148,6 +151,8 @@ public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
 
+} partial class gcm_package {
+
 // NewGCMWithXORCounterNonce returns a new AEAD that works like GCM, but
 // enforces the construction of deterministic nonces. The nonce must be 96 bits,
 // the first 32 bits must be an encoding of the module name, and the last 64
@@ -163,7 +168,7 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMWithXORCounterNonce(ж<a
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 // NewGCMForTLS13 returns a new AEAD that works like GCM, but enforces the
@@ -175,7 +180,7 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMForTLS13(ж<aes.Block> c
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 // NewGCMForHPKE returns a new AEAD that works like GCM, but enforces the
@@ -187,7 +192,7 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMForHPKE(ж<aes.Block> ci
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value.ΔClone())), default);
 }
 
 // NewGCMForQUIC returns a new AEAD that works like GCM, but enforces the
@@ -206,7 +211,7 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMForQUIC(ж<aes.Block> ci
     if (err != nil) {
         return (default, err);
     }
-    var gcm = Ꮡ(new GCMWithXORCounterNonce(g: g.Value));
+    var gcm = Ꮡ(new GCMWithXORCounterNonce(g: g.Value.ΔClone()));
     var errΔ1 = gcm.SetNoncePrefixAndMask(iv); if (errΔ1 != nil) {
         return (default, errΔ1);
     }
@@ -220,6 +225,8 @@ partial struct GCMWithXORCounterNonce {
     internal uint64 mask;
     internal uint64 next;
 }
+
+} partial class gcmᴛGCMWithXORCounterNonce {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoCipherIncorrectˢ => ref cryptoCipherIncorrectˢᵇ;
@@ -298,4 +305,4 @@ public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, sl
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
 
-} // end gcm_package
+} // end gcmᴛGCMWithXORCounterNonce

@@ -16,6 +16,7 @@ using time = time_package;
 using bufio = bufio_package;
 using global::go.net;
 using static global::go.net.http_package;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
@@ -29,10 +30,10 @@ public static readonly ж<Func<ж<url.URL>, ж<url.URL>, @string, @string>> ᏑE
 public static ref Func<ж<url.URL>, ж<url.URL>, @string, @string> ExportRefererForURL => ref ((StaticBox<Func<ж<url.URL>, ж<url.URL>, @string, @string>>)ᏑExportRefererForURL).ValueSlot;
 internal static readonly ж<Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>> ᏑExportServerNewConn = new StaticBox<Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>>(default(Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>));
 internal static ref Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>> ExportServerNewConn => ref ((StaticBox<Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>>)ᏑExportServerNewConn).ValueSlot;
-internal static void initᴛExportServerNewConn() { ExportServerNewConn = ((Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>)(global::go.net.http_package.newConn)); }
+internal static void initᴛExportServerNewConn() { ExportServerNewConn = ((Func<ж<global::go.net.http_package.Server>, net.Conn, ж<global::go.net.http_package.conn>>)(global::go.net.httpᴛServer.newConn)); }
 internal static readonly ж<Action<ж<global::go.net.http_package.conn>>> ᏑExportCloseWriteAndWait = new StaticBox<Action<ж<global::go.net.http_package.conn>>>(default(Action<ж<global::go.net.http_package.conn>>));
 internal static ref Action<ж<global::go.net.http_package.conn>> ExportCloseWriteAndWait => ref ((StaticBox<Action<ж<global::go.net.http_package.conn>>>)ᏑExportCloseWriteAndWait).ValueSlot;
-internal static void initᴛExportCloseWriteAndWait() { ExportCloseWriteAndWait = ((Action<ж<global::go.net.http_package.conn>>)(global::go.net.http_package.closeWriteAndWait)); }
+internal static void initᴛExportCloseWriteAndWait() { ExportCloseWriteAndWait = ((Action<ж<global::go.net.http_package.conn>>)(global::go.net.httpᴛconn.closeWriteAndWait)); }
 public static error ExportErrRequestCanceled;
 internal static void initᴛExportErrRequestCanceled() { ExportErrRequestCanceled = errRequestCanceled; }
 public static error ExportErrRequestCanceledConn;
@@ -65,7 +66,7 @@ internal static void initᴛMaxWriteWaitBeforeConnReuse() { MaxWriteWaitBeforeCo
 
     testHookClientDoResult = (ж<global::go.net.http_package.Response> res, error err) => {
         if (err != nil) {
-            var (_, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok) {
+            var (_, ok) = err._<ж<url.Error>>(ᐧ); if (!ok) {
                 throw panic(fmt.Sprintf("unexpected Client.Do error of type %T; want *url.Error"u8, err));
             }
         } else {
@@ -124,9 +125,9 @@ public static void SetTestHookProxyConnectTimeout(ж<testing.T> t, Func<context.
     testHookProxyConnectTimeout = f;
 }
 
-public static global::go.net.http_package.ΔHandler NewTestTimeoutHandler(global::go.net.http_package.ΔHandler Δhandler, context.Context ctx) {
-    return new global::go.net.http_package.timeoutHandlerжΔHandler(Ꮡ(new timeoutHandler(
-        handler: Δhandler,
+public static global::go.net.http_package.Handler NewTestTimeoutHandler(global::go.net.http_package.Handler handler, context.Context ctx) {
+    return new global::go.net.http_package.timeoutHandlerжHandler(Ꮡ(new timeoutHandler(
+        handler: handler,
         testContext: ctx
         // (no body)
     )));
@@ -136,6 +137,8 @@ public static void ResetCachedEnvironment() {
     resetProxyConfig();
 }
 
+} partial class http_internal_testᴛTransport {
+
 internal static nint NumPendingRequestsForTesting(this ж<global::go.net.http_package.Transport> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -144,7 +147,7 @@ internal static nint NumPendingRequestsForTesting(this ж<global::go.net.http_pa
 
         t.reqMu.Lock();
         ᒐd1 = true;
-        return builtin.len(t.reqCanceler);
+        return len(t.reqCanceler);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().reqMu.Unlock(); ᒐ.Run(); }
@@ -177,7 +180,7 @@ internal static nint IdleConnKeyCountForTesting(this ж<global::go.net.http_pack
 
         t.idleMu.Lock();
         ᒐd1 = true;
-        return builtin.len(t.idleConn);
+        return len(t.idleConn);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().idleMu.Unlock(); ᒐ.Run(); }
@@ -244,7 +247,7 @@ internal static nint IdleConnCountForTesting(this ж<global::go.net.http_package
         @string cacheKey = key.String();
         foreach (var (k, conns) in t.idleConn) {
             if (k.String() == cacheKey) {
-                return builtin.len(conns);
+                return len(conns);
             }
         }
         return 0;
@@ -261,7 +264,7 @@ internal static nint IdleConnWaitMapSizeForTesting(this ж<global::go.net.http_p
 
         t.idleMu.Lock();
         ᒐd1 = true;
-        return builtin.len(t.idleConnWait);
+        return len(t.idleConnWait);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().idleMu.Unlock(); ᒐ.Run(); }
@@ -339,6 +342,8 @@ internal static bool PutIdleTestConnH2(this ж<global::go.net.http_package.Trans
     ))) == nil;
 }
 
+} partial class http_internal_test_package {
+
 // All test hooks must be non-nil so they can be called directly,
 // but the tests use nil to mean hook disabled.
 internal static void unnilTestHook(ж<Action> Ꮡf) {
@@ -367,6 +372,8 @@ public static error ExportHttp2ConfigureTransport(ж<global::go.net.http_package
     t.h2transport = new global::go.net.http_package.http2Transportжh2Transport(t2);
     return default;
 }
+
+} partial class http_internal_testᴛServer {
 
 internal static bool ExportAllConnsIdle(this ж<global::go.net.http_package.Server> Ꮡs) {
     GoFrame ᒐ = default;
@@ -407,9 +414,13 @@ internal static map<global::go.net.http_package.ConnState, nint> ExportAllConnsB
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class http_internal_testᴛRequest {
+
 internal static ж<global::go.net.http_package.Request> WithT(this ref global::go.net.http_package.Request r, ж<testing.T> t) {
-    return r.WithContext(context_package.WithValue(r.Context(), new tLogKey(), t.Logf));
+    return r.WithContext(context.WithValue(r.Context(), new tLogKey(), t.Logf));
 }
+
+} partial class http_internal_test_package {
 
 public static Action /*restore*/ ExportSetH2GoawayTimeout(time.Duration d) {
     var old = http2goAwayTimeout;
@@ -419,7 +430,11 @@ public static Action /*restore*/ ExportSetH2GoawayTimeout(time.Duration d) {
     };
 }
 
+} partial class http_internal_testᴛRequest {
+
 internal static bool ExportIsReplayable(this ref global::go.net.http_package.Request r) { return r.isReplayable(); }
+
+} partial class http_internal_test_package {
 
 // ExportCloseTransportConnsAbruptly closes all idle connections from
 // tr in an abrupt way, just reaching into the underlying Conns and
@@ -452,7 +467,7 @@ public static (net.Conn c, bool ok) ResponseWriterConnForTesting(global::go.net.
     // out tests that unexpectedly depend on it. Such tests should use
     // runTimeSensitiveTest and SetRSTAvoidanceDelay to explicitly raise the delay
     // if needed.
-    rstAvoidanceDelay = 1 * time.ΔNanosecond;
+    rstAvoidanceDelay = 1 * time.Nanosecond;
 }
 
 // SetRSTAvoidanceDelay sets how long we are willing to wait between calling

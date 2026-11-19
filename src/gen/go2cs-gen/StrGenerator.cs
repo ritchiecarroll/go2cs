@@ -77,6 +77,7 @@ public class StrGenerator : ISourceGenerator
             {
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
+                HostClassName = RecvGenerator.HostClassOf(methodSyntax),
                 Method = method,
                 ParameterNames = methodSyntax.ParameterList.Parameters.Select(parameter => parameter.Identifier.Text).ToArray(),
                 NoInlining = RecvGenerator.HasNoInliningMark(methodSyntax, semanticModel),

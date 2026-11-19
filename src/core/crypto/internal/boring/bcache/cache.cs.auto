@@ -14,6 +14,7 @@ namespace go.crypto.@internal.boring;
 using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using sync;
+using static bcache_package;
 
 partial class bcache_package {
 
@@ -46,6 +47,8 @@ partial struct cacheEntry<K, V> {
 
 internal static partial void registerCache(@unsafe.Pointer _);
 
+} partial class bcacheᴛCache {
+
 // provided by runtime
 
 // Register registers the cache with the runtime,
@@ -55,10 +58,14 @@ public static void Register<K, V>(this ж<Cache<K, V>> Ꮡc) {
     registerCache(@unsafe.Pointer.FromPinnedBox(Ꮡc.of(Cache<K, V>.Ꮡptable)));
 }
 
+} partial class bcache_package {
+
 // cacheSize is the number of entries in the hash table.
 // The hash is the pointer value mod cacheSize, a prime.
 // Collisions are resolved by maintaining a linked list in each hash slot.
 internal static UntypedInt cacheSize => 1021;
+
+} partial class bcacheᴛCache {
 
 // table returns a pointer to the current cache hash table,
 // coping with the possibility of the GC clearing it out from under us.
@@ -154,4 +161,4 @@ public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> v) {
     }
 }
 
-} // end bcache_package
+} // end bcacheᴛCache

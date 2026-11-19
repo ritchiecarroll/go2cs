@@ -15,6 +15,7 @@ using runtime = runtime_package;
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -43,6 +44,8 @@ partial struct mmapper {
     internal Func<uintptr, uintptr, nint, nint, nint, int64, (uintptr, error)> mmap;
     internal Func<uintptr, uintptr, error> munmap;
 }
+
+} partial class syscallᴛmmapper {
 
 internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) {
     slice<byte> data = default;
@@ -107,6 +110,8 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
     ᒐdone: return err;
 }
 
+} partial class syscall_package {
+
 // An Errno is an unsigned number describing an error condition.
 // It implements the error interface. The zero Errno is by convention
 // a non-error, so code to convert from Errno to error should use:
@@ -122,6 +127,8 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
 //	_, _, err := syscall.Syscall(...)
 //	if errors.Is(err, fs.ErrNotExist) ...
 partial struct Errno /*num:uintptr*/;
+
+} partial class syscallᴛErrno {
 
 public static @string Error(this Errno e) {
     if (0 <= (nint)e && (nint)e < len(errors)) {
@@ -158,6 +165,8 @@ public static bool Timeout(this Errno e) {
     return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT;
 }
 
+} partial class syscall_package {
+
 // Do the interface allocations only once for common
 // Errno values.
 internal static error errEAGAIN = ((Errno)EAGAIN);
@@ -185,11 +194,13 @@ internal static error errnoErr(Errno e) {
 
 // A Signal is a number describing a process signal.
 // It implements the [os.Signal] interface.
-partial struct ΔSignal /*num:nint*/;
+partial struct Signal /*num:nint*/;
 
-public static void Signal(this ΔSignal s) { }
+} partial class syscallᴛSignal {
 
-public static @string String(this ΔSignal s) {
+public static void Signal(this Signal s) { }
+
+public static @string String(this Signal s) {
     if (0 <= s && (nint)s < len(signals)) {
         @string str = signals[s];
         if (str != ""u8) {
@@ -198,6 +209,8 @@ public static @string String(this ΔSignal s) {
     }
     return "signal "u8 + strconv.Itoa((nint)s);
 }
+
+} partial class syscall_package {
 
 public static (nint n, error err) Read(nint fd, slice<byte> p) {
     nint n = default;
@@ -347,7 +360,7 @@ internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint f
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
     from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
-    from.Addr = pp.Addr.Clone();
+    from.Addr.Assign(pp.Addr);
     return (n, err);
 }
 
@@ -365,7 +378,7 @@ internal static (nint n, error err) recvfromInet6(nint fd, slice<byte> p, nint f
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
     from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
     from.ZoneId = pp.Scope_id;
-    from.Addr = pp.Addr.Clone();
+    from.Addr.Assign(pp.Addr);
     return (n, err);
 }
 
@@ -383,7 +396,7 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet4(nint
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
     from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
-    from.Addr = pp.Addr.Clone();
+    from.Addr.Assign(pp.Addr);
     return (n, oobn, recvflags, err);
 }
 
@@ -402,7 +415,7 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet6(nint
     var port = @unsafe.ArrayPointer<byte>.Of(pp.ᏑPort, 2);
     from.Port = ((nint)port.ElementRef(0) << 8) + (nint)port.ElementRef(1);
     from.ZoneId = pp.Scope_id;
-    from.Addr = pp.Addr.Clone();
+    from.Addr.Assign(pp.Addr);
     return (n, oobn, recvflags, err);
 }
 

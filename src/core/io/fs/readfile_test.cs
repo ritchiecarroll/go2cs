@@ -10,6 +10,7 @@ using fstest = go.testing.fstest_package;
 using time = time_package;
 using fs = go.io.fs_package;
 using go.testing;
+using static fs_test_package;
 
 partial class fs_test_package {
 
@@ -34,7 +35,11 @@ partial struct readFileOnly {
     /*embed*/ public go.io.fs_package.ReadFileFS ReadFileFS;
 }
 
+} partial class fs_testᴛreadFileOnly {
+
 internal static (fs.File, error) Open(this readFileOnly _, @string name) { return (default, ErrNotExist); }
+
+} partial class fs_test_package {
 
 partial struct openOnly {
     /*embed*/ public go.io.fs_package.FS FS;

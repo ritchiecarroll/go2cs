@@ -14,6 +14,7 @@ using strings = strings_package;
 using testing = testing_package;
 using crypto;
 using static global::go.net.http_package;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
@@ -58,11 +59,11 @@ public static void TestFinalChunkedBodyReadEOF(ж<testing.T> t) {
         t.Fatal(err);
     }
     @string want = bodyHereContinuedˢ;
-    var buf = new slice<byte>(builtin.len(want));
+    var buf = new slice<byte>(len(want));
     (var n, err) = res.Body.Read(buf);
-    if (n != builtin.len(want) || !AreEqual(err, io.EOF)) {
+    if (n != len(want) || !AreEqual(err, io.EOF)) {
         t.Logf("body = %#v", res.Body);
-        t.Errorf("Read = %v, %v; want %d, EOF", n, err, builtin.len(want));
+        t.Errorf("Read = %v, %v; want %d, EOF", n, err, len(want));
     }
     if (((sstring)buf) != want) {
         t.Errorf("buf = %q; want %q", buf, want);
@@ -104,6 +105,8 @@ internal partial struct mockTransferWriter {
 
 internal static io.ReaderFrom _ᴛ1ʗ = new http_internal_test_package.mockTransferWriterжReaderFrom(((ж<mockTransferWriter>)nil));
 
+} partial class http_internal_testᴛmockTransferWriter {
+
 internal static (int64, error) ReadFrom(this ref mockTransferWriter w, io.Reader r) {
     w.CalledReader = r;
     return io.Copy(io.Discard, r);
@@ -113,6 +116,8 @@ internal static (nint, error) Write(this ref mockTransferWriter w, slice<byte> p
     w.WriteCalled = true;
     return io.Discard.Write(p);
 }
+
+} partial class http_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string netHttpNewfilefuncˢ => ref netHttpNewfilefuncˢᵇ;
@@ -127,7 +132,7 @@ internal partial struct TestTransferWriterWriteBodyReaderTypes_cases /*dyn*/ {
     internal int64 contentLength;
     internal slice<@string> transferEncoding;
     internal bool limitedReader;
-    internal reflectꓸType expectedReader;
+    internal reflect.Type expectedReader;
     internal bool expectedWrite;
 }
 
@@ -281,7 +286,7 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> t) {
                         tΔ1.Fatal(didNotCallReadFromˢ);
                     }
 
-                    reflectꓸType actualReader = default;
+                    reflect.Type actualReader = default;
                     var (lr, ok) = mw.CalledReader._<ж<io.LimitedReader>>(ᐧ);
                     if (ok && tcʗ1.limitedReader) {
                         actualReader = reflect.TypeOf(lr.R);
@@ -311,38 +316,38 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> t) {
 }
 
 internal partial struct TestParseTransferEncoding_tests /*dyn*/ {
-    internal global::go.net.http_package.ΔHeader hdr;
+    internal global::go.net.http_package.Header hdr;
     internal error wantErr;
 }
 
 public static void TestParseTransferEncoding(ж<testing.T> t) {
     var tests = slice<TestParseTransferEncoding_tests>([
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["fugazi"]}),
+            hdr: new Header(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["fugazi"]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""fugazi""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked, chunked", "identity", "chunked"]}),
+            hdr: new Header(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked, chunked", "identity", "chunked"]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"too many transfer encodings: [""chunked, chunked"" ""identity"" ""chunked""]")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = [""]}),
+            hdr: new Header(new map<@string, slice<@string>>{["Transfer-Encoding"] = [""]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: """"")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked, identity"]}),
+            hdr: new Header(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked, identity"]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""chunked, identity""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked", "identity"]}),
+            hdr: new Header(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked", "identity"]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"too many transfer encodings: [""chunked"" ""identity""]")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = [((@string)(new byte[]{0x0b, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x65, 0x64}))]}),
+            hdr: new Header(new map<@string, slice<@string>>{["Transfer-Encoding"] = [((@string)(new byte[]{0x0b, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x65, 0x64}))]}),
             wantErr: new global::go.net.http_package.unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(@"unsupported transfer encoding: ""\vchunked""")))
         ),
         new(
-            hdr: new ΔHeader(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked"]}),
+            hdr: new Header(new map<@string, slice<@string>>{["Transfer-Encoding"] = ["chunked"]}),
             wantErr: default
         )
     ]);

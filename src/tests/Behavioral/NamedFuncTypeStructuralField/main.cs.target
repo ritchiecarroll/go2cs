@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,15 +12,21 @@ public partial struct item {
 
 public delegate bool By(ж<item> a, ж<item> b);
 
+} partial class mainᴛBy {
+
 public static void Sort(this By by, slice<item> items) {
     var s = Ꮡ(new sorter(items: items, by: NilSafeDelegateConversion<Func<ж<item>, ж<item>, bool>, By>(by)));
     s.run();
 }
 
+} partial class main_package {
+
 partial struct sorter {
     internal slice<item> items;
     internal Func<ж<item>, ж<item>, bool> by;
 }
+
+} partial class mainᴛsorter {
 
 internal static void run(this ref sorter s) {
     nint n = len(s.items);
@@ -31,6 +38,8 @@ internal static void run(this ref sorter s) {
         }
     }
 }
+
+} partial class main_package {
 
 internal static bool byName(ж<item> Ꮡa, ж<item> Ꮡb) {
     ref var a = ref Ꮡa.DerefOrNull();

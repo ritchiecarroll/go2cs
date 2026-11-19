@@ -3,12 +3,17 @@ namespace go;
 using fmt = fmt_package;
 using utf8 = unicode.utf8_package;
 using unicode;
+using static main_package;
 
 partial class main_package {
 
 partial struct literalErr /*@string*/;
 
+} partial class mainᴛliteralErr {
+
 internal static @string Error(this literalErr e) { return "strftime: unsupported literal: "u8 + ((@string)e); }
+
+} partial class main_package {
 
 partial struct digit /*num:byte*/;
 

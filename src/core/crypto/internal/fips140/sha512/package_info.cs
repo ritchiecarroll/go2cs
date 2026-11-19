@@ -57,7 +57,7 @@ using static go.crypto.@internal.fips140.sha512_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/cast.go", "cast.cs", "AAwagoK4AAkUgoKClA==", "14-35:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AE2gAYKUgoKCgoKCgrSCgoKCgoKCtIKCgoKCgoK0goKCgoKCgrSkggAMFoKmgpS0tLS0pIKCgoKCgoKCgoKCAAgGgoKUAA0MlIKUgoKCgoKCgoKCgoKCpoKmgoKokoKCqJKCgqiSgoKokoKCpoKmlMKCgoKCgoKClJSCgoKUgpSmgpSCgoKmtIKCgoKClLiCuIKUgqaCgoKCgoKCgoKm")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AFCgAYKUgoKCgoKCgrSCgoKCgoKCtIKCgoKCgoK0goKCgoKCgrSkggAQFoKmgpS0tLS0pIKCgoKCgoKCgoKCAAgGgoKUAA0MlIKUgoKCgoKCgoKCgoKCxoLGgoLIkoKCqJKCgqiSgoKokoKCxoKmlMKCgoKCgoKClJSCgoKUgpSmgpSCgoKmtIKCgoKClLiCuIKUgqaCgoKCgoKCgoKm")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512block.go", "sha512block.cs", "AA0aAFKmAYKCgoKUgoKCloKCgpSmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512block_noasm.go", "sha512block_noasm.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
@@ -91,3 +91,13 @@ public static partial class sha512_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sha512_package.Digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha512ᴛDigest;
+// </MethodHolders>

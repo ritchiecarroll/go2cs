@@ -14,8 +14,6 @@ using go;
 using static global::go.crypto.sha1_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("BlockSize", "const:ΔBlockSize")]
-[assembly: GoTypeAlias("Size", "const:ΔSize")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

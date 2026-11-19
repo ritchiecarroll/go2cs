@@ -41,6 +41,7 @@ namespace go;
 
 using color = image.color_package;
 using image;
+using static image_package;
 
 partial class image_package {
 
@@ -104,7 +105,7 @@ internal static nint pixelBufferLength(nint bytesPerPixel, Rectangle r, @string 
 }
 
 // RGBA is an in-memory image whose At method returns [color.RGBA] values.
-partial struct ΔRGBA {
+partial struct RGBA {
     // Pix holds the image's pixels, in R, G, B, A order. The pixel at
     // (x, y) starts at Pix[(y-Rect.Min.Y)*Stride + (x-Rect.Min.X)*4].
     public slice<uint8> Pix;
@@ -114,15 +115,17 @@ partial struct ΔRGBA {
     public Rectangle Rect;
 }
 
-public static color.Model ColorModel(this ref ΔRGBA p) { return color.RGBAModel; }
+} partial class imageᴛRGBA {
 
-public static Rectangle Bounds(this ref ΔRGBA p) { return p.Rect; }
+public static color.Model ColorModel(this ref RGBA p) { return color.RGBAModel; }
 
-public static color.Color At(this ref ΔRGBA p, nint x, nint y) {
+public static Rectangle Bounds(this ref RGBA p) { return p.Rect; }
+
+public static color.Color At(this ref RGBA p, nint x, nint y) {
     return p.RGBAAt(x, y);
 }
 
-public static color.RGBA64 RGBA64At(this ref ΔRGBA p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref RGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.RGBA64();
     }
@@ -140,27 +143,27 @@ public static color.RGBA64 RGBA64At(this ref ΔRGBA p, nint x, nint y) {
     );
 }
 
-public static colorꓸRGBA RGBAAt(this ref ΔRGBA p, nint x, nint y) {
+public static color.RGBA RGBAAt(this ref RGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new colorꓸRGBA();
+        return new color.RGBA();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-    return new colorꓸRGBA(s[0], s[1], s[2], s[3]);
+    return new color.RGBA(s[0], s[1], s[2], s[3]);
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-public static nint PixOffset(this ref ΔRGBA p, nint x, nint y) {
+public static nint PixOffset(this ref RGBA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4;
 }
 
-public static void Set(this ref ΔRGBA p, nint x, nint y, color.Color c) {
+public static void Set(this ref RGBA p, nint x, nint y, color.Color c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
     nint i = p.PixOffset(x, y);
-    var c1 = color.RGBAModel.Convert(c)._<color.Color, colorꓸRGBA>();
+    var c1 = color.RGBAModel.Convert(c)._<color.Color, color.RGBA>();
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
     s[0] = c1.R;
     s[1] = c1.G;
@@ -168,7 +171,7 @@ public static void Set(this ref ΔRGBA p, nint x, nint y, color.Color c) {
     s[3] = c1.A;
 }
 
-public static void SetRGBA64(this ref ΔRGBA p, nint x, nint y, color.RGBA64 c) {
+public static void SetRGBA64(this ref RGBA p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -180,7 +183,7 @@ public static void SetRGBA64(this ref ΔRGBA p, nint x, nint y, color.RGBA64 c) 
     s[3] = (uint8)(c.A >> 8);
 }
 
-public static void SetRGBA(this ref ΔRGBA p, nint x, nint y, colorꓸRGBA c) {
+public static void SetRGBA(this ref RGBA p, nint x, nint y, color.RGBA c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
@@ -194,16 +197,16 @@ public static void SetRGBA(this ref ΔRGBA p, nint x, nint y, colorꓸRGBA c) {
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-public static Image SubImage(this ref ΔRGBA p, Rectangle r) {
+public static Image SubImage(this ref RGBA p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new ΔRGBAжImage(Ꮡ(new ΔRGBA()));
+        return new RGBAжImage(Ꮡ(new RGBA()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
-    return new ΔRGBAжImage(Ꮡ(new ΔRGBA(
+    return new RGBAжImage(Ꮡ(new RGBA(
         Pix: p.Pix.slice(i),
         Stride: p.Stride,
         Rect: r
@@ -211,7 +214,7 @@ public static Image SubImage(this ref ΔRGBA p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-public static bool Opaque(this ref ΔRGBA p) {
+public static bool Opaque(this ref RGBA p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -229,13 +232,15 @@ public static bool Opaque(this ref ΔRGBA p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rgbaˢ => ref rgbaˢᵇ;
 private static readonly @string rgbaˢᵇ = "RGBA"u8;
 
 // NewRGBA returns a new [RGBA] image with the given bounds.
-public static ж<ΔRGBA> NewRGBA(Rectangle r) {
-    return Ꮡ(new ΔRGBA(
+public static ж<RGBA> NewRGBA(Rectangle r) {
+    return Ꮡ(new RGBA(
         Pix: new slice<uint8>(pixelBufferLength(4, r, rgbaˢ)),
         Stride: 4 * r.Dx(),
         Rect: r
@@ -252,6 +257,8 @@ partial struct RGBA64 {
     // Rect is the image's bounds.
     public Rectangle Rect;
 }
+
+} partial class imageᴛRGBA64 {
 
 public static color.Model ColorModel(this ref RGBA64 p) { return color.RGBA64Model; }
 
@@ -351,6 +358,8 @@ public static bool Opaque(this ref RGBA64 p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rgba64ˢ => ref rgba64ˢᵇ;
 private static readonly @string rgba64ˢᵇ = "RGBA64"u8;
@@ -374,6 +383,8 @@ partial struct NRGBA {
     // Rect is the image's bounds.
     public Rectangle Rect;
 }
+
+} partial class imageᴛNRGBA {
 
 public static color.Model ColorModel(this ref NRGBA p) { return color.NRGBAModel; }
 
@@ -483,6 +494,8 @@ public static bool Opaque(this ref NRGBA p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nrgbaˢ => ref nrgbaˢᵇ;
 private static readonly @string nrgbaˢᵇ = "NRGBA"u8;
@@ -506,6 +519,8 @@ partial struct NRGBA64 {
     // Rect is the image's bounds.
     public Rectangle Rect;
 }
+
+} partial class imageᴛNRGBA64 {
 
 public static color.Model ColorModel(this ref NRGBA64 p) { return color.NRGBA64Model; }
 
@@ -632,6 +647,8 @@ public static bool Opaque(this ref NRGBA64 p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nrgba64ˢ => ref nrgba64ˢᵇ;
 private static readonly @string nrgba64ˢᵇ = "NRGBA64"u8;
@@ -655,6 +672,8 @@ partial struct Alpha {
     // Rect is the image's bounds.
     public Rectangle Rect;
 }
+
+} partial class imageᴛAlpha {
 
 public static color.Model ColorModel(this ref Alpha p) { return color.AlphaModel; }
 
@@ -745,6 +764,8 @@ public static bool Opaque(this ref Alpha p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string alphaˢ => ref alphaˢᵇ;
 private static readonly @string alphaˢᵇ = "Alpha"u8;
@@ -768,6 +789,8 @@ partial struct Alpha16 {
     // Rect is the image's bounds.
     public Rectangle Rect;
 }
+
+} partial class imageᴛAlpha16 {
 
 public static color.Model ColorModel(this ref Alpha16 p) { return color.Alpha16Model; }
 
@@ -861,6 +884,8 @@ public static bool Opaque(this ref Alpha16 p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string alpha16ˢ => ref alpha16ˢᵇ;
 private static readonly @string alpha16ˢᵇ = "Alpha16"u8;
@@ -884,6 +909,8 @@ partial struct Gray {
     // Rect is the image's bounds.
     public Rectangle Rect;
 }
+
+} partial class imageᴛGray {
 
 public static color.Model ColorModel(this ref Gray p) { return color.GrayModel; }
 
@@ -962,6 +989,8 @@ public static bool Opaque(this ref Gray p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string grayˢ => ref grayˢᵇ;
 private static readonly @string grayˢᵇ = "Gray"u8;
@@ -985,6 +1014,8 @@ partial struct Gray16 {
     // Rect is the image's bounds.
     public Rectangle Rect;
 }
+
+} partial class imageᴛGray16 {
 
 public static color.Model ColorModel(this ref Gray16 p) { return color.Gray16Model; }
 
@@ -1066,6 +1097,8 @@ public static bool Opaque(this ref Gray16 p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gray16ˢ => ref gray16ˢᵇ;
 private static readonly @string gray16ˢᵇ = "Gray16"u8;
@@ -1089,6 +1122,8 @@ partial struct CMYK {
     // Rect is the image's bounds.
     public Rectangle Rect;
 }
+
+} partial class imageᴛCMYK {
 
 public static color.Model ColorModel(this ref CMYK p) { return color.CMYKModel; }
 
@@ -1179,6 +1214,8 @@ public static bool Opaque(this ref CMYK p) {
     return true;
 }
 
+} partial class image_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cmykˢ => ref cmykˢᵇ;
 private static readonly @string cmykˢᵇ = "CMYK"u8;
@@ -1204,6 +1241,8 @@ partial struct Paletted {
     // Palette is the image's palette.
     public color.Palette Palette;
 }
+
+} partial class imageᴛPaletted {
 
 public static color.Model ColorModel(this ref Paletted p) { return p.Palette; }
 
@@ -1322,6 +1361,8 @@ public static bool Opaque(this ref Paletted p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string palettedˢ => ref palettedˢᵇ;

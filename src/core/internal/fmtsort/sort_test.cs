@@ -20,8 +20,8 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class fmtsort_test_package {
 
-internal static slice<slice<reflectꓸValue>> compareTests;
-internal static void initᴛcompareTests() { compareTests = slice<slice<reflectꓸValue>>([
+internal static slice<slice<reflect.Value>> compareTests;
+internal static void initᴛcompareTests() { compareTests = slice<slice<reflect.Value>>([
     ct(reflect.TypeOf((nint)0), (nint)(-1), (nint)0, (nint)1),
     ct(reflect.TypeOf((int8)0), (nint)(-1), (nint)0, (nint)1),
     ct(reflect.TypeOf((int16)0), (nint)(-1), (nint)0, (nint)1),
@@ -49,10 +49,10 @@ internal static void initᴛcompareTests() { compareTests = slice<slice<reflect�
 
 internal static any iFace;
 
-internal static slice<reflectꓸValue> ct(reflectꓸType typ, params ꓸꓸꓸany argsʗp) {
+internal static slice<reflect.Value> ct(reflect.Type typ, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    var value = new slice<reflectꓸValue>(len(args), () => new(nil));
+    var value = new slice<reflect.Value>(len(args), () => new(nil));
     foreach (var (i, v) in range(args)) {
         var x = reflect.ValueOf(v);
         if (!x.IsValid()) { // Make it a typed nil.
@@ -178,11 +178,10 @@ private static readonly @string chanˢᵇ = "CHAN???"u8;
 // problematic types such as pointers. Note that it only does special handling
 // for the troublesome types used in the test cases; it is not a general
 // printer.
-internal static @string sprintKey(reflectꓸValue key) {
+internal static @string sprintKey(reflect.Value key) {
     @string str = key.Type().String();
-    var exprᴛ1 = str;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "*int"u8: {
+    case {} when str == "*int"u8: {
         var ptr = key.Interface()._<ж<nint>>();
         foreach (var i in range(len(ints))) {
             if (ptr == Ꮡints.at<nint>(i)) {
@@ -191,7 +190,7 @@ internal static @string sprintKey(reflectꓸValue key) {
         }
         return ptrˢ;
     }
-    case {} when exprᴛ1 == "unsafe.Pointer"u8: {
+    case {} when str == "unsafe.Pointer"u8: {
         @unsafe.Pointer ptr = key.Interface()._<@unsafe.Pointer>();
         foreach (var i in range(len(ints))) {
             if (ptr == @unsafe.Pointer.FromPinnedBox(Ꮡints.at<nint>(i))) {
@@ -200,7 +199,7 @@ internal static @string sprintKey(reflectꓸValue key) {
         }
         return unsafeptrˢ;
     }
-    case {} when exprᴛ1 == "chan int"u8: {
+    case {} when str == "chan int"u8: {
         var c = key.Interface()._<channel<nint>>();
         foreach (var i in range(len(chans))) {
             if (c == chans[i]) {
@@ -225,7 +224,7 @@ internal static slice<channel<nint>> makeChans() {
     var cs = slice<channel<nint>>([new channel<nint>(0), new channel<nint>(0), new channel<nint>(0)]);
     // Order channels by address. See issue #49431.
     foreach (var i in range(len(cs))) {
-        pin.Pin(@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(cs[i]).UnsafePointer()));
+        pin.Pin(@unsafe.Pointer.OrTypedNil(reflect.ValueOf(cs[i]).UnsafePointer()));
     }
     slices.SortFunc(cs, (channel<nint> a, channel<nint> b) => cmp.Compare(reflect.ValueOf(a).Pointer(), reflect.ValueOf(b).Pointer()));
     return cs;

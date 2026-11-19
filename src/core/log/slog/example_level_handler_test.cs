@@ -9,6 +9,7 @@ using os = os_package;
 using go.log;
 using io = io_package;
 using static go.log.slog_internal_test_package;
+using static slog_test_package;
 
 partial class slog_test_package {
 
@@ -16,12 +17,12 @@ partial class slog_test_package {
 // that returns false for levels below a minimum.
 partial struct LevelHandler {
     internal Δslog.Leveler level;
-    internal slogꓸHandler handler;
+    internal Δslog.Handler handler;
 }
 
 // NewLevelHandler returns a LevelHandler with the given level.
 // All methods except Enabled delegate to h.
-public static ж<LevelHandler> NewLevelHandler(Δslog.Leveler level, slogꓸHandler h) {
+public static ж<LevelHandler> NewLevelHandler(Δslog.Leveler level, Δslog.Handler h) {
     // Optimization: avoid chains of LevelHandlers.
     var (lh, ok) = h._<ж<LevelHandler>>(ᐧ); if (ok) {
         h = lh.Handler();
@@ -29,9 +30,11 @@ public static ж<LevelHandler> NewLevelHandler(Δslog.Leveler level, slogꓸHand
     return Ꮡ(new LevelHandler(level, h));
 }
 
+} partial class slog_testᴛLevelHandler {
+
 // Enabled implements Handler.Enabled by reporting whether
 // level is at least as large as h's level.
-public static bool Enabled(this ref LevelHandler h, context.Context _, slogꓸLevel level) {
+public static bool Enabled(this ref LevelHandler h, context.Context _, Δslog.Level level) {
     return level >= h.level.Level();
 }
 
@@ -43,19 +46,21 @@ public static error Handle(this ref LevelHandler h, context.Context ctx, Δslog.
 }
 
 // WithAttrs implements Handler.WithAttrs.
-public static slogꓸHandler WithAttrs(this ref LevelHandler h, slice<Δslog.Attr> attrs) {
-    return new slog_test_package.LevelHandlerжΔHandler(NewLevelHandler(h.level, h.handler.WithAttrs(attrs)));
+public static Δslog.Handler WithAttrs(this ref LevelHandler h, slice<Δslog.Attr> attrs) {
+    return new slog_test_package.LevelHandlerжHandler(NewLevelHandler(h.level, h.handler.WithAttrs(attrs)));
 }
 
 // WithGroup implements Handler.WithGroup.
-public static slogꓸHandler WithGroup(this ref LevelHandler h, @string name) {
-    return new slog_test_package.LevelHandlerжΔHandler(NewLevelHandler(h.level, h.handler.WithGroup(name)));
+public static Δslog.Handler WithGroup(this ref LevelHandler h, @string name) {
+    return new slog_test_package.LevelHandlerжHandler(NewLevelHandler(h.level, h.handler.WithGroup(name)));
 }
 
 // Handler returns the Handler wrapped by h.
-public static slogꓸHandler Handler(this ref LevelHandler h) {
+public static Δslog.Handler Handler(this ref LevelHandler h) {
     return h.handler;
 }
+
+} partial class slog_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notPrintedˢ => ref notPrintedˢᵇ;
@@ -79,7 +84,7 @@ public static void ExampleHandler_levelHandler() {
         return a;
     };
     var th = Δslog.NewTextHandler(new os.FileжWriter(os.Stdout), Ꮡ(new Δslog.HandlerOptions(ReplaceAttr: removeTime)));
-    var logger = Δslog.New(new slog_test_package.LevelHandlerжΔHandler(NewLevelHandler(Δslog.LevelWarn, new Δslog.TextHandlerжΔHandler(th))));
+    var logger = Δslog.New(new slog_test_package.LevelHandlerжHandler(NewLevelHandler(Δslog.LevelWarn, new Δslog.TextHandlerжHandler(th))));
     logger.Info(notPrintedˢ);
     logger.Warn(printedˢ);
 

@@ -22,13 +22,13 @@ partial class time_test_package {
 }
 
 //go:linkname absDate time.absDate
-/*linkname*/ internal static partial (nint year, timeꓸMonth month, nint day, nint yday) absDate(uint64 _Δp0, bool _Δp1) {
+/*linkname*/ internal static partial (nint year, Δtime.Month month, nint day, nint yday) absDate(uint64 _Δp0, bool _Δp1) {
     var (ᴛ1, ᴛ2, ᴛ3, ᴛ4) = Δtime.legacyAbsDate(_Δp0, _Δp1);
     return (ᴛ1, ᴛ2, ᴛ3, ᴛ4);
 }
 
 public static void TestLinkname(ж<Δtesting.T> t) {
-    var tm = Δtime.Date(2006, Δtime.January, 2, 15, 4, 5, 6, Δtime.ΔUTC);
+    var tm = Δtime.Date(2006, Δtime.January, 2, 15, 4, 5, 6, Δtime.UTC);
     var abs = timeAbs(tm);
     // wantAbs should be Jan 1 based, not Mar 1 based.
     // See absolute time description in time.go.

@@ -37,6 +37,9 @@ Outer:
 		// y is the last field
 	}
 	total += p.x
+
+	// copy the items through a view
+	copy(items, items)
 	return total, err
 }
 

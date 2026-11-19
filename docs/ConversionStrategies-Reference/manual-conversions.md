@@ -214,9 +214,9 @@ is a golib slice-model capability rather than a per-GOOS hand-own (`src/core/gol
      Mprotect(b[:pagesize],
      PROT_NONE) and Munmap(b) answered `invalid argument` (the kernel was handed a managed element address); writes
      landed
-     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:1679
+     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:1684
      (`A pointer that ALIASES a GENUINELY NATIVE address yields a NATIVE-BACKED slice over that`); the door:
-     src/core/golib/slice.cs:304 (`The single creation door for a native-backed slice`). -->
+     src/core/golib/slice.cs:306 (`The single creation door for a native-backed slice`). -->
 
 ## The CryptoAPI chain seam — when a native record must be READ as a struct and HANDED BACK as a pointer
 
@@ -673,10 +673,10 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
 <!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:26-28 (`go2cs-gen calls one of these for every variadic signature that can`),
      :49-53 (`GoDeferredRegistrations.EscapeRegistry.Run()`), :82-83
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
-     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:423
+     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:427
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
-     src/gen/go2cs-gen/MethodSet.cs:431 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
-     :392 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
+     src/gen/go2cs-gen/MethodSet.cs:432 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :393 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
      (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
@@ -1171,9 +1171,9 @@ Left as an ordinary bodyless declaration, it would emit a `partial` that the [`P
 
 <!-- illustration: not converter output -->
 ```csharp
-/*linkname*/ internal static partial (ΔHandle handle, Errno err) syscall_loadlibrary(ж<uint16> filename) {
+/*linkname*/ internal static partial (Handle handle, Errno err) syscall_loadlibrary(ж<uint16> filename) {
     var (ᴛ1, ᴛ2) = syscall.loadlibrary(filename);
-    return ((ΔHandle)(uintptr)ᴛ1, (Errno)(uintptr)ᴛ2);
+    return ((Handle)(uintptr)ᴛ1, (Errno)(uintptr)ᴛ2);
 }
 ```
 
@@ -1336,7 +1336,7 @@ FORWARDED — the pushed body is ordinary converted Go, so call it (`crypto/inte
 
 UNHONORABLE — announce the pair, never fabricate a body (`weak/pointer.cs`'s `.cs.auto` review sibling):
 
-<!-- source: src/core/weak/pointer.cs.auto:102-105 -->
+<!-- source: src/core/weak/pointer.cs.auto:107-110 -->
 ```csharp
 //go:linkname runtime_registerWeakPointer
 internal static @unsafe.Pointer runtime_registerWeakPointer(@unsafe.Pointer _) {
@@ -2139,7 +2139,7 @@ The converter emits a tagged field's Go struct tag verbatim at the declaration:
 ```go
 NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
 ```
-<!-- source: src/core/crypto/x509/sec1.cs:31 -->
+<!-- source: src/core/crypto/x509/sec1.cs:32 -->
 ```csharp
 public asn1.ObjectIdentifier NamedCurveOID; /*`asn1:"optional,explicit,tag:0"`*/
 ```
@@ -2804,6 +2804,7 @@ list, so `TaskNode.Next` is a `TaskNode` and the descent never ends. `go/types`'
 `reflect` for the size of `Named`, which holds a `sync.Mutex`, and the run died there with a
 `StackOverflowException`: uncatchable, so it took the whole process and reported the 44 tests
 alphabetically after it as **absent** verdicts rather than as one failure.
+<!-- 2026-11-15, sqlite-cs W9a: `sync.Mutex` no longer holds a reference. It is Go's two words, `{state int32; sema uint32}`, and its wait queue is named by a handle in `sema` (the section "`sync.Mutex` is Go's eight bytes" below), so it is an ordinary struct to this rule. The rule and its history stand; `sync.RWMutex`'s `RWState` and `sync.WaitGroup`'s `WaitGroupState` are the handles it serves today. -->
 
 The rule is therefore stated positively: **a managed reference is one pointer word wide and is never
 descended into.** `KindOf` reports `Pointer` for it, which is both finite and Go's own answer —
@@ -2897,7 +2898,7 @@ go2cs-gen records on the struct, and golib's field projection reads that record 
 **An embed's TAG is read like any other field's.** The converter writes the tag as a comment after the
 embed's declaration, exactly as it does for a named field, and go2cs-gen records it the same way:
 
-<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:33-38 -->
+<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:34-39 -->
 ```csharp
 partial struct host {
     public nint Plain;
@@ -2999,6 +3000,38 @@ store went through a box over address 0 and landed nowhere, for EVERY byte slice
 over with exactly this call, so every `[]byte` field decoded as empty and `TestLargeByteSlice`
 reported a 2000-byte round trip diverging at byte 0. It is hand-owned now and writes where every other
 setter writes, through the addressable Value's aliased box.
+
+## `reflect` copies an array value when it moves it into another slot
+
+In Go an array is a value. `SetMapIndex`, `Send`, `Set`, a `Call` argument and `Interface()` each copy
+the array they are given, so the source and the stored value never share memory afterwards. golib's
+`array<T>`, and a struct holding one, are .NET structs over a shared `T[]` backing. Copying the struct
+copies the reference to the backing, not the elements.
+
+That difference was harmless until whole-array assignment began copying INTO the existing location
+(`ж<T>.WriteBoxSlot`'s in-place arm for an `IGoValueAssign` pointee). Since then, a slot that reflect
+hands out keeps its backing for life. A `Value` that came from `reflect.New(...).Elem()` therefore
+gives away the backing it will keep using. `encoding/gob`'s `decodeMap` decodes each key and element into
+one such pair of slots, stores them with `SetMapIndex`, and then clears them with `SetZero` for the
+next entry. Every array stored in the map was cleared with them: `TestEndToEnd` decoded
+`map[[2]string][2]*float64` elements as nil. `encoding/json` reuses a map element the same way
+(`decode.go`, `mapElem`).
+
+The transfer doors now copy an array-owning datum when the source `Value` is addressable
+(`transferDatum` and `packInterfaceValue` in `value_impl.cs`). "Array-owning" means an `IArray` that
+is not a slice, or a struct stamped `IGoValueClone`. A source that is not addressable already holds
+its own copy and is passed through. golib's `map<K,V>` already cloned array keys on insert, so only
+map values and the other doors were exposed.
+
+**Allocation.** `Interface()` of an addressable array allocates once, as Go's does. `SetMapIndex`,
+`Send`, `Set` and `Call` with an addressable array source allocate once more than Go, which copies
+into the destination without a new allocation. golib's `AllocationCounter` sees the copy, so an
+`AllocsPerRun` assert over such a call reads one higher than Go. No banked row moved at the cut
+(`reflect`, `encoding/json`, `encoding/gob`).
+
+Builtin `copy`, `append(s, t...)` and slice growth have the same sharing for a slice of arrays, and
+are not covered here. Guarded by `ReflectArrayStoreCopies` (seven reflect arms, a gob round trip and a
+json map of arrays, against `go run`).
 
 ## `new(T)` is Go's ZERO value — and for a container kind that means the NIL one
 
@@ -3509,6 +3542,97 @@ The transfer itself is golib's (`go.golib.Coro`), not `iter`'s, because it is a 
 
 Guarded on both sides: `iter`'s converted suite validates in full against `go test` (goroutine accounting, double-next/double-yield, panic-through on `next` and on `stop`, Goexit across the boundary, immediate stop), and the `IterPullRendezvous` behavioral test pins the rendezvous semantics against `go run` in the corpus gate — deliberately printing no goroutine counts, since a count is stable in Go only under the stabilization loop that suite uses, and a flaky stdout comparison would fire across the whole corpus rather than in one package.
 
+## `sync.Mutex` is Go's eight bytes, and its wait queue is a handle in the `sema` word
+
+Go's `sync.Mutex` is `{state int32; sema uint32}`. Go code relies on that: sqlite's `lib/mutex.go`
+callocs `mutex{sync.Mutex; cnt, id int32; recursive bool}` and reaches it only through
+`(*mutex)(unsafe.Pointer(m))`, and libc's pthread mutex overlay holds a `sync.Mutex` in C memory the
+same way. The hand-owned `Mutex` held a `SemaphoreSlim` reference, so the native read was refused
+("field Mutex is a managed reference"), and no mutex of either library could be taken.
+
+`src/core/sync/mutex.cs` now declares Go's two words and nothing else:
+
+<!-- attribute-shown: a hand-written file keeps the attribute -->
+<!-- illustration: not converter output -->
+```csharp
+[GoType] partial struct Mutex {
+    internal int32 state;
+    internal uint32 sema;
+}
+```
+
+* **`state` is the lock.** 0 unlocked, 1 locked, 2 locked and a waiter may be blocked. `Lock` takes
+  0 -> 1 with one compare-and-swap, which is Go's fast path. A contended `Lock` swaps in 2 and blocks
+  until its swap reads 0. `Unlock` swaps in 0 and wakes the queue only when it read 2. `TryLock` is the
+  compare-and-swap alone. An `Unlock` that reads 0 is Go's fatal error, with Go's text.
+* **`sema` holds the HANDLE of the mutex's wait queue**, a semaphore in a process-wide table keyed by a
+  32-bit number. The handle is a number in the mutex's own bytes. It is not a managed reference and it
+  is not derived from an address, so a mutex works the same in the managed heap, on the stack and in C
+  memory, and a moving collector does not matter.
+* **The queue is held only while a goroutine waits.** A waiter takes the queue before its swap of
+  `state` and gives it back once it has the lock; the last waiter out retires the queue, removes it
+  from the table and writes 0 back. An idle mutex is eight zero bytes, as Go's is.
+* **Retired queues are reused: a contended `Lock` allocates nothing while its thread's stripe has a
+  spare queue.** The table is 64 stripes, each under its own monitor, and a handle is its stripe's index
+  in the low 6 bits under a 26-bit sequence number. A thread installs every queue it installs in one
+  stripe, so threads contending on different mutexes work under different monitors, and a stripe keeps
+  every queue it created to hand out again under a new handle. A new handle skips 0 and every handle in
+  use, so the sequence can wrap; a queue is emptied of any wakeup sent to it after it was retired before
+  it serves another mutex; and a handle that names no queue (bytes the mutex never wrote) is replaced
+  like a zero one.
+* **What a contended `Lock` does allocate.** Spare queues belong to the stripe, and threads share
+  stripes (always, past 64 threads). A `Lock` that has to install a queue allocates one (104 bytes: the
+  semaphore and its lock object) when the stripe has no spare, which is when more of that stripe's
+  queues are in use at once than ever before: a thread that installed a queue moves on while others are
+  still counted on it, so a stripe can have several in the table. So a thread's first install often
+  allocates nothing, and one thread can pay for another's peak. A thread's first read of its stripe slot
+  allocates 32 bytes, the runtime's storage for a thread-static. A queue in the table has a goroutine
+  counted on it, so a stripe never holds more queues than the most goroutines that were ever inside a
+  contended `Lock` at one moment on queues it installed, and queues are kept for the life of the
+  process. Go's waiter takes its `sudog` from a per-P cache in the same way and allocates one when the
+  cache is empty. The mutex this replaced allocated one semaphore (88 bytes) for every `Mutex` ever
+  locked, contended or not.
+* **`Unlock` keeps at most one wakeup.** A waiter that takes the lock leaves 2 behind, so its `Unlock`
+  reaches the queue whether or not anyone waits. The queue needs one wakeup available, not one per
+  `Unlock`: whoever takes it swaps `state` again and either gets the lock or leaves 2 for the new
+  holder's `Unlock`. A wakeup that reaches a queue now serving another mutex costs that mutex's waiter
+  one more look at `state` and nothing else.
+
+**Copies.** Go's vet forbids copying a `Mutex` after first use, but the bytes of a copy work, and they
+work here: a copy of a locked mutex is locked, and a copy of an idle mutex is a free mutex with no
+queue. One copy differs from Go. A mutex copied WHILE a goroutine waits on it carries the queue's
+handle, and until that queue empties a waiter of the copy can take a wakeup meant for the original.
+In Go the two wait on different addresses. That copy also reads two words other goroutines are
+writing; it is recorded on the BOARD.
+
+**Where this differs from Go.** Wakeups follow the semaphore's order and a woken waiter competes with
+newcomers, as in Go's normal mode; Go's starvation mode is not reproduced. A waiter blocks its OS
+thread in the semaphore, where Go parks a goroutine and frees its M, and an `Unlock` that read 2
+takes its stripe's monitor for the lookup. `Unlock` reads the `sema` word after the swap that unlocks,
+as Go's own slow path does. Memory that is zeroed and reused as a mutex while a queue it named still
+has waiters, or bytes that happen to hold a handle a stripe hands out again after its 26-bit sequence
+wraps (about a minute of one stripe installing a queue every microsecond), can name another mutex's
+queue; a waiter that takes a wakeup this way looks at `state` again, so the cost is a spurious wakeup,
+never a second owner.
+
+**Reflection.** `Mutex` was the first example of an opaque managed handle in the reflection bridge's
+descent rule above. It is now an ordinary struct of two 4-byte fields, so `reflect` sizes it by its
+fields and reads Go's 8, and `go/types`' `Named` still computes to 112. `sync.RWMutex`'s `RWState` and
+`sync.WaitGroup`'s `WaitGroupState` remain handles.
+
+Guarded by `GolibTests.SyncMutexLayoutTests` (the layout, exact counts in native memory at 2, 4 and 8
+threads, a handle that names no queue, `TryLock`), `GolibTests.SyncMutexQueueTests` (a copy of an idle
+mutex that once contended is its own mutex; a copy of a locked mutex is locked and its unlock frees
+only the copy; an idle mutex holds no queue; a wakeup that finds no waiter is kept once; `Unlock`
+sends no second wakeup while one waits; a handle in use is not given to a second queue; a wakeup that
+arrives after its queue serves another mutex costs one re-check; a contended lock allocates nothing
+once its thread has a spare queue; the queues a thread installed at once all serve it again; and exact
+counts with queues coming and going, over 8 and over 64 mutexes),
+`GolibTests.SyncMutexFastPathTests` (an uncontended pair allocates nothing)
+and the `MutexInNativeMemory` behavioral program, which runs sqlite's own shapes over an anonymous
+mmap: the fast mutex, the recursive mutex with its owner id written through `&(*mutex)(p).id`,
+`TryLock`, the recursive re-entry and a counter in the same native page under 2, 4 and 8 goroutines.
+
 ## `sync.Pool` — a managed-reference ring slot, and a thread-affine stand-in for the P pin
 
 `sync.Pool` is the third shape of the same wall, and the most instructive: **the raw-metal type is not
@@ -3531,7 +3655,7 @@ contract, and the entire `poolChain` half:
 
 <!-- source: src/core/sync/poolqueue.cs:73-78 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
-<!-- source: src/core/sync/poolqueue.cs:73-78 -->
+<!-- source: src/core/sync/poolqueue.cs:75-80 -->
 ```csharp
 // eface is Go's two-word {type, value} representation of an `any`. Under the CLR an `any` IS a single
 // managed reference, so the slot holds that reference directly; see the file header for why the
@@ -3704,7 +3828,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5168 (`INLINED PANIC SITES`), :5176 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5196 (`INLINED PANIC SITES`), :5204 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -4078,7 +4202,7 @@ statement it replaces, and maps no other line, so a traceback's `created by` lin
 The guard `TestHandOwnedGoStatementsMapToGo` checks every tracked hand-owned file under `src/core` against the pinned
 GOROOT: one record per file, each `goǃ(` line mapped to a Go `go` statement, and every other line left unmapped.
 <!-- src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283 `func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`;
-     examples: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]`),
+     examples: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AP0B3AMAANsD")]`),
      src/core/net/windows/lookup_windows.cs:55 (`[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs",`). -->
 
 **The path is SPELLED Go's way, whichever file it names.** Which source a frame's path points
@@ -4429,9 +4553,9 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3587-3608 -->
+<!-- source: src/core/reflect/value_impl.cs:3692-3713 -->
 ```csharp
-public static ΔType ArrayOf(nint length, ΔType elem) {
+public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {
         throw panic("reflect: negative length passed to ArrayOf");
     }

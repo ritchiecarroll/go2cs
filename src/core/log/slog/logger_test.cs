@@ -31,6 +31,7 @@ using go.@internal;
 using go.os;
 using path;
 using static go.log.slog_package;
+using static slog_internal_test_package;
 
 partial class slog_internal_test_package {
 
@@ -62,7 +63,7 @@ public static partial void TestLogTextHandler(ж<testing.T> t) {
     var ctx = context.Background();
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
-    var l = New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), nil)));
+    var l = New(new global::go.log.slog_package.TextHandlerжHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), nil)));
 
     void check(@string want) {
         t.Helper();
@@ -92,10 +93,10 @@ public static partial void TestLogTextHandler(ж<testing.T> t) {
     l.LogAttrs(ctx, LevelInfo + 1, aBCˢ, Int("a", 1), go.log.slog_package.String("b", twoˢ));
     check(levelInfo1MsgABCA1BTwoˢ);
 
-    l.Info(infoˢ2, (@string)"a", slice<global::go.log.slog_package.Attr>([Int("i", 1)]));
+    l.Info(infoˢ, (@string)"a", slice<global::go.log.slog_package.Attr>([Int("i", 1)]));
     check(levelInfoMsgInfoAI1ˢ);
 
-    l.Info(infoˢ2, (@string)"a", GroupValue(Int("i", 1)));
+    l.Info(infoˢ, (@string)"a", GroupValue(Int("i", 1)));
     check(levelInfoMsgInfoAI1ˢ);
 }
 
@@ -130,20 +131,20 @@ public static void TestConnections(ж<testing.T> t) {
     // tests might change the default logger using SetDefault. Also ensure we
     // restore the default logger at the end of the test.
     var currentLogger = Default();
-    var currentLogWriter = log_package.Writer();
-    nint currentLogFlags = log_package.Flags();
-    SetDefault(New(new global::go.log.slog_package.defaultHandlerжΔHandler(newDefaultHandler(loginternal.DefaultOutput))));
+    var currentLogWriter = log.Writer();
+    nint currentLogFlags = log.Flags();
+    SetDefault(New(new global::go.log.slog_package.defaultHandlerжHandler(newDefaultHandler(loginternal.DefaultOutput))));
     var currentLogWriterʗ1 = currentLogWriter;
     var currentLoggerʗ1 = currentLogger;
     t.Cleanup(() => {
         SetDefault(currentLoggerʗ1);
-        log_package.SetOutput(currentLogWriterʗ1);
-        log_package.SetFlags(currentLogFlags);
+        log.SetOutput(currentLogWriterʗ1);
+        log.SetFlags(currentLogFlags);
     });
 
     // The default slog.Logger's handler uses the log package's default output.
-    log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(Ꮡlogbuf));
-    log_package.SetFlags((nint)((nint)log_package.Lshortfile & ~(nint)(nint)log_package.LstdFlags));
+    log.SetOutput(new slog_test_package.bytes_BufferжWriter(Ꮡlogbuf));
+    log.SetFlags((nint)((nint)log.Lshortfile & ~(nint)(nint)log.LstdFlags));
     Info(msgˢ, "a", (nint)1);
     checkLogOutput(t, Ꮡlogbuf.String(), loggerTestGoDInfoMsgA1ˢ);
     logbuf.Reset();
@@ -176,14 +177,14 @@ public static void TestConnections(ж<testing.T> t) {
 
     // Once slog.SetDefault is called, the direction is reversed: the default
     // log.Logger's output goes through the handler.
-    SetDefault(New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡslogbuf), Ꮡ(new HandlerOptions(AddSource: true))))));
-    log_package.Print(msg2ˢ);
+    SetDefault(New(new global::go.log.slog_package.TextHandlerжHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡslogbuf), Ꮡ(new HandlerOptions(AddSource: true))))));
+    log.Print(msg2ˢ);
     checkLogOutput(t, Ꮡslogbuf.String(), "time=" + textTimeRE + @" level=INFO source=.*logger_test.go:\d{3}""? msg=msg2");
 
     // The default log.Logger always outputs at Info level.
     slogbuf.Reset();
-    SetDefault(New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡslogbuf), Ꮡ(new HandlerOptions(Level: LevelWarn))))));
-    log_package.Print(shouldNotAppearˢ);
+    SetDefault(New(new global::go.log.slog_package.TextHandlerжHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡslogbuf), Ꮡ(new HandlerOptions(Level: LevelWarn))))));
+    log.Print(shouldNotAppearˢ);
     {
         @string got = Ꮡslogbuf.String(); if (got != ""u8) {
             t.Errorf("got %q, want empty", got);
@@ -193,9 +194,9 @@ public static void TestConnections(ж<testing.T> t) {
     // Setting log's output again breaks the connection.
     logbuf.Reset();
     slogbuf.Reset();
-    log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(Ꮡlogbuf));
-    log_package.SetFlags((nint)((nint)log_package.Lshortfile & ~(nint)(nint)log_package.LstdFlags));
-    log_package.Print(msg3ˢ);
+    log.SetOutput(new slog_test_package.bytes_BufferжWriter(Ꮡlogbuf));
+    log.SetFlags((nint)((nint)log.Lshortfile & ~(nint)(nint)log.LstdFlags));
+    log.Print(msg3ˢ);
     checkLogOutput(t, Ꮡlogbuf.String(), loggerTestGoDMsg3ˢ);
     {
         @string got = Ꮡslogbuf.String(); if (got != ""u8) {
@@ -205,20 +206,24 @@ public static void TestConnections(ж<testing.T> t) {
 }
 
 internal partial struct wrappingHandler {
-    internal global::go.log.slog_package.ΔHandler h;
+    internal global::go.log.slog_package.Handler h;
 }
 
-internal static bool Enabled(this wrappingHandler h, context.Context ctx, global::go.log.slog_package.ΔLevel level) {
+} partial class slog_internal_testᴛwrappingHandler {
+
+internal static bool Enabled(this wrappingHandler h, context.Context ctx, global::go.log.slog_package.Level level) {
     return h.h.Enabled(ctx, level);
 }
-internal static global::go.log.slog_package.ΔHandler WithGroup(this wrappingHandler h, @string name) { return h.h.WithGroup(name); }
-internal static global::go.log.slog_package.ΔHandler WithAttrs(this wrappingHandler h, slice<global::go.log.slog_package.Attr> @as) { return h.h.WithAttrs(@as); }
+internal static global::go.log.slog_package.Handler WithGroup(this wrappingHandler h, @string name) { return h.h.WithGroup(name); }
+internal static global::go.log.slog_package.Handler WithAttrs(this wrappingHandler h, slice<global::go.log.slog_package.Attr> @as) { return h.h.WithAttrs(@as); }
 
 internal static error Handle(this wrappingHandler h, context.Context ctx, global::go.log.slog_package.Record r) {
     r = r.ΔClone();
 
     return h.h.Handle(ctx, r);
 }
+
+} partial class slog_internal_test_package {
 
 public static partial void TestAttrs(ж<testing.T> t) {
     void check(slice<global::go.log.slog_package.Attr> got, params Span<global::go.log.slog_package.Attr> wantʗp) {
@@ -229,7 +234,7 @@ public static partial void TestAttrs(ж<testing.T> t) {
         }
     }
 
-    var l1 = New(new slog_internal_test_package.captureHandlerжΔHandler(Ꮡ(new captureHandler()))).With((@string)"a", (nint)1);
+    var l1 = New(new slog_internal_test_package.captureHandlerжHandler(Ꮡ(new captureHandler()))).With((@string)"a", (nint)1);
     var l2 = New(l1.Handler()).With((@string)"b", (nint)2);
     l2.Info("m", (@string)"c", (nint)3);
     var h = l2.Handler()._<ж<captureHandler>>();
@@ -273,7 +278,7 @@ public static partial void TestCallDepth(ж<testing.T> t) {
         }
 
         defer(SetDefault, Default(), ref ᒐ); // restore
-        var logger = New(new slog_internal_test_package.captureHandlerжΔHandler(h));
+        var logger = New(new slog_internal_test_package.captureHandlerжHandler(h));
         SetDefault(logger);
 
         // Calls to check must be one line apart.
@@ -348,46 +353,46 @@ public static partial void TestCallDepthConnection(ж<testing.T> t) {
 
     var tests = slice<TestCallDepthConnection_tests>([
         new("log.Fatal", () => {
-            log_package.Fatal(logFatalˢ);
+            log.Fatal(logFatalˢ);
         }),
         new("log.Fatalf", () => {
-            log_package.Fatalf("log.Fatalf");
+            log.Fatalf("log.Fatalf");
         }),
         new("log.Fatalln", () => {
-            log_package.Fatalln(logFatallnˢ);
+            log.Fatalln(logFatallnˢ);
         }),
         new("log.Output", () => {
-            log_package.Output(1, logOutputˢ);
+            log.Output(1, logOutputˢ);
         }),
         new("log.Panic", () => {
-            log_package.Panic(logPanicˢ);
+            log.Panic(logPanicˢ);
         }),
         new("log.Panicf", () => {
-            log_package.Panicf("log.Panicf");
+            log.Panicf("log.Panicf");
         }),
         new("log.Panicln", () => {
-            log_package.Panicf("log.Panicln");
+            log.Panicf("log.Panicln");
         }),
         new("log.Default.Fatal", () => {
-            log_package.Default().Fatal(logDefaultFatalˢ);
+            log.Default().Fatal(logDefaultFatalˢ);
         }),
         new("log.Default.Fatalf", () => {
-            log_package.Default().Fatalf("log.Default.Fatalf");
+            log.Default().Fatalf("log.Default.Fatalf");
         }),
         new("log.Default.Fatalln", () => {
-            log_package.Default().Fatalln(logDefaultFatallnˢ);
+            log.Default().Fatalln(logDefaultFatallnˢ);
         }),
         new("log.Default.Output", () => {
-            log_package.Default().Output(1, logDefaultOutputˢ);
+            log.Default().Output(1, logDefaultOutputˢ);
         }),
         new("log.Default.Panic", () => {
-            log_package.Default().Panic(logDefaultPanicˢ);
+            log.Default().Panic(logDefaultPanicˢ);
         }),
         new("log.Default.Panicf", () => {
-            log_package.Default().Panicf("log.Default.Panicf");
+            log.Default().Panicf("log.Default.Panicf");
         }),
         new("log.Default.Panicln", () => {
-            log_package.Default().Panicf("log.Default.Panicln");
+            log.Default().Panicf("log.Default.Panicln");
         })
     ]);
 
@@ -416,8 +421,8 @@ public static partial void TestCallDepthConnection(ж<testing.T> t) {
                         return new Attr();
                     }
                 )));
-                SetDefault(New(new global::go.log.slog_package.TextHandlerжΔHandler(h)));
-                log_package.SetFlags(log_package.Lshortfile);
+                SetDefault(New(new global::go.log.slog_package.TextHandlerжHandler(h)));
+                log.SetFlags(log.Lshortfile);
                 ttʗ1.log();
                 os.Exit(1);
             }
@@ -426,7 +431,7 @@ public static partial void TestCallDepthConnection(ж<testing.T> t) {
             var cmd = testenv.Command(new slog_test_package.testing_TжTB(tΔ1), ep,
                 "-test.run=^"u8 + regexp.QuoteMeta(tΔ1.Name()) + "$"u8,
                 testCount1ˢ);
-            cmd.Env = builtin.append(cmd.Environ(), envVar + "=1");
+            cmd.Env = append(cmd.Environ(), envVar + "=1");
 
             var (@out, errΔ1) = cmd.CombinedOutput();
             var (_, okΔ1) = errors.AsType<ж<exec.ExitError>>(errΔ1); if (!okΔ1) {
@@ -452,12 +457,12 @@ public static partial void TestCallDepthConnection(ж<testing.T> t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string infoˢ3 => ref infoˢ3ᵇ;
-private static readonly @string infoˢ3ᵇ = "Info"u8;
+internal static ref readonly @string infoˢ2 => ref infoˢ2ᵇ;
+private static readonly @string infoˢ2ᵇ = "Info"u8;
 internal static ref readonly @string helloˢ2 => ref helloˢ2ᵇ;
 private static readonly @string helloˢ2ᵇ = "hello"u8;
-internal static ref readonly @string errorˢ3 => ref errorˢ3ᵇ;
-private static readonly @string errorˢ3ᵇ = "Error"u8;
+internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
+private static readonly @string errorˢ2ᵇ = "Error"u8;
 internal static ref readonly @string loggerInfoˢ => ref loggerInfoˢᵇ;
 private static readonly @string loggerInfoˢᵇ = "logger.Info"u8;
 internal static ref readonly @string loggerLogˢ => ref loggerLogˢᵇ;
@@ -493,12 +498,12 @@ public static void TestAlloc(ж<testing.T> t) {
         defer(SetDefault, Default(), ref ᒐ); // restore
         SetDefault(dl);
 
-        t.Run(infoˢ3, (ж<testing.T> tΔ1) => {
+        t.Run(infoˢ2, (ж<testing.T> tΔ1) => {
             wantAllocs(tΔ1, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 Info(helloˢ2);
             });
         });
-        t.Run(errorˢ3, (ж<testing.T> tΔ2) => {
+        t.Run(errorˢ2, (ж<testing.T> tΔ2) => {
             wantAllocs(tΔ2, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 go.log.slog_package.Error(helloˢ2);
             });
@@ -562,7 +567,7 @@ public static void TestAlloc(ж<testing.T> t) {
         t.Run(kvsˢ, (ж<testing.T> tΔ8) => {
             @string s = abcˢ;
             nint i = 2000;
-            var d = time_package.ΔSecond;
+            var d = time.Second;
             var dlʗ8 = dlʗ7;
             wantAllocs(tΔ8, 1, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 dlʗ8.Info(helloˢ2,
@@ -575,7 +580,7 @@ public static void TestAlloc(ж<testing.T> t) {
         t.Run(pairsˢ2, (ж<testing.T> tΔ9) => {
             var dlʗ10 = dlʗ9;
             wantAllocs(tΔ9, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-                dlʗ10.Info(""u8, errorˢ2, io.EOF);
+                dlʗ10.Info(""u8, errorˢ, io.EOF);
             });
         });
         var ctxʗ7 = ctx;
@@ -589,7 +594,7 @@ public static void TestAlloc(ж<testing.T> t) {
             var ctxʗ9 = ctxʗ7;
             var dlʗ13 = dlʗ11;
             wantAllocs(tΔ10, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-                dlʗ13.LogAttrs(ctxʗ9, LevelInfo, ""u8, go.log.slog_package.Any(errorˢ2, io.EOF));
+                dlʗ13.LogAttrs(ctxʗ9, LevelInfo, ""u8, go.log.slog_package.Any(errorˢ, io.EOF));
             });
         });
         var ctxʗ10 = ctx;
@@ -598,7 +603,7 @@ public static void TestAlloc(ж<testing.T> t) {
             var ctxʗ11 = ctxʗ10;
             var dlʗ15 = dlʗ14;
             wantAllocs(tΔ11, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-                dlʗ15.LogAttrs(ctxʗ11, LevelInfo, helloˢ2, Int("a", 1), go.log.slog_package.String("b", twoˢ), go.log.slog_package.Duration("c", time_package.ΔSecond));
+                dlʗ15.LogAttrs(ctxʗ11, LevelInfo, helloˢ2, Int("a", 1), go.log.slog_package.String("b", twoˢ), go.log.slog_package.Duration("c", time.Second));
             });
         });
         var ctxʗ12 = ctx;
@@ -607,7 +612,7 @@ public static void TestAlloc(ж<testing.T> t) {
             var ctxʗ13 = ctxʗ12;
             var loggerʗ1 = logger;
             wantAllocs(tΔ12, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-                loggerʗ1.LogAttrs(ctxʗ13, LevelInfo, helloˢ2, Int("a", 1), go.log.slog_package.String("b", twoˢ), go.log.slog_package.Duration("c", time_package.ΔSecond));
+                loggerʗ1.LogAttrs(ctxʗ13, LevelInfo, helloˢ2, Int("a", 1), go.log.slog_package.String("b", twoˢ), go.log.slog_package.Duration("c", time.Second));
             });
         });
         var ctxʗ14 = ctx;
@@ -617,8 +622,8 @@ public static void TestAlloc(ж<testing.T> t) {
             var dlʗ17 = dlʗ16;
             wantAllocs(tΔ13, 1, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 dlʗ17.LogAttrs(ctxʗ15, LevelInfo, helloˢ2,
-                    Int("a", 1), go.log.slog_package.String("b", twoˢ), go.log.slog_package.Duration("c", time_package.ΔSecond),
-                    Int("d", 1), go.log.slog_package.String("e", twoˢ), go.log.slog_package.Duration("f", time_package.ΔSecond));
+                    Int("a", 1), go.log.slog_package.String("b", twoˢ), go.log.slog_package.Duration("c", time.Second),
+                    Int("d", 1), go.log.slog_package.String("e", twoˢ), go.log.slog_package.Duration("f", time.Second));
             });
         });
         var ctxʗ16 = ctx;
@@ -628,9 +633,9 @@ public static void TestAlloc(ж<testing.T> t) {
             var dlʗ19 = dlʗ18;
             wantAllocs(tΔ14, 1, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 dlʗ19.LogAttrs(ctxʗ17, LevelInfo, helloˢ2,
-                    Int("a", 1), go.log.slog_package.String("b", twoˢ), go.log.slog_package.Duration("c", time_package.ΔSecond),
-                    Int("d", 1), go.log.slog_package.String("e", twoˢ), go.log.slog_package.Duration("f", time_package.ΔSecond),
-                    Int("d", 1), go.log.slog_package.String("e", twoˢ), go.log.slog_package.Duration("f", time_package.ΔSecond));
+                    Int("a", 1), go.log.slog_package.String("b", twoˢ), go.log.slog_package.Duration("c", time.Second),
+                    Int("d", 1), go.log.slog_package.String("e", twoˢ), go.log.slog_package.Duration("f", time.Second),
+                    Int("d", 1), go.log.slog_package.String("e", twoˢ), go.log.slog_package.Duration("f", time.Second));
             });
         });
     }
@@ -652,7 +657,7 @@ public static void TestSetAttrs(ж<testing.T> t) {
         new([(@string)"a", (nint)1, (@string)"b"], slice<global::go.log.slog_package.Attr>([Int("a", 1), go.log.slog_package.String(badKey, "b")])),
         new([(@string)"a", (nint)1, (nint)2, (nint)3], slice<global::go.log.slog_package.Attr>([Int("a", 1), Int(badKey, 2), Int(badKey, 3)]))
     ]))) {
-        var r = NewRecord(new time_package.Time(), 0, ""u8, 0);
+        var r = NewRecord(new time.Time(), 0, ""u8, 0);
         r.Add(test.args.ꓸꓸꓸ);
         var got = attrsSlice(r);
         if (!attrsEqual(got, test.want)) {
@@ -665,13 +670,13 @@ public static partial void TestSetDefault(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Verify that setting the default to itself does not result in deadlock.
-        var (ctx, cancel) = context.WithTimeout(context.Background(), time_package.ΔSecond);
+        var (ctx, cancel) = context.WithTimeout(context.Background(), time.Second);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         defer((io.Writer w) => {
-            log_package.SetOutput(w);
-        }, log_package.Writer(), ref ᒐ);
-        log_package.SetOutput(io.Discard);
+            log.SetOutput(w);
+        }, log.Writer(), ref ᒐ);
+        log.SetOutput(io.Discard);
         var cancelʗ2 = cancel;
         goǃ(() => {
             Info("A");
@@ -689,7 +694,7 @@ public static partial void TestSetDefault(ж<testing.T> t) {
 }
 
 internal partial struct TestLogLoggerLevelForDefaultHandler_type /*dyn*/ {
-    internal global::go.log.slog_package.ΔLevel logLevel;
+    internal global::go.log.slog_package.Level logLevel;
     internal Actionꓸꓸꓸ<@string, any> logFn;
     internal @string want;
 }
@@ -697,19 +702,19 @@ internal partial struct TestLogLoggerLevelForDefaultHandler_type /*dyn*/ {
 // Test defaultHandler minimum level without calling slog.SetDefault.
 public static void TestLogLoggerLevelForDefaultHandler(ж<testing.T> t) {
     // Revert any changes to the default logger, flags, and level of log and slog.
-    global::go.log.slog_package.ΔLevel currentLogLoggerLevel = ᏑlogLoggerLevel.Level();
-    var currentLogWriter = log_package.Writer();
-    nint currentLogFlags = log_package.Flags();
+    global::go.log.slog_package.Level currentLogLoggerLevel = ᏑlogLoggerLevel.Level();
+    var currentLogWriter = log.Writer();
+    nint currentLogFlags = log.Flags();
     var currentLogWriterʗ1 = currentLogWriter;
     t.Cleanup(() => {
         ᏑlogLoggerLevel.Set(currentLogLoggerLevel);
-        log_package.SetOutput(currentLogWriterʗ1);
-        log_package.SetFlags(currentLogFlags);
+        log.SetOutput(currentLogWriterʗ1);
+        log.SetFlags(currentLogFlags);
     });
 
     ref var logBuf = ref heap(new bytes.Buffer(), out var ᏑlogBuf);
-    log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
-    log_package.SetFlags(0);
+    log.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
+    log.SetFlags(0);
 
     foreach (var (_, test) in range(slice<TestLogLoggerLevelForDefaultHandler_type>([
         new(LevelDebug, Debug, "DEBUG a"),
@@ -741,24 +746,24 @@ public static void TestLogLoggerLevelForHandlerWriter(ж<testing.T> t) {
     // tests might change the default logger using SetDefault. Also ensure we
     // restore the default logger at the end of the test.
     var currentLogger = Default();
-    global::go.log.slog_package.ΔLevel currentLogLoggerLevel = ᏑlogLoggerLevel.Level();
-    var currentLogWriter = log_package.Writer();
-    nint currentFlags = log_package.Flags();
+    global::go.log.slog_package.Level currentLogLoggerLevel = ᏑlogLoggerLevel.Level();
+    var currentLogWriter = log.Writer();
+    nint currentFlags = log.Flags();
     var currentLogWriterʗ1 = currentLogWriter;
     var currentLoggerʗ1 = currentLogger;
     t.Cleanup(() => {
         SetDefault(currentLoggerʗ1);
         ᏑlogLoggerLevel.Set(currentLogLoggerLevel);
-        log_package.SetOutput(currentLogWriterʗ1);
-        log_package.SetFlags(currentFlags);
+        log.SetOutput(currentLogWriterʗ1);
+        log.SetFlags(currentFlags);
     });
 
     ref var logBuf = ref heap(new bytes.Buffer(), out var ᏑlogBuf);
-    log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
-    log_package.SetFlags(0);
+    log.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
+    log.SetFlags(0);
     SetLogLoggerLevel(LevelError);
-    SetDefault(New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf), Ꮡ(new HandlerOptions(ReplaceAttr: removeTime))))));
-    log_package.Print(errorˢ2);
+    SetDefault(New(new global::go.log.slog_package.TextHandlerжHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf), Ꮡ(new HandlerOptions(ReplaceAttr: removeTime))))));
+    log.Print(errorˢ);
     checkLogOutput(t, ᏑlogBuf.String(), levelErrorMsgErrorˢ);
 }
 
@@ -777,7 +782,7 @@ public static void TestLoggerError(ж<testing.T> t) {
         }
         return a;
     };
-    var l = New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡ(new HandlerOptions(ReplaceAttr: removeTime)))));
+    var l = New(new global::go.log.slog_package.TextHandlerжHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡ(new HandlerOptions(ReplaceAttr: removeTime)))));
     l.Error(msgˢ, errˢ, io.EOF, (@string)"a", (nint)1);
     checkLogOutput(t, Ꮡbuf.String(), levelErrorMsgMsgErrEofA1ˢ);
     buf.Reset();
@@ -790,7 +795,7 @@ public static void TestLoggerError(ж<testing.T> t) {
 public static void TestNewLogLogger(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var h = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), nil);
-    var ll = NewLogLogger(new global::go.log.slog_package.TextHandlerжΔHandler(h), LevelWarn);
+    var ll = NewLogLogger(new global::go.log.slog_package.TextHandlerжHandler(h), LevelWarn);
     ll.Print(helloˢ2);
     checkLogOutput(t, Ꮡbuf.String(), "time=" + textTimeRE + @" level=WARN msg=hello");
 }
@@ -813,7 +818,7 @@ public static void TestLoggerNoOps(ж<testing.T> t) {
 
 internal partial struct TestContext_type /*dyn*/ {
     internal Actionꓸꓸꓸ<context.Context, @string, any> f;
-    internal global::go.log.slog_package.ΔLevel wantLevel;
+    internal global::go.log.slog_package.Level wantLevel;
 }
 
 public static void TestContext(ж<testing.T> t) {
@@ -822,7 +827,7 @@ public static void TestContext(ж<testing.T> t) {
         // Verify that the context argument to log output methods is passed to the handler.
         // Also check the level.
         var h = Ꮡ(new captureHandler());
-        var l = New(new slog_internal_test_package.captureHandlerжΔHandler(h));
+        var l = New(new slog_internal_test_package.captureHandlerжHandler(h));
         defer(SetDefault, Default(), ref ᒐ); // restore
         SetDefault(l);
 
@@ -878,6 +883,8 @@ internal partial struct captureHandler {
     internal slice<@string> groups;
 }
 
+} partial class slog_internal_testᴛcaptureHandler {
+
 internal static error Handle(this ж<captureHandler> Ꮡh, context.Context ctx, global::go.log.slog_package.Record r) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -888,16 +895,16 @@ internal static error Handle(this ж<captureHandler> Ꮡh, context.Context ctx, 
         h.mu.Lock();
         ᒐd1 = true;
         h.ctx = ctx;
-        h.r = r.ΔClone();
+        h.r.AssignFrom(r);
         return default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡh.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static bool Enabled(this ref captureHandler _Δp0, context.Context _Δp1, global::go.log.slog_package.ΔLevel _Δp2) { return true; }
+internal static bool Enabled(this ref captureHandler _Δp0, context.Context _Δp1, global::go.log.slog_package.Level _Δp2) { return true; }
 
-internal static global::go.log.slog_package.ΔHandler WithAttrs(this ж<captureHandler> Ꮡc, slice<global::go.log.slog_package.Attr> @as) {
+internal static global::go.log.slog_package.Handler WithAttrs(this ж<captureHandler> Ꮡc, slice<global::go.log.slog_package.Attr> @as) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -906,16 +913,16 @@ internal static global::go.log.slog_package.ΔHandler WithAttrs(this ж<captureH
         c.mu.Lock();
         ᒐd1 = true;
         ref var c2 = ref heap(new captureHandler(), out var Ꮡc2);
-        c2.r = c.r.ΔClone();
+        c2.r.AssignFrom(c.r);
         c2.groups = c.groups;
         c2.attrs = concat(c.attrs, @as);
-        return new slog_internal_test_package.captureHandlerжΔHandler(Ꮡc2);
+        return new slog_internal_test_package.captureHandlerжHandler(Ꮡc2);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static global::go.log.slog_package.ΔHandler WithGroup(this ж<captureHandler> Ꮡc, @string name) {
+internal static global::go.log.slog_package.Handler WithGroup(this ж<captureHandler> Ꮡc, @string name) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -924,10 +931,10 @@ internal static global::go.log.slog_package.ΔHandler WithGroup(this ж<captureH
         c.mu.Lock();
         ᒐd1 = true;
         ref var c2 = ref heap(new captureHandler(), out var Ꮡc2);
-        c2.r = c.r.ΔClone();
+        c2.r.AssignFrom(c.r);
         c2.attrs = c.attrs;
-        c2.groups = builtin.append(slices.Clip<slice<@string>, @string>(c.groups), name);
-        return new slog_internal_test_package.captureHandlerжΔHandler(Ꮡc2);
+        c2.groups = append(slices.Clip<slice<@string>, @string>(c.groups), name);
+        return new slog_internal_test_package.captureHandlerжHandler(Ꮡc2);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
@@ -942,25 +949,31 @@ internal static void clear(this ж<captureHandler> Ꮡc) {
         c.mu.Lock();
         ᒐd1 = true;
         c.ctx = default;
-        c.r = new Record();
+        c.r.AssignFrom(new Record());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class slog_internal_test_package {
+
 internal partial struct discardTestHandler {
     internal slice<global::go.log.slog_package.Attr> attrs;
 }
 
-internal static bool Enabled(this discardTestHandler d, context.Context _Δp1, global::go.log.slog_package.ΔLevel _Δp2) { return true; }
+} partial class slog_internal_testᴛdiscardTestHandler {
+
+internal static bool Enabled(this discardTestHandler d, context.Context _Δp1, global::go.log.slog_package.Level _Δp2) { return true; }
 internal static error Handle(this discardTestHandler _Δp0, context.Context _Δp1, global::go.log.slog_package.Record _Δp2) { return default; }
-internal static global::go.log.slog_package.ΔHandler WithAttrs(this discardTestHandler d, slice<global::go.log.slog_package.Attr> @as) {
+internal static global::go.log.slog_package.Handler WithAttrs(this discardTestHandler d, slice<global::go.log.slog_package.Attr> @as) {
     d.attrs = concat(d.attrs, @as);
     return d;
 }
-internal static global::go.log.slog_package.ΔHandler WithGroup(this discardTestHandler h, @string name) {
+internal static global::go.log.slog_package.Handler WithGroup(this discardTestHandler h, @string name) {
     return h;
 }
+
+} partial class slog_internal_test_package {
 
 // concat returns a new slice with the elements of s1 followed
 // by those of s2. The slice has no additional capacity.
@@ -986,7 +999,7 @@ private static readonly @string withContextParallelˢᵇ = "WithContext-parallel
 // This is a simple benchmark. See the benchmarks subdirectory for more extensive ones.
 public static void BenchmarkNopLog(ж<testing.B> b) {
     var ctx = context.Background();
-    var l = New(new slog_internal_test_package.captureHandlerжΔHandler(Ꮡ(new captureHandler())));
+    var l = New(new slog_internal_test_package.captureHandlerжHandler(Ꮡ(new captureHandler())));
     var ctxʗ1 = ctx;
     var lʗ1 = l;
     b.Run(noAttrsˢ, (ж<testing.B> bΔ1) => {
@@ -1072,6 +1085,8 @@ internal partial struct panicTextAndJsonMarshaler {
     internal any msg;
 }
 
+} partial class slog_internal_testᴛpanicTextAndJsonMarshaler {
+
 internal static (slice<byte>, error) MarshalText(this panicTextAndJsonMarshaler p) {
     throw panic(p.msg);
 }
@@ -1079,6 +1094,8 @@ internal static (slice<byte>, error) MarshalText(this panicTextAndJsonMarshaler 
 internal static (slice<byte>, error) MarshalJSON(this panicTextAndJsonMarshaler p) {
     throw panic(p.msg);
 }
+
+} partial class slog_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object panickingˢ = (@string)"panicking"u8;
@@ -1093,21 +1110,21 @@ public static void TestPanics(ж<testing.T> t) {
     // tests might change the default logger using SetDefault. Also ensure we
     // restore the default logger at the end of the test.
     var currentLogger = Default();
-    var currentLogWriter = log_package.Writer();
-    nint currentLogFlags = log_package.Flags();
+    var currentLogWriter = log.Writer();
+    nint currentLogFlags = log.Flags();
     var currentLogWriterʗ1 = currentLogWriter;
     var currentLoggerʗ1 = currentLogger;
     t.Cleanup(() => {
         SetDefault(currentLoggerʗ1);
-        log_package.SetOutput(currentLogWriterʗ1);
-        log_package.SetFlags(currentLogFlags);
+        log.SetOutput(currentLogWriterʗ1);
+        log.SetFlags(currentLogFlags);
     });
 
     ref var logBuf = ref heap(new bytes.Buffer(), out var ᏑlogBuf);
-    log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
-    log_package.SetFlags((nint)((nint)log_package.Lshortfile & ~(nint)(nint)log_package.LstdFlags));
+    log.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
+    log.SetFlags((nint)((nint)log.Lshortfile & ~(nint)(nint)log.LstdFlags));
 
-    SetDefault(New(new global::go.log.slog_package.defaultHandlerжΔHandler(newDefaultHandler(loginternal.DefaultOutput))));
+    SetDefault(New(new global::go.log.slog_package.defaultHandlerжHandler(newDefaultHandler(loginternal.DefaultOutput))));
     foreach (var (_, pt) in range(slice<TestPanics_type>([
         new((ж<panicTextAndJsonMarshaler>)nil, @"logger_test.go:\d+: INFO msg p=<nil>"),
         new(new panicTextAndJsonMarshaler(io.ErrUnexpectedEOF), @"logger_test.go:\d+: INFO msg p=""!PANIC: unexpected EOF"""),
@@ -1119,7 +1136,7 @@ public static void TestPanics(ж<testing.T> t) {
         logBuf.Reset();
     }
 
-    SetDefault(New(new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf), nil))));
+    SetDefault(New(new global::go.log.slog_package.JSONHandlerжHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf), nil))));
     foreach (var (_, pt) in range(slice<TestPanics_type>([
         new((ж<panicTextAndJsonMarshaler>)nil, @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":null}"),
         new(new panicTextAndJsonMarshaler(io.ErrUnexpectedEOF), @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":""!PANIC: unexpected EOF""}"),

@@ -10,7 +10,7 @@ partial class main_package {
 internal static void main() {
     AliasImportLibꓸIntFn f = (nint x) => x + 1;
     AliasImportLibꓸBoxFn g = (AliasImportLib.Box b) => new AliasImportLib.Box(V: b.V * 2);
-    AliasImportLibꓸDurFn d = (time.Duration t) => (nint)(t / time.ΔSecond);
+    AliasImportLibꓸDurFn d = (time.Duration t) => (nint)(t / time.Second);
     AliasImportLibꓸAct a = () => {
         fmt.Println("act");
     };
@@ -25,7 +25,7 @@ internal static void main() {
 
     a();
     var (r, err) = m(5);
-    fmt.Println("func:", f(1), g(new AliasImportLibꓸB2(V: 3)).V, d(2 * time.ΔSecond), r, err, v(1, 2, 3), AliasImportLib.ApplyVar(v, 4, 5));
+    fmt.Println("func:", f(1), g(new AliasImportLibꓸB2(V: 3)).V, d(2 * time.Second), r, err, v(1, 2, 3), AliasImportLib.ApplyVar(v, 4, 5));
     var (n, ok) = nr(7);
     fmt.Println("named:", n, ok);
     fmt.Println("struct:", new AliasImportLibꓸB2(V: 4));

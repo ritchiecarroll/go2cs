@@ -324,13 +324,12 @@ internal static void testBlock(ж<testing.T> t, huffTest test, @string ttype) {
 internal static void writeToType(ж<testing.T> t, @string ttype, ж<global::go.compress.flate_package.huffmanBitWriter> Ꮡbw, slice<global::go.compress.flate_package.token> tok, slice<byte> input) {
     ref var bw = ref Ꮡbw.DerefOrNull();
 
-    var exprᴛ1 = ttype;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "wb"u8: {
+    case {} when ttype == "wb"u8: {
         bw.writeBlock(tok, false, input);
         break;
     }
-    case {} when exprᴛ1 == "dyn"u8: {
+    case {} when ttype == "dyn"u8: {
         bw.writeBlockDynamic(tok, false, input);
         break;
     }
@@ -371,17 +370,16 @@ internal static void testWriterEOF(ж<testing.T> t, @string ttype, huffTest test
     }
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var bw = newHuffmanBitWriter(new flate_test_package.bytes_BufferжWriter(Ꮡbuf));
-    var exprᴛ1 = ttype;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "wb"u8: {
+    case {} when ttype == "wb"u8: {
         bw.writeBlock(test.tokens, true, input);
         break;
     }
-    case {} when exprᴛ1 == "dyn"u8: {
+    case {} when ttype == "dyn"u8: {
         bw.writeBlockDynamic(test.tokens, true, input);
         break;
     }
-    case {} when exprᴛ1 == "huff"u8: {
+    case {} when ttype == "huff"u8: {
         bw.writeBlockHuff(true, input);
         break;
     }

@@ -8,9 +8,7 @@ global using static global::go.encoding.xml_package;
 global using static global::go.encoding.xml_internal_test_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using ΔToken = object;
+global using Token = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,7 +29,6 @@ using static global::go.encoding.xml_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b7620616e793b206520616e797d", "badPathTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b786d6c20737472696e673b2074616220656e636f64696e672f786d6c2e5461626c6541747472733b206e7320737472696e677d", "tableAttrsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b786d6c20737472696e673b2074616220656e636f64696e672f786d6c2e5461626c65733b206e7320737472696e677d", "tablesᴛ1")]
-[assembly: GoTypeAlias("Token", "ΔToken")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -66,8 +63,8 @@ using static global::go.encoding.xml_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKClKS0tLYACgaCgpS0tKQAFgaCAAAWhoKmgoKm")]
-[assembly: GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgqS0tKQACgaCgpS0tKQAFgaCAAAWhoKmgoKm")]
+[assembly: GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABcsooKClKS0tLYACgaCgpS0tKQAGAaCAAAWhoKmgoKm")]
+[assembly: GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABcsgqS0tKQACgaCgpS0tKQAGAaCAAAWhoKmgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -119,3 +116,14 @@ public static partial class xml_test_package
         builtin.initPackage(typeof(global::go.encoding.xml_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(xml_test_package.Animal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xml_testᴛAnimal;
+[GoMethodHost(typeof(xml_test_package.Size)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xml_testᴛSize;
+// </MethodHolders>

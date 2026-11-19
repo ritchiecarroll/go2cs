@@ -98,6 +98,10 @@ public class EscapeRegistryGenerator : ISourceGenerator
                 while (package?.ContainingType is not null)
                     package = package.ContainingType;
 
+                // A method's body stands in the holder of its receiver type; the package keeps one registry.
+                if (package is not null)
+                    package = GoMethodHosts.PackageClassOf(package);
+
                 if (package is null || package.IsGenericType || !GeneratedPartials.CanReopen(package))
                     continue;
 

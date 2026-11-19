@@ -555,7 +555,7 @@ public static partial class builtin
     /// </summary>
     public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)
     {
-        return go.slice<T>.Append(slice, elems.ToSpan());
+        return go.slice<T>.AppendSpread(slice, elems.ToSpan());
     }
 
     /// <summary>
@@ -1020,7 +1020,7 @@ public static partial class builtin
             // (Go permits overlap in copy) transfers correctly.
             if (src is ISlice<T1> same)
             {
-                same.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+                GoElementCopy.CopyInto<T1>(same.ToSpan()[..(int)min], dst.ToSpan()[..(int)min]);
             }
             else
             {
@@ -1043,7 +1043,7 @@ public static partial class builtin
         nint min = Min(dst.Length, src.Length);
 
         if (min > 0 && !ZeroSizeCopy<T, T>())
-            src.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+            GoElementCopy.CopyInto<T>(src.ToSpan()[..(int)min], dst.ToSpan()[..(int)min]);
 
         return min;
     }
@@ -1056,7 +1056,7 @@ public static partial class builtin
         nint min = Min(dst.Length, src.Length);
 
         if (min > 0 && !ZeroSizeCopy<T, T>())
-            src.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+            GoElementCopy.CopyInto<T>(src.ToSpan()[..(int)min], dst.ToSpan()[..(int)min]);
 
         return min;
     }
@@ -1093,9 +1093,13 @@ public static partial class builtin
                 // the data: the two are the same runtime type here, which is exactly what the
                 // guard establishes and what MemoryMarshal.Cast cannot express on unconstrained
                 // type parameters.
+                //
+                // An element that owns array storage is copied element by element instead
+                // (GoElementCopy.CopyInto), so the two slices never share an inner array; that test
+                // folds at JIT time too.
                 Span<T2> source = src.ToSpan();
 
-                Unsafe.As<Span<T2>, Span<T1>>(ref source)[..(int)min].CopyTo(dst.ToSpan());
+                GoElementCopy.CopyInto<T1>(Unsafe.As<Span<T2>, Span<T1>>(ref source)[..(int)min], dst.ToSpan()[..(int)min]);
             }
             else if (typeof(T1).IsAssignableFrom(typeof(T2)))
             {
@@ -1234,7 +1238,7 @@ public static partial class builtin
         {
             if (src is ISlice<T1> same)
             {
-                same.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+                GoElementCopy.CopyInto<T1>(same.ToSpan()[..(int)min], dst.ToSpan()[..(int)min]);
             }
             else
             {
@@ -1454,7 +1458,7 @@ public static partial class builtin
     /// </summary>
     public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items) where S : ISlice<T>, ISliceWrap<S, T>
     {
-        return S.Wrap(go.slice<T>.Append(new slice<T>(s), items.ToSpan()));
+        return S.Wrap(go.slice<T>.AppendSpread(new slice<T>(s), items.ToSpan()));
     }
 
     /// <summary>

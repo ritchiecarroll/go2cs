@@ -7,6 +7,7 @@ namespace go;
 using tracev2 = @internal.trace.tracev2_package;
 using @internal.trace;
 using @unsafe = unsafe_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -23,6 +24,8 @@ partial struct traceStringTable {
     // tab is a mapping of string -> unique ID.
     internal traceMap tab;
 }
+
+} partial class runtimeᴛtraceStringTable {
 
 // put adds a string to the table, emits it, and returns a unique ID for it.
 internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string sʗp) {
@@ -97,9 +100,9 @@ internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
 
     if (t.buf != nil) {
         systemstack(() => {
-            @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+            @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
             traceBufFlush(Ꮡt.Value.buf, gen);
-            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+            unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         });
         t.buf = default;
     }
@@ -108,4 +111,4 @@ internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
     Ꮡt.Ꮡtab.reset();
 }
 
-} // end runtime_package
+} // end runtimeᴛtraceStringTable

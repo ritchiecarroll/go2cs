@@ -8,7 +8,7 @@ using syscall = syscall_package;
 
 partial class net_package {
 
-internal static error setDefaultSockopts(syscallꓸHandle s, nint family, nint sotype, bool ipv6only) {
+internal static error setDefaultSockopts(syscall.Handle s, nint family, nint sotype, bool ipv6only) {
     if (family == syscall.AF_INET6 && sotype != syscall.SOCK_RAW) {
         // Allow both IP versions even if the OS default
         // is otherwise. Note that some operating systems
@@ -22,7 +22,7 @@ internal static error setDefaultSockopts(syscallꓸHandle s, nint family, nint s
     return default;
 }
 
-internal static error setDefaultListenerSockopts(syscallꓸHandle s) {
+internal static error setDefaultListenerSockopts(syscall.Handle s) {
     // Windows will reuse recently-used addresses by default.
     // SO_REUSEADDR should not be used here, as it allows
     // a socket to forcibly bind to a port in use by another socket.
@@ -32,7 +32,7 @@ internal static error setDefaultListenerSockopts(syscallꓸHandle s) {
     return default;
 }
 
-internal static error setDefaultMulticastSockopts(syscallꓸHandle s) {
+internal static error setDefaultMulticastSockopts(syscall.Handle s) {
     // Allow multicast UDP and raw IP datagram sockets to listen
     // concurrently across multiple listeners.
     return os.NewSyscallError(setsockoptˢ, syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1));

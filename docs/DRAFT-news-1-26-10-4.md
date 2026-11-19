@@ -83,9 +83,13 @@ but every other package converts. The run still ends with exit 1, naming each re
 package that imports one, since those will not build until the refused package converts. A package that fails to
 convert (it does not load, or the converter panics) was already skipped, but the run used to exit 0; it now exits 1
 too, so a script that checks the exit code sees it. A single-package conversion still stops at a refusal and writes
-nothing. See [`-recurse`](CommandLine.md).
+nothing. `-tests -recurse` goes on past a refusal too, as `go test ./...` goes on past a package that does not build:
+each tested package that the refused package does not reach is converted and tested, and each one it does reach is
+named, with its reason, in the run's output (and in MODULE.md, on a run that writes one). See
+[`-recurse`](CommandLine.md).
 <!-- COORD rulings 20261111T053529Z and 20261111T060642Z, branch claude/r-warn-option: src/go2cs/recurseRefusal.go,
-     moduleConverter.go convertAll / ConvertModule; the caller census in R's post 20261111T062125Z. -->
+     moduleConverter.go convertAll / ConvertModule; the caller census in R's post 20261111T062125Z. The -tests -recurse
+     half: COORD ruling 20261117T063529Z, branch claude/c1-tests-recurse-skip, moduleTestsDriver.go runModuleTests. -->
 
 ### A refusal is renumbered: `GO2CS2005` (R)
 
@@ -228,10 +232,19 @@ keeps it in place. A Go value that holds a reference is still viewed as a copy. 
   it read whatever lay past it;
 - a length too large for a slice panics by name, where its low 32 bits were used.
 
-In the standard library 13 lines in four files of `runtime` take the new form. See
+The open form of an unnamed array type, `(*[N]T)(p)[lo:]`, takes the same view, and `copy` into or out of it the
+same calls. It took them only when the array type was named: over an unnamed one it read the whole array as a
+value, so over memory that holds no Go array of that type it had length 0, and as `copy`'s destination over the
+bytes of a number it ended the process.
+
+In the standard library 13 lines in four files of `runtime` take the new form, and the open form of an unnamed
+array five more, in `reflect`, `internal/reflectlite` and `runtime`. See
 [Pointers](ConversionStrategies-Reference/pointers.md#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors).
 <!-- docs/phase4/DESIGN-array-pointer-doors.md, sections 4, 10 and 11; golib's unsafe.Pointer.View, CopyInto and
-     CopyFrom. Arms: the behavioral program ArrayPointerViewDoors (linux; native pages from syscall.Mmap and Go memory)
+     CopyFrom. The unnamed open form: batch 311, P5's D4 (claude/p5-d4-open-slice 06eccfb59d; converter
+     e3adf166836, corpus d7a8cfe4262: 5 shipped lines, reflect/type.cs, internal/reflectlite/type.cs, runtime/type.cs,
+     runtime/linux/os_linux.cs, runtime/windows/os_windows.cs, plus 2 lines of a .cs.auto review sibling; design
+     16.10; behavioral OpenSliceUnnamedArray). Arms: the behavioral program ArrayPointerViewDoors (linux; native pages from syscall.Mmap and Go memory)
      and the goldens of PointerArrayViewForms and PointerCastSliceReinterpret, GolibTests ArrayPointerViewDoorTests,
      the converter's TestArrayPointerViewDoor, repoguard's TestArrayPointerViewDoors. The pinned case (a Go value
      of another type): design section 12, golib's IHeldStorage, GolibTests' stress arm and its control, 10,000
@@ -267,10 +280,14 @@ through it works as Go's `*p` does: `*p` read as a value is a copy, `*p = v` sto
 slice of the field, and a `range` over `p` reads each element when its round comes, while a `range` over `*p`
 ranges a copy.
 
-A limit: the view of a field of a struct that holds a string, a slice, a map, an interface or a pointer panics by
-name. Every such site found in the TypeScript compiler and in the nine nugetgo modules is in `golang.org/x/sys`
-(`unix` on linux and macOS, `windows` on Windows). A tuple assignment that stores the whole array through two
-such views at once is also refused by name. See
+The view also works over a struct that holds a string, a slice, a map, an interface or a pointer, which is where
+`golang.org/x/sys` reads a socket address (`unix` on linux and macOS, `windows` on Windows), and through a chain of
+field selections from a variable (`&sa.raw.port`). Over such a struct the index, the whole-array load and store,
+`len` and a `range` that takes only the index work; a slice of the view, the address of one of its elements and a
+`range` by value are refused by name, and so is a tuple assignment that stores the whole array through two views at
+once. One related form can end the process: a slice taken where it is written, `(*[N]E)(unsafe.Pointer(&x.f))[:]`,
+over a promoted field, a slice element's field or a call's result
+([Limitations](Limitations.md)). See
 [Pointers](ConversionStrategies-Reference/pointers.md#the-bytes-of-one-field-through-ntunsafepointerpf-the-field-view).
 <!-- F1 parts A and B: merge 0d1f6f1f3f (P5, claude/p5-field-view-index d073be7130), BOARD 2026-11-15 "the field view
      answers over a Go struct, and is indexed in place where it is written" (the before-probe at 516586c4a9,
@@ -281,7 +298,17 @@ such views at once is also refused by name. See
      holds a reference is refused by name" and its census amendment (TypeScript closure: 17/17/4/7 sites on
      linux/amd64, linux/arm64, darwin/amd64, windows/amd64; nugetgo modules 17/17/4/0; all x/sys). The tuple store:
      BOARD 2026-11-15 "a tuple assignment that stores the whole array through two field views is refused by name"
-     (proposed .5). REVISIT AT 310: P5's box-kind seat (a1a1d8534b) answers the reference-holding sites. -->
+     (proposed .5). The reference-holding struct and the chain: batch 310 merge e207d6f5b6 (P5, claude/p5-reinterpret-array-box
+     a1a1d8534b), BOARD 2026-11-15 "a field view over a struct that holds a reference reads and writes the field's own
+     bytes" (DONE; footprint lsf_linux.cs 3 lines on linux x2) and its row "a range by value, a slice and an element's
+     address ... are refused by name" (proposed .5). The process-ending open slice: BOARD 2026-11-15 "the open slice of
+     a pointer conversion over an array field of another element type ends the process" (.5), disclosed in
+     docs/Limitations.md for this release. 2026-11-16 (P4): the earlier text's limit ("the view of a field of a struct
+     that holds a string ... panics by name") was rewritten after 310 landed; if P5's D4 (311) cures the open slice in
+     this release, drop that sentence. 2026-11-18 (P4, HOOK 311): D4 landed in 311 and does NOT cure it, so the
+     sentence stays. D4 is the open slice of an UNNAMED array (the array-view section above); its own control keeps
+     the open form over a field of another element type on the native field view (e3adf166836), and
+     docs/Limitations.md's bullet is unchanged at master f36b6b0d48. -->
 
 ### A write at the address of a named array is no longer lost (P5)
 
@@ -311,14 +338,62 @@ See [Pointers](ConversionStrategies-Reference/pointers.md).
      0c1d295ea8), the lost write (882e3da582, 85b1c4181b), five sqlite-cs shapes (6992717d09, c09d5e04da,
      39b40c8c3a, b62c67b6d8, 4c101b8e57), the inline-array slice limit (6b78cef1a1) and the validated-modules page
      (65be87fd89, 64a5cc7e24). Already carried by their own seats' edits: door A (2d7ac32ffb), the pin-extent fixes
-     (dbd872acad), cgo 3.1 and the cgo truth pass (d658f700cb, 3b202a6c56). HELD for P1: 055f4e6230 and d39b1ffe00
-     (the Tuning section's note). LEFT OUT, each a fix to a feature new in this release, so no released build had
+     (dbd872acad), cgo 3.1 and the cgo truth pass (d658f700cb, 3b202a6c56). Written after P1's AOT reading (2026-11-16): 055f4e6230 and d39b1ffe00, in the
+     Tuning section. LEFT OUT, each a fix to a feature new in this release, so no released build had
      the defect: the inline-array fixes 6b78cef1a1 (the foreign slice itself), b1c73ce844, d7f5a59f79, a6f526f31e
      and 63c2a339c7; the unsafe.Add box chain 18b36cb712, which came with batch 305's derived pointers. LEFT OUT as
      internal (CI, tests, records, design docs): 6f5def3cca (two darwin roster rows; the roster carries them),
      9b05e0dc4c, bd709b8206, 9c3f648b52, 1cfa713959, ec0a21ea2f, 3923dcda87, b4ac41960f, 5aa38c3ac2, 2c2c5b0ec0,
      b2214e00e4, 4415da65d3, 927441cd79, ec250198ff, d5a1f672fd, a0878172b2, be8c7a6859 (the zig pin for the
      linux-arm64 cgo smoke), 9615f7fc18 (proof-page pipe rendering; no committed page changed). -->
+
+### A whole-array assignment copies into the array (R)
+
+**`a = b` for an array now copies `b`'s elements into `a`, as Go does, so a slice of `a`, a pointer to one of its
+elements, or `a`'s address taken before the assignment sees the new values.** The converted code gave `a` a new
+array, so everything taken from `a` beforehand still named the old one: a read through it saw the old values, and a
+write through it was lost. The same holds now for a field, a package variable, `*p = b`, a struct that holds
+arrays, a multiple assignment, a `range` that assigns with `=` and a `select` that receives into an existing
+variable. A conversion between array types, `x := [4]int(n)`, now copies `n`, where it shared `n`'s array. A store
+into a map element still copies, because a map element is a value in Go. In the standard library 70 converted files
+change across the four targets, each at such an assignment.
+<!-- Batch 311, R's array reassign cut A (claude/r-array-reassign 99f34a588e; docs/phase4/DESIGN-array-reassign-in-place.md
+     section 8 with P5's conditions). golib/go2cs-gen/converter 5953f454d02; corpus b6ef01b7672 (79 files, the
+     four targets in one -platforms run, 356 packages each: 70 converted .cs, 8 package_info.cs map
+     re-encodes, and mlkem/mldsa field.cs's N1 return clone, one allocation more per call there); the map element
+     keeps its clone 7820722409e; the native pointer array's tail store 299221fe232. Behavioral ArrayReassignAliases
+     (7 forms: slice, element pointer, array pointer and argument, from a variable, field, package var, through a
+     pointer), ArrayReassignForms and ArrayReassignUnsafe; GolibTests ArrayAssignInPlaceTests. -->
+
+### A struct's copy copies all of its arrays (P2)
+
+**A copy of a struct copies an array the struct reaches through an embedded struct, and a conversion copies its
+operand, as in Go.** A struct that held an array only through an embedded struct was copied without its array, so
+the copy and the original shared it, and a write through one showed in the other. A conversion between struct types,
+`T(v)`, built its result from `v`'s fields, so an array field, or a nested struct holding one, was shared with `v`
+the same way. Both now copy. A conversion copies once, where its result is stored or passed, and not where it is only
+read. See [Struct types](ConversionStrategies-Reference/struct-types.md#a-conversion-copies-its-operand).
+<!-- Batch 312 (ledger afe47908f0): P2's W-embed-array (claude/p2-embed-array-copy 40699e4fe6; converter 084af172ce7,
+     typeNeedsValueClone and structValueCloneFields now visit embedded value fields; fixture EmbeddedArrayCopy;
+     corpus b2d40722376 from the two-seeded footprint on four targets) and W-conv-copy (claude/p2-wall-c a7540ab86d;
+     structConversionCopy.go, b2e58928b51; fixture StructConversionCopy). The single clone: P2's union fix
+     ad5e15194c (926566a93f1: the operand copy and R's result copy both fired; the result copy is kept; mldsa/mlkem
+     field.cs lose 4 double clones, 9dd0f84c9a). -->
+
+### A reference read from native memory is refused (H)
+
+**A Go pointer, func, interface or `unsafe.Pointer` read or written whole through a pointer into native memory is
+refused by name.** For `*p`, where `p` points into memory from C or the operating system and the value is one of
+those types, the converted code took the memory's word for a managed reference: a read produced a reference to an
+object that does not exist, and a write stored a reference where the garbage collector cannot see it. Both now
+panic, naming the type. An `unsafe.Pointer` over memory Go allocated still reads and writes as before. golib's
+maps, channels, strings, slices and arrays are not affected.
+<!-- Batch 311, H's native-box reference floor (claude/h-nativebox-ref-floor 3ce394cbc0): golib 84e400bcc62,
+     NativeBox<T>.ValueAddress throws NativeStructLayoutMismatch(T, "a managed reference where Go stores words") for
+     a CLR reference-type T at a nonzero address; the exemption is COORD's ruling C, narrowed by source (managed Go
+     storage: the converted runtime's map.go indirect key and atomic_pointer.go atomicwb). Found as cgo-e2e
+     s6next's entry.next (DESIGN-cgo-phase3-marshaling.md section 18). The exempt read's managed-word hazard is an
+     OPEN BOARD row for .5 (3ce394cbc0), cure in section 18.2. -->
 
 ### Derived pointers keep what they point into (P5+H)
 
@@ -534,7 +609,9 @@ inline arrays come from `go.arrays.dll`, a new assembly in the go.lib package be
 loads only when it uses one. Indexing, `len`, `range` and printing such a field work as in Go. The standard library
 is never laid out this way, so its converted code is unchanged.
 
-For a module, the rule is automatic, and `-inline-arrays <pattern>` forces packages on, or `-<pattern>` off. A type
+For a module, the rule is automatic, and `-inline-arrays <pattern>` forces packages on, or `-<pattern>` off;
+`-inline-arrays <import path>#<TypeName>` selects one type in its own package, for a type that another package lays
+out at Go's bytes and passes back by value. A type
 the rule picks but cannot hold inline (an array or struct over 4096 bytes, an array field sliced or addressed, a
 struct from another package) converts as before, with warning `GO2CS2009`. Error `GO2CS2010` refuses a
 reinterpret between two structs whose arrays disagree, inline on one side and not on the other, when the packages
@@ -543,6 +620,13 @@ arrays, `fmt.Printf("%v", s)` among it, panics by name. Print the fields one at 
 inline panics by name when the struct around it also holds a string, a slice, a map, an interface or a pointer;
 a `copy` into or out of the array with constant bounds works, and so does slicing a local copy of the array. See
 [`-inline-arrays`](CommandLine.md), [Limitations](Limitations.md) and [diagnostic codes](DiagnosticCodes.md).
+
+A struct the rule does not hold inline can still be copied out of such memory: `x := *p` decodes its bytes at Go's
+offsets into a new value, arrays and arrays of arrays of numbers included, where it was refused by name. A struct
+that holds any other reference is refused by name, naming the field. A zero-length array field (`[0]T`, which C
+translations use for a trailing array) no longer counts against the struct's size checks. A whole read of a struct
+that holds a reference, through a pointer reinterpreted from Go storage of another layout, is now refused by name
+where it used to be read as if the layouts matched.
 <!-- docs/phase4/DESIGN-array-value-storage.md section 7 (the scout, 7.3 for the before-state:
      src/core/golib/runtime/RuntimeErrorPanic.cs refuses the whole-struct read) and its dated part-D and mixed-pair
      amendments. The library: merge b6f3bbb44f (C2, I0-lib; go.arrays packed by src/core/golib/golib.csproj:158-176#f8f2d9,
@@ -552,7 +636,9 @@ a `copy` into or out of the array with constant bounds works, and so does slicin
      limit: docs/Limitations.md "Reflection cannot read a struct whose arrays are held inline". The slice limit:
      docs/Limitations.md "A slice of an array held inline panics when the struct around it also holds a string, …",
      merge 6b78cef1a1 (C2, go-winio Part 2, claude/c2-inline-foreign-slice 0333434616; COORD ruling 3b, disclosed for
-     .4). -->
+     .4). B2: merge 592c8346ef (C2, claude/c2-b2-value-decode 7dfbf9595e; e2d8c170f9 GoValue, 4c8ce23f81 the rvalue
+     *p; GolibTests NativeBoxValueDecodeTests; footprint 0 x4). W14 (a) and B0': merge eeb8a79ff9 (C2, 953a27d8e3 and
+     150d1fdbd4; BOARD 2026-11-15 W14 row). -->
 
 ### A defined type over an instantiated generic converts (P1, H)
 
@@ -613,9 +699,11 @@ TypeScript compiler in Go (microsoft/TypeScript's `tsc` module, at a fixed commi
 each shape it found that did not convert or did not compile is fixed in this release. In go2cs's readiness runs on
 Windows, every package that TypeScript's parser, binder, type-checker and emitter need compiles with no hand edit
 to the converted C#, and the converted parser's output matches native Go's on every file of TypeScript's parser
-test corpus. Type-checking TypeScript's single-file compiler tests one at a time matched native Go's output on all
-but a few dozen of them, before fixes in this release for most of the rest. Five of its language-server packages
-are still refused (`GO2CS2002`) and skipped, and xxh3 is used through the fork described below.
+test corpus. Measured on Linux x64 (JIT, Release build) at this release's tree, the converted compiler's output
+matches native Go's on all 17,422 files of TypeScript's parser test corpus, and type-checking and emitting each of
+TypeScript's 7,404 single-file compiler tests, one at a time, matches native Go's output on every one. Five of its
+language-server packages are still refused (`GO2CS2005`) and skipped, and xxh3 is used through the fork described
+below.
 
 Among the shapes that now convert and run as in Go:
 
@@ -640,6 +728,10 @@ Among the shapes that now convert and run as in Go:
 - `&^` with a constant on a `uintptr` alias, a `:=`-bound variadic func literal used as a value, a value passed to
   another package's anonymous interface parameter, and a package function and a method of the same name;
 
+and a slice of pointers passed beside a callback to a generic function over an interface constraint
+(`GetErrorBaseline[T Diagnostic](…, diagnostics []T, compare func(a, b T) int)` called with a `[]*T`), which did not
+compile;
+
 and others. Two of these answered wrong without any error before: the promoted variadic method's reflection count,
 and a loop header that re-pointed a pointer parameter, whose condition read a stale value. The standard library
 contains almost none of these shapes, so its converted code is unchanged by all but a handful of lines.
@@ -649,7 +741,12 @@ contains almost none of these shapes, so its converted code is unchanged by all 
      of 17,422 parse units after C46; the full type-check pass 7,374 of 7,404 with the C45 xxh3 and C47 runtime
      patches; the 30 misses: C48 24, C49 5, C51 1), rerun-c48-c51-readings.txt (C48's 24 units match; C51 is
      ~110x per-call, correct output). All are Windows (i7) DIAGNOSTIC readings, not gates. TypeScript commit
-     ba29a56299. The five refused packages: internal/ls/lsconv, internal/ls/autoimport, internal/ls,
+     ba29a56299. 2026-11-16 (P4, through batch 310): the measured sentence is P4's emit gate at master 2c1ce10b25
+     (batch 310), linux-x64, JIT, Release, go1.26.11, COORD ACCEPTED 2026-11-16 13:59Z (predictions posted 07:13Z,
+     4/4 MET): parse 17,422/17,422, type-check 7,404/7,404, emit 7,404/7,404, the four demos byte-identical with Go,
+     the same five packages refused. The earlier sentence ("matched native Go's output on all but a few dozen ...
+     before fixes") was the Windows readiness reading below; the refusal code was GO2CS2002 before R's renumbering
+     (the GO2CS2005 section above). The five refused packages: internal/ls/lsconv, internal/ls/autoimport, internal/ls,
      internal/project, internal/fourslash. Merges: C1 2663620296, C3 b5e99e005e, C4 f3ce8a0fc9, C5 ef137b6ae8,
      C6/C12 24973ed469 + 00bc75369f, C8 c021114195, C9 d0f9d63ca1, C10 248966d5e8, C11 240a4dea0e, C15 b6a3bc13ff,
      C16 c5a21d17c6, C17 60b13275fb, C18 d345469a7d, C19 e0468a5309, C22 eeecc94d3b, C22e d613a0c234, C24
@@ -662,7 +759,13 @@ contains almost none of these shapes, so its converted code is unchanged by all 
 
 **Code that ccgo translated from C converts further.** modernc.org/sqlite and modernc.org/libc are C libraries
 translated to Go by ccgo, and converting them through go2cs found Go shapes that are rare in hand-written code but
-everywhere in translated C. These now convert and run as in Go:
+everywhere in translated C. At this release's tree, modernc.org/sqlite v1.62.0 and every package it imports convert
+with no package refused, on Windows x64 and on Linux x64. A converted program that creates a database file, writes
+and reads it back in SQLite's default journal mode and then in WAL mode, and removes it, prints exactly what the
+native Go program prints, on Windows x64 and on Linux x64. On Windows the conversion needs one extra value,
+`-inline-arrays=modernc.org/libc#largeInteger`, without which the first database opened in WAL mode panics
+([Known issues](KnownIssues.md#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger)). These
+shapes now convert and run as in Go:
 
 - a C function pointer carried as a `uintptr`: `__ccgo_fp(f)` and a call back through
   `*(*func(…))(unsafe.Pointer(&struct{ uintptr }{x}))`. Each top-level function gets one number, the same at every
@@ -678,12 +781,16 @@ everywhere in translated C. These now convert and run as in Go:
   before; a struct holding a pointer, string, slice, map, channel, func or interface field is refused by name;
 - a pointer conversion of a pointer conversion, `(*int8)(unsafe.Pointer((*int32)(p)))`;
 - type aliases as C translations write them: an alias named like a C# keyword, an alias of an anonymous struct used
-  across files and packages, and a declared type with a C name such as `float`, which keeps its own name;
+  across files and packages, an alias chain written in a file before the struct it ends at, and a declared type with
+  a C name such as `float`, which keeps its own name;
 - a defined type over a defined slice type (`type fermat nat` with `type nat []uint64`);
 - a terminating `switch` whose guarded `default` falls through, a multiple assignment whose target is `*(*T)(x)`,
   and an integer converted to a named string type;
 - a member that its package renames to avoid a name collision, reached through an import alias: `time` declares
-  `Location` as `ΔLocation`, because `Time` has a method of that name, and libc imports `time` as `gotime`;
+  `Location` as `ΔLocation`, because `Time` has a method of that name, and libc imports `time` as `gotime`. The same
+  holds for such a type reached only through another package's alias (`unix.Signal`, an alias of `syscall.Signal`,
+  in a package that does not import `syscall`), for a pointer method called on a renamed package variable, and for
+  another package taking that variable's address;
 - the address of an element of an array whose element type is an alias of an alias of an anonymous struct that
   another package declares (`&X_iob[i]` over libc's `FILE`);
 - an anonymous struct type declared inside a function and reinterpreted through `unsafe.Pointer`, and one
@@ -692,13 +799,58 @@ everywhere in translated C. These now convert and run as in Go:
   and a pointer method called on a field of a named result, which compiled but wrote into a copy, so the write was lost;
 - importing a converted package whose position map is one line longer than 64 KB, as modernc.org/sqlite's `lib`
   package's is. Its importers read none of its type aliases;
+- an anonymous struct that another package declares identically but spells through its own aliases, as sqlite's
+  `TLARGE_INTEGER` (fields of `DWORD` and `LONG`) does libc's `largeInteger` union, which now takes the other
+  package's type where both lay it out alike, so a C function pointer minted in one package is read through the
+  other's func type. On Windows sqlite lays `TLARGE_INTEGER` out at Go's bytes and libc does not, which is what the
+  `-inline-arrays` value above settles;
+- a struct that another package also declares, held as a field by a struct this package keeps (libc's `Titimerval`
+  on Linux), which did not compile;
+- an array-pointer view whose element is a ccgo union, such as `struct{ Fi [0]int32; Ff float32 }` (sqlite's `TExpr`
+  and `TRtreeCoord`, libc's socket-address union), which had length 0 over native memory;
+- a conversion between two struct types that both belong to other packages, `lib.Pitch(o)` with `o` an
+  `other.Pitch`, which did not compile. go2cs writes one small conversion function for such a pair in the package
+  that converts, since neither type's own assembly can hold it
+  ([Interfaces](ConversionStrategies-Reference/interfaces.md#and-a-struct-pair-of-two-foreign-types-is-served-by-a-function-which-needs-no-host));
 - one instantiation of a generic type used as a non-generic interface whose method names the type argument
   (`box[point]` as `interface{ val() point }`);
+- a struct value moving between a named struct type and an unnamed struct type with the same fields, by an explicit
+  conversion, by assignment or as an argument, and compared with `==` and `!=`, including a named type from another
+  package. An unnamed struct type written twice in one file is one Go type, and a value now moves between the two
+  places as Go allows;
+- an anonymous struct declared inside a function as the element of an array-pointer conversion,
+  `(*[N]struct{ … })(unsafe.Pointer(p))[i]`, which stopped the conversion;
+- a string's bytes read through `reflect.StringHeader`, whose `Data` is a number: `unsafe.Pointer(h.Data)` now
+  points at the string's bytes, as sqlite's table of C string constants (`__ccgo_ts`) needs;
 
 and others. Three uses of that last shape are not converted yet: the instantiation as a type argument the interface
 constrains, a required method promoted from an embedded field, and a second instantiation of the same type behind
 the same interface in one package. Each is named by the new warning `GO2CS2007`, and the C# build then fails at that
 site.
+
+**A write through the address of a field reached through a pointer conversion reaches the field.**
+`&(*T)(p).f` is the address of field `f` in the memory `p` points at, and `&*p` is `p` itself, after Go's nil check.
+Both used to box a copy, so every write through the result was lost with no error, and the result never compared
+equal to the field's address or to `p`. sqlite's mutexes record their owner through
+`atomic.StoreInt32(&(*mutex)(unsafe.Pointer(m)).id, id)`, and libc's `fmod` and `remquo` shift the bits of a double
+through `&*`, so both lost their writes. An increment or decrement through a conversion, `*(*int32)(x)++`, now
+compiles. In the standard library one line changes, in `runtime`'s heap growth (`&(*arenaList)`). See
+[Pointers](ConversionStrategies-Reference/pointers.md#the-address-of-a-field-reached-through-a-pointer-conversion-is-the-fields-own-address).
+
+**Parentheses around the operand of `&` change nothing.** `&((*T)(p).f)` is the same address as `&(*T)(p).f`, and
+`&(x)` the same as `&x`, as in Go. With the parentheses, go2cs took the address of a copy, so every write through it
+was lost. libc's recursive pthread mutex records its owner that way, and on Linux sqlite stopped forever the first
+time it opened a database, waiting on a lock it already held. In the standard library one line changes per target,
+in `runtime`'s heap. See
+[Pointers](ConversionStrategies-Reference/pointers.md#parentheses-around-an-address-of-operand-change-nothing).
+
+**`sync.Mutex` is Go's eight bytes.** C code translated to Go keeps mutexes in memory it allocates itself: sqlite's
+mutex is a struct holding a `sync.Mutex`, allocated with libc's `calloc` and reached through `unsafe.Pointer`. go2cs's
+`sync.Mutex` held a managed reference, so reading one out of that memory was refused by name. It now holds only two
+32-bit words, as Go's does, and works the same in the managed heap, on the stack and in C memory. An idle mutex is
+eight zero bytes, so a copy of an idle mutex is a free mutex of its own, and contended locking no longer allocates.
+One difference remains: a mutex copied while a goroutine is waiting on it can wake that goroutine through the copy.
+Go's `vet` reports every copy of a mutex after first use.
 
 **golang.org/x/sys/cpu reports the real CPU on amd64.** x/sys/cpu reads the processor's features with two assembly
 functions, `cpuid` and `xgetbv`, from its `init`. They converted to methods that throw, so a converted program that
@@ -730,7 +882,32 @@ program that never calls it is unaffected. If yours does, report it as a go2cs i
      stopped at its 64 KB default on lib's 123,448-byte GoPositionMap line; footprint 0/0 on 4 targets), W4/S10
      c09d5e04da (P2; CS0426 x5 fixture / x8 repro; footprint 0 x4), W5a 39b40c8c3a (G; CS0426 x4; footprint 0/0 on 4
      targets), S8c b62c67b6d8 (P2; CS1929 x6, and the silent write into a copy box on master; footprint 0 on 4 targets),
-     L1 4c101b8e57 (G; 4 unresolved dynamic types at master; footprint 0 on 4 targets). -->
+     L1 4c101b8e57 (G; 4 unresolved dynamic types at master; footprint 0 on 4 targets).
+     310 (P4, 2026-11-16, through batch 310 at master 2c1ce10b25): the convert sentence is COORD's 310 landing post
+     (20261116T070711Z): "a sqlite-cs convert-only leg, now in every battery, PASSES on windows + linux (W17 + W7
+     cleared master's refusal)". Running the demo is NOT claimed: G's runs of record (docs/phase4/DATA-sqlite-cs-demo.md,
+     runs A-C, byte-identical with native) each used stand-ins for walls since merged or still open (W9, the mutex,
+     rides after 311). Bullets: W7 merge 8c8b697736 (G, ff06d10513: a GoTypeAlias record names the lift its forward
+     alias chain reaches, not a marker); W11 merge 67113b4faa (P2, eccfffdcc9; ConversionStrategies-Reference
+     golib-namespace.md; footprint 0 x4); W13 merge edd917b022 (G, 85df98bc0d + acab661c3c); W12 merge 3d95f43749
+     (P2; struct-types.md; three neighbour shapes OPEN and loud, census reach 0, BOARD 2026-11-15 W12 row); W17 merge
+     d5cfd11e06 (P5, d2911a658e; master 309 refused the sqlite-cs conversion, rc 1; std census 0 on four targets); W8
+     merge 7b213dd6dd (H, fe14d5faf8; the header store with a changed Len is BOARD row 3, .5, which the sqlite path
+     reads on none of four targets). The pointer paragraph: W9b merge 290c08b18a (P2; pointers.md's two new sections;
+     behavioral AddressOfFieldThroughConversion and its Native twin; std footprint runtime/malloc.cs one line per
+     target, BOARD 2026-11-15 W9b row). Left out: C1's linux/arm64 rawSyscall6 r2 (merge 45307c4307), a fix to the
+     linux-arm64 build that first ships in this release.
+     311 (P4, 2026-11-18, through batch 311 at master f36b6b0d48; ledger 859f1227cb): W18 (C2's W18-A seat, claude/c2-w18-alias-lift-reuse
+     bd2a09c423 carries P1's W18 roots): f4e38409887 (an identical struct spelled through local aliases reuses the
+     import's lift by the import's own spelling) and fae89006f6b (an attributed public-lift record reads as public;
+     libc's largeIntegerᴛ1 carries [GoValueClone]); end-to-end arm red at 7185a1f735 with the func cookie panic.
+     W18-A bd2a09c423 (linux-x64: libc's Titimerval reused uuid's Itimervalᴛ1 while its Ttimeval field kept libc's
+     own lift, CS1503 x3 in G's closure build at 6bcc05d11f). W19 1152f6b6440 (P5; arrayPointerDoorUnionElement_test.go,
+     four arms; std never admitted, unchanged by construction). The demo is still NOT claimed: the windows sqlite
+     WAL pass stays blocked until batch 312, because W9a (P2's mutex, the W9 stand-in of G's runs) seats in 312, and
+     G's windows WAL reading (W18) has not been retaken on a tree carrying both. The file-backed demo's run claim
+     waits for 312's sqlite gates (windows: i9; linux: P4), each byte-identical with native or not claimed; the GUARD
+     stands (name Linux only until windows reads MATCH). -->
 
 ### An `unsafe`-free xxh3 for a `replace` (C1)
 
@@ -869,6 +1046,26 @@ makes no calls, most samples are charged to the loop's caller.
 
 **A nine-argument libc call on Apple silicon passes its ninth argument where Go 1.26 does.** go2cs still placed it
 where Go 1.24 did. `internal/syscall/unix`'s `getnameinfo` is such a call.
+
+**`unsafe.Sizeof` answers Go's size or refuses by name.** For a type golib cannot size the Go way, `unsafe.Sizeof`
+fell back to .NET's marshalling size, which is not Go's: one `dnsmessage` type measured 48 bytes where Go says 32. It
+now panics, naming the type. Every type the standard library passes to it is sized the Go way, so converted
+standard-library code is unchanged, and a Native AOT program no longer carries a throwing marshalling stub for each
+type that reaches it.
+<!-- Batch 311, i9's Sizeof fallback (claude/i9-sizeof-fallback 70befb6059): unsafe 01498f4afc4. The message:
+     "runtime error: unsafe.Sizeof: the Go size of <T> cannot be derived (GoReflect.TryGoSizeOf declined it)".
+     dnsmessage's SVCParam marshalled as 48 where Go says 32; a struct with a [1<<62]int64 field as 16. Every T the
+     windows corpus passes to Sizeof<T> answers through TryGoSizeOf (15 types probed under JIT, plus 3 TypeScript
+     boxes). -->
+
+**In a converted test, `t.Deadline()` reports the deadline that ends the test.** go2cs's test runner can end a
+single test that runs past a per-test limit, which Go does not have, and `t.Deadline()` reported only the deadline
+of the whole package run. A test that sized a wait from it could wait past the limit that ended it, and the run
+reported it abandoned instead of its own result. `t.Deadline()` now reports the earlier of the two.
+<!-- Batch 312, P4's T.Deadline seat (from C2; claude/p4-tdeadline 99bb4bc5bd; fix 0417718b99, COORD ruling (A)
+     2026-11-16). internal/poll's TestSplicePipePool, 45m budget and 30m per-test floor: abandoned at 1802.75 s
+     before (hosted A-7); after, it fails with its disclosed "leaked descriptors" signature at 1620.06 s, not
+     abandoned (hosted run 1759). GolibTests TestDeadlinePerTestTests 6/6. -->
 <!-- Profiler: merge c64f8404c8 (ca23b88d6e: "at MemProfileRate = 1 the first block event on a new stack hangs every
      time"; GolibTests ProfilerOwnAllocationTests, child-process bound; found as an 84-minute hang of GolibTests Debug in
      batch 283's battery; no platform named). GOARCH: merge 26186c1739 (28cfcf657e darwin, 030725e30e windows: Windows on
@@ -929,7 +1126,14 @@ loads many packages started about 40 to 65 ms faster under the JIT on linux/amd6
      targets). A2: merge d9d52c0abd, docs/phase4/DATA-startup-method-sets-a2.md (program "wide", paired medians -42 to
      -66 ms against an A/A control of -9 to +14 ms; hello and stringer within noise; one cloud linux/amd64 VM). -->
 
-### Smaller converter fixes (R, P2)
+### Smaller converter fixes (R, P2, P1)
+
+**A `switch` on a variable reads as written.** `switch os { … }` used to copy `os` into a temporary named `exprᴛ1`
+and test the temporary. When nothing can change the variable between the first case and the last, the converted
+`switch` now tests it in place; otherwise the temporary is named after it (`osᴛ1`). A `select` case on a channel
+variable names its temporary after the channel (`quitᴛ1`).
+<!-- Batch 312, P1's Tour item 3 (claude/p1-vp-switch-temp 672c430fc7; converter 061ae3868d4, switchTagInPlace and
+     switchTagTempPrefix; behavioral fixture over one plain identifier 8968472cde8; regen c6bd89f8b4c). -->
 
 **Converting for another platform reads that platform's Go settings.** With `-platforms` naming a target other than
 the converting host, go2cs now selects files gated on Go's tool tags (`goexperiment.*`, `amd64.v1`, `arm64.v8.0`)
@@ -940,6 +1144,18 @@ In the standard library this adds one file to the darwin build of `internal/goex
 **A module's `package main` keeps its own `package_info.cs` when converted again.** A second conversion into the same
 output used to warn, falsely, that the file belonged to another package and replaced it with the template, dropping
 anything kept outside its marker sections.
+
+**A promoted interface method named like a type of its package converts.** When a struct satisfies an interface
+only through its pointer, and a method promoted from an embedded interface field shares its name with a type of the
+package (method `Driver` beside type `Driver`), the converted method took the type's renamed spelling, `ΔDriver`,
+and did not compile. modernc.org/sqlite's tests reach this through `database/sql/driver.Connector`. The method now
+keeps its Go name, in its struct's method holder.
+<!-- Batch 311, P1's class C forwarder name (claude/p1-promoted-forwarder-name f9b44d1399): converter e9db328467c
+     (getSanitizedFunctionName for the forwarder and its call; CS0102 same package, CS1929 against a foreign
+     interface; the TS session's class C, 2026-11-16); behavioral PromotedForwarderTypeNameCollision with the TS
+     probe's t3 repro as its second arm (2b72404403d). The holder placement: P1's OQ2 x class C fix d61ca26f4f..
+     f36b6b0d48 (CS0102 x4 in go2cs.slnx at the union). The GO2CS2006 flow-insensitivity note is a BOARD row only
+     (f9b44d1399). -->
 <!-- R, batch 281: d914d8b360 (claude/r-tooltags, 14bea07f1e): src/go2cs/directiveOperations.go loaderToolTags per
      target; footprint darwin +1 file, windows and linux 0. P2, batch 282: e85dc60698 (claude/p2-pkginfo-doc-warning):
      BOARD 2026-11-10 "a main package in a module refused its own package_info.cs on every reconvert"; reach 0
@@ -991,14 +1207,42 @@ Converted projects keep .NET's default, workstation GC. See [.NET runtime settin
      converted-project default". "Since 1.26.10.2": Tuning.md at nuget-1.26.10.3 attributed most of the 1.26.10.1 ->
      1.26.10.2 JIT speed-up to the delay of 0. -->
 
-<!-- 2026-11-16 (P4): HELD for P1's AOT reading (COORD: "the AOT items still wait for P1"). Two user-visible Native AOT
-     changes from batch 308 have no line yet, and get one when P1's reading lands:
-     (1) merge 055f4e6230 (i9, lever G): golib's ж<T> no longer names ElemRefBox<T> in its view lookup, which ends a
-     generic cycle; Native AOT IL3054 654 -> 0 on a golib-only consumer, image 19.7 -> 11.2 MB, PerfStartup -44%,
-     parsedemo -34%, ILC peak -34..-41%; +2.7% PerfFieldView under the JIT.
-     (2) merge d39b1ffe00 (P4): Tuning.md's "Native AOT method-body folding" (anchor native-aot-method-body-folding):
-     IlcFoldIdenticalMethodBodies=false makes the AOT compiler 4.5x faster on PerfStartup and parsedemo 32m20s ->
-     7m06s, for an image 11-15% larger; go2cs keeps the SDK default (the owner's ruling). -->
+**A Native AOT publish is smaller and lighter to build, and the README walkthrough's program now publishes.**
+golib's pointer box named a type that named the pointer box again, one level deeper each time, and Native AOT
+expanded that cycle until it reached its nesting limit, compiling every method past the limit as one that always
+throws. The cycle is gone. A program that uses only golib went from 654 such cut-offs to none and from a 19.7 MB
+executable to 11.2 MB. A larger benchmark program's executable shrank by about a quarter, and the AOT compiler's
+peak memory by a third or more (measured on `win-x64`). With the 1.26.10.3 packages the README walkthrough's
+program, which uses github.com/fatih/color, did not publish with Native AOT on `linux-x64`: the compiler stopped at
+the native string table's 2 GiB ceiling. Now it publishes, and its string table is 250 MiB. A program that
+`go2cs -recurse` converted now publishes with `dotnet publish -r <rid> -p:PublishAot=true`, run in the program's
+own folder or naming the program's project file: the converted libraries are compiled into the program and are not
+published on their own. Through 1.26.10.3 that command failed on the converted analyzer projects, and a folder
+converted with `-recurse=nuget` published each library on its own. See
+[Tuning](Tuning.md#choosing-a-deployment). A program under the JIT runs as before, with one benchmark 2.7% slower.
+
+**Tuning has a new section on Native AOT build time.** One pass of the AOT compiler, which folds identical method
+bodies, takes most of its time on go2cs programs. Turning it off with `IlcFoldIdenticalMethodBodies=false` built
+one benchmark program 4.5 times faster and a large program in 7 minutes instead of 32, for an executable 11% to 15%
+larger. go2cs keeps the .NET default. See
+[Native AOT method-body folding](Tuning.md#native-aot-method-body-folding).
+<!-- Lever G: merge 055f4e6230 (i9, claude/i9-golib-elemview-cycle c08c2bba8c): golib's ж<T> no longer names
+     ElemRefBox<T> in its view lookup (an internal virtual the element box overrides); the cycle had returned with
+     4ad8e8df66 (2026-10-21), so 1.26.10.3 carries it. docs/phase4/DATA-ts-aot-b4.md section 15 (win-x64): the
+     golib-only consumer 654 IL3054 lines -> 0, image 19,697,664 -> 11,214,848 B; PerfStartup image 120.5 -> 87.6 MB
+     (-27.3%), ILC peak private 6.54 -> 3.84 GB (-41.3%); parsedemo image -26.2%, ILC peak -33.8%. JIT cost: +2.7%
+     PerfFieldView (the merge message). The walkthrough program: P1's AOT rows 1-3, 2026-11-16, linux-x64 (mailbox
+     20261116T041238Z-P1.md): at master colordemo publishes with the property in its csproj, .strtab 262,013,197
+     bytes, 0 'will always throw'; at 1.26.10.3 ILC fails at StringTableBuilder.CreateIndex with 6,188 such lines,
+     on both routes. P3's runs A and B, 2026-11-15, read the same failure. The command-line property: P1's seat
+     E1+E2 (proposed for batch 311) makes it work; reword the sentence if that seat lands in this release.
+     2026-11-18 (P4, HOOK 311): E1+E2 landed in 311 (claude/p1-aot-publish b6326e52b3; af20562ff29, f358d950693);
+     reworded from docs/Tuning.md's table and its provenance note: NETSDK1207 on the netstandard2.0 analyzer projects
+     (go2cs-gen, go2cs-arrays-gen) on a local -recurse; a -recurse=nuget folder published each library as its own .so;
+     the analyzer projects keep PublishAot false (repoguard TestAnalyzerProjectsKeepPublishAotOff) and the -recurse
+     root's Directory.Build.targets sets IsPublishable false on a Library.
+     Folding: merge d39b1ffe00 (P4); Tuning.md's table (win-x64: PerfStartup 6 min 29 s -> 1 min 27 s, parsedemo
+     32 min 20 s -> 7 min 6 s; executables +15% and +11%); the owner's ruling keeps the SDK default. -->
 
 ### Documentation (COORD)
 
@@ -1020,6 +1264,47 @@ beside the standard-library roster.
      batch 308; docs/ValidatedModules.md, 9 rows, read with Go 1.26.10 on go.* 1.26.10.3) and 64a5cc7e24 (P4, batch
      309; docs/README.md's Explore list). -->
 
+<!-- HOOK 311 (P4), FILLED 2026-11-18 from the ledger line of batch 311 (859f1227cb; master b2eaf5290a ->
+     f36b6b0d48). Each seat and where it went:
+     - P1 OQ2 method holder (0f79b486cb): already in this draft ("Every Go method is in its receiver type's method
+       holder", under Upgrading from 1.26.10.3; f2fcf670d8 wrote it).
+     - P1 AOT E1+E2 (b6326e52b3): the Native AOT paragraph's command-line sentence reworded.
+     - P1 CLASS C forwarder name (f9b44d1399) and the OQ2 x class C holder fix (d61ca26f4f..f36b6b0d48): Smaller
+       converter fixes.
+     - P5 W19 + D4 (988a4cec58): D4 in the array-view section; W19 a sqlite-cs bullet. D4 does not cure the field
+       view's open-slice limit, so that sentence stays.
+     - C2 W18-A alias lift reuse (bd2a09c423), carrying P1's W18 roots: two sqlite-cs bullets. The windows sqlite WAL
+       pass stays blocked until batch 312 (W9a); the demo GUARD stands.
+     - R array reassign cut A (99f34a588e): its own section.
+     - H native-box reference floor (3ce394cbc0): its own section.
+     - i9 Sizeof fallback (70befb6059): Runtime fixes.
+     - No news item, with the reason: G DATA-methodset-scout (1752fc07fb, a record); H W8 should-fix (9d3401725c,
+       IHeaderDataCarrier made internal, no behaviour change); H pin entries once (0a51ac2399, test diagnostic only);
+       P5 alloc loop harden (4fe430f549, a test); R hand-own pointer root (8a21aede04, ten hand-owned files respelled
+       to @unsafe.Pointer.To<T>, same behaviour, plus a repoguard rule); P4 AOT docs (e7a4d94f7d, already in this
+       draft). -->
+
+<!-- HOOK 312 (P4), FILLED 2026-11-18 from the ledger line of batch 312 (afe47908f0; master f36b6b0d48 ->
+     b63418fafc), the last batch before the .4 freeze. Each seat and where it went:
+     - The sqlite demo GUARD is LIFTED, per platform: the file demo (sqlite-cs cf739c54a5, demo/file) is
+       byte-identical to native Go, WAL pass included, on windows (i9, union 2fb422386c) and on linux (P4, union
+       33d60d2ab9, after P2's paren-address fix), no stand-ins, both with -inline-arrays=modernc.org/libc#largeInteger
+       (COORD 312 landing post). The sqlite lead now says so; the windows seed is C2's ruling C (0881fa6371) with its
+       known issue (docs/KnownIssues.md) and the per-type -inline-arrays form (native-struct section).
+     - P2 W9a mutex (bd2f1e3c38): the sqlite section, "sync.Mutex is Go's eight bytes".
+     - P2 paren-address (b346c4d6a4, union fix; converter 2289a7c49b4; std runtime/<t>/mheap.cs -1/+1 x4 at
+       33d60d2ab9): the sqlite section.
+     - P2 wall C (a7540ab86d): a sqlite-cs bullet; W-conv-copy, W-embed-array (40699e4fe6) and the one-clone union fix
+       (ad5e15194c): the new struct-copy section.
+     - P2 zero-length array clone (54aa3a5b85) and its InotifyEvent suppressions (0a34f2f4d6): P2's own bullet under
+       Upgrading from 1.26.10.3, as written.
+     - C1 -tests -recurse skip (bcc0b03286): C1's own sentence in the -recurse section, as written.
+     - P4 T.Deadline (99bb4bc5bd): Runtime fixes. P1 Tour 3 switch temps (672c430fc7): Smaller converter fixes.
+       R class B slice proxy (9b6a116c33): a TypeScript readiness bullet.
+     - No news item: P5 cpu-time harden (fc18c360b6, a test); P4 ide-mode cites (978a497b63, docs citations);
+       P4 news-310 and news-311 (this draft).
+     The .4 freeze is in effect: no batch follows before the release; only release-cut items change this draft. -->
+
 <!-- 2026-11-15 (P4, docs audit Q2): the section below stood in NEWS.md as a held, visible "November XX" entry.
      Moved here verbatim (its heading demoted to ###) so the archive page shows no PENDING text; its items repeat
      some of this draft's (the assembly renaming, the break floor) and are merged at the release cut. -->
@@ -1033,8 +1318,8 @@ beside the standard-library roster.
      1.26.11.1, built from Go 1.26.11 (2026-11-12, the 1.26.11 patch hop). -->
 
 **NuGet 1.26.11.1.** PENDING. The fourth release on the Go 1.26 line, and the first built from Go 1.26.11, a Go patch
-release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a promoted
-method through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
+release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a method
+through `using static` alone; they are first under *Upgrading from 1.26.10.3*.
 
 **Upgrading from 1.26.10.3.**
 
@@ -1050,9 +1335,10 @@ method through `using static` alone; they are first under *Upgrading from 1.26.1
   1.26.11.1 revision.
   <!-- source: the promoted-forwarder seat (docs/phase4/DESIGN-promoted-forwarder-placement.md; owner ruling
        2026-11-10: "better breaking changes now than before we're deep with users"). The moved members are announced
-       to the binary-compatibility guard as generated CP0002 entries, 900 entries in 20 suppression files
-       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.11.1. The nugetgo
-       rebuild wave ships with this release (the owner's hands). -->
+       to the binary-compatibility guard as generated CP0002 entries
+       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1; 900 entries in 20 files when this seat landed,
+       generated since together with the method-holder moves and the U+0394 renames below), and <GoBreakFloor> is
+       1.26.11.1. The nugetgo rebuild wave ships with this release (the owner's hands). -->
 - **Standard-library assemblies are named after their packages.** PENDING. Package `go.fmt` now ships `go.fmt.dll`,
   not `fmt.dll`, and likewise every converted standard-library assembly (`go.net.dll`, `go.crypto.tls.dll`,
   `go.go.ast.dll` for package `go.go.ast`, `go.testing.dll`). The package IDs do not change, nor do `golib.dll`
@@ -1064,13 +1350,65 @@ method through `using static` alone; they are first under *Upgrading from 1.26.1
   <!-- source: OQ4, docs/PLAN-public-surface-stability.md (ruled), the design docs/phase4/DESIGN-assembly-identity.md;
        src/go2cs/assemblyIdentity.go. The binary-compatibility guard compares each renamed assembly with its 1.26.10.3
        baseline through a rename map keyed to this release (src/tools/pushnuget/GoApiCompat.psm1). -->
-- **`using static` alone no longer brings promoted methods.** PENDING. C# that calls into a converted package with
-  only `using static go.bufio_package;` still sees the package's types, functions and the methods its types declare.
-  A method a struct promotes from an embedded struct of the same package now needs the namespace as well:
-  add `using go;` (or `using go.<path>;` for a package below the root). Converted code already has it.
-  [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
+- **`using static` alone no longer brings methods.** PENDING. C# that calls into a converted package with only
+  `using static go.bufio_package;` still sees the package's types, functions, constants and variables, but no method:
+  neither the methods its types declare nor a method a struct promotes from an embedded struct of the same package.
+  Add the namespace as well: `using go;` (or `using go.<path>;` for a package below the root). Converted code already
+  has it. [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
   <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
        (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
+- **Every Go method is in its receiver type's method holder.** PENDING. Through 1.26.10.3 the methods a package
+  declares were members of the package class (`time_package`); from 1.26.11.1 the methods of each type are in a class
+  of their own beside the package class, in the same namespace (`timeᴛTime` holds `time.Time`'s methods). A method is
+  still an extension method on its receiver, so `t.Add(d)` reads as before once the namespace is imported (`using go;`,
+  or `using go.<path>;` for a package below the root); `using static go.time_package;` alone no longer brings any
+  method. A call written in static form through the package class, `time_package.Add(t, d)`, is now
+  `t.Add(d)`. In the standard library more than eight thousand public methods moved, counted once for each assembly
+  a package ships, in over two hundred packages, about 120 of which a program can import. An assembly compiled
+  against 1.26.10.3 that calls a Go method fails under 1.26.11.1 with `MissingMethodException`, and the break floor
+  refuses that combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+  <!-- source: the method-holder seat (OQ2, P1; docs/phase4/SCOUT-method-holder.md on
+       claude/p1-oq2-method-holder-scout). The moved members are announced to the binary-compatibility guard by
+       New-GoApiCompatMoveSuppressions.ps1 over the OQ2 cut's release-smoke pack (2026-11-15): 8,273 CP0002 move
+       entries across all assets, promoted forwarders included, in 230 suppression files that also carry the renames
+       below (13,234 entries in all). The package counts are read from those files: 213 carry a CP0002 entry, 120 of
+       them reachable (no internal segment, not vendored). -->
+- **Names that carried a `Δ` prefix keep their Go names.** PENDING. Through 1.26.10.3 a type, constant or variable
+  whose Go name a method of its package also used was emitted with a `Δ` prefix: `go/doc/comment`'s interface `Text`
+  was `ΔText`, because `Printer` has a method `Text`. With each method in its receiver's holder the two names no
+  longer meet, and from 1.26.11.1 every such name is its Go name. In the standard library this renames over two hundred
+  types and dozens of constants and variables, and changes well over a thousand members that name them (fields,
+  parameters, return types, interface members), in about a hundred packages, two thirds of which a program can
+  import. C# source that names the prefixed form uses the Go name instead (`ΔText` becomes `Text`). An assembly
+  compiled against 1.26.10.3 that binds a prefixed name fails under 1.26.11.1, and the break floor refuses that
+  combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+  <!-- source: the method-holder seat (OQ2, P1); the converter's ShadowVarMarker no longer applies once methods leave
+       the package class. Announced to the binary-compatibility guard as generated rename entries
+       (New-GoApiCompatMoveSuppressions.ps1, the U+0394 drop, COORD ruling 2026-11-15 10:14Z: a removed member is a
+       rename only when its documentation id with every U+0394 dropped is in the current surface exactly, or a move
+       once its receiver and signature drop theirs): 4,961 entries across all assets, CP0001 369, CP0002 4,515, CP0006
+       59, CP0008 16, CP0021 2. On the lib asset alone: 241 types (CP0001), 1,713 members whose id names a prefixed
+       form, in 102 packages, 67 of them reachable. -->
+- **A type, constant or variable named like a method keeps its Go name.** PENDING. A package-level name that shared
+  its spelling with a method of the package took a `Δ` prefix in C#, because both were members of the package class:
+  `time.Second` was `time.ΔSecond`, `reflect.Type` was `reflect.ΔType`, `syscall.Handle` was `syscall.ΔHandle`. With
+  the methods in their holders the names no longer meet, and each keeps its Go spelling. C# source that wrote a `Δ`
+  name writes the Go name.
+  <!-- source: the same seat; behavioral fixtures MethodHolderNames and MethodHolderAlias, and every golden that named
+       a renamed element (goldens: re-baseline). -->
+- **A struct whose only array has length zero no longer has `ΔClone`.** PENDING. Through 1.26.10.3 a struct with a
+  fixed-size array field implemented `go.IGoValueClone` and had a generated `ΔClone()`, because a C# copy of the
+  struct shares the array where Go copies it, and every Go value copy called the clone. A zero-length array holds
+  nothing to copy, so from 1.26.11.1 a struct whose only such field is zero-length has neither, and its value copy is
+  a plain C# copy. In the standard library this is one type, `syscall.InotifyEvent` on Linux, which ends
+  `Name [0]uint8`. C# source that called its `ΔClone()` copies the value instead. An assembly compiled against
+  1.26.10.3 that calls it, or uses the struct as `IGoValueClone`, fails under 1.26.11.1, and the break floor refuses
+  that combination first (`GO2CS3002`): rebuild against 1.26.11.1.
+  <!-- source: P2's zero-length-array seat (54aa3a5b85, batch 312). Announced to the binary-compatibility guard as two
+       generated entries (New-GoApiCompatMoveSuppressions.ps1, the clone drop: CP0008 for the struct, CP0002 for
+       ΔClone) on runtimes/linux-x64 against 1.26.10.3. The generator over the 312 union's release-smoke pack (362
+       packages) found no other: 13,236 entries in 230 files, 0 refused. linux-arm64 has no 1.26.10.3 asset to compare
+       with; darwin and windows have no InotifyEvent. -->
 
 **A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
 than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,

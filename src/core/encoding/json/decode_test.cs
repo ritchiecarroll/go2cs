@@ -22,6 +22,7 @@ using testing = testing_package;
 using time = time_package;
 using go.math;
 using static go.encoding.json_package;
+using static json_internal_test_package;
 
 partial class json_internal_test_package {
 
@@ -61,11 +62,17 @@ public partial struct PP {
 
 public partial struct SS /*@string*/;
 
+} partial class json_internal_testᴛSS {
+
 public static error UnmarshalJSON(this ref SS _, slice<byte> data) {
     return new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number", Type: reflect.TypeFor<SS>())));
 }
 
+} partial class json_internal_test_package {
+
 public partial struct TAlias /*T*/;
+
+} partial class json_internal_testᴛTAlias {
 
 public static error UnmarshalJSON(this ref TAlias tt, slice<byte> data) {
     ref var t = ref heap<T>(new T(), out var Ꮡt);
@@ -75,6 +82,8 @@ public static error UnmarshalJSON(this ref TAlias tt, slice<byte> data) {
     tt = (TAlias)t;
     return default;
 }
+
+} partial class json_internal_test_package {
 
 public partial struct TOuter {
     public TAlias T;
@@ -107,10 +116,14 @@ public partial struct unmarshaler {
     public bool T;
 }
 
+} partial class json_internal_testᴛunmarshaler {
+
 public static error UnmarshalJSON(this ref unmarshaler u, slice<byte> b) {
     u = new unmarshaler(true); // All we need to see that UnmarshalJSON is called.
     return default;
 }
+
+} partial class json_internal_test_package {
 
 internal partial struct ustruct {
     public unmarshaler M;
@@ -119,6 +132,8 @@ internal partial struct ustruct {
 public partial struct unmarshalerText {
     public @string A, B;
 }
+
+} partial class json_internal_testᴛunmarshalerText {
 
 // needed for re-marshaling tests
 public static (slice<byte>, error) MarshalText(this unmarshalerText u) {
@@ -138,6 +153,8 @@ public static error UnmarshalText(this ref unmarshalerText u, slice<byte> b) {
     return default;
 }
 
+} partial class json_internal_test_package {
+
 internal static encoding.TextUnmarshaler _ᴛ1ʗ = new json_internal_test_package.unmarshalerTextжTextUnmarshaler(((ж<unmarshalerText>)nil));
 
 internal partial struct ustructText {
@@ -147,11 +164,17 @@ internal partial struct ustructText {
 // u8marshal is an integer type that can marshal/unmarshal itself.
 internal partial struct u8marshal /*num:uint8*/;
 
+} partial class json_internal_testᴛu8marshal {
+
 internal static (slice<byte>, error) MarshalText(this u8marshal u8) {
     return (slice<byte>(fmt.Sprintf("u%d"u8, u8)), default);
 }
 
+} partial class json_internal_test_package {
+
 internal static error errMissingU8Prefix = errors.New("missing 'u' prefix");
+
+} partial class json_internal_testᴛu8marshal {
 
 internal static error UnmarshalText(this ref u8marshal u8, slice<byte> b) {
     if (!bytes.HasPrefix(b, [(byte)'u'])) {
@@ -164,6 +187,8 @@ internal static error UnmarshalText(this ref u8marshal u8, slice<byte> b) {
     u8 = (u8marshal)(uint8)n;
     return default;
 }
+
+} partial class json_internal_test_package {
 
 internal static encoding.TextUnmarshaler _ᴛ2ʗ = new json_internal_test_package.u8marshalжTextUnmarshaler(((ж<u8marshal>)nil));
 
@@ -294,9 +319,15 @@ public partial struct XYZ {
 internal partial struct unexportedWithMethods {
 }
 
+} partial class json_internal_testᴛunexportedWithMethods {
+
 internal static void F(this unexportedWithMethods _) { }
 
+} partial class json_internal_test_package {
+
 internal partial struct byteWithMarshalJSON /*num:byte*/;
+
+} partial class json_internal_testᴛbyteWithMarshalJSON {
 
 internal static (slice<byte>, error) MarshalJSON(this byteWithMarshalJSON b) {
     return (slice<byte>(fmt.Sprintf(@"""Z%.2x"""u8, (byte)b)), default);
@@ -314,7 +345,11 @@ internal static error UnmarshalJSON(this ref byteWithMarshalJSON b, slice<byte> 
     return default;
 }
 
+} partial class json_internal_test_package {
+
 internal partial struct byteWithPtrMarshalJSON /*num:byte*/;
+
+} partial class json_internal_testᴛbyteWithPtrMarshalJSON {
 
 internal static (slice<byte>, error) MarshalJSON(this ref byteWithPtrMarshalJSON b) {
     return ((byteWithMarshalJSON)(byte)(b)).MarshalJSON();
@@ -324,7 +359,11 @@ internal static error UnmarshalJSON(this ж<byteWithPtrMarshalJSON> Ꮡb, slice<
     return (Ꮡb.Reinterpret<byteWithPtrMarshalJSON, byteWithMarshalJSON>()).UnmarshalJSON(data);
 }
 
+} partial class json_internal_test_package {
+
 internal partial struct byteWithMarshalText /*num:byte*/;
+
+} partial class json_internal_testᴛbyteWithMarshalText {
 
 internal static (slice<byte>, error) MarshalText(this byteWithMarshalText b) {
     return (slice<byte>(fmt.Sprintf(@"Z%.2x"u8, (byte)b)), default);
@@ -342,7 +381,11 @@ internal static error UnmarshalText(this ref byteWithMarshalText b, slice<byte> 
     return default;
 }
 
+} partial class json_internal_test_package {
+
 internal partial struct byteWithPtrMarshalText /*num:byte*/;
+
+} partial class json_internal_testᴛbyteWithPtrMarshalText {
 
 internal static (slice<byte>, error) MarshalText(this ref byteWithPtrMarshalText b) {
     return ((byteWithMarshalText)(byte)(b)).MarshalText();
@@ -352,7 +395,11 @@ internal static error UnmarshalText(this ж<byteWithPtrMarshalText> Ꮡb, slice<
     return (Ꮡb.Reinterpret<byteWithPtrMarshalText, byteWithMarshalText>()).UnmarshalText(data);
 }
 
+} partial class json_internal_test_package {
+
 internal partial struct intWithMarshalJSON /*num:nint*/;
+
+} partial class json_internal_testᴛintWithMarshalJSON {
 
 internal static (slice<byte>, error) MarshalJSON(this intWithMarshalJSON b) {
     return (slice<byte>(fmt.Sprintf(@"""Z%.2x"""u8, (nint)b)), default);
@@ -370,7 +417,11 @@ internal static error UnmarshalJSON(this ref intWithMarshalJSON b, slice<byte> d
     return default;
 }
 
+} partial class json_internal_test_package {
+
 internal partial struct intWithPtrMarshalJSON /*num:nint*/;
+
+} partial class json_internal_testᴛintWithPtrMarshalJSON {
 
 internal static (slice<byte>, error) MarshalJSON(this ref intWithPtrMarshalJSON b) {
     return ((intWithMarshalJSON)(nint)(b)).MarshalJSON();
@@ -380,7 +431,11 @@ internal static error UnmarshalJSON(this ж<intWithPtrMarshalJSON> Ꮡb, slice<b
     return (Ꮡb.Reinterpret<intWithPtrMarshalJSON, intWithMarshalJSON>()).UnmarshalJSON(data);
 }
 
+} partial class json_internal_test_package {
+
 internal partial struct intWithMarshalText /*num:nint*/;
+
+} partial class json_internal_testᴛintWithMarshalText {
 
 internal static (slice<byte>, error) MarshalText(this intWithMarshalText b) {
     return (slice<byte>(fmt.Sprintf(@"Z%.2x"u8, (nint)b)), default);
@@ -398,7 +453,11 @@ internal static error UnmarshalText(this ref intWithMarshalText b, slice<byte> d
     return default;
 }
 
+} partial class json_internal_test_package {
+
 internal partial struct intWithPtrMarshalText /*num:nint*/;
+
+} partial class json_internal_testᴛintWithPtrMarshalText {
 
 internal static (slice<byte>, error) MarshalText(this ref intWithPtrMarshalText b) {
     return ((intWithMarshalText)(nint)(b)).MarshalText();
@@ -407,6 +466,8 @@ internal static (slice<byte>, error) MarshalText(this ref intWithPtrMarshalText 
 internal static error UnmarshalText(this ж<intWithPtrMarshalText> Ꮡb, slice<byte> data) {
     return (Ꮡb.Reinterpret<intWithPtrMarshalText, intWithMarshalText>()).UnmarshalText(data);
 }
+
+} partial class json_internal_test_package {
 
 internal partial struct mapStringToStringData {
     public map<@string, @string> Data; /*`json:"data"`*/
@@ -812,7 +873,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = slice<unmarshalT
         CaseName: Name(""),
         @in: @"{""2009-11-10T23:00:00Z"": ""hello world""}",
         ptr: @new<map<time.Time, @string>>(),
-        @out: new map<time.Time, @string>{[time.Date(2009, 11, 10, 23, 0, 0, 0, time.ΔUTC)] = "hello world"}
+        @out: new map<time.Time, @string>{[time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC)] = "hello world"}
     ),
 
     // issue 8305
@@ -1346,7 +1407,7 @@ public static void TestMarshalInvalidUTF8(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMarshalInvalidUTF8_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -1448,7 +1509,7 @@ private static readonly @string unexpectedEndOfJsonInputˢᵇ = "unexpected end 
 public static void TestUnmarshal(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in range(unmarshalTests)) {
         ref var tt = ref heap(new unmarshalTestsᴛ1(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -1466,7 +1527,7 @@ public static void TestUnmarshal(ж<testing.T> t) {
             }
 
             var typ = reflect.TypeOf(ttʗ1.ptr);
-            if (typ.Kind() != reflect.ΔPointer) {
+            if (typ.Kind() != reflect.Pointer) {
                 tΔ1.Fatalf("%s: unmarshalTest.ptr %T is not a pointer type", ttʗ1.Where, ttʗ1.ptr);
             }
             typ = typ.Elem();
@@ -1576,7 +1637,7 @@ public static void TestNumberAccessors(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestNumberAccessors_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -1692,7 +1753,7 @@ public static void TestErrorMessageFromMisusedString(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestErrorMessageFromMisusedString_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -2175,7 +2236,7 @@ public static void TestInterfaceSet(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestInterfaceSet_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -2215,13 +2276,13 @@ public partial struct NullTest {
     public any Interface;
     public ж<global::go.encoding.json_package.RawMessage> PRaw;
     public ж<time.Time> PTime;
-    public ж<bigꓸInt> PBigInt;
+    public ж<big.Int> PBigInt;
     public ж<MustNotUnmarshalText> PText;
     public ж<bytes.Buffer> PBuffer; // has methods, just not relevant ones
     public ж<EmptyStruct> PStruct;
     public global::go.encoding.json_package.RawMessage Raw;
     public time.Time Time;
-    public bigꓸInt BigInt;
+    public big.Int BigInt;
     public MustNotUnmarshalText Text;
     public bytes.Buffer Buffer;
     public EmptyStruct Struct;
@@ -2291,7 +2352,7 @@ public static void TestUnmarshalNulls(ж<testing.T> t) {
         Interface: @new<MustNotUnmarshalJSON>(),
         PRaw: @new<global::go.encoding.json_package.RawMessage>(),
         PTime: @new<time.Time>(),
-        PBigInt: @new<bigꓸInt>(),
+        PBigInt: @new<big.Int>(),
         PText: @new<MustNotUnmarshalText>(),
         PStruct: @new<EmptyStruct>(),
         PBuffer: @new<bytes.Buffer>(),
@@ -2355,6 +2416,8 @@ public static void TestUnmarshalNulls(ж<testing.T> t) {
 public partial struct MustNotUnmarshalJSON {
 }
 
+} partial class json_internal_testᴛMustNotUnmarshalJSON {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mustNotUnmarshalJSONWasˢ => ref mustNotUnmarshalJSONWasˢᵇ;
 private static readonly @string mustNotUnmarshalJSONWasˢᵇ = "MustNotUnmarshalJSON was used"u8;
@@ -2363,8 +2426,12 @@ public static error UnmarshalJSON(this MustNotUnmarshalJSON x, slice<byte> data)
     return errors.New(mustNotUnmarshalJSONWasˢ);
 }
 
+} partial class json_internal_test_package {
+
 public partial struct MustNotUnmarshalText {
 }
+
+} partial class json_internal_testᴛMustNotUnmarshalText {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mustNotUnmarshalTextWasˢ => ref mustNotUnmarshalTextWasˢᵇ;
@@ -2373,6 +2440,8 @@ private static readonly @string mustNotUnmarshalTextWasˢᵇ = "MustNotUnmarshal
 public static error UnmarshalText(this MustNotUnmarshalText x, slice<byte> text) {
     return errors.New(mustNotUnmarshalTextWasˢ);
 }
+
+} partial class json_internal_test_package {
 
 internal partial struct TestStringKind_stringKind /*@string*/;
 
@@ -2450,7 +2519,7 @@ public static void TestUnmarshalTypeError(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalTypeError_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -2482,7 +2551,7 @@ public static void TestUnmarshalSyntax(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalSyntax_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -2526,6 +2595,8 @@ public static void TestUnmarshalUnexported(ж<testing.T> t) {
 // as an RFC 3339 time in UTC.
 public partial struct Time3339 /*global::go.time_package.Time*/;
 
+} partial class json_internal_testᴛTime3339 {
+
 public static error UnmarshalJSON(this ref Time3339 t, slice<byte> b) {
     if (len(b) < 2 || b[0] != '"' || b[len(b) - 1] != '"') {
         return fmt.Errorf("types: failed to unmarshal non-string value %q as an RFC 3339 time"u8, b);
@@ -2537,6 +2608,8 @@ public static error UnmarshalJSON(this ref Time3339 t, slice<byte> b) {
     t = (Time3339)tm;
     return default;
 }
+
+} partial class json_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
@@ -2615,7 +2688,7 @@ public static void TestPrefilled(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestPrefilled_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -2650,7 +2723,7 @@ public static void TestInvalidUnmarshal(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestInvalidUnmarshal_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -2841,7 +2914,7 @@ public static void TestUnmarshalEmbeddedUnexported(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalEmbeddedUnexported_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -2887,7 +2960,7 @@ public static void TestUnmarshalErrorAfterMultipleJSON(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalErrorAfterMultipleJSON_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -2907,7 +2980,11 @@ public static void TestUnmarshalErrorAfterMultipleJSON(ж<testing.T> t) {
 internal partial struct unmarshalPanic {
 }
 
+} partial class json_internal_testᴛunmarshalPanic {
+
 internal static error UnmarshalJSON(this unmarshalPanic _Δp0, slice<byte> _Δp1) { throw panic((nint)0xdead); }
+
+} partial class json_internal_test_package {
 
 public static void TestUnmarshalPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -2938,10 +3015,14 @@ public static void TestUnmarshalRecursivePointer(ж<testing.T> t) {
 
 internal partial struct textUnmarshalerString /*@string*/;
 
+} partial class json_internal_testᴛtextUnmarshalerString {
+
 internal static error UnmarshalText(this ref textUnmarshalerString m, slice<byte> text) {
     m = (textUnmarshalerString)strings.ToLower((@string)text);
     return default;
 }
+
+} partial class json_internal_test_package {
 
 // Test unmarshal to a map, where the map key is a user defined type.
 // See golang.org/issues/34437.
@@ -3016,6 +3097,8 @@ internal static ref readonly @string typedMissingFieldˢ => ref typedMissingFiel
 private static readonly @string typedMissingFieldˢᵇ = "typed missing field"u8;
 internal static ref readonly @string customUnmarshalerˢ => ref customUnmarshalerˢᵇ;
 private static readonly @string customUnmarshalerˢᵇ = "custom unmarshaler"u8;
+internal static ref readonly @string exceededMaxDepthˢ => ref exceededMaxDepthˢᵇ;
+private static readonly @string exceededMaxDepthˢᵇ = "exceeded max depth"u8;
 
 internal partial struct TestUnmarshalMaxDepth_tests /*dyn*/ {
     /*embed*/ public CaseName CaseName;
@@ -3093,11 +3176,11 @@ public static void TestUnmarshalMaxDepth(ж<testing.T> t) {
 
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnmarshalMaxDepth_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         foreach (var (_, vᴛ2) in range(targets)) {
             ref var target = ref heap(new TestUnmarshalMaxDepth_targets(), out var Ꮡtarget);
-            target = vᴛ2;
+            target = vᴛ2.ΔClone();
 
             var targetʗ1 = target;
             var ttʗ1 = tt;

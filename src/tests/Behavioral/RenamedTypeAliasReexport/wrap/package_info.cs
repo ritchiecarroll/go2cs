@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using libꓸKind = go.RenamedTypeAliasReexport.lib_package.ΔKind;
 global using libꓸToken = object;
 // </ImportedTypeAliases>
 
@@ -29,8 +28,8 @@ using static go.RenamedTypeAliasReexport.wrap_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Encoder", "go.RenamedTypeAliasReexport.lib_package.ΔEncoder")]
-[assembly: GoTypeAlias("Kind", "go.RenamedTypeAliasReexport.lib_package.ΔKind")]
+[assembly: GoTypeAlias("Encoder", "go.RenamedTypeAliasReexport.lib_package.Encoder")]
+[assembly: GoTypeAlias("Kind", "go.RenamedTypeAliasReexport.lib_package.Kind")]
 [assembly: GoTypeAlias("Tok", "go.RenamedTypeAliasReexport.lib_package.Tok")]
 [assembly: GoTypeAlias("Token", "object")]
 // </ExportedTypeAliases>

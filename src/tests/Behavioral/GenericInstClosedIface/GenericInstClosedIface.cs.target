@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,7 +13,11 @@ partial struct box<T> {
     internal T v;
 }
 
+} partial class mainᴛbox {
+
 internal static T val<T>(this box<T> b) { return b.v; }
+
+} partial class main_package {
 
 partial interface valuer {
     point val();
@@ -22,7 +27,11 @@ partial struct cell<T> {
     internal T v;
 }
 
+} partial class mainᴛcell {
+
 internal static T get<T>(this ref cell<T> c) { return c.v; }
+
+} partial class main_package {
 
 partial interface getter {
     point get();
@@ -32,7 +41,11 @@ partial struct sink<T> {
     internal nint n;
 }
 
+} partial class mainᴛsink {
+
 internal static nint take<T>(this sink<T> s, T v) { return s.n + 1; }
+
+} partial class main_package {
 
 partial interface taker {
     nint take(point v);
@@ -42,7 +55,11 @@ partial struct bag<T> {
     internal slice<T> items;
 }
 
+} partial class mainᴛbag {
+
 internal static nint size<T>(this bag<T> b) { return len(b.items); }
+
+} partial class main_package {
 
 partial interface sizer {
     nint size();

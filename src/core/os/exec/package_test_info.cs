@@ -8,11 +8,6 @@ global using static global::go.os.exec_package;
 global using static global::go.os.exec_internal_test_package;
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -20,17 +15,16 @@ using static global::go.os.exec_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657b466428292075696e747074727d", "TestStdinClose_type")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
 [assembly: GoImplement<badWriter, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<delayedInfiniteReader, io_package.Reader>]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+[assembly: GoImplement<syscall_package.Signal, os_package.Signal>]
 [assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 [assembly: GoImplement<tickReader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
@@ -46,7 +40,7 @@ using static global::go.os.exec_test_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: GoFieldAccess(typeof(global::go.os.exec_package.ΔError))]
+[assembly: GoFieldAccess(typeof(global::go.os.exec_package.Error))]
 [assembly: GoFieldAccess(typeof(go.net.http.httptest_package.Server))]
 [assembly: GoFieldAccess(typeof(go.net.http_package.Server))]
 [assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
@@ -63,7 +57,7 @@ using static global::go.os.exec_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("os/exec/dot_test.go", "dot_test.cs", "ABYkgoKUABYGgqaCgIK2goKUgIKkgpS4goKCgoKCgoCCpIKCgriCgoKCgqaCuIKCgoKClJSC3ICCgoIAFy6CgoKAgraAgraCgrjKgoKCgoIACRSCgoKUgpSUgoKCgqaCgsoADB6SgoKCuLaCgoKCuLaCgoKC", "49-101:1;52-99:1.1;120-135:2;137-179:3;181-193:4;182-192:4.1;196-201:5;204-212:6;215-223:7")]
-[assembly: GoPositionMap("os/exec/exec_test.go", "exec_test.cs", "ADJWgoKClIKUgpSClIKCpoKCAA4SwpSCgpQACximgoKCgoLKpoKmpoKCgqaSgoKClIIAAhDSgpSssqiygqrSlIKCgoKUlOoADBqygoKUpqKCuMKCgpSCgoKCgpSSpqKkgoKCgoKCgpSCgoKCgpTKgoKCgpSCgriigqaigoKCgriCgqaigpSCgoKCAA4KgpSCgpSSAAoIgpS4goKClIKCgqaClIKClJIACQiCpoKCgoKClIKC6IKUgoKClIKUgsKCopKClAAMBoKmgoKUgoKUgpSCAAgIgqaCggAJCIKmgoKCpKSCgqa4gqaCgoKClIKCpoKCgoKUgoKmgoKCgpSCgqaCgoKCgriCgoKCACMIgpSCgriCgoKCgoKUgoKCgoKUpoKUgoKAkraCgoCStoKCgJK2goIAEAyylIKCpoKClIaUlIKCgsKUgqaCtKSiAAYQAAgClIKCgpSCqIKClLLuoqSy3IKCtKSCtAAIBpKCuJKCgoKmtoKCpoKCgoKCggAIEoKCABMKwoKmAA0cpoLulILKgoKUtoKClJKCgpTIpIKCkoKCpoKClIKkgoKClIKCpoKUpoKCgriCgKaUgoLGgpKCgoIACRSUgoKUgrT0goKClJSCgoKUlIKCgpSUgoKClLiCgpSCgoKCgoKCgpKSgJKkgJKkgoKClIL+goKClOiSlAAOIILaguaClIKCgoIACQiClIKCgoKUgoKC6IKUgoKCgpSCgpSCpoKUgoKClKSCAAgIooKCypSCkpSCgpSkgriCpriCgoKCpqaCyoKClKaClLQACgaSlIKCgoKUkgAICIKClIKCgoIACQiClIKClAAEEoKCggANCoKUgoKmgoKC+IKCgoIACw6ylIKCgpSCgqaClJKCuIKmgqKCgpSmlIKClJSCgriigoKmgoKCgoKUlIKCgoKCgoKUlIKCgoKClIK2goKCkoKCpriUgoKUgoKClJSCgsqCgpKCgtyCggALGIKmooKClIKmgoKmopSCgoKCgpSogoKCpoKCuIKCgoKClIKmABoGgprogoKCgoKUgpSCgoCC7IKClJSCgpS4gqaCgu6ClIKCgIIACBCClIKCgoKC7oIACBKClIKCgtyC7oKClJSCgoKCgriCAAcQgoKUlIKCgoKClIKUgoKAgv6CgpSUgoKCgoKUgqaCgoCUtoIAEgqCuKKUgqSCgoKmgqKCgpSClJSCgoK07KKUgqSCgoKmgoLcgoKigoKCpoKmgoKCgpSCgoK02qKUgqSCgoKUpIKCkoKClIKClJSCuILcgrTaopSCpIKCgpSkgoKCgpSCgpSUgriC3IK02qKUgqSCgoKmgoKigpSClIKClIKUgrS+wgABEgAKCoKcwpSCspSCgoKCgpSSlIKCgpSmoraCspSClIKCtLaCgqqilIKigoKmggAMBoKCuIKCgpSCgqaCgoKmgoKCyoK4lIKCgoKCgoIACgySlIKClIKCgoI=", "356-359:1;473-477:1;489-495:2;529-533:1;548-558:2;586-595:1;597-608:2;622-630:1;717-717:1;801-807:1;808-814:2;815-822:3;869-884:1;870-883:1.1;1110-1114:1;1121-1127:2;1183-1187:1;1215-1221:2;1266-1268:1;1306-1321:1;1325-1360:2;1366-1384:3;1391-1406:4;1411-1429:5;1435-1456:6;1461-1488:7;1496-1524:1;1509-1513:1.1;1530-1574:2;1552-1557:2.1;1579-1620:3;1594-1598:3.1;1625-1665:4;1639-1643:4.1;1670-1701:5;1684-1687:5.1;1734-1756:1;1760-1770:2;1784-1788:1;1824-1840:1", "", "", "249:29,434:25,915:21,923:21,929:21,951:21,986:29,1205:15,1231:21,1239:21,1490:19,1867:25,1909:25,1966:25,1974:25,2020:25,2028:25,2072:25")]
+[assembly: GoPositionMap("os/exec/exec_test.go", "exec_test.cs", "ADNWgoKClIKUgpSClIKCpoKCAA4SwpSCgpQACximgoKCgoLKpoKmpoKCgqaSgoKClIIAAhDSgpSssqiygqrSlIKCgoKUlOoADBqygoKUpqKCuMKCgpSCgoKCgpSSpqKkgoKCgoKCgpSCgoKCgpTKgoKCgpSCgriigqaigoKCgriCgqaigpSCgoKCAA4KgpSCgpSSAAoIgpS4goKClIKCgqaClIKClJIACQiCpoKCgoKClIKC6IKUgoKClIKUgsKCopKClAAMBoKmgoKUgoKUgpSCAAgIgqaCggAJCIKmgoKCpKSCgqa4gqaCgoKClIKCpoKCgoKUgoKmgoKCgpSCgqaCgoKCgriCgoKCACMIgpSCgriCgoKCgoKUgoKCgoKUpoKUgoKAkraCgoCStoKCgJK2goIAEAyylIKCpoKClIaUlIKCgsKUgqaCtKSiAAYQAAgClIKCgpSCqIKClLLuoqSy3IKCtKSCtAAIBpKCuJKCgoKmtoKCpoKCgoKCggAIEoKCABMKwoKmAA0cpoLulILKgoKUtoKClJKCgpTIpIKCkoKCpoKClIKkgoKClIKCpoKUpoKCgriCgKaUgoLGgpKCgoIACRSUgoKUgrT0goKClJSCgoKUlIKCgpSUgoKClLiCgpSCgoKCgoKCgpKSgJKkgJKkgoKClIIACQ6CgoKUAAgIkpQADiCC+oIACAaClIKCgoIACQiClIKCgoKUgoKC6IKUgoKCgpSCgpSCpoKUgoKClKSCAAgIooKCypSCkpSCgpSkgriCpriCgoKCpqaCyoKClKaClLQACgaSlIKCgoKUkgAICIKClIKCgoIACQiClIKClAAEEoKCggANCoKUgoKmgoKC+IKCgoIACw6ylIKCgpSCgqaClJKCuIKmgqKCgpSmlIKClJSCgriigoKmgoKCgoKUlIKCgoKCgoKUlIKCgoKClIK2goKCkoKCpriUgoKUgoKClJSCgsqCgpKCgtyCggALGILGooKClIKmgoLGopSCgoKCgpSogoKCpoKCuIKCgoKClIKmABoGgprogoKCgoKUgpSCgoCC7IKClJSCgpS4gqaCgu6ClIKCgIIACBCClIKCgoKC7oIACBKClIKCgtyC7oKClJSCgoKCgriCAAcQgoKUlIKCgoKClIKUgoKAgv6CgpSUgoKCgoKUgqaCgoCUtoIAEgqCuKKUgqSCgoKmgqKCgpSClJSCgoK07KKUgqSCgoKmgoLcgoKigoKCpoKmgoKCgpSCgoK02qKUgqSCgoKUpIKCkoKClIKClJSCuILcgrTaopSCpIKCgpSkgoKCgpSCgpSUgriC3IK02qKUgqSCgoKmgoKigpSClIKClIKUgrS+wgABEgAKCoKcwpSCspSCgoKCgpSSlIKCgpSmoraCspSClIKCtLaCgqqilIKigoKmggAMBoKCuIKCgpSCgqaCgoKmgoKCyoK4lIKCgoKCgoIACgySlIKClIKCgoI=", "356-359:1;473-477:1;489-495:2;529-533:1;548-558:2;586-595:1;597-608:2;622-630:1;717-717:1;801-807:1;808-814:2;815-822:3;869-884:1;870-883:1.1;1110-1114:1;1121-1127:2;1183-1187:1;1215-1221:2;1266-1268:1;1306-1321:1;1325-1360:2;1366-1384:3;1391-1406:4;1411-1429:5;1435-1456:6;1461-1488:7;1496-1524:1;1509-1513:1.1;1530-1574:2;1552-1557:2.1;1579-1620:3;1594-1598:3.1;1625-1665:4;1639-1643:4.1;1670-1701:5;1684-1687:5.1;1734-1756:1;1760-1770:2;1784-1788:1;1824-1840:1", "", "", "250:29,435:25,916:21,924:21,930:21,952:21,987:29,1214:15,1240:21,1248:21,1499:19,1880:25,1922:25,1979:25,1987:25,2033:25,2041:25,2085:25")]
 [assembly: GoPositionMap("os/exec/exec_windows_test.go", "exec_windows_test.cs", "ABYsqIKmooKCgoKClAAKBoKUgoKUgoKCgoKUgoKClIKClIKCAAkIgpSCgoKCgpSCAAgO0oKWkoKCgqakgoKUgg==")]
 [assembly: GoPositionMap("os/exec/lp_windows_test.go", "lp_windows_test.cs", "ABswgqaCAAIQ8oKClLS0tuqigpSCgqaClIKUAAQU8oKClKSCgpSSgriCgrSowoKClJKCuIK0AA0aAJEBmALcyoKCprKigqaClIKCpoKCgoKCgqaUlIKUlKaCgoKCgoKUlJSCgpS4goKCgqaClIIAESQAnwHAAtyUspKCpoKUgoKUlIKCgoKUuIKCgpSUgpSmgoKCgqaCpoKCgoKCgpSmggAJDIIACRSCgpSCgoKCpoKC", "90-94:1;109-113:1;288-355:1;540-602:1", "", "", "102:21", "109:21,110:13,134:21,135:13")]
 // </GoSourcePositionMaps>
@@ -133,3 +127,15 @@ public static partial class exec_test_package
         builtin.initPackage(typeof(global::go.os.exec_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(exec_test_package.badWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class exec_testᴛbadWriter;
+[GoMethodHost(typeof(exec_test_package.delayedInfiniteReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class exec_testᴛdelayedInfiniteReader;
+[GoMethodHost(typeof(exec_test_package.tickReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class exec_testᴛtickReader;
+// </MethodHolders>

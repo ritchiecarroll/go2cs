@@ -1,5 +1,7 @@
 namespace go;
 
+using static main_package;
+
 partial class main_package {
 
 partial struct reg {
@@ -11,11 +13,15 @@ internal static ж<reg> newReg() {
     return Ꮡ(new reg());
 }
 
+} partial class mainᴛreg {
+
 internal static @string add(this ref reg r, @string name) {
     r.entries = append(r.entries, name);
     r.count++;
     return name + "-added"u8;
 }
+
+} partial class main_package {
 
 internal static ж<reg> registry = newReg();
 

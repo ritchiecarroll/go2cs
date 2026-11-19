@@ -13,6 +13,7 @@ using runtime = runtime_package;
 using syscall = syscall_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
+using static time_package;
 
 partial class time_package {
 
@@ -37,9 +38,13 @@ internal static UntypedInt maxFileSize => /* 10 << 20 */ 10485760;
 
 partial struct fileSizeError /*@string*/;
 
+} partial class timeᴛfileSizeError {
+
 internal static @string Error(this fileSizeError f) {
     return "time: file "u8 + ((@string)f) + " is too large"u8;
 }
+
+} partial class time_package {
 
 // Copies of io.Seek* constants to avoid importing "io":
 internal static UntypedInt seekStart => 0;
@@ -51,6 +56,8 @@ partial struct dataIO {
     internal slice<byte> p;
     internal bool error;
 }
+
+} partial class timeᴛdataIO {
 
 internal static slice<byte> read(this ref dataIO d, nint n) {
     if (len(d.p) < n) {
@@ -98,6 +105,8 @@ internal static slice<byte> rest(this ref dataIO d) {
     return r;
 }
 
+} partial class time_package {
+
 // Make a string by stopping at the first NUL
 internal static @string byteString(slice<byte> p) {
     nint i = bytealg.IndexByte(p, 0); if (i != -1) {
@@ -112,7 +121,7 @@ internal static error errBadData = errors.New("malformed time zone information")
 // initialized from the IANA Time Zone database-formatted data.
 // The data should be in the format of a standard IANA time zone file
 // (for example, the content of /etc/localtime on Unix systems).
-public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice<byte> data) {
+public static (ж<Location>, error) LoadLocationFromTZData(@string name, slice<byte> data) {
     var d = new dataIO(data, false);
 
     // 4-byte magic "TZif"
@@ -311,7 +320,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     }
 
     // Committed to succeed.
-    var l = Ꮡ(new ΔLocation(zone: zones, tx: tx, name: name, extend: extend));
+    var l = Ꮡ(new Location(zone: zones, tx: tx, name: name, extend: extend));
 
     // Fill in the cache with information about right now,
     // since that will be the most common lookup.
@@ -525,8 +534,8 @@ internal static (slice<byte>, error) loadTzinfo(@string name, @string source) {
 // the specified sources. See loadTzinfo for a list of supported sources.
 // The first timezone data matching the given name that is successfully loaded
 // and parsed is returned as a Location.
-internal static (ж<ΔLocation> z, error firstErr) loadLocation(@string name, slice<@string> sources) {
-    ж<ΔLocation> z = default;
+internal static (ж<Location> z, error firstErr) loadLocation(@string name, slice<@string> sources) {
+    ж<Location> z = default;
     error firstErr = default;
 
     foreach (var (_, source) in range(sources)) {

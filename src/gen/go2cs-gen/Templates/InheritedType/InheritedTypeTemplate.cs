@@ -127,7 +127,7 @@ internal class InheritedTypeTemplate : TemplateBase
             (ISliceTypeTemplate.IsByteSlice(TargetTypeName) ? $", IByteSeq<{ObjectName}, byte>" : ""),
         "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{ObjectName}>",
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
-        "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>",
+        "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>, global::go.golib.IGoValueAssign<{ObjectName}>",
         "Pointer" => $" : IPointer<{TargetTypeName}>, INilPointer",
         // Generic-math declarations so a [GoType num:] wrapper satisfies converter-emitted
         // numeric constraints as a type ARGUMENT — slices.Sort's `cmp.Ordered` maps to
@@ -137,7 +137,7 @@ internal class InheritedTypeTemplate : TemplateBase
         // struct precedent).
         "Numeric" => NumericInterfaces,
         _ when TypeName == "@string" => StringInterfaces,
-        _ => UnderlyingArrayElementType is null ? "" : $" : IArray<{UnderlyingArrayElementType}>"
+        _ => UnderlyingArrayElementType is null ? "" : $" : IArray<{UnderlyingArrayElementType}>, global::go.golib.IGoValueAssign<{ObjectName}>"
     };
 
     // A named type over `string` is ORDERED in Go: `cmp.Ordered` admits it, so `slices.Sort` over `[]Path` (`type Path
@@ -200,7 +200,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize, GoMethodNames),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
-        _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(ObjectName, TypeName, UnderlyingArrayElementType)
+        _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(ObjectName, TypeName, UnderlyingArrayElementType, GoMethodNames)
     };
 
     // Only the plain (struct-underlying) wrapper needs this: every array/slice-backed kind already
@@ -210,7 +210,12 @@ internal class InheritedTypeTemplate : TemplateBase
         TypeClass is not ("Array" or "Slice" or "Map" or "Channel" or "Pointer" or "Numeric");
 
     private string ValueCloneInterface => EmitsValueClone ?
-        string.IsNullOrEmpty(ImplementedInterface) ? " : IGoValueClone" : ", IGoValueClone" : "";
+        (string.IsNullOrEmpty(ImplementedInterface) ? " : IGoValueClone" : ", IGoValueClone") + $", global::go.golib.IGoValueAssign<{ObjectName}>" : "";
+
+    // Go's whole assignment into an existing location of this defined struct type: the inner struct's own in-place copy
+    // (StructTypeTemplate.ValueAssignImplementation), reached through GoValueAssign.Into so the inner struct's member name
+    // never matters. A Go method named AssignFrom on THIS type makes the member ΔAssignFrom (the converter agrees).
+    private string AssignFromMethod => GoMethodNames.Contains("AssignFrom") ? "ΔAssignFrom" : "AssignFrom";
 
     private string ValueCloneImplementation => EmitsValueClone ?
         $$"""
@@ -219,6 +224,16 @@ internal class InheritedTypeTemplate : TemplateBase
                 public {{EscapeCsTypeName(ObjectName)}} {{ValueCloneMethod}}() => new {{ObjectName}}({{Value}}.{{ValueCloneMethod}}());
 
                 object global::System.ICloneable.Clone() => {{ValueCloneMethod}}();
+
+                // Go whole assignment into this value's own storage
+                public void {{AssignFromMethod}}(in {{EscapeCsTypeName(ObjectName)}} source) => global::go.golib.GoValueAssign.Into(ref m_value, source.m_value);
+
+                {{EscapeCsTypeName(ObjectName)}} global::go.golib.IGoValueAssign<{{ObjectName}}>.AssignedFrom(in {{EscapeCsTypeName(ObjectName)}} source)
+                {
+                    {{EscapeCsTypeName(ObjectName)}} target = this;
+                    target.{{AssignFromMethod}}(source);
+                    return target;
+                }
 
         """ : "";
 

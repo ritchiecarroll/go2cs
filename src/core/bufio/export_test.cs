@@ -7,6 +7,7 @@ namespace go;
 using utf8 = unicode.utf8_package;
 using static go.bufio_package;
 using unicode;
+using static bufio_internal_test_package;
 
 partial class bufio_internal_test_package {
 
@@ -14,6 +15,8 @@ public static readonly ж<Func<rune, bool>> ᏑIsSpace = new StaticBox<Func<rune
 public static ref Func<rune, bool> IsSpace => ref ((StaticBox<Func<rune, bool>>)ᏑIsSpace).ValueSlot;
 
 public static UntypedInt DefaultBufSize => /* defaultBufSize */ 4096;
+
+} partial class bufio_internal_testᴛScanner {
 
 internal static void MaxTokenSize(this ref global::go.bufio_package.Scanner s, nint n) {
     if (n < utf8.UTFMax || n > 1000000000) {
@@ -30,4 +33,4 @@ internal static error ErrOrEOF(this ref global::go.bufio_package.Scanner s) {
     return s.err;
 }
 
-} // end bufio_internal_test_package
+} // end bufio_internal_testᴛScanner

@@ -71,14 +71,14 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
-<!-- source: src/core/go/internal/gccgoimporter/parser.cs:531-534, 554 -->
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:546-549, 571 -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
-    /*embed*/ public global::go.go.types_package.ΔType Type;
+    /*embed*/ public global::go.go.types_package.Type Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 …
-        p.typeList[n] = new reservedᴛ1жΔType(reserved);
+        p.typeList[n] = new reservedᴛ1жType(reserved);
 ```
 and `visitStructType` itself falls back to the generic `"type"` when a lift arrives with an empty
 name (the FUNCTION-LOCAL `x := new(struct{…})` form still reaches it through the unnamed-parameter
@@ -518,7 +518,7 @@ records an interface pair from a type's *use*, and that use can be entirely impl
 os/signal's test does `cmd.Stdout = &buf`, whose os/exec field type is `io.Writer`, so
 `package_test_info.cs` carries
 
-<!-- source: src/core/flag/package_test_info.cs:27 -->
+<!-- source: src/core/flag/package_test_info.cs:25 -->
 ```csharp
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 ```
@@ -738,8 +738,8 @@ method would forward to `recvᴛ.<Func>_<name>.F()` (CS0120/CS1061, met in Burnt
 `TestEncodeAnonymousNoStructField`). The interface lift therefore records its stamp exactly as the struct lift does:
 
 <!-- illustration: the two strings the guard asserts, the declaration and its record:
-     src/go2cs/internalTestLocalInterfaceStamp_test.go:88 `internal partial interface TestLocalEmbeddedInterface_Inner`
-     and :102 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
+     src/go2cs/internalTestLocalInterfaceStamp_test.go:84 `internal partial interface TestLocalEmbeddedInterface_Inner`
+     and :98 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
 ```csharp
 internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/ {
 …
@@ -825,7 +825,7 @@ func convLocal(h hertz) int       { x := struct{ Hz int }(h); x.Hz++; return x.H
 func sameLocal(a struct{ Hz int }, h hertz) (bool, bool)       { return a == h, h != a }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:34, 78-82 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:39-87 -->
 ```csharp
 internal static hertz made() { return (hertz)lib.Middle(); }
 …
@@ -851,7 +851,7 @@ internal static nint convLocal(hertz h) {
   user-defined `==` candidates for `a == h` (CS9342), so the unnamed side is cast: `(hertz)a == h`. A `switch`
   whose tag and case value are one of each does the same in its `when` clause.
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:246, 589-596 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:251-609 -->
 ```csharp
 internal static (bool, bool) sameLocal(anonBox_V a, hertz h) { return ((hertz)a == h, h != (hertz)a); }
 …
@@ -913,7 +913,7 @@ func laterTempo() (r struct{ Bpm int }) {
 }
 ```
 
-<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:685-689, 801-805, 835-840 -->
+<!-- source: src/tests/Behavioral/ForeignAndUnnamedStructConversion/main.cs.target:698-853 -->
 ```csharp
 internal static nint liftVar() {
     liftVar_x x = laterTempo();
@@ -958,6 +958,117 @@ Go's, by `TestEachNamedUnnamedStructMoveRecordsItsConversion` in the converter, 
 An unnamed struct inside a FUNC type (a variable, field, parameter or result of func type, or a named func type)
 gets no lift at all and the conversion stops with `Unresolved dynamic struct type`; a declared function taken as
 a value and a called func literal convert.
+
+## A struct conversion between two types of OTHER packages calls a generated function
+Go converts `lib.Pitch(o)`, with `o` an `other.Pitch`, because the two struct types have identical fields. In C#
+each is a `partial struct` of its own assembly, a conversion operator must be declared by one of its two types, and
+this package can reopen neither, so the cast the converter writes for a named target binds nothing (CS0030). The
+pair is recorded as `[assembly: GoImplicitConv<other.Pitch, lib.Pitch>]` like any other, and go2cs-gen, seeing
+both sides in referenced assemblies, writes one static function in this package's class instead of an operator.
+It is named as Go names the target, the package's class name without its suffix, the alias dot, then the type,
+and the site calls it:
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.go:79 -->
+```go
+fmt.Println("overloads:", lib.Pitch(o).Hz, lib.Pitch(twin).Hz, lib.Pitch(other.Tagged{Hz: 55}).Hz)
+```
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:64 -->
+```csharp
+fmt.Println("overloads:", libꓸPitch(o).Hz, libꓸPitch(twin).Hz, libꓸPitch(new other.Tagged(Hz: 55)).Hz);
+```
+
+<!-- illustration: go2cs-gen output, written into Generated/ at build time and not committed -->
+```csharp
+internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);
+```
+
+A second source type for the same target overloads the name (`libꓸPitch(lib.Twin src)`), and two types of ONE
+foreign package are as closed as two of two. The function's name is derived on both sides from the type itself,
+not from the file's import alias, so a file that imports `lib` as `l` still calls `libꓸPitch`. The operand is
+evaluated once, and, as for every conversion, a result that carries an array is cloned where it is transferred
+(*A conversion copies its operand* below).
+
+The route is taken only where the function can be written and nothing else converts. Each limit keeps today's
+cast and its compile error, so none is silent:
+
+- a type written over another named type, `type Tag other.Pitch`, converts from that base through its own
+  operator and keeps the cast;
+- a generic type on either side;
+- an unexported field on either side (CS0030): it is `internal` to its own assembly, out of this package's reach
+  in C# as it is by name in Go;
+- a field whose type holds an unnamed struct type: each package lifts its own C# type for it, and the function
+  would need a second conversion per field;
+- two target types of one name in two packages of one name (`a/lib.Pitch` and `b/lib.Pitch`), each converted
+  from the same source type in one package: both functions are `libꓸPitch` with one parameter type (CS0111).
+
+(Guarded by the `ForeignPairStructConversion` behavioral test, three packages whose output is compared with Go's,
+by `TestAStructConversionBetweenTwoForeignTypesCallsItsFunction` in the converter, one package per site, and by
+the `ForeignPairStructConversionTests` generator tests.)
+
+## A conversion copies its operand
+Go converts a COPY: after `c := chord(lc)` a write to `c.Notes`, or to an array inside a nested struct field,
+does not reach `lc`. A fixed array is a golib `array<T>` over a shared backing store, and every operator a
+struct conversion binds (go2cs-gen's field-wise operator, or its function for two foreign types) builds the result
+from the operand's fields, so the backing would be shared. Where the operand is existing storage (an identifier,
+selector, index or dereference) whose type carries an array, the conversion reads that storage, and the copy is
+taken ONCE, where the converted value is transferred: an assignment, a return, a send or a composite-literal
+element clones the result, as it clones any value (`exprReadsValueNeedingClone`). A conversion consumed by a read
+(a value-receiver call, an index) is not transferred and copies nothing; passed as an argument, it is copied by
+the parameter, as any argument is. A call result or a composite literal is reachable by no other name and is
+converted as it is.
+
+<!-- source: src/tests/Behavioral/StructConversionCopy/main.go:44-45, 96 -->
+```go
+c := chord(lc)
+c.Notes[0], c.In.V[1] = 9, 8
+…
+n := notes(raw)
+```
+
+<!-- source: src/tests/Behavioral/StructConversionCopy/main.cs:42, 84 -->
+```csharp
+var c = ((chord)lc).ΔClone();
+…
+var n = ((notes)raw).Clone();
+```
+
+A defined type written over another named struct, `type Counts counts`, converts through go2cs-gen's inherited
+wrapper, whose two operators with that base already copy (`[GoValueClone("Value")]`, the `ConversionCopy` of
+go2cs-gen's `InheritedTypeTemplate`); that pair takes no clone at the transfer, so the value is copied once. A
+named ARRAY wrapper's operators hand the array over, so its conversions keep the clone at the transfer.
+
+(Guarded by the `StructConversionCopy` behavioral test, twelve routes in three packages whose output is compared
+with Go's, and by `TestAStructConversionOfExistingStorageCopiesItsArrays` in the converter, one package per site.)
+
+An array reached only through an EMBEDDED struct is cloned the same way. The embed is an inline field, so a C# struct
+copy copies the embed, but the array inside it still shares its backing store. `typeNeedsValueClone` walks embedded
+value fields, so the struct is stamped with the embed's member and every copy site clones it:
+
+<!-- source: src/tests/Behavioral/EmbeddedArrayCopy/main.go:57, 62 -->
+```go
+c := le
+…
+e := emb(le)
+```
+
+<!-- source: src/tests/Behavioral/EmbeddedArrayCopy/main.cs:51, 55 -->
+```csharp
+var c = le.ΔClone();
+…
+var e = ((emb)le).ΔClone();
+```
+
+The stamp is `[GoValueClone("Inner")] internal partial struct emb {}`. An embedded POINTER is shared in Go too and
+takes nothing. (Guarded by the `EmbeddedArrayCopy` behavioral test, ten routes in three packages, and by
+`TestAStructCarryingAnArrayThroughAnEmbedCopiesIt` in the converter.)
+
+A ZERO-LENGTH array holds no element, so a copy that shares its empty backing store cannot be told from one that does
+not. A field of type `[0]T` is therefore no reason to clone a struct and no member of its stamp: syscall's
+`InotifyEvent` (`Name [0]uint8`, the flexible-array member) takes no `[GoValueClone]`, and `Sysinfo_t`'s list names
+`Loads`, `Pad_cgo_0` and `Pad_cgo_1` but not `X_f`. An embedded `[0]func()`, the marker that makes a struct
+uncomparable, is skipped the same way. A bare `[0]T` value still takes its own `.Clone()` where Go copies it.
+(Guarded by `TestAZeroLengthArrayFieldTakesNoClone` in the converter.)
 
 ## A methodless named func type renders as its base delegate
 
@@ -1284,9 +1395,9 @@ type Config struct {
     Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
 }
 ```
-<!-- source: src/core/testing/quick/quick.cs:247 -->
+<!-- source: src/core/testing/quick/quick.cs:248 -->
 ```csharp
-public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
+public Action<slice<reflect.Value>, ж<rand.Rand>> Values;
 ```
 
 The re-routing is gated on the signature string containing `/` **or the signature being variadic**:
@@ -1780,7 +1891,7 @@ is the correct value. `archive/tar`'s `testClose{nil}` is the reported shape; `d
 
 **An imported type ALIAS through an aliased import renders as its `global using` name.** A `global using` alias is not a member of the package class, so `import al "AliasImportLib"` with `al.B2{V: 7}`, where `B2` is an exported alias, cannot render `new al.B2(…)` (CS0426). The alias table is keyed by the package's declared name, and `aliasResolvedSelector` looks a published, non-const type alias up under that name, rendering `new AliasImportLibꓸB2(V: 7)` as the canonical import does. Every other member keeps the file's alias (`new al.Box(V: 8)`). (Guarded by the `AliasImport` behavioral test's `aliased.go`.)
 
-**A member its package collision-renames keeps the file's alias and takes the renamed name.** time declares `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collides with a `Time` method. modernc.org/libc imports time as `gotime "time"`, so both lookups that swap in the renamed member missed: the alias table is keyed by the declared name `time`, the type arm (`getAliasQualifiedTypeName`) rendered `ж<gotime.Location>` (CS0426), and the value arm (`aliasResolvedSelector`) redirected only non-const entries, so `gotime.UTC`, `gotime.Local` and `gotime.Second` named the `Time` methods' groups (CS1503 for `gotime.UTC` as an argument, CS0019 for `gotime.Local != nil`). Both arms now look the member up under the declared name and keep the file's own qualifier:
+**A member its package collision-renames keeps the file's alias and takes the renamed name.** Before methods moved to their own holder classes, time declared `ΔLocation`, `ΔMonth`, `ΔUTC`, `ΔLocal` and `ΔSecond`, because each Go name collided with a `Time` method. modernc.org/libc imports time as `gotime "time"`, and the alias table is keyed by the declared name `time`, so the type arm (`getAliasQualifiedTypeName`) and the value arm (`aliasResolvedSelector`) both missed the renamed member (CS0426, CS1503, CS0019). Both arms look the member up under the declared name and keep the file's own qualifier. With the methods in `timeᴛTime`, time renames none of these members, so the arms find nothing to swap and the Go names stand:
 
 <!-- source: src/tests/Behavioral/AliasedImportRenamedMember/main.go:15-26 -->
 ```go
@@ -1801,19 +1912,19 @@ func timeout(n int) gotime.Duration {
 ```csharp
 partial struct tzLocation {
     internal @string tz;
-    internal ж<gotime.ΔLocation> loc;
+    internal ж<gotime.Location> loc;
 }
 
-internal static ж<gotime.ΔLocation> @fixed(@string name, nint offset) {
+internal static ж<gotime.Location> @fixed(@string name, nint offset) {
     return gotime.FixedZone(name, offset);
 }
 
 internal static gotime.Duration timeout(nint n) {
-    return ((gotime.Duration)(int64)n) * gotime.ΔSecond + 250 * gotime.Millisecond;
+    return ((gotime.Duration)(int64)n) * gotime.Second + 250 * gotime.Millisecond;
 }
 ```
 
-A member time does not rename (`Millisecond`, `March`, `RFC3339`, `FixedZone`) keeps its spelling, and neither arm is reached by a plain import, whose qualifier already is the declared name. (Guarded by the `AliasedImportRenamedMember` behavioral test, Output compared with Go.) <!-- P2 W4, 2026-11-14: census over std found 0 such sites on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, test files included; libc v1.80.1 has 10 on windows and darwin, 0 on linux. -->
+A member a package does not rename keeps its spelling, and neither arm is reached by a plain import, whose qualifier already is the declared name. (Guarded by the `AliasedImportRenamedMember` behavioral test, Output compared with Go.) <!-- P2 W4, 2026-11-14: census over std found 0 such sites on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64, test files included; libc v1.80.1 has 10 on windows and darwin, 0 on linux. -->
 
 ---
 

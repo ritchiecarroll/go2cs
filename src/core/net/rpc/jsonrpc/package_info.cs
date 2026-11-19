@@ -66,8 +66,8 @@ using static go.net.rpc.jsonrpc_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACNKkgANHLKCgoKCgoIACBKCgoLmsoKCpoKCgpSCgoKCgpSClJSmgoKUpoKqoqiSgoKU", "", "", "38=NewDecoder/1/1/1,NewEncoder/1/1/2")]
-[assembly: GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "AA8eABIskgANHIKCggAIErKCgpTKgoKCgoKUpoKClIKcwoKm5LKCgoKClIKUlJSCgpSUpoKssg==", "", "", "37=NewDecoder/1/1/1,NewEncoder/1/1/2")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/client.go", "client.cs", "ACRKkgAPHLKCgoKCgoIADBKCgoIACAaygoKmgoKClIKCgoKClIKUlKaCgpSmgsqiqJKCgpQ=", "", "", "39=NewDecoder/1/1/1,NewEncoder/1/1/2")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/server.go", "server.cs", "ABAeABIskgAPHIKCggAMErKCgpTKgoKCgoKUpoKClIKcwoLGAAgEsoKCgoKUgpSUlIKClJSmgsyy", "", "", "38=NewDecoder/1/1/1,NewEncoder/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net.rpc;
@@ -106,3 +106,16 @@ public static partial class jsonrpc_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(jsonrpc_package.clientCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientCodec;
+[GoMethodHost(typeof(jsonrpc_package.clientResponse)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientResponse;
+[GoMethodHost(typeof(jsonrpc_package.serverCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverCodec;
+[GoMethodHost(typeof(jsonrpc_package.serverRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverRequest;
+// </MethodHolders>

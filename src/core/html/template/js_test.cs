@@ -8,6 +8,7 @@ using math = math_package;
 using strings = strings_package;
 using testing = testing_package;
 using static go.html.template_package;
+using static template_internal_test_package;
 
 partial class template_internal_test_package {
 
@@ -122,6 +123,8 @@ public static void TestNextJsCtx(ж<testing.T> t) {
 internal partial struct jsonErrType {
 }
 
+} partial class template_internal_testᴛjsonErrType {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string aBScriptCScriptDESCrIpTFˢ => ref aBScriptCScriptDESCrIpTFˢᵇ;
 private static readonly @string aBScriptCScriptDESCrIpTFˢᵇ = "a */ b <script c </script d <!-- e <sCrIpT f </sCrIpT"u8;
@@ -129,6 +132,8 @@ private static readonly @string aBScriptCScriptDESCrIpTFˢᵇ = "a */ b <script 
 internal static (slice<byte>, error) MarshalJSON(this ref jsonErrType e) {
     return (default, errors.New(aBScriptCScriptDESCrIpTFˢ));
 }
+
+} partial class template_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object cdataˢ = (@string)"<![CDATA["u8;

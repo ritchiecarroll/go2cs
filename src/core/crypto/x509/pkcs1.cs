@@ -18,27 +18,27 @@ partial class x509_package {
 // pkcs1PrivateKey is a structure which mirrors the PKCS #1 ASN.1 for an RSA private key.
 partial struct pkcs1PrivateKey {
     public nint Version;
-    public ж<bigꓸInt> N;
+    public ж<big.Int> N;
     public nint E;
-    public ж<bigꓸInt> D;
-    public ж<bigꓸInt> P;
-    public ж<bigꓸInt> Q;
-    public ж<bigꓸInt> Dp; /*`asn1:"optional"`*/
-    public ж<bigꓸInt> Dq; /*`asn1:"optional"`*/
-    public ж<bigꓸInt> Qinv; /*`asn1:"optional"`*/
+    public ж<big.Int> D;
+    public ж<big.Int> P;
+    public ж<big.Int> Q;
+    public ж<big.Int> Dp; /*`asn1:"optional"`*/
+    public ж<big.Int> Dq; /*`asn1:"optional"`*/
+    public ж<big.Int> Qinv; /*`asn1:"optional"`*/
     public slice<pkcs1AdditionalRSAPrime> AdditionalPrimes; /*`asn1:"optional,omitempty"`*/
 }
 
 public partial struct pkcs1AdditionalRSAPrime {
-    public ж<bigꓸInt> Prime;
+    public ж<big.Int> Prime;
     // We ignore these values because rsa will calculate them.
-    public ж<bigꓸInt> Exp;
-    public ж<bigꓸInt> Coeff;
+    public ж<big.Int> Exp;
+    public ж<big.Int> Coeff;
 }
 
 // pkcs1PublicKey reflects the ASN.1 structure of a PKCS #1 public key.
 partial struct pkcs1PublicKey {
-    public ж<bigꓸInt> N;
+    public ж<big.Int> N;
     public nint E;
 }
 
@@ -67,7 +67,7 @@ private static readonly @string x509PrivateKeyContainsˢ2ᵇ = "x509: private ke
 public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) {
     ref var priv = ref heap(new pkcs1PrivateKey(), out var Ꮡpriv);
     var (rest, err) = asn1.Unmarshal(der, Ꮡpriv);
-    if (builtin.len(rest) > 0) {
+    if (len(rest) > 0) {
         return (default, new asn1.SyntaxError(Msg: "trailing data"));
     }
     if (err != nil) {
@@ -95,7 +95,7 @@ public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) 
     );
 
     key.D = priv.D;
-    key.Primes = new slice<ж<bigꓸInt>>(2 + builtin.len(priv.AdditionalPrimes));
+    key.Primes = new slice<ж<big.Int>>(2 + len(priv.AdditionalPrimes));
     key.Primes[0] = priv.P;
     key.Primes[1] = priv.Q;
     key.Precomputed.Dp = priv.Dp;
@@ -146,7 +146,7 @@ public static slice<byte> MarshalPKCS1PrivateKey(ж<rsa.PrivateKey> Ꮡkey) {
     key.Precompute();
 
     nint version = 0;
-    if (builtin.len(key.Primes) > 2) {
+    if (len(key.Primes) > 2) {
         version = 1;
     }
 
@@ -162,7 +162,7 @@ public static slice<byte> MarshalPKCS1PrivateKey(ж<rsa.PrivateKey> Ꮡkey) {
         Qinv: key.Precomputed.Qinv
     );
 
-    priv.AdditionalPrimes = new slice<pkcs1AdditionalRSAPrime>(builtin.len(key.Precomputed.CRTValues));
+    priv.AdditionalPrimes = new slice<pkcs1AdditionalRSAPrime>(len(key.Precomputed.CRTValues));
     foreach (var (i, values) in range(key.Precomputed.CRTValues)) {
         priv.AdditionalPrimes[i].Prime = key.Primes[2 + i];
         priv.AdditionalPrimes[i].Exp = values.Exp;
@@ -193,7 +193,7 @@ public static (ж<rsa.PublicKey>, error) ParsePKCS1PublicKey(slice<byte> der) {
         }
         return (default, err);
     }
-    if (builtin.len(rest) > 0) {
+    if (len(rest) > 0) {
         return (default, new asn1.SyntaxError(Msg: "trailing data"));
     }
 

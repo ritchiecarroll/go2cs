@@ -9,7 +9,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/build"
 	"go/parser"
@@ -25,15 +24,12 @@ import (
 )
 
 // siblingTestSignals carries what a PRODUCTION conversion must know about the package's build-
-// selected in-package `_test.go` half. Those files compile into the same C# package class (or, under
-// the white-box model, into a friend bridge over it), so they can shadow a production import alias
-// and can take the address of a production package-level var — neither of which the production
-// package go/packages loads can see, because it excludes `_test.go` entirely.
+// selected in-package `_test.go` half. Those files are the same Go package, so they can take the
+// address of a production package-level var and reach an unexported production type through an
+// exported member — neither of which the production package go/packages loads can see, because it
+// excludes `_test.go` entirely. (A test file's method no longer shadows a production import alias:
+// it stands in a holder of its own, methodHolder.go.)
 type siblingTestSignals struct {
-	// funcMethodNames are the package-level function/method declarator names (see
-	// siblingTestFuncMethodNames).
-	funcMethodNames []string
-
 	// addressedGlobalNames are the identifiers whose address the test half takes and that the test
 	// file itself does not declare — candidate production package-level vars (see
 	// siblingTestAddressedGlobalNames).
@@ -80,7 +76,6 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 		return siblingTestSignals{}
 	}
 
-	names := hashset.HashSet[string]{}
 	addressed := hashset.HashSet[string]{}
 	methodValues := map[string]siblingMethodValue{}
 	publicized := hashset.HashSet[string]{}
@@ -104,18 +99,11 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 
 		hasInternal = true
 
-		for _, decl := range file.Decls {
-			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-				names.Add(funcDecl.Name.Name)
-			}
-		}
-
 		collectSiblingAddressedNames(file, addressed, methodValues)
 		collectSiblingPublicizedTypeNames(file, publicized)
 	}
 
 	signals := siblingTestSignals{
-		funcMethodNames:      names.Keys(),
 		addressedGlobalNames: addressed.Keys(),
 		publicizedTypeNames:  publicized.Keys(),
 		hasInternalTests:     hasInternal,
@@ -133,7 +121,6 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 		signals.methodValues = append(signals.methodValues, methodValues[key])
 	}
 
-	sort.Strings(signals.funcMethodNames)
 	sort.Strings(signals.addressedGlobalNames)
 	sort.Strings(signals.publicizedTypeNames)
 	return signals
@@ -481,71 +468,6 @@ func siblingBoundNames(node ast.Node) hashset.HashSet[string] {
 	return bound
 }
 
-// testAliasShadowName reports the first imported-package alias in this statement whose
-// qualification is required only by a same-package test declaration. Nested statements are
-// excluded: each is visited independently and receives its own adjacent comment.
-func (v *Visitor) testAliasShadowName(stmt ast.Stmt) string {
-	if len(packageTestAliasShadows) == 0 {
-		return ""
-	}
-
-	names := hashset.HashSet[string]{}
-
-	ast.Inspect(stmt, func(node ast.Node) bool {
-		if node == nil {
-			return false
-		}
-
-		if node != stmt {
-			if _, nestedStatement := node.(ast.Stmt); nestedStatement {
-				return false
-			}
-		}
-
-		ident, ok := node.(*ast.Ident)
-		if !ok || !packageTestAliasShadows[ident.Name] {
-			return true
-		}
-
-		if _, isPackageName := v.info.ObjectOf(ident).(*types.PkgName); isPackageName {
-			names.Add(ident.Name)
-		}
-
-		return true
-	})
-
-	if len(names) == 0 {
-		return ""
-	}
-
-	ordered := names.Keys()
-	sort.Strings(ordered)
-	return ordered[0]
-}
-
-// writeTestAliasShadowComment explains a qualification that otherwise looks unnecessary when the
-// generated production source is reviewed without its same-package tests in view. Inline
-// for-init/post clauses have no standalone comment slot; their enclosing for statement carries the
-// relevant header expression and receives the comment instead.
-func (v *Visitor) writeTestAliasShadowComment(stmt ast.Stmt, contexts []StmtContext) {
-	for _, context := range contexts {
-		if format, ok := context.(FormattingContext); ok && !format.useNewLine {
-			return
-		}
-	}
-
-	alias := v.testAliasShadowName(stmt)
-	if alias == "" {
-		return
-	}
-
-	v.outputBuilder.WriteString(v.newline)
-	v.outputBuilder.WriteString(v.indent(v.indentLevel))
-	v.outputBuilder.WriteString(fmt.Sprintf(
-		"// Fully qualified to avoid alias shadowing by the same-package test declaration %q.",
-		alias))
-}
-
 // collectWhiteboxInternalTestObjects captures every go/types object declared by an internal test
 // file. The internal and external variants share one go/packages load, so the external half can
 // recognize an export-test declaration by object identity even when imported export data has no Pos.
@@ -802,9 +724,6 @@ func (v *Visitor) whiteboxBridgeMember(ident *ast.Ident) string {
 	switch obj := v.info.ObjectOf(ident).(type) {
 	case *types.Func:
 		name = getSanitizedFunctionName(v.getIdentName(ident))
-		if testMethodRenames[v.info.ObjectOf(ident)] || funcRenamedForMethodCollision(v.info.ObjectOf(ident), v.fset) {
-			name = ShadowVarMarker + name
-		}
 	case *types.TypeName:
 		// A TRUE ALIAS a `_test.go` file declares (`type G = g`, export_test.go) is emitted as its
 		// own `global using` — a COMPILATION-scoped construct, member of no class — so bridge-
@@ -818,11 +737,9 @@ func (v *Visitor) whiteboxBridgeMember(ident *ast.Ident) string {
 
 		name = convertToCSTypeName(v.getIdentName(ident))
 	case *types.Var, *types.Const:
-		// The var/const twin of the *types.TypeName case above: `getSanitizedIdentifier` at line
-		// 555 already ran, but against the EXTERNAL variant's own nameCollisions — wrong for the
-		// identical reason whiteboxBridgeNamedType's doc comment explains for types
-		// (export_test.go's `var Lock = lock` collides with RWMutex's own `Lock` method and
-		// Δ-renames to `ΔLock`; the external variant's own collision map never saw it). Re-derive
+		// The var/const twin of the *types.TypeName case above: getSanitizedIdentifier already
+		// ran at the top of this function, but against the EXTERNAL variant's own nameCollisions,
+		// wrong for the reason whiteboxBridgeNamedType's doc comment explains for types. Re-derive
 		// from the session-scoped, object-keyed record instead.
 		if testTypeRenames[v.info.ObjectOf(ident)] {
 			name = getCollisionAvoidanceIdentifier(v.getIdentName(ident))

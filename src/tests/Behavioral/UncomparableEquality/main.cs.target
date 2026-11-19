@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -47,7 +48,11 @@ partial struct sliceErr {
     public slice<nint> S;
 }
 
+} partial class mainᴛsliceErr {
+
 internal static @string Error(this sliceErr _) { return "sliceErr"; }
+
+} partial class main_package {
 
 internal static void check(@string name, Action f) {
     GoFrame ᒐ = default;

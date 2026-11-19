@@ -561,6 +561,9 @@ func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.In
 				continue
 			}
 
+			// `&(v)` addresses v, as the loaded files read it (addressOfParenOperand.go).
+			unparenAddressOperands(file)
+
 			visit(file, byName, nil)
 		}
 	}

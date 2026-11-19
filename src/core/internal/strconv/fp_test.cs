@@ -177,12 +177,11 @@ internal static (@string @file, @string data) openTestbase(ж<testing.T> t, @str
     @string @file = default;
 
     if (!testbase.Value) {
-        var exprᴛ1 = name;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "atof"u8: {
+        case {} when name == "atof"u8: {
             return (testdataAtof1kTxtˢ, atof1ktxt);
         }
-        case {} when exprᴛ1 == "ftoa"u8: {
+        case {} when name == "ftoa"u8: {
             return (testdataFtoa1kTxtˢ, ftoa1ktxt);
         }}
         t.Fatalf("unknown file %s", name);

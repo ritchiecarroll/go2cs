@@ -1,14 +1,16 @@
 <#
 .SYNOPSIS
-    Table-driven arms for GoApiCompatMoves.psm1, which writes the suppressions of one announced break: public methods
-    that left a package class for a class marked [GoPromotedHost(typeof(S))]. A moved method must get its entry, a
+    Table-driven arms for GoApiCompatMoves.psm1, which writes the suppressions of three announced breaks: public methods
+    that left a package class for a class marked [GoPromotedHost(typeof(S))] or [GoMethodHost(typeof(S))], the Delta
+    drop, and a struct that no longer needs a value clone. A moved
+    method must get its entry, a
     method removed any other way must get none, and the guard itself must agree with both. Exit code = the number of
     failed cases.
 
 .DESCRIPTION
     The fixtures are two builds of one assembly (testdata/apicompat, moves-base.dll and moves-moved.dll, built by
-    build-apicompat-fixtures.ps1 from src/Moves.cs). Four forwarders moved as the release announced; six left the
-    package class another way, each a break nobody announced. The generated file is then handed to the guard
+    build-apicompat-fixtures.ps1 from src/Moves.cs). Seven forwarders and two methods of a method holder moved as the
+    release announced; seven left the package class another way, each a break nobody announced. The generated file is then handed to the guard
     (GoApiCompat.psm1) as push-nuget.ps1 hands it one: every entry must suppress exactly one diagnostic, none may be
     unnecessary, and the six other members must still read red.
 
@@ -93,23 +95,27 @@ try {
     else {
         Write-Host 'a moved forwarder gets one entry per asset, and nothing else gets any'
         $found = Get-GoApiCompatPackageMoves -Baseline $base -Current $moved -WorkDir $work
-        $targets = @($found.Entries | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
+        $moves = @($found.Entries | Where-Object { $_.Kind -ceq 'move' })
+        $targets = @($moves | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
         $want = @('M:go.ann_package.Named(go.ann_package.Tree)', 'M:go.ann_package.Plain(go.ann_package.Tree)', "M:go.ann_package.Plain(go.$zh{go.ann_package.Tree})",
+                  'M:go.hold_package.Read(go.hold_package.Clock)', "M:go.hold_package.Reset(go.$zh{go.hold_package.Clock})",
                   'M:go.internal.abi_package.Size(go.internal.abi_package.Named)', 'M:go.pkg_package.Get``1(go.pkg_package.Box{``0},``0)',
                   'M:go.pkg_package.Val(go.pkg_package.Outer)', "M:go.pkg_package.Val(go.$zh{go.pkg_package.Outer})")
-        Check 'the seven moves: value and pointer forms, a generic struct''s, one below a keyword namespace, three whose nullable attributes sit elsewhere' (
+        Check 'the nine moves: value and pointer forms, a generic struct''s, one below a keyword namespace, three whose nullable attributes sit elsewhere, and a method holder''s two' (
             ($targets -join ' | ') -ceq ($want -join ' | ')) ($targets -join ' | ')
-        Check 'each asset has the same seven' (@($found.Entries).Count -eq 14 -and @($found.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 7) "$(@($found.Entries).Count) entries"
-        $hosts = @($found.Entries | ForEach-Object { $_.Host } | Sort-Object -Unique)
+        Check 'each asset has the same nine, each a CP0002' (
+            $moves.Count -eq 18 -and @($moves | Where-Object { $_.Asset -ceq $linux }).Count -eq 9 -and @($moves | Where-Object { $_.DiagnosticId -cne 'CP0002' }).Count -eq 0) "$($moves.Count) moves"
+        $hosts = @($moves | ForEach-Object { $_.Host } | Sort-Object -Unique)
+        $holder = 'go.hold' + [string][char]0x1D1B + 'Clock'
         Check 'each move names the class that holds the method now' (
-            ($hosts -join ',') -ceq 'go.forwardersOfBox,go.forwardersOfOuter,go.forwardersOfTree,go.internal.forwardersOfNamed') ($hosts -join ',')
+            ($hosts -join ',') -ceq "go.forwardersOfBox,go.forwardersOfOuter,go.forwardersOfTree,$holder,go.internal.forwardersOfNamed") ($hosts -join ',')
 
         $refused = @($found.Refused | Where-Object { $_.Asset -ceq $lib })
         function Reason([string]$Member) {
             $needle = '.' + $Member + '('
             return [string](@($refused | Where-Object { $_.Target.Contains($needle) } | ForEach-Object { $_.Reason }) -join ' ; ')
         }
-        Check 'seven other removed members are refused, per asset' ($refused.Count -eq 7 -and @($found.Refused).Count -eq 14) "$($refused.Count) of $(@($found.Refused).Count): $(@($refused | ForEach-Object { $_.Target }) -join ' | ')"
+        Check 'fifteen other removed or changed members are refused, per asset: seven moves gone wrong, five Delta-drop negative controls and three clone-drop ones' ($refused.Count -eq 15 -and @($found.Refused).Count -eq 30) "$($refused.Count) of $(@($found.Refused).Count): $(@($refused | ForEach-Object { $_.Target }) -join ' | ')"
         Check 'a changed return type is not a move' ((Reason 'Changed').Contains('declares no Changed of the same signature')) (Reason 'Changed')
         Check 'a dropped attribute is not a move' ((Reason 'Unmarked').Contains('declares no Unmarked of the same signature')) (Reason 'Unmarked')
         Check 'a changed nullable annotation is not a move, and the reason shows both readings' (
@@ -118,7 +124,7 @@ try {
         Check 'a class without the attribute is not read' ((Reason 'Elsewhere').Contains('declares no Elsewhere')) (Reason 'Elsewhere')
         Check 'a class marked for another struct is not read' ((Reason 'Misfiled').Contains('go.forwardersOfOuter declares no Misfiled')) (Reason 'Misfiled')
         Check 'a removed method is not a move' ((Reason 'Gone').Contains('declares no Gone')) (Reason 'Gone')
-        Check 'a struct with no marked class has no move' ((Reason 'Only').Contains('no class is marked GoPromotedHost(typeof(go.pkg_package+Solo))')) (Reason 'Only')
+        Check 'a struct with no marked class has no move' ((Reason 'Only').Contains('no class is marked GoPromotedHost(typeof(go.pkg_package+Solo)) or GoMethodHost(typeof(go.pkg_package+Solo))')) (Reason 'Only')
 
         # The three nullable moves test nothing unless the compiler really wrote their attributes in other places in
         # the two fixtures; a rebuilt fixture could lose that without failing any check above.
@@ -154,10 +160,59 @@ try {
         Check 'the fixtures differ in where NullableContext sits: Named gains its own, both forms of Plain lose theirs' (
             $placed -ceq 'Named False -> True; Plain True True -> False False') $placed
 
+        Write-Host 'THE DELTA DROP: a rename gets the entry the engine reports, and only an exact one does'
+        $d = [string][char]0x394
+        $renames = @($found.Entries | Where-Object { $_.Kind -ceq 'rename' })
+        $renameLib = @($renames | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { "$($_.DiagnosticId) $($_.Target)" } | Sort-Object -CaseSensitive -Culture '')
+        $wantRenames = @("CP0001 T:go.ren_package.${d}Stamp", "CP0001 T:go.ren_package.${d}Text", 'CP0002 F:go.ren_package.Holder.When',
+                         "CP0002 M:go.ren_package.get_${d}Limit", 'CP0002 M:go.ren_package.IClock.Now', 'CP0002 M:go.ren_package.Spin(go.ren_package.Dial)', "CP0002 M:go.ren_package.Tick(go.ren_package.${d}Stamp)",
+                         "CP0002 M:go.ren_package.Use(go.ren_package.${d}Stamp)", 'CP0006 M:go.ren_package.IClock.Now', 'CP0008 T:go.ren_package.Italic') |
+            Sort-Object -CaseSensitive -Culture ''
+        Check 'ten renames: the type, the interface, the constant by its getter, a function over the type, a method of the type now in its holder, a method whose receiver parameter dropped its prefix, a field and an interface member that name the type (CP0002 and CP0006), and a type that implements the renamed interface (CP0008)' (
+            ($renameLib -join ' | ') -ceq ($wantRenames -join ' | ')) ($renameLib -join ' | ')
+        Check 'each asset has the same ten renames' ($renames.Count -eq 20) "$($renames.Count) renames"
+        $tick = @($renames | Where-Object { $_.Asset -ceq $lib -and $_.Target.Contains('.Tick(') })
+        Check 'the receiver''s method is a rename into its holder, by the Go-named signature' (
+            $tick.Count -eq 1 -and $tick[0].Host -ceq ('M:go.ren' + [string][char]0x1D1B + 'Stamp.Tick(go.ren_package.Stamp)')) "$(@($tick | ForEach-Object { $_.Host }) -join ', ')"
+        $negatives = @("T:go.ren_package.${d}Orphan", "M:go.ren_package.Orphan(go.ren_package.${d}Orphan)", "M:go.ren_package.Shifted(go.ren_package.${d}Stamp)", 'M:go.ren_package.Retyped', 'M:go.ren_package.Spun(go.ren_package.Dial)')
+        $refusedTargets = @($refused | ForEach-Object { $_.Target })
+        Check 'NEGATIVE CONTROL: a Delta type with no Go-named successor, a parameter added, a return type changed, and a receiver parameter renamed to anything but its Go name are refused' (
+            @($negatives | Where-Object { $refusedTargets -ccontains $_ }).Count -eq 5) "refused: $(@($negatives | Where-Object { $refusedTargets -ccontains $_ }) -join ' | ')"
+        Check 'NEGATIVE CONTROL: no entry names any of them' (@($found.Entries | Where-Object { $negatives -ccontains $_.Target }).Count -eq 0) "$(@($found.Entries | Where-Object { $negatives -ccontains $_.Target } | ForEach-Object { $_.Target }) -join ' | ')"
+        Check 'the changed return type says both types' ((@($refused | Where-Object { $_.Target -ceq 'M:go.ren_package.Retyped' })[0].Reason).Contains('changed its type from')) 'no reason'
+
+        Write-Host 'THE CLONE DROP: a struct that lost go.IGoValueClone and its Clone(), and nothing else, gets both entries'
+        $clones = @($found.Entries | Where-Object { $_.Kind -ceq 'clone' })
+        $cloneLib = @($clones | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { "$($_.DiagnosticId) $($_.Target)" } | Sort-Object -CaseSensitive -Culture '')
+        Check 'Event: a CP0002 for its Clone() and a CP0008 for the interface' (
+            ($cloneLib -join ' | ') -ceq "CP0002 M:go.cln_package.Event.${d}Clone | CP0008 T:go.cln_package.Event") ($cloneLib -join ' | ')
+        Check 'each asset has the same two' ($clones.Count -eq 4) "$($clones.Count) clone entries"
+        $cloneNegatives = @("M:go.cln_package.Kept.${d}Clone", "M:go.cln_package.Boxed.${d}Clone", 'T:go.cln_package.Boxed')
+        Check 'NEGATIVE CONTROL: a struct that keeps the interface and loses the method, and a class that loses both, are refused' (
+            @($cloneNegatives | Where-Object { $refusedTargets -ccontains $_ }).Count -eq 3) "refused: $(@($cloneNegatives | Where-Object { $refusedTargets -ccontains $_ }) -join ' | ')"
+        Check 'NEGATIVE CONTROL: no entry names Kept or Boxed' (@($found.Entries | Where-Object { $_.Target.Contains('.Kept') -or $_.Target.Contains('.Boxed') }).Count -eq 0) 'an entry'
+
         $same = Get-GoApiCompatPackageMoves -Baseline $base -Current $base -WorkDir $work
         Check 'the same surface has no move and no refusal' (@($same.Entries).Count -eq 0 -and @($same.Refused).Count -eq 0) "$(@($same.Entries).Count) entries, $(@($same.Refused).Count) refused"
         $back = Get-GoApiCompatPackageMoves -Baseline $moved -Current $base -WorkDir $work
-        Check 'a method that left a marked class is not a move' (@($back.Entries).Count -eq 0 -and @($back.Refused).Count -gt 0) "$(@($back.Entries).Count) entries, $(@($back.Refused).Count) refused"
+        Check 'a method that left a marked class is not a move, and a Delta GAINED is no rename' (@($back.Entries).Count -eq 0 -and @($back.Refused).Count -gt 0) "$(@($back.Entries).Count) entries ($(@($back.Entries | ForEach-Object { "$($_.DiagnosticId) $($_.Target)" }) -join ' | ')), $(@($back.Refused).Count) refused"
+
+        Write-Host 'a renamed assembly is read against its baseline under the declared rename, as the guard compares it'
+        $renamedMoved = New-Package 'renamed-moved' @{ 'lib/net10.0/go.Moves.dll' = 'moves-moved.dll'; 'runtimes/linux-x64/lib/net10.0/go.Moves.dll' = 'moves-moved.dll' }
+        $rename = Get-GoApiCompatRenameSuccessors -Id 'go.Moves' -Assets @(Get-GoApiCompatAssets $base) -CurrentAssets @(Get-GoApiCompatAssets $renamedMoved) -ReleaseVersion '1.26.11.1-ci.1'
+        Check 'the declaration pairs each baseline asset with go.Moves.dll beside it' (
+            $rename.Declared -and $rename.Successors.Count -eq 2 -and $rename.Successors[$lib] -ceq 'lib/net10.0/go.Moves.dll' -and
+            $rename.Successors[$linux] -ceq 'runtimes/linux-x64/lib/net10.0/go.Moves.dll') "declared $($rename.Declared), $($rename.Successors.Count) successors"
+        $unpaired = Get-GoApiCompatPackageMoves -Baseline $base -Current $renamedMoved -WorkDir $work
+        Check 'unpaired, a renamed assembly is not read at all' (@($unpaired.Entries).Count -eq 0 -and @($unpaired.Refused).Count -eq 0) "$(@($unpaired.Entries).Count) entries"
+        $paired = Get-GoApiCompatPackageMoves -Baseline $base -Current $renamedMoved -WorkDir $work -Successors $rename.Successors
+        $pairedMoves = @($paired.Entries | Where-Object { $_.Kind -ceq 'move' })
+        $pairedTargets = @($pairedMoves | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
+        Check 'paired, the same nine moves, ten renames and two clone entries on each asset, each entry naming the baseline asset' (
+            @($paired.Entries).Count -eq 42 -and $pairedMoves.Count -eq 18 -and @($paired.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 21 -and
+            ($pairedTargets -join ' | ') -ceq ($want -join ' | ')) "$(@($paired.Entries).Count) entries: $(@($paired.Entries | ForEach-Object { $_.Asset } | Sort-Object -Unique) -join ', ')"
+        Check 'another release declares no rename' (-not (Get-GoApiCompatRenameSuccessors -Id 'go.Moves' -Assets @($lib) -CurrentAssets @('lib/net10.0/go.Moves.dll') -ReleaseVersion '1.26.12.1').Declared) 'declared'
+        Check 'go.lib keeps its assembly name: no successor' ((Get-GoApiCompatRenameSuccessors -Id 'go.lib' -Assets @('lib/net10.0/golib.dll') -CurrentAssets @('lib/net10.0/go.lib.dll') -ReleaseVersion '1.26.11.1').Successors.Count -eq 0) 'a successor'
 
         Write-Host 'THE GUARD AGREES: the generated file suppresses the moves, every entry is needed, and the rest reads red'
         $pinned = $null
@@ -165,19 +220,26 @@ try {
         Check 'the pinned tool restores from the manifest' ([bool]$pinned) "$why"
         if ($pinned) {
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $null -RepoRoot $repoRoot -WorkDir $work
-            Check 'unsuppressed, the guard names all fourteen removed members on each asset' ($r.Failures.Count -eq 28 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
+            Check 'unsuppressed, the guard names all thirty-six breaks on each asset' ($r.Failures.Count -eq 72 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
 
             $generated = Join-Path $work 'generated.xml'
             Write-GoApiCompatMoveSuppressions -Entries $found.Entries -Path $generated -Comment $comment
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $generated -RepoRoot $repoRoot -WorkDir $work
             Check 'no generated entry is unnecessary' (@($r.Failures | Where-Object { $_.Contains('unnecessary') }).Count -eq 0) "$(@($r.Failures | Where-Object { $_.Contains('unnecessary') }) -join '; ')"
-            Check 'the fourteen refused removals still read red, and nothing else does' (
-                $r.Failures.Count -eq 14 -and @($r.Failures | Where-Object { $_.Contains('CP0002') }).Count -eq 14 -and $r.Compared -eq 2) "$($r.Failures.Count) failures: $($r.Failures -join '; ')"
-            foreach ($member in 'Changed', 'Unmarked', 'Kind', 'Elsewhere', 'Misfiled', 'Gone', 'Only') {
+            Check 'the thirty refused breaks still read red (the negative controls among them), and nothing else does' (
+                $r.Failures.Count -eq 30 -and @($r.Failures | Where-Object { $_.Contains('CP0002') }).Count -eq 26 -and
+                @($r.Failures | Where-Object { $_.Contains('CP0001') }).Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('CP0008') }).Count -eq 2 -and $r.Compared -eq 2) "$($r.Failures.Count) failures: $($r.Failures -join '; ')"
+            foreach ($member in 'Changed', 'Unmarked', 'Kind', 'Elsewhere', 'Misfiled', 'Gone', 'Only', 'Orphan', 'Shifted', 'Retyped', 'Spun') {
                 $needle = '.' + $member + '('
                 $named = @($r.Failures | Where-Object { $_.Contains($needle) }).Count
                 Check "the guard still names $member" ($named -eq 2) "$named of 2"
             }
+            foreach ($member in 'Kept', 'Boxed') {
+                $named = @($r.Failures | Where-Object { $_.Contains("cln_package.$member") }).Count
+                $want = if ($member -ceq 'Kept') { 2 } else { 4 }
+                Check "the guard still names $member" ($named -eq $want) "$named of $want"
+            }
+            Check 'and no longer names Event' (@($r.Failures | Where-Object { $_.Contains('cln_package.Event') }).Count -eq 0) 'named'
         }
     }
 

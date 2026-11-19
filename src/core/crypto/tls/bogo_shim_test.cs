@@ -39,6 +39,7 @@ using html;
 using path;
 using static go.crypto.tls_package;
 using vendor.golang.org.x.crypto;
+using static tls_internal_test_package;
 
 partial class tls_internal_test_package {
 
@@ -130,6 +131,8 @@ internal static ж<stringSlice> flagStringSlice(@string name, @string usage) {
     return f;
 }
 
+} partial class tls_internal_testᴛstringSlice {
+
 internal static @string String(this ref stringSlice saf) {
     return strings.Join(saf, ",");
 }
@@ -139,6 +142,8 @@ internal static error Set(this ref stringSlice saf, @string s) {
     return default;
 }
 
+} partial class tls_internal_test_package {
+
 internal partial struct intSlice /*[]int64*/;
 
 internal static ж<intSlice> flagIntSlice(@string name, @string usage) {
@@ -146,6 +151,8 @@ internal static ж<intSlice> flagIntSlice(@string name, @string usage) {
     flag.Var(new tls_internal_test_package.intSliceжValue(f), name, usage);
     return f;
 }
+
+} partial class tls_internal_testᴛintSlice {
 
 internal static @string String(this ref intSlice sf) {
     return strings.Join(strings.Split(fmt.Sprint(sf), " "), ",");
@@ -160,6 +167,8 @@ internal static error Set(this ref intSlice sf, @string s) {
     return default;
 }
 
+} partial class tls_internal_test_package {
+
 internal partial struct base64Flag /*[]byte*/;
 
 internal static ж<base64Flag> flagBase64(@string name, @string usage) {
@@ -167,6 +176,8 @@ internal static ж<base64Flag> flagBase64(@string name, @string usage) {
     flag.Var(new tls_internal_test_package.base64FlagжValue(f), name, usage);
     return f;
 }
+
+} partial class tls_internal_testᴛbase64Flag {
 
 internal static @string String(this ref base64Flag f) {
     return base64.StdEncoding.EncodeToString(f);
@@ -183,6 +194,8 @@ internal static error Set(this ref base64Flag f, @string s) {
     f = b;
     return default;
 }
+
+} partial class tls_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object echServerConfigEchServerˢ = (@string)"-ech-server-config, -ech-server-key, and -ech-is-retry-config mismatch"u8;
@@ -782,7 +795,7 @@ internal static error generateReport(bogoResults results, @string outPath) {
     try {
         var data = new reportData(
             Results: results,
-            Timestamp: time_package.Unix((int64)results.SecondsSinceEpoch, 0).Format("2006-01-02 15:04:05"),
+            Timestamp: time.Unix((int64)results.SecondsSinceEpoch, 0).Format("2006-01-02 15:04:05"),
             Revision: boringsslModVer
         );
 

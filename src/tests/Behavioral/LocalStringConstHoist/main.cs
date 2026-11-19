@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -82,9 +83,8 @@ internal static @string concatenated() {
 internal static @string classify(@string x) {
     @string yes = "matched";
     @string no = "unmatched";
-    var exprᴛ1 = x;
     switch (ᐧ) {
-    case {} when exprᴛ1 == yes: {
+    case {} when x == yes: {
         return "case:" + yes;
     }}
 
@@ -101,11 +101,15 @@ internal static @string genericLabel<T>(T v) {
     return fmt.Sprint(prefix, (v).OrTypedNilOf());
 }
 
+} partial class mainᴛparser {
+
 internal static @string name(this ref parser p) {
     @string method = "parser-method";
     p.n++;
     return fmt.Sprintf("%s#%d"u8, method, p.n);
 }
+
+} partial class main_package {
 
 internal static nint loop() {
     nint total = 0;

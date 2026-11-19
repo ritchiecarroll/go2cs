@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,49 +13,53 @@ partial struct Type {
     public TFlag TFlag;
     public uint8 Align_;
     public uint8 FieldAlign_;
-    public ΔKind Kind_;
+    public Kind Kind_;
     public Func<@unsafe.Pointer, @unsafe.Pointer, bool> Equal;
     public ж<byte> GCData;
     public NameOff Str;
     public TypeOff PtrToThis;
 }
 
-partial struct ΔKind /*num:uint8*/;
+partial struct Kind /*num:uint8*/;
 
-public static ΔKind Invalid => /* iota */ 0;
-public static ΔKind Bool => 1;
-public static ΔKind Int => 2;
-public static ΔKind Int8 => 3;
-public static ΔKind Int16 => 4;
-public static ΔKind Int32 => 5;
-public static ΔKind Int64 => 6;
-public static ΔKind Uint => 7;
-public static ΔKind Uint8 => 8;
-public static ΔKind Uint16 => 9;
-public static ΔKind Uint32 => 10;
-public static ΔKind Uint64 => 11;
-public static ΔKind Uintptr => 12;
-public static ΔKind Float32 => 13;
-public static ΔKind Float64 => 14;
-public static ΔKind Complex64 => 15;
-public static ΔKind Complex128 => 16;
-public static ΔKind Array => 17;
-public static ΔKind Chan => 18;
-public static ΔKind Func => 19;
-public static ΔKind Interface => 20;
-public static ΔKind Map => 21;
-public static ΔKind Pointer => 22;
-public static ΔKind Slice => 23;
-public static ΔKind ΔString => 24;
-public static ΔKind Struct => 25;
-public static ΔKind UnsafePointer => 26;
+public static Kind Invalid => /* iota */ 0;
+public static Kind Bool => 1;
+public static Kind Int => 2;
+public static Kind Int8 => 3;
+public static Kind Int16 => 4;
+public static Kind Int32 => 5;
+public static Kind Int64 => 6;
+public static Kind Uint => 7;
+public static Kind Uint8 => 8;
+public static Kind Uint16 => 9;
+public static Kind Uint32 => 10;
+public static Kind Uint64 => 11;
+public static Kind Uintptr => 12;
+public static Kind Float32 => 13;
+public static Kind Float64 => 14;
+public static Kind Complex64 => 15;
+public static Kind Complex128 => 16;
+public static Kind Array => 17;
+public static Kind Chan => 18;
+public static Kind Func => 19;
+public static Kind Interface => 20;
+public static Kind Map => 21;
+public static Kind Pointer => 22;
+public static Kind Slice => 23;
+public static Kind String => 24;
+public static Kind Struct => 25;
+public static Kind UnsafePointer => 26;
 
-public static @string String(this ΔKind k) {
+} partial class mainᴛKind {
+
+public static @string String(this Kind k) {
     if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
 }
+
+} partial class main_package {
 
 [GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [Invalid] = "invalid",
@@ -81,7 +86,7 @@ public static @string String(this ΔKind k) {
     [Map] = "map",
     [Pointer] = "ptr",
     [Slice] = "slice",
-    [ΔString] = "string",
+    [String] = "string",
     [Struct] = "struct",
     [UnsafePointer] = "unsafe.Pointer"
 }.slice(); }
@@ -90,9 +95,9 @@ partial struct NameOff /*num:int32*/;
 partial struct TypeOff /*num:int32*/;
 partial struct TextOff /*num:int32*/;
 
-public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
-public static ΔKind KindGCProg => /* 1 << 6 */ 64;
-public static ΔKind KindMask => /* (1 << 5) - 1 */ 31;
+public static Kind KindDirectIface => /* 1 << 5 */ 32;
+public static Kind KindGCProg => /* 1 << 6 */ 64;
+public static Kind KindMask => /* (1 << 5) - 1 */ 31;
 
 partial struct TFlag /*num:uint8*/;
 
@@ -127,7 +132,9 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf((ж<T>)nil).Elem();
 }
 
-public static ΔKind Kind(this ref Type t) { return (ΔKind)(t.Kind_ & KindMask); }
+} partial class mainᴛType {
+
+public static Kind Kind(this ref Type t) { return (Kind)(t.Kind_ & KindMask); }
 
 public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
@@ -138,18 +145,20 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
 
     switch (t.Kind()) {
     case var ᴛ when ᴛ == Array: {
-        var tt = Ꮡt.Reinterpret<Type, ΔArrayType>();
-        return tt.of(main_package.ΔArrayType.ᏑElem).Value;
+        var tt = Ꮡt.Reinterpret<Type, ArrayType>();
+        return tt.of(main_package.ArrayType.ᏑElem).Value;
     }
     case var ᴛ when ᴛ == Map: {
-        var tt = Ꮡt.Reinterpret<Type, ΔMapType>();
-        return tt.of(main_package.ΔMapType.ᏑElem).Value;
+        var tt = Ꮡt.Reinterpret<Type, MapType>();
+        return tt.of(main_package.MapType.ᏑElem).Value;
     }}
 
     return default;
 }
 
-partial struct ΔMapType {
+} partial class main_package {
+
+partial struct MapType {
     /*embed*/ public Type Type;
     public ж<Type> Key;
     public ж<Type> Elem;
@@ -161,30 +170,38 @@ partial struct ΔMapType {
     public uint32 Flags;
 }
 
-public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
+} partial class mainᴛType {
+
+public static ж<MapType> MapType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Map) {
         return default;
     }
-    return Ꮡt.Reinterpret<Type, ΔMapType>();
+    return Ꮡt.Reinterpret<Type, MapType>();
 }
 
-partial struct ΔArrayType {
+} partial class main_package {
+
+partial struct ArrayType {
     /*embed*/ public Type Type;
     public ж<Type> Elem;
     public ж<Type> Slice;
     public uintptr Len;
 }
 
-public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
+} partial class mainᴛType {
+
+public static ж<ArrayType> ArrayType(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Array) {
         return default;
     }
-    return Ꮡt.Reinterpret<Type, ΔArrayType>();
+    return Ꮡt.Reinterpret<Type, ArrayType>();
 }
+
+} partial class main_package {
 
 internal const nint seqFirst = iota;
 internal const nint seqSecond = 1;

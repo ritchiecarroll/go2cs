@@ -249,9 +249,9 @@ public class NamedArrayViewFloorTests
 
         foreach (ж<FloorSmallMem> pointer in new[] { fromZero, fromNil })
         {
-            reflect.ΔType type = reflect.TypeOf(pointer);
+            reflect.Type type = reflect.TypeOf(pointer);
 
-            Assert.AreEqual(reflect.ΔPointer, type.Kind(), "reflect.TypeOf(p).Kind()");
+            Assert.AreEqual(reflect.Pointer, type.Kind(), "reflect.TypeOf(p).Kind()");
             Assert.AreEqual(reflect.Array, type.Elem().Kind(), "reflect.TypeOf(p).Elem().Kind()");
             Assert.AreEqual((nint)64, type.Elem().Len(), "the length is the type's: there is no pointee to measure");
             Assert.IsTrue(reflect.ValueOf(pointer).IsNil(), "reflect.ValueOf(p).IsNil()");

@@ -8,9 +8,6 @@ global using static global::go.net.http.httptest_package;
 global using static global::go.net.http.httptest_internal_test_package;
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
 
 using go;
@@ -21,7 +18,7 @@ using static global::go.net.http.httptest_test_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<global::go.net.http.httptest_package.ResponseRecorder, go.net.http_package.ResponseWriter>(Pointer = true)]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 [assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
 [assembly: GoImplement<go.net.http_package.noBody, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]

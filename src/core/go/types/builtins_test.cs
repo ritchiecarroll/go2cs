@@ -190,7 +190,7 @@ internal static void testBuiltinSignature(ж<testing.T> t, @string name, @string
 
     var uses = new map<ж<ast.Ident>, types.Object>();
     var types = new map<ast.Expr, types.TypeAndValue>();
-    mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Uses: uses, Types: types)));
+    mustTypecheck(src, nil, Ꮡ(new Info(Uses: uses, Types: types)));
 
     // find called function
     nint n = 0;

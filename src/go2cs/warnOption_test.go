@@ -147,7 +147,7 @@ type impl struct{ n int }
 
 func (p *impl) Parse(s string) bool { p.n++; return s != "" }
 
-func many[O parser](p O, all []O) O { p.Parse("m"); return p }
+func many[O parser](p O, all map[string]O) O { p.Parse("m"); return p }
 
 func main() { _ = many(&impl{}, nil) }
 `)

@@ -21,13 +21,13 @@ partial struct local {
 
 partial struct customLocal /*local*/;
 
-internal static void check(@string name, any x, reflectꓸType to) {
+internal static void check(@string name, any x, reflect.Type to) {
     var v = reflect.ValueOf(x);
     fmt.Println(name, "CanConvert:", v.CanConvert(to), "ConvertibleTo:", v.Type().ConvertibleTo(to), "back:", to.ConvertibleTo(v.Type()));
 }
 
 internal static void main() {
-    var when = time.Date(2020, 1, 2, 3, 4, 5, 0, time.ΔUTC);
+    var when = time.Date(2020, 1, 2, 3, 4, 5, 0, time.UTC);
     var timeType = reflect.TypeOf(new time.Time());
 
     check("customTime -> time.Time", (customTime)when, timeType);

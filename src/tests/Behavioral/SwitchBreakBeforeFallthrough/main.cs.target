@@ -12,9 +12,8 @@ internal static UntypedInt nameZone => 3;
 internal static @string zone(nint kind, @string s) {
     @string @out = "unset";
 
-    var exprᴛ1 = kind;
     var matchᴛ1 = false;
-    if (exprᴛ1 == isoZone) { matchᴛ1 = true;
+    if (kind == isoZone) { matchᴛ1 = true;
         do {
             if (len(s) > 0 && s[0] == 'Z') {
                 @out = "utc(" + s[1..] + ")";
@@ -23,10 +22,10 @@ internal static @string zone(nint kind, @string s) {
             fallthrough = true;
         } while (false);
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == numZone) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && kind == numZone) { matchᴛ1 = true;
         @out = "offset("u8 + s + ")"u8;
     }
-    else if (exprᴛ1 == loopZone) { matchᴛ1 = true;
+    else if (kind == loopZone) { matchᴛ1 = true;
         for (nint i = 0; i < 3; i++) {
             if (i == 1) {
                 break;
@@ -35,7 +34,7 @@ internal static @string zone(nint kind, @string s) {
         }
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == nameZone) {
+    if (fallthrough || !matchᴛ1 && kind == nameZone) {
         do {
             if (s == ""u8) {
                 @out = "anonymous";

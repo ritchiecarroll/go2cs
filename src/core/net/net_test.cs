@@ -39,9 +39,9 @@ public static void TestCloseRead(ж<testing.T> t) {
                 tΔ1.Parallel();
 
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
-                var exprᴛ2 = network;
+                var networkᴛ1 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8: {
+                case {} when networkᴛ1 == "unix"u8 || networkᴛ1 == "unixpacket"u8: {
                     defer(Δos.Remove, ln.Addr().String(), ref ᒐ);
                     break;
                 }}
@@ -52,9 +52,9 @@ public static void TestCloseRead(ж<testing.T> t) {
                 if (err != nil) {
                     tΔ1.Fatal(err);
                 }
-                var exprᴛ3 = network;
+                var networkᴛ2 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ3 == "unix"u8 || exprᴛ3 == "unixpacket"u8: {
+                case {} when networkᴛ2 == "unix"u8 || networkᴛ2 == "unixpacket"u8: {
                     defer(Δos.Remove, c.LocalAddr().String(), ref ᒐ);
                     break;
                 }}
@@ -188,9 +188,9 @@ public static void TestCloseWrite(ж<testing.T> Ꮡt) {
                 if (!deadlineʗ1.IsZero()) {
                     c.SetDeadline(deadlineʗ1);
                 }
-                var exprᴛ2 = network;
+                var networkᴛ1 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8: {
+                case {} when networkᴛ1 == "unix"u8 || networkᴛ1 == "unixpacket"u8: {
                     defer(Δos.Remove, c.LocalAddr().String(), ref ᒐ);
                     break;
                 }}
@@ -240,9 +240,9 @@ public static void TestConnClose(ж<testing.T> t) {
                 tΔ1.Parallel();
 
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
-                var exprᴛ1 = network;
+                var networkᴛ1 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8: {
+                case {} when networkᴛ1 == "unix"u8 || networkᴛ1 == "unixpacket"u8: {
                     defer(Δos.Remove, ln.Addr().String(), ref ᒐ);
                     break;
                 }}
@@ -253,9 +253,9 @@ public static void TestConnClose(ж<testing.T> t) {
                 if (err != nil) {
                     tΔ1.Fatal(err);
                 }
-                var exprᴛ2 = network;
+                var networkᴛ2 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8: {
+                case {} when networkᴛ2 == "unix"u8 || networkᴛ2 == "unixpacket"u8: {
                     defer(Δos.Remove, c.LocalAddr().String(), ref ᒐ);
                     break;
                 }}
@@ -292,9 +292,9 @@ public static void TestListenerClose(ж<testing.T> t) {
                 tΔ1.Parallel();
 
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
-                var exprᴛ1 = network;
+                var networkᴛ1 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8: {
+                case {} when networkᴛ1 == "unix"u8 || networkᴛ1 == "unixpacket"u8: {
                     defer(Δos.Remove, ln.Addr().String(), ref ᒐ);
                     break;
                 }}
@@ -336,9 +336,9 @@ public static void TestPacketConnClose(ж<testing.T> t) {
                 tΔ1.Parallel();
 
                 var c = newLocalPacketListener(new net_test_package.testing_TжTB(tΔ1), network);
-                var exprᴛ1 = network;
+                var networkᴛ1 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ1 == "unixgram"u8: {
+                case {} when networkᴛ1 == "unixgram"u8: {
                     defer(Δos.Remove, c.LocalAddr().String(), ref ᒐ);
                     break;
                 }}
@@ -379,7 +379,7 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> t) {
         goǃ(() => {
             GoFrame ᒐ = default;
             try {
-                defer(ᴛ1 => builtin.close(ᴛ1), syserrʗ1, ref ᒐ);
+                defer(ᴛ1 => close(ᴛ1), syserrʗ1, ref ᒐ);
                 foreach (var (_, errΔ1) in range(abortedConnRequestErrors)) {
                     syserrʗ1.ᐸꟷ(errΔ1);
                 }
@@ -401,7 +401,7 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> t) {
         var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener ln) => {
             GoFrame ᒐ = default;
             try {
-                defer(ᴛ1 => builtin.close(ᴛ1), operrʗ1, ref ᒐ);
+                defer(ᴛ1 => close(ᴛ1), operrʗ1, ref ᒐ);
                 var (cΔ1, errΔ3) = ln.Accept();
                 if (errΔ3 != nil) {
                     var perr = parseAcceptError(errΔ3); if (perr != nil) {
@@ -464,7 +464,7 @@ public static void TestZeroByteRead(ж<testing.T> t) {
                 goǃ(() => {
                     GoFrame ᒐ = default;
                     try {
-                        defer(ᴛ1 => builtin.close(ᴛ1), conncʗ2, ref ᒐ);
+                        defer(ᴛ1 => close(ᴛ1), conncʗ2, ref ᒐ);
                         var (cΔ2, errΔ1) = lnʗ2.Accept();
                         if (errΔ1 != nil) {
                             tΔ1.Error(errΔ1);
@@ -573,13 +573,13 @@ public static void TestReadTimeoutUnblocksRead(ж<testing.T> t) {
     var server = [MethodImpl(MethodImplOptions.NoInlining)] (ж<global::go.net_package.TCPConn> cs) => {
         GoFrame ᒐ = default;
         try {
-            defer(ᴛ1 => builtin.close(ᴛ1), serverDoneʗ1, ref ᒐ);
+            defer(ᴛ1 => close(ᴛ1), serverDoneʗ1, ref ᒐ);
             var errc = new channel<error>(1);
             var errcʗ1 = errc;
             goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
                 GoFrame ᒐ = default;
                 try {
-                    defer(ᴛ1 => builtin.close(ᴛ1), errcʗ1, ref ᒐ);
+                    defer(ᴛ1 => close(ᴛ1), errcʗ1, ref ᒐ);
                     goǃ(() => {
                         // TODO: find a better way to wait
                         // until we're blocked in the cs.Read
@@ -598,10 +598,10 @@ public static void TestReadTimeoutUnblocksRead(ж<testing.T> t) {
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
             });
-            var selᴛ9 = errc;
+            var errcᴛ1 = errc;
             var selᴛ10 = time.After((time.Duration)(5000000000L));
-            switch (select(ᐸꟷ(selᴛ9, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
-            case 0 when selᴛ9.ꟷᐳ(out var err): {
+            switch (select(ᐸꟷ(errcᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
+            case 0 when errcᴛ1.ꟷᐳ(out var err): {
                 return err;
             }
             case 1 when selᴛ10.ꟷᐳ(out _): {
@@ -718,7 +718,7 @@ public static partial void TestNotTemporaryRead(ж<testing.T> t) {
         goǃ(() => {
             GoFrame ᒐ = default;
             try {
-                defer(ᴛ1 => builtin.close(ᴛ1), serverDoneʗ1, ref ᒐ);
+                defer(ᴛ1 => close(ᴛ1), serverDoneʗ1, ref ᒐ);
 
                 var (cs, errΔ1) = lnʗ1.Accept();
                 if (errΔ1 != nil) {
@@ -739,7 +739,7 @@ public static partial void TestNotTemporaryRead(ж<testing.T> t) {
         }, ref ᒐ);
 
         var (ss, err) = Dial(tcpˢ, ln.Addr().String());
-        builtin.close(dialed);
+        close(dialed);
         if (err != nil) {
             t.Fatal(err);
         }
@@ -757,7 +757,7 @@ public static partial void TestNotTemporaryRead(ж<testing.T> t) {
             }
             t.Fatal(readUnexpectedlyReturnedˢ);
         }
-        var (ne, ok) = err._<ΔError>(ᐧ); if (!ok) {
+        var (ne, ok) = err._<Error>(ᐧ); if (!ok) {
             t.Errorf("Read error does not implement net.Error: %v", err);
         } else if (ne.Temporary()) {
             t.Errorf("Read error is unexpectedly temporary: %v", err);
@@ -772,18 +772,18 @@ internal static readonly object errClosedDoesNotˢ = (@string)"ErrClosed does no
 
 // The various errors should implement the Error interface.
 public static void TestErrors(ж<testing.T> t) {
-    global::go.net_package.ΔError _ᴛ1 = new global::go.net_package.OpErrorжΔError(Ꮡ(new OpError()));
-    global::go.net_package.ΔError _ᴛ2 = new global::go.net_package.ParseErrorжΔError(Ꮡ(new ParseError()));
-    global::go.net_package.ΔError _ᴛ3 = new global::go.net_package.AddrErrorжΔError(Ꮡ(new AddrError()));
-    global::go.net_package.ΔError _ᴛ4 = ((global::go.net_package.UnknownNetworkError)(@string)""u8);
-    global::go.net_package.ΔError _ᴛ5 = ((global::go.net_package.InvalidAddrError)(@string)""u8);
-    global::go.net_package.ΔError _ᴛ6 = new net_test_package.net_timeoutErrorжΔError(Ꮡ(new timeoutError()));
-    global::go.net_package.ΔError _ᴛ7 = new global::go.net_package.DNSConfigErrorжΔError(Ꮡ(new DNSConfigError()));
-    global::go.net_package.ΔError _ᴛ8 = new global::go.net_package.DNSErrorжΔError(Ꮡ(new DNSError()));
+    global::go.net_package.Error _ᴛ1 = new global::go.net_package.OpErrorжError(Ꮡ(new OpError()));
+    global::go.net_package.Error _ᴛ2 = new global::go.net_package.ParseErrorжError(Ꮡ(new ParseError()));
+    global::go.net_package.Error _ᴛ3 = new global::go.net_package.AddrErrorжError(Ꮡ(new AddrError()));
+    global::go.net_package.Error _ᴛ4 = ((global::go.net_package.UnknownNetworkError)(@string)""u8);
+    global::go.net_package.Error _ᴛ5 = ((global::go.net_package.InvalidAddrError)(@string)""u8);
+    global::go.net_package.Error _ᴛ6 = new net_test_package.net_timeoutErrorжError(Ꮡ(new timeoutError()));
+    global::go.net_package.Error _ᴛ7 = new global::go.net_package.DNSConfigErrorжError(Ꮡ(new DNSConfigError()));
+    global::go.net_package.Error _ᴛ8 = new global::go.net_package.DNSErrorжError(Ꮡ(new DNSError()));
 
     // ErrClosed was introduced as type error, so we can't check
     // it using a declaration.
-    var (_, ok) = ErrClosed._<ΔError>(ᐧ); if (!ok) {
+    var (_, ok) = ErrClosed._<Error>(ᐧ); if (!ok) {
         t.Fatal(errClosedDoesNotˢ);
     }
 }

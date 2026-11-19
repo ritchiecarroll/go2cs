@@ -16,6 +16,7 @@ using @unsafe = unsafe_package;
 using @internal.syscall.windows;
 using go.sync;
 using ꓸꓸꓸuintptr = Span<uintptr>;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -32,9 +33,13 @@ partial struct DLLError {
     public @string Msg;
 }
 
+} partial class syscallᴛDLLError {
+
 public static @string Error(this ref DLLError e) { return e.Msg; }
 
 public static error Unwrap(this ref DLLError e) { return e.Err; }
+
+} partial class syscall_package {
 
 // N.B. For the Syscall functions below:
 //
@@ -159,7 +164,7 @@ public static (uintptr, Errno) getprocaddress(uintptr handle, ж<uint8> procname
 // A DLL implements access to a single DLL.
 partial struct DLL {
     public @string Name;
-    public ΔHandle Handle;
+    public Handle Handle;
 }
 
 // LoadDLL loads the named DLL file into memory.
@@ -191,7 +196,7 @@ public static (ж<DLL>, error) LoadDLL(@string name) {
     }
     var d = Ꮡ(new DLL(
         Name: name,
-        Handle: ((ΔHandle)h)
+        Handle: ((Handle)h)
     ));
     return (d, default);
 }
@@ -204,6 +209,8 @@ public static ж<DLL> MustLoadDLL(@string name) {
     }
     return d;
 }
+
+} partial class syscallᴛDLL {
 
 // FindProc searches [DLL] d for procedure named name and returns [*Proc]
 // if found. It returns an error if search fails.
@@ -247,12 +254,16 @@ public static error /*err*/ Release(this ref DLL d) {
     return FreeLibrary(d.Handle);
 }
 
+} partial class syscall_package {
+
 // A Proc implements access to a procedure inside a [DLL].
 partial struct Proc {
     public ж<DLL> Dll;
     public @string Name;
     internal uintptr addr;
 }
+
+} partial class syscallᴛProc {
 
 // Addr returns the address of the procedure represented by p.
 // The return value can be passed to Syscall to run the procedure.
@@ -283,6 +294,8 @@ public static (uintptr, uintptr, error) Call(this ref Proc p, params ꓸꓸꓸui
     return (ᴛ1, ᴛ2, ᴛ3);
 }
 
+} partial class syscall_package {
+
 // A LazyDLL implements access to a single [DLL].
 // It will delay the load of the DLL until the first
 // call to its [LazyDLL.Handle] method or to one of its
@@ -298,6 +311,8 @@ partial struct LazyDLL {
     internal ж<DLL> dll; // non nil once DLL is loaded
     public @string Name;
 }
+
+} partial class syscallᴛLazyDLL {
 
 // Load loads DLL file d.Name into memory. It returns an error if fails.
 // Load will not try to load DLL, if it is already loaded into memory.
@@ -349,6 +364,8 @@ public static ж<LazyProc> NewProc(this ж<LazyDLL> Ꮡd, @string name) {
     return Ꮡ(new LazyProc(l: Ꮡd, Name: name));
 }
 
+} partial class syscall_package {
+
 // NewLazyDLL creates new [LazyDLL] associated with [DLL] file.
 public static ж<LazyDLL> NewLazyDLL(@string name) {
     return Ꮡ(new LazyDLL(Name: name));
@@ -362,6 +379,8 @@ partial struct LazyProc {
     internal ж<LazyDLL> l;
     internal ж<Proc> proc;
 }
+
+} partial class syscallᴛLazyProc {
 
 // Find searches [DLL] for procedure named p.Name. It returns
 // an error if search fails. Find will not search procedure,
@@ -426,4 +445,4 @@ public static (uintptr r1, uintptr r2, error lastErr) Call(this ж<LazyProc> Ꮡ
     return p.proc.Call(a.ꓸꓸꓸ);
 }
 
-} // end syscall_package
+} // end syscallᴛLazyProc

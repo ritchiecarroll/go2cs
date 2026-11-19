@@ -366,9 +366,10 @@ public static partial class testing_package
     }
 
     /// <summary>
-    /// Reports the time at which the test binary will have exceeded its package deadline
-    /// (<c>-timeout</c>), matching Go's <c>func (t *T) Deadline() (deadline time.Time, ok bool)</c>.
-    /// <c>ok</c> is false when no deadline is in effect.
+    /// Reports the time at which the test will have exceeded its deadline, matching Go's
+    /// <c>func (t *T) Deadline() (deadline time.Time, ok bool)</c>: the EARLIER of the package deadline
+    /// (<c>-timeout</c>) and the instant the host's per-test watchdog abandons this test's top-level test
+    /// (<see cref="TestExecution.PerTestDeadlineUtc"/>). <c>ok</c> is false when neither is in effect.
     /// </summary>
     /// <remarks>
     /// The FIRST member of this host's surface that needs a converted standard-library type. Go's
@@ -385,10 +386,21 @@ public static partial class testing_package
     {
         // Touch the execution so an unattached T fails the same way every other member does. Inside a
         // synctest bubble Go panics instead of answering a real-clock deadline (testing.go:2164).
-        if (t.RequiredExecution.IsSynctest)
+        TestExecution execution = t.RequiredExecution;
+
+        if (execution.IsSynctest)
             throw builtin.panic(TestExecution.DeadlineInsideBubbleText);
 
-        if (TestHost.PackageDeadlineUtc is not { } deadline)
+        // Go has only the package deadline. The host also abandons a top-level test at its per-test deadline, and a
+        // test that sizes a wait from t.Deadline() must see that bound or it waits past it: internal/poll's
+        // TestSplicePipePool waits 0.9 of what this leaves, and under a 45m budget with a 30m per-test floor it
+        // waited 40.5 minutes and was abandoned at 30 (BOARD 2026-11-12; COORD ruling (A), 2026-11-16).
+        DateTime? earliest = TestHost.PackageDeadlineUtc;
+
+        if (execution.PerTestDeadlineUtc is { } perTest && (earliest is not { } package || perTest < package))
+            earliest = perTest;
+
+        if (earliest is not { } deadline)
             return (default!, false);
 
         // Whole seconds + nanosecond remainder, the shape time.Unix takes. DateTime ticks are

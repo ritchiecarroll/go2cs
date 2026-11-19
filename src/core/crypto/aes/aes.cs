@@ -20,6 +20,7 @@ using strconv = strconv_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static aes_package;
 
 partial class aes_package {
 
@@ -28,9 +29,13 @@ public static UntypedInt BlockSize => 16;
 
 partial struct KeySizeError /*num:nint*/;
 
+} partial class aesᴛKeySizeError {
+
 public static @string Error(this KeySizeError k) {
     return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);
 }
+
+} partial class aes_package {
 
 // NewCipher creates and returns a new [cipher.Block].
 // The key argument must be the AES key,

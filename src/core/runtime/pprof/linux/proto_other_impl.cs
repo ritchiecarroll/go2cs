@@ -19,11 +19,14 @@
 namespace go.runtime;
 
 using os = os_package;
+using static pprof_package;
 
 partial class pprof_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string procSelfMapsˢ = "/proc/self/maps"u8;
+
+} partial class pprofᴛprofileBuilder {
 
 // readMapping reads /proc/self/maps and writes mappings to b.pb.
 // It saves the address ranges of the mappings in b.mem for use
@@ -47,5 +50,7 @@ internal static void readMapping(this ж<profileBuilder> Ꮡb) {
         b.addMappingEntry(textStart, textEnd, 0, exe, buildID, false);
     }
 }
+
+} partial class pprof_package {
 
 } // end pprof_package

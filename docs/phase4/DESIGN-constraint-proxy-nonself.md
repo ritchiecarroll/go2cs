@@ -241,3 +241,39 @@ the proxy is a CLASS in exactly these places, beyond what the self route already
 Not class-dependent, so unchanged by the scout: the name `EжIᴾ`, the result cast back to the box (an implicit operator
 either way), the tuple rebuild, the gate (function, direct position, emitted clause), and the refusals for named
 types, union-plus-methods, siblings and onward generics.
+
+## 11. Class B: a []T argument beside a callback (2026-11-16)
+
+The TS session's class B (repro `t1-genericfunc-slice-ptr-nonself`, on `claude/ts-repros-1116`): tsc's
+`tsbaseline.GetErrorBaseline[T diagnosticwriter.Diagnostic](t, inputFiles, diagnostics []T, compareDiagnostics
+func(a, b T) int, pretty bool)`, called with a `[]*T`. The emission was `join<ж<item>>(widen<ж<item>, Named>(items,
+...), compareItems)`, CS1503: the element-wise widening renders the slice as `slice<Named>` while the call renders T
+as the box. COORD approved the plan (11:00Z) as this route's function-route twin, .4-eligible, target 312.
+
+**The route.** `typeParamTakesProxyRoute` admits a type parameter reached in `[]T` parameters beside a func-typed
+parameter whose signature mentions it, as well as the direct position of section 3.2. That call renders T as the
+proxy, the `[]T` argument projects to `slice<EжIᴾ>` (`widen<ж<E>, EжIᴾ>(xs, e => new EжIᴾ(e))`), and the callback is
+re-wrapped as a lambda, or a literal declares its parameters at the proxy, as the self route's are
+(`callTypeArgProxy`).
+
+**Section 5, amended.** A `[]O` PARAMETER is no longer refused by this route. The widening projects it, and the
+GO2CS2006 gate refuses it by name wherever the callee may write it, exactly as for go/ast's `walkList`. `map`,
+`chan`, `*O`, a `[]O` result and deeper nesting stay refused. This was in the approved plan, and it is what section
+10.3 expected the struct scout to remove altogether.
+
+**One function decides the widening.** `sliceWideningRoute` is asked by both the emission and the GO2CS2006 gate, so
+the gate examines exactly the arguments that are copied:
+- T reached only in `[]T` parameters: widen to the constraint, unchanged (walkList).
+- The proxy applies: widen to the proxy.
+- The clause is elided (the box binds): no widening. The caller's slice is passed as it is, shared as in Go, and
+  there is nothing for GO2CS2006 to refuse.
+- A kept clause the proxy does not carry: unchanged.
+
+**Ruling 3c is unchanged.** The callee hands T on only under identical constraints in tsc's shape
+(`iterateErrorBaseline`, `ToDiagnostics`). The flat repro, which calls `slices.Clone` under `any` in the proxied
+callee itself, is refused by name under 3c. Relaxing 3c for an inner `any` is left for its own ruling: inside such a
+callee, `any(e)`, a type switch or reflect would see the proxy rather than `*T`.
+
+**Census** (the widening's predicate restated over go/types; R's 10:58Z sizing): std on four targets, 4 sites, all
+walkList, 0 mixed; the behavioral corpus, 3 sites, all `[]T`-only, 0 mixed; the tsc closure at `ba29a56299`, 9 sites:
+1 `[]T`-only, 5 class B (GetErrorBaseline, one callee), 2 refused under ruling 1, 1 refused by GO2CS2006.

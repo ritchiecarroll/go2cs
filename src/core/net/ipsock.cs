@@ -9,6 +9,7 @@ using runtime = runtime_package;
 using Δsync = sync_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
+using static net_package;
 
 partial class net_package {
 
@@ -59,10 +60,10 @@ internal static bool supportsIPv4map() {
 }
 
 // An addrList represents a list of network endpoint addresses.
-partial struct addrList /*[]ΔAddr*/;
+partial struct addrList /*[]Addr*/;
 
 // isIPv4 reports whether addr contains an IPv4 address.
-internal static bool isIPv4(ΔAddr addr) {
+internal static bool isIPv4(Addr addr) {
     switch (addr.type()) {
     case ж<TCPAddr> addrΔ1: {
         return addrΔ1.IP.To4() != nil;
@@ -77,21 +78,22 @@ internal static bool isIPv4(ΔAddr addr) {
 }
 
 // isNotIPv4 reports whether addr does not contain an IPv4 address.
-internal static bool isNotIPv4(ΔAddr addr) { return !isIPv4(addr); }
+internal static bool isNotIPv4(Addr addr) { return !isIPv4(addr); }
+
+} partial class netᴛaddrList {
 
 // forResolve returns the most appropriate address in address for
 // a call to ResolveTCPAddr, ResolveUDPAddr, or ResolveIPAddr.
 // IPv4 is preferred, unless addr contains an IPv6 literal.
-internal static ΔAddr forResolve(this addrList addrs, @string network, @string addr) {
+internal static Addr forResolve(this addrList addrs, @string network, @string addr) {
     bool want6 = default;
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8: {
+    case {} when network == "ip"u8: {
         // IPv6 literal (addr does NOT contain a port)
         want6 = bytealg.CountString(addr, (byte)':') > 0;
         break;
     }
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "udp"u8: {
+    case {} when network == "tcp"u8 || network == "udp"u8: {
         // IPv6 literal. (addr contains a port, so look for '[')
         want6 = bytealg.CountString(addr, (byte)'[') > 0;
         break;
@@ -104,8 +106,8 @@ internal static ΔAddr forResolve(this addrList addrs, @string network, @string 
 
 // first returns the first address which satisfies strategy, or if
 // none do, then the first address of any kind.
-internal static ΔAddr first(this addrList addrs, Func<ΔAddr, bool> strategy) {
-    foreach (var (_, addr) in range<ΔAddr>(addrs)) {
+internal static Addr first(this addrList addrs, Func<Addr, bool> strategy) {
+    foreach (var (_, addr) in range<Addr>(addrs)) {
         if (strategy(addr)) {
             return addr;
         }
@@ -119,12 +121,12 @@ internal static ΔAddr first(this addrList addrs, Func<ΔAddr, bool> strategy) {
 // primaries, while addresses with the opposite label are returned
 // as fallbacks. For non-empty inputs, primaries is guaranteed to be
 // non-empty.
-internal static (addrList primaries, addrList fallbacks) partition(this addrList addrs, Func<ΔAddr, bool> strategy) {
+internal static (addrList primaries, addrList fallbacks) partition(this addrList addrs, Func<Addr, bool> strategy) {
     addrList primaries = default;
     addrList fallbacks = default;
 
     bool primaryLabel = default;
-    foreach (var (i, addr) in range<ΔAddr>(addrs)) {
+    foreach (var (i, addr) in range<Addr>(addrs)) {
         var label = strategy(addr);
         if (i == 0 || label == primaryLabel) {
             primaryLabel = label;
@@ -136,12 +138,14 @@ internal static (addrList primaries, addrList fallbacks) partition(this addrList
     return (primaries, fallbacks);
 }
 
+} partial class net_package {
+
 // filterAddrList applies a filter to a list of IP addresses,
 // yielding a list of Addr objects. Known filters are nil, ipv4only,
 // and ipv6only. It returns every address when the filter is nil.
 // The result contains at least one address when error is nil.
-internal static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slice<IPAddr> ips, Func<IPAddr, ΔAddr> inetaddr, @string originalAddr) {
-    var addrsᴷ = new stackAppend<ΔAddr>(moves: true);
+internal static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slice<IPAddr> ips, Func<IPAddr, Addr> inetaddr, @string originalAddr) {
+    var addrsᴷ = new stackAppend<Addr>(moves: true);
 
     addrList addrs = default;
     foreach (var (_, ip) in range(ips)) {
@@ -279,6 +283,8 @@ public static @string JoinHostPort(@string host, @string port) {
     return host + ":"u8 + port;
 }
 
+} partial class netᴛResolver {
+
 // internetAddrList resolves addr, which may be a literal IP
 // address or a DNS name, and returns a list of internet protocol
 // family addresses. The result contains at least one address when
@@ -288,9 +294,9 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
     @string host = default;
     @string port = default;
     ref var portnum = ref heap(new nint(), out var Ꮡportnum);
-    var exprᴛ1 = net;
+    var netᴛ1 = net;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when netᴛ1 == "tcp"u8 || netᴛ1 == "tcp4"u8 || netᴛ1 == "tcp6"u8 || netᴛ1 == "udp"u8 || netᴛ1 == "udp4"u8 || netᴛ1 == "udp6"u8: {
         if (addr != ""u8) {
             (host, port, err) = SplitHostPort(addr); if (err != nil) {
                 return (default, err);
@@ -301,7 +307,7 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
         }
         break;
     }
-    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+    case {} when netᴛ1 == "ip"u8 || netᴛ1 == "ip4"u8 || netᴛ1 == "ip6"u8: {
         if (addr != ""u8) {
             host = addr;
         }
@@ -311,17 +317,17 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
         return (default, ((UnknownNetworkError)net));
     }}
     var portnumʗ1 = portnum;
-    var inetaddr = ΔAddr (IPAddr ip) => {
-        var exprᴛ2 = net;
+    var inetaddr = Addr (IPAddr ip) => {
+        var netᴛ2 = net;
         switch (ᐧ) {
-        case {} when exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8: {
-            return new TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone)));
+        case {} when netᴛ2 == "tcp"u8 || netᴛ2 == "tcp4"u8 || netᴛ2 == "tcp6"u8: {
+            return new TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone)));
         }
-        case {} when exprᴛ2 == "udp"u8 || exprᴛ2 == "udp4"u8 || exprᴛ2 == "udp6"u8: {
-            return new UDPAddrжΔAddr(Ꮡ(new UDPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone)));
+        case {} when netᴛ2 == "udp"u8 || netᴛ2 == "udp4"u8 || netᴛ2 == "udp6"u8: {
+            return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone)));
         }
-        case {} when exprᴛ2 == "ip"u8 || exprᴛ2 == "ip4"u8 || exprᴛ2 == "ip6"u8: {
-            return new IPAddrжΔAddr(Ꮡ(new IPAddr(IP: ip.IP, Zone: ip.Zone)));
+        case {} when netᴛ2 == "ip"u8 || netᴛ2 == "ip4"u8 || netᴛ2 == "ip6"u8: {
+            return new IPAddrжAddr(Ꮡ(new IPAddr(IP: ip.IP, Zone: ip.Zone)));
         }
         default: {
             throw panic("unexpected network: " + net);
@@ -329,7 +335,7 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
         }}
     };
     if (host == ""u8) {
-        return (new addrList(new ΔAddr[]{inetaddr(new IPAddr())}.slice()), default);
+        return (new addrList(new Addr[]{inetaddr(new IPAddr())}.slice()), default);
     }
 
     // Try as a literal IP address, then as a DNS name.
@@ -354,6 +360,8 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
     }
     return filterAddrList(filter, ips, inetaddr, host);
 }
+
+} partial class net_package {
 
 // loopbackIP should be an internal detail,
 // but widely used packages access it using linkname.

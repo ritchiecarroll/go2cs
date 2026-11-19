@@ -5,6 +5,7 @@ namespace go;
 
 using color = image.color_package;
 using image;
+using static image_package;
 
 partial class image_package {
 
@@ -15,13 +16,15 @@ public static ж<Uniform> White = NewUniform(color.White);
 // Transparent is a fully transparent uniform image.
 public static ж<Uniform> Transparent = NewUniform(color.Transparent);
 // Opaque is a fully opaque uniform image.
-public static ж<Uniform> ΔOpaque = NewUniform(color.Opaque);
+public static ж<Uniform> Opaque = NewUniform(color.Opaque);
 
 // Uniform is an infinite-sized [Image] of uniform color.
 // It implements the [color.Color], [color.Model], and [Image] interfaces.
 partial struct Uniform {
     public color.Color C;
 }
+
+} partial class imageᴛUniform {
 
 public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this ref Uniform c) {
     return c.C.RGBA();
@@ -49,6 +52,8 @@ public static bool Opaque(this ref Uniform c) {
     var (_, _, _, a) = c.C.RGBA();
     return a == 0xffff;
 }
+
+} partial class image_package {
 
 // NewUniform returns a new [Uniform] image of the given color.
 public static ж<Uniform> NewUniform(color.Color c) {

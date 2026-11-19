@@ -21,6 +21,7 @@ using go.crypto;
 using go.crypto.@internal;
 using io = io_package;
 using static go.crypto.ed25519_package;
+using static ed25519_internal_test_package;
 
 partial class ed25519_internal_test_package {
 
@@ -102,10 +103,14 @@ public static void TestGenerateKey(ж<testing.T> t) {
 internal partial struct zeroReader {
 }
 
+} partial class ed25519_internal_testᴛzeroReader {
+
 internal static (nint, error) Read(this zeroReader _, slice<byte> buf) {
     clear(buf);
     return (len(buf), default);
 }
+
+} partial class ed25519_internal_test_package {
 
 public static void TestSignVerify(ж<testing.T> t) {
     zeroReader zero = default;

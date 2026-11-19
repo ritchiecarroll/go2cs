@@ -28,7 +28,7 @@ internal partial struct TestACVPRejectionKATs_testCases /*dyn*/ {
     internal @string msg;     // M' input to ML-DSA.Sign_internal
     internal @string sigHash; // SHA2-256(sig)
     internal Func<slice<byte>, (ж<global::go.crypto.@internal.fips140.mldsa_package.PrivateKey>, error)> newPrivateKey;
-    internal Func<slice<byte>, (ж<global::go.crypto.@internal.fips140.mldsa_package.ΔPublicKey>, error)> newPublicKey;
+    internal Func<slice<byte>, (ж<global::go.crypto.@internal.fips140.mldsa_package.PublicKey>, error)> newPublicKey;
 }
 
 // Most tests are in crypto/internal/fips140test/mldsa_test.go, so they can
@@ -376,6 +376,10 @@ public static void TestCASTRejectionPaths(ж<testing.T> t) {
         }
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string mlDsa65ˢ => ref mlDsa65ˢᵇ;
+private static readonly @string mlDsa65ˢᵇ = "ML-DSA-65"u8;
 
 public static void BenchmarkCAST(ж<testing.B> b) {
     // IG 10.3.A says "ML-DSA digital signature generation CASTs should cover

@@ -8,7 +8,7 @@ namespace go;
 
 partial class time_package {
     static time_package() {
-        initᴛΔUTC();
-        initᴛΔLocal();
+        initᴛUTC();
+        initᴛLocal();
     }
 } // end time_package

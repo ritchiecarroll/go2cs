@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct node {
     internal @string name;
 }
+
+} partial class mainᴛnode {
 
 internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chain) {
     @string describe() => Ꮡc.Value.name;
@@ -29,6 +32,8 @@ internal static ж<node> firstOr(this ж<node> Ꮡc, slice<ж<node>> chain) {
 
     return Ꮡc;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var root = Ꮡ(new node(name: "root"));

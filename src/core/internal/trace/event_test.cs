@@ -32,8 +32,8 @@ internal static ref readonly @string goroutineTransitionˢ => ref goroutineTrans
 private static readonly @string goroutineTransitionˢᵇ = "GoroutineTransition"u8;
 internal static ref readonly @string procTransitionˢ => ref procTransitionˢᵇ;
 private static readonly @string procTransitionˢᵇ = "ProcTransition"u8;
-internal static ref readonly @string syncˢ2 => ref syncˢ2ᵇ;
-private static readonly @string syncˢ2ᵇ = "Sync"u8;
+internal static ref readonly @string syncˢ => ref syncˢᵇ;
+private static readonly @string syncˢᵇ = "Sync"u8;
 internal static ref readonly @string taskˢ => ref taskˢᵇ;
 private static readonly @string taskˢᵇ = "Task"u8;
 internal static ref readonly @string regionˢ => ref regionˢᵇ;
@@ -57,7 +57,7 @@ internal partial struct TestMakeEvent_tests /*dyn*/ {
     internal @string name;
     internal @string metric;
     internal uint64 val;
-    internal global::go.@internal.trace_package.ΔStack stack;
+    internal global::go.@internal.trace_package.Stack stack;
     internal bool valid;
 }
 
@@ -71,12 +71,12 @@ internal partial struct TestMakeEvent_testsᴛ1 /*dyn*/ {
 internal partial struct TestMakeEvent_testsᴛ2 /*dyn*/ {
     internal @string name;
     internal global::go.@internal.trace_package.GoID g;
-    internal global::go.@internal.trace_package.ΔStack stack;
+    internal global::go.@internal.trace_package.Stack stack;
     internal global::go.@internal.trace_package.GoID stG;
     internal global::go.@internal.trace_package.GoState from;
     internal global::go.@internal.trace_package.GoState to;
     internal @string reason;
-    internal global::go.@internal.trace_package.ΔStack stStack;
+    internal global::go.@internal.trace_package.Stack stStack;
     internal bool valid;
 }
 
@@ -127,12 +127,12 @@ internal partial struct TestMakeEvent_testsᴛ7 /*dyn*/ {
 internal partial struct TestMakeEvent_testsᴛ8 /*dyn*/ {
     internal @string name;
     internal global::go.@internal.trace_package.EventKind kind;
-    internal global::go.@internal.trace_package.ΔStack stack;
+    internal global::go.@internal.trace_package.Stack stack;
     internal bool valid;
 }
 
 public static void TestMakeEvent(ж<testing.T> t) {
-    void checkTime(ж<testing.T> tΔ1, global::go.@internal.trace_package.ΔEvent ev, global::go.@internal.trace_package.ΔTime want) {
+    void checkTime(ж<testing.T> tΔ1, global::go.@internal.trace_package.Event ev, global::go.@internal.trace_package.Time want) {
         ev = ev.ΔClone();
         tΔ1.Helper();
         if (ev.Time() != want) {
@@ -153,18 +153,18 @@ public static void TestMakeEvent(ж<testing.T> t) {
     }
     TestMakeEvent_stackType schedStack = schedStackᶜ;
     TestMakeEvent_stackType stStack = stStackᶜ;
-    void checkStack(ж<testing.T> tΔ3, global::go.@internal.trace_package.ΔStack got, global::go.@internal.trace_package.ΔStack want, TestMakeEvent_stackType which) {
+    void checkStack(ж<testing.T> tΔ3, global::go.@internal.trace_package.Stack got, global::go.@internal.trace_package.Stack want, TestMakeEvent_stackType which) {
         tΔ3.Helper();
         var diffΔ1 = diff.Diff(wantˢ, slice<byte>(want.String()), gotˢ, slice<byte>(got.String()));
         if (len(diffΔ1) > 0) {
             tΔ3.Errorf("unexpected %s: %s", which, diffΔ1);
         }
     }
-    ref var stk1 = ref heap<global::go.@internal.trace_package.ΔStack>(MakeStack([
+    ref var stk1 = ref heap<global::go.@internal.trace_package.Stack>(MakeStack([
         new(PC: 1, Func: "foo", File: "foo.go", Line: 10),
         new(PC: 2, Func: "bar", File: "bar.go", Line: 20)
     ]), out var Ꮡstk1);
-    ref var stk2 = ref heap<global::go.@internal.trace_package.ΔStack>(MakeStack([
+    ref var stk2 = ref heap<global::go.@internal.trace_package.Stack>(MakeStack([
         new(PC: 1, Func: "foo", File: "foo.go", Line: 10),
         new(PC: 2, Func: "bar", File: "bar.go", Line: 20)
     ]), out var Ꮡstk2);
@@ -190,16 +190,16 @@ public static void TestMakeEvent(ж<testing.T> t) {
             var checkValidʗ2 = checkValidʗ1;
             var testʗ1 = test;
             tΔ4.Run(test.name, (ж<testing.T> tΔ5) => {
-                var (ev, err) = MakeEvent(new EventConfig<ΔMetric>(
+                var (ev, err) = MakeEvent(new EventConfig<Metric>(
                     Kind: EventMetric,
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
-                    Details: new ΔMetric(Name: testʗ1.metric, Value: Uint64Value(testʗ1.val)),
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
+                    Details: new Metric(Name: testʗ1.metric, Value: Uint64Value(testʗ1.val)),
                     Stack: testʗ1.stack
                 ));
                 if (!checkValidʗ2(tΔ5, err, testʗ1.valid)) {
                     return;
                 }
-                checkTimeʗ2(tΔ5, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ2(tΔ5, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
                 checkStackʗ2(tΔ5, ev.Stack(), testʗ1.stack, schedStack);
                 var got = ev.Metric();
                 if (got.Name != testʗ1.metric) {
@@ -215,17 +215,17 @@ public static void TestMakeEvent(ж<testing.T> t) {
     var checkTimeʗ3 = checkTime;
     var checkValidʗ3 = checkValid;
     t.Run(labelˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ6) => {
-        var (ev, err) = MakeEvent(new EventConfig<ΔLabel>(
+        var (ev, err) = MakeEvent(new EventConfig<Label>(
             Kind: EventLabel,
             Time: 42,
-            Details: new ΔLabel(ΔΔLabel: "test", Resource: MakeResourceID((global::go.@internal.trace_package.GoID)23))
+            Details: new Label(ΔLabel: "test", Resource: MakeResourceID((global::go.@internal.trace_package.GoID)23))
         ));
         if (!checkValidʗ3(tΔ6, err, true)) {
             return;
         }
         var label = ev.Label();
-        if (label.ΔΔLabel != "test"u8) {
-            tΔ6.Errorf("expected label to be test, got %q", label.ΔΔLabel);
+        if (label.ΔLabel != "test"u8) {
+            tΔ6.Errorf("expected label to be test, got %q", label.ΔLabel);
         }
         if (label.Resource.Kind != ResourceGoroutine) {
             tΔ6.Errorf("expected label resource to be goroutine, got %d", label.Resource.Kind);
@@ -274,10 +274,10 @@ public static void TestMakeEvent(ж<testing.T> t) {
             var checkValidʗ5 = checkValidʗ4;
             var testʗ2 = test;
             tΔ7.Run(name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ8) => {
-                var (ev, err) = MakeEvent(new EventConfig<ΔRange>(
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
+                var (ev, err) = MakeEvent(new EventConfig<Range>(
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
                     Kind: testʗ2.kind,
-                    Details: new ΔRange(Name: testʗ2.name, Scope: testʗ2.scope)
+                    Details: new Range(Name: testʗ2.name, Scope: testʗ2.scope)
                 ));
                 if (!checkValidʗ5(tΔ8, err, testʗ2.valid)) {
                     return;
@@ -292,7 +292,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
                 if (got.Scope.String() != testʗ2.scope.String()) {
                     tΔ8.Errorf("expected scope to be %s, got %s", testʗ2.scope.String(), got.Scope.String());
                 }
-                checkTimeʗ5(tΔ8, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ5(tΔ8, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
             });
         }
     });
@@ -543,9 +543,9 @@ public static void TestMakeEvent(ж<testing.T> t) {
                 var st = MakeGoStateTransition(testʗ3.stG, testʗ3.from, testʗ3.to);
                 st.Stack = testʗ3.stStack;
                 st.Reason = testʗ3.reason;
-                var (ev, err) = MakeEvent(new EventConfig<ΔStateTransition>(
+                var (ev, err) = MakeEvent(new EventConfig<StateTransition>(
                     Kind: EventStateTransition,
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
                     Goroutine: testʗ3.g,
                     Stack: testʗ3.stack,
                     Details: st
@@ -572,7 +572,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
                     tΔ10.Errorf("expected reason to be %s, got %s", testʗ3.reason, got.Reason);
                 }
                 checkStackʗ4(tΔ10, got.Stack, testʗ3.stStack, stStack);
-                checkTimeʗ7(tΔ10, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ7(tΔ10, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
             });
         }
     });
@@ -596,16 +596,16 @@ public static void TestMakeEvent(ж<testing.T> t) {
             var testʗ4 = test;
             tΔ11.Run(test.name, (ж<testing.T> tΔ12) => {
                 var st = MakeProcStateTransition(testʗ4.proc, testʗ4.from, testʗ4.to);
-                var (ev, err) = MakeEvent(new EventConfig<ΔStateTransition>(
+                var (ev, err) = MakeEvent(new EventConfig<StateTransition>(
                     Kind: EventStateTransition,
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
                     Proc: testʗ4.schedProc,
                     Details: st
                 ));
                 if (!checkValidʗ9(tΔ12, err, testʗ4.valid)) {
                     return;
                 }
-                checkTimeʗ9(tΔ12, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ9(tΔ12, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
                 var gotSt = ev.StateTransition();
                 var (from, to) = gotSt.Proc();
                 if (from != testʗ4.from) {
@@ -626,7 +626,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
 
     var checkTimeʗ10 = checkTime;
     var checkValidʗ10 = checkValid;
-    t.Run(syncˢ2, (ж<testing.T> tΔ13) => {
+    t.Run(syncˢ, (ж<testing.T> tΔ13) => {
         var tests = slice<TestMakeEvent_testsᴛ4>([
             new(
                 name: "invalid kind",
@@ -679,16 +679,16 @@ public static void TestMakeEvent(ж<testing.T> t) {
             var checkValidʗ11 = checkValidʗ10;
             var testʗ5 = test;
             tΔ13.Run(test.name, (ж<testing.T> tΔ14) => {
-                var (ev, err) = MakeEvent(new EventConfig<ΔSync>(
+                var (ev, err) = MakeEvent(new EventConfig<Sync>(
                     Kind: testʗ5.kind,
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
-                    Details: new ΔSync(N: testʗ5.n, ClockSnapshot: testʗ5.clock, ExperimentalBatches: testʗ5.batches)
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
+                    Details: new Sync(N: testʗ5.n, ClockSnapshot: testʗ5.clock, ExperimentalBatches: testʗ5.batches)
                 ));
                 if (!checkValidʗ11(tΔ14, err, testʗ5.valid)) {
                     return;
                 }
                 var got = ev.Sync();
-                checkTimeʗ11(tΔ14, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ11(tΔ14, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
                 if (got.N != testʗ5.n) {
                     tΔ14.Errorf("expected N to be %d, got %d", testʗ5.n, got.N);
                 }
@@ -733,15 +733,15 @@ public static void TestMakeEvent(ж<testing.T> t) {
             var checkValidʗ13 = checkValidʗ12;
             var testʗ6 = test;
             tΔ15.Run(test.name, (ж<testing.T> tΔ16) => {
-                var (ev, err) = MakeEvent(new EventConfig<ΔTask>(
+                var (ev, err) = MakeEvent(new EventConfig<Task>(
                     Kind: testʗ6.kind,
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
-                    Details: new ΔTask(ID: testʗ6.id, Parent: testʗ6.parent, Type: testʗ6.typ)
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
+                    Details: new Task(ID: testʗ6.id, Parent: testʗ6.parent, Type: testʗ6.typ)
                 ));
                 if (!checkValidʗ13(tΔ16, err, testʗ6.valid)) {
                     return;
                 }
-                checkTimeʗ13(tΔ16, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ13(tΔ16, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
                 var got = ev.Task();
                 if (got.ID != testʗ6.id) {
                     tΔ16.Errorf("expected ID to be %d, got %d", testʗ6.id, got.ID);
@@ -773,15 +773,15 @@ public static void TestMakeEvent(ж<testing.T> t) {
             var checkValidʗ15 = checkValidʗ14;
             var testʗ7 = test;
             tΔ17.Run(test.name, (ж<testing.T> tΔ18) => {
-                var (ev, err) = MakeEvent(new EventConfig<ΔRegion>(
+                var (ev, err) = MakeEvent(new EventConfig<Region>(
                     Kind: testʗ7.kind,
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
-                    Details: new ΔRegion(Task: testʗ7.task, Type: testʗ7.typ)
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
+                    Details: new Region(Task: testʗ7.task, Type: testʗ7.typ)
                 ));
                 if (!checkValidʗ15(tΔ18, err, testʗ7.valid)) {
                     return;
                 }
-                checkTimeʗ15(tΔ18, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ15(tΔ18, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
                 var got = ev.Region();
                 if (got.Task != testʗ7.task) {
                     tΔ18.Errorf("expected Task to be %d, got %d", testʗ7.task, got.Task);
@@ -809,15 +809,15 @@ public static void TestMakeEvent(ж<testing.T> t) {
             var checkValidʗ17 = checkValidʗ16;
             var testʗ8 = test;
             tΔ19.Run(test.name, (ж<testing.T> tΔ20) => {
-                var (ev, err) = MakeEvent(new EventConfig<ΔLog>(
+                var (ev, err) = MakeEvent(new EventConfig<Log>(
                     Kind: testʗ8.kind,
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
-                    Details: new ΔLog(Task: testʗ8.task, Category: testʗ8.category, Message: testʗ8.message)
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
+                    Details: new Log(Task: testʗ8.task, Category: testʗ8.category, Message: testʗ8.message)
                 ));
                 if (!checkValidʗ17(tΔ20, err, testʗ8.valid)) {
                     return;
                 }
-                checkTimeʗ17(tΔ20, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ17(tΔ20, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
                 var got = ev.Log();
                 if (got.Task != testʗ8.task) {
                     tΔ20.Errorf("expected Task to be %d, got %d", testʗ8.task, got.Task);
@@ -853,7 +853,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
             tΔ21.Run(test.name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ22) => {
                 var (ev, err) = MakeEvent(new EventConfig<StackSample>(
                     Kind: testʗ9.kind,
-                    Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
+                    Time: ((global::go.@internal.trace_package.Time)(int64)(42 + i)),
                     Stack: testʗ9.stack
                     // N.b. Details defaults to StackSample{}, so we can
                     // omit it here.
@@ -861,7 +861,7 @@ public static void TestMakeEvent(ж<testing.T> t) {
                 if (!checkValidʗ19(tΔ22, err, testʗ9.valid)) {
                     return;
                 }
-                checkTimeʗ19(tΔ22, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
+                checkTimeʗ19(tΔ22, ev, (global::go.@internal.trace_package.Time)(int64)(42 + i));
                 var got = ev.Stack();
                 checkStackʗ6(tΔ22, got, testʗ9.stack, schedStack);
             });
@@ -887,7 +887,7 @@ public static void TestMakeStack(ж<testing.T> t) {
 
 public static void TestPanicEvent(ж<testing.T> t) {
     // Use a sync event for this because it doesn't have any extra metadata.
-    ref var ev = ref heap<global::go.@internal.trace_package.ΔEvent>(syncEvent(nil, 0, 0), out var Ꮡev);
+    ref var ev = ref heap<global::go.@internal.trace_package.Event>(syncEvent(nil, 0, 0), out var Ꮡev);
 
     var evʗ1 = ev;
     mustPanic(t, () => {

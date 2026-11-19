@@ -22,10 +22,12 @@ using runtime = runtime_package;
 using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using log;
 using ꓸꓸꓸany = Span<any>;
+using static log_package;
 
 partial class log_package {
 
@@ -77,6 +79,8 @@ public static ж<Logger> New(Δio.Writer @out, @string prefix, nint flag) {
     return l;
 }
 
+} partial class logᴛLogger {
+
 // SetOutput sets the output destination for the logger.
 public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) {
     GoFrame ᒐ = default;
@@ -92,6 +96,8 @@ public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡl.DerefOrNull().outMu.Unlock(); ᒐ.Run(); }
 }
+
+} partial class log_package {
 
 internal static ж<Logger> std = New(new os.FileжWriter(os.Stderr), "", LstdFlags);
 
@@ -196,6 +202,8 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
     ᏑbufferPool.Put(Ꮡp.OrTypedNil());
 }
 
+} partial class logᴛLogger {
+
 // Output writes the output for a logging event. The string s contains
 // the text to print after the prefix specified by the flags of the
 // Logger. A newline is appended if the last character of s is not
@@ -264,12 +272,16 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
     finally { ᒐ.Run(); }
 }
 
+} partial class log_package {
+
 [GoInit] internal static void init() {
     Δinternal.DefaultOutput = [MethodImpl(MethodImplOptions.NoInlining)] (uintptr pc, slice<byte> data) => {
         var dataʗ1 = data;
         return std.output(pc, 0, (slice<byte> buf) => appendꓸꓸꓸ(buf, dataʗ1));
     };
 }
+
+} partial class logᴛLogger {
 
 // Print calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Print].
@@ -393,6 +405,8 @@ public static Δio.Writer Writer(this ж<Logger> Ꮡl) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡl.DerefOrNull().outMu.Unlock(); ᒐ.Run(); }
 }
+
+} partial class log_package {
 
 // SetOutput sets the output destination for the standard logger.
 public static void SetOutput(Δio.Writer w) {

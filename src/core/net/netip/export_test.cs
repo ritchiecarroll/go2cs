@@ -8,6 +8,7 @@ namespace go.net;
 
 using unique = unique_package;
 using testing = testing_package;
+using static netip_package;
 
 partial class netip_package {
 
@@ -29,16 +30,21 @@ internal static Uint128 Mk128(uint64 hi, uint64 lo) {
     return new uint128(hi, lo);
 }
 
-internal static ΔAddr MkAddr(Uint128 u, unique.Handle<AddrDetail> z) {
-    return new ΔAddr(u, z);
+internal static Addr MkAddr(Uint128 u, unique.Handle<AddrDetail> z) {
+    return new Addr(u, z);
 }
 
-public static ΔAddr IPv4(uint8 a, uint8 b, uint8 c, uint8 d) { return AddrFrom4(new byte[]{a, b, c, d}.array()); }
+public static Addr IPv4(uint8 a, uint8 b, uint8 c, uint8 d) { return AddrFrom4(new byte[]{a, b, c, d}.array()); }
 
 public static readonly ж<Action<ж<testing.T>, appendMarshaler>> ᏑTestAppendToMarshal = new StaticBox<Action<ж<testing.T>, appendMarshaler>>(testAppendToMarshal);
 public static ref Action<ж<testing.T>, appendMarshaler> TestAppendToMarshal => ref ((StaticBox<Action<ж<testing.T>, appendMarshaler>>)ᏑTestAppendToMarshal).ValueSlot;
 
-public static bool IsZero(this ΔAddr a) { return a.isZero(); }
-public static bool IsZero(this ΔPrefix p) { return p.isZero(); }
+} partial class netipᴛAddrᴛtest {
 
-} // end netip_package
+public static bool IsZero(this Addr a) { return a.isZero(); }
+
+} partial class netipᴛPrefixᴛtest {
+
+public static bool IsZero(this Prefix p) { return p.isZero(); }
+
+} // end netipᴛPrefixᴛtest

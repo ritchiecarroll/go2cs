@@ -85,17 +85,17 @@ public static void TestHeap(ж<testing.T> t) {
     nint l = len(heap);
     slice<ж<global::go.@internal.trace_package.batchCursor>> removed = default;
     for (nint i = 0; i < l; i++) {
-        removed = builtin.append(removedᴷ, removed, heap[0]);
+        removed = append(removedᴷ, removed, heap[0]);
         heap = heapRemove(heap, 0);
         checkHeap(t, heap);
     }
-    if (!slices.IsSortedFunc<slice<ж<global::go.@internal.trace_package.batchCursor>>, ж<global::go.@internal.trace_package.batchCursor>>(removed, ((Func<ж<global::go.@internal.trace_package.batchCursor>, ж<global::go.@internal.trace_package.batchCursor>, nint>)(global::go.@internal.trace_package.compare)))) {
+    if (!slices.IsSortedFunc<slice<ж<global::go.@internal.trace_package.batchCursor>>, ж<global::go.@internal.trace_package.batchCursor>>(removed, ((Func<ж<global::go.@internal.trace_package.batchCursor>, ж<global::go.@internal.trace_package.batchCursor>, nint>)(global::go.@internal.traceᴛbatchCursor.compare)))) {
         t.Fatalf("heap elements not removed in sorted order, got: %s", heapDebugString(removed));
     }
 }
 
 internal static ж<global::go.@internal.trace_package.batchCursor> makeBatchCursor(int64 v) {
-    return Ꮡ(new batchCursor(ev: new baseEvent(time: ((global::go.@internal.trace_package.ΔTime)v))));
+    return Ꮡ(new batchCursor(ev: new baseEvent(time: ((global::go.@internal.trace_package.Time)v))));
 }
 
 internal static @string heapDebugString(slice<ж<global::go.@internal.trace_package.batchCursor>> heap) {

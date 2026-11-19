@@ -29,6 +29,7 @@ using hash;
 using hash = hash_package;
 using static go.archive.tar_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static tar_internal_test_package;
 
 partial class tar_internal_test_package {
 
@@ -827,15 +828,20 @@ internal partial struct reader {
 internal partial struct readSeeker {
     /*embed*/ public io_package.ReadSeeker ReadSeeker;
 }
+
 internal partial struct readBadSeeker {
     /*embed*/ public io_package.ReadSeeker ReadSeeker;
 }
+
+} partial class tar_internal_testᴛreadBadSeeker {
 
 // Go method set entry for the promoted 'ReadSeeker.Read()' - provided ONLY by the embedded
 // interface field in *readBadSeeker's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Read(this readBadSeeker recvᴛ, slice<byte> p) => recvᴛ.ReadSeeker.Read(p);
 
 internal static (int64, error) Seek(this ref readBadSeeker rbs, int64 _Δp1, nint _Δp2) { return (0, fmt.Errorf("illegal seek"u8)); }
+
+} partial class tar_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string garbageˢ => ref garbageˢᵇ;
@@ -1490,6 +1496,8 @@ internal partial struct testNonEmptyReader {
     /*embed*/ public io_package.Reader Reader;
 }
 
+} partial class tar_internal_testᴛtestNonEmptyReader {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedEmptyReadCallˢ => ref unexpectedEmptyReadCallˢᵇ;
 private static readonly @string unexpectedEmptyReadCallˢᵇ = "unexpected empty Read call"u8;
@@ -1500,6 +1508,8 @@ internal static (nint, error) Read(this testNonEmptyReader r, slice<byte> b) {
     }
     return r.Reader.Read(b);
 }
+
+} partial class tar_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object cdeˢ = (@string)"cde"u8;

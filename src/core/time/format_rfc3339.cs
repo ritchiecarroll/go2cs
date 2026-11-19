@@ -4,8 +4,11 @@
 namespace go;
 
 using errors = errors_package;
+using static time_package;
 
 partial class time_package {
+
+} partial class timeᴛTime {
 
 // RFC 3339 is the most commonly used format.
 //
@@ -87,7 +90,9 @@ internal static (slice<byte>, error) appendStrictRFC3339(this Time t, slice<byte
     return (b, default);
 }
 
-internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> local)
+} partial class time_package {
+
+internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<Location> local)
     where bytes : /* []byte | string */ IByteSeq<bytes, byte>, new()
 {
     // parseUint parses s as an unsigned decimal integer and
@@ -115,12 +120,12 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> local)
     if (len(s) < len("2006-01-02T15:04:05")) {
         return (new Time(), false);
     }
-    nint year = parseUint(s[0..4], 0, 9999);                        // e.g., 2006
-    nint month = parseUint(s[5..7], 1, 12);                         // e.g., 01
-    nint day = parseUint(s[8..10], 1, daysIn((ΔMonth)month, year)); // e.g., 02
-    nint hour = parseUint(s[11..13], 0, 23);                        // e.g., 15
-    nint min = parseUint(s[14..16], 0, 59);                         // e.g., 04
-    nint sec = parseUint(s[17..19], 0, 59);                         // e.g., 05
+    nint year = parseUint(s[0..4], 0, 9999);                       // e.g., 2006
+    nint month = parseUint(s[5..7], 1, 12);                        // e.g., 01
+    nint day = parseUint(s[8..10], 1, daysIn((Month)month, year)); // e.g., 02
+    nint hour = parseUint(s[11..13], 0, 23);                       // e.g., 15
+    nint min = parseUint(s[14..16], 0, 59);                        // e.g., 04
+    nint sec = parseUint(s[17..19], 0, 59);                        // e.g., 05
     if (!ok || !(s[4] == '-' && s[7] == '-' && s[10] == 'T' && s[13] == ':' && s[16] == ':')) {
         return (new Time(), false);
     }
@@ -137,7 +142,7 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> local)
     }
 
     // Parse the time zone.
-    var t = Date(year, (ΔMonth)month, day, hour, min, sec, nsec, ΔUTC);
+    var t = Date(year, (Month)month, day, hour, min, sec, nsec, UTC);
     if (len(s) != 1 || s[0] != 'Z') {
         if (len(s) != len("-07:00")) {
             return (new Time(), false);
@@ -164,7 +169,7 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> local)
 }
 
 internal static (Time, error) parseStrictRFC3339(slice<byte> b) {
-    var (t, ok) = parseRFC3339(b, ΔLocal);
+    var (t, ok) = parseRFC3339(b, Local);
     if (!ok) {
         var (tΔ1, err) = Parse(RFC3339, (@string)b);
         if (err != nil) {

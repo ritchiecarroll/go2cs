@@ -70,19 +70,19 @@ public static (ж<PrivateKey>, error) TestingOnlyNewPrivateKeyFromSemiExpanded(s
         return (default, err);
     }
 
-    var priv = Ꮡ(new PrivateKey(pub: new ΔPublicKey(p: p)));
-    priv.k = K.Clone();
-    priv.pub.tr = tr.Clone();
+    var priv = Ꮡ(new PrivateKey(pub: new PublicKey(p: p)));
+    priv.k.Assign(K);
+    priv.pub.tr.Assign(tr);
     var A = GoReflect.WithElemDims(priv.pub.a.slice(0, k * l), 256);
     computeMatrixA(A, ρ[..], p);
     foreach (var r in range(l)) {
-        priv.s1[r] = ntt(s1[r]);
+        priv.s1[r].Assign(ntt(s1[r]));
     }
     foreach (var r in range(k)) {
-        priv.s2[r] = ntt(s2[r]);
+        priv.s2[r].Assign(ntt(s2[r]));
     }
     foreach (var r in range(k)) {
-        priv.t0[r] = ntt(t0[r]);
+        priv.t0[r].Assign(ntt(t0[r]));
     }
 
     // We need to put something in priv.seed, and putting random bytes feels
@@ -110,7 +110,7 @@ public static (ж<PrivateKey>, error) TestingOnlyNewPrivateKeyFromSemiExpanded(s
     foreach (var i in range(k)) {
         var tHat = priv.s2[i].Clone();
         foreach (var j in range(l)) {
-            tHat = polyAdd(tHat, nttMul(A[i * l + j], priv.s1[j]));
+            tHat.Assign(polyAdd(tHat, nttMul(A[i * l + j], priv.s1[j])));
         }
         var t = inverseNTT(tHat);
         foreach (var j in range(n)) {
@@ -180,7 +180,9 @@ internal static (array<byte> ρ, array<byte> K, array<byte> tr, slice<ringElemen
     s1 = GoReflect.WithElemDims(new slice<ringElement>(l), 256);
     foreach (var i in range(l)) {
         nint length = (nint)n * bits.Len((nuint)η * 2) / 8;
-        (s1[i], err) = bitUnpackSlow(sk.slice(0, length), η, η);
+        ref var s1ᴛ1 = ref s1[i];
+        (var s1ᴛ2, err) = bitUnpackSlow(sk.slice(0, length), η, η);
+        s1ᴛ1.Assign(s1ᴛ2);
         if (err != nil) {
             return (ρ, K, tr, s1, s2, t0, err);
         }
@@ -190,7 +192,9 @@ internal static (array<byte> ρ, array<byte> K, array<byte> tr, slice<ringElemen
     s2 = GoReflect.WithElemDims(new slice<ringElement>(k), 256);
     foreach (var i in range(k)) {
         nint length = (nint)n * bits.Len((nuint)η * 2) / 8;
-        (s2[i], err) = bitUnpackSlow(sk.slice(0, length), η, η);
+        ref var s2ᴛ1 = ref s2[i];
+        (var s2ᴛ2, err) = bitUnpackSlow(sk.slice(0, length), η, η);
+        s2ᴛ1.Assign(s2ᴛ2);
         if (err != nil) {
             return (ρ, K, tr, s1, s2, t0, err);
         }
@@ -201,7 +205,9 @@ internal static (array<byte> ρ, array<byte> K, array<byte> tr, slice<ringElemen
     t0 = GoReflect.WithElemDims(new slice<ringElement>(k), 256);
     foreach (var i in range(k)) {
         nint length = n * 13 / 8;
-        (t0[i], err) = bitUnpackSlow(sk.slice(0, length), bound - 1, bound);
+        ref var t0ᴛ1 = ref t0[i];
+        (var t0ᴛ2, err) = bitUnpackSlow(sk.slice(0, length), bound - 1, bound);
+        t0ᴛ1.Assign(t0ᴛ2);
         if (err != nil) {
             return (ρ, K, tr, s1, s2, t0, err);
         }

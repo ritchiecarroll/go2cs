@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct counter {
 }
 
 internal static void addInt(ref nint x, nint d) { x += d; }
+
+} partial class mainᴛcounter {
 
 internal static nint addInClosure(this ж<counter> Ꮡc, nint d) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -36,17 +39,29 @@ internal static Action<nint> makeAdder(this ж<counter> Ꮡc) {
     };
 }
 
+} partial class main_package {
+
 partial struct label /*num:nint*/;
 
+} partial class mainᴛlabel {
+
 internal static @string render(this label l) { return fmt.Sprintf("L%d"u8, (nint)l); }
+
+} partial class main_package {
 
 partial struct widget {
     internal label id;
 }
 
+} partial class mainᴛwidget {
+
 internal static @string tag(this widget w) { return fmt.Sprintf("W%d"u8, (nint)w.id); }
 
+} partial class main_package {
+
 internal static @string call(Func<@string> f) { return f(); }
+
+} partial class mainᴛwidget {
 
 internal static @string viaFieldMethodValue(this ж<widget> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
@@ -61,6 +76,8 @@ internal static @string viaBareMethodValue(this ж<widget> Ꮡw) {
     var recvʗ1 = w;
     return call(() => recvʗ1.tag());
 }
+
+} partial class main_package {
 
 internal static void main() {
     var c = Ꮡ(new counter(n: 0));

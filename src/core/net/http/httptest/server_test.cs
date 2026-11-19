@@ -14,24 +14,25 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 using go.net;
 using static go.net.http.httptest_package;
 using time = time_package;
+using static httptest_internal_test_package;
 
 partial class httptest_internal_test_package {
 
 // type newServerFunc is a methodless func type — rendered inline as its base delegate
 
-internal static map<@string, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>>> newServers;
-internal static void initᴛnewServers() { newServers = new map<@string, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>>>{
+internal static map<@string, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>>> newServers;
+internal static void initᴛnewServers() { newServers = new map<@string, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>>>{
     ["NewServer"] = NewServer,
     ["NewTLSServer"] = NewTLSServer,
 
     // The manual variants of newServer create a Server manually by only filling
     // in the exported fields of Server.
-    ["NewServerManual"] = (httpꓸHandler h) => {
+    ["NewServerManual"] = (http.Handler h) => {
         var ts = Ꮡ(new Server(Listener: newLocalListener(), Config: Ꮡ(new http.Server(Handler: h))));
         ts.Start();
         return ts;
     },
-    ["NewTLSServerManual"] = (httpꓸHandler h) => {
+    ["NewTLSServerManual"] = (http.Handler h) => {
         var ts = Ꮡ(new Server(Listener: newLocalListener(), Config: Ꮡ(new http.Server(Handler: h))));
         ts.StartTLS();
         return ts;
@@ -89,10 +90,10 @@ public static void TestServer(ж<testing.T> t) {
     }
 }
 
-internal static void testServer(ж<testing.T> t, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>> newServer) {
+internal static void testServer(ж<testing.T> t, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>> newServer) {
     GoFrame ᒐ = default;
     try {
-        var ts = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var ts = newServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>("hello"u8));
         })));
         var tsʗ1 = ts;
@@ -115,8 +116,8 @@ internal static void testServer(ж<testing.T> t, Func<httpꓸHandler, ж<global:
 }
 
 // Issue 12781
-internal static void testGetAfterClose(ж<testing.T> t, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>> newServer) {
-    var ts = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+internal static void testGetAfterClose(ж<testing.T> t, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>> newServer) {
+    var ts = newServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
         w.Write(slice<byte>("hello"u8));
     })));
 
@@ -142,10 +143,10 @@ internal static void testGetAfterClose(ж<testing.T> t, Func<httpꓸHandler, ж<
     }
 }
 
-internal static void testServerCloseBlocking(ж<testing.T> t, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>> newServer) {
+internal static void testServerCloseBlocking(ж<testing.T> t, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>> newServer) {
     GoFrame ᒐ = default;
     try {
-        var ts = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var ts = newServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>("hello"u8));
         })));
         var tsʗ1 = ts;
@@ -179,11 +180,11 @@ internal static void testServerCloseBlocking(ж<testing.T> t, Func<httpꓸHandle
 }
 
 // Issue 14290
-internal static void testServerCloseClientConnections(ж<testing.T> t, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>> newServer) {
+internal static void testServerCloseClientConnections(ж<testing.T> t, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>> newServer) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref heap<ж<global::go.net.http.httptest_package.Server>>(out var Ꮡs);
-        s = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter w, ж<http.Request> r) => {
+        s = newServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter w, ж<http.Request> r) => {
             Ꮡs.ValueSlot.CloseClientConnections();
         })));
         defer(Ꮡs.ValueSlot.Close, ref ᒐ);
@@ -199,10 +200,10 @@ internal static void testServerCloseClientConnections(ж<testing.T> t, Func<http
 
 // Tests that the Server.Client method works and returns an http.Client that can hit
 // NewTLSServer without cert warnings.
-internal static void testServerClient(ж<testing.T> t, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>> newTLSServer) {
+internal static void testServerClient(ж<testing.T> t, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>> newTLSServer) {
     GoFrame ᒐ = default;
     try {
-        var ts = newTLSServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var ts = newTLSServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>("hello"u8));
         })));
         var tsʗ1 = ts;
@@ -227,10 +228,10 @@ internal static void testServerClient(ж<testing.T> t, Func<httpꓸHandler, ж<g
 
 // Tests that the Server.Client.Transport interface is implemented
 // by a *http.Transport.
-internal static void testServerClientTransportType(ж<testing.T> t, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>> newServer) {
+internal static void testServerClientTransportType(ж<testing.T> t, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>> newServer) {
     GoFrame ᒐ = default;
     try {
-        var ts = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var ts = newServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
         })));
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
@@ -245,10 +246,10 @@ internal static void testServerClientTransportType(ж<testing.T> t, Func<httpꓸ
 
 // Tests that the TLS Server.Client.Transport interface is implemented
 // by a *http.Transport.
-internal static void testTLSServerClientTransportType(ж<testing.T> t, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>> newTLSServer) {
+internal static void testTLSServerClientTransportType(ж<testing.T> t, Func<http.Handler, ж<global::go.net.http.httptest_package.Server>> newTLSServer) {
     GoFrame ᒐ = default;
     try {
-        var ts = newTLSServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var ts = newTLSServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
         })));
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
@@ -265,7 +266,11 @@ internal partial struct onlyCloseListener {
     /*embed*/ public net_package.Listener Listener;
 }
 
+} partial class httptest_internal_testᴛonlyCloseListener {
+
 internal static error Close(this onlyCloseListener _) { return default; }
+
+} partial class httptest_internal_test_package {
 
 // Issue 19729: panic in Server.Close for values created directly
 // without a constructor (so the unexported client field is nil).
@@ -286,7 +291,7 @@ internal static readonly object failedToHijackˢ = (@string)"failed to hijack"u8
 public static partial void TestCloseHijackedConnection(ж<testing.T> t) {
     var hijacked = new channel<net.Conn>(0);
     var hijackedʗ1 = hijacked;
-    var ts = NewServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+    var ts = NewServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => close(ᴛ1), hijackedʗ1, ref ᒐ);
@@ -381,7 +386,7 @@ public static void TestTLSServerWithHTTP2(ж<testing.T> t) {
         t.Run(tt.name, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                var cst = NewUnstartedServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+                var cst = NewUnstartedServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
                     w.Header().Set(xProtoˢ, r.Proto);
                 })));
 
@@ -442,7 +447,7 @@ public static void TestClientExampleCom(ж<testing.T> t) {
         t.Run(tt.proto + " "u8 + tt.host, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                var cst = NewUnstartedServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+                var cst = NewUnstartedServer(new httptest_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
                     w.Header().Set(requestedHostnameˢ, r.Host);
                 })));
                 var exprᴛ1 = ttʗ1.proto;

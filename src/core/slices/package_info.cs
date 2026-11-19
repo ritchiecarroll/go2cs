@@ -57,7 +57,7 @@ using static go.slices_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("slices/iter.go", "iter.cs", "AAocwoKCggAFEMKCgoLesoKCggAFEtKClKqirNKCgqyygoIAAhDSgoIAAhDygqaClLiC", "15-21:1;27-33:1;38-44:1;102-113:1")]
 [assembly: GoPositionMap("slices/slices.go", "slices.cs", "AA4oAAgCgpSCgqYAAhAACAKClIKCgqYAAhQACgKCgpSCgqaClAACEAAIAoKClIKCpoKUqsKCgqaqwoKCpqiyqsIAAhYADAKUgoKUgoKUyoKCgpQADyDKAAcQ7u7u7gACEgAIApSCpoKCgq7igoKmgoKCpoIAAhAACQKUgpSCgoKUpoKUgoKCppSUgoKCAA0clIKCAA4elIKCgoKUgoKCggAHEIKCgq70grgAAhIACAKClIKCgoKCgriCpq7igpSCgoKCgoK4gqYAAhDygpSUlKrCAAIS4oKClIIABCiigoKCuKiygrzigoKCgtyCgpQAAhDygqaCgoKmgoKClA==")]
-[assembly: GoPositionMap("slices/sort.go", "sort.cs", "AAwg0oIAAhgACwKCqsKowoKCpqrCgoKmrOKClIKClKzSgpSCgoKmrOKClIKClKzSgpSCgoKmrgAIBKaSgpSClLgAAhQACQKmkoKUgpS4AAscgoKCgqaCqsI=")]
+[assembly: GoPositionMap("slices/sort.go", "sort.cs", "AA0g0oIAAhgACwKCqsKowoKCpqrCgoKmrOKClIKClKzSgpSCgoKmrOKClIKClKzSgpSCgoKmrgAIBKaSgpSClLgAAhQACQKmkoKUgpS4AA0cgoKCgsaCqsI=")]
 [assembly: GoPositionMap("slices/zsortanyfunc.go", "zsortanyfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgpQAAy4AFgi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDCgpSCgoKUgrg=")]
 [assembly: GoPositionMap("slices/zsortordered.go", "zsortordered.cs", "AAoYsoKCzsKCgoKClIKUgpSCuKKCgqaCuIKCAAMUAAgClKqClIKCuIKCuIKCpoKCuIK4goLcgoKCpoKUkoKCgoKUgoIABBLigqSClIKUgoKUgoKUgoKUgpSClIKClIKqwoKkgoKUgpSClIKClKiymIKCgqaCpoKmpoKCgpS4goKClLiqwoKCgpSCgoKUAAQU8qqUzoKUgoKmppSkpLqygoKUqLKCgoKosqaigoKCgoK4ooK4ooKSgoKClJSCgoKCgpSClAADLgAYCLiCgoKCgpS4gpTcuIKCgoKClLiClKaCgpKCgpSClJSCgoKUuIKClIKUggADEOKClIKCgpSCuA==")]
 // </GoSourcePositionMaps>
@@ -89,3 +89,13 @@ public static partial class slices_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(slices_package.xorshift)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slicesᴛxorshift;
+// </MethodHolders>

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,12 +9,18 @@ partial struct counter {
     internal nint n;
 }
 
+} partial class mainᴛcounter {
+
 internal static void reset(this ref counter c) { c.n = 0; }
 internal static void inc(this ref counter c) { c.n++; }
+
+} partial class main_package {
 
 partial struct builder {
     internal counter c;
 }
+
+} partial class mainᴛbuilder {
 
 internal static void run(this ж<builder> Ꮡb) {
     GoFrame ᒐ = default;
@@ -28,6 +35,8 @@ internal static void run(this ж<builder> Ꮡb) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 internal static void main() {
     var b = Ꮡ(new builder());

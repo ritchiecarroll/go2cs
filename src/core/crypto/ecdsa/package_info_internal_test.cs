@@ -29,7 +29,7 @@ using static go.crypto.ecdsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ACk2ggAGFIKUsoKikoIABRTCgqaCpoKCgpSCuIKmgpSCgoKCpoKmgoK4gqaClIKCgoKmgqaCgriCpoKUgoKCgqaCgoKCppSmgtyUgoKmgqaClIKCgoKmgoKCpoKmgriCgoKUpoIACgbugqaCgqaUgoKCgpKUgoKCgpSUlIKUlIKmgoKUpLS0tLS2pLS0tLS0tqaCppSCxrS0tLSCgoKCgsbagqaCgoKmgoKClIK4gqaClIKCuIKCuIK4gqaCgoKmgriCpoKUgoKUgoKmgoK4gqaClIKClIKCpoKCuIKmgpSCgpSCgqaCggATCIKC7gAHEAALGAAIEu4ABxCC7gAHEILuAAkUggAHEIKCgpSCgpSCuIL2goKUlIKClIKUgoKUgqaCgpSCgpSCpoKCgqaCgpSClIKmgoKUgpSCyoIACgaCgoKAgraCgIKkgoKAgraCgoKAgraCgoKCgIK2goKCgsqCAAoGgoKCgIK2goCCtoKCgoKAgraCgoCCtoKCgIK2goKAggAKCoIABBCCgpLKgoKCgoKUlIKCgoKCpvqCgoKCgpSCgoKmgoKCgtyCgoKCgoKC", "43-48:1;44-47:1.1;440-455:1;456-491:2;492-507:3;508-523:4;621-636:1;637-651:2;652-658:3;666-676:1;677-690:2;691-702:3;716-718:1;723-741:1;745-764:1;768-777:1", "", "43=P256/1/2/4,P224/1/1/5,P384/1/1/6,P521/1/1/7,P256/2/2/8,genericParamsForCurve/1/1/8;605=fromHex/1/3/1,fromHex/2/3/4,fromHex/3/3/5;832=P256/1/1/4,P384/1/1/5,P521/1/1/6")]
+[assembly: GoPositionMap("crypto/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ACo2ggAGFIKUsoKikoIABRTCgqaCpoKCgpSCuIKmgpSCgoKCpoKmgoK4gqaClIKCgoKmgqaCgriCpoKUgoKCgqaCgoKCppSmgvy0goKmgqaClIKCgoKmgoKCpoKmgriCgoKUpoIACgbugqaCgqaUgoKCgpKUgoKCgpSUlIKUlIKmgoKUlLS0tLS2lLS0tLS0tqaCppSCxrS0tLSCgoKCgsbagqaCgoKmgoKClIK4gqaClIKCuIKCuIK4gqaCgoKmgriCpoKUgoKUgoKmgoK4gqaClIKClIKCpoKCuIKmgpSCgpSCgqaCggATCIKC7gAHEAALGAAIEu4ABxCC7gAHEILuAAkUggAHEIKCgpSCgpSCuIL2goKUlIKClIKUgoKUgqaCgpSCgpSCpoKCgqaCgpSClIKmgoKUgpSCyoIACgaCgoKAgraCgIKkgoKAgraCgoKAgraCgoKCgIK2goKCgsqCAAoGgoKCgIK2goCCtoKCgoKAgraCgoCCtoKCgIK2goKAggAKCoIABBCCgpLKgoKCgoKUlIKCgoKCpvqCgoKCgpSCgoKmgoKCgtyCgoKCgoKC", "43-48:1;44-47:1.1;440-455:1;456-491:2;492-507:3;508-523:4;621-636:1;637-651:2;652-658:3;666-676:1;677-690:2;691-702:3;716-718:1;723-741:1;745-764:1;768-777:1", "", "44=P256/1/2/4,P224/1/1/5,P384/1/1/6,P521/1/1/7,P256/2/2/8,genericParamsForCurve/1/1/8;608=fromHex/1/3/1,fromHex/2/3/4,fromHex/3/3/5;835=P256/1/1/4,P384/1/1/5,P521/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -74,3 +74,13 @@ public static partial class ecdsa_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ecdsa_internal_test_package.readerFunc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsa_internal_testᴛreaderFunc;
+// </MethodHolders>

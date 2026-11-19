@@ -15,12 +15,15 @@ namespace go.crypto.@internal;
 using runtime = runtime_package;
 using sync = sync_package;
 using weak = weak_package;
+using static fips140cache_package;
 
 partial class fips140cache_package {
 
 partial struct Cache<K, V> {
     internal sync.Map m;
 }
+
+} partial class fips140cacheᴛCache {
 
 // Get returns the result of new, for an associated key k.
 //
@@ -53,4 +56,4 @@ internal static void evict<K, V>(this ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) {
     Ꮡc.Ꮡm.Delete(p);
 }
 
-} // end fips140cache_package
+} // end fips140cacheᴛCache

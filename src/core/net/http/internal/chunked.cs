@@ -12,6 +12,7 @@ using bytes = bytes_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
+using static internal_package;
 
 partial class internal_package {
 
@@ -41,6 +42,8 @@ partial struct chunkedReader {
     internal bool checkEnd; // whether need to check for \r\n chunk footer
     internal int64 excess;  // "excessive" chunk overhead, for malicious sender detection
 }
+
+} partial class internalᴛchunkedReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chunkedEncodingContainsˢ => ref chunkedEncodingContainsˢᵇ;
@@ -157,6 +160,8 @@ internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8>
     return (n, cr.err);
 }
 
+} partial class internal_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chunkedLineEndsWithBareˢ => ref chunkedLineEndsWithBareˢᵇ;
 private static readonly @string chunkedLineEndsWithBareˢᵇ = "chunked line ends with bare LF"u8;
@@ -249,6 +254,8 @@ partial struct chunkedWriter {
     public io.Writer Wire;
 }
 
+} partial class internalᴛchunkedWriter {
+
 // Write the contents of data as one chunk to Wire.
 // NOTE: Note that the corresponding chunk-writing procedure in Conn.Write has
 // a bug since it does not check for success of [io.WriteString]
@@ -284,6 +291,8 @@ internal static error Close(this ref chunkedWriter cw) {
     var (_, err) = io.WriteString(cw.Wire, "0\r\n");
     return err;
 }
+
+} partial class internal_package {
 
 // FlushAfterChunkWriter signals from the caller of [NewChunkedWriter]
 // that each chunk should be followed by a flush. It is used by the

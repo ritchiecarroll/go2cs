@@ -6,6 +6,7 @@ namespace go.math;
 
 using fmt = fmt_package;
 using math = math_package;
+using static big_package;
 
 partial class big_package {
 
@@ -18,23 +19,25 @@ partial class big_package {
 // an existing (or newly allocated) Rat must be set to
 // a new value using the [Rat.Set] method; shallow copies
 // of Rats are not supported and may lead to errors.
-partial struct ΔRat {
+partial struct Rat {
     // To make zero values for Rat work w/o initialization,
     // a zero value of b (len(b) == 0) acts like b == 1. At
     // the earliest opportunity (when an assignment to the Rat
     // is made), such uninitialized denominators are set to 1.
     // a.neg determines the sign of the Rat, b.neg is ignored.
-    internal ΔInt a, b;
+    internal Int a, b;
 }
 
 // NewRat creates a new [Rat] with numerator a and denominator b.
-public static ж<ΔRat> NewRat(int64 a, int64 b) {
-    return @new<ΔRat>().SetFrac64(a, b);
+public static ж<Rat> NewRat(int64 a, int64 b) {
+    return @new<Rat>().SetFrac64(a, b);
 }
+
+} partial class bigᴛRat {
 
 // SetFloat64 sets z to exactly f and returns z.
 // If f is not finite, SetFloat returns nil.
-public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
+public static ж<Rat> SetFloat64(this ж<Rat> Ꮡz, float64 f) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     UntypedInt expMask = /* 1<<11 - 1 */ 2047;
@@ -74,11 +77,13 @@ public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
     return Ꮡz.norm();
 }
 
+} partial class big_package {
+
 // quotToFloat32 returns the non-negative float32 value
 // nearest to the quotient a/b, using round-to-even in
 // halfway cases. It does not mutate its arguments.
 // Preconditions: b is non-zero; a and b have no common factors.
-internal static (float32 f, bool exact) quotToFloat32(ж<stack> stk, Δnat a, Δnat b) {
+internal static (float32 f, bool exact) quotToFloat32(ж<stack> stk, nat a, nat b) {
     float32 f = default;
     bool exact = default;
 
@@ -113,8 +118,8 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> stk, Δnat a, Δ
     // - the high-order 1 is omitted in "normal" representation;
     // - the low-order 1 will be used during rounding then discarded.
     nint exp = alen - blen;
-    Δnat a2 = default;
-    Δnat b2 = default;
+    nat a2 = default;
+    nat b2 = default;
     a2 = a2.set(a);
     b2 = b2.set(b);
     {
@@ -128,7 +133,7 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> stk, Δnat a, Δ
     // 2. Compute quotient and remainder (q, r).  NB: due to the
     // extra shift, the low-order bit of q is logically the
     // high-order bit of r.
-    Δnat q = default;
+    nat q = default;
     (q, var r) = q.div(stk, a2, a2, b2); // (recycle a2)
     var mantissa = low32(q);
     var haveRem = len(r) > 0; // mantissa&1 && !haveRem => remainder is exactly half
@@ -180,7 +185,7 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> stk, Δnat a, Δ
 // nearest to the quotient a/b, using round-to-even in
 // halfway cases. It does not mutate its arguments.
 // Preconditions: b is non-zero; a and b have no common factors.
-internal static (float64 f, bool exact) quotToFloat64(ж<stack> stk, Δnat a, Δnat b) {
+internal static (float64 f, bool exact) quotToFloat64(ж<stack> stk, nat a, nat b) {
     float64 f = default;
     bool exact = default;
 
@@ -215,8 +220,8 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> stk, Δnat a, Δ
     // - the high-order 1 is omitted in "normal" representation;
     // - the low-order 1 will be used during rounding then discarded.
     nint exp = alen - blen;
-    Δnat a2 = default;
-    Δnat b2 = default;
+    nat a2 = default;
+    nat b2 = default;
     a2 = a2.set(a);
     b2 = b2.set(b);
     {
@@ -230,7 +235,7 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> stk, Δnat a, Δ
     // 2. Compute quotient and remainder (q, r).  NB: due to the
     // extra shift, the low-order bit of q is logically the
     // high-order bit of r.
-    Δnat q = default;
+    nat q = default;
     (q, var r) = q.div(stk, a2, a2, b2); // (recycle a2)
     var mantissa = low64(q);
     var haveRem = len(r) > 0; // mantissa&1 && !haveRem => remainder is exactly half
@@ -278,11 +283,13 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> stk, Δnat a, Δ
     return (f, exact);
 }
 
+} partial class bigᴛRat {
+
 // Float32 returns the nearest float32 value for x and a bool indicating
 // whether f represents x exactly. If the magnitude of x is too large to
 // be represented by a float32, f is an infinity and exact is false.
 // The sign of f always matches the sign of x, even if f == 0.
-public static (float32 f, bool exact) Float32(this ж<ΔRat> Ꮡx) {
+public static (float32 f, bool exact) Float32(this ж<Rat> Ꮡx) {
     float32 f = default;
     bool exact = default;
     GoFrame ᒐ = default;
@@ -310,7 +317,7 @@ public static (float32 f, bool exact) Float32(this ж<ΔRat> Ꮡx) {
 // whether f represents x exactly. If the magnitude of x is too large to
 // be represented by a float64, f is an infinity and exact is false.
 // The sign of f always matches the sign of x, even if f == 0.
-public static (float64 f, bool exact) Float64(this ж<ΔRat> Ꮡx) {
+public static (float64 f, bool exact) Float64(this ж<Rat> Ꮡx) {
     float64 f = default;
     bool exact = default;
     GoFrame ᒐ = default;
@@ -336,7 +343,7 @@ public static (float64 f, bool exact) Float64(this ж<ΔRat> Ꮡx) {
 
 // SetFrac sets z to a/b and returns z.
 // If b == 0, SetFrac panics.
-public static ж<ΔRat> SetFrac(this ж<ΔRat> Ꮡz, ж<ΔInt> Ꮡa, ж<ΔInt> Ꮡb) {
+public static ж<Rat> SetFrac(this ж<Rat> Ꮡz, ж<Int> Ꮡa, ж<Int> Ꮡb) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -347,7 +354,7 @@ public static ж<ΔRat> SetFrac(this ж<ΔRat> Ꮡz, ж<ΔInt> Ꮡa, ж<ΔInt> �
         throw panic("division by zero");
     }
     if (Ꮡz.Ꮡa == Ꮡb || alias(z.a.abs, babs)) {
-        babs = ((Δnat)default).set(babs); // make a copy
+        babs = ((nat)default).set(babs); // make a copy
     }
     z.a.abs = z.a.abs.set(a.abs);
     z.b.abs = z.b.abs.set(babs);
@@ -356,7 +363,7 @@ public static ж<ΔRat> SetFrac(this ж<ΔRat> Ꮡz, ж<ΔInt> Ꮡa, ж<ΔInt> �
 
 // SetFrac64 sets z to a/b and returns z.
 // If b == 0, SetFrac64 panics.
-public static ж<ΔRat> SetFrac64(this ж<ΔRat> Ꮡz, int64 a, int64 b) {
+public static ж<Rat> SetFrac64(this ж<Rat> Ꮡz, int64 a, int64 b) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (b == 0) {
@@ -372,7 +379,7 @@ public static ж<ΔRat> SetFrac64(this ж<ΔRat> Ꮡz, int64 a, int64 b) {
 }
 
 // SetInt sets z to x (by making a copy of x) and returns z.
-public static ж<ΔRat> SetInt(this ж<ΔRat> Ꮡz, ж<ΔInt> x) {
+public static ж<Rat> SetInt(this ж<Rat> Ꮡz, ж<Int> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Ꮡa.Set(x);
@@ -381,7 +388,7 @@ public static ж<ΔRat> SetInt(this ж<ΔRat> Ꮡz, ж<ΔInt> x) {
 }
 
 // SetInt64 sets z to x and returns z.
-public static ж<ΔRat> SetInt64(this ж<ΔRat> Ꮡz, int64 x) {
+public static ж<Rat> SetInt64(this ж<Rat> Ꮡz, int64 x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Ꮡa.SetInt64(x);
@@ -390,7 +397,7 @@ public static ж<ΔRat> SetInt64(this ж<ΔRat> Ꮡz, int64 x) {
 }
 
 // SetUint64 sets z to x and returns z.
-public static ж<ΔRat> SetUint64(this ж<ΔRat> Ꮡz, uint64 x) {
+public static ж<Rat> SetUint64(this ж<Rat> Ꮡz, uint64 x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Ꮡa.SetUint64(x);
@@ -399,7 +406,7 @@ public static ж<ΔRat> SetUint64(this ж<ΔRat> Ꮡz, uint64 x) {
 }
 
 // Set sets z to x (by making a copy of x) and returns z.
-public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
+public static ж<Rat> Set(this ж<Rat> Ꮡz, ж<Rat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (Ꮡz != x) {
@@ -413,7 +420,7 @@ public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
 }
 
 // Abs sets z to |x| (the absolute value of x) and returns z.
-public static ж<ΔRat> Abs(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
+public static ж<Rat> Abs(this ж<Rat> Ꮡz, ж<Rat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Set(x);
@@ -422,7 +429,7 @@ public static ж<ΔRat> Abs(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
 }
 
 // Neg sets z to -x and returns z.
-public static ж<ΔRat> Neg(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
+public static ж<Rat> Neg(this ж<Rat> Ꮡz, ж<Rat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Set(x);
@@ -432,7 +439,7 @@ public static ж<ΔRat> Neg(this ж<ΔRat> Ꮡz, ж<ΔRat> x) {
 
 // Inv sets z to 1/x and returns z.
 // If x == 0, Inv panics.
-public static ж<ΔRat> Inv(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
+public static ж<Rat> Inv(this ж<Rat> Ꮡz, ж<Rat> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -448,12 +455,12 @@ public static ж<ΔRat> Inv(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
 //   - -1 if x < 0;
 //   - 0 if x == 0;
 //   - +1 if x > 0.
-public static nint Sign(this ref ΔRat x) {
+public static nint Sign(this ref Rat x) {
     return x.a.Sign();
 }
 
 // IsInt reports whether the denominator of x is 1.
-public static bool IsInt(this ref ΔRat x) {
+public static bool IsInt(this ref Rat x) {
     return len(x.b.abs) == 0 || x.b.abs.cmp(natOne) == 0;
 }
 
@@ -461,7 +468,7 @@ public static bool IsInt(this ref ΔRat x) {
 // The result is a reference to x's numerator; it
 // may change if a new value is assigned to x, and vice versa.
 // The sign of the numerator corresponds to the sign of x.
-public static ж<ΔInt> Num(this ж<ΔRat> Ꮡx) {
+public static ж<Int> Num(this ж<Rat> Ꮡx) {
     return Ꮡx.Ꮡa;
 }
 
@@ -472,7 +479,7 @@ public static ж<ΔInt> Num(this ж<ΔRat> Ꮡx) {
 // any operation that sets x will do, including x.Set(x).)
 // If the result is a reference to x's denominator it
 // may change if a new value is assigned to x, and vice versa.
-public static ж<ΔInt> Denom(this ж<ΔRat> Ꮡx) {
+public static ж<Int> Denom(this ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // Note that x.b.neg is guaranteed false.
@@ -480,12 +487,12 @@ public static ж<ΔInt> Denom(this ж<ΔRat> Ꮡx) {
         // Note: If this proves problematic, we could
         //       panic instead and require the Rat to
         //       be explicitly initialized.
-        return Ꮡ(new ΔInt(abs: new Δnat(new Word[]{1}.slice())));
+        return Ꮡ(new Int(abs: new nat(new Word[]{1}.slice())));
     }
     return Ꮡx.Ꮡb;
 }
 
-internal static ж<ΔRat> norm(this ж<ΔRat> Ꮡz) {
+internal static ж<Rat> norm(this ж<Rat> Ꮡz) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -520,10 +527,12 @@ internal static ж<ΔRat> norm(this ж<ΔRat> Ꮡz) {
     finally { ᒐ.Run(); }
 }
 
+} partial class big_package {
+
 // mulDenom sets z to the denominator product x*y (by taking into
 // account that 0 values for x or y must be interpreted as 1) and
 // returns z.
-internal static Δnat mulDenom(ж<stack> stk, Δnat z, Δnat x, Δnat y) {
+internal static nat mulDenom(ж<stack> stk, nat z, nat x, nat y) {
     switch (ᐧ) {
     case {} when len(x) == 0 && len(y) == 0: {
         return z.setWord(1);
@@ -537,9 +546,11 @@ internal static Δnat mulDenom(ж<stack> stk, Δnat z, Δnat x, Δnat y) {
     return z.mul(stk, x, y);
 }
 
+} partial class bigᴛInt {
+
 // scaleDenom sets z to the product x*f.
 // If f == 0 (zero value of denominator), z is set to (a copy of) x.
-internal static void scaleDenom(this ж<ΔInt> Ꮡz, ж<stack> stk, ж<ΔInt> Ꮡx, Δnat f) {
+internal static void scaleDenom(this ж<Int> Ꮡz, ж<stack> stk, ж<Int> Ꮡx, nat f) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -551,18 +562,20 @@ internal static void scaleDenom(this ж<ΔInt> Ꮡz, ж<stack> stk, ж<ΔInt> �
     z.neg = x.neg;
 }
 
+} partial class bigᴛRat {
+
 // Cmp compares x and y and returns:
 //   - -1 if x < y;
 //   - 0 if x == y;
 //   - +1 if x > y.
-public static nint Cmp(this ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+public static nint Cmp(this ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
         ref var y = ref Ꮡy.DerefOrNull();
 
-        ref var a = ref heap(new ΔInt(), out var Ꮡa);
-        ref var b = ref heap(new ΔInt(), out var Ꮡb);
+        ref var a = ref heap(new Int(), out var Ꮡa);
+        ref var b = ref heap(new Int(), out var Ꮡb);
         var stk = getStack();
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
@@ -575,7 +588,7 @@ public static nint Cmp(this ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
 }
 
 // Add sets z to the sum x+y and returns z.
-public static ж<ΔRat> Add(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+public static ж<Rat> Add(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -586,8 +599,8 @@ public static ж<ΔRat> Add(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
 
-        ref var a1 = ref heap(new ΔInt(), out var Ꮡa1);
-        ref var a2 = ref heap(new ΔInt(), out var Ꮡa2);
+        ref var a1 = ref heap(new Int(), out var Ꮡa1);
+        ref var a2 = ref heap(new Int(), out var Ꮡa2);
         Ꮡa1.scaleDenom(stk, Ꮡx.Ꮡa, y.b.abs);
         Ꮡa2.scaleDenom(stk, Ꮡy.Ꮡa, x.b.abs);
         Ꮡz.Ꮡa.Add(Ꮡa1, Ꮡa2);
@@ -599,7 +612,7 @@ public static ж<ΔRat> Add(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
 }
 
 // Sub sets z to the difference x-y and returns z.
-public static ж<ΔRat> Sub(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+public static ж<Rat> Sub(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -610,8 +623,8 @@ public static ж<ΔRat> Sub(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
 
-        ref var a1 = ref heap(new ΔInt(), out var Ꮡa1);
-        ref var a2 = ref heap(new ΔInt(), out var Ꮡa2);
+        ref var a1 = ref heap(new Int(), out var Ꮡa1);
+        ref var a2 = ref heap(new Int(), out var Ꮡa2);
         Ꮡa1.scaleDenom(stk, Ꮡx.Ꮡa, y.b.abs);
         Ꮡa2.scaleDenom(stk, Ꮡy.Ꮡa, x.b.abs);
         Ꮡz.Ꮡa.Sub(Ꮡa1, Ꮡa2);
@@ -623,7 +636,7 @@ public static ж<ΔRat> Sub(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
 }
 
 // Mul sets z to the product x*y and returns z.
-public static ж<ΔRat> Mul(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+public static ж<Rat> Mul(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -656,7 +669,7 @@ public static ж<ΔRat> Mul(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
 
 // Quo sets z to the quotient x/y and returns z.
 // If y == 0, Quo panics.
-public static ж<ΔRat> Quo(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+public static ж<Rat> Quo(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -670,8 +683,8 @@ public static ж<ΔRat> Quo(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
         if (len(y.a.abs) == 0) {
             throw panic("division by zero");
         }
-        ref var a = ref heap(new ΔInt(), out var Ꮡa);
-        ref var b = ref heap(new ΔInt(), out var Ꮡb);
+        ref var a = ref heap(new Int(), out var Ꮡa);
+        ref var b = ref heap(new Int(), out var Ꮡb);
         Ꮡa.scaleDenom(stk, Ꮡx.Ꮡa, y.b.abs);
         Ꮡb.scaleDenom(stk, Ꮡy.Ꮡa, x.b.abs);
         z.a.abs = a.abs;
@@ -683,4 +696,4 @@ public static ж<ΔRat> Quo(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy)
     finally { ᒐ.Run(); }
 }
 
-} // end big_package
+} // end bigᴛRat

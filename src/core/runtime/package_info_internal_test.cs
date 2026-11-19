@@ -55,8 +55,8 @@ using static go.runtime_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("runtime/align_runtime_test.go", "align_runtime_test.cs", "AA8eABow")]
-[assembly: GoPositionMap("runtime/export_debuglog_test.go", "export_debuglog_test.cs", "ABIigqaCgoKCgoKCgpSCgoKCgpSmgoKCgoKClKaCgoKClII=")]
-[assembly: GoPositionMap("runtime/export_test.go", "export_test.cs", "ABwmkpKSkpKSkpLEooKStLSUpJKyoqK0orSUksQACA68ggAJFIKmgpSCpoKCuKKClAAKBoKCgoKCgIKkgpSCgoKmgIIACQqCgoKCgoKCgpSCgoKClIKCgpSClIKCgpSUgoKCpoKCAAgKyoKCgoKCgoKCgoKylIKClJSUgoKCupKSkpKSkrKippSigsyykpTGoqKilILcgraasoKmkqSylJSCgriUpoKCuIKmggAFEIKmgqqCpoK4gpSm7tzKppSUttjSppSUuIKCgoKCgqqCgpSClIKClIKCupKWkoKCgoKUgpSUgoKmgoKClIKUlIKmpoKs0oKAkpSCkriiyJSCgoKssqaCgoLugqaCpoKmgqaCpoKCgoKmgqYABkYACgKCgoKClJSCgqaUpoKClAACEoKmgqaitpaSqJIABCSCgqbugoKCptyUgoLKgoK6kqiSgoKUqOwADiKCgoLKgpSCgoKYorSCgpSClIKCgpSUlKiAmKKClIKSgoKClJSClKaClKyygoKClKbcgpSCgpSClIKogO6ClIKCgoKClIKClMaCggAKFoKUkraCgpSUgpSCtoKClJSClLaCgqaClKKCkpSUgoKClKiSggAHEpKokqiSqJKokv4AByIACQKCggACEAAMDIKCgoKUAAYSooKClKqi7uKClKiSAAcsAA4CpoKCgqaSgoK4gqbKgqaCgqaC7qaCpsqSgoK4rLKmgsqmgoKm7oLcpoKClAAKFoKCgpSUgoKUuqIABxCyppKmlIKCgoKUgtyCgoKCgpTK2JSmAA4egoKCpoKUgsqmoqaCpoK4gqayuKKUpIKCxqIACh6SgoKCgqyygoKClN6SgoKCgoKUqJKCgoK4goKCgoKCAAoiwoKClIKClKaCpqSCgoKClIKmgtyowgACEuIADiLKgoKCpqKCgpSCgoKCpoKmgqaCpoKmggAKFoKCgoKCgqaCgoKCpoKmgqaCpoLcgoKUqJKmggACENLuggAJEoIACRjKgoKCpoKmgqaCpoKmgqaCpoKmgqaCpoIADyKigriCgoKmgoKCgrSCgoKkgsaCgoKUgqaCAAMUAA0MgoKCgoKClJSokqiSqsKCgoKClIKC7oIACxiCgoKCgqaCgqaCkqSUpoKClLiCkqSUpoKClLiigoKClJSmgqaCpoLcgoLqAAcQggAEGoKmgqaCgoKCgpSUpoKmpIKmgqaiqqLOouyiloKUgsqCgriCgoKUpMikggAIEIKmgqaCppSCgoKUgoKmgoKCgoKUgu6CpoKUggAIFoKmgraklNyC7oKmgqaC7oLugqaCpoKmooKCgoKCtoKUgoKCgpSmgoKCgoKCgpSqooKCgoKUqJKCgoKClA==", "90-92:1;96-98:1;184-192:1;225-227:1;317-342:1;356-429:1;440-440:1;444-446:2;629-632:1;817-823:1;837-843:1;850-856:1;862-868:1;875-877:1;1036-1040:1;1081-1085:2;1173-1211:1;1320-1325:1;1331-1335:1;1647-1666:1;1850-1856:1;1909-1911:1;2061-2063:1", "2062=runtime.hexdumpMarker.start", "", "", "545:21,546:13")]
+[assembly: GoPositionMap("runtime/export_debuglog_test.go", "export_debuglog_test.cs", "ABMigsaCgoKCgoKCgrSCgoKCgpSmgoKCgoKClKaCgoKClII=")]
+[assembly: GoPositionMap("runtime/export_test.go", "export_test.cs", "AB0mkpKSkpKSkpLEooKStLSUpJKyoqK0orSUksQACA7cggALFIKmgpSCpoKCuKKClAAKBoKCgoKCgIKkgpSCgoKmgIIACQqCgoKCgoKCgpSCgoKClIKCgpSClIKCgpSUgoKCpoKCAAgKyoKCgoKCgoKCgoKylIKClJSUgoKCupKSkpKSkrKippSigsyykpTGoqKilILcgraasoKmkqSylJSCgriUpoKCuILGggAJEIKmgsqCpoK4gpSm7tzKppSUttjSppSUuIKCgoKCgqqCgpSClIKClIKCupKWkoKCgoKUgpSUgoKmgoKClIKUlIKmpoKs0oKAkpSCkrii6LSCgoKssqaCgoIACA6CpoKmgqaCpoLGgoKCgqaCpgAGRgAKAoKCgoKUlIKCppSmgoKUAAISgqaCpqK2lpKokgAEJIKCpu6CgoKm3JSCgsqCgrqSqJKCgpSo7AAOIrKCggAICoKUgoKCuKK0goKUgpSCgoKUlJSogJiigpSCkoKCgpSUgpSmgpSssoKCgpSm/IKUgoKUgpSCyIDugsSCgoKCgpSCgpTGgoIADhaClJK2goKUlIKUgraCgpSUgpS2goKmgpSigpKUlIKCgpSokoIACRKSyJKokqiSqJIACQ4AByIACQKCggACEAAMDIKCgoKUAAgSooKClKqi7uKClKiSAAksAA4CpoKCgqaSgoK4gqbKgqaCgqaC7qaCpsqSgoK4rLKmgsqmgoKm7oLcpoKClAAKFoKCgpSUgoKUuqIABxCyppKmlIKCgoKUgtyCgoKCgpTK2JSmAA4egoKCpoKUgsqmoqaCpoK4gqayuKKUpIKCxqIADB6SgoKCgqyygoKClP6SgoKCgoKUqJKCgoK4goKCgoKCAAwiwoKClIKClKaCxqSCgoKClIKmgtyowgACEuIADiLKgoKCxqKCgpSCgoKCpoKmgqaCpoKmggAOFoKCgoKCgqaCgoKCpoKmgqaCpoL8goKUqJKmggACENLuggALEoIACxjKgoKCxoKmgqaCpoKmgqaCpoKmgqaCpoIAEyKigriCgoKmgoKCgrSCgoKkgsaCgoKUgqaCAAMUAA0MgoKCgoKClJSokqiSqsKCgoKClIKCAAgOggALGIKCgoKCxoKCpoKSpJSmgoKUuIKSpJSmgoKUuKKCgoKUlKaCpoLGgtyCguoABxCCAAYagqaCxoKCgoKClJSmgqakgqaCpqKqos6i7KKWgpSCyoKCuIKCgpSkyKSCAAoQgqaCxoKmlIKCgpSCgqaCgoKCgpSC7oLGgpSCAAwWgsaCtqSU/IIACg6CpoKmggAKDoIACg6CpoKmgsaigoKCgoK2gpSCgoKClKaCgoKCgoKClKqigoKCgpSokoKCgoKU", "90-92:1;96-98:1;184-192:1;225-227:1;317-342:1;356-429:1;440-440:1;444-446:2;629-632:1;817-823:1;837-843:1;850-856:1;862-868:1;875-877:1;1036-1040:1;1081-1085:2;1173-1211:1;1320-1325:1;1331-1335:1;1647-1666:1;1850-1856:1;1909-1911:1;2061-2063:1", "2062=runtime.hexdumpMarker.start", "", "", "558:21,559:13")]
 [assembly: GoPositionMap("runtime/export_windows_test.go", "export_windows_test.cs", "AA8ekgADEoI=")]
 [assembly: GoPositionMap("runtime/proc_runtime_test.go", "proc_runtime_test.cs", "AAoSgoKCgoKUgoKCgoKCgpSClILcgoKmgoKCgoKU")]
 [assembly: GoPositionMap("runtime/symtabinl_test.go", "symtabinl_test.cs", "ABsagoKmgoKCptzugoKCgoAABxCkgoKCgqaUgoKClIKmgoKUgqaClKaClJSC3IKCyoKCyqSSlKKClKKCgg==")]
@@ -75,9 +75,11 @@ public static partial class runtime_internal_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoValueClone("gcControllerState")] partial struct GCController {}
     [GoValueClone("Value")] partial struct PageAlloc {}
+    [GoValueClone("Value")] partial struct PallocData {}
+    [GoValueClone("semTable")] partial struct SemTable {}
     [GoValueClone("Value")] partial struct TimeHistogram {}
-    [GoValueClone("Value")] partial struct ΔPallocData {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -146,3 +148,37 @@ public static partial class runtime_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸweak() => builtin.initPackage(typeof(weak_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(runtime_internal_test_package.AddrRange)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛAddrRange;
+[GoMethodHost(typeof(runtime_internal_test_package.AddrRanges)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛAddrRanges;
+[GoMethodHost(typeof(runtime_internal_test_package.BitCursor)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛBitCursor;
+[GoMethodHost(typeof(runtime_internal_test_package.GCCPULimiter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛGCCPULimiter;
+[GoMethodHost(typeof(runtime_internal_test_package.GCController)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛGCController;
+[GoMethodHost(typeof(runtime_internal_test_package.ListHead)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛListHead;
+[GoMethodHost(typeof(runtime_internal_test_package.ListHeadManual)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛListHeadManual;
+[GoMethodHost(typeof(runtime_internal_test_package.LockRank)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛLockRank;
+[GoMethodHost(typeof(runtime_internal_test_package.PIController)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛPIController;
+[GoMethodHost(typeof(runtime_internal_test_package.PageAlloc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛPageAlloc;
+[GoMethodHost(typeof(runtime_internal_test_package.PageCache)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛPageCache;
+[GoMethodHost(typeof(runtime_internal_test_package.PallocBits)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛPallocBits;
+[GoMethodHost(typeof(runtime_internal_test_package.PallocData)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛPallocData;
+[GoMethodHost(typeof(runtime_internal_test_package.PallocSum)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛPallocSum;
+[GoMethodHost(typeof(runtime_internal_test_package.ProfBuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛProfBuf;
+[GoMethodHost(typeof(runtime_internal_test_package.RWMutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛRWMutex;
+[GoMethodHost(typeof(runtime_internal_test_package.ScavengeIndex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛScavengeIndex;
+[GoMethodHost(typeof(runtime_internal_test_package.Scavenger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛScavenger;
+[GoMethodHost(typeof(runtime_internal_test_package.SemTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛSemTable;
+[GoMethodHost(typeof(runtime_internal_test_package.StackPoisonCopyRestore)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛStackPoisonCopyRestore;
+[GoMethodHost(typeof(runtime_internal_test_package.TimeHistogram)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛTimeHistogram;
+[GoMethodHost(typeof(runtime_internal_test_package.TraceMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛTraceMap;
+[GoMethodHost(typeof(runtime_internal_test_package.TraceStackTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛTraceStackTable;
+[GoMethodHost(typeof(runtime_internal_test_package.UserArena)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛUserArena;
+[GoMethodHost(typeof(global::go.runtime_package.dloggerImpl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class runtime_internal_testᴛdloggerImpl;
+// </MethodHolders>

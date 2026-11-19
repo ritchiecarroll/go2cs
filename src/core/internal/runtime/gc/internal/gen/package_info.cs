@@ -63,8 +63,8 @@ using static go.@internal.runtime.gc.@internal.gen_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(go.@internal.runtime.gc.@internal.gen_package.Func))]
+[assembly: GoFieldAccess(typeof(kind))]
 [assembly: GoFieldAccess(typeof(op))]
-[assembly: GoFieldAccess(typeof(Δkind))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -74,11 +74,11 @@ using static go.@internal.runtime.gc.@internal.gen_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gen.go", "gen.cs", "ABgqogAIEoKmggAHELgACRSCgqrkgoKCgoK4goKCptKCgoKCgqaigoKUggARKIKmgqaigpSCgqamgoKClIKUgpSClKaCgoIADwjG6oKmgoKUgqaClIKCgpSCgpSUgqaClJS6pIKCgpSClIKClIKUpoKigoKCpoK4goKCgoKCuKiSgoKSgpSCgriCpMiClIKCgqaCygAJFvqCgoKC3JSUgoKCgpTugoKCgqYACAaigpS0tOzKgoKCgpSUlJSUkpSmgqaCgoKCggAICP6CgoKCgpSUgqaUgoKClIKCgoKCgriCgoKCgoKCpuaipoKCgrimgrakpLamlIK4lIKClJSClKa4lJSCpoKUgoKCgpSmgriCgoKCgoKClKY=", "173-179:1;230-239:1;259-267:1;366-376:1")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gp.go", "gp.cs", "AAsWlKKCpoKmgoKC")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/regalloc.go", "regalloc.cs", "AB9EgpSkpKSUpoKmggAIEoKClIKUgpSmgqaCgpQACBIADCCC3KKClIKClIKUgpSmgoKUgoKUgpSClKa0poKCAAgSgoKUgpTKgoKUgoKU7oKCgsqCgriClKaUgtKCgpSUgqa4goKkgpS0gpSCgoKCgpS0gpSUkoKUtIK0gujagoKmlKaCgoLKgqaUgriCuIKCgriClLSCxoLGgraCpg==", "215-227:1")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/simd.go", "simd.cs", "AAsWlLKCpoKmgoKCpqKCpqLclILKgoKmooKCpqKCgq7kgoKmtIKCprSCgu6UxIKmooKmooKmgqaCgoKmooKmtIKmooKmtIKmooKmtILulKKCgoKmgqaCgoKmooKmooKmooKUlO6UooKCgqaCpoKCgqaigqaigqaigpSUpqKClJQ=")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/val.go", "val.cs", "ACpMlAAIDpSkooKCgoKClKaigoKmwoKCgpSCprKCgoKCpoIACA7mgqakku7cooKUgpSmgoKCyoI=")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gen.go", "gen.cs", "ABkqogAIEoLGggALELgACxSCgsrkgoKCgoK4goKCxtKCgoKCgqaigoKUggATKILGgsaigpSCgqamgoKClIKUgpSClMaCgoIAEQjG6oKmgoKUgqaClIKCgpSCgpSUgqaClJTapIKCgpSClIKClIKUpoKigoKCpoK4goKCgoKCuKiSgoKSgpSCgriCpMiClIKCgqaC6gALFvqCgoKC3JSUgoKCgpTugoKCgqYACgaigpS0tOzqgoKCgpSUlJSUkpSmgqaCgoKCggAKCP6CgoKCgpSUgqaUgoKClIKCgoKCgriCgoKCgoKCpuaipoKCgrimgrakpLamlIK4lIKClJSClKa4lJSCxoKUgoKCgpSmgriCgoKCgoKClKY=", "173-179:1;230-239:1;259-267:1;366-376:1")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gp.go", "gp.cs", "AA0WlKKCxoKmgoKC")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/regalloc.go", "regalloc.cs", "ACJEgpSkpKSUpoKmggAMEoKClIKUgpSmgqaCgpQAChIADCCC/KKClIKClIKUgpSmgoKUgoKUgpSClMa0poKCAAgSgoKUgpTKgoKUgoKU7oKCgsqCgriClKaUgtKCgpSUgqa4goKkgpS0gpSCgoKCgpS0gpSUkoKUtIK0gujagoKmlKaCgoLKgqaUgriCuIKCgriClLSCxoLGgraCpg==", "215-227:1")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/simd.go", "simd.cs", "AA0WlLKCxoKmgoKCpqKCpqLclILKgoKmooKCpqKCgq7kgoKmtIKCprSCggAIDpTEgqaigsaigqaCpoKCgqaigqa0gqaigqa0gqaigqa0ggAIDpSigoKCxoKmgoKCpqKCpqKCpqKClJQACA6UooKCgsaCpoKCgqaigqaigqaigpSUpqKClJQ=")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/val.go", "val.cs", "ACtMtAAKDpTEooKCgoKClKaigoKmwoKCgpSCxrKCgoKCpoIACA7mgsakkgAKDgAJDKKClIKUpoKCgsqC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime.gc.@internal;
@@ -105,7 +105,7 @@ public static partial class gen_package
     internal partial struct valGP {}
     public partial interface Value {}
     public partial interface Word {}
-    public partial interface Δwrap<T> {}
+    public partial interface wrap<T> {}
     public partial struct Array<T> {}
     public partial struct File {}
     public partial struct Func {}
@@ -115,8 +115,8 @@ public static partial class gen_package
     public partial struct Uint64 {}
     public partial struct Uint64x8 {}
     public partial struct Uint8x64 {}
+    public partial struct kind {}
     public partial struct op {}
-    public partial struct Δkind {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -139,3 +139,29 @@ public static partial class gen_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(go.sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gen_package.Array<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛArray;
+[GoMethodHost(typeof(gen_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛFile;
+[GoMethodHost(typeof(gen_package.Func)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛFunc;
+[GoMethodHost(typeof(gen_package.Mask64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛMask64;
+[GoMethodHost(typeof(gen_package.Mask8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛMask8;
+[GoMethodHost(typeof(gen_package.Ptr<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛPtr;
+[GoMethodHost(typeof(gen_package.Uint64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛUint64;
+[GoMethodHost(typeof(gen_package.Uint64x8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛUint64x8;
+[GoMethodHost(typeof(gen_package.Uint8x64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛUint8x64;
+[GoMethodHost(typeof(gen_package.locMem)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛlocMem;
+[GoMethodHost(typeof(gen_package.locReg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛlocReg;
+[GoMethodHost(typeof(gen_package.op)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛop;
+[GoMethodHost(typeof(gen_package.opHeap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛopHeap;
+[GoMethodHost(typeof(gen_package.regSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛregSet;
+[GoMethodHost(typeof(gen_package.valAny)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛvalAny;
+[GoMethodHost(typeof(gen_package.valGP)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛvalGP;
+[GoMethodHost(typeof(gen_package.@void)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛvoid;
+// </MethodHolders>

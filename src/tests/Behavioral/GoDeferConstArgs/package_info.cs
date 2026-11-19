@@ -43,7 +43,7 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 117, 5, 10)]
+[assembly: GoBoundedGoroutine("main.cs", 122, 5, 10)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAwimIKUpKSkpKSktLiUlJSUuIKCptiUwoK0pIKClIKUgpSClIKUgpSClIKUgpSCgoKUgpKUgpKmooKCgoKCgoKipKKC1oKCgoI=", "", "", "", "83:15,86:15,89:15,92:15,95:15,98:15,101:15,104:15,107:15,111:15,130:21,131:21,132:21,133:21,134:27,145:21")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA0imIKUpKSkpKSktLiUlJSUuIKCpvi0woK0pIKClIKUgpSClIKUgpSClIKUgpSCgoKUgpKUgpKmooKCgoKCgoKipKKC1oKCgoI=", "", "", "", "88:15,91:15,94:15,97:15,100:15,103:15,106:15,109:15,112:15,116:15,135:21,136:21,137:21,138:21,139:27,150:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -83,3 +83,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.box)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbox;
+// </MethodHolders>

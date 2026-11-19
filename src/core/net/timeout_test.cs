@@ -28,7 +28,7 @@ partial class net_internal_test_package {
     testHookStepTime = () => {
         var now = time.Now();
         while (time.Since(now) == 0) {
-            time.Sleep(1 * time.ΔNanosecond);
+            time.Sleep(1 * time.Nanosecond);
         }
     };
 }
@@ -138,7 +138,7 @@ public static void TestDialTimeout(ж<testing.T> t) {
                 var perr = parseDialError(err); if (perr != nil) {
                     tΔ1.Errorf("unexpected error from Dial: %v", perr);
                 }
-                var (nerr, ok) = err._<ΔError>(ᐧ); if (!ok || !nerr.Timeout()) {
+                var (nerr, ok) = err._<Error>(ᐧ); if (!ok || !nerr.Timeout()) {
                     tΔ1.Errorf("Dial: %v, want timeout", err);
                 }
             });
@@ -248,7 +248,7 @@ public static void TestAcceptTimeout(ж<testing.T> t) {
                     goǃ(() => {
                         GoFrame ᒐ = default;
                         try {
-                            defer(ᴛ1 => builtin.close(ᴛ1), dialDoneʗ2, ref ᒐ);
+                            defer(ᴛ1 => close(ᴛ1), dialDoneʗ2, ref ᒐ);
                             ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(), out var Ꮡd);
                             var (cΔ1, errΔ1) = Ꮡd.DialContext(ctxʗ1, lnʗ2.Addr().Network(), lnʗ2.Addr().String());
                             if (errΔ1 != nil) {
@@ -371,10 +371,10 @@ public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> t) {
         var maxʗ1 = max;
         defer(() => maxʗ1.Stop(), ref ᒐ);
 
-        var selᴛ15 = ch;
+        var chᴛ1 = ch;
         var selᴛ16 = max.C;
-        switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
-        case 0 when selᴛ15.ꟷᐳ(out var err): {
+        switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
+        case 0 when chᴛ1.ꟷᐳ(out var err): {
             var perr = parseAcceptError(err); if (perr != nil) {
                 t.Error(perr);
             }
@@ -519,10 +519,10 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> t) {
         var maxʗ1 = max;
         defer(() => maxʗ1.Stop(), ref ᒐ);
 
-        var selᴛ17 = ch;
+        var chᴛ1 = ch;
         var selᴛ18 = max.C;
-        switch (select(ᐸꟷ(selᴛ17, ꓸꓸꓸ), ᐸꟷ(selᴛ18, ꓸꓸꓸ))) {
-        case 0 when selᴛ17.ꟷᐳ(out var errΔ5): {
+        switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ18, ꓸꓸꓸ))) {
+        case 0 when chᴛ1.ꟷᐳ(out var errΔ5): {
             {
                 var perr = parseReadError(errΔ5); if (perr != nil) {
                     t.Error(perr);
@@ -539,7 +539,7 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> t) {
                     t.Error(perr);
                 }
             }
-            var (nerr, ok) = errΔ6._<ΔError>(ᐧ); if (!ok || nerr.Timeout() || nerr.Temporary()) {
+            var (nerr, ok) = errΔ6._<Error>(ᐧ); if (!ok || nerr.Timeout() || nerr.Temporary()) {
                 t.Fatal(errΔ6);
             }
             break;
@@ -560,8 +560,8 @@ internal static slice<readTimeoutTestsᴛ1> readFromTimeoutTests = [
 public static void TestReadFromTimeout(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var ch = new channel<global::go.net_package.ΔAddr>(0);
-        defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+        var ch = new channel<global::go.net_package.Addr>(0);
+        defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
         var chʗ1 = ch;
         var handler = (ж<localPacketServer> lsΔ1, global::go.net_package.PacketConn cΔ1) => {
             var (dst, ok) = ᐸꟷ(chʗ1, ꟷ); if (ok) {
@@ -609,7 +609,7 @@ public static void TestReadFromTimeout(ж<testing.T> t) {
                         time.Sleep(tt.timeout / 3);
                         continue;
                     }
-                    var (nerr, ok) = errΔ3._<ΔError>(ᐧ); if (ok && nerr.Timeout() && n != 0) {
+                    var (nerr, ok) = errΔ3._<Error>(ᐧ); if (ok && nerr.Timeout() && n != 0) {
                         t.Fatalf("#%d/%d: read %d; want 0", i, j, n);
                     }
                     break;
@@ -732,10 +732,10 @@ public static partial void TestWriteTimeoutMustNotReturn(ж<testing.T> t) {
         var maxʗ1 = max;
         defer(() => maxʗ1.Stop(), ref ᒐ);
 
-        var selᴛ19 = ch;
+        var chᴛ1 = ch;
         var selᴛ20 = max.C;
-        switch (select(ᐸꟷ(selᴛ19, ꓸꓸꓸ), ᐸꟷ(selᴛ20, ꓸꓸꓸ))) {
-        case 0 when selᴛ19.ꟷᐳ(out var errΔ5): {
+        switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ20, ꓸꓸꓸ))) {
+        case 0 when chᴛ1.ꟷᐳ(out var errΔ5): {
             {
                 var perr = parseWriteError(errΔ5); if (perr != nil) {
                     t.Error(perr);
@@ -752,7 +752,7 @@ public static partial void TestWriteTimeoutMustNotReturn(ж<testing.T> t) {
                     t.Error(perr);
                 }
             }
-            var (nerr, ok) = errΔ6._<ΔError>(ᐧ); if (!ok || nerr.Timeout() || nerr.Temporary()) {
+            var (nerr, ok) = errΔ6._<Error>(ᐧ); if (!ok || nerr.Timeout() || nerr.Temporary()) {
                 t.Fatal(errΔ6);
             }
             break;
@@ -920,7 +920,7 @@ public static void TestReadTimeoutFluctuation(ж<testing.T> t) {
             (n, err) = c.Read(b);
             var t1 = time.Now();
 
-            if (n != 0 || err == nil || !err._<ΔError>().Timeout()) {
+            if (n != 0 || err == nil || !err._<Error>().Timeout()) {
                 t.Errorf("Read did not return (0, timeout): (%d, %v)", n, err);
             }
             var perr = parseReadError(err); if (perr != nil) {
@@ -984,7 +984,7 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> t) {
             (n, _, err) = c2._<PacketConn>().ReadFrom(b);
             var t1 = time.Now();
 
-            if (n != 0 || err == nil || !err._<ΔError>().Timeout()) {
+            if (n != 0 || err == nil || !err._<Error>().Timeout()) {
                 t.Errorf("ReadFrom did not return (0, timeout): (%d, %v)", n, err);
             }
             var perr = parseReadError(err); if (perr != nil) {
@@ -1061,7 +1061,7 @@ public static void TestWriteTimeoutFluctuation(ж<testing.T> t) {
             }
             var t1 = time.Now();
             // Inv: err != nil
-            if (!errΔ2._<ΔError>().Timeout()) {
+            if (!errΔ2._<Error>().Timeout()) {
                 t.Fatalf("Write did not return (any, timeout): (%d, %v)", n, errΔ2);
             }
             var perr = parseWriteError(errΔ2); if (perr != nil) {
@@ -1171,14 +1171,14 @@ internal static void testVariousDeadlines(ж<testing.T> t) {
         }
 
         foreach (var (_, timeout) in range(slice<time.Duration>([
-            1 * time.ΔNanosecond,
-            2 * time.ΔNanosecond,
-            5 * time.ΔNanosecond,
-            50 * time.ΔNanosecond,
-            100 * time.ΔNanosecond,
-            200 * time.ΔNanosecond,
-            500 * time.ΔNanosecond,
-            750 * time.ΔNanosecond,
+            1 * time.Nanosecond,
+            2 * time.Nanosecond,
+            5 * time.Nanosecond,
+            50 * time.Nanosecond,
+            100 * time.Nanosecond,
+            200 * time.Nanosecond,
+            500 * time.Nanosecond,
+            750 * time.Nanosecond,
             1 * time.Microsecond,
             5 * time.Microsecond,
             25 * time.Microsecond,
@@ -1189,7 +1189,7 @@ internal static void testVariousDeadlines(ж<testing.T> t) {
             100 * time.Millisecond,
             250 * time.Millisecond,
             500 * time.Millisecond,
-            1 * time.ΔSecond
+            1 * time.Second
         ]))) {
             nint numRuns = 3;
             if (testing.Short()) {
@@ -1215,7 +1215,7 @@ internal static void testVariousDeadlines(ж<testing.T> t) {
                 var dt = time.Since(t0);
                 c.Close();
 
-                var (nerr, ok) = err._<ΔError>(ᐧ); if (ok && nerr.Timeout()) {
+                var (nerr, ok) = err._<Error>(ᐧ); if (ok && nerr.Timeout()) {
                     t.Logf("%v: good timeout after %v; %d bytes", name, dt, n);
                 } else {
                     t.Fatalf("%v: Copy = %d, %v; want timeout", name, n, err);
@@ -1261,7 +1261,7 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> t) {
                         defer(Ꮡwg.Done, ref ᒐ);
                         ref var bΔ1 = ref heap(new array<byte>(1), out var ᏑbΔ1);
                         for (;;) {
-                            var errΔ2 = cʗ2.SetReadDeadline(time.Now().Add(time.ΔHour)); if (errΔ2 != nil) {
+                            var errΔ2 = cʗ2.SetReadDeadline(time.Now().Add(time.Hour)); if (errΔ2 != nil) {
                                 var perr = parseCommonError(errΔ2); if (perr != nil) {
                                     t.Error(perr);
                                 }
@@ -1286,7 +1286,7 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> t) {
                         defer(Ꮡwg.Done, ref ᒐ);
                         ref var bΔ2 = ref heap(new array<byte>(1), out var ᏑbΔ2);
                         for (;;) {
-                            var errΔ4 = cʗ3.SetWriteDeadline(time.Now().Add(time.ΔHour)); if (errΔ4 != nil) {
+                            var errΔ4 = cʗ3.SetWriteDeadline(time.Now().Add(time.Hour)); if (errΔ4 != nil) {
                                 var perr = parseCommonError(errΔ4); if (perr != nil) {
                                     t.Error(perr);
                                 }
@@ -1454,8 +1454,8 @@ public static partial void TestConcurrentSetDeadline(ж<testing.T> t) {
                     // to trigger runtime adjusttimers calls.
                     for (nint j = tries; j > 0; j--) {
                         for (nint k = 0; k < conns; k++) {
-                            cʗ2[k].SetReadDeadline(nowʗ1.Add((time.Duration)(7200000000000L) + ((time.Duration)(int64)(iΔ1 * j * k)) * time.ΔSecond));
-                            cʗ2[k].SetWriteDeadline(nowʗ1.Add((time.Duration)(3600000000000L) + ((time.Duration)(int64)(iΔ1 * j * k)) * time.ΔSecond));
+                            cʗ2[k].SetReadDeadline(nowʗ1.Add((time.Duration)(7200000000000L) + ((time.Duration)(int64)(iΔ1 * j * k)) * time.Second));
+                            cʗ2[k].SetWriteDeadline(nowʗ1.Add((time.Duration)(3600000000000L) + ((time.Duration)(int64)(iΔ1 * j * k)) * time.Second));
                         }
                     }
                 }
@@ -1473,7 +1473,7 @@ public static partial void TestConcurrentSetDeadline(ж<testing.T> t) {
 // We also check that the error implements net.Error, and that the
 // Timeout method returns true.
 internal static bool isDeadlineExceeded(error err) {
-    var (nerr, ok) = err._<ΔError>(ᐧ);
+    var (nerr, ok) = err._<Error>(ᐧ);
     if (!ok) {
         return false;
     }

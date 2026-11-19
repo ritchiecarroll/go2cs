@@ -37,7 +37,7 @@ partial class reflect_internal_test_package
     // itself. The fix is converter-side ([GoLocalName] stamped at visitTypeSpec's lift branches,
     // exactly as the dyn-lift sites already do) plus GoTypeName consulting goLocalNameOf — not a
     // guess this companion should paper over.
-    public static bool IsExported(global::go.reflect_package.ΔType t)
+    public static bool IsExported(global::go.reflect_package.Type t)
     {
         var (rt, ok) = t._<ж<global::go.reflect_package.rtype>>(ᐧ);
 

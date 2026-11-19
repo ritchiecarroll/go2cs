@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸnint = Span<nint>;
+using static main_package;
 
 partial class main_package {
 
@@ -35,6 +36,8 @@ partial struct logger {
     internal @string tag;
 }
 
+} partial class mainᴛlogger {
+
 internal static void errorf(this ref logger l, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
@@ -46,6 +49,8 @@ internal static void logf(this ref logger l, @string format, params ꓸꓸꓸany
 
     fmt.Printf(l.tag + "~"u8 + format + "\n"u8, args.ꓸꓸꓸ);
 }
+
+} partial class main_package {
 
 internal static void swapEmitter(ж<logger> l, bool swap) {
     Actionꓸꓸꓸ<@string, any> emit = (@string p1, params ꓸꓸꓸany p2) => l.errorf(p1, p2);

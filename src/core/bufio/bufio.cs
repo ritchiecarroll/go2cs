@@ -13,6 +13,7 @@ using io = io_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
 using unicode;
+using static bufio_package;
 
 partial class bufio_package {
 
@@ -60,6 +61,8 @@ public static ж<Reader> NewReader(io.Reader rd) {
     return NewReaderSize(rd, defaultBufSize);
 }
 
+} partial class bufioᴛReader {
+
 // Size returns the size of the underlying buffer in bytes.
 public static nint Size(this ref Reader b) { return len(b.buf); }
 
@@ -92,7 +95,11 @@ internal static void reset(this ref Reader b, slice<byte> buf, io.Reader r) {
     );
 }
 
+} partial class bufio_package {
+
 internal static error errNegativeRead = errors.New("bufio: reader returned negative count from Read");
+
+} partial class bufioᴛReader {
 
 // fill reads a new chunk into the buffer.
 internal static void fill(this ref Reader b) {
@@ -581,7 +588,11 @@ public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
     return (n, b.readErr());
 }
 
+} partial class bufio_package {
+
 internal static error errNegativeWrite = errors.New("bufio: writer returned negative count from Write");
+
+} partial class bufioᴛReader {
 
 // writeBuf writes the [Reader]'s buffer to the writer.
 internal static (int64, error) writeBuf(this ref Reader b, io.Writer w) {
@@ -592,6 +603,8 @@ internal static (int64, error) writeBuf(this ref Reader b, io.Writer w) {
     b.r += n;
     return ((int64)n, err);
 }
+
+} partial class bufio_package {
 
 // buffered output
 
@@ -632,6 +645,8 @@ public static ж<Writer> NewWriterSize(io.Writer w, nint size) {
 public static ж<Writer> NewWriter(io.Writer w) {
     return NewWriterSize(w, defaultBufSize);
 }
+
+} partial class bufioᴛWriter {
 
 // Size returns the size of the underlying buffer in bytes.
 public static nint Size(this ref Writer b) { return len(b.buf); }
@@ -861,6 +876,8 @@ public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
     }
     return (n, err);
 }
+
+} partial class bufio_package {
 
 // buffered input and output
 

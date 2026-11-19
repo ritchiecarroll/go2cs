@@ -11,6 +11,7 @@ using strconv = go.strconv_package;
 using strings = strings_package;
 using go;
 using io = io_package;
+using static testtrace_package;
 
 partial class testtrace_package {
 
@@ -24,6 +25,8 @@ partial struct Expectation {
 public static ж<Expectation> ExpectSuccess() {
     return @new<Expectation>();
 }
+
+} partial class testtraceᴛExpectation {
 
 // Check validates whether err conforms to the expectation. Returns
 // an error if it does not conform.
@@ -42,6 +45,8 @@ public static error Check(this ref Expectation e, error err) {
     }
     return default;
 }
+
+} partial class testtrace_package {
 
 // ParseExpectation parses the serialized form of an Expectation.
 public static (ж<Expectation>, error) ParseExpectation(slice<byte> data) {

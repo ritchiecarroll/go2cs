@@ -86,7 +86,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
                 defer(Ꮡwg.Done, ref ᒐ);
                 var cf = new slice<Action>(perPContexts);
                 foreach (var j in range(len(cf))) {
-                    (_, cf[j]) = WithTimeout(rootʗ1, time.ΔHour);
+                    (_, cf[j]) = WithTimeout(rootʗ1, time.Hour);
                 }
                 ccfʗ1[iΔ1] = cf;
             }
@@ -102,7 +102,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
         var wcf = new slice<Action>(10);
         while (pb.Next()) {
             foreach (var i in range(len(wcf))) {
-                (_, wcf[i]) = WithTimeout(rootʗ2, time.ΔHour);
+                (_, wcf[i]) = WithTimeout(rootʗ2, time.Hour);
             }
             foreach (var (_, f) in range(wcf)) {
                 f();

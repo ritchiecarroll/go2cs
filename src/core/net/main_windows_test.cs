@@ -15,15 +15,15 @@ using static go.net_package;
 partial class net_internal_test_package {
 
 // Placeholders for saving original socket system calls.
-internal static Func<int32, int32, int32, ж<syscall.WSAProtocolInfo>, uint32, uint32, (syscallꓸHandle, error)> origWSASocket;
+internal static Func<int32, int32, int32, ж<syscall.WSAProtocolInfo>, uint32, uint32, (syscall.Handle, error)> origWSASocket;
 internal static void initᴛorigWSASocket() { origWSASocket = wsaSocketFunc; }
-internal static Func<syscallꓸHandle, error> origClosesocket = poll.CloseFunc;
-internal static Func<syscallꓸHandle, syscallꓸSockaddr, error> origConnect;
+internal static Func<syscall.Handle, error> origClosesocket = poll.CloseFunc;
+internal static Func<syscall.Handle, syscall.Sockaddr, error> origConnect;
 internal static void initᴛorigConnect() { origConnect = connectFunc; }
-internal static Func<syscallꓸHandle, syscallꓸSockaddr, ж<byte>, uint32, ж<uint32>, ж<syscall.Overlapped>, error> origConnectEx = poll.ConnectExFunc;
-internal static Func<syscallꓸHandle, nint, error> origListen;
+internal static Func<syscall.Handle, syscall.Sockaddr, ж<byte>, uint32, ж<uint32>, ж<syscall.Overlapped>, error> origConnectEx = poll.ConnectExFunc;
+internal static Func<syscall.Handle, nint, error> origListen;
 internal static void initᴛorigListen() { origListen = listenFunc; }
-internal static Func<syscallꓸHandle, syscallꓸHandle, ж<byte>, uint32, uint32, uint32, ж<uint32>, ж<syscall.Overlapped>, error> origAccept = poll.AcceptFunc;
+internal static Func<syscall.Handle, syscall.Handle, ж<byte>, uint32, uint32, uint32, ж<uint32>, ж<syscall.Overlapped>, error> origAccept = poll.AcceptFunc;
 
 internal static void installTestHooks() {
     wsaSocketFunc = Ꮡsw.WSASocket;
@@ -60,7 +60,7 @@ internal static void addCmdInheritedHandle(ж<exec.Cmd> Ꮡcmd, uintptr fd) {
     if (cmd.SysProcAttr == nil) {
         cmd.SysProcAttr = Ꮡ(new syscall.SysProcAttr());
     }
-    cmd.SysProcAttr.AdditionalInheritedHandles = append(cmd.SysProcAttr.AdditionalInheritedHandles, (syscallꓸHandle)fd);
+    cmd.SysProcAttr.AdditionalInheritedHandles = append(cmd.SysProcAttr.AdditionalInheritedHandles, (syscall.Handle)fd);
 }
 
 } // end net_internal_test_package

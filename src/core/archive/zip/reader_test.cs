@@ -160,7 +160,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
             new(
                 Name: "r/r.zip",
                 Content: rZipBytes(),
-                Modified: time.Date(2010, 3, 4, 0, 24, 16, 0, time.ΔUTC),
+                Modified: time.Date(2010, 3, 4, 0, 24, 16, 0, time.UTC),
                 Mode: 438
             )
         ])
@@ -189,7 +189,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
             new(
                 Name: "filename",
                 Content: slice<byte>("This is a test textfile.\n"u8),
-                Modified: time.Date(2011, 2, 2, 13, 6, 20, 0, time.ΔUTC),
+                Modified: time.Date(2011, 2, 2, 13, 6, 20, 0, time.UTC),
                 Mode: 438
             )
         ])
@@ -201,25 +201,25 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
             new(
                 Name: "hello",
                 Content: slice<byte>("world \r\n"u8),
-                Modified: time.Date(2011, 12, 8, 10, 4, 24, 0, time.ΔUTC),
+                Modified: time.Date(2011, 12, 8, 10, 4, 24, 0, time.UTC),
                 Mode: 438
             ),
             new(
                 Name: "dir/bar",
                 Content: slice<byte>("foo \r\n"u8),
-                Modified: time.Date(2011, 12, 8, 10, 4, 50, 0, time.ΔUTC),
+                Modified: time.Date(2011, 12, 8, 10, 4, 50, 0, time.UTC),
                 Mode: 438
             ),
             new(
                 Name: "dir/empty/",
                 Content: [],
-                Modified: time.Date(2011, 12, 8, 10, 8, 6, 0, time.ΔUTC),
+                Modified: time.Date(2011, 12, 8, 10, 8, 6, 0, time.UTC),
                 Mode: (fs.FileMode)(fs.ModeDir | 511)
             ),
             new(
                 Name: "readonly",
                 Content: slice<byte>("important \r\n"u8),
-                Modified: time.Date(2011, 12, 8, 10, 6, 8, 0, time.ΔUTC),
+                Modified: time.Date(2011, 12, 8, 10, 6, 8, 0, time.UTC),
                 Mode: 292
             )
         ])
@@ -285,13 +285,13 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
             new(
                 Name: "foo.txt",
                 Content: slice<byte>("foo\n"u8),
-                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.ΔUTC),
+                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.UTC),
                 Mode: 438
             ),
             new(
                 Name: "bar.txt",
                 Content: slice<byte>("bar\n"u8),
-                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.ΔUTC),
+                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.UTC),
                 Mode: 438
             )
         ])
@@ -303,14 +303,14 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
             new(
                 Name: "foo.txt",
                 Content: slice<byte>("foo\n"u8),
-                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.ΔUTC),
+                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.UTC),
                 Mode: 438,
                 ContentErr: ErrChecksum
             ),
             new(
                 Name: "bar.txt",
                 Content: slice<byte>("bar\n"u8),
-                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.ΔUTC),
+                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.UTC),
                 Mode: 438
             )
         ])
@@ -361,7 +361,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
             new(
                 Name: "README",
                 Content: slice<byte>("This small file is in ZIP64 format.\n"u8),
-                Modified: time.Date(2012, 8, 10, 14, 33, 32, 0, time.ΔUTC),
+                Modified: time.Date(2012, 8, 10, 14, 33, 32, 0, time.UTC),
                 Mode: 420
             )
         ])
@@ -387,7 +387,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
                 Name: "big.file",
                 Content: default,
                 Size: (uint64)(4294967296L - 1),
-                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.ΔUTC),
+                Modified: time.Date(1979, 11, 30, 0, 0, 0, 0, time.UTC),
                 Mode: 438
             )
         ])
@@ -497,7 +497,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
                 Name: "test.txt",
                 Content: [],
                 Size: (uint64)(4294967296L - 1),
-                Modified: time.Date(2017, 10, 31, 21, 11, 58, 0, time.ΔUTC),
+                Modified: time.Date(2017, 10, 31, 21, 11, 58, 0, time.UTC),
                 Mode: 438
             )
         ])
@@ -546,7 +546,7 @@ internal static void initᴛtests() { tests = slice<ZipTest>([
                 Content: [],
                 Mode: 438,
                 Modified: time.Date(1999, 12, 31, 19, 0, 0, 0, timeZone((time.Duration)(-18000000000000L))),
-                ModTime: time.Date(1999, 12, 31, 19, 0, 0, 0, time.ΔUTC)
+                ModTime: time.Date(1999, 12, 31, 19, 0, 0, 0, time.UTC)
             )
         ])
     ),
