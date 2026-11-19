@@ -23,20 +23,18 @@ on Windows, on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon); the
      reading; every row but the two Windows-only ones (internal/syscall/windows and its registry child) carries a linux-arm64
      reading and a darwin reading, each chip shown where Intel and Apple silicon differ. -->
 
-## 📰 NEWS — Faster Native AOT, and a Release standard library from source
+## 📰 NEWS — Go 1.26.11, Go methods in classes of their own, and packages for linux-arm64
 
-<!-- HELD for release day with the NEWS.md entry (the .2 precedent): "November XX" and the anchor's "november-xx" both
-     become the publish date as the last change before the release tag. The gojq sentence is PENDING on the publish
-     (the nugetgo wave); drop it if gojq misses the wave. This block quotes no roster figure (check-roster-format 2e).
-     Flipped 2026-11-09 by COORD: gojq 0.12.19 published in the nugetgo .3 wave (post-publish smoke 9 of 9 PASS). -->
-**November 8, 2026, NuGet 1.26.10.3.** The second fix release on the Go 1.26 line, still built from Go 1.26.10.
-Native AOT now inlines a slice read as the JIT does, so the same programs run faster there, and the P-256, P-384 and
-P-521 curves are faster under ReadyToRun (both measured on `win-x64`). A program converted against local standard-library sources builds and
-publishes in Release, and a plain single-file publish starts fast (measured on `win-x64`). A slice's `foreach` now gives its values, so an
-assembly built against 1.26.10.2 must be rebuilt; from this release, revisions within one Go release stay
-compatible except for a break the notes announce. gojq, a jq implementation in Go, ships
-as a NuGet package.
-[Full announcement](NEWS.md#november-8-2026--faster-native-aot-and-a-release-standard-library-from-source).
+<!-- HELD for release day with the NEWS.md entry (the .2 and .3 precedent): "November XX" and the anchor's "november-xx"
+     both become the publish date as the last change before the release tag. This block quotes no roster figure
+     (check-roster-format 2e). Written by the 1.26.11.1 release-controls batch (claude/p4-release-controls-12611). -->
+**November XX, 2026, NuGet 1.26.11.1.** The fourth release on the Go 1.26 line, converted from Go 1.26.11, a patch
+release with security fixes. Each Go method, and each method a struct promotes, now lives in a class of its type's
+own, so names that carried a `Δ` prefix keep their Go names and very large packages load; assemblies built against
+1.26.10.3 must be rebuilt, and the build now says so by name instead of failing at run time. The packages ship a
+linux-arm64 build, `go2cs -cgo` converts a package that calls C, `go2cs -warn` converts a package around a refused
+site, and a converted program's `main` runs with Go's stack.
+[Full announcement](NEWS.md#november-xx-2026--go-12611-go-methods-in-classes-of-their-own-and-packages-for-linux-arm64).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
