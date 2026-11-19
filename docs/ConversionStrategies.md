@@ -6220,12 +6220,14 @@ name through it, as Go code outside the package would (`using time = time_packag
 or through the package class (`time_package.Now()`) where a local of the alias's name hides it.
 
 **Package `main` keeps its methods in the package class.** A program has no consumer of its classes, so a
-type of `main` has its methods beside the package's functions, as the Go file reads, and a method expression
-names the method bare, under the delegate cast that picks its receiver (`((Func<ж<counter>, nint, nint>)(add))`).
-A type of `main` keeps a holder, `mainᴛ<Type>`, only where one of its methods is named like something the
-package's files read bare, which the method would hide from the whole package: a package-level name of
-`main`, a universe name such as `len`, the name of an import or a name a dot-imported package declares, or a
-member of golib's `builtin` class. In the package class, `func (w words) len() int { return len(w) }` would
+type of `main` has its methods beside the package's functions, as the Go file reads. A method expression
+names the method through the package class, as Go names it through its type, under the delegate cast that
+picks its receiver (`((Func<ж<counter>, nint, nint>)(main_package.add))`): a bare name would bind a local of
+its name first. A type of `main` keeps a holder, `mainᴛ<Type>`, only where one of its methods is named like
+something the package's files read bare, which the method would hide from the whole package: a package-level
+name of `main`, a universe name such as `len`, the name of an import or a name a dot-imported package
+declares, or a member of golib's `builtin` class. The names the package's test files add count too, so the
+program and its tests agree on every holder. In the package class, `func (w words) len() int { return len(w) }` would
 call itself; in its holder the call is written `builtin.len(w)`.
 
 The receiver's C# form shows how the method uses it:

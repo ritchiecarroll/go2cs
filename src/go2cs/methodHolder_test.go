@@ -14,6 +14,9 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
+	"golang.org/x/tools/go/packages"
 )
 
 // convertMethodHolderFixture converts a single package made of the given Go files and returns every
@@ -887,6 +890,8 @@ const packageClassMethodsLibSource = `package lib
 func Visible() int { return hidden() }
 
 func hidden() int { return 2 }
+
+func Area() int { return 3 }
 `
 
 const packageClassMethodsMainSource = `package main
@@ -912,7 +917,10 @@ func (withFunc) Limit() int { return Limit() }
 
 type withBuiltin []int
 
-func (w withBuiltin) len() int { return len(w) }
+func (w withBuiltin) len() int {
+	size := plain.Size
+	return len(w) + size(plain{0})
+}
 
 type withImport []int
 
@@ -926,9 +934,26 @@ type withDot struct{}
 
 func (withDot) hidden() int { return 1 }
 
+type withDotExported struct{}
+
+func (withDotExported) Area() int { return Area() }
+
+func apply(Size int) int {
+	size := plain.Size
+	return size(plain{Size})
+}
+
+func pick() (Size func(plain) int) {
+	Size = plain.Size
+	return
+}
+
 func main() {
 	size := plain.Size
+	Size := plain.Size
+	boxed := (*plain).Size
 	p := plain{1}
+	fmt.Println(Size(p), boxed(&p), apply(1), pick()(p), withDotExported{}.Area())
 	p.Grow(2)
 	w := withImport{2, 1}
 	w.sort()
@@ -941,8 +966,11 @@ func main() {
 // package-level name, a name of the universe, an import's name, a name a dot-imported package declares (an
 // unexported one included), or a member of golib's builtin class. Such a type keeps its holder, as does a struct
 // whose forwarder for an embedded interface's method is named so (TestPromotedForwarderIsEmittedInItsStructsHolder).
-// A method expression of a type without a holder
-// names the method bare, under the delegate cast that picks the receiver's overload.
+// A method expression of a type without a holder names the method through the package class, under the delegate
+// cast that picks the receiver's overload: bare, it would bind a local, parameter or result of its name first
+// (apply, pick, main), and nothing from a holder (withBuiltin's len). withDotExported keeps its holder because
+// its method is named like a function the dot import brings, which it calls: in the package class it would call
+// itself.
 func TestMethodsOfPackageMainStayInItsPackageClassUnlessTheyHideAName(t *testing.T) {
 	emitted := convertMethodHolderTree(t, "example.com/app",
 		map[string]string{"main.go": packageClassMethodsMainSource},
@@ -953,18 +981,22 @@ func TestMethodsOfPackageMainStayInItsPackageClassUnlessTheyHideAName(t *testing
 	requireEmitted(t, "main.cs", main, []string{
 		"internal static nint Size(this plain p)",
 		"internal static void Grow(this ref plain p, nint by)",
-		"((Func<plain, nint>)(Size))",
+		"((Func<plain, nint>)(main_package.Size))",
+		"=> main_package.Size(panicwrapRecv(p0, ",
 		"partial class mainᴛwithFunc {",
 		"partial class mainᴛwithBuiltin {",
 		"partial class mainᴛwithImport {",
 		"partial class mainᴛwithGolib {",
 		"partial class mainᴛwithDot {",
+		"partial class mainᴛwithDotExported {",
 	}, []string{
 		"partial class mainᴛplain",
 		"mainᴛplain.",
+		"((Func<plain, nint>)(Size))",
+		"=> Size(",
 	})
 
-	for _, kept := range []string{"withFunc", "withBuiltin", "withImport", "withGolib", "withDot"} {
+	for _, kept := range []string{"withFunc", "withBuiltin", "withImport", "withGolib", "withDot", "withDotExported"} {
 		requireEmitted(t, "package_info.cs", packageInfo, []string{"partial class mainᴛ" + kept + ";"}, nil)
 	}
 
@@ -1013,4 +1045,93 @@ func Use() int { return Make().Twice() }
 	if !strings.HasSuffix(use, "\n} // end app_package\n") {
 		t.Errorf("make.cs does not close its package class by name\n%s", use)
 	}
+}
+
+const mainTestsProductionSource = `package main
+
+import "fmt"
+
+type plain struct{ n int }
+
+func (p plain) Size() int { return p.n }
+
+type opts struct{ on bool }
+
+func (o *opts) verbose() bool { return o.on }
+
+func main() { fmt.Println(plain{1}.Size(), (&opts{true}).verbose()) }
+`
+
+const mainTestsTestSource = `package main
+
+import "testing"
+
+var verbose = true
+
+func TestMethods(t *testing.T) {
+	size := plain.Size
+	on := (*opts).verbose
+
+	if size(plain{2}) != 2 || on(&opts{verbose}) != verbose {
+		t.Fatal("method expressions")
+	}
+}
+`
+
+// A program's test file names a method of a type without a holder through the production package class, rooted,
+// since the test file emits into a class of its own; and a type whose method a test file's name would hide
+// (verbose) keeps its holder, decided alike by the program converted on its own, which loads no test file, and by
+// its -tests variant, which names that holder.
+func TestPackageMainDecidesItsHoldersWithItsTestFilesNames(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	program := convertMethodHolderFixture(t, map[string]string{"main.go": mainTestsProductionSource, "main_test.go": mainTestsTestSource})
+
+	requireEmitted(t, "the program's package_info.cs", program["package_info.cs"], []string{"partial class mainᴛopts;"}, []string{"mainᴛplain"})
+
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod":           "module example/maintests\n\ngo 1.23\n",
+		"app/main.go":      mainTestsProductionSource,
+		"app/main_test.go": mainTestsTestSource,
+	})
+
+	inputPath := filepath.Join(dir, "app")
+
+	loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: inputPath, Tests: true}, ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	production := findProductionPackage(loaded, inputPath)
+	internal, external := findTestVariants(loaded, production)
+
+	if production == nil || internal == nil || external != nil {
+		t.Fatal("the fixture must load a program and its internal test variant alone")
+	}
+
+	outputPath := t.TempDir()
+
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	options := Options{
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+		convertTests:        true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		testPackagePath:     production.PkgPath,
+		testPackageName:     production.Name,
+	}
+
+	if _, err = convertTestVariants(selectTestProjectModel(internal, external), production, internal, external, selectCompileExcludedTestFiles(internal, external),
+		inputPath, outputPath, "go", hashset.NewHashSet(supportedTestCapabilities()), options); err != nil {
+		t.Fatalf("convertTestVariants: %v", err)
+	}
+
+	test := strings.ReplaceAll(readGenerated(t, filepath.Join(outputPath, "main_test.cs")), "\r\n", "\n")
+
+	requireEmitted(t, "main_test.cs", test, []string{"main_package.Size))", "mainᴛopts.verbose"}, []string{"((Func<plain, nint>)(Size))"})
 }

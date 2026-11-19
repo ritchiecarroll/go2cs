@@ -1247,6 +1247,11 @@ type testVariantConversionResult struct {
 func convertTestVariants(model testProjectModel, production, internal, external *packages.Package, compileExcluded map[string]bool, inputPath, outputPath, projectNamespace string, supported hashset.HashSet[string], options Options) (testVariantConversionResult, error) {
 	internalUnitListed := false
 
+	// Package main decides which of its types keep a method holder from its production files and the names its
+	// test files add, read as the production conversion reads them, so the variants name the classes it emitted.
+	siblingSignals := collectSiblingTestSignals(production.Dir, production.Name, options)
+	mainTestScopeNames, mainTestDotImport = siblingSignals.scopeNames, siblingSignals.dotImport
+
 	result := testVariantConversionResult{
 		declarations:         make([]testDeclaration, 0),
 		outputFiles:          make([]string, 0),

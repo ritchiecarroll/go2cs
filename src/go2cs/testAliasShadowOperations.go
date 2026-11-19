@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/ritchiecarroll/hashset"
@@ -45,6 +46,13 @@ type siblingTestSignals struct {
 
 	// hasInternalTests reports whether any build-selected in-package `_test.go` file exists.
 	hasInternalTests bool
+
+	// scopeNames are the names the test half adds to the package scope or to a file scope of its own: its
+	// package-level declarations and its imports (see mainTestScopeNames).
+	scopeNames hashset.HashSet[string]
+
+	// dotImport reports a dot import in the test half, whose names a parse cannot list.
+	dotImport bool
 }
 
 // collectSiblingTestSignals scans the build-selected in-package `_test.go` files for the signals a
@@ -79,6 +87,8 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 	addressed := hashset.HashSet[string]{}
 	methodValues := map[string]siblingMethodValue{}
 	publicized := hashset.HashSet[string]{}
+	scopeNames := hashset.HashSet[string]{}
+	dotImport := false
 	hasInternal := false
 
 	for _, entry := range entries {
@@ -101,12 +111,18 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 
 		collectSiblingAddressedNames(file, addressed, methodValues)
 		collectSiblingPublicizedTypeNames(file, publicized)
+
+		if collectSiblingScopeNames(file, packageDir, buildContext, scopeNames) {
+			dotImport = true
+		}
 	}
 
 	signals := siblingTestSignals{
 		addressedGlobalNames: addressed.Keys(),
 		publicizedTypeNames:  publicized.Keys(),
 		hasInternalTests:     hasInternal,
+		scopeNames:           scopeNames,
+		dotImport:            dotImport,
 	}
 
 	methodValueKeys := make([]string, 0, len(methodValues))
@@ -139,6 +155,70 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 // production package-scope name therefore denotes exactly that object, with no shadowing to
 // disambiguate. A qualified `pkg.T` is skipped: another package's type is never this package's to
 // publicize.
+// collectSiblingScopeNames adds to names what file declares at package level and the names of its imports, a
+// package import by the name its package clause gives. It reports a dot import, whose names it cannot list.
+func collectSiblingScopeNames(file *ast.File, packageDir string, buildContext build.Context, names hashset.HashSet[string]) (dotImport bool) {
+	for _, spec := range file.Imports {
+		path, err := strconv.Unquote(spec.Path.Value)
+
+		if err != nil {
+			continue
+		}
+
+		switch {
+		case spec.Name == nil:
+			if imported, importErr := buildContext.Import(path, packageDir, 0); importErr == nil && imported.Name != "" {
+				names.Add(imported.Name)
+			} else {
+				names.Add(importPathPackageName(path))
+			}
+		case spec.Name.Name == ".":
+			dotImport = true
+		case spec.Name.Name != "_":
+			names.Add(spec.Name.Name)
+		}
+	}
+
+	for _, decl := range file.Decls {
+		switch decl := decl.(type) {
+		case *ast.FuncDecl:
+			if decl.Recv == nil && decl.Name.Name != "init" {
+				names.Add(decl.Name.Name)
+			}
+		case *ast.GenDecl:
+			for _, spec := range decl.Specs {
+				switch spec := spec.(type) {
+				case *ast.TypeSpec:
+					names.Add(spec.Name.Name)
+				case *ast.ValueSpec:
+					for _, name := range spec.Names {
+						names.Add(name.Name)
+					}
+				}
+			}
+		}
+	}
+
+	return dotImport
+}
+
+// importPathPackageName is the package name Go's convention gives an import path, its last element without a
+// major-version suffix (`math/rand/v2` is rand, `gopkg.in/yaml.v3` is yaml), for a package go/build cannot read.
+func importPathPackageName(path string) string {
+	name := path[strings.LastIndex(path, "/")+1:]
+
+	if major, ok := strings.CutPrefix(name, "v"); ok && major != "" && strings.Trim(major, "0123456789") == "" && strings.Contains(path, "/") {
+		trimmed := strings.TrimSuffix(path, "/"+name)
+		name = trimmed[strings.LastIndex(trimmed, "/")+1:]
+	}
+
+	if dot := strings.Index(name, ".v"); dot > 0 {
+		name = name[:dot]
+	}
+
+	return name
+}
+
 func collectSiblingPublicizedTypeNames(file *ast.File, names hashset.HashSet[string]) {
 	for _, decl := range file.Decls {
 		switch decl := decl.(type) {
