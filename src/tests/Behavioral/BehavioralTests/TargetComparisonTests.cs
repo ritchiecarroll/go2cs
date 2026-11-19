@@ -2524,6 +2524,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSliceAliasing() => CheckTarget("SliceAliasing");
 
     [TestMethod]
+    public void CheckSliceArrayElementCopies() => CheckTarget("SliceArrayElementCopies");
+
+    [TestMethod]
     public void CheckSliceBoundsEscapeRoutes() => CheckTarget("SliceBoundsEscapeRoutes");
 
     [TestMethod]
