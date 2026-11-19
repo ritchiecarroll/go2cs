@@ -452,6 +452,36 @@ public class TwinBoxTests
 
         """;
 
+    // The spill's second rule (section 12.4): the box call's value is STORED through a ref local, so the box call moves
+    // ahead of its statement; the later parking call inside it is judged against the moved `var ᴛ = await …`, where no
+    // store remains (crypto/tls's `hs.masterSecret = extMasterFromPreMasterSecret(…, ref (hs.suite)…, hs.finishedHash.Sum())`).
+    private const string LaterCallUnderStore = """
+            internal static nint parksM() { ᐸꟷ(ch); return 1; }
+
+            internal static nint rvs(ref T c, nint k) { ᐸꟷ(ch); return c.x + k; }
+
+            internal static nint pv(nint j, nint k) { ᐸꟷ(ch); return j + k; }
+
+            public static void runStore(ж<T> px, ж<T> Ꮡq)
+            {
+                ref var q = ref Ꮡq.DerefOrNull();
+                q.x = rvs(ref (px).DerefOrNull(), parksM());
+            }
+
+            public static void runStorePlain(ж<T> Ꮡq, nint j)
+            {
+                ref var q = ref Ꮡq.DerefOrNull();
+                q.x = pv(j, parksM());
+            }
+
+            public static void runStoreReadAfter(ж<T> px, ж<T> Ꮡq)
+            {
+                ref var q = ref Ꮡq.DerefOrNull();
+                q.x = rvs(ref (px).DerefOrNull(), parksM()) + q.x;
+            }
+
+        """;
+
     // A hand-written `this ref` method with another `ref` parameter (the converter emits none: ref-lowering skips methods).
     private const string MixedRef = """
             internal static void mx(this ref T t, ref T u) { ᐸꟷ(ch); }
@@ -1093,6 +1123,33 @@ public class TwinBoxTests
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
         StringAssert.Contains(twins, "await rwvꞏtwin(global::go.builtin.Ꮡ((px).DerefOrNull()), (await parksNꞏtwin()))", "the copy is a value too");
+    }
+
+    [TestMethod]
+    public void P30_ALaterParkingCallInsideAMovedBoxCallAwaits()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, LaterCallUnderStore);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "= await rvsꞏtwin(px, (await parksMꞏtwin()));", "the box call moves ahead of the store, and the inner call awaits inside it");
+    }
+
+    [TestMethod]
+    public void P31_ALaterParkingCallInsideAMovedPlainArgumentCallAwaits()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, LaterCallUnderStore);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "= await pvꞏtwin(j, (await parksMꞏtwin()));", "the rule is not limited to box calls: any moved call");
+    }
+
+    [TestMethod]
+    public void P32_ARefLocalReadAfterTheMovedCallKeepsItsOwnRule()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, LaterCallUnderStore);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("rvsꞏtwin(px, (await parksMꞏtwin())) + q.x", StringComparison.Ordinal), "q.x is read after the call: never awaited in place before it");
     }
 
     [TestMethod]

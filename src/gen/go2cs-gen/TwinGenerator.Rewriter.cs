@@ -35,6 +35,10 @@ public sealed partial class TwinGenerator
         // argument order, and keeps it in a temp over the await.
         private readonly Dictionary<SyntaxNode, string?[]> m_boxCalls = [];
 
+        // The spill's second rule (12.4): each awaited call this visit moves ahead of its statement (`var ᴛ = await …`).
+        // A call inside one of its arguments is judged against that moved statement, not the original one.
+        private readonly HashSet<SyntaxNode> m_moving = [];
+
         public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits, Spills, RefBlocked;
 
         // N3's D3 core: the method's own func-value parameters whose pair test is HOISTED to the twin's entry (never
@@ -132,6 +136,9 @@ public sealed partial class TwinGenerator
                 RefBlocked++;
                 return base.VisitInvocationExpression(node);
             }
+
+            if (spill)
+                m_moving.Add(node);
 
             if (HandsArgBoxes(site, node.ArgumentList.Arguments.Count) is { } handsBoxes)
                 m_boxCalls[node] = handsBoxes;
@@ -234,7 +241,9 @@ public sealed partial class TwinGenerator
                     inert = false;
             }
 
-            for (SyntaxNode? parent = node.Parent; parent is not null; child = parent, parent = parent.Parent)
+            SyntaxNode? moved = null;
+
+            for (SyntaxNode? parent = node.Parent; parent is not null && moved is null; child = parent, parent = parent.Parent)
             {
                 if (parent is StatementSyntax statement)
                 {
@@ -290,6 +299,15 @@ public sealed partial class TwinGenerator
                             Earlier(receiver);
                         }
 
+                        // The spill's second rule (12.4): the enclosing call moves ahead of its statement, so this call
+                        // runs inside `var ᴛ = await <that call>`: nothing outside it (a store through a ref, say) is
+                        // evaluated before this await. The walk stops; this call awaits in place there, never moving on.
+                        if (m_moving.Contains(invocation))
+                        {
+                            moved = invocation;
+                            inert = false;
+                        }
+
                         break;
                     // Stage (c): crypto/x509's `s.haveSum[sha256.Sum224(…)]`. A struct indexer takes `this` by reference,
                     // so a struct receiver that reaches a ref local, evaluated before the await, would hold the ref
@@ -332,7 +350,7 @@ public sealed partial class TwinGenerator
 
             movable = inert;
 
-            return refLike || refTarget || RefReadAfter(node);
+            return refLike || refTarget || RefReadAfter(node, moved);
         }
 
         // Stage (c): a receiver passed by reference (a struct value: its instance members take `this` by ref) that reaches
@@ -345,13 +363,18 @@ public sealed partial class TwinGenerator
         // `@new<Float>().SetPrec(n).SetMode(x.mode)`, crypto/rsa's `encryptOAEP(opts.Hash.New(), opts.Hash.New(), …)`).
         // Awaited in place, the ref would be read after the await, before Rule R derives it again at the next statement
         // (CS9217); spilled, the call runs first as it did, and the rest of the statement reads the ref derived again.
-        private bool RefReadAfter(InvocationExpressionSyntax node)
+        // Inside a call that moves ahead of its statement (the spill's second rule, 12.4), only that call's own text runs
+        // before the ref is derived again, so only it is scanned.
+        private bool RefReadAfter(InvocationExpressionSyntax node, SyntaxNode? moved = null)
         {
             if (m_current is null || !m_current.Span.Contains(node.Span))
                 return false;
 
             foreach (IdentifierNameSyntax name in m_current.DescendantNodes().OfType<IdentifierNameSyntax>())
             {
+                if (moved is not null && !moved.Span.Contains(name.Span))
+                    continue;
+
                 // Only a read evaluated with the statement's own expression: one in a NESTED statement (a switch case,
                 // an if body: MnMixedStorm's worker) comes after Rule R has derived the ref again.
                 if (name.SpanStart >= node.Span.End && ReferenceEquals(name.Ancestors().OfType<StatementSyntax>().FirstOrDefault(), m_current) &&
