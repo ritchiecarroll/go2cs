@@ -123,7 +123,7 @@ func TestMethodExpressionWrapperMark(t *testing.T) {
 		{"ifaceExpr", `[GoWrapper("I.M")] (p0, p1) => wrapperRecv(p0).M(p1)`},
 		// A method of package main whose name hides nothing stays in the package class, where the wrapper
 		// names it bare, as it would a function.
-		{"ptrOfValueExpr", `[GoWrapper("(*S).value")] (p0, p1) => value(panicwrapRecv(p0, "value method main.S.value called using nil *S pointer").Value, p1)`},
+		{"ptrOfValueExpr", `[GoWrapper("(*S).value")] (p0, p1) => main_package.value(panicwrapRecv(p0, "value method main.S.value called using nil *S pointer").Value, p1)`},
 		// A method promoted through a same-package embed has its forwarder in a class of the struct's own
 		// (go2cs-gen). Where no forwarder has the expression's receiver, the wrapper calls it as the extension
 		// method it is.
