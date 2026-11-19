@@ -123,3 +123,14 @@ delta.**
 2. The pins in §3 as stated, `net` on the hosted windows runner and linux `os` on the hosted linux-x64 runner included.
 3. G-LAPTOP reading 53 off-list rows at estimated walls (it has no .3 reading; the windows leg ends inside linux and
    darwin either way).
+
+## 9. Lessons from the run (2026-11-19, P5, final hosted burst at `280a01952c`)
+
+1. **A row banked with a sweep option is dealt with that option.** The darwin `net` segment was banked from a read with
+   the sweep-shard `dns` option (public resolvers; `NET-DNS`, run 42617546338). This deal put `net` in DW-5 without
+   it, and the Go oracle failed `TestLookupNoSuchHost/LookupTXT_NXDOMAIN` on osx-arm64 against the runner's resolver
+   (C# passed). The declared re-read DW-5R carried the option. The next deal reads each row's banked evidence for the
+   options it was read with and deals the row with them (COORD 20261119T064301Z).
+2. **The darwin collector must not stop at a void row.** In the first pass at `6e870821d6`, `collect_darwin.py` exited
+   at the first row with no comparison record, and every later row of that shard lost its evidence line. Fixed in
+   batch 314 (`f5e51abe33`): the row is printed as `no-record` and the read goes on.
