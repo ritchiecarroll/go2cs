@@ -8,7 +8,7 @@ their full text.
 
 ---
 
-## November XX, 2026 — Go 1.26.11, cgo conversion, linux-arm64 packages, and TypeScript's compiler and SQLite in C#
+## November 19, 2026 — Go 1.26.11, cgo conversion, linux-arm64 packages, and TypeScript's compiler and SQLite in C#
 
 <!-- Written ahead and HELD for release day (the .2 and .3 precedent, e665f4ea51 and 2ed9f54759): "November XX" becomes
      the publish date as the last change before the release tag (GoCorpusMigration.md, the release ritual, item 1).
