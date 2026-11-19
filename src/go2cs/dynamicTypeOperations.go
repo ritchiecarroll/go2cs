@@ -767,10 +767,12 @@ func resolveDynamicTypeMarkers(outputFileNames []string) {
 				// next pass of the rewrite loop), and this keeps the evidence in the file where a
 				// human or a grep will find it. Substituting only this occurrence, so a second
 				// corrupted marker gets its own report rather than being collapsed into this one.
-				showWarning("Undecodable dynamic-type marker payload \"%s\" in \"%s\"", payload, fileName)
-				// Same gate class as the unresolved case below: the payload replacing the marker is
-				// not valid C# either, so the file is just as certainly unbuildable.
+				// Same gate class as the unresolved case below: the payload replacing the marker is not valid C#
+				// either, so the file is just as certainly unbuildable. A corrupt payload is a converter defect,
+				// not an unlifted type, so it refuses at once (GO2CS2013; P3's review of the godebug seat,
+				// 2026-11-19) rather than waiting for unresolvedDynamicTypeError at the end of the run.
 				recordUnresolvedDynamicType("«undecodable marker payload: "+payload+"»", fileName, line)
+				refuseMarkerPass(fmt.Sprintf("%s:%d", fileName, line), fmt.Sprintf("a dynamic-type marker's payload %q does not decode", payload))
 				return payload, false
 			}
 

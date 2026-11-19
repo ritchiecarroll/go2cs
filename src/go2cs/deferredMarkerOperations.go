@@ -26,18 +26,21 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
 	"strings"
 )
 
-// refuseMarkerPass ends the conversion when a deferred-marker pass cannot leave a file free of markers. A file that
-// still holds one is uncompilable, and a pass that only warned let the run exit 0 over it: a harness gating on the
-// exit code read the row green (i9, F1: encoding/json's encode_test.cs kept five adapter markers when a write hit
-// "user-mapped section open"). A variable so a test can observe the refusal without ending the process.
-var refuseMarkerPass = func(format string, a ...any) {
-	log.Fatalf(format, a...)
+// refuseMarkerPass ends the conversion when a deferred-marker pass cannot leave a file free of markers, reporting
+// GO2CS2013 at position ("file" or "file:line") first. A file that still holds one is uncompilable, and a pass that only
+// warned let the run exit 0 over it: a harness gating on the exit code read the row green (i9, F1: encoding/json's
+// encode_test.cs kept five adapter markers when a write hit "user-mapped section open"). A variable so a test can
+// observe the refusal without ending the process.
+var refuseMarkerPass = func(position, text string) {
+	reportDiagnostic(position, diagnosticDeferredMarkerUnresolved, text)
+	log.Fatalf("Refusing to convert: %s: %s\n", position, text)
 }
 
 // rewriteDeferredMarkers replaces every `prefix…suffix` marker in the given output files with the
@@ -68,7 +71,7 @@ func rewriteDeferredMarkers(outputFileNames []string, description, prefix, suffi
 		}
 
 		if err != nil {
-			refuseMarkerPass("Refusing to convert: cannot read \"%s\" to resolve its %s markers: %s\n", fileName, description, err)
+			refuseMarkerPass(fileName, fmt.Sprintf("cannot read the file to resolve its %s markers: %s", description, err))
 			continue
 		}
 
@@ -121,11 +124,11 @@ func rewriteDeferredMarkers(outputFileNames []string, description, prefix, suffi
 
 		// A marker whose closing sentinel never arrives ends the loop above with the marker still in the file.
 		if start := strings.Index(content, prefix); start != -1 {
-			refuseMarkerPass("Refusing to convert: \"%s\"(%d) still holds a %s marker with no closing sentinel\n", fileName, strings.Count(content[:start], "\n")+1, description)
+			refuseMarkerPass(fmt.Sprintf("%s:%d", fileName, strings.Count(content[:start], "\n")+1), fmt.Sprintf("a %s marker has no closing sentinel", description))
 		}
 
 		if err := os.WriteFile(fileName, uniformLineEndings([]byte(content)), 0644); err != nil {
-			refuseMarkerPass("Refusing to convert: failed to resolve %s markers in \"%s\": %s\n", description, fileName, err)
+			refuseMarkerPass(fileName, fmt.Sprintf("cannot write the file back after resolving its %s markers: %s", description, err))
 		}
 	}
 }
