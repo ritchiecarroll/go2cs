@@ -463,6 +463,53 @@ records where the code departs from 12.1, as ruled. It supersedes 12.1 on these 
   No ж<ж<T>> `.Value.Value` shape exists in src/core. casLoop's only await site is a delegate call that its callers'
   static lambdas never park in.
 
+### 12.4 The spill, resumed (dated block, 2026-11-19)
+
+COORD's step 3 (2026-11-19 17:44Z): the 5 inner calls of G 1(c) that blocked instead of awaiting are a correctness gap
+in this design; P13 stays the control. This block supersedes 12.2's first bullet on the cost it names: all 5 now await.
+
+**Rule 1, the box argument.** A by-ref argument that a box call hands as a box is a value in the rewritten call. A
+later awaitable in the same argument list therefore no longer counts it as a reference held across its await
+(RefLikeBefore). C# evaluates the box once, in argument order, and keeps it in a compiler temp over the await: that is
+12.1 item 5's spill, done by the compiler, with no temp of ours. A by-ref argument with no box (named-plain) keeps its
+`ref`, so a later call stays plain there (CS8178). Units P25-P27 and P29 were red first; P28 is a guard.
+
+**Rule 2, a call inside a moved call.** When the walk up from an awaited call crosses the argument list of an enclosing
+call that itself moves ahead of its statement (`var ᴛ = await outer(…)`), the walk stops there. Nothing outside the
+moved call, such as a store through a ref local, is evaluated before this await, and only the moved call's own text is
+scanned for a later ref read. This rule is not limited to box calls. crypto/tls's
+`hs.masterSecret = extMasterFromPreMasterSecret(c.vers, ref (hs.suite).DerefOrNull(), preMasterSecret,
+hs.finishedHash.Sum())` (client and server) is the case: the box call moved already, and Sum() was judged against the
+original store. Units P30 and P31 were red first; P32 is a guard.
+
+**P13, the control.** The box is still read first, where the plain emission reads it, so the f(p, <-ch) divergence
+(MnLaterArg) is unchanged and nothing moves ahead of the statement. One assertion changed: its receive now awaits in
+place.
+
+**Probe row** `param-later-call`: `readCellK(pk, parkK())`, where parkK parks and readCellK parks again and reads the
+write made meanwhile. Go 1903; twins 1903 (3 of 3 equal to Go's whole output); plain 1903; GoTwinsBoxCopy and
+GoTwinsBoxArgCopy 103, exit 2 as before, every other row unchanged. The row is not red before the spill: a blocking inner
+call gives the same values. The units are the red-first evidence; the row guards the box read order.
+
+**Arms** (windows/amd64 count, MnHttpClosure merged at 870b0f04ad, 185 reports, rc 0, 0 errors in every arm):
+
+| arm | tip | twinned | await | refused | ref-blocked |
+|---|---|---|---|---|---|
+| M-P | 870b0f04ad | 3,946 | 10,165 | 109 | 129 |
+| S-P | rule 1 | 3,946 | 10,168 | 109 | 126 |
+| R-P | rules 1+2 | 3,946 | 10,171 | 109 | 123 |
+| M-N | 870b0f04ad | 3,844 | 9,665 | 169 | 127 |
+| S-N | rule 1 | 3,844 | 9,665 | 169 | 127 |
+| R-N | rules 1+2 | 3,844 | 9,666 | 169 | 126 |
+
+Rule 1 moved net/http only (fs.cs, 3 calls). Rule 2 moved crypto/tls (the 2 Sum() calls) and one site outside G's
+five: encoding/asn1's `(m[i], err) = makeField(v.Field(…), parseFieldParameters(t.Field(…).Tag.Get(…)))`, whose
+`t.Field` now awaits inside the moved makeField call; it moves in N too, since it holds no box. S-N's reports are
+byte-identical to M-N's. Every prediction of both posts was met (S2 at its band's edge, with the 2 tls calls named).
+
+**Base, for the record.** Step 2's O band came from the 11-16 O arm at 1ac7dcf40f, before param boxes; one discriminating
+arm at the pre-merge tip read 3,102 / 7,615, as predicted for that reading. The merged O baseline is 3,142 / 7,818 / 584.
+
 ## 13. HANDOFF to P4, a brief (dated block, 2026-11-16)
 
 Owner ruling, as amended: M:N works on account B until account A's reset (2026-11-20 06:00Z), then comes back to G,
