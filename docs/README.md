@@ -23,18 +23,18 @@ on Windows, on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon); the
      reading; every row but the two Windows-only ones (internal/syscall/windows and its registry child) carries a linux-arm64
      reading and a darwin reading, each chip shown where Intel and Apple silicon differ. -->
 
-## 📰 NEWS — Go 1.26.11, Go methods in classes of their own, and packages for linux-arm64
+## 📰 NEWS — Go 1.26.11, cgo conversion, linux-arm64 packages, and TypeScript's compiler and SQLite in C#
 
 <!-- HELD for release day with the NEWS.md entry (the .2 and .3 precedent): "November XX" and the anchor's "november-xx"
      both become the publish date as the last change before the release tag. This block quotes no roster figure
      (check-roster-format 2e). Written by the 1.26.11.1 release-controls batch (claude/p4-release-controls-12611). -->
 **November XX, 2026, NuGet 1.26.11.1.** The fourth release on the Go 1.26 line, converted from Go 1.26.11, a patch
-release with security fixes. Each Go method, and each method a struct promotes, now lives in a class of its type's
-own, so names that carried a `Δ` prefix keep their Go names and very large packages load; assemblies built against
-1.26.10.3 must be rebuilt, and the build now says so by name instead of failing at run time. The packages ship a
-linux-arm64 build, `go2cs -cgo` converts a package that calls C, `go2cs -warn` converts a package around a refused
-site, and a converted program's `main` runs with Go's stack.
-[Full announcement](NEWS.md#november-xx-2026--go-12611-go-methods-in-classes-of-their-own-and-packages-for-linux-arm64).
+release with security fixes. `go2cs -cgo` converts a package that calls C, the packages ship a linux-arm64 build,
+Microsoft's TypeScript compiler, written in Go, converts, compiles and type-checks, and a modernc.org/sqlite program
+that writes and reads a database file prints exactly what native Go prints, on Windows and on Linux. Each Go method
+now lives in a class of its type's own, so assemblies built against 1.26.10.3 must be rebuilt, and the build now says
+so by name instead of failing at run time.
+[Full announcement](NEWS.md#november-xx-2026--go-12611-cgo-conversion-linux-arm64-packages-and-typescripts-compiler-and-sqlite-in-c).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 

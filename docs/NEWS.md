@@ -8,7 +8,7 @@ their full text.
 
 ---
 
-## November XX, 2026 — Go 1.26.11, Go methods in classes of their own, and packages for linux-arm64
+## November XX, 2026 — Go 1.26.11, cgo conversion, linux-arm64 packages, and TypeScript's compiler and SQLite in C#
 
 <!-- Written ahead and HELD for release day (the .2 and .3 precedent, e665f4ea51 and 2ed9f54759): "November XX" becomes
      the publish date as the last change before the release tag (GoCorpusMigration.md, the release ritual, item 1).
@@ -24,8 +24,16 @@ their full text.
      reference to its 1.26.11.1 revision" holds once the nugetgo wave (PLAN-rebank-1-26-11-1, "Release day") has
      published; reword it if a published module misses the wave. -->
 
-**NuGet 1.26.11.1.** The fourth release on the Go 1.26 line, and the first built from Go 1.26.11, a Go patch
-release. Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a Go method
+**NuGet 1.26.11.1.** The fourth release on the Go 1.26 line converts the standard library from Go 1.26.11, a patch
+release with security fixes; `go2cs -cgo` now converts a package that calls C; the go.* packages ship a linux-arm64
+build; Microsoft's TypeScript compiler, written in Go, converts, compiles and type-checks; and a modernc.org/sqlite
+program that writes and reads a database file prints exactly what native Go prints, on Windows and on Linux.
+<!-- The headline sentence: the owner's title choice, 2026-11-19 ("I like #1", relayed by COORD 14:51Z). Each item is
+     its section below: "The standard library is converted from Go 1.26.11"; "`go2cs -cgo` now converts a cgo
+     package"; "The go.* packages now ship a linux-arm64 build"; "The Go implementation of TypeScript's compiler now
+     converts, compiles and type-checks"; "Code that ccgo translated from C converts further" (the file demo, Windows
+     x64 and Linux x64). -->
+Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a Go method
 through the package class or through `using static` alone, or that writes a name with a `Δ` prefix. They are first
 under *Upgrading from 1.26.10.3*, and a build that would hit one of the binary breaks now stops with an error that
 names the package (`GO2CS3002`).
@@ -610,6 +618,20 @@ throw when called. A program reaches one only through a standard-library path. S
      e141a180ce (P2), 7c7dc687f8 and 6db3fc9dd3 (C1); docs/ValidatedTestPackages.md, the Linux headline
      ("linux-arm64: 236 of 236 banked, 0 pending"). The 15 members: KnownIssues, from S6 66c13e7168. -->
 
+**Every package that applies to macOS is validated on Intel and on Apple silicon.** 1.26.10.3 validated 229 of the
+236 packages that apply to macOS. In 1.26.11.1 all 236 are validated on Apple silicon (`osx-arm64`) and on Intel
+(`osx-x64`), each chip compared with Go built for that chip, with one exception: `runtime`'s Intel reading is the
+one 1.26.10.3 banked, because at 1.26.11.1 it read below its count twice, for two different causes. Its Apple-silicon
+reading is this release's. See the macOS line in [Validated test packages](ValidatedTestPackages.md).
+<!-- Added at the owner's question whether this is the first validated macOS release (COORD 2026-11-19 14:51Z): it is
+     not, and it is the first in which every applicable package validates on both chips, runtime's osx-x64 cell
+     excepted. Sources: the 1.26.11.1 bank, batch 316 (P5, claude/p5-bank-12611-assembly @ c75a37fdd3): the roster's
+     macOS line ("236 of 236 applicable rows validated on Intel and on Apple silicon"; runtime's osx-x64 reading is
+     the 1.26.10.3 bank's, read below its count twice at 1.26.11.1, BOARD 2026-11-19 P5 block) and its parity
+     sentence. 1.26.10.3: the .3 darwin leg, 229 of 236 (not banked on macOS: debug/buildinfo,
+     go/internal/gcimporter and net/http/pprof under arch-strict banking, internal/synctest, net, internal/trace,
+     syscall). Kept out of the title until runtime validates on Intel at this release. -->
+
 **A build for a platform the go.* packages do not ship now says so, instead of running the Windows build.** On
 another operating system, or on Linux with another architecture (`linux-riscv64`, for one), the build stops with
 the new error `GO2CS3003`, naming the platform and the first package that has no build for it. On `win-arm64` it
@@ -786,6 +808,8 @@ matches native Go's on all 17,422 files of TypeScript's parser test corpus, and 
 TypeScript's 7,404 single-file compiler tests, one at a time, matches native Go's output on every one. Five of its
 language-server packages are still refused (`GO2CS2005`) and skipped, and xxh3 is used through the fork described
 below.
+<!-- PENDING on the publish (COORD 2026-11-19 14:51Z): the link to the typescript-go-cs conversion repository goes
+     here once it is public, after the publish. Until then no visible text says it is public. -->
 
 Among the shapes that now convert and run as in Go:
 
@@ -846,6 +870,8 @@ native Go program prints, on Windows x64 and on Linux x64. On Windows the conver
 `-inline-arrays=modernc.org/libc#largeInteger`, without which the first database opened in WAL mode panics
 ([Known issues](KnownIssues.md#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger)). These
 shapes now convert and run as in Go:
+<!-- PENDING on the publish (COORD 2026-11-19 14:51Z): the link to the sqlite-cs conversion repository goes here
+     once it is public, after the publish. Until then no visible text says it is public. -->
 
 - a C function pointer carried as a `uintptr`: `__ccgo_fp(f)` and a call back through
   `*(*func(…))(unsafe.Pointer(&struct{ uintptr }{x}))`. Each top-level function gets one number, the same at every
