@@ -28,7 +28,7 @@ public static void TestDecrypt(ж<testing.T> t) {
     foreach (var (i, data) in range(testData)) {
         t.Logf("test %v. %v", i, data.kind);
         var (block, rest) = pem.Decode(data.pemData);
-        if (builtin.len(rest) > 0) {
+        if (len(rest) > 0) {
             t.Error(extraDataˢ);
         }
         var (der, err) = DecryptPEMBlock(block, data.password);

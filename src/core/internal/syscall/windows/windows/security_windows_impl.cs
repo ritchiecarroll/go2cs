@@ -85,6 +85,7 @@ namespace go.@internal.syscall;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
 using @unsafe = go.unsafe_package;
+using static windows_package;
 
 partial class windows_package
 {
@@ -261,6 +262,8 @@ partial class windows_package
         return Ꮡg;
     }
 
+} partial class windowsᴛTOKEN_GROUPS {
+
     // AllGroups returns the token's groups as a slice.
     //
     // ⚠ NO ADDRESS IS TAKEN HERE, and that is the repair. Go's body reinterprets `&g.Groups[0]`
@@ -274,6 +277,8 @@ partial class windows_package
     {
         return new slice<SID_AND_ATTRIBUTES>(g.Groups);
     }
+
+} partial class windows_package {
 
     // GetSidIdentifierAuthority returns the identifier authority of the given SID.
     //

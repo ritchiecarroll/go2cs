@@ -34,12 +34,11 @@ public static void TestParse(ж<testing.T> t) {
 }
 
 internal static bool nameFilter(@string filename) {
-    var exprᴛ1 = filename;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "parser.go"u8 || exprᴛ1 == "interface.go"u8 || exprᴛ1 == "parser_test.go"u8: {
+    case {} when filename == "parser.go"u8 || filename == "interface.go"u8 || filename == "parser_test.go"u8: {
         return true;
     }
-    case {} when exprᴛ1 == "parser.go.orig"u8: {
+    case {} when filename == "parser.go.orig"u8: {
         return true; // permit but should be ignored by ParseDir
     }}
     return false;
@@ -576,8 +575,8 @@ public static void TestIssue9979(ж<testing.T> t) {
             t.Fatal(err);
         }
 
-        tokenꓸPos pos = default;
-        tokenꓸPos end = default;
+        token.Pos pos = default;
+        token.Pos end = default;
         var fsetʗ1 = fset;
         ast.Inspect(new ast.FileжNode(f), (ast.Node x) => {
             switch (x.type()) {
@@ -1006,7 +1005,7 @@ public static void TestIssue57490(ж<testing.T> t) {
 
     // Because of the syntax error, the end position of the function declaration
     // is past the end of the file's position range.
-    tokenꓸPos funcEnd = @file.Decls[0].End();
+    token.Pos funcEnd = @file.Decls[0].End();
 
     // Offset(funcEnd) must not panic (to test panic, set debug=true in token package)
     // (panic: offset 35 out of bounds [0, 34] (position 36 out of bounds [1, 35]))
@@ -1090,10 +1089,10 @@ public static void TestCommentGroupWithLineDirective(ж<testing.T> t) {
         Ꮡ(new ast.CommentGroup(
             List: slice<ж<ast.Comment>>([
                 Ꮡ(new ast.Comment(
-                    Slash: ((tokenꓸPos)28),
+                    Slash: ((token.Pos)28),
                     Text: "//line a:15:1")),
                 Ꮡ(new ast.Comment(
-                    Slash: ((tokenꓸPos)43),
+                    Slash: ((token.Pos)43),
                     Text: "//"))
             ])))
     ]);

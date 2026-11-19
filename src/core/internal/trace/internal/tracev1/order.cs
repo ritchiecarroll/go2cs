@@ -4,6 +4,7 @@
 namespace go.@internal.trace.@internal;
 
 using errors = errors_package;
+using static tracev1_package;
 
 partial class tracev1_package {
 
@@ -139,6 +140,8 @@ internal static error transition(map<uint64, gState> gs, uint64 g, gState init, 
 
 partial struct orderEventList /*[]orderEvent*/;
 
+} partial class tracev1ᴛorderEventList {
+
 internal static bool Less(this ref orderEventList l, nint i, nint j) {
     return (l)[i].ev.Ts < (l)[j].ev.Ts;
 }
@@ -147,7 +150,7 @@ internal static void Push(this ж<orderEventList> Ꮡh, orderEvent x) {
     x = x.ΔClone();
     ref var h = ref Ꮡh.DerefOrNull();
 
-    h = builtin.append(h, x.ΔClone());
+    h = append(h, x.ΔClone());
     heapUp(Ꮡh, len(h) - 1);
 }
 
@@ -155,12 +158,18 @@ internal static orderEvent Pop(this ж<orderEventList> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint n = len(h) - 1;
-    ((h)[0], (h)[n]) = ((h)[n].ΔClone(), (h)[0].ΔClone());
+    ref var hᴛ1 = ref (h)[0];
+    ref var hᴛ3 = ref (h)[n];
+    (var hᴛ2, var hᴛ4) = ((h)[n].ΔClone(), (h)[0].ΔClone());
+    hᴛ1.AssignFrom(hᴛ2);
+    hᴛ3.AssignFrom(hᴛ4);
     heapDown(Ꮡh, 0, n);
     var x = (h)[len(h) - 1].ΔClone();
     h = (h).slice(0, len(h) - 1);
     return x.ΔClone();
 }
+
+} partial class tracev1_package {
 
 internal static void heapUp(ж<orderEventList> Ꮡh, nint j) {
     ref var h = ref Ꮡh.DerefOrNull();
@@ -170,7 +179,11 @@ internal static void heapUp(ж<orderEventList> Ꮡh, nint j) {
         if (i == j || !h.Less(j, i)) {
             break;
         }
-        ((h)[i], (h)[j]) = ((h)[j].ΔClone(), (h)[i].ΔClone());
+        ref var hᴛ1 = ref (h)[i];
+        ref var hᴛ3 = ref (h)[j];
+        (var hᴛ2, var hᴛ4) = ((h)[j].ΔClone(), (h)[i].ΔClone());
+        hᴛ1.AssignFrom(hᴛ2);
+        hᴛ3.AssignFrom(hᴛ4);
         j = i;
     }
 }
@@ -191,7 +204,11 @@ internal static bool heapDown(ж<orderEventList> Ꮡh, nint i0, nint n) {
         if (!h.Less(j, i)) {
             break;
         }
-        ((h)[i], (h)[j]) = ((h)[j].ΔClone(), (h)[i].ΔClone());
+        ref var hᴛ1 = ref (h)[i];
+        ref var hᴛ3 = ref (h)[j];
+        (var hᴛ2, var hᴛ4) = ((h)[j].ΔClone(), (h)[i].ΔClone());
+        hᴛ1.AssignFrom(hᴛ2);
+        hᴛ3.AssignFrom(hᴛ4);
         i = j;
     }
     return i > i0;

@@ -70,8 +70,8 @@ using static go.@internal.runtime.atomic_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/runtime/atomic/atomic_arm64.go", "atomic_arm64.cs", "AA4mpqampqamABAwpqampqampqampqampqampqam")]
 [assembly: GoPositionMap("internal/runtime/atomic/stubs.go", "stubs.cs", "AAoYpqampqampqamqsampqam")]
-[assembly: GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABIosqyyAAIQ0q7CAAIU8gANIrKssgACENKuwgACFPIAChyyrLIAAhTyAAIU8gAKHLKssoKClAAKHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gANIrKssgACENKuwgACFPIAChyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyAAwgsoKssgAQKLIAAhgACQKokqwABBwADAKssqYABhSyAAIYAAkCrLIAAh4ADAKuwgAKFpI=")]
-[assembly: GoPositionMap("internal/runtime/atomic/types_64bit.go", "types_64bit.cs", "AAgkAAkCAAIYAAkC")]
+[assembly: GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABgosqyyAAIQ0q7CAAIU8gARIrKssgACENKuwgACFPIADhyyrLIAAhTyAAIU8gAOHLKssoKClAAOHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gARIrKssgACENKuwgACFPIADhyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyABAgsoKssgAUKLIAAhgACQKokswABhwADAKsssYACBSyAAIYAAkCrLIAAh4ADAKuwgAOFpI=")]
+[assembly: GoPositionMap("internal/runtime/atomic/types_64bit.go", "types_64bit.cs", "AAwkAAkCAAIYAAkC")]
 [assembly: GoPositionMap("internal/runtime/atomic/unaligned.go", "unaligned.cs", "/oI=")]
 [assembly: GoPositionMap("internal/runtime/atomic/xchg8.go", "xchg8.cs", "AAsapIKCgpSCgpSClJQ=")]
 // </GoSourcePositionMaps>
@@ -111,3 +111,23 @@ public static partial class atomic_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(atomic_package.Bool)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛBool;
+[GoMethodHost(typeof(atomic_package.Float64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛFloat64;
+[GoMethodHost(typeof(atomic_package.Int32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛInt32;
+[GoMethodHost(typeof(atomic_package.Int64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛInt64;
+[GoMethodHost(typeof(atomic_package.Pointer<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛPointer;
+[GoMethodHost(typeof(atomic_package.Uint32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint32;
+[GoMethodHost(typeof(atomic_package.Uint64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint64;
+[GoMethodHost(typeof(atomic_package.Uint8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint8;
+[GoMethodHost(typeof(atomic_package.Uintptr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUintptr;
+[GoMethodHost(typeof(atomic_package.UnsafePointer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUnsafePointer;
+[GoMethodHost(typeof(atomic_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛnoCopy;
+// </MethodHolders>

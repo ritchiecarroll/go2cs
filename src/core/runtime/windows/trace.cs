@@ -184,13 +184,14 @@ using tracev2 = @internal.trace.tracev2_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 using @internal.trace;
+using static runtime_package;
 
 partial class runtime_package {
 
 // Trace state.
 
 // trace is global tracing context.
-partial struct Δtraceᴛ1 /*dyn*/ {
+partial struct traceᴛ1 /*dyn*/ {
     // trace.lock must only be acquired on the system stack where
     // stack splits cannot happen while it is held.
     internal mutex @lock;
@@ -287,8 +288,8 @@ partial struct Δtraceᴛ1 /*dyn*/ {
     // debugMalloc is the value of debug.malloc before tracing began.
     internal bool debugMalloc;
 }
-internal static readonly ж<Δtraceᴛ1> ᏑΔtrace = new StaticBox<Δtraceᴛ1>(new Δtraceᴛ1());
-internal static ref Δtraceᴛ1 Δtrace => ref ((StaticBox<Δtraceᴛ1>)ᏑΔtrace).ValueSlot;
+internal static readonly ж<traceᴛ1> Ꮡtrace = new StaticBox<traceᴛ1>(new traceᴛ1());
+internal static ref traceᴛ1 trace => ref ((StaticBox<traceᴛ1>)Ꮡtrace).ValueSlot;
 
 // Trace public API.
 internal static readonly ж<uint32> ᏑtraceAdvanceSema = new StaticBox<uint32>(1);
@@ -334,7 +335,7 @@ internal static void traceAdvance(bool stopTrace) {
     // Get the gen that we're advancing from. In this function we don't really care much
     // about the generation we're advancing _into_ since we'll do all the cleanup in this
     // generation for the next advancement.
-    var gen = ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Load();
+    var gen = Ꮡtrace.of(traceᴛ1.Ꮡgen).Load();
     if (gen == 0) {
         // We may end up here traceAdvance is called concurrently with StopTrace.
         semrelease(ᏑtraceAdvanceSema);
@@ -379,7 +380,7 @@ internal static void traceAdvance(bool stopTrace) {
                 Ꮡug.Value.status = readgstatus(s.g) & ~(uint32)_Gscan;
                 Ꮡug.Value.waitreason = s.g.Value.waitreason;
                 Ꮡug.Value.inMarkAssist = s.g.Value.inMarkAssist;
-                Ꮡug.Value.stackID = traceStack(0, gp, ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)));
+                Ꮡug.Value.stackID = traceStack(0, gp, Ꮡtrace.at(traceᴛ1.ᏑstackTab, (ulong)(gen % 2)));
             }
             resumeG(s);
             casgstatus(me, _Gwaiting, _Grunning);
@@ -411,9 +412,9 @@ internal static void traceAdvance(bool stopTrace) {
     //
     // TODO(mknyszek): forEachP is very heavyweight. We could do better by integrating
     // the statusWasTraced check into it, to avoid preempting unnecessarily.
-    forEachP(waitReasonTraceProcStatus, (ж<Δp> pp) => {
+    forEachP(waitReasonTraceProcStatus, (ж<p> pp) => {
         var tl = traceAcquire();
-        if (!pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen)) {
+        if (!pp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen)) {
             tl.writer().writeProcStatusForP(pp, false).end();
         }
         traceRelease(tl);
@@ -427,7 +428,7 @@ internal static void traceAdvance(bool stopTrace) {
     // events to indicate whether a P exists, rather than just making its
     // existence implicit.
     foreach (var (_, pp) in range(allp.slice(len(allp), cap(allp)))) {
-        pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).readyNextGen(gen);
+        pp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).readyNextGen(gen);
     }
 
     // Prevent preemption to make sure we're not interrupted.
@@ -436,24 +437,24 @@ internal static void traceAdvance(bool stopTrace) {
     var mp = acquirem();
 
     // Advance the generation or stop the trace.
-    Δtrace.lastNonZeroGen = gen;
+    trace.lastNonZeroGen = gen;
     if (stopTrace) {
         systemstack(() => {
             // Ordering is important here. Set shutdown first, then disable tracing,
             // so that conditions like (traceEnabled() || traceShuttingDown()) have
             // no opportunity to be false. Hold the trace lock so this update appears
             // atomic to the trace reader.
-            @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-            ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡshutdown).Store(true);
-            ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Store(0);
-            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+            @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
+            Ꮡtrace.of(traceᴛ1.Ꮡshutdown).Store(true);
+            Ꮡtrace.of(traceᴛ1.Ꮡgen).Store(0);
+            unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
 
             // Clear trace.enabled. It is totally OK for this value to be stale,
             // because traceAcquire will always double-check gen.
-            Δtrace.enabled = false;
+            trace.enabled = false;
         });
     } else {
-        ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Store(traceNextGen(gen));
+        Ꮡtrace.of(traceᴛ1.Ꮡgen).Store(traceNextGen(gen));
     }
 
     // Emit a sync batch which contains a ClockSnapshot. Also emit a ProcsChange
@@ -540,14 +541,14 @@ internal static void traceAdvance(bool stopTrace) {
                 //
                 // trace.lock needed for traceBufFlush, but also to synchronize
                 // with traceThreadDestroy, which flushes both buffers unconditionally.
-                @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+                @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
                 foreach (var (exp, buf) in range((~mpΔ3).trace.buf[gen % 2].ΔRangeSnapshot())) {
                     if (buf != nil) {
                         traceBufFlush(buf, gen);
                         (~mpΔ3).trace.buf[gen % 2][exp] = default;
                     }
                 }
-                unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+                unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
 
                 // Remove the m from the flush list.
                 prev.ValueSlot = mpΔ3.Value.trace.link;
@@ -603,15 +604,15 @@ internal static void traceAdvance(bool stopTrace) {
     // Ordering is important here. traceCPUFlush may generate new stacks and dumping
     // stacks may generate new strings.
     traceCPUFlush(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).dump(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (ulong)(gen % 2)).dump(gen);
-    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).reset(gen);
+    Ꮡtrace.at(traceᴛ1.ᏑstackTab, (ulong)(gen % 2)).dump(gen);
+    Ꮡtrace.at(traceᴛ1.ᏑtypeTab, (ulong)(gen % 2)).dump(gen);
+    Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(gen % 2)).reset(gen);
 
     // That's it. This generation is done producing buffers.
     systemstack(() => {
-        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-        ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑflushedGen).Store(gen);
-        unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
+        Ꮡtrace.of(traceᴛ1.ᏑflushedGen).Store(gen);
+        unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
     });
 
     if (stopTrace) {
@@ -626,43 +627,43 @@ internal static void traceAdvance(bool stopTrace) {
         // block, but they won't generate events because tracing is disabled.
         // That is, it's OK if mallocs read a stale debug.malloc or
         // trace.enabledWithAllocFree value.
-        if (Δtrace.enabledWithAllocFree) {
-            Δtrace.enabledWithAllocFree = false;
-            debug.malloc = Δtrace.debugMalloc;
+        if (trace.enabledWithAllocFree) {
+            trace.enabledWithAllocFree = false;
+            debug.malloc = trace.debugMalloc;
         }
     }
 
     // Block until the trace reader has finished processing the last generation.
-    semacquire(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
+    semacquire(Ꮡtrace.at(traceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
     if (raceenabled) {
-        raceacquire(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
+        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡtrace.at(traceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
     }
 
     // Double-check that things look as we expect after advancing and perform some
     // final cleanup if the trace has fully stopped.
     systemstack(() => {
-        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-        if (!Δtrace.full[gen % 2].empty()) {
+        @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
+        if (!trace.full[gen % 2].empty()) {
             @throw(traceNonEmptyFullTraceˢ);
         }
         if (stopTrace) {
-            if (!Δtrace.full[1 - (gen % 2)].empty()) {
+            if (!trace.full[1 - (gen % 2)].empty()) {
                 @throw(traceNonEmptyFullTraceˢ2);
             }
-            if (Δtrace.reading != nil || ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).Load() != nil) {
+            if (trace.reading != nil || Ꮡtrace.of(traceᴛ1.Ꮡreader).Load() != nil) {
                 @throw(traceReadingAfterˢ);
             }
             // Free all the empty buffers.
-            while (Δtrace.empty != nil) {
-                var buf = Δtrace.empty;
-                Δtrace.empty = buf.link;
+            while (trace.empty != nil) {
+                var buf = trace.empty;
+                trace.empty = buf.link;
                 sysFree(@unsafe.Pointer.FromPinnedBox(buf), /* unsafe.Sizeof(*buf) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys);
             }
             // Clear trace.shutdown and other flags.
-            Δtrace.headerWritten = false;
-            ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡshutdown).Store(false);
+            trace.headerWritten = false;
+            Ꮡtrace.of(traceᴛ1.Ꮡshutdown).Store(false);
         }
-        unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
     });
 
     if (stopTrace) {
@@ -718,13 +719,13 @@ internal static uintptr traceNextGen(uintptr gen) {
 // generation. Note: the provided generation must not have started yet.
 internal static void traceRegisterLabelsAndReasons(uintptr gen) {
     foreach (var (i, label) in range(gcMarkWorkerModeStrings[..])) {
-        Δtrace.markWorkerLabels[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, label);
+        trace.markWorkerLabels[gen % 2][i] = (traceArg)Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, label);
     }
     foreach (var (i, str) in range(traceBlockReasonStrings[..])) {
-        Δtrace.goBlockReasons[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str);
+        trace.goBlockReasons[gen % 2][i] = (traceArg)Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str);
     }
     foreach (var (i, str) in range(traceGoStopReasonStrings[..])) {
-        Δtrace.goStopReasons[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str);
+        trace.goStopReasons[gen % 2][i] = (traceArg)Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str);
     }
 }
 
@@ -759,42 +760,42 @@ internal static (slice<byte> buf, bool park) readTrace0() {
         // This function must not allocate while holding trace.lock:
         // allocation can call heap allocate, which will try to emit a trace
         // event while holding heap lock.
-        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
 
-        if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).Load() != nil) {
+        if (Ꮡtrace.of(traceᴛ1.Ꮡreader).Load() != nil) {
             // More than one goroutine reads trace. This is bad.
             // But we rather do not crash the program because of tracing,
             // because tracing can be enabled at runtime on prod servers.
-            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+            unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
             println((@string)"runtime: ReadTrace called from multiple goroutines simultaneously");
             (buf, park) = (default, false); goto ᒐdone;
         }
         // Recycle the old buffer.
-        var bufΔ1 = Δtrace.reading; if (bufΔ1 != nil) {
-            bufΔ1.link = Δtrace.empty;
-            Δtrace.empty = bufΔ1;
-            Δtrace.reading = default;
+        var bufΔ1 = trace.reading; if (bufΔ1 != nil) {
+            bufΔ1.link = trace.empty;
+            trace.empty = bufΔ1;
+            trace.reading = default;
         }
         // Write trace header.
-        if (!Δtrace.headerWritten) {
-            Δtrace.headerWritten = true;
-            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        if (!trace.headerWritten) {
+            trace.headerWritten = true;
+            unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
             (buf, park) = (slice<byte>("go 1.26 trace\x00\x00\x00"u8), false); goto ᒐdone;
         }
 
         // Read the next buffer.
 
-        if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load() == 0) {
-            ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Store(1);
+        if (Ꮡtrace.of(traceᴛ1.ᏑreaderGen).Load() == 0) {
+            Ꮡtrace.of(traceᴛ1.ᏑreaderGen).Store(1);
         }
         uintptr gen = default;
         for (;;) {
-            assertLockHeld(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-            gen = ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load();
+            assertLockHeld(Ꮡtrace.of(traceᴛ1.Ꮡlock));
+            gen = Ꮡtrace.of(traceᴛ1.ᏑreaderGen).Load();
 
             // Check to see if we need to block for more data in this generation
             // or if we need to move our generation forward.
-            if (!Δtrace.full[gen % 2].empty()) {
+            if (!trace.full[gen % 2].empty()) {
                 break;
             }
             // Most of the time readerGen is one generation ahead of flushedGen, as the
@@ -802,20 +803,20 @@ internal static (slice<byte> buf, bool park) readTrace0() {
             // into readerGen, flushedGen will rise to meet it. At this point, the tracer
             // is waiting on the reader to finish flushing the last generation so that it
             // can continue to advance.
-            if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑflushedGen).Load() == gen) {
+            if (Ꮡtrace.of(traceᴛ1.ᏑflushedGen).Load() == gen) {
                 // Write out the internal in-band end-of-generation signal.
-                if (!Δtrace.endOfGenerationWritten) {
-                    Δtrace.endOfGenerationWritten = true;
-                    unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+                if (!trace.endOfGenerationWritten) {
+                    trace.endOfGenerationWritten = true;
+                    unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
                     (buf, park) = (slice<byte>([(byte)tracev2.EvEndOfGeneration]), false); goto ᒐdone;
                 }
 
                 // Reset the flag.
-                Δtrace.endOfGenerationWritten = false;
+                trace.endOfGenerationWritten = false;
 
                 // Handle shutdown.
-                if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡshutdown).Load()) {
-                    unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+                if (Ꮡtrace.of(traceᴛ1.Ꮡshutdown).Load()) {
+                    unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
 
                     // Wake up anyone waiting for us to be done with this generation.
                     //
@@ -825,9 +826,9 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                         // Model synchronization on trace.doneSema, which te race
                         // detector does not see. This is required to avoid false
                         // race reports on writer passed to trace.Start.
-                        racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
+                        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡtrace.at(traceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
                     }
-                    semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
+                    semrelease(Ꮡtrace.at(traceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
 
                     // We're shutting down, and the last generation is fully
                     // read. We're done.
@@ -838,8 +839,8 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                 // The previous gen has had all of its buffers flushed, and
                 // there's nothing else for us to read. Advance the generation
                 // we're reading from and try again.
-                ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Store(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Load());
-                unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+                Ꮡtrace.of(traceᴛ1.ᏑreaderGen).Store(Ꮡtrace.of(traceᴛ1.Ꮡgen).Load());
+                unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
 
                 // Wake up anyone waiting for us to be done with this generation.
                 //
@@ -847,12 +848,12 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                 // advance until we've read it.
                 if (raceenabled) {
                     // See comment above in the shutdown case.
-                    racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
+                    racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡtrace.at(traceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
                 }
-                semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
+                semrelease(Ꮡtrace.at(traceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
 
                 // Reacquire the lock and go back to the top of the loop.
-                @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+                @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
                 continue;
             }
             // Wait for new data.
@@ -864,14 +865,14 @@ internal static (slice<byte> buf, bool park) readTrace0() {
             // Before we drop the lock, clear the workAvailable flag. Work can
             // only be queued with trace.lock held, so this is at least true until
             // we drop the lock.
-            ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Store(false);
-            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+            Ꮡtrace.of(traceᴛ1.ᏑworkAvailable).Store(false);
+            unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
             (buf, park) = (default, true); goto ᒐdone;
         }
         // Pull a buffer.
-        var tbuf = Δtrace.full[gen % 2].pop();
-        Δtrace.reading = tbuf;
-        unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        var tbuf = trace.full[gen % 2].pop();
+        trace.reading = tbuf;
+        unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         (buf, park) = (tbuf.arr.slice(0, tbuf.pos), false);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -887,7 +888,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
 //go:systemstack
 internal static ж<g> traceReader() {
     var gp = traceReaderAvailable();
-    if (gp == nil || !ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).CompareAndSwapNoWB(gp, nil)) {
+    if (gp == nil || !Ꮡtrace.of(traceᴛ1.Ꮡreader).CompareAndSwapNoWB(gp, nil)) {
         return default;
     }
     return gp;
@@ -909,8 +910,8 @@ internal static ж<g> traceReaderAvailable() {
     //
     // We also want to be careful not to schedule the reader if there's no
     // reason to.
-    if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑflushedGen).Load() == ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load() || ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Load()) {
-        return ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).Load();
+    if (Ꮡtrace.of(traceᴛ1.ᏑflushedGen).Load() == Ꮡtrace.of(traceᴛ1.ᏑreaderGen).Load() || Ꮡtrace.of(traceᴛ1.ᏑworkAvailable).Load()) {
+        return Ꮡtrace.of(traceᴛ1.Ꮡreader).Load();
     }
     return default;
 }
@@ -923,6 +924,8 @@ partial struct traceAdvancerState {
     internal ж<wakeableSleep> timer;
     internal channel<EmptyStruct> done;
 }
+
+} partial class runtimeᴛtraceAdvancerState {
 
 // start starts a new traceAdvancer.
 internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
@@ -947,9 +950,11 @@ internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
 internal static void stop(this ref traceAdvancerState s) {
     s.timer.wake();
     ᐸꟷ(s.done);
-    builtin.close(s.done);
+    close(s.done);
     s.timer.close();
 }
+
+} partial class runtime_package {
 
 // traceAdvancePeriod is the approximate period between
 // new generations.
@@ -979,6 +984,8 @@ internal static ж<wakeableSleep> newWakeableSleep() {
     s.timer.init(f, s.OrTypedNil());
     return s;
 }
+
+} partial class runtimeᴛwakeableSleep {
 
 // sleep sleeps for the provided duration in nanoseconds or until
 // another goroutine calls wake.
@@ -1063,4 +1070,4 @@ internal static void close(this ж<wakeableSleep> Ꮡs) {
     return;
 }
 
-} // end runtime_package
+} // end runtimeᴛwakeableSleep

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAw2lt6igoKClKaipISCkKaQppCmkKaCkKaCkKaCkKaCkKiCkJKQppCSkJKwpg==", "38-45:1;52-52:1;55-55:2;58-58:3;61-61:4;65-65:5;69-69:6;73-73:7;77-77:8;82-82:9;83-83:10;86-86:11;87-87:12;88-88:13", "", "", "", "24:21,25:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA82lv6igoKClKaipISCkKaQppCmkKaCkKaCkKaCkKaCkKiCkJKQppCSkJKwpg==", "38-45:1;52-52:1;55-55:2;58-58:3;61-61:4;65-65:5;69-69:6;73-73:7;77-77:8;82-82:9;83-83:10;86-86:11;87-87:12;88-88:13", "", "", "", "29:21,30:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -85,3 +84,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.node)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛnode;
+// </MethodHolders>

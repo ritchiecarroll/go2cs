@@ -7,8 +7,11 @@ namespace go.go;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // isTerminating reports if s is a terminating statement.
 // If s is labeled, label is the label name; otherwise s
@@ -111,6 +114,8 @@ internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStm
     }
     return hasDefault;
 }
+
+} partial class types_package {
 
 // TODO(gri) For nested breakable statements, the current implementation of hasBreak
 // will traverse the same subtree repeatedly, once for each label. Replace

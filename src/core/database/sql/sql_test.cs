@@ -27,6 +27,7 @@ using go.sync;
 using math;
 using static go.database.sql_package;
 using ꓸꓸꓸany = Span<any>;
+using static sql_internal_test_package;
 
 partial class sql_internal_test_package {
 
@@ -299,6 +300,8 @@ internal static nint numPrepares(ж<testing.T> t, ж<global::go.database.sql_pac
     return db.freeConn[0].ci._<ж<fakeConn>>().numPrepare;
 }
 
+} partial class sql_internal_testᴛDB {
+
 internal static nint numDeps(this ж<global::go.database.sql_package.DB> Ꮡdb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -388,6 +391,8 @@ internal static void dumpDep(this ref global::go.database.sql_package.DB db, ж<
         }
     }
 }
+
+} partial class sql_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string peopleˢ => ref peopleˢᵇ;
@@ -874,12 +879,12 @@ public static partial void TestPoolExhaustOnCancel(ж<testing.T> t) {
             case 1: {
                 Ꮡsaturate.Done();
                 var selᴛ5 = ctxΔ1.Done();
-                var selᴛ6 = donePingʗ1;
-                switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+                var donePingᴛ1 = donePingʗ1;
+                switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(donePingᴛ1, ꓸꓸꓸ))) {
                 case 0 when selᴛ5.ꟷᐳ(out _): {
                     break;
                 }
-                case 1 when selᴛ6.ꟷᐳ(out _): {
+                case 1 when donePingᴛ1.ꟷᐳ(out _): {
                     break;
                 }}
                 break;
@@ -917,7 +922,7 @@ public static partial void TestPoolExhaustOnCancel(ж<testing.T> t) {
         state = 2;
 
         // Now cancel the request while it is waiting.
-        var (ctx, cancel) = context.WithTimeout(context.Background(), 2 * time.ΔSecond);
+        var (ctx, cancel) = context.WithTimeout(context.Background(), 2 * time.Second);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
 
@@ -933,7 +938,7 @@ public static partial void TestPoolExhaustOnCancel(ж<testing.T> t) {
                 t.Fatalf("PingContext (Exhaust): %v", errΔ2);
             }
         }
-        builtin.close(donePing);
+        close(donePing);
         ᏑsaturateDone.Wait();
 
         // Now try to open a normal connection.
@@ -985,7 +990,7 @@ public static void TestRowsColumnTypes(ж<testing.T> t) {
             t.Fatalf("ColumnTypes: %v", err);
         }
 
-        var types = new slice<reflectꓸType>(len(tt));
+        var types = new slice<reflect.Type>(len(tt));
         foreach (var (i, tp) in range(tt)) {
             var st = tp.ScanType();
             if (st == nil) {
@@ -1217,6 +1222,8 @@ internal partial struct stubDriverStmt {
     internal error err;
 }
 
+} partial class sql_internal_testᴛstubDriverStmt {
+
 internal static error Close(this stubDriverStmt s) {
     return s.err;
 }
@@ -1233,12 +1240,14 @@ internal static (driver.Rows, error) Query(this stubDriverStmt s, slice<driver�
     return (default, default);
 }
 
+} partial class sql_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stmtErrorˢ => ref stmtErrorˢᵇ;
 private static readonly @string stmtErrorˢᵇ = "STMT ERROR"u8;
 
 internal partial struct TestStatementClose_tests /*dyn*/ {
-    internal ж<global::go.database.sql_package.ΔStmt> stmt;
+    internal ж<global::go.database.sql_package.Stmt> stmt;
     internal @string msg;
 }
 
@@ -1247,8 +1256,8 @@ public static void TestStatementClose(ж<testing.T> t) {
     var want = errors.New(stmtErrorˢ);
 
     var tests = slice<TestStatementClose_tests>([
-        new(Ꮡ(new ΔStmt(stickyErr: want)), "stickyErr not propagated"),
-        new(Ꮡ(new ΔStmt(cg: new global::go.database.sql_package.TxжstmtConnGrabber(Ꮡ(new Tx())), cgds: Ꮡ(new driverStmt(Locker: new sync.MutexжLocker(Ꮡ(new sync.Mutex())), si: new stubDriverStmt(want))))), "driverStmt.Close() error not propagated")
+        new(Ꮡ(new Stmt(stickyErr: want)), "stickyErr not propagated"),
+        new(Ꮡ(new Stmt(cg: new global::go.database.sql_package.TxжstmtConnGrabber(Ꮡ(new Tx())), cgds: Ꮡ(new driverStmt(Locker: new sync.MutexжLocker(Ꮡ(new sync.Mutex())), si: new stubDriverStmt(want))))), "driverStmt.Close() error not propagated")
     ]);
     foreach (var (_, test) in range(tests)) {
         var err = test.stmt.Close(); if (!AreEqual(err, want)) {
@@ -2444,8 +2453,8 @@ public static void TestNullBoolParam(ж<testing.T> t) {
 
 public static void TestNullTimeParam(ж<testing.T> t) {
     var t0 = new time.Time();
-    var t1 = time.Date(2000, 1, 1, 8, 9, 10, 11, time.ΔUTC);
-    var t2 = time.Date(2010, 1, 1, 8, 9, 10, 11, time.ΔUTC);
+    var t1 = time.Date(2000, 1, 1, 8, 9, 10, 11, time.UTC);
+    var t2 = time.Date(2010, 1, 1, 8, 9, 10, 11, time.UTC);
     var spec = new nullTestSpec("nulldatetime", "datetime", new nullTestRow[]{
         new(new NullTime(t1, true), t2, new NullTime(t1, true)),
         new(new NullTime(t1, false), t2, new NullTime(t0, false)),
@@ -2564,7 +2573,7 @@ public static void TestIssue4902(ж<testing.T> t) {
         var driver = db.Driver()._<ж<fakeDriver>>();
         nint opens0 = driver.openCount;
 
-        ж<global::go.database.sql_package.ΔStmt> stmt = default;
+        ж<global::go.database.sql_package.Stmt> stmt = default;
         error err = default;
         for (nint i = 0; i < 10; i++) {
             (stmt, err) = db.Prepare(selectPeopleNameˢ);
@@ -2950,10 +2959,10 @@ public static partial void TestPendingConnsAfterErr(ж<testing.T> t) {
 
         // check that all connections fail without deadlock
         for (nint i = 0; i < tryOpen; i++) {
-            var selᴛ7 = errs;
+            var errsᴛ1 = errs;
             var selᴛ8 = to.C;
-            switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
-            case 0 when selᴛ7.ꟷᐳ(out var errΔ2): {
+            switch (select(ᐸꟷ(errsᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
+            case 0 when errsᴛ1.ꟷᐳ(out var errΔ2): {
                 var (got, want) = (errΔ2, errOffline); if (!AreEqual(got, want)) {
                     t.Errorf("unexpected err: got %v, want %v", got, want);
                 }
@@ -3078,7 +3087,7 @@ public static void TestConnMaxLifetime(ж<testing.T> t) {
             t.Fatal(err);
         }
 
-        offset = time.ΔSecond;
+        offset = time.Second;
         (var tx2, err) = db.Begin();
         if (err != nil) {
             t.Fatal(err);
@@ -3548,7 +3557,7 @@ public static void TestManyErrBadConn(ж<testing.T> t) {
         // Prepare
         db = manyErrBadConnSetup();
         defer(closeDB, new sql_test_package.testing_TжTB(t), db, ref ᒐ, recovers: true);
-        ref var stmt = ref heap<ж<global::go.database.sql_package.ΔStmt>>(out var Ꮡstmt);
+        ref var stmt = ref heap<ж<global::go.database.sql_package.Stmt>>(out var Ꮡstmt);
         (stmt, err) = db.Prepare(selectPeopleAgeNameˢ);
         if (err != nil) {
             t.Fatal(err);
@@ -3623,6 +3632,10 @@ internal static ref readonly @string txStatusˢ => ref txStatusˢᵇ;
 private static readonly @string txStatusˢᵇ = "tx_status"u8;
 internal static ref readonly @string selectTxStatusTxStatusˢ => ref selectTxStatusTxStatusˢᵇ;
 private static readonly @string selectTxStatusTxStatusˢᵇ = "SELECT|tx_status|tx_status|"u8;
+internal static ref readonly @string autocommitˢ => ref autocommitˢᵇ;
+private static readonly @string autocommitˢᵇ = "autocommit"u8;
+internal static ref readonly @string transactionˢ => ref transactionˢᵇ;
+private static readonly @string transactionˢᵇ = "transaction"u8;
 
 // Issue 34775: Ensure that a Tx cannot commit after a rollback.
 public static void TestTxCannotCommitAfterRollback(ж<testing.T> t) {
@@ -3687,7 +3700,7 @@ public static void TestTxCannotCommitAfterRollback(ж<testing.T> t) {
         };
         var sendQueryʗ2 = sendQuery;
         rollbackHook = () => {
-            builtin.close(sendQueryʗ2);
+            close(sendQueryʗ2);
         };
         defer(() => {
             hookTxGrabConn = default;
@@ -3821,7 +3834,7 @@ public static void TestConnExpiresFreshOutOfPool(ж<testing.T> t) {
                 goǃ(() => {
                     GoFrame ᒐ = default;
                     try {
-                        defer(ᴛ1 => builtin.close(ᴛ1), afterPutConnʗ1, ref ᒐ);
+                        defer(ᴛ1 => close(ᴛ1), afterPutConnʗ1, ref ᒐ);
 
                         var (connΔ1, errΔ1) = dbʗ2.conn(ctxʗ2, alwaysNewConn);
                         if (errΔ1 == nil) {
@@ -3838,7 +3851,7 @@ public static void TestConnExpiresFreshOutOfPool(ж<testing.T> t) {
                 goǃ(() => {
                     GoFrame ᒐ = default;
                     try {
-                        defer(ᴛ1 => builtin.close(ᴛ1), waitingForConnʗ1, ref ᒐ);
+                        defer(ᴛ1 => close(ᴛ1), waitingForConnʗ1, ref ᒐ);
 
                         for (;;) {
                             if (tΔ1.Failed()) {
@@ -4067,7 +4080,7 @@ public static void TestErrBadConnReconnect(ж<testing.T> t) {
         });
 
         // Provide a way to force a re-prepare of a statement on next execution
-        void forcePrepare(ж<global::go.database.sql_package.ΔStmt> stmt) {
+        void forcePrepare(ж<global::go.database.sql_package.Stmt> stmt) {
             stmt.css = default;
         }
 
@@ -4177,8 +4190,8 @@ public static void TestTxEndBadConn(ж<testing.T> t) {
                 return endTx(tx);
             };
         }
-        simulateBadConn(dbTxExecCommitˢ, ᏑhookCommitBadConn, dbExec(((Func<ж<global::go.database.sql_package.Tx>, error>)(global::go.database.sql_package.Commit))));
-        simulateBadConn(dbTxExecRollbackˢ, ᏑhookRollbackBadConn, dbExec(((Func<ж<global::go.database.sql_package.Tx>, error>)(global::go.database.sql_package.Rollback))));
+        simulateBadConn(dbTxExecCommitˢ, ᏑhookCommitBadConn, dbExec(((Func<ж<global::go.database.sql_package.Tx>, error>)(global::go.database.sqlᴛTx.Commit))));
+        simulateBadConn(dbTxExecRollbackˢ, ᏑhookRollbackBadConn, dbExec(((Func<ж<global::go.database.sql_package.Tx>, error>)(global::go.database.sqlᴛTx.Rollback))));
 
         // db.Query
         var dbʗ4 = db;
@@ -4198,8 +4211,8 @@ public static void TestTxEndBadConn(ж<testing.T> t) {
                 return endTx(tx);
             };
         }
-        simulateBadConn(dbTxQueryCommitˢ, ᏑhookCommitBadConn, dbQuery(((Func<ж<global::go.database.sql_package.Tx>, error>)(global::go.database.sql_package.Commit))));
-        simulateBadConn(dbTxQueryRollbackˢ, ᏑhookRollbackBadConn, dbQuery(((Func<ж<global::go.database.sql_package.Tx>, error>)(global::go.database.sql_package.Rollback))));
+        simulateBadConn(dbTxQueryCommitˢ, ᏑhookCommitBadConn, dbQuery(((Func<ж<global::go.database.sql_package.Tx>, error>)(global::go.database.sqlᴛTx.Commit))));
+        simulateBadConn(dbTxQueryRollbackˢ, ᏑhookRollbackBadConn, dbQuery(((Func<ж<global::go.database.sql_package.Tx>, error>)(global::go.database.sqlᴛTx.Rollback))));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -4215,6 +4228,8 @@ internal partial struct concurrentDBQueryTest {
     internal ж<global::go.database.sql_package.DB> db;
 }
 
+} partial class sql_internal_testᴛconcurrentDBQueryTest {
+
 internal static void init(this ref concurrentDBQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
@@ -4224,6 +4239,10 @@ internal static void init(this ref concurrentDBQueryTest c, testing.TB t, ж<glo
 internal static void finish(this ref concurrentDBQueryTest c, testing.TB t) {
     c.db = default;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string selectPeopleNameˢ => ref selectPeopleNameˢᵇ;
+private static readonly @string selectPeopleNameˢᵇ = "SELECT|people|name|"u8;
 
 internal static error test(this ref concurrentDBQueryTest c, testing.TB t) {
     var (rows, err) = c.db.Query(selectPeopleNameˢ);
@@ -4239,9 +4258,13 @@ internal static error test(this ref concurrentDBQueryTest c, testing.TB t) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct concurrentDBExecTest {
     internal ж<global::go.database.sql_package.DB> db;
 }
+
+} partial class sql_internal_testᴛconcurrentDBExecTest {
 
 internal static void init(this ref concurrentDBExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
@@ -4266,10 +4289,18 @@ internal static error test(this ref concurrentDBExecTest c, testing.TB t) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct concurrentStmtQueryTest {
     internal ж<global::go.database.sql_package.DB> db;
-    internal ж<global::go.database.sql_package.ΔStmt> stmt;
+    internal ж<global::go.database.sql_package.Stmt> stmt;
 }
+
+} partial class sql_internal_testᴛconcurrentStmtQueryTest {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string selectPeopleNameˢ => ref selectPeopleNameˢᵇ;
+private static readonly @string selectPeopleNameˢᵇ = "SELECT|people|name|"u8;
 
 internal static void init(this ref concurrentStmtQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
@@ -4305,10 +4336,18 @@ internal static error test(this ref concurrentStmtQueryTest c, testing.TB t) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct concurrentStmtExecTest {
     internal ж<global::go.database.sql_package.DB> db;
-    internal ж<global::go.database.sql_package.ΔStmt> stmt;
+    internal ж<global::go.database.sql_package.Stmt> stmt;
 }
+
+} partial class sql_internal_testᴛconcurrentStmtExecTest {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nosertPeopleNameChrisAgeˢ => ref nosertPeopleNameChrisAgeˢᵇ;
+private static readonly @string nosertPeopleNameChrisAgeˢᵇ = "NOSERT|people|name=Chris,age=?,photo=CPHOTO,bdate=?"u8;
 
 internal static void init(this ref concurrentStmtExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
@@ -4338,10 +4377,14 @@ internal static error test(this ref concurrentStmtExecTest c, testing.TB t) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct concurrentTxQueryTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.Tx> tx;
 }
+
+} partial class sql_internal_testᴛconcurrentTxQueryTest {
 
 internal static void init(this ref concurrentTxQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
@@ -4362,6 +4405,10 @@ internal static void finish(this ref concurrentTxQueryTest c, testing.TB t) {
     c.db = default;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string selectPeopleNameˢ => ref selectPeopleNameˢᵇ;
+private static readonly @string selectPeopleNameˢᵇ = "SELECT|people|name|"u8;
+
 internal static error test(this ref concurrentTxQueryTest c, testing.TB t) {
     var (rows, err) = c.db.Query(selectPeopleNameˢ);
     if (err != nil) {
@@ -4376,10 +4423,14 @@ internal static error test(this ref concurrentTxQueryTest c, testing.TB t) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct concurrentTxExecTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.Tx> tx;
 }
+
+} partial class sql_internal_testᴛconcurrentTxExecTest {
 
 internal static void init(this ref concurrentTxExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
@@ -4400,6 +4451,10 @@ internal static void finish(this ref concurrentTxExecTest c, testing.TB t) {
     c.db = default;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nosertPeopleNameChrisAgeˢ => ref nosertPeopleNameChrisAgeˢᵇ;
+private static readonly @string nosertPeopleNameChrisAgeˢᵇ = "NOSERT|people|name=Chris,age=?,photo=CPHOTO,bdate=?"u8;
+
 internal static error test(this ref concurrentTxExecTest c, testing.TB t) {
     var (_, err) = c.tx.Exec(nosertPeopleNameChrisAgeˢ, (nint)3, chrisBirthday);
     if (err != nil) {
@@ -4409,11 +4464,19 @@ internal static error test(this ref concurrentTxExecTest c, testing.TB t) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct concurrentTxStmtQueryTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.Tx> tx;
-    internal ж<global::go.database.sql_package.ΔStmt> stmt;
+    internal ж<global::go.database.sql_package.Stmt> stmt;
 }
+
+} partial class sql_internal_testᴛconcurrentTxStmtQueryTest {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string selectPeopleNameˢ => ref selectPeopleNameˢᵇ;
+private static readonly @string selectPeopleNameˢᵇ = "SELECT|people|name|"u8;
 
 internal static void init(this ref concurrentTxStmtQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
@@ -4457,11 +4520,19 @@ internal static error test(this ref concurrentTxStmtQueryTest c, testing.TB t) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct concurrentTxStmtExecTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.Tx> tx;
-    internal ж<global::go.database.sql_package.ΔStmt> stmt;
+    internal ж<global::go.database.sql_package.Stmt> stmt;
 }
+
+} partial class sql_internal_testᴛconcurrentTxStmtExecTest {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nosertPeopleNameChrisAgeˢ => ref nosertPeopleNameChrisAgeˢᵇ;
+private static readonly @string nosertPeopleNameChrisAgeˢᵇ = "NOSERT|people|name=Chris,age=?,photo=CPHOTO,bdate=?"u8;
 
 internal static void init(this ref concurrentTxStmtExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
@@ -4499,9 +4570,13 @@ internal static error test(this ref concurrentTxStmtExecTest c, testing.TB t) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct concurrentRandomTest {
     internal slice<concurrentTest> tests;
 }
+
+} partial class sql_internal_testᴛconcurrentRandomTest {
 
 internal static void init(this ref concurrentRandomTest c, testing.TB t, ж<global::go.database.sql_package.DB> db) {
     c.tests = slice<concurrentTest>([new sql_internal_test_package.concurrentDBQueryTestжconcurrentTest(@new<concurrentDBQueryTest>()), new sql_internal_test_package.concurrentDBExecTestжconcurrentTest(@new<concurrentDBExecTest>()), new sql_internal_test_package.concurrentStmtQueryTestжconcurrentTest(@new<concurrentStmtQueryTest>()), new sql_internal_test_package.concurrentStmtExecTestжconcurrentTest(@new<concurrentStmtExecTest>()), new sql_internal_test_package.concurrentTxQueryTestжconcurrentTest(@new<concurrentTxQueryTest>()), new sql_internal_test_package.concurrentTxExecTestжconcurrentTest(@new<concurrentTxExecTest>()), new sql_internal_test_package.concurrentTxStmtQueryTestжconcurrentTest(@new<concurrentTxStmtQueryTest>()), new sql_internal_test_package.concurrentTxStmtExecTestжconcurrentTest(@new<concurrentTxStmtExecTest>())
@@ -4521,6 +4596,8 @@ internal static error test(this ref concurrentRandomTest c, testing.TB t) {
     var ct = c.tests[rand.Intn(len(c.tests))];
     return ct.test(t);
 }
+
+} partial class sql_internal_test_package {
 
 internal static partial void doConcurrentTest(testing.TB t, concurrentTest ct) {
     GoFrame ᒐ = default;
@@ -4542,7 +4619,7 @@ internal static partial void doConcurrentTest(testing.TB t, concurrentTest ct) {
         Ꮡwg.Add(numReqs);
 
         var reqs = new channel<bool>(0);
-        defer(ᴛ1 => builtin.close(ᴛ1), reqs, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), reqs, ref ᒐ);
 
         for (nint i = 0; i < maxProcs * 2; i++) {
             var reqsʗ1 = reqs;
@@ -5008,10 +5085,10 @@ public static void TestStatsMaxIdleClosedTen(ж<testing.T> t) {
 // testUseConns uses count concurrent connections with 1 nanosecond apart.
 // Returns the returnedAt time of the final connection.
 internal static time.Time testUseConns(ж<testing.T> t, nint count, time.Time tm, ж<global::go.database.sql_package.DB> db) {
-    var conns = new slice<ж<global::go.database.sql_package.ΔConn>>(count);
+    var conns = new slice<ж<global::go.database.sql_package.Conn>>(count);
     var ctx = context.Background();
     foreach (var i in range(len(conns))) {
-        tm = tm.Add(time.ΔNanosecond);
+        tm = tm.Add(time.Nanosecond);
         nowFunc = () => tm;
         var (c, err) = db.Conn(ctx);
         if (err != nil) {
@@ -5021,7 +5098,7 @@ internal static time.Time testUseConns(ж<testing.T> t, nint count, time.Time tm
     }
 
     for (nint i = len(conns) - 1; i >= 0; i--) {
-        tm = tm.Add(time.ΔNanosecond);
+        tm = tm.Add(time.Nanosecond);
         nowFunc = () => tm;
         var err = conns[i].Close(); if (err != nil) {
             t.Error(err);
@@ -5053,7 +5130,7 @@ public static void TestMaxIdleTime(ж<testing.T> t) {
             new(
                 time.Millisecond,
                 0,
-                time.Millisecond - time.ΔNanosecond,
+                time.Millisecond - time.Nanosecond,
                 (int64)(usedConns - reusedConns),
                 (int64)(usedConns - reusedConns),
                 10 * time.Millisecond,
@@ -5065,19 +5142,19 @@ public static void TestMaxIdleTime(ж<testing.T> t) {
                 // nowFunc() - MaxLifetime should be 1 * time.Nanosecond in connectionCleanerRunLocked.
                 // This guarantees that first opened connection is to be closed.
                 // Thus it is timeOffset + secondTimeOffset + 3 (+2 for Close while reusing conns and +1 for Conn).
-                10 * time.Millisecond + 100 * time.ΔNanosecond + 3 * time.ΔNanosecond,
-                time.ΔNanosecond,
+                10 * time.Millisecond + 100 * time.Nanosecond + 3 * time.Nanosecond,
+                time.Nanosecond,
                 // Closed all not reused connections and extra one by max lifetime.
                 (int64)(usedConns - reusedConns + 1),
                 (int64)(usedConns - reusedConns),
                 10 * time.Millisecond,
                 // Add second offset because otherwise connections are expired via max lifetime in Close.
-                100 * time.ΔNanosecond
+                100 * time.Nanosecond
             ),
             new(
-                time.ΔHour,
+                time.Hour,
                 0,
-                time.ΔSecond,
+                time.Second,
                 0,
                 0,
                 10 * time.Millisecond,
@@ -5121,7 +5198,7 @@ public static void TestMaxIdleTime(ж<testing.T> t) {
                     nowFunc = () => Ꮡtm.Value;
 
                     db.Ꮡmu.Lock();
-                    var (nc, closing) = db.connectionCleanerRunLocked(time.ΔSecond);
+                    var (nc, closing) = db.connectionCleanerRunLocked(time.Second);
                     if (nc != itemʗ1.wantNextCheck) {
                         tΔ1.Errorf("got %v; want %v next check duration", nc, itemʗ1.wantNextCheck);
                     }
@@ -5168,6 +5245,8 @@ internal partial struct nvcDriver {
     internal bool skipNamedValueCheck;
 }
 
+} partial class sql_internal_testᴛnvcDriver {
+
 internal static (driver.Conn, error) Open(this ж<nvcDriver> Ꮡd, @string dsn) {
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -5176,6 +5255,8 @@ internal static (driver.Conn, error) Open(this ж<nvcDriver> Ꮡd, @string dsn) 
     fc.db.allowAny = true;
     return (new sql_internal_test_package.nvcConnжConn(Ꮡ(new nvcConn(fc, d.skipNamedValueCheck))), err);
 }
+
+} partial class sql_internal_test_package {
 
 internal partial struct nvcConn {
     /*embed*/ internal ж<fakeConn> fakeConn;
@@ -5190,6 +5271,8 @@ internal partial struct doNotInclude {
 }
 
 internal static driver.NamedValueChecker _ᴛ3ʗ = new sql_internal_test_package.nvcConnжNamedValueChecker(Ꮡ(new nvcConn()));
+
+} partial class sql_internal_testᴛnvcConn {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownNameValueCheckˢ => ref unknownNameValueCheckˢᵇ;
@@ -5232,6 +5315,8 @@ internal static error CheckNamedValue(this ref nvcConn c, ж<driver.NamedValue> 
     }}
 }
 
+} partial class sql_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string namedValueCheckˢ => ref namedValueCheckˢᵇ;
 private static readonly @string namedValueCheckˢᵇ = "NamedValueCheck"u8;
@@ -5246,6 +5331,7 @@ internal static readonly object execInsertˢ = (@string)"exec insert"u8;
 internal static ref readonly @string selectKeysDec1Str1Array1ˢ => ref selectKeysDec1Str1Array1ˢᵇ;
 private static readonly @string selectKeysDec1Str1Array1ˢᵇ = "SELECT|keys|dec1,str1,array1|"u8;
 internal static readonly object selectˢ = (@string)"select"u8;
+internal static readonly object fromServerˢ = (@string)"from-server"u8;
 
 internal partial struct TestNamedValueChecker_list /*dyn*/ {
     internal any got, want;
@@ -5380,6 +5466,8 @@ internal partial struct ctxOnlyDriver {
     /*embed*/ internal fakeDriver fakeDriver;
 }
 
+} partial class sql_internal_testᴛctxOnlyDriver {
+
 internal static (driver.Conn, error) Open(this ж<ctxOnlyDriver> Ꮡd, @string dsn) {
     var (conn, err) = Ꮡd.ᏑfakeDriver.Open(dsn);
     if (err != nil) {
@@ -5387,6 +5475,8 @@ internal static (driver.Conn, error) Open(this ж<ctxOnlyDriver> Ꮡd, @string d
     }
     return (new sql_internal_test_package.ctxOnlyConnжConn(Ꮡ(new ctxOnlyConn(fc: conn._<ж<fakeConn>>()))), default);
 }
+
+} partial class sql_internal_test_package {
 
 internal static driver.Conn _ᴛ4ʗ = new sql_internal_test_package.ctxOnlyConnжConn(Ꮡ(new ctxOnlyConn()));
 internal static driver.QueryerContext _ᴛ5ʗ = new sql_internal_test_package.ctxOnlyConnжQueryerContext(Ꮡ(new ctxOnlyConn()));
@@ -5397,6 +5487,8 @@ internal partial struct ctxOnlyConn {
     internal bool queryCtxCalled;
     internal bool execCtxCalled;
 }
+
+} partial class sql_internal_testᴛctxOnlyConn {
 
 internal static (driver.Tx, error) Begin(this ref ctxOnlyConn c) {
     return c.fc.Begin();
@@ -5425,6 +5517,8 @@ internal static (driver.Result, error) ExecContext(this ref ctxOnlyConn c, conte
     c.execCtxCalled = true;
     return c.fc.ExecContext(ctx, q, args);
 }
+
+} partial class sql_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contextOnlyˢ => ref contextOnlyˢᵇ;
@@ -5523,9 +5617,13 @@ internal partial struct alwaysErrScanner {
 
 internal static error errTestScanWrap = errors.New("errTestScanWrap");
 
+} partial class sql_internal_testᴛalwaysErrScanner {
+
 internal static error Scan(this alwaysErrScanner _Δp0, any _Δp1) {
     return errTestScanWrap;
 }
+
+} partial class sql_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string selectPeopleAgeˢ => ref selectPeopleAgeˢᵇ;
@@ -5570,9 +5668,13 @@ internal partial struct alwaysErrValuer {
 // errEmpty is returned when an empty value is found
 internal static error errEmpty = errors.New("empty value");
 
+} partial class sql_internal_testᴛalwaysErrValuer {
+
 internal static (driverꓸValue, error) Value(this alwaysErrValuer v) {
     return (default, errEmpty);
 }
+
+} partial class sql_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string execˢ => ref execˢᵇ;
@@ -5749,7 +5851,11 @@ internal partial struct testScanner {
     internal Func<any, error> scanf;
 }
 
+} partial class sql_internal_testᴛtestScanner {
+
 internal static error Scan(this testScanner ts, any src) { return ts.scanf(src); }
+
+} partial class sql_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string selectPeopleNameNameˢ => ref selectPeopleNameNameˢᵇ;
@@ -5791,7 +5897,7 @@ public static partial void TestContextCancelDuringScan(ж<testing.T> t) {
             rʗ1.Scan(scannerʗ1.OrTypedNil());
         });
         var got = ᐸꟷ(scanStart);
-        defer(ᴛ1 => builtin.close(ᴛ1), scanEnd, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), scanEnd, ref ᒐ);
         var (gotBytes, ok) = got._<slice<byte>>(ᐧ);
         if (!ok) {
             t.Fatalf("r.Scan returned %T, want []byte", got);
@@ -5898,6 +6004,8 @@ public static void TestRawBytesReuse(ж<testing.T> t) {
 internal partial struct badConn {
 }
 
+} partial class sql_internal_testᴛbadConn {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badConnPrepareˢ => ref badConnPrepareˢᵇ;
 private static readonly @string badConnPrepareˢᵇ = "badConn Prepare"u8;
@@ -5922,13 +6030,19 @@ internal static (driver.Result, error) Exec(this badConn bc, @string query, slic
     throw panic("badConn.Exec");
 }
 
+} partial class sql_internal_test_package {
+
 // badDriver is a driver.Driver that uses badConn.
 internal partial struct badDriver {
 }
 
+} partial class sql_internal_testᴛbadDriver {
+
 internal static (driver.Conn, error) Open(this badDriver bd, @string name) {
     return (new badConn(), default);
 }
+
+} partial class sql_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badˢ => ref badˢᵇ;
@@ -5975,6 +6089,8 @@ internal partial struct pingConn {
 
 internal static error pingError = errors.New("Ping failed");
 
+} partial class sql_internal_testᴛpingConn {
+
 internal static error Ping(this pingConn pc, context.Context ctx) {
     if (pc.driver.fails) {
         return pingError;
@@ -5982,11 +6098,17 @@ internal static error Ping(this pingConn pc, context.Context ctx) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal static driver.Pinger _ᴛ7ʗ = new pingConn();
+
+} partial class sql_internal_testᴛpingDriver {
 
 internal static (driver.Conn, error) Open(this ж<pingDriver> Ꮡpd, @string name) {
     return (new pingConn(driver: Ꮡpd), default);
 }
+
+} partial class sql_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pingˢ => ref pingˢᵇ;
@@ -6160,7 +6282,7 @@ public static void TestGrabConnAllocs(ж<testing.T> t) {
     if (race.Enabled) {
         t.Skip(skippingAllocationTestˢ);
     }
-    var c = @new<global::go.database.sql_package.ΔConn>();
+    var c = @new<global::go.database.sql_package.Conn>();
     var ctx = context.Background();
     var cʗ1 = c;
     var ctxʗ1 = ctx;
@@ -6180,7 +6302,7 @@ public static void BenchmarkGrabConn(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    var c = @new<global::go.database.sql_package.ΔConn>();
+    var c = @new<global::go.database.sql_package.Conn>();
     var ctx = context.Background();
     for (nint i = 0; i < b.N; i++) {
         var (_, release, err) = c.grabConn(ctx);
@@ -6360,9 +6482,13 @@ internal partial struct issue69728Type {
     public @string Name;
 }
 
+} partial class sql_internal_testᴛissue69728Type {
+
 internal static (driverꓸValue, error) Value(this issue69728Type t) {
     return (slice<byte>(fmt.Sprintf("%d, %s"u8, t.ID, t.Name)), default);
 }
+
+} partial class sql_internal_test_package {
 
 public static void TestIssue69728(ж<testing.T> t) {
     var forValue = new Null<issue69728Type>(
@@ -6407,21 +6533,31 @@ public static void TestColumnConverterWithUnknownInputCount(ж<testing.T> t) {
 internal partial struct unknownInputsConnector {
 }
 
+} partial class sql_internal_testᴛunknownInputsConnector {
+
 internal static (driver.Conn, error) Connect(this unknownInputsConnector _Δp0, context.Context _Δp1) {
     return (new unknownInputsConn(), default);
 }
 
 internal static driver.Driver Driver(this unknownInputsConnector _) { return default; }
 
+} partial class sql_internal_test_package {
+
 internal partial struct unknownInputsConn {
 }
+
+} partial class sql_internal_testᴛunknownInputsConn {
 
 internal static (driver.Stmt, error) Prepare(this unknownInputsConn _Δp0, @string _Δp1) { return (new unknownInputsStmt(), default); }
 internal static error Close(this unknownInputsConn _) { return default; }
 internal static (driver.Tx, error) Begin(this unknownInputsConn _) { return (default, default); }
 
+} partial class sql_internal_test_package {
+
 internal partial struct unknownInputsStmt {
 }
+
+} partial class sql_internal_testᴛunknownInputsStmt {
 
 internal static error Close(this unknownInputsStmt _) { return default; }
 internal static nint NumInput(this unknownInputsStmt _) { return -1; }
@@ -6436,11 +6572,18 @@ internal static driver.ValueConverter ColumnConverter(this unknownInputsStmt _, 
     return new unknownInputsValueConverter();
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct unknownInputsValueConverter {
 }
+
+} partial class sql_internal_testᴛunknownInputsValueConverter {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object stringˢ = (@string)"string"u8;
 
 internal static (driverꓸValue, error) ConvertValue(this unknownInputsValueConverter _, any v) {
     return (stringˢ, default);
 }
 
-} // end sql_internal_test_package
+} // end sql_internal_testᴛunknownInputsValueConverter

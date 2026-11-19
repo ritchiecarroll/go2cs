@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -17,8 +18,12 @@ partial struct widget {
     internal @string name;
 }
 
+} partial class mainᴛwidget {
+
 internal static @string Describe(this widget w) { return "describe:"u8 + w.name; }
 internal static @string Tag(this widget w) { return "tag:"u8 + w.name; }
+
+} partial class main_package {
 
 partial struct plain {
 }

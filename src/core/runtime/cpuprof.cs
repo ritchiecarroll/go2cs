@@ -15,6 +15,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -94,6 +95,8 @@ public static void SetCPUProfileRate(nint hz) {
     unlock(Ꮡcpuprof.Ꮡlock);
 }
 
+} partial class runtimeᴛcpuProfile {
+
 // add adds the stack trace to the profile.
 // It is called from signal handlers and other limited environments
 // and cannot allocate memory or acquire locks that might be
@@ -101,7 +104,7 @@ public static void SetCPUProfileRate(nint hz) {
 // of stack.
 //
 //go:nowritebarrierrec
-internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
+internal static void add(this ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with setcpuprofilerate.
     while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
@@ -109,8 +112,8 @@ internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> tagPtr, sl
     }
 
     if (Ꮡprof.of(profᴛ1.Ꮡhz).Load() != 0) { // implies cpuprof.log != nil
-        if (Δp.numExtra > 0 || Δp.lostExtra > 0 || Δp.lostAtomic > 0) {
-            Δp.addExtra();
+        if (p.numExtra > 0 || p.lostExtra > 0 || p.lostAtomic > 0) {
+            p.addExtra();
         }
         var hdr = new uint64[]{1}.array();
         // Note: write "knows" that the argument is &gp.labels,
@@ -133,7 +136,7 @@ internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> tagPtr, sl
 //
 //go:nosplit
 //go:nowritebarrierrec
-internal static void addNonGo(this ref cpuProfile Δp, slice<uintptr> stk) {
+internal static void addNonGo(this ref cpuProfile p, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with SetCPUProfileRate.
     // (Other calls to add or addNonGo should be blocked out
     // by the fact that only one SIGPROF can be handled by the
@@ -162,36 +165,38 @@ internal static void addNonGo(this ref cpuProfile Δp, slice<uintptr> stk) {
 // addExtra is called either from a signal handler on a Go thread
 // or from an ordinary goroutine; either way it can use stack
 // and has a g. The world may be stopped, though.
-internal static void addExtra(this ref cpuProfile Δp) {
+internal static void addExtra(this ref cpuProfile p) {
     // Copy accumulated non-Go profile events.
     var hdr = new uint64[]{1}.array();
-    for (nint i = 0; i < Δp.numExtra; ) {
-        Δp.log.write(nil, 0, hdr[..], Δp.extra.slice(i + 1, i + (nint)Δp.extra[i]));
-        i += (nint)Δp.extra[i];
+    for (nint i = 0; i < p.numExtra; ) {
+        p.log.write(nil, 0, hdr[..], p.extra.slice(i + 1, i + (nint)p.extra[i]));
+        i += (nint)p.extra[i];
     }
-    Δp.numExtra = 0;
+    p.numExtra = 0;
 
     // Report any lost events.
-    if (Δp.lostExtra > 0) {
-        var hdrΔ1 = new uint64[]{Δp.lostExtra}.array();
+    if (p.lostExtra > 0) {
+        var hdrΔ1 = new uint64[]{p.lostExtra}.array();
         var lostStk = new uintptr[]{
             abi.FuncPCABIInternal(_LostExternalCode) + (uintptr)sys.PCQuantum,
             abi.FuncPCABIInternal(_ExternalCode) + (uintptr)sys.PCQuantum
         }.array();
-        Δp.log.write(nil, 0, hdrΔ1[..], lostStk[..]);
-        Δp.lostExtra = 0;
+        p.log.write(nil, 0, hdrΔ1[..], lostStk[..]);
+        p.lostExtra = 0;
     }
 
-    if (Δp.lostAtomic > 0) {
-        var hdrΔ2 = new uint64[]{Δp.lostAtomic}.array();
+    if (p.lostAtomic > 0) {
+        var hdrΔ2 = new uint64[]{p.lostAtomic}.array();
         var lostStk = new uintptr[]{
             abi.FuncPCABIInternal(_LostSIGPROFDuringAtomic64) + (uintptr)sys.PCQuantum,
             abi.FuncPCABIInternal(_System) + (uintptr)sys.PCQuantum
         }.array();
-        Δp.log.write(nil, 0, hdrΔ2[..], lostStk[..]);
-        Δp.lostAtomic = 0;
+        p.log.write(nil, 0, hdrΔ2[..], lostStk[..]);
+        p.lostAtomic = 0;
     }
 }
+
+} partial class runtime_package {
 
 // CPUProfile panics.
 // It formerly provided raw access to chunks of

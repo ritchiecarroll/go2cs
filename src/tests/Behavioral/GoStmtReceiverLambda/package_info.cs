@@ -48,10 +48,10 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 28, 5, 0)]
-[assembly: GoBoundedGoroutine("main.cs", 32, 5, 1)]
-[assembly: GoBoundedGoroutine("main.cs", 59, 5, 2)]
-[assembly: GoBoundedGoroutine("main.cs", 62, 5, 3)]
+[assembly: GoBoundedGoroutine("main.cs", 35, 5, 0)]
+[assembly: GoBoundedGoroutine("main.cs", 39, 5, 1)]
+[assembly: GoBoundedGoroutine("main.cs", 72, 5, 2)]
+[assembly: GoBoundedGoroutine("main.cs", 75, 5, 3)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,7 +61,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAskgoKCpoKCAAYSgqiCAAYWgpSClIKClIKClIKClIKSgpI=", "", "", "", "28:21,32:15,59:15,62:15")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA4kgoKCpoKCAAoSgqiCAAoWgrSClIKClIKClIKClIKSgpI=", "", "", "", "35:21,39:15,72:15,75:15")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -92,3 +92,15 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounter;
+[GoMethodHost(typeof(main_package.engine)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛengine;
+[GoMethodHost(typeof(main_package.valueSender)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛvalueSender;
+// </MethodHolders>

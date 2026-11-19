@@ -12,9 +12,9 @@ partial class big_internal_test_package {
 public static void TestZeroRat(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        ref var x = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡx);
-        ref var y = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡy);
-        ref var z = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡz);
+        ref var x = ref heap(new global::go.math.big_package.Rat(), out var Ꮡx);
+        ref var y = ref heap(new global::go.math.big_package.Rat(), out var Ꮡy);
+        ref var z = ref heap(new global::go.math.big_package.Rat(), out var Ꮡz);
         Ꮡy.SetFrac64(0, 42);
 
         if (Ꮡx.Cmp(Ꮡy) != 0) {
@@ -69,8 +69,8 @@ public static void TestZeroRat(ж<testing.T> t) {
 public static void TestRatSign(ж<testing.T> t) {
     var zero = NewRat(0, 1);
     foreach (var (_, a) in range(setStringTests)) {
-        ref var x = ref heap<ж<global::go.math.big_package.ΔRat>>(out var Ꮡx);
-        (x, var ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
+        ref var x = ref heap<ж<global::go.math.big_package.Rat>>(out var Ꮡx);
+        (x, var ok) = @new<global::go.math.big_package.Rat>().SetString(a.@in);
         if (!ok) {
             continue;
         }
@@ -100,8 +100,8 @@ internal static slice<ratCmpTestsᴛ1> ratCmpTests = [
 
 public static void TestRatCmp(ж<testing.T> t) {
     foreach (var (i, test) in range(ratCmpTests)) {
-        var (x, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.rat1);
-        var (y, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.rat2);
+        var (x, _) = @new<global::go.math.big_package.Rat>().SetString(test.rat1);
+        var (y, _) = @new<global::go.math.big_package.Rat>().SetString(test.rat2);
 
         nint @out = x.Cmp(y);
         if (@out != test.@out) {
@@ -113,7 +113,7 @@ public static void TestRatCmp(ж<testing.T> t) {
 public static void TestIsInt(ж<testing.T> t) {
     var one = NewInt(1);
     foreach (var (_, a) in range(setStringTests)) {
-        var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
+        var (x, ok) = @new<global::go.math.big_package.Rat>().SetString(a.@in);
         if (!ok) {
             continue;
         }
@@ -126,17 +126,17 @@ public static void TestIsInt(ж<testing.T> t) {
 }
 
 public static void TestRatAbs(ж<testing.T> t) {
-    var zero = @new<global::go.math.big_package.ΔRat>();
+    var zero = @new<global::go.math.big_package.Rat>();
     foreach (var (_, a) in range(setStringTests)) {
-        var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
+        var (x, ok) = @new<global::go.math.big_package.Rat>().SetString(a.@in);
         if (!ok) {
             continue;
         }
-        var e = @new<global::go.math.big_package.ΔRat>().Set(x);
+        var e = @new<global::go.math.big_package.Rat>().Set(x);
         if (e.Cmp(zero) < 0) {
             e.Sub(zero, e);
         }
-        var z = @new<global::go.math.big_package.ΔRat>().Abs(x);
+        var z = @new<global::go.math.big_package.Rat>().Abs(x);
         if (z.Cmp(e) != 0) {
             t.Errorf("got Abs(%v) = %v; want %v", x.OrTypedNil(), z.OrTypedNil(), e.OrTypedNil());
         }
@@ -144,14 +144,14 @@ public static void TestRatAbs(ж<testing.T> t) {
 }
 
 public static void TestRatNeg(ж<testing.T> t) {
-    var zero = @new<global::go.math.big_package.ΔRat>();
+    var zero = @new<global::go.math.big_package.Rat>();
     foreach (var (_, a) in range(setStringTests)) {
-        var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
+        var (x, ok) = @new<global::go.math.big_package.Rat>().SetString(a.@in);
         if (!ok) {
             continue;
         }
-        var e = @new<global::go.math.big_package.ΔRat>().Sub(zero, x);
-        var z = @new<global::go.math.big_package.ΔRat>().Neg(x);
+        var e = @new<global::go.math.big_package.Rat>().Sub(zero, x);
+        var z = @new<global::go.math.big_package.Rat>().Neg(x);
         if (z.Cmp(e) != 0) {
             t.Errorf("got Neg(%v) = %v; want %v", x.OrTypedNil(), z.OrTypedNil(), e.OrTypedNil());
         }
@@ -159,17 +159,17 @@ public static void TestRatNeg(ж<testing.T> t) {
 }
 
 public static void TestRatInv(ж<testing.T> t) {
-    var zero = @new<global::go.math.big_package.ΔRat>();
+    var zero = @new<global::go.math.big_package.Rat>();
     foreach (var (_, a) in range(setStringTests)) {
-        var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(a.@in);
+        var (x, ok) = @new<global::go.math.big_package.Rat>().SetString(a.@in);
         if (!ok) {
             continue;
         }
         if (x.Cmp(zero) == 0) {
             continue; // avoid division by zero
         }
-        var e = @new<global::go.math.big_package.ΔRat>().SetFrac(x.Denom(), x.Num());
-        var z = @new<global::go.math.big_package.ΔRat>().Inv(x);
+        var e = @new<global::go.math.big_package.Rat>().SetFrac(x.Denom(), x.Num());
+        var z = @new<global::go.math.big_package.Rat>().Inv(x);
         if (z.Cmp(e) != 0) {
             t.Errorf("got Inv(%v) = %v; want %v", x.OrTypedNil(), z.OrTypedNil(), e.OrTypedNil());
         }
@@ -181,11 +181,11 @@ internal partial struct ratBinArg {
     internal @string x, y, z;
 }
 
-internal static void testRatBin(ж<testing.T> t, nint i, @string name, Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>> f, ratBinArg a) {
-    var (x, _) = @new<global::go.math.big_package.ΔRat>().SetString(a.x);
-    var (y, _) = @new<global::go.math.big_package.ΔRat>().SetString(a.y);
-    var (z, _) = @new<global::go.math.big_package.ΔRat>().SetString(a.z);
-    var @out = f(@new<global::go.math.big_package.ΔRat>(), x, y);
+internal static void testRatBin(ж<testing.T> t, nint i, @string name, Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>> f, ratBinArg a) {
+    var (x, _) = @new<global::go.math.big_package.Rat>().SetString(a.x);
+    var (y, _) = @new<global::go.math.big_package.Rat>().SetString(a.y);
+    var (z, _) = @new<global::go.math.big_package.Rat>().SetString(a.z);
+    var @out = f(@new<global::go.math.big_package.Rat>(), x, y);
 
     if (@out.Cmp(z) != 0) {
         t.Errorf("%s #%d got %s want %s", name, i, @out.OrTypedNil(), z.OrTypedNil());
@@ -236,31 +236,31 @@ private static readonly @string quoSymmetricˢᵇ = "Quo symmetric"u8;
 public static void TestRatBin(ж<testing.T> t) {
     foreach (var (i, test) in range(ratBinTests)) {
         var arg = new ratBinArg(test.x, test.y, test.sum);
-        testRatBin(t, i, addˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Add))), arg);
+        testRatBin(t, i, addˢ2, new Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>(((Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>)(global::go.math.bigᴛRat.Add))), arg);
 
         arg = new ratBinArg(test.y, test.x, test.sum);
-        testRatBin(t, i, addSymmetricˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Add))), arg);
+        testRatBin(t, i, addSymmetricˢ, new Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>(((Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>)(global::go.math.bigᴛRat.Add))), arg);
 
         arg = new ratBinArg(test.sum, test.x, test.y);
-        testRatBin(t, i, subˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Sub))), arg);
+        testRatBin(t, i, subˢ2, new Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>(((Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>)(global::go.math.bigᴛRat.Sub))), arg);
 
         arg = new ratBinArg(test.sum, test.y, test.x);
-        testRatBin(t, i, subSymmetricˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Sub))), arg);
+        testRatBin(t, i, subSymmetricˢ, new Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>(((Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>)(global::go.math.bigᴛRat.Sub))), arg);
 
         arg = new ratBinArg(test.x, test.y, test.prod);
-        testRatBin(t, i, mulˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Mul))), arg);
+        testRatBin(t, i, mulˢ2, new Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>(((Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>)(global::go.math.bigᴛRat.Mul))), arg);
 
         arg = new ratBinArg(test.y, test.x, test.prod);
-        testRatBin(t, i, mulSymmetricˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Mul))), arg);
+        testRatBin(t, i, mulSymmetricˢ, new Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>(((Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>)(global::go.math.bigᴛRat.Mul))), arg);
 
         if (test.x != "0"u8) {
             arg = new ratBinArg(test.prod, test.x, test.y);
-            testRatBin(t, i, quoˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Quo))), arg);
+            testRatBin(t, i, quoˢ, new Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>(((Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>)(global::go.math.bigᴛRat.Quo))), arg);
         }
 
         if (test.y != "0"u8) {
             arg = new ratBinArg(test.prod, test.y, test.x);
-            testRatBin(t, i, quoSymmetricˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Quo))), arg);
+            testRatBin(t, i, quoSymmetricˢ, new Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>(((Func<ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>, ж<global::go.math.big_package.Rat>>)(global::go.math.bigᴛRat.Quo))), arg);
         }
     }
 }
@@ -306,7 +306,7 @@ internal static slice<setFrac64Testsᴛ1> setFrac64Tests = [
 
 public static void TestRatSetFrac64Rat(ж<testing.T> t) {
     foreach (var (i, test) in range(setFrac64Tests)) {
-        var x = @new<global::go.math.big_package.ΔRat>().SetFrac64(test.a, test.b);
+        var x = @new<global::go.math.big_package.Rat>().SetFrac64(test.a, test.b);
         if (x.RatString() != test.@out) {
             t.Errorf("#%d got %s want %s", i, x.RatString(), test.@out);
         }
@@ -316,7 +316,7 @@ public static void TestRatSetFrac64Rat(ж<testing.T> t) {
 public static void TestIssue2379(ж<testing.T> t) {
     // 1) no aliasing
     var q = NewRat(3, 2);
-    var x = @new<global::go.math.big_package.ΔRat>();
+    var x = @new<global::go.math.big_package.Rat>();
     x.SetFrac(NewInt(3), NewInt(2));
     if (x.Cmp(q) != 0) {
         t.Errorf("1) got %s want %s", x.OrTypedNil(), q.OrTypedNil());
@@ -345,7 +345,7 @@ public static void TestIssue2379(ж<testing.T> t) {
 
     // 5) numerator and denominator are the same
     q = NewRat(1, 1);
-    x = @new<global::go.math.big_package.ΔRat>();
+    x = @new<global::go.math.big_package.Rat>();
     var n = NewInt(7);
     x.SetFrac(n, n);
     if (x.Cmp(q) != 0) {
@@ -354,13 +354,13 @@ public static void TestIssue2379(ж<testing.T> t) {
 }
 
 public static void TestIssue3521(ж<testing.T> t) {
-    var a = @new<global::go.math.big_package.ΔInt>();
-    var b = @new<global::go.math.big_package.ΔInt>();
+    var a = @new<global::go.math.big_package.Int>();
+    var b = @new<global::go.math.big_package.Int>();
     a.SetString("64375784358435883458348587", 0);
     b.SetString("4789759874531", 0);
 
     // 0) a raw zero value has 1 as denominator
-    var zero = @new<global::go.math.big_package.ΔRat>();
+    var zero = @new<global::go.math.big_package.Rat>();
     var one = NewInt(1);
     if (zero.Denom().Cmp(one) != 0) {
         t.Errorf("0) got %s want %s", zero.Denom().OrTypedNil(), one.OrTypedNil());
@@ -381,7 +381,7 @@ public static void TestIssue3521(ж<testing.T> t) {
     }
 
     // 1c) the denominator of an initialized zero value is shared with the value
-    var x = @new<global::go.math.big_package.ΔRat>();
+    var x = @new<global::go.math.big_package.Rat>();
     x.Set(x); // initialize x (any operation that sets x explicitly will do)
     s = x.Ꮡb;
     d = x.Denom();
@@ -390,14 +390,14 @@ public static void TestIssue3521(ж<testing.T> t) {
     }
 
     // 1d) a zero value remains zero independent of denominator
-    x.Denom().Set(@new<global::go.math.big_package.ΔInt>().Neg(b));
+    x.Denom().Set(@new<global::go.math.big_package.Int>().Neg(b));
     if (x.Cmp(zero) != 0) {
         t.Errorf("1d) got %s want %s", x.OrTypedNil(), zero.OrTypedNil());
     }
 
     // 1e) a zero value may have a denominator != 0 and != 1
     x.Num().Set(a);
-    var qab = @new<global::go.math.big_package.ΔRat>().SetFrac(a, b);
+    var qab = @new<global::go.math.big_package.Rat>().SetFrac(a, b);
     if (x.Cmp(qab) != 0) {
         t.Errorf("1e) got %s want %s", x.OrTypedNil(), qab.OrTypedNil());
     }
@@ -461,7 +461,7 @@ public static void TestFloat32Distribution(ж<testing.T> t) {
                     } else {
                         den.Lsh(den, (nuint)(-exp));
                     }
-                    var r = @new<global::go.math.big_package.ΔRat>().SetFrac(num, den);
+                    var r = @new<global::go.math.big_package.Rat>().SetFrac(num, den);
                     var (f, _) = r.Float32();
 
                     if (!checkIsBestApprox32(t, f, r)) {
@@ -510,7 +510,7 @@ public static void TestFloat64Distribution(ж<testing.T> t) {
                     } else {
                         den.Lsh(den, (nuint)(-exp));
                     }
-                    var r = @new<global::go.math.big_package.ΔRat>().SetFrac(num, den);
+                    var r = @new<global::go.math.big_package.Rat>().SetFrac(num, den);
                     var (f, _) = r.Float64();
 
                     if (!checkIsBestApprox64(t, f, r)) {
@@ -530,7 +530,7 @@ public static void TestFloat64Distribution(ж<testing.T> t) {
 // returns nil.
 public static void TestSetFloat64NonFinite(ж<testing.T> t) {
     foreach (var (_, f) in range(slice<float64>([math.NaN(), math.Inf(+1), math.Inf(-1)]))) {
-        ref var r = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡr);
+        ref var r = ref heap(new global::go.math.big_package.Rat(), out var Ꮡr);
         var r2 = Ꮡr.SetFloat64(f); if (r2 != nil) {
             t.Errorf("SetFloat64(%g) was %v, want nil", f, r2.OrTypedNil());
         }
@@ -543,7 +543,7 @@ internal static void checkNonLossyRoundtrip32(ж<testing.T> t, float32 f) {
     if (!isFinite((float64)f)) {
         return;
     }
-    var r = @new<global::go.math.big_package.ΔRat>().SetFloat64((float64)f);
+    var r = @new<global::go.math.big_package.Rat>().SetFloat64((float64)f);
     if (r == nil) {
         t.Errorf("Rat.SetFloat64(float64(%g) (%b)) == nil", f, f);
         return;
@@ -561,7 +561,7 @@ internal static void checkNonLossyRoundtrip64(ж<testing.T> t, float64 f) {
     if (!isFinite(f)) {
         return;
     }
-    var r = @new<global::go.math.big_package.ΔRat>().SetFloat64(f);
+    var r = @new<global::go.math.big_package.Rat>().SetFloat64(f);
     if (r == nil) {
         t.Errorf("Rat.SetFloat64(%g (%b)) == nil", f, f);
         return;
@@ -574,15 +574,15 @@ internal static void checkNonLossyRoundtrip64(ж<testing.T> t, float64 f) {
 }
 
 // delta returns the absolute difference between r and f.
-internal static ж<global::go.math.big_package.ΔRat> delta(ж<global::go.math.big_package.ΔRat> r, float64 f) {
-    var d = @new<global::go.math.big_package.ΔRat>().Sub(r, @new<global::go.math.big_package.ΔRat>().SetFloat64(f));
+internal static ж<global::go.math.big_package.Rat> delta(ж<global::go.math.big_package.Rat> r, float64 f) {
+    var d = @new<global::go.math.big_package.Rat>().Sub(r, @new<global::go.math.big_package.Rat>().SetFloat64(f));
     return d.Abs(d);
 }
 
 // checkIsBestApprox32 checks that f is the best possible float32
 // approximation of r.
 // Returns true on success.
-internal static bool checkIsBestApprox32(ж<testing.T> t, float32 f, ж<global::go.math.big_package.ΔRat> r) {
+internal static bool checkIsBestApprox32(ж<testing.T> t, float32 f, ж<global::go.math.big_package.Rat> r) {
     if (math.Abs((float64)f) >= math.MaxFloat32) {
         // Cannot check +Inf, -Inf, nor the float next to them (MaxFloat32).
         // But we have tests for these special cases.
@@ -619,7 +619,7 @@ internal static bool checkIsBestApprox32(ж<testing.T> t, float32 f, ж<global::
 // checkIsBestApprox64 checks that f is the best possible float64
 // approximation of r.
 // Returns true on success.
-internal static bool checkIsBestApprox64(ж<testing.T> t, float64 f, ж<global::go.math.big_package.ΔRat> r) {
+internal static bool checkIsBestApprox64(ж<testing.T> t, float64 f, ж<global::go.math.big_package.Rat> r) {
     if (math.Abs(f) >= math.MaxFloat64) {
         // Cannot check +Inf, -Inf, nor the float next to them (MaxFloat64).
         // But we have tests for these special cases.
@@ -692,7 +692,7 @@ public static void TestRatSetInt64(ж<testing.T> t) {
         math.MaxInt64,
         math.MinInt64
     ]);
-    ж<global::go.math.big_package.ΔRat> r = @new<global::go.math.big_package.ΔRat>();
+    ж<global::go.math.big_package.Rat> r = @new<global::go.math.big_package.Rat>();
     foreach (var (i, want) in range(testCases)) {
         r.SetInt64(want);
         if (!r.IsInt()) {
@@ -716,7 +716,7 @@ public static void TestRatSetUint64(ж<testing.T> t) {
         12345,
         ~(uint64)0
     ]);
-    ж<global::go.math.big_package.ΔRat> r = @new<global::go.math.big_package.ΔRat>();
+    ж<global::go.math.big_package.Rat> r = @new<global::go.math.big_package.Rat>();
     foreach (var (i, want) in range(testCases)) {
         r.SetUint64(want);
         if (!r.IsInt()) {
@@ -744,29 +744,29 @@ public static void BenchmarkRatCmp(ж<testing.B> Ꮡb) {
 
 internal partial struct TestIssue34919_type /*dyn*/ {
     internal @string name;
-    internal Action<ж<global::go.math.big_package.ΔRat>> f;
+    internal Action<ж<global::go.math.big_package.Rat>> f;
 }
 
 // TestIssue34919 verifies that a Rat's denominator is not modified
 // when simply accessing the Rat value.
 public static void TestIssue34919(ж<testing.T> t) {
     foreach (var (_, acc) in range(slice<TestIssue34919_type>([
-        new("Float32", (ж<global::go.math.big_package.ΔRat> x) => {
+        new("Float32", (ж<global::go.math.big_package.Rat> x) => {
             x.Float32();
         }),
-        new("Float64", (ж<global::go.math.big_package.ΔRat> x) => {
+        new("Float64", (ж<global::go.math.big_package.Rat> x) => {
             x.Float64();
         }),
-        new("Inv", (ж<global::go.math.big_package.ΔRat> x) => {
-            @new<global::go.math.big_package.ΔRat>().Inv(x);
+        new("Inv", (ж<global::go.math.big_package.Rat> x) => {
+            @new<global::go.math.big_package.Rat>().Inv(x);
         }),
-        new("Sign", (ж<global::go.math.big_package.ΔRat> x) => {
+        new("Sign", (ж<global::go.math.big_package.Rat> x) => {
             x.Sign();
         }),
-        new("IsInt", (ж<global::go.math.big_package.ΔRat> x) => {
+        new("IsInt", (ж<global::go.math.big_package.Rat> x) => {
             x.IsInt();
         }),
-        new("Num", (ж<global::go.math.big_package.ΔRat> x) => {
+        new("Num", (ж<global::go.math.big_package.Rat> x) => {
             x.Num();
         })
         // {"Denom", func(x *Rat) { x.Denom() }}, TODO(gri) should we change the API? See issue #33792.
@@ -774,7 +774,7 @@ public static void TestIssue34919(ж<testing.T> t) {
         // A denominator of length 0 is interpreted as 1. Make sure that
         // "materialization" of the denominator doesn't lead to setting
         // the underlying array element 0 to 1.
-        var r = Ꮡ(new ΔRat(new ΔInt(abs: new Δnat(new global::go.math.big_package.Word[]{991}.slice())), new ΔInt(abs: new global::go.math.big_package.Δnat(0, 1))));
+        var r = Ꮡ(new Rat(new Int(abs: new nat(new global::go.math.big_package.Word[]{991}.slice())), new Int(abs: new global::go.math.big_package.nat(0, 1))));
         acc.f(r);
         global::go.math.big_package.Word d = r.b.abs[..1][0]; if (d != 0) {
             t.Errorf("%s modified denominator: got %d, want 0", acc.name, d);

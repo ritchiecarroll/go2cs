@@ -19,7 +19,7 @@ partial class ecdsa_package {
 internal static ж<PrivateKey> testPrivateKey() {
     // https://www.rfc-editor.org/rfc/rfc9500.html#section-2.3
     return Ꮡ(new PrivateKey(
-        pub: new ΔPublicKey(
+        pub: new PublicKey(
             curve: p256,
             q: [
                 0x04,

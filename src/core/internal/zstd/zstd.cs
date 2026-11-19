@@ -11,6 +11,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using encoding;
+using static zstd_package;
 
 partial class zstd_package {
 
@@ -75,6 +76,8 @@ public static ж<Reader> NewReader(io.Reader input) {
     return r;
 }
 
+} partial class zstdᴛReader {
+
 // Reset discards the current state and starts reading a new stream from r.
 // This permits reusing a Reader rather than allocating a new one.
 public static void Reset(this ref Reader r, io.Reader input) {
@@ -133,7 +136,7 @@ public static (byte, error) ReadByte(this ж<Reader> Ꮡr) {
 internal static error refillIfNeeded(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    while (r.off >= builtin.len(r.buffer)) {
+    while (r.off >= len(r.buffer)) {
         var err = Ꮡr.refill(); if (err != nil) {
             return err;
         }
@@ -446,7 +449,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         }
         relativeOffset++;
         var v = r.scratch[0];
-        foreach (var i in range(builtin.len(r.buffer))) {
+        foreach (var i in range(len(r.buffer))) {
             r.buffer[i] = v;
         }
         r.blockOffset += (int64)relativeOffset;
@@ -467,10 +470,10 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
     }}
 
     if (!r.frameSizeUnknown) {
-        if ((uint64)builtin.len(r.buffer) > r.remainingFrameSize) {
+        if ((uint64)len(r.buffer) > r.remainingFrameSize) {
             return r.makeError(relativeOffset, tooManyUncompressedBytesˢ);
         }
-        r.remainingFrameSize -= (uint64)builtin.len(r.buffer);
+        r.remainingFrameSize -= (uint64)len(r.buffer);
     }
 
     if (r.hasChecksum) {
@@ -513,11 +516,15 @@ internal static void setBufferSize(this ref Reader r, nint size) {
     r.buffer = r.buffer.slice(0, size);
 }
 
+} partial class zstd_package {
+
 // zstdError is an error while decompressing.
 partial struct zstdError {
     internal int64 offset;
     internal error err;
 }
+
+} partial class zstdᴛzstdError {
 
 internal static @string Error(this ref zstdError ze) {
     return fmt.Sprintf("zstd decompression error at %d: %v"u8, ze.offset, ze.err);
@@ -526,6 +533,8 @@ internal static @string Error(this ref zstdError ze) {
 internal static error Unwrap(this ref zstdError ze) {
     return ze.err;
 }
+
+} partial class zstdᴛReader {
 
 internal static error makeEOFError(this ref Reader r, nint off) {
     return r.wrapError(off, io.ErrUnexpectedEOF);
@@ -549,4 +558,4 @@ internal static error wrapError(this ref Reader r, nint off, error err) {
     return new zstdErrorжerror(Ꮡ(new zstdError(r.blockOffset + (int64)off, err)));
 }
 
-} // end zstd_package
+} // end zstdᴛReader

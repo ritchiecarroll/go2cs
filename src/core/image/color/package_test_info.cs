@@ -13,7 +13,6 @@ using go;
 using static global::go.image.color_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("RGBA", "ΔRGBA")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -21,8 +20,8 @@ using static global::go.image.color_internal_test_package;
 [assembly: GoImplement<global::go.image.color_package.CMYK, global::go.image.color_package.Color>]
 [assembly: GoImplement<global::go.image.color_package.Gray, global::go.image.color_package.Color>]
 [assembly: GoImplement<global::go.image.color_package.NYCbCrA, global::go.image.color_package.Color>]
+[assembly: GoImplement<global::go.image.color_package.RGBA, global::go.image.color_package.Color>]
 [assembly: GoImplement<global::go.image.color_package.YCbCr, global::go.image.color_package.Color>]
-[assembly: GoImplement<global::go.image.color_package.ΔRGBA, global::go.image.color_package.Color>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

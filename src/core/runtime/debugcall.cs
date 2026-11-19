@@ -61,9 +61,8 @@ internal static @string debugCallCheck(uintptr pc) {
 
         @string name = funcname(f);
 
-        var exprᴛ1 = name;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "debugCall32"u8 || exprᴛ1 == "debugCall64"u8 || exprᴛ1 == "debugCall128"u8 || exprᴛ1 == "debugCall256"u8 || exprᴛ1 == "debugCall512"u8 || exprᴛ1 == "debugCall1024"u8 || exprᴛ1 == "debugCall2048"u8 || exprᴛ1 == "debugCall4096"u8 || exprᴛ1 == "debugCall8192"u8 || exprᴛ1 == "debugCall16384"u8 || exprᴛ1 == "debugCall32768"u8 || exprᴛ1 == "debugCall65536"u8: {
+        case {} when name == "debugCall32"u8 || name == "debugCall64"u8 || name == "debugCall128"u8 || name == "debugCall256"u8 || name == "debugCall512"u8 || name == "debugCall1024"u8 || name == "debugCall2048"u8 || name == "debugCall4096"u8 || name == "debugCall8192"u8 || name == "debugCall16384"u8 || name == "debugCall32768"u8 || name == "debugCall65536"u8: {
             // These functions are allowed so that the debugger can initiate multiple function calls.
             // See: https://golang.org/cl/161137/
             return;
@@ -168,16 +167,16 @@ internal static void debugCallWrap(uintptr dispatch) {
         gpΔ1.Value.schedlink = 0;
 
         // Park the calling goroutine.
-        var Δtrace = traceAcquire();
-        if (Δtrace.ok()) {
+        var trace = traceAcquire();
+        if (trace.ok()) {
             // Trace the event before the transition. It may take a
             // stack trace, but we won't own the stack after the
             // transition anymore.
-            Δtrace.GoPark(traceBlockDebugCall, 1);
+            trace.GoPark(traceBlockDebugCall, 1);
         }
         casGToWaiting(gpΔ1, _Grunning, waitReasonDebugCall);
-        if (Δtrace.ok()) {
-            traceRelease(Δtrace);
+        if (trace.ok()) {
+            traceRelease(trace);
         }
         dropg();
 
@@ -234,27 +233,27 @@ internal static void debugCallWrap1() {
         // Switch back to the calling goroutine. At some point
         // the scheduler will schedule us again and we'll
         // finish exiting.
-        var Δtrace = traceAcquire();
-        if (Δtrace.ok()) {
+        var trace = traceAcquire();
+        if (trace.ok()) {
             // Trace the event before the transition. It may take a
             // stack trace, but we won't own the stack after the
             // transition anymore.
-            Δtrace.GoSched();
+            trace.GoSched();
         }
         casgstatus(gpΔ1, _Grunning, _Grunnable);
-        if (Δtrace.ok()) {
-            traceRelease(Δtrace);
+        if (trace.ok()) {
+            traceRelease(trace);
         }
         dropg();
         @lock(Ꮡsched.of(schedt.Ꮡlock));
         globrunqput(gpΔ1);
         unlock(Ꮡsched.of(schedt.Ꮡlock));
 
-        Δtrace = traceAcquire();
+        trace = traceAcquire();
         casgstatus(callingGΔ1, _Gwaiting, _Grunnable);
-        if (Δtrace.ok()) {
-            Δtrace.GoUnpark(callingGΔ1, 0);
-            traceRelease(Δtrace);
+        if (trace.ok()) {
+            trace.GoUnpark(callingGΔ1, 0);
+            traceRelease(trace);
         }
         execute(callingGΔ1, true);
     });

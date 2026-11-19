@@ -15,12 +15,15 @@ using fs = go.io.fs_package;
 using go.@internal;
 using go.@internal.coverage;
 using path;
+using static test_internal_test_package;
 
 partial class test_internal_test_package {
 
 internal partial struct ctrVis {
     internal slice<decodecounter.FuncPayload> funcs;
 }
+
+} partial class test_internal_testᴛctrVis {
 
 internal static error VisitFuncs(this ref ctrVis v, Func<uint32, uint32, slice<uint32>, error> f) {
     foreach (var (_, fn) in range(v.funcs)) {
@@ -30,6 +33,8 @@ internal static error VisitFuncs(this ref ctrVis v, Func<uint32, uint32, slice<u
     }
     return default;
 }
+
+} partial class test_internal_test_package {
 
 internal static decodecounter.FuncPayload mkfunc(uint32 p, uint32 f, slice<uint32> c) {
     return new decodecounter.FuncPayload(

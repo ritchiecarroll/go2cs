@@ -3,14 +3,20 @@ global using IntBox = go.GenericTypeAliasLib_package.Box<nint>;
 
 namespace go;
 
+using static GenericTypeAliasLib_package;
+
 partial class GenericTypeAliasLib_package {
 
 partial struct Box<T> {
     public T V;
 }
 
+} partial class GenericTypeAliasLibᴛBox {
+
 public static T Get<T>(this Box<T> b) { return b.V; }
 public static void Set<T>(this ref Box<T> b, T v) { b.V = v; }
+
+} partial class GenericTypeAliasLib_package {
 
 public static Box<T> NewBox<T>(T v) { return new Box<T>(V: v); }
 // type Alias[T any] = Box[T]

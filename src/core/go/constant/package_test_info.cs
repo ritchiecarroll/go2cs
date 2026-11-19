@@ -8,7 +8,6 @@ global using static global::go.go.constant_package;
 global using static global::go.go.constant_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 // </ImportedTypeAliases>
 
 using go;
@@ -17,8 +16,6 @@ using static global::go.go.constant_test_package;
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b696e70757420737472696e673b2073686f727420737472696e673b20657861637420737472696e677d", "stringTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b76616c20696e7436343b2077616e7420696e747d", "bitLenTestsᴛ1")]
-[assembly: GoTypeAlias("Kind", "ΔKind")]
-[assembly: GoTypeAlias("String", "const:ΔString")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

@@ -124,7 +124,7 @@ internal static @string sampleToString(ж<profile.Sample> Ꮡs) {
         var loc = s.Location[i];
         funcs = locationToStrings(loc, funcs);
     }
-    return fmt.Sprintf("%s %v"u8, strings_package.Join(funcs, ";"), s.Value);
+    return fmt.Sprintf("%s %v"u8, strings.Join(funcs, ";"), s.Value);
 }
 
 internal static slice<@string> locationToStrings(ж<profile.Location> Ꮡloc, slice<@string> funcs) {
@@ -178,7 +178,7 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> t) {
 
         foreach (var (_, l) in range(expected)) {
             if (!slices.Contains(actual, l)) {
-                t.Errorf("profile = %v\nwant = %v", strings_package.Join(actual, "\n"), l);
+                t.Errorf("profile = %v\nwant = %v", strings.Join(actual, "\n"), l);
             }
         }
     }
@@ -264,10 +264,10 @@ public static void TestGenericsInlineLocations(ж<testing.T> t) {
             }
         }
         if (s == nil) {
-            t.Fatalf("expected \n%s\ngot\n%s", expectedSample, strings_package.Join(profileToStrings(p), "\n"));
+            t.Fatalf("expected \n%s\ngot\n%s", expectedSample, strings.Join(profileToStrings(p), "\n"));
         }
         var loc = s.Location[0];
-        @string actual = strings_package.Join(locationToStrings(loc, default), ";");
+        @string actual = strings.Join(locationToStrings(loc, default), ";");
         if (expectedLocation != actual && expectedLocationNewInliner != actual) {
             t.Errorf("expected a location with at least 3 functions\n%s\ngot\n%s\n", expectedLocation, actual);
         }
@@ -317,25 +317,25 @@ public static void TestHeapRuntimeFrames(ж<testing.T> t) {
         // We must see growMap at least once.
         var foundGrowMap = false;
         foreach (var (_, l) in range(actual)) {
-            if (!strings_package.Contains(l, runtimePprofGrowMapˢ)) {
+            if (!strings.Contains(l, runtimePprofGrowMapˢ)) {
                 continue;
             }
             foundGrowMap = true;
 
             // Runtime frames like mapassign and map internals should be hidden.
-            if (strings_package.Contains(l, runtimeˢ)) {
+            if (strings.Contains(l, runtimeˢ)) {
                 t.Errorf("Sample got %s, want no runtime frames", l);
             }
-            if (strings_package.Contains(l, internalRuntimeˢ)) {
+            if (strings.Contains(l, internalRuntimeˢ)) {
                 t.Errorf("Sample got %s, want no runtime frames", l);
             }
-            if (strings_package.Contains(l, mapassignˢ)) { // in case mapassign moves to a package not matching above paths.
+            if (strings.Contains(l, mapassignˢ)) { // in case mapassign moves to a package not matching above paths.
                 t.Errorf("Sample got %s, want no mapassign frames", l);
             }
         }
 
         if (!foundGrowMap) {
-            t.Errorf("Profile got:\n%s\nwant sample in runtime/pprof.growMap", strings_package.Join(actual, "\n"));
+            t.Errorf("Profile got:\n%s\nwant sample in runtime/pprof.growMap", strings.Join(actual, "\n"));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

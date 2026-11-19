@@ -20,8 +20,8 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class exec_test_package {
 
-internal static osꓸSignal quitSignal = default;
-internal static osꓸSignal pipeSignal = new exec_test_package.syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)syscall.SIGPIPE));
+internal static os.Signal quitSignal = default;
+internal static os.Signal pipeSignal = new exec_test_package.syscall_SignalᴠSignal(((syscall.Signal)syscall.SIGPIPE));
 
 [GoInit] internal static void initΔ1() {
     registerHelperCommand("pipehandle", cmdPipeHandle);
@@ -57,7 +57,7 @@ public static void TestPipePassing(ж<testing.T> t) {
     }
     @string marker = markerᶜ;
     var childProc = helperCommand(t, pipehandleˢ, strconv.FormatUint((uint64)w.Fd(), 16), marker);
-    childProc.SysProcAttr = Ꮡ(new syscall.SysProcAttr(AdditionalInheritedHandles: slice<syscallꓸHandle>([(syscallꓸHandle)w.Fd()])));
+    childProc.SysProcAttr = Ꮡ(new syscall.SysProcAttr(AdditionalInheritedHandles: slice<syscall.Handle>([(syscall.Handle)w.Fd()])));
     err = childProc.Start();
     if (err != nil) {
         t.Error(err);

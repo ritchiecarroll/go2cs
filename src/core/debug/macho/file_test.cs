@@ -306,7 +306,7 @@ public static void TestOpen(ж<testing.T> t) {
                 }
 
                 switch (l.type()) {
-                case ж<global::go.debug.macho_package.ΔSegment> lΔ1: {
+                case ж<global::go.debug.macho_package.Segment> lΔ1: {
                     var have = lΔ1.ᏑSegmentHeader;
                     if (!reflect.DeepEqual(have.OrTypedNil(), want)) {
                         t.Errorf("open %s, command %d:\n\thave %#v\n\twant %#v\n", tt.@file, iΔ2, have.OrTypedNil(), want);

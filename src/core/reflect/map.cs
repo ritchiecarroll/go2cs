@@ -10,14 +10,19 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static reflect_package;
 
 partial class reflect_package {
 
+} partial class reflectᴛrtype {
+
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func MapOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
+internal static (Type, Type) groupAndSlotOf(Type ktyp, Type etyp) {
     // type group struct {
     //     ctrl uint64
     //     slots [abi.MapGroupSlots]struct {
@@ -61,12 +66,16 @@ internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
 
 internal static ж<abi.Type> stringType = rtypeOf("");
 
+} partial class reflectᴛValue {
+
 // go2cs generated this placeholder — func MapIndex is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflect_package {
 
 // Equivalent to runtime.mapIterStart.
 //
 //go:noinline
-internal static partial void mapIterStart(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<maps.Iter> Ꮡit) {
+internal static partial void mapIterStart(ж<abi.MapType> t, ж<maps.Map> m, ж<maps.Iter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     if (race.Enabled && m != nil) {
@@ -92,30 +101,48 @@ internal static partial void mapIterNext(ж<maps.Iter> Ꮡit) {
     it.Next();
 }
 
+} partial class reflectᴛValue {
+
 // go2cs generated this placeholder — func MapKeys is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflect_package {
 
 // A MapIter is an iterator for ranging over a map.
 // See [Value.MapRange].
 partial struct MapIter {
-    internal ΔValue m;
+    internal Value m;
     internal maps.Iter hiter;
 }
 
+} partial class reflectᴛMapIter {
+
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func SetIterKey is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+} partial class reflectᴛMapIter {
+
 // go2cs generated this placeholder — func Value is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+} partial class reflectᴛValue {
+
 // go2cs generated this placeholder — func SetIterValue is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflectᴛMapIter {
 
 // go2cs generated this placeholder — func Next is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Reset is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+} partial class reflectᴛValue {
+
 // go2cs generated this placeholder — func MapRange is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func SetMapIndex is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflectᴛflag {
 
 // Force slow panicking path not inlined, so it won't add to the
 // inlining budget of the caller.
@@ -126,4 +153,4 @@ internal static partial void panicNotMap(this flag f) {
     f.mustBe(Map);
 }
 
-} // end reflect_package
+} // end reflectᴛflag

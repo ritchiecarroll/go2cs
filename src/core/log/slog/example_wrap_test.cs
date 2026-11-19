@@ -44,12 +44,12 @@ public static void Example_wrapping() {
         }
         // Remove the directory from the source's filename.
         if (a.Key == Δslog.SourceKey) {
-            var source = a.Value.Any()._<ж<slogꓸSource>>();
+            var source = a.Value.Any()._<ж<Δslog.Source>>();
             source.File = filepath.Base(source.File);
         }
         return a;
     };
-    var logger = Δslog.New(new Δslog.TextHandlerжΔHandler(Δslog.NewTextHandler(new os.FileжWriter(os.Stdout), Ꮡ(new Δslog.HandlerOptions(AddSource: true, ReplaceAttr: replace)))));
+    var logger = Δslog.New(new Δslog.TextHandlerжHandler(Δslog.NewTextHandler(new os.FileжWriter(os.Stdout), Ꮡ(new Δslog.HandlerOptions(AddSource: true, ReplaceAttr: replace)))));
     Infof(logger, "message, %s", formattedˢ);
 
     // Output:

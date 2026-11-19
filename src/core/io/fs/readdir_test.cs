@@ -12,6 +12,7 @@ using time = time_package;
 using fs = go.io.fs_package;
 using go.io;
 using go.testing;
+using static fs_test_package;
 
 partial class fs_test_package {
 
@@ -19,7 +20,11 @@ partial struct readDirOnly {
     /*embed*/ public go.io.fs_package.ReadDirFS ReadDirFS;
 }
 
+} partial class fs_testᴛreadDirOnly {
+
 internal static (fs.File, error) Open(this readDirOnly _, @string name) { return (default, ErrNotExist); }
+
+} partial class fs_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string subˢ => ref subˢᵇ;

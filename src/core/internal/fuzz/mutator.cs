@@ -8,6 +8,7 @@ using fmt = fmt_package;
 using math = math_package;
 using @unsafe = unsafe_package;
 using encoding;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -19,6 +20,8 @@ partial struct mutator {
 internal static ж<mutator> newMutator() {
     return Ꮡ(new mutator(r: new pcgRandжmutatorRand(newPcgRand())));
 }
+
+} partial class fuzzᴛmutator {
 
 internal static nint rand(this ref mutator m, nint n) {
     return m.r.intn(n);
@@ -122,7 +125,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
         if (len(v) > maxPerVal) {
             throw panic(fmt.Sprintf("cannot mutate bytes of length %d"u8, len(v)));
         }
-        if (builtin.cap(m.scratch) < maxPerVal) {
+        if (cap(m.scratch) < maxPerVal) {
             m.scratch = append(new slice<byte>(0, maxPerVal), v.ꓸꓸꓸ);
         } else {
             m.scratch = m.scratch.slice(0, len(v));
@@ -136,7 +139,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
         if (len(v) > maxPerVal) {
             throw panic(fmt.Sprintf("cannot mutate bytes of length %d"u8, len(v)));
         }
-        if (builtin.cap(m.scratch) < maxPerVal) {
+        if (cap(m.scratch) < maxPerVal) {
             m.scratch = appendꓸꓸꓸ(new slice<byte>(0, maxPerVal), v);
         } else {
             m.scratch = m.scratch.slice(0, len(v));
@@ -273,6 +276,8 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
     }
 }
 
+} partial class fuzz_package {
+
 // type byteSliceMutator is a methodless func type — rendered inline as its base delegate
 
 [GoLazy] partial class lazyᴛbyteSliceMutators { internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = [
@@ -295,6 +300,8 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
     byteSliceShuffleBytes,
     byteSliceSwapBytes
 ]; }
+
+} partial class fuzzᴛmutator {
 
 internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) {
     GoFrame ᒐ = default;
@@ -321,6 +328,8 @@ internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB)
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class fuzz_package {
 
 internal static slice<int8> interesting8 = [(int8)(-128), (int8)(-1), 0, 1, 16, 32, 64, 100, 127];
 internal static slice<int16> interesting16 = [(int16)(-32768), (int16)(-129), 128, 255, 256, 512, 1000, 1024, 4096, 32767];

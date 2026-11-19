@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,7 +39,7 @@ using static go.net.http.pprof_package;
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
-[assembly: GoImplement<handler, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<handler, go.net.http_package.Handler>]
 [assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
@@ -69,7 +68,7 @@ using static go.net.http.pprof_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGLAAYKCgpSCgoKCAAwMsoKCpqIACgyigoKUggAJCIKCgoKCAAoMsoKCgqa4goKUlJSC7LKCgoKmuIKClJSUgqzSgpjqlIKClKaCgoKUgoKCgtyCgpS4qqIACgqCgoKCgpSCgpSCgpSCgpSClAAOBsKCgoKmgoKmlIKCgpSCgoKmgqS0goKUlNiCgoKUgpSUgoKCpoKUgoKipIKCgpSCgoKUgqYACRQADBqCggAQHuKCgoK4gpSCggAIEoLumIIALAiCggABKIKCpo6ClJqC", "424-426:1", "", "196=Sprintf/1/1/1;226=Sprintf/1/1/1;487=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4", "367:21")]
+[assembly: GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGPAAYKCgpSCgoKCAAwMsoKCpqIACgyigoKUggAJCIKCgoKCAAoMsoKCgqa4goKUlJSC7LKCgoKmuIKClJSUgqzSgpjqlIKClKaCgoKUgoKCgtyCgpS4qqIAGgqCgoKCgpSCgpSCgpSCgpSClAAOBsKCgoKmgoKmlIKCgpSCgoKmgqS0goKUlNiCgoKUgpSUgoKCpoKUgoKixIKCgpSCgoKUgqYACRQADBqCggAQHuKCgoK4gpSCggAIEoLumIIALAiCggABKIKCpo6ClJqC", "424-426:1", "", "197=Sprintf/1/1/1;227=Sprintf/1/1/1;506=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4", "384:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -116,3 +115,13 @@ public static partial class pprof_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(pprof_package.handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛhandler;
+// </MethodHolders>

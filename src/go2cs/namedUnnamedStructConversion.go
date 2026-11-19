@@ -67,8 +67,11 @@ func (v *Visitor) structTypeLiteralConversion(callExpr *ast.CallExpr) (string, b
 	// The cast is wrapped as every conversion to a named type is: its result can be the base of a
 	// selector, `struct{ Hz int }(p).Hz`, and unwrapped that read `(T)p.Hz`, a cast of the field. Where
 	// the conversion stands as a whole expression the wrap is dropped again
-	// (unparenthesizedWholeExpression).
-	return "(" + v.structCastOf(targetName, arg, v.checkForImplicitConversion(structType, arg, targetName, nil)) + ")", true
+	// (unparenthesizedWholeExpression). The copy Go converts is taken where the value is transferred
+	// (structConversionCopy.go).
+	rendered := v.checkForImplicitConversion(structType, arg, targetName, nil)
+
+	return "(" + v.structCastOf(targetName, arg, rendered) + ")", true
 }
 
 // structCastOf renders the cast of a struct operand as the named-target conversion does: `(T)p` for an

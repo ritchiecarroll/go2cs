@@ -11,17 +11,18 @@ using time = time_package;
 using iter = iter_package;
 using static global::go.reflect_internal_test_package;
 using Δreflect = reflect_package;
+using static reflect_test_package;
 
 partial class reflect_test_package {
 
 partial struct sourceAllᴛ1 /*dyn*/ {
-    public reflectꓸValue Bool;
-    public reflectꓸValue String;
-    public reflectꓸValue Bytes;
-    public reflectꓸValue NamedBytes;
-    public reflectꓸValue BytesArray;
-    public reflectꓸValue SliceAny;
-    public reflectꓸValue MapStringAny;
+    public Δreflect.Value Bool;
+    public Δreflect.Value String;
+    public Δreflect.Value Bytes;
+    public Δreflect.Value NamedBytes;
+    public Δreflect.Value BytesArray;
+    public Δreflect.Value SliceAny;
+    public Δreflect.Value MapStringAny;
 }
 internal static sourceAllᴛ1 sourceAll = new sourceAllᴛ1(
     Bool: ValueOf(@new<bool>()).Elem(),
@@ -196,8 +197,8 @@ public static void BenchmarkIsZero(ж<Δtesting.B> b) {
     s.ArrayInt_1024_NoZero[512] = 1;
     var source = ValueOf(s);
 
-    foreach (var (field, vᴛ1) in range<Δreflect.StructField, reflectꓸValue>(source.Fields().Invoke)) {
-        ref var value = ref heap(new reflectꓸValue(), out var Ꮡvalue);
+    foreach (var (field, vᴛ1) in range<Δreflect.StructField, Δreflect.Value>(source.Fields().Invoke)) {
+        ref var value = ref heap(new Δreflect.Value(), out var Ꮡvalue);
         value = vᴛ1;
 
         var valueʗ1 = value;
@@ -219,26 +220,26 @@ internal partial struct BenchmarkSetZero_type /*dyn*/ {
     public uint64 Uint;
     public float64 Float;
     public complex128 Complex;
-    public array<reflectꓸValue> Array = new(4, () => new(nil));
-    public channel<reflectꓸValue> Chan;
-    public Func<reflectꓸValue> Func;
+    public array<Δreflect.Value> Array = new(4, () => new(nil));
+    public channel<Δreflect.Value> Chan;
+    public Func<Δreflect.Value> Func;
     public BenchmarkSetZero_type_Interface Interface;
-    public map<@string, reflectꓸValue> Map;
-    public ж<reflectꓸValue> Pointer;
-    public slice<reflectꓸValue> Slice;
+    public map<@string, Δreflect.Value> Map;
+    public ж<Δreflect.Value> Pointer;
+    public slice<Δreflect.Value> Slice;
     public @string String;
-    public reflectꓸValue Struct;
+    public Δreflect.Value Struct;
 }
 
 public static void BenchmarkSetZero(ж<Δtesting.B> b) {
     var source = ValueOf(@new<BenchmarkSetZero_type>()).Elem();
 
-    foreach (var (field, vᴛ1) in range<Δreflect.StructField, reflectꓸValue>(source.Fields().Invoke)) {
-        ref var value = ref heap(new reflectꓸValue(), out var Ꮡvalue);
+    foreach (var (field, vᴛ1) in range<Δreflect.StructField, Δreflect.Value>(source.Fields().Invoke)) {
+        ref var value = ref heap(new Δreflect.Value(), out var Ꮡvalue);
         value = vᴛ1;
 
         @string name = field.Name;
-        ref var zero = ref heap<reflectꓸValue>(Zero(value.Type()), out var Ꮡzero);
+        ref var zero = ref heap<Δreflect.Value>(Zero(value.Type()), out var Ꮡzero);
         var valueʗ1 = value;
         b.Run(name + "/Direct"u8, (ж<Δtesting.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -275,8 +276,8 @@ private static readonly @string timeˢᵇ = "Time"u8;
 
 internal partial struct BenchmarkZero_bm /*dyn*/ {
     internal @string name;
-    internal reflectꓸValue zero;
-    internal reflectꓸValue nonZero;
+    internal Δreflect.Value zero;
+    internal Δreflect.Value nonZero;
     internal nint size;
 }
 
@@ -360,12 +361,12 @@ public static void BenchmarkSelect(ж<Δtesting.B> b) {
 public static void BenchmarkCall(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var fv = ref heap<reflectꓸValue>(ValueOf((@string a, @string bΔ1) => {
+    ref var fv = ref heap<Δreflect.Value>(ValueOf((@string a, @string bΔ1) => {
     }), out var Ꮡfv);
     b.ReportAllocs();
     var fvʗ1 = fv;
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
-        var args = slice<reflectꓸValue>([ValueOf("a"), ValueOf("b")]);
+        var args = slice<Δreflect.Value>([ValueOf("a"), ValueOf("b")]);
         while (pb.Next()) {
             fvʗ1.Call(args);
         }
@@ -374,9 +375,13 @@ public static void BenchmarkCall(ж<Δtesting.B> Ꮡb) {
 
 partial struct myint /*num:int64*/;
 
+} partial class reflect_testᴛmyint {
+
 internal static void inc(this ref myint i) {
     i = i + 1;
 }
+
+} partial class reflect_test_package {
 
 public static void BenchmarkCallMethod(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -391,12 +396,12 @@ public static void BenchmarkCallMethod(ж<Δtesting.B> Ꮡb) {
 }
 
 internal partial struct BenchmarkCallArgCopy_sizes /*dyn*/ {
-    internal reflectꓸValue fv;
-    internal reflectꓸValue arg;
+    internal Δreflect.Value fv;
+    internal Δreflect.Value arg;
 }
 
 public static void BenchmarkCallArgCopy(ж<Δtesting.B> b) {
-    reflectꓸValue byteArray(nint n) => Zero(ArrayOf(n, TypeOf((byte)0)));
+    Δreflect.Value byteArray(nint n) => Zero(ArrayOf(n, TypeOf((byte)0)));
     var sizes = new BenchmarkCallArgCopy_sizes[]{
         new(ValueOf(([GoArrayDims(128)] array<byte> a) => {
             a = a.Clone();
@@ -420,7 +425,7 @@ public static void BenchmarkCallArgCopy(ж<Δtesting.B> b) {
 
         var sizeʗ1 = size;
         var bench = (ж<Δtesting.B> bΔ1) => {
-            var args = slice<reflectꓸValue>([sizeʗ1.arg]);
+            var args = slice<Δreflect.Value>([sizeʗ1.arg]);
             bΔ1.SetBytes((int64)sizeʗ1.arg.Len());
             bΔ1.ResetTimer();
             var argsʗ1 = args;
@@ -513,7 +518,7 @@ partial struct S {
 public static void BenchmarkInterfaceBig(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var v = ref heap<reflectꓸValue>(ValueOf(new S()), out var Ꮡv);
+    ref var v = ref heap<Δreflect.Value>(ValueOf(new S()), out var Ꮡv);
     var vʗ1 = v;
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
@@ -524,7 +529,7 @@ public static void BenchmarkInterfaceBig(ж<Δtesting.B> Ꮡb) {
 }
 
 public static void BenchmarkInterfaceSmall(ж<Δtesting.B> b) {
-    ref var v = ref heap<reflectꓸValue>(ValueOf((int64)0), out var Ꮡv);
+    ref var v = ref heap<Δreflect.Value>(ValueOf((int64)0), out var Ꮡv);
     var vʗ1 = v;
     b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
@@ -555,7 +560,7 @@ internal partial struct BenchmarkMap_S /*@string*/;
 
 internal partial struct BenchmarkMap_tests /*dyn*/ {
     internal @string label;
-    internal reflectꓸValue m, keys, value;
+    internal Δreflect.Value m, keys, value;
 }
 
 public static void BenchmarkMap(ж<Δtesting.B> b) {

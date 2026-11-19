@@ -158,7 +158,7 @@ internal static void lockRankMayQueueFinalizer() {
     lockWithRankMayAcquire(Ꮡfinlock, getLockRank(Ꮡfinlock));
 }
 
-internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
+internal static void queuefinalizer(@unsafe.Pointer p, ж<funcval> Ꮡfn, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
     ref var fn = ref Ꮡfn.Value;
     ref var fint = ref Ꮡfint.Value;
     ref var ot = ref Ꮡot.Value;
@@ -175,7 +175,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
     @lock(Ꮡfinlock);
     if (finq == nil || (~finq).cnt == (uint32)len((~finq).fin)) {
         if (finc == nil) {
-            finc = (ж<finBlock>)(uintptr)(persistentalloc(finBlockSize, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+            finc = @unsafe.Pointer.To<finBlock>(persistentalloc(finBlockSize, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
             finc.Value.alllink = allfin;
             allfin = finc;
             if (finptrmask[0] == 0) {
@@ -201,7 +201,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
     f.Value.nret = nret;
     f.Value.fint = Ꮡfint;
     f.Value.ot = Ꮡot;
-    f.Value.arg = Δp;
+    f.Value.arg = p;
     finqueued++;
     unlock(Ꮡfinlock);
     ᏑfingStatus.Or(fingWake);
@@ -247,7 +247,7 @@ internal static void createfing() {
 internal static bool finalizercommit(ж<g> Ꮡgp, @unsafe.Pointer @lock) {
     ref var gp = ref Ꮡgp.Value;
 
-    unlock((ж<mutex>)(uintptr)(@lock));
+    unlock(@unsafe.Pointer.To<mutex>(@lock));
     // fingStatus should be modified after fing is put into a waiting state
     // to avoid waking fing in running state, even if it is about to be parked.
     ᏑfingStatus.Or(fingWait);
@@ -326,22 +326,22 @@ internal static void runFinalizers() {
                     // memory. That means we have to clear
                     // it before writing to it to avoid
                     // confusing the write barrier.
-                    ((ж<array<uintptr>>)(uintptr)(frame)).Value = new uintptr[]{}.array();
+                    (@unsafe.Pointer.To<array<uintptr>>(frame)).Value = new uintptr[]{}.array();
                 }
                 var exprᴛ1 = (~f).fint.Kind();
                 if (exprᴛ1 == abi.Pointer) {
-                    ((ж<@unsafe.Pointer>)(uintptr)(r)).Value = f.Value.arg;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(r)).Value = f.Value.arg;
                 }
                 else if (exprᴛ1 == abi.Interface) {
-                    var ityp = (ж<interfacetype>)(uintptr)(new @unsafe.Pointer((~f).fint));
-                    ((ж<eface>)(uintptr)(r)).Value._type = (~f).ot.of(ptrtype.ᏑType);
-                    ((ж<eface>)(uintptr)(r)).Value.data = f.Value.arg;
+                    var ityp = @unsafe.Pointer.To<interfacetype>(new @unsafe.Pointer((~f).fint));
+                    (@unsafe.Pointer.To<eface>(r)).Value._type = (~f).ot.of(ptrtype.ᏑType);
+                    (@unsafe.Pointer.To<eface>(r)).Value.data = f.Value.arg;
                     if (len((~ityp).Methods) != 0) {
                         // direct use of pointer
                         // set up with empty interface
                         // convert to interface with methods
                         // this conversion is guaranteed to succeed - we checked in SetFinalizer
-                        ((ж<iface>)(uintptr)(r)).Value.tab = assertE2I(ityp, ((ж<eface>)(uintptr)(r)).Value._type);
+                        (@unsafe.Pointer.To<iface>(r)).Value.tab = assertE2I(ityp, (@unsafe.Pointer.To<eface>(r)).Value._type);
                     }
                 }
                 else { /* default: */
@@ -371,9 +371,9 @@ internal static void runFinalizers() {
     }
 }
 
-internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
+internal static bool isGoPointerWithoutSpan(@unsafe.Pointer p) {
     // 0-length objects are okay.
-    if (Δp.Value == @unsafe.Pointer.FromRef(ref (Ꮡzerobase).Value)) {
+    if (p.Value == @unsafe.Pointer.FromRef(ref (Ꮡzerobase).Value)) {
         return true;
     }
     // Global initializers might be linker-allocated.
@@ -385,7 +385,7 @@ internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
     // We cannot assume they are in any order or even contiguous,
     // due to external linking.
     for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
-        if ((~datap).noptrdata <= (uintptr)Δp && (uintptr)Δp < (~datap).enoptrdata || (~datap).data <= (uintptr)Δp && (uintptr)Δp < (~datap).edata || (~datap).bss <= (uintptr)Δp && (uintptr)Δp < (~datap).ebss || (~datap).noptrbss <= (uintptr)Δp && (uintptr)Δp < (~datap).enoptrbss) {
+        if ((~datap).noptrdata <= (uintptr)p && (uintptr)p < (~datap).enoptrdata || (~datap).data <= (uintptr)p && (uintptr)p < (~datap).edata || (~datap).bss <= (uintptr)p && (uintptr)p < (~datap).ebss || (~datap).noptrbss <= (uintptr)p && (uintptr)p < (~datap).enoptrbss) {
             return true;
         }
     }
@@ -659,7 +659,7 @@ private sealed class GoFinalizerSentinel
 //                re-attached at once.
 //   CANCELLED -- SetFinalizer(obj, nil) cleared the finalizer: nothing to wait for, so cleanups queue
 //                at the object's first death as they would with no finalizer at all.
-private sealed class GoFinalizerGate
+internal sealed class GoFinalizerGate
 {
     private const int Pending = 0, Ran = 1, Cancelled = 2;
 

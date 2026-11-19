@@ -134,7 +134,7 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> fset, @str
 
             // Ensure the start/end are consistent,
             // whether parsing succeeded or not.
-            f.FileStart = (tokenꓸPos)fileʗ1.Base();
+            f.FileStart = (token.Pos)fileʗ1.Base();
             f.FileEnd = fileʗ1.End();
 
             Ꮡp.Value.errors.Sort();

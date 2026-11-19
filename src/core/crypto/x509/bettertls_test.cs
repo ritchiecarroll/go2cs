@@ -26,6 +26,7 @@ using go.encoding;
 using go.os;
 using path;
 using static go.crypto.x509_package;
+using static x509_internal_test_package;
 
 partial class x509_internal_test_package {
 
@@ -65,7 +66,7 @@ internal static void runTestSuite(ж<testing.T> t, @string suiteName, ж<betterT
 
     t.Logf(
         "running %s test suite with %d test cases",
-        suiteName, builtin.len(suite.TestCases));
+        suiteName, len(suite.TestCases));
 
     foreach (var (_, vᴛ1) in range(suite.TestCases)) {
         var tc = vᴛ1;
@@ -79,7 +80,7 @@ internal static void runTestSuite(ж<testing.T> t, @string suiteName, ж<betterT
                 tc.ID, err);
         }
 
-        if (builtin.len(certsDER) == 0) {
+        if (len(certsDER) == 0) {
             t.Fatalf("test case %d has no certificates", tc.ID);
         }
 
@@ -201,7 +202,7 @@ internal static (betterTLS, ж<global::go.crypto.x509_package.CertPool>) betterT
     }
 
     t.Logf("testing betterTLS revision: %s", data.Revision);
-    t.Logf("number of test suites: %d", builtin.len(data.Suites));
+    t.Logf("number of test suites: %d", len(data.Suites));
 
     (var rootDER, err) = data.RootCert();
     if (err != nil) {
@@ -225,9 +226,13 @@ internal partial struct betterTLS {
     public map<@string, betterTLSSuite> Suites; /*`json:"suites"`*/
 }
 
+} partial class x509_internal_testᴛbetterTLS {
+
 internal static (slice<byte>, error) RootCert(this ref betterTLS b) {
     return base64.StdEncoding.DecodeString(b.Root);
 }
+
+} partial class x509_internal_test_package {
 
 public partial struct betterTLSSuite {
     public slice<betterTLSTest> TestCases; /*`json:"testCases"`*/
@@ -240,8 +245,10 @@ public partial struct betterTLSTest {
     public expectedResult Expected; /*`json:"expected"`*/
 }
 
+} partial class x509_internal_testᴛbetterTLSTest {
+
 public static (slice<slice<byte>>, error) Certs(this ref betterTLSTest test) {
-    var certs = new slice<slice<byte>>(builtin.len(test.Certificates));
+    var certs = new slice<slice<byte>>(len(test.Certificates));
     foreach (var (i, cert) in range(test.Certificates)) {
         var (decoded, err) = base64.StdEncoding.DecodeString(cert);
         if (err != nil) {
@@ -251,6 +258,8 @@ public static (slice<slice<byte>>, error) Certs(this ref betterTLSTest test) {
     }
     return (certs, default);
 }
+
+} partial class x509_internal_test_package {
 
 public partial struct expectedResult /*@string*/;
 

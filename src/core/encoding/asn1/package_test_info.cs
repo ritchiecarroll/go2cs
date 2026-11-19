@@ -7,10 +7,6 @@
 global using static global::go.encoding.asn1_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;

@@ -150,7 +150,7 @@ internal static ref readonly @string packageQˢ => ref packageQˢᵇ;
 private static readonly @string packageQˢᵇ = "package q"u8;
 
 internal partial struct TestQualifiedTypeString_type /*dyn*/ {
-    internal typesꓸType typ;
+    internal types.Type typ;
     internal ж<types.Package> @this;
     internal @string want;
 }
@@ -165,8 +165,8 @@ public static void TestQualifiedTypeString(ж<testing.T> t) {
         new(pT, nil, "p.T"),
         new(pT, p, "T"),
         new(pT, q, "p.T"),
-        new(new types.PointerжΔType(NewPointer(pT)), p, "*T"),
-        new(new types.PointerжΔType(NewPointer(pT)), q, "*p.T")
+        new(new types.PointerжType(NewPointer(pT)), p, "*T"),
+        new(new types.PointerжType(NewPointer(pT)), q, "*p.T")
     ]))) {
         ref var test = ref heap(new TestQualifiedTypeString_type(), out var Ꮡtest);
         test = vᴛ1;
@@ -178,7 +178,7 @@ public static void TestQualifiedTypeString(ж<testing.T> t) {
             }
             return ""u8;
         };
-        @string got = TypeString(test.typ, new Func<ж<types.Package>, @string>(qualifier)); if (got != test.want) {
+        @string got = TypeString(test.typ, qualifier); if (got != test.want) {
             t.Errorf("TypeString(%s, %s) = %s, want %s",
                 test.@this.OrTypedNil(), test.typ, got, test.want);
         }

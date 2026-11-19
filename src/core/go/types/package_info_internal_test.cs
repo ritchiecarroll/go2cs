@@ -32,7 +32,7 @@ using static go.go.types_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("go/types/context_test.go", "context_test.cs", "ABEcgoIAChzSlIKUlIKUlIKCpqaCgILagILagILIgII=")]
-[assembly: GoPositionMap("go/types/errors_test.go", "errors_test.cs", "ABIYgoKCgIK2goKAgraCgoCCAAgIggAGEoKC")]
+[assembly: GoPositionMap("go/types/errors_test.go", "errors_test.cs", "ABQYgoKCgIK2goKAgraCgoCCAAgIggAGEoKC")]
 [assembly: GoPositionMap("go/types/sizeof_test.go", "sizeof_test.cs", "ABEakpQAH0iCgoKClII=")]
 [assembly: GoPositionMap("go/types/termlist_test.go", "termlist_test.cs", "AA0gkoKCgoKUpoKCuIIAChaCyoIACBKCgoLKggAJFIKCggAICoIADSCCgoIACAqCAA8mgoKCggAICoIAESqCgoKCAAkKggAKHIKCgoIACQqCAAwggoKCggAJCoIAFjSCgoKCAAkKggARKoKCgoI=")]
 [assembly: GoPositionMap("go/types/token_test.go", "token_test.cs", "AA4eAA0chJKCuJSCgoKCgg==")]

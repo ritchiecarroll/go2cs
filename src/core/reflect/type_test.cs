@@ -15,7 +15,7 @@ internal partial struct TestTypeFor_mystring /*@string*/;
 
 internal partial struct TestTypeFor_testcases /*dyn*/ {
     internal any wantFrom;
-    internal reflectꓸType got;
+    internal Δreflect.Type got;
 }
 
 public static void TestTypeFor(ж<Δtesting.T> t) {
@@ -64,7 +64,7 @@ public static void TestStructOfEmbeddedIfaceMethodCall(ж<Δtesting.T> t) {
 }
 
 internal partial struct TestIsRegularMemory_args /*dyn*/ {
-    internal reflectꓸType t;
+    internal Δreflect.Type t;
 }
 
 internal partial struct TestIsRegularMemory_S /*dyn*/ {
@@ -138,7 +138,7 @@ public static void TestIsRegularMemory(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-internal static reflectꓸType sinkType;
+internal static Δreflect.Type sinkType;
 
 public static void BenchmarkTypeForString(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -162,7 +162,7 @@ private static readonly @string nonSeqˢᵇ = "NonSeq"u8;
 
 internal partial struct TestType_CanSeq_tests /*dyn*/ {
     internal @string name;
-    internal reflectꓸType tr;
+    internal Δreflect.Type tr;
     internal bool want;
 }
 
@@ -201,7 +201,7 @@ private static readonly @string nonSeq2ˢᵇ = "NonSeq2"u8;
 
 internal partial struct TestType_CanSeq2_tests /*dyn*/ {
     internal @string name;
-    internal reflectꓸType tr;
+    internal Δreflect.Type tr;
     internal bool want;
 }
 

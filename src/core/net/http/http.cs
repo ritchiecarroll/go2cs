@@ -12,6 +12,7 @@ using utf8 = go.unicode.utf8_package;
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using go.unicode;
 using vendor.golang.org.x.net.http;
+using static http_package;
 
 partial class http_package {
 
@@ -33,6 +34,8 @@ partial struct Protocols {
 internal static UntypedInt protoHTTP1 => /* 1 << iota */ 1;
 internal static UntypedInt protoHTTP2 => 2;
 internal static UntypedInt protoUnencryptedHTTP2 => 4;
+
+} partial class httpᴛProtocols {
 
 // HTTP1 reports whether p includes HTTP/1.
 public static bool HTTP1(this Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP1) != 0; }
@@ -76,6 +79,8 @@ public static @string String(this Protocols p) {
     return "{"u8 + strings.Join(s, ",") + "}"u8;
 }
 
+} partial class http_package {
+
 // incomparable is a zero-width, non-comparable type. Adding it to a struct
 // makes that struct also non-comparable, and generally doesn't add
 // any size (as long as it's first).
@@ -103,7 +108,11 @@ public partial struct contextKey {
     internal @string name;
 }
 
+} partial class httpᴛcontextKey {
+
 public static @string String(this ref contextKey k) { return "net/http context value "u8 + k.name; }
+
+} partial class http_package {
 
 // Given a string of the form "host", "host:port", or "[ipv6::address]:port",
 // return true if the string includes a port.
@@ -126,7 +135,7 @@ internal static bool isToken(@string v) {
 
 // stringContainsCTLByte reports whether s contains any ASCII control character.
 internal static bool stringContainsCTLByte(@string s) {
-    for (nint i = 0; i < builtin.len(s); i++) {
+    for (nint i = 0; i < len(s); i++) {
         var b = s[i];
         if (b < ' ' || b == 0x7f) {
             return true;
@@ -139,19 +148,19 @@ internal static @string hexEscapeNonASCII(@string s) {
     var bᴷ = new stackAppend<byte>();
 
     nint newLen = 0;
-    for (nint i = 0; i < builtin.len(s); i++) {
+    for (nint i = 0; i < len(s); i++) {
         if (s[i] >= utf8.RuneSelf) {
             newLen += 3;
         } else {
             newLen++;
         }
     }
-    if (newLen == builtin.len(s)) {
+    if (newLen == len(s)) {
         return s;
     }
     var b = new slice<byte>(0, newLen);
     nint pos = default;
-    for (nint i = 0; i < builtin.len(s); i++) {
+    for (nint i = 0; i < len(s); i++) {
         if (s[i] >= utf8.RuneSelf) {
             if (pos < i) {
                 b = append(b, s.slice(pos, i).ꓸꓸꓸ);
@@ -161,7 +170,7 @@ internal static @string hexEscapeNonASCII(@string s) {
             pos = i + 1;
         }
     }
-    if (pos < builtin.len(s)) {
+    if (pos < len(s)) {
         b = append(b, s.slice(pos).ꓸꓸꓸ);
     }
     return (@string)b;
@@ -177,9 +186,13 @@ public static ref noBody NoBody => ref ((StaticBox<noBody>)ᏑNoBody).ValueSlot;
 public partial struct noBody {
 }
 
+} partial class httpᴛnoBody {
+
 public static (nint, error) Read(this noBody _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 public static error Close(this noBody _) { return default; }
 public static (int64, error) WriteTo(this noBody _Δp0, io.Writer _Δp1) { return (0, default); }
+
+} partial class http_package {
 
 // verify that an io.Copy from NoBody won't require a buffer:
 internal static io.WriterTo _ᴛ7ʗ = NoBody;
@@ -193,7 +206,7 @@ partial struct PushOptions {
     // Header specifies additional promised request headers. This cannot
     // include HTTP/2 pseudo header fields like ":path" and ":scheme",
     // which will be added automatically.
-    public ΔHeader Header;
+    public Header Header;
 }
 
 // Pusher is the interface implemented by ResponseWriters that support

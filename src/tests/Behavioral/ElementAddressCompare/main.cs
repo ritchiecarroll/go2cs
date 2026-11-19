@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using testing = testing_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct holder {
     internal quad q;
 }
 
+} partial class mainᴛholder {
+
 internal static (bool, bool) sameField(this ref holder h) {
     return (Ꮡelem(h.f, 1) == Ꮡelem(h.f, 1), Ꮡelem(h.f, 0) == Ꮡelem(h.f, 1));
 }
@@ -21,6 +24,8 @@ internal static (bool, bool) sameField(this ref holder h) {
 internal static (bool, bool) sameNamedField(this ref holder h) {
     return (Ꮡelem(h.q.Value, 2) == Ꮡelem(h.q.Value, 2), Ꮡelem(h.q.Value, 2) != Ꮡelem(h.q.Value, 3));
 }
+
+} partial class main_package {
 
 internal static (bool, bool) sameParam(quad xʗp) {
     ref var x = ref heap(xʗp.Clone(), out var Ꮡx);

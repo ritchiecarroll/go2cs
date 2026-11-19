@@ -47,6 +47,9 @@ continue_Outer:;
         // y is the last field
     );
     total += p.x;
+
+    // copy the items through a view
+    @unsafe.Pointer.CopyInto<nint>(@unsafe.Pointer.FromPinnedBox(Ꮡitems), 0, 4, items);
     return (total, errΔ1);
 }
 

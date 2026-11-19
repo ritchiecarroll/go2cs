@@ -291,8 +291,8 @@ internal static (slice<ж<global::go.net_package.NS>> ns, error err) nslookupNS(
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cnameˢ2 => ref cnameˢ2ᵇ;
-private static readonly @string cnameˢ2ᵇ = "cname"u8;
+internal static ref readonly @string cnameˢ => ref cnameˢᵇ;
+private static readonly @string cnameˢᵇ = "cname"u8;
 internal static ref readonly @string mAZ09SCanonicalNameSSAZ0ˢ => ref mAZ09SCanonicalNameSSAZ0ˢᵇ;
 private static readonly @string mAZ09SCanonicalNameSSAZ0ˢᵇ = @"(?m)^([a-z0-9.\-]+)\s+canonical name\s*=\s*([a-z0-9.\-]+)$"u8;
 
@@ -301,7 +301,7 @@ internal static (@string cname, error err) nslookupCNAME(@string name) {
     error err = default;
 
     @string r = default;
-    (r, err) = nslookup(cnameˢ2, name); if (err != nil) {
+    (r, err) = nslookup(cnameˢ, name); if (err != nil) {
         return (cname, err);
     }
     // mail.golang.com canonical name = golang.org.

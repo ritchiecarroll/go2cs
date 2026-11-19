@@ -5,8 +5,11 @@
 namespace go.@internal;
 
 using Δsyscall = syscall_package;
+using static poll_package;
 
 partial class poll_package {
+
+} partial class pollᴛFD {
 
 // SetsockoptInt wraps the setsockopt network call with an int argument.
 public static error SetsockoptInt(this ж<FD> Ꮡfd, nint level, nint name, nint arg) {
@@ -77,4 +80,4 @@ public static (nint, error) GetsockoptInt(this ж<FD> Ꮡfd, nint level, nint na
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end poll_package
+} // end pollᴛFD

@@ -23,17 +23,17 @@ private static readonly @string falseˢᵇ = "false"u8;
 
 // valueToString returns a textual representation of the reflection value val.
 // For debugging only.
-internal static @string valueToString(reflectꓸValue val) {
+internal static @string valueToString(Δreflect.Value val) {
     @string str = default;
     if (!val.IsValid()) {
         return zeroValueˢ;
     }
     var typ = val.Type();
     switch (val.Kind()) {
-    case var ᴛ when ᴛ == ΔInt || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
+    case var ᴛ when ᴛ == Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
         return strconv.FormatInt(val.Int(), 10);
     }
-    case var ᴛ when ᴛ == ΔUint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr: {
+    case var ᴛ when ᴛ == Uint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr: {
         return strconv.FormatUint(val.Uint(), 10);
     }
     case var ᴛ when ᴛ == Float32 || ᴛ == Float64: {
@@ -43,10 +43,10 @@ internal static @string valueToString(reflectꓸValue val) {
         var c = val.Complex();
         return strconv.FormatFloat(real(c), (byte)'g', -1, 64) + "+"u8 + strconv.FormatFloat(imag(c), (byte)'g', -1, 64) + "i"u8;
     }
-    case var ᴛ when ᴛ == ΔString: {
+    case var ᴛ when ᴛ == String: {
         return val.String();
     }
-    case var ᴛ when ᴛ == ΔBool: {
+    case var ᴛ when ᴛ == Bool: {
         if (val.Bool()) {
             return trueˢ;
         } else {
@@ -54,7 +54,7 @@ internal static @string valueToString(reflectꓸValue val) {
         }
         break;
     }
-    case var ᴛ when ᴛ == ΔPointer: {
+    case var ᴛ when ᴛ == Pointer: {
         var v = val;
         str = typ.String() + "("u8;
         if (v.IsNil()) {
@@ -65,7 +65,7 @@ internal static @string valueToString(reflectꓸValue val) {
         str += ")"u8;
         return str;
     }
-    case var ᴛ when ᴛ == Array || ᴛ == ΔSlice: {
+    case var ᴛ when ᴛ == Array || ᴛ == Slice: {
         var v = val;
         str += typ.String();
         str += "{"u8;
@@ -104,7 +104,7 @@ internal static @string valueToString(reflectꓸValue val) {
         str += "}"u8;
         return str;
     }
-    case var ᴛ when ᴛ == ΔInterface: {
+    case var ᴛ when ᴛ == Interface: {
         return typ.String() + "("u8 + valueToString(val.Elem()) + ")"u8;
     }
     case var ᴛ when ᴛ == Func: {

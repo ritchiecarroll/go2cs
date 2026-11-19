@@ -133,7 +133,7 @@ internal static Action<Action<@string>> genConcat2(Action<Action<@string>> g1, A
 internal static Action<Action<@string>> genConcat(params Span<Action<Action<@string>>> gsʗp) {
     var gs = gsʗp.slice();
 
-    if (builtin.len(gs) == 0) {
+    if (len(gs) == 0) {
         return genConst(""u8);
     }
     return genConcat2(gs[0], genConcat(gs[1..].ꓸꓸꓸ));
@@ -172,14 +172,14 @@ public static void BenchmarkMultiConflicts(ж<testing.B> Ꮡb) {
         ref var idx = ref heap(new global::go.net.http_package.routingIndex(), out var Ꮡidx);
         foreach (var (_, p) in range(pats)) {
             var got = indexConflicts(p, Ꮡidx);
-            if (builtin.len(got) != 0) {
-                Ꮡb.Fatalf("got %d conflicts, want 0", builtin.len(got));
+            if (len(got) != 0) {
+                Ꮡb.Fatalf("got %d conflicts, want 0", len(got));
             }
             idx.addPattern(p);
         }
         if (i == 0) {
             // Confirm that all the multis ended up where they belong.
-            nint g = builtin.len(idx.multis);
+            nint g = len(idx.multis);
             nint w = nMultis; if (g != w) {
                 Ꮡb.Fatalf("got %d multis, want %d", g, w);
             }

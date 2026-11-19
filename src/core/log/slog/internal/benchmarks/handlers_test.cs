@@ -46,7 +46,7 @@ public static void TestHandlers(ж<testing.T> t) {
             tΔ2.Fatal(err);
         }
         var got = h.ringBuffer[0].ΔClone();
-        if (!got.Time.Equal(rʗ2.Time) || !slices.EqualFunc<slice<slog.Attr>, slice<slog.Attr>, slog.Attr, slog.Attr>(attrSlice(got), attrSlice(rʗ2), ((Func<slog.Attr, slog.Attr, bool>)(slog.Equal)))) {
+        if (!got.Time.Equal(rʗ2.Time) || !slices.EqualFunc<slice<slog.Attr>, slice<slog.Attr>, slog.Attr, slog.Attr>(attrSlice(got), attrSlice(rʗ2), ((Func<slog.Attr, slog.Attr, bool>)(global::go.log.slogᴛAttr.Equal)))) {
             tΔ2.Errorf("got %+v, want %+v", got, rʗ2);
         }
     });

@@ -17,6 +17,7 @@ using encoding;
 using hash;
 using ꓸꓸꓸValue = Span<gen_package.Value>;
 using ꓸꓸꓸany = Span<any>;
+using static gen_package;
 
 partial class gen_package {
 
@@ -38,14 +39,20 @@ public static ж<File> NewFile(io.Writer w) {
     return Ꮡ(new File(w: w));
 }
 
+} partial class genᴛFile {
+
 public static void AddFunc(this ref File f, ж<Func> fn) {
     f.funcs = append(f.funcs, fn);
 }
+
+} partial class gen_package {
 
 partial struct fileConst {
     internal @string name;
     internal any data;
 }
+
+} partial class genᴛFile {
 
 public static void AddConst(this ref File f, @string name, any data) {
     // TODO: It would be nice if this were unified with "const" ops, but the
@@ -53,6 +60,8 @@ public static void AddConst(this ref File f, @string name, any data) {
     // to represent in "const" ops.
     f.consts = append(f.consts, new fileConst(name, data));
 }
+
+} partial class gen_package {
 
 partial struct Func {
     internal @string name;
@@ -65,6 +74,8 @@ public static ж<Func> NewFunc(@string name) {
     var fn = Ꮡ(new Func(name: name));
     return fn;
 }
+
+} partial class genᴛFunc {
 
 // attach adds x to fn's op list. If x has any unattached arguments, this adds
 // those first (recursively).
@@ -88,8 +99,10 @@ internal static void attach(this ж<Func> Ꮡfn, ж<op> Ꮡx) {
     fn.ops = append(fn.ops, Ꮡx);
 }
 
+} partial class gen_package {
+
 public static T Arg<W, T>(ж<Func> Ꮡfn)
-    where W : Δwrap<T>
+    where W : wrap<T>
     where T : Word
 {
     ref var fn = ref Ꮡfn.DerefOrNull();
@@ -115,7 +128,7 @@ public static void Return(params ꓸꓸꓸValue resultsʗp) {
 
 public partial struct op {
     internal @string Δop;
-    internal ж<Δkind> kind;
+    internal ж<kind> kind;
     internal slice<ж<op>> args;
     internal nint id;
     internal ж<Func> fn;
@@ -128,13 +141,19 @@ public partial struct op {
     internal @string name;
 }
 
+} partial class genᴛop {
+
 public static @string String(this ref op o) {
     return fmt.Sprintf("v%02d"u8, o.id);
 }
 
+} partial class gen_package {
+
 internal static ж<op> imm(any val) {
     return Ꮡ(new op(Δop: "imm", c: val));
 }
+
+} partial class genᴛop {
 
 internal static bool equalNoName(this ref op o, ж<op> Ꮡo2) {
     ref var o2 = ref Ꮡo2.DerefOrNull();
@@ -167,12 +186,16 @@ internal static void write(this ref op o, io.Writer w) {
     fmt.Fprintf(w, "\n"u8);
 }
 
+} partial class genᴛFunc {
+
 internal static void write(this ref Func fn, io.Writer w) {
     fmt.Fprintf(w, "FUNC %s\n"u8, fn.name);
     foreach (var (_, op) in range(fn.ops)) {
         op.write(w);
     }
 }
+
+} partial class genᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string initialˢ => ref initialˢᵇ;
@@ -236,6 +259,8 @@ public static void Compile(this ж<File> Ꮡf) {
         fn.emit(Ꮡf, locs);
     }
 }
+
+} partial class genᴛFunc {
 
 // cse performs common subexpression elimination.
 internal static bool cse(this ref Func fn) {
@@ -323,6 +348,8 @@ internal static bool deadcode(this ref Func fn) {
     return true;
 }
 
+} partial class gen_package {
+
 // canMem is a map from operation to a bitmap of which arguments can use a
 // direct memory reference.
 [GoLazy] partial class lazyᴛcanMem { internal static map<@string, uint64> canMem = new map<@string, uint64>{
@@ -334,6 +361,8 @@ internal static bool deadcode(this ref Func fn) {
     ["VPSUBQ"] = ((uint64)1 << 0),
     ["VPSHUFBITQMB"] = ((uint64)1 << 0)
 }; }
+
+} partial class genᴛFunc {
 
 // addLoads inserts load ops for ops that can't take memory inputs directly.
 internal static void addLoads(this ж<Func> Ꮡfn) {
@@ -380,6 +409,8 @@ internal static map<ж<op>, nint> opRefs(this ref Func fn) {
     return refs;
 }
 
+} partial class gen_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string movqˢ => ref movqˢᵇ;
 private static readonly @string movqˢᵇ = "MOVQ"u8;
@@ -411,6 +442,8 @@ internal static ж<op> makeLoad(ж<op> Ꮡderef) {
 }
 
 partial struct opHeap /*[]ж<op>*/;
+
+} partial class genᴛopHeap {
 
 internal static nint Len(this opHeap h) { return len(h); }
 internal static void Swap(this opHeap h, nint i, nint j) { (h[i], h[j]) = (h[j], h[i]); }
@@ -444,6 +477,8 @@ internal static any Pop(this ref opHeap h) {
     h = old.slice(0, n - 1);
     return x.OrTypedNil();
 }
+
+} partial class genᴛFunc {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object scheduleDidnTScheduleAllˢ = (@string)"schedule didn't schedule all ops"u8;
@@ -573,6 +608,8 @@ internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs
     fmt.Fprintf(w, "\n"u8);
 }
 
+} partial class genᴛFile {
+
 internal static void emitConst(this ref File f, @string name, any data) {
     switch (data.type()) {
     case slice<ж<Func>> dataΔ1: {
@@ -605,4 +642,4 @@ internal static void emitConst(this ref File f, @string name, any data) {
     fmt.Fprintf(f.w, "\n"u8);
 }
 
-} // end gen_package
+} // end genᴛFile

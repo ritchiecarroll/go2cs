@@ -220,8 +220,8 @@ public static error /*err*/ LookupPrivilegeValue(ж<uint16> systemname, ж<uint1
     return err;
 }
 
-public static (syscallꓸHandle handle, error err) OpenSCManager(ж<uint16> machineName, ж<uint16> databaseName, uint32 access) {
-    syscallꓸHandle handle = default;
+public static (syscall.Handle handle, error err) OpenSCManager(ж<uint16> machineName, ж<uint16> databaseName, uint32 access) {
+    syscall.Handle handle = default;
     error err = default;
 
     var ᴋ13 = machineName;
@@ -229,28 +229,28 @@ public static (syscallꓸHandle handle, error err) OpenSCManager(ж<uint16> mach
         var (r0, _, e1) = syscall.SyscallN(procOpenSCManagerW.Addr(), (uintptr)ᴋ13, (uintptr)ᴋ14, (uintptr)access);
     System.GC.KeepAlive(ᴋ13);
     System.GC.KeepAlive(ᴋ14);
-    handle = (syscallꓸHandle)r0;
+    handle = (syscall.Handle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
     return (handle, err);
 }
 
-public static (syscallꓸHandle handle, error err) OpenService(syscallꓸHandle mgr, ж<uint16> serviceName, uint32 access) {
-    syscallꓸHandle handle = default;
+public static (syscall.Handle handle, error err) OpenService(syscall.Handle mgr, ж<uint16> serviceName, uint32 access) {
+    syscall.Handle handle = default;
     error err = default;
 
     var ᴋ15 = serviceName;
         var (r0, _, e1) = syscall.SyscallN(procOpenServiceW.Addr(), (uintptr)mgr, (uintptr)ᴋ15, (uintptr)access);
     System.GC.KeepAlive(ᴋ15);
-    handle = (syscallꓸHandle)r0;
+    handle = (syscall.Handle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
     return (handle, err);
 }
 
-public static error /*err*/ OpenThreadToken(syscallꓸHandle h, uint32 access, bool openasself, ж<syscall.Token> token) {
+public static error /*err*/ OpenThreadToken(syscall.Handle h, uint32 access, bool openasself, ж<syscall.Token> token) {
     error err = default;
 
     uint32 _p0 = default;
@@ -266,7 +266,7 @@ public static error /*err*/ OpenThreadToken(syscallꓸHandle h, uint32 access, b
     return err;
 }
 
-public static error /*err*/ QueryServiceStatus(syscallꓸHandle hService, ж<SERVICE_STATUS> lpServiceStatus) {
+public static error /*err*/ QueryServiceStatus(syscall.Handle hService, ж<SERVICE_STATUS> lpServiceStatus) {
     error err = default;
 
     var ᴋ17 = lpServiceStatus;
@@ -379,8 +379,8 @@ public static error /*errcode*/ GetAdaptersAddresses(uint32 family, uint32 flags
     return errcode;
 }
 
-public static (syscallꓸHandle handle, error err) CreateEvent(ж<SecurityAttributes> eventAttrs, uint32 manualReset, uint32 initialState, ж<uint16> name) {
-    syscallꓸHandle handle = default;
+public static (syscall.Handle handle, error err) CreateEvent(ж<SecurityAttributes> eventAttrs, uint32 manualReset, uint32 initialState, ж<uint16> name) {
+    syscall.Handle handle = default;
     error err = default;
 
     var ᴋ31 = eventAttrs;
@@ -388,27 +388,27 @@ public static (syscallꓸHandle handle, error err) CreateEvent(ж<SecurityAttrib
         var (r0, _, e1) = syscall.SyscallN(procCreateEventW.Addr(), (uintptr)ᴋ31, (uintptr)manualReset, (uintptr)initialState, (uintptr)ᴋ32);
     System.GC.KeepAlive(ᴋ31);
     System.GC.KeepAlive(ᴋ32);
-    handle = (syscallꓸHandle)r0;
+    handle = (syscall.Handle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
     return (handle, err);
 }
 
-public static (syscallꓸHandle handle, error err) CreateIoCompletionPort(syscallꓸHandle filehandle, syscallꓸHandle cphandle, uintptr key, uint32 threadcnt) {
-    syscallꓸHandle handle = default;
+public static (syscall.Handle handle, error err) CreateIoCompletionPort(syscall.Handle filehandle, syscall.Handle cphandle, uintptr key, uint32 threadcnt) {
+    syscall.Handle handle = default;
     error err = default;
 
     var (r0, _, e1) = syscall.SyscallN(procCreateIoCompletionPort.Addr(), (uintptr)filehandle, (uintptr)cphandle, (uintptr)key, (uintptr)threadcnt);
-    handle = (syscallꓸHandle)r0;
+    handle = (syscall.Handle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
     return (handle, err);
 }
 
-public static (syscallꓸHandle handle, error err) CreateNamedPipe(ж<uint16> name, uint32 flags, uint32 pipeMode, uint32 maxInstances, uint32 outSize, uint32 inSize, uint32 defaultTimeout, ж<syscall.SecurityAttributes> sa) {
-    syscallꓸHandle handle = default;
+public static (syscall.Handle handle, error err) CreateNamedPipe(ж<uint16> name, uint32 flags, uint32 pipeMode, uint32 maxInstances, uint32 outSize, uint32 inSize, uint32 defaultTimeout, ж<syscall.SecurityAttributes> sa) {
+    syscall.Handle handle = default;
     error err = default;
 
     var ᴋ33 = name;
@@ -416,7 +416,7 @@ public static (syscallꓸHandle handle, error err) CreateNamedPipe(ж<uint16> na
         var (r0, _, e1) = syscall.SyscallN(procCreateNamedPipeW.Addr(), (uintptr)ᴋ33, (uintptr)flags, (uintptr)pipeMode, (uintptr)maxInstances, (uintptr)outSize, (uintptr)inSize, (uintptr)defaultTimeout, (uintptr)ᴋ34);
     System.GC.KeepAlive(ᴋ33);
     System.GC.KeepAlive(ᴋ34);
-    handle = (syscallꓸHandle)r0;
+    handle = (syscall.Handle)r0;
     if (handle == syscall.InvalidHandle) {
         err = errnoErr(e1);
     }
@@ -453,19 +453,19 @@ public static uint32 /*ccp*/ GetConsoleCP() {
     return ccp;
 }
 
-public static (syscallꓸHandle pseudoHandle, error err) GetCurrentThread() {
-    syscallꓸHandle pseudoHandle = default;
+public static (syscall.Handle pseudoHandle, error err) GetCurrentThread() {
+    syscall.Handle pseudoHandle = default;
     error err = default;
 
     var (r0, _, e1) = syscall.SyscallN(procGetCurrentThread.Addr());
-    pseudoHandle = (syscallꓸHandle)r0;
+    pseudoHandle = (syscall.Handle)r0;
     if (pseudoHandle == 0) {
         err = errnoErr(e1);
     }
     return (pseudoHandle, err);
 }
 
-public static error /*err*/ GetFileInformationByHandleEx(syscallꓸHandle handle, uint32 @class, ж<byte> info, uint32 bufsize) {
+public static error /*err*/ GetFileInformationByHandleEx(syscall.Handle handle, uint32 @class, ж<byte> info, uint32 bufsize) {
     error err = default;
 
     var ᴋ37 = info;
@@ -477,7 +477,7 @@ public static error /*err*/ GetFileInformationByHandleEx(syscallꓸHandle handle
     return err;
 }
 
-public static error /*err*/ GetFileSizeEx(syscallꓸHandle handle, ж<int64> size) {
+public static error /*err*/ GetFileSizeEx(syscall.Handle handle, ж<int64> size) {
     error err = default;
 
     var ᴋ38 = size;
@@ -489,7 +489,7 @@ public static error /*err*/ GetFileSizeEx(syscallꓸHandle handle, ж<int64> siz
     return err;
 }
 
-public static (uint32 n, error err) GetFinalPathNameByHandle(syscallꓸHandle @file, ж<uint16> filePath, uint32 filePathSize, uint32 flags) {
+public static (uint32 n, error err) GetFinalPathNameByHandle(syscall.Handle @file, ж<uint16> filePath, uint32 filePathSize, uint32 flags) {
     uint32 n = default;
     error err = default;
 
@@ -503,7 +503,7 @@ public static (uint32 n, error err) GetFinalPathNameByHandle(syscallꓸHandle @f
     return (n, err);
 }
 
-public static (uint32 n, error err) GetModuleFileName(syscallꓸHandle module, ж<uint16> fn, uint32 len) {
+public static (uint32 n, error err) GetModuleFileName(syscall.Handle module, ж<uint16> fn, uint32 len) {
     uint32 n = default;
     error err = default;
 
@@ -517,14 +517,14 @@ public static (uint32 n, error err) GetModuleFileName(syscallꓸHandle module, �
     return (n, err);
 }
 
-public static (syscallꓸHandle handle, error err) GetModuleHandle(ж<uint16> modulename) {
-    syscallꓸHandle handle = default;
+public static (syscall.Handle handle, error err) GetModuleHandle(ж<uint16> modulename) {
+    syscall.Handle handle = default;
     error err = default;
 
     var ᴋ41 = modulename;
         var (r0, _, e1) = syscall.SyscallN(procGetModuleHandleW.Addr(), (uintptr)ᴋ41);
     System.GC.KeepAlive(ᴋ41);
-    handle = (syscallꓸHandle)r0;
+    handle = (syscall.Handle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -547,7 +547,7 @@ public static (uint32 n, error err) GetTempPath2(uint32 buflen, ж<uint16> buf) 
     return (n, err);
 }
 
-public static error /*err*/ GetVolumeInformationByHandle(syscallꓸHandle @file, ж<uint16> volumeNameBuffer, uint32 volumeNameSize, ж<uint32> volumeNameSerialNumber, ж<uint32> maximumComponentLength, ж<uint32> fileSystemFlags, ж<uint16> fileSystemNameBuffer, uint32 fileSystemNameSize) {
+public static error /*err*/ GetVolumeInformationByHandle(syscall.Handle @file, ж<uint16> volumeNameBuffer, uint32 volumeNameSize, ж<uint32> volumeNameSerialNumber, ж<uint32> maximumComponentLength, ж<uint32> fileSystemFlags, ж<uint16> fileSystemNameBuffer, uint32 fileSystemNameSize) {
     error err = default;
 
     var ᴋ43 = volumeNameBuffer;
@@ -581,7 +581,7 @@ public static error /*err*/ GetVolumeNameForVolumeMountPoint(ж<uint16> volumeMo
     return err;
 }
 
-public static error /*err*/ LockFileEx(syscallꓸHandle @file, uint32 flags, uint32 reserved, uint32 bytesLow, uint32 bytesHigh, ж<syscall.Overlapped> overlapped) {
+public static error /*err*/ LockFileEx(syscall.Handle @file, uint32 flags, uint32 reserved, uint32 bytesLow, uint32 bytesHigh, ж<syscall.Overlapped> overlapped) {
     error err = default;
 
     var ᴋ50 = overlapped;
@@ -627,12 +627,12 @@ public static (int32 nwrite, error err) MultiByteToWideChar(uint32 codePage, uin
     return (nwrite, err);
 }
 
-public static (syscallꓸHandle handle, error err) ReOpenFile(syscallꓸHandle filehandle, uint32 desiredAccess, uint32 shareMode, uint32 flagAndAttributes) {
-    syscallꓸHandle handle = default;
+public static (syscall.Handle handle, error err) ReOpenFile(syscall.Handle filehandle, uint32 desiredAccess, uint32 shareMode, uint32 flagAndAttributes) {
+    syscall.Handle handle = default;
     error err = default;
 
     var (r0, _, e1) = syscall.SyscallN(procReOpenFile.Addr(), (uintptr)filehandle, (uintptr)desiredAccess, (uintptr)shareMode, (uintptr)flagAndAttributes);
-    handle = (syscallꓸHandle)r0;
+    handle = (syscall.Handle)r0;
     if (handle == syscall.InvalidHandle) {
         err = errnoErr(e1);
     }
@@ -669,7 +669,7 @@ public static uintptr /*ret*/ RtlVirtualUnwind(uint32 handlerType, uintptr baseA
     return ret;
 }
 
-public static error /*err*/ SetFileInformationByHandle(syscallꓸHandle handle, uint32 fileInformationClass, @unsafe.Pointer buf, uint32 bufsize) {
+public static error /*err*/ SetFileInformationByHandle(syscall.Handle handle, uint32 fileInformationClass, @unsafe.Pointer buf, uint32 bufsize) {
     error err = default;
 
     var ᴋ62 = buf;
@@ -681,7 +681,7 @@ public static error /*err*/ SetFileInformationByHandle(syscallꓸHandle handle, 
     return err;
 }
 
-public static error /*err*/ UnlockFileEx(syscallꓸHandle @file, uint32 reserved, uint32 bytesLow, uint32 bytesHigh, ж<syscall.Overlapped> overlapped) {
+public static error /*err*/ UnlockFileEx(syscall.Handle @file, uint32 reserved, uint32 bytesLow, uint32 bytesHigh, ж<syscall.Overlapped> overlapped) {
     error err = default;
 
     var ᴋ63 = overlapped;
@@ -757,7 +757,7 @@ public static error /*neterr*/ NetUserDel(ж<uint16> serverName, ж<uint16> user
 
 // go2cs generated this placeholder — func NtOpenFile is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static error /*ntstatus*/ NtQueryInformationFile(syscallꓸHandle handle, ж<IO_STATUS_BLOCK> iosb, @unsafe.Pointer inBuffer, uint32 inBufferLen, uint32 @class) {
+public static error /*ntstatus*/ NtQueryInformationFile(syscall.Handle handle, ж<IO_STATUS_BLOCK> iosb, @unsafe.Pointer inBuffer, uint32 inBufferLen, uint32 @class) {
     error ntstatus = default;
 
     var ᴋ72 = iosb;
@@ -771,7 +771,7 @@ public static error /*ntstatus*/ NtQueryInformationFile(syscallꓸHandle handle,
     return ntstatus;
 }
 
-public static error /*ntstatus*/ NtSetInformationFile(syscallꓸHandle handle, ж<IO_STATUS_BLOCK> iosb, @unsafe.Pointer inBuffer, uint32 inBufferLen, uint32 @class) {
+public static error /*ntstatus*/ NtSetInformationFile(syscall.Handle handle, ж<IO_STATUS_BLOCK> iosb, @unsafe.Pointer inBuffer, uint32 inBufferLen, uint32 @class) {
     error ntstatus = default;
 
     var ᴋ74 = iosb;
@@ -805,7 +805,7 @@ internal static syscall.Errno /*ret*/ rtlNtStatusToDosErrorNoTeb(NTStatus ntstat
     return ret;
 }
 
-public static error /*err*/ GetProcessMemoryInfo(syscallꓸHandle handle, ж<PROCESS_MEMORY_COUNTERS> memCounters, uint32 cb) {
+public static error /*err*/ GetProcessMemoryInfo(syscall.Handle handle, ж<PROCESS_MEMORY_COUNTERS> memCounters, uint32 cb) {
     error err = default;
 
     var ᴋ77 = memCounters;
@@ -859,7 +859,7 @@ public static error /*err*/ GetProfilesDirectory(ж<uint16> dir, ж<uint32> dirL
     return err;
 }
 
-public static error /*err*/ WSADuplicateSocket(syscallꓸHandle s, uint32 processID, ж<syscall.WSAProtocolInfo> info) {
+public static error /*err*/ WSADuplicateSocket(syscall.Handle s, uint32 processID, ж<syscall.WSAProtocolInfo> info) {
     error err = default;
 
     var ᴋ82 = info;
@@ -873,14 +873,14 @@ public static error /*err*/ WSADuplicateSocket(syscallꓸHandle s, uint32 proces
 
 // go2cs generated this placeholder — func WSAGetOverlappedResult is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static (syscallꓸHandle handle, error err) WSASocket(int32 af, int32 typ, int32 protocol, ж<syscall.WSAProtocolInfo> protinfo, uint32 group, uint32 flags) {
-    syscallꓸHandle handle = default;
+public static (syscall.Handle handle, error err) WSASocket(int32 af, int32 typ, int32 protocol, ж<syscall.WSAProtocolInfo> protinfo, uint32 group, uint32 flags) {
+    syscall.Handle handle = default;
     error err = default;
 
     var ᴋ83 = protinfo;
         var (r0, _, e1) = syscall.SyscallN(procWSASocketW.Addr(), (uintptr)af, (uintptr)typ, (uintptr)protocol, (uintptr)ᴋ83, (uintptr)group, (uintptr)flags);
     System.GC.KeepAlive(ᴋ83);
-    handle = (syscallꓸHandle)r0;
+    handle = (syscall.Handle)r0;
     if (handle == syscall.InvalidHandle) {
         err = errnoErr(e1);
     }

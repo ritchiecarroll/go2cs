@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -25,7 +26,11 @@ partial struct gen {
     internal map<@string, bool> used;
 }
 
+} partial class mainᴛgen {
+
 internal static bool isUnique(this ref gen g, @string name, bool @private) { return !g.used[name]; }
+
+} partial class main_package {
 
 internal static @string makeName(@string @base, Func<@string, bool, bool> check) {
     if (check == nil || check(@base, false)) {

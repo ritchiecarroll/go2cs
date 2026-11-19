@@ -42,11 +42,14 @@ using static go.main_package;
 
 // The struct types whose arrays this package holds inline (the go.arrays family), as the converter
 // admitted them: a `GoInlineArrayType` record per named type, a `GoInlineArrayKeys` record with the
-// count and a digest of every admitted type (anonymous ones included), and a `GoInlineArrays` record
-// naming the rule when it is not the default. A -tests conversion applies the same rule rather than
-// deciding again, and refuses a production set that admits differently. The section exists only while
-// there is a record to hold.
+// count and a digest of every admitted type (anonymous ones included), a `GoInlineArrayAnonymous`
+// record per admitted anonymous type, a `GoInlineArraySeed` record per -inline-arrays seed, and a
+// `GoInlineArrays` record naming the rule when it is not the default. A -tests conversion applies the
+// same rule and seeds rather than deciding again, and refuses a production set that admits differently.
+// The section exists only while there is a record to hold.
 // <InlineArrays>
+[assembly: go.golib.GoInlineArrayAnonymous("9372ff055bfdc900")]
+[assembly: go.golib.GoInlineArrayAnonymous("ce5718e1508c46dd")]
 [assembly: go.golib.GoInlineArrayKeys(2, "84ed87dc45bc6fa6")]
 // </InlineArrays>
 

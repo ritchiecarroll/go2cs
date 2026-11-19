@@ -49,7 +49,7 @@ public static void TestMulAlloc(ж<testing.T> t) {
     foreach (var (_, size) in range(sizes)) {
         var x = randInt(r, (nuint)size);
         var y = randInt(r, (nuint)size);
-        var z = Ꮡ(new ΔInt(abs: new global::go.math.big_package.Δnat((nint)(2 * (nuint)size))));
+        var z = Ꮡ(new Int(abs: new global::go.math.big_package.nat((nint)(2 * (nuint)size))));
         {
             var xʗ1 = x;
             var yʗ1 = y;
@@ -68,7 +68,7 @@ public static void TestSqrAlloc(ж<testing.T> t) {
     var sizes = slice<nint>([basicSqrThreshold / 2, basicSqrThreshold, karatsubaSqrThreshold]);
     foreach (var (_, size) in range(sizes)) {
         var x = randInt(r, (nuint)size);
-        var z = Ꮡ(new ΔInt(abs: new global::go.math.big_package.Δnat((nint)(2 * (nuint)size))));
+        var z = Ꮡ(new Int(abs: new global::go.math.big_package.nat((nint)(2 * (nuint)size))));
         {
             var xʗ1 = x;
             var zʗ1 = z;

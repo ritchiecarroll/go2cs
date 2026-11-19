@@ -38,7 +38,7 @@ Before, `src/core/strings/builder.cs`:
 
 After, the same file:
 
-<!-- source: src/core/strings/builder.cs:53 -->
+<!-- source: src/core/strings/builder.cs:56 -->
 ```csharp
 public static nint Len(this ref Builder b) { return len(b.buf); }
 ```
@@ -72,7 +72,7 @@ Before, `src/core/container/list/list.cs`:
 
 After, the same file:
 
-<!-- source: src/core/container/list/list.cs:48-51 -->
+<!-- source: src/core/container/list/list.cs:54-57 -->
 ```csharp
 partial struct List {
     internal Element root; // sentinel list element, only &root, root.prev, and root.next are used
@@ -103,7 +103,7 @@ Before, `src/core/time/time.cs`:
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:936 -->
+<!-- source: src/core/time/time.cs:976 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -131,7 +131,7 @@ Before, `src/core/sort/sort.cs`:
 
 After, the same file:
 
-<!-- source: src/core/sort/sort.cs:119 -->
+<!-- source: src/core/sort/sort.cs:129 -->
 ```csharp
 partial struct IntSlice /*[]nint*/;
 ```
@@ -167,7 +167,7 @@ Before, `src/core/sort/sort.cs`:
 
 After, the same file:
 
-<!-- source: src/core/sort/sort.cs:86-90 -->
+<!-- source: src/core/sort/sort.cs:92-96 -->
 ```csharp
 partial struct reverse {
     // This embedded Interface permits Reverse to use the methods of
@@ -210,7 +210,7 @@ Before, `src/core/net/rpc/jsonrpc/client.cs`:
 
 After, the same file:
 
-<!-- source: src/core/net/rpc/jsonrpc/client.cs:46-50 -->
+<!-- source: src/core/net/rpc/jsonrpc/client.cs:47-51 -->
 ```csharp
 partial struct clientRequest {
     public @string Method; /*`json:"method"`*/
@@ -242,7 +242,7 @@ internal static nint format(this Duration d, [GoArrayDims(32)] ж<array<byte>> �
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:974 -->
+<!-- source: src/core/time/time.cs:1016 -->
 ```csharp
 internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
 ```

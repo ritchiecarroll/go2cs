@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -25,37 +26,41 @@ partial struct localBase {
     internal nint n;
 }
 
+} partial class mainᴛlocalBase {
+
 internal static nint Twice(this localBase b) { return b.n * 2; }
+
+} partial class main_package {
 
 partial struct Wrap {
     /*embed*/ internal localBase localBase;
 }
 
-internal static time.Time @base = time.Date(2026, 9, 30, 12, 34, 56, 789000000, time.ΔUTC);
+internal static time.Time @base = time.Date(2026, 9, 30, 12, 34, 56, 789000000, time.UTC);
 
 internal static void main() {
     var s = new Stamp(@base);
     var p = Ꮡ(new Stamp(@base));
 
-    fmt.Println(s.Time.Truncate(time.ΔSecond).Format(time.RFC3339Nano));
-    fmt.Println(p.Value.Time.Add(-time.ΔHour).Format(time.RFC3339));
+    fmt.Println(s.Time.Truncate(time.Second).Format(time.RFC3339Nano));
+    fmt.Println(p.Value.Time.Add(-time.Hour).Format(time.RFC3339));
     fmt.Println(s.Time.Unix(), p.Value.Time.Nanosecond());
 
     ref var t = ref heap<time.Time>(@base, out var Ꮡt);
     var ps = new PtrStamp(Ꮡt);
     var pp = Ꮡ(new PtrStamp(Ꮡt));
-    fmt.Println(ps.Time.Value.Truncate(time.ΔMinute).Format(time.RFC3339), pp.Value.Time.Value.Year());
+    fmt.Println(ps.Time.Value.Truncate(time.Minute).Format(time.RFC3339), pp.Value.Time.Value.Year());
 
     ref var o = ref heap<Outer>(new Outer(new inner(@base)), out var Ꮡo);
     var po = Ꮡo;
-    fmt.Println(o.inner.Time.Truncate(time.ΔHour).Format(time.RFC3339), po.Value.inner.Time.Month());
+    fmt.Println(o.inner.Time.Truncate(time.Hour).Format(time.RFC3339), po.Value.inner.Time.Month());
     
     var sʗ1 = s;
     var f = (time.Duration p1) => sʗ1.Time.Truncate(p1);
-    fmt.Println(f(time.ΔMinute).Format(time.RFC3339));
+    fmt.Println(f(time.Minute).Format(time.RFC3339));
     
     var g = ((Func<Stamp, time.Duration, time.Time>)((p0, p1) => p0.Time.Add(p1)));
-    fmt.Println(g(s, time.ΔHour).Format(time.RFC3339));
+    fmt.Println(g(s, time.Hour).Format(time.RFC3339));
 
     var w = new Wrap(new localBase(21));
     fmt.Println(w.Twice());

@@ -18,24 +18,24 @@ using static go.math.big_package;
 partial class big_internal_test_package {
 
 partial struct cmpTestsᴛ1 /*dyn*/ {
-    internal global::go.math.big_package.Δnat x, y;
+    internal global::go.math.big_package.nat x, y;
     internal nint r;
 }
 internal static slice<cmpTestsᴛ1> cmpTests = [
     new(default, default, 0),
-    new(default, (global::go.math.big_package.Δnat)default, 0),
-    new((global::go.math.big_package.Δnat)default, default, 0),
-    new((global::go.math.big_package.Δnat)default, (global::go.math.big_package.Δnat)default, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{0}.slice()), new Δnat(new global::go.math.big_package.Word[]{0}.slice()), 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{0}.slice()), new Δnat(new global::go.math.big_package.Word[]{1}.slice()), -1),
-    new(new Δnat(new global::go.math.big_package.Word[]{1}.slice()), new Δnat(new global::go.math.big_package.Word[]{0}.slice()), 1),
-    new(new Δnat(new global::go.math.big_package.Word[]{1}.slice()), new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 1),
-    new(new Δnat(new global::go.math.big_package.Word[]{1}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, _M}.slice()), -1),
-    new(new Δnat(new global::go.math.big_package.Word[]{1, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, _M}.slice()), 1),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{1, _M}.slice()), -1),
-    new(new Δnat(new global::go.math.big_package.Word[]{16, 571956, 8794, 68}.slice()), new Δnat(new global::go.math.big_package.Word[]{837, 9146, 1, 754489}.slice()), -1),
-    new(new Δnat(new global::go.math.big_package.Word[]{34986, 41, 105, 1957}.slice()), new Δnat(new global::go.math.big_package.Word[]{56, 7458, 104, 1957}.slice()), 1)
+    new(default, (global::go.math.big_package.nat)default, 0),
+    new((global::go.math.big_package.nat)default, default, 0),
+    new((global::go.math.big_package.nat)default, (global::go.math.big_package.nat)default, 0),
+    new(new nat(new global::go.math.big_package.Word[]{0}.slice()), new nat(new global::go.math.big_package.Word[]{0}.slice()), 0),
+    new(new nat(new global::go.math.big_package.Word[]{0}.slice()), new nat(new global::go.math.big_package.Word[]{1}.slice()), -1),
+    new(new nat(new global::go.math.big_package.Word[]{1}.slice()), new nat(new global::go.math.big_package.Word[]{0}.slice()), 1),
+    new(new nat(new global::go.math.big_package.Word[]{1}.slice()), new nat(new global::go.math.big_package.Word[]{1}.slice()), 0),
+    new(new nat(new global::go.math.big_package.Word[]{0, _M}.slice()), new nat(new global::go.math.big_package.Word[]{1}.slice()), 1),
+    new(new nat(new global::go.math.big_package.Word[]{1}.slice()), new nat(new global::go.math.big_package.Word[]{0, _M}.slice()), -1),
+    new(new nat(new global::go.math.big_package.Word[]{1, _M}.slice()), new nat(new global::go.math.big_package.Word[]{0, _M}.slice()), 1),
+    new(new nat(new global::go.math.big_package.Word[]{0, _M}.slice()), new nat(new global::go.math.big_package.Word[]{1, _M}.slice()), -1),
+    new(new nat(new global::go.math.big_package.Word[]{16, 571956, 8794, 68}.slice()), new nat(new global::go.math.big_package.Word[]{837, 9146, 1, 754489}.slice()), -1),
+    new(new nat(new global::go.math.big_package.Word[]{34986, 41, 105, 1957}.slice()), new nat(new global::go.math.big_package.Word[]{56, 7458, 104, 1957}.slice()), 1)
 ];
 
 public static void TestCmp(ж<testing.T> t) {
@@ -50,16 +50,16 @@ public static void TestCmp(ж<testing.T> t) {
 // type funNN is a methodless func type — rendered inline as its base delegate
 // type funSNN is a methodless func type — rendered inline as its base delegate
 internal partial struct argNN {
-    internal global::go.math.big_package.Δnat z, x, y;
+    internal global::go.math.big_package.nat z, x, y;
 }
 
 internal static slice<argNN> sumNN = [
     new(),
-    new(new Δnat(new global::go.math.big_package.Word[]{1}.slice()), default, new Δnat(new global::go.math.big_package.Word[]{1}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{1111111110}.slice()), new Δnat(new global::go.math.big_package.Word[]{123456789}.slice()), new Δnat(new global::go.math.big_package.Word[]{987654321}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice()), default, new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 1111111110}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 123456789}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 987654321}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 1}.slice()))
+    new(new nat(new global::go.math.big_package.Word[]{1}.slice()), default, new nat(new global::go.math.big_package.Word[]{1}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{1111111110}.slice()), new nat(new global::go.math.big_package.Word[]{123456789}.slice()), new nat(new global::go.math.big_package.Word[]{987654321}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice()), default, new nat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{0, 0, 0, 1111111110}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, 0, 123456789}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, 0, 987654321}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, _M}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, 1}.slice()))
 ];
 
 internal static slice<argNN> prodNN;
@@ -75,8 +75,8 @@ internal static void permute<E>(slice<E> x) {
 
 // testMul returns the product of x and y using the grade-school algorithm,
 // as a reference implementation.
-internal static global::go.math.big_package.Δnat testMul(global::go.math.big_package.Δnat x, global::go.math.big_package.Δnat y) {
-    var z = new global::go.math.big_package.Δnat(len(x) + len(y));
+internal static global::go.math.big_package.nat testMul(global::go.math.big_package.nat x, global::go.math.big_package.nat y) {
+    var z = new global::go.math.big_package.nat(len(x) + len(y));
     foreach (var (i, xi) in range<global::go.math.big_package.Word>(x)) {
         foreach (var (j, yj) in range<global::go.math.big_package.Word>(y)) {
             var (hi, lo) = bits.Mul((nuint)xi, (nuint)yj);
@@ -98,8 +98,8 @@ internal static global::go.math.big_package.Δnat testMul(global::go.math.big_pa
 internal static slice<argNN> prodTests() {
     slice<argNN> tests = default;
     foreach (var size in range(10)) {
-        global::go.math.big_package.Δnat x = default;
-        global::go.math.big_package.Δnat y = default;
+        global::go.math.big_package.nat x = default;
+        global::go.math.big_package.nat y = default;
         foreach (var i in range(size)) {
             x = append(x, (global::go.math.big_package.Word)(nuint)(i + 1));
             y = append(y, (global::go.math.big_package.Word)(nuint)(i + 1 + size));
@@ -117,8 +117,8 @@ internal static slice<argNN> prodTests() {
             continue; // already tested the only 0-length possibility above
         }
         foreach (var _ᴛ1 in range(10)) {
-            var x = new global::go.math.big_package.Δnat(size);
-            var y = new global::go.math.big_package.Δnat(size);
+            var x = new global::go.math.big_package.nat(size);
+            var y = new global::go.math.big_package.nat(size);
             foreach (var i in range(size)) {
                 x[i] = words[Δrand.N(len(words))];
                 y[i] = words[Δrand.N(len(words))];
@@ -133,19 +133,19 @@ internal static slice<argNN> prodTests() {
 
 internal static slice<argNN> prodNNExtra;
 internal static void initᴛprodNNExtra() { prodNNExtra = slice<argNN>([
-    new(default, new Δnat(new global::go.math.big_package.Word[]{991}.slice()), default),
-    new(new Δnat(new global::go.math.big_package.Word[]{991}.slice()), new Δnat(new global::go.math.big_package.Word[]{991}.slice()), new Δnat(new global::go.math.big_package.Word[]{1}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{991 * 991}.slice()), new Δnat(new global::go.math.big_package.Word[]{991}.slice()), new Δnat(new global::go.math.big_package.Word[]{991}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{8, 22, 15}.slice()), new Δnat(new global::go.math.big_package.Word[]{2, 3}.slice()), new Δnat(new global::go.math.big_package.Word[]{4, 5}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{10, 27, 52, 45, 28}.slice()), new Δnat(new global::go.math.big_package.Word[]{2, 3, 4}.slice()), new Δnat(new global::go.math.big_package.Word[]{5, 6, 7}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{12, 32, 61, 100, 94, 76, 45}.slice()), new Δnat(new global::go.math.big_package.Word[]{2, 3, 4, 5}.slice()), new Δnat(new global::go.math.big_package.Word[]{6, 7, 8, 9}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{12, 32, 61, 100, 94, 76, 45}.slice()), new Δnat(new global::go.math.big_package.Word[]{2, 3, 4, 5}.slice()), new Δnat(new global::go.math.big_package.Word[]{6, 7, 8, 9}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{14, 37, 70, 114, 170, 166, 148, 115, 66}.slice()), new Δnat(new global::go.math.big_package.Word[]{2, 3, 4, 5, 6}.slice()), new Δnat(new global::go.math.big_package.Word[]{7, 8, 9, 10, 11}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{991 * 991, 991 * 2, 1}.slice()), new Δnat(new global::go.math.big_package.Word[]{991, 1}.slice()), new Δnat(new global::go.math.big_package.Word[]{991, 1}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{991 * 991, 991 * 777 * 2, 777 * 777}.slice()), new Δnat(new global::go.math.big_package.Word[]{991, 777}.slice()), new Δnat(new global::go.math.big_package.Word[]{991, 777}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 991 * 991}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 991}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 991}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{1 * 991, 2 * 991, 3 * 991, 4 * 991}.slice()), new Δnat(new global::go.math.big_package.Word[]{1, 2, 3, 4}.slice()), new Δnat(new global::go.math.big_package.Word[]{991}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{4, 11, 20, 30, 20, 11, 4}.slice()), new Δnat(new global::go.math.big_package.Word[]{1, 2, 3, 4}.slice()), new Δnat(new global::go.math.big_package.Word[]{4, 3, 2, 1}.slice())),
+    new(default, new nat(new global::go.math.big_package.Word[]{991}.slice()), default),
+    new(new nat(new global::go.math.big_package.Word[]{991}.slice()), new nat(new global::go.math.big_package.Word[]{991}.slice()), new nat(new global::go.math.big_package.Word[]{1}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{991 * 991}.slice()), new nat(new global::go.math.big_package.Word[]{991}.slice()), new nat(new global::go.math.big_package.Word[]{991}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{8, 22, 15}.slice()), new nat(new global::go.math.big_package.Word[]{2, 3}.slice()), new nat(new global::go.math.big_package.Word[]{4, 5}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{10, 27, 52, 45, 28}.slice()), new nat(new global::go.math.big_package.Word[]{2, 3, 4}.slice()), new nat(new global::go.math.big_package.Word[]{5, 6, 7}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{12, 32, 61, 100, 94, 76, 45}.slice()), new nat(new global::go.math.big_package.Word[]{2, 3, 4, 5}.slice()), new nat(new global::go.math.big_package.Word[]{6, 7, 8, 9}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{12, 32, 61, 100, 94, 76, 45}.slice()), new nat(new global::go.math.big_package.Word[]{2, 3, 4, 5}.slice()), new nat(new global::go.math.big_package.Word[]{6, 7, 8, 9}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{14, 37, 70, 114, 170, 166, 148, 115, 66}.slice()), new nat(new global::go.math.big_package.Word[]{2, 3, 4, 5, 6}.slice()), new nat(new global::go.math.big_package.Word[]{7, 8, 9, 10, 11}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{991 * 991, 991 * 2, 1}.slice()), new nat(new global::go.math.big_package.Word[]{991, 1}.slice()), new nat(new global::go.math.big_package.Word[]{991, 1}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{991 * 991, 991 * 777 * 2, 777 * 777}.slice()), new nat(new global::go.math.big_package.Word[]{991, 777}.slice()), new nat(new global::go.math.big_package.Word[]{991, 777}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{0, 0, 991 * 991}.slice()), new nat(new global::go.math.big_package.Word[]{0, 991}.slice()), new nat(new global::go.math.big_package.Word[]{0, 991}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{1 * 991, 2 * 991, 3 * 991, 4 * 991}.slice()), new nat(new global::go.math.big_package.Word[]{1, 2, 3, 4}.slice()), new nat(new global::go.math.big_package.Word[]{991}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{4, 11, 20, 30, 20, 11, 4}.slice()), new nat(new global::go.math.big_package.Word[]{1, 2, 3, 4}.slice()), new nat(new global::go.math.big_package.Word[]{4, 3, 2, 1}.slice())),
     // 3^100 * 3^28 = 3^128
     new(
         natFromString("11790184577738583171520872861412518665678211592275841109096961"),
@@ -170,8 +170,8 @@ internal static void initᴛprodNNExtra() { prodNNExtra = slice<argNN>([
     )
 ]); }
 
-internal static global::go.math.big_package.Δnat natFromString(@string s) {
-    var (x, _, _, err) = ((global::go.math.big_package.Δnat)default).scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(s)), 0, false);
+internal static global::go.math.big_package.nat natFromString(@string s) {
+    var (x, _, _, err) = ((global::go.math.big_package.nat)default).scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(s)), 0, false);
     if (err != nil) {
         throw panic(err);
     }
@@ -180,21 +180,21 @@ internal static global::go.math.big_package.Δnat natFromString(@string s) {
 
 public static void TestSet(ж<testing.T> t) {
     foreach (var (_, a) in range(sumNN)) {
-        var z = ((global::go.math.big_package.Δnat)default).set(a.z);
+        var z = ((global::go.math.big_package.nat)default).set(a.z);
         if (z.cmp(a.z) != 0) {
             t.Errorf("got z = %v; want %v", z, a.z);
         }
     }
 }
 
-internal static partial void testFunNN(ж<testing.T> t, @string msg, Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat> f, argNN a) {
+internal static partial void testFunNN(ж<testing.T> t, @string msg, Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat> f, argNN a) {
     var z = f(default, a.x, a.y);
     if (z.cmp(a.z) != 0) {
         t.Errorf("%s%+v\n\tgot z = %v; want %v", msg, a, z, a.z);
     }
 }
 
-internal static void testFunSNN(ж<testing.T> t, @string msg, Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat> f, argNN a) {
+internal static void testFunSNN(ж<testing.T> t, @string msg, Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat> f, argNN a) {
     GoFrame ᒐ = default;
     try {
         t.Helper();
@@ -229,9 +229,9 @@ public static void TestAdd(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in range(sumNN)) {
         var a = vᴛ1;
 
-        testFunNN(t, addˢ, new Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.add))), a);
+        testFunNN(t, addˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.add))), a);
         (a.x, a.y) = (a.y, a.x);
-        testFunNN(t, addˢ, new Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.add))), a);
+        testFunNN(t, addˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.add))), a);
     }
 }
 
@@ -244,10 +244,10 @@ public static void TestSub(ж<testing.T> t) {
         var a = vᴛ1;
 
         (a.x, a.z) = (a.z, a.x);
-        testFunNN(t, subˢ, new Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.sub))), a);
+        testFunNN(t, subˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.sub))), a);
 
         (a.y, a.z) = (a.z, a.y);
-        testFunNN(t, subˢ, new Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.sub))), a);
+        testFunNN(t, subˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.sub))), a);
     }
 }
 
@@ -270,9 +270,9 @@ public static void TestNatMul(ж<testing.T> t) {
             if (len(a.z) >= 100) {
                 continue;
             }
-            testFunSNN(tΔ1, mulˢ, new Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.mul))), a);
+            testFunSNN(tΔ1, mulˢ, new Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.mul))), a);
             (a.x, a.y) = (a.y, a.x);
-            testFunSNN(tΔ1, mulˢ, new Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.mul))), a);
+            testFunSNN(tΔ1, mulˢ, new Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.mul))), a);
         }
     });
     t.Run(karatsubaˢ2, (ж<testing.T> tΔ2) => {
@@ -280,9 +280,9 @@ public static void TestNatMul(ж<testing.T> t) {
         foreach (var (_, vᴛ2) in range(prodNN)) {
             var a = vᴛ2;
 
-            testFunSNN(tΔ2, mulˢ, new Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.mul))), a);
+            testFunSNN(tΔ2, mulˢ, new Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.mul))), a);
             (a.x, a.y) = (a.y, a.x);
-            testFunSNN(tΔ2, mulˢ, new Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.mul))), a);
+            testFunSNN(tΔ2, mulˢ, new Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.mul))), a);
         }
     });
 
@@ -290,22 +290,22 @@ public static void TestNatMul(ж<testing.T> t) {
         foreach (var (_, vᴛ3) in range(prodNN)) {
             var a = vᴛ3;
 
-            testFunSNN(tΔ3, mulˢ, new Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.mul))), a);
+            testFunSNN(tΔ3, mulˢ, new Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.mul))), a);
             (a.x, a.y) = (a.y, a.x);
-            testFunSNN(tΔ3, mulˢ, new Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>(((Func<global::go.math.big_package.Δnat, ж<global::go.math.big_package.stack>, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat, global::go.math.big_package.Δnat>)(global::go.math.big_package.mul))), a);
+            testFunSNN(tΔ3, mulˢ, new Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, ж<global::go.math.big_package.stack>, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.bigᴛnat.mul))), a);
         }
     });
 }
 
-internal static void testSqr(ж<testing.T> t, global::go.math.big_package.Δnat x) {
+internal static void testSqr(ж<testing.T> t, global::go.math.big_package.nat x) {
     GoFrame ᒐ = default;
     try {
         var stk = getStack();
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
 
-        var got = new global::go.math.big_package.Δnat(2 * len(x));
-        var want = new global::go.math.big_package.Δnat(2 * len(x));
+        var got = new global::go.math.big_package.nat(2 * len(x));
+        var want = new global::go.math.big_package.nat(2 * len(x));
         got = got.sqr(stk, x);
         want = want.mul(stk, x, x);
         if (got.cmp(want) != 0) {
@@ -385,7 +385,7 @@ public static void TestMulRangeN(ж<testing.T> t) {
         defer(stkʗ1.free, ref ᒐ);
 
         foreach (var (i, r) in range(mulRangesN)) {
-            @string prod = (@string)((global::go.math.big_package.Δnat)default).mulRange(stk, r.a, r.b).utoa(10);
+            @string prod = (@string)((global::go.math.big_package.nat)default).mulRange(stk, r.a, r.b).utoa(10);
             if (prod != r.prod) {
                 t.Errorf("#%d: got %s; want %s", i, prod, r.prod);
             }
@@ -422,7 +422,7 @@ public static void TestMulUnbalanced(ж<testing.T> t) {
         var xʗ1 = x;
         var yʗ1 = y;
         var allocSize = allocBytes(() => {
-            ((global::go.math.big_package.Δnat)default).mul(stkʗ2, xʗ1, yʗ1);
+            ((global::go.math.big_package.nat)default).mul(stkʗ2, xʗ1, yʗ1);
         });
         var inputSize = (uint64)(len(x) + len(y)) * (uint64)_S;
         var ratio = allocSize / (uint64)inputSize; if (ratio > 10) {
@@ -436,13 +436,13 @@ public static void TestMulUnbalanced(ж<testing.T> t) {
 // rndNat returns a random nat value >= 0 of (usually) n words in length.
 // In extremely unlikely cases it may be smaller than n words if the top-
 // most words are 0.
-internal static global::go.math.big_package.Δnat rndNat(nint n) {
-    return ((global::go.math.big_package.Δnat)rndV(n)).norm();
+internal static global::go.math.big_package.nat rndNat(nint n) {
+    return ((global::go.math.big_package.nat)rndV(n)).norm();
 }
 
 // rndNat1 is like rndNat but the result is guaranteed to be > 0.
-internal static global::go.math.big_package.Δnat rndNat1(nint n) {
-    var x = ((global::go.math.big_package.Δnat)rndV(n)).norm();
+internal static global::go.math.big_package.nat rndNat1(nint n) {
+    var x = ((global::go.math.big_package.nat)rndV(n)).norm();
     if (len(x) == 0) {
         x.setWord(1);
     }
@@ -454,7 +454,7 @@ internal static void benchmarkNatMul(ж<testing.B> Ꮡb, nint nwords) {
 
     var x = rndNat(nwords);
     var y = rndNat(nwords);
-    global::go.math.big_package.Δnat z = default;
+    global::go.math.big_package.nat z = default;
     b.ResetTimer();
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
@@ -486,9 +486,9 @@ public static void TestNLZ(ж<testing.T> t) {
 }
 
 internal partial struct shiftTest {
-    internal global::go.math.big_package.Δnat @in;
+    internal global::go.math.big_package.nat @in;
     internal nuint shift;
-    internal global::go.math.big_package.Δnat @out;
+    internal global::go.math.big_package.nat @out;
 }
 
 internal static slice<shiftTest> leftShiftTests;
@@ -497,13 +497,13 @@ internal static void initᴛleftShiftTests() { leftShiftTests = [
     new(default, 1, default),
     new(natOne, 0, natOne),
     new(natOne, 1, natTwo),
-    new(new Δnat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice()), 1, new Δnat(new global::go.math.big_package.Word[]{0}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), 0}.slice()), 1, new Δnat(new global::go.math.big_package.Word[]{0, 1}.slice()))
+    new(new nat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice()), 1, new nat(new global::go.math.big_package.Word[]{0}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1)), 0}.slice()), 1, new nat(new global::go.math.big_package.Word[]{0, 1}.slice()))
 ]; }
 
 public static void TestShiftLeft(ж<testing.T> t) {
     foreach (var (i, test) in range(leftShiftTests)) {
-        global::go.math.big_package.Δnat z = default;
+        global::go.math.big_package.nat z = default;
         z = z.lsh(test.@in, test.shift);
         foreach (var (j, d) in range<global::go.math.big_package.Word>(test.@out)) {
             if (j >= len(z) || z[j] != d) {
@@ -521,13 +521,13 @@ internal static void initᴛrightShiftTests() { rightShiftTests = [
     new(natOne, 0, natOne),
     new(natOne, 1, default),
     new(natTwo, 1, natOne),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, 1}.slice()), 1, new Δnat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice())),
-    new(new Δnat(new global::go.math.big_package.Word[]{2, 1, 1}.slice()), 1, new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(9223372036854775809UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice()))
+    new(new nat(new global::go.math.big_package.Word[]{0, 1}.slice()), 1, new nat(new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice())),
+    new(new nat(new global::go.math.big_package.Word[]{2, 1, 1}.slice()), 1, new nat(new global::go.math.big_package.Word[]{unchecked((nuint)(9223372036854775809UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice()))
 ]; }
 
 public static void TestShiftRight(ж<testing.T> t) {
     foreach (var (i, test) in range(rightShiftTests)) {
-        global::go.math.big_package.Δnat z = default;
+        global::go.math.big_package.nat z = default;
         z = z.rsh(test.@in, test.shift);
         foreach (var (j, d) in range<global::go.math.big_package.Word>(test.@out)) {
             if (j >= len(z) || z[j] != d) {
@@ -554,7 +554,7 @@ public static void BenchmarkZeroShifts(ж<testing.B> b) {
     var xʗ1 = x;
     b.Run(lshˢ, (ж<testing.B> bΔ1) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            global::go.math.big_package.Δnat z = default;
+            global::go.math.big_package.nat z = default;
             z.lsh(xʗ1, 0);
         }
     });
@@ -568,7 +568,7 @@ public static void BenchmarkZeroShifts(ж<testing.B> b) {
     var xʗ3 = x;
     b.Run(rshˢ, (ж<testing.B> bΔ3) => {
         for (nint i = 0; i < (~bΔ3).N; i++) {
-            global::go.math.big_package.Δnat z = default;
+            global::go.math.big_package.nat z = default;
             z.rsh(xʗ3, 0);
         }
     });
@@ -596,9 +596,9 @@ internal static slice<modWTest> modWTests64 = [
 
 internal static void runModWTests(ж<testing.T> t, slice<modWTest> tests) {
     foreach (var (i, test) in range(tests)) {
-        var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
-        var (d, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.dividend, 10);
-        var (@out, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
+        var (@in, _) = @new<global::go.math.big_package.Int>().SetString(test.@in, 10);
+        var (d, _) = @new<global::go.math.big_package.Int>().SetString(test.dividend, 10);
+        var (@out, _) = @new<global::go.math.big_package.Int>().SetString(test.@out, 10);
 
         global::go.math.big_package.Word r = @in.abs.modW(d.abs[0]);
         if (r != @out.abs[0]) {
@@ -699,7 +699,7 @@ public static void TestMontgomery(ж<testing.T> t) {
         defer(stkʗ1.free, ref ᒐ);
 
         var one = NewInt(1);
-        var _B = @new<global::go.math.big_package.ΔInt>().Lsh(one, _W);
+        var _B = @new<global::go.math.big_package.Int>().Lsh(one, _W);
         foreach (var (i, test) in range(montgomeryTests)) {
             var x = natFromString(test.x);
             var y = natFromString(test.y);
@@ -712,15 +712,15 @@ public static void TestMontgomery(ж<testing.T> t) {
             }
 
             if (x.cmp(m) > 0) {
-                var (_, r) = ((global::go.math.big_package.Δnat)default).div(stk, default, x, m);
+                var (_, r) = ((global::go.math.big_package.nat)default).div(stk, default, x, m);
                 t.Errorf("#%d: x > m (0x%s > 0x%s; use 0x%s)", i, x.utoa(16), m.utoa(16), r.utoa(16));
             }
             if (y.cmp(m) > 0) {
-                var (_, r) = ((global::go.math.big_package.Δnat)default).div(stk, default, x, m);
+                var (_, r) = ((global::go.math.big_package.nat)default).div(stk, default, x, m);
                 t.Errorf("#%d: y > m (0x%s > 0x%s; use 0x%s)", i, y.utoa(16), m.utoa(16), r.utoa(16));
             }
 
-            global::go.math.big_package.Δnat @out = default;
+            global::go.math.big_package.nat @out = default;
             if (_W == 32) {
                 @out = natFromString(test.out32);
             } else {
@@ -730,25 +730,25 @@ public static void TestMontgomery(ж<testing.T> t) {
             // t.Logf("#%d: len=%d\n", i, len(m))
 
             // check output in table
-            var xi = Ꮡ(new ΔInt(abs: x));
-            var yi = Ꮡ(new ΔInt(abs: y));
-            var mi = Ꮡ(new ΔInt(abs: m));
-            var p = @new<global::go.math.big_package.ΔInt>().Mod(@new<global::go.math.big_package.ΔInt>().Mul(xi, @new<global::go.math.big_package.ΔInt>().Mul(yi, @new<global::go.math.big_package.ΔInt>().ModInverse(@new<global::go.math.big_package.ΔInt>().Lsh(one, (nuint)len(m) * (nuint)_W), mi))), mi);
+            var xi = Ꮡ(new Int(abs: x));
+            var yi = Ꮡ(new Int(abs: y));
+            var mi = Ꮡ(new Int(abs: m));
+            var p = @new<global::go.math.big_package.Int>().Mod(@new<global::go.math.big_package.Int>().Mul(xi, @new<global::go.math.big_package.Int>().Mul(yi, @new<global::go.math.big_package.Int>().ModInverse(@new<global::go.math.big_package.Int>().Lsh(one, (nuint)len(m) * (nuint)_W), mi))), mi);
             if (@out.cmp(p.abs.norm()) != 0) {
                 t.Errorf("#%d: out in table=0x%s, computed=0x%s", i, @out.utoa(16), p.abs.norm().utoa(16));
             }
 
             // check k0 in table
-            var k = @new<global::go.math.big_package.ΔInt>().Mod(Ꮡ(new ΔInt(abs: m)), _B);
-            k = @new<global::go.math.big_package.ΔInt>().Sub(_B, k);
-            k = @new<global::go.math.big_package.ΔInt>().Mod(k, _B);
-            global::go.math.big_package.Word k0 = (global::go.math.big_package.Word)(nuint)@new<global::go.math.big_package.ΔInt>().ModInverse(k, _B).Uint64();
+            var k = @new<global::go.math.big_package.Int>().Mod(Ꮡ(new Int(abs: m)), _B);
+            k = @new<global::go.math.big_package.Int>().Sub(_B, k);
+            k = @new<global::go.math.big_package.Int>().Mod(k, _B);
+            global::go.math.big_package.Word k0 = (global::go.math.big_package.Word)(nuint)@new<global::go.math.big_package.Int>().ModInverse(k, _B).Uint64();
             if (k0 != ((global::go.math.big_package.Word)(nuint)test.k0)) {
                 t.Errorf("#%d: k0 in table=%#x, computed=%#x\n", i, test.k0, k0);
             }
 
             // check montgomery with correct k0 produces correct output
-            var z = ((global::go.math.big_package.Δnat)default).montgomery(x, y, m, k0, len(m));
+            var z = ((global::go.math.big_package.nat)default).montgomery(x, y, m, k0, len(m));
             z = z.norm();
             if (z.cmp(@out) != 0) {
                 t.Errorf("#%d: got 0x%s want 0x%s", i, z.utoa(16), @out.utoa(16));
@@ -803,12 +803,12 @@ public static void TestExpNN(ж<testing.T> t) {
             var y = natFromString(test.y);
             var @out = natFromString(test.@out);
 
-            global::go.math.big_package.Δnat m = default;
+            global::go.math.big_package.nat m = default;
             if (len(test.m) > 0) {
                 m = natFromString(test.m);
             }
 
-            var z = ((global::go.math.big_package.Δnat)default).expNN(stk, x, y, m, false);
+            var z = ((global::go.math.big_package.nat)default).expNN(stk, x, y, m, false);
             if (z.cmp(@out) != 0) {
                 t.Errorf("#%d got %s want %s", i, z.utoa(10), @out.utoa(10));
             }
@@ -823,11 +823,11 @@ public static void FuzzExpMont(ж<testing.F> f) {
         if (m1 == 0 && m2 == 0 && m3 == 0) {
             return;
         }
-        var x = @new<global::go.math.big_package.ΔInt>().SetBits([(global::go.math.big_package.Word)x1, (global::go.math.big_package.Word)x2, (global::go.math.big_package.Word)x3]);
-        var y = @new<global::go.math.big_package.ΔInt>().SetBits([(global::go.math.big_package.Word)y1, (global::go.math.big_package.Word)y2, (global::go.math.big_package.Word)y3]);
-        var m = @new<global::go.math.big_package.ΔInt>().SetBits([(global::go.math.big_package.Word)m1, (global::go.math.big_package.Word)m2, (global::go.math.big_package.Word)m3]);
-        var @out = @new<global::go.math.big_package.ΔInt>().Exp(x, y, m);
-        var want = @new<global::go.math.big_package.ΔInt>().expSlow(x, y, m);
+        var x = @new<global::go.math.big_package.Int>().SetBits([(global::go.math.big_package.Word)x1, (global::go.math.big_package.Word)x2, (global::go.math.big_package.Word)x3]);
+        var y = @new<global::go.math.big_package.Int>().SetBits([(global::go.math.big_package.Word)y1, (global::go.math.big_package.Word)y2, (global::go.math.big_package.Word)y3]);
+        var m = @new<global::go.math.big_package.Int>().SetBits([(global::go.math.big_package.Word)m1, (global::go.math.big_package.Word)m2, (global::go.math.big_package.Word)m3]);
+        var @out = @new<global::go.math.big_package.Int>().Exp(x, y, m);
+        var want = @new<global::go.math.big_package.Int>().expSlow(x, y, m);
         if (@out.Cmp(want) != 0) {
             t.Errorf("x = %#x\ny=%#x\nz=%#x\nout=%#x\nwant=%#x\ndc: 16o 16i %X %X %X |p", x.OrTypedNil(), y.OrTypedNil(), m.OrTypedNil(), @out.OrTypedNil(), want.OrTypedNil(), x.OrTypedNil(), y.OrTypedNil(), m.OrTypedNil());
         }
@@ -847,7 +847,7 @@ public static void BenchmarkExp3Power(ж<testing.B> b) {
         ]))) {
             var stkʗ2 = stk;
             b.Run(fmt.Sprintf("%#x"u8, y), (ж<testing.B> bΔ1) => {
-                global::go.math.big_package.Δnat z = default;
+                global::go.math.big_package.nat z = default;
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     z.expWW(stkʗ2, x, y);
                 }
@@ -858,17 +858,17 @@ public static void BenchmarkExp3Power(ж<testing.B> b) {
     finally { ᒐ.Run(); }
 }
 
-internal static global::go.math.big_package.Δnat fibo(nint n) {
+internal static global::go.math.big_package.nat fibo(nint n) {
     switch (n) {
     case 0: {
         return default;
     }
     case 1: {
-        return new Δnat(new global::go.math.big_package.Word[]{1}.slice());
+        return new nat(new global::go.math.big_package.Word[]{1}.slice());
     }}
     var f0 = fibo(0);
     var f1 = fibo(1);
-    global::go.math.big_package.Δnat f2 = default;
+    global::go.math.big_package.nat f2 = default;
     for (nint i = 1; i < n; i++) {
         f2 = f2.add(f0, f1);
         (f0, f1, f2) = (f1, f2, f0);
@@ -990,7 +990,7 @@ internal static void benchmarkNatSqr(ж<testing.B> Ꮡb, nint nwords) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var x = rndNat(nwords);
-    global::go.math.big_package.Δnat z = default;
+    global::go.math.big_package.nat z = default;
     b.ResetTimer();
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
@@ -1040,16 +1040,16 @@ public static void TestNatSubMod2N(ж<testing.T> t) {
                 var x0 = natFromString(tt.x);
                 var y0 = natFromString(tt.y);
                 var want = natFromString(tt.z);
-                var x = ((global::go.math.big_package.Δnat)default).set(x0);
-                var y = ((global::go.math.big_package.Δnat)default).set(y0);
-                global::go.math.big_package.Δnat z = default;
-                var exprᴛ1 = mode;
+                var x = ((global::go.math.big_package.nat)default).set(x0);
+                var y = ((global::go.math.big_package.nat)default).set(y0);
+                global::go.math.big_package.nat z = default;
+                var modeᴛ1 = mode;
                 switch (ᐧ) {
-                case {} when exprᴛ1 == "aliasX"u8: {
+                case {} when modeᴛ1 == "aliasX"u8: {
                     z = x;
                     break;
                 }
-                case {} when exprᴛ1 == "aliasY"u8: {
+                case {} when modeᴛ1 == "aliasY"u8: {
                     z = y;
                     break;
                 }}
@@ -1076,7 +1076,7 @@ public static void BenchmarkNatSetBytes(ж<testing.B> b) {
         // With remainder:
         7, 23, maxLength - 1
     ]);
-    var n = new global::go.math.big_package.Δnat(maxLength / _W); // ensure n doesn't need to grow during the test
+    var n = new global::go.math.big_package.nat(maxLength / _W); // ensure n doesn't need to grow during the test
     var buf = new slice<byte>(maxLength);
     foreach (var (_, l) in range(lengths)) {
         var bufʗ1 = buf;
@@ -1115,11 +1115,11 @@ public static void TestNatDiv(ж<testing.T> t) {
                     c = c.norm();
                 }
                 // compute x = a*b+c
-                var x = ((global::go.math.big_package.Δnat)default).mul(stk, a, b);
+                var x = ((global::go.math.big_package.nat)default).mul(stk, a, b);
                 x = x.add(x, c);
 
-                global::go.math.big_package.Δnat q = default;
-                global::go.math.big_package.Δnat r = default;
+                global::go.math.big_package.nat q = default;
+                global::go.math.big_package.nat r = default;
                 (q, r) = q.div(stk, r, x, b);
                 if (q.cmp(a) != 0) {
                     t.Fatalf("wrong quotient: got %s; want %s for %s/%s", q.utoa(10), a.utoa(10), x.utoa(10), b.utoa(10));
@@ -1150,7 +1150,7 @@ public static void TestIssue37499(ж<testing.T> t) {
         var u = natFromString("0x2b6c385a05be027f5c22005b63c42a1165b79ff510e1706b39f8489c1d28e57bb5ba4ef9fd9387a3e344402c0a453381");
         var v = natFromString("0x2b6c385a05be027f5c22005b63c42a1165b79ff510e1706c");
 
-        var q = ((global::go.math.big_package.Δnat)default).make(8);
+        var q = ((global::go.math.big_package.nat)default).make(8);
         q.divBasic(stk, u, v);
         q = q.norm();
         @string s = (@string)q.utoa(16); if (s != "fffffffffffffffffffffffffffffffffffffffffffffffb"u8) {
@@ -1173,7 +1173,7 @@ public static void TestIssue42552(ж<testing.T> t) {
 
         var u = natFromString("0xc23b166884c3869092a520eceedeced2b00847bd256c9cf3b2c5e2227c15bd5e6ee7ef8a2f49236ad0eedf2c8a3b453cf6e0706f64285c526b372c4b1321245519d430540804a50b7ca8b6f1b34a2ec05cdbc24de7599af112d3e3c8db347e8799fe70f16e43c6566ba3aeb169463a3ecc486172deb2d9b80a3699c776e44fef20036bd946f1b4d054dd88a2c1aeb986199b0b2b7e58c42288824b74934d112fe1fc06e06b4d99fe1c5e725946b23210521e209cd507cce90b5f39a523f27e861f9e232aee50c3f585208b4573dcc0b897b6177f2ba20254fd5c50a033e849dee1b3a93bd2dc44ba8ca836cab2c2ae50e50b126284524fa0187af28628ff0face68d87709200329db1392852c8b8963fbe3d05fb1efe19f0ed5ca9fadc2f96f82187c24bb2512b2e85a66333a7e176605695211e1c8e0b9b9e82813e50654964945b1e1e66a90840396c7d10e23e47f364d2d3f660fa54598e18d1ca2ea4fe4f35a40a11f69f201c80b48eaee3e2e9b0eda63decf92bec08a70f731587d4ed0f218d5929285c8b2ccbc497e20db42de73885191fa453350335990184d8df805072f958d5354debda38f5421effaaafd6cb9b721ace74be0892d77679f62a4a126697cd35797f6858193da4ba1770c06aea2e5c59ec04b8ea26749e61b72ecdde403f3bc7e5e546cd799578cc939fa676dfd5e648576d4a06cbadb028adc2c0b461f145b2321f42e5e0f3b4fb898ecd461df07a6f5154067787bf74b5cc5c03704a1ce47494961931f0263b0aac32505102595957531a2de69dd71aac51f8a49902f81f21283dbe8e21e01e5d82517868826f86acf338d935aa6b4d5a25c8d540389b277dd9d64569d68baf0f71bd03dba45b92a7fc052601d1bd011a2fc6790a23f97c6fa5caeea040ab86841f268d39ce4f7caf01069df78bba098e04366492f0c2ac24f1bf16828752765fa523c9a4d42b71109d123e6be8c7b1ab3ccf8ea03404075fe1a9596f1bba1d267f9a7879ceece514818316c9c0583469d2367831fc42b517ea028a28df7c18d783d16ea2436cee2b15d52db68b5dfdee6b4d26f0905f9b030c911a04d078923a4136afea96eed6874462a482917353264cc9bee298f167ac65a6db4e4eda88044b39cc0b33183843eaa946564a00c3a0ab661f2c915e70bf0bb65bfbb6fa2eea20aed16bf2c1a1d00ec55fb4ff2f76b8e462ea70c19efa579c9ee78194b86708fdae66a9ce6e2cf3d366037798cfb50277ba6d2fd4866361022fd788ab7735b40b8b61d55e32243e06719e53992e9ac16c9c4b6e6933635c3c47c8f7e73e17dd54d0dd8aeba5d76de46894e7b3f9d3ec25ad78ee82297ba69905ea0fa094b8667faa2b8885e2187b3da80268aa1164761d7b0d6de206b676777348152b8ae1d4afed753bc63c739a5ca8ce7afb2b241a226bd9e502baba391b5b13f5054f070b65a9cf3a67063bfaa803ba390732cd03888f664023f888741d04d564e0b5674b0a183ace81452001b3fbb4214c77d42ca75376742c471e58f67307726d56a1032bd236610cbcbcd03d0d7a452900136897dc55bb3ce959d10d4e6a10fb635006bd8c41cd9ded2d3dfdd8f2e229590324a7370cb2124210b2330f4c56155caa09a2564932ceded8d92c79664dcdeb87faad7d3da006cc2ea267ee3df41e9677789cc5a8cc3b83add6491561b3047919e0648b1b2e97d7ad6f6c2aa80cab8e9ae10e1f75b1fdd0246151af709d259a6a0ed0b26bd711024965ecad7c41387de45443defce53f66612948694a6032279131c257119ed876a8e805dfb49576ef5c563574115ee87050d92d191bc761ef51d966918e2ef925639400069e3959d8fe19f36136e947ff430bf74e71da0aa5923b00000000");
         var v = natFromString("0x838332321d443a3d30373d47301d47073847473a383d3030f25b3d3d3e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002e00000000000000000041603038331c3d32f5303441e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e01c0a5459bfc7b9be9fcbb9d2383840464319434707303030f43a32f53034411c0a5459413820878787878787878787878787878787878787878787878787878787878787878787870630303a3a30334036605b923a6101f83638413943413960204337602043323801526040523241846038414143015238604060328452413841413638523c0240384141364036605b923a6101f83638413943413960204334602043323801526040523241846038414143015238604060328452413841413638523c02403841413638433030f25a8b83838383838383838383838383838383837d838383ffffffffffffffff838383838383838383000000000000000000030000007d26e27c7c8b83838383838383838383838383838383837d838383ffffffffffffffff83838383838383838383838383838383838383838383435960f535073030f3343200000000000000011881301938343030fa398383300000002300000000000000000000f11af4600c845252904141364138383c60406032414443095238010241414303364443434132305b595a15434160b042385341ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff47476043410536613603593a6005411c437405fcfcfcfcfcfcfc0000000000005a3b075815054359000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-        var q = ((global::go.math.big_package.Δnat)default).make(16);
+        var q = ((global::go.math.big_package.nat)default).make(16);
         q.div(stk, q, u, v);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

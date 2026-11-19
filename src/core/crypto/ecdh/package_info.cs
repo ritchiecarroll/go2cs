@@ -12,7 +12,6 @@
 // <ImportedTypeAliases>
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using ecdhꓸPublicKey = go.crypto.@internal.fips140.ecdh_package.ΔPublicKey;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,8 +29,6 @@ using static go.crypto.ecdh_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Curve", "ΔCurve")]
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -42,8 +39,8 @@ using static go.crypto.ecdh_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<PrivateKey, KeyExchanger>(Pointer = true)]
-[assembly: GoImplement<nistCurve, ΔCurve>(Pointer = true)]
-[assembly: GoImplement<x25519Curve, ΔCurve>(Pointer = true)]
+[assembly: GoImplement<nistCurve, Curve>(Pointer = true)]
+[assembly: GoImplement<x25519Curve, Curve>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -58,7 +55,7 @@ using static go.crypto.ecdh_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(PrivateKey))]
-[assembly: GoFieldAccess(typeof(ΔPublicKey))]
+[assembly: GoFieldAccess(typeof(PublicKey))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -68,9 +65,9 @@ using static go.crypto.ecdh_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCAAwaABI0AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "87=ConstantTimeCompare/1/1/1;164=ConstantTimeCompare/1/1/1")]
-[assembly: GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABoyguaigoKClIKClNymlIKmgoKmAAkUgoKClIKClIKU5qKCgoKUgoKU3KaCgpQACRTmxoKUuIKCgpSUgoKUlKYAChCClAACEMCUAAUYAAMSwJQABRgAAxLAlAAFGA==", "", "", "47=Bytes/1/1/3;67=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;108=Clone/1/1/2,Bytes/1/1/3;121=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;146=Clone/1/1/2")]
-[assembly: GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ2wJQACAiC5oKClIKCgpTmgoKUgpSCgrjugoKUgpQACQyygoKClKaClIKCgpTigoKClIKCgoKCgoKUgoKCgoKCgoKCgoKClIKCgoKmgpSCgqiSgoKU", "", "", "74=Clone/1/1/2;88=Clone/1/1/2")]
+[assembly: GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEWIAZaiAAIU8oKClKiCAA4aABQ0AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "90=ConstantTimeCompare/1/1/1;171=ConstantTimeCompare/1/1/1")]
+[assembly: GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "AB0yguaigoKClIKClNymlIKmgoKmAAkUgoKClIKClIKU5qKCgoKUgoKU3KaCgpQACRTmxoKUuIKCgpSUgoKUlKYAChCClAAEEMCUAAUYAAMSwJQABRgAAxLAlAAFGA==", "", "", "50=Bytes/1/1/3;70=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;111=Clone/1/1/2,Bytes/1/1/3;124=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;149=Clone/1/1/2")]
+[assembly: GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABU2wJQACgiC5oKClIKCgpTmgoKUgpSCgrgACg6CgpSClAAJDLKCgoKUxoKUgoKClOKCgoKUgoKCgoKCgpSCgoKCgoKCgoKCgoKUgoKCgqaClIKCqJKCgpQ=", "", "", "77=Clone/1/1/2;95=Clone/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -87,10 +84,10 @@ public static partial class ecdh_package
     // <TypeAccessibility>
     internal partial struct nistCurve {}
     internal partial struct x25519Curve {}
+    public partial interface Curve {}
     public partial interface KeyExchanger {}
-    public partial interface ΔCurve {}
     public partial struct PrivateKey {}
-    public partial struct ΔPublicKey {}
+    public partial struct PublicKey {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -112,3 +109,16 @@ public static partial class ecdh_package
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ecdh_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPrivateKey;
+[GoMethodHost(typeof(ecdh_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPublicKey;
+[GoMethodHost(typeof(ecdh_package.nistCurve)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛnistCurve;
+[GoMethodHost(typeof(ecdh_package.x25519Curve)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛx25519Curve;
+// </MethodHolders>

@@ -76,8 +76,8 @@ internal static (slice<ж<ast.File>>, slice<error>) parseFiles(ж<testing.T> t, 
         files = append(filesᴷ, files, @file);
         if (err != nil) {
             var (list, _) = err._<scanner.ErrorList>(ᐧ); if (len(list) > 0) {
-                foreach (var (_, errΔ1) in range<ж<scannerꓸError>>(list)) {
-                    errlist = append(errlist, (error)(new types_test_package.scanner_ΔErrorжerror(errΔ1)));
+                foreach (var (_, errΔ1) in range<ж<scanner.Error>>(list)) {
+                    errlist = append(errlist, (error)(new types_test_package.scanner_Errorжerror(errΔ1)));
                 }
             } else {
                 errlist = append(errlist, err);
@@ -88,12 +88,12 @@ internal static (slice<ж<ast.File>>, slice<error>) parseFiles(ж<testing.T> t, 
     return (files, errlist);
 }
 
-internal static (tokenꓸPosition, @string) unpackError(ж<token.FileSet> fset, error err) {
+internal static (token.Position, @string) unpackError(ж<token.FileSet> fset, error err) {
     switch (err.type()) {
-    case ж<scannerꓸError> errΔ1: {
+    case ж<scanner.Error> errΔ1: {
         return (errΔ1.Pos, errΔ1.Msg);
     }
-    case typesꓸError errΔ1: {
+    case Error errΔ1: {
         return (fset.Position(errΔ1.Pos), errΔ1.Msg);
     }}
     throw panic("unreachable");
@@ -256,14 +256,14 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
         }
 
         // Provide Config.Info with all maps so that info recording is tested.
-        ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+        ref var info = ref heap<types.Info>(new Info(
             Types: new map<ast.Expr, types.TypeAndValue>(),
             Instances: new map<ж<ast.Ident>, types.Instance>(),
             Defs: new map<ж<ast.Ident>, types.Object>(),
             Uses: new map<ж<ast.Ident>, types.Object>(),
             Implicits: new map<ast.Node, types.Object>(),
             Selections: new map<ж<ast.SelectorExpr>, ж<types.Selection>>(),
-            Scopes: new map<ast.Node, ж<typesꓸScope>>(),
+            Scopes: new map<ast.Node, ж<types.Scope>>(),
             FileVersions: new map<ж<ast.File>, @string>()
         ), out var Ꮡinfo);
 
@@ -384,7 +384,7 @@ internal static void testFilesImpl(ж<testing.T> t, slice<@string> filenames, sl
 internal static ref readonly @string go116codeˢ => ref go116codeˢᵇ;
 private static readonly @string go116codeˢᵇ = "go116code"u8;
 
-internal static errors.Code readCode(typesꓸError err) {
+internal static errors.Code readCode(types.Error err) {
     var v = reflect.ValueOf(err);
     return (errors.Code)(nint)v.FieldByName(go116codeˢ).Int();
 }
@@ -393,14 +393,14 @@ internal static errors.Code readCode(typesꓸError err) {
 // For accessing unexported fields.
 internal static ж<bool> boolFieldAddr(ж<types.Config> conf, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(conf.OrTypedNil()));
-    return (ж<bool>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
+    return @unsafe.Pointer.To<bool>(v.FieldByName(name).Addr().UnsafePointer());
 }
 
 // stringFieldAddr(conf, name) returns the address of the string field conf.<name>.
 // For accessing unexported fields.
 internal static ж<@string> stringFieldAddr(ж<types.Config> conf, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(conf.OrTypedNil()));
-    return (ж<@string>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
+    return @unsafe.Pointer.To<@string>(v.FieldByName(name).Addr().UnsafePointer());
 }
 
 // setGOEXPERIMENT overwrites the existing buildcfg.Experiment with a new one

@@ -7,7 +7,6 @@
 global using static global::go.go.importer_package;
 
 // <ImportedTypeAliases>
-global using tokenꓸPos = go.go.token_package.ΔPos;
 // </ImportedTypeAliases>
 
 using go;

@@ -2,6 +2,7 @@
 namespace go.math;
 
 using strconv = strconv_package;
+using static big_package;
 
 partial class big_package {
 
@@ -22,6 +23,8 @@ private static readonly @string _RoundingMode_nameᵇ = "ToNearestEvenToNearestA
 
 internal static array<uint8> _RoundingMode_index = new uint8[]{0, 13, 26, 32, 44, 57, 70}.array();
 
+} partial class bigᴛRoundingMode {
+
 public static @string String(this RoundingMode i) {
     if (i >= ((RoundingMode)(byte)(len(_RoundingMode_index) - 1))) {
         return "RoundingMode("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
@@ -29,4 +32,4 @@ public static @string String(this RoundingMode i) {
     return _RoundingMode_name.slice(_RoundingMode_index[i], _RoundingMode_index[i + 1]);
 }
 
-} // end big_package
+} // end bigᴛRoundingMode

@@ -63,25 +63,25 @@ using static go.@internal.poll_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/poll/errno_unix.go", "errno_unix.cs", "ABAqopSkpKSU")]
-[assembly: GoPositionMap("internal/poll/fd.go", "fd.cs", "ABgwsJSCuMi4lpKClMoACRKwgoK4lpKCgoKClIKCyg==")]
-[assembly: GoPositionMap("internal/poll/fd_fsync_darwin.go", "fd_fsync_darwin.cs", "AAwg4oCCpIKCyoKU", "21-31:1")]
-[assembly: GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "ACdqAA4CgoKClIKClIIABkyigoKClIKCAAisAZKYwoKUrLKClKrCgpSs0oK8woKUrNKCvMKClKzSgoK6kg==")]
-[assembly: GoPositionMap("internal/poll/fd_opendir_darwin.go", "fd_opendir_darwin.cs", "AA4e1oKClIKCgoKmgoKUrA==")]
-[assembly: GoPositionMap("internal/poll/fd_poll_runtime.go", "fd_poll_runtime.cs", "AA8oxIKCgoKCgoKCAAgQooKCgpSCpoKClIKokoKUpoKClIKmgqaC5oKClIKmgqaCpoKClKaCAAkYgpSkpKSUgqiSqJKokqbCgoKCgqaClJSClIIABR4ADAI=", "", "", "", "168:21")]
-[assembly: GoPositionMap("internal/poll/fd_posix.go", "fd_posix.cs", "AAsgooKUqOKClILYwoKUgtzCgpSC3vKClIKCAAUU8oKCgsySgoKC", "38-40:1;49-51:1")]
-[assembly: GoPositionMap("internal/poll/fd_unix.go", "fd_unix.cs", "ACpu8qaClIKClIKmlKrmlJSCgqrCggAHELgABxCCpqjigpS4ggAMFuKAgqSC3JSAgqSClIKCgoKCgriC6uiClIKUloKUgoKo4oCCpIKAgqSCgoKClIKCgriC6uKAgqSCgIKkgoKCgpSCgoK4gurigIKkgoCCpIKCgoKUgoKCuILq4oCCpIKAgqSCgoKCpoKCuILq4oCCpIKAgqSCgoKCpoKCuILq4oCCpIKAgqSCgoKCpoKCuILq4oCCpIKAgqSCgoKClIKC3JSUgpSCgqaClIL8AAkIgIKkgoKCgoKUgoKUgpSClIKUgvzigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKklICCpIKCgpSUtIKCAAgOpOrCgpSC3MKClIIADRKSgoKClMq0pqjigpSC3LKo4oKUgtjigIKkgoCCpIKClIL84oCCpIKAgqSCgpSC/JKCgoI=", "186-188:1;633-635:1;644-646:1")]
-[assembly: GoPositionMap("internal/poll/fd_unixjs.go", "fd_unixjs.cs", "ABAglNzqwoKCgoKUgtjigpSC3AAIAoCCpIKCgoKCgoLK6uKClII=")]
+[assembly: GoPositionMap("internal/poll/fd.go", "fd.cs", "ABswsJSC2Mi4lpKClMoACxKwgoLYlpKCgoKClIKCyg==")]
+[assembly: GoPositionMap("internal/poll/fd_fsync_darwin.go", "fd_fsync_darwin.cs", "AA8g4oCCpIKCyoKU", "21-31:1")]
+[assembly: GoPositionMap("internal/poll/fd_mutex.go", "fd_mutex.cs", "ACpqAA4CgoKClIKClIIABkyigoKClIKCAAqsAZK4woKUrLKClKrCgpSs0oK8woKUrNKCvMKClKzSgoK6kg==")]
+[assembly: GoPositionMap("internal/poll/fd_opendir_darwin.go", "fd_opendir_darwin.cs", "ABEe1oKClIKCgoKmgoKUzA==")]
+[assembly: GoPositionMap("internal/poll/fd_poll_runtime.go", "fd_poll_runtime.cs", "ABAoxIKCgoKCgoKCAAoQooKCgpSCpoKClIKokoKUpoKClIKmgqaC5oKClIKmgqaCpoKClKaCAAsYgpSkpKSUgsiSqJKoksbCgoKCgqaClJSClIIABR4ADAI=", "", "", "", "177:21")]
+[assembly: GoPositionMap("internal/poll/fd_posix.go", "fd_posix.cs", "AA4gooKUqOKClILYwoKUgtzCgpSC3vKClIKCAAcU8oKCgsySgoKC", "38-40:1;49-51:1")]
+[assembly: GoPositionMap("internal/poll/fd_unix.go", "fd_unix.cs", "AC1u8qaClIKClIKmlKrmlJSCgqrCggAHELgABxCCpqjigpS4ggAQFuKAgqSC3JSAgqSClIKCgoKCgriC6uiClIKUloKUgoKo4oCCpIKAgqSCgoKClIKCgriC6uKAgqSCgIKkgoKCgpSCgoK4gurigIKkgoCCpIKCgoKUgoKCuILq4oCCpIKAgqSCgoKCpoKCuILq4oCCpIKAgqSCgoKCpoKCuILq4oCCpIKAgqSCgoKCpoKCuILq4oCCpIKAgqSCgoKClIKC3JSUgpSCgqaClIL8AAkIgIKkgoKCgoKUgoKUgpSClIKUgvzigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKkgoCCpIKCgpSCgqaClOrigIKklICCpIKCgpSUtIKCAAgOpOrCgpSC3MKClIIADxKSgoKClMq0psjigpSC3LKo4oKUgtjigIKkgoCCpIKClIL84oCCpIKAgqSCgpSCAAkMkoKCgg==", "186-188:1;633-635:1;644-646:1")]
+[assembly: GoPositionMap("internal/poll/fd_unixjs.go", "fd_unixjs.cs", "ABMglNwACArCgoKCgpSC+OKClILcAAgCgIKkgoKCgoKCgsrq4oKUgg==")]
 [assembly: GoPositionMap("internal/poll/fd_writev_libc.go", "fd_writev_libc.cs", "AAse")]
-[assembly: GoPositionMap("internal/poll/fstatat_unix.go", "fstatat_unix.cs", "AAwcsoKUgg==", "19-21:1")]
+[assembly: GoPositionMap("internal/poll/fstatat_unix.go", "fstatat_unix.cs", "AA8csoKUgg==", "19-21:1")]
 [assembly: GoPositionMap("internal/poll/hook_unix.go", "hook_unix.cs", "AAsYtg==")]
 [assembly: GoPositionMap("internal/poll/iovec_unix.go", "iovec_unix.cs", "AAoWgg==")]
 [assembly: GoPositionMap("internal/poll/sendfile.go", "sendfile.cs", "/g==")]
 [assembly: GoPositionMap("internal/poll/sendfile_unix.go", "sendfile_unix.cs", "AAw8ABMCuNyGgqaCgoKYqAAIAoKUgpSUgqaCyoKClIKCgpQABxCCAAgOgpSCAA0U7IK4AAgKwrbGgoIADBqCxoKCyrY=", "41-43:1;51-53:2;60-62:1", "", "", "", "65:21,66:13")]
-[assembly: GoPositionMap("internal/poll/sockopt.go", "sockopt.cs", "AAoY4oKUgtjygpSC2OKClILY4oKUgg==")]
-[assembly: GoPositionMap("internal/poll/sockopt_unix.go", "sockopt_unix.cs", "AAoY4oKUgg==")]
-[assembly: GoPositionMap("internal/poll/sockoptip.go", "sockoptip.cs", "AAoY4oKUgtjigpSC")]
+[assembly: GoPositionMap("internal/poll/sockopt.go", "sockopt.cs", "AA0Y4oKUgtjygpSC2OKClILY4oKUgg==")]
+[assembly: GoPositionMap("internal/poll/sockopt_unix.go", "sockopt_unix.cs", "AA0Y4oKUgg==")]
+[assembly: GoPositionMap("internal/poll/sockoptip.go", "sockoptip.cs", "AA0Y4oKUgtjigpSC")]
 [assembly: GoPositionMap("internal/poll/sys_cloexec.go", "sys_cloexec.cs", "ABIk/IKClIKUgoKU")]
-[assembly: GoPositionMap("internal/poll/writev.go", "writev.cs", "AAwg8oKUgoKmgoLKgpSmgoKCgoKClIKCgpSCgqaClIKUlIKCgpSCgoKCgoKUgoKmlIKCpg==")]
+[assembly: GoPositionMap("internal/poll/writev.go", "writev.cs", "AA8g8oKUgoKmgoLKgpSmgoKCgoKClIKCgpSCgqaClIKUlIKCgpSCgoKCgoKUgoKmlIKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -123,3 +123,18 @@ public static partial class poll_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(poll_package.DeadlineExceededError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛDeadlineExceededError;
+[GoMethodHost(typeof(poll_package.FD)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛFD;
+[GoMethodHost(typeof(poll_package.SysFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛSysFile;
+[GoMethodHost(typeof(poll_package.errNetClosing)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛerrNetClosing;
+[GoMethodHost(typeof(poll_package.fdMutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛfdMutex;
+[GoMethodHost(typeof(poll_package.pollDesc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛpollDesc;
+// </MethodHolders>

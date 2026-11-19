@@ -11,6 +11,7 @@ using strings = strings_package;
 using testing = testing_package;
 using io = io_package;
 using static go.testing.iotest_package;
+using static iotest_internal_test_package;
 
 partial class iotest_internal_test_package {
 
@@ -18,9 +19,13 @@ internal partial struct errWriter {
     internal error err;
 }
 
+} partial class iotest_internal_testᴛerrWriter {
+
 internal static (nint, error) Write(this errWriter w, slice<byte> _) {
     return (0, w.err);
 }
+
+} partial class iotest_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string writeˢ => ref writeˢᵇ;

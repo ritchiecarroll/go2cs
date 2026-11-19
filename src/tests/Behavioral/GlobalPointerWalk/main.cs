@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct node {
     internal ж<node> next;
 }
 
+} partial class mainᴛnode {
+
 internal static nint sum(this ж<node> Ꮡn) {
     nint total = 0;
     for (var p = Ꮡn; p != nil; p = p.next) {
@@ -16,6 +19,8 @@ internal static nint sum(this ж<node> Ꮡn) {
     }
     return total;
 }
+
+} partial class main_package {
 
 internal static readonly ж<ж<node>> Ꮡhead = new StaticBox<ж<node>>(default(ж<node>));
 internal static ref ж<node> head => ref ((StaticBox<ж<node>>)Ꮡhead).ValueSlot;

@@ -17,7 +17,7 @@ private static readonly object fooˢ = (@string)"foo"u8;
 internal static void main() {
     var m = new map<@string, any>{["vstring"] = fooˢ, ["Vint"] = (nint)42, ["vbool"] = true};
     var dataVal = reflect.ValueOf(m);
-    var keys = new map<reflectꓸValue, EmptyStruct>();
+    var keys = new map<reflect.Value, EmptyStruct>();
     foreach (var (_, k) in range(dataVal.MapKeys())) {
         keys[k] = new EmptyStruct();
     }
@@ -54,7 +54,7 @@ internal static void main() {
     var other = new map<@string, any>{};
     fmt.Println("different maps equal:", reflect.ValueOf(m) == reflect.ValueOf(other));
 
-    fmt.Println("zero equal:", new reflectꓸValue() == new reflectꓸValue());
+    fmt.Println("zero equal:", new reflect.Value() == new reflect.Value());
 }
 
 } // end main_package

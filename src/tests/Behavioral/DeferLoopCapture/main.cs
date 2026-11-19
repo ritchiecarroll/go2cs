@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using sort = sort_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct conn {
     internal @string name;
 }
 
+} partial class mainᴛconn {
+
 internal static error Close(this ref conn c) {
     fmt.Println("close", c.name);
     return default;
@@ -23,25 +26,35 @@ internal static void Reset(this ref conn c) {
     fmt.Println("reset", c.name);
 }
 
+} partial class main_package {
+
 partial struct valueConn {
     internal @string name;
     internal channel<@string> @out;
 }
+
+} partial class mainᴛvalueConn {
 
 internal static error Close(this valueConn a) {
     a.@out.ᐸꟷ(a.name);
     return default;
 }
 
+} partial class main_package {
+
 partial struct asyncConn {
     internal @string name;
     internal channel<@string> @out;
 }
 
+} partial class mainᴛasyncConn {
+
 internal static error Close(this ref asyncConn a) {
     a.@out.ᐸꟷ(a.name);
     return default;
 }
+
+} partial class main_package {
 
 internal static void receiverReassignedNoLoop() {
     GoFrame ᒐ = default;
@@ -87,10 +100,10 @@ internal static partial void goIndexedReceiverInLoop() {
     }
     var got = new slice<@string>(0, 3);
     for (nint j = 0; j < 3; j++) {
-        var selᴛ1 = @out;
+        var outᴛ1 = @out;
         var selᴛ2 = time.After((time.Duration)(5000000000L));
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out var s): {
+        switch (select(ᐸꟷ(outᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        case 0 when outᴛ1.ꟷᐳ(out var s): {
             got = append(gotᴷ, got, s);
             break;
         }
@@ -155,10 +168,10 @@ internal static partial void goElementReassigned() {
     v[0] = new valueConn(name: "second value", @out: @out);
     var got = new slice<@string>(0, 2);
     for (nint j = 0; j < 2; j++) {
-        var selᴛ3 = @out;
+        var outᴛ1 = @out;
         var selᴛ4 = time.After((time.Duration)(5000000000L));
-        switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-        case 0 when selᴛ3.ꟷᐳ(out var s): {
+        switch (select(ᐸꟷ(outᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+        case 0 when outᴛ1.ꟷᐳ(out var s): {
             got = append(gotᴷ, got, s);
             break;
         }

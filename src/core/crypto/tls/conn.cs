@@ -21,6 +21,7 @@ using time = time_package;
 using go.@internal;
 using go.crypto;
 using go.sync;
+using static tls_package;
 
 partial class tls_package {
 
@@ -113,17 +114,19 @@ partial struct Conn {
     internal array<byte> tmp = new(16);
 }
 
+} partial class tlsᴛConn {
+
 // Access to net.Conn methods.
 // Cannot just embed net.Conn because that would
 // export the struct field too.
 
 // LocalAddr returns the local network address.
-public static netꓸAddr LocalAddr(this ref Conn c) {
+public static net.Addr LocalAddr(this ref Conn c) {
     return c.conn.LocalAddr();
 }
 
 // RemoteAddr returns the remote network address.
-public static netꓸAddr RemoteAddr(this ref Conn c) {
+public static net.Addr RemoteAddr(this ref Conn c) {
     return c.conn.RemoteAddr();
 }
 
@@ -154,6 +157,8 @@ public static net.Conn NetConn(this ref Conn c) {
     return c.conn;
 }
 
+} partial class tls_package {
+
 // A halfConn represents one direction of the record layer
 // connection, either sending or receiving.
 partial struct halfConn {
@@ -171,16 +176,20 @@ partial struct halfConn {
 }
 
 partial struct permanentError {
-    internal netꓸError err;
+    internal net.Error err;
 }
 
+} partial class tlsᴛpermanentError {
+
 internal static @string Error(this ref permanentError e) { return e.err.Error(); }
-internal static error Unwrap(this ref permanentError e) { return new net_ΔErrorᴠerror(e.err); }
+internal static error Unwrap(this ref permanentError e) { return new net_Errorᴠerror(e.err); }
 internal static bool Timeout(this ref permanentError e) { return e.err.Timeout(); }
 internal static bool Temporary(this ref permanentError e) { return false; }
 
+} partial class tlsᴛhalfConn {
+
 internal static error setErrorLocked(this ref halfConn hc, error err) {
-    var (e, ok) = err._<netꓸError>(ᐧ); if (ok) {
+    var (e, ok) = err._<net.Error>(ᐧ); if (ok) {
         hc.err = new permanentErrorжerror(Ꮡ(new permanentError(err: e)));
     } else {
         hc.err = err;
@@ -267,6 +276,8 @@ internal static nint explicitNonceLen(this ref halfConn hc) {
     }}
 }
 
+} partial class tls_package {
+
 // extractPadding returns, in constant time, the length of the padding to remove
 // from the end of payload. It also returns a byte which is equal to 255 if the
 // padding was valid and 0 otherwise. See RFC 2246, Section 6.2.3.2.
@@ -330,6 +341,8 @@ partial interface cbcMode :
 {
     void SetIV(slice<byte> _);
 }
+
+} partial class tlsᴛhalfConn {
 
 // decrypt authenticates and decrypts the record if protection is active at
 // this stage. The returned plaintext might overlap with the input.
@@ -465,6 +478,8 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
     return (plaintext, typ, default);
 }
 
+} partial class tls_package {
+
 // sliceForAppend extends the input slice by n bytes. head is the full extended
 // slice, while tail is the appended part. If the original slice has sufficient
 // capacity no allocation is performed.
@@ -481,6 +496,8 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
     tail = head.slice(len(@in));
     return (head, tail);
 }
+
+} partial class tlsᴛhalfConn {
 
 // encrypt encrypts payload, adding the appropriate nonce and/or MAC, and
 // appends it to record, which must already contain the record header.
@@ -577,6 +594,8 @@ internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> r
     return (record, default);
 }
 
+} partial class tls_package {
+
 // RecordHeaderError is returned when a TLS record header is invalid.
 partial struct RecordHeaderError {
     // Msg contains a human readable string that describes the error.
@@ -591,11 +610,15 @@ partial struct RecordHeaderError {
     public net.Conn Conn;
 }
 
+} partial class tlsᴛRecordHeaderError {
+
 public static @string Error(this RecordHeaderError e) {
     e = e.ΔClone();
 
     return "tls: "u8 + e.Msg;
 }
+
+} partial class tlsᴛConn {
 
 internal static RecordHeaderError /*err*/ newRecordHeaderError(this ref Conn c, net.Conn conn, @string msg) {
     RecordHeaderError err = new();
@@ -664,7 +687,7 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         if (AreEqual(errΔ1, io.ErrUnexpectedEOF) && c.rawInput.Len() == 0) {
             errΔ1 = io.EOF;
         }
-        var (e, ok) = errΔ1._<netꓸError>(ᐧ); if (!ok || !e.Temporary()) {
+        var (e, ok) = errΔ1._<net.Error>(ᐧ); if (!ok || !e.Temporary()) {
             c.@in.setErrorLocked(errΔ1);
         }
         return errΔ1;
@@ -709,7 +732,7 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         return c.@in.setErrorLocked(c.newRecordHeaderError(default, msg));
     }
     var errΔ2 = c.readFromUntil(new net_ConnᴠReader(c.conn), (nint)recordHeaderLen + n); if (errΔ2 != nil) {
-        var (e, ok) = errΔ2._<netꓸError>(ᐧ); if (!ok || !e.Temporary()) {
+        var (e, ok) = errΔ2._<net.Error>(ᐧ); if (!ok || !e.Temporary()) {
             c.@in.setErrorLocked(errΔ2);
         }
         return errΔ2;
@@ -846,6 +869,8 @@ internal static error retryReadRecord(this ж<Conn> Ꮡc, bool expectChangeCiphe
     return Ꮡc.readRecordOrCCS(expectChangeCipherSpec);
 }
 
+} partial class tls_package {
+
 // atLeastReader reads from R, stopping with EOF once at least N bytes have been
 // read. It is different from an io.LimitedReader in that it doesn't cut short
 // the last Read call, and in that it considers an early EOF an error.
@@ -853,6 +878,8 @@ partial struct atLeastReader {
     public io.Reader R;
     public int64 N;
 }
+
+} partial class tlsᴛatLeastReader {
 
 internal static (nint, error) Read(this ref atLeastReader r, slice<byte> p) {
     if (r.N <= 0) {
@@ -868,6 +895,8 @@ internal static (nint, error) Read(this ref atLeastReader r, slice<byte> p) {
     }
     return (n, err);
 }
+
+} partial class tlsᴛConn {
 
 // readFromUntil reads from r into c.rawInput until c.rawInput contains
 // at least n bytes or else returns an error.
@@ -925,6 +954,8 @@ internal static error sendAlert(this ж<Conn> Ꮡc, alert err) {
     finally { if (ᒐd1) Ꮡc.Ꮡout.of(halfConn.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
+} partial class tls_package {
+
 // tcpMSSEstimate is a conservative estimate of the TCP maximum segment
 // size (MSS). A constant is used, rather than querying the kernel for
 // the actual MSS, to avoid complexity. The value here is the IPv6
@@ -936,6 +967,8 @@ internal static UntypedInt tcpMSSEstimate => 1208;
 // sent after which the TLS record size will be increased to the
 // maximum.
 internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
+
+} partial class tlsᴛConn {
 
 // maxPayloadSizeForWrite returns the maximum TLS payload size to use for the
 // next application data record. There is the following trade-off:
@@ -1031,11 +1064,15 @@ internal static (nint, error) flush(this ref Conn c) {
     return (n, err);
 }
 
+} partial class tls_package {
+
 // outBufPool pools the record-sized scratch buffers used by writeRecordLocked.
 internal static readonly ж<sync.Pool> ᏑoutBufPool = new StaticBox<sync.Pool>(new sync.Pool(
     New: () => @new<slice<byte>>()
 ));
 internal static ref sync.Pool outBufPool => ref ((StaticBox<sync.Pool>)ᏑoutBufPool).ValueSlot;
+
+} partial class tlsᴛConn {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsInternalErrorSendingˢ => ref tlsInternalErrorSendingˢᵇ;
@@ -1315,7 +1352,11 @@ internal static (handshakeMessage, error) unmarshalHandshakeMessage(this ж<Conn
     return (m, default);
 }
 
+} partial class tls_package {
+
 internal static error errShutdown = errors.New("tls: protocol is shutdown");
+
+} partial class tlsᴛConn {
 
 // Write writes data to the connection.
 //
@@ -1642,7 +1683,11 @@ public static error Close(this ж<Conn> Ꮡc) {
     return alertErr;
 }
 
+} partial class tls_package {
+
 internal static error errEarlyCloseWrite = errors.New("tls: CloseWrite called before handshake complete");
+
+} partial class tlsᴛConn {
 
 // CloseWrite shuts down the writing side of the connection. It should only be
 // called once the handshake has completed and does not call CloseWrite on the
@@ -1666,11 +1711,11 @@ internal static error closeNotify(this ж<Conn> Ꮡc) {
 
         if (!c.closeNotifySent) {
             // Set a Write Deadline to prevent possibly blocking forever.
-            c.SetWriteDeadline(time_package.Now().Add((time.Duration)(5000000000L)));
+            c.SetWriteDeadline(time.Now().Add((time.Duration)(5000000000L)));
             c.closeNotifyErr = Ꮡc.sendAlertLocked(alertCloseNotify);
             c.closeNotifySent = true;
             // Any subsequent writes will fail.
-            c.SetWriteDeadline(time_package.Now());
+            c.SetWriteDeadline(time.Now());
         }
         return c.closeNotifyErr;
     }
@@ -1817,7 +1862,7 @@ internal static error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Conte
 }
 
 // ConnectionState returns basic TLS details about the connection.
-public static ΔConnectionState ConnectionState(this ж<Conn> Ꮡc) {
+public static ConnectionState ConnectionState(this ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1831,12 +1876,16 @@ public static ΔConnectionState ConnectionState(this ж<Conn> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().handshakeMutex.Unlock(); ᒐ.Run(); }
 }
 
+} partial class tls_package {
+
 internal static ж<godebug.Setting> tlsunsafeekm = godebug.New("tlsunsafeekm");
 
-internal static ΔConnectionState connectionStateLocked(this ж<Conn> Ꮡc) {
+} partial class tlsᴛConn {
+
+internal static ConnectionState connectionStateLocked(this ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    ΔConnectionState state = default;
+    ConnectionState state = default;
     state.HandshakeComplete = Ꮡc.ᏑisHandshakeComplete.Load();
     state.Version = c.vers;
     state.NegotiatedProtocol = c.clientProtocol;
@@ -1958,4 +2007,4 @@ internal static void setWriteTrafficSecret(this ref Conn c, ж<cipherSuiteTLS13>
     c.@out.setTrafficSecret(suite, level, secret);
 }
 
-} // end tls_package
+} // end tlsᴛConn

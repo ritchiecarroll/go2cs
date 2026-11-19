@@ -8,6 +8,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using Δtesting = testing_package;
 using static go.fmt_internal_test_package;
+using static fmt_test_package;
 
 partial class fmt_test_package {
 
@@ -137,6 +138,8 @@ internal static slice<error> splitErr(error err) {
 
 partial struct errString /*@string*/;
 
+} partial class fmt_testᴛerrString {
+
 internal static @string Error(this errString e) { return (@string)e; }
 
-} // end fmt_test_package
+} // end fmt_testᴛerrString

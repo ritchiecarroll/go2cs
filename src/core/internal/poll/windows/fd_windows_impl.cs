@@ -116,7 +116,7 @@ namespace go.@internal;
 // spells it the same way for the same reason.
 using Δsyscall = go.syscall_package;
 using windows = go.@internal.syscall.windows_package;
-using atomic = go.sync.atomic_package;
+using static poll_package;
 
 partial class poll_package
 {
@@ -157,6 +157,8 @@ partial class poll_package
     internal static int32 sockaddrInet6ToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ref Δsyscall.SockaddrInet6 sa) {
         return Δsyscall.GoRawSockaddrFromInet6(Ꮡrsa, sa.Port, sa.ZoneId, sa.Addr);
     }
+
+} partial class pollᴛFD {
 
     // (*FD).DisassociateIOCP. Go's body asks the kernel to drop the handle's completion port, which
     // in Go always exists: netpollopen associates every pollable handle at open. The managed poller
@@ -200,9 +202,9 @@ partial class poll_package
             }
 
             golib.GoAsyncIO.MarkUnassociated(descriptor);
-            // Through the alias: in namespace go.@internal the extension lookup reaches go.sync_package's
-            // generic Store first (CS7036), where the generated file's `using go.sync;` finds atomic's.
-            atomic.Store(Ꮡfd.of(FD.Ꮡdisassociated), true);
+            // Through atomic.Bool's method holder: from namespace go.@internal the extension lookup does not
+            // reach go.sync, where the holder is declared.
+            go.sync.atomicᴛBool.Store(Ꮡfd.of(FD.Ꮡdisassociated), true);
             // Don't call fd.pd.close(), it would be too racy.
             // There is no harm on leaving fd.pd open until Close is called.
             return default!;
@@ -210,4 +212,7 @@ partial class poll_package
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
         finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
     }
+
+} partial class poll_package {
+
 }

@@ -1,7 +1,9 @@
 namespace go;
 
 using fmt = fmt_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using static main_package;
 
 partial class main_package {
 
@@ -25,6 +27,8 @@ partial struct payload {
     internal slice<nint> vals;
 }
 
+} partial class mainᴛpayload {
+
 internal static nint sum(this payload p) {
     nint t = 0;
     foreach (var (_, v) in range(p.vals)) {
@@ -32,6 +36,8 @@ internal static nint sum(this payload p) {
     }
     return t;
 }
+
+} partial class main_package {
 
 internal static nint nestedStructCapture() {
     ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);

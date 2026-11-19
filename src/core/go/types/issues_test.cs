@@ -19,6 +19,7 @@ using global::go.go;
 using io = io_package;
 using static global::go.go.types_internal_test_package;
 using types = global::go.go.types_package;
+using static types_test_package;
 
 partial class types_test_package {
 
@@ -57,39 +58,39 @@ var (
 public static void TestIssue5849(ж<testing.T> t) {
     @string src = packagePVarSUintUint88ˢ;
     var types = new map<ast.Expr, types.TypeAndValue>();
-    mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
+    mustTypecheck(src, nil, Ꮡ(new Info(Types: types)));
 
     foreach (var (x, tv) in types) {
-        typesꓸType want = default;
+        types.Type want = default;
         switch (x.type()) {
         case ж<ast.BasicLit> xΔ1: {
             var exprᴛ1 = (~xΔ1).Value;
             switch (ᐧ) {
             case {} when exprᴛ1 == @"8"u8: {
-                want = new types.BasicжΔType(Typ[Uint8]);
+                want = new types.BasicжType(Typ[Uint8]);
                 break;
             }
             case {} when exprᴛ1 == @"16"u8: {
-                want = new types.BasicжΔType(Typ[Uint16]);
+                want = new types.BasicжType(Typ[Uint16]);
                 break;
             }
             case {} when exprᴛ1 == @"32"u8: {
-                want = new types.BasicжΔType(Typ[Uint32]);
+                want = new types.BasicжType(Typ[Uint32]);
                 break;
             }
             case {} when exprᴛ1 == @"64"u8: {
-                want = new types.BasicжΔType(Typ[Uint]); // because of "+ s", s is of type uint
+                want = new types.BasicжType(Typ[Uint]); // because of "+ s", s is of type uint
                 break;
             }
             case {} when exprᴛ1 == @"""foo"""u8: {
-                want = new types.BasicжΔType(Typ[ΔString]);
+                want = new types.BasicжType(Typ[String]);
                 break;
             }}
             break;
         }
         case ж<ast.Ident> xΔ1: {
             if (xΔ1.Name == "nil"u8) {
-                want = new types.BasicжΔType(Typ[UntypedNil]);
+                want = new types.BasicжType(Typ[UntypedNil]);
             }
             break;
         }}
@@ -115,7 +116,7 @@ func f() int {
 public static void TestIssue6413(ж<testing.T> t) {
     @string src = packagePFuncFIntDeferFGoˢ;
     var types = new map<ast.Expr, types.TypeAndValue>();
-    mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
+    mustTypecheck(src, nil, Ꮡ(new Info(Types: types)));
 
     var want = Typ[Int];
     nint n = 0;
@@ -149,7 +150,7 @@ public static void TestIssue7245(ж<testing.T> t) {
 
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     var defs = new map<ж<ast.Ident>, types.Object>();
-    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, [f], Ꮡ(new typesꓸInfo(Defs: defs)));
+    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, [f], Ꮡ(new Info(Defs: defs)));
     if (err != nil) {
         t.Fatal(err);
     }
@@ -216,7 +217,7 @@ public static void TestIssue7827(ж<testing.T> t) {
     }), out var Ꮡconf);
     var defs = new map<ж<ast.Ident>, types.Object>();
     var uses = new map<ж<ast.Ident>, types.Object>();
-    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, [f], Ꮡ(new typesꓸInfo(Defs: defs, Uses: uses)));
+    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, [f], Ꮡ(new Info(Defs: defs, Uses: uses)));
     @string s = err.Error(); if (!strings.HasSuffix(s, cannotAssignToWˢ)) {
         t.Errorf("Check: unexpected error: %s", s);
     }
@@ -321,7 +322,7 @@ public static void TestIssue13898(ж<testing.T> t) {
     // (used to fail with this issue)
     @string src2 = src2ᶜ1;
     void f(@string test, @string src) {
-        var info = Ꮡ(new typesꓸInfo(Uses: new map<ж<ast.Ident>, types.Object>()));
+        var info = Ꮡ(new Info(Uses: new map<ж<ast.Ident>, types.Object>()));
         mustTypecheck(src, nil, info);
 
         ж<types.Package> pkg = default;
@@ -384,10 +385,10 @@ public static void TestIssue25627(ж<testing.T> t) {
 
         ref var cfg = ref heap<types.Config>(new Config(Importer: defaultImporter(fset), Error: (error errΔ1) => {
         }), out var Ꮡcfg);
-        var info = Ꮡ(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()));
+        var info = Ꮡ(new Info(Types: new map<ast.Expr, types.TypeAndValue>()));
         var (_, err) = Ꮡcfg.Check(f.Name.Name, fset, [f], info);
         if (err != nil) {
-            var (_, ok) = err._<typesꓸError>(ᐧ); if (!ok) {
+            var (_, ok) = err._<Error>(ᐧ); if (!ok) {
                 t.Fatal(err);
             }
         }
@@ -444,7 +445,7 @@ public static void TestIssue28005(ж<testing.T> t) {
 
         // type-check package with given file order permutation
         ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-        var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
+        var info = Ꮡ(new Info(Defs: new map<ж<ast.Ident>, types.Object>()));
         var (_, err) = Ꮡconf.Check(""u8, fset, files, info);
         if (err != nil) {
             t.Fatal(err);
@@ -497,7 +498,7 @@ public static void TestIssue28282(ж<testing.T> t) {
     if (!AreEqual(obj, want)) {
         t.Fatalf("%s.Lookup: got %q (%p); want %q (%p)", et, obj, obj, want.OrTypedNil(), want.OrTypedNil());
     }
-    (obj, _, _) = LookupFieldOrMethod(new types.InterfaceжΔType(it), false, nil, errorˢ4);
+    (obj, _, _) = LookupFieldOrMethod(new types.InterfaceжType(it), false, nil, errorˢ4);
     if (!AreEqual(obj, want)) {
         t.Fatalf("%s.Lookup: got %q (%p); want %q (%p)", it.OrTypedNil(), obj, obj, want.OrTypedNil(), want.OrTypedNil());
     }
@@ -514,7 +515,7 @@ public static void TestIssue29029(ж<testing.T> t) {
     var f2 = mustParse(fset, packagePVarBInterfaceAˢ);
 
     // printInfo prints the *Func definitions recorded in info, one *Func per line.
-    @string printInfo(ж<typesꓸInfo> infoΔ1) {
+    @string printInfo(ж<types.Info> infoΔ1) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         foreach (var (_, obj) in infoΔ1.Defs) {
             var (fn, ok) = obj._<ж<types.Func>>(ᐧ); if (ok) {
@@ -530,7 +531,7 @@ public static void TestIssue29029(ж<testing.T> t) {
 
     // type-check together
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
+    var info = Ꮡ(new Info(Defs: new map<ж<ast.Ident>, types.Object>()));
     var check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"), info);
     {
         var err = check.Files([f1, f2]); if (err != nil) {
@@ -540,7 +541,7 @@ public static void TestIssue29029(ж<testing.T> t) {
     @string want = printInfo(info);
 
     // type-check incrementally
-    info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
+    info = Ꮡ(new Info(Defs: new map<ж<ast.Ident>, types.Object>()));
     check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"), info);
     {
         var err = check.Files([f1]); if (err != nil) {
@@ -582,6 +583,8 @@ partial struct importHelper {
     internal types.Importer fallback;
 }
 
+} partial class types_testᴛimportHelper {
+
 internal static (ж<types.Package>, error) Import(this importHelper h, @string path) {
     if (path == h.pkg.Path()) {
         return (h.pkg, default);
@@ -591,6 +594,8 @@ internal static (ж<types.Package>, error) Import(this importHelper h, @string p
     }
     return h.fallback.Import(path);
 }
+
+} partial class types_test_package {
 
 // TestIssue34921 verifies that we don't update an imported type's underlying
 // type when resolving an underlying type. Specifically, when determining the
@@ -636,15 +641,15 @@ public static void TestIssue43088(ж<testing.T> t) {
     var T1 = NewNamed(n1, default, default);
     var n2 = NewTypeName(nopos, nil, "T2", default);
     var T2 = NewNamed(n2, default, default);
-    var s1 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.NamedжΔType(T2), false)]), default);
-    T1.SetUnderlying(new types.StructжΔType(s1));
-    var s2 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.NamedжΔType(T2), false)]), default);
-    var s3 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.StructжΔType(s2), false)]), default);
-    T2.SetUnderlying(new types.StructжΔType(s3));
+    var s1 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.NamedжType(T2), false)]), default);
+    T1.SetUnderlying(new types.StructжType(s1));
+    var s2 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.NamedжType(T2), false)]), default);
+    var s3 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.StructжType(s2), false)]), default);
+    T2.SetUnderlying(new types.StructжType(s3));
 
     // These calls must terminate (no endless recursion).
-    Comparable(new types.NamedжΔType(T1));
-    Comparable(new types.NamedжΔType(T2));
+    Comparable(new types.NamedжType(T1));
+    Comparable(new types.NamedжType(T2));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -672,7 +677,7 @@ public static void TestIssue44515(ж<testing.T> t) {
         }
         return ""u8;
     };
-    got = TypeString(typ, new Func<ж<types.Package>, @string>(qf));
+    got = TypeString(typ, qf);
     want = fooPointerˢ;
     if (got != want) {
         t.Errorf("got %q; want %q", got, want);
@@ -809,7 +814,7 @@ public static void TestIssue50646(ж<testing.T> t) {
 public static void TestIssue55030(ж<testing.T> t) {
     // makeSig makes the signature func(typ...)
     // If valid is not set, making that signature is expected to panic.
-    void makeSig(typesꓸType typ, bool valid) {
+    void makeSig(types.Type typ, bool valid) {
         GoFrame ᒐ = default;
         try {
             if (!valid) {
@@ -833,46 +838,46 @@ public static void TestIssue55030(ж<testing.T> t) {
 
     // makeSig must not panic for the following (example) types:
     // []int
-    makeSig(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))), true);
+    makeSig(new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int]))), true);
 
     // string
-    makeSig(new types.BasicжΔType(Typ[ΔString]), true);
+    makeSig(new types.BasicжType(Typ[String]), true);
 
     // P where P's common underlying type is string
     {
         var P = NewTypeName(nopos, nil, "P", default); // [P string]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, [new types.BasicжΔType(Typ[ΔString])])))), true);
+        makeSig(new types.TypeParamжType(NewTypeParam(P, new types.InterfaceжType(NewInterfaceType(default, [new types.BasicжType(Typ[String])])))), true);
     }
 
     // P where P's common underlying type is an (unnamed) slice
     {
         var P = NewTypeName(nopos, nil, "P", default); // [P []int]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]))))), true);
+        makeSig(new types.TypeParamжType(NewTypeParam(P, new types.InterfaceжType(NewInterfaceType(default, slice<types.Type>([new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int])))]))))), true);
     }
 
     // P where P's type set contains strings and []byte
     {
-        var t1 = NewTerm(true, new types.BasicжΔType(Typ[ΔString]));                                // ~string
-        var t2 = NewTerm(false, new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Byte])))); // []byte
-        var u = NewUnion([t1, t2]);                                                                 // ~string | []byte
-        var P = NewTypeName(nopos, nil, "P", default);                                              // [P ~string | []byte]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, [new types.UnionжΔType(u)])))), true);
+        var t1 = NewTerm(true, new types.BasicжType(Typ[String]));                                // ~string
+        var t2 = NewTerm(false, new types.SliceжType(NewSlice(new types.BasicжType(Typ[Byte])))); // []byte
+        var u = NewUnion([t1, t2]);                                                               // ~string | []byte
+        var P = NewTypeName(nopos, nil, "P", default);                                            // [P ~string | []byte]
+        makeSig(new types.TypeParamжType(NewTypeParam(P, new types.InterfaceжType(NewInterfaceType(default, [new types.UnionжType(u)])))), true);
     }
 
     // makeSig must panic for the following (example) types:
     // int
-    makeSig(new types.BasicжΔType(Typ[Int]), false);
+    makeSig(new types.BasicжType(Typ[Int]), false);
 
     // P where P's type set doesn't have any specific types
     {
         var P = NewTypeName(nopos, nil, "P", default); // [P any]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([Universe.Lookup(anyˢ).Type()]))))), false);
+        makeSig(new types.TypeParamжType(NewTypeParam(P, new types.InterfaceжType(NewInterfaceType(default, slice<types.Type>([Universe.Lookup(anyˢ).Type()]))))), false);
     }
 
     // P where P's type set doesn't have any slice or string types
     {
         var P = NewTypeName(nopos, nil, "P", default); // [P any]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, [new types.BasicжΔType(Typ[Int])])))), false);
+        makeSig(new types.TypeParamжType(NewTypeParam(P, new types.InterfaceжType(NewInterfaceType(default, [new types.BasicжType(Typ[Int])])))), false);
     }
 }
 
@@ -904,7 +909,7 @@ public static void TestIssue51093(ж<testing.T> t) {
     foreach (var (_, test) in range(tests)) {
         @string src = fmt.Sprintf("package p; func _[P %s]() { _ = P(%s) }"u8, test.typ, test.val);
         var types = new map<ast.Expr, types.TypeAndValue>();
-        mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
+        mustTypecheck(src, nil, Ꮡ(new Info(Types: types)));
 
         nint n = default;
         foreach (var (x, tv) in types) {
@@ -1255,13 +1260,13 @@ func f[I *T, T any]() {
 public static void TestIssue63260(ж<testing.T> t) {
     @string src = srcᶜ25;
 
-    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
+    ref var info = ref heap<types.Info>(new Info(
         Defs: new map<ж<ast.Ident>, types.Object>()
     ), out var Ꮡinfo);
     var pkg = mustTypecheck(src, nil, Ꮡinfo);
 
     // get type parameter T in signature of f
-    var T = pkg.Scope().Lookup("f").Type()._<ж<typesꓸSignature>>().TypeParams().At(1);
+    var T = pkg.Scope().Lookup("f").Type()._<ж<types.Signature>>().TypeParams().At(1);
     if (T.Obj().Name() != "T"u8) {
         t.Fatalf("got type parameter %s, want T", T.OrTypedNil());
     }
@@ -1512,7 +1517,7 @@ public static void TestIssue69092(ж<testing.T> t) {
     var @file = mustParse(fset, src);
     ref var conf = ref heap<types.Config>(new Config(Error: (error err) => {
     }), out var Ꮡconf); // ignore errors
-    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
+    ref var info = ref heap<types.Info>(new Info(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
     Ꮡconf.Check("p", fset, [@file], Ꮡinfo);
 
     // look for {x} expression

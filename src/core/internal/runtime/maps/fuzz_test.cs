@@ -196,7 +196,7 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
                 if (!ok) {
                     continue;
                 }
-                var gotElem = ~(ж<uint32>)(uintptr)(elemPtr);
+                var gotElem = ~@unsafe.Pointer.To<uint32>(elemPtr);
                 if (gotElem != refElem) {
                     t.Errorf("Get(%d) got %d want %d", c.Key, gotElem, refElem);
                 }

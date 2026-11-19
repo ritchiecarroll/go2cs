@@ -157,8 +157,8 @@ internal static void testNumbers(ж<testing.T> t, token.Token kind, slice<@strin
             }
         }
 
-        global::go.go.constant_package.ΔKind xk = x.Kind();
-        global::go.go.constant_package.ΔKind yk = y.Kind();
+        global::go.go.constant_package.Kind xk = x.Kind();
+        global::go.go.constant_package.Kind yk = y.Kind();
         if (xk != yk) {
             t.Errorf("%s: got kind %d != %d", test, xk, yk);
             continue;
@@ -456,15 +456,14 @@ internal static global::go.go.constant_package.Value val(@string lit) {
         return MakeUnknown();
     }
 
-    var exprᴛ1 = lit;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "?"u8: {
+    case {} when lit == "?"u8: {
         return MakeUnknown();
     }
-    case {} when exprᴛ1 == "true"u8: {
+    case {} when lit == "true"u8: {
         return MakeBool(true);
     }
-    case {} when exprᴛ1 == "false"u8: {
+    case {} when lit == "false"u8: {
         return MakeBool(false);
     }}
 
@@ -709,11 +708,11 @@ public static void TestMakeFloat64(ж<testing.T> t) {
 }
 
 internal partial struct makeTestCase {
-    internal global::go.go.constant_package.ΔKind kind;
+    internal global::go.go.constant_package.Kind kind;
     internal any arg, want;
 }
 
-internal static makeTestCase dup(global::go.go.constant_package.ΔKind k, any x) { return new makeTestCase(k, x, x); }
+internal static makeTestCase dup(global::go.go.constant_package.Kind k, any x) { return new makeTestCase(k, x, x); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object helloˢ = (@string)"hello"u8;
@@ -721,12 +720,12 @@ internal static readonly object helloˢ = (@string)"hello"u8;
 public static void TestMake(ж<testing.T> t) {
     foreach (var (_, test) in range(slice<makeTestCase>([
         new(Bool, false, false),
-        new(ΔString, helloˢ, helloˢ),
+        new(String, helloˢ, helloˢ),
 
         new(Int, (int64)1, (int64)1),
         new(Int, big.NewInt(10).OrTypedNil(), (int64)10),
-        new(Int, @new<bigꓸInt>().Lsh(big.NewInt(1), 62).OrTypedNil(), (int64)(4611686018427387904L)),
-        dup(Int, @new<bigꓸInt>().Lsh(big.NewInt(1), 63).OrTypedNil()),
+        new(Int, @new<big.Int>().Lsh(big.NewInt(1), 62).OrTypedNil(), (int64)(4611686018427387904L)),
+        dup(Int, @new<big.Int>().Lsh(big.NewInt(1), 63).OrTypedNil()),
 
         new(Float, big.NewFloat(0D).OrTypedNil(), floatVal0.val.OrTypedNil()),
         dup(Float, big.NewFloat(2.0D).OrTypedNil()),

@@ -14,7 +14,6 @@
 package main
 
 import (
-	"go/types"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,9 +58,6 @@ func TestForwardAliasChainInAnInternalTestFileRecordsItsLift(t *testing.T) {
 	options.testWhiteboxReference = true
 	options.testInlineTypeAccess = true
 	options.testProductionPath = "example/fwd"
-
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
 
 	takeUnresolvedDynamicTypes()
 	t.Cleanup(func() { takeUnresolvedDynamicTypes() })

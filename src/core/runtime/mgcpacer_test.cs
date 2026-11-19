@@ -13,6 +13,7 @@ using global::go.math;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
 using ꓸꓸꓸfloat64Stream = Span<runtime_test_package.float64Stream>;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -766,6 +767,8 @@ partial struct gcExecTest {
 // These values just cannot be zero.
 internal static UntypedFloat minRate => 0.0001;
 
+} partial class runtime_testᴛgcExecTest {
+
 internal static gcCycle next(this ref gcExecTest e) {
     return new gcCycle(
         allocRate: e.allocRate.min(minRate)(),
@@ -820,6 +823,8 @@ internal static void check(this ref gcExecTest e, ж<testing.T> t, slice<gcCycle
     e.checker(t, results);
 }
 
+} partial class runtime_test_package {
+
 partial struct gcCycle {
     internal float64 allocRate;
     internal float64 scanRate;
@@ -842,6 +847,8 @@ partial struct gcCycleResult {
     internal float64 gcUtilization;
 }
 
+} partial class runtime_testᴛgcCycleResult {
+
 internal static float64 goalRatio(this ref gcCycleResult r) {
     return (float64)r.heapPeak / (float64)r.heapGoal;
 }
@@ -857,6 +864,8 @@ internal static float64 triggerRatio(this ref gcCycleResult r) {
 internal static @string String(this ref gcCycleResult r) {
     return fmt.Sprintf("%d %2.1f%% %d->%d->%d (goal: %d)"u8, r.cycle, r.gcUtilization * 100D, r.heapLive, r.heapTrigger, r.heapPeak, r.heapGoal);
 }
+
+} partial class runtime_test_package {
 
 internal static partial void assertInEpsilon(ж<testing.T> t, @string name, float64 a, float64 b, float64 epsilon) {
     t.Helper();
@@ -928,6 +937,8 @@ internal static float64Stream random(float64 amp, int64 seed) {
     var rʗ1 = r;
     return () => ((rʗ1.Float64() - 0.5D) * 2D) * amp;
 }
+
+} partial class runtime_testᴛfloat64Stream {
 
 // delay returns a new stream which is a buffered version
 // of f: it returns zero for cycles steps, followed by f.
@@ -1009,6 +1020,8 @@ internal static float64Stream limit(this float64Stream f, float64 min, float64 m
         return v;
     };
 }
+
+} partial class runtime_test_package {
 
 internal static uint64 applyMemoryLimitHeapGoalHeadroom(uint64 goal) {
     var headroom = goal / 100 * (uint64)runtime_internal_test_package.MemoryLimitHeapGoalHeadroomPercent;

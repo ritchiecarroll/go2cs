@@ -23,6 +23,8 @@ using atomic = go.sync.atomic_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal;
 using go.sync;
+using rand = rand_package;
+using static rand_package;
 
 partial class rand_package {
 
@@ -81,6 +83,8 @@ public static ж<Rand> New(Source src) {
     var (s64, _) = src._<Source64>(ᐧ);
     return Ꮡ(new Rand(src: src, s64: s64));
 }
+
+} partial class randᴛRand {
 
 // Seed uses the provided seed value to initialize the generator to a deterministic state.
 // Seed should not be called concurrently with any other [Rand] method.
@@ -286,6 +290,8 @@ public static (nint n, error err) Read(this ж<Rand> Ꮡr, slice<byte> p) {
     return read(p, r.src, ref nonnil(ref r).readVal, ref nonnil(ref r).readPos);
 }
 
+} partial class rand_package {
+
 internal static (nint n, error err) read(slice<byte> p, Source src, ref int64 readVal, ref int8 readPos) {
     nint n = default;
     error err = default;
@@ -370,6 +376,8 @@ partial struct runtimeSource {
     internal sync.Mutex mu;
 }
 
+} partial class randᴛruntimeSource {
+
 internal static int64 Int63(this ref runtimeSource _) {
     return (int64)(runtime_rand() & (uint64)rngMask);
 }
@@ -388,10 +396,12 @@ internal static (nint n, error err) read(this ж<runtimeSource> Ꮡfs, slice<byt
     ref var fs = ref Ꮡfs.DerefOrNull();
 
     fs.mu.Lock();
-    (n, err) = read(p, new runtimeSourceжSource(Ꮡfs), ref (readVal).DerefOrNull(), ref (readPos).DerefOrNull());
+    (n, err) = rand.read(p, new runtimeSourceжSource(Ꮡfs), ref (readVal).DerefOrNull(), ref (readPos).DerefOrNull());
     fs.mu.Unlock();
     return (n, err);
 }
+
+} partial class rand_package {
 
 // Seed uses the provided seed value to initialize the default Source to a
 // deterministic state. Seed values that have the same remainder when
@@ -527,6 +537,8 @@ partial struct lockedSource {
     internal ж<rngSource> s;
 }
 
+} partial class randᴛlockedSource {
+
 internal static int64 /*n*/ Int63(this ж<lockedSource> Ꮡr) {
     int64 n = default;
     ref var r = ref Ꮡr.DerefOrNull();
@@ -583,9 +595,9 @@ internal static (nint n, error err) read(this ж<lockedSource> Ꮡr, slice<byte>
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.lk.Lock();
-    (n, err) = read(p, new rngSourceжSource(r.s), ref (readVal).DerefOrNull(), ref (readPos).DerefOrNull());
+    (n, err) = rand.read(p, new rngSourceжSource(r.s), ref (readVal).DerefOrNull(), ref (readPos).DerefOrNull());
     r.lk.Unlock();
     return (n, err);
 }
 
-} // end rand_package
+} // end randᴛlockedSource

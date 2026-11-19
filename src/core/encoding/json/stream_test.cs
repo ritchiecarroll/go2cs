@@ -23,6 +23,7 @@ using go.net;
 using go.net.http;
 using go.runtime;
 using static go.encoding.json_package;
+using static json_internal_test_package;
 
 partial class json_internal_test_package {
 
@@ -48,6 +49,8 @@ public partial struct CasePos {
     internal array<uintptr> pc = new(1);
 }
 
+} partial class json_internal_testᴛCasePos {
+
 public static @string String(this CasePos pos) {
     pos = pos.ΔClone();
 
@@ -55,6 +58,8 @@ public static @string String(this CasePos pos) {
     var (frame, _) = frames.Next();
     return fmt.Sprintf("%s:%d"u8, path.Base(frame.File), frame.Line);
 }
+
+} partial class json_internal_test_package {
 
 // Test values for the stream test.
 // One of each JSON kind.
@@ -185,15 +190,23 @@ public static void TestEncoderIndent(ж<testing.T> t) {
 
 internal partial struct strMarshaler /*@string*/;
 
+} partial class json_internal_testᴛstrMarshaler {
+
 internal static (slice<byte>, error) MarshalJSON(this strMarshaler s) {
     return (slice<byte>((@string)s), default);
 }
 
+} partial class json_internal_test_package {
+
 internal partial struct strPtrMarshaler /*@string*/;
+
+} partial class json_internal_testᴛstrPtrMarshaler {
 
 internal static (slice<byte>, error) MarshalJSON(this ref strPtrMarshaler s) {
     return (slice<byte>((@string)s), default);
 }
+
+} partial class json_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tagStructˢ => ref tagStructˢᵇ;
@@ -259,7 +272,7 @@ public static void TestEncoderSetEscapeHTML(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestEncoderSetEscapeHTML_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -449,7 +462,7 @@ public static void TestBlocking(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestBlocking_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
@@ -559,7 +572,7 @@ public static void TestDecodeInStream(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestDecodeInStream_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -616,7 +629,7 @@ public static void TestHTTPDecoding(ж<testing.T> t) {
     try {
         @string raw = rawᶜ1;
 
-        var ts = httptest.NewServer(new json_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var ts = httptest.NewServer(new json_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(raw));
         })));
         var tsʗ1 = ts;

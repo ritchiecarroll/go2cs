@@ -10,6 +10,7 @@ using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using regexp;
+using static regexp_package;
 
 partial class regexp_package {
 
@@ -105,6 +106,8 @@ partial struct queueOnePass {
     internal uint32 size, nextIndex;
 }
 
+} partial class regexpᴛqueueOnePass {
+
 internal static bool empty(this ref queueOnePass q) {
     return q.nextIndex >= q.size;
 }
@@ -143,6 +146,8 @@ internal static void insertNew(this ref queueOnePass q, uint32 u) {
     q.dense[q.size] = u;
     q.size++;
 }
+
+} partial class regexp_package {
 
 internal static ж<queueOnePass> /*q*/ newQueue(nint size) {
     return Ꮡ(new queueOnePass(

@@ -252,7 +252,7 @@ public static void TestMemmoveAtomicity(ж<testing.T> t) {
                 foreach (var i in range(len(Ꮡsrc.ValueSlot))) {
                     Ꮡsrc.ValueSlot[i] = Ꮡx;
                 }
-                builtin.clear(Ꮡdst.ValueSlot);
+                clear(Ꮡdst.ValueSlot);
 
                 ref var ready = ref heap(new atomic.Uint32(), out var Ꮡready);
                 goǃ(() => {
@@ -478,7 +478,7 @@ public static void BenchmarkGoMemclr(ж<testing.B> b) {
         var x = new slice<byte>(n);
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            builtin.clear(x);
+            clear(x);
         }
     });
 }
@@ -514,7 +514,7 @@ public static void BenchmarkMemclrRange(ж<testing.B> b) {
         nint maxLen = 0;
 
         foreach (var (_, clrLen) in range(t.data)) {
-            maxLen = builtin.max(maxLen, clrLen);
+            maxLen = max(maxLen, clrLen);
             if (clrLen < minLen || minLen == 0) {
                 minLen = clrLen;
             }
@@ -550,7 +550,7 @@ public static void BenchmarkClearFat3(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(3);
+        p.Assign(new byte[]{}.array(3));
     }
 }
 
@@ -561,7 +561,7 @@ public static void BenchmarkClearFat4(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(1);
+        p.Assign(new uint32[]{}.array(1));
     }
 }
 
@@ -572,7 +572,7 @@ public static void BenchmarkClearFat5(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(5);
+        p.Assign(new byte[]{}.array(5));
     }
 }
 
@@ -583,7 +583,7 @@ public static void BenchmarkClearFat6(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(6);
+        p.Assign(new byte[]{}.array(6));
     }
 }
 
@@ -594,7 +594,7 @@ public static void BenchmarkClearFat7(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(7);
+        p.Assign(new byte[]{}.array(7));
     }
 }
 
@@ -605,7 +605,7 @@ public static void BenchmarkClearFat8(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(2);
+        p.Assign(new uint32[]{}.array(2));
     }
 }
 
@@ -616,7 +616,7 @@ public static void BenchmarkClearFat9(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(9);
+        p.Assign(new byte[]{}.array(9));
     }
 }
 
@@ -627,7 +627,7 @@ public static void BenchmarkClearFat10(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(10);
+        p.Assign(new byte[]{}.array(10));
     }
 }
 
@@ -638,7 +638,7 @@ public static void BenchmarkClearFat11(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(11);
+        p.Assign(new byte[]{}.array(11));
     }
 }
 
@@ -649,7 +649,7 @@ public static void BenchmarkClearFat12(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(3);
+        p.Assign(new uint32[]{}.array(3));
     }
 }
 
@@ -660,7 +660,7 @@ public static void BenchmarkClearFat13(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(13);
+        p.Assign(new byte[]{}.array(13));
     }
 }
 
@@ -671,7 +671,7 @@ public static void BenchmarkClearFat14(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(14);
+        p.Assign(new byte[]{}.array(14));
     }
 }
 
@@ -682,7 +682,7 @@ public static void BenchmarkClearFat15(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(15);
+        p.Assign(new byte[]{}.array(15));
     }
 }
 
@@ -693,7 +693,7 @@ public static void BenchmarkClearFat16(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(4);
+        p.Assign(new uint32[]{}.array(4));
     }
 }
 
@@ -704,7 +704,7 @@ public static void BenchmarkClearFat18(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new byte[]{}.array(18);
+        p.Assign(new byte[]{}.array(18));
     }
 }
 
@@ -715,7 +715,7 @@ public static void BenchmarkClearFat20(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(5);
+        p.Assign(new uint32[]{}.array(5));
     }
 }
 
@@ -726,7 +726,7 @@ public static void BenchmarkClearFat24(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(6);
+        p.Assign(new uint32[]{}.array(6));
     }
 }
 
@@ -737,7 +737,7 @@ public static void BenchmarkClearFat32(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(8);
+        p.Assign(new uint32[]{}.array(8));
     }
 }
 
@@ -748,7 +748,7 @@ public static void BenchmarkClearFat40(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(10);
+        p.Assign(new uint32[]{}.array(10));
     }
 }
 
@@ -759,7 +759,7 @@ public static void BenchmarkClearFat48(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(12);
+        p.Assign(new uint32[]{}.array(12));
     }
 }
 
@@ -770,7 +770,7 @@ public static void BenchmarkClearFat56(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(14);
+        p.Assign(new uint32[]{}.array(14));
     }
 }
 
@@ -781,7 +781,7 @@ public static void BenchmarkClearFat64(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(16);
+        p.Assign(new uint32[]{}.array(16));
     }
 }
 
@@ -792,7 +792,7 @@ public static void BenchmarkClearFat72(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(18);
+        p.Assign(new uint32[]{}.array(18));
     }
 }
 
@@ -803,7 +803,7 @@ public static void BenchmarkClearFat128(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(32);
+        p.Assign(new uint32[]{}.array(32));
     }
 }
 
@@ -814,7 +814,7 @@ public static void BenchmarkClearFat256(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(64);
+        p.Assign(new uint32[]{}.array(64));
     }
 }
 
@@ -825,7 +825,7 @@ public static void BenchmarkClearFat512(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(128);
+        p.Assign(new uint32[]{}.array(128));
     }
 }
 
@@ -836,7 +836,7 @@ public static void BenchmarkClearFat1024(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(256);
+        p.Assign(new uint32[]{}.array(256));
     }
 }
 
@@ -847,7 +847,7 @@ public static void BenchmarkClearFat1032(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(258);
+        p.Assign(new uint32[]{}.array(258));
     }
 }
 
@@ -858,7 +858,7 @@ public static void BenchmarkClearFat1040(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = new uint32[]{}.array(260);
+        p.Assign(new uint32[]{}.array(260));
     }
 }
 
@@ -870,7 +870,7 @@ public static void BenchmarkCopyFat3(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -882,7 +882,7 @@ public static void BenchmarkCopyFat4(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -894,7 +894,7 @@ public static void BenchmarkCopyFat5(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -906,7 +906,7 @@ public static void BenchmarkCopyFat6(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -918,7 +918,7 @@ public static void BenchmarkCopyFat7(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -930,7 +930,7 @@ public static void BenchmarkCopyFat8(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -942,7 +942,7 @@ public static void BenchmarkCopyFat9(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -954,7 +954,7 @@ public static void BenchmarkCopyFat10(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -966,7 +966,7 @@ public static void BenchmarkCopyFat11(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -978,7 +978,7 @@ public static void BenchmarkCopyFat12(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -990,7 +990,7 @@ public static void BenchmarkCopyFat13(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1002,7 +1002,7 @@ public static void BenchmarkCopyFat14(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1014,7 +1014,7 @@ public static void BenchmarkCopyFat15(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1026,7 +1026,7 @@ public static void BenchmarkCopyFat16(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1038,7 +1038,7 @@ public static void BenchmarkCopyFat18(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1050,7 +1050,7 @@ public static void BenchmarkCopyFat20(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1062,7 +1062,7 @@ public static void BenchmarkCopyFat24(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1074,7 +1074,7 @@ public static void BenchmarkCopyFat32(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1086,7 +1086,7 @@ public static void BenchmarkCopyFat64(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1098,7 +1098,7 @@ public static void BenchmarkCopyFat72(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1110,7 +1110,7 @@ public static void BenchmarkCopyFat128(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1122,7 +1122,7 @@ public static void BenchmarkCopyFat256(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1134,7 +1134,7 @@ public static void BenchmarkCopyFat512(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1146,7 +1146,7 @@ public static void BenchmarkCopyFat520(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1158,7 +1158,7 @@ public static void BenchmarkCopyFat1024(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1170,7 +1170,7 @@ public static void BenchmarkCopyFat1032(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1182,7 +1182,7 @@ public static void BenchmarkCopyFat1040(ж<testing.B> Ꮡb) {
     runtime_internal_test_package.Escape(p);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        p.Value = x.Clone();
+        p.Assign(x);
     }
 }
 
@@ -1465,7 +1465,7 @@ public static void BenchmarkMemmoveKnownSize112(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)112);
     for (nint i = 0; i < b.N; i++) {
-        p.Value = q.Value.ΔClone();
+        p.Value.AssignFrom(q.Value);
     }
 
     memclrSink = p.x[..];
@@ -1482,7 +1482,7 @@ public static void BenchmarkMemmoveKnownSize128(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)128);
     for (nint i = 0; i < b.N; i++) {
-        p.Value = q.Value.ΔClone();
+        p.Value.AssignFrom(q.Value);
     }
 
     memclrSink = p.x[..];
@@ -1499,7 +1499,7 @@ public static void BenchmarkMemmoveKnownSize192(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)192);
     for (nint i = 0; i < b.N; i++) {
-        p.Value = q.Value.ΔClone();
+        p.Value.AssignFrom(q.Value);
     }
 
     memclrSink = p.x[..];
@@ -1516,7 +1516,7 @@ public static void BenchmarkMemmoveKnownSize248(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)248);
     for (nint i = 0; i < b.N; i++) {
-        p.Value = q.Value.ΔClone();
+        p.Value.AssignFrom(q.Value);
     }
 
     memclrSink = p.x[..];
@@ -1533,7 +1533,7 @@ public static void BenchmarkMemmoveKnownSize256(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)256);
     for (nint i = 0; i < b.N; i++) {
-        p.Value = q.Value.ΔClone();
+        p.Value.AssignFrom(q.Value);
     }
 
     memclrSink = p.x[..];
@@ -1550,7 +1550,7 @@ public static void BenchmarkMemmoveKnownSize512(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)512);
     for (nint i = 0; i < b.N; i++) {
-        p.Value = q.Value.ΔClone();
+        p.Value.AssignFrom(q.Value);
     }
 
     memclrSink = p.x[..];
@@ -1567,7 +1567,7 @@ public static void BenchmarkMemmoveKnownSize1024(ж<testing.B> Ꮡb) {
 
     b.SetBytes((int64)/* unsafe.Sizeof(T{}) */ (uintptr)1024);
     for (nint i = 0; i < b.N; i++) {
-        p.Value = q.Value.ΔClone();
+        p.Value.AssignFrom(q.Value);
     }
 
     memclrSink = p.x[..];

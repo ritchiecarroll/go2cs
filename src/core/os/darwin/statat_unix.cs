@@ -8,8 +8,11 @@ using unix = @internal.syscall.unix_package;
 using @internal;
 using @internal.syscall;
 using syscall = syscall_package;
+using static os_package;
 
 partial class os_package {
+
+} partial class osᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fstatatˢ => ref fstatatˢᵇ;
@@ -26,4 +29,4 @@ internal static (FileInfo, error) lstatatNolog(this ж<File> Ꮡf, @string name)
     return (new fileStatжFileInfo(Ꮡfs), default);
 }
 
-} // end os_package
+} // end osᴛFile

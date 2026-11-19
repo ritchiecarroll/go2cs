@@ -7,18 +7,12 @@
 global using static global::go.net.rpc_package;
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.net.rpc_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("ArgNotPublic", "ΔArgNotPublic")]
-[assembly: GoTypeAlias("Call", "ΔCall")]
-[assembly: GoTypeAlias("NeedsPtrType", "ΔNeedsPtrType")]
-[assembly: GoTypeAlias("ReplyNotPointer", "ΔReplyNotPointer")]
-[assembly: GoTypeAlias("ReplyNotPublic", "ΔReplyNotPublic")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -36,7 +30,7 @@ using static global::go.net.rpc_internal_test_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Args))]
 [assembly: GoFieldAccess(typeof(Reply))]
-[assembly: GoFieldAccess(typeof(global::go.net.rpc_package.ΔCall))]
+[assembly: GoFieldAccess(typeof(global::go.net.rpc_package.Call))]
 [assembly: GoFieldAccess(typeof(go.net.http.httptest_package.Server))]
 [assembly: GoFieldAccess(typeof(shutdownCodec))]
 [assembly: GoFieldAccess(typeof(writeCrasher))]
@@ -49,8 +43,8 @@ using static global::go.net.rpc_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/rpc/client_test.go", "client_test.cs", "ABMogsKCgpSCgtaCgoKCgoIACxiiggAMBqKCgoKUgqaUgoKUlIKCpoKCgqaClKI=", "55-63:1", "", "", "", "76:21,77:13")]
-[assembly: GoPositionMap("net/rpc/server_test.go", "server_test.cs", "ADFcsoKmsoLmooKUgqaygqaigqaCpqKCyqKCAAkSsoKmsoKmsoKCpoKCgpT2goKCgpSCgoKUggAJBoKCgoKClIKCgpSC1oKCgqaCgoKCggAkBqKCgpS2goKCgpSCuIKCgoKUgriCgpSCgoK4goKCgoKCuIKCgoKUgoKUgqaCgpSCuIKClIKCgriCgoKCgqiSgoKCgoKCuIKCgoKUgoKmgoKCgpSCuIKCgoKUgrTkooKClLaCgoKClIK0pIKCgoKmooKCgpSUgpS2goKCgpSCtAAKBKKUgoKUtoKCgoKUgriCgoKClICCyIKCgoKUgILEAAwYwoKCgoKCgpSUgpSmooKCpoKClIKmooKUlKaCpoKCgoKmooKUgoKCgpSCpoKCtAAJEIKmgqaCpoIACwiSgoKUgoKUgoKUgoKCggAJDJSmgraCtoLWooKkgqKCgpS0pMSkooKUgoKipIKmgtaigoKClKSCgrKCgpSCAAsKgoKUgpSmgoKUgpTugqaCguaCAAgGooKCpIKCgpSClKLUopSCgpSkgoKCgpSCgrTUgpSCgpSCgpSCgrqSgoKClIKCguaCgoKCwpKCgpSikoKClIKCpoKCpIKCgoKC7oKCgoKCgujCgoKClLaClKKCgoKClILYpMKClIKCgoKUtoKCgoKCgoKClILCgoKCpqKCgoKCgoKUgoKmpqKkgqaCpoKmgg==", "546-550:1;560-562:1;586-594:1;705-712:1;760-771:1;798-804:1;805-820:2", "", "", "257:21,405:21,443:21,478:21,594:21,702:21,761:21,839:21,868:21,932:25,992:21,1032:21", "730:21,731:13")]
+[assembly: GoPositionMap("net/rpc/client_test.go", "client_test.cs", "ABYogsKCgpSCgvaCgoKCgoIADRiiggAOBqKCgoKUgqaUgoKUlIKCpoKCgqaClKI=", "55-63:1", "", "", "", "85:21,86:13")]
+[assembly: GoPositionMap("net/rpc/server_test.go", "server_test.cs", "ADRcsoKmsoLmooKUgqaygqaigqaCpqKCAAgKooIADRKygqaygqaygoLGgoKClPaCgoKClIKCgpSCAAkGgoKCgoKUgoKClILWgoKCpoKCgoKCACQGooKClLaCgoKClIK4goKCgpSCuIKClIKCgriCgoKCgoK4goKCgpSCgpSCpoKClIK4goKUgoKCuIKCgoKCqJKCgoKCgoK4goKCgpSCgqaCgoKClIK4goKCgpSCtOSigoKUtoKCgoKUgrSkgoKCgqaigoKClJSClLaCgoKClIK0AAoEopSCgpS2goKCgpSCuIKCgoKUgILIgoKCgpSAgsQADhjCgoKCgoKClJSClKaigoKmgoKUgqaigpSUpoLGgoKCgqaigpSCgoKClIKmgoK0AAsQgsaCxoLGggANCJKCgpSCgpSCgpSCgoKCAAsMlKaCtoK2gvaigqSCooKClLSkxKSigpSCgqKkgqaC1qKCgoKUpIKCsoKClIIACwqCgpSClKaCgpSClAAIDoKmgoLmggAKBqKCgqSCgoKUgpSi1KKUgoKUpIKCgoKUgoK01IKUgoKUgoKUgoK6koKCgpSCgoLmgoKCgsKSgoKUopKCgpSCgqaCgqSCgoKCgu6CgoKCgoLowoKCgpS2gpSigoKCgpSC2KTCgpSCgoKClLaCgoKCgoKCgpSCwoKCgqaigoKCgoKClIKCpqaipIKmgqaCpoI=", "546-550:1;560-562:1;586-594:1;705-712:1;760-771:1;798-804:1;805-820:2", "", "", "270:21,418:21,456:21,491:21,611:21,733:21,792:21,874:21,903:21,967:25,1027:21,1067:21", "761:21,762:13")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -96,3 +90,24 @@ public static partial class rpc_internal_test_package
         builtin.initPackage(typeof(global::go.net.rpc_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(rpc_internal_test_package.ArgNotPublic)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛArgNotPublic;
+[GoMethodHost(typeof(rpc_internal_test_package.Arith)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛArith;
+[GoMethodHost(typeof(rpc_internal_test_package.BuiltinTypes)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛBuiltinTypes;
+[GoMethodHost(typeof(rpc_internal_test_package.CodecEmulator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛCodecEmulator;
+[GoMethodHost(typeof(rpc_internal_test_package.NeedsPtrType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛNeedsPtrType;
+[GoMethodHost(typeof(rpc_internal_test_package.ReplyNotPointer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛReplyNotPointer;
+[GoMethodHost(typeof(rpc_internal_test_package.ReplyNotPublic)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛReplyNotPublic;
+[GoMethodHost(typeof(rpc_internal_test_package.S)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛS;
+[GoMethodHost(typeof(rpc_internal_test_package.WriteFailCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛWriteFailCodec;
+[GoMethodHost(typeof(rpc_internal_test_package.hidden)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛhidden;
+[GoMethodHost(typeof(rpc_internal_test_package.shutdownCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛshutdownCodec;
+[GoMethodHost(typeof(rpc_internal_test_package.writeCrasher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpc_internal_testᴛwriteCrasher;
+// </MethodHolders>

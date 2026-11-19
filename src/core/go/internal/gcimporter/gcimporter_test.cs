@@ -30,6 +30,7 @@ using global::go.path;
 using io;
 using io = io_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static gcimporter_test_package;
 
 partial class gcimporter_test_package {
 
@@ -354,9 +355,8 @@ public static void TestVersionHandling(ж<testing.T> t) {
             if (errΔ2 != nil) {
                 // ok to fail if it fails with a 'not the start of an archive file' error for select files
                 if (strings.Contains(errΔ2.Error(), notTheStartOfAnArchiveˢ)) {
-                    var exprᴛ1 = name;
                     switch (ᐧ) {
-                    case {} when exprᴛ1 == "test_go1.8_4.a"u8 || exprᴛ1 == "test_go1.8_5.a"u8: {
+                    case {} when name == "test_go1.8_4.a"u8 || name == "test_go1.8_5.a"u8: {
                         continue;
                         break;
                     }}
@@ -364,9 +364,8 @@ public static void TestVersionHandling(ж<testing.T> t) {
                 }
                 // ok to fail if it fails with a 'no longer supported' error for select files
                 if (strings.Contains(errΔ2.Error(), noLongerSupportedˢ)) {
-                    var exprᴛ2 = name;
                     switch (ᐧ) {
-                    case {} when exprᴛ2 == "test_go1.7_0.a"u8 || exprᴛ2 == "test_go1.7_1.a"u8 || exprᴛ2 == "test_go1.8_4.a"u8 || exprᴛ2 == "test_go1.8_5.a"u8 || exprᴛ2 == "test_go1.11_0i.a"u8 || exprᴛ2 == "test_go1.11_6b.a"u8 || exprᴛ2 == "test_go1.11_999b.a"u8 || exprᴛ2 == "test_go1.11_999i.a"u8: {
+                    case {} when name == "test_go1.7_0.a"u8 || name == "test_go1.7_1.a"u8 || name == "test_go1.8_4.a"u8 || name == "test_go1.8_5.a"u8 || name == "test_go1.11_0i.a"u8 || name == "test_go1.11_6b.a"u8 || name == "test_go1.11_999b.a"u8 || name == "test_go1.11_999i.a"u8: {
                         continue;
                         break;
                     }}
@@ -374,9 +373,8 @@ public static void TestVersionHandling(ж<testing.T> t) {
                 }
                 // ok to fail if it fails with a 'newer version' error for select files
                 if (strings.Contains(errΔ2.Error(), newerVersionˢ)) {
-                    var exprᴛ3 = name;
                     switch (ᐧ) {
-                    case {} when exprᴛ3 == "test_go1.11_999i.a"u8: {
+                    case {} when name == "test_go1.11_999i.a"u8: {
                         continue;
                         break;
                     }}
@@ -635,7 +633,7 @@ public static void TestCorrectMethodPackage(ж<testing.T> t) {
     }
 
     var mutex = imports[syncˢ].Scope().Lookup(mutexˢ)._<ж<types.TypeName>>().Type();
-    var mset = types.NewMethodSet(new types.PointerжΔType(types.NewPointer(mutex))); // methods of *sync.Mutex
+    var mset = types.NewMethodSet(new types.PointerжType(types.NewPointer(mutex))); // methods of *sync.Mutex
     var sel = mset.Lookup(nil, lockˢ);
     var @lock = sel.Obj()._<ж<types.Func>>();
     @string got = @lock.Pkg().Path();
@@ -767,7 +765,7 @@ public static void TestIssue13898(ж<testing.T> t) {
     }
 
     // lookup go/types.Object.Pkg method
-    (var sel, ok) = types.LookupSelection(new types.NamedжΔType(typ), false, nil, pkgˢ);
+    (var sel, ok) = types.LookupSelection(new types.NamedжType(typ), false, nil, pkgˢ);
     if (!ok) {
         t.Fatalf("go/types.Object.Pkg not found");
     }
@@ -925,7 +923,7 @@ internal static ж<types.Package> compileAndImportPkg(ж<testing.T> t, @string n
     finally { ᒐ.Run(); }
 }
 
-internal static types.Object lookupObj(ж<testing.T> t, ж<typesꓸScope> Ꮡscope, @string name) {
+internal static types.Object lookupObj(ж<testing.T> t, ж<types.Scope> Ꮡscope, @string name) {
     ref var scope = ref Ꮡscope.DerefOrNull();
 
     var obj = scope.Lookup(name); if (obj != nil) {
@@ -939,7 +937,11 @@ internal static types.Object lookupObj(ж<testing.T> t, ж<typesꓸScope> Ꮡsco
 // importMap implements the types.Importer interface.
 partial struct importMap /*map[@string, ж<types.Package>]*/;
 
-internal static (ж<types.Package>, error) ΔImport(this importMap m, @string path) { return (m[path], default); }
+} partial class gcimporter_testᴛimportMap {
+
+internal static (ж<types.Package>, error) Import(this importMap m, @string path) { return (m[path], default); }
+
+} partial class gcimporter_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string issue69912Goˢ => ref issue69912Goˢᵇ;

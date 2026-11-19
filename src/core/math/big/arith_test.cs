@@ -618,7 +618,7 @@ public static void TestIssue31084(ж<testing.T> t) {
 
         // compute 10^n via 5^n << n.
         UntypedInt n = 165;
-        var p = ((global::go.math.big_package.Δnat)default).expNN(stk, new Δnat(new global::go.math.big_package.Word[]{5}.slice()), new Δnat(new global::go.math.big_package.Word[]{n}.slice()), default, false);
+        var p = ((global::go.math.big_package.nat)default).expNN(stk, new nat(new global::go.math.big_package.Word[]{5}.slice()), new nat(new global::go.math.big_package.Word[]{n}.slice()), default, false);
         p = p.lsh(p, n);
         @string got = (@string)p.utoa(10);
         @string want = "1"u8 + strings.Repeat("0", n);
@@ -635,7 +635,7 @@ private static readonly @string issue42838Valueᵇ = "15930919111324522770288803
 
 public static void TestIssue42838(ж<testing.T> t) {
     UntypedInt s = 192;
-    var (z, _, _, _) = ((global::go.math.big_package.Δnat)default).scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(issue42838Value)), 0, false);
+    var (z, _, _, _) = ((global::go.math.big_package.nat)default).scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(issue42838Value)), 0, false);
     z = z.lsh(z, s);
     @string got = (@string)z.utoa(10);
     @string want = "1"u8 + strings.Repeat("0", s);
@@ -646,39 +646,39 @@ public static void TestIssue42838(ж<testing.T> t) {
 
 // type funVWW is a methodless func type — rendered inline as its base delegate
 internal partial struct argVWW {
-    internal global::go.math.big_package.Δnat z, x;
+    internal global::go.math.big_package.nat z, x;
     internal global::go.math.big_package.Word y, r;
     internal global::go.math.big_package.Word c;
 }
 
 internal static slice<argVWW> prodVWW = [
     new(),
-    new(new Δnat(new global::go.math.big_package.Word[]{0}.slice()), new Δnat(new global::go.math.big_package.Word[]{0}.slice()), 0, 0, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{991}.slice()), new Δnat(new global::go.math.big_package.Word[]{0}.slice()), 0, 991, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{0}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M}.slice()), 0, 0, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{991}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M}.slice()), 0, 991, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{0}.slice()), new Δnat(new global::go.math.big_package.Word[]{0}.slice()), _M, 0, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{991}.slice()), new Δnat(new global::go.math.big_package.Word[]{0}.slice()), _M, 991, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{1}.slice()), new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 1, 0, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{992}.slice()), new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 1, 991, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{22793}.slice()), new Δnat(new global::go.math.big_package.Word[]{991}.slice()), 23, 0, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{22800}.slice()), new Δnat(new global::go.math.big_package.Word[]{991}.slice()), 23, 7, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 22793}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 991}.slice()), 23, 0, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{7, 0, 0, 22793}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 991}.slice()), 23, 7, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 0}.slice()), new Δnat(new global::go.math.big_package.Word[]{7893475, 7395495, 798547395, 68943}.slice()), 0, 0, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{991, 0, 0, 0}.slice()), new Δnat(new global::go.math.big_package.Word[]{7893475, 7395495, 798547395, 68943}.slice()), 0, 991, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 0}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 0}.slice()), 894375984, 0, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{991, 0, 0, 0}.slice()), new Δnat(new global::go.math.big_package.Word[]{0, 0, 0, 0}.slice()), 894375984, 991, 0),
-    new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551614UL))}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 1), 0, (nuint)(/* _M >> (_W - 1) */ 1UL)),
-    new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551615UL))}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 1), 1, (nuint)(/* _M >> (_W - 1) */ 1UL)),
-    new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551488UL))}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), 0, (nuint)(/* _M >> (_W - 7) */ 127UL)),
-    new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551552UL))}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), (global::go.math.big_package.Word)((nuint)1 << 6), (nuint)(/* _M >> (_W - 7) */ 127UL)),
-    new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551488UL)), _M, _M, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M, _M, _M, _M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), 0, (nuint)(/* _M >> (_W - 7) */ 127UL)),
-    new(new Δnat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551552UL)), _M, _M, _M}.slice()), new Δnat(new global::go.math.big_package.Word[]{_M, _M, _M, _M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), (global::go.math.big_package.Word)((nuint)1 << 6), (nuint)(/* _M >> (_W - 7) */ 127UL))
+    new(new nat(new global::go.math.big_package.Word[]{0}.slice()), new nat(new global::go.math.big_package.Word[]{0}.slice()), 0, 0, 0),
+    new(new nat(new global::go.math.big_package.Word[]{991}.slice()), new nat(new global::go.math.big_package.Word[]{0}.slice()), 0, 991, 0),
+    new(new nat(new global::go.math.big_package.Word[]{0}.slice()), new nat(new global::go.math.big_package.Word[]{_M}.slice()), 0, 0, 0),
+    new(new nat(new global::go.math.big_package.Word[]{991}.slice()), new nat(new global::go.math.big_package.Word[]{_M}.slice()), 0, 991, 0),
+    new(new nat(new global::go.math.big_package.Word[]{0}.slice()), new nat(new global::go.math.big_package.Word[]{0}.slice()), _M, 0, 0),
+    new(new nat(new global::go.math.big_package.Word[]{991}.slice()), new nat(new global::go.math.big_package.Word[]{0}.slice()), _M, 991, 0),
+    new(new nat(new global::go.math.big_package.Word[]{1}.slice()), new nat(new global::go.math.big_package.Word[]{1}.slice()), 1, 0, 0),
+    new(new nat(new global::go.math.big_package.Word[]{992}.slice()), new nat(new global::go.math.big_package.Word[]{1}.slice()), 1, 991, 0),
+    new(new nat(new global::go.math.big_package.Word[]{22793}.slice()), new nat(new global::go.math.big_package.Word[]{991}.slice()), 23, 0, 0),
+    new(new nat(new global::go.math.big_package.Word[]{22800}.slice()), new nat(new global::go.math.big_package.Word[]{991}.slice()), 23, 7, 0),
+    new(new nat(new global::go.math.big_package.Word[]{0, 0, 0, 22793}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, 0, 991}.slice()), 23, 0, 0),
+    new(new nat(new global::go.math.big_package.Word[]{7, 0, 0, 22793}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, 0, 991}.slice()), 23, 7, 0),
+    new(new nat(new global::go.math.big_package.Word[]{0, 0, 0, 0}.slice()), new nat(new global::go.math.big_package.Word[]{7893475, 7395495, 798547395, 68943}.slice()), 0, 0, 0),
+    new(new nat(new global::go.math.big_package.Word[]{991, 0, 0, 0}.slice()), new nat(new global::go.math.big_package.Word[]{7893475, 7395495, 798547395, 68943}.slice()), 0, 991, 0),
+    new(new nat(new global::go.math.big_package.Word[]{0, 0, 0, 0}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, 0, 0}.slice()), 894375984, 0, 0),
+    new(new nat(new global::go.math.big_package.Word[]{991, 0, 0, 0}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, 0, 0}.slice()), 894375984, 991, 0),
+    new(new nat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551614UL))}.slice()), new nat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 1), 0, (nuint)(/* _M >> (_W - 1) */ 1UL)),
+    new(new nat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551615UL))}.slice()), new nat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 1), 1, (nuint)(/* _M >> (_W - 1) */ 1UL)),
+    new(new nat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551488UL))}.slice()), new nat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), 0, (nuint)(/* _M >> (_W - 7) */ 127UL)),
+    new(new nat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551552UL))}.slice()), new nat(new global::go.math.big_package.Word[]{_M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), (global::go.math.big_package.Word)((nuint)1 << 6), (nuint)(/* _M >> (_W - 7) */ 127UL)),
+    new(new nat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551488UL)), _M, _M, _M}.slice()), new nat(new global::go.math.big_package.Word[]{_M, _M, _M, _M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), 0, (nuint)(/* _M >> (_W - 7) */ 127UL)),
+    new(new nat(new global::go.math.big_package.Word[]{unchecked((nuint)(18446744073709551552UL)), _M, _M, _M}.slice()), new nat(new global::go.math.big_package.Word[]{_M, _M, _M, _M}.slice()), (global::go.math.big_package.Word)((nuint)1 << 7), (global::go.math.big_package.Word)((nuint)1 << 6), (nuint)(/* _M >> (_W - 7) */ 127UL))
 ];
 
 internal static void testFunVWW(ж<testing.T> t, @string msg, Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word, global::go.math.big_package.Word> f, argVWW a) {
-    var z = new global::go.math.big_package.Δnat(len(a.z));
+    var z = new global::go.math.big_package.nat(len(a.z));
     global::go.math.big_package.Word c = f(z, a.x, a.y, a.r);
     foreach (var (i, zi) in range<global::go.math.big_package.Word>(z)) {
         if (zi != a.z[i]) {
@@ -695,17 +695,17 @@ internal static void testFunVWW(ж<testing.T> t, @string msg, Func<slice<global:
 // TODO(gri) mulAddVWW and divWVW are symmetric operations but
 // their signature is not symmetric. Try to unify.
 internal partial struct argWVW {
-    internal global::go.math.big_package.Δnat z;
+    internal global::go.math.big_package.nat z;
     internal global::go.math.big_package.Word xn;
-    internal global::go.math.big_package.Δnat x;
+    internal global::go.math.big_package.nat x;
     internal global::go.math.big_package.Word y;
     internal global::go.math.big_package.Word r;
 }
 
 internal static void testFunWVW(ж<testing.T> t, @string msg, Func<slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word> f, argWVW a) {
-    var z = new global::go.math.big_package.Δnat(len(a.z));
+    var z = new global::go.math.big_package.nat(len(a.z));
     global::go.math.big_package.Word r = f(z, a.xn, a.x, a.y);
-    if (!slices.Equal<global::go.math.big_package.Δnat, global::go.math.big_package.Word>(z, a.z) || r != a.r) {
+    if (!slices.Equal<global::go.math.big_package.nat, global::go.math.big_package.Word>(z, a.z) || r != a.r) {
         t.Errorf("%s%+v\nhave %v, %v\nwant %v, %v", msg, a, z, r, a.z, a.r);
     } else {
         t.Logf("%s%+v\ngood %v, %v", msg, a, z, r);

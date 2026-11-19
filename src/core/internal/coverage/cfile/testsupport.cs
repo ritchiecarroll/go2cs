@@ -25,6 +25,7 @@ using go.@internal;
 using go.@internal.coverage;
 using go.@internal.runtime;
 using path;
+using static cfile_package;
 
 partial class cfile_package {
 
@@ -138,6 +139,8 @@ partial struct tstate {
     internal ж<cformat.Formatter> cf;
     internal coverage.CounterMode cmode;
 }
+
+} partial class cfileᴛtstate {
 
 // processPod reads coverage counter data for a specific pod.
 internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) {
@@ -263,9 +266,13 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
     finally { ᒐ.Run(); }
 }
 
+} partial class cfile_package {
+
 partial struct pkfunc {
     internal uint32 pk, fcn;
 }
+
+} partial class cfileᴛtstate {
 
 internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) {
     // Unmarshal the information on available aux metafiles into
@@ -297,6 +304,8 @@ internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles,
     }
     return default;
 }
+
+} partial class cfile_package {
 
 // Snapshot returns a snapshot of coverage percentage at a moment of
 // time within a running test, so as to support the testing.Coverage()

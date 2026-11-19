@@ -17,7 +17,7 @@ using static go.net_package;
 partial class net_internal_test_package {
 
 internal partial struct TestUnixConnLocalWindows_type /*dyn*/ {
-    internal global::go.net_package.ΔAddr got, want;
+    internal global::go.net_package.Addr got, want;
 }
 
 public static void TestUnixConnLocalWindows(ж<testing.T> t) {
@@ -78,9 +78,9 @@ public static void TestUnixConnLocalWindows(ж<testing.T> t) {
                 laddr = "@";
             }
             array<TestUnixConnLocalWindows_type> connAddrs = new TestUnixConnLocalWindows_type[]{
-                new(ln.Addr(), new global::go.net_package.UnixAddrжΔAddr(ta)),
-                new(c.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unix")))),
-                new(c.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжΔAddr(ta))
+                new(ln.Addr(), new global::go.net_package.UnixAddrжAddr(ta)),
+                new(c.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unix")))),
+                new(c.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжAddr(ta))
             }.array();
             foreach (var (_, ca) in range(connAddrs.ΔRangeSnapshot())) {
                 if (!reflect.DeepEqual(ca.got, ca.want)) {

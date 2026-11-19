@@ -19,8 +19,11 @@ using @internal;
 using go.io;
 using net.@internal;
 using static go.net_package;
+using static net_internal_test_package;
 
 partial class net_internal_test_package {
+
+} partial class net_internal_testᴛOpError {
 
 internal static error isValid(this ж<global::go.net_package.OpError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -31,7 +34,7 @@ internal static error isValid(this ж<global::go.net_package.OpError> Ꮡe) {
     if (e.Net == ""u8) {
         return fmt.Errorf("OpError.Net is empty: %v"u8, Ꮡe.OrTypedNil());
     }
-    foreach (var (_, addr) in range(slice<global::go.net_package.ΔAddr>([e.Source, e.Addr]))) {
+    foreach (var (_, addr) in range(slice<global::go.net_package.Addr>([e.Source, e.Addr]))) {
         switch (addr.type()) {
         case null: {
             break;
@@ -88,6 +91,8 @@ internal static error isValid(this ж<global::go.net_package.OpError> Ꮡe) {
     }
     return default;
 }
+
+} partial class net_internal_test_package {
 
 internal partial interface parseDialError_type /*dyn*/ {
     void isAddrinfoErrno();
@@ -240,21 +245,20 @@ public static void TestProtocolDialError(ж<testing.T> t) {
 
     foreach (var (_, network) in range(slice<@string>(["tcp", "udp", "ip:4294967296", "unix", "unixpacket", "unixgram"]))) {
         error err = default;
-        var exprᴛ2 = network;
         switch (ᐧ) {
-        case {} when exprᴛ2 == "tcp"u8: {
+        case {} when network == "tcp"u8: {
             (_, err) = DialTCP(network, nil, Ꮡ(new TCPAddr(Port: (1 << 16))));
             break;
         }
-        case {} when exprᴛ2 == "udp"u8: {
+        case {} when network == "udp"u8: {
             (_, err) = DialUDP(network, nil, Ꮡ(new UDPAddr(Port: (1 << 16))));
             break;
         }
-        case {} when exprᴛ2 == "ip:4294967296"u8: {
+        case {} when network == "ip:4294967296"u8: {
             (_, err) = DialIP(network, nil, nil);
             break;
         }
-        case {} when exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8 || exprᴛ2 == "unixgram"u8: {
+        case {} when network == "unix"u8 || network == "unixpacket"u8 || network == "unixgram"u8: {
             (_, err) = DialUnix(network, nil, Ꮡ(new UnixAddr(Name: "//")));
             break;
         }}
@@ -475,25 +479,24 @@ public static void TestProtocolListenError(ж<testing.T> t) {
 
     foreach (var (_, network) in range(slice<@string>(["tcp", "udp", "ip:4294967296", "unix", "unixpacket", "unixgram"]))) {
         error err = default;
-        var exprᴛ2 = network;
         switch (ᐧ) {
-        case {} when exprᴛ2 == "tcp"u8: {
+        case {} when network == "tcp"u8: {
             (_, err) = ListenTCP(network, Ꮡ(new TCPAddr(Port: (1 << 16))));
             break;
         }
-        case {} when exprᴛ2 == "udp"u8: {
+        case {} when network == "udp"u8: {
             (_, err) = ListenUDP(network, Ꮡ(new UDPAddr(Port: (1 << 16))));
             break;
         }
-        case {} when exprᴛ2 == "ip:4294967296"u8: {
+        case {} when network == "ip:4294967296"u8: {
             (_, err) = ListenIP(network, nil);
             break;
         }
-        case {} when exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8: {
+        case {} when network == "unix"u8 || network == "unixpacket"u8: {
             (_, err) = ListenUnix(network, Ꮡ(new UnixAddr(Name: "//")));
             break;
         }
-        case {} when exprᴛ2 == "unixgram"u8: {
+        case {} when network == "unixgram"u8: {
             (_, err) = ListenUnixgram(network, Ꮡ(new UnixAddr(Name: "//")));
             break;
         }}
@@ -807,7 +810,7 @@ public static void TestAcceptError(ж<testing.T> t) {
                 if (c != nil) {
                     t.Errorf("Accept returned non-nil interface %T(%v) with err != nil", c, c);
                 }
-                var (nerr, ok) = err._<ΔError>(ᐧ); if (!ok || (!nerr.Timeout() && !nerr.Temporary())) {
+                var (nerr, ok) = err._<Error>(ᐧ); if (!ok || (!nerr.Timeout() && !nerr.Temporary())) {
                     return;
                 }
                 continue;

@@ -9,6 +9,7 @@ using alias = go.crypto.@internal.fips140.alias_package;
 using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static gcm_package;
 
 partial class gcm_package {
 
@@ -50,7 +51,7 @@ internal static partial (ж<GCM>, error) newGCM(ж<GCM> Ꮡg, ж<aes.Block> Ꮡc
     if (cipher.BlockSize() != gcmBlockSize) {
         return (default, errors.New(cipherNewGCMRequires128ˢ));
     }
-    g.cipher = cipher;
+    g.cipher.AssignFrom(cipher);
     g.nonceSize = nonceSize;
     g.tagSize = tagSize;
     initGCM(ref (Ꮡg).DerefOrNull());
@@ -61,6 +62,8 @@ internal static UntypedInt gcmBlockSize => 16;
 internal static UntypedInt gcmTagSize => 16;
 internal static UntypedInt gcmMinimumTagSize => 12; // NIST SP 800-38D recommends tags with 12 or more bytes.
 internal static UntypedInt gcmStandardNonceSize => 12;
+
+} partial class gcmᴛGCM {
 
 public static nint NonceSize(this ref GCM g) {
     return g.nonceSize;
@@ -100,7 +103,11 @@ internal static slice<byte> sealAfterIndicator(this ж<GCM> Ꮡg, slice<byte> ds
     return ret;
 }
 
+} partial class gcm_package {
+
 internal static error errOpen = errors.New("cipher: message authentication failed");
+
+} partial class gcmᴛGCM {
 
 public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
@@ -140,6 +147,8 @@ public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slic
     }
     return (ret, default);
 }
+
+} partial class gcm_package {
 
 // sliceForAppend takes a slice and a requested number of bytes. It returns a
 // slice with the contents of the given slice followed by that many bytes and a

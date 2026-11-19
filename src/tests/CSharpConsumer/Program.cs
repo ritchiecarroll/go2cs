@@ -75,7 +75,7 @@ static class Program
         @string bare = ToUpper("gopher");                       // using static go.strings_package;
         @string qualified = strings_package.ToUpper("gopher");  // using go;
         Check("2 using static and the package class reach the same function", bare == "GOPHER" && qualified == "GOPHER");
-        time.Duration timeout = 90 * time.ΔSecond;
+        time.Duration timeout = 90 * time.Second;
         @string shown = timeout.String();   // a Go method: found through `using go;`
         Check("2 a Go method is an extension method found through the namespace", shown == "1m30s");
         var log = new CollectingWriter();
@@ -295,8 +295,8 @@ static class Program
         uuid.UUID copied = parsed.Clone();  // Go: copied := parsed
         copied[0] = 0;
         Check("12 Clone copies a Go array value", parsed[0] == 0x6b && copied[0] == 0);
-        uuid.ΔVersion version = parsed.Version();   // Go: uuid.Version
-        Check("12 a Δ name: uuid.Version is uuid.ΔVersion", version.String() == "VERSION_1");
+        uuid.Version version = parsed.Version();    // the type and the method keep the name Version
+        Check("12 a type and a method share a name: uuid.Version", version.String() == "VERSION_1");
 
         // 13. Generics: github.com/ritchiecarroll/hashset.
         var set = hashset.NewHashSet<int>(new[] { 1, 2, 3 });   // Go: hashset.NewHashSet[int32]

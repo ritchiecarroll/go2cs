@@ -14,8 +14,8 @@ using static go.crypto.x509_package;
 
 partial class x509_internal_test_package {
 
-internal static map<@string, global::go.crypto.x509_package.ΔOID> nistTestPolicies;
-internal static void initᴛnistTestPolicies() { nistTestPolicies = new map<@string, global::go.crypto.x509_package.ΔOID>{
+internal static map<@string, global::go.crypto.x509_package.OID> nistTestPolicies;
+internal static void initᴛnistTestPolicies() { nistTestPolicies = new map<@string, global::go.crypto.x509_package.OID>{
     ["anyPolicy"] = anyPolicyOID,
     ["NIST-test-policy-1"] = mustNewOIDFromInts([2, 16, 840, 1, 101, 3, 2, 1, 48, 1]),
     ["NIST-test-policy-2"] = mustNewOIDFromInts([2, 16, 840, 1, 101, 3, 2, 1, 48, 2]),
@@ -161,7 +161,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> t) {
         var tcʗ1 = tc;
         t.Run(tc.Name, (ж<testing.T> tΔ1) => {
             var chainᴷ = new stackAppend<ж<global::go.crypto.x509_package.Certificate>>();
-            var initialPoliciesᴷ = new stackAppend<global::go.crypto.x509_package.ΔOID>();
+            var initialPoliciesᴷ = new stackAppend<global::go.crypto.x509_package.OID>();
             slice<ж<global::go.crypto.x509_package.Certificate>> chain = default;
             foreach (var (_, c) in range(tcʗ1.CertPath)) {
                 var (certDER, errΔ2) = os.ReadFile(filepath.Join(certDir, c));
@@ -176,7 +176,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> t) {
             }
             slices.Reverse<slice<ж<global::go.crypto.x509_package.Certificate>>, ж<global::go.crypto.x509_package.Certificate>>(chain);
 
-            slice<global::go.crypto.x509_package.ΔOID> initialPolicies = default;
+            slice<global::go.crypto.x509_package.OID> initialPolicies = default;
             foreach (var (_, pstr) in range(tcʗ1.InitialPolicySet)) {
                 var (policy, ok) = nistTestPolicies[pstr, ꟷ];
                 if (!ok) {
