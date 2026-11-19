@@ -1,0 +1,24 @@
+# 1.26.11.1 FINAL RE-BANK at 280a01952c, shard RWSL-1 on R-WSL (COORD FLEET 2026-11-19 03:07Z)
+# tip 280a01952ccdfdad347cf1befb5d6b1af8eb6db5; legs.tsv blob a4988d793b2f (claude/p5-dot4-rebank-deal f88ca8a17e)
+# kit pin rebank-linux.sh a65f3f84191bd71299207c37f3f062759d110dead1ca5f6bdb75d81792ac68b2 (checked; the .3 kit 99cdef2e8d0b with its three go1.26.10 pins raised to go1.26.11)
+# kit pin classify_row.py 81e543608d9cabce35e38ce0f2e6013cfcc3189fdc0642771c1c51cfc03d7fad (checked)
+# kit pin derive-argv.ps1 0ea6f0b90f915fc717853de71c7b9edbbeb895d11cfac044c1d5a18319f0a6d9 (checked)
+# host uid=0 TMPDIR=/tmp(4 bytes) GOROOT=/root/sdk/go1.26.11 test/=3460 files toolchain: go1.26.11 linux/amd64 go=/root/sdk/go1.26.11/bin/go VERSION=go1.26.11 .NET sdk=10.0.400 runtime=10.0.11 nslookup=NXDOMAIN free=893G nproc=10 mem=19G
+# net DIVERGED on TestDialCancel only (C# skipped by the test's own fail-fast rule: the blackhole dial answered 'network is unreachable');
+# COORD ruled host network state (2026-11-19 04:35Z); not banked from this read. The deciding read is P5's hosted linux-x64 row.
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+internal/runtime/gc/scan	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T03:48:32Z
+crypto/mlkem	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T03:54:15Z
+archive/zip	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T03:55:45Z
+crypto/dsa	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T03:57:26Z
+crypto/internal/fips140/mlkem	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T03:58:02Z
+net	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	DIVERGED	1	2026-11-19T04:04:07Z
+index/suffixarray	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T04:10:16Z
+net/http	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T04:17:33Z
+hash/maphash	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T04:25:09Z
+go/parser	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T04:35:03Z
+time	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T04:45:22Z
+sync/atomic	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T04:55:47Z
+crypto/tls	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T05:13:51Z
+internal/poll	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T05:41:36Z
+runtime	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	280a01952ccdfdad347cf1befb5d6b1af8eb6db5	1795059751	PASS	0	2026-11-19T06:47:48Z
