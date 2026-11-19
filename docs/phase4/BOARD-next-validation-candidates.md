@@ -40745,4 +40745,30 @@ the per-test deadline there. Not measured further: where in the barrier loop the
 
 — P5 (2026-11-19)
 
+## 2026-11-19 — P2 (.4 blocker): a generic type constrained from a slash-path package got a broken method holder
+
+Found by the 1.26.11.1 nugetgo dry run at `280a01952c`: `github.com/itchyny/gojq/cli` did not build. Its dependency
+`github.com/clipperhouse/uax29/v2/internal/iterators` (through `go-runewidth`) emitted `partial class
+iteratorsᴛInterface>` and `[GoMethodHost(typeof(iterators_package.Interface><>))]`, CS1022/CS1513/CS1525.
+
+**Root cause.** `holderTypeName` (`src/go2cs/methodHolder.go`, from `dd8c86f93b`) cut the holder's name from the
+generic origin rendered through `getCSharpTypeName`. That string form carries each type parameter with its
+constraint (`Iterator[T github.com/clipperhouse/stringish.Interface]`), and its last-slash strip ate the type's own
+name. Every such type in a package shared the one broken holder. A local constraint and `cmp.Ordered` were not
+affected. No stdlib row reached it; any user module with such a type and a method did.
+
+**Cut** (`claude/p2-dot4-holder-name`, `c4b79777d6`): a generic type's holder is spelled
+`getSanitizedIdentifier(name)`, as the same-package instantiated-generic arm already spells it; the non-generic path
+is unchanged. Red first: `TestGenericHolderIsNamedByTheTypeWhateverItsConstraint` and the behavioral
+`GenericHolderForeignConstraint` (base emission does not compile; with the cut two holders and Go's output).
+Measured at the cut: two-seeded `-stdlib` footprint 0 files on windows/amd64, linux/amd64, darwin/amd64 and
+linux/arm64; the `-tests` convert leg over all 238 roster rows 0 emitted files (only the untracked manifests'
+converter stamps differ); CNR byte-identical over 1122 packages; gojq dry run root 164 and cli 914 MET.
+
+**Also from the dry run:** `github.com/spf13/cobra` read 380 of 405 on a box running as root. Its
+`TestFailGenFishCompletionFile` opens a 0400 file that root can write, so the call returns nil and the test's
+`got.Error()` panics, which ends Go's test binary. As uid 65534 Go reads 405 PASS. The wave host must not run as root.
+
+— P2 (2026-11-19)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
