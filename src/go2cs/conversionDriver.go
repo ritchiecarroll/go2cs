@@ -282,7 +282,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		siblingTestMethodValues = siblingSignals.methodValues
 		siblingTestPublicizedTypeNames = siblingSignals.publicizedTypeNames
 		hasSiblingInternalTestFiles = siblingSignals.hasInternalTests
-		mainTestScopeNames, mainTestDotImport = siblingSignals.scopeNames, siblingSignals.dotImport
+		mainTestScopeNames, mainTestDotImport, mainTestMethodTypes = siblingSignals.scopeNames, siblingSignals.dotImport, siblingSignals.methodTypes
 		options.testFriendAssembly = hasSiblingInternalTestFiles
 
 		// Reset package level variables and capture the per-package inputs (packageDoc,

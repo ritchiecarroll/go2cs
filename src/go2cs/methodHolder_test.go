@@ -1089,12 +1089,22 @@ func TestPackageMainDecidesItsHoldersWithItsTestFilesNames(t *testing.T) {
 
 	requireEmitted(t, "the program's package_info.cs", program["package_info.cs"], []string{"partial class mainᴛopts;"}, []string{"mainᴛplain"})
 
+	test := convertMainTestsVariant(t, mainTestsProductionSource, mainTestsTestSource)
+
+	requireEmitted(t, "main_test.cs", test, []string{"main_package.Size))", "mainᴛopts.verbose"}, []string{"((Func<plain, nint>)(Size))"})
+}
+
+// convertMainTestsVariant runs the real -tests wiring (convertTestVariants) over a program with one in-package test
+// file and returns the test file's emission, LF-normalized.
+func convertMainTestsVariant(t *testing.T, productionSource, testSource string) string {
+	t.Helper()
+
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
 		"go.mod":           "module example/maintests\n\ngo 1.23\n",
-		"app/main.go":      mainTestsProductionSource,
-		"app/main_test.go": mainTestsTestSource,
+		"app/main.go":      productionSource,
+		"app/main_test.go": testSource,
 	})
 
 	inputPath := filepath.Join(dir, "app")
@@ -1131,7 +1141,50 @@ func TestPackageMainDecidesItsHoldersWithItsTestFilesNames(t *testing.T) {
 		t.Fatalf("convertTestVariants: %v", err)
 	}
 
-	test := strings.ReplaceAll(readGenerated(t, filepath.Join(outputPath, "main_test.cs")), "\r\n", "\n")
+	return strings.ReplaceAll(readGenerated(t, filepath.Join(outputPath, "main_test.cs")), "\r\n", "\n")
+}
 
-	requireEmitted(t, "main_test.cs", test, []string{"main_package.Size))", "mainᴛopts.verbose"}, []string{"((Func<plain, nint>)(Size))"})
+// A type a test file declares a method on keeps its holder in the program converted on its own, which never sees
+// that method, as in its -tests variant, where the method joins the type's own and hides the package function of
+// its name (reset): otherwise the test file names a holder the program never emitted.
+func TestPackageMainKeepsTheHolderOfATypeItsTestFileAddsAMethodTo(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	const production = `package main
+
+import "fmt"
+
+type plain int
+
+func (p plain) Size() int { return int(p) }
+
+func reset() {}
+
+func main() {
+	reset()
+	fmt.Println(plain(1).Size())
+}
+`
+
+	const test = `package main
+
+import "testing"
+
+func (p plain) reset() {}
+
+func TestSize(t *testing.T) {
+	size := plain.Size
+	plain(0).reset()
+
+	if size(plain(2)) != 2 {
+		t.Fatal("method expression")
+	}
+}
+`
+
+	program := convertMethodHolderFixture(t, map[string]string{"main.go": production, "main_test.go": test})
+
+	requireEmitted(t, "the program's package_info.cs", program["package_info.cs"], []string{"partial class mainᴛplain;"}, nil)
+	requireEmitted(t, "the program's main.cs", program["main.cs"], []string{"partial class mainᴛplain {"}, nil)
+	requireEmitted(t, "main_test.cs", convertMainTestsVariant(t, production, test), []string{"global::go.mainᴛplain.Size))"}, nil)
 }

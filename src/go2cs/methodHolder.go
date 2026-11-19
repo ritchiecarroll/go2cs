@@ -93,7 +93,7 @@ func receiverNamed(info *types.Info, funcDecl *ast.FuncDecl) *types.Named {
 //
 // The names a test file of the package adds count as well (mainTestScopeNames), so that a program converted on
 // its own and its -tests variants decide alike, and a type whose methods a test file's name would hide keeps its
-// holder in both.
+// holder in both, as does a type a test file declares a method on (mainTestMethodTypes).
 //
 // The methods counted are those the type declares and those a struct gets from an embedded interface, which the
 // converter writes as forwarders beside them (visitStructType.go). A library keeps every holder: its classes are
@@ -136,15 +136,18 @@ var packageClassMethodTypes sync.Map
 // source (collectSiblingTestSignals). A plain conversion loads no test file, and the -tests flow compiles the
 // production files a plain conversion emitted, so both read the test files the same way; a -tests variant's own
 // scope holds nothing beyond these and the production files'. mainTestDotImport reports a dot import there, whose
-// names a parse cannot list: every type of the package then keeps its holder.
+// names a parse cannot list: every type of the package then keeps its holder. mainTestMethodTypes names the types
+// a test file declares a method on: a -tests variant lists that method among the type's own and a plain conversion
+// does not, so such a type keeps its holder in both.
 var (
-	mainTestScopeNames hashset.HashSet[string]
-	mainTestDotImport  bool
+	mainTestScopeNames  hashset.HashSet[string]
+	mainTestDotImport   bool
+	mainTestMethodTypes hashset.HashSet[string]
 )
 
 // methodsMayStayInPackageClass answers methodsStayInPackageClass for origin, a type of package main.
 func methodsMayStayInPackageClass(origin *types.Named) bool {
-	if mainTestDotImport {
+	if mainTestDotImport || mainTestMethodTypes.Contains(origin.Obj().Name()) {
 		return false
 	}
 
