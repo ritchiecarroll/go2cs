@@ -49,11 +49,11 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 176, 5, 0)]
-[assembly: GoBoundedGoroutine("main.cs", 256, 5, 2)]
-[assembly: GoBoundedGoroutine("main.cs", 257, 5, 3)]
-[assembly: GoBoundedGoroutine("main.cs", 258, 5, 4)]
-[assembly: GoBoundedGoroutine("main.cs", 259, 5, 5)]
+[assembly: GoBoundedGoroutine("main.cs", 181, 5, 0)]
+[assembly: GoBoundedGoroutine("main.cs", 261, 5, 2)]
+[assembly: GoBoundedGoroutine("main.cs", 262, 5, 3)]
+[assembly: GoBoundedGoroutine("main.cs", 263, 5, 4)]
+[assembly: GoBoundedGoroutine("main.cs", 264, 5, 5)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,7 +63,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA4ugpiCgoKCgoK4goKCuIKCgoIADhqUgoKmgoKmgoKmgoKmgoKCpoKCpoKUgqamgoKmgoKmgoKmgoL6opSCpoKmgoKCAAcQgoKmgoKCgoLqooKCgpTSgoKCgoKCpoKCpoKCgoKCgqaClJKSuJSCpqaCgoKCgpSClIKmgrimgoKmgoLWgoKCgpSCgoKCgoKUgoKCgpSCgoKCgoKCgpSCgoKUgoKCgpSCgoKCgoKUgoKCgpSClIKUgoKUkoKmgg==", "170-178:1;198-200:1;309-312:1")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA8ugpiCgoKCgoK4goKCuIKCgoIADhqUgoKmgoKmgoKmgoKmgoKCpoKCpoKUgqamgoKmgoKmgoKmgoL6opSCpoKmgoKCAAkQgoKmgoKCgoIACAqigoKClNKCgoKCgoKmgoKmgoKCgoKCpoKUkpK4lIKmpoKCgoKClIKUgqaCuKaCgqaCgtaCgoKClIKCgoKCgpSCgoKClIKCgoKCgoKClIKCgpSCgoKClIKCgoKCgpSCgoKClIKUgpSCgpSSgqaC", "170-178:1;198-200:1;309-312:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -100,3 +100,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.box<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbox;
+// </MethodHolders>

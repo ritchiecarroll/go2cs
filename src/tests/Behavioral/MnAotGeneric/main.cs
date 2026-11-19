@@ -4,6 +4,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using runtime = runtime_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
@@ -143,6 +144,8 @@ partial struct box<T> {
     internal nint n;
 }
 
+} partial class mainᴛbox {
+
 internal static T val<T>(this box<T> b, nint n) {
     park(n);
     return b.v;
@@ -155,6 +158,8 @@ internal static T swap<T>(this ref box<T> b, T v, nint n) {
     b.v = v;
     return old;
 }
+
+} partial class main_package {
 
 partial interface holder<T> {
     T val(nint n);

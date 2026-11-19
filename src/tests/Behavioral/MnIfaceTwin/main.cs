@@ -6,6 +6,7 @@ using reflect = reflect_package;
 using strconv = strconv_package;
 using Δsync = sync_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -18,6 +19,8 @@ partial struct gate {
     internal nint n;
 }
 
+} partial class mainᴛgate {
+
 internal static nint Park(this ж<gate> Ꮡg, time.Duration d) {
     ref var g = ref Ꮡg.DerefOrNull();
 
@@ -28,37 +31,55 @@ internal static nint Park(this ж<gate> Ꮡg, time.Duration d) {
     return 1;
 }
 
+} partial class main_package {
+
 partial struct napper /*num:nint*/;
+
+} partial class mainᴛnapper {
 
 internal static nint Park(this napper n, time.Duration d) {
     time.Sleep(d);
     return (nint)n;
 }
 
+} partial class main_package {
+
 partial struct @fixed {
     internal nint v;
 }
+
+} partial class mainᴛfixed {
 
 internal static nint Park(this @fixed f, time.Duration d) {
     return f.v;
 }
 
+} partial class main_package {
+
 partial struct relay {
     internal nint v;
 }
+
+} partial class mainᴛrelay {
 
 internal static nint Park(this ref relay r, time.Duration d) {
     time.Sleep(d);
     return r.v;
 }
 
+} partial class main_package {
+
 partial struct late {
     internal nint v;
 }
 
+} partial class mainᴛlate {
+
 internal static nint Park(this late l, time.Duration d) {
     return l.v;
 }
+
+} partial class main_package {
 
 public static Parker Hand;
 

@@ -54,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABQ6ooKCgoLKgoLqguqCguqCzIKCgoKCsoKipIKCgpSmgoKClKaCgoKUgpSClIKUgpSCpoKClJSCgoI=", "71-74:1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABc6ooKCgoIACAqCggAKCoIACgqCggAKCoLsgoKCgoKygqKkgoKClKaCgoKUpoKCgpSClIKUgpSClIKmgoKUlIKCgg==", "71-74:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -93,3 +93,17 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.@fixed)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfixed;
+[GoMethodHost(typeof(main_package.gate)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛgate;
+[GoMethodHost(typeof(main_package.late)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛlate;
+[GoMethodHost(typeof(main_package.napper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛnapper;
+[GoMethodHost(typeof(main_package.relay)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛrelay;
+// </MethodHolders>
