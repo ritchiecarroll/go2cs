@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using strings = strings_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,11 +9,7 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static void Inc(this ref counter c) { c.n++; }
-
-} partial class main_package {
 
 internal static bool isNil(ж<counter> c) {
     return c == nil;

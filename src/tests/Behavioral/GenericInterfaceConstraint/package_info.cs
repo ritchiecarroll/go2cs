@@ -59,7 +59,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("GenericInterfaceConstraint.go", "GenericInterfaceConstraint.cs", "ABg4gqaCpoIACg6CpoLIooKClKqigriCrKKClIKmggAHGIKmgoKCgpSCgoKUgoKUgpSCkICSlJSCkg==", "120-120:1;126-126:2;127-127:3")]
+[assembly: GoPositionMap("GenericInterfaceConstraint.go", "GenericInterfaceConstraint.cs", "ABU4gqaCpoLugqaCqKKCgpSqooK4gqyigpSCpoIABxiCpoKCgoKUgoKClIKClIKUgpCAkpSUgpI=", "120-120:1;126-126:2;127-127:3")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -100,6 +100,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Circle)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛCircle;
-[GoMethodHost(typeof(main_package.Square)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛSquare;
 // </MethodHolders>

@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("GenericTypeInference.go", "GenericTypeInference.cs", "ABoqgsiygoKUqIKCrrKssoKCgoKssoKClIKosoKoooK+sgAEEKKClIKCpgAGFIKCgoLcgoK8ooKUgoKUqKKmgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUlIKClIKCgoKCgoKCgoKCgpSCrKKClAACELKCgoIABRCygpKCgoKUpq6igpSqog==", "116-122:1;126-128:1;214-220:1")]
+[assembly: GoPositionMap("GenericTypeInference.go", "GenericTypeInference.cs", "ABcqgqiygoKUqIKCrrKssoKCgoKssoKClIKosoKoooK+sgAEEKKClIKCpgAGFIKCgoLcgoK8ooKUgoKUqKKmgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKUlIKClIKCgoKCgoKCgoKCgpSCrKKClAACELKCgoIABRCygpKCgoKUpq6igpSqog==", "116-122:1;126-128:1;214-220:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -90,5 +90,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPoint;
 // </MethodHolders>

@@ -9,11 +9,7 @@ partial struct Δslice {
     internal nint lo, hi;
 }
 
-} partial class mainᴛΔslice {
-
 internal static nint span(this Δslice s) { return s.hi - s.lo; }
-
-} partial class main_package {
 
 partial struct builder {
     internal nint @base;

@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using ledger = SamePackageImplementNoWitness.ledger_package;
 using SamePackageImplementNoWitness;
-using static main_package;
 
 partial class main_package {
 
@@ -15,11 +14,7 @@ partial struct Stamp {
     public @string S;
 }
 
-} partial class mainᴛStamp {
-
 public static @string Mark(this Stamp s) { return s.S; }
-
-} partial class main_package {
 
 internal static void main() {
     ledger.Metric m = new ledger.Counter(N: 7);

@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -18,19 +17,9 @@ partial struct square {
 partial struct dot {
 }
 
-} partial class mainᴛcircle {
-
 internal static @string name(this circle c) { return "circle"; }
-
-} partial class mainᴛsquare {
-
 internal static @string name(this square s) { return "square"; }
-
-} partial class mainᴛdot {
-
 internal static @string name(this dot d) { return "dot"; }
-
-} partial class main_package {
 
 internal static @string describe(shape v) {
     switch (v.type()) {

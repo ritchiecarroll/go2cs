@@ -2,7 +2,6 @@ namespace go;
 
 using errors = errors_package;
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -11,13 +10,9 @@ partial struct openErr {
     internal nint code;
 }
 
-} partial class mainᴛopenErr {
-
 internal static @string Error(this ref openErr e) {
     return fmt.Sprintf("open %s: code %d"u8, e.path, e.code);
 }
-
-} partial class main_package {
 
 internal static error mustOpen(@string path) {
     return new openErrжerror(Ꮡ(new openErr(path: path, code: 13)));

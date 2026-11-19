@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸstring = Span<@string>;
-using static main_package;
 
 partial class main_package {
 
@@ -29,8 +28,6 @@ internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
     return joined;
 }
 
-} partial class mainᴛContext {
-
 internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
@@ -40,8 +37,6 @@ internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp)
 
     return slashJoin(elem.ꓸꓸꓸ);
 }
-
-} partial class main_package {
 
 internal static void main() {
     var ctxt = new Context(

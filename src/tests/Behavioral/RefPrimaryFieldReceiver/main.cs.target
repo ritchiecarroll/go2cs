@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using Δsync = sync_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,8 +9,6 @@ partial struct counter {
     internal Δsync.Mutex mu;
     internal nint n;
 }
-
-} partial class mainᴛcounter {
 
 internal static void bump(this ж<counter> Ꮡc, nint times) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -81,8 +78,6 @@ internal static bool tryWhileHeld(this ж<counter> Ꮡc) {
     c.mu.Unlock();
     return got;
 }
-
-} partial class main_package {
 
 internal static partial void main() {
     UntypedInt workers = 8;

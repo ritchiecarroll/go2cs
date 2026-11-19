@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,15 +9,9 @@ public delegate nint AssignA();
 
 public delegate nint Other();
 
-} partial class mainᴛOther {
-
 public static @string Name(this Other o) { return "other"; }
 
-} partial class mainᴛAssignA {
-
 public static bool Equal(this AssignA x, Func<nint> y) { return x() == y(); }
-
-} partial class main_package {
 
 internal static nint apply(Func<nint> f) { return f() * 10; }
 

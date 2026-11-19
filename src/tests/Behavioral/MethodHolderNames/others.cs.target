@@ -30,11 +30,7 @@ partial struct gauge {
     internal nint n;
 }
 
-} partial class mainᴛgauge {
-
 internal static nint size(this gauge g, words w) { return cap(w) + bits.Len64((uint64)g.n); }
-
-} partial class main_package {
 
 public static void Sort(sort.Interface data) { sort.Sort(data); }
 

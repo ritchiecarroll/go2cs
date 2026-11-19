@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("ForeignDefinedConversion.go", "ForeignDefinedConversion.cs", "AA4qAAcQgpSClIKUlA==")]
+[assembly: GoPositionMap("ForeignDefinedConversion.go", "ForeignDefinedConversion.cs", "AAsqAAUQgpSClIKUlA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -89,5 +89,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Level)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛLevel;
 // </MethodHolders>

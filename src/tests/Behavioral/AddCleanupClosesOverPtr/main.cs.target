@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using runtime = runtime_package;
-using static main_package;
 
 partial class main_package {
 
@@ -42,11 +41,7 @@ internal static void @try(@string name, Action register) {
 
 internal static void nothing(nint _) { }
 
-} partial class mainᴛT {
-
 internal static void release(this ref T t, nint _) { }
-
-} partial class main_package {
 
 internal static void main() {
     @try("captures ptr", () => {

@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,13 +9,9 @@ partial struct frame {
     public bool Inlined;
 }
 
-} partial class mainᴛframe {
-
 internal static @string label(this frame f) { return f.Name; }
 
 internal static void bump(this ref frame f) { f.Name += "!"u8; }
-
-} partial class main_package {
 
 partial interface namer {
     @string label();

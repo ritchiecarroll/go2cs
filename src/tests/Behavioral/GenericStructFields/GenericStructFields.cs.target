@@ -21,11 +21,7 @@ partial struct tag<T> {
     internal T label;
 }
 
-} partial class mainᴛtag {
-
 internal static T show<T>(this tag<T> t) { return t.label; }
-
-} partial class main_package {
 
 partial struct wrapped<T> {
     /*embed*/ internal tag<T> tag;
@@ -70,8 +66,6 @@ partial struct pool<T> {
     internal slice<T> items;
 }
 
-} partial class mainᴛpool {
-
 internal static (T, bool) take<T>(this ref pool<T> p) {
     if (len(p.items) == 0) {
         T zero = GoZero<T>();
@@ -81,8 +75,6 @@ internal static (T, bool) take<T>(this ref pool<T> p) {
     p.items = p.items.slice(0, len(p.items) - 1);
     return (v, true);
 }
-
-} partial class main_package {
 
 partial struct keeper {
 }

@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,12 +8,8 @@ partial struct atom {
     internal int64 v;
 }
 
-} partial class mainᴛatom {
-
 internal static void add(this ref atom a, int64 d) { a.v += d; }
 internal static int64 get(this ref atom a) { return a.v; }
-
-} partial class main_package {
 
 partial struct profile {
     internal atom wait;

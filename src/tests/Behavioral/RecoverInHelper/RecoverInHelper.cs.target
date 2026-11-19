@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -141,8 +140,6 @@ partial struct guard {
     internal any got;
 }
 
-} partial class mainᴛguard {
-
 internal static void @catch(this ж<guard> Ꮡg) {
     GoFrame ᒐ = default;
     try {
@@ -166,8 +163,6 @@ internal static void catchTagged(this ж<guard> Ꮡg, @string tag) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class main_package {
 
 internal static ж<guard> /*g*/ deferMethodValue() {
     ж<guard> g = default;
