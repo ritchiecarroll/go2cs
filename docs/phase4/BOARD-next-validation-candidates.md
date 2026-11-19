@@ -40722,4 +40722,27 @@ its key and element types with `reflect.TypeOf`. Not measured further.
 
 — P5 (2026-11-18)
 
+## 2026-11-19 — P5 (.4 final hosted re-bank at `280a01952c`): runtime osx-x64 does not bank at .4; the barrier pair is an M:N-scheduler target
+
+**Appended to C1's STANDING osx-x64 line (2026-10-28, runtime darwin halves entry above):** `TestChanSendBarrier` and
+`TestChanSendSelectBarrier` hit the 60 m per-test deadline on osx-x64 again at the .4 final tip.
+
+**The reads** (os-matrix sweep-shard, runtime row, both mac RIDs, read through the artifact relay):
+- DW-1, run `44449541821`: osx-x64 matched 11061, the Go oracle failing `TestPingPongHog` (the .3 SIG-1 shape);
+  osx-arm64 11063 + 57, AT.
+- DW-1R, the declared re-read, run `44464066634`: osx-x64 matched 11060. The two lines are C#-side: each barrier test
+  ran to the deadline, elapsed 3600 s each. osx-arm64 11063 + 57 again, AT.
+
+**COORD ruling (2026-11-19):** osx-arm64 BANKS at 11063 + 57, DW-1R the read of record. osx-x64 is NOT banked at .4,
+and no third read is taken. Evidence: `docs/phase4/data/rebank-1.26.11.1/hosted-280a01952c/` (`score.tsv` carries both
+reads raw, `final.tsv` the read of record per RID).
+
+**Named as an M:N-scheduler target.** The pair completes on osx-arm64 and on every other RID, and runs to the deadline
+only on the osx-x64 runner, at master as well as at the seat (C1). That shape is scheduler throughput on the slowest
+host, not a wrong answer, so it is listed for the M:N scheduler work
+([`DESIGN-mn-scheduler-sizing.md`](../DESIGN-mn-scheduler-sizing.md)): runtime osx-x64 banks when the pair finishes inside
+the per-test deadline there. Not measured further: where in the barrier loop the time goes.
+
+— P5 (2026-11-19)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
