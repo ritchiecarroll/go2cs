@@ -110,7 +110,7 @@ Check 'the Go module badge links pkg.go.dev at the module version' (
     $readme.Contains('[![Go module](https://img.shields.io/badge/Go_module-@v1.2.3-00ADD8?logo=go)](https://pkg.go.dev/example.com/mod@v1.2.3)')) 'no such badge'
 Check 'the go2cs badge links the release it was built on' (
     $readme.Contains('[![go2cs](https://img.shields.io/badge/go2cs-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5)')) 'no such badge'
-$convertedBy = '[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)'
+$convertedBy = '[![converted by go2cs](https://cdn.jsdelivr.net/gh/ritchiecarroll/go2cs@master/docs/images/go2cs-badge.svg)](https://go2cs.net)'
 $badgeLines = @($lines | Where-Object { $_.Contains('[![') })
 Check 'the converted-by badge appears exactly once, first on the first badge line, before the Tests badge (owner 2026-11-12)' (
     ([regex]::Matches($readme, [regex]::Escape($convertedBy))).Count -eq 1 -and $badgeLines.Count -eq 2 -and
