@@ -494,7 +494,7 @@ public static void TestComparableAllocations(ж<testing.T> t) {
     if (asan.Enabled) {
         t.Skip(skipAllocationTestUnderˢ);
     }
-    ref var seed = ref heap<global::go.hash.maphash_package.ΔSeed>(MakeSeed(), out var Ꮡseed);
+    ref var seed = ref heap<global::go.hash.maphash_package.Seed>(MakeSeed(), out var Ꮡseed);
     @string x = heapStr(t);
     var seedʗ1 = seed;
     var allocs = testing.AllocsPerRun(10, () => {

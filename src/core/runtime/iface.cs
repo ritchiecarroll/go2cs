@@ -10,6 +10,8 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using runtime = runtime_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -30,7 +32,7 @@ partial struct itabTableType {
     internal array<ж<itab>> entries = new(itabInitSize); // really [size] large
 }
 
-internal static uintptr itabHashFunc(ref abiꓸInterfaceType inter, ref _type typ) {
+internal static uintptr itabHashFunc(ref interfacetype inter, ref _type typ) {
     // compiler has provided some good hash codes for us.
     return (uintptr)(inter.Type.Hash ^ typ.Hash);
 }
@@ -71,7 +73,7 @@ internal static ж<itab> getitab(ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp, b
     // This is by far the most common case, so do it without locks.
     // Use atomic to ensure we see any previous writes done by the thread
     // that updates the itabTable field (with atomic.Storep in itabAdd).
-    var t = (ж<itabTableType>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑitabTable)));
+    var t = @unsafe.Pointer.To<itabTableType>(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑitabTable)));
     m = t.find(Ꮡinter, Ꮡtyp); if (m != nil) {
         goto finish;
     }
@@ -84,7 +86,7 @@ internal static ж<itab> getitab(ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp, b
     }
 
     // Entry doesn't exist yet. Make a new entry & add it.
-    m = (ж<itab>)(uintptr)(persistentalloc(/* unsafe.Sizeof(itab{}) */ (uintptr)32 + (uintptr)(len(inter.Methods) - 1) * (uintptr)goarch.PtrSize, 0, Ꮡmemstats.Ꮡother_sys));
+    m = @unsafe.Pointer.To<itab>(persistentalloc(/* unsafe.Sizeof(itab{}) */ (uintptr)32 + (uintptr)(len(inter.Methods) - 1) * (uintptr)goarch.PtrSize, 0, Ꮡmemstats.Ꮡother_sys));
     m.Inter = Ꮡinter;
     m.Type = Ꮡtyp;
     // The hash is used in type switches. However, compiler statically generates itab's
@@ -112,6 +114,8 @@ finish:
     throw panic(Ꮡ(new TypeAssertionError(concrete: Ꮡtyp, asserted: Ꮡinter.ᏑType, missingMethod: itabInit(m, false))));
 }
 
+} partial class runtimeᴛitabTableType {
+
 // find finds the given interface/type pair in t.
 // Returns nil if the given interface/type pair isn't present.
 internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
@@ -123,11 +127,11 @@ internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> int
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (inter).DerefOrNull(), ref (typ).DerefOrNull()) & mask);
     for (var i = (uintptr)1; ; i++) {
-        var Δp = (ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
+        var p = @unsafe.Pointer.To<ж<itab>>(runtime.add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
         // Use atomic read here so if we see m != nil, we also see
         // the initializations of the fields of m.
         // m := *p
-        var m = (ж<itab>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Δp)));
+        var m = @unsafe.Pointer.To<itab>(atomic.Loadp(@unsafe.Pointer.FromBox(p)));
         if (m == nil) {
             return default;
         }
@@ -138,6 +142,8 @@ internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> int
         h &= (uintptr)(mask);
     }
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mismatchedCountDuringˢ => ref mismatchedCountDuringˢᵇ;
@@ -162,7 +168,7 @@ internal static void itabAdd(ж<itab> Ꮡm) {
         // t2 = new(itabTableType) + some additional entries
         // We lie and tell malloc we want pointer-free memory because
         // all the pointed-to values are not in the heap.
-        var t2 = (ж<itabTableType>)(uintptr)(mallocgc((2 + 2 * t.size) * (uintptr)goarch.PtrSize, nil, true));
+        var t2 = @unsafe.Pointer.To<itabTableType>(mallocgc((2 + 2 * t.size) * (uintptr)goarch.PtrSize, nil, true));
         t2.size = t.size * 2;
 
         // Copy over entries.
@@ -182,6 +188,8 @@ internal static void itabAdd(ж<itab> Ꮡm) {
     t.add(Ꮡm);
 }
 
+} partial class runtimeᴛitabTableType {
+
 // add adds the given itab to itab table t.
 // itabLock must be held.
 internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
@@ -193,8 +201,8 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (m.Inter).DerefOrNull(), ref (m.Type).DerefOrNull()) & mask);
     for (var i = (uintptr)1; ; i++) {
-        var Δp = (ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
-        var m2 = Δp.ValueSlot;
+        var p = @unsafe.Pointer.To<ж<itab>>(runtime.add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
+        var m2 = p.ValueSlot;
         if (m2 == Ꮡm) {
             // A given itab may be used in more than one module
             // and thanks to the way global symbol resolution works, the
@@ -207,7 +215,7 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
             // sees the correctly initialized fields of m.
             // NoWB is ok because m is not in heap memory.
             // *p = m
-            atomic.StorepNoWB(@unsafe.Pointer.FromBox(Δp), @unsafe.Pointer.FromPinnedBox(Ꮡm));
+            atomic.StorepNoWB(@unsafe.Pointer.FromBox(p), @unsafe.Pointer.FromPinnedBox(Ꮡm));
             t.count++;
             return;
         }
@@ -215,6 +223,8 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
         h &= (uintptr)(mask);
     }
 }
+
+} partial class runtime_package {
 
 // itabInit fills in the m.Fun array with all the code pointers for
 // the m.Inter/m.Type pair. If the type does not implement the interface,
@@ -227,7 +237,7 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
 // //go:nowritebarrier enforces that (see the methods store below).
 //
 //go:nowritebarrier
-internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
+internal static @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var inter = m.Inter;
@@ -240,7 +250,7 @@ internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     // the loop is O(ni+nt) not O(ni*nt).
     nint ni = len(inter.Methods);
     nint nt = (nint)x.Mcount;
-    var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff)), (int)(nt)));
+    var xmhdr = @unsafe.Pointer.View<abi.Method>(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)x.Moff), 0, nt, nt, 65536);
     nint j = 0;
     // These are code pointers, not heap pointers. Use a uintptr slice so the
     // store emits no write barrier: on wasm a code pointer can look like a
@@ -416,7 +426,7 @@ internal static @unsafe.Pointer /*x*/ convT16(uint16 val) {
         }
     } else {
         x = mallocgc(2, uint16Type, false);
-        ((ж<uint16>)(uintptr)(x)).Value = val;
+        (@unsafe.Pointer.To<uint16>(x)).Value = val;
     }
     return x;
 }
@@ -431,7 +441,7 @@ internal static @unsafe.Pointer /*x*/ convT32(uint32 val) {
         }
     } else {
         x = mallocgc(4, uint32Type, false);
-        ((ж<uint32>)(uintptr)(x)).Value = val;
+        (@unsafe.Pointer.To<uint32>(x)).Value = val;
     }
     return x;
 }
@@ -452,7 +462,7 @@ internal static @unsafe.Pointer /*x*/ convT64(uint64 val) {
         x = @unsafe.Pointer.FromPinnedBox(Ꮡstaticuint64s.at<uint64>((ulong)(val)));
     } else {
         x = mallocgc(8, uint64Type, false);
-        ((ж<uint64>)(uintptr)(x)).Value = val;
+        (@unsafe.Pointer.To<uint64>(x)).Value = val;
     }
     return x;
 }
@@ -473,7 +483,7 @@ internal static @unsafe.Pointer /*x*/ convTstring(@string val) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
         x = mallocgc(/* unsafe.Sizeof(val) */ (uintptr)16, stringType, true);
-        ((ж<@string>)(uintptr)(x)).Value = val;
+        (@unsafe.Pointer.To<@string>(x)).Value = val;
     }
     return x;
 }
@@ -492,11 +502,11 @@ internal static @unsafe.Pointer /*x*/ convTslice(slice<byte> valʗp) {
     ref var val = ref heap(valʗp, out var Ꮡval);
 
     // Note: this must work for any element type, not just byte.
-    if ((Ꮡval.Reinterpret<slice<byte>, Δsliceᴛ>()).Value.Δarray == nil) {
+    if ((Ꮡval.Reinterpret<slice<byte>, Δslice>()).Value.Δarray == nil) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
         x = mallocgc(/* unsafe.Sizeof(val) */ (uintptr)24, sliceType, true);
-        ((ж<slice<byte>>)(uintptr)(x)).ValueSlot = val;
+        (@unsafe.Pointer.To<slice<byte>>(x)).ValueSlot = val;
     }
     return x;
 }
@@ -542,7 +552,7 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> t) {
         return tab;
     }
     // Load the current cache.
-    var oldC = (ж<abi.TypeAssertCache>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑCache)));
+    var oldC = @unsafe.Pointer.To<abi.TypeAssertCache>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑCache)));
 
     if ((cheaprand() & (uint32)oldC.Mask) != 0) {
         // As cache gets larger, choose to update it less often
@@ -582,7 +592,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
 
     // Allocate the new table.
     var newSize = /* unsafe.Sizeof(abi.TypeAssertCache{}) */ (uintptr)24 + (uintptr)(newN - 1) * /* unsafe.Sizeof(abi.TypeAssertCacheEntry{}) */ (uintptr)16;
-    var newC = (ж<abi.TypeAssertCache>)(uintptr)(mallocgc(newSize, nil, true));
+    var newC = @unsafe.Pointer.To<abi.TypeAssertCache>(mallocgc(newSize, nil, true));
     newC.Mask = (uintptr)(newN - 1);
     var newEntries = @unsafe.Slice(newC.at(abi.TypeAssertCache.ᏑEntries, 0), newN);
 
@@ -601,7 +611,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
     }
     foreach (var (_, e) in range(oldEntries)) {
         if (e.Typ != 0) {
-            addEntry((ж<_type>)(uintptr)((@unsafe.Pointer)e.Typ), (ж<itab>)(uintptr)((@unsafe.Pointer)e.Itab));
+            addEntry(@unsafe.Pointer.To<_type>((@unsafe.Pointer)e.Typ), @unsafe.Pointer.To<itab>((@unsafe.Pointer)e.Itab));
         }
     }
     addEntry(typ, tab);
@@ -649,7 +659,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
         return (case_, tab);
     }
     // Load the current cache.
-    var oldC = (ж<abi.InterfaceSwitchCache>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑCache)));
+    var oldC = @unsafe.Pointer.To<abi.InterfaceSwitchCache>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑCache)));
 
     if ((cheaprand() & (uint32)oldC.Mask) != 0) {
         // As cache gets larger, choose to update it less often
@@ -693,7 +703,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
 
     // Allocate the new table.
     var newSize = /* unsafe.Sizeof(abi.InterfaceSwitchCache{}) */ (uintptr)32 + (uintptr)(newN - 1) * /* unsafe.Sizeof(abi.InterfaceSwitchCacheEntry{}) */ (uintptr)24;
-    var newC = (ж<abi.InterfaceSwitchCache>)(uintptr)(mallocgc(newSize, nil, true));
+    var newC = @unsafe.Pointer.To<abi.InterfaceSwitchCache>(mallocgc(newSize, nil, true));
     newC.Mask = (uintptr)(newN - 1);
     var newEntries = @unsafe.Slice(newC.at(abi.InterfaceSwitchCache.ᏑEntries, 0), newN);
 
@@ -713,7 +723,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
     }
     foreach (var (_, e) in range(oldEntries)) {
         if (e.Typ != 0) {
-            addEntry((ж<_type>)(uintptr)((@unsafe.Pointer)e.Typ), e.Case, (ж<itab>)(uintptr)((@unsafe.Pointer)e.Itab));
+            addEntry(@unsafe.Pointer.To<_type>((@unsafe.Pointer)e.Typ), e.Case, @unsafe.Pointer.To<itab>((@unsafe.Pointer)e.Itab));
         }
     }
     addEntry(typ, case_, tab);
@@ -749,7 +759,7 @@ internal static void iterate_itabs(Action<ж<itab>> fn) {
     // so no other locks/atomics needed.
     var t = itabTable;
     for (var i = (uintptr)0; i < t.size; i++) {
-        var m = ~(ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(t.Ꮡentries), i * (uintptr)goarch.PtrSize));
+        var m = ~@unsafe.Pointer.To<ж<itab>>(add(@unsafe.Pointer.FromPinnedBox(t.Ꮡentries), i * (uintptr)goarch.PtrSize));
         if (m != nil) {
             fn(m);
         }

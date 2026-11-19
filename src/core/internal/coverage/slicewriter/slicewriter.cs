@@ -5,6 +5,7 @@ namespace go.@internal.coverage;
 
 using fmt = fmt_package;
 using io = io_package;
+using static slicewriter_package;
 
 partial class slicewriter_package {
 
@@ -17,6 +18,8 @@ partial struct WriteSeeker {
     internal slice<byte> payload;
     internal int64 off;
 }
+
+} partial class slicewriterᴛWriteSeeker {
 
 public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
@@ -80,4 +83,4 @@ public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) 
     return (amt, default);
 }
 
-} // end slicewriter_package
+} // end slicewriterᴛWriteSeeker

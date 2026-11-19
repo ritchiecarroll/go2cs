@@ -73,6 +73,7 @@ using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using regexp;
+using static regexp_package;
 
 partial class regexp_package {
 
@@ -100,6 +101,8 @@ partial struct Regexp {
     internal bool longest; // whether regexp prefers leftmost-longest match
 }
 
+} partial class regexpᴛRegexp {
+
 // String returns the source text used to compile the regular expression.
 public static @string String(this ref Regexp re) {
     return re.expr;
@@ -117,6 +120,8 @@ public static ж<Regexp> Copy(this ref Regexp re) {
     ref var re2 = ref heap<Regexp>(re, out var Ꮡre2);
     return Ꮡre2;
 }
+
+} partial class regexp_package {
 
 // Compile parses a regular expression and returns, if successful,
 // a [Regexp] object that can be used to match against text.
@@ -155,6 +160,8 @@ public static (ж<Regexp>, error) CompilePOSIX(@string expr) {
     return compile(expr, syntax.POSIX, true);
 }
 
+} partial class regexpᴛRegexp {
+
 // Longest makes future searches prefer the leftmost-longest match.
 // That is, when matching against text, the regexp returns a match that
 // begins as early as possible in the input (leftmost), and among those
@@ -164,6 +171,8 @@ public static (ж<Regexp>, error) CompilePOSIX(@string expr) {
 public static void Longest(this ref Regexp re) {
     re.longest = true;
 }
+
+} partial class regexp_package {
 
 internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, bool longest) {
     var (re, err) = syntax.Parse(expr, mode);
@@ -226,6 +235,8 @@ internal static array<nint> matchSize = new nint[]{128, 512, 2048, 16384, 0}.arr
 internal static readonly ж<array<Δsync.Pool>> ᏑmatchPool = new StaticBox<array<Δsync.Pool>>(new array<Δsync.Pool>(5));
 internal static ref array<Δsync.Pool> matchPool => ref ((StaticBox<array<Δsync.Pool>>)ᏑmatchPool).ValueSlot;
 
+} partial class regexpᴛRegexp {
+
 // get returns a machine to use for matching re.
 // It uses the re's machine cache if possible, to avoid
 // unnecessary allocation.
@@ -267,6 +278,8 @@ internal static void put(this ref Regexp re, ж<machine> Ꮡm) {
     m.inputs.clear();
     ᏑmatchPool.at<Δsync.Pool>(re.mpool).Put(Ꮡm.OrTypedNil());
 }
+
+} partial class regexp_package {
 
 // minInputLen walks the regexp to find the minimum length of any matchable input.
 internal static nint minInputLen(ref syntax.Regexp re) {
@@ -343,6 +356,8 @@ internal static @string quote(@string s) {
     return strconv.Quote(s);
 }
 
+} partial class regexpᴛRegexp {
+
 // NumSubexp returns the number of parenthesized subexpressions in this [Regexp].
 public static nint NumSubexp(this ref Regexp re) {
     return re.numSubexp;
@@ -375,6 +390,8 @@ public static nint SubexpIndex(this ref Regexp re, @string name) {
     return -1;
 }
 
+} partial class regexp_package {
+
 internal const rune endOfText = -1;
 
 // input abstracts different representations of the input text. It provides
@@ -391,6 +408,8 @@ partial interface input {
 partial struct inputString {
     internal @string str;
 }
+
+} partial class regexpᴛinputString {
 
 internal static (rune, nint) step(this ref inputString i, nint pos) {
     if (pos < len(i.str)) {
@@ -428,10 +447,14 @@ internal static lazyFlag context(this ref inputString i, nint pos) {
     return newLazyFlag(r1, r2);
 }
 
+} partial class regexp_package {
+
 // inputBytes scans a byte slice.
 partial struct inputBytes {
     internal slice<byte> str;
 }
+
+} partial class regexpᴛinputBytes {
 
 internal static (rune, nint) step(this ref inputBytes i, nint pos) {
     if (pos < len(i.str)) {
@@ -469,12 +492,16 @@ internal static lazyFlag context(this ref inputBytes i, nint pos) {
     return newLazyFlag(r1, r2);
 }
 
+} partial class regexp_package {
+
 // inputReader scans a RuneReader.
 partial struct inputReader {
     internal io.RuneReader r;
     internal bool atEOT;
     internal nint pos;
 }
+
+} partial class regexpᴛinputReader {
 
 internal static (rune, nint) step(this ref inputReader i, nint pos) {
     if (!i.atEOT && pos != i.pos) {
@@ -505,6 +532,8 @@ internal static lazyFlag context(this ref inputReader i, nint pos) {
     return 0; // not used
 }
 
+} partial class regexpᴛRegexp {
+
 // LiteralPrefix returns a literal string that must begin any match
 // of the regular expression re. It returns the boolean true if the
 // literal string comprises the entire regular expression.
@@ -529,6 +558,8 @@ public static bool MatchString(this ж<Regexp> Ꮡre, @string s) {
 public static bool Match(this ж<Regexp> Ꮡre, slice<byte> b) {
     return Ꮡre.doMatch(default, b, ""u8);
 }
+
+} partial class regexp_package {
 
 // MatchReader reports whether the text returned by the [io.RuneReader]
 // contains any match of the regular expression pattern.
@@ -568,6 +599,8 @@ public static (bool matched, error err) Match(@string pattern, slice<byte> b) {
     }
     return (re.Match(b), default);
 }
+
+} partial class regexpᴛRegexp {
 
 // ReplaceAllString returns a copy of src, replacing matches of the [Regexp]
 // with the replacement string repl.
@@ -705,6 +738,8 @@ public static slice<byte> ReplaceAllFunc(this ж<Regexp> Ꮡre, slice<byte> src,
     return Ꮡre.replaceAll(src, ""u8, 2, (slice<byte> dst, slice<nint> match) => appendꓸꓸꓸ(dst, repl(srcʗ1.slice(match[0], match[1]))));
 }
 
+} partial class regexp_package {
+
 // Bitmap used by func special to check whether a character needs to be escaped.
 internal static array<byte> specialBytes = new(16);
 
@@ -748,6 +783,8 @@ public static @string QuoteMeta(@string s) {
     }
     return (@string)(b.slice(0, j));
 }
+
+} partial class regexpᴛRegexp {
 
 // The number of capture values in the program may correspond
 // to fewer capturing expressions than are in the regexp.
@@ -976,6 +1013,8 @@ internal static slice<byte> expand(this ref Regexp re, slice<byte> dst, @string 
     return dst;
 }
 
+} partial class regexp_package {
+
 // extract returns the name from a leading "name" or "{name}" in str.
 // (The $ has already been removed by the caller.)
 // If it is a number, extract returns num set to that number; otherwise num = -1.
@@ -1033,6 +1072,8 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
     return (name, num, rest, ok);
 }
 
+} partial class regexpᴛRegexp {
+
 // FindSubmatchIndex returns a slice holding the index pairs identifying the
 // leftmost match of the regular expression in b and the matches, if any, of
 // its subexpressions, as defined by the 'Submatch' and 'Index' descriptions
@@ -1088,7 +1129,11 @@ public static slice<nint> FindReaderSubmatchIndex(this ж<Regexp> Ꮡre, io.Rune
     return re.pad(Ꮡre.doExecute(r, default, ""u8, 0, re.prog.NumCap, default));
 }
 
+} partial class regexp_package {
+
 internal static UntypedInt startSize => 10; // The size at which to start a slice in the 'All' routines.
+
+} partial class regexpᴛRegexp {
 
 // FindAll is the 'All' version of [Regexp.Find]; it returns a slice of all successive
 // matches of the expression, as defined by the 'All' description in the
@@ -1329,4 +1374,4 @@ public static error UnmarshalText(this ref Regexp re, slice<byte> text) {
     return default;
 }
 
-} // end regexp_package
+} // end regexpᴛRegexp

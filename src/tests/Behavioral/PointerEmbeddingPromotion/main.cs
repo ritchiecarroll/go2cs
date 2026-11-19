@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,8 +9,12 @@ partial struct leaf {
     internal nint n;
 }
 
+} partial class mainᴛleaf {
+
 internal static void bump(this ref leaf l) { l.n++; }
 internal static nint get(this ref leaf l) { return l.n; }
+
+} partial class main_package {
 
 partial struct holder {
     /*embed*/ internal ж<leaf> leaf;

@@ -50,6 +50,7 @@ namespace go.@internal.syscall;
 
 using abi = go.@internal.abi_package;
 using syscall = syscall_package;
+using @unsafe = go.unsafe_package;
 using System.Runtime.InteropServices;
 
 partial class unix_package
@@ -468,11 +469,11 @@ partial class unix_package
             // true for a record libc left empty (the linux sockaddr file's msg_name lesson).
             record.Canonname = cursor->Canonname == null
                 ? default!
-                : (ж<byte>)(uintptr)(void*)cursor->Canonname;
+                : @unsafe.Pointer.To<byte>((uintptr)(void*)cursor->Canonname);
 
             record.Addr = cursor->Addr == null
                 ? default!
-                : (ж<syscall.RawSockaddr>)(uintptr)(void*)cursor->Addr;
+                : @unsafe.Pointer.To<syscall.RawSockaddr>((uintptr)(void*)cursor->Addr);
 
             if (head == nil) {
                 head = box;

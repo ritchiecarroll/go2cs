@@ -12,6 +12,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using go.math;
+using static slices_test_package;
 
 partial class slices_test_package {
 
@@ -84,6 +85,8 @@ internal static nint intPairCmp(intPair x, intPair y) {
     return x.a - y.a;
 }
 
+} partial class slices_testᴛintPairs {
+
 // Record initial order in B.
 internal static void initB(this intPairs d) {
     foreach (var i in range(len(d))) {
@@ -115,6 +118,8 @@ internal static bool inOrder(this intPairs d, bool reversed) {
     }
     return true;
 }
+
+} partial class slices_test_package {
 
 public static void TestStability(ж<testing.T> t) {
     nint n = 100000;

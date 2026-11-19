@@ -10,6 +10,7 @@ using strings = strings_package;
 using time = time_package;
 using html;
 using io = io_package;
+using static traceviewer_package;
 
 partial class traceviewer_package {
 
@@ -22,6 +23,8 @@ partial struct TimeHistogram {
 
 // Five buckets for every power of 10.
 internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
+
+} partial class traceviewerᴛTimeHistogram {
 
 // Add adds a single sample to the histogram.
 public static void Add(this ref TimeHistogram h, time.Duration d) {
@@ -87,4 +90,4 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     return (template.HTML)w.String();
 }
 
-} // end traceviewer_package
+} // end traceviewerᴛTimeHistogram

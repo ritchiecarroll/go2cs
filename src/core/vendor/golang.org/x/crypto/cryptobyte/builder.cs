@@ -6,6 +6,7 @@ namespace go.vendor.golang.org.x.crypto;
 using errors = errors_package;
 using fmt = fmt_package;
 using ꓸꓸꓸbyte = Span<byte>;
+using static cryptobyte_package;
 
 partial class cryptobyte_package {
 
@@ -49,6 +50,8 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
         fixedSize: true
     ));
 }
+
+} partial class cryptobyteᴛBuilder {
 
 // SetError sets the value to be returned as the error from Bytes. Writes
 // performed after calling SetError are ignored.
@@ -110,6 +113,8 @@ public static void AddBytes(this ref Builder b, slice<byte> v) {
     b.add(v.ꓸꓸꓸ);
 }
 
+} partial class cryptobyte_package {
+
 // BuilderContinuation is a continuation-passing interface for building
 // length-prefixed byte sequences. Builder methods for length-prefixed
 // sequences (AddUint8LengthPrefixed etc) will invoke the BuilderContinuation
@@ -140,6 +145,8 @@ public static void AddBytes(this ref Builder b, slice<byte> v) {
 partial struct BuildError {
     public error Err;
 }
+
+} partial class cryptobyteᴛBuilder {
 
 // AddUint8LengthPrefixed adds a 8-bit length-prefixed byte sequence.
 public static void AddUint8LengthPrefixed(this ж<Builder> Ꮡb, Action<ж<Builder>> f) {
@@ -354,6 +361,8 @@ public static void Unwrite(this ref Builder b, nint n) {
     b.result = b.result.slice(0, len(b.result) - n);
 }
 
+} partial class cryptobyte_package {
+
 // A MarshalingValue marshals itself into a Builder.
 partial interface MarshalingValue {
     // Marshal is called by Builder.AddValue. It receives a pointer to a builder
@@ -361,6 +370,8 @@ partial interface MarshalingValue {
     // marshaling, such as unset or invalid values.
     error Marshal(ж<Builder> b);
 }
+
+} partial class cryptobyteᴛBuilder {
 
 // AddValue calls Marshal on v, passing a pointer to the builder to append to.
 // If Marshal returns an error, it is set on the Builder so that subsequent
@@ -374,4 +385,4 @@ public static void AddValue(this ж<Builder> Ꮡb, MarshalingValue v) {
     }
 }
 
-} // end cryptobyte_package
+} // end cryptobyteᴛBuilder

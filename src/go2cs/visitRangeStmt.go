@@ -189,7 +189,19 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	savedHoist := v.hoistedDecls
 	hoistBuf := &strings.Builder{}
 	v.hoistedDecls = hoistBuf
-	rangeExpr := v.convExpr(rangeStmt.X, nil)
+	// A pointer-to-array conversion over an unsafe.Pointer, ranged for its values, ranges the view door's window of
+	// the whole array, a slice (arrayPointerElementDoor.go).
+	rangeExpr, rangeWindowElem, isRangeWindow := v.arrayPointerRangeWindow(rangeStmt)
+
+	// A field view ranged for its values ranges its own window (nativeFieldArrayView.go).
+	if !isRangeWindow {
+		rangeExpr, rangeWindowElem, isRangeWindow = v.nativeFieldArrayViewRangeWindow(rangeStmt)
+	}
+
+	if !isRangeWindow {
+		rangeExpr = v.convExpr(rangeStmt.X, nil)
+	}
+
 	v.hoistedDecls = savedHoist
 
 	if hoistBuf.Len() > 0 {
@@ -204,6 +216,10 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// type, and an unhandled alias fell through every arm — silently emitting the ENTIRE loop
 	// as a C# comment. Applied again after the pointer unwrap (the pointee may itself alias).
 	rangeType := types.Unalias(v.getExprType(rangeStmt.X))
+
+	if isRangeWindow {
+		rangeType = types.NewSlice(rangeWindowElem)
+	}
 
 	// Ranging THROUGH a pointer shares the pointee — Go copies nothing there — so the array-value
 	// snapshot below must not fire for it. Recorded here because the unwrap immediately makes
@@ -836,14 +852,20 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			// An inline array (a go.arrays member, inlineArrayEmission.go) ranges its constant length: golib's len
 			// cannot see the family, and Go does not evaluate this operand.
 			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
+		case isArrayPointee && !rangedThroughPointer && v.arrayPointerConversionIsUnevaluated(rangeStmt.X):
+			// `for i := range *(*A)(p)`: the type's length, and no memory (arrayPointerElementDoor.go).
+			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
+		case isArrayPointee && !rangedThroughPointer && v.nativeFieldArrayViewDerefIsUnevaluated(rangeStmt.X):
+			// `for i := range *p`, p a field view: the same (nativeFieldArrayView.go).
+			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
 		case isArrayPointee && rangedThroughPointer && ptrDeref != "":
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())
 		default:
-			// A package that declares its own `len` method shadows golib's using-static builtin (see Phase 7a in
-			// convCallExpr.go), so the length is qualified there, as every other `len(x)` in that package is.
+			// A holder that declares its own `len` method shadows golib's using-static builtin (see Phase 7a in
+			// convCallExpr.go), so the length is qualified there, as every other `len(x)` in that holder is.
 			lenName := "len"
 
-			if packageBuiltinShadows["len"] {
+			if v.holderDeclares("len") {
 				lenName = "builtin.len"
 			}
 
@@ -871,7 +893,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					keyType = v.getCSharpTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
 
-				innerPrefix += fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr, keyCloneSuffix)
+				innerPrefix += v.rangeAssignVar(rangeStmt.Key, keyExpr, tempKeyExpr, keyCloneSuffix)
 			}
 
 			if valExpr == "_" {
@@ -883,7 +905,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					valType = v.getCSharpTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
 
-				innerPrefix += fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr, valCloneSuffix)
+				innerPrefix += v.rangeAssignVar(rangeStmt.Value, valExpr, tempValExpr, valCloneSuffix)
 			}
 
 			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, pairExpr)
@@ -1102,4 +1124,16 @@ func isYieldFunc(t types.Type) int {
 	}
 
 	return -1
+}
+
+// rangeAssignVar is one per-iteration store of a `for k, v = range x` loop (the range ASSIGNS existing variables) into
+// the variable `rendered` from the iteration temporary. A variable that owns array storage takes the element IN PLACE
+// (valueAssignMethod; DESIGN-array-reassign-in-place.md §8 C5), so a slice or a pointer taken from it before the loop
+// sees each element, as in Go; any other variable is stored, with the clone suffix the caller computed.
+func (v *Visitor) rangeAssignVar(goExpr ast.Expr, rendered, temp, cloneSuffix string) string {
+	if method := valueAssignMethod(v.info.TypeOf(goExpr)); method != "" {
+		return fmt.Sprintf("%s%s%s.%s(%s);", v.newline, v.indent(v.indentLevel+1), valueAssignTarget(goExpr, v.info.TypeOf(goExpr), rendered), method, temp)
+	}
+
+	return fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), rendered, temp, cloneSuffix)
 }

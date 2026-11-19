@@ -21,7 +21,7 @@ namespace GenTests;
 /// M:N PROTOTYPE, the go statement's ARITY fix and its LOUD fallback (COORD's A3 ruling, 2026-11-12; the owner's severity
 /// ruling, 2026-11-13, FREEZE-SHEET.md): a go statement of up to 16 arguments launches its function's twin, a go literal
 /// WITH arguments launches its twin like one without, and a go statement the generator does NOT launch as a twin, where
-/// its goroutine could park, keeps its plain launch and warns once, GO2CS0014, naming the site and the reason. A go
+/// its goroutine could park, keeps its plain launch and warns once, GO2CS0015, naming the site and the reason. A go
 /// statement whose function provably never parks loses nothing, and does not warn.
 /// </summary>
 [TestClass]
@@ -229,7 +229,7 @@ public class TwinGoLaunchTests
         Assert.AreEqual(0, errors.Length, method + ": " + string.Join("\n", errors.Select(error => error.ToString())));
         StringAssert.Contains(twins, method + "ꞏtwin(", method + " is twinned");
         StringAssert.Contains(twins, launch, method + "'s go statement launches the twin");
-        Assert.IsFalse(generator.Any(diagnostic => diagnostic.Id == "GO2CS0014"), "no fallback warning: " + string.Join("\n", generator.Select(d => d.ToString())));
+        Assert.IsFalse(generator.Any(diagnostic => diagnostic.Id == "GO2CS0015"), "no fallback warning: " + string.Join("\n", generator.Select(d => d.ToString())));
     }
 
     [TestMethod]
@@ -287,7 +287,7 @@ public class TwinGoLaunchTests
         Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
         Assert.IsFalse(twins.Contains("goǃtwin(", StringComparison.Ordinal), "no twin launch of the by-ref wrapper");
 
-        string[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0014").Select(diagnostic => diagnostic.GetMessage()).ToArray();
+        string[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0015").Select(diagnostic => diagnostic.GetMessage()).ToArray();
         string all = string.Join("\n", generator.Select(diagnostic => diagnostic.ToString()));
 
         Assert.AreEqual(1, warnings.Length, all);
@@ -301,7 +301,7 @@ public class TwinGoLaunchTests
 
         Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
 
-        string[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0014").Select(diagnostic => diagnostic.GetMessage()).OrderBy(text => text, StringComparer.Ordinal).ToArray();
+        string[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0015").Select(diagnostic => diagnostic.GetMessage()).OrderBy(text => text, StringComparer.Ordinal).ToArray();
         string all = string.Join("\n", generator.Select(diagnostic => diagnostic.ToString()));
 
         Assert.AreEqual(2, warnings.Length, "two plain launches that could park, not the control: " + all);

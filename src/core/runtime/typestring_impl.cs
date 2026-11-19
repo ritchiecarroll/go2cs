@@ -21,10 +21,14 @@ namespace go;
 using go.golib;
 using abi = @internal.abi_package;
 using @internal;
+using static runtime_package;
 
 partial class runtime_package
 {
-    internal static @string @string(this Δrtype t)
+
+} partial class runtimeᴛrtype {
+
+    internal static @string @string(this rtype t)
     {
         if (t.Type.Value.sysType is { } managed)
             return GoReflect.GoTypeName(managed);
@@ -36,4 +40,7 @@ partial class runtime_package
 
         return s;
     }
+
+} partial class runtime_package {
+
 }

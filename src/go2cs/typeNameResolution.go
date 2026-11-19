@@ -487,15 +487,7 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					aliasQualifier = qualifier
 				}
 
-				// The member as the producing package declares it: Δ-renamed when its name collides with a
-				// method or function there (`coll.ΔSet<T>`; see foreignRenamedGenericMember).
-				member := obj.Name()
-
-				if renamed, ok := foreignRenamedGenericMember(obj); ok {
-					member = renamed
-				}
-
-				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, member, strings.Join(args, ", "))
+				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, obj.Name(), strings.Join(args, ", "))
 			}
 
 			// A SAME-PACKAGE instantiated generic must ALSO render structurally — each type ARGUMENT
@@ -549,20 +541,25 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
 				}
 
-				// A collision-renamed type this file reaches ONLY through another package's alias, with no import
-				// of the type's own package, so no alias key was loaded for it: spell the producer's member,
-				// `jsontext.ΔEncoder`, not the Go name (TS readiness C22e; see foreignRenamedTypeSpelling). A file
-				// that imports the producer holds the key and keeps its `pkgꓸName` alias route unchanged.
-				if !importedTypeAliasPublished(key) {
-					if spelling, bare, ok := foreignRenamedTypeSpelling(obj); ok {
-						// The two-hop form (`type Token any`): the producer's member stands for the concrete type its
-						// definition names, so render that, exactly as any reference to it would be rendered.
-						if bare {
-							return v.getAliasQualifiedTypeName(named.Underlying(), isUnderlying)
-						}
-
-						return aliasQualifier + "." + spelling
+				// An EXPLICITLY-aliased import (`gotime "time"`) qualifies the type with the file's alias, and the
+				// alias table is keyed by the DECLARED package name, so a member the package collision-renames kept
+				// its Go name: `ж<gotime.Location>` where time declares `ΔLocation` (CS0426, sqlite-cs S10). Swap
+				// the member and keep the alias. A member the table does not rename (cryptobyte's
+				// `encoding_asn1.BitString`) keeps its spelling.
+				if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" && fileAlias != pkg.Name() {
+					if member, renamed := explicitAliasRenamedTypeMember(key, obj.Name(), pkg); renamed {
+						return aliasQualifier + "." + member
 					}
+				}
+
+				// A type its package emits as a `global using` over the empty interface (`type Token any`),
+				// which this file reaches ONLY through another package's alias, with no import of the type's
+				// own package, so no alias key was loaded for it: the Go name is no member of that package's
+				// class (`lib.Token`, CS0426). Render what it stands for, exactly as any reference to that
+				// would be rendered (see foreignUsingAliasOverEmptyInterface). A file that imports the
+				// package holds the key and keeps its `pkgꓸName` alias route unchanged.
+				if !importedTypeAliasPublished(key) && foreignUsingAliasOverEmptyInterface(obj) {
+					return v.getAliasQualifiedTypeName(named.Underlying(), isUnderlying)
 				}
 			}
 
@@ -592,6 +589,13 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// + ~170-error parser cascade).
 	if !isUnderlying {
 		if name := v.deferredDynamicTypeName(t); name != "" {
+			// A marker an import's identical lift can answer now (sqlite-cs W2, forwardImportedStructLift).
+			if strings.HasPrefix(name, dynamicTypeMarkerPrefix) {
+				if imported := v.forwardImportedStructLift(t); imported != "" {
+					return imported
+				}
+			}
+
 			return name
 		}
 	}
@@ -818,12 +822,6 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 					}
 				}
 
-				// A Δ-renamed foreign generic names its declared member, as the alias-qualified twin does
-				// (see foreignRenamedGenericMember).
-				if renamed, ok := foreignRenamedGenericMember(obj); ok {
-					baseName = getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + renamed
-				}
-
 				return baseName + "[" + strings.Join(args, ", ") + "]"
 			}
 
@@ -876,6 +874,20 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// name or a deferred marker, never raw Go type text (see the getAliasQualifiedTypeName twin).
 	if !isUnderlying {
 		if name := v.deferredDynamicTypeName(t); name != "" {
+			// A marker an import's identical lift can answer now: another package's type, so this package's
+			// qualifier never prefixes it (sqlite-cs W2, forwardImportedStructLift).
+			if strings.HasPrefix(name, dynamicTypeMarkerPrefix) {
+				if imported := v.forwardImportedStructLift(t); imported != "" {
+					if v.inUsingAliasTarget {
+						if target, ok := importedStructLiftTarget(imported); ok {
+							return target
+						}
+					}
+
+					return imported
+				}
+			}
+
 			qualifier := v.usingAliasTypeQualifier(t)
 
 			// A deferred MARKER is replaced by the lift's name only after the file-visit barrier, so the
@@ -1098,7 +1110,12 @@ func getAliasedTypeName(typeName string) string {
 	// io_package;` — `io` collides with the go.io CHILD NAMESPACE once io/fs is in the
 	// reference closure): rewrite the qualifier so the type reference binds the renamed
 	// alias (mime's `CharsetReader Func<@string, io.Reader, …>` field, CS0234 ×6).
-	if qualifier, rest, found := strings.Cut(typeName, "."); found {
+	//
+	// Only a name written `<alias>.<Member>` starts with an alias. A member written through its
+	// package class (`math.bits_package.Len64`, the spelling a holder uses where one of its methods
+	// carries the import's name) starts with a NAMESPACE, which no using renames: there `math` is
+	// go.math, and `Δmath` would be the alias of package math's class.
+	if qualifier, rest, found := strings.Cut(typeName, "."); found && !strings.Contains(strings.SplitN(rest, "<", 2)[0], ".") {
 		if renamed, ok := packageImportAliasRenames[qualifier]; ok {
 			// No recursion: a foreign type WITH its own rename already hit the alias map
 			// above under the raw key; this qualifier rewrite is the final form.
@@ -1151,6 +1168,29 @@ func getAliasedTypeName(typeName string) string {
 	}
 
 	return typeName
+}
+
+// explicitAliasRenamedTypeMember returns the C# member name a published TYPE alias entry gives the
+// foreign type behind key (`time.Location` -> `ΔLocation`) when that name differs from the Go name, and
+// only when the entry came from pkg (see aliasSourceMatchesPackage). A const entry, an unpublished key
+// or an unrenamed member answers false.
+func explicitAliasRenamedTypeMember(key, goName string, pkg *types.Package) (string, bool) {
+	packageLock.Lock()
+	target, published := importedTypeAliases[key]
+	isConst := constImportedTypeAliases.Contains(key)
+	packageLock.Unlock()
+
+	if !published || isConst || !aliasSourceMatchesPackage(key, pkg) {
+		return "", false
+	}
+
+	member := target[strings.LastIndex(target, ".")+1:]
+
+	if member == getCoreSanitizedIdentifier(goName) || member == getSanitizedIdentifier(goName) {
+		return "", false
+	}
+
+	return member, true
 }
 
 // getRefParameterTypeName renders t as the C#-shaped spelling a `ref` parameter position needs.
@@ -1267,6 +1307,16 @@ func (v *Visitor) isForeignAliasOfNamed(t types.Type) bool {
 	_, isNamed := types.Unalias(alias).(*types.Named)
 
 	return isNamed
+}
+
+// isPublishedForeignAnonStructAlias reports whether t is another package's alias of a non-empty ANONYMOUS struct
+// whose lift that package published (foreignAnonStructAliasTarget): libc's real `stdio.FILE` is `type FILE =
+// X_iobuf` with `type X_iobuf = struct{...}` (ccgo), so isForeignAliasOfNamed's defined-type test misses it
+// (sqlite-cs W5a). Its declarations already spell it `stdioꓸFILE`; an unpublished one keeps its path.
+func (v *Visitor) isPublishedForeignAnonStructAlias(t types.Type) bool {
+	_, ok := foreignAnonStructAliasTarget(t, v.pkg)
+
+	return ok
 }
 
 // foreignAliasedTypeName resolves a cross-package type that is RENAMED (or Go-aliased) inside
@@ -1448,98 +1498,6 @@ func (v *Visitor) discardTargetTypeName(expr ast.Expr) string {
 	return v.iifeDelegateType(sig)
 }
 
-// methodGroupClashDelegateType returns the C# delegate type a package-level func used as a VALUE must
-// be cast to when its package also declares a METHOD of the same name, or "" when no cast is needed.
-// Go methods are emitted as extension methods in the package class, so `func Run()` and
-// `func (T) Run()` — and, across packages, `time.After` and `Time.After` — are ONE C# method group.
-// Where the site supplies a delegate type (a func-typed parameter, var or field) C# picks the func
-// by signature; where it supplies none — a `:=` local, an `any` slot — the group has no natural type
-// (CS8917, CS1503). The structural `Func<…>`/`Action<…>` is used, never a package named func type: in
-// an interface slot the delegate type IS the dynamic type, and Go's dynamic type is the unnamed
-// signature.
-//
-// Any same-named method counts, whatever its visibility: one on an unexported type is invisible to
-// another assembly, but a test assembly can see it, and the cast is valid C# either way. A GENERIC
-// func is left alone (no instantiation to name).
-func (v *Visitor) methodGroupClashDelegateType(expr ast.Expr) string {
-	for {
-		paren, ok := expr.(*ast.ParenExpr)
-
-		if !ok {
-			break
-		}
-
-		expr = paren.X
-	}
-
-	var ident *ast.Ident
-
-	switch e := expr.(type) {
-	case *ast.Ident:
-		ident = e
-	case *ast.SelectorExpr:
-		ident = e.Sel
-	default:
-		return ""
-	}
-
-	fn, ok := v.info.ObjectOf(ident).(*types.Func)
-
-	if !ok || fn.Pkg() == nil || fn.Parent() != fn.Pkg().Scope() {
-		return ""
-	}
-
-	sig, ok := fn.Type().(*types.Signature)
-
-	if !ok || sig.Recv() != nil || sig.TypeParams().Len() > 0 || !packageDeclaresMethodNamed(fn.Pkg(), fn.Name()) {
-		return ""
-	}
-
-	return v.iifeDelegateType(sig)
-}
-
-// applyMethodGroupClashCast casts a rendered value to its delegate type when methodGroupClashDelegateType
-// says the bare method group is ambiguous; every other value passes through unchanged.
-func (v *Visitor) applyMethodGroupClashCast(expr ast.Expr, rendered string) string {
-	if expr == nil || rendered == "" {
-		return rendered
-	}
-
-	if delegateType := v.methodGroupClashDelegateType(expr); delegateType != "" {
-		return castOf(delegateType, rendered)
-	}
-
-	return rendered
-}
-
-// packageDeclaresMethodNamed reports whether any named type declared at pkg's scope has a method
-// called name.
-func packageDeclaresMethodNamed(pkg *types.Package, name string) bool {
-	scope := pkg.Scope()
-
-	for _, typeName := range scope.Names() {
-		obj, ok := scope.Lookup(typeName).(*types.TypeName)
-
-		if !ok || obj.IsAlias() {
-			continue
-		}
-
-		named, ok := obj.Type().(*types.Named)
-
-		if !ok {
-			continue
-		}
-
-		for i := 0; i < named.NumMethods(); i++ {
-			if named.Method(i).Name() == name {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
 func convertToCSTypeName(typeName string) string {
 	return renderCSTypeName(typeName, false)
 }
@@ -1654,6 +1612,21 @@ func delegateRoot(rootNested bool, family string) string {
 // `Action`/`Func` delegates, which root to `System.` rather than to `go.` (the golib variadic
 // FAMILY `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ` does live in `go`, and is rooted there).
 func renderCSFullTypeName(typeName string, rootNested bool) string {
+	return renderCSFullTypeNameAs(typeName, rootNested, false)
+}
+
+// convertToCSDeclaredTypeName renders the name of a type the Go source DECLARES (a package-level or
+// function-local TypeName, never a Universe one). Such a name can share a spelling with a basic type
+// the switch below maps (`int`, `string`), or with a C# type keyword it maps (`float`), and it must
+// still name the user's type: modernc.org/mathutil's `type float struct{…}` built as `float{n: n}`
+// emitted `new float64(…)` (CS1739). The caller decides from the go/types object, not the spelling.
+func convertToCSDeclaredTypeName(typeName string) string {
+	return strings.TrimPrefix(renderCSFullTypeNameAs(typeName, false, true), RootNamespace+".")
+}
+
+// renderCSFullTypeNameAs is renderCSFullTypeName; declared skips the basic-type spellings (see
+// convertToCSDeclaredTypeName).
+func renderCSFullTypeNameAs(typeName string, rootNested bool, declared bool) string {
 	typeName = strings.TrimPrefix(typeName, "~")
 
 	if strings.HasPrefix(typeName, "untyped ") {
@@ -1915,6 +1888,15 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 				base = getCollisionAvoidanceIdentifier(base)
 			}
 
+			// A generic type of the package that the current method's holder cannot name bare
+			// (holderHiddenTypes) is named through its declaring class, as the leaf below names a
+			// type without arguments.
+			if !rootNested {
+				if hidden := holderHiddenTypeName(base); hidden != "" {
+					base = RootNamespace + "." + hidden
+				}
+			}
+
 			typeName = fmt.Sprintf("%s<%s>%s", base, strings.Join(subTypes, ", "), typeName[end+1:])
 		}
 	}
@@ -1941,7 +1923,13 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 		return typeName
 	}
 
-	switch typeName {
+	builtinSpelling := typeName
+
+	if declared {
+		builtinSpelling = ""
+	}
+
+	switch builtinSpelling {
 	case "int":
 		return "nint"
 	case "uint":
@@ -1991,6 +1979,14 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 						return target
 					}
 				}
+			}
+		}
+
+		// A type of the package that the current method's holder cannot name bare (holderHiddenTypes)
+		// is named through its declaring class.
+		if !rootNested {
+			if hidden := holderHiddenTypeName(typeName); hidden != "" {
+				return RootNamespace + "." + hidden
 			}
 		}
 

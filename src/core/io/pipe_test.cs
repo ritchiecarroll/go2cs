@@ -14,6 +14,7 @@ using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAt
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.io_internal_test_package;
 using Δio = io_package;
+using static io_test_package;
 
 partial class io_test_package {
 
@@ -157,9 +158,13 @@ partial struct pipeTest {
     internal bool closeWithError;
 }
 
+} partial class io_testᴛpipeTest {
+
 internal static @string String(this pipeTest p) {
     return fmt.Sprintf("async=%v err=%v closeWithError=%v"u8, p.async, p.err, p.closeWithError);
 }
+
+} partial class io_test_package {
 
 internal static slice<pipeTest> pipeTests = [
     new(true, default, false),

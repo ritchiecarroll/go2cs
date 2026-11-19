@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
+using static pkgbits_package;
+
 partial class pkgbits_package {
 
 // Version indicates a version of a unified IR bitstream.
@@ -10,23 +12,23 @@ partial class pkgbits_package {
 // new data in the bitstream.
 //
 // These are serialized to disk and the interpretation remains fixed.
-partial struct ΔVersion /*num:uint32*/;
+partial struct Version /*num:uint32*/;
 
 // V0: initial prototype.
 //
 // All data that is not assigned a Field is in version V0
 // and has not been deprecated.
-public static ΔVersion V0 => /* iota */ 0;
+public static Version V0 => /* iota */ 0;
 
 // V1: adds the Flags uint32 word
-public static ΔVersion V1 => 1;
+public static Version V1 => 1;
 
 // V2: removes unused legacy fields and supports type parameters for aliases.
 // - remove the legacy "has init" bool from the public root
 // - remove obj's "derived func instance" bool
 // - add a TypeParamNames field to ObjAlias
 // - remove derived info "needed" bool
-public static ΔVersion V2 => 2;
+public static Version V2 => 2;
 
 internal static UntypedInt numVersions => /* iota */ 3;
 
@@ -62,7 +64,7 @@ public static Field DerivedInfoNeeded => 4;
 internal static UntypedInt numFields => /* iota */ 5;
 
 // introduced is the version a field was added.
-internal static array<ΔVersion> introduced = new golib.SparseArray<ΔVersion>{
+internal static array<Version> introduced = new golib.SparseArray<Version>{
     [(int)Flags] = V1,
     [(int)AliasTypeParamNames] = V2
 }.array(5);
@@ -70,15 +72,17 @@ internal static array<ΔVersion> introduced = new golib.SparseArray<ΔVersion>{
 // removed is the version a field was removed in or 0 for fields
 // that have not yet been deprecated.
 // (So removed[f]-1 is the last version it is included in.)
-internal static array<ΔVersion> removed = new golib.SparseArray<ΔVersion>{
+internal static array<Version> removed = new golib.SparseArray<Version>{
     [(int)HasInit] = V2,
     [(int)DerivedFuncInstance] = V2,
     [(int)DerivedInfoNeeded] = V2
 }.array(5);
 
+} partial class pkgbitsᴛVersion {
+
 // Has reports whether field f is present in a bitstream at version v.
-public static bool Has(this ΔVersion v, Field f) {
+public static bool Has(this Version v, Field f) {
     return introduced[f] <= v && (v < removed[f] || removed[f] == V0);
 }
 
-} // end pkgbits_package
+} // end pkgbitsᴛVersion

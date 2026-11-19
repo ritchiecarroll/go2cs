@@ -12,19 +12,22 @@ using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using static go.encoding.xml_package;
+using static xml_internal_test_package;
 
 partial class xml_internal_test_package {
 
 internal partial struct toks {
     internal bool earlyEOF;
-    internal slice<ΔToken> t;
+    internal slice<Token> t;
 }
 
-internal static (ΔToken, error) Token(this ref toks t) {
+} partial class xml_internal_testᴛtoks {
+
+internal static (Token, error) Token(this ref toks t) {
     if (len(t.t) == 0) {
         return (default, io.EOF);
     }
-    ΔToken tok = default;
+    Token tok = default;
     (tok, t.t) = (t.t[0], t.t[1..]);
     if (t.earlyEOF && len(t.t) == 0) {
         return (tok, io.EOF);
@@ -32,9 +35,11 @@ internal static (ΔToken, error) Token(this ref toks t) {
     return (tok, default);
 }
 
+} partial class xml_internal_test_package {
+
 internal partial struct TestDecodeEOF_tests /*dyn*/ {
     internal @string name;
-    internal slice<ΔToken> tokens;
+    internal slice<Token> tokens;
     internal bool ok;
 }
 
@@ -47,7 +52,7 @@ public static void TestDecodeEOF(ж<testing.T> t) {
     var tests = slice<TestDecodeEOF_tests>([
         new(
             name: "OK",
-            tokens: slice<ΔToken>([
+            tokens: slice<Token>([
                 start,
                 start.End()
             ]),
@@ -55,7 +60,7 @@ public static void TestDecodeEOF(ж<testing.T> t) {
         ),
         new(
             name: "Malformed",
-            tokens: slice<ΔToken>([
+            tokens: slice<Token>([
                 start,
                 new StartElement(Name: new Name(Local: "bad")),
                 start.End()
@@ -93,10 +98,12 @@ public static void TestDecodeEOF(ж<testing.T> t) {
 
 internal partial struct toksNil {
     internal bool returnEOF;
-    internal slice<ΔToken> t;
+    internal slice<Token> t;
 }
 
-internal static (ΔToken, error) Token(this ref toksNil t) {
+} partial class xml_internal_testᴛtoksNil {
+
+internal static (Token, error) Token(this ref toksNil t) {
     if (len(t.t) == 0) {
         if (!t.returnEOF) {
             // Return nil, nil before returning an EOF. It's legal, but
@@ -106,10 +113,12 @@ internal static (ΔToken, error) Token(this ref toksNil t) {
         }
         return (default, io.EOF);
     }
-    ΔToken tok = default;
+    Token tok = default;
     (tok, t.t) = (t.t[0], t.t[1..]);
     return (tok, default);
 }
+
+} partial class xml_internal_test_package {
 
 internal partial struct TestDecodeNilToken_type /*dyn*/ {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"test"`*/
@@ -123,7 +132,7 @@ public static void TestDecodeNilToken(ж<testing.T> t) {
             var bad = new StartElement(Name: new Name(Local: "bad"));
             var d = NewTokenDecoder(new xml_internal_test_package.toksNilжTokenReader(Ꮡ(new toksNil(
                 // Malformed
-                t: slice<ΔToken>([start, bad, start.End()])
+                t: slice<Token>([start, bad, start.End()])
             ))));
             d.Strict = strict;
             var err = d.Decode(Ꮡ(new TestDecodeNilToken_type()));
@@ -139,7 +148,7 @@ private static readonly @string testInputᵇ = "\n<?xml version=\"1.0\" encoding
 
 internal static map<@string, @string> testEntity = new map<@string, @string>{["何"] = "What", ["is-it"] = "is it?"};
 
-internal static slice<ΔToken> rawTokens = [
+internal static slice<Token> rawTokens = [
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new ProcInst("xml", slice<byte>(@"version=""1.0"" encoding=""UTF-8"""u8)),
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
@@ -178,7 +187,7 @@ DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     (global::go.encoding.xml_package.Comment)slice<byte>((@string)" missing final newline "u8)
 ];
 
-internal static slice<ΔToken> cookedTokens = [
+internal static slice<Token> cookedTokens = [
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new ProcInst("xml", slice<byte>(@"version=""1.0"" encoding=""UTF-8"""u8)),
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
@@ -224,7 +233,7 @@ private static readonly @string testInputAltEncodingᵇ = """
 <TAG>VALUE</TAG>
 """u8.Raw();
 
-internal static slice<ΔToken> rawTokensAltEncoding = [
+internal static slice<Token> rawTokensAltEncoding = [
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new ProcInst("xml", slice<byte>(@"version=""1.0"" encoding=""x-testing-uppercase"""u8)),
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
@@ -300,7 +309,7 @@ private static readonly @string nonStrictInputᵇ = """
 
 """u8.Raw();
 
-internal static slice<ΔToken> nonStrictTokens = [
+internal static slice<Token> nonStrictTokens = [
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name("", "tag"), []),
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"non&entity"u8),
@@ -347,6 +356,8 @@ internal partial struct downCaser {
     internal io.ByteReader r;
 }
 
+} partial class xml_internal_testᴛdownCaser {
+
 internal static (byte c, error err) ReadByte(this ref downCaser d) {
     byte c = default;
     error err = default;
@@ -362,6 +373,8 @@ internal static partial (nint, error) Read(this ref downCaser d, slice<byte> p) 
     d.t.Fatalf("unexpected Read call on downCaser reader");
     throw panic("unreachable");
 }
+
+} partial class xml_internal_test_package {
 
 public static void TestRawTokenAltEncoding(ж<testing.T> t) {
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(testInputAltEncoding)));
@@ -401,7 +414,7 @@ public static void TestRawTokenAltEncodingNoConverter(ж<testing.T> t) {
     }
 }
 
-internal static void testRawToken(ж<testing.T> t, ж<global::go.encoding.xml_package.Decoder> Ꮡd, @string raw, slice<ΔToken> rawTokens) {
+internal static void testRawToken(ж<testing.T> t, ж<global::go.encoding.xml_package.Decoder> Ꮡd, @string raw, slice<Token> rawTokens) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var lastEnd = (int64)0;
@@ -472,7 +485,7 @@ internal static @string nestedDirectivesInput = """
 
 """u8.Raw();
 
-internal static slice<ΔToken> nestedDirectivesTokens = [
+internal static slice<Token> nestedDirectivesTokens = [
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY rdf ""http://www.w3.org/1999/02/22-rdf-syntax-ns#"">]"u8),
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
@@ -675,9 +688,9 @@ internal static readonly object wrongEndElementˢ = (@string)"Wrong end element"
 public static void TestIssue68387(ж<testing.T> t) {
     @string data = itemBˢ;
     var dec = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(data)));
-    ΔToken tok1 = default;
-    ΔToken tok2 = default;
-    ΔToken tok3 = default;
+    Token tok1 = default;
+    Token tok2 = default;
+    Token tok3 = default;
     error err = default;
     (tok1, err) = dec.RawToken(); if (err != nil) {
         t.Fatalf("RawToken() failed: %v", err);
@@ -772,7 +785,7 @@ internal static readonly object copyTokenCharDataUsesˢ = (@string)"CopyToken(Ch
 
 public static void TestCopyTokenCharData(ж<testing.T> t) {
     var data = slice<byte>("same data"u8);
-    ΔToken tok1 = ((global::go.encoding.xml_package.CharData)data);
+    Token tok1 = ((global::go.encoding.xml_package.CharData)data);
     var tok2 = CopyToken(tok1);
     if (!reflect.DeepEqual(tok1, tok2)) {
         t.Error(copyTokenCharDataˢ);
@@ -789,7 +802,7 @@ internal static readonly object copyTokenStartElementˢ = (@string)"CopyToken(St
 
 public static void TestCopyTokenStartElement(ж<testing.T> t) {
     var elt = new StartElement(new Name("", "hello"), [new(new Name("", "lang"), "en")]);
-    ΔToken tok1 = elt;
+    Token tok1 = elt;
     var tok2 = CopyToken(tok1);
     if (tok1._<StartElement>().Attr[0].Value != "en"u8) {
         t.Error(copyTokenOverwroteAttr0ˢ);
@@ -809,7 +822,7 @@ internal static readonly object copyTokenCommentUsesSameˢ = (@string)"CopyToken
 
 public static void TestCopyTokenComment(ж<testing.T> t) {
     var data = slice<byte>("<!-- some comment -->"u8);
-    ΔToken tok1 = ((global::go.encoding.xml_package.Comment)data);
+    Token tok1 = ((global::go.encoding.xml_package.Comment)data);
     var tok2 = CopyToken(tok1);
     if (!reflect.DeepEqual(tok1, tok2)) {
         t.Error(copyTokenCommentCommentˢ);
@@ -949,6 +962,12 @@ internal static slice<procInstTestsᴛ1> procInstTests = [
     new(@"version=""encoding='utf-8'""", new @string[]{"encoding='utf-8'", "utf-8"}.array())
 ];
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string versionˢ => ref versionˢᵇ;
+private static readonly @string versionˢᵇ = "version"u8;
+internal static ref readonly @string encodingˢ => ref encodingˢᵇ;
+private static readonly @string encodingˢᵇ = "encoding"u8;
+
 public static void TestProcInstEncoding(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in range(procInstTests)) {
         var test = vᴛ1.ΔClone();
@@ -976,7 +995,7 @@ internal static @string directivesWithCommentsInput = """
 
 """u8.Raw();
 
-internal static slice<ΔToken> directivesWithCommentsTokens = [
+internal static slice<Token> directivesWithCommentsTokens = [
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [ <!ENTITY rdf ""http://www.w3.org/1999/02/22-rdf-syntax-ns#"">]"u8),
     (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
@@ -1004,7 +1023,11 @@ public static void TestDirectivesWithComments(ж<testing.T> t) {
 internal partial struct errWriter {
 }
 
+} partial class xml_internal_testᴛerrWriter {
+
 internal static (nint n, error err) Write(this errWriter _, slice<byte> p) { return (0, fmt.Errorf("unwritable"u8)); }
+
+} partial class xml_internal_test_package {
 
 public static void TestEscapeTextIOErrors(ж<testing.T> t) {
     @string expectErr = unwritableˢ;
@@ -1329,7 +1352,7 @@ public static void TestIssue20685(ж<testing.T> t) {
     }
 }
 
-internal static Func<global::go.encoding.xml_package.TokenReader, global::go.encoding.xml_package.TokenReader> tokenMap(Func<ΔToken, ΔToken> mapping) {
+internal static Func<global::go.encoding.xml_package.TokenReader, global::go.encoding.xml_package.TokenReader> tokenMap(Func<Token, Token> mapping) {
     return (global::go.encoding.xml_package.TokenReader src) => new mapper(
             t: src,
             f: mapping
@@ -1338,16 +1361,20 @@ internal static Func<global::go.encoding.xml_package.TokenReader, global::go.enc
 
 internal partial struct mapper {
     internal global::go.encoding.xml_package.TokenReader t;
-    internal Func<ΔToken, ΔToken> f;
+    internal Func<Token, Token> f;
 }
 
-internal static (ΔToken, error) Token(this mapper m) {
+} partial class xml_internal_testᴛmapper {
+
+internal static (Token, error) Token(this mapper m) {
     var (tok, err) = m.t.Token();
     if (err != nil) {
         return (default, err);
     }
     return (m.f(tok), default);
 }
+
+} partial class xml_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object newTokenDecoderDidNotˢ = (@string)"NewTokenDecoder did not detect underlying Decoder"u8;
@@ -1374,7 +1401,7 @@ internal partial struct TestWrapDecoder_o /*dyn*/ {
 
 public static void TestWrapDecoder(ж<testing.T> t) {
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(quoteReEnterClownWithAˢ)));
-    var m = tokenMap((ΔToken tΔ1) => {
+    var m = tokenMap((Token tΔ1) => {
         switch (tΔ1.type()) {
         case StartElement tok: {
             if (tok.Name.Local == "quote"u8) {
@@ -1409,16 +1436,24 @@ public static void TestWrapDecoder(ж<testing.T> t) {
 internal partial struct tokReader {
 }
 
-internal static (ΔToken, error) Token(this tokReader _) {
+} partial class xml_internal_testᴛtokReader {
+
+internal static (Token, error) Token(this tokReader _) {
     return (new StartElement(), default);
 }
+
+} partial class xml_internal_test_package {
 
 public partial struct Failure {
 }
 
+} partial class xml_internal_testᴛFailure {
+
 public static error UnmarshalXML(this Failure _Δp0, ж<global::go.encoding.xml_package.Decoder> _Δp1, global::go.encoding.xml_package.StartElement _Δp2) {
     return default;
 }
+
+} partial class xml_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedPanicUsingˢ = (@string)"Unexpected panic using custom token unmarshaler"u8;
@@ -1441,7 +1476,7 @@ public static void TestTokenUnmarshaler(ж<testing.T> t) {
 
 internal static void testRoundTrip(ж<testing.T> t, @string input) {
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(input)));
-    slice<ΔToken> tokens = default;
+    slice<Token> tokens = default;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var e = NewEncoder(new xml_test_package.bytes_BufferжWriter(Ꮡbuf));
     for (;;) {
@@ -1603,9 +1638,9 @@ public static void BenchmarkHTMLAutoClose(ж<testing.B> b) {
 }
 
 public static void TestHTMLAutoClose(ж<testing.T> t) {
-    var haveTokensᴷ = new stackAppend<ΔToken>();
+    var haveTokensᴷ = new stackAppend<Token>();
 
-    var wantTokens = slice<ΔToken>([
+    var wantTokens = slice<Token>([
         new ProcInst("xml", slice<byte>(@"version=""1.0"" encoding=""UTF-8"""u8)),
         (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
         new StartElement(new Name("", "br"), []),
@@ -1650,7 +1685,7 @@ public static void TestHTMLAutoClose(ж<testing.T> t) {
     d.Strict = false;
     d.AutoClose = HTMLAutoClose;
     d.Entity = HTMLEntity;
-    slice<ΔToken> haveTokens = default;
+    slice<Token> haveTokens = default;
     for (;;) {
         var (tok, err) = d.Token();
         if (err != nil) {

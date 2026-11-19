@@ -133,6 +133,9 @@ go.GoMapKeyDimsAttribute
 go.GoMemProfile
 go.GoMemberFact
 go.GoMemberRecordAttribute
+# go.GoMethodHostAttribute: added 2026-11-12 with the method holders (OQ2), on each holder class in package_info.cs.
+# COORD 2026-11-12: a converter-emitted attribute, the GoPromotedHost class; [go-tier2] by ruling
+go.GoMethodHostAttribute
 go.GoMethodText
 go.GoModInfoAttribute
 go.GoPackageAttribute

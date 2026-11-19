@@ -61,14 +61,14 @@ internal static partial void main() {
     var otherʗ1 = other;
     var res3ʗ1 = res3;
     goǃ(() => {
-        var selᴛ1 = ch3ʗ1;
-        var selᴛ2 = otherʗ1;
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out var v, out var ok): {
+        var ch3ᴛ1 = ch3ʗ1;
+        var otherᴛ1 = otherʗ1;
+        switch (select(ᐸꟷ(ch3ᴛ1, ꓸꓸꓸ), ᐸꟷ(otherᴛ1, ꓸꓸꓸ))) {
+        case 0 when ch3ᴛ1.ꟷᐳ(out var v, out var ok): {
             res3ʗ1.ᐸꟷ(fmt.Sprintf("select recv %d %t"u8, v, ok));
             break;
         }
-        case 1 when selᴛ2.ꟷᐳ(out var v): {
+        case 1 when otherᴛ1.ꟷᐳ(out var v): {
             res3ʗ1.ᐸꟷ(fmt.Sprintf("other %d (wrong)"u8, v));
             break;
         }}
@@ -91,14 +91,14 @@ internal static partial void main() {
                     res4ʗ2.ᐸꟷ(fmt.Sprintf("select send panicked: %v"u8, r));
                 }
             }, ref ᒐ);
-            var selᴛ3 = ch4ʗ1.ᐸꟷ(99, ꓸꓸꓸ);
-            var selᴛ4 = other2ʗ1;
-            switch (select(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+            var ch4ᴛ1 = ch4ʗ1.ᐸꟷ(99, ꓸꓸꓸ);
+            var other2ᴛ1 = other2ʗ1;
+            switch (select(ch4ᴛ1, ᐸꟷ(other2ᴛ1, ꓸꓸꓸ))) {
             case 0: {
                 res4ʗ1.ᐸꟷ("select send completed (wrong)");
                 break;
             }
-            case 1 when selᴛ4.ꟷᐳ(out var v): {
+            case 1 when other2ᴛ1.ꟷᐳ(out var v): {
                 res4ʗ1.ᐸꟷ(fmt.Sprintf("other %d (wrong)"u8, v));
                 break;
             }}
@@ -126,8 +126,8 @@ internal static partial void main() {
     expectPanic("select send on closed with default", () => {
         var sd = new channel<nint>(1);
         close(sd);
-        var selᴛ5 = sd.ᐸꟷ(1, ꓸꓸꓸ);
-        switch (trySelect(selᴛ5)) {
+        var sdᴛ1 = sd.ᐸꟷ(1, ꓸꓸꓸ);
+        switch (trySelect(sdᴛ1)) {
         case 0: {
             fmt.Println("sent (wrong)");
             break;

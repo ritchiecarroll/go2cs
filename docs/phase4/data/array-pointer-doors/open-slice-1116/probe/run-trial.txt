@@ -1,0 +1,16 @@
+start 01:07:24Z tree=26c2938653 bin=54fa96f437af875d
+convert rc=0
+raw Go struct text in the emission: 0
+build rc=0
+run rc=0
+EQUAL to Go, 7 lines
+39:        @unsafe.Pointer bp = @unsafe.Pointer.FromPinnedBox(Ꮡbuf);
+40:        var tail = @unsafe.Pointer.View<main__ᴛ1>(bp, 1, 3);
+47:        var w = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 0, 16);
+55:        @unsafe.Pointer off = @unsafe.Pointer.FromPinnedBox(Ꮡsrc.at<byte>(2));
+56:        nint n = @unsafe.Pointer.CopyInto<byte>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff), 0, 4, @unsafe.Pointer.View<byte>(off, 0, 4));
+62:        fmt.Println("D", takes(@unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡu), 0, 4)));
+67:        var s = Ꮡa.slice(1);
+75:        foreach (var (_, b) in range(@unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡu), 2, 8))) {
+83:        var b = @unsafe.Pointer.View<byte>(@unsafe.Pointer.FromPinnedBox(Ꮡwords), 2, 4);
+CONVDONE 01:07:39Z

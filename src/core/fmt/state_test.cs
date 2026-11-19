@@ -6,6 +6,7 @@ namespace go;
 using fmt = fmt_package;
 using Δtesting = testing_package;
 using static go.fmt_internal_test_package;
+using static fmt_test_package;
 
 partial class fmt_test_package {
 
@@ -18,6 +19,8 @@ partial struct testState {
 }
 
 internal static fmt.State _ᴛ2ʗ = new testState();
+
+} partial class fmt_testᴛtestState {
 
 internal static (nint n, error err) Write(this testState s, slice<byte> b) {
     throw panic("unimplemented");
@@ -34,6 +37,8 @@ internal static (nint prec, bool ok) Precision(this testState s) {
 internal static bool Flag(this testState s, nint c) {
     return s.flag[c];
 }
+
+} partial class fmt_test_package {
 
 public static UntypedInt NO => -1000;
 

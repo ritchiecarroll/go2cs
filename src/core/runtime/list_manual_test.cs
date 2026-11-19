@@ -51,8 +51,8 @@ public static void TestListManualPush(ж<testing.T> t) {
     var three = newListedValManual(3);
     headA.Push(@unsafe.Pointer.FromPinnedBox(three));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValManual>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValManual>(p);
     if (v == nil) {
         t.Fatalf("pop got nil want 3");
     }
@@ -60,8 +60,8 @@ public static void TestListManualPush(ж<testing.T> t) {
         t.Errorf("pop got %d want 3", v.val);
     }
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     if (v == nil) {
         t.Fatalf("pop got nil want 2");
     }
@@ -69,8 +69,8 @@ public static void TestListManualPush(ж<testing.T> t) {
         t.Errorf("pop got %d want 2", v.val);
     }
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     if (v == nil) {
         t.Fatalf("pop got nil want 1");
     }
@@ -78,8 +78,8 @@ public static void TestListManualPush(ж<testing.T> t) {
         t.Errorf("pop got %d want 1", v.val);
     }
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -116,16 +116,16 @@ public static void TestListManualRemoveHead(ж<testing.T> t) {
 
     headA.Remove(@unsafe.Pointer.FromPinnedBox(three));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValManual>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValManual>(p);
     wantValManual(t, v, 2);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     wantValManual(t, v, 1);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -150,16 +150,16 @@ public static void TestListManualRemoveMiddle(ж<testing.T> t) {
 
     headA.Remove(@unsafe.Pointer.FromPinnedBox(two));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValManual>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValManual>(p);
     wantValManual(t, v, 3);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     wantValManual(t, v, 1);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -184,16 +184,16 @@ public static void TestListManualRemoveTail(ж<testing.T> t) {
 
     headA.Remove(@unsafe.Pointer.FromPinnedBox(one));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValManual>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValManual>(p);
     wantValManual(t, v, 3);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     wantValManual(t, v, 2);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValManual>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValManual>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -220,8 +220,8 @@ public static void TestListManualRemoveAll(ж<testing.T> t) {
     headA.Remove(@unsafe.Pointer.FromPinnedBox(two));
     headA.Remove(@unsafe.Pointer.FromPinnedBox(three));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValManual>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValManual>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -238,13 +238,13 @@ public static void TestListManualRemoveAll(ж<testing.T> t) {
 }
 
 internal static ж<listedValNIH> newListedValNIH(nint v) {
-    var l = (ж<listedValNIH>)(uintptr)(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(listedValNIH{}) */ (uintptr)40, /* unsafe.Alignof(listedValNIH{}) */ (uintptr)8));
+    var l = @unsafe.Pointer.To<listedValNIH>(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(listedValNIH{}) */ (uintptr)40, /* unsafe.Alignof(listedValNIH{}) */ (uintptr)8));
     l.val = v;
     return l;
 }
 
 internal static ж<global::go.runtime_internal_test_package.ListHeadManual> newListHeadNIH() {
-    return (ж<runtime_internal_test_package.ListHeadManual>)(uintptr)(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(runtime.ListHeadManual{}) */ (uintptr)24, /* unsafe.Alignof(runtime.ListHeadManual{}) */ (uintptr)8));
+    return @unsafe.Pointer.To<runtime_internal_test_package.ListHeadManual>(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(runtime.ListHeadManual{}) */ (uintptr)24, /* unsafe.Alignof(runtime.ListHeadManual{}) */ (uintptr)8));
 }
 
 public static void TestListNIHPush(ж<testing.T> t) {
@@ -260,8 +260,8 @@ public static void TestListNIHPush(ж<testing.T> t) {
     var three = newListedValNIH(3);
     headA.Push(@unsafe.Pointer.FromPinnedBox(three));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValNIH>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValNIH>(p);
     if (v == nil) {
         t.Fatalf("pop got nil want 3");
     }
@@ -269,8 +269,8 @@ public static void TestListNIHPush(ж<testing.T> t) {
         t.Errorf("pop got %d want 3", v.val);
     }
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     if (v == nil) {
         t.Fatalf("pop got nil want 2");
     }
@@ -278,8 +278,8 @@ public static void TestListNIHPush(ж<testing.T> t) {
         t.Errorf("pop got %d want 2", v.val);
     }
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     if (v == nil) {
         t.Fatalf("pop got nil want 1");
     }
@@ -287,8 +287,8 @@ public static void TestListNIHPush(ж<testing.T> t) {
         t.Errorf("pop got %d want 1", v.val);
     }
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -321,16 +321,16 @@ public static void TestListNIHRemoveHead(ж<testing.T> t) {
 
     headA.Remove(@unsafe.Pointer.FromPinnedBox(three));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValNIH>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValNIH>(p);
     wantValNIH(t, v, 2);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     wantValNIH(t, v, 1);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -351,16 +351,16 @@ public static void TestListNIHRemoveMiddle(ж<testing.T> t) {
 
     headA.Remove(@unsafe.Pointer.FromPinnedBox(two));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValNIH>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValNIH>(p);
     wantValNIH(t, v, 3);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     wantValNIH(t, v, 1);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -381,16 +381,16 @@ public static void TestListNIHRemoveTail(ж<testing.T> t) {
 
     headA.Remove(@unsafe.Pointer.FromPinnedBox(one));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValNIH>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValNIH>(p);
     wantValNIH(t, v, 3);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     wantValNIH(t, v, 2);
 
-    p = (uintptr)headA.Pop();
-    v = (ж<listedValNIH>)(uintptr)(p);
+    p = headA.Pop();
+    v = @unsafe.Pointer.To<listedValNIH>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }
@@ -413,8 +413,8 @@ public static void TestListNIHRemoveAll(ж<testing.T> t) {
     headA.Remove(@unsafe.Pointer.FromPinnedBox(two));
     headA.Remove(@unsafe.Pointer.FromPinnedBox(three));
 
-    @unsafe.Pointer p = (uintptr)headA.Pop();
-    var v = (ж<listedValNIH>)(uintptr)(p);
+    @unsafe.Pointer p = headA.Pop();
+    var v = @unsafe.Pointer.To<listedValNIH>(p);
     if (v != nil) {
         t.Fatalf("pop got %+v want nil", v.OrTypedNil());
     }

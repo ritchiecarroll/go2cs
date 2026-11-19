@@ -32,8 +32,11 @@ deliberate and visible:** only `runtime.GOARCH` moves. `internal/goarch` (`GOARC
 stay coherent with each other. A reader of the converted runtime will see `GOARCH` read `arm64` beside
 `goarch.GOARCH` reading `amd64` on the same Mac. Each runtime branch on `GOARCH` was checked and reads correctly at
 arm64. The windows flavour does the same (`runtime/windows/goarch_windows_impl.cs`), for Windows on Arm, by its own
-census. The linux flavour keeps the converted const: its syscall numbers and struct layouts are linux/amd64's, so it
-cannot run on linux/arm64 whatever `GOARCH` says, and needs a flavour of its own.
+census. The linux flavours keep the converted const: a linux process runs the flavour converted for its own architecture
+(`runtime/linux-amd64/` or `runtime/linux-arm64/`), whose syscall numbers and struct layouts are that architecture's.
+<!-- 2026-11-15 (user-facing docs audit, seat 3b): was "its syscall numbers and struct layouts are linux/amd64's, so it cannot
+     run on linux/arm64 whatever GOARCH says, and needs a flavour of its own"; the linux/arm64 flavour exists
+     (src/core/runtime/linux-arm64/extern.cs:375 `GOARCHᵇ = "arm64"`). -->
 <!-- src/go2cs/manualTypeOperations.go `var manualConversionConsts`; the placeholder is visitValueSpec.go's
      constPlaceholderFormat. Guards: TestAManualConstIsDisplacedOnlyOnItsTarget (the emission, per target) and
      TestManualConversionConstsAreDisplacedAndDeclared (the committed corpus), src/go2cs/manualConversionVars_test.go.
@@ -93,7 +96,7 @@ Guarded at VALUE level by two behavioral output tests: `TcpLoopbackRoundTrip` (l
 
 <!-- history: the readiness poller superseded the fallback in place on 2026-08-22 (branch claude/linux-poller-impl;
      design DESIGN-linux-readiness-poller.md, ratified). -->
-**The readiness poller, in the same hand-owned file** (design: `DESIGN-linux-readiness-poller.md`). The fallback above was the honest answer while `internal/poll` had no readiness mechanism; the poller is the answer, and it lives in the same hand-owned file. `pollOpen`'s EPERM stops being a constant and becomes the KERNEL's — `epoll_ctl(EPOLL_CTL_ADD)` answers `EPERM` for a regular file or a directory (measured), precisely the class Go's own fallback covers — so the rows the fallback flipped keep their exact behavior while pipes, FIFOs, ttys and sockets become pollable.
+**The readiness poller, in the same hand-owned file.** <!-- design: DESIGN-linux-readiness-poller.md (internal record) --> The fallback above was the honest answer while `internal/poll` had no readiness mechanism; the poller is the answer, and it lives in the same hand-owned file. `pollOpen`'s EPERM stops being a constant and becomes the KERNEL's — `epoll_ctl(EPOLL_CTL_ADD)` answers `EPERM` for a regular file or a directory (measured), precisely the class Go's own fallback covers — so the rows the fallback flipped keep their exact behavior while pipes, FIFOs, ttys and sockets become pollable.
 
 **The shape, and why it is not Go's runtime poller.** Go drains epoll from the SCHEDULER (`netpoll(delta)` -> `netpollready` -> `goready`), which go2cs does not have; the converted `runtime/linux/netpoll_epoll.cs` therefore stays dead and is used as a SPECIFICATION. The hand-own reproduces its mechanism outside the scheduler: one `epoll_create1(EPOLL_CLOEXEC)`, one background thread blocked in `epoll_wait(-1)` forever, and per event Go's own mode mapping (`EPOLLIN|EPOLLRDHUP|EPOLLHUP|EPOLLERR` -> `'r'`, `EPOLLOUT|EPOLLHUP|EPOLLERR` -> `'w'`, `events == EPOLLERR` -> the eventErr bit -> `pollErrNotPollable` on the read side only) setting `Ready` under the descriptor's lock and pulsing it. `gopark`/`goready` become `Monitor.Wait`/`Monitor.PulseAll` on that lock — which is exactly what the Windows flavor already does, so its whole descriptor state machine (`Ready`/`Expired`/generation-checked `Timer`s, `pollBlock`, `pollReset`, `pollSetDeadline`, `pollUnblock`) is COPIED rather than re-derived, per the `lock_sema`/`lock_futex` per-GOOS-authority precedent. A waiting goroutine parks its dedicated thread on a gate instead of blocking in `read(2)`: the same one thread, but now `evict` and deadlines can reach it.
 
@@ -101,7 +104,7 @@ Guarded at VALUE level by two behavioral output tests: `TcpLoopbackRoundTrip` (l
 
 **Tokens, not pointers, and the two orderings that follow.** `epoll_event.data` carries an opaque token minted by `Interlocked.Increment`, which is also the `ctx` handed back to `internal/poll` — the kernel cannot hold a managed reference, and the fd number is the wrong key because the kernel reissues it at close (Go defends the same hazard with `fdseq`). So: the table entry is inserted BEFORE `EPOLL_CTL_ADD` (a socket can deliver its only ET edge before `epoll_ctl` returns), and `EPOLL_CTL_DEL` runs BEFORE `close(2)` — which `FD.destroy` already guarantees by calling `pd.close()` ahead of `CloseFunc` — because the kernel drops a closed fd from an epoll set only when its LAST reference closes, and `os.File.Fd()`/`os/exec` dup descriptors into children. A stale event is inert by construction: its token no longer resolves.
 
-**The kernel image is native, per the struct-passing rule.** `struct epoll_event` on linux/amd64 is PACKED — `uint32 events` at 0, `uint64 data` at 4, 12 bytes — and the file writes and reads it with `Marshal.WriteInt32`/`WriteInt64` over `AllocHGlobal` memory, handed to the keystone `syscall(2)` binding as a `uintptr`. No `ж<T>` address and no generated address-taking wrapper reaches the kernel, the same rule the sockaddr and `struct stat` mirrors follow; and because the safe `Marshal` form needs no `unsafe`, `internal.poll.csproj`'s `<AllowUnsafeBlocks>` — ONE property serving every `$(GoTargetOS)` — stays `false` and the Windows build is untouched. An architecture other than amd64 is REFUSED at `pollServerInit` rather than misread (arm64's record is 16 bytes, unpacked).
+**The kernel image is native, per the struct-passing rule.** `struct epoll_event` on linux/amd64 is PACKED — `uint32 events` at 0, `uint64 data` at 4, 12 bytes — and the file writes and reads it with `Marshal.WriteInt32`/`WriteInt64` over `AllocHGlobal` memory, handed to the keystone `syscall(2)` binding as a `uintptr`. No `ж<T>` address and no generated address-taking wrapper reaches the kernel, the same rule the sockaddr and `struct stat` mirrors follow; and because the safe `Marshal` form needs no `unsafe`, `internal.poll.csproj`'s `<AllowUnsafeBlocks>` — ONE property serving every `$(GoTargetOS)` — stays `false` and the Windows build is untouched. `pollServerInit` takes the syscall numbers and the record's layout per architecture: amd64 as above, and arm64, whose record is 16 bytes, unpacked, and which has no `epoll_wait` at all (`epoll_pwait` with a NULL sigmask is the same call). An architecture with no mapping is REFUSED there rather than misread. <!-- src/core/internal/poll/linux/runtime_netpoll_impl.cs epollKernelFor and runtime_pollServerInit; the X64-only admission guard was lifted with the linux/arm64 proof (GolibTests LinuxEpollLiveTests). Re-read 2026-11-15, seat 3b. -->
 
 **Deadlines are the Windows semantics minus one dimension.** Sticky per-mode expiry, generation-checked `Timer` callbacks, "a deadline in the past fires NOW against the current waiter", wake-without-ready for unblock, and the check order (closing > timeout > eventErr, readiness consumed first) are inherited verbatim. What Linux does NOT have is cancel-and-harvest: a Windows timeout wakes a thread still owning a kernel-pending overlapped operation (hence `CancelIoEx` + `pollWaitCanceled`), while a Linux timeout wakes a thread that owns nothing — the syscall already returned `EAGAIN` — so it simply returns `pollErrTimeout`. `pollWaitCanceled` has no Linux caller at all and is wired to the shared wait loop anyway, so the two flavors' machinery stays textually identical.
 
@@ -109,7 +112,7 @@ Guarded at VALUE level by two behavioral output tests: `TcpLoopbackRoundTrip` (l
 
 <!-- Measured 2026-08-22 at 00cc122c9 (the Linux roster read encoding/json at PASS 491); the roster count moved into
      this comment at the 2026-10-25 docs review. -->
-**Measured on the Linux flavor.** All four behavioral guards run by hand on the Linux flavor are stdout-IDENTICAL to `go run`: `PipeCloseUnblocksRead` prints Go's `read unblocked: read |0: file already closed` where the fallback printed `read did NOT unblock`; `TcpLoopbackRoundTrip` completes IPv4 and IPv6 round trips plus `CloseRead`/`CloseWrite` breaking blocked operations; `NetListenSmoke` binds, deadlines, closes and rebinds; and `NetDeadlineMatrix` passes every assertion including both race arms. `encoding/json` passes on the Linux roster, including `TestHTTPDecoding`'s `httptest` loopback round trip, the row the design named first.
+**Measured on the Linux flavor.** All four behavioral guards run by hand on the Linux flavor are stdout-IDENTICAL to `go run`: `PipeCloseUnblocksRead` prints Go's `read unblocked: read |0: file already closed` where the fallback printed `read did NOT unblock`; `TcpLoopbackRoundTrip` completes IPv4 and IPv6 round trips plus `CloseRead`/`CloseWrite` breaking blocked operations; `NetListenSmoke` binds, deadlines, closes and rebinds; and `NetDeadlineMatrix` passes every assertion including both race arms. `encoding/json` validates on Linux, including `TestHTTPDecoding`'s `httptest` loopback round trip, the row the design named first.
 
 ## The Linux `struct stat` mirror and the NoError raw bottom — the first Linux members of the struct-passing class
 
@@ -118,7 +121,7 @@ Guarded at VALUE level by two behavioral output tests: `TcpLoopbackRoundTrip` (l
 
 **`syscall.Stat_t` passed by address.** On linux/amd64 Go's `Stat_t` *is* the kernel's 144-byte `struct stat`, field for field, with `X__unused [3]int64` inline at the end, so the generated `Fstat`/`fstatat` wrappers pass `uintptr(unsafe.Pointer(stat))` and the kernel writes straight into it. The converted `Stat_t` cannot be that: the trailing array is a golib `array<int64>` MANAGED REFERENCE, so the struct is not blittable, the CLR lays it out itself (~128 bytes, its own field order), and `(uintptr)Ꮡstat` — golib pinning the box's value slot — hands the kernel that managed image. `fstat(2)`/`fstatat(2)` then write 144 bytes of native record over a field order that is not the kernel's **and 16 bytes past the object**. Nothing faults; it answers. Measured in an isolated probe on the Linux flavor: `os.Stat(dir)` returned `err == nil`, `IsDir() == false`, `Mode() == p---------` for a real directory, `Stat().Size()` read 0 for a 3,302-byte file, while `Readdirnames`/`ReadDir`/`Read` (dirent-typed, no stat) were correct — so every `filepath.Glob` answered nothing (glob swallows the I/O error and tests `IsDir`), every `Walk`/`WalkDir` visited only its root, `archive/zip` read "not a valid zip file" from a mis-sized archive, `MkdirAll` said "not a directory": several roster rows wall-to-wall plus partials, the quiet-wrong-answer shape that is the struct-passing class's worst.<!-- 2026-08-22: eight roster rows; the figure moved into this comment at the 2026-10-25 docs review. --> The remedy is that class's established one, now on Linux: `syscall/linux/zsyscall_linux_amd64_impl.cs` hand-owns **`Fstat` and `fstatat`** over a `[StructLayout(LayoutKind.Sequential)]` `NativeStatLinuxAmd64` mirror (the reserved words `fixed int64[3]` inline), hands the keystone libc `syscall(2)` binding the mirror's address, and copies field-for-field into the converted `Stat_t` on success — errors and the nil-pointer `EFAULT` follow the Go original, and the path argument keeps the generated wrapper's own `BytePtrFromString` + byte-box pinning verbatim, because that part was never the defect. The two wrappers are displaced from the generated file by `manualConversionFuncs` under a NEW **`goosLinux`** scope: darwin declares both names too, with libc-backed bodies that are not defective and must keep them, and Windows declares neither — `TestLinuxOnlyEntriesAreScopedToLinux` is the mirror of the Windows-only guard. `Stat` and `Lstat` are NOT hand-owned (on linux/amd64 they are pure Go over `fstatat` and inherit the fix), and the mirror is deliberately linux/amd64's layout alone (another Linux GOARCH's `Stat_t` differs and would want its own `zsyscall_<arch>_impl.cs`, stated rather than generalized); `Statfs_t`/`Sysinfo_t`/`Utsname` are the same class and are taken when a suite reaches them, per the class doctrine.
 
-**`rawSyscallNoError` has a body.** Go declares it in `syscall_linux.go` and implements it in `asm_linux_amd64.s` as a bare `SYSCALL; MOVQ AX, r1; MOVQ DX, r2` with no errno handling, for the generated "NoError" family that cannot fail — `Getpid`, `Getppid`, `Gettid`, `Getuid`, `Geteuid`, `Getgid`, `Getegid`, `Umask` — and for `forkExec`'s own getpid/getppid. The Linux keystone hand-own had deliberately left it an announcing stub "until something genuinely needs them"; the roster re-run showed what the stub costs once the poll seam is open: `os.Getuid` → `NotImplementedException` at the top of `os/user.Current` (poisoning its `sync.Once`, so every later call NREs — `archive/tar`'s whole uid→name path), `time.interrupt`'s `Kill(Getpid())` in `TestSleep`, and `os/exec`'s test host dying in init before a single verdict. The body, beside `runtime_entersyscall` in `syscall_linux_impl.cs`, is the keystone binding once more with the errno word dropped — which is exactly what the asm returns, and not a swallowed error: the callers are syscalls that cannot fail.
+**`rawSyscallNoError` has a body.** Go declares it in `syscall_linux.go` and implements it in `asm_linux_amd64.s` as a bare `SYSCALL; MOVQ AX, r1; MOVQ DX, r2` with no errno handling, for the generated "NoError" family that cannot fail — `Getpid`, `Getppid`, `Gettid`, `Getuid`, `Geteuid`, `Getgid`, `Getegid`, `Umask` — and for `forkExec`'s own getpid/getppid. The Linux keystone hand-own had deliberately left it an announcing stub "until something genuinely needs them"; a re-run of the validated packages on Linux showed what the stub costs once the poll seam is open: `os.Getuid` → `NotImplementedException` at the top of `os/user.Current` (poisoning its `sync.Once`, so every later call NREs — `archive/tar`'s whole uid→name path), `time.interrupt`'s `Kill(Getpid())` in `TestSleep`, and `os/exec`'s test host dying in init before a single verdict. The body, beside `runtime_entersyscall` in `syscall_linux_impl.cs`, is the keystone binding once more with the errno word dropped — which is exactly what the asm returns, and not a swallowed error: the callers are syscalls that cannot fail.
 
 Guarded by the `StatLayoutTruth` behavioral output test (a temp tree: `Stat`/`Lstat`/`File.Stat` type bits, sizes and a sane `ModTime`; `Glob`, `ReadDir` with `Info()`, `WalkDir` counts; `Getpid`/`Getppid`/`Getuid`/`Getgid` as callable predicates — every line a boolean or a count, so Windows and Linux print the same bytes).
 
@@ -139,11 +142,12 @@ The parse read `(0, 0)`, so the test took **Go's own** skip — `requires Linux 
 faccessat2(2) syscall` — on a kernel that is 6.18 and has the syscall: Go passed the test, the
 converted side skipped it. Two things about that are worth carrying:
 
-- **It is a defect, not a `platform-skip` disclosure.** That class admits a Go=pass/C#=skip pair
+- **It is a defect, not a `platform-skip` disclosure** (the disclosure classes are defined on
+  [Validated Test Packages](../ValidatedTestPackages.md)). That class admits a Go=pass/C#=skip pair
   only when the skipped-on property is one the deployment genuinely holds. Here the property is
   false — the kernel has `faccessat2`; the conversion merely could not read its own `uname`.
-  Disclosing it would have laundered a fixable seam into a permanent one, which is precisely what
-  the class's anti-laundering clause exists to prevent.
+  Disclosing it would have recorded a fixable seam as a permanent one, which the class's bar exists
+  to prevent.
 - **A smashed header reads as LENGTH ZERO, which is why the failure was quiet.** The `foreach` over
   `Release` iterated nothing and returned `(0, 0)` instead of faulting — so the run continued, and
   the clean skip looked like evidence that the kernel's write had never landed. It is the opposite:
@@ -177,8 +181,8 @@ pointers belong, a bogus syncblock index) — but its writer is a separate, stil
 The `Uname` mirror is credited only with what it demonstrably fixes.
 
 **The deferral rule this exposed.** The `Fstat` entry above ends "`Statfs_t`/`Sysinfo_t`/`Utsname`
-are the same class and are taken when a suite reaches them, per the class doctrine" — and `Utsname`
-sat on that list, reached, quietly answering `(0, 0)`, because "no roster row reached it" is a
+are the same class and are taken when a suite reaches them" — and `Utsname`
+sat on that list, reached, quietly answering `(0, 0)`, because "no validated test reached it" is a
 statement about our COVERAGE rather than about execution. For members whose converted struct carries
 `array<>` fields the failure is not only a wrong answer: the kernel writes over GC-TRACKED
 REFERENCE SLOTS, which the collector then follows. That is a memory-safety failure whose crash can
@@ -191,7 +195,7 @@ mirrors each one (`Select`, `FcntlFlock`, `Statfs`/`Fstatfs`, `Sysinfo`, `Adjtim
 
 ## The sockaddr family on Linux — the Windows mirror, arm for arm, as the socket poller's prerequisite; and `Mmap`'s slice aliases the mapping
 
-**The sockaddr mirror.** The Linux flavor has the same two defects the Windows flavor's sockaddr hand-own (`syscall/windows/syscall_windows_impl.cs`, the SOCKET-ADDRESS surface) retires: `syscall_linux.go` writes the port through `(*[2]byte)(unsafe.Pointer(&sa.raw.Port))` — which converts to a length-zero `array<byte>` and panics `index out of range [0] with length 0` in `SockaddrInet4.sockaddr` — and `Bind`/`Connect` hand the kernel `unsafe.Pointer(&sa.raw)` while `accept4`/`getsockname`/`getpeername` hand it `&rsa` to fill, neither of which has a native layout (`RawSockaddrInet4.Addr/Zero`, `RawSockaddrAny.Data/Pad` are golib `array` references). Measured on a Linux roster re-run: `encoding/json`'s `TestHTTPDecoding` and `crypto/tls`'s `TestMain` both died in the encoder before any socket call. `syscall/linux/sockaddr_linux_impl.cs` mirrors the Windows hand-own exactly: the two INET encoders write the port arithmetically; `writeNativeSockaddr` builds the native `sockaddr_in`/`_in6`/`_un`/`_ll`/`_nl` image in a stack buffer (calling Go's own `sockaddr()` first, so there is ONE definition of what a Sockaddr means and the hand-own translates layout alone); `Bind`/`Connect` hand that address to the package's own generated address-taking `bind`/`connect`; `Getsockname`/`Getpeername`/`Accept4` go through the trampoline with a stack buffer — their generated wrappers take a typed `ж<RawSockaddrAny>` — and decode with `readNativeSockaddr`, Go's `anyToSockaddr` arm for arm over a native image; and `anyToSockaddr` itself becomes a flatten-then-decode of the managed struct (Family at 0, Data 2..15, Pad 16..111 = `SizeofSockaddrAny`), so any remaining auto caller decodes correctly once its own fill is. The registry carries the family under a new **`goosWindowsLinux`** scope for the names both flavors hand-own (the encoders, `Bind`/`Connect`/`Getsockname`/`Getpeername` — one entry, each flavor's per-GOOS file its own authority, the `lock_sema`/`lock_futex` precedent; darwin keeps its libc bodies) and `goosLinux` for `Accept4`/`anyToSockaddr`, guarded by `TestSockaddrFamilyIsScopedToEachHandOwningFlavor`. Not covered, named: `Recvfrom`/`Sendto`/`Recvmsg`/`Sendmsg` (UDP and ancillary), exactly the Windows hand-own's line.
+**The sockaddr mirror.** The Linux flavor has the same two defects the Windows flavor's sockaddr hand-own (`syscall/windows/syscall_windows_impl.cs`, the SOCKET-ADDRESS surface) retires: `syscall_linux.go` writes the port through `(*[2]byte)(unsafe.Pointer(&sa.raw.Port))` — which converts to a length-zero `array<byte>` and panics `index out of range [0] with length 0` in `SockaddrInet4.sockaddr` — and `Bind`/`Connect` hand the kernel `unsafe.Pointer(&sa.raw)` while `accept4`/`getsockname`/`getpeername` hand it `&rsa` to fill, neither of which has a native layout (`RawSockaddrInet4.Addr/Zero`, `RawSockaddrAny.Data/Pad` are golib `array` references). Measured on a Linux re-run of the validated packages: `encoding/json`'s `TestHTTPDecoding` and `crypto/tls`'s `TestMain` both died in the encoder before any socket call. `syscall/linux/sockaddr_linux_impl.cs` mirrors the Windows hand-own exactly: the two INET encoders write the port arithmetically; `writeNativeSockaddr` builds the native `sockaddr_in`/`_in6`/`_un`/`_ll`/`_nl` image in a stack buffer (calling Go's own `sockaddr()` first, so there is ONE definition of what a Sockaddr means and the hand-own translates layout alone); `Bind`/`Connect` hand that address to the package's own generated address-taking `bind`/`connect`; `Getsockname`/`Getpeername`/`Accept4` go through the trampoline with a stack buffer — their generated wrappers take a typed `ж<RawSockaddrAny>` — and decode with `readNativeSockaddr`, Go's `anyToSockaddr` arm for arm over a native image; and `anyToSockaddr` itself becomes a flatten-then-decode of the managed struct (Family at 0, Data 2..15, Pad 16..111 = `SizeofSockaddrAny`), so any remaining auto caller decodes correctly once its own fill is. The registry carries the family under a new **`goosWindowsLinux`** scope for the names both flavors hand-own (the encoders, `Bind`/`Connect`/`Getsockname`/`Getpeername` — one entry, each flavor's per-GOOS file its own authority, the `lock_sema`/`lock_futex` precedent; darwin keeps its libc bodies) and `goosLinux` for `Accept4`/`anyToSockaddr`, guarded by `TestSockaddrFamilyIsScopedToEachHandOwningFlavor`. Not covered, named: `Recvfrom`/`Sendto`/`Recvmsg`/`Sendmsg` (UDP and ancillary), exactly the Windows hand-own's line.
 <!-- The Windows hand-own is the L10 entry; the Linux measurement is R5 of the 2026-08-22 Linux roster re-run (BOARD).
      -->
 
@@ -203,16 +207,16 @@ builds a native-backed `slice<T>` (`slice<T>.OverNativeMemory`): writes reach th
 its `uintptr` are the mapping's real addresses, and the lifetime is the mapping's own, as in Go. Only an element type
 that holds no managed references may alias native memory, which the creation door enforces with a named panic. This
 is a golib slice-model capability rather than a per-GOOS hand-own (`src/core/golib/slice.cs`,
-`src/core/unsafe/unsafe.cs`; design `docs/phase4/DESIGN-native-backed-slice.md`). `crypto/sha1`'s
+`src/core/unsafe/unsafe.cs`). <!-- design: docs/phase4/DESIGN-native-backed-slice.md (internal record) --> `crypto/sha1`'s
 `TestOutOfBoundsRead` and `bytes`' `*NearPageBoundary` tests on Linux depend on it.
 <!-- history (W1b): before the native-backed slice, unsafe.Slice over a native pointer SNAPSHOT the bytes into a managed
      slice. Probe, converted program: Mmap(0, 0, 3*pagesize, ...) gave a 12,288-byte slice, err nil;
      Mprotect(b[:pagesize],
      PROT_NONE) and Munmap(b) answered `invalid argument` (the kernel was handed a managed element address); writes
      landed
-     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:1029
+     in the copy. The native-backed arm that retires it: src/core/unsafe/unsafe.cs:1684
      (`A pointer that ALIASES a GENUINELY NATIVE address yields a NATIVE-BACKED slice over that`); the door:
-     src/core/golib/slice.cs:288 (`The single creation door for a native-backed slice`). -->
+     src/core/golib/slice.cs:306 (`The single creation door for a native-backed slice`). -->
 
 ## The CryptoAPI chain seam — when a native record must be READ as a struct and HANDED BACK as a pointer
 
@@ -232,7 +236,7 @@ process-length hang (`crypto/tls`'s `TestQUICHandshakeError`) or an `SEHExceptio
 (`TestVerifyHostname`, and the offline verifier) rather than a clean error. `UsageIdentifiers` is
 the part that is more than a layout copy — an array of C string pointers into NUL-terminated managed
 byte slices, with no native form at either level — so it is transcribed into one native block for
-exactly the duration of the call, per the mirror-is-a-local doctrine.
+exactly the duration of the call, as every native mirror here is a local.
 
 **Fixing only that was measured NOT to be enough**, and the reason generalizes past CryptoAPI: one
 of this call's arguments is a field the CALLER reads out of a native record before the wrapper is
@@ -305,7 +309,7 @@ The declarations sit at kernel boundaries: `internal/runtime/syscall` (the Linux
 
 ## Hand-owns have a platform, and it is not the same question as a folder
 
-Two different mechanisms answer two different questions, and conflating them is what produced the Linux corpus's whole class-(b) failure surface (`docs/phase4/DESIGN-multiplatform-corpus.md` §12, increments 3.5 and 3.5b).
+Two different mechanisms answer two different questions, and conflating them is what produced the Linux corpus's whole class-(b) failure surface. <!-- docs/phase4/DESIGN-multiplatform-corpus.md §12, increments 3.5 and 3.5b (internal record) -->
 
 * **Where a hand-owned FILE is built** is layout L3's question, answered by the file's *principal*: an `*_impl.cs` takes part in exactly the platform builds the `<name>.cs` it supplements does; a marked whole-file hand-own follows its `.cs.auto` review sibling. Every platform ⟹ flat; a subset ⟹ one copy per platform in the subset. Routed automatically by the reconvert merge and guarded by a walk of the real corpus (`platformHandOwn_test.go`).
 * **Whether a DECLARATION is hand-owned at all** is the registry's question, and it has a platform axis because a Go name is not unique across platforms — Go selects one of several files declaring the same function by build constraint — so an entry keyed by name alone would speak for every flavor, turning each one's declaration into a placeholder while an implementation exists only where somebody has written one.<!-- history: until 2026-08-08 manualConversionFuncs was keyed by name alone, with exactly that effect. -->
@@ -332,7 +336,7 @@ bridge).** `sort.Slice`/`SliceStable`/`SliceIsSorted` route through reflectlite 
 `ValueOf(x).Len()` and `Swapper(x)` — and the auto forms reinterpret the interface's eface
 `{type,data}` words, so the first touch dereferenced a nil `ж<abi.Type>` (sort's `TestSlice`, the
 first operational hit: `unpackEface` → `abi.Kind` → NRE). The fix mirrors the full `reflect`
-bridge (see `reflect/value_impl.cs` and `docs/phase4/DESIGN-reflection-bridge.md`) for exactly the
+bridge (see `reflect/value_impl.cs`) for exactly the<!-- design: docs/phase4/DESIGN-reflection-bridge.md (internal record) -->
 mini-surface sort exercises: `ValueOf`/`unpackEface` build the `Value` over a companion
 `partial struct Value { object boxed }` field — `typ_` takes the synthetic `abi.Type` and
 the flag takes the Kind bits, so `Kind()`/`IsValid()` keep working from the auto `value.cs`
@@ -351,8 +355,8 @@ managed Swapper, and its closing `SliceIsSorted` check reads length through the 
 
 **That the CLR offers no COUNT is measured, not assumed, and a nonzero result says which unit it is in.**<!-- r56d --> The value the shim returns is rendered by Go's own `"got %v allocs"` format, so a byte figure was reaching the page wearing the word *allocs* — `crypto/internal/nistec`'s row reads `got 21964011.0`, and nothing on it said that was 21 MB rather than 22 million objects. Since a disclosed divergence may never paper over a go2cs-owned defect, an invisible unit at the seam is itself the defect. The survey behind the claim (net9.0/9.0.18, x64) is recorded on the declaration: the whole public `GC` surface exposes byte totals only; `GetAllocatedBytesForCurrentThread` is exact (40.000 B/object over 1, 10, 1e3 and 1e5 allocations of a 40-byte type) yet cannot separate count from size, one `byte[40000]` and 1,000 40-byte objects both reading ≈40,000 B; `GCAllocationTick` is a byte-threshold *sample*, 378 events per 1,000,000 allocations (one per ≈105,820 B); `GCSampledObjectAllocation` — whose `ObjectCountForTypeSample` payload *would* be a count — raises **zero** events through an in-process `EventListener` in every configuration tried (High `0x200000`, Low `0x2000000`, both, and all keywords `0xFFFFFFFFFFFF`, at Verbose and Informational), with the GC keyword's own tick count as the live positive control; `System.Runtime`'s 27 EventCounters offer only `alloc-rate`, bytes per interval; and runtime events reach an in-process listener **asynchronously** — zero visible immediately after the measured loop, settling ≈117 ms later — so no event-derived figure could be returned by a synchronous call anyway. Accordingly a **nonzero** result records its unit — and both numbers, the count and the bytes — once on the running test (`TestExecution.NoteMeasurementUnitOnce`), landing beside the assert's own message and riding the `TestEvent` into `results.json`; the **zero** case is deliberately left silent, because there the two units agree exactly (0 bytes ⟺ 0 allocations) and a test that passes on the zero answer keeps its output byte-identical to before the seam existed. A true count *is* obtainable from go2cs's own runtime rather than the CLR's — golib allocates essentially every Go-semantic object, so counting there mirrors what Go's `Mallocs` already is, a runtime-owned counter rather than a platform facility (proven by measurement: nistec's P256 body allocates 241,077 golib objects per run for its 21,963,547 bytes) — and that is the count the shim reports: a count that silently omitted allocation sites would be worse than an honest byte figure, so it is taken with its coverage boundary stated (golib's sites only, a lower bound) and the byte cross-check above, which falls back to bytes whenever the counter saw nothing.
 
-The strings suite exposed the two divergence classes this mapping discloses (full analysis:
-`docs/phase4/StringsBytes-BlockerMap.md`, *AllocsPerRun divergence analysis*): **count-shape
+The strings suite exposed the two divergence classes this mapping discloses<!-- full analysis:
+docs/phase4/StringsBytes-BlockerMap.md, *AllocsPerRun divergence analysis* (internal record) -->: **count-shape
 asserts** (`TestBuilderAllocs` wants exactly 1 malloc; the shim's golib object count for the converted
 body is higher than that, so it diverges loudly — by design), and **allocation-profile divergences**, where the zero-shape itself
 is unsatisfiable because the managed model allocates where Go's compiler doesn't: an addressed
@@ -385,7 +389,7 @@ charter §5 -->), and it was resolved as such: the range enumerator became a str
 `for i, v := range s` in the corpus had been paying it), and the union-constraint boxing was removed
 wholesale by the self-referential redesign described under
 [Allocation-free union-constrained bodies](generic-constraints.md#allocation-free-union-constrained-bodies) — a
-`parseRFC3339`-shaped body over `slice<byte>` measures **0 B/parse** where it measured 720.
+`parseRFC3339`-shaped body over `slice<byte>` allocates **nothing** per parse.<!-- measured 0 B/parse where it measured 720; platform not recorded -->
 
 **The disclosed-divergence manifest.**<!-- history: 2026-07-18 ruling, implemented --> These provably
 unsatisfiable divergences are disclosed at TEST level, extending the declaration-level
@@ -427,14 +431,14 @@ whether that runner passes, expands into its 3,243-row case matrix, or fails is 
 per run by network reachability and by the 10-minute deadline Go's test binary carries by default.
 That makes the pin brittle in **both** directions — the sweep goes red when Go starts failing (Go
 fail / C# fail reads as an ordinary *agreed failure*, so the row leaves the disclosed set and
-`crypto/tls` reports 401 + 1 where the roster records 400 + 2), and red again when Go goes back to
+`crypto/tls` reports one disclosure fewer than the roster records)<!-- 401 + 1 where the roster recorded 400 + 2 -->, and red again when Go goes back to
 passing on a quieter host. Nothing in a go2cs branch can move either reading: the baseline is
 `go test -json` over GOROOT's own sources, where the BoGo shim is Go's own test binary.
 
-> *At go1.24.13, after the annotation was introduced:* the BoGo fan-out was 3,419 rows (1 parent + 1,022
-> pass + 2,396 skip), `crypto/tls` validated at 4759 + 1, and `TestBogoSuite` agreed pass/pass on its proof
-> page, so the annotated entry disclosed nothing there. The other figures in this entry are from the run
-> that motivated the annotation.
+<!-- At go1.24.13, after the annotation was introduced: the BoGo fan-out was 3,419 rows (1 parent + 1,022
+     pass + 2,396 skip), crypto/tls validated at 4759 + 1, and TestBogoSuite agreed pass/pass on its proof
+     page, so the annotated entry disclosed nothing there. The other figures in this entry are from the run
+     that motivated the annotation. -->
 
 The design **refuses** the broad remedy — accepting agreement-on-failure as satisfying a disclosure
 *in general*, which would make every pin self-satisfying the moment its baseline broke for any
@@ -475,11 +479,11 @@ class of descriptor reads that can never be honored behind the bridge; each surf
 semantic boundary onto the SAME golib machinery emitted asserts use: `rtype.Implements` /
 `rtype.AssignableTo` over `GoReflect.GoImplements` (mirroring the reflectlite increment-1 forms),
 `PointerTo` synthesizing the managed `ж<T>` pointer type (canonical via `toType`),
-`rtype.FieldByName` over the shared `GoFields` projection (top-level names; the embedded-field
-depth search is deferred with a named consumer — a promoted name answers Go's not-found path),
-and `Value.Convert` over `GoReflect.TryConvertTo` — THE convertibility relation (the recorded
-R-13 remedy), severing the `cvtInt → makeInt → unsafe_New` stub chain (R-14; internal/fmtsort's
-package-level `ct()` table). `Value.Cap`/`Value.SetLen` join over the golib container interfaces
+`rtype.FieldByName` over the shared `GoFields` projection (direct fields first, then Go's
+breadth-first promoted-field search over embedded fields, `promotedFieldByName`),
+and `Value.Convert` over `GoReflect.TryConvertTo` — THE convertibility relation<!-- the recorded R-13 remedy -->,
+severing the `cvtInt → makeInt → unsafe_New` stub chain (internal/fmtsort's
+package-level `ct()` table)<!-- R-14 -->. `Value.Cap`/`Value.SetLen` join over the golib container interfaces
 (gob's `decodeSlice` probes `Cap() < n` then re-lengths the header — SetLen writes the re-windowed
 slice back through the aliased box), and the hand-owned `rtype.Field` stamps the single-hop
 `StructField.Index` — an empty Index made the auto `FieldByIndex` return the struct ITSELF, so
@@ -554,7 +558,7 @@ type counts ALL its methods (`GetInterfaceMethodNames`, instance members only �
 `As<T>` helpers stay invisible), the empty interface (`object`) counts 0, a concrete type counts
 exported only, with `ж<X>` seeing X's value- AND pointer-receiver methods and a plain X only the
 value-receiver ones; an adapter shell answers as the Go dynamic type it stands for, mirroring the
-`KindOf`/`ElementType` unwrap (R10). The count is memoized per (element, pointer-ness) and cleared
+`KindOf`/`ElementType` unwrap.<!-- R10 --> The count is memoized per (element, pointer-ness) and cleared
 on assembly load with the candidate cache that feeds it.
 
 One root, four symptom shapes — the guard (`tests/Behavioral/JsonUnmarshalerDispatch`) locks all
@@ -632,7 +636,7 @@ and `math/rand/v2` validate in full with `TestRegress`
 genuinely walking (the converted bridge reports `*rand.Rand NumMethod: 16` in Go's order and
 `Intn(1000000000) = 526058514`, matching `go run` — where before the pair it reported 0 and the
 test passed VACUOUSLY, executing none of its 320 golden comparisons); `time`'s two JSON rows
-re-landed with it (146 → 148 pass of 159 when measured). The next gaps this recorded — `MakeFunc`,
+pass with it.<!-- 146 -> 148 pass of 159 when measured --> The next gaps this recorded — `MakeFunc`,
 variadic `Call`/`CallSlice`, and `reflectlite`'s `rtype.Name` — are hand-owned too
 (`manualConversionFuncs["reflect"]`; `rtype.Name` through the `TFlagNamed` stamp below).
 
@@ -669,10 +673,10 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
 <!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:26-28 (`go2cs-gen calls one of these for every variadic signature that can`),
      :49-53 (`GoDeferredRegistrations.EscapeRegistry.Run()`), :82-83
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
-     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:423
+     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:427
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
-     src/gen/go2cs-gen/MethodSet.cs:431 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
-     :392 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
+     src/gen/go2cs-gen/MethodSet.cs:432 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :393 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
      (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
@@ -840,7 +844,7 @@ field is an embed to `reflect`* below).
 <!-- history: Anonymous first waited on field ORDER, because go2cs-gen declared the promoted-embed backing box
      after the declared fields, so struct{X; y; Inner; inner; Ptr} walked as X, y, Ptr, Inner, inner; GoFields'
      reorder by the all-fields constructor and the Anonymous projection landed together. The converter has since
-     declared embeds in place (src/go2cs/visitStructType.go:1009 `// declaration order, marked like every other embed:`). -->
+     declared embeds in place (src/go2cs/visitStructType.go:1034 `// declaration order, marked like every other embed:`). -->
 
 Guard: `tests/Behavioral/ReflectUnexportedFieldFlags`, byte-identical to `go run` — the indexed
 walk's `IsExported`/`PkgPath`/`Tag`, `FieldByName` carrying the same flags (including the blank
@@ -1114,11 +1118,11 @@ conversion of `os` keeps `dir_unix.go`'s pure-Go readdir. The guard is the opera
 `TestTestdata`
 (`filepath.Glob` over `testdata/`) went from *zero subtests ran* to 54 enumerated.
 
-**The testing shim's compile-only benchmark surface and `CoverMode` (`core/testing/testing.cs`).** Capability-excluded test and benchmark declarations still **compile** — exclusion gates the run registry, not emission — so every member their bodies reference must exist even though the code never executes (a broken emission inside an excluded test blocks the whole package build; see the strings/bytes blocker map, B6). The `B` surface (`N`, `Run`, `ReportAllocs`, `SetBytes`, `ResetTimer`, `StartTimer`, `StopTimer`, `Errorf`, `Fatal`, `Fatalf`) is therefore compile-only: safe non-throwing no-ops, with the params-taking members carrying explicit `ж<B>` overloads exactly as `T`'s do (ref-like `params` Spans are outside the RecvGenerator's synthesis). `testing.CoverMode()` returns `""` — not a stub-lie but Go's exact coverage-off value: the sole caller across the strings/bytes suites (strings' TestIndexRune) branches on `CoverMode() == ""` and so takes the same path as an uncovered `go test` run. Guarded by `TestingRuntimeTests.BenchmarkCompileSurfaceIsNoOpAndCoverModeReportsCoverageOff`, which compile-references every member through both receiver shapes and asserts the coverage-off semantic — removing any member fails the suite at build.
+**The testing shim's compile-only benchmark surface and `CoverMode` (`core/testing/testing.cs`).** Capability-excluded test and benchmark declarations still **compile** — exclusion gates the run registry, not emission — so every member their bodies reference must exist even though the code never executes (a broken emission inside an excluded test blocks the whole package build)<!-- the strings/bytes blocker map, B6 -->. The `B` surface (`N`, `Run`, `ReportAllocs`, `SetBytes`, `ResetTimer`, `StartTimer`, `StopTimer`, `Errorf`, `Fatal`, `Fatalf`) is therefore compile-only: safe non-throwing no-ops, with the params-taking members carrying explicit `ж<B>` overloads exactly as `T`'s do (ref-like `params` Spans are outside the RecvGenerator's synthesis). `testing.CoverMode()` returns `""` — not a stub-lie but Go's exact coverage-off value: the sole caller across the strings/bytes suites (strings' TestIndexRune) branches on `CoverMode() == ""` and so takes the same path as an uncovered `go test` run. Guarded by `TestingRuntimeTests.BenchmarkCompileSurfaceIsNoOpAndCoverModeReportsCoverageOff`, which compile-references every member through both receiver shapes and asserts the coverage-off semantic — removing any member fails the suite at build.
 
 **The same rule extends to `testing.F`.**<!-- history: 2026-07-20 --> A `Fuzz*` declaration is classified disclosed-unsupported in the manifest exactly as a benchmark is (`testConversion.go` emits the `fuzz`/"deferred to Phase 4D" entry), but its converted body still compiles into the test assembly — and `F` simply did not exist, so math/big's `func FuzzExpMont(f *testing.F)` (nat_test.go) failed the whole package build with CS0426 *the type name 'F' does not exist in the type 'testing_package'*. `F` now mirrors `B`: a compile-only struct whose members are safe non-throwing no-ops, with explicit `ж<F>` overloads on the params-taking members. Its member set is Go 1.23's full public surface for `*testing.F` — the `TB` members it inherits from the embedded `common`, plus its own `Add` and `Fuzz` — declared complete under the same anti-drift rule as `TB` above rather than trimmed to today's callers. `Fuzz` takes a **`System.Delegate`**: a Go fuzz target's signature is arbitrary (`*testing.T` followed by the fuzzed argument types), and the converted body is an explicitly-typed lambda, so C# infers its natural `Action<…>` and converts — no per-arity overload set is needed. Nothing is invoked and no seed corpus is retained, because there is no fuzzing engine to consume either. This is not math/big-specific: many stdlib packages ship fuzz targets (archive/tar, archive/zip, compress/gzip, encoding/csv, encoding/json, html, image/{gif,jpeg,png}, net/netip, time, syscall, …), every one of which would hit the identical build blocker. The set follows the corpus's Go version: `Chdir` and `Context`, which Go 1.24 added to `TB` and `F` inherits from `common`, joined it, and so did Go 1.25/1.26's `Attr`, `Output` and `ArtifactDir` (`src/core/testing/testing.cs:906-920`).
 
-**A hand-owned struct declares the zero-value constructor the generator would have given it.** go2cs-gen writes a `T(NilType _)` constructor for every converted struct, and the converter binds it wherever it writes a struct's zero value without a literal: the zero of an address-taken package-level `var x T` reads `new StaticBox<T>(new T(nil))`. testing's `T`, `M`, `B`, `PB` and `F` are hand-written C# structs with no generator behind them, so each declares `public X(NilType _) { }` itself, and a hand-owned struct a converted package may hold that way owes the same constructor. An empty composite literal no longer needs it: since parity seat #21 (Z1) `&testing.T{}` (testify's require tests construct one) reads `Ꮡ(new testing.T())`, which binds the parameterless constructor every C# struct has (see [An empty struct literal `T{}` reads `new T()`](struct-types.md#an-empty-struct-literal-t-reads-new-t)). Guarded by the `TestingStructZeroLiteral` behavioral test.
+**A hand-owned struct declares the zero-value constructor the generator would have given it.** go2cs-gen writes a `T(NilType _)` constructor for every converted struct, and the converter binds it wherever it writes a struct's zero value without a literal: the zero of an address-taken package-level `var x T` reads `new StaticBox<T>(new T(nil))`. testing's `T`, `M`, `B`, `PB` and `F` are hand-written C# structs with no generator behind them, so each declares `public X(NilType _) { }` itself, and a hand-owned struct a converted package may hold that way owes the same constructor. An empty composite literal does not need it<!-- since parity seat #21 (Z1) -->: `&testing.T{}` (testify's require tests construct one) reads `Ꮡ(new testing.T())`, which binds the parameterless constructor every C# struct has (see [An empty struct literal `T{}` reads `new T()`](struct-types.md#an-empty-struct-literal-t-reads-new-t)). Guarded by the `TestingStructZeroLiteral` behavioral test.
 
 **A detached `testing.T` behaves as Go's zero `T`.** A `T` that was never handed to a test (`new(testing.T)`, `&testing.T{}`) is a legal Go value: testify's assert tests pass one to every assertion and then read `Failed()`. Measured on Go 1.26.10 (linux/amd64) inside `go test`, a zero `T` does nothing on `Helper`, `Log`, `Name` and `Cleanup`; `Error` and `Fail` set `Failed`; `FailNow` and `Fatal` set `Failed` and then end the calling goroutine (`runtime.Goexit`); `Skip` and `SkipNow` set `Skipped` and end it the same way. The hand-owned `T` keeps two flags for exactly that state and throws `GoexitException` where Go calls `Goexit`; an attached `T` is unchanged. A zero `B` and `F` behave the same in Go, so they keep the same state. Guarded by `DetachedTestingValueTests` (GolibTests).
 
@@ -1126,7 +1130,7 @@ conversion of `os` keeps `dir_unix.go`'s pure-Go readdir. The guard is the opera
 
 Hand-owning an asm-backed declaration does not have to mean stubbing it. Where .NET exposes the *same* instructions the `.s` file issues — via `System.Runtime.Intrinsics` — the architecture layer can be ported for real, and the converted package gains genuine hardware acceleration rather than a fallback. **`hash/crc32` is the first of its kind and sets the pattern.**<!-- history: 2026-07-24 -->
 
-Go's `crc32_amd64.go` declares three functions with no body — `castagnoliSSE42`, `castagnoliSSE42Triple` (the SSE4.2 `CRC32` instruction) and `ieeeCLMUL` (PCLMULQDQ carry-less multiply folding) — implemented in `crc32_amd64.s`. Converted literally they become bodyless `partial`s that the [`PartialStubGenerator`](source-generators.md#source-generators) fills with `NotImplementedException`, so `crc32.go` always took the slicing-by-8 fallback and the package's own `TestArchIEEE`/`TestArchCastagnoli` **skipped**. `crc32_amd64.cs` is hand-owned (`[module: go.GoManualConversion]`, whole-file) and the three functions are transcribed against `System.Runtime.Intrinsics.X86` — `Sse42.X64.Crc32` for the CRC32B/W/L/Q chain, `Pclmulqdq.CarrylessMultiply` + `Sse2` for the fold and Barrett reduction, `Sse41.Extract` for the final `PEXTRD`. Because the corpus converts at GOARCH=amd64, the same file is the arch layer an arm64 process runs, so it also carries an arm64 arm that transcribes `crc32_arm64.go`/`.s` against `System.Runtime.Intrinsics.Arm.Crc32`, probed locally the same way; the x86 path keeps precedence. Every other declaration in the file is the converted output verbatim.
+Go's `crc32_amd64.go` declares three functions with no body — `castagnoliSSE42`, `castagnoliSSE42Triple` (the SSE4.2 `CRC32` instruction) and `ieeeCLMUL` (PCLMULQDQ carry-less multiply folding) — implemented in `crc32_amd64.s`. Converted literally they become bodyless `partial`s that the [`PartialStubGenerator`](source-generators.md#source-generators) fills with `NotImplementedException`, so `crc32.go` always took the slicing-by-8 fallback and the package's own `TestArchIEEE`/`TestArchCastagnoli` **skipped**. `crc32_amd64.cs` is hand-owned (`[module: go.GoManualConversion]`, whole-file) and the three functions are transcribed against `System.Runtime.Intrinsics.X86` — `Sse42.X64.Crc32` for the CRC32B/W/L/Q chain, `Pclmulqdq.CarrylessMultiply` + `Sse2` for the fold and Barrett reduction, `Sse41.Extract` for the final `PEXTRD`. The amd64 flavour is also the arch layer an Apple silicon or Windows-on-Arm process runs, because those platforms are served by the amd64 conversion, so it also carries an arm64 arm that transcribes `crc32_arm64.go`/`.s` against `System.Runtime.Intrinsics.Arm.Crc32`, probed locally the same way; the x86 path keeps precedence. The linux/arm64 flavour has an arch layer of its own, `hash/crc32/linux-arm64/crc32_arm64_impl.cs`, over the same intrinsics. Every other declaration in the file is the converted output verbatim.
 
 Three rules make this a repeatable recipe rather than a one-off:
 
@@ -1167,9 +1171,9 @@ Left as an ordinary bodyless declaration, it would emit a `partial` that the [`P
 
 <!-- illustration: not converter output -->
 ```csharp
-/*linkname*/ internal static partial (ΔHandle handle, Errno err) syscall_loadlibrary(ж<uint16> filename) {
+/*linkname*/ internal static partial (Handle handle, Errno err) syscall_loadlibrary(ж<uint16> filename) {
     var (ᴛ1, ᴛ2) = syscall.loadlibrary(filename);
-    return ((ΔHandle)(uintptr)ᴛ1, (Errno)(uintptr)ᴛ2);
+    return ((Handle)(uintptr)ᴛ1, (Errno)(uintptr)ᴛ2);
 }
 ```
 
@@ -1256,7 +1260,7 @@ proves an identical FRAME and nothing more, so the local and target signatures m
 must be exported (nothing widens the target package's surface) and must live in a package the trampoline's
 package imports DIRECTLY, since only a direct import carries the type information the signature check
 reads; a same-package target whose parameters
-Phase A lowered to `ref` keeps its stub. It applies only OUTSIDE the converted standard library: the
+are lowered to `ref` keeps its stub. It applies only OUTSIDE the converted standard library: the
 corpus's own trampolines (internal/runtime/atomic and the hand-owned sync/atomic) are governed by hand-owns
 and the stub census, and a forwarder there would collide with a hand-owned partial.
 
@@ -1266,8 +1270,8 @@ A module function written in assembly that holds real machine code has nothing t
 target, no linkname. Its bodyless declaration would convert to a stub that throws when called. For
 golang.org/x/sys/cpu that stub sat in the package's init: x/sys/cpu decodes its feature flags from `cpuid`
 and `xgetbv` as it loads, and modernc.org/libc imports it on windows and darwin, so every converted
-program on that path died before `main` (sqlite-cs row S21; `docs/phase4/DESIGN-sqlite-cs-funcptr.md`
-sections 2.3 and 3.7).
+program on that path died before `main`.<!-- sqlite-cs row S21; docs/phase4/DESIGN-sqlite-cs-funcptr.md sections
+2.3 and 3.7. -->
 
 **A small table, `asmForwardBodies` (`asmForwardBodies.go`), maps (package, function) to a managed body
 in golib, `go.golib.GoCpu`, together with the Go signature that body implements.** A listed function
@@ -1332,7 +1336,7 @@ FORWARDED — the pushed body is ordinary converted Go, so call it (`crypto/inte
 
 UNHONORABLE — announce the pair, never fabricate a body (`weak/pointer.cs`'s `.cs.auto` review sibling):
 
-<!-- source: src/core/weak/pointer.cs.auto:102-105 -->
+<!-- source: src/core/weak/pointer.cs.auto:107-110 -->
 ```csharp
 //go:linkname runtime_registerWeakPointer
 internal static @unsafe.Pointer runtime_registerWeakPointer(@unsafe.Pointer _) {
@@ -1492,7 +1496,7 @@ protocol all stay auto-converted in `runtime/windows/sigqueue.cs`. `notetsleepg`
 (`runtime/lock_managed_impl.cs`): a `Monitor.Wait` against a gate that `notewakeup` pulses after it flips the
 key, rather than the `SpinWait` escalation its siblings use, because its two callers — `signal_recv` and
 `profbuf`'s reader — idle indefinitely and polling either would burn a thread forever to observe nothing.
-No park-accounting scope is taken: `DESIGN-cooperative-scheduler.md` §6 row 11 places the note protocol below
+No park-accounting scope is taken<!-- DESIGN-cooperative-scheduler.md §6 row 11 (internal record) -->: the design places the note protocol below
 the goroutine model by design, and golib's `Goroutine.Park` is design-only regardless.
 
 **Faithfulness is the whole mechanism, including where it looks wrong.** With both halves in place the pushed
@@ -1721,8 +1725,8 @@ stop `unique.Make("hello")` agreeing with itself, which is the exact inverse of 
 
 Populating `Hasher` anyway — with anything plausible — is barred by the **inverse of the atomic rule**: a
 descriptor field whose read cannot be honored must stay EMPTY, because a half-populated descriptor converts
-a loud construction failure into a map that is silently wrong. (Reflection increment 8 rooted the row there
-and reported it *not landable in the bridge*.) So the literal conversion compiles and can never run:
+a loud construction failure into a map that is silently wrong. (The reflection bridge cannot
+populate it.)<!-- Reflection increment 8 rooted the row there and reported it not landable in the bridge. --> So the literal conversion compiles and can never run:
 `NewHashTrieMap` threw inside the package initializer of every `unique` consumer, taking `net/netip` and
 every dependent with it.
 
@@ -1730,7 +1734,7 @@ every dependent with it.
 the SEMANTICS rather than the mechanism.** `sync`'s Mutex/RWMutex/WaitGroup are reimplemented on
 `SemaphoreSlim`/monitors because Go's sleeping semaphore is co-designed with the state machine and cannot be
 emulated; here the coupling is to the descriptor surface instead of to the scheduler, but the fork is the
-same one — the raw-metal arm of the S1 fork (see
+same one — the raw-metal arm of the split between a managed reimplementation and a real conversion (see
 [`Baseline-vs-FullConversion.md`](../../src/archived/Baseline-vs-FullConversion.md)).
 `src/core/internal/sync/hashtriemap.cs`
 (at Go 1.23, `internal/concurrent/hashtriemap.cs`) carries `[module: go.GoManualConversion]` and contains **no trie at
@@ -1758,9 +1762,15 @@ shape the converted corpus actually interns these agree:
   type always presents one key, and a second `TypeFor` call finds the first call's entry.
 * **A converted struct** — `net/netip`'s `addrDetail{isV6 bool; zoneV6 string}`, the shape `unique`
   actually interns — carries a generated field-wise `Equals` over `==` plus a `HashCode.Combine` of the
-  same fields, which is Go's struct `==` exactly. It does **not** implement `IEquatable<T>`, so
-  `EqualityComparer<T>.Default` routes through the `object` override; that lands on the same comparison, at
-  the cost of one box per lookup.
+  same fields, which is Go's struct `==` exactly. It implements `IEquatable<T>`, so
+  `EqualityComparer<T>.Default` calls the typed `Equals(T)` and a lookup boxes nothing; the hash is the typed
+  `go.golib.HashCode.Combine` overload, which gives the value the boxed form gives and allocates nothing. A
+  defined type over a struct (`type K S`) declares its own `Equals(K)`, `Equals(object)`, `GetHashCode` and
+  `IEquatable<K>`, each forwarding to the struct's. Guarded by `GenTests.EqualityWithoutBoxingTests` and
+  `GolibTests.HashCodeCombineAllocationTests`. <!-- history: until the S4 fix of the TypeScript perf scout,
+  a struct declared Equals(T) without IEquatable<T>, so each probe boxed, its
+  GetHashCode bound Combine(params object[]), and a defined type over a struct declared no equality at all and
+  fell back to ValueType.Equals and ValueType.GetHashCode. -->
 * **`@string`** compares and hashes by CONTENT, as Go's string `==` does — verified with two keys built
   from distinct backing storage.
 
@@ -1793,10 +1803,10 @@ and both outside this file:
    tolerating a type-unsafe key would be the same "plausible but fake" move the inverse-atomic rule
    forbids; the loud failure is the correct behavior and the fix belongs in `abi`.
 
-**Guarding measurement.** `encoding/gob` holds at **95 of 106** and `TestNetIP`'s root moves from
+**Guarding measurement.** No `encoding/gob` test regresses,<!-- gob held at 95 of 106 --> and `TestNetIP`'s root moves from
 `NewHashTrieMap` → `ArgumentException: Delegate to an instance method cannot have null 'this'` to the
 linkname stub above (no row regresses; `TestNetIP` is the only gob row whose closure reaches `unique` at
-all). `unique` itself goes **0 → 1 of 19** and, more usefully, stops being a one-root wall: its 15 identical
+all). `unique` itself gains its first passing test<!-- 0 -> 1 of 19 --> and, more usefully, stops failing at one root: its identical
 `TypeInitializationException` rows resolve into five distinct downstream roots (the two linkname pushes, a
 `GCHandle: Object contains references` on `abi.Escape`, an `IndexOutOfRangeException` in `makeCloneSeq`'s
 `slice<T>` enumeration, and the `TypeFor` hole above). The hand-owned file is also its package's only Go
@@ -1817,7 +1827,7 @@ Everything funnels through it: `syscall`'s `RawSyscall`/`RawSyscall6`/`Syscall`/
 
 The hand-own (`core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs`) binds **glibc's `syscall(2)`** rather than reproducing the instruction — a deliberate choice over the alternative of mapping each wrapper onto a .NET API. One P/Invoke lights the whole generated surface at once; the per-call alternative is N hand-owns, each independently guessing at semantics the kernel already defines exactly.
 
-<!-- source: src/core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:103-104 -->
+<!-- source: src/core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:106-107 -->
 ```csharp
 [LibraryImport("libc", EntryPoint = "syscall", SetLastError = true)]
 private static partial nint libc_syscall(nint number, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6);
@@ -1833,7 +1843,7 @@ Three details separate a faithful binding from a plausible one. Each was **measu
 
 **The pointer half needed nothing.** These wrappers pass addresses as `uintptr` — `Getrlimit` emits `RawSyscall(SYS_GETRLIMIT, (uintptr)resource, (uintptr)Ꮡrlim, 0)` — and golib's `ж<T>` → `uintptr` operator does not hand out a token: it calls `EnsureStableAddress()` to pin the managed storage and returns a real address, so the kernel genuinely reads and writes through it. The residual risk is per-struct **layout**, not addressing, and it is the same open class as the Windows non-blittable-wrapper census (see `zsyscall_windows_impl.cs`); `Rlimit` is two `uint64`s, so the first crosser was blittable and worked untouched.
 
-**Portability, stated in the file for the arm64 increment:** `asm_linux_arm64.s` puts `a1..a6` in `X0..X5` with the number in `X8` and reads `r2` from `X1` — which holds `a2`, not `a3` — so an arm64 flavor must echo `a2` and must re-run the `r2` probe there rather than inherit this answer. The variadic shortcut is likewise a per-platform judgment (standard AAPCS64 passes variadic integer args in the same registers as named ones; Apple's arm64 ABI deliberately does not), and a musl target would likely need a `NativeLibrary.SetDllImportResolver` fallback.
+**Portability.** The file is shared by both linux flavours, amd64 and arm64, and echoes `a3` as `r2`, which is amd64's answer. `asm_linux_arm64.s` puts `a1..a6` in `X0..X5` with the number in `X8` and reads `r2` from `X1`, which holds `a2`, so on linux/arm64 Go's `r2` is `a2` and the converted call returns `a3`; a caller that reads `r2` on linux/arm64 reads a different value from Go's.<!-- 2026-11-16 (docs audit seat 4): was "Portability, stated in the file for the arm64 increment: ... so an arm64 flavor must echo a2 and must re-run the r2 probe there rather than inherit this answer." Read at the tree: src/core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs rawSyscall6 returns (r1, a3, 0) on success and is compiled for both flavours (linux-arm64/ holds only defs and package_info); GOROOT go1.26.11 asm_linux_arm64.s `MOVD R1, r2+64(FP)` after SVC, R1 = a2. Reported to COORD as a finding. --> The variadic shortcut is likewise a per-platform judgment (standard AAPCS64 passes variadic integer args in the same registers as named ones; Apple's arm64 ABI deliberately does not), and a musl target would likely need a `NativeLibrary.SetDllImportResolver` fallback.
 
 The binding itself is `[LibraryImport]` rather than `[DllImport]` — the syscall boundary's FFI convention; see [Syscall-boundary P/Invokes are source-generated](#every-pinvoke-is-source-generated) for what that buys and what it cost to reach.
 
@@ -2016,8 +2026,8 @@ compares field-wise, sending only the members whose type cannot use `==` through
 **Guarding measurement.** `internal/weak`'s own suite now links and runs
 (`go2cs -tests -test-action all "<GOROOT>/src/internal/weak" src/core/internal/weak`): **`TestPointerEquality`
 PASSES against `go test`** — the canonicalization clause, the hardest one, validated end to end.
-`TestPointer` and `TestPointerFinalizer` do not, and the reason is the roster's already-named
-**`codegen-liveness`** class rather than the weak model: both hold the referent in a live C# local (`bt`)
+`TestPointer` and `TestPointerFinalizer` do not, and the reason is the already-named
+[**`codegen-liveness`**](#codegen-liveness--a-frame-holds-what-go-has-already-dropped) class rather than the weak model: both hold the referent in a live C# local (`bt`)
 across the `runtime.GC()` that is supposed to kill it, where Go's per-safepoint liveness maps drop it at
 its last use. (Neither is *disclosable* — `TestPointerFinalizer` does not fail an assertion, it blocks
 forever on `<-done` waiting for a finalizer that a still-rooted object can never queue — so
@@ -2129,7 +2139,7 @@ The converter emits a tagged field's Go struct tag verbatim at the declaration:
 ```go
 NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
 ```
-<!-- source: src/core/crypto/x509/sec1.cs:31 -->
+<!-- source: src/core/crypto/x509/sec1.cs:32 -->
 ```csharp
 public asn1.ObjectIdentifier NamedCurveOID; /*`asn1:"optional,explicit,tag:0"`*/
 ```
@@ -2252,7 +2262,7 @@ throughout, which is why the defect stayed invisible to `%T` and to the `Reflect
 
 (Guarded by the `ReflectStructTagCopy` behavioral test, which pairs each of the five named shapes
 with its unnamed control and re-runs asn1's own `HasSuffix(Name(), "SET")` decision. Measured on
-`encoding/asn1`'s converted suite: **37 of 38**, up from 35 — it closes `TestMarshal` #37 and also
+`encoding/asn1`'s converted suite<!-- 37 of 38, up from 35 -->: it closes `TestMarshal` #37 and also
 `TestCertificate`, whose "sequence tag mismatch" and empty RDN name
 are the same root, since its `RDNSequence` is a `[]RelativeDistinguishedNameSET`.)
 
@@ -2616,7 +2626,7 @@ precedence neutered ONLY the `decIndirect` line moves, landing on `[0]int 0` —
 
 ## The reflectlite MINI-BRIDGE mirrors reflect one layer down — and the closure that validated it landed five rules in SHARED machinery
 
-`internal/reflectlite` is Go's reflect one layer down, and its bridge follows one doctrine:
+`internal/reflectlite` is Go's reflect one layer down, and its bridge follows one rule:
 **mirror `reflect`'s hand-owns over the SAME golib machinery, so the two layers cannot disagree**
 — `valueInterface` mirrors `packInterfaceValue`, `rtype.PkgPath` answers `GoReflect.GoPackagePath`,
 and `AssignableTo` runs Go's own literal body over bridged `implements` +
@@ -2758,7 +2768,7 @@ of the seed alone, the honest maximum because the corpus's only caller (`interna
 
 Guarded by `GolibTests.GoStructLayoutTests` (Go offsets and sizes for the exact shapes `unique`'s
 `TestMakeCloneSeq` exercises, plus alignment padding — removing the per-field alignment rounding fails
-`FieldOffsets_ApplyGoAlignmentPadding`), and measured by `unique`'s own suite: **1 → 4 of 19 matched**,
+`FieldOffsets_ApplyGoAlignmentPadding`), and measured by `unique`'s own suite, where three more tests match<!-- 1 -> 4 of 19 -->,
 with all six `IndexOutOfRangeException` rows gone and the three `TestHandle` ones moved on to the
 `internal/weak` linkname root behind them. `Elem()`/`Key()` are guarded by the
 `ReflectConvertAssignable` behavioral test — `ConvertibleTo`/`AssignableTo` across all six
@@ -2794,6 +2804,7 @@ list, so `TaskNode.Next` is a `TaskNode` and the descent never ends. `go/types`'
 `reflect` for the size of `Named`, which holds a `sync.Mutex`, and the run died there with a
 `StackOverflowException`: uncatchable, so it took the whole process and reported the 44 tests
 alphabetically after it as **absent** verdicts rather than as one failure.
+<!-- 2026-11-15, sqlite-cs W9a: `sync.Mutex` no longer holds a reference. It is Go's two words, `{state int32; sema uint32}`, and its wait queue is named by a handle in `sema` (the section "`sync.Mutex` is Go's eight bytes" below), so it is an ordinary struct to this rule. The rule and its history stand; `sync.RWMutex`'s `RWState` and `sync.WaitGroup`'s `WaitGroupState` are the handles it serves today. -->
 
 The rule is therefore stated positively: **a managed reference is one pointer word wide and is never
 descended into.** `KindOf` reports `Pointer` for it, which is both finite and Go's own answer —
@@ -2806,7 +2817,7 @@ The CLR's own primitives are the one exception to CS0523: each is a struct holdi
 own type (`System.Char` holds `char m_value`, `System.Int32` holds `int m_value`). So every primitive
 must classify as a scalar before the `Struct` arm is reached. `System.Char` was the one that did not.
 No Go type converts to it, but a C# lambda whose body returns a bare `'a'` infers `Func<int, char>`,
-and a converter defect that dropped a rune literal's cast emitted exactly that (P2, seat #23 r2).
+and a converter defect that dropped a rune literal's cast emitted exactly that.<!-- P2, seat #23 r2 -->
 `fmt`'s `%v` of such a value then died in `IsComparable` with an uncatchable `Stack overflow.`.
 `KindOf` now reports a `char` as `Uint16`, a UTF-16 code unit, and `GoTypeName` spells it `uint16`.
 `GolibTests.ClrPrimitiveKindTests` holds all fourteen primitives to a scalar kind, and checks the
@@ -2827,8 +2838,8 @@ Two consequences worth carrying:
 Guarded by `GolibTests.GoStructLayoutTests` — `ManagedReferenceField_IsOneWord_NotAStructToDescendInto`,
 `CyclicManagedReferenceGraph_Terminates` and `SelfReferentialThroughPointer_IsFiniteAndCorrect`, the
 first two of which are guards against a stack overflow no assertion can catch, so reaching the
-assert at all is the guard. Measured by `go/types`: 513 verdicts with 44 absent, then **557 of 557
-agreeing with `go test`**.
+assert at all is the guard. Measured by `go/types`: verdicts that were absent are present, and every verdict agrees with
+`go test`.<!-- 513 verdicts with 44 absent, then 557 of 557 -->
 
 ### The VALUE side of the same rule: pointer KIND is not pointer BOX
 
@@ -2887,7 +2898,7 @@ go2cs-gen records on the struct, and golib's field projection reads that record 
 **An embed's TAG is read like any other field's.** The converter writes the tag as a comment after the
 embed's declaration, exactly as it does for a named field, and go2cs-gen records it the same way:
 
-<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:33-38 -->
+<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:34-39 -->
 ```csharp
 partial struct host {
     public nint Plain;
@@ -2915,7 +2926,7 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      encoding/json's dominance rules are decided by DEPTH and tag, never by declaration order, and its one
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
-     embeds in place (src/go2cs/visitStructType.go:1009 `// declaration order, marked like every other embed:`). The
+     embeds in place (src/go2cs/visitStructType.go:1034 `// declaration order, marked like every other embed:`). The
      legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:529 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
@@ -2989,6 +3000,38 @@ store went through a box over address 0 and landed nowhere, for EVERY byte slice
 over with exactly this call, so every `[]byte` field decoded as empty and `TestLargeByteSlice`
 reported a 2000-byte round trip diverging at byte 0. It is hand-owned now and writes where every other
 setter writes, through the addressable Value's aliased box.
+
+## `reflect` copies an array value when it moves it into another slot
+
+In Go an array is a value. `SetMapIndex`, `Send`, `Set`, a `Call` argument and `Interface()` each copy
+the array they are given, so the source and the stored value never share memory afterwards. golib's
+`array<T>`, and a struct holding one, are .NET structs over a shared `T[]` backing. Copying the struct
+copies the reference to the backing, not the elements.
+
+That difference was harmless until whole-array assignment began copying INTO the existing location
+(`ж<T>.WriteBoxSlot`'s in-place arm for an `IGoValueAssign` pointee). Since then, a slot that reflect
+hands out keeps its backing for life. A `Value` that came from `reflect.New(...).Elem()` therefore
+gives away the backing it will keep using. `encoding/gob`'s `decodeMap` decodes each key and element into
+one such pair of slots, stores them with `SetMapIndex`, and then clears them with `SetZero` for the
+next entry. Every array stored in the map was cleared with them: `TestEndToEnd` decoded
+`map[[2]string][2]*float64` elements as nil. `encoding/json` reuses a map element the same way
+(`decode.go`, `mapElem`).
+
+The transfer doors now copy an array-owning datum when the source `Value` is addressable
+(`transferDatum` and `packInterfaceValue` in `value_impl.cs`). "Array-owning" means an `IArray` that
+is not a slice, or a struct stamped `IGoValueClone`. A source that is not addressable already holds
+its own copy and is passed through. golib's `map<K,V>` already cloned array keys on insert, so only
+map values and the other doors were exposed.
+
+**Allocation.** `Interface()` of an addressable array allocates once, as Go's does. `SetMapIndex`,
+`Send`, `Set` and `Call` with an addressable array source allocate once more than Go, which copies
+into the destination without a new allocation. golib's `AllocationCounter` sees the copy, so an
+`AllocsPerRun` assert over such a call reads one higher than Go. No banked row moved at the cut
+(`reflect`, `encoding/json`, `encoding/gob`).
+
+Builtin `copy`, `append(s, t...)` and slice growth have the same sharing for a slice of arrays, and
+are not covered here. Guarded by `ReflectArrayStoreCopies` (seven reflect arms, a gob round trip and a
+json map of arrays, against `go run`).
 
 ## `new(T)` is Go's ZERO value — and for a container kind that means the NIL one
 
@@ -3154,7 +3197,7 @@ two genuinely disagree move.
 
 **ONE firing per timer per pass — a firing reads the clock exactly once.** Each firing samples `now` once, under the timer lock, and decides and re-arms from that single value; `GoTimer`'s pass fixes its batch of due timers before any callback runs, and a timer is on its heap at most once, so a periodic re-arm waits for the next pass. A bubble's check samples its fake clock once and threads it through the whole drain. That is the invariant, not an optimization, and Go does the same for the same reason: the scheduler samples the clock in `timers.check` and hands it down through `timers.run(now)` to `timer.unlockAndRun(now)`, never re-reading it inside a pass. The consequence is a theorem rather than a heuristic — *within one service pass every timer fires at most once*. A one-shot leaves the heap with `when` cleared; a periodic timer is re-armed to `next = when + period*(1 + delay/period)` with `delay = now - when >= 0`, and writing `delay = q*period + r` for `0 <= r < period` gives `next = when + period*(1 + q) = now + (period - r)`, which `r < period` makes **strictly greater than `now`** — so the re-peek always takes the "not yet due" branch and the drain ends. It holds for every period, down to 1 ns. Re-reading the clock per iteration breaks the theorem (a real defect this model once had<!-- recorded r36, fixed r39 -->): the advanced `when` lands one nanosecond ahead, a freshly read `now` has already passed it, and the same ticker fires again — for as long as consecutive reads of the ~100 ns monotonic source keep advancing. The burst is invisible while nobody is receiving (the non-blocking send onto a cap-1 channel drops all but one) but `time`'s own `TestChan` *is* receiving: the two stale values an async ticker is allowed became three or more, and `noTick` reported "extra tick" in **all three** `asynctimerchan` modes — which the then-standing asynchronous-timer-channel divergence (now implemented, below), scoped to the sync mode, never explained. The invariant does not rate-limit: a pass fires each due timer once and then waits until the new head deadline, which for a fast ticker is already past, so the wait returns at once and the next pass fires it again — exactly as Go's scheduler calls `check` again with a fresh `now`. The bound is on re-firing *within* a pass, which is what "drop ticks to make up for slow receivers" means. Nor can it delay anything: `next` depends on `now` only through the non-decreasing floor `delay/period`, so one read can only make the re-arm deadline smaller or equal, and `GoTimer` computes each wait from a fresh clock — no timer can wake later than the per-iteration version would have woken it, and when `delay < period` (the common case) the deadline is identical either way. A timer coming due *during* a pass waits for the next one and that is not a delay either, because the head of the heap is the minimum `when` among armed timers, so the deadline is already past by the end of the pass and the next pass starts at once. Real timers match Go at the two places a single-batch drain does not. Each firing is decided in its own callback under the timer lock, as Go's `check` releases the timer-set lock around *each* callback and re-validates between them, so a `Stop` landing mid-pass cancels the firings after it; and a real timer has one heap entry, repositioned in place, as Go's does. A bubble's fake timers keep the older shape, and the fidelity claim should not be read past them: a bubble's check commits its whole batch under one lock hold and then runs it, and its heap keeps one entry per *arm*, reclaiming a dead entry only when it reaches the head; in synchronous mode the `seq` check restores the mid-pass cancellation for its chan timers. A standing constraint follows from the same arithmetic: at the instant a ticker is stopped or reset at most **two** of its ticks can exist — one buffered, one committed but not yet sent. In *synchronous* mode both are now revoked outright (the drain takes the first, the `seq` check the second — see the next entry), so the guarantee no longer rests on that count; in `asynctimerchan={1,2}` it still does, and two is exactly what `drainAsync` drains, so the margin there is zero and any later change that lets two ticks for one timer be committed before their callbacks run re-breaks `noTick` in those modes without touching `time_impl.cs`.
 
-**`tick.cs` is hand-owned, and revertibly so.** Go builds a `Ticker` by reinterpreting the `*Timer` the runtime returned — `(*Ticker)(unsafe.Pointer(newTimer(…)))`, plus the mirror-image casts in `Ticker.Stop`/`Reset` — because "Ticker and Timer have the same layout". Converted literally those three reinterprets **compile but cannot work**: each is a managed-box `uintptr` round-trip whose address escapes its `fixed` pin, and nothing references the `ж<Timer>` `newTimer` produced, so the ticker's storage is collected at the next GC (the retained-pointer worst case of the corpus-wide hazard in `docs/phase4/FINDING-managed-box-uintptr-lifetime.md`). Pinning is not available either — `Ticker` holds a `channel<Time>`, a managed reference, and `GCHandle.Alloc(…, Pinned)` rejects a type containing references — so the raw-address model has no sound form here. The file (marked `[module: go.GoManualConversion]`, whole-file) builds the `Ticker` directly and addresses its timer by box identity, which is the standing managed-referent rule at the top of this section; every doc comment and the struct declaration are the converted output verbatim, and the file should be **deleted** in favor of its `tick.cs.auto` sibling the moment a general managed-reinterpret capability lands.
+**`tick.cs` is hand-owned, and revertibly so.** Go builds a `Ticker` by reinterpreting the `*Timer` the runtime returned — `(*Ticker)(unsafe.Pointer(newTimer(…)))`, plus the mirror-image casts in `Ticker.Stop`/`Reset` — because "Ticker and Timer have the same layout". Converted literally those three reinterprets **compile but cannot work**: each is a managed-box `uintptr` round-trip whose address escapes its `fixed` pin, and nothing references the `ж<Timer>` `newTimer` produced, so the ticker's storage is collected at the next GC (the retained-pointer worst case of a corpus-wide hazard)<!-- docs/phase4/FINDING-managed-box-uintptr-lifetime.md (internal record) -->. Pinning is not available either — `Ticker` holds a `channel<Time>`, a managed reference, and `GCHandle.Alloc(…, Pinned)` rejects a type containing references — so the raw-address model has no sound form here. The file (marked `[module: go.GoManualConversion]`, whole-file) builds the `Ticker` directly and addresses its timer by box identity, which is the standing managed-referent rule at the top of this section; every doc comment and the struct declaration are the converted output verbatim, and the file should be **deleted** in favor of its `tick.cs.auto` sibling the moment a general managed-reinterpret capability lands.
 
 **Synchronous timer channels — the property, and the two mechanisms that keep it (#37196).** Go 1.23 made a chan-based `Timer`/`Ticker` channel *synchronous*, and the name describes a guarantee rather than a plumbing change: the channel is still created as `make(chan Time, 1)` — a tick can be produced with nobody receiving — and what changed is that its owner may take a tick **back**. The whole proposal is one sentence: *a `Stop` or `Reset` prevents any tick generated before the call from being received after it.* Equivalently, every value a receive on `t.C` observes was committed **after** the most recent `Stop`/`Reset`, so there are no stale values and the pre-1.23 "drain `t.C` when `Stop` returned false" idiom is unnecessary. Two consequences are directly observable: `Stop`/`Reset` report `pending == true` when they **revoke** an unreceived tick, not only when the timer was still armed; and `len(t.C)`/`cap(t.C)` are **0**, because a buffered value the next `Stop` may confiscate must not be advertised.
 
@@ -3164,7 +3207,7 @@ The channel side is a general hook, not a `time` special case: golib gains `ICha
 
 Two places are deliberately **not** Go. Upstream `Stop` drains after releasing `sendLock` and `Reset` drains before releasing it; this holds `sendLock` across the drain in **both**, because Go can afford the looser order only thanks to lazy heaping (a sync-mode chan timer is in a heap only while a receiver is blocked on it, so nothing can produce a tick between `Stop`'s unlock and its drain) and this model's service thread is always live and always eager — a `Reset` racing another goroutine's `Stop` could otherwise have its fresh tick drained by the `Stop`. And Go fires a sync-mode chan timer **lazily** (`runtime.maybeRunChan`, at receive time) where this fires eagerly from the service heap; that is what mechanism 3 exists for, and *with* it `Stop`'s answer is the same either way — but eager firing still costs Go 1.23's early GC of unreferenced timers, since an armed timer stays reachable from the service heap. `GODEBUG=asynctimerchan` selects the model as upstream: `0` (default) synchronous, `1` pre-1.23 asynchronous (package `time`'s own `syncTimer` withholds the channel, so none is ever registered), `2` asynchronous semantics over a registered channel — and modes 1 and 2 run the pre-existing model unchanged, every branch being gated on the live setting. Measured on `time`'s own `TestChan`: all six subtests (`asynctimerchan={0,1,2}` × Timer/Ticker) pass, where before only `{1,2}` did. Guarded end-to-end by the `SyncTimerChannel` behavioral project, whose stdout is byte-compared against `go run`: `Stop`/`Reset` `pending` after a fire, no stale tick, `len`/`cap` 0, `AfterFunc` untouched, and three things a single-shot test cannot see: 200 `Reset`-to-imminent timers that must still deliver (the counter-property that keeps the drain honest), 600 ticker `Stop`/`Reset`-vs-firing races that must revoke exactly nothing, and two 600-timer batches armed against ONE absolute deadline and stopped/reset at that instant, every one of which must report `pending`. The last is what exposed mechanism 3's absence, and it only samples the window because the batch and the caller's sleep share a deadline — give each timer its own relative duration and the caller wakes milliseconds after the last tick has already landed, so the window is never entered and a broken implementation passes.
 
-**Reach.** Timers gate many stdlib suites. `encoding/base64`'s `TestDecoderIssue3577` and four of `internal/singleflight`'s five tests flip to passing on this alone; `singleflight`'s fifth needs 1000 *simultaneously parked* goroutines, which was the separately-documented cooperative-scheduler limitation in golib's `goǃ` (a goroutine was a ThreadPool work item and held its thread while parked, so the 256-thread floor bounded how many could be parked at once), not a timer issue. A goroutine now runs on a thread of its own, reused across goroutines by golib's `GoroutineThreadPool`, which removes that bound (`docs/phase4/DESIGN-cooperative-scheduler.md`; `src/core/golib/runtime/GoroutineThreadPool.cs`).
+**Reach.** Timers gate many stdlib suites. `encoding/base64`'s `TestDecoderIssue3577` and four of `internal/singleflight`'s five tests flip to passing on this alone; `singleflight`'s fifth needs 1000 *simultaneously parked* goroutines, which was the separately-documented cooperative-scheduler limitation in golib's `goǃ` (a goroutine was a ThreadPool work item and held its thread while parked, so the 256-thread floor bounded how many could be parked at once), not a timer issue. A goroutine now runs on a thread of its own, reused across goroutines by golib's `GoroutineThreadPool`, which removes that bound (`src/core/golib/runtime/GoroutineThreadPool.cs`).<!-- design: docs/phase4/DESIGN-cooperative-scheduler.md (internal record) -->
 
 ## The runtime's PROCESS-CONTROL surface: implement the CONTRACT, never the mechanism
 
@@ -3189,7 +3232,7 @@ everything below them stays auto-converted and simply becomes unreachable.
 | Go API | Managed realization | Divergence |
 |---|---|---|
 | `Gosched()` | `Thread.Yield()` | none — same "offer the rest of the slice, then continue" contract |
-| `GOMAXPROCS(n)` | remembered value, defaults to `Environment.ProcessorCount`; `n < 1` queries | does **not** cap parallelism — the CLR schedules goroutine threads. The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
+| `GOMAXPROCS(n)` | remembered value, defaults to `Environment.ProcessorCount`; `n < 1` queries | with the default threads, does **not** cap parallelism — the CLR schedules goroutine threads. The universal save/restore idiom `defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(n))` is exactly right |
 | `GC()` | blocking compacting collect → `WaitForPendingFinalizers` → collect → **`GcPauseRecorder.Drain()`** | none observable; the second pass reclaims what finalizers released, which is the state a completed Go cycle leaves. The drain is what makes `NumGC` current on return |
 | `Stack(buf, all)` | a Go-shaped traceback rendered from the managed stack into `buf`; `all` enumerates every live goroutine | see *`runtime.Stack` renders a GO-shaped traceback* and *`runtime.Stack(all: true)`* below |
 | `ReadMemStats(m)` | `GC.GetTotalMemory`/`GetTotalAllocatedBytes` + one `GcPauseRecorder` snapshot | allocator-internal fields (`Mallocs`/`Frees`/`HeapObjects`/`BySize`) and `GCCPUFraction` stay **zero** rather than invented; the pause history, `LastGC`, `PauseTotalNs`, `NumGC`, `NumForcedGC` and `HeapReleased` are **real** (see below) |
@@ -3259,7 +3302,7 @@ runs. `runtime/coverage.ClearCounters` therefore returns Go's `program not built
 other four `runtime/coverage` functions keep returning their own errors before they would reach it.
 Guarded by the `Phase5CoverageAPIs` behavioral test (all five functions, output-compared).
 
-**`internal/runtime/atomic` is the NATIVE half of the S1 fork and gets a real conversion, not a
+**`internal/runtime/atomic` is the native half of that split and gets a real conversion, not a
 stub** (`atomic_impl.cs`). Its ~40 declarations are all `.s` files, but they are plain memory atomics
 over native scalars, and the CLR has an exact equivalent: `Xadd*`→`Interlocked.Add` (both return the
 NEW value), `Xchg*`→`Interlocked.Exchange` and `And32`/`Or32`/`And64`/`Or64`→`Interlocked.And`/`Or`
@@ -3314,10 +3357,10 @@ ones left are blocked). Which goroutine runs a function is not statically decida
 catches that exception: `GoFrame.IsPanic` answers it with an internal marker `recover()` cannot read, the frame's
 `Run` runs its deferred calls and throws a fresh from-main Goexit from its `finally`. Past the outermost deferring
 frame, golib's backstop parks the main thread (`MainGoexit.Park`) until no other goroutine is left, and a goroutine
-left in a forever wait reports the deadlock itself, since the dead-program check counts an exited main as blocked
-(`docs/DESIGN-goexit-main.md`). The test host catches it around `TestMain` and parks the same way. Guarded by the
+left in a forever wait reports the deadlock itself, since the dead-program check counts an exited main as blocked.<!-- design: docs/DESIGN-goexit-main.md (internal record) -->
+The test host catches it around `TestMain` and parks the same way. Guarded by the
 `GoexitFromMain` behavioral test (six arms against `go run`) and GolibTests `MainGoexitTests`. Consequently
-`unsupportedRuntimeCapabilities` (`testConversion.go`) is now **empty**: the mechanism remains — a test
+`unsupportedRuntimeCapabilities` (`testConversion.go`) no longer lists the `Goexit`-from-main capability: the mechanism remains — a test
 whose transitive closure reaches a listed symbol converts as `unsupported`, disclosed by name, the
 same gate an unsupported `testing.*` member uses — with `TestUnsupportedRuntimeCapabilityGate` as its
 positive control so an empty list cannot masquerade as a working lookup. Add an entry only for
@@ -3327,7 +3370,7 @@ trap.
 
 **`-test-timeout` is the PACKAGE deadline, and it reaches both sides.** The flag used to bound only the
 child *process*, leaving `go test` and the converted host each on its own **10-minute** default — so no
-value of it could let a slower-than-Go suite finish. `hash/maphash` self-terminated at exactly 600 s
+value of it could let a slower-than-Go suite finish. `hash/maphash` self-terminated at the 10-minute default
 under `-test-timeout 40m`, reporting its still-running `TestSmhasherAvalanche` as an empty verdict that
 reads exactly like a real failure (the very "slow ≠ hung" trap, one layer below where it was known).
 The compare/run actions now pass the flag through as `go test -timeout` **and** the host's own
@@ -3336,8 +3379,8 @@ in-process deadline must fire first, because it is the side that writes results.
 exposed that the host's duration parser accepted only a *single* unit, rejecting `time.Duration`'s own
 `String()` output (`30m0s` → "invalid Go-style duration", exit 2 before a test ran); it now parses Go's
 real grammar, a sequence of decimal-and-unit pairs over ns/us/µs/ms/s/m/h, so `1h30m` works as it does
-for `go test`. maphash's C# suite needs ~15 min where Go's needs 7.6 s — a performance gap, recorded as
-such, not a correctness one.
+for `go test`. maphash's C# suite takes minutes where Go's takes seconds, a performance gap, recorded as
+such, not a correctness one.<!-- about 15 min against 7.6 s; platform not recorded -->
 
 **The test host treats an escaping `GoexitException` as Go's `tRunner` does**, and each test's
 dedicated thread is marked a goroutine (`Goroutine.Enter`) because in Go a test body IS one. Go's
@@ -3454,7 +3497,7 @@ and one recorder supplies the missing half:
 * the mechanism is a **resurrecting finalizable sentinel**: an object nothing strongly references,
   whose finalizer records the collection and then calls `GC.ReRegisterForFinalize(this)`, so it wakes
   once per gen2 collection. `GC.RegisterForFullGCNotification` was refused (it requires background GC
-  off, process-wide), an in-process EventPipe listener was refused (events arrive ~117 ms late), and
+  off, process-wide), an in-process EventPipe listener was refused (its events arrive asynchronously, well after the collection)<!-- about 117 ms late, the figure the allocation-count survey above measured -->, and
   polling from each read was refused (it loses every collection between two reads, which is a hole in
   a ring whose slots are indexed by cycle number);
 * the ring is written in **Go's own order** — slot `observed % 256`, *then* the counter — so
@@ -3466,17 +3509,17 @@ and one recorder supplies the missing half:
   recorder before returning, which closes the lag at the one boundary Go's tests read it across;
 * **`HeapReleased = max(0, committedHighWater − currentCommitted)`** over `TotalCommittedBytes`. A
   *cumulative* decrease would be monotone; Go documents the field as a current quantity that falls
-  when the heap reacquires, and the monotone form was measured drifting ~33.6 MB per release cycle;
+  when the heap reacquires, and the monotone form drifts upward with every release cycle;<!-- measured about 33.6 MB per cycle; platform not recorded -->
 * **`ReadMemStats` is allocation-free**, and that is a precondition rather than a nicety:
   `net/textproto`'s validated `TestReadMIMEHeaderAllocations` brackets each header read between two
-  `ReadMemStats` calls. `GC.GetGCMemoryInfo()` allocates a `GCMemoryInfoData` box per call (288 B
-  measured), so the committed/heap-size figures come from the recorder's own per-gen2 sample and the
+  `ReadMemStats` calls. `GC.GetGCMemoryInfo()` allocates a `GCMemoryInfoData` box per call<!-- 288 B
+  measured -->, so the committed/heap-size figures come from the recorder's own per-gen2 sample and the
   ring is copied into the caller's already-allocated `array<T>` backing. Guarded at **zero** by
   `GolibTests.GcMeasurementSurfaceProbes.ReadMemStatsPerCallAllocation`;
 * always on, armed from `runtime`'s (and `runtime/debug`'s) module initializer, with a
   `GO2CS_GC_PAUSE_HISTORY=0` escape hatch that restores the pre-recorder answers exactly. Measured
-  cost: one finalizer run and one `GetGCMemoryInfo` call per gen2 collection — below the noise floor
-  of a 1.25–1.64 ms collection.
+  cost: one finalizer run and one `GetGCMemoryInfo` call per gen2 collection, below the noise floor
+  of the collection itself.<!-- against a 1.25-1.64 ms collection; platform not recorded -->
 
 Guarded by `GolibTests.GcPauseHistorySurfaceTests` (the two surfaces held against each other,
 `HeapReleased` across a `FreeOSMemory`, `NumForcedGC`, and the refused-fields-stay-zero rule).
@@ -3497,6 +3540,97 @@ The transfer itself is golib's (`go.golib.Coro`), not `iter`'s, because it is a 
 **`runtime.NumGoroutine` was wired in the same change, and it had never answered truthfully.** Its Go body is `gcount()`, which derives the live count by SUBTRACTION over scheduler state the managed model never populates — `allglen`, less `sched.gFree.n`, less `sched.ngsys`, less each P's `gFree.n`. Every term was zero, and `gcount`'s own `if n < 1 { n = 1 }` floor then turned the nonsense into a plausible-looking constant: **`NumGoroutine()` returned 1 for every program, forever** — exactly the shape of wrong that survives unnoticed, because a single-goroutine program's answer really is 1. golib's `Goroutine` registry had maintained the true count all along (it is what the SIGQUIT dump already printed), so this is a WIRING rather than an approximation: a `manualConversionFuncs` entry displaces the auto body and `managed_impl.cs` returns `Goroutine.Count`. Go's staleness caveat carries over unchanged and for the same reason; `gcount`'s floor does not, since the registry cannot report fewer than the caller's own goroutine.
 
 Guarded on both sides: `iter`'s converted suite validates in full against `go test` (goroutine accounting, double-next/double-yield, panic-through on `next` and on `stop`, Goexit across the boundary, immediate stop), and the `IterPullRendezvous` behavioral test pins the rendezvous semantics against `go run` in the corpus gate — deliberately printing no goroutine counts, since a count is stable in Go only under the stabilization loop that suite uses, and a flaky stdout comparison would fire across the whole corpus rather than in one package.
+
+## `sync.Mutex` is Go's eight bytes, and its wait queue is a handle in the `sema` word
+
+Go's `sync.Mutex` is `{state int32; sema uint32}`. Go code relies on that: sqlite's `lib/mutex.go`
+callocs `mutex{sync.Mutex; cnt, id int32; recursive bool}` and reaches it only through
+`(*mutex)(unsafe.Pointer(m))`, and libc's pthread mutex overlay holds a `sync.Mutex` in C memory the
+same way. The hand-owned `Mutex` held a `SemaphoreSlim` reference, so the native read was refused
+("field Mutex is a managed reference"), and no mutex of either library could be taken.
+
+`src/core/sync/mutex.cs` now declares Go's two words and nothing else:
+
+<!-- attribute-shown: a hand-written file keeps the attribute -->
+<!-- illustration: not converter output -->
+```csharp
+[GoType] partial struct Mutex {
+    internal int32 state;
+    internal uint32 sema;
+}
+```
+
+* **`state` is the lock.** 0 unlocked, 1 locked, 2 locked and a waiter may be blocked. `Lock` takes
+  0 -> 1 with one compare-and-swap, which is Go's fast path. A contended `Lock` swaps in 2 and blocks
+  until its swap reads 0. `Unlock` swaps in 0 and wakes the queue only when it read 2. `TryLock` is the
+  compare-and-swap alone. An `Unlock` that reads 0 is Go's fatal error, with Go's text.
+* **`sema` holds the HANDLE of the mutex's wait queue**, a semaphore in a process-wide table keyed by a
+  32-bit number. The handle is a number in the mutex's own bytes. It is not a managed reference and it
+  is not derived from an address, so a mutex works the same in the managed heap, on the stack and in C
+  memory, and a moving collector does not matter.
+* **The queue is held only while a goroutine waits.** A waiter takes the queue before its swap of
+  `state` and gives it back once it has the lock; the last waiter out retires the queue, removes it
+  from the table and writes 0 back. An idle mutex is eight zero bytes, as Go's is.
+* **Retired queues are reused: a contended `Lock` allocates nothing while its thread's stripe has a
+  spare queue.** The table is 64 stripes, each under its own monitor, and a handle is its stripe's index
+  in the low 6 bits under a 26-bit sequence number. A thread installs every queue it installs in one
+  stripe, so threads contending on different mutexes work under different monitors, and a stripe keeps
+  every queue it created to hand out again under a new handle. A new handle skips 0 and every handle in
+  use, so the sequence can wrap; a queue is emptied of any wakeup sent to it after it was retired before
+  it serves another mutex; and a handle that names no queue (bytes the mutex never wrote) is replaced
+  like a zero one.
+* **What a contended `Lock` does allocate.** Spare queues belong to the stripe, and threads share
+  stripes (always, past 64 threads). A `Lock` that has to install a queue allocates one (104 bytes: the
+  semaphore and its lock object) when the stripe has no spare, which is when more of that stripe's
+  queues are in use at once than ever before: a thread that installed a queue moves on while others are
+  still counted on it, so a stripe can have several in the table. So a thread's first install often
+  allocates nothing, and one thread can pay for another's peak. A thread's first read of its stripe slot
+  allocates 32 bytes, the runtime's storage for a thread-static. A queue in the table has a goroutine
+  counted on it, so a stripe never holds more queues than the most goroutines that were ever inside a
+  contended `Lock` at one moment on queues it installed, and queues are kept for the life of the
+  process. Go's waiter takes its `sudog` from a per-P cache in the same way and allocates one when the
+  cache is empty. The mutex this replaced allocated one semaphore (88 bytes) for every `Mutex` ever
+  locked, contended or not.
+* **`Unlock` keeps at most one wakeup.** A waiter that takes the lock leaves 2 behind, so its `Unlock`
+  reaches the queue whether or not anyone waits. The queue needs one wakeup available, not one per
+  `Unlock`: whoever takes it swaps `state` again and either gets the lock or leaves 2 for the new
+  holder's `Unlock`. A wakeup that reaches a queue now serving another mutex costs that mutex's waiter
+  one more look at `state` and nothing else.
+
+**Copies.** Go's vet forbids copying a `Mutex` after first use, but the bytes of a copy work, and they
+work here: a copy of a locked mutex is locked, and a copy of an idle mutex is a free mutex with no
+queue. One copy differs from Go. A mutex copied WHILE a goroutine waits on it carries the queue's
+handle, and until that queue empties a waiter of the copy can take a wakeup meant for the original.
+In Go the two wait on different addresses. That copy also reads two words other goroutines are
+writing; it is recorded on the BOARD.
+
+**Where this differs from Go.** Wakeups follow the semaphore's order and a woken waiter competes with
+newcomers, as in Go's normal mode; Go's starvation mode is not reproduced. A waiter blocks its OS
+thread in the semaphore, where Go parks a goroutine and frees its M, and an `Unlock` that read 2
+takes its stripe's monitor for the lookup. `Unlock` reads the `sema` word after the swap that unlocks,
+as Go's own slow path does. Memory that is zeroed and reused as a mutex while a queue it named still
+has waiters, or bytes that happen to hold a handle a stripe hands out again after its 26-bit sequence
+wraps (about a minute of one stripe installing a queue every microsecond), can name another mutex's
+queue; a waiter that takes a wakeup this way looks at `state` again, so the cost is a spurious wakeup,
+never a second owner.
+
+**Reflection.** `Mutex` was the first example of an opaque managed handle in the reflection bridge's
+descent rule above. It is now an ordinary struct of two 4-byte fields, so `reflect` sizes it by its
+fields and reads Go's 8, and `go/types`' `Named` still computes to 112. `sync.RWMutex`'s `RWState` and
+`sync.WaitGroup`'s `WaitGroupState` remain handles.
+
+Guarded by `GolibTests.SyncMutexLayoutTests` (the layout, exact counts in native memory at 2, 4 and 8
+threads, a handle that names no queue, `TryLock`), `GolibTests.SyncMutexQueueTests` (a copy of an idle
+mutex that once contended is its own mutex; a copy of a locked mutex is locked and its unlock frees
+only the copy; an idle mutex holds no queue; a wakeup that finds no waiter is kept once; `Unlock`
+sends no second wakeup while one waits; a handle in use is not given to a second queue; a wakeup that
+arrives after its queue serves another mutex costs one re-check; a contended lock allocates nothing
+once its thread has a spare queue; the queues a thread installed at once all serve it again; and exact
+counts with queues coming and going, over 8 and over 64 mutexes),
+`GolibTests.SyncMutexFastPathTests` (an uncontended pair allocates nothing)
+and the `MutexInNativeMemory` behavioral program, which runs sqlite's own shapes over an anonymous
+mmap: the fast mutex, the recursive mutex with its owner id written through `&(*mutex)(p).id`,
+`TryLock`, the recursive re-entry and a counter in the same native page under 2, 4 and 8 goroutines.
 
 ## `sync.Pool` — a managed-reference ring slot, and a thread-affine stand-in for the P pin
 
@@ -3520,7 +3654,7 @@ contract, and the entire `poolChain` half:
 
 <!-- source: src/core/sync/poolqueue.cs:73-78 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
-<!-- source: src/core/sync/poolqueue.cs:73-78 -->
+<!-- source: src/core/sync/poolqueue.cs:75-80 -->
 ```csharp
 // eface is Go's two-word {type, value} representation of an `any`. Under the CLR an `any` IS a single
 // managed reference, so the slot holds that reference directly; see the file header for why the
@@ -3693,7 +3827,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5118 (`INLINED PANIC SITES`), :5126 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5112 (`INLINED PANIC SITES`), :5120 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -3708,8 +3842,7 @@ total to equal `NumGoroutine()`).
 
 **Park accounting** is what makes the word answerable. golib's `Goroutine` carries ONE field — a
 `WaitReason`, whose `Zero` value *is* "running", so the state and the reason cannot disagree — and
-every blocking primitive names its wait around the wait it already performs
-(`docs/phase4/DESIGN-cooperative-scheduler.md` §5.3):
+every blocking primitive names its wait around the wait it already performs<!-- docs/phase4/DESIGN-cooperative-scheduler.md §5.3 (internal record) -->:
 
 <!-- illustration: adapted, owed a real excerpt -->
 ```csharp
@@ -4068,7 +4201,7 @@ statement it replaces, and maps no other line, so a traceback's `created by` lin
 The guard `TestHandOwnedGoStatementsMapToGo` checks every tracked hand-owned file under `src/core` against the pinned
 GOROOT: one record per file, each `goǃ(` line mapped to a Go `go` statement, and every other line left unmapped.
 <!-- src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283 `func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`;
-     examples: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]`),
+     examples: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "AP0B3AMAANsD")]`),
      src/core/net/windows/lookup_windows.cs:55 (`[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs",`). -->
 
 **The path is SPELLED Go's way, whichever file it names.** Which source a frame's path points
@@ -4385,10 +4518,10 @@ It is deliberately **not** a cryptographic source: security against a local atta
 bucketed **per test** because its unrelated `FindFirstFile` root kills the host mid-suite and makes
 every later verdict read `C#=""`:
 
-| Package | Before | After | What moved |
-|:--|:--|:--|:--|
-| `io` | 47 / 54 | **51 / 54** | `TestOffsetWriter_Seek`, `TestOffsetWriter_WriteAt` and `TestWriteAt_PositionPriorToBase` (all three `infrastructure-error`: *"runtime_rand: … is not implemented"*), plus `TestOffsetWriter_Write` and its subtests (`fail`) |
-| `path/filepath` | 34 / 55 | **47 / 55** | 13 tests, every one of them the same shape: `skip` ↔ `skip` |
+| Package | Effect | What moved |
+|:--|:--|:--|
+| `io` | four more tests match<!-- 47 / 54 -> 51 / 54 --> | `TestOffsetWriter_Seek`, `TestOffsetWriter_WriteAt` and `TestWriteAt_PositionPriorToBase` (all three `infrastructure-error`: *"runtime_rand: … is not implemented"*), plus `TestOffsetWriter_Write` and its subtests (`fail`) |
+| `path/filepath` | thirteen more tests match<!-- 34 / 55 -> 47 / 55 --> | 13 tests, every one of them the same shape: `skip` ↔ `skip` |
 
 `path/filepath`'s entire gain is `testenv.MustHaveSymlink`'s bucket turning into **skips that match
 Go's skips** — `runtime_rand` sat under `MustHaveSymlink`'s `os.MkdirTemp` probe, so C# could not
@@ -4419,9 +4552,9 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3587-3608 -->
+<!-- source: src/core/reflect/value_impl.cs:3692-3713 -->
 ```csharp
-public static ΔType ArrayOf(nint length, ΔType elem) {
+public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {
         throw panic("reflect: negative length passed to ArrayOf");
     }
@@ -4641,8 +4774,8 @@ call result in `(uintptr)` on its way into the `any` parameter (today the number
 `unsafe.Pointer` with no retained source) — so `Pin` accepts a bare number, as a `uintptr` or inside such
 an `unsafe.Pointer`, as the projected form of a pointer, resolving it through the record and
 no-op'ing on a miss. The
-accommodation retires with the converter fix.<!-- routed to the Q49 bridge class --> Design, per-row classification
-and the prediction on record: `docs/phase4/DESIGN-runtime-pinner.md`; guards: GolibTests
+accommodation retires with the converter fix.<!-- routed to the Q49 bridge class --> <!-- Design, per-row classification
+and the prediction on record: docs/phase4/DESIGN-runtime-pinner.md (internal record). --> Guards: GolibTests
 `RuntimePinnerTests` (every "passes" arm followed by the same check with the pin removed, which must
 go red), and runtime's own `pinner_test.go` through the `-tests` pipeline.
 

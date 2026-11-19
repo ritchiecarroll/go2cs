@@ -4,6 +4,7 @@
 namespace go.os;
 
 using sync = sync_package;
+using static user_package;
 
 partial class user_package {
 
@@ -69,9 +70,11 @@ public static (ж<Group>, error) LookupGroupId(@string gid) {
     return lookupGroupId(gid);
 }
 
+} partial class userᴛUser {
+
 // GroupIds returns the list of group IDs that the user is a member of.
 public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) {
     return listGroups(ref (Ꮡu).DerefOrNull());
 }
 
-} // end user_package
+} // end userᴛUser

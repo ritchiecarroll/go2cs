@@ -29,17 +29,17 @@ private static readonly @string trueˢᵇ = "true"u8;
 internal static ref readonly @string falseˢ => ref falseˢᵇ;
 private static readonly @string falseˢᵇ = "false"u8;
 
-internal static @string valueToStringImpl(reflectꓸValue val) {
+internal static @string valueToStringImpl(reflect.Value val) {
     @string str = default;
     if (!val.IsValid()) {
         return zeroValueˢ;
     }
     var typ = val.Type();
     switch (val.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return strconv.FormatInt(val.Int(), 10);
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return strconv.FormatUint(val.Uint(), 10);
     }
     case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
@@ -49,10 +49,10 @@ internal static @string valueToStringImpl(reflectꓸValue val) {
         var c = val.Complex();
         return strconv.FormatFloat(real(c), (byte)'g', -1, 64) + "+"u8 + strconv.FormatFloat(imag(c), (byte)'g', -1, 64) + "i"u8;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return val.String();
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         if (val.Bool()) {
             return trueˢ;
         } else {
@@ -60,7 +60,7 @@ internal static @string valueToStringImpl(reflectꓸValue val) {
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         var v = val;
         str = typ.String() + "("u8;
         if (v.IsNil()) {
@@ -71,7 +71,7 @@ internal static @string valueToStringImpl(reflectꓸValue val) {
         str += ")"u8;
         return str;
     }
-    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Slice: {
         var v = val;
         str += typ.String();
         str += "{"u8;
@@ -109,7 +109,7 @@ internal static @string valueToStringImpl(reflectꓸValue val) {
         str += "}"u8;
         return str;
     }
-    case var ᴛ when ᴛ == reflect.ΔInterface: {
+    case var ᴛ when ᴛ == reflect.Interface: {
         return typ.String() + "("u8 + valueToStringImpl(val.Elem()) + ")"u8;
     }
     case var ᴛ when ᴛ == reflect.Func: {

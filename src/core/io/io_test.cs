@@ -17,6 +17,7 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 using go.sync;
 using static go.io_internal_test_package;
 using Δio = io_package;
+using static io_test_package;
 
 partial class io_test_package {
 
@@ -107,10 +108,14 @@ partial struct writeToChecker {
     internal bool writeToCalled;
 }
 
+} partial class io_testᴛwriteToChecker {
+
 internal static (int64, error) WriteTo(this ref writeToChecker wt, Δio.Writer w) {
     wt.writeToCalled = true;
     return wt.Buffer.WriteTo(w);
 }
+
+} partial class io_test_package {
 
 // It's preferable to choose WriterTo over ReaderFrom, since a WriterTo can issue one large write,
 // while the ReaderFrom must read until EOF, potentially allocating when running out of buffer.
@@ -131,17 +136,25 @@ partial struct zeroErrReader {
     internal error err;
 }
 
+} partial class io_testᴛzeroErrReader {
+
 internal static (nint, error) Read(this zeroErrReader r, slice<byte> p) {
     return (copy(p, slice<byte>([0])), r.err);
 }
+
+} partial class io_test_package {
 
 partial struct errWriter {
     internal error err;
 }
 
+} partial class io_testᴛerrWriter {
+
 internal static (nint, error) Write(this errWriter w, slice<byte> _) {
     return (0, w.err);
 }
+
+} partial class io_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string readErrorˢ => ref readErrorˢᵇ;
@@ -223,12 +236,18 @@ partial struct noReadFrom {
     internal Δio.Writer w;
 }
 
+} partial class io_testᴛnoReadFrom {
+
 internal static (nint n, error err) Write(this ref noReadFrom w, slice<byte> p) {
     return w.w.Write(p);
 }
 
+} partial class io_test_package {
+
 partial struct wantedAndErrReader {
 }
+
+} partial class io_testᴛwantedAndErrReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string wantedAndErrReaderErrorˢ => ref wantedAndErrReaderErrorˢᵇ;
@@ -237,6 +256,8 @@ private static readonly @string wantedAndErrReaderErrorˢᵇ = "wantedAndErrRead
 internal static (nint, error) Read(this wantedAndErrReader _, slice<byte> p) {
     return (len(p), errors.New(wantedAndErrReaderErrorˢ));
 }
+
+} partial class io_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooˢ => ref fooˢᵇ;
@@ -291,6 +312,8 @@ partial struct dataAndErrorBuffer {
     /*embed*/ public bytes_package.Buffer Buffer;
 }
 
+} partial class io_testᴛdataAndErrorBuffer {
+
 internal static (nint n, error err) Read(this ref dataAndErrorBuffer r, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -301,6 +324,8 @@ internal static (nint n, error err) Read(this ref dataAndErrorBuffer r, slice<by
     }
     return (n, err);
 }
+
+} partial class io_test_package {
 
 public static void TestReadAtLeastWithDataAndEOF(ж<testing.T> t) {
     ref var rb = ref heap(new dataAndErrorBuffer(), out var Ꮡrb);
@@ -514,9 +539,13 @@ partial struct largeWriter {
     internal error err;
 }
 
+} partial class io_testᴛlargeWriter {
+
 internal static (nint, error) Write(this largeWriter w, slice<byte> p) {
     return (len(p) + 1, w.err);
 }
+
+} partial class io_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string largeWriterErrorˢ => ref largeWriterErrorˢᵇ;

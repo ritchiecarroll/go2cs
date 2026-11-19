@@ -137,8 +137,8 @@ that generic constraints lift to.
 
 <a id="ilc"></a>**ILC — the IL Compiler (Native AOT).**
 .NET's ahead-of-time compiler: it consumes IL at **publish** time and emits native machine code, so the
-program starts without a JIT. go2cs measures it as the third column of the performance suite (Go binary /
-C# JIT / C# **Native AOT**), and it is expensive here — each AOT publish compiles every `go.*` assembly the
+program starts without a JIT. go2cs measures it as the Native AOT column of the performance suite (Go /
+C# JIT / C# ReadyToRun / C# **Native AOT**), and it is expensive here — each AOT publish compiles every `go.*` assembly the
 program references in full
 ([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
 **ILC arrives as a runtime pack selected by the [TFM](#tfm), not by the SDK performing the publish** — so a new SDK

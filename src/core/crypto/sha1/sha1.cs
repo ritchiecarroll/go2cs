@@ -16,6 +16,8 @@ using hash = hash_package;
 using byteorder = go.@internal.byteorder_package;
 using go.@internal;
 using go.crypto.@internal;
+using sha1 = sha1_package;
+using static sha1_package;
 
 partial class sha1_package {
 
@@ -24,10 +26,10 @@ partial class sha1_package {
 }
 
 // The size of a SHA-1 checksum in bytes.
-public static UntypedInt ΔSize => 20;
+public static UntypedInt Size => 20;
 
 // The blocksize of SHA-1 in bytes.
-public static UntypedInt ΔBlockSize => 64;
+public static UntypedInt BlockSize => 64;
 
 internal static UntypedInt chunk => 64;
 internal static UntypedInt init0 => 0x67452301;
@@ -47,6 +49,8 @@ partial struct digest {
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "sha\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 5*4 + chunk + 8 */ 96;
+
+} partial class sha1ᴛdigest {
 
 internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
@@ -90,6 +94,8 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default;
 }
 
+} partial class sha1_package {
+
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
     return (b[8..], byteorder.BEUint64(b));
 }
@@ -97,6 +103,8 @@ internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
 internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b));
 }
+
+} partial class sha1ᴛdigest {
 
 internal static (hash.Cloner, error) Clone(this ref digest d) {
     ref var r = ref heap<digest>(d.ΔClone(), out var Ꮡr);
@@ -113,6 +121,8 @@ internal static void Reset(this ref digest d) {
     d.len = 0;
 }
 
+} partial class sha1_package {
+
 // New returns a new [hash.Hash] computing the SHA1 checksum. The Hash
 // also implements [encoding.BinaryMarshaler], [encoding.BinaryAppender] and
 // [encoding.BinaryUnmarshaler] to marshal and unmarshal the internal
@@ -126,9 +136,11 @@ public static hash.Hash New() {
     return new digestжHash(d);
 }
 
-internal static nint Size(this ref digest d) { return ΔSize; }
+} partial class sha1ᴛdigest {
 
-internal static nint BlockSize(this ref digest d) { return ΔBlockSize; }
+internal static nint Size(this ref digest d) { return sha1.Size; }
+
+internal static nint BlockSize(this ref digest d) { return sha1.BlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoSha1UseOfSha1IsNotˢ => ref cryptoSha1UseOfSha1IsNotˢᵇ;
@@ -201,7 +213,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
         throw panic("d.nx != 0");
     }
 
-    array<byte> digest = new(20); /* ΔSize */
+    array<byte> digest = new(20); /* sha1.Size */
 
     byteorder.BEPutUint32(digest[0..], d.h[0]);
     byteorder.BEPutUint32(digest[4..], d.h[1]);
@@ -255,7 +267,7 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
     // compress, and only keep the digest if all fit in one block
     block(ref (Ꮡd).DerefOrNull(), d.x[..]);
 
-    array<byte> digest = new(20); /* ΔSize */
+    array<byte> digest = new(20); /* sha1.Size */
     foreach (var (i, s) in range(d.h.ΔRangeSnapshot())) {
         digest[i * 4] = (byte)(mask1b & (byte)(s >> 24));
         digest[i * 4 + 1] = (byte)(mask1b & (byte)(s >> 16));
@@ -285,6 +297,8 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
 
     return digest.Clone();
 }
+
+} partial class sha1_package {
 
 // Sum returns the SHA-1 checksum of the data.
 public static array<byte> Sum(slice<byte> data) {

@@ -237,8 +237,8 @@ for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);  // the element is read at the defer statement
 }
 ```
-<!-- shape: src/tests/Behavioral/DeferLoopCapture/main.cs.target:69 `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);`
-(deferIndexedReceiverInLoop, :65 `for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {`), the fixture's conn construction written
+<!-- shape: src/tests/Behavioral/DeferLoopCapture/main.cs.target:82 `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);`
+(deferIndexedReceiverInLoop, :78 `for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {`), the fixture's conn construction written
 as dial(i). -->
 
 net's `TestConcurrentSetDeadline` is the witness: with the variable shared, `defer c[i].Close()` over a
@@ -300,7 +300,7 @@ for range atyp.Len {
 ```csharp
 foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
     var exprᴛ1 = etyp.Kind();
-    if (exprᴛ1 == abi.ΔString) {
+    if (exprᴛ1 == abi.String) {
         seq.stringOffsets = append(seq.stringOffsets, offset);
     }
     …
@@ -322,10 +322,10 @@ at landing: 570 behavioral packages, and exactly one non-`int` range operand in 
 is re-measured by a guard. -->
 
 ## An index-only range over a slice or array reads no element
-<!-- src/go2cs/visitRangeStmt.go:776 `} else if (isSlice || isArray) && valExpr == "_" {` and :850
-`foreach (%s%s in range(%s(%s)))`, the length named by :844 `lenName := "len"` (`builtin.len` where the package
-declares its own len); src/core/golib/builtin.cs:2190 `public static nint len<T>(in slice<T> slice)`,
-:2200 `public static nint len<T>(in sslice<T> slice)`, :2150 `public static nint len<T>(in array<T> array)`. -->
+<!-- src/go2cs/visitRangeStmt.go:792 `} else if (isSlice || isArray) && valExpr == "_" {` and :872
+`foreach (%s%s in range(%s(%s)))`, the length named by :866 `lenName := "len"` (`builtin.len` where the package
+declares its own len); src/core/golib/builtin.cs:2194 `public static nint len<T>(in slice<T> slice)`,
+:2204 `public static nint len<T>(in sslice<T> slice)`, :2154 `public static nint len<T>(in array<T> array)`. -->
 Go's index-only range (`for i := range s`, `for i, _ := range s`, or `for range s`) reads the length once and
 loads no element. The converter ranges the length, `foreach (var i in range(len(s)))`, when the operand is a
 slice, an array, a named slice or array type, a type parameter whose core type is one, or a variadic parameter
@@ -372,8 +372,8 @@ A pointer receiver is the value it addresses (`this ref T b`). Either would rang
 pointer and faults where Go ranges `N` times. Neither needs evaluating, because with at most one iteration variable and
 a constant length Go does not evaluate the range operand at all. So each ranges the count itself, `range(N)`, a
 pointer to a named array type included; the box overload, which cannot bind a `ref` (CS0411), is never asked to.
-<!-- src/go2cs/visitRangeStmt.go:832-833 `case isArrayPointee && rangedThroughPointer && derefdValue:` then
-`foreach (%s%s in range(%d))`, and :840 `foreach (%s%s in range(%s, %d))` for the box form; Go spec, For statements
+<!-- src/go2cs/visitRangeStmt.go:849-850 `case isArrayPointee && rangedThroughPointer && derefdValue:` then
+`foreach (%s%s in range(%d))`, and :862 `foreach (%s%s in range(%s, %d))` for the box form; Go spec, For statements
 with range clause: "if at most one iteration variable is present and len(x) is constant, the range expression is
 not evaluated". Ruled 2026-10-25 (COORD, H's diagnosis of C2's H12 finding): before it a nil pointer parameter or
 receiver faulted at `range(p)`; runtime's pageBits.setAll and image/jpeg's differ are the corpus sites. src/core/golib/RangePairs.cs:87
@@ -392,7 +392,7 @@ ranges a nil `*[3]int` and a nil `*grid` and prints Go's counts, and whose `fill
 :261 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`; :267 `expect("overPointerParam", "foreach (var i in range(2))")`;
 :269 `expect("setAll", "foreach (var i in range(4))")`;
 :281 `expect("overString", "foreach (var (i, _) in str)")`; :282 `expect("overMap", "foreach (var (k, _) in m)")`.
-src/go2cs/collectionExpressionTargets_test.go:218 `func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {`.
+src/go2cs/collectionExpressionTargets_test.go:219 `func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {`.
 src/go2cs/rangeNilPointerArray_test.go `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`.
 src/tests/Behavioral/PointerArraySlice/main.go:63 `func rangeIndexOnly() {`, :90 `func (b *grid) fill() {`.
 src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:105 `foreach (var i in range(len(a))) {`;
@@ -407,7 +407,7 @@ for range b.N {
     _ = Size(data)
 }
 ```
-<!-- source: src/core/encoding/binary/binary_test.cs:1340-1342 -->
+<!-- source: src/core/encoding/binary/binary_test.cs:1345-1347 -->
 ```csharp
 foreach (var _ᴛ1 in range((~bΔ1).N)) {
     _ = Size(dataʗ1);

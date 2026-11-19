@@ -27,9 +27,6 @@ using static go.go.token_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("File", "ΔFile")]
-[assembly: GoTypeAlias("Pos", "ΔPos")]
-[assembly: GoTypeAlias("Position", "ΔPosition")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -52,11 +49,11 @@ using static go.go.token_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(File))]
 [assembly: GoFieldAccess(typeof(FileSet))]
 [assembly: GoFieldAccess(typeof(lineInfo))]
 [assembly: GoFieldAccess(typeof(node))]
 [assembly: GoFieldAccess(typeof(tree))]
-[assembly: GoFieldAccess(typeof(ΔFile))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,10 +63,10 @@ using static go.go.token_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/token/position.go", "position.cs", "ACJEgAABFAAIAoKCgpSCgqaClAAgRJIAFC6SqJKokqiSqLKCgoKs0oKClK4ACQKClIKCgu6CoqjCgoKCAAIWAAsEgoKCyoKCgqrSgoKCgpSCgsqCkqwACAKClIKCgpQADx6iAAIWAAoCgoKUqJKUgsaCxriCuAACGAAJAgACGAAJAqqipoKGppSsAAgCgoKAgqSUgoKClIKCyoKm7oKmsoKCggACEPKClKyyACJIks7CgoKCAAIkABUElIKCgpSClIKCpoKCpoKCgt4AHCaClIKCtAACEAAMAoKUlIKCtKjCgsqigoLkpMSCpoKUgqaClNzSgpSu4oKCpqqirAALFJKClIKUpg==", "334-336:1;559-563:1")]
-[assembly: GoPositionMap("go/token/serialize.go", "serialize.cs", "ABkwsoKCpoKCggAHEIKUqLKUgoKCgoLulIKU", "", "", "63=Clone/1/2/4,Clone/2/2/5")]
-[assembly: GoPositionMap("go/token/token.go", "token.cs", "AIQBjAIAZdYB0oKClIKUAAsispSkpKSklMqCgoK6koKUrrCYoqqQlpKCqKSCrLKClIKCpg==")]
-[assembly: GoPositionMap("go/token/tree.go", "tree.cs", "ADRqggACGAAJApSklKrSgoKClIKUgoK4goKCgpSClIKCAAMQAAgCkoKCgoKClKauwoKClIKCgqaClKYABhDClKSkpLiigoKUlIKClKaigoK4soKCuLKCgriigpSmgoKCpqKUgpS0tLQABBQACAKCgoKUgpS2gpSkuJS81IKClIKUgoKUgoKq1IKClIKUgoKUgoKq0oKCgpSCAAUQ0riClIKUgoKospSCyoKUpoKUtoKCtraCgoKCgqrCgpSCgoKUgoKCgpSs4oKUgoKClA==", "132-151:1", "", "362=Name/1/2/1,Base/1/2/1,End/1/2/1,Name/2/2/2,Base/2/2/2,End/2/2/2")]
+[assembly: GoPositionMap("go/token/position.go", "position.cs", "ACVEgAABFAAIAoKCgpSCgqaClAAkRJIAGC6SqJKokqiSqLKCgoKs0oKClK4ACQKClIKCgu6CoqjCgoKCAAIWAAsEgoKCyoKCgqrSgoKCgpSCgsqCkqwACAKClIKCgpQAEx6iAAIWAAoCgoKUqJKUgsaCxriCuAACGAAJAgACGAAJAqqixoKGppTMAAgCgoKAgqSUgoKClIKCyoKm7oKmsoKCggACEPKClKyyACRIku7CgoKCAAIkABUElIKCgpSClIKCpoKCpoKCgt4AHCaClIKCtAACEAAMAoKUlIKCtKjCgsqigoLkpMSCpoKUgqaClNzSgpSu4oKCpqqizAALFJKClIKUpg==", "334-336:1;559-563:1")]
+[assembly: GoPositionMap("go/token/serialize.go", "serialize.cs", "ABwwsoKCpoKCggAHEIKUqLKUgoKCgoLulIKU", "", "", "66=Clone/1/2/4,Clone/2/2/5")]
+[assembly: GoPositionMap("go/token/token.go", "token.cs", "AIUBjAIAZ9YB0oKClIKUAA8ispSkpKSklOqCgoK6koKUzrCYoqqQtpKCqKSCrLKClIKCpg==")]
+[assembly: GoPositionMap("go/token/tree.go", "tree.cs", "ADdqggAEGAAJApSklMrSgoKClIKUgoK4goKCgpSClIKCAAUQAAgCkoKCgoKClKauwoKClIKCgqaClKYABhDClKSkpNiigoKUlIKClMaigoLYsoKCuLKCgriigpSmgoKCxqKUgpS0tLQABBQACAKCgoKUgpS2gpSkuJS81IKClIKUgoKUgoKq1IKClIKUgoKUgoKq0oKCgpSCAAUQ0riClIKUgoKospSCyoKUpoKUtoKCtraCgoKCgqrCgpSCgoKUgoKCgpSs4oKUgoKClA==", "132-151:1", "", "379=Name/1/2/1,Base/1/2/1,End/1/2/1,Name/2/2/2,Base/2/2/2,End/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -84,17 +81,17 @@ public static partial class token_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct key {}
     internal partial struct node {}
     internal partial struct serializedFileSet {}
     internal partial struct tree {}
-    internal partial struct Δkey {}
+    public partial struct File {}
     public partial struct FileSet {}
+    public partial struct Pos {}
+    public partial struct Position {}
     public partial struct Token {}
     public partial struct lineInfo {}
     public partial struct serializedFile {}
-    public partial struct ΔFile {}
-    public partial struct ΔPos {}
-    public partial struct ΔPosition {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -114,3 +111,19 @@ public static partial class token_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(global::go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(token_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛFile;
+[GoMethodHost(typeof(token_package.FileSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛFileSet;
+[GoMethodHost(typeof(token_package.Pos)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛPos;
+[GoMethodHost(typeof(token_package.Position)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛPosition;
+[GoMethodHost(typeof(token_package.Token)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛToken;
+[GoMethodHost(typeof(token_package.node)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛnode;
+[GoMethodHost(typeof(token_package.tree)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tokenᴛtree;
+// </MethodHolders>

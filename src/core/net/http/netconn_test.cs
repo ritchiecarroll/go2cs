@@ -16,6 +16,7 @@ using time = time_package;
 using global::go.@internal;
 using global::go.net;
 using static global::go.net.http_internal_test_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -41,6 +42,8 @@ partial struct fakeNetListener {
     internal bool trackConns; // set this to record all created conns
     internal slice<ж<fakeNetConn>> conns;
 }
+
+} partial class http_testᴛfakeNetListener {
 
 internal static void @lock(this ref fakeNetListener li) {
     var selᴛ16 = li.setc;
@@ -122,9 +125,11 @@ internal static error Close(this ж<fakeNetListener> Ꮡli) {
     finally { if (ᒐd1) Ꮡli.DerefOrNull().unlock(); ᒐ.Run(); }
 }
 
-internal static netꓸAddr Addr(this ref fakeNetListener li) {
-    return new net.TCPAddrжΔAddr(net.TCPAddrFromAddrPort(li.addr));
+internal static net.Addr Addr(this ref fakeNetListener li) {
+    return new net.TCPAddrжAddr(net.TCPAddrFromAddrPort(li.addr));
 }
+
+} partial class http_test_package {
 
 // fakeNetPipe creates an in-memory, full duplex network connection.
 //
@@ -134,8 +139,8 @@ internal static netꓸAddr Addr(this ref fakeNetListener li) {
 internal static (ж<fakeNetConn> r, ж<fakeNetConn> w) fakeNetPipe(netip.AddrPort s1ap, netip.AddrPort s2ap) {
     var s1addr = net.TCPAddrFromAddrPort(s1ap);
     var s2addr = net.TCPAddrFromAddrPort(s2ap);
-    var s1 = newSynctestNetConnHalf(new net.TCPAddrжΔAddr(s1addr));
-    var s2 = newSynctestNetConnHalf(new net.TCPAddrжΔAddr(s2addr));
+    var s1 = newSynctestNetConnHalf(new net.TCPAddrжAddr(s1addr));
+    var s2 = newSynctestNetConnHalf(new net.TCPAddrжAddr(s2addr));
     var c1 = Ꮡ(new fakeNetConn(loc: s1, rem: s2));
     var c2 = Ꮡ(new fakeNetConn(loc: s2, rem: s1));
     c1.peer = c2;
@@ -155,6 +160,8 @@ partial struct fakeNetConn {
     internal ж<fakeNetConn> peer;
     internal Action<ж<fakeNetConn>> onClose; // called when closing
 }
+
+} partial class http_testᴛfakeNetConn {
 
 // Read reads data from the connection.
 internal static (nint n, error err) Read(this ref fakeNetConn c, slice<byte> b) {
@@ -238,12 +245,12 @@ internal static error Close(this ж<fakeNetConn> Ꮡc) {
 }
 
 // LocalAddr returns the (fake) local network address.
-internal static netꓸAddr LocalAddr(this ref fakeNetConn c) {
+internal static net.Addr LocalAddr(this ref fakeNetConn c) {
     return c.loc.addr;
 }
 
 // LocalAddr returns the (fake) remote network address.
-internal static netꓸAddr RemoteAddr(this ref fakeNetConn c) {
+internal static net.Addr RemoteAddr(this ref fakeNetConn c) {
     return c.rem.addr;
 }
 
@@ -272,10 +279,18 @@ internal static void SetReadBufferSize(this ref fakeNetConn c, nint size) {
     c.loc.setReadBufferSize(size);
 }
 
+internal static void SetReadError(this ref fakeNetConn c, error err) {
+    c.loc.@lock();
+    c.loc.readErr = err;
+    c.loc.unlock();
+}
+
+} partial class http_test_package {
+
 // fakeNetConnHalf is one data flow in the connection created by fakeNetPipe.
 // Each half contains a buffer. Writes to the half push to the buffer, and reads pull from it.
 partial struct fakeNetConnHalf {
-    internal netꓸAddr addr;
+    internal net.Addr addr;
     // Read and write timeouts.
     internal deadlineContext rctx, wctx;
     // A half can be readable and/or writable.
@@ -294,7 +309,7 @@ partial struct fakeNetConnHalf {
     internal error writeErr; // error returned by writes
 }
 
-internal static ж<fakeNetConnHalf> newSynctestNetConnHalf(netꓸAddr addr) {
+internal static ж<fakeNetConnHalf> newSynctestNetConnHalf(net.Addr addr) {
     var h = Ꮡ(new fakeNetConnHalf(
         addr: addr,
         lockw: new channel<EmptyStruct>(1),
@@ -306,6 +321,8 @@ internal static ж<fakeNetConnHalf> newSynctestNetConnHalf(netꓸAddr addr) {
     h.unlock();
     return h;
 }
+
+} partial class http_testᴛfakeNetConnHalf {
 
 // lock locks h.
 internal static void @lock(this ref fakeNetConnHalf h) {
@@ -382,7 +399,7 @@ internal static error waitAndLockForRead(this ж<fakeNetConnHalf> Ꮡh) {
         return default; // readable and writable
     }
     case 2 when selᴛ26.ꟷᐳ(out _): {
-        return context_package.Cause(ctx);
+        return context.Cause(ctx);
     }}
     return default;
 }
@@ -418,7 +435,7 @@ internal static error waitAndLockForWrite(this ж<fakeNetConnHalf> Ꮡh) {
         return default; // readable and writable
     }
     case 2 when selᴛ31.ꟷᐳ(out _): {
-        return context_package.Cause(ctx);
+        return context.Cause(ctx);
     }}
     return default;
 }
@@ -510,6 +527,8 @@ internal static (nint n, error err) writePartial(this ж<fakeNetConnHalf> Ꮡh, 
     ᒐdone: return (n, err);
 }
 
+} partial class http_test_package {
+
 // deadlineContext converts a changable deadline (as in net.Conn.SetDeadline) into a Context.
 partial struct deadlineContext {
     internal sync.Mutex mu;
@@ -517,6 +536,8 @@ partial struct deadlineContext {
     internal Action<error> cancel;
     internal ж<time.Timer> timer;
 }
+
+} partial class http_testᴛdeadlineContext {
 
 // context returns a Context which expires when the deadline does.
 internal static context.Context context(this ж<deadlineContext> Ꮡt) {
@@ -586,4 +607,4 @@ internal static void setDeadline(this ж<deadlineContext> Ꮡt, time.Time deadli
     finally { ᒐ.Run(); }
 }
 
-} // end http_test_package
+} // end http_testᴛdeadlineContext

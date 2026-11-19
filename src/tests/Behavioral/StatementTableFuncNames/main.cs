@@ -4,6 +4,7 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,11 +12,15 @@ partial struct T {
     internal nint n;
 }
 
+} partial class mainᴛT {
+
 internal static nint valueMethod(this T t) { return t.n; }
 
 public static nint ValueMethod(this T t) { return t.n + 1; }
 
 internal static nint pointerMethod(this ref T t) { return t.n; }
+
+} partial class main_package {
 
 partial struct W {
     /*embed*/ public bytes_package.Buffer Buffer;

@@ -49,7 +49,8 @@ still the *minimal* solution, just the one that generalizes.
 
 **Two solutions, one tree**: `src/go2cs.slnx` is the converter-dev workspace; `src/go2cs-stdlib.slnx`
 is every `core/` package. They overlap deliberately. ⚠ **Nothing routinely builds `go2cs.slnx` end to
-end**, so a broken solution member rots invisibly — build it once after any golib/runtime API change.
+end**, so a broken solution member rots invisibly — build it once after any golib/runtime API change
+(os-matrix stage `solution-build`).
 
 Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md). Converter entry `src/go2cs/main.go`;
 `visit*.go` walk AST → C#, `conv*.go` convert expressions/types.
@@ -66,7 +67,7 @@ Detail: `.claude/rules/corpus.md`.
 
 Phase 3 complete (2026-07-10): the full converted stdlib compiles clean. Phase 4 (operational
 validation against Go's own test suites) is live via the `-tests` pipeline, and the corpus is on
-**Go 1.26.10**. Roster, counts and campaign state are in
+**Go 1.26.11**. Roster, counts and campaign state are in
 [`docs/ValidatedTestPackages.md`](docs/ValidatedTestPackages.md) and
 [`docs/phase4/BOARD-next-validation-candidates.md`](docs/phase4/BOARD-next-validation-candidates.md).
 **Never quote a count from this file** — it is exactly the kind of fact that goes stale silently.

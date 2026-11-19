@@ -6,6 +6,7 @@ namespace go.@internal;
 using goarch = go.@internal.goarch_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static abi_package;
 
 partial class abi_package {
 
@@ -42,6 +43,8 @@ partial struct RegArgs {
     public IntArgRegBitmap ReturnIsPtr;
 }
 
+} partial class abiᴛRegArgs {
+
 public static void Dump(this ref RegArgs r) {
     print((@string)"Ints:");
     foreach (var (_, x) in range(r.Ints.ΔRangeSnapshot())) {
@@ -77,13 +80,17 @@ public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintpt
     if (goarch.BigEndian) {
         offset = (uintptr)goarch.PtrSize - argSize;
     }
-    return (@unsafe.Pointer)((uintptr)@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)) + offset);
+    return @unsafe.Add(@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)), offset);
 }
+
+} partial class abi_package {
 
 // IntArgRegBitmap is a bitmap large enough to hold one bit per
 // integer argument/return register.
 /* [(IntArgRegs + 7) / 8]uint8 */
 partial struct IntArgRegBitmap /*[2]uint8*/;
+
+} partial class abiᴛIntArgRegBitmap {
 
 // Set sets the i'th bit of the bitmap to 1.
 public static void Set(this ref IntArgRegBitmap b, nint i) {
@@ -97,11 +104,9 @@ public static void Set(this ref IntArgRegBitmap b, nint i) {
 //
 //go:nosplit
 public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
     // Compute p=&b[i/8], but without a bounds check. We don't have the stack for it.
-    var p = (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref b) + (uintptr)(i / 8)));
+    var p = @unsafe.Pointer.To<byte>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡb), (uintptr)(i / 8)));
     return (byte)(p.Value & (((uint8)1).Lsh((int64)(i % 8)))) != 0;
 }
 
-} // end abi_package
+} // end abiᴛIntArgRegBitmap

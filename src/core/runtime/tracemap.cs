@@ -20,6 +20,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -58,6 +59,8 @@ partial struct traceMapNode {
     internal slice<byte> data;
 }
 
+} partial class runtimeᴛtraceMap {
+
 // stealID steals an ID from the table, ensuring that it will not
 // appear in the table anymore.
 internal static uint64 stealID(this ж<traceMap> Ꮡtab) {
@@ -80,7 +83,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
     var m = Ꮡtab.Ꮡroot;
     var hashIter = hash;
     for (;;) {
-        var n = (ж<traceMapNode>)(uintptr)(m.Load());
+        var n = @unsafe.Pointer.To<traceMapNode>(m.Load());
         if (n == nil) {
             // Try to insert a new map node. We may end up discarding
             // this node if we fail to insert because it turns out the
@@ -106,7 +109,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
             // Reload n. Because pointers are only stored once,
             // we must have lost the race, and therefore n is not nil
             // anymore.
-            n = (ж<traceMapNode>)(uintptr)(m.Load());
+            n = @unsafe.Pointer.To<traceMapNode>(m.Load());
         }
         if (n.hash == hash && (uintptr)len(n.data) == size) {
             if (memequal(@unsafe.Pointer.FromPinnedBox(Ꮡ(n.data, 0)), data, size)) {
@@ -130,4 +133,4 @@ internal static void reset(this ж<traceMap> Ꮡtab) {
     Ꮡtab.Ꮡmem.drop();
 }
 
-} // end runtime_package
+} // end runtimeᴛtraceMap

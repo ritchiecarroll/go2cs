@@ -5,6 +5,7 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
@@ -16,12 +17,16 @@ partial struct inner {
     internal nint n;
 }
 
+} partial class mainᴛinner {
+
 internal static nint Add(this ref inner i, nint d) {
     i.n += d;
     return i.n;
 }
 
 internal static nint Get(this inner i) { return i.n; }
+
+} partial class main_package {
 
 partial struct outer {
     /*embed*/ internal inner inner;
@@ -38,7 +43,7 @@ partial struct box<T> {
 
 internal static uintptr pc(any f) { return reflect.ValueOf(f).Pointer(); }
 
-internal static uintptr tablePC(reflectꓸType t, @string name) {
+internal static uintptr tablePC(reflect.Type t, @string name) {
     var (m, _) = t.MethodByName(name);
     return m.Func.Pointer();
 }
@@ -47,7 +52,11 @@ partial struct own {
     internal @string s;
 }
 
+} partial class mainᴛown {
+
 internal static @string Say(this own o, @string p) { return p + o.s; }
+
+} partial class main_package {
 
 internal static void main() {
     var write = ((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)));
@@ -91,10 +100,10 @@ internal static void main() {
         pc(((Func<box<nint>, nint>)(mainᴛboxᴛpkg.Get))) == tablePC(reflect.TypeOf(new box<nint>()), "Get"));
     fmt.Println("(*bufio.ReadWriter).ReadString is one func:",
         pc(((Func<ж<bufio.ReadWriter>, byte, (@string, error)>)(global::go.bufioᴛReadWriterᴛpkg.ReadString))) == pc(((Func<ж<bufio.ReadWriter>, byte, (@string, error)>)(global::go.bufioᴛReadWriterᴛpkg.ReadString))));
-    fmt.Println("and not another's:", pc(((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))) != pc(((Func<ж<inner>, nint, nint>)(Add))), pc(((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))) != pc(((Func<ж<deep>, nint, nint>)(mainᴛdeepᴛpkg.Add))),
+    fmt.Println("and not another's:", pc(((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))) != pc(((Func<ж<inner>, nint, nint>)(mainᴛinner.Add))), pc(((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))) != pc(((Func<ж<deep>, nint, nint>)(mainᴛdeepᴛpkg.Add))),
         pc(((Func<outer, nint>)(mainᴛouterᴛpkg.Get))) != pc(((Func<box<nint>, nint>)(mainᴛboxᴛpkg.Get))));
     
-    var say = ((Func<own, @string, @string>)(Say));
+    var say = ((Func<own, @string, @string>)(mainᴛown.Say));
     fmt.Println("own.Say:", say(new own("!"), "hi"));
     var recvʗ1 = new own("?");
     

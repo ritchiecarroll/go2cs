@@ -12,7 +12,6 @@
 // <ImportedTypeAliases>
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using ed25519ꓸPublicKey = go.crypto.@internal.fips140.ed25519_package.ΔPublicKey;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,7 +61,7 @@ using static go.crypto.ed25519_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "AC9kwoKClN6SgoKokoKClKyyAA0gAAsCuoKUgoKClJSkgpSkpAANIICUAAEWAAkCgoKCgqa4goKmgoKu1IKCpoKClJSqxoKCpoK6gpSCAAIQ0gAGHAANAoKUgoKUlKSClKSk", "98-100:1;100-102:2;204-206:1;206-208:2")]
+[assembly: GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "ADJkwoKClAAJDpKCgqiSgoKUrLIAESAACwK6gpSCgoKUlKSClKSkABEggLQAARYACQKCgoKCpriCgqaCgq7UgoKmgoKUlKrGgoKmgrqClIIAAhDSAAgcAA0CgpSCgpSUpIKUpKQ=", "98-100:1;100-102:2;204-206:1;206-208:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -102,3 +101,15 @@ public static partial class ed25519_package
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ed25519_package.Options)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛOptions;
+[GoMethodHost(typeof(ed25519_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
+[GoMethodHost(typeof(ed25519_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
+// </MethodHolders>

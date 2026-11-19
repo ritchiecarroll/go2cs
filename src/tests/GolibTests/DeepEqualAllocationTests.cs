@@ -81,8 +81,8 @@ public class DeepEqualAllocationTests
     [TestMethod]
     public void SliceOfArraysKeepsItsElementLength()
     {
-        reflect.ΔType six = reflect.TypeOf(sliceOf(new array<byte>(new byte[6])));
-        reflect.ΔType three = reflect.TypeOf(sliceOf(new array<byte>(new byte[3])));
+        reflect.Type six = reflect.TypeOf(sliceOf(new array<byte>(new byte[6])));
+        reflect.Type three = reflect.TypeOf(sliceOf(new array<byte>(new byte[3])));
 
         Assert.AreEqual((nint)6, six.Elem().Len());
         Assert.AreEqual((nint)3, three.Elem().Len());

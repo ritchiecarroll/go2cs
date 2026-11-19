@@ -44,7 +44,7 @@ partial class asmgen_package {
     jmpNonZero: "BNE %s, %s"
 )); }
 
-internal static void mips64MulWide(ж<Asm> a, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
+internal static void mips64MulWide(ж<Asm> a, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
     a.Printf("\tMULVU %s, %s\n\tMOVV LO, %s\n\tMOVV HI, %s\n", src1, src2, dstlo, dsthi);
 }
 

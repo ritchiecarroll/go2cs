@@ -636,7 +636,7 @@ public class FieldAccessGenerator : ISourceGenerator
         }
 
         static bool HasMethod(INamedTypeSymbol type, string name) =>
-            type.ContainingType is { } package && package.GetMembers(name).OfType<IMethodSymbol>().Any(method =>
+            type.ContainingType is { } package && GoMethodHosts.DeclaredMethods(package, type, name).Any(method =>
                 method.IsExtensionMethod && method.Parameters.Length > 0 && IsReceiverOf(method.Parameters[0].Type, type));
 
         static bool IsReceiverOf(ITypeSymbol receiver, INamedTypeSymbol type)

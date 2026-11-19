@@ -82,9 +82,9 @@ using static global::go.io_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("io/io_test.go", "io_test.cs", "ACE4koKCgoKC+IKCgoKCgqaCgriCgoKCgoK4goKCgoKCuIKCgoKCgriCgoKCgoIACRSCgqyygoKCgoKCggAHEILuggAIDLKCgoKCuIKCgoKCgriCgoKCgoK4goKCgoKCuKKCgoKUgoK4ooKCgpSCggAHEIIACQqC5riUgoKmgoKmgoKmgoKmgoKmgoK4goIACRSygoKUpoKCgqaCgoKmgoKCgoKUgpSCgpSClIKClIKUgoKUgpSCgoKClIKUgriCgoKCgoKAgqSClIKUgIKkgoKCgoCCABIIgoIADSyCgoKCgIKkgILalIKUgoKCgoLugoKmgoIACAiCAAQQgoKCggAICoKCgoKCgpSCgpSCAAkUguaCgoKCgoCCtoKCgoKAggAOCIIAAxSUgoKCABQKooKCgpSSppKCgoKC7pKCgoKCAAcQkgAIGoKCgurkgoKClKKCgoKUpIKUgoKilIKCgpSipKaCgoKUgoLGkoKCAAgKooKCgoKUtpSCgoKCtAAOBIKCgpSCgoKClJSUgoKClIKCyoKC5oKSgoKCpriCgpKCosiCwoKSgqI=", "515-524:1;527-537:2;540-561:3;569-606:1;582-591:1.1;639-646:1;647-659:2;663-683:3;688-693:4", "", "", "597:21,670:25,731:21,797:25,811:25,829:25")]
-[assembly: GoPositionMap("io/multi_test.go", "multi_test.cs", "AB0mgoKCgoKCgoKCgpSCgoKCpoKCpoKmlJKCgoKUkoKCgpSSuILOgoKUgoKClIKUggAICIKUrIL6opKIkpSC/IKCpoLWgoKCgoIADgiIgpSCgpSCpoKmgoKmgu6CqJKCgoKCooKCppSCpoKUgsqChoKClIKCgvqSgoKCgoK6koKCgoKCgpSC7oKosoKCgoKU6JKCgoKCooKCuIKmlIIACBKCppSC6JKCgpSCgr6ygoKCguiCgriSgoKCgLaCgIK2gua2gILIgoKUgpS4goCC2oKAgg==", "23-30:1;31-48:2;49-54:3;55-60:4;61-63:5;112-114:1;182-186:1;204-206:1;207-210:2;268-272:1;331-336:1;335-335:1.1", "", "81=NewReader/1/3/1,NewReader/2/3/3,NewReader/3/3/4,MultiReader/1/2/2")]
-[assembly: GoPositionMap("io/pipe_test.go", "pipe_test.cs", "ABMigoKClIKUqJKCgoKCgoKCgpSCgqaCgoKCgoKUgpS6koKCgoKCgoKClIKUgoKmgoKCAAgUkoKCpoKCgoKClIKCgoKCgriCgoKCgoKmgpSUgoKUgpSCggARJIKmAAgSgoKCgpSUgpSmgrKCgoKUlIKCgoKClIKUgpSCzJKCgoKCgoL8krKCgoKUlIKCgoKUgpSClILMkoKCgoKCgriCgpKClIKCpoKCkoKUgoKmooKSgoKigoKUgoKmgoKCgpSClIKUgrQACgSCiIKAgqSCgIK2goKAgqSCgIIADAiCvIKUgpKCgsqCgoLcgoKCuIKUgoKigoKClLiCgtyCgpSCgoKCyqKCgoKUggAFEIKCyoKC", "267-270:1;278-281:1;292-300:1;351-377:1;355-360:1.1;379-412:2;384-391:2.1;431-433:1", "", "", "306:21")]
+[assembly: GoPositionMap("io/io_test.go", "io_test.cs", "ACI4koKCgoKC+IKCgoKCgqaCgriCgoKCgoK4goKCgoKCuIKCgoKCgriCgoKCgoIACxSCgsyygoKCgoKCggAJEIIACg6CAAoMsoKCgoK4goKCgoKCuIKCgoKCgriCgoKCgoK4ooKCgpSCgriigoKClIKCAAkQggANCoIACAa4lIKCpoKCpoKCpoKCpoKCpoKCuIKCAAsUsoKClMaCgoKmgoKCpoKCgoKClIKUgoKUgpSCgpSClIKClIKUgoKCgpSClIK4goKCgoKCgIKkgpSClICCpIKCgoKAggASCIKCAA0sgoKCgoCCpICC2pSClIKCgoKC7oKCpoKCAAgIggAEEIKCgoIACAqCgoKCgoKUgoKUggALFIIACAaCgoKCgoCCtoKCgoKAggAOCIIAAxSUgoKCABQKooKCgpSSppKCgoKC7pKCgoKCAAcQkgAIGoKCgurkgoKClKKCgoKUpIKUgoKilIKCgpSipKaCgoKUgoLGkoKCAAgKooKCgoKUtpSCgoKCtAAOBIKCgpSCgoKClJSUgoKClIKCyoKC5oKSgoKCpriCgpKCosiCwoKSgqI=", "515-524:1;527-537:2;540-561:3;569-606:1;582-591:1.1;639-646:1;647-659:2;663-683:3;688-693:4", "", "", "626:21,699:25,760:21,826:25,840:25,858:25")]
+[assembly: GoPositionMap("io/multi_test.go", "multi_test.cs", "AB4mgoKCgoKCgoKCgpSCgoKCpoKCpoKmlJKCgoKUkoKCgpSSuILOgoKUgoKClIKUggAICIKUrIL6opKIkpSCAAkMgoKmgvaCgoKCggAOCIiClIKClIKmgqaCgqaCAAgOgsiSgoKCgqKCgqaUgqaClILKgoaCgpSCgoL6koKCgoKCupKCgoKCgoKUggAIDoLIsoKCgoKU6JKCgoKCooKCuIKmlIIAChKCppSCAAgIkoKClIKCvrKCgoKC6IKCuJKCgoKAtoKAgraC5raAgsiCgpSClLiCgILagoCC", "23-30:1;31-48:2;49-54:3;55-60:4;61-63:5;112-114:1;182-186:1;204-206:1;207-210:2;268-272:1;331-336:1;335-335:1.1", "", "82=NewReader/1/3/1,NewReader/2/3/3,NewReader/3/3/4,MultiReader/1/2/2")]
+[assembly: GoPositionMap("io/pipe_test.go", "pipe_test.cs", "ABQigoKClIKUqJKCgoKCgoKCgpSCgqaCgoKCgoKUgpS6koKCgoKCgoKClIKUgoKmgoKCAAgUkoKCpoKCgoKClIKCgoKCgriCgoKCgoKmgpSUgoKUgpSCggATJILGAAgSgoKCgpSUgpSmgrKCgoKUlIKCgoKClIKUgpSCzJKCgoKCgoL8krKCgoKUlIKCgoKUgpSClILMkoKCgoKCgriCgpKClIKCpoKCkoKUgoKmooKSgoKigoKUgoKmgoKCgpSClIKUgrQACgSCiIKAgqSCgIK2goKAgqSCgIIADAiCvIKUgpKCgsqCgoLcgoKCuIKUgoKigoKClLiCgtyCgpSCgoKCyqKCgoKUggAFEIKCyoKC", "267-270:1;278-281:1;292-300:1;351-377:1;355-360:1.1;379-412:2;384-391:2.1;431-433:1", "", "", "311:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -153,3 +153,24 @@ public static partial class io_test_package
         builtin.initPackage(typeof(global::go.io_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(io_test_package.byteAndEOFReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛbyteAndEOFReader;
+[GoMethodHost(typeof(io_test_package.dataAndErrorBuffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛdataAndErrorBuffer;
+[GoMethodHost(typeof(io_test_package.errWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛerrWriter;
+[GoMethodHost(typeof(io_test_package.largeWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛlargeWriter;
+[GoMethodHost(typeof(io_test_package.noReadFrom)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛnoReadFrom;
+[GoMethodHost(typeof(io_test_package.pipeTest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛpipeTest;
+[GoMethodHost(typeof(io_test_package.readerFunc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛreaderFunc;
+[GoMethodHost(typeof(io_test_package.wantedAndErrReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛwantedAndErrReader;
+[GoMethodHost(typeof(io_test_package.writeStringChecker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛwriteStringChecker;
+[GoMethodHost(typeof(io_test_package.writeToChecker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛwriteToChecker;
+[GoMethodHost(typeof(io_test_package.writerFunc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛwriterFunc;
+[GoMethodHost(typeof(io_test_package.zeroErrReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class io_testᴛzeroErrReader;
+// </MethodHolders>

@@ -36,8 +36,8 @@ partial class os_package
     private static void prepayDeadlinePath()
     {
         // Read and read are also promoted onto the types that embed *File; these casts pick File's own.
-        RuntimeHelpers.PrepareMethod(((Func<ж<File>, slice<byte>, (nint, error)>)Read).Method.MethodHandle);
-        RuntimeHelpers.PrepareMethod(((Func<ж<File>, slice<byte>, (nint, error)>)read).Method.MethodHandle);
+        RuntimeHelpers.PrepareMethod(((Func<ж<File>, slice<byte>, (nint, error)>)osᴛFile.Read).Method.MethodHandle);
+        RuntimeHelpers.PrepareMethod(((Func<ж<File>, slice<byte>, (nint, error)>)osᴛFile.read).Method.MethodHandle);
 
         ж<File> spare = Ꮡ(new File(Ꮡ(new @file())));
         spare.SetReadDeadline(default);

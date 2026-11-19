@@ -7,6 +7,7 @@ namespace go;
 
 using @unsafe = unsafe_package;
 using ꓸꓸꓸnint = Span<nint>;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -22,11 +23,13 @@ public static nint CmsgSpace(nint datalen) {
     return cmsgAlignOf(SizeofCmsghdr) + cmsgAlignOf(datalen);
 }
 
-internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) {
-    ref var h = ref Ꮡh.DerefOrNull();
+} partial class syscallᴛCmsghdr {
 
-    return (@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref h) + (uintptr)cmsgAlignOf(SizeofCmsghdr) + offset);
+internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) {
+    return @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡh), (uintptr)cmsgAlignOf(SizeofCmsghdr) + offset);
 }
+
+} partial class syscall_package {
 
 // SocketControlMessage represents a socket control message.
 partial struct SocketControlMessage {
@@ -71,7 +74,7 @@ public static slice<byte> UnixRights(params ꓸꓸꓸnint fdsʗp) {
     h.Type = SCM_RIGHTS;
     h.SetLen(CmsgLen(datalen));
     foreach (var (i, fd) in range(fds)) {
-        ((ж<int32>)(uintptr)(h.data(4 * (uintptr)i))).Value = (int32)fd;
+        (@unsafe.Pointer.To<int32>(h.data(4 * (uintptr)i))).Value = (int32)fd;
     }
     return b;
 }

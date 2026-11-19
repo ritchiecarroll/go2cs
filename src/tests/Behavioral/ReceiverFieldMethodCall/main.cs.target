@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,6 +13,8 @@ internal static int32 bump(ref int32 p, int32 delta) {
     p += delta;
     return p;
 }
+
+} partial class mainᴛCounter {
 
 public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -28,16 +31,22 @@ internal static int32 add(this ж<Counter> Ꮡc, int32 delta) {
 public static void Set(this ж<Counter> Ꮡc, int32 v) { (Ꮡc.Ꮡn).Value = v; }
 public static int32 Get(this ref Counter c) { return c.n; }
 
+} partial class main_package {
+
 partial struct Flag {
     internal Counter c;
     internal @string label;
 }
+
+} partial class mainᴛFlag {
 
 public static int32 Incr(this ж<Flag> Ꮡf) { return Ꮡf.Ꮡc.Add(1); }
 public static int32 AddN(this ж<Flag> Ꮡf, int32 d) { return Ꮡf.Ꮡc.Add(d); }
 public static void Reset(this ж<Flag> Ꮡf, int32 v) { Ꮡf.Ꮡc.Set(v); }
 public static int32 Value(this ref Flag f) { return f.c.Get(); }
 public static @string Label(this ref Flag f) { return f.label; }
+
+} partial class main_package {
 
 internal static int32 applyTwice(Func<int32, int32> f, int32 d) {
     f(d);
@@ -46,9 +55,16 @@ internal static int32 applyTwice(Func<int32, int32> f, int32 d) {
 
 internal static int32 readVia(Func<int32> get) { return get(); }
 
+} partial class mainᴛCounter {
+
 public static int32 AddTwice(this ж<Counter> Ꮡc, int32 d) { return applyTwice(Ꮡc.Add, d); }
+
+} partial class mainᴛFlag {
+
 public static int32 AddViaValue(this ж<Flag> Ꮡf, int32 d) { return applyTwice(Ꮡf.Ꮡc.Add, d); }
 public static int32 ReadViaValue(this ж<Flag> Ꮡf) { return readVia(Ꮡf.Ꮡc.Get); }
+
+} partial class main_package {
 
 internal static void main() {
     ref var fl = ref heap(new Flag(), out var Ꮡfl);

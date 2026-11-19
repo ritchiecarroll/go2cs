@@ -6,6 +6,7 @@ namespace go.@internal;
 
 using Δsyscall = syscall_package;
 using go;
+using static poll_package;
 
 partial class poll_package {
 
@@ -13,6 +14,8 @@ partial struct SysFile {
     // Writev cache.
     internal ж<slice<Δsyscall.Iovec>> iovecs;
 }
+
+} partial class pollᴛSysFile {
 
 internal static void init(this ref SysFile s) { }
 
@@ -24,6 +27,8 @@ internal static error destroy(this ref SysFile s, nint fd) {
     // (The Linux kernel guarantees that it is closed on an EINTR error.)
     return CloseFunc(fd);
 }
+
+} partial class poll_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dupˢ => ref dupˢᵇ;
@@ -46,6 +51,8 @@ internal static (nint, @string, error) dupCloseOnExecOld(nint fd) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class pollᴛFD {
 
 // Fchdir wraps syscall.Fchdir.
 public static error Fchdir(this ж<FD> Ꮡfd) {
@@ -114,4 +121,4 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end poll_package
+} // end pollᴛFD

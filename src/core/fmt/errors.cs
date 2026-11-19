@@ -8,6 +8,7 @@ using stringslite = @internal.stringslite_package;
 using slices = slices_package;
 using @internal;
 using ꓸꓸꓸany = Span<any>;
+using static fmt_package;
 
 partial class fmt_package {
 
@@ -36,7 +37,7 @@ public static error /*err*/ Errorf(sstring format, params ꓸꓸꓸany aʗp) {
 }
 
 // errorf formats and returns an error value, or nil if no formatting is required.
-internal static error errorf(@string format, params ꓸꓸꓸany aʗp) {
+internal static error errorf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
     if (len(a) == 0 && stringslite.IndexByte(format, (byte)'%') == -1) {
@@ -83,6 +84,8 @@ partial struct wrapError {
     internal error err;
 }
 
+} partial class fmtᴛwrapError {
+
 internal static @string Error(this ref wrapError e) {
     return e.msg;
 }
@@ -91,10 +94,14 @@ internal static error Unwrap(this ref wrapError e) {
     return e.err;
 }
 
+} partial class fmt_package {
+
 partial struct wrapErrors {
     internal @string msg;
     internal slice<error> errs;
 }
+
+} partial class fmtᴛwrapErrors {
 
 internal static @string Error(this ref wrapErrors e) {
     return e.msg;
@@ -104,4 +111,4 @@ internal static slice<error> Unwrap(this ref wrapErrors e) {
     return e.errs;
 }
 
-} // end fmt_package
+} // end fmtᴛwrapErrors

@@ -560,7 +560,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 
 		v.outputBuilder.WriteString(v.newline)
-		v.outputBuilder.WriteString(v.manualSignatureLiftPrefix(funcDecl))
+		v.outputBuilder.WriteString(v.placeFuncDecl(funcDecl, v.manualSignatureLiftPrefix(funcDecl), ""))
 		v.writeDoc(nil, funcDecl.Pos())
 		v.writeOutput(funcPlaceholderFormat, funcDecl.Name.Name)
 		v.outputBuilder.WriteString(v.newline)
@@ -597,16 +597,21 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		csFunctionName = getGlobalTempVarName("_")
 	}
 
-	// A `-tests` variant registered THIS test-file declarator for a Δ-rename (B2/B9, see performNameCollisionAnalysis),
-	// or THIS production free function collides with a same-named production method (C40, see
-	// funcRenamedForMethodCollision); reference sites follow through convIdent.
-	if testMethodRenames[v.info.ObjectOf(funcDecl.Name)] || funcRenamedForMethodCollision(v.info.ObjectOf(funcDecl.Name), v.fset) {
-		csFunctionName = ShadowVarMarker + csFunctionName
-	}
-
 	v.currentFuncDecl = funcDecl
 	v.currentFuncName = csFunctionName
 	v.currentFuncPrefix = &strings.Builder{}
+	v.currentFuncHoists = nil
+	v.currentHolderNamed = receiverNamed(v.info, funcDecl)
+
+	// The holder ends with its method: a declaration that follows in file order (a package-level
+	// variable holding a function literal, a type) stands in the package class again.
+	defer v.leaveHolder()
+
+	if v.currentHolderNamed != nil {
+		v.currentFuncHoists = &strings.Builder{}
+		v.currentHolderInTestFile = v.declaredInTestFile(v.info.Defs[funcDecl.Name])
+		holderHiddenTypeClasses = v.holderHiddenTypes(funcDecl)
+	}
 
 	// Record the Go name of every function literal this declaration encloses (the funcLits half
 	// of the file's GoPositionMap record) — from the AST, before any conversion of the body, so
@@ -1292,7 +1297,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// (internal) -- otherwise a public method returning that method's own unexported
 					// types is CS0050 (inconsistent accessibility). A PUBLICIZED unexported receiver
 					// type is emitted `public`, so its exported methods count as public here.
-					if (getAccess(recvTypeName) == "public" || receiverTypeIsPublicized(param.Type())) && getAccess(goFunctionName) == "public" {
+					if (getAccess(holderUnqualifiedTypeName(recvTypeName)) == "public" || receiverTypeIsPublicized(param.Type())) && getAccess(goFunctionName) == "public" {
 						functionAccess = "public"
 					} else {
 						functionAccess = "internal"
@@ -1610,7 +1615,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		v.currentFuncPrefix.WriteString(v.newline)
 	}
 
-	v.replaceMarker(functionPrefixMarker, v.currentFuncPrefix.String())
+	hoisted := ""
+
+	if v.currentFuncHoists != nil && v.currentFuncHoists.Len() > 0 {
+		hoisted = v.currentFuncHoists.String() + v.newline
+	}
+
+	v.replaceMarker(functionPrefixMarker, v.placeFuncDecl(funcDecl, v.currentFuncPrefix.String(), hoisted))
+	v.currentFuncHoists = nil
 
 	if useGoFrame {
 		// Close the frame: the catch that parks a panic where recover() can read it, the finally
@@ -2064,7 +2076,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			// Update function access to match receiver type. A PUBLICIZED unexported receiver
 			// type is emitted `public`, so it does not restrict the method's access.
-			receiverAccess = getAccess(recvTypeName)
+			receiverAccess = getAccess(holderUnqualifiedTypeName(recvTypeName))
 
 			if receiverAccess != "public" && receiverTypeIsPublicized(param.Type()) {
 				receiverAccess = "public"

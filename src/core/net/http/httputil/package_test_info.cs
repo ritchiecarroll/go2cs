@@ -8,9 +8,6 @@ global using static global::go.net.http.httputil_package;
 global using static global::go.net.http.httputil_internal_test_package;
 
 // <ImportedTypeAliases>
-global using httpꓸCookie = go.net.http_package.ΔCookie;
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
 // </ImportedTypeAliases>
 
 using go;
@@ -25,10 +22,10 @@ using static global::go.net.http.httputil_test_package;
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<global::go.net.http.httputil_package.ReverseProxy, go.net.http_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<global::go.net.http.httputil_package.ReverseProxy, go.net.http_package.Handler>(Pointer = true)]
 [assembly: GoImplement<global::go.net.http.httputil_package.neverEnding, io_package.Reader>]
 [assembly: GoImplement<go.net.http.httptest_package.ResponseRecorder, go.net.http_package.ResponseWriter>(Pointer = true)]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 [assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
 [assembly: GoImplement<go.net.http_package.noBody, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
@@ -54,10 +51,10 @@ using static global::go.net.http.httputil_test_package;
 [assembly: GoFieldAccess(typeof(global::go.net.http.httputil_package.ReverseProxy))]
 [assembly: GoFieldAccess(typeof(go.net.http.httptest_package.Server))]
 [assembly: GoFieldAccess(typeof(go.net.http_package.Client))]
+[assembly: GoFieldAccess(typeof(go.net.http_package.Cookie))]
 [assembly: GoFieldAccess(typeof(go.net.http_package.Request))]
 [assembly: GoFieldAccess(typeof(go.net.http_package.Response))]
 [assembly: GoFieldAccess(typeof(go.net.http_package.Server))]
-[assembly: GoFieldAccess(typeof(go.net.http_package.ΔCookie))]
 [assembly: GoFieldAccess(typeof(go.net.url_package.URL))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

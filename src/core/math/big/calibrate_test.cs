@@ -63,7 +63,7 @@ internal static void computeKaratsubaThreshold(ж<testing.T> t) {
 internal static Action benchMul(nint size) {
     var x = rndNat(size);
     var y = rndNat(size);
-    global::go.math.big_package.Δnat z = default;
+    global::go.math.big_package.nat z = default;
     var xʗ1 = x;
     var yʗ1 = y;
     var zʗ1 = z;
@@ -86,7 +86,7 @@ internal static void computeBasicSqrThreshold(ж<testing.T> t) {
 
 internal static Action benchBasicSqr(nint size) {
     var x = rndNat(size);
-    global::go.math.big_package.Δnat z = default;
+    global::go.math.big_package.nat z = default;
     var xʗ1 = x;
     var zʗ1 = z;
     return () => {
@@ -111,7 +111,7 @@ internal static void computeKaratsubaSqrThreshold(ж<testing.T> t) {
 
 internal static Action benchSqr(nint size) {
     var x = rndNat(size);
-    global::go.math.big_package.Δnat z = default;
+    global::go.math.big_package.nat z = default;
     var xʗ1 = x;
     var zʗ1 = z;
     return () => {
@@ -133,8 +133,8 @@ internal static void computeDivRecursiveThreshold(ж<testing.T> t) {
 internal static Action benchDiv(nint size) {
     var divx = rndNat(2 * size);
     var divy = rndNat(size);
-    global::go.math.big_package.Δnat z = default;
-    global::go.math.big_package.Δnat r = default;
+    global::go.math.big_package.nat z = default;
+    global::go.math.big_package.nat r = default;
     var divxʗ1 = divx;
     var divyʗ1 = divy;
     var rʗ1 = r;

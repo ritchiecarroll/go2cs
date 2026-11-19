@@ -28,20 +28,20 @@ internal static void main() {
 
     var selᴛ1 = ch;
     var (ᴛ1, ᴛ2) = pair();
-    var selᴛ2 = selᴛ1.ᐸꟷ(must(ᴛ1, ᴛ2), ꓸꓸꓸ);
-    switch (select(selᴛ2)) {
+    var chᴛ1 = selᴛ1.ᐸꟷ(must(ᴛ1, ᴛ2), ꓸꓸꓸ);
+    switch (select(chᴛ1)) {
     case 0: {
         fmt.Println("sent alone");
         break;
     }}
 
     var never = new channel<nint>(0);
-    var selᴛ3 = never;
+    var neverᴛ1 = never;
     var selᴛ4 = ch;
     var (ᴛ3, ᴛ4) = pair();
-    var selᴛ5 = selᴛ4.ᐸꟷ(must(ᴛ3, ᴛ4), ꓸꓸꓸ);
-    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), selᴛ5)) {
-    case 0 when selᴛ3.ꟷᐳ(out var v): {
+    var chᴛ2 = selᴛ4.ᐸꟷ(must(ᴛ3, ᴛ4), ꓸꓸꓸ);
+    switch (select(ᐸꟷ(neverᴛ1, ꓸꓸꓸ), chᴛ2)) {
+    case 0 when neverᴛ1.ꟷᐳ(out var v): {
         fmt.Println("impossible", v);
         break;
     }

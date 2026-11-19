@@ -5,6 +5,7 @@ namespace go;
 
 using atomic = @internal.runtime.atomic_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -77,6 +78,8 @@ partial struct gcCPULimiterState {
     internal int32 nprocs;
 }
 
+} partial class runtimeᴛgcCPULimiterState {
+
 // limiting returns true if the CPU limiter is currently enabled, meaning the Go GC
 // should take action to limit CPU utilization.
 //
@@ -143,9 +146,13 @@ internal static void finishGCTransition(this ж<gcCPULimiterState> Ꮡl, int64 n
     Ꮡl.unlock();
 }
 
+} partial class runtime_package {
+
 // gcCPULimiterUpdatePeriod dictates the maximum amount of wall-clock time
 // we can go before updating the limiter.
 internal static UntypedFloat gcCPULimiterUpdatePeriod => 10e6; // 10ms
+
+} partial class runtimeᴛgcCPULimiterState {
 
 // needUpdate returns true if the limiter's maximum update period has been
 // exceeded, and so would benefit from an update.
@@ -227,7 +234,7 @@ internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) {
         // leading to all sorts of weird transient behavior.
         var mp = acquirem();
         foreach (var (_, pp) in range(allp)) {
-            var (typ, duration) = pp.of(runtime_package.Δp.ᏑlimiterEvent).consume(now);
+            var (typ, duration) = pp.of(p.ᏑlimiterEvent).consume(now);
             switch (typ) {
             case var ᴛ when ᴛ == limiterEventIdle: {
                 Ꮡsched.of(schedt.ᏑidleTime).Add(duration);
@@ -344,8 +351,12 @@ internal static void unlock(this ж<gcCPULimiterState> Ꮡl) {
     }
 }
 
+} partial class runtime_package {
+
 // capacityPerProc is the limiter's bucket capacity for each P in GOMAXPROCS.
 internal static UntypedFloat capacityPerProc => 1e9; // 1 second in nanoseconds
+
+} partial class runtimeᴛgcCPULimiterState {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string failedToAcquireLockToˢ2 => ref failedToAcquireLockToˢ2ᵇ;
@@ -378,6 +389,8 @@ internal static void resetCapacity(this ж<gcCPULimiterState> Ꮡl, int64 now, i
     Ꮡl.unlock();
 }
 
+} partial class runtime_package {
+
 // limiterEventType indicates the type of an event occurring on some P.
 //
 // These events represent the full set of events that the GC CPU limiter tracks
@@ -407,6 +420,8 @@ internal static limiterEventStamp makeLimiterEventStamp(limiterEventType typ, in
     return (limiterEventStamp)((uint64)typ << (int)(64 - limiterEventBits) | ((uint64)now & ~limiterEventTypeMask));
 }
 
+} partial class runtimeᴛlimiterEventStamp {
+
 // duration computes the difference between now and the start time stored in the stamp.
 //
 // Returns 0 if the difference is negative, which may happen if now is stale or if the
@@ -426,10 +441,14 @@ internal static limiterEventType typ(this limiterEventStamp s) {
     return (limiterEventType)(uint8)((s >> (int)(64 - limiterEventBits)));
 }
 
+} partial class runtime_package {
+
 // limiterEvent represents tracking state for an event tracked by the GC CPU limiter.
 partial struct limiterEvent {
     internal atomic.Uint64 stamp; // Stores a limiterEventStamp.
 }
+
+} partial class runtimeᴛlimiterEvent {
 
 // start begins tracking a new limiter event of the current type. If an event
 // is already in flight, then a new event cannot begin because the current time is
@@ -533,4 +552,4 @@ internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int6
     }}
 }
 
-} // end runtime_package
+} // end runtimeᴛlimiterEvent

@@ -55,7 +55,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Connection"] = ["close"] // TODO(rsc): Delete?
             }),
             Close: true,
@@ -78,7 +78,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Request: dummyReq("GET"),
             Close: true,
             ContentLength: -1
@@ -99,7 +99,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Request: dummyReq("GET"),
             Close: false,
             ContentLength: 0
@@ -121,7 +121,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Connection"] = ["close"],
                 ["Content-Length"] = ["10"]
             }),
@@ -145,7 +145,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: -1,
             TransferEncoding: ["chunked"]
@@ -167,7 +167,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Connection"] = ["close"],
                 ["Content-Length"] = ["10"],
                 ["Trailer"] = ["Content-MD5, Content-Sources"]
@@ -192,7 +192,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: false,
             ContentLength: -1,
             TransferEncoding: ["chunked"]
@@ -214,7 +214,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("HEAD"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             TransferEncoding: ["chunked"],
             Close: false,
             ContentLength: -1
@@ -236,7 +236,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("HEAD"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{["Content-Length"] = ["256"]}),
+            Header: new Header(new map<@string, slice<@string>>{["Content-Length"] = ["256"]}),
             TransferEncoding: default,
             Close: true,
             ContentLength: 256
@@ -258,7 +258,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("HEAD"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{["Content-Length"] = ["256"]}),
+            Header: new Header(new map<@string, slice<@string>>{["Content-Length"] = ["256"]}),
             TransferEncoding: default,
             Close: false,
             ContentLength: 256
@@ -280,7 +280,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("HEAD"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             TransferEncoding: default,
             Close: true,
             ContentLength: -1
@@ -302,7 +302,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Content-Length"] = ["0"]
             }),
             Close: false,
@@ -326,7 +326,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: true,
             ContentLength: -1
         ),
@@ -348,7 +348,7 @@ internal static slice<respTest> respTests = slice<respTest>([
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: true,
             ContentLength: -1
         ),
@@ -375,7 +375,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Content-Type"] = ["multipart/byteranges; boundary=18a75608c8f47cef"]
             }),
             Close: true,
@@ -397,7 +397,7 @@ some body
             Proto: "HTTP/1.0",
             ProtoMajor: 1,
             ProtoMinor: 0,
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Connection"] = ["close"] // TODO(rsc): Delete?
             }),
             Close: true,
@@ -420,7 +420,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Accept-Ranges"] = ["bytes"],
                 ["Content-Length"] = ["6"],
                 ["Content-Type"] = ["text/plain; charset=utf-8"],
@@ -445,7 +445,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("HEAD"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Content-Length"] = ["256"]
             }),
             TransferEncoding: default,
@@ -469,7 +469,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("HEAD"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Content-Length"] = ["256"]
             }),
             TransferEncoding: default,
@@ -494,7 +494,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: true,
             ContentLength: -1
         ),
@@ -516,7 +516,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Content-Length"] = ["10"]
             }),
             Close: true,
@@ -538,7 +538,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 1,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Content-Length"] = ["23"],
                 ["Content-Encoding"] = ["gzip"],
                 ["Connection"] = ["keep-alive"],
@@ -563,7 +563,7 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 0,
             Request: dummyReq("GET"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Content-Type"] = ["text/html"],
                 ["Www-Authenticate"] = [@"Basic realm="""""]
             }),
@@ -645,6 +645,8 @@ internal partial struct readerAndCloser {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http11200Okˢ => ref http11200Okˢᵇ;
 private static readonly @string http11200Okˢᵇ = "HTTP/1.1 200 OK\r\n"u8;
+internal static ref readonly @string transferEncodingChunkedˢ2 => ref transferEncodingChunkedˢ2ᵇ;
+private static readonly @string transferEncodingChunkedˢ2ᵇ = "Transfer-Encoding: chunked\r\n"u8;
 internal static ref readonly @string contentLength1000000ˢ => ref contentLength1000000ˢᵇ;
 private static readonly @string contentLength1000000ˢᵇ = "Content-Length: 1000000\r\n"u8;
 internal static ref readonly @string contentEncodingGzipˢ => ref contentEncodingGzipˢᵇ;
@@ -689,7 +691,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> t) {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         buf.WriteString(http11200Okˢ);
         if (test.chunked) {
-            buf.WriteString(transferEncodingChunkedˢ);
+            buf.WriteString(transferEncodingChunkedˢ2);
         } else {
             buf.WriteString(contentLength1000000ˢ);
         }
@@ -756,7 +758,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> t) {
         {
             @string e = nextRequestHereˢ;
             @string g = (@string)rest; if (e != g) {
-                g = regexp.MustCompile(@"(xx+)").ReplaceAllStringFunc(g, (@string match) => fmt.Sprintf("x(repeated x%d)"u8, builtin.len(match)));
+                g = regexp.MustCompile(@"(xx+)").ReplaceAllStringFunc(g, (@string match) => fmt.Sprintf("x(repeated x%d)"u8, len(match)));
                 fatalf("remainder = %q, expected %q", g, e);
             }
         }
@@ -801,7 +803,7 @@ internal static void initᴛresponseLocationTests() { responseLocationTests = [
 public static void TestLocationResponse(ж<testing.T> t) {
     foreach (var (i, tt) in range(responseLocationTests)) {
         var res = @new<global::go.net.http_package.Response>();
-        res.Header = new global::go.net.http_package.ΔHeader(0);
+        res.Header = new global::go.net.http_package.Header(0);
         res.Header.Set(locationˢ, tt.location);
         if (tt.requrl != ""u8) {
             res.Request = Ꮡ(new Request());
@@ -872,8 +874,8 @@ public static void TestResponseContentLengthShortBody(ж<testing.T> t) {
         }
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         (var n, err) = io.Copy(new http_test_package.strings_BuilderжWriter(Ꮡbuf), res.Body);
-        if (n != (int64)builtin.len(shortBody)) {
-            t.Errorf("Copied %d bytes; want %d, len(%q)", n, builtin.len(shortBody), shortBody);
+        if (n != (int64)len(shortBody)) {
+            t.Errorf("Copied %d bytes; want %d, len(%q)", n, len(shortBody), shortBody);
         }
         if (buf.String() != shortBody) {
             t.Errorf("Read body %q; want %q", buf.String(), shortBody);

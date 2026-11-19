@@ -8,7 +8,6 @@ global using static global::go.syscall_package;
 global using static global::go.syscall_internal_test_package;
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
 // </ImportedTypeAliases>
 
 using go;
@@ -16,9 +15,6 @@ using static global::go.syscall_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b73747220737472696e673b2077737472205b5d75696e7431367d", "wtf8testsᴛ1")]
-[assembly: GoTypeAlias("Handle", "ΔHandle")]
-[assembly: GoTypeAlias("Signal", "ΔSignal")]
-[assembly: GoTypeAlias("Sockaddr", "ΔSockaddr")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -31,6 +27,7 @@ using static global::go.syscall_test_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(TestWin32finddata_X))]
 [assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 [assembly: GoFieldAccess(typeof(os_package.Process))]
 [assembly: GoFieldAccess(typeof(syscall_package.Timeval))]

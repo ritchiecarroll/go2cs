@@ -40,7 +40,8 @@ type cgoBindingTarget struct {
 // and C# cannot overload on the result alone, so `r, err := C.exp(x)` reaches C.expꓸerrno.
 const cgoErrnoFormSuffix = TypeAliasDot + "errno"
 
-// cgoBuiltinNames are cmd/cgo's own helpers declared as _Cfunc_ (cmd/cgo/out.go, builtinDefs): Phase 3's.
+// cgoBuiltinNames are cmd/cgo's own helpers declared as _Cfunc_ (cmd/cgo/out.go, builtinDefs). Phase 3's increment
+// 3.1 writes each as a member of the pseudo-package (cgoWrapperSet.helper); the scalar binding alone refuses them.
 var cgoBuiltinNames = map[string]bool{"CString": true, "CBytes": true, "GoString": true, "GoStringN": true, "GoBytes": true}
 
 // cgoScalar is one parameter or result: its Go-side C# type, the extern's primitive, and the Go basic type that

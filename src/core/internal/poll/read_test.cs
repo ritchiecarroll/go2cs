@@ -34,7 +34,7 @@ public static void TestRead(ж<testing.T> t) {
                                 tΔ1.Error(err);
                                 return;
                             }
-                            time.Sleep(time.ΔNanosecond);
+                            time.Sleep(time.Nanosecond);
                         }
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

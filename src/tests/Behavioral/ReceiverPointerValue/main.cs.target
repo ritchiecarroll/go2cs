@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,6 +9,8 @@ partial struct ring {
     internal nint data;
     internal ж<ring> next;
 }
+
+} partial class mainᴛring {
 
 internal static void initSelf(this ж<ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -43,6 +46,8 @@ internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
 internal static array<ж<ring>> pair(this ж<ring> Ꮡr, ж<ring> other) {
     return new ж<ring>[]{Ꮡr, other}.array();
 }
+
+} partial class main_package {
 
 internal static void main() {
     var a = Ꮡ(new ring(data: 1));

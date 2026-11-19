@@ -113,6 +113,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		Mode:       packages.LoadAllSyntax,
 		Dir:        inputFilePath,
 		BuildFlags: options.loaderBuildFlags(),
+		ParseFile:  parseFileUnparenAddressOperands,
 	}
 
 	targetParts := strings.Split(options.targetPlatform, "/")
@@ -277,7 +278,6 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// build-selected in-package test files for declarator names before collision analysis.
 		// This is package-local (important for ./... loads) and reads no test dependencies.
 		siblingSignals := collectSiblingTestSignals(pkg.Dir, pkg.Name, options)
-		siblingTestFuncMethodNames = siblingSignals.funcMethodNames
 		siblingTestAddressedGlobalNames = siblingSignals.addressedGlobalNames
 		siblingTestMethodValues = siblingSignals.methodValues
 		siblingTestPublicizedTypeNames = siblingSignals.publicizedTypeNames
@@ -297,6 +297,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 		files := []FileEntry{}
 		unmarkedFileCount := 0
+		var handOwnedTypeNames map[string]bool // the package's C# type names, read at its first hand-owned file
 		fset := pkg.Fset
 		packageTypes := pkg.Types
 		info := pkg.TypesInfo
@@ -394,9 +395,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		}
 
 		// Which structs hold their arrays inline (inlineArrayAdmission.go): decided once, from the package's non-test
-		// files, before any file emits. A reinterpret chain whose sides disagree refuses the package (GO2CS2010).
+		// files, before any file emits. A reinterpret chain whose sides disagree keeps its admitted side out under the
+		// automatic rule (GO2CS2009) and refuses the package when forced (GO2CS2010).
 		packageInlineAdmission = computeInlineArrayAdmission(pkg.Syntax, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
 		packageInlineArrayRecords = inlineArrayStampRecords(packageInlineAdmission, inlineArrayMode(pkg.Types.Path(), pkg.Dir, options))
+		packageValueDecodeSites = collectValueDecodeSites(pkg.Syntax, pkg.TypesInfo, packageInlineAdmission)
 
 		if err := reportInlineArrayAdmission(packageInlineAdmission); err != nil {
 			return refusePackage(options, diagnosticInlineArrayMixedPair, err)
@@ -487,7 +490,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					// file-visit loop below). Dropping the visit entirely corrupted every sibling
 					// file of a seeded reconvert: raw Go `struct{...}` text where a lifted type
 					// name belongs, and package-var assignments re-declared as shadowing locals.
-					files = append(files, newFileEntry(file, path, true))
+					if handOwnedTypeNames == nil {
+						handOwnedTypeNames = csharpDeclaredTypeNames(packageOutputPath, options.targetPlatform)
+					}
+
+					entry := newFileEntry(file, path, true)
+					entry.handOwnedTypeNames = handOwnedTypeNames
+					files = append(files, entry)
 				}
 			}
 		}
@@ -624,6 +633,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// transitive import closure (CS0576) so alias emission and every package-qualifier
 		// render Δ-renames them consistently.
 		computeImportAliasRenames(files, packageTypes, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), false)
+		computeSelfAlias(packageTypes, packageNamespace)
 
 		// Find unexported types used as exported struct fields so they can be emitted as public
 		// (an exported field's type must be at least as accessible — CS0051/CS0052).

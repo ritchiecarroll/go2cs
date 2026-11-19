@@ -11,14 +11,18 @@
                            deliberate regression the guard's sizing used (GoTypeOps<T>.Instance made internal).
       widget-added.dll     Widget.Instance is public and Widget.Weight is new: an addition, which is compatible.
       gowidget-base.dll    widget-base.dll under the assembly identity go.Widget: OQ4's rename (fmt.dll became
-                           go.fmt.dll in 1.26.10.4), the same surface under its package ID's name.
+                           go.fmt.dll in 1.26.11.1), the same surface under its package ID's name.
       gowidget-internal.dll  widget-internal.dll under go.Widget: the rename AND a member removed.
 
     Moves, from src/Moves.cs, compiled against src/MovesLib.cs (a stand-in for go.lib, built and not kept):
 
-      moves-base.dll       a package class that holds its structs' promoted-method forwarders: the baseline.
+      moves-base.dll       a package class that holds its structs' promoted-method forwarders and a type's own
+                           methods: the baseline.
       moves-moved.dll      the forwarders have left the package class: seven into a class marked [GoPromotedHost] for
-                           their struct, unchanged, and seven in ways the suppression generator must refuse.
+                           their struct, unchanged, and seven in ways the suppression generator must refuse; and the
+                           type's two methods into its method holder, a class marked [GoMethodHost]; and the Delta
+                           drop (OQ2): ten renames and five negative controls the generator must refuse; and the
+                           clone drop: a struct that lost go.IGoValueClone and its Clone(), and two controls.
 #>
 #Requires -Version 7.0
 $ErrorActionPreference = 'Stop'

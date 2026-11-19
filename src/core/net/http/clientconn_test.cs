@@ -26,7 +26,7 @@ public static void TestTransportNewClientConnRoundTrip(ж<testing.T> t) { run<T�
 internal static void testTransportNewClientConnRoundTrip(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> reqΔ1) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> reqΔ1) => {
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), reqΔ1.Host);
         })), optFakeNet.OrTypedNil());
 
@@ -84,7 +84,7 @@ internal static (ж<clientServerTest>, ж<Δhttp.ClientConn>) newClientConnTest(
         h = (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
         };
     }
-    var cst = newClientServerTest(t, mode, new http_test_package.http_HandlerFuncᴠΔHandler(h), opts.ꓸꓸꓸ);
+    var cst = newClientServerTest(t, mode, new http_test_package.http_HandlerFuncᴠHandler(h), opts.ꓸꓸꓸ);
     var (cc, err) = cst.tr.NewClientConn(t.Context(), mode.Scheme(), cst.ts.Listener.Addr().String());
     if (err != nil) {
         t.Fatal(err);
@@ -107,9 +107,8 @@ internal static void testClientConnReserveAll(ж<testing.T> t, testMode mode) {
     });
 
     nint want = 1;
-    var exprᴛ1 = mode;
     switch (ᐧ) {
-    case {} when exprᴛ1 == http2Mode || exprᴛ1 == http2UnencryptedMode: {
+    case {} when mode == http2Mode || mode == http2UnencryptedMode: {
         want = cst.ts.Config.HTTP2.MaxConcurrentStreams;
         break;
     }}
@@ -265,7 +264,7 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
         // Request context canceled before headers received.
         name: "cancel",
         consume: [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ4, ж<Δhttp.ClientConn> cc, testMode mode) => {
-            var (ctx, cancel) = context_package.WithCancel(tΔ4.Context());
+            var (ctx, cancel) = context.WithCancel(tΔ4.Context());
             var ctxʗ1 = ctx;
             goǃ(() => {
                 var (req, _) = Δhttp.NewRequestWithContext(ctxʗ1, getˢ2, mode.Scheme() + "://example.tld/"u8, default);
@@ -313,7 +312,7 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
                 GoFrame ᒐ = default;
                 try {
                     var donec = new channel<EmptyStruct>(0);
-                    defer(ᴛ1 => builtin.close(ᴛ1), donec, ref ᒐ);
+                    defer(ᴛ1 => close(ᴛ1), donec, ref ᒐ);
                     var donecʗ1 = donec;
                     var testʗ3 = testʗ2;
                     var handler = (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
@@ -322,7 +321,7 @@ public static void TestClientConnReserveAndConsume(ж<testing.T> t) {
                         }
                     };
 
-                    var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(tΔ7), mode, new Δhttp.HandlerFunc(handler), optFakeNet.OrTypedNil());
+                    var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(tΔ7), mode, NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(handler), optFakeNet.OrTypedNil());
                     nint stateHookCalls = 0;
                     cc.SetStateHook((ж<Δhttp.ClientConn> ccΔ1) => {
                         stateHookCalls++;
@@ -412,7 +411,7 @@ internal static partial void testClientConnRoundTripBlocks(ж<testing.T> t, test
         ᏑhandlerCalls.Add(1);
         ᐸꟷ(requestcʗ1);
     };
-    var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(t), mode, new Δhttp.HandlerFunc(handler), optFakeNet.OrTypedNil(), (ж<Δhttp.Server> s) => {
+    var (_, cc) = newClientConnTest(new http_test_package.testing_TжTB(t), mode, NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(handler), optFakeNet.OrTypedNil(), (ж<Δhttp.Server> s) => {
         s.HTTP2 = Ꮡ(new Δhttp.HTTP2Config(
             MaxConcurrentStreams: 3
         ));

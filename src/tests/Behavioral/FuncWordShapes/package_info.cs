@@ -41,6 +41,10 @@ using static go.main_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(table))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -49,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0elJaiyKKqoqiiqIKogqiCqIKmgoKCgoKCgoKClIKCgoKCloKCgpaCgoKigpaCloKCgoKCgoKCloKiguo=", "98-98:1;99-99:2")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA4glJaiyKKqoqiiqIKogqiCqIKmgoKCgoKCgoKClIKCgoKCloKCgpaCgoKigpiCgoKCmIKCgoKCloKCloKCgoKCgoKWgoKWgpaCgoKCgoKCgpaCooKsggAUHg==", "136-136:1;137-137:2")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -68,6 +72,7 @@ public static partial class main_package
     [GoLocalName("iface")] internal partial struct ccgoFPLocal_iface {}
     internal partial struct counter {}
     internal partial struct holder {}
+    internal partial struct table {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -80,3 +85,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounter;
+// </MethodHolders>

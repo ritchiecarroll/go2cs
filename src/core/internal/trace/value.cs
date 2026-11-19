@@ -5,6 +5,7 @@ namespace go.@internal;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static trace_package;
 
 partial class trace_package {
 
@@ -21,6 +22,8 @@ partial struct ValueKind /*num:uint8*/;
 public static ValueKind ValueBad => /* iota */ 0;
 public static ValueKind ValueUint64 => 1;
 public static ValueKind ValueString => 2;
+
+} partial class traceᴛValue {
 
 // Kind returns the ValueKind of the value.
 //
@@ -50,7 +53,7 @@ private static readonly @string valueBadˢᵇ = "Value{Bad}"u8;
 // a string representation of the value for other kinds of values.
 public static @string String(this Value v) {
     if (v.kind == ValueString) {
-        return @unsafe.String((ж<byte>)(uintptr)(v.pointer), (nint)v.scalar);
+        return @unsafe.String(@unsafe.Pointer.To<byte>(v.pointer), (nint)v.scalar);
     }
     switch (v.kind) {
     case var ᴛ when ᴛ == ValueUint64: {
@@ -58,6 +61,8 @@ public static @string String(this Value v) {
     }}
     return valueBadˢ;
 }
+
+} partial class trace_package {
 
 // Uint64Value creates a value of kind ValueUint64.
 public static Value Uint64Value(uint64 x) {

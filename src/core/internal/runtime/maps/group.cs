@@ -9,6 +9,7 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
+using static maps_package;
 
 partial class maps_package {
 
@@ -40,6 +41,8 @@ internal const uint64 bitsetEmpty = /* bitsetLSB * uint64(ctrlEmpty) */ 92595421
 // arithmetic instructions.
 partial struct bitset /*num:uint64*/;
 
+} partial class mapsᴛbitset {
+
 // first returns the relative index of the first control byte in the group that
 // is in the set.
 //
@@ -48,6 +51,8 @@ internal static uintptr first(this bitset b) {
     return bitsetFirst(b);
 }
 
+} partial class maps_package {
+
 // Portable implementation of first.
 //
 // On AMD64, this is replaced with an intrisic that simply does
@@ -55,6 +60,8 @@ internal static uintptr first(this bitset b) {
 internal static uintptr bitsetFirst(bitset b) {
     return (uintptr)sys.TrailingZeros64((uint64)b) >> 3;
 }
+
+} partial class mapsᴛbitset {
 
 // removeFirst clears the first set bit (that is, resets the least significant
 // set bit to 0).
@@ -67,6 +74,8 @@ internal static bitset removeBelow(this bitset b, uintptr i) {
     return bitsetRemoveBelow(b, i);
 }
 
+} partial class maps_package {
+
 // Portable implementation of removeBelow.
 //
 // On AMD64, this is replaced with an intrisic that clears the lower i bits.
@@ -76,6 +85,8 @@ internal static bitset bitsetRemoveBelow(bitset b, uintptr i) {
     return (bitset)(b & ~((bitset)mask));
 }
 
+} partial class mapsᴛbitset {
+
 // lowestSet returns true if the bit is set for the lowest index in the bitset.
 //
 // This is intended for use with shiftOutLowest to loop over all entries in the
@@ -84,6 +95,8 @@ internal static bool lowestSet(this bitset b) {
     return bitsetLowestSet(b);
 }
 
+} partial class maps_package {
+
 // Portable implementation of lowestSet.
 //
 // On AMD64, this is replaced with an intrisic that checks the lowest bit.
@@ -91,11 +104,15 @@ internal static bool bitsetLowestSet(bitset b) {
     return (bitset)(b & ((bitset)((uint64)1 << 7))) != 0;
 }
 
+} partial class mapsᴛbitset {
+
 // shiftOutLowest shifts the lowest entry out of the bitset. Afterwards, the
 // lowest entry in the bitset corresponds to the next slot.
 internal static bitset shiftOutLowest(this bitset b) {
     return bitsetShiftOutLowest(b);
 }
+
+} partial class maps_package {
 
 // Portable implementation of shiftOutLowest.
 //
@@ -104,11 +121,15 @@ internal static bitset bitsetShiftOutLowest(bitset b) {
     return b >> 8;
 }
 
+} partial class mapsᴛbitset {
+
 // count returns the number of bits set in b.
 internal static nint count(this bitset b) {
     // Note: works for both bitset representations (AMD64 and generic)
     return sys.OnesCount64((uint64)b);
 }
+
+} partial class maps_package {
 
 // Each slot in the hash table has a control byte which can have one of three
 // states: empty, deleted, and full. They have the following bit patterns:
@@ -124,25 +145,23 @@ partial struct ctrl /*num:uint8*/;
 // stored in a uint64.
 partial struct ctrlGroup /*num:uint64*/;
 
+} partial class mapsᴛctrlGroup {
+
 // get returns the i-th control byte.
 internal static ctrl get(this ж<ctrlGroup> Ꮡg, uintptr i) {
-    ref var g = ref Ꮡg.DerefOrNull();
-
     if (goarch.BigEndian) {
-        return ~(ж<ctrl>)(uintptr)(@unsafe.Add((uintptr)@unsafe.Pointer.FromRef(ref g), 7 - i));
+        return ~@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), 7 - i));
     }
-    return ~(ж<ctrl>)(uintptr)(@unsafe.Add((uintptr)@unsafe.Pointer.FromRef(ref g), i));
+    return ~@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), i));
 }
 
 // set sets the i-th control byte.
 internal static void set(this ж<ctrlGroup> Ꮡg, uintptr i, ctrl c) {
-    ref var g = ref Ꮡg.DerefOrNull();
-
     if (goarch.BigEndian) {
-        ((ж<ctrl>)(uintptr)(@unsafe.Add((uintptr)@unsafe.Pointer.FromRef(ref g), 7 - i))).Value = c;
+        (@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), 7 - i))).Value = c;
         return;
     }
-    ((ж<ctrl>)(uintptr)(@unsafe.Add((uintptr)@unsafe.Pointer.FromRef(ref g), i))).Value = c;
+    (@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), i))).Value = c;
 }
 
 // setEmpty sets all the control bytes to empty.
@@ -155,6 +174,8 @@ internal static void setEmpty(this ref ctrlGroup g) {
 internal static bitset matchH2(this ctrlGroup g, uintptr h) {
     return ctrlGroupMatchH2(g, h);
 }
+
+} partial class maps_package {
 
 // Portable implementation of matchH2.
 //
@@ -173,10 +194,14 @@ internal static bitset ctrlGroupMatchH2(ctrlGroup g, uintptr h) {
     return (bitset)(((v - (uint64)bitsetLSB) & ~v) & (uint64)bitsetMSB);
 }
 
+} partial class mapsᴛctrlGroup {
+
 // matchEmpty returns the set of slots in the group that are empty.
 internal static bitset matchEmpty(this ctrlGroup g) {
     return ctrlGroupMatchEmpty(g);
 }
+
+} partial class maps_package {
 
 // Portable implementation of matchEmpty.
 //
@@ -193,11 +218,15 @@ internal static bitset ctrlGroupMatchEmpty(ctrlGroup g) {
     return (bitset)((v & ~(v << 6)) & (uint64)bitsetMSB);
 }
 
+} partial class mapsᴛctrlGroup {
+
 // matchEmptyOrDeleted returns the set of slots in the group that are empty or
 // deleted.
 internal static bitset matchEmptyOrDeleted(this ctrlGroup g) {
     return ctrlGroupMatchEmptyOrDeleted(g);
 }
+
+} partial class maps_package {
 
 // Portable implementation of matchEmptyOrDeleted.
 //
@@ -213,6 +242,8 @@ internal static bitset ctrlGroupMatchEmptyOrDeleted(ctrlGroup g) {
     return (bitset)(v & (uint64)bitsetMSB);
 }
 
+} partial class mapsᴛctrlGroup {
+
 // matchFull returns the set of slots in the group that are full.
 internal static bitset matchFull(this ctrlGroup g) {
     return ctrlGroupMatchFull(g);
@@ -223,6 +254,8 @@ internal static bool anyFull(this ctrlGroup g) {
     // A slot is full iff bit 7 is unset. Test whether any slot has bit 7 unset.
     return (ctrlGroup)((~g) & (uint64)bitsetMSB) != 0;
 }
+
+} partial class maps_package {
 
 // Portable implementation of matchFull.
 //
@@ -281,28 +314,32 @@ internal static (uint64, bool) alignUpPow2(uint64 n) {
     return (v, false);
 }
 
+} partial class mapsᴛgroupReference {
+
 // ctrls returns the group control word.
 internal static ж<ctrlGroup> ctrls(this ref groupReference g) {
-    return (ж<ctrlGroup>)(uintptr)(g.data);
+    return @unsafe.Pointer.To<ctrlGroup>(g.data);
 }
 
 // key returns a pointer to the key at index i.
-internal static @unsafe.Pointer key(this ref groupReference g, ж<abiꓸMapType> Ꮡtyp, uintptr i) {
+internal static @unsafe.Pointer key(this ref groupReference g, ж<abi.MapType> Ꮡtyp, uintptr i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize;
 
-    return (@unsafe.Pointer)((uintptr)g.data + offset);
+    return @unsafe.Add(g.data, offset);
 }
 
 // elem returns a pointer to the element at index i.
-internal static @unsafe.Pointer elem(this ref groupReference g, ж<abiꓸMapType> Ꮡtyp, uintptr i) {
+internal static @unsafe.Pointer elem(this ref groupReference g, ж<abi.MapType> Ꮡtyp, uintptr i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize + typ.ElemOff;
 
-    return (@unsafe.Pointer)((uintptr)g.data + offset);
+    return @unsafe.Add(g.data, offset);
 }
+
+} partial class maps_package {
 
 // groupsReference is a wrapper type describing an array of groups stored at
 // data.
@@ -319,7 +356,7 @@ partial struct groupsReference {
 // newGroups allocates a new array of length groups.
 //
 // Length must be a power of two.
-internal static groupsReference newGroups(ref abiꓸMapType typ, uint64 length) {
+internal static groupsReference newGroups(ref abi.MapType typ, uint64 length) {
     return new groupsReference(
         // TODO: make the length type the same throughout.
         data: newarray(typ.Group, (nint)length),
@@ -327,8 +364,10 @@ internal static groupsReference newGroups(ref abiꓸMapType typ, uint64 length) 
     );
 }
 
+} partial class mapsᴛgroupsReference {
+
 // group returns the group at index i.
-internal static groupReference group(this ref groupsReference g, ж<abiꓸMapType> Ꮡtyp, uint64 i) {
+internal static groupReference group(this ref groupsReference g, ж<abi.MapType> Ꮡtyp, uint64 i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     // TODO(prattmic): Do something here about truncation on cast to
@@ -336,36 +375,38 @@ internal static groupReference group(this ref groupsReference g, ж<abiꓸMapTyp
     var offset = (uintptr)i * typ.GroupSize;
 
     return new groupReference(
-        data: (@unsafe.Pointer)((uintptr)g.data + offset)
+        data: @unsafe.Add(g.data, offset)
     );
 }
 
-internal static void cloneGroup(ж<abiꓸMapType> Ꮡtyp, groupReference newGroup, groupReference oldGroup) {
+} partial class maps_package {
+
+internal static void cloneGroup(ж<abi.MapType> Ꮡtyp, groupReference newGroup, groupReference oldGroup) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     typedmemmove(typ.Group, newGroup.data, oldGroup.data);
     if (typ.IndirectKey()) {
         // Deep copy keys if indirect.
         for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
-            @unsafe.Pointer oldKey = ~(ж<@unsafe.Pointer>)(uintptr)(oldGroup.key(Ꮡtyp, i));
+            @unsafe.Pointer oldKey = ~@unsafe.Pointer.To<@unsafe.Pointer>(oldGroup.key(Ꮡtyp, i));
             if (oldKey == nil) {
                 continue;
             }
             @unsafe.Pointer newKey = newobject(typ.Key);
             typedmemmove(typ.Key, newKey, oldKey);
-            ((ж<@unsafe.Pointer>)(uintptr)(newGroup.key(Ꮡtyp, i))).Value = newKey;
+            (@unsafe.Pointer.To<@unsafe.Pointer>(newGroup.key(Ꮡtyp, i))).Value = newKey;
         }
     }
     if (typ.IndirectElem()) {
         // Deep copy elems if indirect.
         for (var i = (uintptr)0; i < abi.MapGroupSlots; i++) {
-            @unsafe.Pointer oldElem = ~(ж<@unsafe.Pointer>)(uintptr)(oldGroup.elem(Ꮡtyp, i));
+            @unsafe.Pointer oldElem = ~@unsafe.Pointer.To<@unsafe.Pointer>(oldGroup.elem(Ꮡtyp, i));
             if (oldElem == nil) {
                 continue;
             }
             @unsafe.Pointer newElem = newobject(typ.Elem);
             typedmemmove(typ.Elem, newElem, oldElem);
-            ((ж<@unsafe.Pointer>)(uintptr)(newGroup.elem(Ꮡtyp, i))).Value = newElem;
+            (@unsafe.Pointer.To<@unsafe.Pointer>(newGroup.elem(Ꮡtyp, i))).Value = newElem;
         }
     }
 }

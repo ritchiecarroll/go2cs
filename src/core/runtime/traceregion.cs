@@ -8,6 +8,7 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -38,6 +39,8 @@ partial struct traceRegionAllocBlockHeader {
 
 internal static uintptr traceRegionAllocBlockData => /* 64<<10 - unsafe.Sizeof(traceRegionAllocBlockHeader{}) */ 65520;
 
+} partial class runtimeᴛtraceRegionAlloc {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string traceRegionAllocTooLargeˢ => ref traceRegionAllocTooLargeˢᵇ;
 private static readonly @string traceRegionAllocTooLargeˢᵇ = "traceRegion: alloc too large"u8;
@@ -59,7 +62,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
     }
 
     // Try to bump-pointer allocate into the current block.
-    ref var block = ref heap<ж<traceRegionAllocBlock>>((ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.Ꮡcurrent.Load()), out var Ꮡblock);
+    ref var block = ref heap<ж<traceRegionAllocBlock>>(@unsafe.Pointer.To<traceRegionAllocBlock>(Ꮡa.Ꮡcurrent.Load()), out var Ꮡblock);
     if (block != nil) {
         var r = block.of(traceRegionAllocBlock.Ꮡoff).Add(n);
         if (r <= (uintptr)len(block.data)) {
@@ -76,7 +79,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
 
         // Check block again under the lock. Someone may
         // have gotten here first.
-        Ꮡblock.ValueSlot = (ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.Ꮡcurrent.Load());
+        Ꮡblock.ValueSlot = @unsafe.Pointer.To<traceRegionAllocBlock>(Ꮡa.Ꮡcurrent.Load());
         if (Ꮡblock.ValueSlot != nil) {
             var r = Ꮡblock.ValueSlot.of(traceRegionAllocBlock.Ꮡoff).Add(n);
             if (r <= (uintptr)len(Ꮡblock.ValueSlot.data)) {
@@ -91,7 +94,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
         }
 
         // Allocate a new block.
-        Ꮡblock.ValueSlot = (ж<traceRegionAllocBlock>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceArenaAllocˢ));
+        Ꮡblock.ValueSlot = @unsafe.Pointer.To<traceRegionAllocBlock>(sysAlloc(/* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceArenaAllocˢ));
         if (Ꮡblock.ValueSlot == nil) {
             @throw(traceRegionOutOfMemoryˢ);
         }
@@ -128,4 +131,4 @@ internal static void drop(this ж<traceRegionAlloc> Ꮡa) {
     Ꮡa.Ꮡdropping.Store(false);
 }
 
-} // end runtime_package
+} // end runtimeᴛtraceRegionAlloc

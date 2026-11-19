@@ -21,7 +21,7 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-internal static bool isNormalized(ж<global::go.math.big_package.ΔInt> Ꮡx) {
+internal static bool isNormalized(ж<global::go.math.big_package.Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (len(x.abs) == 0) {
@@ -33,7 +33,7 @@ internal static bool isNormalized(ж<global::go.math.big_package.ΔInt> Ꮡx) {
 
 // type funZZ is a methodless func type — rendered inline as its base delegate
 internal partial struct argZZ {
-    internal ж<global::go.math.big_package.ΔInt> z, x, y;
+    internal ж<global::go.math.big_package.Int> z, x, y;
 }
 
 internal static slice<argZZ> sumZZ = slice<argZZ>([
@@ -54,7 +54,7 @@ internal static slice<argZZ> prodZZ = slice<argZZ>([
 ]);
 
 public static void TestSignZ(ж<testing.T> t) {
-    ref var zero = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡzero);
+    ref var zero = ref heap(new global::go.math.big_package.Int(), out var Ꮡzero);
     foreach (var (_, a) in range(sumZZ)) {
         nint s = a.z.Sign();
         nint e = a.z.Cmp(Ꮡzero);
@@ -66,7 +66,7 @@ public static void TestSignZ(ж<testing.T> t) {
 
 public static void TestSetZ(ж<testing.T> t) {
     foreach (var (_, a) in range(sumZZ)) {
-        ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
+        ref var z = ref heap(new global::go.math.big_package.Int(), out var Ꮡz);
         Ꮡz.Set(a.z);
         if (!isNormalized(Ꮡz)) {
             t.Errorf("%v is not normalized", z);
@@ -78,11 +78,11 @@ public static void TestSetZ(ж<testing.T> t) {
 }
 
 public static void TestAbsZ(ж<testing.T> t) {
-    ref var zero = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡzero);
+    ref var zero = ref heap(new global::go.math.big_package.Int(), out var Ꮡzero);
     foreach (var (_, a) in range(sumZZ)) {
-        ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
+        ref var z = ref heap(new global::go.math.big_package.Int(), out var Ꮡz);
         Ꮡz.Abs(a.z);
-        ref var e = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡe);
+        ref var e = ref heap(new global::go.math.big_package.Int(), out var Ꮡe);
         Ꮡe.Set(a.z);
         if (Ꮡe.Cmp(Ꮡzero) < 0) {
             Ꮡe.Sub(Ꮡzero, Ꮡe);
@@ -93,8 +93,8 @@ public static void TestAbsZ(ж<testing.T> t) {
     }
 }
 
-internal static void testFunZZ(ж<testing.T> t, @string msg, Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>> f, argZZ a) {
-    ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
+internal static void testFunZZ(ж<testing.T> t, @string msg, Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>> f, argZZ a) {
+    ref var z = ref heap(new global::go.math.big_package.Int(), out var Ꮡz);
     f(Ꮡz, a.x, a.y);
     if (!isNormalized(Ꮡz)) {
         t.Errorf("%s%v is not normalized", msg, z);
@@ -115,20 +115,20 @@ internal static ref readonly @string subZZSymmetricˢ => ref subZZSymmetricˢᵇ
 private static readonly @string subZZSymmetricˢᵇ = "SubZZ symmetric"u8;
 
 public static void TestSumZZ(ж<testing.T> t) {
-    var AddZZ = (ж<global::go.math.big_package.ΔInt> z, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y) => z.Add(x, y);
-    var SubZZ = (ж<global::go.math.big_package.ΔInt> z, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y) => z.Sub(x, y);
+    var AddZZ = (ж<global::go.math.big_package.Int> z, ж<global::go.math.big_package.Int> x, ж<global::go.math.big_package.Int> y) => z.Add(x, y);
+    var SubZZ = (ж<global::go.math.big_package.Int> z, ж<global::go.math.big_package.Int> x, ж<global::go.math.big_package.Int> y) => z.Sub(x, y);
     foreach (var (_, a) in range(sumZZ)) {
         var arg = a;
-        testFunZZ(t, addZZˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(AddZZ), arg);
+        testFunZZ(t, addZZˢ, AddZZ, arg);
 
         arg = new argZZ(a.z, a.y, a.x);
-        testFunZZ(t, addZZSymmetricˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(AddZZ), arg);
+        testFunZZ(t, addZZSymmetricˢ, AddZZ, arg);
 
         arg = new argZZ(a.x, a.z, a.y);
-        testFunZZ(t, subZZˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(SubZZ), arg);
+        testFunZZ(t, subZZˢ, SubZZ, arg);
 
         arg = new argZZ(a.y, a.z, a.x);
-        testFunZZ(t, subZZSymmetricˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(SubZZ), arg);
+        testFunZZ(t, subZZSymmetricˢ, SubZZ, arg);
     }
 }
 
@@ -139,13 +139,13 @@ internal static ref readonly @string mulZZSymmetricˢ => ref mulZZSymmetricˢᵇ
 private static readonly @string mulZZSymmetricˢᵇ = "MulZZ symmetric"u8;
 
 public static void TestProdZZ(ж<testing.T> t) {
-    var MulZZ = (ж<global::go.math.big_package.ΔInt> z, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y) => z.Mul(x, y);
+    var MulZZ = (ж<global::go.math.big_package.Int> z, ж<global::go.math.big_package.Int> x, ж<global::go.math.big_package.Int> y) => z.Mul(x, y);
     foreach (var (_, a) in range(prodZZ)) {
         var arg = a;
-        testFunZZ(t, mulZZˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(MulZZ), arg);
+        testFunZZ(t, mulZZˢ, MulZZ, arg);
 
         arg = new argZZ(a.z, a.y, a.x);
-        testFunZZ(t, mulZZSymmetricˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(MulZZ), arg);
+        testFunZZ(t, mulZZSymmetricˢ, MulZZ, arg);
     }
 }
 
@@ -182,14 +182,14 @@ internal static slice<byte> mulBytes(slice<byte> x, slice<byte> y) {
 }
 
 internal static bool checkMul(slice<byte> a, slice<byte> b) {
-    ref var x = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡx);
-    ref var y = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡy);
-    ref var z1 = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz1);
+    ref var x = ref heap(new global::go.math.big_package.Int(), out var Ꮡx);
+    ref var y = ref heap(new global::go.math.big_package.Int(), out var Ꮡy);
+    ref var z1 = ref heap(new global::go.math.big_package.Int(), out var Ꮡz1);
     Ꮡx.SetBytes(a);
     Ꮡy.SetBytes(b);
     Ꮡz1.Mul(Ꮡx, Ꮡy);
 
-    ref var z2 = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz2);
+    ref var z2 = ref heap(new global::go.math.big_package.Int(), out var Ꮡz2);
     Ꮡz2.SetBytes(mulBytes(a, b));
 
     return Ꮡz1.Cmp(Ꮡz2) == 0;
@@ -233,7 +233,7 @@ internal static slice<mulRangesZᴛ1> mulRangesZ = [
 ];
 
 public static void TestMulRangeZ(ж<testing.T> t) {
-    ref var tmp = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtmp);
+    ref var tmp = ref heap(new global::go.math.big_package.Int(), out var Ꮡtmp);
     // test entirely positive ranges
     foreach (var (i, r) in range(mulRangesN)) {
         // skip mulRangesN entries that overflow int64
@@ -260,7 +260,7 @@ internal partial struct TestBinomial_type /*dyn*/ {
 }
 
 public static void TestBinomial(ж<testing.T> t) {
-    ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
+    ref var z = ref heap(new global::go.math.big_package.Int(), out var Ꮡz);
     foreach (var (_, test) in range(slice<TestBinomial_type>([
         new(0, 0, "1"),
         new(0, 1, "0"),
@@ -291,7 +291,7 @@ public static void TestBinomial(ж<testing.T> t) {
 public static void BenchmarkBinomial(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
+    ref var z = ref heap(new global::go.math.big_package.Int(), out var Ꮡz);
     for (nint i = 0; i < b.N; i++) {
         Ꮡz.Binomial(1000, 990);
     }
@@ -321,8 +321,8 @@ public static void TestDivisionSigns(ж<testing.T> t) {
         var d = NewInt(test.d);
         var m = NewInt(test.m);
 
-        var q1 = @new<global::go.math.big_package.ΔInt>().Quo(x, y);
-        var r1 = @new<global::go.math.big_package.ΔInt>().Rem(x, y);
+        var q1 = @new<global::go.math.big_package.Int>().Quo(x, y);
+        var r1 = @new<global::go.math.big_package.Int>().Rem(x, y);
         if (!isNormalized(q1)) {
             t.Errorf("#%d Quo: %v is not normalized", i, q1.Value);
         }
@@ -333,7 +333,7 @@ public static void TestDivisionSigns(ж<testing.T> t) {
             t.Errorf("#%d QuoRem: got (%s, %s), want (%s, %s)", i, q1.OrTypedNil(), r1.OrTypedNil(), q.OrTypedNil(), r.OrTypedNil());
         }
 
-        var (q2, r2) = @new<global::go.math.big_package.ΔInt>().QuoRem(x, y, @new<global::go.math.big_package.ΔInt>());
+        var (q2, r2) = @new<global::go.math.big_package.Int>().QuoRem(x, y, @new<global::go.math.big_package.Int>());
         if (!isNormalized(q2)) {
             t.Errorf("#%d Quo: %v is not normalized", i, q2.Value);
         }
@@ -344,8 +344,8 @@ public static void TestDivisionSigns(ж<testing.T> t) {
             t.Errorf("#%d QuoRem: got (%s, %s), want (%s, %s)", i, q2.OrTypedNil(), r2.OrTypedNil(), q.OrTypedNil(), r.OrTypedNil());
         }
 
-        var d1 = @new<global::go.math.big_package.ΔInt>().Div(x, y);
-        var m1 = @new<global::go.math.big_package.ΔInt>().Mod(x, y);
+        var d1 = @new<global::go.math.big_package.Int>().Div(x, y);
+        var m1 = @new<global::go.math.big_package.Int>().Mod(x, y);
         if (!isNormalized(d1)) {
             t.Errorf("#%d Div: %v is not normalized", i, d1.Value);
         }
@@ -356,7 +356,7 @@ public static void TestDivisionSigns(ж<testing.T> t) {
             t.Errorf("#%d DivMod: got (%s, %s), want (%s, %s)", i, d1.OrTypedNil(), m1.OrTypedNil(), d.OrTypedNil(), m.OrTypedNil());
         }
 
-        var (d2, m2) = @new<global::go.math.big_package.ΔInt>().DivMod(x, y, @new<global::go.math.big_package.ΔInt>());
+        var (d2, m2) = @new<global::go.math.big_package.Int>().DivMod(x, y, @new<global::go.math.big_package.Int>());
         if (!isNormalized(d2)) {
             t.Errorf("#%d Div: %v is not normalized", i, d2.Value);
         }
@@ -369,7 +369,7 @@ public static void TestDivisionSigns(ж<testing.T> t) {
     }
 }
 
-internal static global::go.math.big_package.Δnat Δnorm(global::go.math.big_package.Δnat x) {
+internal static global::go.math.big_package.nat norm(global::go.math.big_package.nat x) {
     nint i = len(x);
     while (i > 0 && x[i - 1] == 0) {
         i--;
@@ -378,7 +378,7 @@ internal static global::go.math.big_package.Δnat Δnorm(global::go.math.big_pac
 }
 
 public static void TestBits(ж<testing.T> t) {
-    foreach (var (_, test) in range(slice<global::go.math.big_package.Δnat>([
+    foreach (var (_, test) in range(slice<global::go.math.big_package.nat>([
         default,
         slice<global::go.math.big_package.Word>([0]),
         slice<global::go.math.big_package.Word>([1]),
@@ -386,10 +386,10 @@ public static void TestBits(ж<testing.T> t) {
         slice<global::go.math.big_package.Word>([4, 3, 2, 1, 0]),
         slice<global::go.math.big_package.Word>([4, 3, 2, 1, 0, 0, 0, 0])
     ]))) {
-        ref var z = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡz);
+        ref var z = ref heap(new global::go.math.big_package.Int(), out var Ꮡz);
         z.neg = true;
         var got = Ꮡz.SetBits(test);
-        var want = Δnorm(test);
+        var want = norm(test);
         if (got.abs.cmp(want) != 0) {
             t.Errorf("SetBits(%v) = %v; want %v", test, got.abs, want);
         }
@@ -398,7 +398,7 @@ public static void TestBits(ж<testing.T> t) {
             t.Errorf("SetBits(%v): got negative result", test);
         }
 
-        var bits = (global::go.math.big_package.Δnat)z.Bits();
+        var bits = (global::go.math.big_package.nat)z.Bits();
         if (bits.cmp(want) != 0) {
             t.Errorf("%v.Bits() = %v; want %v", z.abs, bits, want);
         }
@@ -406,7 +406,7 @@ public static void TestBits(ж<testing.T> t) {
 }
 
 internal static bool checkSetBytes(slice<byte> b) {
-    @string hex1 = hex.EncodeToString(@new<global::go.math.big_package.ΔInt>().SetBytes(b).Bytes());
+    @string hex1 = hex.EncodeToString(@new<global::go.math.big_package.Int>().SetBytes(b).Bytes());
     @string hex2 = hex.EncodeToString(b);
 
     while (len(hex1) < len(hex2)) {
@@ -432,8 +432,8 @@ internal static bool checkBytes(slice<byte> b) {
     while (len(b) > 0 && b[0] == 0) {
         b = b[1..];
     }
-    var b2 = @new<global::go.math.big_package.ΔInt>().SetBytes(b).Bytes();
-    return bytes_package.Equal(b, b2);
+    var b2 = @new<global::go.math.big_package.Int>().SetBytes(b).Bytes();
+    return bytes.Equal(b, b2);
 }
 
 public static partial void TestBytes(ж<testing.T> t) {
@@ -443,21 +443,21 @@ public static partial void TestBytes(ж<testing.T> t) {
 }
 
 internal static bool checkQuo(slice<byte> x, slice<byte> y) {
-    var u = @new<global::go.math.big_package.ΔInt>().SetBytes(x);
-    var v = @new<global::go.math.big_package.ΔInt>().SetBytes(y);
+    var u = @new<global::go.math.big_package.Int>().SetBytes(x);
+    var v = @new<global::go.math.big_package.Int>().SetBytes(y);
 
     if (len(v.abs) == 0) {
         return true;
     }
 
-    var r = @new<global::go.math.big_package.ΔInt>();
-    (var q, r) = @new<global::go.math.big_package.ΔInt>().QuoRem(u, v, r);
+    var r = @new<global::go.math.big_package.Int>();
+    (var q, r) = @new<global::go.math.big_package.Int>().QuoRem(u, v, r);
 
     if (r.Cmp(v) >= 0) {
         return false;
     }
 
-    var uprime = @new<global::go.math.big_package.ΔInt>().Set(q);
+    var uprime = @new<global::go.math.big_package.Int>().Set(q);
     uprime.Mul(uprime, v);
     uprime.Add(uprime, r);
 
@@ -489,13 +489,13 @@ public static void TestQuo(ж<testing.T> t) {
     }
 
     foreach (var (i, test) in range(quoTests)) {
-        var (x, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.x, 10);
-        var (y, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.y, 10);
-        var (expectedQ, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.q, 10);
-        var (expectedR, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.r, 10);
+        var (x, _) = @new<global::go.math.big_package.Int>().SetString(test.x, 10);
+        var (y, _) = @new<global::go.math.big_package.Int>().SetString(test.y, 10);
+        var (expectedQ, _) = @new<global::go.math.big_package.Int>().SetString(test.q, 10);
+        var (expectedR, _) = @new<global::go.math.big_package.Int>().SetString(test.r, 10);
 
-        var r = @new<global::go.math.big_package.ΔInt>();
-        (var q, r) = @new<global::go.math.big_package.ΔInt>().QuoRem(x, y, r);
+        var r = @new<global::go.math.big_package.Int>();
+        (var q, r) = @new<global::go.math.big_package.Int>().QuoRem(x, y, r);
 
         if (q.Cmp(expectedQ) != 0 || r.Cmp(expectedR) != 0) {
             t.Errorf("#%d got (%s, %s) want (%s, %s)", i, q.OrTypedNil(), r.OrTypedNil(), expectedQ.OrTypedNil(), expectedR.OrTypedNil());
@@ -523,11 +523,11 @@ public static void TestQuoStepD6(ж<testing.T> t) {
     // See Knuth, Volume 2, section 4.3.1, exercise 21. This code exercises
     // a code path which only triggers 1 in 10^{-19} cases.
 
-    var u = Ꮡ(new ΔInt(false, new Δnat(new global::go.math.big_package.Word[]{0, 0, unchecked((nuint)(9223372036854775809UL)), unchecked((nuint)(9223372036854775807UL))}.slice())));
-    var v = Ꮡ(new ΔInt(false, new Δnat(new global::go.math.big_package.Word[]{5, unchecked((nuint)(9223372036854775810UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice())));
+    var u = Ꮡ(new Int(false, new nat(new global::go.math.big_package.Word[]{0, 0, unchecked((nuint)(9223372036854775809UL)), unchecked((nuint)(9223372036854775807UL))}.slice())));
+    var v = Ꮡ(new Int(false, new nat(new global::go.math.big_package.Word[]{5, unchecked((nuint)(9223372036854775810UL)), (global::go.math.big_package.Word)((nuint)1 << (int)(_W - 1))}.slice())));
 
-    var r = @new<global::go.math.big_package.ΔInt>();
-    (var q, r) = @new<global::go.math.big_package.ΔInt>().QuoRem(u, v, r);
+    var r = @new<global::go.math.big_package.Int>();
+    (var q, r) = @new<global::go.math.big_package.Int>().QuoRem(u, v, r);
     @string expectedQ64 = expectedQ64ᶜ;
     @string expectedR64 = expectedR64ᶜ;
     @string expectedQ32 = expectedQ32ᶜ;
@@ -540,10 +540,10 @@ public static void TestQuoStepD6(ж<testing.T> t) {
 public static void BenchmarkQuoRem(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var (x, _) = @new<global::go.math.big_package.ΔInt>().SetString("153980389784927331788354528594524332344709972855165340650588877572729725338415474372475094155672066328274535240275856844648695200875763869073572078279316458648124537905600131008790701752441155668003033945258023841165089852359980273279085783159654751552359397986180318708491098942831252291841441726305535546071", 0);
-    var (y, _) = @new<global::go.math.big_package.ΔInt>().SetString("7746362281539803897849273317883545285945243323447099728551653406505888775727297253384154743724750941556720663282745352402758568446486952008757638690735720782793164586481245379056001310087907017524411556680030339452580238411650898523599802732790857831596547515523593979861803187084910989428312522918414417263055355460715745539358014631136245887418412633787074173796862711588221766398229333338511838891484974940633857861775630560092874987828057333663969469797013996401149696897591265769095952887917296740109742927689053276850469671231961384715398038978492733178835452859452433234470997285516534065058887757272972533841547437247509415567206632827453524027585684464869520087576386907357207827931645864812453790560013100879070175244115566800303394525802384116508985235998027327908578315965475155235939798618031870849109894283125229184144172630553554607112725169432413343763989564437170644270643461665184965150423819594083121075825", 0);
-    var q = @new<global::go.math.big_package.ΔInt>();
-    var r = @new<global::go.math.big_package.ΔInt>();
+    var (x, _) = @new<global::go.math.big_package.Int>().SetString("153980389784927331788354528594524332344709972855165340650588877572729725338415474372475094155672066328274535240275856844648695200875763869073572078279316458648124537905600131008790701752441155668003033945258023841165089852359980273279085783159654751552359397986180318708491098942831252291841441726305535546071", 0);
+    var (y, _) = @new<global::go.math.big_package.Int>().SetString("7746362281539803897849273317883545285945243323447099728551653406505888775727297253384154743724750941556720663282745352402758568446486952008757638690735720782793164586481245379056001310087907017524411556680030339452580238411650898523599802732790857831596547515523593979861803187084910989428312522918414417263055355460715745539358014631136245887418412633787074173796862711588221766398229333338511838891484974940633857861775630560092874987828057333663969469797013996401149696897591265769095952887917296740109742927689053276850469671231961384715398038978492733178835452859452433234470997285516534065058887757272972533841547437247509415567206632827453524027585684464869520087576386907357207827931645864812453790560013100879070175244115566800303394525802384116508985235998027327908578315965475155235939798618031870849109894283125229184144172630553554607112725169432413343763989564437170644270643461665184965150423819594083121075825", 0);
+    var q = @new<global::go.math.big_package.Int>();
+    var r = @new<global::go.math.big_package.Int>();
 
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -572,7 +572,7 @@ internal static slice<bitLenTestsᴛ1> bitLenTests = [
 
 public static void TestBitLen(ж<testing.T> t) {
     foreach (var (i, test) in range(bitLenTests)) {
-        var (x, ok) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 0);
+        var (x, ok) = @new<global::go.math.big_package.Int>().SetString(test.@in, 0);
         if (!ok) {
             t.Errorf("#%d test input invalid: %s", i, test.@in);
             continue;
@@ -667,24 +667,24 @@ internal static slice<expTestsᴛ1> expTests = [
 
 public static void TestExp(ж<testing.T> t) {
     foreach (var (i, test) in range(expTests)) {
-        var (x, ok1) = @new<global::go.math.big_package.ΔInt>().SetString(test.x, 0);
-        var (y, ok2) = @new<global::go.math.big_package.ΔInt>().SetString(test.y, 0);
+        var (x, ok1) = @new<global::go.math.big_package.Int>().SetString(test.x, 0);
+        var (y, ok2) = @new<global::go.math.big_package.Int>().SetString(test.y, 0);
 
         bool ok3 = default;
         bool ok4 = default;
-        ж<global::go.math.big_package.ΔInt> @out = default;
-        ж<global::go.math.big_package.ΔInt> m = default;
+        ж<global::go.math.big_package.Int> @out = default;
+        ж<global::go.math.big_package.Int> m = default;
 
         if (len(test.@out) == 0) {
             (@out, ok3) = (default, true);
         } else {
-            (@out, ok3) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 0);
+            (@out, ok3) = @new<global::go.math.big_package.Int>().SetString(test.@out, 0);
         }
 
         if (len(test.m) == 0) {
             (m, ok4) = (default, true);
         } else {
-            (m, ok4) = @new<global::go.math.big_package.ΔInt>().SetString(test.m, 0);
+            (m, ok4) = @new<global::go.math.big_package.Int>().SetString(test.m, 0);
         }
 
         if (!ok1 || !ok2 || !ok3 || !ok4) {
@@ -692,7 +692,7 @@ public static void TestExp(ж<testing.T> t) {
             continue;
         }
 
-        var z1 = @new<global::go.math.big_package.ΔInt>().Exp(x, y, m);
+        var z1 = @new<global::go.math.big_package.Int>().Exp(x, y, m);
         if (z1 != nil && !isNormalized(z1)) {
             t.Errorf("#%d: %v is not normalized", i, z1.Value);
         }
@@ -703,8 +703,8 @@ public static void TestExp(ж<testing.T> t) {
         if (m == nil) {
             // The result should be the same as for m == 0;
             // specifically, there should be no div-zero panic.
-            m = Ꮡ(new ΔInt(abs: new Δnat(new global::go.math.big_package.Word[]{}.slice()))); // m != nil && len(m.abs) == 0
-            var z2 = @new<global::go.math.big_package.ΔInt>().Exp(x, y, m);
+            m = Ꮡ(new Int(abs: new nat(new global::go.math.big_package.Word[]{}.slice()))); // m != nil && len(m.abs) == 0
+            var z2 = @new<global::go.math.big_package.Int>().Exp(x, y, m);
             if (z2.Cmp(z1) != 0) {
                 t.Errorf("#%d: got %x want %x", i, z2.OrTypedNil(), z1.OrTypedNil());
             }
@@ -715,10 +715,10 @@ public static void TestExp(ж<testing.T> t) {
 public static void BenchmarkExp(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var (x, _) = @new<global::go.math.big_package.ΔInt>().SetString("11001289118363089646017359372117963499250546375269047542777928006103246876688756735760905680604646624353196869572752623285140408755420374049317646428185270079555372763503115646054602867593662923894140940837479507194934267532831694565516466765025434902348314525627418515646588160955862839022051353653052947073136084780742729727874803457643848197499548297570026926927502505634297079527299004267769780768565695459945235586892627059178884998772989397505061206395455591503771677500931269477503508150175717121828518985901959919560700853226255420793148986854391552859459511723547532575574664944815966793196961286234040892865", 0);
-    var (y, _) = @new<global::go.math.big_package.ΔInt>().SetString("0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF72", 0);
-    var (n, _) = @new<global::go.math.big_package.ΔInt>().SetString("0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF73", 0);
-    var @out = @new<global::go.math.big_package.ΔInt>();
+    var (x, _) = @new<global::go.math.big_package.Int>().SetString("11001289118363089646017359372117963499250546375269047542777928006103246876688756735760905680604646624353196869572752623285140408755420374049317646428185270079555372763503115646054602867593662923894140940837479507194934267532831694565516466765025434902348314525627418515646588160955862839022051353653052947073136084780742729727874803457643848197499548297570026926927502505634297079527299004267769780768565695459945235586892627059178884998772989397505061206395455591503771677500931269477503508150175717121828518985901959919560700853226255420793148986854391552859459511723547532575574664944815966793196961286234040892865", 0);
+    var (y, _) = @new<global::go.math.big_package.Int>().SetString("0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF72", 0);
+    var (n, _) = @new<global::go.math.big_package.Int>().SetString("0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF73", 0);
+    var @out = @new<global::go.math.big_package.Int>();
     for (nint i = 0; i < b.N; i++) {
         @out.Exp(x, y, n);
     }
@@ -730,8 +730,8 @@ internal partial struct BenchmarkExpMont_type /*dyn*/ {
 }
 
 public static void BenchmarkExpMont(ж<testing.B> b) {
-    var (x, _) = @new<global::go.math.big_package.ΔInt>().SetString("297778224889315382157302278696111964193", 0);
-    var (y, _) = @new<global::go.math.big_package.ΔInt>().SetString("2548977943381019743024248146923164919440527843026415174732254534318292492375775985739511369575861449426580651447974311336267954477239437734832604782764979371984246675241012538135715981292390886872929238062252506842498360562303324154310849745753254532852868768268023732398278338025070694508489163836616810661033068070127919590264734220833816416141878688318329193389865030063416339367925710474801991305827284114894677717927892032165200876093838921477120036402410731159852999623461591709308405270748511350289172153076023215", 0);
+    var (x, _) = @new<global::go.math.big_package.Int>().SetString("297778224889315382157302278696111964193", 0);
+    var (y, _) = @new<global::go.math.big_package.Int>().SetString("2548977943381019743024248146923164919440527843026415174732254534318292492375775985739511369575861449426580651447974311336267954477239437734832604782764979371984246675241012538135715981292390886872929238062252506842498360562303324154310849745753254532852868768268023732398278338025070694508489163836616810661033068070127919590264734220833816416141878688318329193389865030063416339367925710474801991305827284114894677717927892032165200876093838921477120036402410731159852999623461591709308405270748511350289172153076023215", 0);
     slice<BenchmarkExpMont_type> mods = slice<BenchmarkExpMont_type>([
         new("Odd", "0x82828282828200FFFF28FF2B218281FF82828282828200FFFF28FF2B218281FF82828282828200FFFF28FF2B218281FF"),
         new("Even1", "0x82828282828200FFFF28FF2B218281FF82828282828200FFFF28FF2B218281FF82828282828200FFFF28FF2B218281FE"),
@@ -750,8 +750,8 @@ public static void BenchmarkExpMont(ж<testing.B> b) {
         new("SmallEven4", "0x70")
     ]);
     foreach (var (_, mod) in range(mods)) {
-        var (n, _) = @new<global::go.math.big_package.ΔInt>().SetString(mod.val, 0);
-        var @out = @new<global::go.math.big_package.ΔInt>();
+        var (n, _) = @new<global::go.math.big_package.Int>().SetString(mod.val, 0);
+        var @out = @new<global::go.math.big_package.Int>();
         var nʗ1 = n;
         var outʗ1 = @out;
         var xʗ1 = x;
@@ -768,22 +768,22 @@ public static void BenchmarkExpMont(ж<testing.B> b) {
 public static void BenchmarkExp2(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var (x, _) = @new<global::go.math.big_package.ΔInt>().SetString("2", 0);
-    var (y, _) = @new<global::go.math.big_package.ΔInt>().SetString("0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF72", 0);
-    var (n, _) = @new<global::go.math.big_package.ΔInt>().SetString("0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF73", 0);
-    var @out = @new<global::go.math.big_package.ΔInt>();
+    var (x, _) = @new<global::go.math.big_package.Int>().SetString("2", 0);
+    var (y, _) = @new<global::go.math.big_package.Int>().SetString("0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF72", 0);
+    var (n, _) = @new<global::go.math.big_package.Int>().SetString("0xAC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF73", 0);
+    var @out = @new<global::go.math.big_package.Int>();
     for (nint i = 0; i < b.N; i++) {
         @out.Exp(x, y, n);
     }
 }
 
 internal static bool checkGcd(slice<byte> aBytes, slice<byte> bBytes) {
-    var x = @new<global::go.math.big_package.ΔInt>();
-    var y = @new<global::go.math.big_package.ΔInt>();
-    var a = @new<global::go.math.big_package.ΔInt>().SetBytes(aBytes);
-    var b = @new<global::go.math.big_package.ΔInt>().SetBytes(bBytes);
+    var x = @new<global::go.math.big_package.Int>();
+    var y = @new<global::go.math.big_package.Int>();
+    var a = @new<global::go.math.big_package.Int>().SetBytes(aBytes);
+    var b = @new<global::go.math.big_package.Int>().SetBytes(bBytes);
 
-    var d = @new<global::go.math.big_package.ΔInt>().GCD(x, y, a, b);
+    var d = @new<global::go.math.big_package.Int>().GCD(x, y, a, b);
     x.Mul(x, a);
     y.Mul(y, b);
     x.Add(x, y);
@@ -794,22 +794,22 @@ internal static bool checkGcd(slice<byte> aBytes, slice<byte> bBytes) {
 // euclidExtGCD is a reference implementation of Euclid's
 // extended GCD algorithm for testing against optimized algorithms.
 // Requirements: a, b > 0
-internal static (ж<global::go.math.big_package.ΔInt> g, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y) euclidExtGCD(ж<global::go.math.big_package.ΔInt> a, ж<global::go.math.big_package.ΔInt> b) {
-    var A = @new<global::go.math.big_package.ΔInt>().Set(a);
-    var B = @new<global::go.math.big_package.ΔInt>().Set(b);
+internal static (ж<global::go.math.big_package.Int> g, ж<global::go.math.big_package.Int> x, ж<global::go.math.big_package.Int> y) euclidExtGCD(ж<global::go.math.big_package.Int> a, ж<global::go.math.big_package.Int> b) {
+    var A = @new<global::go.math.big_package.Int>().Set(a);
+    var B = @new<global::go.math.big_package.Int>().Set(b);
 
     // A = Ua*a + Va*b
     // B = Ub*a + Vb*b
-    var Ua = @new<global::go.math.big_package.ΔInt>().SetInt64(1);
-    var Va = @new<global::go.math.big_package.ΔInt>();
+    var Ua = @new<global::go.math.big_package.Int>().SetInt64(1);
+    var Va = @new<global::go.math.big_package.Int>();
 
-    var Ub = @new<global::go.math.big_package.ΔInt>();
-    var Vb = @new<global::go.math.big_package.ΔInt>().SetInt64(1);
+    var Ub = @new<global::go.math.big_package.Int>();
+    var Vb = @new<global::go.math.big_package.Int>().SetInt64(1);
 
-    var q = @new<global::go.math.big_package.ΔInt>();
-    var temp = @new<global::go.math.big_package.ΔInt>();
+    var q = @new<global::go.math.big_package.Int>();
+    var temp = @new<global::go.math.big_package.Int>();
 
-    var r = @new<global::go.math.big_package.ΔInt>();
+    var r = @new<global::go.math.big_package.Int>();
     while (len(B.abs) > 0) {
         (q, r) = q.QuoRem(A, B, r);
 
@@ -831,30 +831,30 @@ internal static (ж<global::go.math.big_package.ΔInt> g, ж<global::go.math.big
 }
 
 internal static bool checkLehmerGcd(slice<byte> aBytes, slice<byte> bBytes) {
-    var a = @new<global::go.math.big_package.ΔInt>().SetBytes(aBytes);
-    var b = @new<global::go.math.big_package.ΔInt>().SetBytes(bBytes);
+    var a = @new<global::go.math.big_package.Int>().SetBytes(aBytes);
+    var b = @new<global::go.math.big_package.Int>().SetBytes(bBytes);
 
     if (a.Sign() <= 0 || b.Sign() <= 0) {
         return true; // can only test positive arguments
     }
 
-    var d = @new<global::go.math.big_package.ΔInt>().lehmerGCD(nil, nil, a, b);
+    var d = @new<global::go.math.big_package.Int>().lehmerGCD(nil, nil, a, b);
     var (d0, _, _) = euclidExtGCD(a, b);
 
     return d.Cmp(d0) == 0;
 }
 
 internal static bool checkLehmerExtGcd(slice<byte> aBytes, slice<byte> bBytes) {
-    var a = @new<global::go.math.big_package.ΔInt>().SetBytes(aBytes);
-    var b = @new<global::go.math.big_package.ΔInt>().SetBytes(bBytes);
-    var x = @new<global::go.math.big_package.ΔInt>();
-    var y = @new<global::go.math.big_package.ΔInt>();
+    var a = @new<global::go.math.big_package.Int>().SetBytes(aBytes);
+    var b = @new<global::go.math.big_package.Int>().SetBytes(bBytes);
+    var x = @new<global::go.math.big_package.Int>();
+    var y = @new<global::go.math.big_package.Int>();
 
     if (a.Sign() <= 0 || b.Sign() <= 0) {
         return true; // can only test positive arguments
     }
 
-    var d = @new<global::go.math.big_package.ΔInt>().lehmerGCD(x, y, a, b);
+    var d = @new<global::go.math.big_package.Int>().lehmerGCD(x, y, a, b);
     var (d0, x0, y0) = euclidExtGCD(a, b);
 
     return d.Cmp(d0) == 0 && x.Cmp(x0) == 0 && y.Cmp(y0) == 0;
@@ -881,17 +881,17 @@ internal static slice<gcdTestsᴛ1> gcdTests = [
     new("1", "-221", "22059940471369027483332068679400581064239780177629666810348940098015901108344", "98920366548084643601728869055592650835572950932266967461790948584315647051443", "991")
 ];
 
-internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.ΔInt> d, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y, ж<global::go.math.big_package.ΔInt> a, ж<global::go.math.big_package.ΔInt> b) {
-    ж<global::go.math.big_package.ΔInt> X = default;
+internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.Int> d, ж<global::go.math.big_package.Int> x, ж<global::go.math.big_package.Int> y, ж<global::go.math.big_package.Int> a, ж<global::go.math.big_package.Int> b) {
+    ж<global::go.math.big_package.Int> X = default;
     if (x != nil) {
-        X = @new<global::go.math.big_package.ΔInt>();
+        X = @new<global::go.math.big_package.Int>();
     }
-    ж<global::go.math.big_package.ΔInt> Y = default;
+    ж<global::go.math.big_package.Int> Y = default;
     if (y != nil) {
-        Y = @new<global::go.math.big_package.ΔInt>();
+        Y = @new<global::go.math.big_package.Int>();
     }
 
-    var D = @new<global::go.math.big_package.ΔInt>().GCD(X, Y, a, b);
+    var D = @new<global::go.math.big_package.Int>().GCD(X, Y, a, b);
     if (D.Cmp(d) != 0) {
         t.Errorf("GCD(%s, %s, %s, %s): got d = %s, want %s", x.OrTypedNil(), y.OrTypedNil(), a.OrTypedNil(), b.OrTypedNil(), D.OrTypedNil(), d.OrTypedNil());
     }
@@ -903,8 +903,8 @@ internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.ΔI
     }
 
     // check results in presence of aliasing (issue #11284)
-    var a2 = @new<global::go.math.big_package.ΔInt>().Set(a);
-    var b2 = @new<global::go.math.big_package.ΔInt>().Set(b);
+    var a2 = @new<global::go.math.big_package.Int>().Set(a);
+    var b2 = @new<global::go.math.big_package.Int>().Set(b);
     a2.GCD(X, Y, a2, b2); // result is same as 1st argument
     if (a2.Cmp(d) != 0) {
         t.Errorf("aliased z = a GCD(%s, %s, %s, %s): got d = %s, want %s", x.OrTypedNil(), y.OrTypedNil(), a.OrTypedNil(), b.OrTypedNil(), a2.OrTypedNil(), d.OrTypedNil());
@@ -916,8 +916,8 @@ internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.ΔI
         t.Errorf("aliased z = a GCD(%s, %s, %s, %s): got y = %s, want %s", x.OrTypedNil(), y.OrTypedNil(), a.OrTypedNil(), b.OrTypedNil(), Y.OrTypedNil(), y.OrTypedNil());
     }
 
-    a2 = @new<global::go.math.big_package.ΔInt>().Set(a);
-    b2 = @new<global::go.math.big_package.ΔInt>().Set(b);
+    a2 = @new<global::go.math.big_package.Int>().Set(a);
+    b2 = @new<global::go.math.big_package.Int>().Set(b);
     b2.GCD(X, Y, a2, b2); // result is same as 2nd argument
     if (b2.Cmp(d) != 0) {
         t.Errorf("aliased z = b GCD(%s, %s, %s, %s): got d = %s, want %s", x.OrTypedNil(), y.OrTypedNil(), a.OrTypedNil(), b.OrTypedNil(), b2.OrTypedNil(), d.OrTypedNil());
@@ -929,9 +929,9 @@ internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.ΔI
         t.Errorf("aliased z = b GCD(%s, %s, %s, %s): got y = %s, want %s", x.OrTypedNil(), y.OrTypedNil(), a.OrTypedNil(), b.OrTypedNil(), Y.OrTypedNil(), y.OrTypedNil());
     }
 
-    a2 = @new<global::go.math.big_package.ΔInt>().Set(a);
-    b2 = @new<global::go.math.big_package.ΔInt>().Set(b);
-    D = @new<global::go.math.big_package.ΔInt>().GCD(a2, b2, a2, b2); // x = a, y = b
+    a2 = @new<global::go.math.big_package.Int>().Set(a);
+    b2 = @new<global::go.math.big_package.Int>().Set(b);
+    D = @new<global::go.math.big_package.Int>().GCD(a2, b2, a2, b2); // x = a, y = b
     if (D.Cmp(d) != 0) {
         t.Errorf("aliased x = a, y = b GCD(%s, %s, %s, %s): got d = %s, want %s", x.OrTypedNil(), y.OrTypedNil(), a.OrTypedNil(), b.OrTypedNil(), D.OrTypedNil(), d.OrTypedNil());
     }
@@ -942,9 +942,9 @@ internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.ΔI
         t.Errorf("aliased x = a, y = b GCD(%s, %s, %s, %s): got y = %s, want %s", x.OrTypedNil(), y.OrTypedNil(), a.OrTypedNil(), b.OrTypedNil(), b2.OrTypedNil(), y.OrTypedNil());
     }
 
-    a2 = @new<global::go.math.big_package.ΔInt>().Set(a);
-    b2 = @new<global::go.math.big_package.ΔInt>().Set(b);
-    D = @new<global::go.math.big_package.ΔInt>().GCD(b2, a2, a2, b2); // x = b, y = a
+    a2 = @new<global::go.math.big_package.Int>().Set(a);
+    b2 = @new<global::go.math.big_package.Int>().Set(b);
+    D = @new<global::go.math.big_package.Int>().GCD(b2, a2, a2, b2); // x = b, y = a
     if (D.Cmp(d) != 0) {
         t.Errorf("aliased x = b, y = a GCD(%s, %s, %s, %s): got d = %s, want %s", x.OrTypedNil(), y.OrTypedNil(), a.OrTypedNil(), b.OrTypedNil(), D.OrTypedNil(), d.OrTypedNil());
     }
@@ -958,11 +958,11 @@ internal static void testGcd(ж<testing.T> t, ж<global::go.math.big_package.ΔI
 
 public static void TestGcd(ж<testing.T> t) {
     foreach (var (_, test) in range(gcdTests)) {
-        var (d, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.d, 0);
-        var (x, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.x, 0);
-        var (y, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.y, 0);
-        var (a, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.a, 0);
-        var (b, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.b, 0);
+        var (d, _) = @new<global::go.math.big_package.Int>().SetString(test.d, 0);
+        var (x, _) = @new<global::go.math.big_package.Int>().SetString(test.x, 0);
+        var (y, _) = @new<global::go.math.big_package.Int>().SetString(test.y, 0);
+        var (a, _) = @new<global::go.math.big_package.Int>().SetString(test.a, 0);
+        var (b, _) = @new<global::go.math.big_package.Int>().SetString(test.b, 0);
 
         testGcd(t, d, nil, nil, a, b);
         testGcd(t, d, x, nil, a, b);
@@ -1024,9 +1024,9 @@ internal static slice<intShiftTest> rshTests = [
 
 public static void TestRsh(ж<testing.T> t) {
     foreach (var (i, test) in range(rshTests)) {
-        var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
-        var (expected, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
-        var @out = @new<global::go.math.big_package.ΔInt>().Rsh(@in, test.shift);
+        var (@in, _) = @new<global::go.math.big_package.Int>().SetString(test.@in, 10);
+        var (expected, _) = @new<global::go.math.big_package.Int>().SetString(test.@out, 10);
+        var @out = @new<global::go.math.big_package.Int>().Rsh(@in, test.shift);
 
         if (!isNormalized(@out)) {
             t.Errorf("#%d: %v is not normalized", i, @out.Value);
@@ -1039,8 +1039,8 @@ public static void TestRsh(ж<testing.T> t) {
 
 public static void TestRshSelf(ж<testing.T> t) {
     foreach (var (i, test) in range(rshTests)) {
-        var (z, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
-        var (expected, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
+        var (z, _) = @new<global::go.math.big_package.Int>().SetString(test.@in, 10);
+        var (expected, _) = @new<global::go.math.big_package.Int>().SetString(test.@out, 10);
         z.Rsh(z, test.shift);
 
         if (!isNormalized(z)) {
@@ -1076,9 +1076,9 @@ internal static slice<intShiftTest> lshTests = [
 
 public static void TestLsh(ж<testing.T> t) {
     foreach (var (i, test) in range(lshTests)) {
-        var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
-        var (expected, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
-        var @out = @new<global::go.math.big_package.ΔInt>().Lsh(@in, test.shift);
+        var (@in, _) = @new<global::go.math.big_package.Int>().SetString(test.@in, 10);
+        var (expected, _) = @new<global::go.math.big_package.Int>().SetString(test.@out, 10);
+        var @out = @new<global::go.math.big_package.Int>().Lsh(@in, test.shift);
 
         if (!isNormalized(@out)) {
             t.Errorf("#%d: %v is not normalized", i, @out.Value);
@@ -1091,8 +1091,8 @@ public static void TestLsh(ж<testing.T> t) {
 
 public static void TestLshSelf(ж<testing.T> t) {
     foreach (var (i, test) in range(lshTests)) {
-        var (z, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
-        var (expected, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
+        var (z, _) = @new<global::go.math.big_package.Int>().SetString(test.@in, 10);
+        var (expected, _) = @new<global::go.math.big_package.Int>().SetString(test.@out, 10);
         z.Lsh(z, test.shift);
 
         if (!isNormalized(z)) {
@@ -1106,8 +1106,8 @@ public static void TestLshSelf(ж<testing.T> t) {
 
 public static void TestLshRsh(ж<testing.T> t) {
     foreach (var (i, test) in range(rshTests)) {
-        var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
-        var @out = @new<global::go.math.big_package.ΔInt>().Lsh(@in, test.shift);
+        var (@in, _) = @new<global::go.math.big_package.Int>().SetString(test.@in, 10);
+        var @out = @new<global::go.math.big_package.Int>().Lsh(@in, test.shift);
         @out = @out.Rsh(@out, test.shift);
 
         if (!isNormalized(@out)) {
@@ -1118,8 +1118,8 @@ public static void TestLshRsh(ж<testing.T> t) {
         }
     }
     foreach (var (i, test) in range(lshTests)) {
-        var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
-        var @out = @new<global::go.math.big_package.ΔInt>().Lsh(@in, test.shift);
+        var (@in, _) = @new<global::go.math.big_package.Int>().SetString(test.@in, 10);
+        var @out = @new<global::go.math.big_package.Int>().Lsh(@in, test.shift);
         @out.Rsh(@out, test.shift);
 
         if (!isNormalized(@out)) {
@@ -1147,10 +1147,10 @@ internal static slice<@string> cmpAbsTests = [
 internal static readonly object cmpAbsTestsEntriesNotˢ = (@string)"cmpAbsTests entries not sorted in ascending order"u8;
 
 public static void TestCmpAbs(ж<testing.T> t) {
-    var values = new slice<ж<global::go.math.big_package.ΔInt>>(len(cmpAbsTests));
-    ж<global::go.math.big_package.ΔInt> prev = default;
+    var values = new slice<ж<global::go.math.big_package.Int>>(len(cmpAbsTests));
+    ж<global::go.math.big_package.Int> prev = default;
     foreach (var (i, s) in range(cmpAbsTests)) {
-        var (x, ok) = @new<global::go.math.big_package.ΔInt>().SetString(s, 0);
+        var (x, ok) = @new<global::go.math.big_package.Int>().SetString(s, 0);
         if (!ok) {
             t.Fatalf("SetString(%s, 0) failed", s);
         }
@@ -1165,8 +1165,8 @@ public static void TestCmpAbs(ж<testing.T> t) {
         foreach (var (j, y) in range(values)) {
             // try all combinations of signs for x, y
             for (nint k = 0; k < 4; k++) {
-                ref var a = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡa);
-                ref var b = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡb);
+                ref var a = ref heap(new global::go.math.big_package.Int(), out var Ꮡa);
+                ref var b = ref heap(new global::go.math.big_package.Int(), out var Ꮡb);
                 Ꮡa.Set(x);
                 Ꮡb.Set(y);
                 if ((k & 1) != 0) {
@@ -1197,7 +1197,7 @@ public static void TestCmpAbs(ж<testing.T> t) {
 
 public static void TestIntCmpSelf(ж<testing.T> t) {
     foreach (var (_, s) in range(cmpAbsTests)) {
-        var (x, ok) = @new<global::go.math.big_package.ΔInt>().SetString(s, 0);
+        var (x, ok) = @new<global::go.math.big_package.Int>().SetString(s, 0);
         if (!ok) {
             t.Fatalf("SetString(%s, 0) failed", s);
         }
@@ -1231,7 +1231,7 @@ internal static slice<@string> int64Tests = [
 
 public static void TestInt64(ж<testing.T> t) {
     foreach (var (_, s) in range(int64Tests)) {
-        ref var x = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡx);
+        ref var x = ref heap(new global::go.math.big_package.Int(), out var Ꮡx);
         var (_, ok) = Ꮡx.SetString(s, 0);
         if (!ok) {
             t.Errorf("SetString(%s, 0) failed", s);
@@ -1281,7 +1281,7 @@ internal static slice<@string> uint64Tests = [
 
 public static void TestUint64(ж<testing.T> t) {
     foreach (var (_, s) in range(uint64Tests)) {
-        ref var x = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡx);
+        ref var x = ref heap(new global::go.math.big_package.Int(), out var Ꮡx);
         var (_, ok) = Ꮡx.SetString(s, 0);
         if (!ok) {
             t.Errorf("SetString(%s, 0) failed", s);
@@ -1359,20 +1359,20 @@ internal static slice<bitwiseTestsᴛ1> bitwiseTests = [
 
 // type bitFun is a methodless func type — rendered inline as its base delegate
 
-internal static void testBitFun(ж<testing.T> t, @string msg, Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>> f, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y, @string exp) {
-    var expected = @new<global::go.math.big_package.ΔInt>();
+internal static void testBitFun(ж<testing.T> t, @string msg, Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>> f, ж<global::go.math.big_package.Int> x, ж<global::go.math.big_package.Int> y, @string exp) {
+    var expected = @new<global::go.math.big_package.Int>();
     expected.SetString(exp, 0);
 
-    var @out = f(@new<global::go.math.big_package.ΔInt>(), x, y);
+    var @out = f(@new<global::go.math.big_package.Int>(), x, y);
     if (@out.Cmp(expected) != 0) {
         t.Errorf("%s: got %s want %s", msg, @out.OrTypedNil(), expected.OrTypedNil());
     }
 }
 
-internal static void testBitFunSelf(ж<testing.T> t, @string msg, Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>> f, ж<global::go.math.big_package.ΔInt> x, ж<global::go.math.big_package.ΔInt> y, @string exp) {
-    var self = @new<global::go.math.big_package.ΔInt>();
+internal static void testBitFunSelf(ж<testing.T> t, @string msg, Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>> f, ж<global::go.math.big_package.Int> x, ж<global::go.math.big_package.Int> y, @string exp) {
+    var self = @new<global::go.math.big_package.Int>();
     self.Set(x);
-    var expected = @new<global::go.math.big_package.ΔInt>();
+    var expected = @new<global::go.math.big_package.Int>();
     expected.SetString(exp, 0);
 
     self = f(self, self, y);
@@ -1381,16 +1381,16 @@ internal static void testBitFunSelf(ж<testing.T> t, @string msg, Func<ж<global
     }
 }
 
-internal static nuint altBit(ж<global::go.math.big_package.ΔInt> x, nint i) {
-    var z = @new<global::go.math.big_package.ΔInt>().Rsh(x, (nuint)i);
+internal static nuint altBit(ж<global::go.math.big_package.Int> x, nint i) {
+    var z = @new<global::go.math.big_package.Int>().Rsh(x, (nuint)i);
     z = z.And(z, NewInt(1));
-    if (z.Cmp(@new<global::go.math.big_package.ΔInt>()) != 0) {
+    if (z.Cmp(@new<global::go.math.big_package.Int>()) != 0) {
         return 1;
     }
     return 0;
 }
 
-internal static ж<global::go.math.big_package.ΔInt> altSetBit(ж<global::go.math.big_package.ΔInt> z, ж<global::go.math.big_package.ΔInt> x, nint i, nuint b) {
+internal static ж<global::go.math.big_package.Int> altSetBit(ж<global::go.math.big_package.Int> z, ж<global::go.math.big_package.Int> x, nint i, nuint b) {
     var one = NewInt(1);
     var m = one.Lsh(one, (nuint)i);
     switch (b) {
@@ -1403,20 +1403,20 @@ internal static ж<global::go.math.big_package.ΔInt> altSetBit(ж<global::go.ma
     throw panic("set bit is not 0 or 1");
 }
 
-internal static void testBitset(ж<testing.T> t, ж<global::go.math.big_package.ΔInt> Ꮡx) {
+internal static void testBitset(ж<testing.T> t, ж<global::go.math.big_package.Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     nint n = x.BitLen();
-    var z = @new<global::go.math.big_package.ΔInt>().Set(Ꮡx);
-    var z1 = @new<global::go.math.big_package.ΔInt>().Set(Ꮡx);
+    var z = @new<global::go.math.big_package.Int>().Set(Ꮡx);
+    var z1 = @new<global::go.math.big_package.Int>().Set(Ꮡx);
     for (nint i = 0; i < n + 10; i++) {
         nuint old = z.Bit(i);
         nuint old1 = altBit(z1, i);
         if (old != old1) {
             t.Errorf("bitset: inconsistent value for Bit(%s, %d), got %v want %v", z1.OrTypedNil(), i, old, old1);
         }
-        var zΔ1 = @new<global::go.math.big_package.ΔInt>().SetBit(z, i, 1);
-        var z1Δ1 = altSetBit(@new<global::go.math.big_package.ΔInt>(), z1, i, 1);
+        var zΔ1 = @new<global::go.math.big_package.Int>().SetBit(z, i, 1);
+        var z1Δ1 = altSetBit(@new<global::go.math.big_package.Int>(), z1, i, 1);
         if (zΔ1.Bit(i) == 0) {
             t.Errorf("bitset: bit %d of %s got 0 want 1", i, Ꮡx.OrTypedNil());
         }
@@ -1464,15 +1464,15 @@ internal static slice<bitsetTestsᴛ1> bitsetTests = [
 
 public static void TestBitSet(ж<testing.T> t) {
     foreach (var (_, test) in range(bitwiseTests)) {
-        var x = @new<global::go.math.big_package.ΔInt>();
+        var x = @new<global::go.math.big_package.Int>();
         x.SetString(test.x, 0);
         testBitset(t, x);
-        x = @new<global::go.math.big_package.ΔInt>();
+        x = @new<global::go.math.big_package.Int>();
         x.SetString(test.y, 0);
         testBitset(t, x);
     }
     foreach (var (i, test) in range(bitsetTests)) {
-        var x = @new<global::go.math.big_package.ΔInt>();
+        var x = @new<global::go.math.big_package.Int>();
         x.SetString(test.x, 0);
         nuint b = x.Bit(test.i);
         if (b != test.b) {
@@ -1502,7 +1502,7 @@ internal static slice<tzbTestsᴛ1> tzbTests = [
 
 public static void TestTrailingZeroBits(ж<testing.T> t) {
     foreach (var (i, test) in range(tzbTests)) {
-        var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 0);
+        var (@in, _) = @new<global::go.math.big_package.Int>().SetString(test.@in, 0);
         nuint want = test.@out;
         nuint got = @in.TrailingZeroBits();
 
@@ -1515,7 +1515,7 @@ public static void TestTrailingZeroBits(ж<testing.T> t) {
 public static void BenchmarkBitset(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var z = @new<global::go.math.big_package.ΔInt>();
+    var z = @new<global::go.math.big_package.Int>();
     z.SetBit(z, 512, 1);
     b.ResetTimer();
     for (nint i = b.N - 1; i >= 0; i--) {
@@ -1537,7 +1537,7 @@ public static void BenchmarkBitsetNeg(ж<testing.B> Ꮡb) {
 public static void BenchmarkBitsetOrig(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var z = @new<global::go.math.big_package.ΔInt>();
+    var z = @new<global::go.math.big_package.Int>();
     altSetBit(z, z, 512, 1);
     b.ResetTimer();
     for (nint i = b.N - 1; i >= 0; i--) {
@@ -1558,10 +1558,10 @@ public static void BenchmarkBitsetNegOrig(ж<testing.B> Ꮡb) {
 
 // tri generates the trinomial 2**(n*2) - 2**n - 1, which is always 3 mod 4 and
 // 7 mod 8, so that 2 is always a quadratic residue.
-internal static ж<global::go.math.big_package.ΔInt> tri(nuint n) {
+internal static ж<global::go.math.big_package.Int> tri(nuint n) {
     var x = NewInt(1);
     x.Lsh(x, n);
-    var x2 = @new<global::go.math.big_package.ΔInt>().Lsh(x, n);
+    var x2 = @new<global::go.math.big_package.Int>().Lsh(x, n);
     x2.Sub(x2, x);
     x2.Sub(x2, intOne);
     return x2;
@@ -1582,7 +1582,7 @@ public static void BenchmarkModSqrt225_3Mod4(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var p = tri(225);
-    var x = @new<global::go.math.big_package.ΔInt>().SetUint64(2);
+    var x = @new<global::go.math.big_package.Int>().SetUint64(2);
     for (nint i = 0; i < b.N; i++) {
         x.SetUint64(2);
         x.modSqrt3Mod4Prime(x, p);
@@ -1595,7 +1595,7 @@ public static void BenchmarkModSqrt231_Tonelli(ж<testing.B> Ꮡb) {
     var p = tri(231);
     p.Sub(p, intOne);
     p.Sub(p, intOne); // tri(231) - 2 is a prime == 5 mod 8
-    var x = @new<global::go.math.big_package.ΔInt>().SetUint64(7);
+    var x = @new<global::go.math.big_package.Int>().SetUint64(7);
     for (nint i = 0; i < b.N; i++) {
         x.SetUint64(7);
         x.modSqrtTonelliShanks(x, p);
@@ -1608,7 +1608,7 @@ public static void BenchmarkModSqrt231_5Mod8(ж<testing.B> Ꮡb) {
     var p = tri(231);
     p.Sub(p, intOne);
     p.Sub(p, intOne); // tri(231) - 2 is a prime == 5 mod 8
-    var x = @new<global::go.math.big_package.ΔInt>().SetUint64(7);
+    var x = @new<global::go.math.big_package.Int>().SetUint64(7);
     for (nint i = 0; i < b.N; i++) {
         x.SetUint64(7);
         x.modSqrt5Mod8Prime(x, p);
@@ -1624,20 +1624,20 @@ internal static ref readonly @string xorˢ => ref xorˢᵇ;
 private static readonly @string xorˢᵇ = "xor"u8;
 
 public static void TestBitwise(ж<testing.T> t) {
-    var x = @new<global::go.math.big_package.ΔInt>();
-    var y = @new<global::go.math.big_package.ΔInt>();
+    var x = @new<global::go.math.big_package.Int>();
+    var y = @new<global::go.math.big_package.Int>();
     foreach (var (_, test) in range(bitwiseTests)) {
         x.SetString(test.x, 0);
         y.SetString(test.y, 0);
 
-        testBitFun(t, andˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(((Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>)(global::go.math.big_package.And))), x, y, test.and);
-        testBitFunSelf(t, andˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(((Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>)(global::go.math.big_package.And))), x, y, test.and);
-        testBitFun(t, andNotˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(((Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>)(global::go.math.big_package.AndNot))), x, y, test.andNot);
-        testBitFunSelf(t, andNotˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(((Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>)(global::go.math.big_package.AndNot))), x, y, test.andNot);
-        testBitFun(t, "or", new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(((Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>)(global::go.math.big_package.Or))), x, y, test.or);
-        testBitFunSelf(t, "or", new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(((Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>)(global::go.math.big_package.Or))), x, y, test.or);
-        testBitFun(t, xorˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(((Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>)(global::go.math.big_package.Xor))), x, y, test.xor);
-        testBitFunSelf(t, xorˢ, new Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>(((Func<ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>, ж<global::go.math.big_package.ΔInt>>)(global::go.math.big_package.Xor))), x, y, test.xor);
+        testBitFun(t, andˢ, new Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>(((Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>)(global::go.math.bigᴛInt.And))), x, y, test.and);
+        testBitFunSelf(t, andˢ, new Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>(((Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>)(global::go.math.bigᴛInt.And))), x, y, test.and);
+        testBitFun(t, andNotˢ, new Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>(((Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>)(global::go.math.bigᴛInt.AndNot))), x, y, test.andNot);
+        testBitFunSelf(t, andNotˢ, new Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>(((Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>)(global::go.math.bigᴛInt.AndNot))), x, y, test.andNot);
+        testBitFun(t, "or", new Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>(((Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>)(global::go.math.bigᴛInt.Or))), x, y, test.or);
+        testBitFunSelf(t, "or", new Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>(((Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>)(global::go.math.bigᴛInt.Or))), x, y, test.or);
+        testBitFun(t, xorˢ, new Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>(((Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>)(global::go.math.bigᴛInt.Xor))), x, y, test.xor);
+        testBitFunSelf(t, xorˢ, new Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>(((Func<ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>, ж<global::go.math.big_package.Int>>)(global::go.math.bigᴛInt.Xor))), x, y, test.xor);
     }
 }
 
@@ -1658,9 +1658,9 @@ internal static slice<notTestsᴛ1> notTests = [
 ];
 
 public static void TestNot(ж<testing.T> t) {
-    var @in = @new<global::go.math.big_package.ΔInt>();
-    var @out = @new<global::go.math.big_package.ΔInt>();
-    var expected = @new<global::go.math.big_package.ΔInt>();
+    var @in = @new<global::go.math.big_package.Int>();
+    var @out = @new<global::go.math.big_package.Int>();
+    var expected = @new<global::go.math.big_package.Int>();
     foreach (var (i, test) in range(notTests)) {
         @in.SetString(test.@in, 10);
         expected.SetString(test.@out, 10);
@@ -1688,10 +1688,10 @@ internal static slice<modInverseTestsᴛ1> modInverseTests = [
 ];
 
 public static void TestModInverse(ж<testing.T> t) {
-    ref var element = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡelement);
-    ref var modulus = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡmodulus);
-    ref var gcd = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡgcd);
-    ref var inverse = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡinverse);
+    ref var element = ref heap(new global::go.math.big_package.Int(), out var Ꮡelement);
+    ref var modulus = ref heap(new global::go.math.big_package.Int(), out var Ꮡmodulus);
+    ref var gcd = ref heap(new global::go.math.big_package.Int(), out var Ꮡgcd);
+    ref var inverse = ref heap(new global::go.math.big_package.Int(), out var Ꮡinverse);
     var one = NewInt(1);
     foreach (var (_, test) in range(modInverseTests)) {
         (Ꮡelement).SetString(test.element, 10);
@@ -1725,11 +1725,11 @@ public static void TestModInverse(ж<testing.T> t) {
 public static void BenchmarkModInverse(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var p = @new<global::go.math.big_package.ΔInt>().SetInt64(1); // Mersenne prime 2**1279 -1
+    var p = @new<global::go.math.big_package.Int>().SetInt64(1); // Mersenne prime 2**1279 -1
     p.abs = p.abs.lsh(p.abs, 1279);
     p.Sub(p, intOne);
-    var x = @new<global::go.math.big_package.ΔInt>().Sub(p, intOne);
-    var z = @new<global::go.math.big_package.ΔInt>();
+    var x = @new<global::go.math.big_package.Int>().Sub(p, intOne);
+    var z = @new<global::go.math.big_package.Int>();
     for (nint i = 0; i < b.N; i++) {
         z.ModInverse(x, p);
     }
@@ -1737,10 +1737,10 @@ public static void BenchmarkModInverse(ж<testing.B> Ꮡb) {
 
 // testModSqrt is a helper for TestModSqrt,
 // which checks that ModSqrt can compute a square-root of elt^2.
-internal static bool testModSqrt(ж<testing.T> t, ж<global::go.math.big_package.ΔInt> elt, ж<global::go.math.big_package.ΔInt> mod, ж<global::go.math.big_package.ΔInt> sq, ж<global::go.math.big_package.ΔInt> sqrt) {
-    ref var sqChk = ref heap(new global::go.math.big_package.ΔInt(), out var ᏑsqChk);
-    ref var sqrtChk = ref heap(new global::go.math.big_package.ΔInt(), out var ᏑsqrtChk);
-    ref var sqrtsq = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡsqrtsq);
+internal static bool testModSqrt(ж<testing.T> t, ж<global::go.math.big_package.Int> elt, ж<global::go.math.big_package.Int> mod, ж<global::go.math.big_package.Int> sq, ж<global::go.math.big_package.Int> sqrt) {
+    ref var sqChk = ref heap(new global::go.math.big_package.Int(), out var ᏑsqChk);
+    ref var sqrtChk = ref heap(new global::go.math.big_package.Int(), out var ᏑsqrtChk);
+    ref var sqrtsq = ref heap(new global::go.math.big_package.Int(), out var Ꮡsqrtsq);
     sq.Mul(elt, elt);
     sq.Mod(sq, mod);
     var z = sqrt.ModSqrt(sq, mod);
@@ -1776,11 +1776,11 @@ internal static bool testModSqrt(ж<testing.T> t, ж<global::go.math.big_package
 }
 
 public static void TestModSqrt(ж<testing.T> t) {
-    ref var elt = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡelt);
-    ref var mod = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡmod);
-    ref var modx4 = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡmodx4);
-    ref var sq = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡsq);
-    ref var sqrt = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡsqrt);
+    ref var elt = ref heap(new global::go.math.big_package.Int(), out var Ꮡelt);
+    ref var mod = ref heap(new global::go.math.big_package.Int(), out var Ꮡmod);
+    ref var modx4 = ref heap(new global::go.math.big_package.Int(), out var Ꮡmodx4);
+    ref var sq = ref heap(new global::go.math.big_package.Int(), out var Ꮡsq);
+    ref var sqrt = ref heap(new global::go.math.big_package.Int(), out var Ꮡsqrt);
     var r = Δrand.New(Δrand.NewSource(9));
     foreach (var (i, s) in range(primes[1..])) { // skip 2, use only odd primes
         Ꮡmod.SetString(s, 10);
@@ -1858,8 +1858,8 @@ public static void TestJacobi(ж<testing.T> t) {
         new(-6, -5, -1)
     ]);
 
-    ref var x = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡx);
-    ref var y = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡy);
+    ref var x = ref heap(new global::go.math.big_package.Int(), out var Ꮡx);
+    ref var y = ref heap(new global::go.math.big_package.Int(), out var Ꮡy);
 
     foreach (var (i, test) in range(testCases)) {
         Ꮡx.SetInt64(test.x);
@@ -1905,7 +1905,7 @@ public static void TestIssue2607(ж<testing.T> t) {
 
 public static void TestSqrt(ж<testing.T> t) {
     nint root = 0;
-    var r = @new<global::go.math.big_package.ΔInt>();
+    var r = @new<global::go.math.big_package.Int>();
     for (nint i = 0; i < 10000; i++) {
         if ((root + 1) * (root + 1) <= i) {
             root++;
@@ -1919,9 +1919,9 @@ public static void TestSqrt(ж<testing.T> t) {
     }
 
     for (nint i = 0; i < 1000; i += 10) {
-        var (n, _) = @new<global::go.math.big_package.ΔInt>().SetString("1"u8 + strings.Repeat("0", i), 10);
-        var rΔ1 = @new<global::go.math.big_package.ΔInt>().Sqrt(n);
-        var (rootΔ1, _) = @new<global::go.math.big_package.ΔInt>().SetString("1"u8 + strings.Repeat("0", i / 2), 10);
+        var (n, _) = @new<global::go.math.big_package.Int>().SetString("1"u8 + strings.Repeat("0", i), 10);
+        var rΔ1 = @new<global::go.math.big_package.Int>().Sqrt(n);
+        var (rootΔ1, _) = @new<global::go.math.big_package.Int>().SetString("1"u8 + strings.Repeat("0", i / 2), 10);
         if (rΔ1.Cmp(rootΔ1) != 0) {
             t.Errorf("Sqrt(1e%d) = %v, want 1e%d", i, rΔ1.OrTypedNil(), i / 2);
         }
@@ -1938,10 +1938,10 @@ public static void TestSqrt(ж<testing.T> t) {
 // We can't test this together with the other Exp tests above because
 // it requires a different receiver setup.
 public static void TestIssue22830(ж<testing.T> t) {
-    var one = @new<global::go.math.big_package.ΔInt>().SetInt64(1);
-    var (@base, _) = @new<global::go.math.big_package.ΔInt>().SetString("84555555300000000000", 10);
-    var (mod, _) = @new<global::go.math.big_package.ΔInt>().SetString("66666670001111111111", 10);
-    var (want, _) = @new<global::go.math.big_package.ΔInt>().SetString("17888885298888888889", 10);
+    var one = @new<global::go.math.big_package.Int>().SetInt64(1);
+    var (@base, _) = @new<global::go.math.big_package.Int>().SetString("84555555300000000000", 10);
+    var (mod, _) = @new<global::go.math.big_package.Int>().SetString("66666670001111111111", 10);
+    var (want, _) = @new<global::go.math.big_package.Int>().SetString("17888885298888888889", 10);
 
     slice<int64> tests = slice<int64>([
         0, 1, -1
@@ -1958,9 +1958,9 @@ public static void TestIssue22830(ж<testing.T> t) {
 public static void BenchmarkSqrt(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var (n, _) = @new<global::go.math.big_package.ΔInt>().SetString("1"u8 + strings.Repeat("0", 1001), 10);
+    var (n, _) = @new<global::go.math.big_package.Int>().SetString("1"u8 + strings.Repeat("0", 1001), 10);
     b.ResetTimer();
-    var t = @new<global::go.math.big_package.ΔInt>();
+    var t = @new<global::go.math.big_package.Int>();
     for (nint i = 0; i < b.N; i++) {
         t.Sqrt(n);
     }
@@ -1969,9 +1969,9 @@ public static void BenchmarkSqrt(ж<testing.B> Ꮡb) {
 internal static void benchmarkIntSqr(ж<testing.B> Ꮡb, nint nwords) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var x = @new<global::go.math.big_package.ΔInt>();
+    var x = @new<global::go.math.big_package.Int>();
     x.abs = rndNat(nwords);
-    var t = @new<global::go.math.big_package.ΔInt>();
+    var t = @new<global::go.math.big_package.Int>();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         t.Mul(x, x);
@@ -1998,8 +1998,8 @@ internal static void benchmarkDiv(ж<testing.B> Ꮡb, nint aSize, nint bSize) {
     if (aa.Cmp(bb) < 0) {
         (aa, bb) = (bb, aa);
     }
-    var x = @new<global::go.math.big_package.ΔInt>();
-    var y = @new<global::go.math.big_package.ΔInt>();
+    var x = @new<global::go.math.big_package.Int>();
+    var y = @new<global::go.math.big_package.Int>();
 
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -2021,9 +2021,9 @@ public static void BenchmarkDiv(ж<testing.B> b) {
 }
 
 public static void TestFillBytes(ж<testing.T> t) {
-    void checkResult(ж<testing.T> tΔ1, slice<byte> buf, ж<global::go.math.big_package.ΔInt> want) {
+    void checkResult(ж<testing.T> tΔ1, slice<byte> buf, ж<global::go.math.big_package.Int> want) {
         tΔ1.Helper();
-        var got = @new<global::go.math.big_package.ΔInt>().SetBytes(buf);
+        var got = @new<global::go.math.big_package.Int>().SetBytes(buf);
         if (got.CmpAbs(want) != 0) {
             tΔ1.Errorf("got 0x%x, want 0x%x: %x", got.OrTypedNil(), want.OrTypedNil(), buf);
         }
@@ -2057,7 +2057,7 @@ public static void TestFillBytes(ж<testing.T> t) {
         var panicsʗ1 = panics;
         t.Run(n, (ж<testing.T> tΔ2) => {
             tΔ2.Log(n);
-            var (x, ok) = @new<global::go.math.big_package.ΔInt>().SetString(n, 0);
+            var (x, ok) = @new<global::go.math.big_package.Int>().SetString(n, 0);
             if (!ok) {
                 throw panic("invalid test entry");
             }
@@ -2144,7 +2144,7 @@ public static void TestFloat64(ж<testing.T> t) {
         new("9223372036854775808", 9223372036854775808D, Exact), // +2^63
         new("1000000000000000000000000000000000000000000000000000000", 1000000000000000078291540404596243842305360299886116864.000000D, Above)
     ]))) {
-        var (i, ok) = @new<global::go.math.big_package.ΔInt>().SetString(test.istr, 0);
+        var (i, ok) = @new<global::go.math.big_package.Int>().SetString(test.istr, 0);
         if (!ok) {
             t.Errorf("SetString(%s) failed", test.istr);
             continue;

@@ -14,6 +14,7 @@ import (
 	"go/token"
 	"go/types"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -29,11 +30,17 @@ import (
 //     VALUE (fields and array elements, at any depth), plain nested structs included: the layout gate needs a managed
 //     layout table at every level (C1's review, N4). Every type in the closure must pass 7.7's declaration-local rules:
 //     unmanaged once its arrays are inline, no array over 4096 bytes or 4096 elements, no struct over 4096 bytes.
-//  2. PAIR RULE. A reinterpret chain (*T)(unsafe.Pointer(e)), e a *X, whose two sides both hold arrays and disagree on
-//     admission is a convert-time ERROR naming both types (GO2CS2010), under either trigger.
+//  2. PAIR RULE. A reinterpret chain (*T)(unsafe.Pointer(e)), e a *X, whose two sides both hold arrays must agree on
+//     admission. FORCED, a disagreement is a convert-time ERROR naming both types (GO2CS2010). Under the AUTOMATIC rule
+//     the admitted side is kept out with its partner instead, warning GO2CS2009 (COORD 2026-11-14 13:56Z: x/sys's
+//     sockaddr decode); only a pair whose admitted side another package lays out is still refused.
 //  3. STAMP. The decision is recorded in package_info.cs, and a -tests conversion reads it (inlineArrayStamp.go).
 //  4. OVERRIDE. -inline-arrays=<patterns> forces a package ON with the declaration-local population (every struct the
 //     package declares or spells that holds an array), and "-<pattern>" turns auto OFF. std stays out either way.
+//     "<import path>#<TypeName>" SEEDS one type instead (COORD ruling C, 2026-11-17 12:14Z): the package selects that
+//     type as if it converted it whole through unsafe.Pointer, under the automatic rule, so its closure, the caps, the
+//     faces check and GO2CS2009 apply exactly as to any other seed. It exists for a type an IMPORTER converts whole
+//     and passes back by value: modernc.org/libc's largeInteger, which sqlite/lib admits and libc never converts.
 //
 // A type the rule SELECTS (converted whole, or forced) that a cap keeps out stays exactly as today and is reported by a
 // WARNING naming the type, the field and the cap (GO2CS2009; COORD 2026-11-13 05:20Z). So is a type whose closure
@@ -51,6 +58,7 @@ const (
 type inlineArrayAdmission struct {
 	pkgPath  string
 	forced   bool
+	seeded   []string              // the -inline-arrays seeds this package declares, sorted (its GoInlineArraySeed records)
 	admitted map[string]bool       // inlineTypeKey -> admitted
 	keyOrder []string              // admitted keys, sorted
 	holding  int                   // admitted types that hold an array at any depth
@@ -123,12 +131,19 @@ func inlineTypeKey(t types.Type) (string, bool) {
 
 // inlineArrayOverride is the parsed -inline-arrays value.
 type inlineArrayOverride struct {
-	force []string // patterns forced ON
-	off   []string // patterns with auto OFF ("-<pattern>")
+	force []string            // patterns forced ON
+	off   []string            // patterns with auto OFF ("-<pattern>")
+	seeds map[string][]string // import path -> the type names seeded in it ("<path>#<TypeName>")
+}
+
+// seedsFor returns the type names seeded in the package pkgPath.
+func (o inlineArrayOverride) seedsFor(pkgPath string) []string {
+	return o.seeds[pkgPath]
 }
 
 // parseInlineArrayOverride parses -inline-arrays: a comma-separated list of import-path patterns, each an exact path or
-// a "/..." prefix, a leading "-" turning auto off for the pattern instead of forcing it on.
+// a "/..." prefix, a leading "-" turning auto off for the pattern instead of forcing it on, or a "<path>#<TypeName>"
+// seed of one type in one package (an exact path; a seed admits, so it takes no "-").
 func parseInlineArrayOverride(value string) (inlineArrayOverride, error) {
 	var override inlineArrayOverride
 
@@ -136,6 +151,23 @@ func parseInlineArrayOverride(value string) (inlineArrayOverride, error) {
 		entry = strings.TrimSpace(entry)
 
 		if entry == "" {
+			continue
+		}
+
+		if path, name, isSeed := strings.Cut(entry, "#"); isSeed {
+			if path == "" || strings.HasPrefix(path, "-") || strings.HasSuffix(path, "/...") || strings.ContainsAny(path, " \t") || !token.IsIdentifier(name) {
+				return inlineArrayOverride{}, fmt.Errorf("-inline-arrays: %q is not a <import path>#<TypeName> seed", entry)
+			}
+
+			if override.seeds == nil {
+				override.seeds = map[string][]string{}
+			}
+
+			if !slices.Contains(override.seeds[path], name) {
+				override.seeds[path] = append(override.seeds[path], name)
+				slices.Sort(override.seeds[path])
+			}
+
 			continue
 		}
 
@@ -200,6 +232,10 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 		}
 	}
 
+	// The -inline-arrays seeds this package declares (a name the package does not declare selects nothing: libc declares
+	// largeInteger only on windows, and one flag serves every target).
+	seedNames := options.inlineArrays.seedsFor(pkg.Path())
+
 	// The SELECTED types: each a seed whose by-value closure must be inline, with the position that selected it.
 	type selection struct {
 		t   types.Type
@@ -254,6 +290,17 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 							seeds = append(seeds, selection{obj.Type(), node.Pos()})
 						}
 					}
+				} else if slices.Contains(seedNames, node.Name.Name) {
+					// A -inline-arrays seed: selected as a whole-struct conversion would select it (OVERRIDE, above).
+					if obj, ok := info.Defs[node.Name].(*types.TypeName); ok && obj.Pkg() == pkg && obj.Parent() == pkg.Scope() && node.TypeParams == nil {
+						if _, ok := obj.Type().Underlying().(*types.Struct); ok {
+							seeds = append(seeds, selection{obj.Type(), node.Pos()})
+
+							if !slices.Contains(a.seeded, obj.Name()) {
+								a.seeded = append(a.seeded, obj.Name())
+							}
+						}
+					}
 				}
 			case *ast.CallExpr:
 				target, pair, ok := unsafePointerConversion(node, info)
@@ -269,6 +316,36 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 
 			return true
 		})
+	}
+
+	// A defined type over a named struct (`type GUID windows.GUID`) is laid out by go2cs-gen as a wrapper of its base,
+	// forwarding the base's fields, so its layout IS the base's: it is held inline exactly when its base is, and never on
+	// its own (go-winio's pkg/guid, COORD 2026-11-15 01:19Z). A face its uses spell against it is a face on the base's
+	// layout, so a local base answers for it; a foreign base is that package's decision, read from its record.
+	definedOver := definedOverNamedStructs(files, fset, pkg, info)
+
+	for changed := true; changed; {
+		changed = false
+
+		for key, over := range definedOver {
+			baseKey, _ := inlineTypeKey(over.base)
+
+			if face, found := faces[key]; found && over.base.Obj().Pkg() == pkg {
+				if _, has := faces[baseKey]; !has {
+					faces[baseKey] = face
+					changed = true
+				}
+			}
+		}
+	}
+
+	// A reinterpret of a defined type reinterprets its base's layout: the seed is the base.
+	for i, seed := range seeds {
+		seedKey, _ := inlineTypeKey(seed.t)
+
+		for over, seen := definedOver[seedKey], 0; over != nil && seen < len(definedOver); over, seen = definedOver[mustTypeKey(over.base)], seen+1 {
+			seeds[i].t = over.base
+		}
 	}
 
 	// Every struct type in each seed's closure, and whether the closure is admissible as a whole.
@@ -349,7 +426,27 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 
 	// A type admitted through one seed but blocked as another's root stays admitted only if its own closure is clean,
 	// which inlineDeclarationRule already proved for every member above; nothing more to reconcile.
-	for key := range a.admitted {
+	a.types = candidates
+	a.pkg, a.spelled = pkg, spelled
+
+	// The pair rule, AUTOMATIC trigger (COORD 2026-11-14 13:56Z): a reinterpret chain whose two sides hold arrays and
+	// disagree is made to agree by keeping the admitted side out with its partner, never by refusing the package. Its
+	// root struct leaves the admitted set, and so does every admitted struct that holds it by value (a struct cannot hold
+	// a managed one inline), until no pair disagrees; each type kept out this way is a GO2CS2009 warning naming why.
+	// golang.org/x/sys's sockaddr decode is the population: RawSockaddrAny reinterpreted as each family's sockaddr,
+	// every one of which a face keeps out. Both sides then hold array<T>, which is the standard library's own state.
+	if !a.forced {
+		for a.keepMixedPairsOut(pairs, fset) {
+		}
+	}
+
+	a.reconcileDefinedTypes(definedOver, candidates, fset)
+
+	for key, in := range a.admitted {
+		if !in {
+			continue
+		}
+
 		a.keyOrder = append(a.keyOrder, key)
 
 		if st, ok := candidates[key].Underlying().(*types.Struct); ok && structHoldsArray(st, 0) {
@@ -359,13 +456,12 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 	}
 
 	sort.Strings(a.keyOrder)
-	a.types = candidates
+	sort.Strings(a.seeded)
 
 	// The pair rule (GO2CS2010): both sides hold arrays and disagree. A struct another package lays out is that package's
 	// decision, read from its record (inlineArrayStamp.go); a pair reaching one whose record cannot be read, or an
-	// anonymous struct another package spells, is counted, not judged.
-	a.pkg, a.spelled = pkg, spelled
-
+	// anonymous struct another package spells, is counted, not judged. Under the automatic trigger only a pair whose
+	// admitted side another package lays out can still disagree here.
 	for _, pair := range pairs {
 		dstHolds, dstIn, dstForeign := a.closureAdmitted(pair.dst)
 		srcHolds, srcIn, srcForeign := a.closureAdmitted(pair.src)
@@ -393,6 +489,172 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 	}
 
 	return a
+}
+
+// keepMixedPairsOut takes one pass over the reinterpret pairs and keeps out the admitted side of each local pair that
+// disagrees (with every admitted struct that holds it by value). It reports whether anything was kept out, so the
+// caller repeats it until the pairs agree; the admitted set only shrinks, so the repetition ends.
+func (a *inlineArrayAdmission) keepMixedPairsOut(pairs []inlineReinterpretPair, fset *token.FileSet) bool {
+	changed := false
+
+	for _, pair := range pairs {
+		dstHolds, dstIn, dstForeign := a.closureAdmitted(pair.dst)
+		srcHolds, srcIn, srcForeign := a.closureAdmitted(pair.src)
+
+		if dstForeign || srcForeign || !dstHolds || !srcHolds || dstIn == srcIn {
+			continue
+		}
+
+		side, partner := pair.dst, pair.src
+		why := fmt.Sprintf("%s is reinterpreted as it", types.TypeString(partner, packageQualifier(a.pkg)))
+
+		if srcIn {
+			side, partner = pair.src, pair.dst
+			why = fmt.Sprintf("it is reinterpreted as %s", types.TypeString(partner, packageQualifier(a.pkg)))
+		}
+
+		// The admitted side another package lays out is that package's decision: the refusal pass reports it.
+		if !inlineTypeIsLocal(side, a.pkg, a.spelled) {
+			continue
+		}
+
+		position := fset.Position(pair.pos)
+		why = fmt.Sprintf("%s at %s:%d:%d, whose arrays are not held inline", why, filepath.Base(position.Filename), position.Line, position.Column)
+
+		if partnerKey, ok := inlineTypeKey(partner); ok {
+			if reason, blocked := a.blocked[partnerKey]; blocked {
+				why = fmt.Sprintf("%s (%s)", why, reason)
+			}
+		}
+
+		if key, ok := inlineTypeKey(side); ok && a.admitted[key] {
+			a.keepOut(key, why, position)
+			changed = true
+		}
+	}
+
+	return changed
+}
+
+// definedOverType is a local defined type declared over a named struct, and where.
+type definedOverType struct {
+	t    types.Type
+	base *types.Named
+	pos  token.Pos
+}
+
+// definedOverNamedStructs maps each local defined type declared over a named struct (`type T U`, U a non-generic named
+// struct, local or foreign) to that base, by the defined type's key. An alias is the same type and needs no entry.
+func definedOverNamedStructs(files []*ast.File, fset *token.FileSet, pkg *types.Package, info *types.Info) map[string]*definedOverType {
+	definedOver := map[string]*definedOverType{}
+
+	for _, file := range files {
+		if strings.HasSuffix(strings.ToLower(fset.Position(file.Pos()).Filename), "_test.go") {
+			continue
+		}
+
+		ast.Inspect(file, func(n ast.Node) bool {
+			spec, ok := n.(*ast.TypeSpec)
+
+			if !ok || spec.Assign.IsValid() || spec.TypeParams != nil {
+				return true
+			}
+
+			obj, ok := info.Defs[spec.Name].(*types.TypeName)
+
+			if !ok || obj.Pkg() != pkg {
+				return true
+			}
+
+			base, ok := types.Unalias(info.TypeOf(spec.Type)).(*types.Named)
+
+			if !ok || base.TypeArgs().Len() > 0 || base.Obj().Pkg() == nil {
+				return true
+			}
+
+			if _, isStruct := base.Underlying().(*types.Struct); !isStruct {
+				return true
+			}
+
+			if key, ok := inlineTypeKey(obj.Type()); ok {
+				definedOver[key] = &definedOverType{obj.Type(), base, spec.Pos()}
+			}
+
+			return true
+		})
+	}
+
+	return definedOver
+}
+
+// mustTypeKey is inlineTypeKey for a type known to be a keyed named struct.
+func mustTypeKey(t types.Type) string {
+	key, _ := inlineTypeKey(t)
+	return key
+}
+
+// reconcileDefinedTypes gives each local defined type over a named struct its base's answer: held inline when the base
+// is (admitted here, or by its own package's record), kept out with its holders when the base is not. Repeated until
+// stable, since a defined type may be declared over another one.
+func (a *inlineArrayAdmission) reconcileDefinedTypes(definedOver map[string]*definedOverType, candidates map[string]types.Type, fset *token.FileSet) {
+	for pass := 0; pass <= len(definedOver); pass++ {
+		changed := false
+
+		for key, over := range definedOver {
+			baseKey := mustTypeKey(over.base)
+			held := a.admitted[baseKey]
+
+			if over.base.Obj().Pkg() != a.pkg {
+				in, known := a.foreignAdmits(over.base)
+				held = known && in
+			}
+
+			switch {
+			case held && !a.admitted[key]:
+				a.admitted[key] = true
+				candidates[key] = over.t
+				changed = true
+			case !held && a.admitted[key]:
+				a.keepOut(key, fmt.Sprintf("its layout is %s's, whose arrays are not held inline", types.TypeString(over.base, packageQualifier(a.pkg))), fset.Position(over.pos))
+				changed = true
+			}
+		}
+
+		if !changed {
+			return
+		}
+	}
+}
+
+// keepOut removes an admitted struct from the admitted set with its GO2CS2009 warning, and with it every admitted
+// struct that holds it by value.
+func (a *inlineArrayAdmission) keepOut(key string, why string, position token.Position) {
+	if !a.admitted[key] {
+		return
+	}
+
+	a.admitted[key] = false
+	a.blocked[key] = why
+	a.warnings = append(a.warnings, inlineAdmissionDiagnostic{position,
+		fmt.Sprintf("%s is converted whole through unsafe.Pointer but keeps array<T> storage: %s", types.TypeString(a.types[key], packageQualifier(a.pkg)), why)})
+
+	for holder, in := range a.admitted {
+		if !in || holder == key {
+			continue
+		}
+
+		holds := false
+
+		byValueStructs(a.types[holder], 0, map[string]bool{}, func(member types.Type) {
+			if memberKey, ok := inlineTypeKey(member); ok && memberKey == key {
+				holds = true
+			}
+		})
+
+		if holds {
+			a.keepOut(holder, fmt.Sprintf("it holds %s by value, whose arrays are not held inline", types.TypeString(a.types[key], packageQualifier(a.pkg))), position)
+		}
+	}
 }
 
 // closureAdmitted reports whether t's by-value closure holds an array, whether every array-holding struct in it is
@@ -648,6 +910,14 @@ func inlineUnmanaged(t types.Type, depth int) bool {
 
 // inlineArrayCaps names the first array, at any depth of a field's type, over a cap.
 func inlineArrayCaps(t types.Type, sizes types.Sizes, depth int) string {
+	return inlineArrayCapsOf(t, sizes, depth, true)
+}
+
+// inlineArrayCapsOf is inlineArrayCaps, with the byte caps applied only while countBytes holds. A zero-length array
+// occupies no bytes, so below one nothing is laid out and no byte cap applies: [0][1042]uint32 is 0 bytes, not the
+// 4168 of its element (W14, sqlite's TBF_ctx). Its element still meets the ELEMENT-count cap, because the [0][N]T
+// alignment carrier names the element as a go.arrays family member (W15), and that family stops at 4096.
+func inlineArrayCapsOf(t types.Type, sizes types.Sizes, depth int, countBytes bool) string {
 	if depth > 10 {
 		return ""
 	}
@@ -657,11 +927,11 @@ func inlineArrayCaps(t types.Type, sizes types.Sizes, depth int) string {
 			return fmt.Sprintf("%s has %d elements, over the %d-element cap", types.TypeString(t, nil), array.Len(), inlineArrayMaxElements)
 		}
 
-		if size := sizes.Sizeof(array); size > inlineArrayMaxBytes {
+		if size := sizes.Sizeof(array); countBytes && size > inlineArrayMaxBytes {
 			return fmt.Sprintf("%s is %d bytes, over the %d-byte array cap", types.TypeString(t, nil), size, inlineArrayMaxBytes)
 		}
 
-		return inlineArrayCaps(array.Elem(), sizes, depth+1)
+		return inlineArrayCapsOf(array.Elem(), sizes, depth+1, countBytes && array.Len() > 0)
 	}
 
 	return ""

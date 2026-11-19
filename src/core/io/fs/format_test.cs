@@ -8,6 +8,7 @@ using testing = testing_package;
 using time = time_package;
 using fs = go.io.fs_package;
 using go.io;
+using static fs_test_package;
 
 partial class fs_test_package {
 
@@ -20,6 +21,8 @@ partial struct formatTest {
     internal time.Time modTime;
     internal bool isDir;
 }
+
+} partial class fs_testᴛformatTest {
 
 internal static @string Name(this ref formatTest fs) {
     return fs.name;
@@ -53,6 +56,8 @@ internal static (fs.FileInfo, error) Info(this ж<formatTest> Ꮡfs) {
     return (new formatTestжFileInfo(Ꮡfs), default);
 }
 
+} partial class fs_test_package {
+
 partial struct formatTestsᴛ1 /*dyn*/ {
     internal formatTest input;
     internal @string wantFileInfo;
@@ -64,7 +69,7 @@ internal static slice<formatTestsᴛ1> formatTests = slice<formatTestsᴛ1>([
             name: "hello.go",
             size: 100,
             mode: 420,
-            modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.ΔUTC),
+            modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.UTC),
             isDir: false
         ),
         "-rw-r--r-- 100 1970-01-01 12:00:00 hello.go",
@@ -75,7 +80,7 @@ internal static slice<formatTestsᴛ1> formatTests = slice<formatTestsᴛ1>([
             name: "home/gopher",
             size: 0,
             mode: (fs.FileMode)(ModeDir | 493),
-            modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.ΔUTC),
+            modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.UTC),
             isDir: true
         ),
         "drwxr-xr-x 0 1970-01-01 12:00:00 home/gopher/",
@@ -86,7 +91,7 @@ internal static slice<formatTestsᴛ1> formatTests = slice<formatTestsᴛ1>([
             name: "big",
             size: 0x7fffffffffffffffL,
             mode: (fs.FileMode)(ModeIrregular | 420),
-            modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.ΔUTC),
+            modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.UTC),
             isDir: false
         ),
         "?rw-r--r-- 9223372036854775807 1970-01-01 12:00:00 big",
@@ -97,7 +102,7 @@ internal static slice<formatTestsᴛ1> formatTests = slice<formatTestsᴛ1>([
             name: "small",
             size: -9223372036854775808L,
             mode: (fs.FileMode)((fs.FileMode)(ModeSocket | ModeSetuid) | 420),
-            modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.ΔUTC),
+            modTime: time.Date(1970, time.January, 1, 12, 0, 0, 0, time.UTC),
             isDir: false
         ),
         "Surw-r--r-- -9223372036854775808 1970-01-01 12:00:00 small",

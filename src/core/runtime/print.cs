@@ -12,7 +12,7 @@ partial class runtime_package {
 
 // The compiler knows that a print of a value of this type
 // should use printhex instead of printuint (decimal).
-partial struct Δhex /*num:uint64*/;
+partial struct hex /*num:uint64*/;
 
 // The compiler knows that a print of a value of this type should use
 // printquoted instead of printstring.
@@ -255,11 +255,11 @@ internal static void printquoted(@string s) {
     printunlock();
 }
 
-internal static void printpointer(@unsafe.Pointer Δp) {
-    printhex((uint64)(uintptr)Δp);
+internal static void printpointer(@unsafe.Pointer p) {
+    printhex((uint64)(uintptr)p);
 }
-internal static void printuintptr(uintptr Δp) {
-    printhex((uint64)Δp);
+internal static void printuintptr(uintptr p) {
+    printhex((uint64)p);
 }
 
 internal static void printstring(@string s) {
@@ -269,7 +269,7 @@ internal static void printstring(@string s) {
 internal static void printslice(slice<byte> sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
-    var sp = Ꮡs.Reinterpret<slice<byte>, Δsliceᴛ>();
+    var sp = Ꮡs.Reinterpret<slice<byte>, Δslice>();
     print((@string)"[", len(s), (@string)"/", cap(s), (@string)"]");
     printpointer(sp.Δarray);
 }

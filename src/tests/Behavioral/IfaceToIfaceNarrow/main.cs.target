@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -29,9 +30,13 @@ partial struct conn {
     internal @string data;
 }
 
+} partial class mainᴛconn {
+
 internal static @string Read(this ref conn c) { return c.data; }
 internal static void Write(this ref conn c, @string s) { c.data = s; }
 internal static @string Close(this ref conn c) { return "closed:"u8 + c.data; }
+
+} partial class main_package {
 
 internal static @string readFrom(Reader r) { return r.Read(); }
 

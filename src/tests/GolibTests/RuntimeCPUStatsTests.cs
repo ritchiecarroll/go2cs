@@ -1,5 +1,6 @@
 using System.Threading;
 using go;
+using go.runtime;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static go.runtime_package;
 using metrics = go.runtime.metrics_package;
@@ -114,7 +115,7 @@ public class RuntimeCPUStatsTests
         samples[1].Name = "/cpu/classes/gc/pause:cpu-seconds";
         metrics.Read(samples);
 
-        return [metrics.Float64(samples[0].Value), metrics.Float64(samples[1].Value)];
+        return [samples[0].Value.Float64(), samples[1].Value.Float64()];
     }
 
     [TestMethod]

@@ -174,24 +174,40 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    // GO2CS0013, TwinGenerator (M:N PROTOTYPE, N3's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
+    // GO2CS0013, MethodHolderNameAnalyzer: the methods of a Go type are extension methods of a class of their own,
+    // marked [GoMethodHost], beside the package class. A method body reads its package's names by their simple names,
+    // and in that class they arrive through `using static`, which C# reads after the class's own members, after the
+    // types of the enclosing namespace, and merged with go.builtin's members. So a simple name the package declares can
+    // bind a method of the holder, a builtin or a namespace type instead, and the file's alias of the package can bind a
+    // local of the same name: some of those compile and run the other member (measured: a call of a package function
+    // ran the holder's method of that name). The converter qualifies such a name by rule; the build fails where one
+    // is not qualified, in converted and hand-written holders alike.
+    public static readonly DiagnosticDescriptor HolderNameBindsElsewhere = new(
+        id: "GO2CS0013",
+        title: "A name in a method-holder class binds another member than the package's",
+        messageFormat: "'{0}' binds {1} in the method-holder class '{2}', and the package class '{3}' declares '{4}': write '{3}.{4}' for the package's member, or {5}",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    // GO2CS0014, TwinGenerator (M:N PROTOTYPE, N3's must-fix 3, DESIGN-mn-func-values.md 10.4): under the propagating
     // caller rule a function that calls through a func value is twinned, so its call can await a pair's twin. A function
     // the generator REFUSES a twin (a by-ref or ref-like parameter, unsafe, an iterator, ...) keeps calling the plain
     // delegate, so a func value that can park blocks its carrier there. Reported once per function, not per call.
     public static readonly DiagnosticDescriptor RefusedFuncValueCaller = new(
-        id: "GO2CS0013",
+        id: "GO2CS0014",
         title: "A function refused a twin calls through a func value",
         messageFormat: "'{0}' calls through a func value but gets no twin ({1}): a func value that can park runs plain here and blocks its carrier",
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
-    // GO2CS0014, TwinGenerator (M:N PROTOTYPE, the LOUD fallback: COORD's A3 ruling 2026-11-12; severity by the owner,
+    // GO2CS0015, TwinGenerator (M:N PROTOTYPE, the LOUD fallback: COORD's A3 ruling 2026-11-12; severity by the owner,
     // FREEZE-SHEET.md 2026-11-13): a go statement the generator does not launch as a twin, where its goroutine could
     // park, keeps its plain launch on a thread. A WARNING by default; WarningsAsErrors (or an .editorconfig severity) on
     // this code is the opt-in that makes it an error. Reported once per go statement, naming the reason.
     public static readonly DiagnosticDescriptor PlainGoLaunch = new(
-        id: "GO2CS0014",
+        id: "GO2CS0015",
         title: "A go statement launches its goroutine plain",
         messageFormat: "A go statement in '{0}' launches its goroutine plain ({1}): a goroutine that parks there blocks a thread",
         category: "go2cs-gen",

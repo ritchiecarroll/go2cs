@@ -14,6 +14,7 @@ using strings = strings_package;
 using time = time_package;
 using go.io;
 using iter = iter_package;
+using static tar_package;
 
 partial class tar_package {
 
@@ -43,6 +44,8 @@ partial interface fileWriter :
     io.ReaderFrom
 {
 }
+
+} partial class tarᴛWriter {
 
 // Flush finishes writing the current file's block padding.
 // The current file must be fully written before Flush can be called.
@@ -92,7 +95,7 @@ public static error WriteHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     // does not always result in the PAX format being chosen, which
     // causes a 1KiB increase to every header.
     if (tw.hdr.Format == FormatUnknown) {
-        tw.hdr.ModTime = tw.hdr.ModTime.Round(time.ΔSecond);
+        tw.hdr.ModTime = tw.hdr.ModTime.Round(time.Second);
         tw.hdr.AccessTime = new time.Time();
         tw.hdr.ChangeTime = new time.Time();
     }
@@ -230,7 +233,7 @@ internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, m
     var fmtStr = (slice<byte> b, @string s) => {
         Ꮡf.Value.formatString(b, toASCII(s));
     };
-    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, new Action<slice<byte>, @string>(fmtStr), new Action<slice<byte>, int64>(Ꮡf.formatOctal));
+    var blk = Ꮡtw.templateV7Plus(Ꮡhdr, fmtStr, new Action<slice<byte>, int64>(Ꮡf.formatOctal));
     blk.setFormat(FormatPAX);
     {
         var err = tw.writeRawHeader(blk, hdr.Size, hdr.Typeflag); if (err != nil) {
@@ -343,9 +346,13 @@ internal static error writeGNUHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     return default;
 }
 
+} partial class tar_package {
+
 // type stringFormatter is a methodless func type — rendered inline as its base delegate
 
 // type numberFormatter is a methodless func type — rendered inline as its base delegate
+
+} partial class tarᴛWriter {
 
 // templateV7Plus fills out the V7 fields of a block using values from hdr.
 // It also fills out fields (uname, gname, devmajor, devminor) that are
@@ -503,6 +510,8 @@ public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) {
     });
 }
 
+} partial class tar_package {
+
 // splitUSTARPath splits a path according to USTAR prefix and suffix rules.
 // If the path is not splittable, then it will return ("", "", false).
 internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string name) {
@@ -523,6 +532,8 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
     }
     return (name.slice(0, i), name.slice(i + 1), true);
 }
+
+} partial class tarᴛWriter {
 
 // Write writes to the current file in the tar archive.
 // Write returns the error [ErrWriteTooLong] if more than
@@ -585,11 +596,15 @@ public static error Close(this ref Writer tw) {
     return err; // Report IO errors
 }
 
+} partial class tar_package {
+
 // regFileWriter is a fileWriter for writing data to a regular file entry.
 partial struct regFileWriter {
     internal io.Writer w; // Underlying Writer
     internal int64 nb;    // Number of remaining bytes to write
 }
+
+} partial class tarᴛregFileWriter {
 
 internal static (nint n, error err) Write(this ref regFileWriter fw, slice<byte> b) {
     nint n = default;
@@ -615,9 +630,13 @@ internal static (nint n, error err) Write(this ref regFileWriter fw, slice<byte>
     }}
 }
 
+} partial class tar_package {
+
 internal partial struct ReadFrom_dst /*dyn*/ {
     /*embed*/ public io_package.Writer Writer;
 }
+
+} partial class tarᴛregFileWriter {
 
 internal static (int64, error) ReadFrom(this ж<regFileWriter> Ꮡfw, io.Reader r) {
     return io.Copy(new ReadFrom_dst(new regFileWriterжWriter(Ꮡfw)), r);
@@ -633,12 +652,16 @@ internal static int64 physicalRemaining(this regFileWriter fw) {
     return fw.nb;
 }
 
+} partial class tar_package {
+
 // sparseFileWriter is a fileWriter for writing data to a sparse file entry.
 partial struct sparseFileWriter {
     internal fileWriter fw;  // Underlying fileWriter
     internal sparseDatas sp; // Normalized list of data fragments
     internal int64 pos;      // Current position in sparse file
 }
+
+} partial class tarᴛsparseFileWriter {
 
 internal static (nint n, error err) Write(this ж<sparseFileWriter> Ꮡsw, slice<byte> b) {
     nint n = default;
@@ -759,9 +782,13 @@ internal static int64 physicalRemaining(this sparseFileWriter sw) {
     return sw.fw.physicalRemaining();
 }
 
+} partial class tar_package {
+
 // zeroWriter may only be written with NULs, otherwise it returns errWriteHole.
 partial struct zeroWriter {
 }
+
+} partial class tarᴛzeroWriter {
 
 internal static (nint, error) Write(this zeroWriter _, slice<byte> b) {
     foreach (var (i, c) in range(b)) {
@@ -771,6 +798,8 @@ internal static (nint, error) Write(this zeroWriter _, slice<byte> b) {
     }
     return (len(b), default);
 }
+
+} partial class tar_package {
 
 // ensureEOF checks whether r is at EOF, reporting ErrWriteTooLong if not so.
 internal static error ensureEOF(io.Reader r) {

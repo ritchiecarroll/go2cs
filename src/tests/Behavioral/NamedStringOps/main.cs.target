@@ -26,12 +26,11 @@ internal static T maxOf<T>(params Span<T> xsʗp)
 }
 
 internal static @string describe(Tag t) {
-    var exprᴛ1 = t;
     switch (ᐧ) {
-    case {} when exprᴛ1 == (Tag)("alpha"u8): {
+    case {} when t == (Tag)("alpha"u8): {
         return "first";
     }
-    case {} when exprᴛ1 == (Tag)("omega"u8): {
+    case {} when t == (Tag)("omega"u8): {
         return "last";
     }}
 

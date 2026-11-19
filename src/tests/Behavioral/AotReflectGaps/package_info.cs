@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -51,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABNclAAJGJSigoKmoqSCgoKUgpSClIKCgqaCgpCAkpCAyIKCgpSAkoCSkJKSgoKUkJKQkpKCgriCgpCAkpCAkpCAkoKC", "63-67:1;83-86:1;90-90:2;91-91:3;100-100:1;101-101:2;102-102:3;103-107:4;108-108:5;109-109:6;110-114:7;119-119:1;120-120:2;121-121:3;122-125:4", "", "", "", "37:21,38:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABZclAANGLSigoKmoqSCgoKUgpSClIKCgqaCgpCAkpCAyIKCgpSAkoCSkJKSgoKUkJKQkpKCgriCgpCAkpCAkpCAkoKC", "63-67:1;83-86:1;90-90:2;91-91:3;100-100:1;101-101:2;102-102:3;103-107:4;108-108:5;109-109:6;110-114:7;119-119:1;120-120:2;121-121:3;122-125:4", "", "", "", "46:21,47:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -85,3 +83,14 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.Ghost)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛGhost;
+[GoMethodHost(typeof(main_package.Num)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛNum;
+// </MethodHolders>

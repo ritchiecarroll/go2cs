@@ -12,6 +12,7 @@ using @internal;
 using @internal.runtime;
 using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -20,6 +21,8 @@ partial class runtime_package {
 partial struct traceTypeTable {
     internal traceMap tab;
 }
+
+} partial class runtimeᴛtraceTypeTable {
 
 // put returns a unique id for the type typ and caches it in the table,
 // if it's seeing it for the first time.
@@ -42,17 +45,19 @@ internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
 // can guarantee that there are no more writers to the table.
 internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) {
     var w = unsafeTraceExpWriter(gen, nil, tracev2.AllocFree);
-    var root = (ж<traceMapNode>)(uintptr)(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
+    var root = @unsafe.Pointer.To<traceMapNode>(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
         w = dumpTypesRec(root, w);
     }
     w.flush().end();
     Ꮡt.Ꮡtab.reset();
 }
 
+} partial class runtime_package {
+
 internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w) {
     ref var node = ref Ꮡnode.DerefOrNull();
 
-    var typ = (ж<abi.Type>)(uintptr)(~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡ(node.data, 0))));
+    var typ = @unsafe.Pointer.To<abi.Type>(~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡ(node.data, 0))));
     @string typName = toRType(typ).@string();
 
     // The maximum number of bytes required to hold the encoded type.
@@ -84,7 +89,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
         if (child == nil) {
             continue;
         }
-        w = dumpTypesRec((ж<traceMapNode>)(uintptr)(child), w);
+        w = dumpTypesRec(@unsafe.Pointer.To<traceMapNode>(child), w);
     }
     return w;
 }

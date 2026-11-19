@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,7 +9,11 @@ partial struct node {
     internal nint id;
 }
 
+} partial class mainᴛnode {
+
 internal static @string Error(this ref node n) { return fmt.Sprintf("node %d"u8, n.id); }
+
+} partial class main_package {
 
 internal static void main() {
     var p = Ꮡ(new node(id: 1));

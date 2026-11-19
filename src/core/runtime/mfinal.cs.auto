@@ -104,7 +104,7 @@ internal static void lockRankMayQueueFinalizer() {
     lockWithRankMayAcquire(Ꮡfinlock, getLockRank(Ꮡfinlock));
 }
 
-internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
+internal static void queuefinalizer(@unsafe.Pointer p, ж<funcval> Ꮡfn, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
     ref var fn = ref Ꮡfn.DerefOrNull();
     ref var fint = ref Ꮡfint.DerefOrNull();
     ref var ot = ref Ꮡot.DerefOrNull();
@@ -123,7 +123,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
 
     if (finq == nil || (~finq).cnt == (uint32)len((~finq).fin)) {
         if (finc == nil) {
-            finc = (ж<finBlock>)(uintptr)(persistentalloc(finBlockSize, 0, Ꮡmemstats.ᏑgcMiscSys));
+            finc = @unsafe.Pointer.To<finBlock>(persistentalloc(finBlockSize, 0, Ꮡmemstats.ᏑgcMiscSys));
             finc.Value.alllink = allfin;
             allfin = finc;
             if (finptrmask[0] == 0) {
@@ -148,7 +148,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
     f.Value.nret = nret;
     f.Value.fint = Ꮡfint;
     f.Value.ot = Ꮡot;
-    f.Value.arg = Δp;
+    f.Value.arg = p;
     finqueued++;
     unlock(Ꮡfinlock);
     ᏑfingStatus.Or(fingWake);
@@ -179,7 +179,7 @@ internal static partial void createfing() {
 }
 
 internal static bool finalizercommit(ж<g> gp, @unsafe.Pointer @lock) {
-    unlock((ж<mutex>)(uintptr)(@lock));
+    unlock(@unsafe.Pointer.To<mutex>(@lock));
     // fingStatus should be modified after fing is put into a waiting state
     // to avoid waking fing in running state, even if it is about to be parked.
     ᏑfingStatus.Or(fingWait);
@@ -255,23 +255,23 @@ internal static void runFinalizers() {
                     // memory. That means we have to clear
                     // it before writing to it to avoid
                     // confusing the write barrier.
-                    ((ж<array<uintptr>>)(uintptr)(frame)).Value = new uintptr[]{}.array(2);
+                    @unsafe.Pointer.StoreArray<uintptr>(frame, 2, new uintptr[]{}.array(2));
                 }
                 switch ((~f).fint.Kind()) {
                 case var ᴛ when ᴛ == abi.Pointer: {
                     // direct use of pointer
-                    ((ж<@unsafe.Pointer>)(uintptr)(r)).Value = f.Value.arg;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(r)).Value = f.Value.arg;
                     break;
                 }
                 case var ᴛ when ᴛ == abi.Interface: {
                     var ityp = (~f).fint.Reinterpret<_type, interfacetype>();
                     // set up with empty interface
-                    ((ж<eface>)(uintptr)(r)).Value._type = (~f).ot.ᏑType;
-                    ((ж<eface>)(uintptr)(r)).Value.data = f.Value.arg;
+                    (@unsafe.Pointer.To<eface>(r)).Value._type = (~f).ot.ᏑType;
+                    (@unsafe.Pointer.To<eface>(r)).Value.data = f.Value.arg;
                     if (len(ityp.Methods) != 0) {
                         // convert to interface with methods
                         // this conversion is guaranteed to succeed - we checked in SetFinalizer
-                        ((ж<iface>)(uintptr)(r)).Value.tab = assertE2I(ityp, ((ж<eface>)(uintptr)(r)).Value._type);
+                        (@unsafe.Pointer.To<iface>(r)).Value.tab = assertE2I(ityp, (@unsafe.Pointer.To<eface>(r)).Value._type);
                     }
                     break;
                 }
@@ -303,9 +303,9 @@ internal static void runFinalizers() {
     }
 }
 
-internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
+internal static bool isGoPointerWithoutSpan(@unsafe.Pointer p) {
     // 0-length objects are okay.
-    if (Δp == @unsafe.Pointer.FromBox(Ꮡzerobase)) {
+    if (p == @unsafe.Pointer.FromBox(Ꮡzerobase)) {
         return true;
     }
 
@@ -318,7 +318,7 @@ internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
     // We cannot assume they are in any order or even contiguous,
     // due to external linking.
     for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.next) {
-        if (datap.noptrdata <= (uintptr)Δp && (uintptr)Δp < datap.enoptrdata || datap.data <= (uintptr)Δp && (uintptr)Δp < datap.edata || datap.bss <= (uintptr)Δp && (uintptr)Δp < datap.ebss || datap.noptrbss <= (uintptr)Δp && (uintptr)Δp < datap.enoptrbss) {
+        if (datap.noptrdata <= (uintptr)p && (uintptr)p < datap.enoptrdata || datap.data <= (uintptr)p && (uintptr)p < datap.edata || datap.bss <= (uintptr)p && (uintptr)p < datap.ebss || datap.noptrbss <= (uintptr)p && (uintptr)p < datap.enoptrbss) {
             return true;
         }
     }
@@ -556,11 +556,11 @@ okarg:
     var fintʗ1 = fint;
     var otʗ1 = ot;
     systemstack(() => {
-        if (!addfinalizer((~eʗ2).data, (ж<funcval>)(uintptr)((~fʗ1).data), nret, fintʗ1, otʗ1)) {
+        if (!addfinalizer((~eʗ2).data, @unsafe.Pointer.To<funcval>((~fʗ1).data), nret, fintʗ1, otʗ1)) {
             @throw("runtime.SetFinalizer: finalizer already set"u8);
         }
         if (debug.checkfinalizers != 0) {
-            setFinalizerContext((~eʗ2).data, otʗ1.of(ptrtype.ᏑElem).Value, callerpc, ((ж<funcval>)(uintptr)((~fʗ1).data)).Value.fn);
+            setFinalizerContext((~eʗ2).data, otʗ1.of(ptrtype.ᏑElem).Value, callerpc, (@unsafe.Pointer.To<funcval>((~fʗ1).data)).Value.fn);
         }
     });
 }

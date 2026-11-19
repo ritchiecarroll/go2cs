@@ -13,7 +13,6 @@ using go;
 using static global::go.hash.crc64_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Size", "const:ΔSize")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

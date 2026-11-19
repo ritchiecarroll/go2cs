@@ -8,7 +8,6 @@ global using static global::go.@internal.poll_package;
 global using static global::go.@internal.poll_internal_test_package;
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
 // </ImportedTypeAliases>
 
 using go;

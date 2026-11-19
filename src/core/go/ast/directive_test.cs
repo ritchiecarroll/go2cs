@@ -30,7 +30,7 @@ public static void TestParseDirectiveMatchesIsDirective(ж<testing.T> t) {
 internal partial struct TestParseDirective_type /*dyn*/ {
     internal @string name;
     internal @string @in;
-    internal tokenꓸPos pos;
+    internal token.Pos pos;
     internal global::go.go.ast_package.Directive want;
     internal bool wantOK;
 }
@@ -46,7 +46,7 @@ public static void TestParseDirective(ж<testing.T> t) {
                 Name: "generate",
                 Args: "stringer -type Op -trimprefix Op",
                 Slash: 10,
-                ArgsPos: ((tokenꓸPos)(10 + len("//go:generate ")))
+                ArgsPos: ((token.Pos)(10 + len("//go:generate ")))
             ),
             wantOK: true
         ),
@@ -59,7 +59,7 @@ public static void TestParseDirective(ж<testing.T> t) {
                 Name: "build",
                 Args: "ignore",
                 Slash: 20,
-                ArgsPos: ((tokenꓸPos)(20 + len("//go:build ")))
+                ArgsPos: ((token.Pos)(20 + len("//go:build ")))
             ),
             wantOK: true
         ),
@@ -108,7 +108,7 @@ public static void TestParseDirective(ж<testing.T> t) {
                 Name: "build",
                 Args: "foo bar",
                 Slash: 90,
-                ArgsPos: ((tokenꓸPos)(90 + len("//go:build  ")))
+                ArgsPos: ((token.Pos)(90 + len("//go:build  ")))
             ),
             wantOK: true
         ),
@@ -121,7 +121,7 @@ public static void TestParseDirective(ж<testing.T> t) {
                 Name: "build",
                 Args: "foo",
                 Slash: 100,
-                ArgsPos: ((tokenꓸPos)(100 + len("//go:build ")))
+                ArgsPos: ((token.Pos)(100 + len("//go:build ")))
             ),
             wantOK: true
         )
@@ -161,8 +161,8 @@ public static void TestParseArgs(ж<testing.T> t) {
             ),
             want: slice<global::go.go.ast_package.DirectiveArg>([
                 new("stringer", 10),
-                new("-type", (tokenꓸPos)(10 + len("stringer "))),
-                new("Op", (tokenꓸPos)(10 + len("stringer -type ")))
+                new("-type", (token.Pos)(10 + len("stringer "))),
+                new("Op", (token.Pos)(10 + len("stringer -type ")))
             ])
         ),
         new(
@@ -175,7 +175,7 @@ public static void TestParseArgs(ж<testing.T> t) {
             ),
             want: slice<global::go.go.ast_package.DirectiveArg>([
                 new("foo bar", 10),
-                new("baz", (tokenꓸPos)(10 + len("\"foo bar\" ")))
+                new("baz", (token.Pos)(10 + len("\"foo bar\" ")))
             ])
         ),
         new(
@@ -188,7 +188,7 @@ public static void TestParseArgs(ж<testing.T> t) {
             ),
             want: slice<global::go.go.ast_package.DirectiveArg>([
                 new("foo bar", 10),
-                new("baz", (tokenꓸPos)(10 + len("`foo bar` ")))
+                new("baz", (token.Pos)(10 + len("`foo bar` ")))
             ])
         ),
         new(
@@ -201,7 +201,7 @@ public static void TestParseArgs(ж<testing.T> t) {
             ),
             want: slice<global::go.go.ast_package.DirectiveArg>([
                 new("foo😊bar", 10),
-                new("a\\tb", (tokenꓸPos)(10 + len("\"foo\\U0001F60Abar\" ")))
+                new("a\\tb", (token.Pos)(10 + len("\"foo\\U0001F60Abar\" ")))
             ])
         ),
         new(
@@ -223,8 +223,8 @@ public static void TestParseArgs(ж<testing.T> t) {
                 ArgsPos: 10
             ),
             want: slice<global::go.go.ast_package.DirectiveArg>([
-                new("foo", (tokenꓸPos)(10 + len("  "))),
-                new("bar", (tokenꓸPos)(10 + len("  foo   ")))
+                new("foo", (token.Pos)(10 + len("  "))),
+                new("bar", (token.Pos)(10 + len("  foo   ")))
             ])
         ),
         new(

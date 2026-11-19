@@ -1020,25 +1020,24 @@ public static void TestTrim(ж<testing.T> t) {
     foreach (var (_, tc) in range(trimTests)) {
         @string name = tc.f;
         Func<@string, @string, @string> f = default;
-        var exprᴛ1 = name;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "Trim"u8: {
+        case {} when name == "Trim"u8: {
             f = Trim;
             break;
         }
-        case {} when exprᴛ1 == "TrimLeft"u8: {
+        case {} when name == "TrimLeft"u8: {
             f = TrimLeft;
             break;
         }
-        case {} when exprᴛ1 == "TrimRight"u8: {
+        case {} when name == "TrimRight"u8: {
             f = TrimRight;
             break;
         }
-        case {} when exprᴛ1 == "TrimPrefix"u8: {
+        case {} when name == "TrimPrefix"u8: {
             f = TrimPrefix;
             break;
         }
-        case {} when exprᴛ1 == "TrimSuffix"u8: {
+        case {} when name == "TrimSuffix"u8: {
             f = TrimSuffix;
             break;
         }
@@ -1062,25 +1061,24 @@ public static void BenchmarkTrim(ж<testing.B> Ꮡb) {
         foreach (var (_, tc) in range(trimTests)) {
             @string name = tc.f;
             Func<@string, @string, @string> f = default;
-            var exprᴛ1 = name;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "Trim"u8: {
+            case {} when name == "Trim"u8: {
                 f = Trim;
                 break;
             }
-            case {} when exprᴛ1 == "TrimLeft"u8: {
+            case {} when name == "TrimLeft"u8: {
                 f = TrimLeft;
                 break;
             }
-            case {} when exprᴛ1 == "TrimRight"u8: {
+            case {} when name == "TrimRight"u8: {
                 f = TrimRight;
                 break;
             }
-            case {} when exprᴛ1 == "TrimPrefix"u8: {
+            case {} when name == "TrimPrefix"u8: {
                 f = TrimPrefix;
                 break;
             }
-            case {} when exprᴛ1 == "TrimSuffix"u8: {
+            case {} when name == "TrimSuffix"u8: {
                 f = TrimSuffix;
                 break;
             }

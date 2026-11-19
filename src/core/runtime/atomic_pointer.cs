@@ -34,7 +34,7 @@ internal static void atomicwb(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer @new) 
     ref var ptr = ref Ꮡptr.DerefOrNull();
 
     var slot = Ꮡptr.Reinterpret<@unsafe.Pointer, uintptr>();
-    var buf = (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf).get2();
+    var buf = (~(~getg()).m).p.ptr().of(p.ᏑwbBuf).get2();
     buf.Value[0] = slot.Value;
     buf.Value[1] = (uintptr)@new;
 }
@@ -44,10 +44,10 @@ internal static void atomicwb(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer @new) 
 //go:nosplit
 internal static void atomicstorep(@unsafe.Pointer ptr, @unsafe.Pointer @new) {
     if (writeBarrier.enabled) {
-        atomicwb((ж<@unsafe.Pointer>)(uintptr)(ptr), @new);
+        atomicwb(@unsafe.Pointer.To<@unsafe.Pointer>(ptr), @new);
     }
     if (goexperiment.CgoCheck2) {
-        cgoCheckPtrWrite((ж<@unsafe.Pointer>)(uintptr)(ptr), @new);
+        cgoCheckPtrWrite(@unsafe.Pointer.To<@unsafe.Pointer>(ptr), @new);
     }
     atomic.StorepNoWB(noescape(ptr), @new);
 }

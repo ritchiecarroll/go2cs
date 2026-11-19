@@ -24,6 +24,7 @@ using net;
 using net.@internal;
 using socktest = net.@internal.socktest_package;
 using static go.net_package;
+using static net_internal_test_package;
 
 partial class net_internal_test_package {
 
@@ -280,14 +281,14 @@ public static void TestDialParallel(ж<testing.T> t) {
 
     // Convert a list of IP strings into TCPAddrs.
     global::go.net_package.addrList makeAddrs(slice<@string> ips, @string port) {
-        var outᴷ = new stackAppend<global::go.net_package.ΔAddr>(moves: true);
+        var outᴷ = new stackAppend<global::go.net_package.Addr>(moves: true);
         global::go.net_package.addrList @out = default;
         foreach (var (_, ip) in range(ips)) {
             var (addr, err) = ResolveTCPAddr(tcpˢ, JoinHostPort(ip, port));
             if (err != nil) {
                 t.Fatal(err);
             }
-            @out = append(outᴷ, @out, (global::go.net_package.ΔAddr)(new global::go.net_package.TCPAddrжΔAddr(addr)));
+            @out = append(outᴷ, @out, (global::go.net_package.Addr)(new global::go.net_package.TCPAddrжAddr(addr)));
         }
         @out = move2heap(outᴷ, @out);
         return @out;
@@ -371,9 +372,8 @@ public static void TestDialParallel(ж<testing.T> t) {
 }
 
 internal static (slice<global::go.net_package.IPAddr>, error) lookupSlowFast(context.Context ctx, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) {
-    var exprᴛ1 = host;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "slow6loopback4"u8: {
+    case {} when host == "slow6loopback4"u8: {
         // Returns a slow IPv6 address, and a local IPv4 address.
         return (slice<global::go.net_package.IPAddr>([
             new(IP: ParseIP(slowDst6)),
@@ -420,7 +420,7 @@ public static void TestDialerFallbackDelay(ж<testing.T> t) {
 
         slice<TestDialerFallbackDelay_type> testCases = slice<TestDialerFallbackDelay_type>([
             // Use a very brief delay, which should fallback immediately.
-            new(true, 1 * time.ΔNanosecond, 0),
+            new(true, 1 * time.Nanosecond, 0),
             // Use a 200ms explicit timeout.
             new(true, 200 * time.Millisecond, 200 * time.Millisecond),
             // The default is 300ms.
@@ -565,7 +565,7 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
             if (errΔ4 != nil) {
                 Ꮡt.Fatal(errΔ4);
             }
-            return new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(addr)}.slice());
+            return new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(addr)}.slice());
         }
 
         // dialParallel returns one connection (and closes the other.)
@@ -591,14 +591,14 @@ internal partial struct TestDialerPartialDeadline_type /*dyn*/ {
 }
 
 public static void TestDialerPartialDeadline(ж<testing.T> t) {
-    var now = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.ΔUTC);
+    var now = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC);
     slice<TestDialerPartialDeadline_type> testCases = slice<TestDialerPartialDeadline_type>([
         // Regular division.
         new(now, now.Add((time.Duration)(12000000000L)), 1, now.Add((time.Duration)(12000000000L)), default),
         new(now, now.Add((time.Duration)(12000000000L)), 2, now.Add((time.Duration)(6000000000L)), default),
         new(now, now.Add((time.Duration)(12000000000L)), 3, now.Add((time.Duration)(4000000000L)), default),
         // Bump against the 2-second sane minimum.
-        new(now, now.Add((time.Duration)(12000000000L)), 999, now.Add(2 * time.ΔSecond), default),
+        new(now, now.Add((time.Duration)(12000000000L)), 999, now.Add(2 * time.Second), default),
         // Total available is now below the sane minimum.
         new(now, now.Add(1900 * time.Millisecond), 999, now.Add(1900 * time.Millisecond), default),
         // Null deadline.
@@ -624,7 +624,7 @@ internal static Func<error, bool> isEADDRINUSE = (error err) => false;
 
 internal partial struct TestDialerLocalAddr_test /*dyn*/ {
     internal @string network, raddr;
-    internal global::go.net_package.ΔAddr laddr;
+    internal global::go.net_package.Addr laddr;
     /*embed*/ internal error error;
 }
 
@@ -636,58 +636,58 @@ public static void TestDialerLocalAddr(ж<testing.T> t) {
         }
         slice<TestDialerLocalAddr_test> tests = slice<TestDialerLocalAddr_test>([
             new("tcp4", "127.0.0.1", default, default),
-            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr())), default),
-            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
-            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
-            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
-            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), default),
-            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), default),
-            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
-            new("tcp4", "127.0.0.1", new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
-            new("tcp4", "127.0.0.1", new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr())), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
+            new("tcp4", "127.0.0.1", new global::go.net_package.UDPAddrжAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp4", "127.0.0.1", new global::go.net_package.UnixAddrжAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
 
             new("tcp6", "::1", default, default),
-            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr())), default),
-            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
-            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
-            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default),
-            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), errNoSuitableAddress),
-            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), errNoSuitableAddress),
-            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default),
-            new("tcp6", "::1", new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
-            new("tcp6", "::1", new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr())), default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), errNoSuitableAddress),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), errNoSuitableAddress),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default),
+            new("tcp6", "::1", new global::go.net_package.UDPAddrжAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp6", "::1", new global::go.net_package.UnixAddrжAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
 
             new("tcp", "127.0.0.1", default, default),
-            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr())), default),
-            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
-            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
-            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), default),
-            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), default),
-            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
-            new("tcp", "127.0.0.1", new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
-            new("tcp", "127.0.0.1", new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr())), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
+            new("tcp", "127.0.0.1", new global::go.net_package.UDPAddrжAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp", "127.0.0.1", new global::go.net_package.UnixAddrжAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
 
             new("tcp", "::1", default, default),
-            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr())), default),
-            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
-            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
-            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default),
-            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), errNoSuitableAddress),
-            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), errNoSuitableAddress),
-            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default),
-            new("tcp", "::1", new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
-            new("tcp", "::1", new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"))))
+            new("tcp", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr())), default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), errNoSuitableAddress),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), errNoSuitableAddress),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default),
+            new("tcp", "::1", new global::go.net_package.UDPAddrжAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp", "::1", new global::go.net_package.UnixAddrжAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"))))
         ]);
 
         nint issue34264Index = -1;
         if (supportsIPv4map()) {
             issue34264Index = len(tests);
             tests = append(tests, new TestDialerLocalAddr_test(
-                "tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default
+                "tcp", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default
             ));
         } else {
             tests = append(tests, new TestDialerLocalAddr_test(
-                "tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))
+                "tcp", "127.0.0.1", new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))
             ));
         }
 
@@ -921,25 +921,25 @@ public static partial void TestDialCancel(ж<testing.T> t) {
         nint ticks = 0;
         for (;;) {
             var selᴛ1 = ticker.C;
-            var selᴛ2 = connc;
-            var selᴛ3 = errc;
-            switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+            var conncᴛ1 = connc;
+            var errcᴛ1 = errc;
+            switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(conncᴛ1, ꓸꓸꓸ), ᐸꟷ(errcᴛ1, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out _): {
                 ticks++;
                 if (ticks == cancelTick) {
-                    builtin.close(cancel);
+                    close(cancel);
                 }
                 if (ticks == timeoutTick) {
                     t.Fatal(timeoutWaitingForDialToˢ);
                 }
                 break;
             }
-            case 1 when selᴛ2.ꟷᐳ(out var c): {
+            case 1 when conncᴛ1.ꟷᐳ(out var c): {
                 c.Close();
                 t.Fatal(unexpectedSuccessfulˢ);
                 break;
             }
-            case 2 when selᴛ3.ꟷᐳ(out var err): {
+            case 2 when errcᴛ1.ꟷᐳ(out var err): {
                 var perr = parseDialError(err); if (perr != nil) {
                     t.Error(perr);
                 }
@@ -1031,7 +1031,7 @@ public static partial void TestCancelAfterDial(ж<testing.T> t) {
                 // Immediately after dialing, request cancellation and sleep.
                 // Before Issue 15078 was fixed, this would cause subsequent operations
                 // to fail with an i/o timeout roughly 50% of the time.
-                builtin.close(cancel);
+                close(cancel);
                 time.Sleep(10 * time.Millisecond);
 
                 if (err != nil) {
@@ -1105,7 +1105,7 @@ public static void TestDialClosedPortFailFast(ж<testing.T> t) {
                 // available.
                 ln.Close();
 
-                var maxElapsed = time.ΔSecond;
+                var maxElapsed = time.Second;
                 // The host can be heavy-loaded and take
                 // longer than configured. Retry until
                 // Dial takes less than maxElapsed or
@@ -1331,9 +1331,8 @@ public static void TestDialContext(ж<testing.T> t) {
                 }
                 ), out var Ꮡd);
                 global::go.net_package.Conn c = default;
-                var exprᴛ2 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8: {
+                case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
                     var (raddr, errΔ2) = netip.ParseAddrPort(ln.Addr().String());
                     if (errΔ2 != nil) {
                         tΔ1.Error(errΔ2);
@@ -1343,7 +1342,7 @@ public static void TestDialContext(ж<testing.T> t) {
                     (c, errΔ2) = (new global::go.net_package.TCPConnжConn(ᴛ1), ᴛ2);
                     break;
                 }
-                case {} when exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8: {
+                case {} when network == "unix"u8 || network == "unixpacket"u8: {
                     var (raddr, errΔ3) = ResolveUnixAddr(network, ln.Addr().String());
                     if (errΔ3 != nil) {
                         tΔ1.Error(errΔ3);
@@ -1387,9 +1386,8 @@ public static void TestDialContext(ж<testing.T> t) {
                 }
                 ), out var Ꮡd);
                 global::go.net_package.Conn c2 = default;
-                var exprᴛ3 = network;
                 switch (ᐧ) {
-                case {} when exprᴛ3 == "udp"u8 || exprᴛ3 == "udp4"u8 || exprᴛ3 == "udp6"u8: {
+                case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
                     var (raddr, errΔ2) = netip.ParseAddrPort(c1.LocalAddr().String());
                     if (errΔ2 != nil) {
                         tΔ2.Error(errΔ2);
@@ -1399,7 +1397,7 @@ public static void TestDialContext(ж<testing.T> t) {
                     (c2, errΔ2) = (new global::go.net_package.UDPConnжConn(ᴛ1), ᴛ2);
                     break;
                 }
-                case {} when exprᴛ3 == "unixgram"u8: {
+                case {} when network == "unixgram"u8: {
                     var (raddr, errΔ3) = ResolveUnixAddr(network, c1.LocalAddr().String());
                     if (errΔ3 != nil) {
                         tΔ2.Error(errΔ3);
@@ -1424,6 +1422,41 @@ public static void TestDialContext(ж<testing.T> t) {
     });
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string dialTCPˢ => ref dialTCPˢᵇ;
+private static readonly @string dialTCPˢᵇ = "DialTCP()"u8;
+internal static ref readonly @string dialUDPˢ => ref dialUDPˢᵇ;
+private static readonly @string dialUDPˢᵇ = "DialUDP()"u8;
+internal static ref readonly @string ip6Ipv6Icmpˢ => ref ip6Ipv6Icmpˢᵇ;
+private static readonly @string ip6Ipv6Icmpˢᵇ = "ip6:ipv6-icmp"u8;
+internal static ref readonly @string dialIPˢ => ref dialIPˢᵇ;
+private static readonly @string dialIPˢᵇ = "DialIP()"u8;
+
+public static partial void TestDialNetipInvalidRaddr(ж<testing.T> t) {
+    void assertErrMissingAddress(ж<testing.T> tΔ1, @string name, error errΔ1) {
+        tΔ1.Helper();
+        if (errΔ1 == nil) {
+            tΔ1.Errorf("%s err = nil", name);
+            return;
+        }
+        var (e, ok) = errΔ1._<ж<global::go.net_package.OpError>>(ᐧ);
+        if (!ok) {
+            tΔ1.Errorf("%s err = %#v, want *OpError", name, errΔ1);
+            return;
+        }
+        if (!AreEqual(e.Err, errMissingAddress)) {
+            tΔ1.Errorf("%s err = %#v, want *OpError errMissingAddress", name, errΔ1);
+        }
+    }
+    ref var d = ref heap(new global::go.net_package.Dialer(), out var Ꮡd);
+    var (_, err) = Ꮡd.DialTCP(t.Context(), tcpˢ, new netip.AddrPort(), new netip.AddrPort());
+    assertErrMissingAddress(t, dialTCPˢ, err);
+    (_, err) = Ꮡd.DialUDP(t.Context(), udpˢ, new netip.AddrPort(), new netip.AddrPort());
+    assertErrMissingAddress(t, dialUDPˢ, err);
+    (_, err) = Ꮡd.DialIP(t.Context(), ip6Ipv6Icmpˢ, new netip.Addr(), new netip.Addr());
+    assertErrMissingAddress(t, dialIPˢ, err);
+}
+
 // mustHaveExternalNetwork is like testenv.MustHaveExternalNetwork
 // except on non-Linux, non-mobile builders it permits the test to
 // run in -short mode.
@@ -1446,10 +1479,14 @@ internal partial struct contextWithNonZeroDeadline {
     /*embed*/ public context_package.Context Context;
 }
 
+} partial class net_internal_testᴛcontextWithNonZeroDeadline {
+
 internal static (time.Time, bool) Deadline(this contextWithNonZeroDeadline _) {
     // Return non-zero time.Time value with false indicating that no deadline is set.
     return (time.Unix(0, 0), false);
 }
+
+} partial class net_internal_test_package {
 
 public static void TestDialWithNonZeroDeadline(ж<testing.T> t) {
     GoFrame ᒐ = default;

@@ -73,7 +73,7 @@ public static void TestTCPConnKeepAliveConfigDialer(ж<testing.T> t) {
             {
                 var cfgʗ1 = cfg;
                 var errΔ1 = sc.Control((uintptr fd) => {
-                    verifyKeepAliveSettings(t, (syscallꓸHandle)fd, ᏑoldCfg.Value, cfgʗ1);
+                    verifyKeepAliveSettings(t, (fdType)fd, ᏑoldCfg.Value, cfgʗ1);
                 }); if (errΔ1 != nil) {
                     t.Fatal(errΔ1);
                 }
@@ -144,7 +144,7 @@ public static void TestTCPConnKeepAliveConfigListener(ж<testing.T> t) {
             {
                 var cfgʗ1 = cfg;
                 var errΔ1 = sc.Control((uintptr fd) => {
-                    verifyKeepAliveSettings(t, (syscallꓸHandle)fd, ᏑoldCfg.Value, cfgʗ1);
+                    verifyKeepAliveSettings(t, (fdType)fd, ᏑoldCfg.Value, cfgʗ1);
                 }); if (errΔ1 != nil) {
                     t.Fatal(errΔ1);
                 }
@@ -198,7 +198,7 @@ public static void TestTCPConnKeepAliveConfig(ж<testing.T> t) {
             ref var oldCfg = ref heap(new global::go.net_package.KeepAliveConfig(), out var ᏑoldCfg);
             {
                 var errΔ1 = sc.Control((uintptr fd) => {
-                    (ᏑoldCfg.Value, ᏑerrHook.ValueSlot) = getCurrentKeepAliveSettings((syscallꓸHandle)fd);
+                    (ᏑoldCfg.Value, ᏑerrHook.ValueSlot) = getCurrentKeepAliveSettings((fdType)fd);
                 }); if (errΔ1 != nil) {
                     t.Fatal(errΔ1);
                 }
@@ -224,7 +224,7 @@ public static void TestTCPConnKeepAliveConfig(ж<testing.T> t) {
             {
                 var cfgʗ1 = cfg;
                 var errΔ2 = sc.Control((uintptr fd) => {
-                    verifyKeepAliveSettings(t, (syscallꓸHandle)fd, ᏑoldCfg.Value, cfgʗ1);
+                    verifyKeepAliveSettings(t, (fdType)fd, ᏑoldCfg.Value, cfgʗ1);
                 }); if (errΔ2 != nil) {
                     t.Fatal(errΔ2);
                 }

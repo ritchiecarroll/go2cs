@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct frame {
     public @string Name;
 }
+
+} partial class mainᴛframe {
 
 internal static @string label(this frame f) { return f.Name; }
 
@@ -16,6 +19,8 @@ internal static @string touch(this frame f) {
     f.Name = "touched";
     return f.Name;
 }
+
+} partial class main_package {
 
 partial struct holder {
     internal ж<frame> p;

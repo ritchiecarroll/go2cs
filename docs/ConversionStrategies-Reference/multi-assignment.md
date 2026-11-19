@@ -8,7 +8,7 @@ All right-hand operands in assignment expressions in Go are evaluated before ass
 x, y = y, x+y
 ```
 the equivalent C# code operates as follows:
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs:33 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs:34 -->
 ```csharp
 (x, y) = (y, x + y);
 ```
@@ -75,7 +75,7 @@ A subtler case: a newly-declared tuple element can be flagged *escaping* by anal
 
 **A tuple deconstruction into INTERFACE variables hoists the call when a component needs converting.** Reassigning a multi-value call into pre-declared interface locals (`c, err = sd.dialTCP(…)` with `var c Conn`) can require a per-component interface conversion C#'s tuple assignment cannot perform implicitly — a `ж<TCPConn>` component satisfies `Conn` only through its generated pointer adapter, an *explicit* conversion (CS0266 ×11 in net's dial.go). Mirroring the return-statement tuple arm, the call is hoisted into temp markers and each component converts in a tuple literal:
 
-<!-- source: src/core/net/darwin/dial.cs:906-907 -->
+<!-- source: src/core/net/darwin/dial.cs:960-961 -->
 ```csharp
 var (ᴛ1, ᴛ2) = Ꮡsd.dialTCP(ctx, laΔ1, raΔ1);
 (c, err) = (new TCPConnжConn(ᴛ1), ᴛ2);
@@ -96,7 +96,7 @@ small, even := func(v int) bool { return v < n }, func(v int) bool { return v%2 
 d, t := double, triple
 ```
 
-<!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:25-26, 29-30 -->
+<!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:30-31, 34-35 -->
 ```csharp
 var small = (nint v) => v < n;
 var even = (nint v) => v % 2 == 0;
@@ -125,10 +125,10 @@ func ParseOID(oid string) (OID, error) {
     return o, o.unmarshalOIDText(oid)   // gc: the call runs, THEN o is read
 }
 ```
-<!-- source: src/core/crypto/x509/oid.cs:27-31 -->
+<!-- source: src/core/crypto/x509/oid.cs:28-32 -->
 ```csharp
-public static (ΔOID, error) ParseOID(@string oid) {
-    ΔOID o = default;
+public static (OID, error) ParseOID(@string oid) {
+    OID o = default;
     var ᴛ1 = o.unmarshalOIDText(oid);
     return (o, ᴛ1);
 }
@@ -227,18 +227,18 @@ not correctness.)
 call-deref swap, output-compared vs `go run`; the pre-fix converter leaves all three visibly uncorrected.)
 
 ## A dereferenced pointer CONVERSION as a tuple target writes through `.Value`
-A single assignment to `*(*T)(p)` writes through the converted box, `((ж<T>)(uintptr)p).Value = v`. The tuple
+A single assignment to `*(*T)(p)` writes through the converted box, `(@unsafe.Pointer.To<T>(p)).Value = v`. The tuple
 target was rendered as a read instead, with the prefix `~` dereference, which is a value and not a variable,
 so a parallel assignment through two such targets did not compile (CS0131). modernc.org/libc's `qsort.go`
-swaps elements this way (sqlite-cs row S14):
+swaps elements this way:<!-- sqlite-cs row S14 -->
 
 ```go
 *(*uint64)(unsafe.Pointer(p)), *(*uint64)(unsafe.Pointer(q)) = *(*uint64)(unsafe.Pointer(q)), *(*uint64)(unsafe.Pointer(p))
 ```
 
 Each tuple target now takes the single assignment's `.Value` spelling, and the right-hand reads keep `~`, so the
-statement stays one simultaneous deconstruction, like the Go line: `(((ж<uint64>)(uintptr)((@unsafe.Pointer)p)).Value,
-((ж<uint64>)(uintptr)((@unsafe.Pointer)q)).Value) = (~(ж<uint64>)(uintptr)((@unsafe.Pointer)q), ~(ж<uint64>)(uintptr)((@unsafe.Pointer)p));`.
+statement stays one simultaneous deconstruction, like the Go line: `((@unsafe.Pointer.To<uint64>((@unsafe.Pointer)p)).Value,
+(@unsafe.Pointer.To<uint64>((@unsafe.Pointer)q)).Value) = (~@unsafe.Pointer.To<uint64>((@unsafe.Pointer)q), ~@unsafe.Pointer.To<uint64>((@unsafe.Pointer)p));`.
 Every such target was a compile error before, so no compiled corpus file changes. (Guarded by
 `ParallelDerefCastAssign`: a swap through `uintptr` addresses, a three-way rotate through `unsafe.Pointer`, and a
 swap of an address with itself, output-compared vs Go.)
@@ -258,7 +258,7 @@ capturing closure (the pre-existing box-ref-var case) or anywhere in the current
 var swapped Animal = Dog{}
 replaceAnimal(&swapped)      // callee: *a = &Cat{}
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:165-168 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:194-197 -->
 ```csharp
 ref var swapped = ref heap<Animal>(out var Ꮡswapped);
 
@@ -324,6 +324,34 @@ take the same treatment. (Guarded by `NamedResultAddressEscape` — an error res
 `PointerToInterfaceParamDeref` re-baselined to the box form, its output unchanged since its handler
 only *reads* `*err`.)
 
+Go also takes `&r` **implicitly** for a named result, in the same two forms the value parameter and
+value receiver arms below already handle: a call of a capture-mode (direct-ж) pointer method on the
+result or on a value-field chain rooted at it, and a pointer-method value of it. A direct-ж method's
+only emitted receiver is the box `ж<T>`, so before the named-result arm took the call form an unboxed
+result failed to compile (CS1929), and the chain form `Ꮡ(h).Ꮡinner.Add(…)` compiled through a **copy**
+box and dropped the method's writes. The shape is modernc.org/mathutil's `NewInt128FromFloat32`
+calling `r.SetBigInt(bi)` on its named result, where `SetBigInt` uses its receiver pointer as a value
+(`fmt.Errorf("%T…", x)`):
+```go
+func fromInt(v int64) (r Int128) {
+	r.SetBig(v)
+	return r
+}
+```
+<!-- source: src/tests/Behavioral/NamedResultCaptureModeReceiver/main.cs:27-32 -->
+```csharp
+internal static Int128 /*r*/ fromInt(int64 v) {
+    ref var r = ref heap(new Int128(), out var Ꮡr);
+
+    Ꮡr.SetBig(v);
+    return r;
+}
+```
+A named slice, map or chan result is a reference already and boxes only for this recorded reason, as
+the parameter arm does. (Guarded by `NamedResultCaptureModeReceiver` — struct results with a body write
+before the call and a bare return, the value-field chain form, and a named slice result whose method
+appends through its receiver, output-compared vs Go.)
+
 ## An address-taken VALUE PARAMETER heap-boxes too
 A value parameter, like a named result, is declared in the **signature** — not by any body statement —
 so the escape analysis' define-walk never reached it either. Parameters were additionally kept out of
@@ -351,7 +379,7 @@ func readOnlyParam(r Rect) (int, int) {
 	return p.Min, p.Max
 }
 ```
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:50-55 -->
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:51-56 -->
 ```csharp
 internal static (nint, nint) readOnlyParam(Rect rʗp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
@@ -448,7 +476,7 @@ receiver folding its Go by-value clone into the box init exactly as an array par
 func (b Box) BumpedRecv() int { bumpBox(&b); return b.Tag }
 func (b Box) ReadOnlyRecv() (int, int) { p := &b; return p.R.Min, p.Tag }
 ```
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:71-74, 93-98 -->
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:74-77, 102-107 -->
 ```csharp
 public static nint BumpedRecv(this Box b) {
     bumpBox(ref b);
@@ -486,8 +514,8 @@ receiver the capture analysis routed to box-ref storage must never take the `ʗp
 neither `bodyCallsCaptureModeMethodOn` nor `isLambdaBoxRefVar` joins the receiver gate.
 
 The receiver reuses `paramAddressTakenNeedsBox`, so an inherently-heap receiver still boxes only for
-the bare `&r`. **Measured, that restriction rejected no corpus site at the landing** — unlike the parameter
-arm's — and the reason is worth recording: the parameter over-boxings came from the first
+the bare `&r`. **That restriction rejects no site in the converted standard library**, unlike the parameter
+arm's, and the reason is worth recording: the parameter over-boxings came from the first
 cut *also* recording `packageCaptureModeBoxIdents`, which forces `identHasHeapBox` to grant a box. The
 receiver arm never records it, so for a `&r[i]`-only slice receiver `identHasHeapBox`'s own gate
 refuses the box independently and the emission is byte-identical either way. The restriction is kept
@@ -495,14 +523,14 @@ because it keeps the analysis verdict and that gate in **agreement**: marking a 
 refuses leaves `identEscapesHeap` set with no box, and that map is read raw by the capture analysis and
 several emitters.
 
-Corpus footprint of the fix, from a two-seeded-root A/B (master converter vs fixed, both reconverting
-every project into their own temp root)<!-- 305 projects; 3 receiver sites across 2 files -->: the receiver sites
+<!-- Corpus footprint of the fix, from a two-seeded-root A/B (master converter vs fixed, both reconverting
+every project into their own temp root)(305 projects; 3 receiver sites across 2 files): the receiver sites
 `encoding/base64`'s
 `WithPadding` and `Strict` and `encoding/base32`'s `WithPadding`, each `func (enc Encoding) … *Encoding`
 returning `&enc`. All three are *correct-by-luck* under the old emission: `&enc` is the last operation,
 after every mutation, so the `Ꮡ(enc)` copy carried the mutated value out. They are now one storage
 identity rather than two, at the same single allocation. That there is no live victim is the point —
-this path was closed at its root rather than after a sixth package was found broken by it.
+this path was closed at its root rather than after a sixth package was found broken by it. -->
 
 **The receiver decision is MODE-STABLE, structurally** — `-stdlib` and `-tests` cannot disagree about
 it, and that is worth stating because the sibling category *can*. A package-level var's address may be
@@ -541,7 +569,7 @@ p := &x.val
 *p = 99
 return x.val                       // Go: 99
 ```
-<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs:17-20 -->
+<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs:18-21 -->
 ```csharp
 ref var x = ref heap<Thing>(new Thing(val: 7), out var Ꮡx);
 var p = Ꮡx.Ꮡval;
@@ -584,7 +612,7 @@ the call routes through its identity box:
 	x.i.Store(7)
 	fmt.Println("anon:", x.i.Add(1))
 ```
-<!-- source: src/tests/Behavioral/CaptureModeFieldAddress/main.cs.target:57-59 -->
+<!-- source: src/tests/Behavioral/CaptureModeFieldAddress/main.cs.target:62-64 -->
 ```csharp
     ref var x = ref heap(new anonStruct_x(), out var Ꮡx);
     Ꮡx.of(anonStruct_x.Ꮡi).Store(7);
@@ -684,7 +712,7 @@ carried exactly one per op. --><!-- The seg-3 sizing censused 965 receiver-base 
 parameter-base call sites in 52 stdlib packages paying that box after the ref-primary machinery had freed 1,023 of the
 2,036 shape sites. -->
 
-With the field-view cache (`golib/ж.Views.cs`, design `docs/phase4/DESIGN-field-view-cache.md`),
+With the field-view cache (`golib/ж.Views.cs`)<!-- design: docs/phase4/DESIGN-field-view-cache.md (internal record) -->,
 `of()` returns the SAME `FieldRefBox` for the same (box, accessor token) for the box's life — minted
 on the first call, reused afterwards. Nothing in the emission changes; what changes is the identity
 contract at run time, and it changes in the STRONGER direction: `FieldRefBox.Equals` was already
@@ -703,7 +731,7 @@ across a process's early life. Guarded by `GolibTests/FieldViewCacheTests.cs` (i
 by type, the chain hop, the fallback, the nil box, the negative arm, and concurrent first calls).
 <!-- The concurrent-first-calls arm caught a publish race before the cut was announced. -->
 
-Since parity seat #32 the emitted spelling is the field's address property, `Ꮡrecv.Ꮡfield.Method()` (`&x.f` is
+The emitted spelling is the field's address property,<!-- since parity seat #32 --> `Ꮡrecv.Ꮡfield.Method()` (`&x.f` is
 `Ꮡx.Ꮡf`; [the rule](pointers.md)), and the property hands `of()` the struct's ONE accessor token for the field,
 `T.Ꮡf‿`, a `static readonly FieldRefFunc<T, F>` on `T` in `T`'s own assembly. Before it, each `&x.f` site
 converted the accessor method group to its own delegate, so one field reached a box as several delegate objects and
@@ -719,8 +747,7 @@ there (go/types: *"symbolic variables t in t := x.(type) … the corresponding o
 the real binding is one implicit `*types.Var` PER CASE CLAUSE, in `info.Implicits`). So no
 address form on a type-switch binding was ever seen: `d.translate(&t1.Name, true)` handed a
 ж<Name> **method** parameter (a method's pointer parameter is never
-[ref-lowered](pointers.md#a-pointer-parameter-whose-every-use-is-a-dereference-is-a-ref-parameter--the-ж-box-ref-lowering);
-see §10.1 of `phase4/DESIGN-zh-box-reduction.md`) the `Ꮡ(t1).of(StartElement.ᏑName)` copy-box, and
+[ref-lowered](pointers.md#a-pointer-parameter-whose-every-use-is-a-dereference-is-a-ref-parameter--the-ж-box-ref-lowering))<!-- see §10.1 of phase4/DESIGN-zh-box-reduction.md (internal record) --> the `Ꮡ(t1).of(StartElement.ᏑName)` copy-box, and
 encoding/xml's Token() namespace translation wrote into a heap copy that `t = t1` then discarded
 — a shipped lost write, invisible to every compile gate because the copy READS correctly.
 
@@ -743,7 +770,7 @@ case StartElement:
     d.translate(&t1.Name, true)    // write must land in t1
     t = t1                          // …because Go reads it back out
 ```
-<!-- source: src/core/encoding/xml/xml.cs:306-307, 327, 331 -->
+<!-- source: src/core/encoding/xml/xml.cs:333-358 -->
 ```csharp
 case StartElement t1ᴛ1: {
     ref var t1 = ref heap(t1ᴛ1, out var Ꮡt1);

@@ -9,11 +9,12 @@ using sys = go.@internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
+using static maps_package;
 
 partial class maps_package {
 
 //go:linkname runtime_mapaccess1_fast64 runtime.mapaccess1_fast64
-internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint64 key) {
+internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint64 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -40,11 +41,11 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡt
         @unsafe.Pointer slotKey = g.key(Ꮡtyp, 0);
         var slotSize = typ.SlotSize;
         while (full != 0) {
-            if (key == ~(ж<uint64>)(uintptr)(slotKey) && full.lowestSet()) {
-                @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + 8);
+            if (key == ~@unsafe.Pointer.To<uint64>(slotKey) && full.lowestSet()) {
+                @unsafe.Pointer slotElem = @unsafe.Add(slotKey, 8);
                 return slotElem;
             }
-            slotKey = (@unsafe.Pointer)((uintptr)slotKey + slotSize);
+            slotKey = @unsafe.Add(slotKey, slotSize);
             full = full.shiftOutLowest();
         }
         return @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
@@ -70,8 +71,8 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡt
             var i = match.first();
 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-            if (key == ~(ж<uint64>)(uintptr)(slotKey)) {
-                @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + 8);
+            if (key == ~@unsafe.Pointer.To<uint64>(slotKey)) {
+                @unsafe.Pointer slotElem = @unsafe.Add(slotKey, 8);
                 return slotElem;
             }
             match = match.removeFirst();
@@ -87,7 +88,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast64(ж<abiꓸMapType> Ꮡt
 }
 
 //go:linkname runtime_mapaccess2_fast64 runtime.mapaccess2_fast64
-internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint64 key) {
+internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint64 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -114,11 +115,11 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapTy
         @unsafe.Pointer slotKey = g.key(Ꮡtyp, 0);
         var slotSize = typ.SlotSize;
         while (full != 0) {
-            if (key == ~(ж<uint64>)(uintptr)(slotKey) && full.lowestSet()) {
-                @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + 8);
+            if (key == ~@unsafe.Pointer.To<uint64>(slotKey) && full.lowestSet()) {
+                @unsafe.Pointer slotElem = @unsafe.Add(slotKey, 8);
                 return (slotElem, true);
             }
-            slotKey = (@unsafe.Pointer)((uintptr)slotKey + slotSize);
+            slotKey = @unsafe.Add(slotKey, slotSize);
             full = full.shiftOutLowest();
         }
         return (@unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0)), false);
@@ -145,8 +146,8 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapTy
             var i = match.first();
 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-            if (key == ~(ж<uint64>)(uintptr)(slotKey)) {
-                @unsafe.Pointer slotElem = (@unsafe.Pointer)((uintptr)slotKey + 8);
+            if (key == ~@unsafe.Pointer.To<uint64>(slotKey)) {
+                @unsafe.Pointer slotElem = @unsafe.Add(slotKey, 8);
                 return (slotElem, true);
             }
             match = match.removeFirst();
@@ -161,7 +162,9 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abiꓸMapTy
     }
 }
 
-internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abiꓸMapType> typ, uintptr hash, uint64 key) {
+} partial class mapsᴛMap {
+
+internal static @unsafe.Pointer putSlotSmallFast64(this ref Map m, ж<abi.MapType> typ, uintptr hash, uint64 key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -173,7 +176,7 @@ internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abiꓸMa
         var iΔ1 = match.first();
 
         @unsafe.Pointer slotKeyΔ1 = g.key(typ, iΔ1);
-        if (key == ~(ж<uint64>)(uintptr)(slotKeyΔ1)) {
+        if (key == ~@unsafe.Pointer.To<uint64>(slotKeyΔ1)) {
             @unsafe.Pointer slotElemΔ1 = g.elem(typ, iΔ1);
             return slotElemΔ1;
         }
@@ -191,7 +194,7 @@ internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abiꓸMa
     var i = match.first();
 
     @unsafe.Pointer slotKey = g.key(typ, i);
-    ((ж<uint64>)(uintptr)(slotKey)).Value = key;
+    (@unsafe.Pointer.To<uint64>(slotKey)).Value = key;
 
     @unsafe.Pointer slotElem = g.elem(typ, i);
 
@@ -201,8 +204,10 @@ internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abiꓸMa
     return slotElem;
 }
 
+} partial class maps_package {
+
 //go:linkname runtime_mapassign_fast64 runtime.mapassign_fast64
-internal static @unsafe.Pointer runtime_mapassign_fast64(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint64 key) {
+internal static @unsafe.Pointer runtime_mapassign_fast64(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint64 key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -271,7 +276,7 @@ outer:
                 var iΔ1 = match.first();
 
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
-                if (key == ~(ж<uint64>)(uintptr)(slotKey)) {
+                if (key == ~@unsafe.Pointer.To<uint64>(slotKey)) {
                     slotElem = g.elem(Ꮡtyp, iΔ1);
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -315,7 +320,7 @@ outer:
             // If there is room left to grow, just insert the new entry.
             if (t.growthLeft > 0) {
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-                ((ж<uint64>)(uintptr)(slotKey)).Value = key;
+                (@unsafe.Pointer.To<uint64>(slotKey)).Value = key;
 
                 slotElem = g.elem(Ꮡtyp, i);
 
@@ -343,7 +348,9 @@ break_outer:;
     return slotElem;
 }
 
-internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abiꓸMapType> typ, uintptr hash, @unsafe.Pointer key) {
+} partial class mapsᴛMap {
+
+internal static @unsafe.Pointer putSlotSmallFastPtr(this ref Map m, ж<abi.MapType> typ, uintptr hash, @unsafe.Pointer key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -355,7 +362,7 @@ internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abiꓸM
         var iΔ1 = match.first();
 
         @unsafe.Pointer slotKeyΔ1 = g.key(typ, iΔ1);
-        if (key == ~(ж<@unsafe.Pointer>)(uintptr)(slotKeyΔ1)) {
+        if (key == ~@unsafe.Pointer.To<@unsafe.Pointer>(slotKeyΔ1)) {
             @unsafe.Pointer slotElemΔ1 = g.elem(typ, iΔ1);
             return slotElemΔ1;
         }
@@ -373,7 +380,7 @@ internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abiꓸM
     var i = match.first();
 
     @unsafe.Pointer slotKey = g.key(typ, i);
-    ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
+    (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = key;
 
     @unsafe.Pointer slotElem = g.elem(typ, i);
 
@@ -383,10 +390,12 @@ internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abiꓸM
     return slotElem;
 }
 
+} partial class maps_package {
+
 // Key is a 64-bit pointer (only called on 64-bit GOARCH).
 //
 //go:linkname runtime_mapassign_fast64ptr runtime.mapassign_fast64ptr
-internal static @unsafe.Pointer runtime_mapassign_fast64ptr(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+internal static @unsafe.Pointer runtime_mapassign_fast64ptr(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -455,7 +464,7 @@ outer:
                 var iΔ1 = match.first();
 
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
-                if (key == ~(ж<@unsafe.Pointer>)(uintptr)(slotKey)) {
+                if (key == ~@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)) {
                     slotElem = g.elem(Ꮡtyp, iΔ1);
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -494,7 +503,7 @@ outer:
             // If there is room left to grow, just insert the new entry.
             if (t.growthLeft > 0) {
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-                ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = key;
 
                 slotElem = g.elem(Ꮡtyp, i);
 
@@ -523,7 +532,7 @@ break_outer:;
 }
 
 //go:linkname runtime_mapdelete_fast64 runtime.mapdelete_fast64
-internal static void runtime_mapdelete_fast64(ж<abiꓸMapType> typ, ж<ΔMap> Ꮡm, uint64 keyʗp) {
+internal static void runtime_mapdelete_fast64(ж<abi.MapType> typ, ж<Map> Ꮡm, uint64 keyʗp) {
     ref var m = ref Ꮡm.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 

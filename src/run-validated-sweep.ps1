@@ -1142,7 +1142,21 @@ function Invoke-SweepRow {
 
     # The cgo state is pinned ONCE for the whole run (see the pin above the row loop); the per-row
     # -CgoOff switch this function carried until 2026-09-03 retired with the per-package table.
-    return & $exe -tests -test-action all -test-timeout $PkgTimeout @ExecArgs -go2cspath $src $GoDir $OutDir 2>&1
+    # A row's child go test flags ($childGoTestFlags) reach every go command its run starts, both sides', through
+    # GOFLAGS for the row alone; the ambient value is kept in front and restored after.
+    $childFlags = Get-RowChildGoTestFlags $Package
+    if (-not $childFlags) {
+        return & $exe -tests -test-action all -test-timeout $PkgTimeout @ExecArgs -go2cspath $src $GoDir $OutDir 2>&1
+    }
+
+    $ambient = $env:GOFLAGS
+    $env:GOFLAGS = (@($ambient, $childFlags) | Where-Object { $_ }) -join ' '
+    try {
+        return & $exe -tests -test-action all -test-timeout $PkgTimeout @ExecArgs -go2cspath $src $GoDir $OutDir 2>&1
+    }
+    finally {
+        $env:GOFLAGS = $ambient
+    }
 }
 
 # Packages whose C# suite legitimately exceeds the default package deadline. hash/maphash's
@@ -1275,7 +1289,29 @@ $longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto
 #     package floor, as crypto/dsa and go/parser do.
 # Every key here must also be a $longTimeouts row: a test bound above its own package's default deadline is
 # meaningless, and run-h10-recon.ps1 refuses such an orphan by name.
-$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m'; 'runtime' = '60m'; 'internal/poll' = '30m'; 'sync/atomic' = '150m' }
+$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m'; 'runtime' = '60m'; 'internal/poll' = '30m'; 'sync/atomic' = '150m'; 'crypto/tls' = '30m' }
+
+# CHILD go test FLAGS, per row and host OS: flags for a go test that a test itself starts, which neither the sweep's
+# -test-timeout nor the converter reaches. They go to the row's run through GOFLAGS (Invoke-SweepRow), so the same
+# child gets them on both sides: Go's oracle and the converted test host start the same command, and a flag the
+# current go command does not know is ignored, while the oracle's own go test keeps its explicit -timeout.
+#   crypto/tls linux -timeout=25m, added 2026-11-15 (COORD ruling on P5's hosted linux reads): TestBogoSuite runs
+#     BoringSSL's runner as a child `go test` under Go's default 10m limit. On hosted linux the test PASSED in 522.2 s
+#     on one runner and its child was KILLED at 600 s on four runners whose witness rows read 1.3x to 1.8x slower
+#     (1.8 x 522 s = about 940 s), so the row read red with no defect whenever the runner was about 1.15x slow. 25m is
+#     1.6x that projection. Linux only: linux banks the full fan-out (host state 1), while windows and darwin bank
+#     the runner's death at its 600 s wall under the row's host-limit entry (host state 3), which a raised wall
+#     would turn into a different reading of the same limit. Its per-test deadline floor (30m, above) keeps the 15m
+#     watchdog from abandoning the test before the child's own limit.
+$childGoTestFlags = @{ 'crypto/tls' = @{ linux = '-timeout=25m' } }
+
+# The row's child go test flags on this host's OS, or '' for none.
+function Get-RowChildGoTestFlags([string] $Package) {
+    $byOs = $childGoTestFlags[$Package]
+    if (-not $byOs) { return '' }
+    $os = if ($IsWindows) { 'windows' } elseif ($IsMacOS) { 'darwin' } else { 'linux' }
+    return [string]$byOs[$os]
+}
 
 # A row's per-test deadline: the LONGER of the asked -TestDeadline and the row's floor, compared as Go
 # durations, the package floor's rule. '0' is no deadline, which is longer than any duration, so an asked
@@ -1510,6 +1546,10 @@ foreach ($row in $rows) {
     # The publish cap, in every row's arguments when -TestBuildMaxCpu asks for one. @() keeps an empty answer empty:
     # a bare += of nothing would append a $null argument.
     $execArgs += @(Get-TestBuildMaxCpuArgs $TestBuildMaxCpu)
+
+    # A row's child go test flags, on its verdict line so a re-run repeats them.
+    $rowChildFlags = Get-RowChildGoTestFlags $pkg
+    if ($rowChildFlags) { $execSuffix += " [GOFLAGS=$rowChildFlags]" }
 
     $rowStarted = Get-Date
     $out = Invoke-SweepRow -Package $pkg -GoDir $goDir -OutDir $outDir -PkgTimeout $pkgTimeout -ExecArgs $execArgs

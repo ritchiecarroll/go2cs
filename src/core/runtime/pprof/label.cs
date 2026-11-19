@@ -10,6 +10,7 @@ using slices = slices_package;
 using strings = strings_package;
 using @internal.runtime.pprof;
 using ꓸꓸꓸstring = Span<@string>;
+using static pprof_package;
 
 partial class pprof_package {
 
@@ -37,6 +38,8 @@ partial struct labelMap {
     /*embed*/ public @internal.runtime.pprof.label_package.Set Set;
 }
 
+} partial class pprofᴛlabelMap {
+
 // String satisfies Stringer and returns key, value pairs in a consistent
 // order.
 internal static @string String(this ж<labelMap> Ꮡl) {
@@ -53,8 +56,10 @@ internal static @string String(this ж<labelMap> Ꮡl) {
     }
 
     slices.Sort<slice<@string>, @string>(keyVals);
-    return "{"u8 + strings_package.Join(keyVals, ", ") + "}"u8;
+    return "{"u8 + strings.Join(keyVals, ", ") + "}"u8;
 }
+
+} partial class pprof_package {
 
 // WithLabels returns a new [context.Context] with the given labels added.
 // A label overwrites a prior label with the same key.
@@ -75,7 +80,7 @@ internal static label.Set mergeLabelSets(label.Set left, LabelSet right) {
     nint r = 0;
     var result = new slice<label.Label>(0, len(rList));
     while (l < len(lList) && r < len(rList)) {
-        switch (strings_package.Compare(lList[l].Key, rList[r].Key)) {
+        switch (strings.Compare(lList[l].Key, rList[r].Key)) {
         case var ᴛ when ᴛ == -1: { // left key < right key
             result = append(result, lList[l]);
             l++;
@@ -121,7 +126,7 @@ public static LabelSet Labels(params ꓸꓸꓸstring argsʗp) {
     }
     if (!sortedNoDupes) {
         // slow path: keys are unsorted, contain duplicates, or both
-        slices.SortStableFunc(list, (label.Label a, label.Label b) => strings_package.Compare(a.Key, b.Key));
+        slices.SortStableFunc(list, (label.Label a, label.Label b) => strings.Compare(a.Key, b.Key));
         var deduped = new slice<label.Label>(0, len(list));
         foreach (var (i, lbl) in range(list)) {
             if (i == 0 || lbl.Key != list[i - 1].Key) {

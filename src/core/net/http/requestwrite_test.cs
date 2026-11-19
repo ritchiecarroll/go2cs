@@ -18,6 +18,7 @@ using time = time_package;
 using global::go.net;
 using global::go.testing;
 using static global::go.net.http_package;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
@@ -43,7 +44,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Accept"] = ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
                 ["Accept-Charset"] = ["ISO-8859-1,utf-8;q=0.7,*;q=0.7"],
                 ["Accept-Encoding"] = ["gzip,deflate"],
@@ -73,7 +74,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             )),
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             TransferEncoding: ["chunked"]
         ),
 
@@ -94,7 +95,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             )),
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: true,
             TransferEncoding: ["chunked"]
         ),
@@ -117,7 +118,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             )),
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{}),
+            Header: new Header(new map<@string, slice<@string>>{}),
             Close: true,
             ContentLength: 6
         ),
@@ -135,7 +136,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             Method: "POST",
             URL: mustParseURL("http://example.com/"),
             Host: "example.com",
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Content-Length"] = ["10"] // ignored
             }),
             ContentLength: 6
@@ -302,7 +303,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             URL: mustParseURL("/foo"),
             ProtoMajor: 1,
             ProtoMinor: 0,
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["X-Foo"] = ["X-Bar"]
             })
         ),
@@ -325,7 +326,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             )),
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["Host"] = ["bad.example.com"]
             })
         ),
@@ -344,7 +345,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             )),
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{})
+            Header: new Header(new map<@string, slice<@string>>{})
         ),
 
         WantWrite: "GET /%2F/%2F/ HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n\r\n"u8
@@ -361,7 +362,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             )),
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{})
+            Header: new Header(new map<@string, slice<@string>>{})
         ),
 
         WantWrite: "GET http://y.google.com/%2F/%2F/ HTTP/1.1\r\n"u8 + "Host: x.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n\r\n"u8
@@ -379,7 +380,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
             Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["ALL-CAPS"] = ["x"]
             })
         ),
@@ -443,7 +444,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
         Req: new Request(
             Method: "GET",
             URL: mustParseURL("/foo"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["X-Foo"] = ["X-Bar"],
                 ["X-Idempotency-Key"] = default
             })
@@ -455,7 +456,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
         Req: new Request(
             Method: "GET",
             URL: mustParseURL("/foo"),
-            Header: new ΔHeader(new map<@string, slice<@string>>{
+            Header: new Header(new map<@string, slice<@string>>{
                 ["X-Foo"] = ["X-Bar"],
                 ["X-Idempotency-Key"] = []
             })
@@ -492,7 +493,7 @@ internal static readonly ж<slice<reqWriteTest>> ᏑreqWriteTests = new StaticBo
 internal static ref slice<reqWriteTest> reqWriteTests => ref ((StaticBox<slice<reqWriteTest>>)ᏑreqWriteTests).ValueSlot;
 
 public static void TestRequestWrite(ж<testing.T> t) {
-    foreach (var i in range(builtin.len(reqWriteTests))) {
+    foreach (var i in range(len(reqWriteTests))) {
         var tt = Ꮡ(reqWriteTests, i);
 
         var ttʗ1 = tt;
@@ -512,7 +513,7 @@ public static void TestRequestWrite(ж<testing.T> t) {
         }
         setBody();
         if (tt.Req.Header == nil) {
-            tt.Req.Header = new global::go.net.http_package.ΔHeader(0);
+            tt.Req.Header = new global::go.net.http_package.Header(0);
         }
 
         ref var braw = ref heap(new strings.Builder(), out var Ꮡbraw);
@@ -561,14 +562,16 @@ public static void TestRequestWriteTransport(ж<testing.T> t) {
     synctest.Test(t, testRequestWriteTransport);
 }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string transferEncodingˢ2 => ref transferEncodingˢ2ᵇ;
-private static readonly @string transferEncodingˢ2ᵇ = "Transfer-Encoding: "u8;
+internal static ref readonly @string contentLengthˢ2 => ref contentLengthˢ2ᵇ;
+private static readonly @string contentLengthˢ2ᵇ = "Content-Length: "u8;
+internal static ref readonly @string transferEncodingˢ => ref transferEncodingˢᵇ;
+private static readonly @string transferEncodingˢᵇ = "Transfer-Encoding: "u8;
 internal static ref readonly @string foobodyˢ => ref foobodyˢᵇ;
 private static readonly @string foobodyˢᵇ = "foobody"u8;
 internal static ref readonly @string contentLength7ˢ => ref contentLength7ˢᵇ;
 private static readonly @string contentLength7ˢᵇ = "Content-Length: 7"u8;
-internal static ref readonly @string transferEncodingChunkedˢ2 => ref transferEncodingChunkedˢ2ᵇ;
-private static readonly @string transferEncodingChunkedˢ2ᵇ = "Transfer-Encoding: chunked"u8;
+internal static ref readonly @string transferEncodingChunkedˢ => ref transferEncodingChunkedˢᵇ;
+private static readonly @string transferEncodingChunkedˢᵇ = "Transfer-Encoding: chunked"u8;
 internal static ref readonly @string oobodyˢ => ref oobodyˢᵇ;
 private static readonly @string oobodyˢᵇ = "oobody"u8;
 
@@ -591,10 +594,10 @@ internal static void testRequestWriteTransport(ж<testing.T> t) {
         };
 
     var noContentLengthOrTransferEncoding = error (@string req) => {
-        if (strings.Contains(req, contentLengthˢ3)) {
+        if (strings.Contains(req, contentLengthˢ2)) {
             return fmt.Errorf("unexpected Content-Length in request: %s"u8, req);
         }
-        if (strings.Contains(req, transferEncodingˢ2)) {
+        if (strings.Contains(req, transferEncodingˢ)) {
             return fmt.Errorf("unexpected Transfer-Encoding in request: %s"u8, req);
         }
         return default;
@@ -642,7 +645,7 @@ internal static void testRequestWriteTransport(ж<testing.T> t) {
             method: "GET",
             clen: -1,
             body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(foobodyˢ))),
-            want: all(matchSubstr(transferEncodingChunkedˢ2),
+            want: all(matchSubstr(transferEncodingChunkedˢ),
                 matchSubstr("\r\n1\r\nf\r\n"),
                 matchSubstr(oobodyˢ))
         ),
@@ -652,14 +655,14 @@ internal static void testRequestWriteTransport(ж<testing.T> t) {
             method: "POST",
             clen: -1,
             body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(foobodyˢ))),
-            want: all(matchSubstr(transferEncodingChunkedˢ2),
+            want: all(matchSubstr(transferEncodingChunkedˢ),
                 matchSubstr(foobodyˢ))
         ),
         new(
             method: "POST",
             clen: -1,
             body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8))),
-            want: all(matchSubstr(transferEncodingChunkedˢ2))
+            want: all(matchSubstr(transferEncodingChunkedˢ))
         ),
         // Verify that a blocking Request.Body doesn't block forever.
         new(
@@ -673,7 +676,7 @@ internal static void testRequestWriteTransport(ж<testing.T> t) {
                 };
                 tt.body = io.NopCloser(new io.PipeReaderжReader(pr));
             },
-            want: matchSubstr(transferEncodingChunkedˢ2)
+            want: matchSubstr(transferEncodingChunkedˢ)
         )
     ]);
 
@@ -690,7 +693,7 @@ internal static void testRequestWriteTransport(ж<testing.T> t) {
                 Scheme: "http",
                 Host: "example.com"
             )),
-            Header: new global::go.net.http_package.ΔHeader(0),
+            Header: new global::go.net.http_package.Header(0),
             ContentLength: tt.clen,
             Body: tt.body
         ));
@@ -710,14 +713,20 @@ internal partial struct closeChecker {
     internal bool closed;
 }
 
+} partial class http_internal_testᴛcloseChecker {
+
 internal static error Close(this ref closeChecker rc) {
     rc.closed = true;
     return default;
 }
 
+} partial class http_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string myBodyˢ => ref myBodyˢᵇ;
 private static readonly @string myBodyˢᵇ = "my body"u8;
+internal static ref readonly @string postˢ => ref postˢᵇ;
+private static readonly @string postˢᵇ = "POST"u8;
 internal static ref readonly @string httpFooComˢ => ref httpFooComˢᵇ;
 private static readonly @string httpFooComˢᵇ = "http://foo.com/"u8;
 internal static readonly object bodyNotClosedAfterWriteˢ = (@string)"body not closed after write"u8;
@@ -745,7 +754,7 @@ public static void TestRequestWriteClosesBody(ж<testing.T> t) {
 }
 
 internal static @string chunk(@string s) {
-    return fmt.Sprintf("%x\r\n%s\r\n"u8, builtin.len(s), s);
+    return fmt.Sprintf("%x\r\n%s\r\n"u8, len(s), s);
 }
 
 internal static ж<url.URL> mustParseURL(@string s) {
@@ -758,7 +767,11 @@ internal static ж<url.URL> mustParseURL(@string s) {
 
 internal delegate (nint, error) writerFunc(slice<byte> _);
 
+} partial class http_internal_testᴛwriterFunc {
+
 internal static partial (nint, error) Write(this writerFunc f, slice<byte> p) { return f(p); }
+
+} partial class http_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fakeWriteFailureˢ => ref fakeWriteFailureˢᵇ;
@@ -789,7 +802,7 @@ public static void TestRequestWriteError(ж<testing.T> t) {
                 err = errFailʗ1;
             }
             failAfter--;
-            return (builtin.len(p), err);
+            return (len(p), err);
         }))
     );
 
@@ -889,6 +902,8 @@ internal partial struct delegateReader {
     internal io.Reader r; // nil until received from c
 }
 
+} partial class http_internal_testᴛdelegateReader {
+
 internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
     if (r.r == nil) {
         r.r = ᐸꟷ(r.c);
@@ -896,17 +911,21 @@ internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
     return r.r.Read(p);
 }
 
+} partial class http_internal_test_package {
+
 // dumpConn is a net.Conn that writes to Writer and reads from Reader.
 internal partial struct dumpConn {
     /*embed*/ public io_package.Writer Writer;
     /*embed*/ public io_package.Reader Reader;
 }
 
+} partial class http_internal_testᴛdumpConn {
+
 internal static error Close(this ref dumpConn c) { return default; }
-internal static netꓸAddr LocalAddr(this ref dumpConn c) { return default; }
-internal static netꓸAddr RemoteAddr(this ref dumpConn c) { return default; }
+internal static net.Addr LocalAddr(this ref dumpConn c) { return default; }
+internal static net.Addr RemoteAddr(this ref dumpConn c) { return default; }
 internal static error SetDeadline(this ref dumpConn c, time.Time t) { return default; }
 internal static error SetReadDeadline(this ref dumpConn c, time.Time t) { return default; }
 internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) { return default; }
 
-} // end http_internal_test_package
+} // end http_internal_testᴛdumpConn

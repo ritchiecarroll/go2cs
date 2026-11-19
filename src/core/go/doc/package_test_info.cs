@@ -15,7 +15,6 @@ using static global::go.go.doc_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b74787420737472696e673b2066736c20696e743b2073796e20737472696e677d", "testsᴛ1")]
-[assembly: GoTypeAlias("Filter", "ΔFilter")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -53,7 +52,7 @@ using static global::go.go.doc_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/doc/example_test.go", "example_test.cs", "ACQugoKCgpSCgoKCgpSCgoKUgoK4goKUgoKC7oKCgpSCgqaCpLa0toIACxCCgoKUgoKUACcKpgACFgACFILcgoKmgoIAfhCCAABUAAKKAYK4goK4goKClIKCgpSCuAAYMoKClJSCuKKClKaCgoKU", "30-87:1", "", "102=Diff/1/1/1;173=mustParse/1/2/1,mustParse/2/2/2;319=mustParse/1/2/1,mustParse/2/2/2")]
+[assembly: GoPositionMap("go/doc/example_test.go", "example_test.cs", "ACQugoKCgpSCgoKCgpSCgoKUgoK4goKUgoKC7oKCgpSCgqaClLa0toIACxCCgoKUgoKUACcKpgACFgACFILcgoKmgoIAfhCCAABUAAKKAYK4goK4goKClIKCgpSCuAAYMoKClJSCuKKClKaCgoKU", "30-87:1", "", "101=Diff/1/1/1;172=mustParse/1/2/1,mustParse/2/2/2;318=mustParse/1/2/1,mustParse/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

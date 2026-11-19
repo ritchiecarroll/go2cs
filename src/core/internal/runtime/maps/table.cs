@@ -8,6 +8,7 @@ using math = go.@internal.runtime.math_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
+using static maps_package;
 
 partial class maps_package {
 
@@ -66,7 +67,7 @@ public partial struct table {
     internal groupsReference groups;
 }
 
-internal static ж<table> newTable(ж<abiꓸMapType> typ, uint64 capacity, nint index, uint8 localDepth) {
+internal static ж<table> newTable(ж<abi.MapType> typ, uint64 capacity, nint index, uint8 localDepth) {
     if (capacity < abi.MapGroupSlots) {
         capacity = abi.MapGroupSlots;
     }
@@ -92,9 +93,11 @@ internal static ж<table> newTable(ж<abiꓸMapType> typ, uint64 capacity, nint 
     return t;
 }
 
+} partial class mapsᴛtable {
+
 // reset resets the table with new, empty groups with the specified new total
 // capacity.
-internal static void reset(this ref table t, ж<abiꓸMapType> typ, uint16 capacity) {
+internal static void reset(this ref table t, ж<abi.MapType> typ, uint16 capacity) {
     var groupCount = (uint64)capacity / (uint64)abi.MapGroupSlots;
     t.groups = newGroups(ref (typ).DerefOrNull(), groupCount);
     t.capacity = capacity;
@@ -135,7 +138,7 @@ public static uint64 Used(this ref table t) {
 
 // Get performs a lookup of the key that key points to. It returns a pointer to
 // the element, or false if the key doesn't exist.
-public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -159,7 +162,7 @@ public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abiꓸMapType> �
 // expose updated elements. For NeedsKeyUpdate keys, iteration also must return
 // the new key value, not the old key value.
 // hash must be the hash of the key.
-internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref table t, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     // To find the location of a key in the table, we compute hash(key). From
@@ -201,12 +204,12 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
-                slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
             }
             if (typ.Key.Equal(key, slotKey)) {
                 @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()) {
-                    slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
+                    slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
                 }
                 return (slotKey, slotElem, true);
             }
@@ -222,7 +225,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
     }
 }
 
-internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
@@ -237,12 +240,12 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi�
 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
-                slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
             }
             if (typ.Key.Equal(key, slotKey)) {
                 @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()) {
-                    slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
+                    slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
                 }
                 return (slotElem, true);
             }
@@ -265,7 +268,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi�
 // the new table.
 //
 // hash must be the hash of key.
-public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uintptr hash, @unsafe.Pointer key) {
+public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uintptr hash, @unsafe.Pointer key) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -288,7 +291,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
             if (typ.IndirectKey()) {
-                slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
             }
             if (typ.Key.Equal(key, slotKey)) {
                 if (typ.NeedKeyUpdate()) {
@@ -297,7 +300,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
 
                 @unsafe.Pointer slotElem = g.elem(Ꮡtyp, iΔ1);
                 if (typ.IndirectElem()) {
-                    slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
+                    slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
                 }
 
                 t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -343,7 +346,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
                 @unsafe.Pointer kmem = newobject(typ.Key);
-                ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = kmem;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = kmem;
                 slotKey = kmem;
             }
             typedmemmove(typ.Key, slotKey, key);
@@ -351,7 +354,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
             @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
                 @unsafe.Pointer emem = newobject(typ.Elem);
-                ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = emem;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = emem;
                 slotElem = emem;
             }
 
@@ -385,7 +388,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
 // requires the caller to ensure that the referenced memory never
 // changes (by sourcing those pointers from another indirect key/elem
 // map).
-internal static void uncheckedPutSlot(this ref table t, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) {
+internal static void uncheckedPutSlot(this ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (t.growthLeft == 0) {
@@ -406,14 +409,14 @@ internal static void uncheckedPutSlot(this ref table t, ж<abiꓸMapType> Ꮡtyp
 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
-                ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = key;
             } else {
                 typedmemmove(typ.Key, slotKey, key);
             }
 
             @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
-                ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = elem;
+                (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = elem;
             } else {
                 typedmemmove(typ.Elem, slotElem, elem);
             }
@@ -427,7 +430,7 @@ internal static void uncheckedPutSlot(this ref table t, ж<abiꓸMapType> Ꮡtyp
 }
 
 // Delete returns true if it put a tombstone in t.
-public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uintptr hash, @unsafe.Pointer key) {
+public static bool Delete(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -443,7 +446,7 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             @unsafe.Pointer origSlotKey = slotKey;
             if (typ.IndirectKey()) {
-                slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
             }
 
             if (typ.Key.Equal(key, slotKey)) {
@@ -452,7 +455,7 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
 
                 if (typ.IndirectKey()) {
                     // Clearing the pointer is sufficient.
-                    ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(origSlotKey)).Value = default;
                 } else if (typ.Key.Pointers()) {
                     // Only bothing clear the key if there
                     // are pointers in it.
@@ -462,7 +465,7 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
                 @unsafe.Pointer slotElem = g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()) {
                     // Clearing the pointer is sufficient.
-                    ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = default;
+                    (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = default;
                 } else {
                     // Unlike keys, always clear the elem (even if
                     // it contains no pointers), as compound
@@ -518,7 +521,7 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
 // We really need to remove O(n) tombstones so we can pay for the cost
 // of finding them. If we can't, then we need to grow (which is also O(n),
 // but guarantees O(n) subsequent inserts can happen in constant time).
-internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+internal static void pruneTombstones(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -539,7 +542,7 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
             match = match.removeFirst();
             @unsafe.Pointer key = g.key(Ꮡtyp, j);
             if (typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
             if (!typ.Key.Equal(key, key)) {
                 // Key not equal to itself. We never have to find these
@@ -611,7 +614,7 @@ internal static uint16 tombstones(this ref table t) {
 }
 
 // Clear deletes all entries from the table resulting in an empty table.
-public static void Clear(this ref table t, ж<abiꓸMapType> Ꮡtyp) {
+public static void Clear(this ref table t, ж<abi.MapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var mgl = t.maxGrowthLeft();
@@ -654,11 +657,13 @@ public static void Clear(this ref table t, ж<abiꓸMapType> Ꮡtyp) {
     t.growthLeft = mgl;
 }
 
+} partial class maps_package {
+
 partial struct Iter {
     internal @unsafe.Pointer key;  // Must be in first position.  Write nil to indicate iteration end (see cmd/compile/internal/walk/range.go).
     internal @unsafe.Pointer elem; // Must be in second position (see cmd/compile/internal/walk/range.go).
-    internal ж<abiꓸMapType> typ;
-    internal ж<ΔMap> m;
+    internal ж<abi.MapType> typ;
+    internal ж<Map> m;
     // Randomize iteration order by starting iteration at a random slot
     // offset. The offset into the directory uses a separate offset, as it
     // must adjust when the directory grows.
@@ -683,8 +688,10 @@ partial struct Iter {
     internal uint64 entryIdx;
 }
 
+} partial class mapsᴛIter {
+
 // Init initializes Iter for iteration.
-public static void Init(this ref Iter it, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+public static void Init(this ref Iter it, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -716,7 +723,7 @@ public static bool Initialized(this ref Iter it) {
 }
 
 // Map returns the map this iterator is iterating over.
-public static ж<ΔMap> Map(this ref Iter it) {
+public static ж<Map> Map(this ref Iter it) {
     return it.m;
 }
 
@@ -800,7 +807,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElem(this ref I
         if (it.clearSeq == it.m.clearSeq && !(~it.typ).Key.Equal(key, key)) {
             @unsafe.Pointer elem = it.group.elem(it.typ, slotIdx);
             if (it.typ.IndirectElem()) {
-                elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
             }
             return (key, elem, true);
         }
@@ -848,7 +855,7 @@ public static void Next(this ref Iter it) {
 
             @unsafe.Pointer key = it.group.key(it.typ, k);
             if (it.typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
 
             // As below, if we have grown to a full map since Init,
@@ -865,7 +872,7 @@ public static void Next(this ref Iter it) {
                     if (it.clearSeq == it.m.clearSeq && !(~it.typ).Key.Equal(key, key)) {
                         elem = it.group.elem(it.typ, k);
                         if (it.typ.IndirectElem()) {
-                            elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                            elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                         }
                     } else {
                         continue;
@@ -877,7 +884,7 @@ public static void Next(this ref Iter it) {
             } else {
                 elem = it.group.elem(it.typ, k);
                 if (it.typ.IndirectElem()) {
-                    elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                    elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                 }
             }
 
@@ -991,7 +998,7 @@ public static void Next(this ref Iter it) {
 
             @unsafe.Pointer key = it.group.key(it.typ, slotIdx);
             if (it.typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
 
             var grown = it.tab.index == -1;
@@ -1010,7 +1017,7 @@ public static void Next(this ref Iter it) {
             } else {
                 elem = it.group.elem(it.typ, slotIdx);
                 if (it.typ.IndirectElem()) {
-                    elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                    elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                 }
             }
 
@@ -1084,7 +1091,7 @@ next:
 
             @unsafe.Pointer key = it.group.key(it.typ, slotIdxΔ1);
             if (it.typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
 
             // If the table has changed since the last
@@ -1125,7 +1132,7 @@ next:
             } else {
                 elem = it.group.elem(it.typ, slotIdxΔ1);
                 if (it.typ.IndirectElem()) {
-                    elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                    elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                 }
             }
 
@@ -1155,10 +1162,12 @@ next:
     return;
 }
 
+} partial class mapsᴛtable {
+
 // Replaces the table with one larger table or two split tables to fit more
 // entries. Since the table is replaced, t is now stale and should not be
 // modified.
-internal static void rehash(this ж<table> Ꮡt, ж<abiꓸMapType> typ, ж<ΔMap> m) {
+internal static void rehash(this ж<table> Ꮡt, ж<abi.MapType> typ, ж<Map> m) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // TODO(prattmic): SwissTables typically perform a "rehash in place"
@@ -1185,6 +1194,8 @@ internal static void rehash(this ж<table> Ꮡt, ж<abiꓸMapType> typ, ж<ΔMap
     Ꮡt.split(typ, m);
 }
 
+} partial class maps_package {
+
 // Bitmask for the last selection bit at this depth.
 internal static uintptr localDepthMask(uint8 localDepth) {
     if (!Use64BitHash) {
@@ -1193,8 +1204,10 @@ internal static uintptr localDepthMask(uint8 localDepth) {
     return ((uintptr)1).Lsh((uint64)((uint8)(64 - localDepth)));
 }
 
+} partial class mapsᴛtable {
+
 // split the table into two, installing the new tables in the map directory.
-internal static void split(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+internal static void split(this ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -1219,12 +1232,12 @@ internal static void split(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔM
 
             @unsafe.Pointer key = g.key(Ꮡtyp, j);
             if (typ.IndirectKey()) {
-                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
             }
 
             @unsafe.Pointer elem = g.elem(Ꮡtyp, j);
             if (typ.IndirectElem()) {
-                elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
             }
 
             var hash = typ.Hasher(key, m.seed);
@@ -1246,7 +1259,7 @@ internal static void split(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔM
 // and uncheckedPutting each element of the table into the new table (we know
 // that no insertion here will Put an already-present value), and discard the
 // old table.
-internal static void grow(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint16 newCapacity) {
+internal static void grow(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint16 newCapacity) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -1263,12 +1276,12 @@ internal static void grow(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
 
                 @unsafe.Pointer key = g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
-                    key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                    key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
                 }
 
                 @unsafe.Pointer elem = g.elem(Ꮡtyp, j);
                 if (typ.IndirectElem()) {
-                    elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
+                    elem = (@unsafe.Pointer.To<@unsafe.Pointer>(elem)).Value;
                 }
 
                 var hash = typ.Hasher(key, m.seed);
@@ -1282,6 +1295,8 @@ internal static void grow(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
     m.replaceTable(newTableΔ1);
     t.index = -1;
 }
+
+} partial class maps_package {
 
 // probeSeq maintains the state for a probe sequence that iterates through the
 // groups in a table. The sequence is a triangular progression of the form
@@ -1310,13 +1325,17 @@ internal static probeSeq makeProbeSeq(uintptr hash, uint64 mask) {
     );
 }
 
+} partial class mapsᴛprobeSeq {
+
 internal static probeSeq next(this probeSeq s) {
     s.index++;
     s.offset = (s.offset + s.index) & s.mask;
     return s;
 }
 
-internal static ж<table> clone(this ж<table> Ꮡt, ж<abiꓸMapType> typ) {
+} partial class mapsᴛtable {
+
+internal static ж<table> clone(this ж<table> Ꮡt, ж<abi.MapType> typ) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Shallow copy the table structure.
@@ -1337,4 +1356,4 @@ internal static ж<table> clone(this ж<table> Ꮡt, ж<abiꓸMapType> typ) {
     return Ꮡt;
 }
 
-} // end maps_package
+} // end mapsᴛtable

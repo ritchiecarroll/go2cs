@@ -2,10 +2,13 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
+using static main_package;
 
 partial class main_package {
 
 public delegate @string Greeter();
+
+} partial class mainᴛGreeter {
 
 public static @string Greet(this Greeter g) {
     if (g == nil) {
@@ -15,6 +18,8 @@ public static @string Greet(this Greeter g) {
 }
 
 public static @string Shout(this Greeter g) { return g() + "!"u8; }
+
+} partial class main_package {
 
 partial interface Greetable {
     @string Greet();
@@ -42,11 +47,11 @@ internal static void main() {
     i = new GreeterᴠGreetable(g);
     fmt.Println("interface nil:", i == nil);
 
-    ref var v = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡi).Elem(), out var Ꮡv);
+    ref var v = ref heap<reflect.Value>(reflect.ValueOf(Ꮡi).Elem(), out var Ꮡv);
     fmt.Println("kind:", v.Kind(), "elem type:", v.Elem().Type(), "elem nil:", v.Elem().IsNil());
     fmt.Println("NumMethod:", v.NumMethod());
 
-    ref var m = ref heap<reflectꓸValue>(v.Method(0), out var Ꮡm);
+    ref var m = ref heap<reflect.Value>(v.Method(0), out var Ꮡm);
     fmt.Println("method kind:", m.Kind(), "type:", m.Type());
     var mʗ1 = m;
     call("Method(0).Call", () => mʗ1.Call(default)[0].String());

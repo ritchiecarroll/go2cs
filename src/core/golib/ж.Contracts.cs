@@ -377,6 +377,13 @@ internal interface IGoReflectBox
     /// <summary>The pointee through the kind's own <c>ValueSlot</c>.</summary>
     object? ReadBoxSlot();
 
+    /// <summary>
+    /// <see cref="ReadBoxSlot"/> for a pointee that is about to be re-typed and shared: a named array's lazily filled
+    /// backing is first published into the box's own storage (<c>publishArrayBacking</c>), so the value read and the
+    /// variable hold one backing. Any other pointee reads as <see cref="ReadBoxSlot"/> does.
+    /// </summary>
+    object? ReadBoxSlotPublished();
+
     /// <summary>Stores <paramref name="value"/> through the kind's own <c>ValueSlot</c>; a nil box panics as Go's nil store does.</summary>
     void WriteBoxSlot(object? value);
 
@@ -418,6 +425,18 @@ internal readonly struct RuntimeArrayViewCheck(Type elementType) : IArrayViewChe
     public Type ElementType => elementType;
 
     public bool Accepts(IArray view) => view is IGoReflectSequence sequence && sequence.ReflectElementType == elementType;
+}
+
+/// <summary>
+/// The test of a pin path, which holds the whole array still whatever its element: every view is accepted. The publish
+/// (<c>publishArrayBacking</c>) asks <see cref="Accepts"/> only; <see cref="ElementType"/> is the native-view
+/// question of the element door, which a pin path answers before it reaches the publish, so no element is named.
+/// </summary>
+internal readonly struct AnyElementArrayViewCheck : IArrayViewCheck
+{
+    public Type ElementType => typeof(void);
+
+    public bool Accepts(IArray view) => true;
 }
 
 /// <summary>

@@ -1,0 +1,20 @@
+std-darwin-arm64: 963 packages, 0 load errors, 113 sites
+  deref/bound (test)           1
+  deref/read                   6
+  deref/return                 1
+  deref/store                  1
+  index/addr                   2
+  index/arg                    1
+  index/store                  34
+  pointer/arg                  4
+  pointer/bound                45
+  pointer/range                1
+  pointer/return               1
+  slice-open/bound             1
+  slice-open/copy-dst          3
+  slice-open/copy-dst (test)   1
+  slice-open/copy-src          3
+  slice2/bound                 3
+  slice2/copy-src              2
+  slice3/bound                 2
+  slice3/return                4

@@ -39,7 +39,7 @@ public class GoUnexportedMethodPackageTests
 
     // A PROMOTED unexported method. Go: a struct that embeds a type of its own package has that type's unexported
     // methods in its method set, so it satisfies its package's marker interface (net's `*TCPConn` is a
-    // `buffersWriter` through the embedded `conn`). From 1.26.10.4 go2cs-gen writes the forwarder in a class of
+    // `buffersWriter` through the embedded `conn`). From 1.26.11.1 go2cs-gen writes the forwarder in a class of
     // the struct's own, marked [GoPromotedHost], and no longer in the package class: the forwarder's package is
     // its STRUCT's, read through the attribute.
     [TestMethod]
@@ -59,6 +59,28 @@ public class GoUnexportedMethodPackageTests
             "the foreign struct's promoted-method class is read: its exported forwarder satisfies");
         Assert.IsFalse(typeof(ж<markerimpl_package.ForeignOuter>).StructurallyImplements(typeof(markerdecl_package.markedExpr)),
             "a promoted unexported method is satisfiable only from the interface's own package");
+    }
+
+    // A DECLARED unexported method. The methods a type declares are in a class of the type's own, marked
+    // [GoMethodHost], and no longer in the package class: the method's package is its receiver TYPE's, read
+    // through the attribute. Read as the holder's own class it matched no package, and a type stopped satisfying
+    // its own package's marker interface.
+    [TestMethod]
+    public void AnUnexportedMethodOfAMethodHolderSatisfiesTheInterfaceOfItsTypesPackage()
+    {
+        Assert.IsTrue(typeof(ж<markerdecl_package.HeldNode>).StructurallyImplements(typeof(markerdecl_package.markedExpr)),
+            "a method in a type's method holder is a method of the type's package");
+    }
+
+    // The control for the test above: a foreign type's holder is read (its exported method satisfies), and its
+    // unexported method still does not satisfy another package's marker.
+    [TestMethod]
+    public void AForeignMethodHoldersUnexportedMethodDoesNotSatisfyTheInterface()
+    {
+        Assert.IsTrue(typeof(ж<markerimpl_package.ForeignHeld>).StructurallyImplements(typeof(markerdecl_package.PlainNode)),
+            "the foreign type's method holder is read: its exported method satisfies");
+        Assert.IsFalse(typeof(ж<markerimpl_package.ForeignHeld>).StructurallyImplements(typeof(markerdecl_package.markedExpr)),
+            "an unexported method is satisfiable only from the interface's own package");
     }
 
     // EXPORTED methods carry no package constraint — the foreign type still satisfies an
@@ -91,6 +113,9 @@ public static class markerdecl_package
     // Embeds HomeNode, so Go promotes Pos and exprNode to it (markerdeclᴛOuterNodeᴛpkg, below).
     public struct OuterNode;
 
+    // Declares Pos and exprNode in its method holder (markerdeclᴛHeldNode, below).
+    public struct HeldNode;
+
     [GoRecv] public static nint Pos(this ref HomeNode n) => 1;
 
     public static nint Pos(this ж<HomeNode> n) => 1;
@@ -109,6 +134,9 @@ public static class markerimpl_package
     // Embeds ForeignNode, so Go promotes Pos and exprNode to it (markerimplᴛForeignOuterᴛpkg, below).
     public struct ForeignOuter;
 
+    // Declares Pos and exprNode in its method holder (markerimplᴛForeignHeld, below).
+    public struct ForeignHeld;
+
     [GoRecv] public static nint Pos(this ref ForeignNode n) => 2;
 
     public static nint Pos(this ж<ForeignNode> n) => 2;
@@ -118,7 +146,7 @@ public static class markerimpl_package
     public static void exprNode(this ж<ForeignNode> n) { }
 }
 
-// The promoted methods of markerdecl's OuterNode, in the shape go2cs-gen emits from 1.26.10.4: a class of the
+// The promoted methods of markerdecl's OuterNode, in the shape go2cs-gen emits from 1.26.11.1: a class of the
 // struct's own beside the package class, found by its attribute.
 [GoPromotedHost(typeof(markerdecl_package.OuterNode))]
 public static class markerdeclᴛOuterNodeᴛpkg
@@ -135,4 +163,31 @@ public static class markerimplᴛForeignOuterᴛpkg
     public static nint Pos(this ж<markerimpl_package.ForeignOuter> n) => 2;
 
     internal static void exprNode(this ж<markerimpl_package.ForeignOuter> n) { }
+}
+
+// The methods markerdecl's HeldNode declares, in the shape the converter emits: a class of the type's own
+// beside the package class, found by its attribute, with go2cs-gen's ж twins beside the originals.
+[GoMethodHost(typeof(markerdecl_package.HeldNode))]
+public static class markerdeclᴛHeldNode
+{
+    public static nint Pos(this ref markerdecl_package.HeldNode n) => 1;
+
+    public static nint Pos(this ж<markerdecl_package.HeldNode> n) => 1;
+
+    internal static void exprNode(this ref markerdecl_package.HeldNode n) { }
+
+    internal static void exprNode(this ж<markerdecl_package.HeldNode> n) { }
+}
+
+// The methods markerimpl's ForeignHeld declares.
+[GoMethodHost(typeof(markerimpl_package.ForeignHeld))]
+public static class markerimplᴛForeignHeld
+{
+    public static nint Pos(this ref markerimpl_package.ForeignHeld n) => 2;
+
+    public static nint Pos(this ж<markerimpl_package.ForeignHeld> n) => 2;
+
+    internal static void exprNode(this ref markerimpl_package.ForeignHeld n) { }
+
+    internal static void exprNode(this ж<markerimpl_package.ForeignHeld> n) { }
 }

@@ -13,8 +13,6 @@ using go;
 using static global::go.debug.macho_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Section", "ΔSection")]
-[assembly: GoTypeAlias("Segment", "ΔSegment")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -38,8 +36,8 @@ using static global::go.debug.macho_internal_test_package;
 [assembly: GoFieldAccess(typeof(global::go.debug.macho_package.FatFile))]
 [assembly: GoFieldAccess(typeof(global::go.debug.macho_package.File))]
 [assembly: GoFieldAccess(typeof(global::go.debug.macho_package.Rpath))]
-[assembly: GoFieldAccess(typeof(global::go.debug.macho_package.ΔSection))]
-[assembly: GoFieldAccess(typeof(global::go.debug.macho_package.ΔSegment))]
+[assembly: GoFieldAccess(typeof(global::go.debug.macho_package.Section))]
+[assembly: GoFieldAccess(typeof(global::go.debug.macho_package.Segment))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

@@ -42,6 +42,9 @@ internal class StructTypeTemplate : TemplateBase
     // nothing (A17, COORD ruling 2026-09-28).
     public HashSet<string> ReadOnlyZeroSizeMembers = [];
     public string[] ValueCloneFields = [];
+    // The Go methods declared on this struct (TypeGenerator.GoMethodNames): a Go method named AssignFrom would be shadowed
+    // by the generated instance member, so the member is ΔAssignFrom then (the converter's structAssignMethod agrees).
+    public ICollection<string> GoMethodNames = [];
     // The [GoAlignmentCarrier] fields (see GetAlignmentCarrierMembers): readonly stand-ins for Go [0]T fields that share
     // bytes with the field Go places at the same offset, so equality and hashing skip them
     // (docs/phase4/DESIGN-array-value-storage.md, 7.6.2).
@@ -120,8 +123,11 @@ internal class StructTypeTemplate : TemplateBase
 
     // Go's == through an interface (golib builtin.AreEqual): a second partial part implements golib's IGoEquatable
     // EXPLICITLY, through this struct's own ==, so the comparison runs in compiled code and no member is added.
+    // IEquatable<T> beside IGoEquatable lets EqualityComparer<T>.Default (a Dictionary key, a map<K,V>
+    // keyed by this struct) call Equals(T) directly instead of boxing the probe key into Equals(object).
+    // A hand-owned partial's own equality may not have that signature, so it gets IGoEquatable alone.
     private string GoEquatablePart =>
-        $"\r\n\r\n    partial struct {StructName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {StructName} value && this == value;\r\n    }}";
+        $"\r\n\r\n    partial struct {StructName} : global::go.IGoEquatable{(HandWrittenEquality ? "" : $", global::System.IEquatable<{StructName}>")}\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {StructName} value && this == value;\r\n    }}";
 
     // golib's IGoManagedLayout for a [GoInlineLayout] struct: the struct measures its own fields' CLR offsets with
     // Unsafe.ByteOffset over a default instance, its CLR size and its CLR alignment, so the inline-layout gate compares them
@@ -241,7 +247,10 @@ internal class StructTypeTemplate : TemplateBase
             List<string> bases = [];
 
             if (ValueCloneFields.Length > 0)
+            {
                 bases.Add("IGoValueClone");
+                bases.Add($"global::go.golib.IGoValueAssign<{StructName}>");
+            }
 
             if (NeedsZeroConstruction)
                 bases.Add("global::go.IGoZeroConstructed");
@@ -360,9 +369,50 @@ internal class StructTypeTemplate : TemplateBase
             result.Append($"\r\n{TypeElemIndent}}}");
             result.Append($"\r\n\r\n{TypeElemIndent}object ICloneable.Clone() => {ValueCloneMethod}();");
             result.Append("\r\n");
+            result.Append(ValueAssignImplementation(declaredName));
 
             return result.ToString();
         }
+    }
+
+    // Go's whole assignment INTO an existing location of this struct (docs/phase4/DESIGN-array-reassign-in-place.md §8):
+    // `s = t` copies t's fields into s's own storage, so a slice or a pointer taken from one of s's array fields beforehand
+    // still names it. Every field is copied by value (`this = from`), then each clone-needing field gets its own storage
+    // back and takes the source's elements in place (GoValueAssign.Into, a constrained call: nothing boxed). The source is
+    // read whole first, so `s = s`, or a source that a field of this struct reaches, copies as Go does. The converter
+    // emits `L.AssignFrom(R)`; a Go method named AssignFrom makes the member ΔAssignFrom.
+    private string AssignFromMethod => GoMethodNames.Contains("AssignFrom") ? "ΔAssignFrom" : "AssignFrom";
+
+    // Every field is written `this.<field>`, and the two locals carry the converter's temp marker (ᴛ, symbols.go), so no
+    // Go field name can shadow or be shadowed by them: a cgo struct with a field named `from` made the unqualified form
+    // write its own local (behavioral CgoPseudoPackageTypes, CS0411 at Into).
+    private string ValueAssignImplementation(string declaredName)
+    {
+        StringBuilder result = new();
+
+        result.Append($"\r\n{TypeElemIndent}// Go whole assignment into this struct's own storage");
+        result.Append($"\r\n{TypeElemIndent}public void {AssignFromMethod}(in {declaredName} source)");
+        result.Append($"\r\n{TypeElemIndent}{{");
+        result.Append($"\r\n{TypeElemIndent}    {declaredName} fromᴛ = source;");
+        result.Append($"\r\n{TypeElemIndent}    {declaredName} ownᴛ = this;");
+        result.Append($"\r\n{TypeElemIndent}    this = fromᴛ;");
+
+        foreach (string fieldName in ValueCloneFields)
+        {
+            result.Append($"\r\n{TypeElemIndent}    this.{fieldName} = ownᴛ.{fieldName};");
+            result.Append($"\r\n{TypeElemIndent}    global::go.golib.GoValueAssign.Into(ref this.{fieldName}, fromᴛ.{fieldName});");
+        }
+
+        result.Append($"\r\n{TypeElemIndent}}}");
+        result.Append($"\r\n\r\n{TypeElemIndent}{declaredName} global::go.golib.IGoValueAssign<{StructName}>.AssignedFrom(in {declaredName} source)");
+        result.Append($"\r\n{TypeElemIndent}{{");
+        result.Append($"\r\n{TypeElemIndent}    {declaredName} target = this;");
+        result.Append($"\r\n{TypeElemIndent}    target.{AssignFromMethod}(source);");
+        result.Append($"\r\n{TypeElemIndent}    return target;");
+        result.Append($"\r\n{TypeElemIndent}}}");
+        result.Append("\r\n");
+
+        return result.ToString();
     }
 
     private string PromotedStructDeclarations

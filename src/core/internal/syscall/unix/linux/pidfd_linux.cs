@@ -7,7 +7,7 @@ using syscall = syscall_package;
 
 partial class unix_package {
 
-public static error PidFDSendSignal(uintptr pidfd, syscallꓸSignal s) {
+public static error PidFDSendSignal(uintptr pidfd, syscall.Signal s) {
     var (_, _, errno) = syscall.Syscall(pidfdSendSignalTrap, pidfd, (uintptr)s, 0);
     if (errno != 0) {
         return errno;

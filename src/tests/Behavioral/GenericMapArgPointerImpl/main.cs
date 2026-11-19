@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,18 +15,26 @@ partial struct Expected<T> {
     public bool Valid;
 }
 
+} partial class mainᴛExpected {
+
 public static bool IsPresent<T>(this ref Expected<T> e) { return e.Valid; }
 
 public static @string Describe<T>(this ref Expected<T> e) { return fmt.Sprintf("%v"u8, (e.Value).OrTypedNilOf()); }
+
+} partial class main_package {
 
 partial struct Pair<K, V> {
     public K Key;
     public V Val;
 }
 
+} partial class mainᴛPair {
+
 public static bool IsPresent<K, V>(this ref Pair<K, V> p) { return true; }
 
 public static @string Describe<K, V>(this ref Pair<K, V> p) { return fmt.Sprintf("%v=%v"u8, (p.Key).OrTypedNilOf(), (p.Val).OrTypedNilOf()); }
+
+} partial class main_package {
 
 partial struct Fields {
     public Expected<@string> Name;

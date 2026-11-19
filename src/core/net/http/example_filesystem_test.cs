@@ -11,6 +11,7 @@ using strings = strings_package;
 using global::go.io;
 using global::go.net;
 using static global::go.net.http_internal_test_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -34,6 +35,8 @@ partial struct dotFileHidingFile {
     /*embed*/ public global::go.net.http_package.File File;
 }
 
+} partial class http_testᴛdotFileHidingFile {
+
 // Readdir is a wrapper around the Readdir method of the embedded File
 // that filters out all files that start with a period in their name.
 internal static (slice<fs.FileInfo> fis, error err) Readdir(this dotFileHidingFile f, nint n) {
@@ -54,11 +57,15 @@ internal static (slice<fs.FileInfo> fis, error err) Readdir(this dotFileHidingFi
     return (fis, err);
 }
 
+} partial class http_test_package {
+
 // dotFileHidingFileSystem is an http.FileSystem that hides
 // hidden "dot files" from being served.
 partial struct dotFileHidingFileSystem {
     /*embed*/ public global::go.net.http_package.FileSystem FileSystem;
 }
+
+} partial class http_testᴛdotFileHidingFileSystem {
 
 // Open is a wrapper around the Open method of the embedded FileSystem
 // that serves a 403 permission error when name has a file or directory
@@ -74,6 +81,8 @@ internal static (Δhttp.File, error) Open(this dotFileHidingFileSystem fsys, @st
     }
     return (new dotFileHidingFile(@file), default);
 }
+
+} partial class http_test_package {
 
 public static void ExampleFileServer_dotFileHiding() {
     var fsys = new dotFileHidingFileSystem((Δhttp.Dir)(@string)".");

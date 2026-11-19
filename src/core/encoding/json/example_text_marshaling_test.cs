@@ -10,6 +10,8 @@ using log = log_package;
 using strings = strings_package;
 using go.encoding;
 using static go.encoding.json_internal_test_package;
+using json_test = json_test_package;
+using static json_test_package;
 
 partial class json_test_package {
 
@@ -19,6 +21,8 @@ public static Size Unrecognized => /* iota */ 0;
 public static Size Small => 1;
 public static Size Large => 2;
 
+} partial class json_testᴛSize {
+
 public static error UnmarshalText(this ref Size s, slice<byte> text) {
     var exprᴛ1 = strings.ToLower((@string)text);
     switch (ᐧ) {
@@ -27,7 +31,7 @@ public static error UnmarshalText(this ref Size s, slice<byte> text) {
         break;
     }
     case {} when exprᴛ1 == "small"u8: {
-        s = Small;
+        s = json_test.Small;
         break;
     }
     case {} when exprᴛ1 == "large"u8: {
@@ -52,7 +56,7 @@ public static (slice<byte>, error) MarshalText(this Size s) {
         name = unrecognizedˢ;
         break;
     }
-    case var ᴛ when ᴛ == Small: {
+    case var ᴛ when ᴛ == json_test.Small: {
         name = smallˢ;
         break;
     }
@@ -62,6 +66,8 @@ public static (slice<byte>, error) MarshalText(this Size s) {
     }}
     return (slice<byte>(name), default);
 }
+
+} partial class json_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string smallRegularLargeˢ => ref smallRegularLargeˢᵇ;

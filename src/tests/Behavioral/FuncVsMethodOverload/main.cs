@@ -2,28 +2,31 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static main_package;
 
 partial class main_package {
 
 internal static partial @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
-    return (@unsafe.Pointer)((uintptr)p + x);
+    return @unsafe.Add(p, x);
 }
 
 partial struct nih {
     internal uint32 a, b;
 }
 
-internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
-    ref var p = ref Ꮡp.DerefOrNull();
+} partial class mainᴛnih {
 
+internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
     if (bytes == 0) {
         return Ꮡp;
     }
-    return (ж<nih>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref p) + bytes));
+    return @unsafe.Pointer.To<nih>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡp), bytes));
 }
 
+} partial class main_package {
+
 internal static partial uint32 step(ж<uint32> v) {
-    var q = (ж<uint32>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(v), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
+    var q = @unsafe.Pointer.To<uint32>(add(@unsafe.Pointer.FromPinnedBox(v), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
     return q.Value;
 }
 
@@ -31,18 +34,22 @@ partial struct holder {
     internal uint32 x, y;
 }
 
+} partial class mainᴛholder {
+
 internal static uint32 second(this ж<holder> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    return ~(ж<uint32>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref h), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
+    return ~@unsafe.Pointer.To<uint32>(add((uintptr)@unsafe.Pointer.FromRef(ref h), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
 }
+
+} partial class main_package {
 
 internal static void main() {
     ref var vals = ref heap<array<uint32>>(new uint32[]{10, 20, 30, 40}.array(), out var Ꮡvals);
     fmt.Println(step(Ꮡvals.at<uint32>(0)));
 
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡvals.at<uint32>(1));
-    fmt.Println(~(ж<uint32>)(uintptr)(add(p, 8)));
+    fmt.Println(~@unsafe.Pointer.To<uint32>(add(p, 8)));
 
     ref var n = ref heap<nih>(new nih(a: 7, b: 9), out var Ꮡn);
     var m = Ꮡn.add(0);

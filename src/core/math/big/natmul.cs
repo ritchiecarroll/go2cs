@@ -4,6 +4,8 @@
 // Multiplication.
 namespace go.math;
 
+using static big_package;
+
 partial class big_package {
 
 // Operands that are shorter than karatsubaThreshold are multiplied using
@@ -12,9 +14,11 @@ partial class big_package {
 internal static readonly ж<nint> ᏑkaratsubaThreshold = new StaticBox<nint>(40);
 internal static ref nint karatsubaThreshold => ref ((StaticBox<nint>)ᏑkaratsubaThreshold).ValueSlot; // see calibrate_test.go
 
+} partial class bigᴛnat {
+
 // mul sets z = x*y, using stk for temporary storage.
 // The caller may pass stk == nil to request that mul obtain and release one itself.
-internal static Δnat mul(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y) {
+internal static nat mul(this nat z, ж<stack> Ꮡstk, nat x, nat y) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -72,6 +76,8 @@ internal static Δnat mul(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y) {
     finally { ᒐ.Run(); }
 }
 
+} partial class big_package {
+
 // Operands that are shorter than basicSqrThreshold are squared using
 // "grade school" multiplication; for operands longer than karatsubaSqrThreshold
 // we use the Karatsuba algorithm optimized for x == y.
@@ -80,9 +86,11 @@ internal static ref nint basicSqrThreshold => ref ((StaticBox<nint>)ᏑbasicSqrT
 internal static readonly ж<nint> ᏑkaratsubaSqrThreshold = new StaticBox<nint>(80);
 internal static ref nint karatsubaSqrThreshold => ref ((StaticBox<nint>)ᏑkaratsubaSqrThreshold).ValueSlot; // see calibrate_test.go
 
+} partial class bigᴛnat {
+
 // sqr sets z = x*x, using stk for temporary storage.
 // The caller may pass stk == nil to request that sqr obtain and release one itself.
-internal static Δnat sqr(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
+internal static nat sqr(this nat z, ж<stack> Ꮡstk, nat x) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -126,11 +134,13 @@ internal static Δnat sqr(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
     finally { ᒐ.Run(); }
 }
 
+} partial class big_package {
+
 // basicSqr sets z = x*x and is asymptotically faster than basicMul
 // by about a factor of 2, but slower for small arguments due to overhead.
 // Requirements: len(x) > 0, len(z) == 2*len(x)
 // The (non-normalized) result is placed in z.
-internal static void basicSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
+internal static void basicSqr(ж<stack> Ꮡstk, nat z, nat x) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -159,8 +169,10 @@ internal static void basicSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
     finally { ᒐ.Run(); }
 }
 
+} partial class bigᴛnat {
+
 // mulAddWW returns z = x*y + r.
-internal static Δnat mulAddWW(this Δnat z, Δnat x, Word y, Word r) {
+internal static nat mulAddWW(this nat z, nat x, Word y, Word r) {
     nint m = len(x);
     if (m == 0 || y == 0) {
         return z.setWord(r); // result is r
@@ -173,9 +185,11 @@ internal static Δnat mulAddWW(this Δnat z, Δnat x, Word y, Word r) {
     return z.norm();
 }
 
+} partial class big_package {
+
 // basicMul multiplies x and y and leaves the result in z.
 // The (non-normalized) result is placed in z[0 : len(x) + len(y)].
-internal static void basicMul(Δnat z, Δnat x, Δnat y) {
+internal static void basicMul(nat z, nat x, nat y) {
     clear(z.slice(0, len(x) + len(y))); // initialize z
     foreach (var (i, d) in range<Word>(y)) {
         if (d != 0) {
@@ -188,7 +202,7 @@ internal static void basicMul(Δnat z, Δnat x, Δnat y) {
 // writing the (non-normalized) result to z.
 // x and y must have the same length n,
 // and z must have length twice that.
-internal static void karatsuba(ж<stack> Ꮡstk, Δnat z, Δnat x, Δnat y) {
+internal static void karatsuba(ж<stack> Ꮡstk, nat z, nat x, nat y) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -225,16 +239,16 @@ internal static void karatsuba(ж<stack> Ꮡstk, Δnat z, Δnat x, Δnat y) {
         //	z1 = (x0-x1)*(y1-y0) + z0 + z2
 
         nint n2 = (n + 1) / 2;
-        var (x0, x1) = (Ꮡ(new ΔInt(abs: x.slice(0, n2).norm())), Ꮡ(new ΔInt(abs: x.slice(n2).norm())));
-        var (y0, y1) = (Ꮡ(new ΔInt(abs: y.slice(0, n2).norm())), Ꮡ(new ΔInt(abs: y.slice(n2).norm())));
-        var z0 = Ꮡ(new ΔInt(abs: z.slice(0, 2 * n2)));
-        var z2 = Ꮡ(new ΔInt(abs: z.slice(2 * n2)));
+        var (x0, x1) = (Ꮡ(new Int(abs: x.slice(0, n2).norm())), Ꮡ(new Int(abs: x.slice(n2).norm())));
+        var (y0, y1) = (Ꮡ(new Int(abs: y.slice(0, n2).norm())), Ꮡ(new Int(abs: y.slice(n2).norm())));
+        var z0 = Ꮡ(new Int(abs: z.slice(0, 2 * n2)));
+        var z2 = Ꮡ(new Int(abs: z.slice(2 * n2)));
 
         // Allocate temporary storage for z1; repurpose z0 to hold tx and ty.
         defer(Ꮡstk.restore, Ꮡstk.Value.save(), ref ᒐ);
-        var z1 = Ꮡ(new ΔInt(abs: stk.nat(2 * n2 + 1)));
-        var tx = Ꮡ(new ΔInt(abs: z.slice(0, n2)));
-        var ty = Ꮡ(new ΔInt(abs: z.slice(n2, 2 * n2)));
+        var z1 = Ꮡ(new Int(abs: stk.nat(2 * n2 + 1)));
+        var tx = Ꮡ(new Int(abs: z.slice(0, n2)));
+        var ty = Ꮡ(new Int(abs: z.slice(n2, 2 * n2)));
 
         tx.Sub(x0, x1);
         ty.Sub(y1, y0);
@@ -250,21 +264,21 @@ internal static void karatsuba(ж<stack> Ꮡstk, Δnat z, Δnat x, Δnat y) {
         // Debug mode: double-check answer and print trace on failure.
         const bool debug = false;
         if (debug) {
-            var zz = new Δnat(len(z));
+            var zz = new nat(len(z));
             basicMul(zz, x, y);
             if (z.cmp(zz) != 0) {
                 // All the temps were aliased to z and gone. Recompute.
-                z0 = @new<ΔInt>();
+                z0 = @new<Int>();
                 z0.mul(Ꮡstk, x0, y0);
-                tx = @new<ΔInt>().Sub(x1, x0);
-                ty = @new<ΔInt>().Sub(y0, y1);
-                z2 = @new<ΔInt>();
+                tx = @new<Int>().Sub(x1, x0);
+                ty = @new<Int>().Sub(y0, y1);
+                z2 = @new<Int>();
                 z2.mul(Ꮡstk, x1, y1);
                 print((@string)"karatsuba wrong\n");
-                trace("x ", Ꮡ(new ΔInt(abs: x)));
-                trace("y ", Ꮡ(new ΔInt(abs: y)));
-                trace("z ", Ꮡ(new ΔInt(abs: z)));
-                trace("zz", Ꮡ(new ΔInt(abs: zz)));
+                trace("x ", Ꮡ(new Int(abs: x)));
+                trace("y ", Ꮡ(new Int(abs: y)));
+                trace("z ", Ꮡ(new Int(abs: z)));
+                trace("zz", Ꮡ(new Int(abs: zz)));
                 trace("x0", x0);
                 trace("x1", x1);
                 trace("y0", y0);
@@ -287,7 +301,7 @@ internal static void karatsuba(ж<stack> Ꮡstk, Δnat z, Δnat x, Δnat y) {
 // z must have length 2*len(x).
 // It is analogous to [karatsuba] but can run faster
 // knowing both multiplicands are the same value.
-internal static void karatsubaSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
+internal static void karatsubaSqr(ж<stack> Ꮡstk, nat z, nat x) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -320,14 +334,14 @@ internal static void karatsubaSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
         //	z1 = z0 + z2 - (x0-x1)²
 
         nint n2 = (n + 1) / 2;
-        var (x0, x1) = (Ꮡ(new ΔInt(abs: x.slice(0, n2).norm())), Ꮡ(new ΔInt(abs: x.slice(n2).norm())));
-        var z0 = Ꮡ(new ΔInt(abs: z.slice(0, 2 * n2)));
-        var z2 = Ꮡ(new ΔInt(abs: z.slice(2 * n2)));
+        var (x0, x1) = (Ꮡ(new Int(abs: x.slice(0, n2).norm())), Ꮡ(new Int(abs: x.slice(n2).norm())));
+        var z0 = Ꮡ(new Int(abs: z.slice(0, 2 * n2)));
+        var z2 = Ꮡ(new Int(abs: z.slice(2 * n2)));
 
         // Allocate temporary storage for z1; repurpose z0 to hold tx.
         defer(Ꮡstk.restore, Ꮡstk.Value.save(), ref ᒐ);
-        var z1 = Ꮡ(new ΔInt(abs: stk.nat(2 * n2 + 1)));
-        var tx = Ꮡ(new ΔInt(abs: z.slice(0, n2)));
+        var z1 = Ꮡ(new Int(abs: stk.nat(2 * n2 + 1)));
+        var tx = Ꮡ(new Int(abs: z.slice(0, n2)));
 
         tx.Sub(x0, x1);
         z1.abs = z1.abs.sqr(Ꮡstk, tx.abs);
@@ -343,21 +357,21 @@ internal static void karatsubaSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
         // Debug mode: double-check answer and print trace on failure.
         const bool debug = false;
         if (debug) {
-            var zz = new Δnat(len(z));
+            var zz = new nat(len(z));
             basicSqr(Ꮡstk, zz, x);
             if (z.cmp(zz) != 0) {
                 // All the temps were aliased to z and gone. Recompute.
-                tx = @new<ΔInt>().Sub(x0, x1);
-                z0 = @new<ΔInt>().Mul(x0, x0);
-                z2 = @new<ΔInt>().Mul(x1, x1);
-                z1 = @new<ΔInt>().Mul(tx, tx);
+                tx = @new<Int>().Sub(x0, x1);
+                z0 = @new<Int>().Mul(x0, x0);
+                z2 = @new<Int>().Mul(x1, x1);
+                z1 = @new<Int>().Mul(tx, tx);
                 z1.Neg(z1);
                 z1.Add(z1, z0);
                 z1.Add(z1, z2);
                 print((@string)"karatsubaSqr wrong\n");
-                trace("x ", Ꮡ(new ΔInt(abs: x)));
-                trace("z ", Ꮡ(new ΔInt(abs: z)));
-                trace("zz", Ꮡ(new ΔInt(abs: zz)));
+                trace("x ", Ꮡ(new Int(abs: x)));
+                trace("z ", Ꮡ(new Int(abs: z)));
+                trace("zz", Ꮡ(new Int(abs: zz)));
                 trace("x0", x0);
                 trace("x1", x1);
                 trace("z0", z0);
@@ -372,7 +386,7 @@ internal static void karatsubaSqr(ж<stack> Ꮡstk, Δnat z, Δnat x) {
 }
 
 // ifmt returns the debug formatting of the Int x: 0xHEX.
-internal static @string ifmt(ж<ΔInt> x) {
+internal static @string ifmt(ж<Int> x) {
     @string neg = ""u8;
     @string s = x.Text(16);
     @string t = ""u8;
@@ -392,7 +406,7 @@ internal static @string ifmt(ж<ΔInt> x) {
 }
 
 // trace prints a single debug value.
-internal static void trace(@string name, ж<ΔInt> x) {
+internal static void trace(@string name, ж<Int> x) {
     print(name, (@string)"=", ifmt(x), (@string)"\n");
 }
 

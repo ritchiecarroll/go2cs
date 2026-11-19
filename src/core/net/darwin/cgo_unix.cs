@@ -19,6 +19,7 @@ using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
 using net;
 using vendor.golang.org.x.net.dns;
+using static net_package;
 
 partial class net_package {
 
@@ -31,12 +32,16 @@ internal const bool cgoAvailable = true;
 // by convention.
 partial struct addrinfoErrno /*num:nint*/;
 
+} partial class netᴛaddrinfoErrno {
+
 internal static @string Error(this addrinfoErrno eai) { return _C_gai_strerror((_C_int)eai); }
 internal static bool Temporary(this addrinfoErrno eai) { return eai == _C_EAI_AGAIN; }
 internal static bool Timeout(this addrinfoErrno eai) { return false; }
 
 // isAddrinfoErrno is just for testing purposes.
 internal static void isAddrinfoErrno(this addrinfoErrno eai) { }
+
+} partial class net_package {
 
 internal partial struct doBlockingWithCtx_result<T> /*dyn*/ {
     internal T res;
@@ -75,10 +80,10 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
             finally { ᒐ.Run(); }
         });
 
-        var selᴛ1 = res;
+        var resᴛ1 = res;
         var selᴛ2 = ctx.Done();
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out var r): {
+        switch (select(ᐸꟷ(resᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        case 0 when resᴛ1.ꟷᐳ(out var r): {
             return (r.res, r.err);
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
@@ -112,17 +117,17 @@ internal static (slice<@string> hosts, error err) cgoLookupHost(context.Context 
 
 internal static (nint port, error err) cgoLookupPort(context.Context ctx, @string network, @string service) {
     ref var hints = ref heap(new _C_struct_addrinfo(), out var Ꮡhints);
-    var exprᴛ1 = network;
+    var networkᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "ip"u8: { // no hints
+    case {} when networkᴛ1 == "ip"u8: { // no hints
         break;
     }
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when networkᴛ1 == "tcp"u8 || networkᴛ1 == "tcp4"u8 || networkᴛ1 == "tcp6"u8: {
         _C_ai_socktype(Ꮡhints).Value = _C_SOCK_STREAM;
         _C_ai_protocol(Ꮡhints).Value = _C_IPPROTO_TCP;
         break;
     }
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when networkᴛ1 == "udp"u8 || networkᴛ1 == "udp4"u8 || networkᴛ1 == "udp6"u8: {
         _C_ai_socktype(Ꮡhints).Value = _C_SOCK_DGRAM;
         _C_ai_protocol(Ꮡhints).Value = _C_IPPROTO_UDP;
         break;
@@ -221,9 +226,8 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
         ref var res = ref heap<ж<_C_struct_addrinfo>>(out var Ꮡres);
         (var gerrno, err) = _C_getaddrinfo(h, nil, Ꮡhints, Ꮡres);
         if (gerrno != 0) {
-            var exprᴛ1 = gerrno;
             var matchᴛ1 = false;
-            if (exprᴛ1 == _C_EAI_SYSTEM) { matchᴛ1 = true;
+            if (gerrno == _C_EAI_SYSTEM) { matchᴛ1 = true;
                 if (err == nil) {
                     // err should not be nil, but sometimes getaddrinfo returns
                     // gerrno == _C_EAI_SYSTEM with err == nil on Linux.
@@ -236,10 +240,10 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
                 }
                 (addrs, err) = (default, new DNSErrorжerror(newDNSError(err, name, ""u8))); goto ᒐdone;
             }
-            if (exprᴛ1 == _C_EAI_NONAME || exprᴛ1 == _C_EAI_NODATA) { matchᴛ1 = true;
+            if (gerrno == _C_EAI_NONAME || gerrno == _C_EAI_NODATA) { matchᴛ1 = true;
                 (addrs, err) = (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8))); goto ᒐdone;
             }
-            if (exprᴛ1 == _C_EAI_ADDRFAMILY) { matchᴛ1 = true;
+            if (gerrno == _C_EAI_ADDRFAMILY) { matchᴛ1 = true;
                 if (runtime.GOOS == "freebsd"u8) {
                     // FreeBSD began returning EAI_ADDRFAMILY for valid hosts without
                     // an A record in 13.2. We previously returned "no such host" for
@@ -389,7 +393,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         if (resStateSize > 0) {
             @unsafe.Pointer mem = _C_malloc(resStateSize);
             defer(_C_free, mem, ref ᒐ);
-            var memSlice = @unsafe.Slice((ж<byte>)(uintptr)(mem), resStateSize);
+            var memSlice = @unsafe.Slice(@unsafe.Pointer.To<byte>(mem), resStateSize);
             clear(memSlice);
             state = Ꮡ(memSlice, 0).Reinterpret<byte, _C_struct___res_state>();
         }
@@ -407,7 +411,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         // For now, we are willing to take res_search's word that there's nothing
         // useful in the response, even though there *is* a response.
         nint bufSize = maxDNSPacketSize;
-        ref var buf = ref heap<ж<_C_uchar>>((ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize)), out var Ꮡbuf);
+        ref var buf = ref heap<ж<_C_uchar>>(@unsafe.Pointer.To<_C_uchar>(_C_malloc((uintptr)bufSize)), out var Ꮡbuf);
         defer(() => {
             // Free in a closure which captures buf to pick up a reallocated buffer from below.
             _C_free(@unsafe.Pointer.FromPinnedBox(Ꮡbuf.ValueSlot));
@@ -431,7 +435,7 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
             // Allocate a bigger buffer to fit the entire msg.
             _C_free(@unsafe.Pointer.FromPinnedBox(buf));
             bufSize = size;
-            buf = (ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize));
+            buf = @unsafe.Pointer.To<_C_uchar>(_C_malloc((uintptr)bufSize));
         }
 
         dnsmessage.Parser p = default;

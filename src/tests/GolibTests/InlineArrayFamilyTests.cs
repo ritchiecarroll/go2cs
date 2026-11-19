@@ -172,6 +172,17 @@ public class InlineArrayFamilyTests
         }
     }
 
+    // A member names itself as the Go array it stands for, alone, nested, and as the element of a [0][N]T carrier's
+    // array<arrayN<T>> (W15, P3's review): reflect printed [0]array4[uint32] where Go prints [0][4]uint32.
+    [TestMethod]
+    public void AMemberIsNamedAsTheGoArrayItStandsFor()
+    {
+        Assert.AreEqual("[4]uint32", GoReflect.GoTypeName(typeof(array4<uint>)));
+        Assert.AreEqual("[2][3]uint16", GoReflect.GoTypeName(typeof(array2<array3<ushort>>)));
+        Assert.AreEqual("[0][4]uint32", GoReflect.GoTypeName(typeof(array<array4<uint>>), [0, 4]));
+        Assert.AreEqual("[0][2][3]uint16", GoReflect.GoTypeName(typeof(array<array2<array3<ushort>>>), [0, 2, 3]));
+    }
+
     // 7.6.1: the member exposes an element and its length, and nothing that reaches its storage as a whole. Part D3 adds
     // members that COPY rather than reach: the element-list constructor a Go array literal converts to (elements in),
     // ΔRangeSnapshot, the copy a Go range iterates, and ΔCopy and ΔSelect, the copy an interface holds (elements out; C1's
@@ -264,7 +275,7 @@ public class InlineArrayFamilyTests
         Assert.AreEqual((short)6, inline[1]);
 
         // The converted reflect reads it through that face (value_impl.cs, Len and Index), and fmt through reflect.
-        go.reflect_package.ΔValue value = go.reflect_package.ValueOf(boxed);
+        go.reflect_package.Value value = go.reflect_package.ValueOf(boxed);
         Assert.AreEqual((nint)3, value.Len());
         Assert.AreEqual(6L, (long)value.Index(1).Int());
         Assert.AreEqual("[5 6 7]", (string)go.fmt_package.Sprintf("%v", boxed));

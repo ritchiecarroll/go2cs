@@ -29,7 +29,7 @@ using static go.encoding.base32_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/base32/base32_test.go", "base32_test.cs", "ABUqABQqyqKCgoKUAAgGgoKCgoK4goKCgoKCAA0IgoKCgoKCgoKUgoKUgoL4goKCgpSCgpSClMqCgoKCgpSCgpSClAAYCoKCgoKCgoKUlIKClIKClIKCgoIADQqCgoKCgoKUgoKClAAKJPKCgpSClIKUgoKClIIADwqiggAycLKCgoKClJSCgoKCgoKCuIIACQyigoKCgoKCgoIACg6igoKCgoKCgoKCgoKC+IKCgoKCgoKCgpSClAAOCIIAGDiCgoKCgpSUlMQACQqCgoKCgpSCgoKClIKClIKCpoKCgoKmuIKCgoKClIIACgqUAAoWprjWggAMFpSCgoKmgoKCgqaCuKKCgoKCuKKCgoK4ooKCgoKCpqKCgoK4goKCgpSClILKgoKCgpSClILKgtyChIKUgoKmggAIDIKUgoKmgoIACQiCADRygoKmooKUpoKUggAKDIIAGjyygqKClKaClIKCggAKCqKCABU2lIK0gqSCggAKCqKCABAslIK0gqSCgsqCyoKEgoKClIKCppSC3ILKgoKCgqaCgqaC3ILKgoKCgoKmlJSCgoKCgpSCuII=", "663-668:1;713-718:1", "", "676=WithPadding/1/2/2,WithPadding/2/2/3;954=WithPadding/1/1/2;981=WithPadding/1/1/2;1006=WithPadding/1/1/2")]
+[assembly: GoPositionMap("encoding/base32/base32_test.go", "base32_test.cs", "ABYqABQqyqKCgoKUAAgGgoKCgoK4goKCgoKCAA0IgoKCgoKCgoKUgoKUgoL4goKCgpSCgpSClMqCgoKCgpSCgpSClAAYCoKCgoKCgoKUlIKClIKClIKCgoIADQqCgoKCgoKUgoKClAAMJPKCgpSClIKUgoKClIIAEQqiggAycLKCgoKClJSCgoKCgoKCuIIACQyigoKCgoKCgoIACg6igoKCgoKCgoKCgoKC+IKCgoKCgoKCgpSClAAOCIIAGDiCgoKCgpSUlMQACQqCgoKCgpSCgoKClIKClIKCpoKCgoKmuIKCgoKClIIACgqUAAoWprjWggAMFpSCgoKmgoKCgqaCuKKCgoKCuKKCgoK4ooKCgoKCpqKCgoK4goKCgpSClILKgoKCgpSClILKgtyChIKUgoKmggAIDIKUgoKmgoIACQiCADRygoKmooKUpoKUggAKDIIAGjyygqKClKaClIKCggAKCqKCABU2lIK0gqSCggAKCqKCABAslIK0gqSCgsqCyoKEgoKClIKCppSC3ILKgoKCgqaCgqaC3ILKgoKCgoKmlJSCgoKCgpSCuII=", "663-668:1;713-718:1", "", "681=WithPadding/1/2/2,WithPadding/2/2/3;959=WithPadding/1/1/2;986=WithPadding/1/1/2;1011=WithPadding/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -64,3 +64,13 @@ public static partial class base32_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(base32_internal_test_package.badReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32_internal_testᴛbadReader;
+// </MethodHolders>

@@ -19,7 +19,7 @@ public static slice<byte> UnixCredentials(ж<Ucred> Ꮡucred) {
     h.Level = SOL_SOCKET;
     h.Type = SCM_CREDENTIALS;
     h.SetLen(CmsgLen(SizeofUcred));
-    ((ж<Ucred>)(uintptr)(h.data(0))).Value = ucred;
+    (@unsafe.Pointer.To<Ucred>(h.data(0))).Value = ucred;
     return b;
 }
 

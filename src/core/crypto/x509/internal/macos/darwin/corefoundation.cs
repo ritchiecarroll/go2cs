@@ -31,7 +31,7 @@ partial struct CFRef /*num:uintptr*/;
 public static slice<byte> CFDataToSlice(CFRef data) {
     nint length = CFDataGetLength(data);
     var ptr = CFDataGetBytePtr(data);
-    var src = @unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)ptr), length);
+    var src = @unsafe.Slice(@unsafe.Pointer.To<byte>((@unsafe.Pointer)ptr), length);
     return bytes.Clone(src);
 }
 
@@ -49,7 +49,7 @@ public static @string CFStringToString(CFRef @ref) {
 
 // TimeToCFDateRef converts a time.Time into an apple CFDateRef.
 public static CFRef TimeToCFDateRef(time.Time t) {
-    var secs = t.Sub(time.Date(2001, 1, 1, 0, 0, 0, 0, time.ΔUTC)).Seconds();
+    var secs = t.Sub(time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)).Seconds();
     var @ref = CFDateCreate(secs);
     return @ref;
 }

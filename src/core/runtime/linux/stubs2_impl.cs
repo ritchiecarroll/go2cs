@@ -41,6 +41,10 @@ using go.golib;
 using @unsafe = go.unsafe_package;
 
 [module: go.GoManualConversion]
+// UNSAFE: this file's own code needs /unsafe, so it says so: the converter raises runtime.csproj's
+// <AllowUnsafeBlocks> on a hand-owned declaration (projectFileWriter.go allowUnsafeBlocks), and it no longer
+// emits an unsafe function in this package that would raise it by accident.
+[module: go.GoRequiresUnsafe]
 
 namespace go;
 
@@ -67,18 +71,18 @@ partial class runtime_package
     private static int32 negativeErrno() => (int32)(-Marshal.GetLastPInvokeError());
 
     // stubs2.go: read returns the count or the negative errno.
-    internal static partial int32 read(int32 fd, @unsafe.Pointer Δp, int32 n)
+    internal static partial int32 read(int32 fd, @unsafe.Pointer p, int32 n)
     {
-        nint r = libc_read(fd, (nint)(nuint)(uintptr)Δp, (nuint)(uint)n);
-        System.GC.KeepAlive(Δp);
+        nint r = libc_read(fd, (nint)(nuint)(uintptr)p, (nuint)(uint)n);
+        System.GC.KeepAlive(p);
         return r < 0 ? negativeErrno() : (int32)r;
     }
 
     // stubs2.go: write1 returns the count or the negative errno.
-    internal static partial int32 write1(uintptr fd, @unsafe.Pointer Δp, int32 n)
+    internal static partial int32 write1(uintptr fd, @unsafe.Pointer p, int32 n)
     {
-        nint r = libc_write((int)(nuint)fd, (nint)(nuint)(uintptr)Δp, (nuint)(uint)n);
-        System.GC.KeepAlive(Δp);
+        nint r = libc_write((int)(nuint)fd, (nint)(nuint)(uintptr)p, (nuint)(uint)n);
+        System.GC.KeepAlive(p);
         return r < 0 ? negativeErrno() : (int32)r;
     }
 

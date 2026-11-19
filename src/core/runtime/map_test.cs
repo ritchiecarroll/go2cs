@@ -23,6 +23,7 @@ using @internal.runtime;
 using exec = global::go.os.exec_package;
 using global::go.os;
 using static global::go.runtime_internal_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -390,10 +391,10 @@ internal static partial void testConcurrentReadsAfterGrowth(ж<testing.T> t, boo
                             GoFrame ᒐ = default;
                             try {
                                 defer(Ꮡwg.Done, ref ᒐ);
-                                ref var mv = ref heap<reflectꓸValue>(reflect.ValueOf(mʗ3), out var Ꮡmv);
+                                ref var mv = ref heap<reflect.Value>(reflect.ValueOf(mʗ3), out var Ꮡmv);
                                 var keys = mv.MapKeys();
                                 foreach (var (_, vᴛ1) in range(keys)) {
-                                    ref var k = ref heap(new reflectꓸValue(), out var Ꮡk);
+                                    ref var k = ref heap(new reflect.Value(), out var Ꮡk);
                                     k = vᴛ1;
 
                                     mv.MapIndex(k);
@@ -904,9 +905,13 @@ public static void TestIncrementAfterBulkClearKeyStringValueInt(ж<testing.T> t)
 
 partial struct canString /*num:nint*/;
 
+} partial class runtime_testᴛcanString {
+
 internal static @string String(this canString c) {
     return fmt.Sprintf("%d"u8, (nint)c);
 }
+
+} partial class runtime_test_package {
 
 internal partial interface TestMapInterfaceKey_GrabBag_i1 /*dyn*/ {
     @string String();
@@ -969,6 +974,8 @@ partial struct panicStructKey {
     internal slice<nint> sli;
 }
 
+} partial class runtime_testᴛpanicStructKey {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string panicˢ2 => ref panicˢ2ᵇ;
 private static readonly @string panicˢ2ᵇ = "panic"u8;
@@ -977,8 +984,12 @@ internal static @string String(this panicStructKey p) {
     return panicˢ2;
 }
 
+} partial class runtime_test_package {
+
 partial struct structKey {
 }
+
+} partial class runtime_testᴛstructKey {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string structKeyˢ => ref structKeyˢᵇ;
@@ -987,6 +998,8 @@ private static readonly @string structKeyˢᵇ = "structKey"u8;
 internal static @string String(this structKey _) {
     return structKeyˢ;
 }
+
+} partial class runtime_test_package {
 
 public static void TestEmptyMapWithInterfaceKey(ж<testing.T> t) {
     bool b = default;
@@ -1313,7 +1326,7 @@ public static void TestHmapSize(ж<testing.T> t) {
 public static void TestGroupSizeZero(ж<testing.T> t) {
     map<EmptyStruct, EmptyStruct> m = default;
     var mTyp = abi.TypeOf(m);
-    var mt = mTyp.Reinterpret<abi.Type, abiꓸMapType>();
+    var mt = mTyp.Reinterpret<abi.Type, abi.MapType>();
 
     // internal/runtime/maps when create pointers to slots, even if slots
     // are size 0. The compiler should have reserved an extra word to

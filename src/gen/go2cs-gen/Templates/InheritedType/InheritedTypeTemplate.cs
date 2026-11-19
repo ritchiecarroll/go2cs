@@ -104,6 +104,13 @@ internal class InheritedTypeTemplate : TemplateBase
     // IStrongBox step), so the Go value seen through reflect is the map itself.
     public bool HoldsMapInHolder = false;
 
+    // A defined type over a struct that contributes fields (`type CacheHashKey key`). Without its own
+    // equality the wrapper falls back to ValueType.Equals and ValueType.GetHashCode, which box it and
+    // read m_value by reflection (the inner struct overrides Equals, so the runtime cannot compare bits)
+    // and then call m_value's own Equals(object) and GetHashCode. EqualityOverrides states that same
+    // answer directly, and GoEquatablePart adds IEquatable<T> so a Dictionary key takes it unboxed.
+    public bool StructEquality = false;
+
     // The Go methods declared on this type, and its own name (TypeGenerator.GoMethodNames). A Go method
     // is an extension method, which loses to any applicable instance member, and a member may not share
     // its type's name, so a map or channel wrapper YIELDS each of these names: a member implementing an interface becomes its explicit implementation, and Set is
@@ -120,7 +127,7 @@ internal class InheritedTypeTemplate : TemplateBase
             (ISliceTypeTemplate.IsByteSlice(TargetTypeName) ? $", IByteSeq<{ObjectName}, byte>" : ""),
         "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{ObjectName}>",
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
-        "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>",
+        "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>, global::go.golib.IGoValueAssign<{ObjectName}>",
         "Pointer" => $" : IPointer<{TargetTypeName}>, INilPointer",
         // Generic-math declarations so a [GoType num:] wrapper satisfies converter-emitted
         // numeric constraints as a type ARGUMENT — slices.Sort's `cmp.Ordered` maps to
@@ -130,7 +137,7 @@ internal class InheritedTypeTemplate : TemplateBase
         // struct precedent).
         "Numeric" => NumericInterfaces,
         _ when TypeName == "@string" => StringInterfaces,
-        _ => UnderlyingArrayElementType is null ? "" : $" : IArray<{UnderlyingArrayElementType}>"
+        _ => UnderlyingArrayElementType is null ? "" : $" : IArray<{UnderlyingArrayElementType}>, global::go.golib.IGoValueAssign<{ObjectName}>"
     };
 
     // A named type over `string` is ORDERED in Go: `cmp.Ordered` admits it, so `slices.Sort` over `[]Path` (`type Path
@@ -193,7 +200,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize, GoMethodNames),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
-        _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(ObjectName, TypeName, UnderlyingArrayElementType)
+        _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(ObjectName, TypeName, UnderlyingArrayElementType, GoMethodNames)
     };
 
     // Only the plain (struct-underlying) wrapper needs this: every array/slice-backed kind already
@@ -203,7 +210,12 @@ internal class InheritedTypeTemplate : TemplateBase
         TypeClass is not ("Array" or "Slice" or "Map" or "Channel" or "Pointer" or "Numeric");
 
     private string ValueCloneInterface => EmitsValueClone ?
-        string.IsNullOrEmpty(ImplementedInterface) ? " : IGoValueClone" : ", IGoValueClone" : "";
+        (string.IsNullOrEmpty(ImplementedInterface) ? " : IGoValueClone" : ", IGoValueClone") + $", global::go.golib.IGoValueAssign<{ObjectName}>" : "";
+
+    // Go's whole assignment into an existing location of this defined struct type: the inner struct's own in-place copy
+    // (StructTypeTemplate.ValueAssignImplementation), reached through GoValueAssign.Into so the inner struct's member name
+    // never matters. A Go method named AssignFrom on THIS type makes the member ΔAssignFrom (the converter agrees).
+    private string AssignFromMethod => GoMethodNames.Contains("AssignFrom") ? "ΔAssignFrom" : "AssignFrom";
 
     private string ValueCloneImplementation => EmitsValueClone ?
         $$"""
@@ -212,6 +224,16 @@ internal class InheritedTypeTemplate : TemplateBase
                 public {{EscapeCsTypeName(ObjectName)}} {{ValueCloneMethod}}() => new {{ObjectName}}({{Value}}.{{ValueCloneMethod}}());
 
                 object global::System.ICloneable.Clone() => {{ValueCloneMethod}}();
+
+                // Go whole assignment into this value's own storage
+                public void {{AssignFromMethod}}(in {{EscapeCsTypeName(ObjectName)}} source) => global::go.golib.GoValueAssign.Into(ref m_value, source.m_value);
+
+                {{EscapeCsTypeName(ObjectName)}} global::go.golib.IGoValueAssign<{{ObjectName}}>.AssignedFrom(in {{EscapeCsTypeName(ObjectName)}} source)
+                {
+                    {{EscapeCsTypeName(ObjectName)}} target = this;
+                    target.{{AssignFromMethod}}(source);
+                    return target;
+                }
 
         """ : "";
 
@@ -255,14 +277,17 @@ internal class InheritedTypeTemplate : TemplateBase
     // ISliceTypeTemplate Equals(ISlice<T>?) compares the backing arrays element-wise), so a non-nil
     // EMPTY named slice (`S{}`, `make(S, 0)`, an `s[len(s):]` tail) was misclassified as nil. Delegate
     // to slice<T>'s own == NilType — REPRESENTATION nilness (null backing array, R13) — so `IntSlice{}
-    // == nil` is false while the zero value stays nil. Map/channel keep the structural default and are
-    // already correct: they declare no structural Equals, so `Equals(default)` falls back to reference
-    // identity on the backing field (map<K,V>.Equals is ReferenceEquals(m_map); channel<T> compares its
-    // queue). Pointer uses its reference-identity Equals override, and array/numeric/string/struct/any
-    // are not nil-comparable in Go — all keep the default.
+    // == nil` is false while the zero value stays nil. Map/channel delegate the same way, to map<K,V>'s
+    // and channel<T>'s own == NilType (no backing store): the wrapper declares no Equals(S), so the old
+    // `value.Equals(default(S))` boxed both values into ValueType.Equals, which reads the fields by
+    // reflection, and answered the same question (map<K,V>.Equals is ReferenceEquals(m_map); channel<T>
+    // compares its core) at that cost on every `m == nil`. Pointer uses its reference-identity Equals
+    // override, and array/numeric/string/struct/any are not nil-comparable in Go — all keep the default.
     private string NilComparisonExpression => TypeClass switch
     {
         "Slice" => "value.m_value == nil",
+        "Map" => $"value.{Value} == nil",
+        "Channel" => "value.m_value == nil",
         // STRUCTURAL nil for pointers (null-safe): a null reference and the canonical typed nil
         // instance are the same Go nil pointer; the old `value.Equals(default)` NRE'd on a null
         // reference and reported the canonical instance non-nil.
@@ -383,6 +408,21 @@ internal class InheritedTypeTemplate : TemplateBase
     // this same case) remain the explicit path for every consumer, all of which are sibling files
     // in the one test assembly under the whitebox-reference model.
     private bool OmitUnderlyingConversionOperators => Scope!.StartsWith("public") && !WrappedTypeIsPublic;
+
+    // For a defined type over another defined SLICE type (`type fermat nat`): the base the Go source names,
+    // and whether it is public. The wrapper holds the bottom slice, so it converts to and from the base
+    // through that slice; a public wrapper over a non-public base omits the pair, as above.
+    public string? NamedBaseTypeName = null;
+    public bool NamedBaseIsPublic = true;
+
+    private string NamedBaseConversionOperators => NamedBaseTypeName is null || Scope!.StartsWith("public") && !NamedBaseIsPublic ? "" :
+        $$"""
+
+                // Handle conversions between '{{NamedBaseTypeName}}' and {{ObjectKind}} '{{ObjectName}}', the type it is defined over
+                public static implicit operator {{ObjectName}}({{NamedBaseTypeName}} value) => new {{ObjectName}}(({{TypeName}})value);
+
+                public static implicit operator {{NamedBaseTypeName}}({{ObjectName}} value) => ({{NamedBaseTypeName}})value.{{Value}};
+        """;
 
     private string UnderlyingConversionOperators => TypeName is "any" or "object" || OmitUnderlyingConversionOperators ? "" :
         $$"""
@@ -679,6 +719,15 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public override int GetHashCode() => {Value}.GetHashCode();
 
+        """ : StructEquality ?
+        $"""
+
+                public bool Equals({ObjectName} other) => m_value.Equals(other.m_value);
+
+                public override bool Equals(object? obj) => obj is {ObjectName} other && Equals(other);
+
+                public override int GetHashCode() => m_value.GetHashCode();
+
         """ : "";
 
     private string ReadOnly => ReadOnlyValue ? "readonly " : "";
@@ -847,7 +896,7 @@ internal class InheritedTypeTemplate : TemplateBase
     // EXPLICITLY, through this type's own == (EqualityExpression; IEEE for a float underlying, where its Equals is
     // NaN-equal), so the comparison runs in compiled code and no member is added.
     private string GoEquatablePart =>
-        $"\r\n\r\n    partial {ObjectKind} {ObjectName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {ObjectName} value && this == value;\r\n    }}";
+        $"\r\n\r\n    partial {ObjectKind} {ObjectName} : global::go.IGoEquatable{(StructEquality ? $", global::System.IEquatable<{ObjectName}>" : "")}\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {ObjectName} value && this == value;\r\n    }}";
 
     // A named pointer's deref alias, an extension method of the package class (PointerTypeTemplate.DerefAlias).
     private string PointerDerefAlias => TypeClass == "Pointer" ? PointerTypeTemplate.DerefAlias(MemberScope, ObjectName, TargetTypeName) : "";
@@ -872,7 +921,7 @@ internal class InheritedTypeTemplate : TemplateBase
         
                 public static bool operator !=({{ObjectName}} left, {{ObjectName}} right) => !(left == right);
         
-        {{UnderlyingConversionOperators}}
+        {{UnderlyingConversionOperators}}{{NamedBaseConversionOperators}}
                     {{UintptrBridgeOperators}}{{UntypedIntBridgeOperator}}{{UntypedFloatBridgeOperator}}{{BasicNumericConversionOperators}}{{ComplexBridgeOperators}}{{StringSurfaceMembers}}
                 // Handle comparisons between 'nil' and {{ObjectKind}} '{{ObjectName}}'
                 public static bool operator ==({{ObjectName}} value, NilType nil) => {{NilComparisonExpression}};

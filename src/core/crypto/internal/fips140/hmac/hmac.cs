@@ -15,6 +15,7 @@ using errors = errors_package;
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static hmac_package;
 
 partial class hmac_package {
 
@@ -44,10 +45,12 @@ partial struct HMAC {
     internal nint keyLen;
 }
 
+} partial class hmacᴛHMAC {
+
 public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) {
     // Per FIPS 140-3 IG C.M, key lengths below 112 bits are only allowed for
     // legacy use (i.e. verification only) and we don't support that. However,
-    // HKDF uses the HMAC key for the salt, which is allowed to be shorter.
+    // HKDF-Extract uses the HMAC key for the salt, which is allowed to be shorter.
     if (h.keyLen < 112 / 8 && !h.forHKDF) {
         fips140.RecordNonApproved();
     }
@@ -135,8 +138,12 @@ public static void Reset(this ref HMAC h) {
     h.marshaled = true;
 }
 
+} partial class hmac_package {
+
 partial struct errCloneUnsupported {
 }
+
+} partial class hmacᴛerrCloneUnsupported {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoHmacHashDoesNotˢ => ref cryptoHmacHashDoesNotˢᵇ;
@@ -149,6 +156,8 @@ internal static @string Error(this errCloneUnsupported e) {
 internal static error Unwrap(this errCloneUnsupported e) {
     return errors.ErrUnsupported;
 }
+
+} partial class hmacᴛHMAC {
 
 // Clone implements [hash.Cloner] if the underlying hash does.
 // Otherwise, it returns an error wrapping [errors.ErrUnsupported].
@@ -173,6 +182,8 @@ public static (hash.Cloner, error) Clone(this ref HMAC h) {
     }
     return (new HMACжCloner(Ꮡr), default);
 }
+
+} partial class hmac_package {
 
 // New returns a new HMAC hash using the given [hash.Hash] type and key.
 public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)

@@ -20,19 +20,19 @@ public static void TestTree(ж<testing.T> t) {
     var rng = rand.New(new rand.PCGжSource(rand.NewPCG(seed1, seed2)));
 
     // Create a number of Files of arbitrary size.
-    var files = new slice<ж<global::go.go.token_package.ΔFile>>(500);
+    var files = new slice<ж<global::go.go.token_package.File>>(500);
     ref var @base = ref heap(new nint(), out var Ꮡbase);
     foreach (var i in range(len(files))) {
         @base++;
         ref var size = ref heap<nint>(1000, out var Ꮡsize);
-        files[i] = Ꮡ(new ΔFile(@base: @base, size: size));
+        files[i] = Ꮡ(new File(@base: @base, size: size));
         @base += size;
     }
 
     // Add them all to the tree in random order.
     ref var tr = ref heap(new global::go.go.token_package.tree(), out var Ꮡtr);
     {
-        var files2 = slices.Clone<slice<ж<global::go.go.token_package.ΔFile>>, ж<global::go.go.token_package.ΔFile>>(files);
+        var files2 = slices.Clone<slice<ж<global::go.go.token_package.File>>, ж<global::go.go.token_package.File>>(files);
         Shuffle(rng, files2);
         foreach (var (_, f) in range(files2)) {
             Ꮡtr.add(f);
@@ -65,7 +65,7 @@ public static void TestTree(ж<testing.T> t) {
             @file.@base + @file.size / 2, // midpoint
             @file.@base + @file.size      // end
         ]))) {
-            var (pn, _) = Ꮡtr.locate(new Δkey(pos, pos));
+            var (pn, _) = Ꮡtr.locate(new key(pos, pos));
             if ((pn.ValueSlot).@file != @file) {
                 t.Fatalf("lookup %s@%d returned wrong file %s",
                     @file.name, pos,
@@ -75,8 +75,8 @@ public static void TestTree(ж<testing.T> t) {
     }
 
     // Check that the sequence is the same.
-    files = slices.DeleteFunc(files, (ж<global::go.go.token_package.ΔFile> f) => f == nil);
-    if (!slices.Equal<slice<ж<global::go.go.token_package.ΔFile>>, ж<global::go.go.token_package.ΔFile>>(slices.Collect(Ꮡtr.all()), files)) {
+    files = slices.DeleteFunc(files, (ж<global::go.go.token_package.File> f) => f == nil);
+    if (!slices.Equal<slice<ж<global::go.go.token_package.File>>, ж<global::go.go.token_package.File>>(slices.Collect(Ꮡtr.all()), files)) {
         t.Fatalf("incorrect tree.all sequence");
     }
 }

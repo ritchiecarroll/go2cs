@@ -6,10 +6,15 @@ namespace go.runtime;
 
 using errors = errors_package;
 using os = os_package;
+using static pprof_package;
 
 partial class pprof_package {
 
+} partial class pprofᴛprofileBuilder {
+
 // go2cs generated this placeholder — func readMapping is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class pprof_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notImplementedˢ => ref notImplementedˢᵇ;

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,6 +9,8 @@ partial struct Ring {
     internal ж<Ring> next, prev;
     public nint Value;
 }
+
+} partial class mainᴛRing {
 
 internal static ж<Ring> init(this ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -60,6 +63,8 @@ public static nint Len(this ж<Ring> Ꮡr) {
     }
     return n;
 }
+
+} partial class main_package {
 
 internal static ж<Ring> makeRing(nint count) {
     if (count <= 0) {

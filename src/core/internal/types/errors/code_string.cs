@@ -3,6 +3,7 @@ namespace go.@internal.types;
 
 using strconv = go.strconv_package;
 using go;
+using static errors_package;
 
 partial class errors_package {
 
@@ -178,6 +179,8 @@ private static readonly @string _Code_name_5ᵇ = "InvalidClearTypeTooLargeInval
 [GoLazy] partial class lazyᴛ_Code_index_4 { internal static array<uint16> _Code_index_4 = new uint16[]{0, 14, 30, 44, 61, 81, 94, 110, 124, 141, 158, 175, 190, 204, 218, 229, 241, 254, 271, 284, 295, 308, 320, 329, 336, 348, 364, 382, 400, 415, 432, 451, 465, 485, 497, 521, 544, 562, 584, 603}.array(); }
 internal static array<uint8> _Code_index_5 = new uint8[]{0, 12, 24, 44, 50}.array();
 
+} partial class errorsᴛCode {
+
 public static @string String(this Code i) {
     switch (ᐧ) {
     case {} when i == -1: {
@@ -208,4 +211,4 @@ public static @string String(this Code i) {
     }}
 }
 
-} // end errors_package
+} // end errorsᴛCode

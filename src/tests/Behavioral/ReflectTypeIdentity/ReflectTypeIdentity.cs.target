@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using Δsync = sync_package;
+using static main_package;
 
 partial class main_package {
 
@@ -15,13 +16,17 @@ partial struct Arr /*[3]nint*/;
 partial struct M {
 }
 
+} partial class mainᴛM {
+
 public static @string Do(this M _Δp0, nint _Δp1) { return ""; }
 
+} partial class main_package {
+
 partial struct typeError {
-    public reflectꓸType Type;
+    public reflect.Type Type;
 }
 
-internal static void show(@string name, reflectꓸType a, reflectꓸType b) {
+internal static void show(@string name, reflect.Type a, reflect.Type b) {
     fmt.Printf("%-28s == %v  deep %v  (%v / %v)\n"u8, name, AreEqual(a, b), reflect.DeepEqual(a, b), a, b);
 }
 
@@ -51,7 +56,7 @@ internal static void main() {
 
     fmt.Println("error DeepEqual TypeOf/TypeFor", reflect.DeepEqual(Ꮡ(new typeError(reflect.TypeOf(s))), Ꮡ(new typeError(reflect.TypeFor<T>()))));
 
-    var m = new map<reflectꓸType, nint>{[reflect.TypeFor<T>()] = 1, [reflect.TypeFor<ж<T>>()] = 2};
+    var m = new map<reflect.Type, nint>{[reflect.TypeFor<T>()] = 1, [reflect.TypeFor<ж<T>>()] = 2};
     var (_, ok1) = m[reflect.TypeOf(s), ꟷ];
     var (_, ok2) = m[reflect.TypeOf(p.OrTypedNil()), ꟷ];
     fmt.Println("map key TypeFor->TypeOf", ok1, ok2);

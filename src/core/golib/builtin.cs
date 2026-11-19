@@ -555,7 +555,7 @@ public static partial class builtin
     /// </summary>
     public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)
     {
-        return go.slice<T>.Append(slice, elems.ToSpan());
+        return go.slice<T>.AppendSpread(slice, elems.ToSpan());
     }
 
     /// <summary>
@@ -1020,7 +1020,7 @@ public static partial class builtin
             // (Go permits overlap in copy) transfers correctly.
             if (src is ISlice<T1> same)
             {
-                same.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+                GoElementCopy.CopyInto<T1>(same.ToSpan()[..(int)min], dst.ToSpan()[..(int)min]);
             }
             else
             {
@@ -1043,7 +1043,7 @@ public static partial class builtin
         nint min = Min(dst.Length, src.Length);
 
         if (min > 0 && !ZeroSizeCopy<T, T>())
-            src.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+            GoElementCopy.CopyInto<T>(src.ToSpan()[..(int)min], dst.ToSpan()[..(int)min]);
 
         return min;
     }
@@ -1056,7 +1056,7 @@ public static partial class builtin
         nint min = Min(dst.Length, src.Length);
 
         if (min > 0 && !ZeroSizeCopy<T, T>())
-            src.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+            GoElementCopy.CopyInto<T>(src.ToSpan()[..(int)min], dst.ToSpan()[..(int)min]);
 
         return min;
     }
@@ -1093,9 +1093,13 @@ public static partial class builtin
                 // the data: the two are the same runtime type here, which is exactly what the
                 // guard establishes and what MemoryMarshal.Cast cannot express on unconstrained
                 // type parameters.
+                //
+                // An element that owns array storage is copied element by element instead
+                // (GoElementCopy.CopyInto), so the two slices never share an inner array; that test
+                // folds at JIT time too.
                 Span<T2> source = src.ToSpan();
 
-                Unsafe.As<Span<T2>, Span<T1>>(ref source)[..(int)min].CopyTo(dst.ToSpan());
+                GoElementCopy.CopyInto<T1>(Unsafe.As<Span<T2>, Span<T1>>(ref source)[..(int)min], dst.ToSpan()[..(int)min]);
             }
             else if (typeof(T1).IsAssignableFrom(typeof(T2)))
             {
@@ -1234,7 +1238,7 @@ public static partial class builtin
         {
             if (src is ISlice<T1> same)
             {
-                same.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+                GoElementCopy.CopyInto<T1>(same.ToSpan()[..(int)min], dst.ToSpan()[..(int)min]);
             }
             else
             {
@@ -1454,7 +1458,7 @@ public static partial class builtin
     /// </summary>
     public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items) where S : ISlice<T>, ISliceWrap<S, T>
     {
-        return S.Wrap(go.slice<T>.Append(new slice<T>(s), items.ToSpan()));
+        return S.Wrap(go.slice<T>.AppendSpread(new slice<T>(s), items.ToSpan()));
     }
 
     /// <summary>
@@ -2513,7 +2517,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(view.NativeElementAddress(index));
+                return new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view));
             }
         }
 
@@ -2542,7 +2546,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(view.NativeElementAddress(index));
+                return new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view));
             }
         }
 
@@ -2630,7 +2634,7 @@ public static partial class builtin
             {
                 // Unchecked here too: the length-checked NativeElementAddress refused SliceData over an
                 // empty native window.
-                return new NativeBox<T>(target.NativeElementAddressUnchecked(index));
+                return new NativeBox<T>(target.NativeElementAddressUnchecked(index), retainedSource: NativeSliceAnchors<T>.Of(target));
             }
         }
 
@@ -2660,7 +2664,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(target.NativeElementAddress(index));
+                return new NativeBox<T>(target.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(target));
             }
         }
 
@@ -2850,7 +2854,12 @@ public static partial class builtin
     /// only in one assembly is a trap for whichever package meets the shape next.
     /// </para>
     /// </remarks>
-    public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length)
+    public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length) => NativeArrayPointer<T>(address, length, null);
+
+    // The same door for a window that keeps a root: an array field of a struct viewed over Go memory
+    // (FieldRefBox.NativeArrayWindow). Only the bare-element kind keeps it; the shadow and pointer-word kinds are
+    // unchanged, and keep nothing as before.
+    internal static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length, object? retainedSource)
     {
         if (ShadowArrayBox<T>.Needed)
         {
@@ -2866,7 +2875,7 @@ public static partial class builtin
             return ShadowArrayBox<T>.Over(address, length);
         }
 
-        return NativeArrayBox<T>.Over(address, length);
+        return NativeArrayBox<T>.Over(address, length, retainedSource);
     }
 
     // E for a pointer element T = ж<E>, else null: a pure type query, decided once per T.
@@ -2923,7 +2932,8 @@ public static partial class builtin
             _ => 0
         };
 
-        return address == 0 ? null : NativeArrayPointer<T>(address, length);
+        // A field of a view over Go memory keeps that view, as the field door's own window does (NativeArrayWindow).
+        return address == 0 ? null : NativeArrayPointer<T>(address, length, NativeDerivation.Kept(field));
     }
 
     /// <summary>

@@ -28,6 +28,7 @@ using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.aes;
 using go.os;
+using static cipher_test_package;
 
 partial class cipher_test_package {
 
@@ -37,9 +38,13 @@ partial struct wrapper {
     internal cipher.Block block;
 }
 
+} partial class cipher_testᴛwrapper {
+
 internal static nint BlockSize(this ref wrapper w) { return w.block.BlockSize(); }
 internal static void Encrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) { w.block.Encrypt(dst, src); }
 internal static void Decrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) { w.block.Decrypt(dst, src); }
+
+} partial class cipher_test_package {
 
 // wrap wraps the Block so that it does not type-asserts to *aes.Block.
 internal static cipher.Block wrap(cipher.Block b) {

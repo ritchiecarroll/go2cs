@@ -13,14 +13,14 @@ using static global::go.go.types_package;
 
 partial class types_internal_test_package {
 
-public static nint CmpPos(tokenꓸPos p, tokenꓸPos q) { return cmpPos(p, q); }
+public static nint CmpPos(token.Pos p, token.Pos q) { return cmpPos(p, q); }
 
-public static @string ScopeComment(ж<global::go.go.types_package.ΔScope> Ꮡs) {
+public static @string ScopeComment(ж<global::go.go.types_package.Scope> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     return s.comment;
 }
 
-public static tokenꓸPos ObjectScopePos(global::go.go.types_package.Object obj) { return obj.scopePos(); }
+public static token.Pos ObjectScopePos(global::go.go.types_package.Object obj) { return obj.scopePos(); }
 
 } // end types_internal_test_package

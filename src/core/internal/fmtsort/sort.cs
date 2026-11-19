@@ -25,7 +25,7 @@ partial struct SortedMap /*[]KeyValue*/;
 
 // KeyValue holds a single key and value pair found in a map.
 partial struct KeyValue {
-    public reflectꓸValue Key, Value;
+    public reflect.Value Key, Value;
 }
 
 // Sort accepts a map and returns a SortedMap that has the same keys and
@@ -46,7 +46,7 @@ partial struct KeyValue {
 //     Otherwise identical arrays compare by length.
 //   - interface values compare first by reflect.Type describing the concrete type
 //     and then by concrete value as described in the previous rules.
-public static SortedMap Sort(reflectꓸValue mapValue) {
+public static SortedMap Sort(reflect.Value mapValue) {
     if (mapValue.Type().Kind() != reflect.Map) {
         return default;
     }
@@ -67,19 +67,19 @@ public static SortedMap Sort(reflectꓸValue mapValue) {
 // according to whether a > b (1), a == b (0), or a < b (-1).
 // If the types differ, it returns -1.
 // See the comment on Sort for the comparison rules.
-internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
+internal static nint compare(reflect.Value aVal, reflect.Value bVal) {
     var (aType, bType) = (aVal.Type(), bVal.Type());
     if (!AreEqual(aType, bType)) {
         return -1; // No good answer possible, but don't return 0: they're not equal.
     }
     switch (aVal.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return cmp.Compare(aVal.Int(), bVal.Int());
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return cmp.Compare(aVal.Uint(), bVal.Uint());
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return cmp.Compare(aVal.String(), bVal.String());
     }
     case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
@@ -94,7 +94,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return cmp.Compare(imag(a), imag(b));
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         var (a, b) = (aVal.Bool(), bVal.Bool());
         switch (ᐧ) {
         case {} when a == b: {
@@ -108,7 +108,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }}
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔUnsafePointer: {
+    case var ᴛ when ᴛ == reflect.Pointer || ᴛ == reflect.UnsafePointer: {
         return cmp.Compare(aVal.Pointer(), bVal.Pointer());
     }
     case var ᴛ when ᴛ == reflect.Chan: {
@@ -135,7 +135,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         }
         return 0;
     }
-    case var ᴛ when ᴛ == reflect.ΔInterface: {
+    case var ᴛ when ᴛ == reflect.Interface: {
         {
             var (cΔ1, ok) = nilCompare(aVal, bVal); if (ok) {
                 return cΔ1;
@@ -159,7 +159,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
 // value. The comparison is defined to be 0 if both are nil, otherwise the one
 // nil value compares low. Both arguments must represent a chan, func,
 // interface, map, pointer, or slice.
-internal static (nint, bool) nilCompare(reflectꓸValue aVal, reflectꓸValue bVal) {
+internal static (nint, bool) nilCompare(reflect.Value aVal, reflect.Value bVal) {
     if (aVal.IsNil()) {
         if (bVal.IsNil()) {
             return (0, true);

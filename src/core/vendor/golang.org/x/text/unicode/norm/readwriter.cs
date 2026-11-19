@@ -4,6 +4,7 @@
 namespace go.vendor.golang.org.x.text.unicode;
 
 using io = io_package;
+using static norm_package;
 
 partial class norm_package {
 
@@ -12,6 +13,8 @@ partial struct normWriter {
     internal io.Writer w;
     internal slice<byte> buf;
 }
+
+} partial class normᴛnormWriter {
 
 // Write implements the standard write interface.  If the last characters are
 // not at a normalization boundary, the bytes will be buffered for the next
@@ -64,6 +67,8 @@ internal static error Close(this ref normWriter w) {
     return default;
 }
 
+} partial class normᴛForm {
+
 // Writer returns a new writer that implements Write(b)
 // by writing f(b) to w. The returned writer may use an
 // internal buffer to maintain state across Write calls.
@@ -74,6 +79,8 @@ public static io.WriteCloser Writer(this Form f, io.Writer w) {
     return new normWriterжWriteCloser(wr);
 }
 
+} partial class norm_package {
+
 partial struct normReader {
     internal reorderBuffer rb;
     internal io.Reader r;
@@ -83,6 +90,8 @@ partial struct normReader {
     internal nint lastBoundary;
     internal error err;
 }
+
+} partial class normᴛnormReader {
 
 // Read implements the standard read interface.
 internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
@@ -121,6 +130,8 @@ internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
     }
 }
 
+} partial class normᴛForm {
+
 // Reader returns a new reader that implements Read
 // by reading data from r and returning f(data).
 public static io.Reader Reader(this Form f, io.Reader r) {
@@ -131,4 +142,4 @@ public static io.Reader Reader(this Form f, io.Reader r) {
     return new normReaderжReader(rr);
 }
 
-} // end norm_package
+} // end normᴛForm

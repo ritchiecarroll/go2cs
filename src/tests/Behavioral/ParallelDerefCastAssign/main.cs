@@ -6,11 +6,11 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static void swap(uintptr p, uintptr q) {
-    (((ж<uint64>)(uintptr)((@unsafe.Pointer)p)).Value, ((ж<uint64>)(uintptr)((@unsafe.Pointer)q)).Value) = (~(ж<uint64>)(uintptr)((@unsafe.Pointer)q), ~(ж<uint64>)(uintptr)((@unsafe.Pointer)p));
+    ((@unsafe.Pointer.To<uint64>((@unsafe.Pointer)p)).Value, (@unsafe.Pointer.To<uint64>((@unsafe.Pointer)q)).Value) = (~@unsafe.Pointer.To<uint64>((@unsafe.Pointer)q), ~@unsafe.Pointer.To<uint64>((@unsafe.Pointer)p));
 }
 
 internal static void rotate(@unsafe.Pointer a, @unsafe.Pointer b, @unsafe.Pointer c) {
-    (((ж<int32>)(uintptr)(a)).Value, ((ж<int32>)(uintptr)(b)).Value, ((ж<int32>)(uintptr)(c)).Value) = (~(ж<int32>)(uintptr)(b), ~(ж<int32>)(uintptr)(c), ~(ж<int32>)(uintptr)(a));
+    ((@unsafe.Pointer.To<int32>(a)).Value, (@unsafe.Pointer.To<int32>(b)).Value, (@unsafe.Pointer.To<int32>(c)).Value) = (~@unsafe.Pointer.To<int32>(b), ~@unsafe.Pointer.To<int32>(c), ~@unsafe.Pointer.To<int32>(a));
 }
 
 internal static void main() {

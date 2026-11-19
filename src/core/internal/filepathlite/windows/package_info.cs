@@ -55,7 +55,7 @@ using static go.@internal.filepathlite_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/filepathlite/path.go", "path.cs", "ABQkAA0cgoKUpoKCgoKUgpSCpqKCpoKClKiSgoKCgpSUlO6CgpKCgqaCpsbGgqaCgtiClIKC+oKmguyCpoKokqaCgpSCgoKCgoKmgpSClKiSgpSokoKUqJKClKaCgpSCgoKmqJKCgoKUqJKCgqaokoKmgqaUgoKUgqaClKiSgoKClIKUlKiSqqI=")]
+[assembly: GoPositionMap("internal/filepathlite/path.go", "path.cs", "ABUkAA8cgoKUpoKCgoKUgpSCpqKCpoKClMiSgoKCgpSUlO6CgpKCgqaCpsbGgqaCgtiClIKC+oKmguyCpoKokqaCgpSCgoKCgoKmgpSClKiSgpSokoKUqJKClKaCgpSCgoKmqJKCgoKUqJKCgqaokoKmgqaUgoKUgqaClKiSgoKClIKUlKiSqqI=")]
 [assembly: GoPositionMap("internal/filepathlite/path_windows.go", "path_windows.cs", "ABEmgqaCgpSUlKaUgoKCgoKUgqaClIKUpoKClKaChJKCgoKUgoKUgqaUgoKCppQAAhDkgoKUyIKUgpSC3IKClAAIBoKCpKaCpIKmpJQACBKClIKUpoKClIKCpqaCgpSokoKCpoKUgoKUAAYS4gAIErgABxAACBSClIKClLiUrLKClIKCgpSCpoKUrLKCgoKCgriokoKCpqrCgsqCgpSCgtyC")]
 // </GoSourcePositionMaps>
 
@@ -90,3 +90,13 @@ public static partial class filepathlite_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(filepathlite_package.lazybuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class filepathliteᴛlazybuf;
+// </MethodHolders>

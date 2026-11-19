@@ -8,6 +8,7 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -121,10 +122,14 @@ internal static UntypedInt pollFDSeq => 16; // 20 bit field, low 20 bits of fdse
 internal static UntypedInt pollFDSeqBits => 20;                                 // number of bits in pollFDSeq
 internal static UntypedInt pollFDSeqMask => /* 1<<pollFDSeqBits - 1 */ 1048575; // mask for pollFDSeq
 
+} partial class runtimeᴛpollInfo {
+
 internal static bool closing(this pollInfo i) { return (pollInfo)(i & (uint32)pollClosing) != 0; }
 internal static bool eventErr(this pollInfo i) { return (pollInfo)(i & (uint32)pollEventErr) != 0; }
 internal static bool expiredReadDeadline(this pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredReadDeadline) != 0; }
 internal static bool expiredWriteDeadline(this pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredWriteDeadline) != 0; }
+
+} partial class runtimeᴛpollDesc {
 
 // info returns the pollInfo corresponding to pd.
 internal static pollInfo info(this ж<pollDesc> Ꮡpd) {
@@ -178,6 +183,8 @@ internal static void setEventErr(this ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
         }
     }
 }
+
+} partial class runtime_package {
 
 partial struct pollCache {
     internal mutex @lock;
@@ -291,6 +298,8 @@ internal static void poll_runtime_pollClose(ж<pollDesc> Ꮡpd) {
     Ꮡpollcache.free(Ꮡpd);
 }
 
+} partial class runtimeᴛpollCache {
+
 internal static void free(this ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var pd = ref Ꮡpd.DerefOrNull();
@@ -314,6 +323,8 @@ internal static void free(this ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
     c.first = Ꮡpd;
     unlock(Ꮡc.Ꮡlock);
 }
+
+} partial class runtime_package {
 
 // poll_runtime_pollReset, which is internal/poll.runtime_pollReset,
 // prepares a descriptor for polling in mode, which is 'r' or 'w'.
@@ -540,7 +551,7 @@ internal static nint netpollcheckerr(ж<pollDesc> pd, int32 mode) {
 }
 
 internal static bool netpollblockcommit(ж<g> gp, @unsafe.Pointer gpp) {
-    var r = atomic.Casuintptr((ж<uintptr>)(uintptr)(gpp), pdWait, (uintptr)gp);
+    var r = atomic.Casuintptr(@unsafe.Pointer.To<uintptr>(gpp), pdWait, (uintptr)gp);
     if (r) {
         // Bump the count of goroutines waiting for the poller.
         // The scheduler uses this to decide whether to block
@@ -633,7 +644,7 @@ internal static ж<g> netpollunblock(ж<pollDesc> pd, int32 mode, bool ioready, 
             } else if (old != pdNil) {
                 delta -= 1;
             }
-            return (ж<g>)(uintptr)((@unsafe.Pointer)old);
+            return @unsafe.Pointer.To<g>((@unsafe.Pointer)old);
         }
     }
 }
@@ -717,6 +728,8 @@ internal partial struct alloc_pollDescPadded /*dyn*/ {
     internal array<byte> pad = new(216);
 }
 
+} partial class runtimeᴛpollCache {
+
 internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -731,7 +744,7 @@ internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
         // only from epoll/kqueue internals.
         @unsafe.Pointer mem = persistentalloc(n * pdSize, tagAlign, Ꮡmemstats.Ꮡother_sys);
         for (var i = (uintptr)0; i < n; i++) {
-            var pdΔ1 = (ж<pollDesc>)(uintptr)(add(mem, i * pdSize));
+            var pdΔ1 = @unsafe.Pointer.To<pollDesc>(add(mem, i * pdSize));
             lockInit(ref (pdΔ1.Ꮡlock).DerefOrNull(), lockRankPollDesc);
             pdΔ1.Ꮡrt.init(default, default);
             pdΔ1.Ꮡwt.init(default, default);
@@ -744,6 +757,8 @@ internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
     unlock(Ꮡc.Ꮡlock);
     return pd;
 }
+
+} partial class runtimeᴛpollDesc {
 
 // makeArg converts pd to an interface{}.
 // makeArg does not do any allocation. Normally, such
@@ -758,6 +773,8 @@ internal static any /*i*/ makeArg(this ж<pollDesc> Ꮡpd) {
     x.of(eface.Ꮡdata).Value = @unsafe.Pointer.FromBox(Ꮡpd.Ꮡself);
     return i;
 }
+
+} partial class runtime_package {
 
 internal static readonly ж<any> ᏑpdEface = new StaticBox<any>(((ж<pollDesc>)nil));
 internal static ref any pdEface => ref ((StaticBox<any>)ᏑpdEface).ValueSlot;

@@ -177,7 +177,7 @@ public class TwinFuncPairTests
     {
         (_, _, Diagnostic[] generator) = RunAll();
 
-        Diagnostic[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0013").ToArray();
+        Diagnostic[] warnings = generator.Where(diagnostic => diagnostic.Id == "GO2CS0014").ToArray();
 
         Assert.AreEqual(1, warnings.Length, "one warning, for refusedCaller's two calls: " + string.Join("\n", generator.Select(d => d.ToString())));
         Assert.AreEqual(DiagnosticSeverity.Warning, warnings[0].Severity);

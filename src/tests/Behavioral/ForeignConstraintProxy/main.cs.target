@@ -6,6 +6,7 @@ using b1 = ForeignConstraintProxy.b1_package;
 using elem = ForeignConstraintProxy.elem_package;
 using lib = ForeignConstraintProxy.lib_package;
 using ForeignConstraintProxy;
+using static main_package;
 
 partial class main_package {
 
@@ -13,15 +14,23 @@ partial struct mnode {
     internal nint k;
 }
 
+} partial class mainᴛmnode {
+
 internal static bool Less(this ref mnode n, ж<mnode> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     return n.k < o.k;
 }
 
+} partial class main_package {
+
 partial struct age /*num:nint*/;
 
+} partial class mainᴛage {
+
 internal static bool Less(this age a, age b) { return a < b; }
+
+} partial class main_package {
 
 internal static void main() {
     fmt.Println(new lib.Ord2<age>(V: 3).Below(5), new lib.Ord<age>(V: 3).Below(2));

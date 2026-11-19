@@ -6,6 +6,7 @@ namespace go.@internal.syscall;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
+using static windows_package;
 
 partial class windows_package {
 
@@ -64,9 +65,13 @@ partial struct TOKEN_MANDATORY_LABEL {
     public SID_AND_ATTRIBUTES Label;
 }
 
+} partial class windowsᴛTOKEN_MANDATORY_LABEL {
+
 public static uint32 Size(this ref TOKEN_MANDATORY_LABEL tml) {
     return (uint32)/* unsafe.Sizeof(TOKEN_MANDATORY_LABEL{}) */ (uintptr)16 + syscall.GetLengthSid(tml.Label.Sid);
 }
+
+} partial class windows_package {
 
 public static UntypedInt SE_GROUP_INTEGRITY => 0x00000020;
 
@@ -171,7 +176,11 @@ partial struct TOKEN_GROUPS {
     public array<SID_AND_ATTRIBUTES> Groups = new(1);
 }
 
+} partial class windowsᴛTOKEN_GROUPS {
+
 // go2cs generated this placeholder — func AllGroups is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class windows_package {
 
 // go2cs generated this placeholder — func GetTokenGroups is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -212,7 +221,7 @@ public static uint32 GetSidSubAuthority(ж<syscall.SID> sid, uint32 subAuthority
     GoFrame ᒐ = default;
     try {
         defer(runtime.KeepAlive, sid.OrTypedNil(), ref ᒐ);
-        return ~(ж<uint32>)(uintptr)((@unsafe.Pointer)getSidSubAuthority(sid, subAuthorityIdx));
+        return ~@unsafe.Pointer.To<uint32>((@unsafe.Pointer)getSidSubAuthority(sid, subAuthorityIdx));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -223,7 +232,7 @@ public static uint8 GetSidSubAuthorityCount(ж<syscall.SID> sid) {
     GoFrame ᒐ = default;
     try {
         defer(runtime.KeepAlive, sid.OrTypedNil(), ref ᒐ);
-        return ~(ж<uint8>)(uintptr)((@unsafe.Pointer)getSidSubAuthorityCount(sid));
+        return ~@unsafe.Pointer.To<uint8>((@unsafe.Pointer)getSidSubAuthorityCount(sid));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }

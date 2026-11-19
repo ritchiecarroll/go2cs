@@ -5,12 +5,16 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using static types_package;
+
 partial class types_package {
 
 // TypeParamList holds a list of type parameters.
 partial struct TypeParamList {
     internal slice<ж<TypeParam>> tparams;
 }
+
+} partial class typesᴛTypeParamList {
 
 // Len returns the number of type parameters in the list.
 // It is safe to call on a nil receiver.
@@ -31,30 +35,34 @@ internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) {
     return l.tparams;
 }
 
+} partial class types_package {
+
 // TypeList holds a list of types.
 partial struct TypeList {
-    internal slice<ΔType> types;
+    internal slice<Type> types;
 }
 
 // newTypeList returns a new TypeList with the types in list.
-internal static ж<TypeList> newTypeList(slice<ΔType> list) {
+internal static ж<TypeList> newTypeList(slice<Type> list) {
     if (len(list) == 0) {
         return default;
     }
     return Ꮡ(new TypeList(list));
 }
 
+} partial class typesᴛTypeList {
+
 // Len returns the number of types in the list.
 // It is safe to call on a nil receiver.
 public static nint Len(this ж<TypeList> Ꮡl) { return len(Ꮡl.list()); }
 
 // At returns the i'th type in the list.
-public static ΔType At(this ref TypeList l, nint i) { return l.types[i]; }
+public static Type At(this ref TypeList l, nint i) { return l.types[i]; }
 
 // list is for internal use where we expect a []Type.
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeList instead.
-internal static slice<ΔType> list(this ж<TypeList> Ꮡl) {
+internal static slice<Type> list(this ж<TypeList> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (Ꮡl == nil) {
@@ -62,6 +70,8 @@ internal static slice<ΔType> list(this ж<TypeList> Ꮡl) {
     }
     return l.types;
 }
+
+} partial class types_package {
 
 // ----------------------------------------------------------------------------
 // Implementation

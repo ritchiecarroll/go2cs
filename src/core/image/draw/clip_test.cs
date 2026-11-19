@@ -159,8 +159,8 @@ public static void TestClip(ж<testing.T> t) {
     var src0 = image.NewRGBA(image.Rect(0, 0, 100, 100));
     var mask0 = image.NewRGBA(image.Rect(0, 0, 100, 100));
     foreach (var (_, c) in range(clipTests)) {
-        var dst = dst0.SubImage(c.dr)._<ж<imageꓸRGBA>>();
-        var src = src0.SubImage(c.sr)._<ж<imageꓸRGBA>>();
+        var dst = dst0.SubImage(c.dr)._<ж<image.RGBA>>();
+        var src = src0.SubImage(c.sr)._<ж<image.RGBA>>();
         ref var r = ref heap<image.Rectangle>(out var Ꮡr);
         r = c.r;
         ref var sp = ref heap<image.Point>(out var Ꮡsp);
@@ -168,9 +168,9 @@ public static void TestClip(ж<testing.T> t) {
         ref var mp = ref heap<image.Point>(out var Ꮡmp);
         mp = c.mp;
         if (c.nilMask) {
-            clip(new draw_test_package.image_ΔRGBAжImage(dst), Ꮡr, new image.ΔRGBAжImage(src), ref sp, default, nil);
+            clip(new draw_test_package.image_RGBAжImage(dst), Ꮡr, new image.RGBAжImage(src), ref sp, default, nil);
         } else {
-            clip(new draw_test_package.image_ΔRGBAжImage(dst), Ꮡr, new image.ΔRGBAжImage(src), ref sp, mask0.SubImage(c.mr), Ꮡmp);
+            clip(new draw_test_package.image_RGBAжImage(dst), Ꮡr, new image.RGBAжImage(src), ref sp, mask0.SubImage(c.mr), Ꮡmp);
         }
 
         // Check that the actual results equal the expected results.

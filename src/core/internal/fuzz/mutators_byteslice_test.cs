@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using testing = testing_package;
 using static global::go.@internal.fuzz_package;
+using static fuzz_internal_test_package;
 
 partial class fuzz_internal_test_package {
 
@@ -15,6 +16,8 @@ internal partial struct mockRand {
     internal nint counter;
     internal bool b;
 }
+
+} partial class fuzz_internal_testᴛmockRand {
 
 internal static uint32 uint32(this ref mockRand mr) {
     nint c = mr.values[mr.counter];
@@ -47,6 +50,8 @@ internal static void save(this ref mockRand mr, ж<uint64> _Δp1, ж<uint64> _Δ
 internal static void restore(this ref mockRand mr, uint64 _Δp1, uint64 _Δp2) {
     throw panic("unimplemented");
 }
+
+} partial class fuzz_internal_test_package {
 
 internal partial struct TestByteSliceMutators_type /*dyn*/ {
     internal @string name;

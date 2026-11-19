@@ -161,10 +161,10 @@ internal static partial void closeBreaksBlockedRead() {
         time.Sleep(200 * time.Millisecond);
         client.Close();
 
-        var selᴛ1 = done;
+        var doneᴛ1 = done;
         var selᴛ2 = time.After((time.Duration)(10000000000L));
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out var errΔ3): {
+        switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        case 0 when doneᴛ1.ꟷᐳ(out var errΔ3): {
             fmt.Printf("closeRead: brokeBlockedRead=%v\n"u8, errΔ3 != nil);
             break;
         }
@@ -229,10 +229,10 @@ internal static partial void closeBreaksBlockedWrite() {
         time.Sleep(500 * time.Millisecond);
         client.Close();
 
-        var selᴛ3 = done;
+        var doneᴛ1 = done;
         var selᴛ4 = time.After((time.Duration)(20000000000L));
-        switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-        case 0 when selᴛ3.ꟷᐳ(out var errΔ3): {
+        switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+        case 0 when doneᴛ1.ꟷᐳ(out var errΔ3): {
             fmt.Printf("closeWrite: brokeBlockedWrite=%v\n"u8, errΔ3 != nil);
             break;
         }

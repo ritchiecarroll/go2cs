@@ -13,6 +13,7 @@ using sort = sort_package;
 using sync = sync_package;
 using @internal;
 using encoding;
+using static gosym_package;
 
 partial class gosym_package {
 
@@ -73,6 +74,8 @@ partial struct LineTable {
 // matters in the old (pre-Go 1.2) symbol table format, so it's not worth
 // fixing.
 internal static UntypedInt oldQuantum => 1;
+
+} partial class gosymᴛLineTable {
 
 internal static (slice<byte> b, uint64 pc, nint line) parse(this ref LineTable t, uint64 targetPC, nint targetLine) {
     slice<byte> b = default;
@@ -157,6 +160,8 @@ public static uint64 LineToPC(this ж<LineTable> Ꮡt, nint line, uint64 maxpc) 
     return pc - (uint64)oldQuantum;
 }
 
+} partial class gosym_package {
+
 // NewLineTable returns a new PC/line table
 // corresponding to the encoded data.
 // Text must be the start address of the
@@ -168,6 +173,8 @@ public static uint64 LineToPC(this ж<LineTable> Ꮡt, nint line, uint64 maxpc) 
 public static ж<LineTable> NewLineTable(slice<byte> data, uint64 text) {
     return Ꮡ(new LineTable(Data: data, PC: text, Line: 0, funcNames: new map<uint32, @string>(), strings: new map<uint32, @string>()));
 }
+
+} partial class gosymᴛLineTable {
 
 // Go 1.2 symbol table format.
 // See golang.org/s/go12symtab.
@@ -374,12 +381,12 @@ internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) {
 }
 
 // findFunc returns the funcData corresponding to the given program counter.
-internal static ΔfuncData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
+internal static funcData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    ref var ft = ref heap<ΔfuncTab>(Ꮡt.funcTab(), out var Ꮡft);
+    ref var ft = ref heap<funcTab>(Ꮡt.funcTab(), out var Ꮡft);
     if (pc < ft.pc(0) || pc >= ft.pc(ft.Count())) {
-        return new ΔfuncData();
+        return new funcData();
     }
     var ftʗ1 = ft;
     nint idx = sort.Search((nint)t.nfunctab, (nint i) => ftʗ1.pc(i) > pc);
@@ -442,26 +449,30 @@ internal static nint functabFieldSize(this ref LineTable t) {
 }
 
 // funcTab returns t's funcTab.
-internal static ΔfuncTab funcTab(this ж<LineTable> Ꮡt) {
+internal static funcTab funcTab(this ж<LineTable> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    return new ΔfuncTab(LineTable: Ꮡt, sz: t.functabFieldSize());
+    return new funcTab(LineTable: Ꮡt, sz: t.functabFieldSize());
 }
+
+} partial class gosym_package {
 
 // funcTab is memory corresponding to a slice of functab structs, followed by an invalid PC.
 // A functab struct is a PC and a func offset.
-partial struct ΔfuncTab {
+partial struct funcTab {
     /*embed*/ public ж<LineTable> LineTable;
     internal nint sz; // cached result of t.functabFieldSize
 }
 
+} partial class gosymᴛfuncTab {
+
 // Count returns the number of func entries in f.
-internal static nint Count(this ΔfuncTab f) {
+internal static nint Count(this funcTab f) {
     return (nint)f.nfunctab;
 }
 
 // pc returns the PC of the i'th func in f.
-internal static uint64 pc(this ΔfuncTab f, nint i) {
+internal static uint64 pc(this funcTab f, nint i) {
     var u = f.@uint(f.functab.slice(2 * i * f.sz));
     if (f.version >= ver118) {
         u += f.textStart;
@@ -470,39 +481,45 @@ internal static uint64 pc(this ΔfuncTab f, nint i) {
 }
 
 // funcOff returns the funcdata offset of the i'th func in f.
-internal static uint64 funcOff(this ΔfuncTab f, nint i) {
+internal static uint64 funcOff(this funcTab f, nint i) {
     return f.@uint(f.functab.slice((2 * i + 1) * f.sz));
 }
 
 // uint returns the uint stored at b.
-internal static uint64 @uint(this ΔfuncTab f, slice<byte> b) {
+internal static uint64 @uint(this funcTab f, slice<byte> b) {
     if (f.sz == 4) {
         return (uint64)f.binary.Uint32(b);
     }
     return f.binary.Uint64(b);
 }
 
+} partial class gosym_package {
+
 // funcData is memory corresponding to an _func struct.
-partial struct ΔfuncData {
+partial struct funcData {
     internal ж<LineTable> t;   // LineTable this data is a part of
     internal slice<byte> data; // raw memory for the function
 }
 
+} partial class gosymᴛLineTable {
+
 // funcData returns the ith funcData in t.functab.
-internal static ΔfuncData funcData(this ж<LineTable> Ꮡt, uint32 i) {
+internal static funcData funcData(this ж<LineTable> Ꮡt, uint32 i) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var data = t.funcdata.slice((nint)(Ꮡt.funcTab().funcOff((nint)i)));
-    return new ΔfuncData(t: Ꮡt, data: data);
+    return new funcData(t: Ꮡt, data: data);
 }
 
+} partial class gosymᴛfuncData {
+
 // IsZero reports whether f is the zero value.
-internal static bool IsZero(this ΔfuncData f) {
+internal static bool IsZero(this funcData f) {
     return f.t == nil && f.data == nil;
 }
 
 // entryPC returns the func's entry PC.
-internal static uint64 entryPC(this ref ΔfuncData f) {
+internal static uint64 entryPC(this ref funcData f) {
     // In Go 1.18, the first field of _func changed
     // from a uintptr entry PC to a uint32 entry offset.
     if (f.t.version >= ver118) {
@@ -513,16 +530,16 @@ internal static uint64 entryPC(this ref ΔfuncData f) {
     return f.t.uintptr(f.data);
 }
 
-internal static uint32 nameOff(this ΔfuncData f) { return f.field(1); }
-internal static uint32 deferreturn(this ΔfuncData f) { return f.field(3); }
-internal static uint32 pcfile(this ΔfuncData f) { return f.field(5); }
-internal static uint32 pcln(this ΔfuncData f) { return f.field(6); }
-internal static uint32 cuOffset(this ΔfuncData f) { return f.field(8); }
+internal static uint32 nameOff(this funcData f) { return f.field(1); }
+internal static uint32 deferreturn(this funcData f) { return f.field(3); }
+internal static uint32 pcfile(this funcData f) { return f.field(5); }
+internal static uint32 pcln(this funcData f) { return f.field(6); }
+internal static uint32 cuOffset(this funcData f) { return f.field(8); }
 
 // field returns the nth field of the _func struct.
 // It panics if n == 0 or n > 9; for n == 0, call f.entryPC.
 // Most callers should use a named field accessor (just above).
-internal static uint32 field(this ΔfuncData f, uint32 n) {
+internal static uint32 field(this funcData f, uint32 n) {
     if (n == 0 || n > 9) {
         throw panic("bad funcdata field");
     }
@@ -536,6 +553,8 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
     var data = f.data.slice((nint)(off));
     return f.t.binary.Uint32(data);
 }
+
+} partial class gosymᴛLineTable {
 
 // step advances to the next pc, value pair in the encoded table.
 internal static bool step(this ref LineTable t, ж<slice<byte>> p, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) {
@@ -791,6 +810,8 @@ internal static void go12MapFiles(this ж<LineTable> Ꮡt, map<@string, ж<Obj>>
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class gosym_package {
 
 // disableRecover causes this package not to swallow panics.
 // This is useful when making changes.

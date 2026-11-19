@@ -158,7 +158,7 @@ literal's default `"…"u8` span would fail against the channel's `in object` se
 In converted code both sends then read the literal's hoisted pre-boxed field (see above), never a bare
 `"text"u8`:
 
-<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:45-46, 51, 57-58 -->
+<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:54-55, 60, 66-67 -->
 ```csharp
 private static readonly object textˢ = (@string)"text"u8;
 private static readonly object selˢ = (@string)"sel"u8;
@@ -267,9 +267,8 @@ plumbing; the other positions wrap through `boxUntypedConstAsDefaultType`.
   parameter), where a bare int literal already converts implicitly. Every gate uses
   `isEmptyInterfaceTarget` (which excludes type parameters), unlike the u8-span→`@string` case, where
   a `K=string` parameter genuinely needs the cast to bind.
-- An untyped **COMPLEX** constant is out of scope: a named one renders as golib `GoBigConst` (a
-  `BigInteger.Parse` of the literal text — `visitValueSpec`'s `writeUntypedConst` path, with its own
-  standing TODO), a separate gap that a `(complex128)` cast would not close. A complex
+- An untyped **COMPLEX** constant is out of scope: a named one renders as golib's `UntypedComplex`
+  ([Constants](constants.md)), a separate gap that a `(complex128)` cast would not close. A complex
   *literal* renders `1D + 2D.i()` and already boxes as `complex128`.
 - Untyped **bool** constants need nothing: `true`/`false` render as C# `bool`, already the Go type.
   Untyped **string** constants DO need the cast, but under the mirror-image rule — see below.
@@ -504,7 +503,7 @@ converter renders the type unwrapped, `v.data._<Map>()` and `v.data._<Map>(ᐧ)`
 C# type argument cannot be parenthesized (`_<(Map)>()` is CS1525). A parenthesized pointer type takes the same
 route: `p.((*point))` becomes `p._<ж<point>>(ᐧ)`. (Guarded by the `ParenthesizedTypeAssertion` behavioral test.)
 
-A type-switch case type takes the same unwrapping: typescript-go's internal/printer writes `case (*ast.Node):`, and
+A type-switch case type takes the same unwrapping: a type switch written `case (*ast.Node):`, and
 every case label is rendered from the bare type, so it reads `case ж<point> v:` as an unparenthesized case does.
 With the parentheses kept, C# reads `case (ж<point>) v:` as a cast of `v` (CS0103), `case (nil):` misses the
 `case null:` arm, and `case (int):` misses the identifier path that spells it `nint`. The extension covers a

@@ -61,7 +61,7 @@ internal static (@string, error) findExecutable(@string @file, slice<@string> ex
 
 internal static (@string, error) lookPath(@string @file) {
     var err = validateLookPath(@file); if (err != nil) {
-        return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
+        return ("", new Errorжerror(Ꮡ(new Error(@file, err))));
     }
 
     return lookPathExts(@file, pathExt());
@@ -78,7 +78,7 @@ internal static (@string, error) lookPath(@string @file) {
 // program is actually "C:\foo\example.com.exe".
 internal static (@string, error) lookExtensions(@string path, @string dir) {
     var errΔ1 = validateLookPath(path); if (errΔ1 != nil) {
-        return ("", new ΔErrorжerror(Ꮡ(new ΔError(path, errΔ1))));
+        return ("", new Errorжerror(Ꮡ(new Error(path, errΔ1))));
     }
 
     if (filepath.Base(path) == path) {
@@ -147,7 +147,7 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
         if (err == nil) {
             return (f, default);
         }
-        return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
+        return ("", new Errorжerror(Ꮡ(new Error(@file, err))));
     }
 
     // On Windows, creating the NoDefaultCurrentDirectoryInExePath
@@ -167,7 +167,7 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
                 execerrdot.IncNonDefault();
                 return (f, default);
             }
-            (dotf, dotErr) = (f, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
+            (dotf, dotErr) = (f, new Errorжerror(Ꮡ(new Error(@file, ErrDot))));
         }
     }
 
@@ -202,7 +202,7 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
                     // Otherwise, record this path as the one to which we must resolve,
                     // with or without a dotErr.
                     if (dotErr == nil) {
-                        (dotf, dotErr) = (f, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
+                        (dotf, dotErr) = (f, new Errorжerror(Ꮡ(new Error(@file, ErrDot))));
                     }
                     continue;
                 }
@@ -215,7 +215,7 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
     if (dotErr != nil) {
         return (dotf, dotErr);
     }
-    return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrNotFound))));
+    return ("", new Errorжerror(Ꮡ(new Error(@file, ErrNotFound))));
 }
 
 } // end exec_package

@@ -75,7 +75,7 @@ public static void TestHasMonotonicClock(ж<Δtesting.T> t) {
     var ticker = NewTicker(1);
     yes(tick1ˢ, ᐸꟷ(ticker.C));
     ticker.Stop();
-    no(date200911230000Utcˢ, Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC));
+    no(date200911230000Utcˢ, Date(2009, 11, 23, 0, 0, 0, 0, UTC));
     var (tp, _) = Parse(UnixDate, satMar7110639Pst2015ˢ2);
     no(parseUnixDateSatMar71106ˢ, tp);
     no(unix14860573710ˢ, Unix(1486057371, 0));
@@ -89,7 +89,7 @@ public static void TestHasMonotonicClock(ж<Δtesting.T> t) {
     yes("tm", tm);
 
     no(tuAdd1ˢ, tu.Add(1));
-    no(tuInUtcˢ, tu.In(ΔUTC));
+    no(tuInUtcˢ, tu.In(UTC));
     no(tuAddDate111ˢ, tu.AddDate(1, 1, 1));
     no(tuAddDate000ˢ, tu.AddDate(0, 0, 0));
     no(tuLocalˢ, tu.Local());
@@ -100,7 +100,7 @@ public static void TestHasMonotonicClock(ж<Δtesting.T> t) {
     yes(tmAdd1ˢ, tm.Add(1));
     no(tmAddDate111ˢ, tm.AddDate(1, 1, 1));
     no(tmAddDate000ˢ, tm.AddDate(0, 0, 0));
-    no(tmInUtcˢ, tm.In(ΔUTC));
+    no(tmInUtcˢ, tm.In(UTC));
     no(tmLocalˢ, tm.Local());
     no(tmUtcˢ, tm.UTC());
     no(tmRound2ˢ, tm.Round(2));

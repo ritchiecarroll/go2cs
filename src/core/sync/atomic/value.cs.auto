@@ -10,6 +10,7 @@
 namespace go.sync;
 
 using @unsafe = unsafe_package;
+using static atomic_package;
 
 partial class atomic_package {
 
@@ -27,6 +28,8 @@ partial struct efaceWords {
     internal @unsafe.Pointer typ;
     internal @unsafe.Pointer data;
 }
+
+} partial class atomicᴛValue {
 
 // Load returns the value set by the most recent Store.
 // It returns nil if there has been no call to Store for this Value.
@@ -46,8 +49,12 @@ public static any /*val*/ Load(this ж<Value> Ꮡv) {
     return val;
 }
 
+} partial class atomic_package {
+
 internal static readonly ж<byte> ᏑfirstStoreInProgress = new StaticBox<byte>(default(byte));
 internal static ref byte firstStoreInProgress => ref ((StaticBox<byte>)ᏑfirstStoreInProgress).ValueSlot;
+
+} partial class atomicᴛValue {
 
 // Store sets the value of the [Value] v to val.
 // All calls to Store for a given Value must use values of the same concrete type.
@@ -202,6 +209,8 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
         return CompareAndSwapPointer(vp.of(efaceWords.Ꮡdata), data, np.of(efaceWords.Ꮡdata).Value);
     }
 }
+
+} partial class atomic_package {
 
 // Disable/enable preemption, implemented in runtime.
 internal static partial nint runtime_procPin();

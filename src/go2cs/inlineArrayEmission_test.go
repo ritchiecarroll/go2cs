@@ -10,7 +10,10 @@ package main
 
 import (
 	"go/build"
+	"os"
+	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -108,11 +111,296 @@ func view(p unsafe.Pointer) *Outer { return (*Outer)(p) }
 `)
 
 	for _, want := range []string{
-		`[GoInlineLayout(Size = 6, Align = 2), StructLayout(LayoutKind.Explicit, Size = 6)] partial struct S22`,
-		`[GoInlineLayout(Size = 8, Align = 2), StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Outer`,
+		`[global::go.golib.GoInlineLayout(Size = 6, Align = 2), StructLayout(LayoutKind.Explicit, Size = 6)] partial struct S22`,
+		`[global::go.golib.GoInlineLayout(Size = 8, Align = 2), StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Outer`,
 	} {
 		if !strings.Contains(cs, want) {
 			t.Errorf("want %q:\n%s", want, cs)
+		}
+	}
+}
+
+// [GoInlineLayout] lives in go.golib, which a converted project's global usings do not import. The converter adds
+// `using go.golib;` only where an admitted struct holds an array field itself, so a file whose admitted structs hold
+// none (a plain struct admitted because an admitted struct holds it by value) failed to build: CS0246 in
+// x/sys/windows' setupapi_windows.cs, release-smoke win-x64 run 43622476546 (COORD 2026-11-14 19:23Z). The stamp is
+// spelled fully qualified, as the converter's other go.golib names are.
+var inlineLayoutStampModule = map[string]string{
+	"pair.go": `package stamponly
+
+type Pair struct {
+	X int32
+	Y int32
+}
+`,
+	"holder.go": `package stamponly
+
+import "unsafe"
+
+type Holder struct {
+	P Pair
+	B [4]byte
+}
+
+func View(p unsafe.Pointer) *Holder { return (*Holder)(p) }
+`,
+}
+
+// convertInlineLayoutStampModule converts the two-file module and returns its output root.
+func convertInlineLayoutStampModule(t *testing.T) string {
+	t.Helper()
+
+	return convertInlineModule(t, "stamponly", inlineLayoutStampModule)
+}
+
+// convertInlineModule converts the module example.com/<name> made of files, for the host platform, and returns its
+// output root.
+func convertInlineModule(t *testing.T, name string, files map[string]string) string {
+	t.Helper()
+	isolateConverterPathGlobals(t)
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/"+name+"\n\ngo 1.23\n")
+
+	for file, source := range files {
+		writeModuleFile(t, filepath.Join(appDir, file), source)
+	}
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{goRoot: goRoot, goPath: build.Default.GOPATH, go2csPath: filepath.Join(root, "out"), recurse: true, targetPlatform: runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces: 4, preferVarDecl: true, useChannelOperators: true, hoistLiterals: true}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	return filepath.Join(options.go2csPath, "src", "example.com", name)
+}
+
+func TestInlineArrayLayoutStampIsFullyQualified(t *testing.T) {
+	out := convertInlineLayoutStampModule(t)
+	pair := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "pair.cs")), "\r\n", "\n")
+
+	if strings.Contains(pair, "using go.golib;") {
+		t.Fatalf("pair.cs must not import go.golib, or the fixture cannot show the stamp resolving alone:\n%s", pair)
+	}
+
+	if want := `[global::go.golib.GoInlineLayout(Size = 8, Align = 4), StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Pair`; !strings.Contains(pair, want) {
+		t.Errorf("want %q:\n%s", want, pair)
+	}
+}
+
+// The same module BUILT with the .NET SDK. GO2CS_INLINE_BUILD=1 runs it (it builds golib too, so it is opt-in like the
+// cgo build arms).
+func TestInlineArrayLayoutStampModuleBuilds(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, convertInlineLayoutStampModule(t)); err != nil {
+		t.Fatalf("a module file whose only golib name is the layout stamp does not build: %v\n%s", err, built)
+	}
+}
+
+// requireInlineBuild skips unless GO2CS_INLINE_BUILD=1 and returns the dotnet SDK the template's framework needs. These
+// arms build golib too, so they are opt-in like the cgo build arms.
+func requireInlineBuild(t *testing.T) string {
+	t.Helper()
+
+	if os.Getenv("GO2CS_INLINE_BUILD") != "1" {
+		t.Skip("NOT RUN: set GO2CS_INLINE_BUILD=1 to build the converted module with the .NET SDK (Inconclusive, not a pass)")
+	}
+
+	framework := regexp.MustCompile(`<TargetFramework Condition="[^"]*">([^<]+)</TargetFramework>`).FindStringSubmatch(renderCsprojTemplate("Library", "", ""))
+
+	if framework == nil {
+		t.Fatal("the rendered template names no TargetFramework")
+	}
+
+	return requireDotnetSdk(t, framework[1])
+}
+
+// buildConvertedInlineModule builds the one project under out for the host and returns the tail of the build output.
+// Each compiler error is logged as it reads.
+func buildConvertedInlineModule(t *testing.T, dotnet, out string) (string, error) {
+	t.Helper()
+
+	projects, err := filepath.Glob(filepath.Join(out, "*.csproj"))
+
+	if err != nil || len(projects) != 1 {
+		t.Fatalf("the conversion wrote %d project files, want 1 (%v)", len(projects), err)
+	}
+
+	buildCmd := exec.Command(dotnet, cgoBuildArgs(t, projects[0], runtime.GOOS, "")...)
+	buildCmd.Env = append(os.Environ(), "DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1")
+	built, err := buildCmd.CombinedOutput()
+
+	for _, line := range cgoCompilerErrors(string(built)) {
+		t.Logf("READING build error %s", line)
+	}
+
+	return lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40), err
+}
+
+// A struct literal that stores a whole array value into an array field: an inline array spells only an array literal
+// there (the member's constructor), so any other value (a variable, a dereference, a call) is a whole value stored,
+// unspelled at I0 as an assignment to x.f is. The face rule read selections only, so x/sys/windows' RawSockaddrBth was
+// admitted and SockaddrBth.sockaddr's literal handed four array<byte> values to array2<byte>..array16<byte> fields:
+// CS1503 at syscall_windows.cs(673,24), release-smoke win-x64 run 43633010415 (COORD 2026-11-14 21:32Z). The
+// control, Pair, stores only an array literal and stays inline.
+var inlineLiteralStoreModule = map[string]string{
+	"bth.go": `package literalstore
+
+import "unsafe"
+
+const AF_BTH = 32
+
+type GUID struct {
+	Data1 uint32
+	Data2 uint16
+	Data3 uint16
+	Data4 [8]byte
+}
+
+type RawSockaddrBth struct {
+	AddressFamily  [2]byte
+	BtAddr         [8]byte
+	ServiceClassId [16]byte
+	Port           [4]byte
+}
+
+type SockaddrBth struct {
+	BtAddr         uint64
+	ServiceClassId GUID
+	Port           uint32
+	raw            RawSockaddrBth
+}
+
+func (sa *SockaddrBth) sockaddr() (unsafe.Pointer, int32) {
+	family := AF_BTH
+	sa.raw = RawSockaddrBth{
+		AddressFamily:  *(*[2]byte)(unsafe.Pointer(&family)),
+		BtAddr:         *(*[8]byte)(unsafe.Pointer(&sa.BtAddr)),
+		Port:           *(*[4]byte)(unsafe.Pointer(&sa.Port)),
+		ServiceClassId: *(*[16]byte)(unsafe.Pointer(&sa.ServiceClassId)),
+	}
+	return unsafe.Pointer(&sa.raw), int32(unsafe.Sizeof(sa.raw))
+}
+
+type Pair struct {
+	A [2]byte
+	N uint16
+}
+
+func View(p unsafe.Pointer) *Pair { return (*Pair)(p) }
+
+func Make() Pair { return Pair{A: [2]byte{1, 2}, N: 3} }
+`,
+}
+
+func TestInlineArrayStructLiteralStoreKeepsTheTypeOut(t *testing.T) {
+	out := convertInlineModule(t, "literalstore", inlineLiteralStoreModule)
+	cs := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "bth.cs")), "\r\n", "\n")
+
+	if !strings.Contains(cs, "\npartial struct RawSockaddrBth {") {
+		t.Errorf("want RawSockaddrBth kept as array<T> storage (its literal stores a whole value):\n%s", cs)
+	}
+
+	if !strings.Contains(cs, "partial struct Pair {") || !strings.Contains(cs, "GoInlineLayout(Size = 4, Align = 2), StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Pair {") {
+		t.Errorf("want Pair held inline (its literal stores only an array literal):\n%s", cs)
+	}
+}
+
+// The same module BUILT with the .NET SDK: at the face rule that read selections only it fails with CS1503.
+func TestInlineArrayStructLiteralStoreModuleBuilds(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, convertInlineModule(t, "literalstore", inlineLiteralStoreModule)); err != nil {
+		t.Fatalf("a struct literal storing a whole array value into an admitted field does not build: %v\n%s", err, built)
+	}
+}
+
+// COORD 2026-11-14 13:56Z, the sqlite-cs wall: golang.org/x/sys decodes a RawSockaddrAny by reinterpreting it as each
+// family's sockaddr, and every family sockaddr is kept out by a face (a whole Addr copied, &Path[0]) while the Any
+// itself is admitted, so the module was refused (GO2CS2010) on every target. Under the automatic rule the pair now
+// agrees by keeping the Any out with its partners; the rest of the closure (RawSockaddr) stays inline.
+func TestInlineArrayPairKeepsTheSockaddrDecodeOut(t *testing.T) {
+	cs := convertInlineArrayFixture(t, "sockaddr", `package sockaddr
+
+import "unsafe"
+
+const (
+	AF_UNIX = 1
+	AF_INET = 2
+)
+
+type RawSockaddr struct {
+	Family uint16
+	Data   [14]int8
+}
+
+type RawSockaddrAny struct {
+	Addr RawSockaddr
+	Pad  [100]int8
+}
+
+type RawSockaddrInet4 struct {
+	Family uint16
+	Port   uint16
+	Addr   [4]byte
+	Zero   [8]uint8
+}
+
+type RawSockaddrUnix struct {
+	Family uint16
+	Path   [108]int8
+}
+
+type SockaddrInet4 struct {
+	Port int
+	Addr [4]byte
+	raw  RawSockaddrInet4
+}
+
+func (sa *SockaddrInet4) sockaddr() (unsafe.Pointer, int32) {
+	sa.raw.Family = AF_INET
+	sa.raw.Addr = sa.Addr
+	return unsafe.Pointer(&sa.raw), int32(unsafe.Sizeof(sa.raw))
+}
+
+func (rsa *RawSockaddrAny) Decode() (string, [4]byte) {
+	switch rsa.Addr.Family {
+	case AF_UNIX:
+		pp := (*RawSockaddrUnix)(unsafe.Pointer(rsa))
+		n := 0
+		for n < len(pp.Path) && pp.Path[n] != 0 {
+			n++
+		}
+		return string(unsafe.Slice((*byte)(unsafe.Pointer(&pp.Path[0])), n)), [4]byte{}
+	case AF_INET:
+		pp := (*RawSockaddrInet4)(unsafe.Pointer(rsa))
+		return "", pp.Addr
+	}
+	return "", [4]byte{}
+}
+
+func Wire(p unsafe.Pointer) *RawSockaddrAny { return (*RawSockaddrAny)(p) }
+`)
+
+	if !strings.Contains(cs, `[global::go.golib.GoInlineLayout(Size = 16, Align = 2), StructLayout(LayoutKind.Explicit, Size = 16)] partial struct RawSockaddr {`) {
+		t.Errorf("want RawSockaddr held inline:\n%s", cs)
+	}
+
+	for _, kept := range []string{"RawSockaddrAny", "RawSockaddrInet4", "RawSockaddrUnix"} {
+		if !strings.Contains(cs, "\npartial struct "+kept+" {") {
+			t.Errorf("want %s kept as array<T> storage:\n%s", kept, cs)
 		}
 	}
 }
@@ -224,5 +512,98 @@ func main() {
 		if !strings.Contains(cs, want) {
 			t.Errorf("want %q:\n%s", want, cs)
 		}
+	}
+}
+
+// A defined type over an admitted struct: go-winio's `type GUID windows.GUID` (pkg/guid, v0.6.2). go2cs-gen lays the
+// defined type out as a wrapper over its base, forwarding the base's fields, so guid.GUID holds windows.GUID's inline
+// array8<byte> and, like windows.GUID, copies by value with no ΔClone. The converter keyed the defined type by its own
+// name, which nothing admits, so it emitted g.ΔClone() at every value copy (CS1061 x13 in the i9's Windows TypeScript
+// build, COORD 2026-11-15 01:19Z). Admission now follows the base: the defined type is held inline exactly when its base
+// is, and its package's record says so, so a consumer one package further (the root here, pkg/etw in go-winio) reads
+// it too. The pointer conversion back to the base, which go-winio's etw makes, needs the shared layout. Slicing the
+// field from the defined type's package is not spelled here; that is the separate face question.
+var inlineDefinedOverModule = map[string]string{
+	"win/win.go": `package win
+
+import "unsafe"
+
+type GUID struct {
+	Data1 uint32
+	Data2 uint16
+	Data3 uint16
+	Data4 [8]byte
+}
+
+func Register(g *GUID) uintptr { return uintptr(unsafe.Pointer(g)) }
+`,
+	"guid/guid.go": `package guid
+
+import "example.com/definedover/win"
+
+type GUID win.GUID
+
+func FromParts(a uint32, d4 [8]byte) GUID {
+	var g GUID
+	g.Data1 = a
+	for i := range d4 {
+		g.Data4[i] = d4[i]
+	}
+	return g
+}
+
+func (g GUID) First() byte { return g.Data4[0] }
+
+func Copy(g GUID) GUID {
+	h := g
+	return h
+}
+`,
+	"definedover.go": `package definedover
+
+import (
+	"example.com/definedover/guid"
+	"example.com/definedover/win"
+)
+
+type Provider struct {
+	ID guid.GUID
+}
+
+func (p *Provider) Register() uintptr { return win.Register((*win.GUID)(&p.ID)) }
+
+func Snapshot(p Provider) guid.GUID {
+	id := p.ID
+	return id
+}
+`,
+}
+
+func TestInlineArrayDefinedTypeFollowsItsBase(t *testing.T) {
+	out := convertInlineModule(t, "definedover", inlineDefinedOverModule)
+	guidCs := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "guid", "guid.cs")), "\r\n", "\n")
+	guidInfo := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "guid", "package_info.cs")), "\r\n", "\n")
+	rootCs := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "definedover.cs")), "\r\n", "\n")
+
+	if strings.Contains(guidCs, "ΔClone") {
+		t.Errorf("guid.GUID is laid out over the admitted win.GUID and copies by value; want no ΔClone:\n%s", guidCs)
+	}
+
+	if !strings.Contains(guidInfo, `GoInlineArrayType("GUID")`) {
+		t.Errorf("want guid's record to list GUID as held inline, so a consumer package reads it:\n%s", guidInfo)
+	}
+
+	if strings.Contains(rootCs, "ΔClone") {
+		t.Errorf("a consumer of guid.GUID reads guid's record; want no ΔClone:\n%s", rootCs)
+	}
+}
+
+// The same module BUILT with the .NET SDK: at the admission that keyed a defined type by its own name it fails with
+// CS1061 ('GUID' does not contain a definition for 'ΔClone').
+func TestInlineArrayDefinedTypeModuleBuilds(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, convertInlineModule(t, "definedover", inlineDefinedOverModule)); err != nil {
+		t.Fatalf("a defined type over an admitted struct does not build: %v\n%s", err, built)
 	}
 }

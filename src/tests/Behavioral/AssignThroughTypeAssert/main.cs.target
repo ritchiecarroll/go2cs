@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,14 +14,22 @@ partial struct Lit {
     public @string Name;
 }
 
+} partial class mainᴛLit {
+
 internal static void node(this ref Lit _) { }
+
+} partial class main_package {
 
 partial struct ValueSpec {
     public slice<@string> Names;
     public slice<Node> Values;
 }
 
+} partial class mainᴛValueSpec {
+
 internal static void node(this ref ValueSpec _) { }
+
+} partial class main_package {
 
 internal static void walk(Node root, Func<Node, bool> f) {
     f(root);

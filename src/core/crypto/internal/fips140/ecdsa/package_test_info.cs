@@ -7,14 +7,12 @@
 global using static global::go.crypto.@internal.fips140.ecdsa_package;
 
 // <ImportedTypeAliases>
-global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.crypto.@internal.fips140.ecdsa_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

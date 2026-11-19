@@ -61,7 +61,7 @@ using static go.@internal.coverage.encodecounter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/encodecounter/encode.go", "encode.cs", "ACZKgu6CggAPJuKClKaigoKCgoKCgoKmprSCgqaClIKUgqaClKaygIKkyoKAgqSUlIKCgoKUuICCtoKCgIKkgoKAgraAgqSUqsKCgpSCgoKmgoKUgpSClIKUgpSClIKmtO6ClKaCgpSCgpSClKbugpKCgoKCgoKCgoKClJSCgoKUuJKCgIK2gIK2gIKkgoKmlICCpKaCgriClA==", "128-135:1;234-255:1;258-277:2", "", "40=NewWriter/1/1/2")]
+[assembly: GoPositionMap("internal/coverage/encodecounter/encode.go", "encode.cs", "ACdKgu6CggARJuKClMaigoKCgoKCgoKmxrSCgqaClIKUgqaClKaygIKkyoKAgqSUlIKCgoKUuICCtoKCgIKkgoKAgraAgqSUqsKCgpSCgoKmgoKUgpSClIKUgpSClIKmtO6ClKaCgpSCgpSClKbugpKCgoKCgoKCgoKClJSCgoKUuJKCgIK2gIK2gIKkgoKmlICCpKaCgriClA==", "128-135:1;234-255:1;258-277:2", "", "41=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -99,3 +99,13 @@ public static partial class encodecounter_package
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(encodecounter_package.CoverageDataWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class encodecounterᴛCoverageDataWriter;
+// </MethodHolders>

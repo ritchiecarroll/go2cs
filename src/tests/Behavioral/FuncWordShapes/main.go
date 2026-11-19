@@ -1,6 +1,7 @@
 // FuncWordShapes: a func value carried as a number, in the six structural shapes ccgo writes (sqlite-cs S1).
 // m1/m2 read a func as a word, w2 writes a func into a word slot, r1/r2 read a word as a func, w1 writes a word
-// into a func variable. Nothing prints a raw word: only equalities, nil tests and call results.
+// into a func variable, w3 writes a func through a pointer whose target is known only at run time.
+// Nothing prints a raw word: only equalities, nil tests and call results.
 package main
 
 import (
@@ -89,6 +90,43 @@ func main() {
 	*(*uintptr)(unsafe.Pointer(&z)) = 0
 	fmt.Println("w1 zero is nil:", z == nil)
 
+	// w3: a func stored through a pointer that is not `&v` at the store. What the pointer names is known at run time.
+	// A func variable: the variable is then called.
+	var h func(int, int) int
+	storeFunc(unsafe.Pointer(&h), mul)
+	fmt.Println("w3 func variable h(5,6):", h(5, 6))
+	storeFunc(unsafe.Pointer(&h), nil)
+	fmt.Println("w3 func variable stored nil:", h == nil)
+
+	// A word slot at a computed address inside a package variable (vfs/patches64.go's shape): read back, compared
+	// and called.
+	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gwords), 8)) = add
+	fmt.Println("w3 word slot == m1 add:", gwords[1] == wAdd)
+	fmt.Println("w3 word slot r1(3,4):", callR1(gwords[1], 3, 4))
+	fmt.Println("w3 neighbours untouched:", gwords[0] == 0 && gwords[2] == 0)
+	*(*func(int, int) int)(unsafe.Pointer(uintptr(unsafe.Pointer(&gwords)) + 16)) = mul
+	fmt.Println("w3 word slot, arithmetic form == m1 mul:", gwords[2] == wMul)
+
+	// The same into a local, through a function.
+	var words [3]uintptr
+	storeFunc(unsafe.Add(unsafe.Pointer(&words), 8), mul)
+	fmt.Println("w3 local word slot == m1 mul:", words[1] == wMul, words[0] == 0 && words[2] == 0)
+
+	// The inside of a struct that holds references: a func field takes the func, a word field takes the word.
+	gtable.name = "t"
+	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gtable), unsafe.Offsetof(gtable.f))) = add
+	fmt.Println("w3 func field f(1,2):", gtable.f(1, 2))
+	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gtable), unsafe.Offsetof(gtable.w))) = mul
+	fmt.Println("w3 word field == m1 mul:", gtable.w == wMul, gtable.name)
+	lt := &table{name: "lt"}
+	storeFunc(unsafe.Add(unsafe.Pointer(lt), unsafe.Offsetof(lt.f)), mul)
+	fmt.Println("w3 local func field f(3,3):", lt.f(3, 3), lt.name)
+
+	// A named func type's variable takes a func stored as the unnamed type.
+	var nb binop
+	storeFunc(unsafe.Pointer(&nb), add)
+	fmt.Println("w3 named func variable nb(2,2):", nb(2, 2))
+
 	// nil: a nil func's word is 0.
 	var nf func(int, int) int
 	fmt.Println("m2 nil word is 0:", wordOf(nf) == 0)
@@ -109,6 +147,23 @@ func main() {
 	mv := acc.plus
 	wmv := wordOf(mv)
 	fmt.Println("method value r1(1,2):", callR1(wmv, 1, 2))
+}
+
+// storeFunc stores a func through a pointer it is handed.
+//
+//go:noinline
+func storeFunc(p unsafe.Pointer, fn func(int, int) int) {
+	*(*func(int, int) int)(p) = fn
+}
+
+var gwords [3]uintptr
+
+var gtable table
+
+type table struct {
+	name string
+	f    func(int, int) int
+	w    uintptr
 }
 
 type counter struct{ n int }

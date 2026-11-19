@@ -1,0 +1,71 @@
+namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using @unsafe = unsafe_package;
+
+partial class main_package {
+
+partial struct smallMem /*[64]byte*/;
+
+partial struct hdr {
+    internal int32 n;
+    internal array<byte> buf = new(64);
+}
+
+internal static void main() {
+    var exprᴛ1 = os.Args[1];
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "ga"u8: {
+        var h = Ꮡ(new hdr());
+        var a = h.Ꮡbuf.Reinterpret<array<byte>, smallMem>();
+        a.Value[1] = 3;
+        fmt.Println(h.buf[1], a.Value[1], h.buf[..8]);
+        break;
+    }
+    case {} when exprᴛ1 == "gb"u8: {
+        var h = Ꮡ(new hdr());
+        var b = @unsafe.Pointer.To<smallMem>(@unsafe.Pointer.FromPinnedBox(h.at(hdr.Ꮡbuf, 0)));
+        b.Value[2] = 4;
+        fmt.Println(h.buf[2], b.Value[2], h.buf[..8]);
+        break;
+    }
+    case {} when exprᴛ1 == "gd"u8: {
+        ref var arr = ref heap(new array<byte>(64), out var Ꮡarr);
+        var d = Ꮡarr.Reinterpret<array<byte>, smallMem>();
+        d.Value[4] = 6;
+        fmt.Println(arr[4], d.Value[4], arr[..8]);
+        break;
+    }
+    case {} when exprᴛ1 == "ge"u8: {
+        ref var sm = ref heap(new smallMem(), out var Ꮡsm);
+        var e = Ꮡsm.Reinterpret<smallMem, array<byte>>();
+        e.Value[5] = 7;
+        fmt.Println(sm[5], e.Value[5], sm[..8]);
+        break;
+    }
+    case {} when exprᴛ1 == "gf"u8: {
+        ref var sm = ref heap(new smallMem(), out var Ꮡsm);
+        var f = Ꮡsm;
+        f.Value[6] = 8;
+        fmt.Println(sm[6], f.Value[6], sm[..8]);
+        break;
+    }
+    case {} when exprᴛ1 == "gg"u8: {
+        var s = new slice<byte>(64);
+        var g = @unsafe.Pointer.To<smallMem>(@unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)));
+        g.Value[7] = 9;
+        fmt.Println(s[7], g.Value[7], s[..8]);
+        break;
+    }
+    case {} when exprᴛ1 == "gh"u8: {
+        ref var w = ref heap(new array<uint64>(8), out var Ꮡw);
+        var x = @unsafe.Pointer.To<smallMem>(@unsafe.Pointer.FromPinnedBox(Ꮡw));
+        x.Value[0] = 1;
+        fmt.Println(w[0], x.Value[0], w[..2]);
+        break;
+    }}
+
+}
+
+} // end main_package

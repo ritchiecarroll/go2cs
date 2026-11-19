@@ -16,10 +16,15 @@ An *example* link opens a behavioral test: a Go program, its converted C#, and t
 print. [Limitations](Limitations.md) and [Known issues](KnownIssues.md) have the detail behind every
 entry that is supported with limits or not supported yet.
 
-<!-- Assumed release state: the cgo, linux/arm64 and windows/arm64 rows describe the state planned for the
-     next release and get a final accuracy pass before it ships. Grounding: cgo, docs/PLAN-cgo-interop.md and the
-     converter's cgo*.go files; linux/arm64, docs/phase4/DESIGN-linux-arm64-flavour.md; windows/arm64,
-     docs/KnownIssues.md (GO2CS3004). Internal records stay unlinked from published pages. -->
+<!-- Assumed release state: the linux/arm64 and windows/arm64 rows describe the state planned for the
+     next release and get a final accuracy pass before it ships. Grounding: linux/arm64,
+     docs/phase4/DESIGN-linux-arm64-flavour.md; windows/arm64, docs/KnownIssues.md (GO2CS3004). Internal records stay
+     unlinked from published pages.
+     The two cgo rows are NOT assumed: 2026-11-14 (H, the release-notes audit's item for H), they describe the release
+     tip, where cgo Phase 2 and Phase 3 increment 3.1 have landed (43ac9e33fa, batch 305). Grounding:
+     docs/Limitations.md's cgo items; docs/phase4/DESIGN-cgo-phase2-pinvoke.md section 11.22 (the G1 gate, hosted on
+     linux/amd64, darwin/amd64, darwin/arm64, windows/amd64); docs/phase4/DESIGN-cgo-phase3-marshaling.md section 16 and
+     the hosted cgo-e2e legs 43638330006, 43638338397 and 43638346986 (the same four targets, 50 of 50 arms). -->
 
 <div class="feature-matrix" markdown="1">
 
@@ -74,7 +79,7 @@ entry that is supported with limits or not supported yet.
 | Interface comparison | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | `==` on interface values compares dynamic type and value. [Example](../src/tests/Behavioral/InterfaceEqualityTyped/) |
 | Struct embedding and promotion | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | Promoted fields and methods, through pointers, across several levels and packages. [How](ConversionStrategies.md#struct-type-embedding) · [example](../src/tests/Behavioral/StructPromotion/) |
 | Type assertions | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | Both the panicking form and comma-ok. [Example](../src/tests/Behavioral/TypeAssert/) |
-| Type switches | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | [How](ConversionStrategies.md#type-switch-statements) · [example](../src/tests/Behavioral/TypeSwitch/). [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) lists one rare `int`/`int32` case (status to confirm). |
+| Type switches | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | [How](ConversionStrategies.md#type-switch-statements) · [example](../src/tests/Behavioral/TypeSwitch/) |
 
 ## Generics
 
@@ -85,7 +90,7 @@ entry that is supported with limits or not supported yet.
 | Constraints and type sets | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | Unions, `~T`, `comparable`, and constraints with methods. [How](ConversionStrategies-Reference/generic-constraints.md) · [example](../src/tests/Behavioral/Constraints/) |
 | Type inference | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | [Example](../src/tests/Behavioral/TypeInference/) |
 | Generic type aliases | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Converted, except an alias whose target is an anonymous struct or interface ([Limitations](Limitations.md#what-wont-make-the-trip)). [Example](../src/tests/Behavioral/GenericTypeAlias/) |
-| A pointer element under a self-referential constraint whose method returns a collection of the element | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` is refused with `GO2CS2002`; the same code over a value element converts ([Limitations](Limitations.md#what-wont-make-the-trip)). |
+| A pointer element under a self-referential constraint whose method returns a collection of the element | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` is refused with `GO2CS2002`; the same code over a value element converts ([Limitations](Limitations.md#what-wont-make-the-trip)). Two related pointer-element shapes are refused as `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)). |
 
 ## Concurrency
 
@@ -99,11 +104,11 @@ entry that is supported with limits or not supported yet.
 | `context`, timers and tickers | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | `context` passes Go's tests. [Example](../src/tests/Behavioral/SyncTimerChannel/) |
 | `runtime.Gosched`, `Goexit`, `LockOSThread` | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | [Example](../src/tests/Behavioral/GoexitDefers/) |
 | `testing/synctest` | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | Passes Go's tests ([roster](ValidatedTestPackages.md)). |
-| Goroutines | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Go's semantics, on real threads, not rewritten into `async`. Each live goroutine holds an operating-system thread, so thousands at once are fine and hundreds of thousands are not; macOS and Linux each cap the count lower ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go), [Known issues](KnownIssues.md)). [How](ConversionStrategies.md#goroutines) · [example](../src/tests/Behavioral/GoCallVariations/) |
+| Goroutines | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Go's semantics, on real threads by default. Each live goroutine then holds an operating-system thread, so thousands at once are fine and hundreds of thousands are not; macOS and Linux each cap the count lower ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go), [Known issues](KnownIssues.md)). [How](ConversionStrategies.md#goroutines) · [example](../src/tests/Behavioral/GoCallVariations/) |
 | Goroutine stacks | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Stacks do not grow: each goroutine reserves a large fixed stack, and recursion past it ends the process ([Tuning](Tuning.md#goroutine-stacks)). |
-| `runtime.GOMAXPROCS` | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Read and set, but it does not limit parallelism: `GOMAXPROCS(1)` does not run goroutines one at a time ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). |
+| `runtime.GOMAXPROCS` | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Read and set; with the default threads it does not limit parallelism: `GOMAXPROCS(1)` does not run goroutines one at a time ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). |
 | Deadlock detection | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Go's `all goroutines are asleep` report, with its goroutine blocks, appears only when every goroutine waits on a nil channel or an empty `select {}`; any other deadlock hangs ([Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)). |
-| The race detector (`-race`) | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Validation runs without it ([Limitations](Limitations.md#what-validated-means-and-what-it-doesnt)); converted code has no race detector (status to confirm). |
+| The race detector (`-race`) | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Validation runs without it ([Limitations](Limitations.md#what-validated-means-and-what-it-doesnt)); converted code has no race detector. |
 
 ## Memory and runtime
 
@@ -144,8 +149,8 @@ entry that is supported with limits or not supported yet.
 |---|---|---|
 | `windows/amd64` | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | The standard library is validated here. |
 | `linux/amd64` | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | glibc, validated here. Ubuntu's own .NET package has a [known issue](KnownIssues.md#ubuntus-packaged-net-10-can-end-a-converted-program-early). |
-| `darwin/amd64`, `darwin/arm64` | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Packages ship for both chips and validation is package by package: a [roster](ValidatedTestPackages.md) row shows a macOS count once its package validates. On Apple silicon the standard library is the `amd64` build ([Known issues](KnownIssues.md#on-apple-silicon-runtimegoarch-reports-amd64)). |
-| `linux/arm64` | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Packages ship for it (status to confirm). [Platforms](Roadmap.md#platforms) |
+| `darwin/amd64`, `darwin/arm64` | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Packages ship for both chips, and the standard library is validated on both ([roster](ValidatedTestPackages.md)). On Apple silicon the standard library is the `amd64` build ([Known issues](KnownIssues.md#on-apple-silicon-runtimegoarch-reports-amd64)). |
+| `linux/arm64` | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | glibc, validated here. A few standard-library members throw when called ([Known issues](KnownIssues.md#on-linux-arm64-15-standard-library-members-throw-when-called)). [Platforms](Roadmap.md#platforms) |
 | `windows/arm64` | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Builds with a warning and runs the Windows build, whose architecture-specific choices follow `amd64`; not validated. [Platforms](Roadmap.md#platforms) |
 | Other targets (`wasm`, the BSDs, 32-bit) | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | [Platforms](Roadmap.md#platforms) |
 
@@ -155,9 +160,9 @@ entry that is supported with limits or not supported yet.
 |---|---|---|
 | Calling converted Go from C# | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | A converted package is an ordinary .NET library ([Consuming converted Go](ConsumingGoFromCSharp.md)). [Example](../src/tests/CSharpConsumer/) |
 | System calls | <img src="assets/img/status-supported.svg" width="18" height="18" alt="Supported" title="Supported"> | The `syscall` package on Windows, Linux and macOS, including `syscall.NewCallback` on Windows. [Example](../src/tests/Behavioral/LinuxSpawnBasics/) · [callback](../src/tests/Behavioral/WindowsNewCallback/) |
-| cgo: calling C functions | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | A package that calls C library functions converts and compiles, and loads its C library at run time. C types, typedefs and constants arrive through a `C` pseudo-package, and structs pass by value or by pointer ([Roadmap](Roadmap.md#cgo)). |
+| cgo: calling C functions | <img src="assets/img/status-limits.svg" width="18" height="18" alt="Supported with limits" title="Supported with limits"> | Under `go2cs -cgo`, a package that calls C library functions converts and compiles, and loads its C library at run time. C types, typedefs and constants arrive through a `C` pseudo-package. Structs pass by value or by pointer. `C.CString`, `C.GoString`, `C.GoBytes`, `C.malloc`, `C.free`, a `void *` into C memory, and `defer C.f(…)` convert. Measured on linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64 ([Roadmap](Roadmap.md#cgo)). |
 | Calling .NET from Go source | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | The road runs one way: Go source cannot name a .NET API ([Limitations](Limitations.md#reading-and-debugging-the-output)). |
-| cgo: callbacks, C globals, unions, inline C | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Function pointers and callbacks into Go, C global variables, unions by value, flexible array members, a pointer into an array element as an argument, and C code written inline in the Go file ([Roadmap](Roadmap.md#cgo)). |
+| cgo: callbacks, C globals, unions, inline C | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Function pointers and callbacks into Go, C global variables, unions by value, flexible array members, a pointer into Go memory handed to C (an array or slice element, or `unsafe.Pointer(&x)`), and C code written inline in the Go file. Each is refused by name ([Roadmap](Roadmap.md#cgo)). |
 | Hand-written assembly (`.s` files) | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | Not translated: such a function converts to a stub that fails when called. Many libraries have a pure-Go build tag ([Limitations](Limitations.md#what-wont-make-the-trip)). The standard library uses Go's portable code and hand-written C# instead ([how](ConversionStrategies.md#the-standard-library-reproduces-go--tags-purego)). |
 | `plugin` | <img src="assets/img/status-not-yet.svg" width="18" height="18" alt="Not supported yet" title="Not supported yet"> | `plugin.Open` returns `plugin: not implemented`, as in a Go build without cgo. |
 

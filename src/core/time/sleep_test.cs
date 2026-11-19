@@ -95,7 +95,7 @@ public static void TestAfterFunc(ж<Δtesting.T> t) {
         i--;
         if (i >= 0) {
             AfterFunc(0, Ꮡf.ValueSlot);
-            Sleep(1 * ΔSecond);
+            Sleep(1 * Second);
         } else {
             cʗ1.ᐸꟷ(true);
         }
@@ -113,7 +113,7 @@ public static partial void TestTickerStress(ж<Δtesting.T> t) {
             // Yield so that the OS can wake up the timer thread,
             // so that it can generate channel sends for the main goroutine,
             // which will eventually set stop = 1 for us.
-            Sleep(ΔNanosecond);
+            Sleep(Nanosecond);
         }
     });
     var ticker = NewTicker(1);
@@ -132,7 +132,7 @@ public static partial void TestTickerConcurrentStress(ж<Δtesting.T> t) {
             // Yield so that the OS can wake up the timer thread,
             // so that it can generate channel sends for the main goroutine,
             // which will eventually set stop = 1 for us.
-            Sleep(ΔNanosecond);
+            Sleep(Nanosecond);
         }
     });
     var ticker = NewTicker(1);
@@ -219,7 +219,7 @@ internal static partial void benchmark(ж<Δtesting.B> Ꮡb, Action<ж<Δtesting
                 defer(Ꮡwg.Done, ref ᒐ);
                 var garbage = new slice<ж<Δtime.Timer>>((1 << 15));
                 foreach (var j in range(len(garbage))) {
-                    garbage[j] = AfterFunc(ΔHour, default);
+                    garbage[j] = AfterFunc(Hour, default);
                 }
                 garbageAllʗ1[iΔ1] = garbage;
             }
@@ -279,14 +279,14 @@ public static void BenchmarkStop(ж<Δtesting.B> b) {
     b.Run(implChanˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.B> bΔ1) => {
         benchmark(bΔ1, (ж<Δtesting.PB> pb) => {
             while (pb.Next()) {
-                NewTimer(1 * ΔSecond).Stop();
+                NewTimer(1 * Second).Stop();
             }
         });
     });
     b.Run(implFuncˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.B> bΔ2) => {
         benchmark(bΔ2, (ж<Δtesting.PB> pb) => {
             while (pb.Next()) {
-                newTimerFunc(1 * ΔSecond).Stop();
+                newTimerFunc(1 * Second).Stop();
             }
         });
     });
@@ -312,7 +312,7 @@ public static void BenchmarkStartStop1000(ж<Δtesting.B> b) {
             const nint N = 1000;
             var timers = new slice<ж<Δtime.Timer>>(N);
             foreach (var i in range(len(timers))) {
-                timers[i] = AfterFunc(ΔHour, default);
+                timers[i] = AfterFunc(Hour, default);
             }
 
             foreach (var i in range(len(timers))) {
@@ -325,18 +325,18 @@ public static void BenchmarkStartStop1000(ж<Δtesting.B> b) {
 public static void BenchmarkReset(ж<Δtesting.B> b) {
     b.Run(implChanˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.B> bΔ1) => {
         benchmark(bΔ1, (ж<Δtesting.PB> pb) => {
-            var t = NewTimer(ΔHour);
+            var t = NewTimer(Hour);
             while (pb.Next()) {
-                t.Reset(ΔHour);
+                t.Reset(Hour);
             }
             t.Stop();
         });
     });
     b.Run(implFuncˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.B> bΔ2) => {
         benchmark(bΔ2, (ж<Δtesting.PB> pb) => {
-            var t = newTimerFunc(ΔHour);
+            var t = newTimerFunc(Hour);
             while (pb.Next()) {
-                t.Reset(ΔHour);
+                t.Reset(Hour);
             }
             t.Stop();
         });
@@ -351,7 +351,7 @@ public static void BenchmarkSleep1000(ж<Δtesting.B> b) {
             Ꮡwg.Add(N);
             foreach (var _ᴛ1 in range(N)) {
                 goǃ(() => {
-                    Sleep(ΔNanosecond);
+                    Sleep(Nanosecond);
                     Ꮡwg.Done();
                 });
             }
@@ -440,14 +440,14 @@ internal static void testAfterStop(ж<Δtesting.T> t, Func<Δtime.Duration, ж<�
         }
         ᐸꟷ(c2);
         var selᴛ5 = t0.C;
-        var selᴛ6 = c1;
-        switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+        var c1ᴛ1 = c1;
+        switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(c1ᴛ1, ꓸꓸꓸ))) {
         case 0 when selᴛ5.ꟷᐳ(out _): {
             errs = append(errs, (@string)"event 0 was not stopped");
             continue;
             break;
         }
-        case 1 when selᴛ6.ꟷᐳ(out _): {
+        case 1 when c1ᴛ1.ꟷᐳ(out _): {
             errs = append(errs, (@string)"event 1 was not stopped");
             continue;
             break;
@@ -555,10 +555,10 @@ public static partial void TestTimerStopStress(ж<Δtesting.T> t) {
     t.Parallel();
     for (nint i = 0; i < 100; i++) {
         goǃ((nint iΔ1) => {
-            var timer = AfterFunc(2 * ΔSecond, () => {
+            var timer = AfterFunc(2 * Second, () => {
                 t.Errorf("timer %d was not stopped", iΔ1);
             });
-            Sleep(1 * ΔSecond);
+            Sleep(1 * Second);
             timer.Stop();
         }, i);
     }
@@ -685,7 +685,7 @@ public static partial void TestOverflowSleep(ж<Δtesting.T> t) {
     Δtime.Duration neg = /* Duration(-1 << 63) */ -9223372036854775808;
     Sleep(neg); // Returns immediately.
     var selᴛ11 = After(neg);
-    var selᴛ12 = After(1 * ΔSecond);
+    var selᴛ12 = After(1 * Second);
     switch (select(ᐸꟷ(selᴛ11, ꓸꓸꓸ), ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
     case 0 when selᴛ11.ꟷᐳ(out _): {
         // OK
@@ -706,7 +706,7 @@ internal static readonly object shouldBeUnreachableˢ = (@string)"Should be unre
 public static void TestIssue5745(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        var ticker = NewTicker(ΔHour);
+        var ticker = NewTicker(Hour);
         var tickerʗ1 = ticker;
         defer(() => {
             // would deadlock here before the fix due to
@@ -787,7 +787,7 @@ public static void TestZeroTimer(ж<Δtesting.T> t) {
         testZeroTimer(tΔ2, newTimerFunc);
     });
     t.Run(implCacheˢ, (ж<Δtesting.T> tΔ3) => {
-        var timer = newTimerFunc(ΔHour);
+        var timer = newTimerFunc(Hour);
         var timerʗ1 = timer;
         testZeroTimer(tΔ3, (Δtime.Duration d) => {
             timerʗ1.Reset(d);
@@ -808,7 +808,7 @@ internal static void testZeroTimer(ж<Δtesting.T> t, Func<Δtime.Duration, ж<�
         var s = Now();
         var ti = newTimer(0);
         ᐸꟷ(ti.C);
-        var diff = Since(s); if (diff > 2 * ΔSecond) {
+        var diff = Since(s); if (diff > 2 * Second) {
             t.Errorf("Expected time to get value from Timer channel in less than 2 sec, took %v", diff);
         }
     }
@@ -830,7 +830,7 @@ public static void TestTimerModifiedEarlier(ж<Δtesting.T> t) {
         nint count = 1000;
         nint fail = 0;
         for (nint i = 0; i < count; i++) {
-            var timer = newTimerFunc(ΔHour);
+            var timer = newTimerFunc(Hour);
             for (nint j = 0; j < 10; j++) {
                 if (!timer.Stop()) {
                     ᐸꟷ(timer.C);
@@ -1070,7 +1070,7 @@ public static partial void TestMultiWakeupTimer(ж<Δtesting.T> t) {
     }
 
     nint goroutines = Δruntime.GOMAXPROCS(0);
-    var timer = NewTimer(ΔNanosecond);
+    var timer = NewTimer(Nanosecond);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(goroutines);
     foreach (var _ᴛ1 in range(goroutines)) {
@@ -1088,7 +1088,7 @@ public static partial void TestMultiWakeupTimer(ж<Δtesting.T> t) {
                     default: {
                         break;
                     }}
-                    timerʗ1.Reset(ΔNanosecond);
+                    timerʗ1.Reset(Nanosecond);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1306,11 +1306,11 @@ public static void BenchmarkAdjustTimers10000(ж<Δtesting.B> b) {
             UntypedInt n = 10000;
             var timers = new slice<ж<Δtime.Timer>>(0, n);
             foreach (var _ᴛ1 in range(n)) {
-                var t = AfterFunc(ΔHour, () => {
+                var t = AfterFunc(Hour, () => {
                 });
                 timers = append(timersᴷ, timers, t);
             }
-            timers[n - 1].Reset(ΔNanosecond);
+            timers[n - 1].Reset(Nanosecond);
             Sleep(Microsecond);
             foreach (var (_, t) in range(timers)) {
                 t.Stop();

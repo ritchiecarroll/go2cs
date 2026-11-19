@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using Δio = io_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,6 +12,8 @@ partial struct Text {
 }
 
 internal static ж<strings.Reader> newReader(@string s) { return strings.NewReader(s); }
+
+} partial class mainᴛText {
 
 public static ж<strings.Reader> Reader(this ref Text stringsΔ1) { return newReader(stringsΔ1.s); }
 
@@ -40,6 +43,8 @@ public static (ж<Text>, ж<strings.Reader>) Addr(this Text stringsʗp) {
 }
 
 public static nint Len(this ref Text strings) { return len(strings.s); }
+
+} partial class main_package {
 
 internal static @string toUpper(@string s) { return strings.ToUpper(s); }
 

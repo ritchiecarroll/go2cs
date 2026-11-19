@@ -62,7 +62,7 @@ public class SyncMutexProfileTests
         }) { IsBackground = true };
         holder.Start();
         held.Wait();
-        gate = GateOf(shared);
+        gate = GateOf(ref shared.M);
         PrecreateStamps(gate);
         ready.Set();
         Volatile.Write(ref inLock, 1);
@@ -75,22 +75,25 @@ public class SyncMutexProfileTests
 
     private static readonly TimeSpan ParkBound = TimeSpan.FromMinutes(1);
 
-    private static readonly FieldInfo? s_gateField =
-        typeof(sync_package.Mutex).GetField("gate", BindingFlags.NonPublic | BindingFlags.Instance);
+    private static readonly MethodInfo? s_gateOf =
+        typeof(sync_package).GetMethod("gateOf", BindingFlags.NonPublic | BindingFlags.Static);
     private static readonly FieldInfo? s_waitStampsField =
         typeof(sync_package).GetField("s_waitStamps", BindingFlags.NonPublic | BindingFlags.Static);
     private static readonly FieldInfo? s_semaphoreWaitCount =
         typeof(SemaphoreSlim).GetField("m_waitCount", BindingFlags.NonPublic | BindingFlags.Instance);
 
-    // The mutex's gate, once a Lock has created it.
-    private static object GateOf(Shared shared) => GateOf(shared.M);
-
-    private static object GateOf(sync_package.Mutex m)
+    // The mutex's wait queue (its gate), installed now if the mutex has not contended yet: Lock installs
+    // it only on contention, and these fixtures read the gate before the waiter's Lock. The mutex is passed
+    // by ref and written back, so the handle lands in the mutex itself; every caller holds the only thread
+    // that touches the mutex at that point.
+    private static object GateOf(ref sync_package.Mutex m)
     {
-        Assert.IsNotNull(s_gateField, "the hand-own's Mutex.gate field");
+        Assert.IsNotNull(s_gateOf, "the hand-own's gateOf(ref Mutex)");
         RequireWaitCount();
-        object? gate = s_gateField.GetValue(m);
-        Assert.IsNotNull(gate, "a mutex that has been locked has its gate");
+        object?[] args = [m];
+        object? gate = s_gateOf.Invoke(null, args);
+        m = (sync_package.Mutex)args[0]!;
+        Assert.IsNotNull(gate, "gateOf returns the mutex's wait queue");
         return gate;
     }
 
@@ -104,7 +107,8 @@ public class SyncMutexProfileTests
     }
 
     // A thread is PARKED in Lock when its in-Lock flag is set, the gate's SemaphoreSlim counts a thread
-    // inside its monitor section (m_waitCount, read first), and the thread is then in WaitSleepJoin. Read by
+    // inside its monitor section (m_waitCount, read first) and holds no wakeup, and the thread is then in
+    // WaitSleepJoin. Read by
     // the holder, which holds the gate and touches nothing else, about a gate whose stamp record exists
     // (PrecreateStamps): the thread's try has failed, and the only place in Lock where it can wait after
     // that is inside gate.Wait(), past its stamp. WaitSleepJoin alone is not enough: a thread blocked on the
@@ -112,6 +116,18 @@ public class SyncMutexProfileTests
     // counts only a thread that has entered the monitor. (Measured: WaitSleepJoin alone read 13 of 20 idle
     // 300-episode runs red on unchanged golib, mostly at an episode's first Lock.) Plain threads, so Lock's
     // park scope is inert.
+    // And the gate holds NO wakeup (CurrentCount == 0, read after m_waitCount and before the thread state):
+    // a waiter the previous Unlock already woke is still counted in m_waitCount and still in WaitSleepJoin
+    // until it runs, but it is Go's dequeued waiter, charged by that Unlock. If the holder took the lock
+    // straight back, the woken waiter can take it between the holder's next swap to 0 and that Unlock's
+    // charge, retiring its stamp first, and that Unlock then records nothing: Go records nothing there
+    // either (unlockSlow returns on mutexWoken, internal/sync/mutex.go). Only the holder adds a wakeup, so
+    // a 0 the holder reads stays 0 until its own Unlock; with no wakeup to take, the waiter cannot leave
+    // Lock before that Unlock's charge, and the swap it made before waiting left `state` at 2.
+    // (Measured 2026-11-15, this file's alternating-workers arm called 50 times per process, 300 runs on a
+    // quiet 4-cpu box: without this read, 144 runs red, 219 of 101,743 asserted Unlocks, every one with
+    // `state` 1, one wakeup in the gate and one pulsed waiter; the mutex this one replaced read 0 of 300,
+    // because its Unlock charged before it released. With it, 0 of 300, and 0 of 300 beside 4 busy loops.)
     // Every test that reads Parked passes here first, on the test thread and before any thread it starts
     // can call Parked: a renamed or retyped field fails by name, never as a silent "not parked".
     private static void RequireWaitCount() =>
@@ -120,6 +136,7 @@ public class SyncMutexProfileTests
     private static bool Parked(object gate, Thread thread, ref int inLock) =>
         Volatile.Read(ref inLock) == 1 &&
         (int)s_semaphoreWaitCount!.GetValue(gate)! >= 1 &&
+        ((SemaphoreSlim)gate).CurrentCount == 0 &&
         (thread.ThreadState & ThreadState.WaitSleepJoin) != 0;
 
     private static void WithRates(int mutexFraction, nint blockRate, System.Action body)
@@ -198,9 +215,9 @@ public class SyncMutexProfileTests
         WithRates(1, 1, () =>
         {
             var shared = new Shared();
-            shared.M.Lock();                      // creates the gate; uncontended, so it records nothing
+            shared.M.Lock();                      // uncontended, so it records nothing (GateOf installs the gate)
             shared.M.Unlock();
-            object gate = GateOf(shared);
+            object gate = GateOf(ref shared.M);
             PrecreateStamps(gate);
             int64 blockBefore = Total(mutex: false);
             var missed = new System.Collections.Generic.List<string>();
@@ -402,7 +419,7 @@ public class SyncMutexProfileTests
                 }) { IsBackground = true };
                 holder.Start();
                 held.Wait();
-                gate = GateOf(box.Value);
+                gate = GateOf(ref box.Value);
                 PrecreateStamps(gate);
                 ready.Set();
                 Volatile.Write(ref inLock, 1);
@@ -511,7 +528,7 @@ public class SyncMutexProfileTests
             {
                 var shared = new Shared();
                 shared.M.Lock();
-                object gate = GateOf(shared);
+                object gate = GateOf(ref shared.M);
                 PrecreateStamps(gate);
                 int inLock = 0;
                 var waiter = new Thread(() =>
@@ -565,9 +582,9 @@ public class SyncMutexProfileTests
             for (; episode < MaxEpisodes && contended < MinContended && elapsed.Elapsed < budget; episode++)
             {
                 var shared = new Shared();
-                shared.M.Lock();                  // creates the gate; uncontended, so it records nothing
+                shared.M.Lock();                  // uncontended, so it records nothing (GateOf installs the gate)
                 shared.M.Unlock();
-                object gate = GateOf(shared);
+                object gate = GateOf(ref shared.M);
                 PrecreateStamps(gate);
                 using var start = new ManualResetEventSlim();
                 int[] inLock = new int[2];

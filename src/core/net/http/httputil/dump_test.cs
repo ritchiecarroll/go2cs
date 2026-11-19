@@ -20,15 +20,20 @@ using go.net;
 using go.runtime;
 using math;
 using static go.net.http.httputil_package;
+using static httputil_internal_test_package;
 
 partial class httputil_internal_test_package {
 
 internal partial struct eofReader {
 }
 
+} partial class httputil_internal_testᴛeofReader {
+
 internal static error Close(this eofReader n) { return default; }
 
 internal static (nint, error) Read(this eofReader n, slice<byte> _) { return (0, io.EOF); }
+
+} partial class httputil_internal_test_package {
 
 internal partial struct dumpTest {
     // Either Req or GetReq can be set/nil but not both.
@@ -69,7 +74,7 @@ internal static slice<dumpTest> dumpTests = slice<dumpTest>([
             URL: mustParseURL("/foo"),
             ProtoMajor: 1,
             ProtoMinor: 0,
-            Header: new httpꓸHeader(new map<@string, slice<@string>>{
+            Header: new http.Header(new map<@string, slice<@string>>{
                 ["X-Foo"] = ["X-Bar"]
             })
         )),
@@ -121,7 +126,7 @@ internal static slice<dumpTest> dumpTests = slice<dumpTest>([
                 Host: "post.tld",
                 Path: "/"
             )),
-            Header: new httpꓸHeader(new map<@string, slice<@string>>{
+            Header: new http.Header(new map<@string, slice<@string>>{
                 ["Content-Length"] = ["8193"]
             }),
 
@@ -218,7 +223,7 @@ public static partial void TestDumpRequest(ж<testing.T> t) {
             }
 
             if (req.Header == nil) {
-                req.Header = new httpꓸHeader(0);
+                req.Header = new http.Header(0);
             }
 
             if (ti.Body == nil) {
@@ -279,7 +284,7 @@ public static partial void TestDumpRequest(ж<testing.T> t) {
 
     // Validate we haven't leaked any goroutines.
     nint dg = default;
-    var dl = deadline(t, (time.Duration)(5000000000L), time.ΔSecond);
+    var dl = deadline(t, (time.Duration)(5000000000L), time.Second);
     while (time.Now().Before(dl)) {
         dg = runtime.NumGoroutine() - numg0; if (dg <= 4) {
             // No unexpected goroutines.
@@ -355,7 +360,7 @@ internal static slice<dumpResTestsᴛ1> dumpResTests = slice<dumpResTestsᴛ1>([
             ProtoMajor: 1,
             ProtoMinor: 1,
             ContentLength: 50,
-            Header: new httpꓸHeader(new map<@string, slice<@string>>{
+            Header: new http.Header(new map<@string, slice<@string>>{
                 ["Foo"] = ["Bar"]
             }),
             Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo"))) // shouldn't be used
@@ -416,7 +421,7 @@ foo
             ProtoMajor: 1,
             ProtoMinor: 1,
             ContentLength: 0,
-            Header: new httpꓸHeader(new map<@string, slice<@string>>{
+            Header: new http.Header(new map<@string, slice<@string>>{
                 // To verify if headers are not filtered out.
                 ["Foo1"] = ["Bar1"],
                 ["Foo2"] = ["Bar2"]
@@ -470,7 +475,7 @@ public static partial void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
         var timeout = (time.Duration)(10000000000L);
         var (deadline, ok) = t.Deadline(); if (ok) {
             timeout = time.Until(deadline);
-            timeout -= time.ΔSecond * 2; // Leave 2 seconds to report failures.
+            timeout -= time.Second * 2; // Leave 2 seconds to report failures.
         }
         for (nint i = 0; i < 1000; i++) {
             var delay = ((time.Duration)(int64)rand.Intn(5)) * time.Millisecond;
@@ -493,10 +498,10 @@ public static partial void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
                 outʗ1.ᐸꟷ(Ꮡerr.ValueSlot);
             });
 
-            var selᴛ1 = @out;
+            var outᴛ1 = @out;
             var selᴛ2 = time.After(timeout);
-            switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-            case 0 when selᴛ1.ꟷᐳ(out _): {
+            switch (select(ᐸꟷ(outᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+            case 0 when outᴛ1.ꟷᐳ(out _): {
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out _): {

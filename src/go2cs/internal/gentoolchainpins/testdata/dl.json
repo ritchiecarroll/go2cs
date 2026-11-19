@@ -1,60 +1,60 @@
 [
  {
-  "version": "go1.26.10",
+  "version": "go1.26.11",
   "stable": true,
   "files": [
    {
-    "filename": "go1.26.10.windows-amd64.zip",
+    "filename": "go1.26.11.windows-amd64.zip",
     "os": "windows",
     "arch": "amd64",
-    "version": "go1.26.10",
-    "sha256": "7ecd2d7260e82c59bcbd7f1077a07cee2dea607295b858df67195a1e4e09629b",
-    "size": 75004774,
+    "version": "go1.26.11",
+    "sha256": "71ae086f0137e665f855a811cc119152b6a783e0bbc1b906e709f46d80141eb0",
+    "size": 75074581,
     "kind": "archive"
    },
    {
-    "filename": "go1.26.10.windows-arm64.zip",
+    "filename": "go1.26.11.windows-arm64.zip",
     "os": "windows",
     "arch": "arm64",
-    "version": "go1.26.10",
-    "sha256": "6831fd8c31091243d5695c8fa3a721c9f4ae2bb36482763e77e57ee01b76489f",
-    "size": 71525215,
+    "version": "go1.26.11",
+    "sha256": "a4c7e96d431ad186392a25e00db525839c6ee3840e80385e3c187e41e4f1f8d2",
+    "size": 71588897,
     "kind": "archive"
    },
    {
-    "filename": "go1.26.10.linux-amd64.tar.gz",
+    "filename": "go1.26.11.linux-amd64.tar.gz",
     "os": "linux",
     "arch": "amd64",
-    "version": "go1.26.10",
-    "sha256": "ccfe7ae822d2c2f41f4fe7c956199967a4dac22d0ee0d2b2bfdb440aab3b20c5",
-    "size": 66936659,
+    "version": "go1.26.11",
+    "sha256": "9849f4e04ee35303714e34fbc3ac8ab44ea3e448a95aa182f91e3b9b79c710ec",
+    "size": 66999944,
     "kind": "archive"
    },
    {
-    "filename": "go1.26.10.linux-arm64.tar.gz",
+    "filename": "go1.26.11.linux-arm64.tar.gz",
     "os": "linux",
     "arch": "arm64",
-    "version": "go1.26.10",
-    "sha256": "3f4227ce7b206a513e794f1393adb473a07b46e94d18bd15d1c684bbb7319797",
-    "size": 63827526,
+    "version": "go1.26.11",
+    "sha256": "6c2f29b458b5add0835f18b776f69c8881a6d88428f1484a6da55755e620757e",
+    "size": 63895190,
     "kind": "archive"
    },
    {
-    "filename": "go1.26.10.darwin-amd64.tar.gz",
+    "filename": "go1.26.11.darwin-amd64.tar.gz",
     "os": "darwin",
     "arch": "amd64",
-    "version": "go1.26.10",
-    "sha256": "e820ab780c273ae4a340b79d0f3c4313b74ee029aa3874792145d44b9f4f91da",
-    "size": 67810289,
+    "version": "go1.26.11",
+    "sha256": "394baae971332f2bc783d6e2004ae57101479bd3b06ed8209a3fe3570d4ce498",
+    "size": 67888638,
     "kind": "archive"
    },
    {
-    "filename": "go1.26.10.darwin-arm64.tar.gz",
+    "filename": "go1.26.11.darwin-arm64.tar.gz",
     "os": "darwin",
     "arch": "arm64",
-    "version": "go1.26.10",
-    "sha256": "0b5183492292ada170f9b561a834863808dd02edba599e4ad0e89899330020b3",
-    "size": 64669745,
+    "version": "go1.26.11",
+    "sha256": "e3a42e67a7a8acf450ebada2b074c7ca863000ca514907b7185b45e8f5cdff57",
+    "size": 64730001,
     "kind": "archive"
    }
   ]

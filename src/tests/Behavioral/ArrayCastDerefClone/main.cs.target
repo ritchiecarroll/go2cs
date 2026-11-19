@@ -24,15 +24,15 @@ internal static holder typedCastDerefIntoStruct(ж<Row> p) {
 }
 
 internal static void typedCastDerefAssign(ж<Row> p) {
-    (p).Value = new Row(new nint[]{40, 50, 60}.array());
+    (p).Value.Assign(new Row(new nint[]{40, 50, 60}.array()));
 }
 
 internal static Row castDerefReturn(@unsafe.Pointer p) {
-    return (~(ж<Row>)(uintptr)(p)).Clone();
+    return (Row)@unsafe.Pointer.LoadArray<nint>(p, 3);
 }
 
 internal static array<uintptr> castDerefReturnDirect(@unsafe.Pointer p) {
-    return (~(ж<array<uintptr>>)(uintptr)(p)).Clone();
+    return @unsafe.Pointer.LoadArray<uintptr>(p, 2);
 }
 
 internal static void main() {

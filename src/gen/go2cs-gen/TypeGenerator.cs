@@ -178,6 +178,7 @@ public class TypeGenerator : ISourceGenerator
                                 hasEqualityOperators ? null : structDeclaration.GetEqualityFallbackMembers(context.Compilation),
                                 structDeclaration.GetInterfaceValueMembers(context.Compilation)),
                             ValueCloneFields = valueCloneFields,
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         };
 
@@ -311,6 +312,38 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeName = identifier,
                             TypeClass = "Numeric",
                             UsingStatements = usingStatements
+                        }
+                        .Generate();
+
+                        break;
+
+                    // A defined type over another DEFINED slice type (`type fermat nat`, `type nat []big.Word`;
+                    // github.com/remyoudompheng/bigfft) is a slice in Go: it is made, indexed, sliced and
+                    // len()'d like its base. Its definition names the base, as the Go source does, and the
+                    // base's own wrapper declares no slice surface for it, so follow the chain to the `[]elem`
+                    // at its bottom and generate the slice wrapper, plus the conversions to and from the base
+                    // that Go's `fermat(n)` and `nat(f)` need.
+                    case StructDeclarationSyntax when !string.IsNullOrWhiteSpace(typeDefinition) &&
+                                                      ResolveSliceElementType(context, typeDefinition, []) is { } sliceElement:
+                        typeName = QualifySourceAliasReferences(sliceElement, syntaxTree, semanticModel);
+
+                        generatedSource = new InheritedTypeTemplate
+                        {
+                            PackageNamespace = packageNamespace,
+                            EmitGoTypeAttribute = emitGoTypeAttribute,
+                            GoTypeDefinition = typeDefinition,
+                            PackageName = packageName,
+                            ObjectName = identifier,
+                            Scope = scope,
+                            TypeName = $"slice<{typeName}>",
+                            TargetTypeName = typeName,
+                            TypeClass = "Slice",
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
+                            NamedBaseTypeName = typeDefinition,
+                            NamedBaseIsPublic = context.GetStructDeclaration(typeDefinition) is (StructDeclarationSyntax baseDeclaration, Compilation baseCompilation) &&
+                                baseCompilation.GetSemanticModel(baseDeclaration.SyntaxTree).GetDeclaredSymbol(baseDeclaration) is ITypeSymbol baseSymbol &&
+                                StructDeclarationSyntaxExtensions.IsMemberTypePublic(baseSymbol),
+                            ReadOnlyValue = false
                         }
                         .Generate();
 
@@ -486,6 +519,7 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeName = typeName,
                             TypeClass = NamedUnderlyingTypeClass(typeDefinition),
                             ForwardedStructMembers = forwardedMembers,
+                            StructEquality = forwardedMembers is { Count: > 0 },
                             UnderlyingArrayElementType = underlyingArrayElem,
                             ValueClone = valueCloneFields.Length > 0,
                             WrappedTypeIsPublic = wrappedTypeIsPublic,
@@ -562,7 +596,9 @@ public class TypeGenerator : ISourceGenerator
                         break;
 
                     case ClassDeclarationSyntax when typeDefinition.StartsWith($"{PointerPrefix}<"): // pointer
-                        typeName = typeDefinition[2..^1];
+                        // The pointee may be spelled through the file's alias of its package (log/slog's
+                        // `ж<time.Location>`), which this generated part has no using for.
+                        typeName = QualifySourceAliasReferences(typeDefinition[2..^1], syntaxTree, semanticModel);
                         
                         generatedSource = new InheritedTypeTemplate
                         {
@@ -1078,6 +1114,29 @@ public class TypeGenerator : ISourceGenerator
         return ResolveArrayElementType(context, definition, seen);
     }
 
+    // The SLICE twin of ResolveArrayElementType: walks a defined-type-over-defined-type chain to its
+    // `[]elem` bottom and returns elem, or null once the chain reaches anything else. Same compilation
+    // only, as the struct walk in the named-definition case is: every hop's definition is a bare name
+    // relative to its own package, and an element spelled in another package's terms would not bind in
+    // this one, so a chain that leaves the compilation keeps the plain named-base wrapper.
+    private static string? ResolveSliceElementType(GeneratorExecutionContext context, string typeName, HashSet<string> seen)
+    {
+        if (!seen.Add(typeName))
+            return null;
+
+        (StructDeclarationSyntax? structDecl, Compilation? structCompilation) = context.GetStructDeclaration(typeName);
+
+        if (structDecl is null || structCompilation != context.Compilation || GetGoTypeDefinition(structDecl) is not { } definition)
+            return null;
+
+        if (definition.StartsWith("[]"))
+            return definition[2..].Trim();
+
+        // Another named hop (`type A B`, `type B C`, `type C []T`); anything else ends the walk.
+        return definition.StartsWith("[") || definition.StartsWith("map[") || definition.StartsWith("chan ") || definition.Contains('(') ?
+            null : ResolveSliceElementType(context, definition, seen);
+    }
+
     // Reads a struct declaration's own [GoType("…")] definition string (first constructor argument,
     // quotes stripped) — used to inspect the UNDERLYING type of a defined-over-defined chain
     // (`type pallocBits pageBits`: pageBits' definition is "[8]uint64"). Null when the struct has no
@@ -1136,7 +1195,7 @@ public class TypeGenerator : ISourceGenerator
 
         names.Add(self.Name);
 
-        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        foreach (IMethodSymbol method in GoMethodHosts.DeclaredMethods(packageClass, self))
         {
             if (method.IsExtensionMethod && method.Parameters.Length > 0 &&
                 method.Parameters[0].Type is INamedTypeSymbol receiver &&

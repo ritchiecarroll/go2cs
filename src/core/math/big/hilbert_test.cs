@@ -9,27 +9,32 @@ namespace go.math;
 using fmt = fmt_package;
 using testing = testing_package;
 using static go.math.big_package;
+using static big_internal_test_package;
 
 partial class big_internal_test_package {
 
 internal partial struct matrix {
     internal nint n, m;
-    internal slice<ж<global::go.math.big_package.ΔRat>> a;
+    internal slice<ж<global::go.math.big_package.Rat>> a;
 }
 
-internal static ж<global::go.math.big_package.ΔRat> at(this ref matrix a, nint i, nint j) {
+} partial class big_internal_testᴛmatrix {
+
+internal static ж<global::go.math.big_package.Rat> at(this ref matrix a, nint i, nint j) {
     if (!(0 <= i && i < a.n && 0 <= j && j < a.m)) {
         throw panic("index out of range");
     }
     return a.a[i * a.m + j];
 }
 
-internal static void set(this ref matrix a, nint i, nint j, ж<global::go.math.big_package.ΔRat> x) {
+internal static void set(this ref matrix a, nint i, nint j, ж<global::go.math.big_package.Rat> x) {
     if (!(0 <= i && i < a.n && 0 <= j && j < a.m)) {
         throw panic("index out of range");
     }
     a.a[i * a.m + j] = x;
 }
+
+} partial class big_internal_test_package {
 
 internal static ж<matrix> newMatrix(nint n, nint m) {
     if (!(0 <= n && 0 <= m)) {
@@ -38,7 +43,7 @@ internal static ж<matrix> newMatrix(nint n, nint m) {
     var a = @new<matrix>();
     a.n = n;
     a.m = m;
-    a.a = new slice<ж<global::go.math.big_package.ΔRat>>(n * m);
+    a.a = new slice<ж<global::go.math.big_package.Rat>>(n * m);
     return a;
 }
 
@@ -70,10 +75,10 @@ internal static ж<matrix> newInverseHilbert(nint n) {
     var a = newMatrix(n, n);
     for (nint i = 0; i < n; i++) {
         for (nint j = 0; j < n; j++) {
-            var x1 = @new<global::go.math.big_package.ΔRat>().SetInt64((int64)(i + j + 1));
-            var x2 = @new<global::go.math.big_package.ΔRat>().SetInt(@new<global::go.math.big_package.ΔInt>().Binomial((int64)(n + i), (int64)(n - j - 1)));
-            var x3 = @new<global::go.math.big_package.ΔRat>().SetInt(@new<global::go.math.big_package.ΔInt>().Binomial((int64)(n + j), (int64)(n - i - 1)));
-            var x4 = @new<global::go.math.big_package.ΔRat>().SetInt(@new<global::go.math.big_package.ΔInt>().Binomial((int64)(i + j), (int64)i));
+            var x1 = @new<global::go.math.big_package.Rat>().SetInt64((int64)(i + j + 1));
+            var x2 = @new<global::go.math.big_package.Rat>().SetInt(@new<global::go.math.big_package.Int>().Binomial((int64)(n + i), (int64)(n - j - 1)));
+            var x3 = @new<global::go.math.big_package.Rat>().SetInt(@new<global::go.math.big_package.Int>().Binomial((int64)(n + j), (int64)(n - i - 1)));
+            var x4 = @new<global::go.math.big_package.Rat>().SetInt(@new<global::go.math.big_package.Int>().Binomial((int64)(i + j), (int64)i));
 
             x1.Mul(x1, x2);
             x1.Mul(x1, x3);
@@ -90,6 +95,8 @@ internal static ж<matrix> newInverseHilbert(nint n) {
     return a;
 }
 
+} partial class big_internal_testᴛmatrix {
+
 internal static ж<matrix> mul(this ref matrix a, ж<matrix> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -101,7 +108,7 @@ internal static ж<matrix> mul(this ref matrix a, ж<matrix> Ꮡb) {
         for (nint j = 0; j < c.m; j++) {
             var x = NewRat(0, 1);
             for (nint k = 0; k < a.m; k++) {
-                x.Add(x, @new<global::go.math.big_package.ΔRat>().Mul(a.at(i, k), b.at(k, j)));
+                x.Add(x, @new<global::go.math.big_package.Rat>().Mul(a.at(i, k), b.at(k, j)));
             }
             c.set(i, j, x);
         }
@@ -135,6 +142,8 @@ internal static @string String(this ref matrix a) {
     }
     return s;
 }
+
+} partial class big_internal_test_package {
 
 internal static void doHilbert(ж<testing.T> t, nint n) {
     var a = newHilbert(n);

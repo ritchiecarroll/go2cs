@@ -44,7 +44,7 @@ internal static ж<syscall.LazyProc> procRegLoadMUIStringW = modadvapi32.NewProc
 internal static ж<syscall.LazyProc> procRegSetValueExW = modadvapi32.NewProc("RegSetValueExW");
 internal static ж<syscall.LazyProc> procExpandEnvironmentStringsW = modkernel32.NewProc("ExpandEnvironmentStringsW");
 
-internal static error /*regerrno*/ regCreateKeyEx(syscallꓸHandle key, ж<uint16> subkey, uint32 reserved, ж<uint16> @class, uint32 options, uint32 desired, ж<syscall.SecurityAttributes> sa, ж<syscallꓸHandle> result, ж<uint32> disposition) {
+internal static error /*regerrno*/ regCreateKeyEx(syscall.Handle key, ж<uint16> subkey, uint32 reserved, ж<uint16> @class, uint32 options, uint32 desired, ж<syscall.SecurityAttributes> sa, ж<syscall.Handle> result, ж<uint32> disposition) {
     error regerrno = default;
 
     var ᴋ0 = subkey;
@@ -64,7 +64,7 @@ internal static error /*regerrno*/ regCreateKeyEx(syscallꓸHandle key, ж<uint1
     return regerrno;
 }
 
-internal static error /*regerrno*/ regDeleteKey(syscallꓸHandle key, ж<uint16> subkey) {
+internal static error /*regerrno*/ regDeleteKey(syscall.Handle key, ж<uint16> subkey) {
     error regerrno = default;
 
     var ᴋ5 = subkey;
@@ -76,7 +76,7 @@ internal static error /*regerrno*/ regDeleteKey(syscallꓸHandle key, ж<uint16>
     return regerrno;
 }
 
-internal static error /*regerrno*/ regDeleteValue(syscallꓸHandle key, ж<uint16> name) {
+internal static error /*regerrno*/ regDeleteValue(syscall.Handle key, ж<uint16> name) {
     error regerrno = default;
 
     var ᴋ6 = name;
@@ -88,7 +88,7 @@ internal static error /*regerrno*/ regDeleteValue(syscallꓸHandle key, ж<uint1
     return regerrno;
 }
 
-internal static error /*regerrno*/ regEnumValue(syscallꓸHandle key, uint32 index, ж<uint16> name, ж<uint32> nameLen, ж<uint32> reserved, ж<uint32> valtype, ж<byte> buf, ж<uint32> buflen) {
+internal static error /*regerrno*/ regEnumValue(syscall.Handle key, uint32 index, ж<uint16> name, ж<uint32> nameLen, ж<uint32> reserved, ж<uint32> valtype, ж<byte> buf, ж<uint32> buflen) {
     error regerrno = default;
 
     var ᴋ7 = name;
@@ -110,7 +110,7 @@ internal static error /*regerrno*/ regEnumValue(syscallꓸHandle key, uint32 ind
     return regerrno;
 }
 
-internal static error /*regerrno*/ regLoadMUIString(syscallꓸHandle key, ж<uint16> name, ж<uint16> buf, uint32 buflen, ж<uint32> buflenCopied, uint32 flags, ж<uint16> dir) {
+internal static error /*regerrno*/ regLoadMUIString(syscall.Handle key, ж<uint16> name, ж<uint16> buf, uint32 buflen, ж<uint32> buflenCopied, uint32 flags, ж<uint16> dir) {
     error regerrno = default;
 
     var ᴋ13 = name;
@@ -128,7 +128,7 @@ internal static error /*regerrno*/ regLoadMUIString(syscallꓸHandle key, ж<uin
     return regerrno;
 }
 
-internal static error /*regerrno*/ regSetValueEx(syscallꓸHandle key, ж<uint16> valueName, uint32 reserved, uint32 vtype, ж<byte> buf, uint32 bufsize) {
+internal static error /*regerrno*/ regSetValueEx(syscall.Handle key, ж<uint16> valueName, uint32 reserved, uint32 vtype, ж<byte> buf, uint32 bufsize) {
     error regerrno = default;
 
     var ᴋ17 = valueName;

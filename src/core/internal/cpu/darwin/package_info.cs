@@ -63,7 +63,7 @@ using static go.@internal.cpu_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/cpu/cpu.go", "cpu.cs", "AMQB6ALCgoKCABEw4oKCgoKClJSClIKCgpSkgqS0tIK2goKClKaCgoKCuMaCgqaCgqYAAxDCgoKm")]
+[assembly: GoPositionMap("internal/cpu/cpu.go", "cpu.cs", "AMQB6ALCgoKCABEw4oKCgoKClJSClIKCgpSkgpS0tIK2goKClKaCgoKCuMaCgqaCgqYAAxDCgoKm")]
 [assembly: GoPositionMap("internal/cpu/cpu_darwin.go", "cpu_darwin.cs", "AAocygAEGAAKAoKClK7CgoKCpoKCgoKUtIKCxrTGgpQ=")]
 [assembly: GoPositionMap("internal/cpu/cpu_x86.go", "cpu_x86.cs", "AAwYpgA1cIIACRSCpu6m7qYABxKUgoKmlJSCgoKCgoLKlIKUgpTcpgAHEJSCgqaCgoKCgoKClIKCgoKCgoKCgoKCgoKCgoKCppSClIKCpoKUAAcQpoKCgrimgqyygqaUsoKCgoKCpoK4goKCuKaygtw=", "211-220:1")]
 [assembly: GoPositionMap("internal/cpu/cpu_x86_darwin.go", "cpu_x86_darwin.cs", "AAgSgtyCuII=")]

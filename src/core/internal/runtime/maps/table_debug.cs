@@ -6,12 +6,15 @@ namespace go.@internal.runtime;
 using abi = go.@internal.abi_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static maps_package;
 
 partial class maps_package {
 
 internal const bool debugLog = false;
 
-internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+} partial class mapsᴛtable {
+
+internal static void checkInvariants(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -42,7 +45,7 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
 
                 @unsafe.Pointer key = g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
-                    key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+                    key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
                 }
 
                 // Can't lookup keys that don't compare equal
@@ -88,7 +91,7 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
         throw panic("invariant failed: found no empty slots (violates probe invariant)");
     }
 }
-public static void Print(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> m) {
+public static void Print(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> m) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""
@@ -146,12 +149,14 @@ table{
     }
 }
 
+} partial class maps_package {
+
 // TODO(prattmic): not in hex because print doesn't have a way to print in hex
 // outside the runtime.
 internal static void dump(@unsafe.Pointer ptr, uintptr size) {
     while (size > 0) {
-        print(~(ж<byte>)(uintptr)(ptr), (@string)" ");
-        ptr = (@unsafe.Pointer)((uintptr)ptr + 1);
+        print(~@unsafe.Pointer.To<byte>(ptr), (@string)" ");
+        ptr = @unsafe.Add(ptr, 1);
         size--;
     }
 }

@@ -12,6 +12,7 @@ using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -49,6 +50,8 @@ internal static mptcpStatusDial mptcpUseDefaultDial => /* iota */ 0;
 internal static mptcpStatusDial mptcpEnabledDial => 1;
 internal static mptcpStatusDial mptcpDisabledDial => 2;
 
+} partial class netᴛmptcpStatusDial {
+
 internal static bool get(this ref mptcpStatusDial m) {
     switch (m) {
     case var ᴛ when ᴛ == mptcpEnabledDial: {
@@ -76,6 +79,8 @@ internal static void set(this ref mptcpStatusDial m, bool use) {
     }
 }
 
+} partial class net_package {
+
 // mptcpStatusListen is a tristate for Multipath TCP on servers,
 // see go.dev/issue/56539
 partial struct mptcpStatusListen /*num:uint8*/;
@@ -84,6 +89,8 @@ partial struct mptcpStatusListen /*num:uint8*/;
 internal static mptcpStatusListen mptcpUseDefaultListen => /* iota */ 0;
 internal static mptcpStatusListen mptcpEnabledListen => 1;
 internal static mptcpStatusListen mptcpDisabledListen => 2;
+
+} partial class netᴛmptcpStatusListen {
 
 internal static bool get(this ref mptcpStatusListen m) {
     switch (m) {
@@ -112,6 +119,8 @@ internal static void set(this ref mptcpStatusListen m, bool use) {
         m = mptcpDisabledListen;
     }
 }
+
+} partial class net_package {
 
 // A Dialer contains options for connecting to an address.
 //
@@ -143,7 +152,7 @@ partial struct Dialer {
     // address. The address must be of a compatible type for the
     // network being dialed.
     // If nil, a local address is automatically chosen.
-    public ΔAddr LocalAddr;
+    public Addr LocalAddr;
     // DualStack previously enabled RFC 6555 Fast Fallback
     // support, also known as "Happy Eyeballs", in which IPv4 is
     // tried soon if IPv6 appears to be misconfigured and
@@ -216,7 +225,11 @@ partial struct Dialer {
     internal mptcpStatusDial mptcpStatus;
 }
 
+} partial class netᴛDialer {
+
 internal static bool dualStack(this ref Dialer d) { return d.FallbackDelay >= 0; }
+
+} partial class net_package {
 
 internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
     if (a.IsZero()) {
@@ -227,6 +240,8 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
     }
     return b;
 }
+
+} partial class netᴛDialer {
 
 // deadline returns the earliest of:
 //   - now+Timeout
@@ -253,6 +268,8 @@ internal static ж<Resolver> resolver(this ref Dialer d) {
     return DefaultResolver;
 }
 
+} partial class net_package {
+
 // partialDeadline returns the deadline to use for a single address,
 // when multiple addresses are pending.
 internal static (time.Time, error) partialDeadline(time.Time now, time.Time deadline, nint addrsRemaining) {
@@ -277,6 +294,8 @@ internal static (time.Time, error) partialDeadline(time.Time now, time.Time dead
     return (now.Add(timeout), default);
 }
 
+} partial class netᴛDialer {
+
 internal static time.Duration fallbackDelay(this ref Dialer d) {
     if (d.FallbackDelay > 0) {
         return d.FallbackDelay;
@@ -285,27 +304,28 @@ internal static time.Duration fallbackDelay(this ref Dialer d) {
     }
 }
 
+} partial class net_package {
+
 internal static (@string afnet, nint proto, error err) parseNetwork(context.Context ctx, @string network, bool needsProto) {
     @string afnet = default;
     error err = default;
 
     nint i = bytealg.LastIndexByteString(network, (byte)':');
     if (i < 0) { // no colon
-        var exprᴛ1 = network;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+        case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
             break;
         }
-        case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+        case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
             break;
         }
-        case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+        case {} when network == "ip"u8 || network == "ip4"u8 || network == "ip6"u8: {
             if (needsProto) {
                 return ("", 0, ((UnknownNetworkError)network));
             }
             break;
         }
-        case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+        case {} when network == "unix"u8 || network == "unixgram"u8 || network == "unixpacket"u8: {
             break;
         }
         default: {
@@ -314,9 +334,8 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
         return (network, 0, default);
     }
     afnet = network.slice(0, i);
-    var exprᴛ2 = afnet;
     switch (ᐧ) {
-    case {} when exprᴛ2 == "ip"u8 || exprᴛ2 == "ip4"u8 || exprᴛ2 == "ip6"u8: {
+    case {} when afnet == "ip"u8 || afnet == "ip4"u8 || afnet == "ip6"u8: {
         @string protostr = network.slice(i + 1);
         var (protoΔ2, iΔ2, ok) = dtoi(protostr);
         if (!ok || iΔ2 != len(protostr)) {
@@ -330,10 +349,12 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
     return ("", 0, ((UnknownNetworkError)network));
 }
 
+} partial class netᴛResolver {
+
 // resolveAddrList resolves addr using hint and returns a list of
 // addresses. The result contains at least one address when error is
 // nil.
-internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, ΔAddr hint) {
+internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, Addr hint) {
     var (afnet, _, err) = parseNetwork(ctx, network, true);
     if (err != nil) {
         return (default, err);
@@ -341,9 +362,8 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
     if (op == "dial"u8 && addr == ""u8) {
         return (default, errMissingAddress);
     }
-    var exprᴛ1 = afnet;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+    case {} when afnet == "unix"u8 || afnet == "unixgram"u8 || afnet == "unixpacket"u8: {
         var (addrΔ2, errΔ2) = ResolveUnixAddr(afnet, addr);
         if (errΔ2 != nil) {
             return (default, errΔ2);
@@ -351,7 +371,7 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
         if (op == "dial"u8 && hint != nil && addrΔ2.Network() != hint.Network()) {
             return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: "mismatched local address type", Addr: hint.String()))));
         }
-        return (new addrList(new ΔAddr[]{new UnixAddrжΔAddr(addrΔ2)}.slice()), default);
+        return (new addrList(new Addr[]{new UnixAddrжAddr(addrΔ2)}.slice()), default);
     }}
     (var addrs, err) = Ꮡr.internetAddrList(ctx, afnet, addr);
     if (err != nil || op != "dial"u8 || hint == nil) {
@@ -378,7 +398,7 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
         break;
     }}
     var naddrs = addrs[..0];
-    foreach (var (_, addrΔ3) in range<ΔAddr>(addrs)) {
+    foreach (var (_, addrΔ3) in range<Addr>(addrs)) {
         if (addrΔ3.Network() != hint.Network()) {
             return (default, new AddrErrorжerror(Ꮡ(new AddrError(Err: "mismatched local address type", Addr: hint.String()))));
         }
@@ -387,21 +407,21 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
             if (!wildcard && !addrΔ4.isWildcard() && !addrΔ4.IP.matchAddrFamily(tcp.IP)) {
                 continue;
             }
-            naddrs = append(naddrs, (ΔAddr)(new TCPAddrжΔAddr(addrΔ4)));
+            naddrs = append(naddrs, (Addr)(new TCPAddrжAddr(addrΔ4)));
             break;
         }
         case ж<UDPAddr> addrΔ4: {
             if (!wildcard && !addrΔ4.isWildcard() && !addrΔ4.IP.matchAddrFamily(udp.IP)) {
                 continue;
             }
-            naddrs = append(naddrs, (ΔAddr)(new UDPAddrжΔAddr(addrΔ4)));
+            naddrs = append(naddrs, (Addr)(new UDPAddrжAddr(addrΔ4)));
             break;
         }
         case ж<IPAddr> addrΔ4: {
             if (!wildcard && !addrΔ4.isWildcard() && !addrΔ4.IP.matchAddrFamily(ip.IP)) {
                 continue;
             }
-            naddrs = append(naddrs, (ΔAddr)(new IPAddrжΔAddr(addrΔ4)));
+            naddrs = append(naddrs, (Addr)(new IPAddrжAddr(addrΔ4)));
             break;
         }}
     }
@@ -410,6 +430,8 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
     }
     return (naddrs, default);
 }
+
+} partial class netᴛDialer {
 
 // MultipathTCP reports whether MPTCP will be used.
 //
@@ -428,6 +450,8 @@ public static bool MultipathTCP(this ref Dialer d) {
 public static void SetMultipathTCP(this ref Dialer d, bool use) {
     d.mptcpStatus.set(use);
 }
+
+} partial class net_package {
 
 // Dial connects to the address on the named network.
 //
@@ -503,6 +527,8 @@ partial struct sysDialer {
     internal @string network, address;
     internal Func<context.Context, @string, ж<TCPAddr>, ж<TCPAddr>, (ж<TCPConn>, error)> testHookDialTCP;
 }
+
+} partial class netᴛDialer {
 
 // Dial connects to the address on the named network.
 //
@@ -602,10 +628,10 @@ internal static partial (context.Context, Action) dialCtx(this ref Dialer d, con
             var oldCancelʗ1 = oldCancel;
             var subCtxʗ1 = subCtx;
             goǃ(() => {
-                var selᴛ3 = oldCancelʗ1;
+                var oldCancelᴛ1 = oldCancelʗ1;
                 var selᴛ4 = subCtxʗ1.Done();
-                switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-                case 0 when selᴛ3.ꟷᐳ(out _): {
+                switch (select(ᐸꟷ(oldCancelᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+                case 0 when oldCancelᴛ1.ꟷᐳ(out _): {
                     cancel2ʗ1();
                     break;
                 }
@@ -644,7 +670,15 @@ public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context
         (ctx, var cancel) = d.dialCtx(ctx);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        return dialTCP(ctx, Ꮡd, network, TCPAddrFromAddrPort(laddr), TCPAddrFromAddrPort(raddr));
+        ж<TCPAddr> laddrTCP = default;
+        ж<TCPAddr> raddrTCP = default;
+        if (laddr.IsValid()) {
+            laddrTCP = TCPAddrFromAddrPort(laddr);
+        }
+        if (raddr.IsValid()) {
+            raddrTCP = TCPAddrFromAddrPort(raddr);
+        }
+        return dialTCP(ctx, Ꮡd, network, laddrTCP, raddrTCP);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -666,7 +700,15 @@ public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context
         (ctx, var cancel) = d.dialCtx(ctx);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        return dialUDP(ctx, Ꮡd, network, UDPAddrFromAddrPort(laddr), UDPAddrFromAddrPort(raddr));
+        ж<UDPAddr> laddrUDP = default;
+        ж<UDPAddr> raddrUDP = default;
+        if (laddr.IsValid()) {
+            laddrUDP = UDPAddrFromAddrPort(laddr);
+        }
+        if (raddr.IsValid()) {
+            raddrUDP = UDPAddrFromAddrPort(raddr);
+        }
+        return dialUDP(ctx, Ꮡd, network, laddrUDP, raddrUDP);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -680,7 +722,7 @@ public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context
 // connection.
 //
 // The network must be an IP network name; see func Dial for details.
-public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netipꓸAddr laddr, netipꓸAddr raddr) {
+public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.Addr laddr, netip.Addr raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -688,7 +730,15 @@ public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context c
         (ctx, var cancel) = d.dialCtx(ctx);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        return dialIP(ctx, Ꮡd, network, ipAddrFromAddr(laddr), ipAddrFromAddr(raddr));
+        ж<IPAddr> laddrIP = default;
+        ж<IPAddr> raddrIP = default;
+        if (laddr.IsValid()) {
+            laddrIP = ipAddrFromAddr(laddr);
+        }
+        if (raddr.IsValid()) {
+            raddrIP = ipAddrFromAddr(raddr);
+        }
+        return dialIP(ctx, Ꮡd, network, laddrIP, raddrIP);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -716,12 +766,16 @@ public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Conte
     finally { ᒐ.Run(); }
 }
 
+} partial class net_package {
+
 internal partial struct dialParallel_dialResult /*dyn*/ {
     /*embed*/ public Conn Conn;
     /*embed*/ internal error error;
     internal bool primary;
     internal bool done;
 }
+
+} partial class netᴛsysDialer {
 
 // dialParallel races two copies of dialSerial, giving the first a
 // head start. It returns the first established connection and
@@ -735,7 +789,7 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
         }
 
         var returned = new channel<EmptyStruct>(0);
-        defer(ᴛ1 => builtin.close(ᴛ1), returned, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), returned, ref ᒐ);
         var results = new channel<dialParallel_dialResult>(0); // unbuffered
 
         var fallbacksʗ1 = fallbacks;
@@ -748,13 +802,13 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
                 ras = fallbacksʗ1;
             }
             var (c, err) = Ꮡsd.dialSerial(ctxΔ1, ras);
-            var selᴛ5 = resultsʗ1.ᐸꟷ(new dialParallel_dialResult(Conn: c, error: err, primary: primaryΔ1, done: true), ꓸꓸꓸ);
-            var selᴛ6 = returnedʗ1;
-            switch (select(selᴛ5, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+            var resultsᴛ1 = resultsʗ1.ᐸꟷ(new dialParallel_dialResult(Conn: c, error: err, primary: primaryΔ1, done: true), ꓸꓸꓸ);
+            var returnedᴛ1 = returnedʗ1;
+            switch (select(resultsᴛ1, ᐸꟷ(returnedᴛ1, ꓸꓸꓸ))) {
             case 0: {
                 break;
             }
-            case 1 when selᴛ6.ꟷᐳ(out _): {
+            case 1 when returnedᴛ1.ꟷᐳ(out _): {
                 if (c != nil) {
                     c.Close();
                 }
@@ -779,8 +833,8 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
 
         for (;;) {
             var selᴛ7 = fallbackTimer.C;
-            var selᴛ8 = results;
-            switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
+            var resultsᴛ2 = results;
+            switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(resultsᴛ2, ꓸꓸꓸ))) {
             case 0 when selᴛ7.ꟷᐳ(out _): {
                 var (fallbackCtx, fallbackCancel) = context.WithCancel(ctx);
                 var fallbackCancelʗ1 = fallbackCancel;
@@ -789,7 +843,7 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
                 goǃ(startRacerʗ2, fallbackCtx, (bool)false);
                 break;
             }
-            case 1 when selᴛ8.ꟷᐳ(out var res): {
+            case 1 when resultsᴛ2.ꟷᐳ(out var res): {
                 if (res.error == nil) {
                     return (res.Conn, default);
                 }
@@ -825,7 +879,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
 
         error firstErr = default; // The error from the first address is most relevant.
 
-        foreach (var (i, ra) in range<ΔAddr>(ras)) {
+        foreach (var (i, ra) in range<Addr>(ras)) {
             var selᴛ9 = ctx.Done();
             switch (trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
             case 0 when selᴛ9.ꟷᐳ(out _): {
@@ -875,7 +929,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
 
 // dialSingle attempts to establish and returns a single connection to
 // the destination address.
-internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context.Context ctx, ΔAddr ra) {
+internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context.Context ctx, Addr ra) {
     Conn c = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -940,6 +994,8 @@ internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context
     ᒐdone: return (c, err);
 }
 
+} partial class net_package {
+
 // ListenConfig contains options for listening to an address.
 partial struct ListenConfig {
     // If Control is not nil, it is called after creating the network
@@ -974,6 +1030,8 @@ partial struct ListenConfig {
     // supported by the operating system.
     internal mptcpStatusListen mptcpStatus;
 }
+
+} partial class netᴛListenConfig {
 
 // MultipathTCP reports whether MPTCP will be used.
 //
@@ -1086,6 +1144,8 @@ public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context
     }
     return (c, default);
 }
+
+} partial class net_package {
 
 // sysListener contains a Listen's parameters and configuration.
 partial struct sysListener {

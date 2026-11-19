@@ -197,6 +197,22 @@ func refuseDuplicateGlobalUsings(sortedLines []string, packageInfoFileName strin
 	}
 }
 
+// exportedTypeAliasRecord renders one exported alias's GoTypeAlias record. A forward alias chain recorded a deferred
+// marker the .cs files have since resolved (sqlite-cs W7), so each marker is resolved here too. One no registry answers
+// is reported exactly as the .cs resolver reports its own (a warning, and a site for unresolvedDynamicTypeError): this
+// package may never use the alias and build green, while every importer's `global using` copy of the record fails to
+// parse (CS1730).
+func exportedTypeAliasRecord(alias, typeName, packageInfoFileName string) string {
+	resolvedTypeName, unresolved := resolvedDynamicTypeText(typeName)
+
+	for _, signature := range unresolved {
+		showWarning("Unresolved dynamic type %s in exported alias \"%s\"'s GoTypeAlias record in \"%s\"", signature, alias, packageInfoFileName)
+		recordUnresolvedDynamicType(signature, packageInfoFileName, 0)
+	}
+
+	return fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, resolvedTypeName)
+}
+
 // writePackageInfoFile creates or updates a package information file (package_info.cs, or the
 // test conversion's package_test_info.cs) by inserting the CURRENT package-scoped metadata
 // globals (imported/exported type aliases, interface implementations, implicit conversions)
@@ -286,10 +302,17 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// Read existing type aliases from package info file
 		lines := hashset.HashSet[string]{}
 
-		// If processing a single file, instead of all package files, merge type aliases
+		// If processing a single file, instead of all package files, merge type aliases. A persisted line that still
+		// holds a dynamic-type marker was written before records resolved them (sqlite-cs W7) and never parses; it is
+		// dropped, and this conversion writes the line again, resolved, if its alias is still here.
 		if mergeExisting {
 			for i := startLineIndex + 1; i < endLineIndex; i++ {
 				line := packageInfoLines[i]
+
+				if strings.Contains(line, dynamicTypeMarkerPrefix) {
+					continue
+				}
+
 				lines.Add(strings.TrimSpace(line))
 			}
 		}
@@ -358,10 +381,17 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// Read existing type aliases from package info file
 		lines := hashset.HashSet[string]{}
 
-		// If processing a single file, instead of all package files, merge type aliases
+		// If processing a single file, instead of all package files, merge type aliases. A persisted line that still
+		// holds a dynamic-type marker was written before records resolved them (sqlite-cs W7) and never parses; it is
+		// dropped, and this conversion writes the line again, resolved, if its alias is still here.
 		if mergeExisting {
 			for i := startLineIndex + 1; i < endLineIndex; i++ {
 				line := packageInfoLines[i]
+
+				if strings.Contains(line, dynamicTypeMarkerPrefix) {
+					continue
+				}
+
 				lines.Add(strings.TrimSpace(line))
 			}
 		}
@@ -379,7 +409,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 				continue
 			}
 
-			lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
+			lines.Add(exportedTypeAliasRecord(alias, typeName, packageInfoFileName))
 		}
 
 		// Publish every purely-anonymous (no Go-level alias) struct/interface this package's own
@@ -980,6 +1010,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	packageInfoLines = applyBoundedGoRecords(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyCgoDynamicImports(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyCgoPseudoPackageStamp(packageInfoLines, mergeExisting)
+	packageInfoLines = applyMethodHolderSection(packageInfoLines, mergeExisting)
 
 	// Remove trailing empty lines
 	for i := len(packageInfoLines) - 1; i >= 0; i-- {

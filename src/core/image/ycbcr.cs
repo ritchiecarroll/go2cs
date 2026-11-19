@@ -5,6 +5,7 @@ namespace go;
 
 using color = image.color_package;
 using image;
+using static image_package;
 
 partial class image_package {
 
@@ -17,6 +18,8 @@ public static YCbCrSubsampleRatio YCbCrSubsampleRatio420 => 2;
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio440 => 3;
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio411 => 4;
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio410 => 5;
+
+} partial class imageᴛYCbCrSubsampleRatio {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string yCbCrSubsampleRatio444ˢ => ref yCbCrSubsampleRatio444ˢᵇ;
@@ -55,6 +58,8 @@ public static @string String(this YCbCrSubsampleRatio s) {
     return "YCbCrSubsampleRatioUnknown";
 }
 
+} partial class image_package {
+
 // YCbCr is an in-memory image of Y'CbCr colors. There is one Y sample per
 // pixel, but each Cb and Cr sample can span one or more pixels.
 // YStride is the Y slice index delta between vertically adjacent pixels.
@@ -76,6 +81,8 @@ partial struct YCbCr {
     public YCbCrSubsampleRatio SubsampleRatio;
     public Rectangle Rect;
 }
+
+} partial class imageᴛYCbCr {
 
 public static color.Model ColorModel(this ref YCbCr p) {
     return color.YCbCrModel;
@@ -165,6 +172,8 @@ public static bool Opaque(this ref YCbCr p) {
     return true;
 }
 
+} partial class image_package {
+
 internal static (nint w, nint h, nint cw, nint ch) yCbCrSize(Rectangle r, YCbCrSubsampleRatio subsampleRatio) {
     nint w = default;
     nint h = default;
@@ -245,6 +254,8 @@ partial struct NYCbCrA {
     public slice<uint8> A;
     public nint AStride;
 }
+
+} partial class imageᴛNYCbCrA {
 
 public static color.Model ColorModel(this ref NYCbCrA p) {
     return color.NYCbCrAModel;
@@ -332,6 +343,8 @@ public static bool Opaque(this ref NYCbCrA p) {
     }
     return true;
 }
+
+} partial class image_package {
 
 // NewNYCbCrA returns a new [NYCbCrA] image with the given bounds and subsample
 // ratio.

@@ -18,6 +18,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -173,7 +174,7 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
             (tp, addr) = tp.next(cBase + cSpan.elemsize); if (addr == 0) {
                 break;
             }
-            var ptrΔ1 = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
+            var ptrΔ1 = ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)addr);
             if (ptrΔ1 >= @base && ptrΔ1 < @base + span.elemsize) {
                 throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
             }
@@ -214,7 +215,7 @@ internal static partial void callCleanup<T>(ж<funcval> Ꮡfn, @unsafe.Pointer a
     ref var fn = ref Ꮡfn.DerefOrNull();
 
     var cleanup = (Ꮡ(fn).Reinterpret<ж<funcval>, Action<T>>()).ValueSlot;
-    cleanup(~(ж<T>)(uintptr)(arg));
+    cleanup(~@unsafe.Pointer.To<T>(arg));
 }
 
 // Cleanup is a handle to a cleanup call for a specific object.
@@ -224,6 +225,8 @@ partial struct Cleanup {
     // ptr contains the pointer to the object.
     internal uintptr ptr;
 }
+
+} partial class runtimeᴛCleanup {
 
 // Stop cancels the cleanup call. Stop will have no effect if the cleanup call
 // has already been queued for execution (because ptr became unreachable).
@@ -292,6 +295,8 @@ public static void Stop(this Cleanup c) {
     }
 }
 
+} partial class runtime_package {
+
 internal static UntypedInt cleanupBlockSize => 512;
 
 // cleanupBlock is an block of cleanups to be executed.
@@ -332,6 +337,8 @@ partial struct cleanupBlockHeader {
     // scanning the block as a root.
     internal uint32 n;
 }
+
+} partial class runtimeᴛcleanupBlock {
 
 // enqueue pushes a single cleanup function into the block.
 //
@@ -375,6 +382,8 @@ internal static void take(this ref cleanupBlock a, ж<cleanupBlock> Ꮡb) {
         b.n -= (uint32)len(dst);
     }
 }
+
+} partial class runtime_package {
 
 // cleanupQueue is a queue of ready-to-run cleanup functions.
 partial struct cleanupQueue {
@@ -438,6 +447,8 @@ partial struct cleanupQueue {
     internal atomic.Uint64 executed;
 }
 
+} partial class runtimeᴛcleanupQueue {
+
 // addWork indicates that n units of parallelizable work have been added to the queue.
 internal static void addWork(this ж<cleanupQueue> Ꮡq, nint n) {
     Ꮡq.of(cleanupQueue.ᏑworkUnits).Add((int64)n);
@@ -469,11 +480,11 @@ internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
         if (Ꮡq.of(cleanupQueue.Ꮡflushed).Load()) {
             Ꮡq.of(cleanupQueue.Ꮡflushed).Store(false);
         }
-        b = (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡfree).pop());
+        b = @unsafe.Pointer.To<cleanupBlock>(Ꮡq.of(cleanupQueue.Ꮡfree).pop());
         if (b == nil) {
-            b = (ж<cleanupBlock>)(uintptr)(persistentalloc(cleanupBlockSize, tagAlign, Ꮡmemstats.ᏑgcMiscSys));
+            b = @unsafe.Pointer.To<cleanupBlock>(persistentalloc(cleanupBlockSize, tagAlign, Ꮡmemstats.ᏑgcMiscSys));
             for (;;) {
-                var next = (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡall).Load());
+                var next = @unsafe.Pointer.To<cleanupBlock>(Ꮡq.of(cleanupQueue.Ꮡall).Load());
                 b.Value.alllink = next;
                 if (Ꮡq.of(cleanupQueue.Ꮡall).CompareAndSwap(@unsafe.Pointer.FromPinnedBox(next), @unsafe.Pointer.FromPinnedBox(b))) {
                     break;
@@ -499,7 +510,7 @@ internal static ж<cleanupBlock> dequeue(this ж<cleanupQueue> Ꮡq) {
     for (;;) {
         if (Ꮡq.tryTakeWork()) {
             // Guaranteed to be non-nil.
-            return (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡfull).pop());
+            return @unsafe.Pointer.To<cleanupBlock>(Ꮡq.of(cleanupQueue.Ꮡfull).pop());
         }
         @lock(Ꮡq.of(cleanupQueue.Ꮡlock));
         // Increment asleep first. We may have to undo this if we abort the sleep.
@@ -716,9 +727,11 @@ internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQ
     return (queued, executed);
 }
 
+} partial class runtime_package {
+
 internal static uint32 maxCleanupGs() {
     // N.B. Left as a function to make changing the policy easier.
-    return (uint32)builtin.max(gomaxprocs / 4, 1);
+    return (uint32)max(gomaxprocs / 4, 1);
 }
 
 // gcCleanups is the global cleanup queue.
@@ -770,6 +783,8 @@ internal static void runCleanups() {
     }
 }
 
+} partial class runtimeᴛcleanupQueue {
+
 // blockUntilEmpty blocks until either the cleanup queue is emptied
 // and the cleanups have been executed, or the timeout is reached.
 // Returns true if the cleanup queue was emptied.
@@ -791,6 +806,8 @@ internal static bool blockUntilEmpty(this ж<cleanupQueue> Ꮡq, int64 timeout) 
     }
     return false;
 }
+
+} partial class runtime_package {
 
 //go:linkname unique_runtime_blockUntilEmptyCleanupQueue unique.runtime_blockUntilEmptyCleanupQueue
 public static bool unique_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {

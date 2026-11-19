@@ -12,7 +12,7 @@ internal static (ж<Signature>, error) sign<P>(ref Curve<P> c, ref PrivateKey pr
     return signGeneric(ref c, ref priv, drbg, hash);
 }
 
-internal static error verify<P>(ref Curve<P> c, ref ΔPublicKey pub, slice<byte> hash, ref Signature sig)
+internal static error verify<P>(ref Curve<P> c, ref PublicKey pub, slice<byte> hash, ref Signature sig)
     where P : Point<P>
 {
     return verifyGeneric(ref c, ref pub, hash, ref sig);

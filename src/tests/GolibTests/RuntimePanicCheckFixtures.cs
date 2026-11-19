@@ -80,7 +80,7 @@ internal static class runtime_test_package
     }
 }
 
-// The promoted-method class of a struct of package runtime, named as go2cs-gen names it from 1.26.10.4
+// The promoted-method class of a struct of package runtime, named as go2cs-gen names it from 1.26.11.1
 // (`<pkg>ᴛ<Struct>ᴛpkg`, beside the package class). Go names a promoted method's wrapper runtime.* as well, and
 // the forwarder's frame is the first one outside golib when the JIT inlines the promoted method into it.
 internal static class runtimeᴛheldᴛpkg
@@ -118,6 +118,59 @@ internal static class runtime_internal_testᴛheldᴛpkg
 
 // The same class for a struct of package runtime_test, which panicCheck1's prefix excludes.
 internal static class runtime_testᴛheldᴛpkg
+{
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static Exception Raise()
+    {
+        try
+        {
+            throw RuntimeErrorPanic.IndexOutOfRange(1L, 0L);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+}
+
+// The method holder of a type of package runtime, named as the converter names it (`<pkg>ᴛ<Type>`, beside the
+// package class): the class that declares the type's methods. Go names a method by its receiver type's package,
+// so a frame here is a frame of package runtime.
+internal static class runtimeᴛheld
+{
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static Exception Raise()
+    {
+        try
+        {
+            throw RuntimeErrorPanic.IndexOutOfRange(1L, 0L);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+}
+
+// The same class for a type that package runtime's own _test.go files declare.
+internal static class runtime_internal_testᴛheld
+{
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static Exception Raise()
+    {
+        try
+        {
+            throw RuntimeErrorPanic.IndexOutOfRange(1L, 0L);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+}
+
+// The same class for a type of package runtime_test, which panicCheck1's prefix excludes.
+internal static class runtime_testᴛheld
 {
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static Exception Raise()

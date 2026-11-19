@@ -921,6 +921,49 @@ func (a *refLoweringAnalysis) exprIsTypeConversion(call *ast.CallExpr) bool {
 	return false
 }
 
+// isReflectHeaderDataPointerUse reports whether selector is the `.Data` field of a reflect.StringHeader or
+// reflect.SliceHeader (through a pointer or not) that an `unsafe.Pointer(...)` conversion takes directly: Go's unsafe
+// rule 6, which the converter emits as `@unsafe.Pointer.FromHeaderData(<box>)` so the pointer carries what the header
+// describes (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8). The emission needs the header's BOX, so a parameter used
+// this way must keep it.
+func (a *refLoweringAnalysis) isReflectHeaderDataPointerUse(selector *ast.SelectorExpr, parents map[ast.Node]ast.Node) bool {
+	if selector.Sel.Name != "Data" {
+		return false
+	}
+
+	header := types.Unalias(a.info.TypeOf(selector.X))
+
+	if pointer, ok := header.(*types.Pointer); ok {
+		header = types.Unalias(pointer.Elem())
+	}
+
+	named, ok := header.(*types.Named)
+
+	if !ok || named.Obj().Pkg() == nil || named.Obj().Pkg().Path() != "reflect" || (named.Obj().Name() != "StringHeader" && named.Obj().Name() != "SliceHeader") {
+		return false
+	}
+
+	var node ast.Node = selector
+
+	for {
+		switch parent := parents[node].(type) {
+		case *ast.ParenExpr:
+			node = parent
+			continue
+
+		case *ast.CallExpr:
+			if !a.exprIsTypeConversion(parent) || len(parent.Args) != 1 {
+				return false
+			}
+
+			basic, ok := types.Unalias(a.info.TypeOf(parent)).(*types.Basic)
+			return ok && basic.Kind() == types.UnsafePointer
+		}
+
+		return false
+	}
+}
+
 // ptrConvDetail sub-classifies a row-5 pointer conversion: the ruled hoisted-temp mechanism was
 // priced against `(*T2)(&v.x)`-shaped operands (an address expression); a pointer-VALUE operand is
 // mechanically different and is surfaced separately so A2 prices it, not discovers it.
@@ -1065,6 +1108,12 @@ func (a *refLoweringAnalysis) classifyParamUse(ident *ast.Ident, parents map[ast
 					return a.classifyPointeeUse(p, parents)
 				}
 
+				return refVetoX3Repr, nil
+			}
+
+			// unsafe.Pointer(p.Data) over a reflect header: the emission hands golib p's BOX so the pointer can carry
+			// what the header describes (docs/phase4/DESIGN-sqlite-ccgo-ts.md, QW-8) — a representation use (§3.2 X3).
+			if a.isReflectHeaderDataPointerUse(p, parents) {
 				return refVetoX3Repr, nil
 			}
 
@@ -1260,6 +1309,12 @@ func (a *refLoweringAnalysis) classifyPointeeUse(chainRoot ast.Node, parents map
 				return refVetoOtherUse, nil
 			}
 
+			// unsafe.Pointer((*p).Data) over a reflect header: as the p.Data arm of classifyParamUse — the emission
+			// needs p's box (QW-8), a representation use (§3.2 X3).
+			if node == chainRoot && a.isReflectHeaderDataPointerUse(p, parents) {
+				return refVetoX3Repr, nil
+			}
+
 			// Deeper field — or a method on the pointee chain.
 			if method, ok := a.info.Uses[p.Sel].(*types.Func); ok {
 				if methodHasPointerReceiver(method) && !exprTypeIsPointer(a.info, node) {
@@ -1296,6 +1351,12 @@ func (a *refLoweringAnalysis) classifyPointeeUse(chainRoot ast.Node, parents map
 			return a.classifyDerivedAddress(p, parents)
 
 		case *ast.SliceExpr:
+			// p.f[:] of an array held INLINE in the pointee (a go.arrays member) is (&p.f)[:]: it is emitted over the
+			// field's address (inlineArraySliceBase), which needs p's box, as &p.f does.
+			if p.X == node && inlineArraySliceSpelled(p, a.info) && !a.inlineCopyOperandAt(p, parents) {
+				return refVetoOtherUse, nil
+			}
+
 			// p.f[:] — slices the pointee's array backing; the resulting header aliases heap
 			// backing in both emissions (array<T> keeps a shared T[]), value-level for the
 			// parameter's own classification.
@@ -2288,4 +2349,30 @@ func relPathForCensus(root, path string) string {
 	}
 
 	return path
+}
+
+// inlineCopyOperandAt reports whether slice is the operand of a copy that reads or writes it over a reference to the
+// inline storage (inlineArrayCopyOperand), which takes no address of the pointee.
+func (a *refLoweringAnalysis) inlineCopyOperandAt(slice *ast.SliceExpr, parents map[ast.Node]ast.Node) bool {
+	parent := parents[slice]
+
+	for {
+		paren, ok := parent.(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		parent = parents[paren]
+	}
+
+	call, ok := parent.(*ast.CallExpr)
+
+	if !ok {
+		return false
+	}
+
+	operand, _, ok := inlineArrayCopyOperand(call, a.info)
+
+	return ok && operand == slice
 }

@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,6 +12,8 @@ internal static partial uintptr readViaParam(ж<uintptr> p) {
     var q = p;
     return q.Value;
 }
+
+} partial class mainᴛutp {
 
 internal static uintptr read(this ж<utp> Ꮡr) {
     var q = Ꮡr.Reinterpret<utp, uintptr>();
@@ -26,6 +29,8 @@ internal static uintptr tricky(this ж<utp> Ꮡr) {
         return q.Value;
     }
 }
+
+} partial class main_package {
 
 partial struct holder {
     internal uintptr v;
@@ -64,9 +69,9 @@ internal static void main() {
     z = 22;
     @unsafe.Pointer pa = @unsafe.Pointer.FromBox(Ꮡa);
     @unsafe.Pointer pz = @unsafe.Pointer.FromBox(Ꮡz);
-    fmt.Println(~(ж<uintptr>)(uintptr)(pick(true, pa, pz)), ~(ж<uintptr>)(uintptr)(pick(false, pa, pz)));
+    fmt.Println(~@unsafe.Pointer.To<uintptr>(pick(true, pa, pz)), ~@unsafe.Pointer.To<uintptr>(pick(false, pa, pz)));
     var (n2, fd2) = advance(pa, 5);
-    fmt.Println(n2, ~(ж<uintptr>)(uintptr)(fd2));
+    fmt.Println(n2, ~@unsafe.Pointer.To<uintptr>(fd2));
     var w = same(Ꮡa);
     w.Value = 99;
     fmt.Println(a);

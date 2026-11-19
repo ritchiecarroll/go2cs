@@ -17,18 +17,17 @@ internal static bool debug;
 
 [GoInit] internal static void init() {
     @string v = godebug.Value("#fips140");
-    var exprᴛ1 = v;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "on"u8 || exprᴛ1 == "only"u8: {
+    case {} when v == "on"u8 || v == "only"u8: {
         Enabled = true;
         break;
     }
-    case {} when exprᴛ1 == "debug"u8: {
+    case {} when v == "debug"u8: {
         Enabled = true;
         debug = true;
         break;
     }
-    case {} when exprᴛ1 == "off"u8 || exprᴛ1 == ""u8: {
+    case {} when v == "off"u8 || v == ""u8: {
         break;
     }
     default: {
@@ -47,7 +46,8 @@ private static readonly @string fips1403ModeIsˢ3ᵇ = "FIPS 140-3 mode is incom
 
 // Supported returns an error if FIPS 140-3 mode can't be enabled.
 public static error Supported() {
-    // Keep this in sync with fipsSupported in cmd/dist/test.go.
+    // Keep this in sync with internal/platform.FIPS140Supported and
+    // cmd/dist.tester.fips140Supported.
 
     // The purego tag changes too much of the implementation to claim the
     // validation still applies.

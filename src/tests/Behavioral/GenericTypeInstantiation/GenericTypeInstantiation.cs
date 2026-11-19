@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct Stack<T>
 {
     internal slice<T> elements;
 }
+
+} partial class mainᴛStack {
 
 public static void Push<T>(this ref Stack<T> s, T element)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
@@ -29,6 +32,8 @@ public static (T, bool) Pop<T>(this ref Stack<T> s)
     s.elements = s.elements.slice(0, index);
     return (element, true);
 }
+
+} partial class main_package {
 
 public static slice<U> MapElements<T, U>(ж<Stack<T>> Ꮡs, Func<T, U> mapper)
     where T : /* ~int */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()

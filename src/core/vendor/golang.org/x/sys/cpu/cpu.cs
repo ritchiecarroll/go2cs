@@ -313,13 +313,12 @@ field:
         @string value = field.slice(i + 1); // e.g. "SSE2", "on"
 
         bool enable = default;
-        var exprᴛ1 = value;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "on"u8: {
+        case {} when value == "on"u8: {
             enable = true;
             break;
         }
-        case {} when exprᴛ1 == "off"u8: {
+        case {} when value == "off"u8: {
             enable = false;
             break;
         }

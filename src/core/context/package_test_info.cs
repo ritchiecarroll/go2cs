@@ -8,7 +8,6 @@ global using static global::go.context_package;
 global using static global::go.context_internal_test_package;
 
 // <ImportedTypeAliases>
-global using netꓸError = go.net_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -43,7 +42,7 @@ using static global::go.context_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("x_test.cs", 513, 9, 1)]
+[assembly: GoBoundedGoroutine("x_test.cs", 518, 9, 1)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,11 +52,11 @@ using static global::go.context_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("context/afterfunc_test.go", "afterfunc_test.cs", "ABYulIKm0oKCgpTW0oKC1oKmwoKCgoKUgrKCgoKCAAkI0oKCgpSCgqSipKKCgpKCoqSigoKSgqKkooKCkpSSgqKkgoKCgoCSpIKCgJLIgoKCgJKkgoCSyIKCkoCSpIKAkg==", "56-62:1;97-99:1;133-133:1", "", "", "122:21,136:21,154:21")]
+[assembly: GoPositionMap("context/afterfunc_test.go", "afterfunc_test.cs", "ABcutIKm0oKCgpTW0oKC1oKmwoKCgoKUgrKCgoKCAAkI0oKCgpSCgqSixKKCgpKCoqSigoKSgqKkooKCkpSSgqKkgoKCgoCSpIKCgJLIgoKCgJKkgoCSyIKCkoCSpIKAkg==", "56-62:1;97-99:1;133-133:1", "", "", "127:21,141:21,159:21")]
 [assembly: GoPositionMap("context/benchmark_test.go", "benchmark_test.cs", "ABkgwoKCpIKSgoKCgpSClIKC2KSCkoKCyqKCgpaSgoKCwoKCgpSipJSCkoKCgpSCuJSCggAMCoKCgoKCgqaCgoKCpoKCgoLugoIACQiCgoKSgqaSggALEKKCpJKCAAsMpIKCgoKmgoKCgqKCopLcgoKCgqaCgtyigpKCgsakgoKCgoI=", "22-37:1;43-45:1;59-66:1;71-81:2;94-114:1;95-99:1.1;100-106:1.2;107-113:1.3;127-131:1;132-139:2;146-153:1;163-173:1;167-170:1.1;184-188:1", "", "", "34:21,197:21,263:21")]
 [assembly: GoPositionMap("context/example_test.go", "example_test.cs", "ABEgmgAKDIKCgpKCtKTIpoKkgoKCAAoS2MKCyqS0tPqo5oKktLT6AAwIooaCgpSmgpSCAAYSoqLYggAJFKKS2oKCgrjWlIKCgsKUgqSCpIKipAAOFsKigpKClIKmgoKUpoKCgpSkgoKClKSCpIKC2AAICOaCgpKUooK4gqSUgqSCgtg=", "27-41:1;30-39:1.1;106-112:1;128-159:1;129-145:1.1;166-177:2;175-175:2.1;191-206:1;193-196:1.1;238-247:1;240-242:1.1;243-246:1.2", "", "", "54:21,88:21,118:21,200:25,232:29,291:21,299:21,303:21,351:21")]
 [assembly: GoPositionMap("context/net_test.go", "net_test.cs", "AA8agoKClII=")]
-[assembly: GoPositionMap("context/x_test.go", "x_test.cs", "ABcqkpSClIKUggAOJsKCgqaC1IKCgpSk1pL4goKClKTWkviClJKmgoKUgoKUgqak+oKC1qSCyqKCgoKStNaCtAAQBIKUgpKUlIKClIKCgpSClIIACgaClIKSlJSCgpSCgoKmgoKCgoLWpILuABUMgoKAgqSAgqSAgsiClIKUgJK2gpSAkraClIKUgJK2gpSClIKUgpSCAAwGgoKUggAKEP6CAAcQggAHEIKCAAcQgoLcgqaUgoKUgsrCgoKUgoKCgoKCqJKCgoKCuIKCkJK2guaCgsiCkoKU5oKCxKSigoKigpSCgoKS5oKCxKSCpoIADgbSlIKCkpSGvoKUgoK0goK0goKClIKCtrKCgriCpOiSlIKCgoKCkuaklIKC1qS0pIKCgpSC1qSAgqSAgsiUgoKCpIKCgIKkgIIACwqCgJKClICSkuiCgJKClICSgpSAkoK4soCSggANBoKGgpSCAAkGgs4ANSqCggAHEIKCAAcQgoIABxCCgoKCAAcQgoKCggAHEIKCgoIABxCCgoKCAAcQgoKCggAHEIKCgoIABxCCggAHEIKCAAcQgoIABxCCggAHEIKCggAHEIKCggANIIKCggAHEIKCggAHEIKCggAHEIKCgoIABxCCgoKCAAwUkoKCgIKkgIIACgyCgoKilKaCgpSUuIKSgoKClIKUgpSCABQSgqaigoKCuIKkgpSCgIKkgILEAAoWsqbSgoLW0oKC1oKmooKCgoKUgriC5pSmgoCCpICC/qaCgoKAgqSAgqSAgqSAguyCgIKkgIKkgIKkgILapoKCgoCCpICCpICCpICCyIKCgpKUtNaC5qSCuKKCkoKSlObEpIKCgoKSlObIgoKCkpSClIK01oK6soKCpJSSlObEAAoWgriSkoKmkpKCyoKmgqaCpKS4gqikgoKCkoKCptY=", "212-222:1;280-280:1;286-289:2;295-298:3;304-308:4;314-318:5;357-360:1;365-365:2;380-383:3;396-399:1;426-428:1;460-466:2;539-539:1;543-543:2;550-550:1;554-554:2;558-558:3;565-565:1;609-613:1;619-623:2;629-633:3;639-645:4;651-657:5;663-669:6;675-681:7;687-693:8;699-705:9;711-715:10;721-725:11;731-735:12;741-745:13;751-756:14;762-767:15;773-775:16;781-786:17;792-797:18;803-808:19;814-820:20;826-832:21;841-850:22;857-859:1;1046-1048:1;1069-1071:1;1083-1085:1;1096-1098:1;1117-1120:1;1145-1150:1;1146-1149:1.1;1151-1156:2;1152-1155:2.1", "", "", "170:21,493:21,549:21,663:25,1215:21,1446:21,1525:21,1604:19", "794:21,795:13")]
+[assembly: GoPositionMap("context/x_test.go", "x_test.cs", "ABgqkpSClIKUggAOJsKCgqaC1IKCgpSk1pL4goKClKTWkviClJKmgoKUgoKUgqak+oKC1qSCyqKCgoKStNaCtAAQBIKUgpKUlIKClIKCgpSClIIACgaClIKSlJSCgpSCgoKmgoKCgoLWpIIACA4AFwyCgoCCpICCpICCyIKUgpSAkraClICStoKUgpSAkraClIKUgpSClIIADAaCgpSCAAoQ/oIABxCCAAcQgoIABxCCgtyCppSCgpSCysKCgpSCgoKCgoKokoKCgoK4goKQkraC5oKCyIKSgpTmgoLEpKKCgqKClIKCgpLmgoLEpIKmggAOBtKUgoKSlIa+gpSCgrSCgrSCgoKUgoK2soKCuIKk6JKUgoKCgoKS5qSUgoLWpLSkgoKClILWpICCpICCyJSCgoKkgoKAgqSAggALCoKAkoKUgJKS6IKAkoKUgJKClICSgriygJKCAA0GgoaClIIACQaCzgA1KoKCAAcQgoIABxCCggAHEIKCgoIABxCCgoKCAAcQgoKCggAHEIKCgoIABxCCgoKCAAcQgoKCggAHEIKCAAcQgoIABxCCggAHEIKCAAcQgoKCAAcQgoKCAA0ggoKCAAcQgoKCAAcQgoKCAAcQgoKCggAHEIKCgoIADBSSgoKAgqSAggAKDIKCgqKUpoKClJS4gpKCgoKUgpSClIIAFhKCxqKCgoK4gqSClIKAgqSAgsQADBayptKCgtbSgoLWgqaigoKCgpSCuIIACAaUpoKAgqSAgv6mgoKCgIKkgIKkgIKkgILsgoCCpICCpICCpICC2qaCgoKAgqSAgqSAgqSAgsiCgoKSlLTWguakgriigpKCkpTmxKSCgoKCkpTmyIKCgpKUgpSCtNaCurKCgqSUkpTmxAAKFoK4kpKCppKSguqCpoKmgqSkuILIpIKCgpKCgqbW", "212-222:1;280-280:1;286-289:2;295-298:3;304-308:4;314-318:5;357-360:1;365-365:2;380-383:3;396-399:1;426-428:1;460-466:2;539-539:1;543-543:2;550-550:1;554-554:2;558-558:3;565-565:1;609-613:1;619-623:2;629-633:3;639-645:4;651-657:5;663-669:6;675-681:7;687-693:8;699-705:9;711-715:10;721-725:11;731-735:12;741-745:13;751-756:14;762-767:15;773-775:16;781-786:17;792-797:18;803-808:19;814-820:20;826-832:21;841-850:22;857-859:1;1046-1048:1;1069-1071:1;1083-1085:1;1096-1098:1;1117-1120:1;1145-1150:1;1146-1149:1.1;1151-1156:2;1152-1155:2.1", "", "", "171:21,498:21,554:21,668:25,1224:21,1459:21,1538:21,1621:19", "799:21,800:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -112,3 +111,17 @@ public static partial class context_test_package
         builtin.initPackage(typeof(global::go.context_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(context_test_package.afterFuncContext)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class context_testᴛafterFuncContext;
+[GoMethodHost(typeof(context_test_package.customCauseContext)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class context_testᴛcustomCauseContext;
+[GoMethodHost(typeof(context_test_package.customContext)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class context_testᴛcustomContext;
+[GoMethodHost(typeof(context_test_package.customDoneContext)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class context_testᴛcustomDoneContext;
+[GoMethodHost(typeof(context_test_package.key2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class context_testᴛkey2;
+// </MethodHolders>

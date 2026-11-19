@@ -7,8 +7,6 @@
 global using static global::go.io.fs_package;
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -68,14 +66,14 @@ using static global::go.io.fs_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaC9gAuZoKygoLKgrKCgg==", "", "", "61=Date/1/4/10,Date/2/4/21,Date/3/4/32,Date/4/4/43")]
+[assembly: GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABougqaCpoKmgqaCpoKmgqaCAAkGAC5mgrKCgsqCsoKC", "", "", "66=Date/1/4/10,Date/2/4/21,Date/3/4/32,Date/4/4/43")]
 [assembly: GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA4YABo8goKCgg==")]
-[assembly: GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABMgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/AAJBIKCgoLKgqaC", "74-79:1", "", "20=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
-[assembly: GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABUk1IKCgoKCgpTKgqaCpoKClIIACAaCAAweAAQSsqKCgqaCgIKkgJKkgILsgoKClAAKBoKCgoKS", "21-30:1;75-91:1", "", "64=Now/1/2/4,Now/2/2/10")]
-[assembly: GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmAAoIlIKCuIKCuIKClIKCuIKCgoKS", "", "", "17=Now/1/2/4,Now/2/2/10")]
+[assembly: GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABQgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKCAAkMAAsEgoKCgsqCpoI=", "74-79:1", "", "21=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
+[assembly: GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABgk9IKCgoKCgpTKgqaCpoKClIIACAaCAAweAAQSsqKCgqaCgIKkgJKkgILsgoKClAAKBoKCgoKS", "21-30:1;75-91:1", "", "69=Now/1/2/4,Now/2/2/10")]
+[assembly: GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABEeABUmAAwIlIKCuIKCuIKClIKCuIKCgoKS", "", "", "18=Now/1/2/4,Now/2/2/10")]
 [assembly: GoPositionMap("io/fs/readlink_test.go", "readlink_test.cs", "ACIaggASMIKCgoK4goKmgoKmgqaCABIwgoKCgoKUgriCpoKClA==", "38-44:1;85-95:1")]
-[assembly: GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABEe9IKCgoKCgpTKgqaC", "18-27:1")]
-[assembly: GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEeAA0EgoKCgoKUgoKmgoKCgpTKgqaClIKClIKClIKmgoI=", "18-37:1")]
+[assembly: GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABQeAAkEgoKCgoKClMqCpoI=", "18-27:1")]
+[assembly: GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABQeAA8EgoKCgoKUgoKmgoKCgpTKgqaClIKClIKClIKmgoI=", "18-37:1")]
 [assembly: GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKUgoKCmIKClIKUgoKUuILu7oKigoKCgpSClLiCgpSCggAKCqKCgoKmgoKUgoKCgpSClJSClIKCtA==", "58-64:1;73-77:1;94-96:1;105-110:2;129-140:1;167-175:1")]
 // </GoSourcePositionMaps>
 
@@ -133,3 +131,18 @@ public static partial class fs_test_package
         builtin.initPackage(typeof(global::go.io.fs_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fs_test_package.formatTest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fs_testᴛformatTest;
+[GoMethodHost(typeof(fs_test_package.globOnly)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fs_testᴛglobOnly;
+[GoMethodHost(typeof(fs_test_package.readDirOnly)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fs_testᴛreadDirOnly;
+[GoMethodHost(typeof(fs_test_package.readFileOnly)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fs_testᴛreadFileOnly;
+[GoMethodHost(typeof(fs_test_package.statOnly)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fs_testᴛstatOnly;
+[GoMethodHost(typeof(fs_test_package.subOnly)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fs_testᴛsubOnly;
+// </MethodHolders>

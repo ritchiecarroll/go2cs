@@ -284,7 +284,7 @@ internal static slice<baseMultTest> p224BaseMultTests = [
 public static void TestP224BaseMult(ж<testing.T> t) {
     var p224 = P224();
     foreach (var (i, e) in range(p224BaseMultTests)) {
-        var (k, ok) = @new<bigꓸInt>().SetString(e.k, 10);
+        var (k, ok) = @new<big.Int>().SetString(e.k, 10);
         if (!ok) {
             t.Errorf("%d: bad value for k: %s", i, e.k);
         }
@@ -302,7 +302,7 @@ public static void TestP224GenericBaseMult(ж<testing.T> t) {
     // We use the P224 CurveParams directly in order to test the generic implementation.
     var p224 = genericParamsForCurve(P224());
     foreach (var (i, e) in range(p224BaseMultTests)) {
-        var (k, ok) = @new<bigꓸInt>().SetString(e.k, 10);
+        var (k, ok) = @new<big.Int>().SetString(e.k, 10);
         if (!ok) {
             t.Errorf("%d: bad value for k: %s", i, e.k);
         }

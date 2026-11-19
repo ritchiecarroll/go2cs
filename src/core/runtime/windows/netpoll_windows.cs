@@ -77,7 +77,7 @@ internal static ж<pollOperation> pollOperationFromOverlappedEntry(ref overlappe
     if (goarch.PtrSize == 4) {
         keyMatch = (uintptr)(e.key & ~(uintptr)(uintptr)sourceMasks) == (uintptr)op.pd << (int)(sourceBits);
     } else {
-        keyMatch = (ж<pollDesc>)(uintptr)(((taggedPointer)(uint64)e.key).pointer()) == op.pd;
+        keyMatch = @unsafe.Pointer.To<pollDesc>(((taggedPointer)(uint64)e.key).pointer()) == op.pd;
     }
     if (!keyMatch) {
         return default;
@@ -260,14 +260,13 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
     // expired yet. In this case, the completion packet can still be picked up by
     // another thread, so defer the cancellation until it is really necessary.
     var errno = stdcall(_NtCancelWaitCompletionPacket, (~mp).waitIocpHandle, 1);
-    var exprᴛ1 = errno;
     var matchᴛ1 = false;
-    if (exprᴛ1 == windows.STATUS_CANCELLED) { matchᴛ1 = true;
+    if (errno == windows.STATUS_CANCELLED) { matchᴛ1 = true;
         // STATUS_CANCELLED is returned when the associated timer has already expired,
         // in which automatically cancels the wait completion packet.
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == windows.STATUS_SUCCESS) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && errno == windows.STATUS_SUCCESS) { matchᴛ1 = true;
         ref var dt = ref heap<int64>(-delay / 100, out var Ꮡdt); // relative sleep (negative), 100ns units
         if (stdcall(_SetWaitableTimer, (~mp).waitIocpTimer, (uintptr)Ꮡdt, 0, 0, 0, 0) == 0) {
             println((@string)"runtime: SetWaitableTimer failed; errno=", getlasterror());
@@ -279,7 +278,7 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
             @throw(runtimeNetpollFailedˢ);
         }
     }
-    else if (exprᴛ1 == windows.STATUS_PENDING) {
+    else if (errno == windows.STATUS_PENDING) {
         // STATUS_PENDING is returned if the wait operation can't be canceled yet.
         // This can happen if this thread was woken up by another event, such as a netpollBreak,
         // and the timer expired just while calling NtCancelWaitCompletionPacket, in which case

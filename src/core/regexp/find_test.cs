@@ -9,6 +9,7 @@ using testing = testing_package;
 using static go.regexp_package;
 using Δio = io_package;
 using ꓸꓸꓸnint = Span<nint>;
+using static regexp_internal_test_package;
 
 partial class regexp_internal_test_package {
 
@@ -23,9 +24,13 @@ public partial struct FindTest {
     internal slice<slice<nint>> matches;
 }
 
+} partial class regexp_internal_testᴛFindTest {
+
 public static @string String(this FindTest t) {
     return fmt.Sprintf("pat: %#q text: %#q"u8, t.pat, t.text);
 }
+
+} partial class regexp_internal_test_package {
 
 internal static slice<FindTest> findTests = slice<FindTest>([
     new(@"", @"", build(1, 0, 0)),
@@ -577,8 +582,8 @@ public static void TestFindAllSubmatch(ж<testing.T> t) {
             break;
         }
         case {} when test.matches != nil && result != nil: {
-            foreach (var (k, Δmatch) in range(test.matches)) {
-                testSubmatchBytes(Ꮡtest, k, Δmatch, result[k], t);
+            foreach (var (k, match) in range(test.matches)) {
+                testSubmatchBytes(Ꮡtest, k, match, result[k], t);
             }
             break;
         }}
@@ -609,8 +614,8 @@ public static void TestFindAllStringSubmatch(ж<testing.T> t) {
             break;
         }
         case {} when test.matches != nil && result != nil: {
-            foreach (var (k, Δmatch) in range(test.matches)) {
-                testSubmatchString(Ꮡtest, k, Δmatch, result[k], t);
+            foreach (var (k, match) in range(test.matches)) {
+                testSubmatchString(Ꮡtest, k, match, result[k], t);
             }
             break;
         }}
@@ -638,8 +643,8 @@ internal static void testFindAllSubmatchIndex(ж<FindTest> Ꮡtest, slice<slice<
         break;
     }
     case {} when test.matches != nil && result != nil: {
-        foreach (var (k, Δmatch) in range(test.matches)) {
-            testSubmatchIndices(Ꮡtest, k, Δmatch, result[k], t);
+        foreach (var (k, match) in range(test.matches)) {
+            testSubmatchIndices(Ꮡtest, k, match, result[k], t);
         }
         break;
     }}

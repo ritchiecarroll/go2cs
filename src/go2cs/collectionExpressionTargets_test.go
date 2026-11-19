@@ -213,8 +213,9 @@ func ranges() {
 	}
 }
 
-// A package that declares its own `len` method (index/suffixarray's `func (a *ints) len() int`) shadows golib's
-// using-static builtin inside the package class, so an index-only range qualifies the length it ranges.
+// A type that declares its own `len` method (index/suffixarray's `func (a *ints) len() int`) shadows golib's
+// using-static builtin inside its method holder, so an index-only range in one of its methods qualifies the
+// length it ranges. A range anywhere else in the package reads the built-in bare.
 func TestAnIndexOnlyRangeQualifiesAShadowedLen(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
@@ -232,13 +233,21 @@ type ints struct{ v []int }
 
 func (a *ints) len() int { return len(a.v) }
 
-func main() {
-	s := []int{1, 2}
+func (a *ints) each() {
+	s := a.v
 	for i := range s {
 		println(i)
 	}
-	a := &ints{s}
+}
+
+func main() {
+	t := []int{1, 2}
+	for i := range t {
+		println(i)
+	}
+	a := &ints{t}
 	println(a.len())
+	a.each()
 }
 `)
 
@@ -270,5 +279,9 @@ func main() {
 
 	if want := "foreach (var i in range(builtin.len(s)))"; !strings.Contains(mainCs, want) {
 		t.Errorf("want %q: a shadowed len is qualified in an index-only range:\n%s", want, mainCs)
+	}
+
+	if want := "foreach (var i in range(len(t)))"; !strings.Contains(mainCs, want) {
+		t.Errorf("want %q: outside the holder that declares len, the built-in is read bare:\n%s", want, mainCs)
 	}
 }

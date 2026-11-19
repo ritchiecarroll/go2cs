@@ -1,0 +1,3 @@
+# readings on H, 2026-11-15, TieredCompilation=0, GolibTests Release at 483e71b412 (golib identical to master 091935257c); run by run-roundtrip.sh, 2 processes
+master-p1 control (box held): wrong bytes 0/200 | window (box dropped, compacting GC + finalizers between): resolved 0/200, wrong bytes 199/200
+master-p2 control (box held): wrong bytes 0/200 | window (box dropped, compacting GC + finalizers between): resolved 0/200, wrong bytes 199/200

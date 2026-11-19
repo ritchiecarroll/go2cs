@@ -6,6 +6,7 @@ namespace go;
 using fmt = fmt_package;
 using sort = sort_package;
 using static go.sort_internal_test_package;
+using static sort_test_package;
 
 partial class sort_test_package {
 
@@ -23,20 +24,26 @@ partial struct Planet {
 // By is the type of a "less" function that defines the ordering of its Planet arguments.
 public delegate bool By(ж<Planet> p1, ж<Planet> p2);
 
+} partial class sort_testᴛBy {
+
 // Sort is a method on the function type, By, that sorts the argument slice according to the function.
-public static void ΔSort(this By by, slice<Planet> planets) {
+public static void Sort(this By by, slice<Planet> planets) {
     var ps = Ꮡ(new planetSorter(
         planets: planets,
-        by: new Func<ж<Planet>, ж<Planet>, bool>(by) // The Sort method's receiver is the function (closure) that defines the sort order.
+        by: NilSafeDelegateConversion<Func<ж<Planet>, ж<Planet>, bool>, By>(by) // The Sort method's receiver is the function (closure) that defines the sort order.
     ));
     sort.Sort(new sort_test_package.planetSorterжInterface(ps));
 }
+
+} partial class sort_test_package {
 
 // planetSorter joins a By function and a slice of Planets to be sorted.
 partial struct planetSorter {
     internal slice<Planet> planets;
     internal Func<ж<Planet>, ж<Planet>, bool> by; // Closure used in the Less method.
 }
+
+} partial class sort_testᴛplanetSorter {
 
 // Len is part of sort.Interface.
 internal static nint Len(this ref planetSorter s) {
@@ -52,6 +59,8 @@ internal static void Swap(this ref planetSorter s, nint i, nint j) {
 internal static bool Less(this ref planetSorter s, nint i, nint j) {
     return s.by(Ꮡ(s.planets, i), Ꮡ(s.planets, j));
 }
+
+} partial class sort_test_package {
 
 internal static slice<Planet> planets = [
     new("Mercury", 0.055D, 0.4D),
@@ -76,16 +85,16 @@ public static void Example_sortKeys() {
     var decreasingDistance = (ж<Planet> p1, ж<Planet> p2) => distanceʗ1(p2, p1);
 
     // Sort the planets by the various criteria.
-    NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(name).ΔSort(planets);
+    NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(name).Sort(planets);
     fmt.Println(byNameˢ, planets);
 
-    NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(mass).ΔSort(planets);
+    NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(mass).Sort(planets);
     fmt.Println(byMassˢ, planets);
 
-    NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(distance).ΔSort(planets);
+    NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(distance).Sort(planets);
     fmt.Println(byDistanceˢ, planets);
 
-    NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(decreasingDistance).ΔSort(planets);
+    NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(decreasingDistance).Sort(planets);
     fmt.Println(byDecreasingDistanceˢ, planets);
 
     // Output: By name: [{Earth 1 1} {Mars 0.107 1.5} {Mercury 0.055 0.4} {Venus 0.815 0.7}]

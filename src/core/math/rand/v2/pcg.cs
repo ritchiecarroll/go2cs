@@ -8,6 +8,7 @@ using byteorder = @internal.byteorder_package;
 using bits = go.math.bits_package;
 using @internal;
 using go.math;
+using static rand_package;
 
 partial class rand_package {
 
@@ -25,6 +26,8 @@ partial struct PCG {
 public static ж<PCG> NewPCG(uint64 seed1, uint64 seed2) {
     return Ꮡ(new PCG(seed1, seed2));
 }
+
+} partial class randᴛPCG {
 
 // Seed resets the PCG to behave the same way as NewPCG(seed1, seed2).
 public static void Seed(this ref PCG p, uint64 seed1, uint64 seed2) {
@@ -45,7 +48,11 @@ public static (slice<byte>, error) MarshalBinary(this ref PCG p) {
     return p.AppendBinary(new slice<byte>(0, 20));
 }
 
+} partial class rand_package {
+
 internal static error errUnmarshalPCG = errors.New("invalid PCG encoding");
+
+} partial class randᴛPCG {
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
@@ -107,4 +114,4 @@ public static uint64 Uint64(this ref PCG p) {
     return hi;
 }
 
-} // end rand_package
+} // end randᴛPCG

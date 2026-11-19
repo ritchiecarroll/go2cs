@@ -1,0 +1,30 @@
+start 01:00:24Z tree=26c2938653 bin=ae168fe5a456e3fd
+convert rc=0
+raw Go struct text in the emission: 0
+build rc=0
+<scratch>/d4/conv.sh: line 17:  5038 Aborted                 timeout 60 dotnet "$dll" > $P/cs-$tag.out 2> $P/cs-$tag.err
+run rc=134
+1,7c1,2
+< A 2 2 7
+< B 16 [0 1 0 0]
+< C 4 84148994
+< D 410
+< E 3 3 [0 9 0 0]
+< F 33
+< G 2 0x1234
+---
+> A panic: runtime error: slice bounds out of range [1:0]
+> B panic: runtime error: index out of range [4] with length 0
+Fatal error.
+System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
+   at go.slice`1[[System.Byte, System.Private.CoreLib]]..ctor(Byte[], IntPtr, IntPtr, IntPtr)
+39:        @unsafe.Pointer bp = @unsafe.Pointer.FromPinnedBox(Ꮡbuf);
+40:        var tail = @unsafe.Pointer.To<array<main__ᴛ1>>(bp).slice(1);
+47:        var w = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡarr)).slice();
+55:        @unsafe.Pointer off = @unsafe.Pointer.FromPinnedBox(Ꮡsrc.at<byte>(2));
+56:        nint n = copy(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)).slice(), @unsafe.Pointer.To<array<byte>>(off).slice());
+62:        fmt.Println("D", takes(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡu)).slice()));
+67:        var s = Ꮡa.slice(1);
+75:        foreach (var (_, b) in range(@unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡu)).slice(2))) {
+83:        var b = @unsafe.Pointer.To<array<byte>>(@unsafe.Pointer.FromPinnedBox(Ꮡwords)).slice(2);
+CONVDONE 01:06:02Z

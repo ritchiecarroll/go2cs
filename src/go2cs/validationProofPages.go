@@ -165,6 +165,43 @@ func escapeProofCell(value string) string {
 	return strings.TrimSpace(value)
 }
 
+// proofCodeCell renders value as CODE inside a Markdown TABLE cell. A value with no pipe is the backtick span every
+// committed page already holds. A pipe ends a table column, and the escape `\|` inside a code span renders
+// differently on GitHub (which removes the backslash) and on the Pages site (kramdown keeps it), so repoguard's
+// TestDocsTableCodeSpanHasNoEscapedPipe refuses it. A value WITH a pipe is therefore the form both render the same,
+// the HTML code element with the pipe as an entity; inside <code> GitHub still applies Markdown escapes and emphasis,
+// so the backslash and the Markdown-active characters are entities too (the guard's header). timefmt-go's proof page,
+// a test name holding a pipe, is the first page that met this.
+func proofCodeCell(value string) string {
+	value = foldProofNewlines(value)
+
+	if !strings.Contains(value, "|") {
+		return "`" + value + "`"
+	}
+
+	return "<code>" + proofCodeEntities.Replace(value) + "</code>"
+}
+
+// proofCodeSpan renders value as CODE in PROSE (a paragraph or a list item, never a table row). A code span there is
+// literal on both renderers, so a pipe is written as it is; the table escape would show its backslash.
+func proofCodeSpan(value string) string {
+	return "`" + foldProofNewlines(value) + "`"
+}
+
+// foldProofNewlines flattens a manifest string onto one line, as a table row and a code span need.
+func foldProofNewlines(value string) string {
+	value = strings.ReplaceAll(value, "\r\n", " ")
+	value = strings.ReplaceAll(value, "\n", " ")
+
+	return strings.TrimSpace(value)
+}
+
+// proofCodeEntities are the characters proofCodeCell writes as entities inside <code>: the HTML-special ones, the
+// pipe, and the backslash and Markdown-active characters GitHub would otherwise interpret there.
+var proofCodeEntities = strings.NewReplacer(
+	"&", "&amp;", "<", "&lt;", ">", "&gt;", "|", "&#124;", "\\", "&#92;",
+	"`", "&#96;", "*", "&#42;", "_", "&#95;", "[", "&#91;", "]", "&#93;", "~", "&#126;")
+
 // proofVerdictNames returns the sorted union of the two verdict maps — every test the comparison
 // saw, from either side. On a validated comparison the two key sets are identical (a one-sided row
 // is a mismatch and never validates), but the union is what makes the renderer honest if that ever
@@ -219,6 +256,18 @@ func proofDisclosedNames(comparison testComparison, names []string, disclosures 
 	}
 
 	return disclosed
+}
+
+// isProofGoSideSkip reports whether a disclosed row is a Go-side host skip: an entry with a
+// GoSkipSignature, Go skipping and the converted side passing.
+func isProofGoSideSkip(comparison testComparison, name string, disclosure testDisclosure) bool {
+	return disclosure.GoSkipSignature != "" && comparison.Go[name] == "skip" && comparison.CSharp[name] == "pass"
+}
+
+// isProofNativeSubprocessSkip reports whether a disclosed row is the mirror shape a SkipEitherSide
+// entry admits: Go passing and the converted side skipping on the same native subprocess's skip.
+func isProofNativeSubprocessSkip(comparison testComparison, name string, disclosure testDisclosure) bool {
+	return disclosure.GoSkipSignature != "" && disclosure.SkipEitherSide && comparison.Go[name] == "pass" && comparison.CSharp[name] == "skip"
 }
 
 // proofVerdict renders one side's terminal status, or an em dash when that side never reported the
@@ -354,7 +403,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 			csharp += " ([disclosed](#disclosed-divergences))"
 		}
 
-		fmt.Fprintf(&page, "| `%s` | %s | %s |\n", escapeProofCell(name), proofVerdict(comparison.Go, name), csharp)
+		fmt.Fprintf(&page, "| %s | %s | %s |\n", proofCodeCell(name), proofVerdict(comparison.Go, name), csharp)
 	}
 
 	if len(disclosed) > 0 {
@@ -364,7 +413,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 		// clause is selected by what this package's manifest actually contains — so pages without a
 		// platform-skip row keep their exact wording, and the page that has one cannot state
 		// something false about itself.
-		hasPlatformSkip, hasDeferred := false, false
+		hasPlatformSkip, hasDeferred, hasGoSkip := false, false, false
 
 		for _, name := range disclosed {
 			if disclosure, pinned := disclosures[name]; pinned {
@@ -378,6 +427,10 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				// row that actually skipped makes the clause false, so every existing runtime-capability
 				// failure row keeps its page's wording byte for byte.
 				hasPlatformSkip = hasPlatformSkip || (disclosure.hasClass(runtimeCapabilityClass) && comparison.CSharp[name] == "skip")
+
+				// A Go-side host skip (testDisclosure.GoSkipSignature) has the GO side skipping and the
+				// converted side passing, so both "provably cannot" and "not a skipped test" are false of it.
+				hasGoSkip = hasGoSkip || isProofGoSideSkip(comparison, name, disclosure) || isProofNativeSubprocessSkip(comparison, name, disclosure)
 			}
 		}
 
@@ -391,9 +444,15 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 			claim = "this conversion does not satisfy"
 		}
 
+		// A page with a Go-side skip states the claim every class shares; pages without one keep
+		// their wording byte for byte.
+		if hasGoSkip {
+			claim = "on which the two runtimes' verdicts differ for a stated reason"
+		}
+
 		page.WriteString("\n## Disclosed divergences\n\n")
 
-		if hasPlatformSkip {
+		if hasPlatformSkip || hasGoSkip {
 			fmt.Fprintf(&page, "A disclosed divergence is a specific Go assertion %s — never\n", claim)
 			page.WriteString("a tolerance, and never a test skipped to make a row pass. Each one is pinned by exact signature in the package's\n")
 		} else {
@@ -426,7 +485,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				// A parent whose Go=pass/C#=fail divergence is purely the roll-up of disclosed
 				// subtests carries no manifest entry of its own (matchTerminalStatuses' aggregation
 				// rule), so say what it actually is rather than rendering two empty cells.
-				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), disclosureClassAggregate,
+				fmt.Fprintf(&page, "| %s | %s | %s |\n", proofCodeCell(name), proofCodeCell(disclosureClassAggregate),
 					escapeProofCell("no failure text of its own — the roll-up of this test's disclosed subtests"))
 				continue
 			}
@@ -434,13 +493,13 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 			// One row per reason: a plain entry's one, or each half of a two-half entry (ruling
 			// 2026-09-28 09:47, item 3b: the page reports each half).
 			for _, part := range disclosure.parts() {
-				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), escapeProofCell(part.Class), escapeProofCell(part.Reason))
+				fmt.Fprintf(&page, "| %s | %s | %s |\n", proofCodeCell(name), proofCodeCell(part.Class), escapeProofCell(part.Reason))
 			}
 
 			// And one row per optional record, the record the test logs on some runs (option A,
 			// 2026-11-01), so a visitor reads why the count can differ by one.
 			for _, optional := range disclosure.OptionalRecords {
-				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), disclosureOptionalRecordLabel, escapeProofCell(optional.Reason))
+				fmt.Fprintf(&page, "| %s | %s | %s |\n", proofCodeCell(name), proofCodeCell(disclosureOptionalRecordLabel), escapeProofCell(optional.Reason))
 			}
 		}
 
@@ -455,11 +514,11 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				continue
 			}
 
-			fmt.Fprintf(&page, "\n`%s` is a **source-defined platform skip**: `go test` reports **pass** and the converted\n"+
+			fmt.Fprintf(&page, "\n%s is a **source-defined platform skip**: `go test` reports **pass** and the converted\n"+
 				"suite reports **skip**, because the test's own upstream source skips on a platform property the\n"+
 				"converted corpus genuinely and permanently holds. The skip is Go's, not the harness's — it is pinned\n"+
 				"to that upstream message, so the row moves to a hard mismatch if the converted side ever skips for a\n"+
-				"different reason, or stops skipping.\n", escapeProofCell(name))
+				"different reason, or stops skipping.\n", proofCodeSpan(name))
 		}
 
 		// A compiler-property row's own note, for the same anti-laundering reason as platform-skip's: Go
@@ -471,10 +530,10 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				continue
 			}
 
-			fmt.Fprintf(&page, "\n`%s` is a **compiler-property skip**: `go test` reports **pass** and the converted\n"+
+			fmt.Fprintf(&page, "\n%s is a **compiler-property skip**: `go test` reports **pass** and the converted\n"+
 				"suite reports **skip**, at the test's own upstream check for a decision of the Go compiler (inlining)\n"+
 				"that the converted program does not carry; the owner ruled the family structural. It is pinned to that\n"+
-				"upstream message, and any subtest Go ran beneath it is listed as withdrawn, never counted as matched.\n", escapeProofCell(name))
+				"upstream message, and any subtest Go ran beneath it is listed as withdrawn, never counted as matched.\n", proofCodeSpan(name))
 		}
 
 		// A runtime-capability SKIP's own note, for the same anti-laundering reason: that class admits the
@@ -487,10 +546,40 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				continue
 			}
 
-			fmt.Fprintf(&page, "\n`%s` is a **runtime-capability skip**: `go test` reports **pass** and the converted\n"+
+			fmt.Fprintf(&page, "\n%s is a **runtime-capability skip**: `go test` reports **pass** and the converted\n"+
 				"suite reports **skip**, at a check for a runtime capability the managed host does not have. It is\n"+
 				"pinned to that skip message, so the row moves to a hard mismatch if the converted side ever skips\n"+
-				"for a different reason, or stops skipping.\n", escapeProofCell(name))
+				"for a different reason, or stops skipping.\n", proofCodeSpan(name))
+		}
+
+		// A Go-side host skip's own note, for the same anti-laundering reason, from the other side: here
+		// it is Go that did not run the test, and a reader must see that in words.
+		for _, name := range disclosed {
+			disclosure, pinned := disclosures[name]
+
+			if !pinned || !isProofGoSideSkip(comparison, name, disclosure) {
+				continue
+			}
+
+			fmt.Fprintf(&page, "\n%s is a **Go-side host skip**: `go test` reports **skip** and the converted\n"+
+				"suite reports **pass**, because Go's own test skips on a property of the host it ran on that the\n"+
+				"converted side does not share. It is pinned to Go's own skip message, so the row moves to a hard\n"+
+				"mismatch if Go ever skips for a different reason or fails, or if the converted side stops passing.\n", proofCodeSpan(name))
+		}
+
+		// The mirror shape's note: both sides run one native Go subprocess, and this time it was the
+		// converted side's run of it that skipped.
+		for _, name := range disclosed {
+			disclosure, pinned := disclosures[name]
+
+			if !pinned || !isProofNativeSubprocessSkip(comparison, name, disclosure) {
+				continue
+			}
+
+			fmt.Fprintf(&page, "\n%s is a **native-subprocess skip**: `go test` reports **pass** and the converted\n"+
+				"suite reports **skip**. Both sides build and run the same native Go program, which decides the\n"+
+				"verdict, and on this run the converted side's run of it hit Go's own skip. It is pinned to Go's own\n"+
+				"skip message, so the row moves to a hard mismatch if the skip text changes or either side fails.\n", proofCodeSpan(name))
 		}
 
 		// A host-conditional row's own note, modeled on the roster's internal/zstd row: name the
@@ -504,8 +593,8 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				continue
 			}
 
-			fmt.Fprintf(&page, "\n`%s` is **host-conditional**: %s\n",
-				escapeProofCell(name), strings.TrimSpace(disclosure.HostConditional))
+			fmt.Fprintf(&page, "\n%s is **host-conditional**: %s\n",
+				proofCodeSpan(name), strings.TrimSpace(disclosure.HostConditional))
 			page.WriteString("The row is therefore accepted — and counted as disclosed — in two shapes: `go test` **pass**\n")
 			page.WriteString("with go2cs **fail**, the pinned divergence above; or **both sides failing**, agreement on a host\n")
 			page.WriteString("where the Go premise itself fails. Any movement on the go2cs side still fails the comparison, in\n")
@@ -539,7 +628,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 					suffix = ""
 				}
 
-				fmt.Fprintf(&page, "- `%s` — %d verdict row%s withdrawn\n", escapeProofCell(root), counts[root], suffix)
+				fmt.Fprintf(&page, "- %s — %d verdict row%s withdrawn\n", proofCodeSpan(root), counts[root], suffix)
 			}
 		}
 	}
@@ -554,7 +643,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 		for _, entry := range provenance.archWithdrawals {
 			goos, rest, _ := strings.Cut(entry, ": ")
 			name, detail, _ := strings.Cut(rest, ": ")
-			fmt.Fprintf(&page, "- %s: `%s` — %s\n", goos, escapeProofCell(name), detail)
+			fmt.Fprintf(&page, "- %s: %s — %s\n", goos, proofCodeSpan(name), detail)
 		}
 	}
 

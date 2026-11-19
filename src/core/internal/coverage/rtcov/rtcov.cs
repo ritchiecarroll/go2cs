@@ -66,7 +66,7 @@ public static uint32 AddMeta(@unsafe.Pointer p, uint32 dlen, /*[16]*/ array<byte
 
     nint slot = len(Meta.List);
     Meta.List = append(Meta.List, new CovMetaBlob(
-        P: (ж<byte>)(uintptr)(p),
+        P: @unsafe.Pointer.To<byte>(p),
         Len: dlen,
         Hash: hash.Clone(),
         PkgPath: pkgpath,

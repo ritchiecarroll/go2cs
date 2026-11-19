@@ -18,9 +18,10 @@ import (
 
 // A module package that shares its NAME with a standard-library package, and declares a type with the
 // same simple name as one of that package's: logrus' hooks/slog is `package slog` and declares
-// `Handler`, whose pointer implements log/slog's `Handler` interface. log/slog publishes the alias
-// `slog.Handler` -> ΔHandler (its Handler collides with a method), and the type-name renderer took that
-// alias for hooks/slog's type too, keyed by package name alone. The conversion `slog.New(h)` then
+// `Handler`, whose pointer implements log/slog's `Handler` interface. log/slog published the alias
+// `slog.Handler` -> ΔHandler (its Handler shared a method's name, which renamed it until methods left
+// the package class on 2026-11-11), and the type-name renderer took that alias for hooks/slog's type
+// too, keyed by package name alone. The conversion `slog.New(h)` then
 // compared the interface's name with what it took for the argument's, found them equal and emitted an
 // identity (`slog.New(~h)`) with no GoImplement record (CS1503). The argument must render as its own
 // package's type and the conversion must be recorded and emitted like any other.
@@ -133,9 +134,9 @@ func main() {
 	// through the adapter its own package declares (it returns itself as a slog.Handler); and the other
 	// control, a same-package type (Writer) to an interface of another name, keeps its local record.
 	for _, want := range []string{
-		"slog.New(new lslog.HandlerжΔHandler(lslog.NewHandler()))",
-		"slog.New(new lslog.HandlerжΔHandler(h))",
-		"slog.New(new lslog.SinkжΔHandler(lslog.NewSink()))",
+		"slog.New(new lslog.HandlerжHandler(lslog.NewHandler()))",
+		"slog.New(new lslog.HandlerжHandler(h))",
+		"slog.New(new lslog.SinkжHandler(lslog.NewSink()))",
 		"use(new slog_WriterжWriter(lslog.NewWriter()))",
 	} {
 		if !strings.Contains(mainCs, want) {
@@ -147,7 +148,7 @@ func main() {
 		t.Errorf("missing the Writer control's record in:\n%s", packageInfo)
 	}
 
-	if strings.Contains(packageInfo, "log.slog_package.ΔHandler, ") {
+	if strings.Contains(packageInfo, "log.slog_package.Handler, ") {
 		t.Errorf("a record names log/slog's interface as the CONCRETE type in:\n%s", packageInfo)
 	}
 }

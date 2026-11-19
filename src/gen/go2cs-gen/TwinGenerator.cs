@@ -41,7 +41,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
         public IMethodSymbol? IfaceTarget;
 
         // A go statement the generator cannot launch as a twin (GoKind.Other): why, and whether its goroutine could park
-        // (the LOUD fallback, GO2CS0014). PairLaunch: a func value a twin's go statement tests for a pair (fix 6).
+        // (the LOUD fallback, GO2CS0015). PairLaunch: a func value a twin's go statement tests for a pair (fix 6).
         public string? GoReason;
         public bool GoCouldPark, PairLaunch, PairBody;
 
@@ -591,7 +591,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
         // A go literal launches its twin; a by-ref thunk, only where its call is awaited through the boxes (12.1, Thunks).
         internal bool LiteralLaunches(Site site) => !site.RefThunk || site.Thunk is { } thunk && ShouldAwait(thunk);
 
-        // The name a go statement left plain is reported under (GO2CS0014), or null where it launched its twin.
+        // The name a go statement left plain is reported under (GO2CS0015), or null where it launched its twin.
         private string? PlainGoReason(Site site) =>
             site.Go == GoKind.Other ? site.PairLaunch ? null : site.GoReason :
             site.Go == GoKind.Literal && !LiteralLaunches(site) ? "ref-wrapper" : null;

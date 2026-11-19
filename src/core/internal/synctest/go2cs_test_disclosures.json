@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestWaitGroupManyBubbles",
+      "class": "host-fatal",
+      "platforms": [
+        "darwin"
+      ],
+      "signature": "",
+      "reason": "TestWaitGroupManyBubbles holds 100 synctest bubbles of 100 parked goroutines each, 10,100 goroutines alive at once. go2cs runs each goroutine on its own OS thread (the 1:1 goroutine-to-thread model of golib's GoroutineThreadPool), and macOS caps the threads of one process: 2,028 on osx-arm64 and 3,052 on osx-x64, measured on the hosted runners (docs/phase4/DATA-mn-spike-2.md, T6). Thread creation then fails with an OutOfMemoryException at Thread.StartCore inside GoroutineThreadPool.Worker.Start, and the test host dies. Go itself runs the test (a parked goroutine holds no thread there), so the cause is go2cs's thread model meeting the host's cap, not the host alone, as with runtime's init-deadlock entry. Measured cost before this entry (os-matrix sweep-shard run 43586434174 at 314e1d8b60, both RIDs): \"matched 56 of 59 Go / 58 C# verdicts\"; TestHappensBefore lost its verdict to the same death and TestWeak never ran, so one test cost three. The test is withdrawn from both sides by name on darwin only and counted as disclosed; linux and windows run it and match. The signature is empty: a host-fatal test produces no verdict on either side. RETIRES when M:N goroutine scheduling lands (docs/phase4/DESIGN-mn-scheduler.md): parked goroutines then hold no thread, so the test fits under the cap. Remove this entry in that change and re-read the row on both mac RIDs.",
+      "history": "COORD ruling 2026-11-14 (the darwin parity scout, P4): host-fatal is the class for this test on darwin, by the precedent of runtime's init-deadlock entry, whose cause is also go2cs's own runtime design. Scoped with \"platforms\" so the shared manifest withdraws nothing on linux or windows; the mint rule reads the windows proof page, which records the test pass/pass, and since this change it reports a darwin-scoped entry as unchecked against that page rather than refusing it. The retirement condition is M:N scheduling, owner rulings R5 and R6 of DESIGN-mn-scheduler.md."
+    }
+  ]
+}

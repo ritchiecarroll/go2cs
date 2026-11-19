@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using textprotoꓸError = go.net.textproto_package.ΔError;
-global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +27,6 @@ using static go.net.smtp_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Auth", "ΔAuth")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -39,10 +36,10 @@ using static go.net.smtp_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<cramMD5Auth, ΔAuth>(Pointer = true)]
+[assembly: GoImplement<cramMD5Auth, Auth>(Pointer = true)]
 [assembly: GoImplement<dataCloser, io_package.WriteCloser>(Pointer = true)]
 [assembly: GoImplement<net_package.Conn, io_package.ReadWriteCloser>]
-[assembly: GoImplement<plainAuth, ΔAuth>(Pointer = true)]
+[assembly: GoImplement<plainAuth, Auth>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -66,8 +63,8 @@ using static go.net.smtp_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/smtp/auth.go", "auth.cs", "ACxqAAgCpoIACgb8gpSClILmgpSUAAYWwuaCpoKCgoKClA==")]
-[assembly: GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADtqooKClIKqooKCgoKUgoKokqiygoKCgqYABhDygpSClIKo4oKClIKCggAJCsKCggAICsKCgpSCgoKCgoKmgpSC6sKClIKClIKCgqzigoKU7sKClIKUgqzSgpSCgoKClIKCooKClMa0pIKUlIKClIKUgoKUAAgQ8oKUgpSCgoKUgqaC7LKClIIACxCCgoLu4oKClAAIMgAWAoKUgoKmgoKUkoKUgIKCgpSCtoKClIKmgpSCgqaCgpSCgpSCgpTe4oKUgpSCguqigpSC6qKClILosoKCgpTokoKU", "", "", "", "424:21")]
+[assembly: GoPositionMap("net/smtp/auth.go", "auth.cs", "AC1qAAgCpoIADAb8gpSClILmgpSUAAgWwgAIBoKmgoKCgoKU")]
+[assembly: GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADxqooKClIKqooKCgoKUgoLIkqiygoKCgqYABhDygpSClIKo4oKClIKCggAJCsKCggAICsKCgpSCgoKCgoKmgpSC6sKClIKClIKCgqzigoKU7sKClIKUgqzSgpSCgoKClIKCooKClMa0pIKUlIKClIKUgoKUAAgQ8oKUgpSCgoKUgqaC7LKClIIADxCCgoIACA7igoKUAA4yABYCgpSCgqaCgpSSgpSAgoKClIK2goKUgqaClIKCpoKClIKClIKClP7igpSClIKC6qKClILqooKUguiygoKClAAICJKClA==", "", "", "", "439:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -85,7 +82,7 @@ public static partial class smtp_package
     internal partial struct cramMD5Auth {}
     internal partial struct dataCloser {}
     internal partial struct plainAuth {}
-    public partial interface ΔAuth {}
+    public partial interface Auth {}
     public partial struct Client {}
     public partial struct ServerInfo {}
     // </TypeAccessibility>
@@ -109,3 +106,16 @@ public static partial class smtp_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(smtp_package.Client)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtpᴛClient;
+[GoMethodHost(typeof(smtp_package.cramMD5Auth)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtpᴛcramMD5Auth;
+[GoMethodHost(typeof(smtp_package.dataCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtpᴛdataCloser;
+[GoMethodHost(typeof(smtp_package.plainAuth)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class smtpᴛplainAuth;
+// </MethodHolders>

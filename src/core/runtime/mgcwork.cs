@@ -11,6 +11,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -126,6 +127,8 @@ partial struct gcWork {
     // stats are scan stats broken down by size class.
     internal array<sizeClassScanStats> stats = new(gc.NumSizeClasses);
 }
+
+} partial class runtimeᴛgcWork {
 
 // Most of the methods of gcWork are go:nowritebarrierrec because the
 // write barrier itself can invoke gcWork methods but the methods are
@@ -378,6 +381,8 @@ internal static bool empty(this ж<gcWork> Ꮡw) {
     return (w.wbuf1 == nil || (w.wbuf1.nobj == 0 && w.wbuf2.nobj == 0)) && Ꮡw.Ꮡspanq.empty();
 }
 
+} partial class runtime_package {
+
 // Internally, the GC work pool is kept in arrays in work buffers.
 // The gcWork interface caches a work buffer until full (or empty) to
 // avoid contending on the global work buffer lists.
@@ -392,6 +397,8 @@ partial struct workbuf {
     // account for the above fields
     internal array<uintptr> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(workbufhdr{}) */ (uintptr)24) / goarch.PtrSize);
 }
+
+} partial class runtimeᴛworkbuf {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string workbufIsEmptyˢ => ref workbufIsEmptyˢᵇ;
@@ -417,6 +424,8 @@ internal static void checkempty(this ref workbuf b) {
     }
 }
 
+} partial class runtime_package {
+
 // getempty pops an empty work buffer off the work.empty list,
 // allocating new buffers if none are available.
 //
@@ -424,7 +433,7 @@ internal static void checkempty(this ref workbuf b) {
 internal static ж<workbuf> getempty() {
     ж<workbuf> b = default;
     if (work.empty != 0) {
-        b = (ж<workbuf>)(uintptr)(Ꮡwork.Ꮡempty.pop());
+        b = @unsafe.Pointer.To<workbuf>(Ꮡwork.Ꮡempty.pop());
         if (b != nil) {
             b.checkempty();
         }
@@ -460,7 +469,7 @@ internal static ж<workbuf> getempty() {
         // Slice up the span into new workbufs. Return one and
         // put the rest on the empty list.
         for (var i = (uintptr)0; i + (uintptr)_WorkbufSize <= workbufAlloc; i += _WorkbufSize) {
-            var newb = (ж<workbuf>)(uintptr)((@unsafe.Pointer)(s.@base() + i));
+            var newb = @unsafe.Pointer.To<workbuf>((@unsafe.Pointer)(s.@base() + i));
             newb.workbufhdr.nobj = 0;
             lfnodeValidate(newb.of(workbuf.Ꮡnode));
             if (i == 0) {
@@ -501,7 +510,7 @@ internal static void putfull(ж<workbuf> Ꮡb) {
 //
 //go:nowritebarrier
 internal static ж<workbuf> trygetfull() {
-    var b = (ж<workbuf>)(uintptr)(Ꮡwork.Ꮡfull.pop());
+    var b = @unsafe.Pointer.To<workbuf>(Ꮡwork.Ꮡfull.pop());
     if (b != nil) {
         b.checknonempty();
         return b;

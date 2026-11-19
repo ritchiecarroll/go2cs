@@ -11,6 +11,7 @@ using version = go.@internal.trace.version_package;
 using go.@internal.trace;
 using io = io_package;
 using ꓸꓸꓸuint64 = Span<uint64>;
+using static trace_package;
 
 partial class trace_package {
 
@@ -30,8 +31,10 @@ partial struct ordering {
     internal uint64 gcSeq;
     internal gcState gcState;
     internal uint64 initialGen;
-    internal queue<ΔEvent> queue;
+    internal queue<Event> queue;
 }
+
+} partial class traceᴛordering {
 
 // Advance checks if it's valid to proceed with ev which came from thread m.
 //
@@ -97,81 +100,85 @@ internal static @string evName(this ref ordering o, tracev2.EventType typ) {
     return o.traceVer.EventName(typ);
 }
 
+} partial class trace_package {
+
 // type orderingHandleFunc is a methodless func type — rendered inline as its base delegate
 
 internal static array<Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>> orderingDispatch;
 internal static void initᴛorderingDispatch() { orderingDispatch = new golib.SparseArray<Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>>{
     // Procs.
-    [tracev2.EvProcsChange] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
-    [tracev2.EvProcStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStart)),
-    [tracev2.EvProcStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStop)),
-    [tracev2.EvProcSteal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcSteal)),
-    [tracev2.EvProcStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStatus)),
+    [tracev2.EvProcsChange] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation)),
+    [tracev2.EvProcStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStart)),
+    [tracev2.EvProcStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStop)),
+    [tracev2.EvProcSteal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcSteal)),
+    [tracev2.EvProcStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceProcStatus)),
 
     // Goroutines.
-    [tracev2.EvGoCreate] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreate)),
-    [tracev2.EvGoCreateSyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreateSyscall)),
-    [tracev2.EvGoStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStart)),
-    [tracev2.EvGoDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
-    [tracev2.EvGoDestroySyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoDestroySyscall)),
-    [tracev2.EvGoStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
-    [tracev2.EvGoBlock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStopExec)),
-    [tracev2.EvGoUnblock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoUnblock)),
-    [tracev2.EvGoSyscallBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallBegin)),
-    [tracev2.EvGoSyscallEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallEnd)),
-    [tracev2.EvGoSyscallEndBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallEndBlocked)),
-    [tracev2.EvGoStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStatus)),
+    [tracev2.EvGoCreate] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreate)),
+    [tracev2.EvGoCreateSyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreateSyscall)),
+    [tracev2.EvGoStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStart)),
+    [tracev2.EvGoDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec)),
+    [tracev2.EvGoDestroySyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoDestroySyscall)),
+    [tracev2.EvGoStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec)),
+    [tracev2.EvGoBlock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStopExec)),
+    [tracev2.EvGoUnblock] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoUnblock)),
+    [tracev2.EvGoSyscallBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallBegin)),
+    [tracev2.EvGoSyscallEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallEnd)),
+    [tracev2.EvGoSyscallEndBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSyscallEndBlocked)),
+    [tracev2.EvGoStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStatus)),
 
     // STW.
-    [tracev2.EvSTWBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeBegin)),
-    [tracev2.EvSTWEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeEnd)),
+    [tracev2.EvSTWBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeBegin)),
+    [tracev2.EvSTWEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeEnd)),
 
     // GC events.
-    [tracev2.EvGCActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCActive)),
-    [tracev2.EvGCBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCBegin)),
-    [tracev2.EvGCEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCEnd)),
-    [tracev2.EvGCSweepActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepActive)),
-    [tracev2.EvGCSweepBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepBegin)),
-    [tracev2.EvGCSweepEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCSweepEnd)),
-    [tracev2.EvGCMarkAssistActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeActive)),
-    [tracev2.EvGCMarkAssistBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeBegin)),
-    [tracev2.EvGCMarkAssistEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeEnd)),
-    [tracev2.EvHeapAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceHeapMetric)),
-    [tracev2.EvHeapGoal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceHeapMetric)),
+    [tracev2.EvGCActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCActive)),
+    [tracev2.EvGCBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCBegin)),
+    [tracev2.EvGCEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCEnd)),
+    [tracev2.EvGCSweepActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepActive)),
+    [tracev2.EvGCSweepBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepBegin)),
+    [tracev2.EvGCSweepEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGCSweepEnd)),
+    [tracev2.EvGCMarkAssistActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeActive)),
+    [tracev2.EvGCMarkAssistBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeBegin)),
+    [tracev2.EvGCMarkAssistEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoRangeEnd)),
+    [tracev2.EvHeapAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceHeapMetric)),
+    [tracev2.EvHeapGoal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceHeapMetric)),
 
     // Annotations.
-    [tracev2.EvGoLabel] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
-    [tracev2.EvUserTaskBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserTaskBegin)),
-    [tracev2.EvUserTaskEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserTaskEnd)),
-    [tracev2.EvUserRegionBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserRegionBegin)),
-    [tracev2.EvUserRegionEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserRegionEnd)),
-    [tracev2.EvUserLog] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
+    [tracev2.EvGoLabel] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation)),
+    [tracev2.EvUserTaskBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserTaskBegin)),
+    [tracev2.EvUserTaskEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserTaskEnd)),
+    [tracev2.EvUserRegionBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserRegionBegin)),
+    [tracev2.EvUserRegionEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceUserRegionEnd)),
+    [tracev2.EvUserLog] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAnnotation)),
 
     // Coroutines. Added in Go 1.23.
-    [tracev2.EvGoSwitch] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSwitch)),
-    [tracev2.EvGoSwitchDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSwitch)),
-    [tracev2.EvGoCreateBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreate)),
+    [tracev2.EvGoSwitch] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSwitch)),
+    [tracev2.EvGoSwitchDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoSwitch)),
+    [tracev2.EvGoCreateBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoCreate)),
 
     // GoStatus event with a stack. Added in Go 1.23.
-    [tracev2.EvGoStatusStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStatus)),
+    [tracev2.EvGoStatusStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceGoStatus)),
 
     // Experimental events.
 
     // Experimental heap span events. Added in Go 1.23.
-    [tracev2.EvSpan] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [tracev2.EvSpanAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [tracev2.EvSpanFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvSpan] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
+    [tracev2.EvSpanAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
+    [tracev2.EvSpanFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
 
     // Experimental heap object events. Added in Go 1.23.
-    [tracev2.EvHeapObject] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [tracev2.EvHeapObjectAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [tracev2.EvHeapObjectFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+    [tracev2.EvHeapObject] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
+    [tracev2.EvHeapObjectAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
+    [tracev2.EvHeapObjectFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
 
     // Experimental goroutine stack events. Added in Go 1.23.
-    [tracev2.EvGoroutineStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [tracev2.EvGoroutineStackAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
-    [tracev2.EvGoroutineStackFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree))
+    [tracev2.EvGoroutineStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
+    [tracev2.EvGoroutineStackAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree)),
+    [tracev2.EvGoroutineStackFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(traceᴛordering.advanceAllocFree))
 }.array(256); }
+
+} partial class traceᴛordering {
 
 internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
@@ -235,7 +242,7 @@ internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, �
             return (curCtx, false, fmt.Errorf("failed to find sched context for proc %d that's about to be stolen"u8, pid));
         }
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -268,7 +275,7 @@ internal static (schedCtx, bool, error) advanceProcStart(this ref ordering o, ж
     state.seq = seq;
     var newCtx = curCtx;
     newCtx.P = pid;
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -298,7 +305,7 @@ internal static (schedCtx, bool, error) advanceProcStop(this ref ordering o, ж<
     state.status = tracev2.ProcIdle;
     var newCtx = curCtx;
     newCtx.P = NoProc;
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -335,7 +342,7 @@ internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж
     // If we've lost information then don't try to do anything with the M.
     // It may have moved on and we can't be sure.
     if (oldStatus == tracev2.ProcSyscallAbandoned) {
-        o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+        o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
         return (curCtx, true, default);
     }
 
@@ -349,7 +356,7 @@ internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж
             return (curCtx, false, fmt.Errorf("tried to self-steal proc %d (thread %d), but got proc %d instead"u8, pid, mid, curCtx.P));
         }
         newCtx.P = NoProc;
-        o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+        o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
         return (newCtx, true, default);
     }
 
@@ -371,7 +378,7 @@ internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж
     // GoSyscallEndBlocked cannot advance until the corresponding
     // M loses its P.
     mState.p = NoProc;
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -453,7 +460,7 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
         curCtx.M = mid;
         break;
     }}
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -480,7 +487,7 @@ internal static (schedCtx, bool, error) advanceGoCreate(this ref ordering o, ж<
         status = tracev2.GoWaiting;
     }
     o.gStates[newgid] = Ꮡ(new gState(id: newgid, status: status, seq: makeSeq(gen, 0)));
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -522,7 +529,7 @@ internal static (schedCtx, bool, error) advanceGoStopExec(this ref ordering o, �
         newCtx.G = NoGoroutine;
         break;
     }}
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -547,7 +554,7 @@ internal static (schedCtx, bool, error) advanceGoStart(this ref ordering o, ж<b
     state.seq = seq;
     var newCtx = curCtx;
     newCtx.G = gid;
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -568,7 +575,7 @@ internal static (schedCtx, bool, error) advanceGoUnblock(this ref ordering o, ж
     state.seq = seq;
     // N.B. No context to validate. Basically anything can unblock
     // a goroutine (e.g. sysmon).
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -603,7 +610,7 @@ internal static (schedCtx, bool, error) advanceGoSwitch(this ref ordering o, ж<
         // state emitted, or before we got to the right point in the trace yet.
         return (curCtx, false, default);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
 
     // Update the state of the executing goroutine and emit an event for it
     // (GoSwitch and GoSwitchDestroy will be interpreted as GoUnblock events
@@ -677,7 +684,7 @@ internal static (schedCtx, bool, error) advanceGoSyscallBegin(this ref ordering 
         return (curCtx, false, fmt.Errorf("failed to advance %s: can't make sequence: %s -> %s"u8, o.evName(ev.typ), pState.seq, pSeq));
     }
     pState.seq = pSeq;
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -708,7 +715,7 @@ internal static (schedCtx, bool, error) advanceGoSyscallEnd(this ref ordering o,
         return (curCtx, false, fmt.Errorf("expected proc %d in state %v, but got %v instead"u8, curCtx.P, tracev2.ProcSyscall, pState.status));
     }
     pState.status = tracev2.ProcRunning;
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -749,7 +756,7 @@ internal static (schedCtx, bool, error) advanceGoSyscallEndBlocked(this ref orde
     var newCtx = curCtx;
     newCtx.G = NoGoroutine;
     state.status = tracev2.GoRunnable;
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -771,7 +778,7 @@ internal static (schedCtx, bool, error) advanceGoCreateSyscall(this ref ordering
     // Goroutine is executing. Bind it to the context.
     var newCtx = curCtx;
     newCtx.G = newgid;
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -828,7 +835,7 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall(this ref orderin
         extra.@base.extra(version.Go122)[0] = (uint64)tracev2.ProcSyscall;
         o.queue.push(extra);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default);
 }
 
@@ -869,7 +876,7 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
     var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -893,7 +900,7 @@ internal static (schedCtx, bool, error) advanceUserTaskEnd(this ref ordering o, 
     var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -921,7 +928,7 @@ internal static (schedCtx, bool, error) advanceUserRegionBegin(this ref ordering
             return (curCtx, false, err);
         }
     }
-    o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -949,7 +956,7 @@ internal static (schedCtx, bool, error) advanceUserRegionEnd(this ref ordering o
             return (curCtx, false, err);
         }
     }
-    o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -970,7 +977,7 @@ internal static (schedCtx, bool, error) advanceGCActive(this ref ordering o, ж<
         }
         o.gcSeq = seq;
         o.gcState = gcRunning;
-        o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+        o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
         return (curCtx, true, default);
     }
     if (seq != o.gcSeq + 1) {
@@ -984,7 +991,7 @@ internal static (schedCtx, bool, error) advanceGCActive(this ref ordering o, ж<
     var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -995,7 +1002,7 @@ internal static (schedCtx, bool, error) advanceGCBegin(this ref ordering o, ж<b
     if (o.gcState == gcUndetermined) {
         o.gcSeq = seq;
         o.gcState = gcRunning;
-        o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+        o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
         return (curCtx, true, default);
     }
     if (seq != o.gcSeq + 1) {
@@ -1010,7 +1017,7 @@ internal static (schedCtx, bool, error) advanceGCBegin(this ref ordering o, ж<b
     var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1033,7 +1040,7 @@ internal static (schedCtx, bool, error) advanceGCEnd(this ref ordering o, ж<bas
     var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1044,7 +1051,7 @@ internal static (schedCtx, bool, error) advanceAnnotation(this ref ordering o, �
     var err = validateCtx(curCtx, userGoReqs); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1055,7 +1062,7 @@ internal static (schedCtx, bool, error) advanceHeapMetric(this ref ordering o, �
     var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1073,7 +1080,7 @@ internal static (schedCtx, bool, error) advanceGCSweepBegin(this ref ordering o,
             return (curCtx, false, err);
         }
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1092,7 +1099,7 @@ internal static (schedCtx, bool, error) advanceGCSweepActive(this ref ordering o
     var err = pState.of(trace_package.pState.ᏑrangeState).activeRange(makeRangeType(ev.typ, 0), gen == o.initialGen); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1106,7 +1113,7 @@ internal static (schedCtx, bool, error) advanceGCSweepEnd(this ref ordering o, �
     if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1132,7 +1139,7 @@ internal static (schedCtx, bool, error) advanceGoRangeBegin(this ref ordering o,
             return (curCtx, false, err);
         }
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1150,7 +1157,7 @@ internal static (schedCtx, bool, error) advanceGoRangeActive(this ref ordering o
     var err = gState.of(trace_package.gState.ᏑrangeState).activeRange(makeRangeType(ev.typ, 0), gen == o.initialGen); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1173,7 +1180,7 @@ internal static (schedCtx, bool, error) advanceGoRangeEnd(this ref ordering o, �
         // Don't use ev.extra here so we have symmetry with STWBegin.
         ev.args[0] = (uint64)desc;
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
@@ -1184,14 +1191,16 @@ internal static (schedCtx, bool, error) advanceAllocFree(this ref ordering o, ж
     var err = validateCtx(curCtx, new schedReqs(M: mustHave, P: mayHave, G: mayHave)); if (err != nil) {
         return (curCtx, false, err);
     }
-    o.queue.push(new ΔEvent(table: evt, ctx: curCtx, @base: ev.ΔClone()));
+    o.queue.push(new Event(table: evt, ctx: curCtx, @base: ev.ΔClone()));
     return (curCtx, true, default);
 }
 
 // Next returns the next event in the ordering.
-internal static (ΔEvent, bool) Next(this ref ordering o) {
+internal static (Event, bool) Next(this ref ordering o) {
     return o.queue.pop();
 }
+
+} partial class trace_package {
 
 // schedCtx represents the scheduling resources associated with an event.
 partial struct schedCtx {
@@ -1235,6 +1244,8 @@ internal static gcState gcUndetermined => /* iota */ 0;
 internal static gcState gcNotRunning => 1;
 internal static gcState gcRunning => 2;
 
+} partial class traceᴛgcState {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string undeterminedˢ => ref undeterminedˢᵇ;
 private static readonly @string undeterminedˢᵇ = "Undetermined"u8;
@@ -1259,6 +1270,8 @@ internal static @string String(this gcState s) {
     }}
     return badˢ;
 }
+
+} partial class trace_package {
 
 // userRegion represents a unique user region when attached to some gState.
 partial struct userRegion {
@@ -1298,9 +1311,11 @@ partial struct gState {
     /*embed*/ internal rangeState rangeState;
 }
 
+} partial class traceᴛgState {
+
 // beginRegion starts a user region on the goroutine.
 internal static error beginRegion(this ref gState s, userRegion r) {
-    s.regions = builtin.append(s.regions, r);
+    s.regions = append(s.regions, r);
     return default;
 }
 
@@ -1316,6 +1331,8 @@ internal static error endRegion(this ref gState s, userRegion r) {
     s.regions = s.regions.slice(0, len(s.regions) - 1);
     return default;
 }
+
+} partial class trace_package {
 
 // pState is the state of a proc at a point in the trace.
 partial struct pState {
@@ -1338,6 +1355,8 @@ partial struct rangeState {
     internal slice<rangeType> inFlight;
 }
 
+} partial class traceᴛrangeState {
+
 // beginRange begins a special range in time on the goroutine.
 //
 // Returns an error if the range is already in progress.
@@ -1345,7 +1364,7 @@ internal static error beginRange(this ref rangeState s, rangeType typ) {
     if (s.hasRange(typ)) {
         return fmt.Errorf("discovered event already in-flight for when starting event %v"u8, tracev2.Specs()[typ.typ].Name);
     }
-    s.inFlight = builtin.append(s.inFlight, typ);
+    s.inFlight = append(s.inFlight, typ);
     return default;
 }
 
@@ -1356,7 +1375,7 @@ internal static error activeRange(this ref rangeState s, rangeType typ, bool isI
         if (s.hasRange(typ)) {
             return fmt.Errorf("found named active range already in first gen: %v"u8, typ);
         }
-        s.inFlight = builtin.append(s.inFlight, typ);
+        s.inFlight = append(s.inFlight, typ);
     } else if (!s.hasRange(typ)) {
         return fmt.Errorf("resource is missing active range: %v %v"u8, tracev2.Specs()[typ.typ].Name, s.inFlight);
     }
@@ -1390,6 +1409,8 @@ internal static (stringID, error) endRange(this ref rangeState s, tracev2.EventT
     return (desc, default);
 }
 
+} partial class trace_package {
+
 // seqCounter represents a global sequence counter for a resource.
 partial struct seqCounter {
     internal uint64 gen; // The generation for the local sequence counter seq.
@@ -1401,6 +1422,8 @@ internal static seqCounter makeSeq(uint64 gen, uint64 seq) {
     return new seqCounter(gen: gen, seq: seq);
 }
 
+} partial class traceᴛseqCounter {
+
 // succeeds returns true if a is the immediate successor of b.
 internal static bool succeeds(this seqCounter a, seqCounter b) {
     return a.gen == b.gen && a.seq == b.seq + 1;
@@ -1410,6 +1433,8 @@ internal static bool succeeds(this seqCounter a, seqCounter b) {
 internal static @string String(this seqCounter c) {
     return fmt.Sprintf("%d (gen=%d)"u8, c.seq, c.gen);
 }
+
+} partial class trace_package {
 
 internal static @string dumpOrdering(ref ordering order) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
@@ -1442,6 +1467,8 @@ partial struct queue<T> {
     internal nint start, end;
     internal slice<T> buf;
 }
+
+} partial class traceᴛqueue {
 
 // push adds a new event to the back of the queue.
 internal static void push<T>(this ref queue<T> q, T value) {
@@ -1485,15 +1512,17 @@ internal static (T, bool) pop<T>(this ref queue<T> q) {
     return (value, true);
 }
 
+} partial class trace_package {
+
 // makeEvent creates an Event from the provided information.
 //
 // It's just a convenience function; it's always OK to construct
 // an Event manually if this isn't quite the right way to express
 // the contents of the event.
-internal static ΔEvent makeEvent(ж<evTable> table, schedCtx ctx, tracev2.EventType typ, ΔTime time, params ꓸꓸꓸuint64 argsʗp) {
+internal static Event makeEvent(ж<evTable> table, schedCtx ctx, tracev2.EventType typ, Time time, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
-    var ev = new ΔEvent(
+    var ev = new Event(
         table: table,
         ctx: ctx,
         @base: new baseEvent(

@@ -51,9 +51,9 @@ internal static void main() {
     ch.ᐸꟷ(7);
     var repl = new channel<nint>(1);
     repl.ᐸꟷ(8);
-    var selᴛ3 = ch;
-    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-    case 0 when selᴛ3.ꟷᐳ(out sink[swap(ref ch, repl)]): {
+    var chᴛ1 = ch;
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out sink[swap(ref ch, repl)]): {
         fmt.Println("S3 sink[0] =", sink[0], "len(ch) =", len(ch), "len(repl) =", len(repl));
         break;
     }}

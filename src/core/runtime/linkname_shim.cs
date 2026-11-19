@@ -62,7 +62,7 @@ partial struct linknameIter {
     // Fields from hiter.
     internal @unsafe.Pointer key;
     internal @unsafe.Pointer elem;
-    internal ж<abiꓸMapType> typ;
+    internal ж<abi.MapType> typ;
     // The real iterator.
     internal ж<maps.Iter> it;
 }
@@ -85,7 +85,7 @@ partial struct linknameIter {
 // See go.dev/issue/67401.
 //
 //go:linkname mapiterinit
-internal static void mapiterinit(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<linknameIter> Ꮡit) {
+internal static void mapiterinit(ж<abi.MapType> t, ж<maps.Map> m, ж<linknameIter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     if (raceenabled && m != nil) {
@@ -119,7 +119,7 @@ internal static void mapiterinit(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<linkn
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_mapiterinit reflect.mapiterinit
-internal static void reflect_mapiterinit(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<linknameIter> it) {
+internal static void reflect_mapiterinit(ж<abi.MapType> t, ж<maps.Map> m, ж<linknameIter> it) {
     mapiterinit(t, m, it);
 }
 

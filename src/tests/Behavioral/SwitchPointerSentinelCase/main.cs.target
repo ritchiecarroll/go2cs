@@ -64,11 +64,11 @@ internal static bool preferLowLatency(ж<mu> p) {
 internal static UntypedInt ptrSize => 8;
 
 internal static ж<uint8> key8(ж<uintptr> p) {
-    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(0);
+    return @unsafe.Pointer.Element<uint8>(@unsafe.Pointer.FromPinnedBox(p), 0, 8);
 }
 
 internal static ж<uint8> key8Last(ж<uintptr> p) {
-    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(ptrSize - 1);
+    return @unsafe.Pointer.Element<uint8>(@unsafe.Pointer.FromPinnedBox(p), ptrSize - 1, 8);
 }
 
 internal static void main() {

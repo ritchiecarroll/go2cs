@@ -8,34 +8,37 @@ using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static runtime_package;
 
 partial class runtime_package {
 
 internal static void dumpregs(ж<sigctxt> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    print((@string)"rax    ", (Δhex)c.rax(), (@string)"\n");
-    print((@string)"rbx    ", (Δhex)c.rbx(), (@string)"\n");
-    print((@string)"rcx    ", (Δhex)c.rcx(), (@string)"\n");
-    print((@string)"rdx    ", (Δhex)c.rdx(), (@string)"\n");
-    print((@string)"rdi    ", (Δhex)c.rdi(), (@string)"\n");
-    print((@string)"rsi    ", (Δhex)c.rsi(), (@string)"\n");
-    print((@string)"rbp    ", (Δhex)c.rbp(), (@string)"\n");
-    print((@string)"rsp    ", (Δhex)c.rsp(), (@string)"\n");
-    print((@string)"r8     ", (Δhex)c.r8(), (@string)"\n");
-    print((@string)"r9     ", (Δhex)c.r9(), (@string)"\n");
-    print((@string)"r10    ", (Δhex)c.r10(), (@string)"\n");
-    print((@string)"r11    ", (Δhex)c.r11(), (@string)"\n");
-    print((@string)"r12    ", (Δhex)c.r12(), (@string)"\n");
-    print((@string)"r13    ", (Δhex)c.r13(), (@string)"\n");
-    print((@string)"r14    ", (Δhex)c.r14(), (@string)"\n");
-    print((@string)"r15    ", (Δhex)c.r15(), (@string)"\n");
-    print((@string)"rip    ", (Δhex)c.rip(), (@string)"\n");
-    print((@string)"rflags ", (Δhex)c.rflags(), (@string)"\n");
-    print((@string)"cs     ", (Δhex)c.cs(), (@string)"\n");
-    print((@string)"fs     ", (Δhex)c.fs(), (@string)"\n");
-    print((@string)"gs     ", (Δhex)c.gs(), (@string)"\n");
+    print((@string)"rax    ", (hex)c.rax(), (@string)"\n");
+    print((@string)"rbx    ", (hex)c.rbx(), (@string)"\n");
+    print((@string)"rcx    ", (hex)c.rcx(), (@string)"\n");
+    print((@string)"rdx    ", (hex)c.rdx(), (@string)"\n");
+    print((@string)"rdi    ", (hex)c.rdi(), (@string)"\n");
+    print((@string)"rsi    ", (hex)c.rsi(), (@string)"\n");
+    print((@string)"rbp    ", (hex)c.rbp(), (@string)"\n");
+    print((@string)"rsp    ", (hex)c.rsp(), (@string)"\n");
+    print((@string)"r8     ", (hex)c.r8(), (@string)"\n");
+    print((@string)"r9     ", (hex)c.r9(), (@string)"\n");
+    print((@string)"r10    ", (hex)c.r10(), (@string)"\n");
+    print((@string)"r11    ", (hex)c.r11(), (@string)"\n");
+    print((@string)"r12    ", (hex)c.r12(), (@string)"\n");
+    print((@string)"r13    ", (hex)c.r13(), (@string)"\n");
+    print((@string)"r14    ", (hex)c.r14(), (@string)"\n");
+    print((@string)"r15    ", (hex)c.r15(), (@string)"\n");
+    print((@string)"rip    ", (hex)c.rip(), (@string)"\n");
+    print((@string)"rflags ", (hex)c.rflags(), (@string)"\n");
+    print((@string)"cs     ", (hex)c.cs(), (@string)"\n");
+    print((@string)"fs     ", (hex)c.fs(), (@string)"\n");
+    print((@string)"gs     ", (hex)c.gs(), (@string)"\n");
 }
+
+} partial class runtimeᴛsigctxt {
 
 //go:nosplit
 //go:nowritebarrierrec
@@ -54,7 +57,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     // Look at instruction to see if it is a divide.
     // Not necessary in Snow Leopard (si_code will be != 0).
     if (GOOS == "darwin"u8 && sig == _SIGFPE && gp.sigcode0 == 0) {
-        var pcΔ1 = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)gp.sigpc);
+        var pcΔ1 = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)gp.sigpc);
         nint i = 0;
         if ((byte)(pcΔ1.Value[i] & 0xF0) == 0x40) { // 64-bit REX prefix
             i++;
@@ -72,7 +75,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     // In case we are panicking from external code, we need to initialize
     // Go special registers. We inject sigpanic0 (instead of sigpanic),
     // which takes care of that.
-    if (shouldPushSigpanic(ref (Ꮡgp).DerefOrNull(), pc, ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)sp))) {
+    if (shouldPushSigpanic(ref (Ꮡgp).DerefOrNull(), pc, ~@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp))) {
         c.pushCall(abi.FuncPCABI0(sigpanic0), pc);
     } else {
         // Not safe to push the call. Just clobber the frame.
@@ -84,9 +87,9 @@ internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resu
     // Make it look like we called target at resumePC.
     var sp = (uintptr)c.rsp();
     sp -= goarch.PtrSize;
-    ((ж<uintptr>)(uintptr)((@unsafe.Pointer)sp)).Value = resumePC;
+    (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = resumePC;
     c.set_rsp((uint64)sp);
     c.set_rip((uint64)targetPC);
 }
 
-} // end runtime_package
+} // end runtimeᴛsigctxt

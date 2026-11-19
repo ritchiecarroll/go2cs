@@ -1,0 +1,139 @@
+// SCRATCH PROBE (never committed): pin-extent BOARD row 3's discriminator. Five arms at 1 and 4 threads, each thread on
+// ITS OWN array (8 KiB fillers keep arrays off shared pages): (a) GCHandle pinned alloc+free; (b) PinnedBuffer.Of with
+// the index OFF + Dispose; (b2) a finalizable object of PinnedBuffer's shape + SuppressFinalize, no handle; (c) fixed;
+// (d) a non-finalizable object of the same shape. Reported with no bar.
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Threading;
+using go.golib;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace GolibTests;
+
+[TestClass]
+public unsafe class ProbePinCollapse
+{
+    private static readonly FieldInfo s_current = typeof(PinnedBuffer).Assembly.GetType("go.golib.PinExtents")!
+        .GetField("s_current", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+    private const int Ops = 200_000;
+
+    private sealed class Finalizable
+    {
+        internal GCHandle h; internal int len; internal bool disposed; internal byte state;
+        ~Finalizable() { disposed = true; }
+    }
+
+    private sealed class Plain
+    {
+        internal GCHandle h; internal int len; internal bool disposed; internal byte state;
+    }
+
+    private static volatile object? s_sink;
+
+    [TestMethod]
+    public void Measure()
+    {
+        string label = Environment.GetEnvironmentVariable("PROBE_LABEL") ?? "?";
+        string arms = Environment.GetEnvironmentVariable("PROBE_ARMS") ?? "a,b,b2,c,d";
+        object? concurrent = AppContext.GetData("System.GC.Concurrent");
+        var lines = new List<string> { $"{label} box H cpus {Environment.ProcessorCount} serverGC {GCSettings.IsServerGC} latency {GCSettings.LatencyMode} concurrent-config {concurrent ?? "default"} tc {Environment.GetEnvironmentVariable("DOTNET_TieredCompilation") ?? "default"}" };
+        object? index = s_current.GetValue(null);
+        s_current.SetValue(null, null); // the index OFF for every arm
+
+        try
+        {
+            for (int reading = 1; reading <= 2; reading++)
+                foreach (string arm in arms.Split(','))
+                    foreach ((string kind, int size) in new[] { ("64K", 64 * 1024), ("16B", 16) })
+                        foreach (int threads in new[] { 1, 4 })
+                            lines.Add($"{label} r{reading} {arm,-2} {kind} t{threads} {Run(arm, size, threads)}");
+        }
+        finally
+        {
+            s_current.SetValue(null, index);
+        }
+
+        Console.WriteLine(string.Join(Environment.NewLine, lines));
+        System.IO.File.AppendAllLines(Environment.GetEnvironmentVariable("PROBE_OUT")!, lines);
+    }
+
+    private static string Run(string arm, int size, int threads)
+    {
+        var objects = new byte[threads][];
+        var fillers = new byte[threads][];
+
+        for (int i = 0; i < threads; i++)
+        {
+            objects[i] = new byte[size];
+            fillers[i] = new byte[8192];
+        }
+
+        double[] perOp = new double[threads];
+        using var barrier = new Barrier(threads + 1);
+        var workers = new Thread[threads];
+
+        for (int t = 0; t < threads; t++)
+        {
+            int me = t;
+            workers[t] = new Thread(() =>
+            {
+                byte[] mine = objects[me];
+                Loop(arm, mine, 2_000);
+                barrier.SignalAndWait();
+                perOp[me] = Loop(arm, mine, Ops);
+                barrier.SignalAndWait();
+            });
+            workers[t].Start();
+        }
+
+        barrier.SignalAndWait();
+        Stopwatch wall = Stopwatch.StartNew();
+        barrier.SignalAndWait();
+        wall.Stop();
+
+        foreach (Thread worker in workers)
+            worker.Join();
+
+        Array.Sort(perOp);
+        double mops = (double)Ops * threads / wall.Elapsed.TotalSeconds / 1e6;
+        GC.KeepAlive(objects);
+        GC.KeepAlive(fillers);
+        return $"per-op median {perOp[threads / 2]:F0} ns (min {perOp[0]:F0} max {perOp[threads - 1]:F0}) | {mops:F2} Mops/s";
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+    private static double Loop(string arm, byte[] target, int n)
+    {
+        Stopwatch watch = Stopwatch.StartNew();
+        int sum = 0;
+
+        switch (arm)
+        {
+            case "a":
+                for (int i = 0; i < n; i++) { GCHandle h = GCHandle.Alloc(target, GCHandleType.Pinned); h.Free(); }
+                break;
+            case "b":
+                for (int i = 0; i < n; i++) PinnedBuffer.Of(target).Dispose();
+                break;
+            case "b2":
+                for (int i = 0; i < n; i++) { var f = new Finalizable(); GC.SuppressFinalize(f); s_sink = f; }
+                break;
+            case "c":
+                for (int i = 0; i < n; i++) { fixed (byte* p = target) sum += p[0]; }
+                break;
+            case "d":
+                for (int i = 0; i < n; i++) { s_sink = new Plain(); }
+                break;
+        }
+
+        double ns = watch.Elapsed.TotalMilliseconds * 1e6 / n;
+        GC.KeepAlive(sum);
+        return ns;
+    }
+}

@@ -579,6 +579,20 @@ Assert-Equal 'host-conditional-disclosure: the named entry firing in any other s
         csharp = New-VerdictMap @{ TestOther = 'pass'; TestExtraFiles = 'fail' }
         disclosed = @('TestCredentialNoSetGroups (host-limit): the seam names the field', 'TestExtraFiles (platform-skip): source-defined platform skip')
     })).Accepted
+# The mirror shape (2026-11-14, internal/trace on darwin): Go=skip / C#=pass, one verdict changing
+# column, is absorbed like Go=pass / C#=skip; a Go failure beside a converted pass, or a converted
+# failure beside a Go skip, is not.
+$hcdMirror = { param($go, $cs) [PSCustomObject]@{
+        go = New-VerdictMap @{ TestOther = 'pass'; 'TestTraceCPUProfile/Default' = $go }
+        csharp = New-VerdictMap @{ TestOther = 'pass'; 'TestTraceCPUProfile/Default' = $cs }
+        disclosed = @('TestTraceCPUProfile/Default (host-identity): both sides run one native Go program')
+    } }
+Assert-Equal 'host-conditional-disclosure: the mirror shape (Go=skip / C#=pass) is accepted' $true `
+    (Test-HostConditionalDisclosureDelta -Expected 187 -Disclosed 0 -Names @('TestTraceCPUProfile/Default') -Got 186 -GotDisclosed 1 -Comparison (& $hcdMirror 'skip' 'pass')).Accepted
+Assert-Equal 'host-conditional-disclosure: Go=fail / C#=pass is refused' $false `
+    (Test-HostConditionalDisclosureDelta -Expected 187 -Disclosed 0 -Names @('TestTraceCPUProfile/Default') -Got 186 -GotDisclosed 1 -Comparison (& $hcdMirror 'fail' 'pass')).Accepted
+Assert-Equal 'host-conditional-disclosure: Go=skip / C#=fail is refused' $false `
+    (Test-HostConditionalDisclosureDelta -Expected 187 -Disclosed 0 -Names @('TestTraceCPUProfile/Default') -Got 186 -GotDisclosed 1 -Comparison (& $hcdMirror 'skip' 'fail')).Accepted
 Assert-Equal 'host-conditional-disclosure: a row naming nothing absorbs nothing' $false `
     (Test-HostConditionalDisclosureDelta -Expected 87 -Disclosed 1 -Names @() -Got 86 -GotDisclosed 2 -Comparison $hcdFired).Accepted
 Assert-Equal 'host-conditional-disclosure: a record without verdict maps is refused' $false `
@@ -1465,6 +1479,86 @@ if ($linuxNaRows.Count -gt 0) {
         (Get-HeaderNumber $lines 'Linux:' '(\d+)\s+row(?:s)?\s+platform-exclusive')
 }
 
+# The roster's osx-x64 reading in a darwin segment: the headline when the headline is osx-x64's (or the segment has no
+# note), else the note's. darwin never takes pending, so a noted segment always yields one.
+function Get-DarwinX64Reading {
+    param($Segment)
+
+    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    $rid = if ($Segment.PSObject.Properties['Rid']) { $Segment.Rid } else { $null }
+    if ((-not $rid) -or ($rid -ceq 'osx-x64')) { return [PSCustomObject]@{ Expected = [int]$Segment.Expected; Disclosed = [int]$Segment.Disclosed } }
+    if (($null -ne $other) -and ($other.Rid -ceq 'osx-x64')) { return [PSCustomObject]@{ Expected = [int]$other.Expected; Disclosed = [int]$other.Disclosed } }
+    return $null
+}
+
+# The macOS line's population. A darwin segment is banked only when BOTH chips read it (osx-x64 and osx-arm64, each
+# against Go built for that chip), so one count serves both RIDs: Validated is the applicable rows carrying a darwin
+# segment, and the verdict sums are each segment's osx-x64 reading, as the Linux line sums linux-x64's. Applicable is
+# the table minus the Windows-only rows, which are the `linux: n/a` rows (a package that cannot exist on Linux is
+# Windows-exclusive by the n/a ruling, so it cannot exist on macOS either). WindowsOnlyWithDarwin names a Windows-only
+# row that carries a darwin count (a contradiction); NoX64 a segment with no osx-x64 reading (the parser never yields
+# one).
+function Get-DarwinHeaderPopulation {
+    param($Rows)
+
+    $population = [PSCustomObject]@{ Applicable = 0; Validated = 0; WindowsOnly = 0; X64Matched = 0; X64Disclosed = 0; NoX64 = @(); WindowsOnlyWithDarwin = @() }
+    foreach ($row in $Rows) {
+        $windowsOnly = $row.OS.ContainsKey('linux') -and -not $row.OS['linux'].Applicable
+        $hasDarwin = $row.OS.ContainsKey('darwin') -and $row.OS['darwin'].Applicable
+        if ($windowsOnly) {
+            $population.WindowsOnly++
+            if ($hasDarwin) { $population.WindowsOnlyWithDarwin += $row.Package }
+            continue
+        }
+        $population.Applicable++
+        if (-not $hasDarwin) { continue }
+        $population.Validated++
+        $x64 = Get-DarwinX64Reading $row.OS['darwin']
+        if ($null -eq $x64) { $population.NoX64 += $row.Package } else { $population.X64Matched += $x64.Expected; $population.X64Disclosed += $x64.Disclosed }
+    }
+    return $population
+}
+
+# The macOS progress line and the three-OS parity sentence (user-facing docs audit, section 3 (a) and (b); COORD
+# 2026-11-16). Both are summed from the darwin segments exactly as the Linux line is summed from its annotations, so a
+# roster change that moves a darwin count, adds a row or drops a segment moves the stated numbers or reds here.
+$darFixturePopulation = Get-DarwinHeaderPopulation -Rows (Read-FixtureRoster @(
+        "| [``dha/pkg``](https://x/dha) | 1 |  | Plain. $dot linux: 10 $dot darwin: 10 + 1 $dot [proof](p.md) |"
+        "| [``dhb/pkg``](https://x/dhb) | 1 |  | Arm headlines. $dot linux: 8 $dot darwin: 7 + 3 (osx-arm64; osx-x64: 10) $dot [proof](p.md) |"
+        "| [``dhc/pkg``](https://x/dhc) | 1 |  | X64 headlines. $dot linux: 5 $dot darwin: 6 (osx-x64; osx-arm64: 4) $dot [proof](p.md) |"
+        "| [``dhd/pkg``](https://x/dhd) | 1 |  | Not read on macOS yet. $dot linux: 7 $dot [proof](p.md) |"
+        "| [``dhe/pkg``](https://x/dhe) | 1 |  | Windows only. $dot linux: n/a $dot [proof](p.md) |"))
+Assert-Equal 'darwin header population: osx-x64 matched sums each row''s osx-x64 reading (the note''s where osx-arm64 headlines)' 26 $darFixturePopulation.X64Matched
+Assert-Equal 'darwin header population: osx-x64 disclosed likewise' 1 $darFixturePopulation.X64Disclosed
+Assert-Equal 'darwin header population: validated counts the applicable rows carrying a darwin segment' 3 $darFixturePopulation.Validated
+Assert-Equal 'darwin header population: applicable is the table minus the Windows-only (linux: n/a) rows' 4 $darFixturePopulation.Applicable
+Assert-Equal 'darwin header population: the Windows-only rows are counted' 1 $darFixturePopulation.WindowsOnly
+$darBadPopulation = Get-DarwinHeaderPopulation -Rows (Read-FixtureRoster @(
+        "| [``dhx/pkg``](https://x/dhx) | 1 |  | Windows only, yet a darwin count. $dot linux: n/a $dot darwin: 3 $dot [proof](p.md) |"))
+Assert-Equal 'darwin header population: a Windows-only row carrying a darwin count is named' 'dhx/pkg' ($darBadPopulation.WindowsOnlyWithDarwin -join ', ')
+
+$darwinPopulation = Get-DarwinHeaderPopulation -Rows $rows
+$macPattern = 'macOS:\s*\*{0,2}(\d+)\s+of\s+(\d+)\s+applicable rows validated on Intel \(`osx-x64`\) and on Apple silicon \(`osx-arm64`\)'
+Assert-Equal 'macOS header: no Windows-only row carries a darwin count' '' ($darwinPopulation.WindowsOnlyWithDarwin -join ', ')
+Assert-Equal 'macOS header: no darwin segment lacks an osx-x64 reading' '' ($darwinPopulation.NoX64 -join ', ')
+Assert-Equal 'macOS header: validated rows, derived from the darwin segments' $darwinPopulation.Validated (Get-HeaderNumber $lines 'macOS:' $macPattern)
+Assert-Equal 'macOS header: denominator is the applicable table (whole minus Windows-only)' $darwinPopulation.Applicable (Get-HeaderNumber $lines 'macOS:' $macPattern 2)
+Assert-Equal 'macOS header: matching verdicts equal the osx-x64 darwin sum' $darwinPopulation.X64Matched `
+    (Get-HeaderNumber $lines 'macOS:' 'osx-x64 counts,\s*([\d,]+)\s+matching verdicts')
+Assert-Equal 'macOS header: disclosed equals the osx-x64 darwin sum' $darwinPopulation.X64Disclosed `
+    (Get-HeaderNumber $lines 'macOS:' '([\d,]+)\s+disclosed')
+Assert-Equal 'macOS header: the Windows-only count is stated, derived from the n/a annotations' $darwinPopulation.WindowsOnly `
+    (Get-HeaderNumber $lines 'macOS:' '(\d+)\s+row(?:s)?\s+Windows-only')
+
+# The parity sentence: every number in it is one this guard already derives, so it cannot drift from the lines above.
+$parityPattern = 'Windows,\s*(\d+)\s+of\s+(\d+);\s*Linux,\s*(\d+)\s+of\s+(\d+)\s+on x64 and\s+(\d+)\s+of\s+(\d+)\s+on arm64;\s*macOS,\s*(\d+)\s+of\s+(\d+)\s+on Intel and on Apple silicon'
+$paritySelect = 'Every package that applies to a platform is validated on it'
+$parityExpected = @($rows.Count, $implementable, $linuxRows.Count, ($rows.Count - $linuxNaRows.Count), $linuxPopulation.ArmBanked, $linuxPopulation.Applicable, $darwinPopulation.Validated, $darwinPopulation.Applicable)
+$parityNames = @('Windows validated (the table rows)', 'Windows denominator (the implementable set)', 'Linux x64 validated', 'Linux x64 denominator', 'Linux arm64 banked', 'Linux arm64 denominator', 'macOS validated', 'macOS denominator')
+for ($i = 0; $i -lt $parityExpected.Count; $i++) {
+    Assert-Equal "parity sentence: $($parityNames[$i])" $parityExpected[$i] (Get-HeaderNumber $lines $paritySelect $parityPattern ($i + 1))
+}
+
 # Every applicable annotation must be a real expectation, not a placeholder: a zero-count row would
 # read as "validated at nothing" in the header's numerator. (The n/a form is the ONLY legal
 # non-count annotation, and it is excluded above by construction.)
@@ -1687,6 +1781,7 @@ $structuralClass = 'structural'
 $manifestsChecked = 0
 $entriesChecked = 0
 $manifestParseFailures = 0
+$classEntryCounts = @{}
 
 # Enumerated from the FILESYSTEM rather than from $rows, and that is the whole of this change.
 # Reading the roster made this arm blind to a package that has no row -- which is the state EVERY
@@ -1799,6 +1894,7 @@ foreach ($manifestFile in $manifestFiles) {
             $reason = $reasons[$r]
             $label = $labels[$r]
             $class = [string]$reason.class
+            if (-not [string]::IsNullOrWhiteSpace($class)) { $classEntryCounts[$class] = 1 + [int]$classEntryCounts[$class] }
 
             if ($class -eq $deferredClass) {
                 # Each field separately, so the failure NAMES the missing one.
@@ -1861,6 +1957,53 @@ foreach ($manifestFile in $manifestFiles) {
 # thing under test measures nothing -- the corrective is a second derivation, and here that is a
 # separate walk of the same tree.
 $manifestsOnDisk = @(Get-ChildItem -LiteralPath $coreRoot -Recurse -File -Filter 'go2cs_test_disclosures.json' -ErrorAction SilentlyContinue).Count
+
+# The roster's disclosure-class table (its "Entries" column) is derived here from the same walk: each class's entries
+# in the committed manifests, a two-half entry counting once in each half's class (user-facing docs audit seat 5,
+# COORD 2026-11-16: "derive it or drop the figures"). Every class with an entry must have a row, every row must name a
+# class with entries, and each row's count must equal the manifests' count. Get-ClassTableRows reads the table: the
+# rows after the `| Class | Entries |` header, a class in backticks and a number.
+function Get-ClassTableRows {
+    param([string[]] $Lines)
+
+    $table = [ordered]@{}
+    $inTable = $false
+    foreach ($line in $Lines) {
+        if ($line -match '^\|\s*Class\s*\|\s*Entries\s*\|') { $inTable = $true; continue }
+        if (-not $inTable) { continue }
+        if ($line -match '^\|\s*:?-') { continue }
+        if ($line -match '^\|\s*`([^`]+)`\s*\|\s*(\d+)\s*\|') { $table[$Matches[1]] = [int]$Matches[2]; continue }
+        break
+    }
+    return $table
+}
+
+function Get-ClassTableMismatches {
+    param($Table, $Counts)
+
+    $problems = @()
+    foreach ($class in @($Counts.Keys | Sort-Object)) {
+        if (-not $Table.Contains($class)) { $problems += "$class has $($Counts[$class]) entries and no row" }
+        elseif ($Table[$class] -ne $Counts[$class]) { $problems += "$class row says $($Table[$class]), the manifests hold $($Counts[$class])" }
+    }
+    foreach ($class in @($Table.Keys)) {
+        if (-not $Counts.ContainsKey($class)) { $problems += "$class has a row and no entries" }
+    }
+    return $problems
+}
+
+$classFixtureTable = Get-ClassTableRows -Lines @('intro', '| Class | Entries | What |', '|:--|:--:|:--|', '| `a` | 2 | x |', '| `b` | 1 | y |', '', '| `c` | 9 | after the table |')
+Assert-Equal 'class table: the reader takes the rows after the header and stops at the first non-row' 'a=2; b=1' `
+    ((@($classFixtureTable.Keys | ForEach-Object { "$_=$($classFixtureTable[$_])" })) -join '; ')
+Assert-Equal 'class table: a matching table reads clean' '' ((Get-ClassTableMismatches -Table $classFixtureTable -Counts @{ a = 2; b = 1 }) -join '; ')
+Assert-Equal 'class table: a wrong count, a missing row and a row with no entries are each named' `
+    'a row says 2, the manifests hold 3; z has 4 entries and no row; b has a row and no entries' `
+    ((Get-ClassTableMismatches -Table $classFixtureTable -Counts @{ a = 3; z = 4 }) -join '; ')
+
+$classTable = Get-ClassTableRows -Lines $lines
+Assert-Equal 'class table: the roster carries the disclosure-class table' $true ($classTable.Count -gt 0)
+Assert-Equal 'class table: each row''s Entries equals the committed manifests'' count for its class' '' `
+    ((Get-ClassTableMismatches -Table $classTable -Counts $classEntryCounts) -join '; ')
 Assert-Equal 'the manifest arm reaches every committed manifest, not just the banked rows' $manifestsOnDisk ($manifestsChecked + $manifestParseFailures)
 
 # Vacuity guard: this arm is worthless if it silently checks nothing, which is exactly what a wrong
@@ -2522,7 +2665,12 @@ function Get-DarwinSegmentRefusal {
 # 'native-oracle' (C1, 2026-11-07, arch-strict banking, COORD ruling (1)): readings taken after batch 208 moved the
 # osx-arm64 oracle to native arm64 (-test-oracle-goarch), so a row's two RIDs can legitimately differ. Its first file,
 # C1-NO1.tsv, is crypto/subtle from run 42261290086 (headSha 8fba1e6e7, over the AES seat's DIT disclosure).
-$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread', 'native-oracle')
+# 'h10-go1.26.11' (R, 2026-11-14, the 1.26.11 patch hop's H10, COORD ruling (a) 20261114T110007Z): the three rows whose
+# counts moved with go1.26.11's own tests (crypto/internal/fips140test, net, net/http), re-read on both mac RIDs in one
+# dispatch after their segments were set (run 43591880062, net with ;dns=1.1.1.1,8.8.8.8). The TSV is collected from the
+# run's artifacts by docs/phase4/la64-s7/collect_darwin.py (collect.py's darwin twin), controlled first against run
+# 43588192951, whose log it reproduced on every row and RID.
+$DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread', 'native-oracle', 'h10-go1.26.11')
 
 # THE EVIDENCE DIRECTORY (COORD, 2026-10-27, PLAN-release-1-26-10-2.md, Rulings 1). The ONE place the darwin evidence
 # is named: relative to the repository root, with `{pin}` standing for the corpus pin (src/version.props'
@@ -3498,7 +3646,11 @@ Assert-Equal 'ledger: a ledgered row that banks is refused (banked with pending)
 # W<wave>-<shard>.tsv; a re-dispatch (W1-A7R) extends its original's stem and supersedes it, as for darwin.
 # The collector (docs/phase4/la64-s7/collect.py) adds same_names, which the arch-names form reads.
 $LinuxRidEvidenceDirectory = 'docs/phase4/rebank-1.26.10.4/linux-arm64/evidence'
-$LinuxRidEvidenceWaves = @('')
+# The 1.26.11 patch hop's H10 (2026-11-14) is its own wave: the three rows whose counts moved with go1.26.11's own tests
+# (crypto/internal/fips140test, net, net/http) were re-read in ONE arch-both dispatch (43588190175), collected by
+# collect.py into h10-go1.26.11/H10-L1.tsv. Their originals sit in three different W2 files, so a stem extension cannot
+# supersede them; a later declared wave is the row's reading of record, as for darwin's waves.
+$LinuxRidEvidenceWaves = @('', 'h10-go1.26.11')
 
 # RULED ARCH-COUNTS (Get-LinuxRuledArchCountReading): row -> '<verdict names, ;-separated> -- <citations>'. A row here
 # banks linux-arm64 at the roster's linux-x64 reading less exactly these verdicts, beside a hosted linux-x64 line that is
