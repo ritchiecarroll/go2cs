@@ -165,23 +165,37 @@ func main() {
 
 	srcs, n := Readers([]*memSrc{{"abc"}, {"de"}})
 	fmt.Println("foreign type in the signature:", len(srcs), n, srcs[1].data)
+	fmt.Println("package Span:", Span[int]{1, 2}.hi)
 }
 
 // ---- a constraint whose method names ANOTHER package's type, imported under an ALIAS ----
 
 // The witness declarations live in package_info.cs, where `stdio` is not in scope: they must name io.Reader by its
 // package class, not by this file's alias.
-type Source interface{ Open() stdio.Reader }
+// Join is variadic: its witness member takes `params global::System.Span<...>`, and package_info.cs has no `using System;`.
+type Source interface {
+	Open() stdio.Reader
+	Join(sep string, parts ...string) string
+}
+
+// A package type named Span: the witness declarations sit inside this package's class, where it hides System.Span, so
+// the variadic witness member must name System.Span in full.
+type Span[T any] struct{ lo, hi T }
 
 type memSrc struct{ data string }
 
 func (m *memSrc) Open() stdio.Reader { return strings.NewReader(m.data) }
+
+func (m *memSrc) Join(sep string, parts ...string) string {
+	return m.data + ":" + strings.Join(parts, sep)
+}
 
 func Readers[T Source](srcs []T) ([]T, int) {
 	n := 0
 	for _, s := range srcs {
 		b, _ := stdio.ReadAll(s.Open())
 		n += len(b)
+		n += len(s.Join(",", "x", "y"))
 	}
 	return srcs, n
 }

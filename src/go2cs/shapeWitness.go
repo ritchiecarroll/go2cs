@@ -1027,9 +1027,10 @@ func (v *Visitor) shapeWitnessSignature(method *types.Func) (string, string, str
 
 		name = getSanitizedIdentifier(name)
 
+		// The witness declarations sit inside the package class, where a package type named Span hides System.Span.
 		if i == sig.Params().Len()-1 && sig.Variadic() {
 			if slice, ok := param.Type().(*types.Slice); ok {
-				params = append(params, fmt.Sprintf("params Span<%s> %s", v.shapeWitnessDeclType(slice.Elem()), name))
+				params = append(params, fmt.Sprintf("params global::System.Span<%s> %s", v.shapeWitnessDeclType(slice.Elem()), name))
 				args = append(args, name)
 				continue
 			}
@@ -2107,7 +2108,13 @@ func refuseShapeWitnessTestDivergence(pkg *packages.Package, variant map[types.O
 		return nil
 	}
 
-	sort.Slice(refusal.sites, func(a, b int) bool { return refusal.sites[a].position.Line < refusal.sites[b].position.Line })
+	sort.Slice(refusal.sites, func(a, b int) bool {
+		if refusal.sites[a].position.Filename != refusal.sites[b].position.Filename {
+			return refusal.sites[a].position.Filename < refusal.sites[b].position.Filename
+		}
+
+		return refusal.sites[a].position.Line < refusal.sites[b].position.Line
+	})
 
 	return refusal
 }

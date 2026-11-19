@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using stdio = io_package;
 using strings = strings_package;
 using Δio = io_package;
+using ꓸꓸꓸstring = Span<@string>;
 using static main_package;
 
 partial class main_package {
@@ -231,10 +232,16 @@ internal static void main() {
 
     var (srcs, n) = Readers<ж<memSrc>, memSrcжSourceΔshape>(slice<ж<memSrc>>([Ꮡ(new memSrc("abc")), Ꮡ(new memSrc("de"))]));
     fmt.Println("foreign type in the signature:", len(srcs), n, srcs[1].data);
+    fmt.Println("package Span:", new Span<nint>(1, 2).hi);
 }
 
 partial interface Source {
     stdio.Reader Open();
+    @string Join(@string sep, params ꓸꓸꓸstring partsʗp);
+}
+
+partial struct Span<T> {
+    internal T lo, hi;
 }
 
 partial struct memSrc {
@@ -245,6 +252,12 @@ partial struct memSrc {
 
 internal static stdio.Reader Open(this ref memSrc m) { return new strings_ReaderжReader(strings.NewReader(m.data)); }
 
+internal static @string Join(this ref memSrc m, @string sep, params ꓸꓸꓸstring partsʗp) {
+    var parts = partsʗp.slice();
+
+    return m.data + ":"u8 + strings.Join(parts, sep);
+}
+
 } partial class main_package {
 
 public static (slice<T>, nint) Readers<T, TΔSource>(slice<T> srcs)
@@ -254,6 +267,7 @@ public static (slice<T>, nint) Readers<T, TΔSource>(slice<T> srcs)
     foreach (var (_, s) in range(srcs)) {
         var (b, _) = stdio.ReadAll(TΔSource.Open(s));
         n += len(b);
+        n += len(TΔSource.Join(s, ",", "x", "y"));
     }
     return (srcs, n);
 }
