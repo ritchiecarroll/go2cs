@@ -738,6 +738,7 @@ name the drift as a class (test-refresh-1262, shapes a, b and c) and refresh the
    CR-normalised:
    - a file the tests leg rewrote is restored from `E(final)`, and recorded as a finding;
    - it is never applied as part of the regen.
+   *(Step 3a, the per-row BUILD, follows the guard: Amendment 2026-11-19 below. Pointer added 2026-11-19.)*
 4. **Classify the test diff.** Each changed test hunk must belong to a mechanism the regen's rungs or a standing ruling
    name. An unclassified hunk is a finding.
 5. **Commit the tests as their own commit** in the regen series, after production and before the metadata
@@ -748,6 +749,63 @@ The 1.26.10.2 end regen runs this shape: [`PLAN-parity-train.md`](PLAN-parity-tr
 from [`DESIGN-ladder-identity.md`](phase4/DESIGN-ladder-identity.md) Step B. That control found the L3 `.csproj`
 rewrite, and seat #49 removed its cause. The guard stays, because any later `-tests`-only emission path can write
 production files again.
+
+#### Amendment 2026-11-19 (P2, from the 2026-11-18 lesson) — the tests leg BUILDS every row it converts, before its commit
+
+**The lesson.** A convert-only leg cannot see a compile failure. The .4 tests regen (`3cd829a83f`, 2026-11-18)
+converted every roster row with rc 0. Its guard read 0 production files rewritten, and its classifier explained every
+file it wrote. Seven of those rows did not compile, and nothing in the leg could show it. The re-bank, dispatched
+about 80 minutes later, was the first step that built them:
+- `text/tabwriter`, CS0579: the external test's two method holders were declared in both test info files. This was a
+  converter defect in the `-tests` path.
+- `runtime`, `net/http`, `encoding/json`, `encoding/gob`, CS0229, CS0104 and CS1501: in an external-test holder, an
+  own name tied with the same name in the internal test package. Also a converter defect.
+- `reflect`, `internal/reflectlite`, CS0305: their hand-owned `export_impl_test.cs` companions still named `ΔType`
+  after OQ2's regen of 2026-11-12 renamed it. A convert never writes a hand-owned companion, so only a build reads
+  one. These two had not compiled since 11-12.
+
+All seven came from OQ2's method holders meeting the `-tests` emission. Every one read FAIL in the re-bank's shards
+and hosted legs instead of at the regen. Two fix seats had to land during the re-bank, and the rows were dispatched
+again.
+<!-- 2026-11-18, the .4 hop (1.26.11.1). The regen: 3cd829a83f (i9, committed 14:44Z; 238 of 238 rows rc 0, 793 files,
+     the guard 0 production files, the classifier 793 of 793 explained). The re-bank at 6e870821d6 was dispatched by
+     COORD FLEET 160502Z. Reports, mailbox: P1 163516Z (text/tabwriter CS0579, P1-1 row 19); i9 163655Z (the same row,
+     i9-S seq 58: "My classifier attributed the shape correctly ... but cannot see a compile failure. The re-bank is
+     the gate that caught it."); i9 164408Z (internal/reflectlite CS0305, reflect predicted to fail the same way);
+     P5 164706Z (the hosted set: 7 rows FAIL, every one a build failure, classes A, B and C; "Nobody built runtime's
+     test project between 311 and this regen."). COORD's rulings: to P1 163716Z, to P5 164941Z. The fixes: P5's
+     4c5ed19247 (converter), 723264bca0 (the three hand-owns) and 8a86140f79 (the four rows' tests), on master at
+     17:25Z; P1's 947a66ed7b, landed in batch 313 as 81409fa08f with COORD's tabwriter tests regen a1b6c7bf52.
+     COORD assigned this amendment in FLEET 174056Z (2026-11-19). -->
+
+**So the tests leg gains step 3a, a per-row BUILD.** It runs after the guard (step 3) and before the classification
+and the commit (steps 4 and 5):
+
+**Step 3a: build every row the leg converted.** In the same seeded root, once step 3 has restored production to
+`E(final)`, run each roster row's convert argv again with `-test-action build`:
+
+`go2cs -tests -test-action build -go2cspath <tree>/src <GOROOT>/src/<pkg> <tree>/src/core/<pkg>`
+
+Use the same `-platforms` value as step 2 (or the same host default). Run the rows one at a time, after the
+convert leg has ended; no test runs. The build publishes the row's test project, which compiles the converted
+tests and the hand-owned test companions with the production package. It is the same publish that the
+re-bank's `-test-action all` runs.
+
+- Record each row's rc and, for a failure, its first error lines (file, line, code).
+- A failing row is a finding. Post it to COORD at once, with its error lines and its cause if known, before the
+  re-bank is dispatched. COORD rules each one: fix it in the hop, or hold the row at its last banked reading.
+- The tests commit (step 5) carries the build reading: the rows built, the rows that failed by name, and the
+  target.
+- Afterwards, purge the build output under the root (`bin`, `obj`, published hosts). Before staging, assert
+  that `git status --porcelain | grep '^ D'` is empty (safety floor item 8).
+
+A build on one target does not compile the other targets' flavours of an L3 package; the re-bank's legs still read
+those. The build adds wall time that the convert-only leg did not have. Measure it at the first run and record it
+in the commit; this runbook does not estimate it.
+
+**Why a build, and not a better classifier.** The classifier at `3cd829a83f` attributed the tabwriter hunk correctly
+("OQ2: MethodHolders block"). Attribution says which mechanism moved a line. Whether the moved lines compile is a
+separate question, and only a compiler answers it.
 
 #### Amendment 2026-09-13 — the pin assertion, both halves and the pairing, as copyable blocks
 
