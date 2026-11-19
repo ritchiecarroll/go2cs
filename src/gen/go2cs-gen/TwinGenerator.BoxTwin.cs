@@ -584,7 +584,8 @@ public sealed partial class TwinGenerator
         // PB-5 (12.5): why a stack local cannot become a heap local in the twin, or null. `captured`: a lambda or local
         // function names it (a ref local cannot be captured); `declaration`: not the one variable of a local declaration
         // statement directly in a block of the function itself (a deconstruction, a for or using header, a pattern, a
-        // switch section); `loop`: declared inside a loop body (fresh-per-iteration aliasing, refused in the first cut);
+        // switch section); `loop`: declared inside a loop body, a deconstructing foreach included (fresh-per-iteration
+        // aliasing, refused in the first cut);
         // `name`: the name Ꮡx is already taken in the function; `shadow`: another local of the same name.
         private static string? PromoteRefusal(ILocalSymbol local, Candidate caller)
         {
@@ -601,7 +602,7 @@ public sealed partial class TwinGenerator
                 return "declaration";
             }
 
-            if (statement.Ancestors().TakeWhile(ancestor => ancestor != body).Any(ancestor => ancestor is ForStatementSyntax or ForEachStatementSyntax or WhileStatementSyntax or DoStatementSyntax))
+            if (statement.Ancestors().TakeWhile(ancestor => ancestor != body).Any(ancestor => ancestor is ForStatementSyntax or CommonForEachStatementSyntax or WhileStatementSyntax or DoStatementSyntax))
                 return "loop";
 
             string name = local.Name;

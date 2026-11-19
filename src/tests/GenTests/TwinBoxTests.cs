@@ -530,6 +530,15 @@ public class TwinBoxTests
                 bump(ref dc);
             }
 
+            public static void runLoopDeconstructing()
+            {
+                foreach (var (kd, wd) in new (nint, nint)[] { (1, 2) })
+                {
+                    nint ld = kd;
+                    bump(ref ld);
+                }
+            }
+
             public static void runLoopRecv(nint n)
             {
                 for (nint i = 0; i < n; i++)
@@ -1278,6 +1287,16 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.IsFalse(twins.Contains("Ꮡtr", StringComparison.Ordinal), "a loop-body receiver stays a stack local");
         StringAssert.Contains(twins, "|b|tr (loop)", "the receiver's P row names the reason as an argument's does");
+    }
+
+    [TestMethod]
+    public void P40_ALocalInADeconstructingForeachIsALoopLocal()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡld", StringComparison.Ordinal), "a `foreach (var (k, v) in …)` body is a loop body too");
+        StringAssert.Contains(twins, "|bump|ld (loop)", "named loop, as the converter's range loops are");
     }
 
     [TestMethod]
