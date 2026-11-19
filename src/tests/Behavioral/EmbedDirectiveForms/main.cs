@@ -1,6 +1,6 @@
 namespace go;
 
-// blank import: embed_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "embed" (init forced in ImportInitializers)
 using fmt = fmt_package;
 using strings = strings_package;
 
