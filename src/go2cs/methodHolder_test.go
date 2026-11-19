@@ -208,10 +208,10 @@ func TestMethodExpressionNamesTheHolder(t *testing.T) {
 }
 
 // A file whose methods share no package name takes no alias line, and a file without a method takes
-// neither line.
+// neither line. The package is a library: package main keeps such methods in its package class.
 func TestSelfAliasIsDeclaredOnlyWhereAHolderUsesIt(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{
-		"main.go": `package main
+		"main.go": `package app
 
 import "fmt"
 
@@ -219,9 +219,9 @@ type Box struct{ n int }
 
 func (b Box) Size() int { return b.n + unit }
 
-func main() { fmt.Println(Box{1}.Size(), double(2)) }
+func Run() { fmt.Println(Box{1}.Size(), double(2)) }
 `,
-		"plain.go": `package main
+		"plain.go": `package app
 
 const unit = 1
 
@@ -229,8 +229,8 @@ func double(n int) int { return n * 2 }
 `,
 	})
 
-	requireEmitted(t, "main.cs", emitted["main.cs"], []string{"using static main_package;\n"}, []string{"using main = "})
-	requireEmitted(t, "plain.cs", emitted["plain.cs"], nil, []string{"using main = ", "using static main_package;", "partial class mainᴛ"})
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{"using static app_package;\n"}, []string{"using app = "})
+	requireEmitted(t, "plain.cs", emitted["plain.cs"], nil, []string{"using app = ", "using static app_package;", "partial class appᴛ"})
 }
 
 // Where the alias's name means something else, the package class is written out: for a function that
@@ -583,7 +583,7 @@ func TestDeclarationAfterAMethodIsNotReadAsInsideItsHolder(t *testing.T) {
 	}
 }
 
-const holderHiddenTypeSource = `package main
+const holderHiddenTypeSource = `package app
 
 import (
 	"fmt"
@@ -610,7 +610,7 @@ func fresh() sync { return sync{label: "fresh"} }
 
 func each(all []sync) int { return len(all) }
 
-func main() {
+func Run() {
 	var c atomic.Int32
 	s := fresh()
 	s.bump(&c)
@@ -633,8 +633,8 @@ func TestHolderNamesATypeANamespaceHidesThroughThePackageClass(t *testing.T) {
 		t.Fatalf("main.cs is not in the root namespace, where `go.sync` is a child of the package's own\n%s", main)
 	}
 
-	holderStart := strings.Index(main, "partial class mainᴛsync {")
-	holderEnd := strings.LastIndex(main, "} partial class main_package {")
+	holderStart := strings.Index(main, "partial class appᴛsync {")
+	holderEnd := strings.LastIndex(main, "} partial class app_package {")
 
 	if holderStart == -1 || holderEnd == -1 || holderEnd < holderStart {
 		t.Fatalf("main.cs has no holder of sync followed by the package class\n%s", main)
@@ -643,11 +643,11 @@ func TestHolderNamesATypeANamespaceHidesThroughThePackageClass(t *testing.T) {
 	holder, outside := main[holderStart:holderEnd], main[:holderStart]+main[holderEnd:]
 
 	requireEmitted(t, "the holder of sync", holder, []string{
-		"bump(this ref main_package.sync s, ",
-		"main_package.sync again(this main_package.sync s)",
-		"new main_package.sync(label: s.label",
-		"slice<main_package.sync> all(this main_package.sync s)",
-		"other._<main_package.sync>(",
+		"bump(this ref app_package.sync s, ",
+		"app_package.sync again(this app_package.sync s)",
+		"new app_package.sync(label: s.label",
+		"slice<app_package.sync> all(this app_package.sync s)",
+		"other._<app_package.sync>(",
 	}, []string{
 		" sync s",
 		"<sync>",
@@ -661,7 +661,7 @@ func TestHolderNamesATypeANamespaceHidesThroughThePackageClass(t *testing.T) {
 		"new sync(label: \"fresh\")",
 		"each(slice<sync> all)",
 	}, []string{
-		"main_package.sync",
+		"app_package.sync",
 	})
 }
 
@@ -674,7 +674,7 @@ func TestHolderKeepsATypeNoNamespaceHidesBare(t *testing.T) {
 		"bump(this ref sync s, ",
 		"internal static sync again(this sync s)",
 	}, []string{
-		"main_package.sync",
+		"app_package.sync",
 	})
 }
 
@@ -827,7 +827,7 @@ type pair struct{ a, b int }
 func Exported() int { return size + shared + pair{1, 2}.a }
 `
 
-const dotImportHolderMainSource = `package main
+const dotImportHolderMainSource = `package prog
 
 import (
 	"fmt"
@@ -853,7 +853,7 @@ func (p pair) Sum(q single) int { return p.x + q.y + pair{x: 1}.x }
 
 func plain() int { return size + shared + alone }
 
-func main() {
+func Run() {
 	fmt.Println(Set{n: 1}.Bits(), plain(), Exported(), pair{}.Sum(single{}))
 }
 `
@@ -864,7 +864,8 @@ func main() {
 // the two using-statics supply a name both packages declare with equal standing (CS0229, runtime's
 // hashSize in hash_test.go; for a type, net/http's dumpConn, CS0104). The holder writes such a name through
 // its own package's class, which is the binding Go gives it. A name only the package declares, and every
-// name outside a holder, stays bare.
+// name outside a holder, stays bare. The package is a library: package main keeps these methods in its
+// package class, where its own members win.
 func TestHolderQualifiesAnOwnNameADotImportedPackageAlsoDeclares(t *testing.T) {
 	emitted := convertMethodHolderTree(t, "example.com/app",
 		map[string]string{"main.go": dotImportHolderMainSource},
@@ -872,11 +873,111 @@ func TestHolderQualifiesAnOwnNameADotImportedPackageAlsoDeclares(t *testing.T) {
 
 	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
 		"using static go.example.com.app.lib_package;\n",
-		"return s.n + (nint)main.size + main.shared + alone;",
+		"return s.n + (nint)prog.size + prog.shared + alone;",
 		"return (nint)size + shared + alone;",
-		"Sum(this main_package.pair p, single q) { return p.x + q.y + new main_package.pair(x: 1).x; }",
+		"Sum(this prog_package.pair p, single q) { return p.x + q.y + new prog_package.pair(x: 1).x; }",
 	}, []string{
-		"main.alone",
+		"prog.alone",
 		"lib_package.size",
 	})
+}
+
+const packageClassMethodsLibSource = `package lib
+
+func Visible() int { return hidden() }
+
+func hidden() int { return 2 }
+`
+
+const packageClassMethodsMainSource = `package main
+
+import (
+	"fmt"
+	"sort"
+
+	. "example.com/app/lib"
+)
+
+type plain struct{ n int }
+
+func (p plain) Size() int { return p.n }
+
+func (p *plain) Grow(by int) { p.n += by }
+
+func Limit() int { return 7 }
+
+type withFunc struct{}
+
+func (withFunc) Limit() int { return Limit() }
+
+type withBuiltin []int
+
+func (w withBuiltin) len() int { return len(w) }
+
+type withImport []int
+
+func (w withImport) sort() { sort.Ints(w) }
+
+type withGolib struct{}
+
+func (withGolib) zero() int { return 0 }
+
+type withDot struct{}
+
+func (withDot) hidden() int { return 1 }
+
+func main() {
+	size := plain.Size
+	p := plain{1}
+	p.Grow(2)
+	w := withImport{2, 1}
+	w.sort()
+	fmt.Println(size(p), withFunc{}.Limit(), withBuiltin{1}.len(), withGolib{}.zero(), withDot{}.hidden(), Visible(), w)
+}
+`
+
+// Package main keeps a type's methods in its package class, beside its functions, unless one of them is named
+// like something a file of the package reads bare, which the method would hide there from the whole package: a
+// package-level name, a name of the universe, an import's name, a name a dot-imported package declares (an
+// unexported one included), or a member of golib's builtin class. Such a type keeps its holder, as does a struct
+// whose forwarder for an embedded interface's method is named so (TestPromotedForwarderIsEmittedInItsStructsHolder).
+// A method expression of a type without a holder
+// names the method bare, under the delegate cast that picks the receiver's overload.
+func TestMethodsOfPackageMainStayInItsPackageClassUnlessTheyHideAName(t *testing.T) {
+	emitted := convertMethodHolderTree(t, "example.com/app",
+		map[string]string{"main.go": packageClassMethodsMainSource},
+		map[string]string{"lib/lib.go": packageClassMethodsLibSource})
+
+	main, packageInfo := emitted["main.cs"], emitted["package_info.cs"]
+
+	requireEmitted(t, "main.cs", main, []string{
+		"internal static nint Size(this plain p)",
+		"internal static void Grow(this ref plain p, nint by)",
+		"((Func<plain, nint>)(Size))",
+		"partial class mainᴛwithFunc {",
+		"partial class mainᴛwithBuiltin {",
+		"partial class mainᴛwithImport {",
+		"partial class mainᴛwithGolib {",
+		"partial class mainᴛwithDot {",
+	}, []string{
+		"partial class mainᴛplain",
+		"mainᴛplain.",
+	})
+
+	for _, kept := range []string{"withFunc", "withBuiltin", "withImport", "withGolib", "withDot"} {
+		requireEmitted(t, "package_info.cs", packageInfo, []string{"partial class mainᴛ" + kept + ";"}, nil)
+	}
+
+	requireEmitted(t, "package_info.cs", packageInfo, nil, []string{"mainᴛplain"})
+
+	// A library keeps the holder of the same type: its classes are a consumer's surface.
+	library := convertMethodHolderFixture(t, map[string]string{"main.go": `package app
+
+type plain struct{ n int }
+
+func (p plain) Size() int { return p.n }
+`})
+
+	requireEmitted(t, "the library's main.cs", library["main.cs"], []string{"partial class appᴛplain {"}, nil)
+	requireEmitted(t, "the library's package_info.cs", library["package_info.cs"], []string{"partial class appᴛplain;"}, nil)
 }
