@@ -20,11 +20,12 @@ using @internal;
 using crypto;
 using go.net;
 using static go.net.smtp_package;
+using static smtp_internal_test_package;
 
 partial class smtp_internal_test_package {
 
 internal partial struct authTest {
-    internal global::go.net.smtp_package.ΔAuth auth;
+    internal global::go.net.smtp_package.Auth auth;
     internal slice<@string> challenges;
     internal @string name;
     internal slice<@string> responses;
@@ -164,6 +165,8 @@ public static void TestClientAuthTrimSpace(ж<testing.T> t) {
 internal partial struct toServerEmptyAuth {
 }
 
+} partial class smtp_internal_testᴛtoServerEmptyAuth {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooauthˢ => ref fooauthˢᵇ;
 private static readonly @string fooauthˢᵇ = "FOOAUTH"u8;
@@ -176,16 +179,22 @@ internal static (slice<byte> toServer, error err) Next(this toServerEmptyAuth _,
     throw panic("unexpected call");
 }
 
+} partial class smtp_internal_test_package {
+
 internal partial struct faker {
     /*embed*/ public io_package.ReadWriter ReadWriter;
 }
 
+} partial class smtp_internal_testᴛfaker {
+
 internal static error Close(this faker f) { return default; }
-internal static netꓸAddr LocalAddr(this faker f) { return default; }
-internal static netꓸAddr RemoteAddr(this faker f) { return default; }
+internal static net.Addr LocalAddr(this faker f) { return default; }
+internal static net.Addr RemoteAddr(this faker f) { return default; }
 internal static error SetDeadline(this faker f, time.Time _) { return default; }
 internal static error SetReadDeadline(this faker f, time.Time _) { return default; }
 internal static error SetWriteDeadline(this faker f, time.Time _) { return default; }
+
+} partial class smtp_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string aUtHˢ => ref aUtHˢᵇ;
@@ -406,6 +415,8 @@ internal static ref readonly @string heloˢ => ref heloˢᵇ;
 private static readonly @string heloˢᵇ = "helo"u8;
 internal static ref readonly @string ehloˢ => ref ehloˢᵇ;
 private static readonly @string ehloˢᵇ = "ehlo"u8;
+internal static ref readonly @string smtputf8ˢ => ref smtputf8ˢᵇ;
+private static readonly @string smtputf8ˢᵇ = "SMTPUTF8"u8;
 internal static ref readonly @string ehlo8bitmimeˢ => ref ehlo8bitmimeˢᵇ;
 private static readonly @string ehlo8bitmimeˢᵇ = "ehlo 8bitmime"u8;
 internal static ref readonly @string ehloSmtputf8ˢ => ref ehloSmtputf8ˢᵇ;
@@ -1388,7 +1399,7 @@ public static partial void TestTLSConnState(ж<testing.T> t) {
                     t.Errorf("StartTLS: %v", errΔ1);
                     return;
                 }
-                ref var cs = ref heap<tlsꓸConnectionState>(out var Ꮡcs);
+                ref var cs = ref heap<tls.ConnectionState>(out var Ꮡcs);
                 (cs, var ok) = c.TLSConnectionState();
                 if (!ok) {
                     t.Errorf("TLSConnectionState returned ok == false; want true");
@@ -1427,9 +1438,13 @@ internal partial struct smtpSender {
     internal io.Writer w;
 }
 
+} partial class smtp_internal_testᴛsmtpSender {
+
 internal static void send(this smtpSender s, @string f) {
     s.w.Write(slice<byte>(f + "\r\n"));
 }
+
+} partial class smtp_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string esmtpServiceReadyˢ => ref esmtpServiceReadyˢᵇ;

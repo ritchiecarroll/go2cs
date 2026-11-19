@@ -7,10 +7,13 @@ using rand = math.rand_package;
 using testing = testing_package;
 using math;
 using static go.container.heap_package;
+using static heap_internal_test_package;
 
 partial class heap_internal_test_package {
 
 internal partial struct myHeap /*[]nint*/;
+
+} partial class heap_internal_testᴛmyHeap {
 
 internal static bool Less(this ref myHeap h, nint i, nint j) {
     return (h)[i] < (h)[j];
@@ -55,6 +58,8 @@ internal static void verify(this myHeap h, ж<testing.T> t, nint i) {
         h.verify(t, j2);
     }
 }
+
+} partial class heap_internal_test_package {
 
 public static void TestInit0(ж<testing.T> t) {
     var h = @new<myHeap>();

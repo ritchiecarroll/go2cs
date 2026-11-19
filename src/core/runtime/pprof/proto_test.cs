@@ -22,6 +22,7 @@ using encoding;
 using go.os;
 using io = io_package;
 using static go.runtime.pprof_package;
+using static pprof_internal_test_package;
 
 partial class pprof_internal_test_package {
 
@@ -356,8 +357,8 @@ private static readonly @string withDeletedFileˢᵇ = "WithDeletedFile"u8;
 
 public static void TestProcSelfMaps(ж<testing.T> t) {
     void f(ж<testing.T> tΔ1, @string input) {
-        foreach (var (tx, tt) in range(strings_package.Split(input, "\n\n"))) {
-            var (@in, @out, ok) = strings_package.Cut(tt, "->\n");
+        foreach (var (tx, tt) in range(strings.Split(input, "\n\n"))) {
+            var (@in, @out, ok) = strings.Cut(tt, "->\n");
             if (!ok) {
                 tΔ1.Fatal(malformedTestCaseˢ);
             }
@@ -537,7 +538,11 @@ internal static error errWrite = errors.New("error from writer");
 internal partial struct errWriter {
 }
 
+} partial class pprof_internal_testᴛerrWriter {
+
 internal static (nint, error) Write(this errWriter _, slice<byte> p) { return (0, errWrite); }
+
+} partial class pprof_internal_test_package {
 
 public static partial void TestWriteToErr(ж<testing.T> t) {
     var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.errWriterжWriter(Ꮡ(new errWriter())), 0);

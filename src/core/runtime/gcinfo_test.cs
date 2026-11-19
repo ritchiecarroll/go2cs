@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
 using static global::go.runtime_internal_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -253,8 +254,12 @@ partial interface Iface {
 
 partial struct IfaceImpl /*num:nint*/;
 
+} partial class runtime_testᴛIfaceImpl {
+
 internal static void f(this IfaceImpl _) {
 }
+
+} partial class runtime_test_package {
 
 // BSS
 internal static readonly ж<Ptr> ᏑbssPtr = new StaticBox<Ptr>(default(Ptr));

@@ -8,11 +8,6 @@ global using static global::go.time_package;
 global using static global::go.time_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,15 +39,6 @@ using static global::go.time_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b7965617220696e743b206d6f6e746820696e743b20646920696e747d", "daysInTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b796561727320696e743b206d6f6e74687320696e743b206461797320696e747d", "addDateTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b7a6f6e654e616d6520737472696e673b2066696c654e616d6520737472696e673b20646174652066756e63282a74696d652e4c6f636174696f6e292074696d652e54696d653b2077616e744e616d6520737472696e673b2077616e744f666673657420696e747d", "slimTestsᴛ1")]
-[assembly: GoTypeAlias("Hour", "const:ΔHour")]
-[assembly: GoTypeAlias("Local", "const:ΔLocal")]
-[assembly: GoTypeAlias("Location", "ΔLocation")]
-[assembly: GoTypeAlias("Minute", "const:ΔMinute")]
-[assembly: GoTypeAlias("Month", "ΔMonth")]
-[assembly: GoTypeAlias("Nanosecond", "const:ΔNanosecond")]
-[assembly: GoTypeAlias("Second", "const:ΔSecond")]
-[assembly: GoTypeAlias("UTC", "const:ΔUTC")]
-[assembly: GoTypeAlias("Weekday", "ΔWeekday")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -76,7 +62,7 @@ using static global::go.time_test_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(TimeTest))]
-[assembly: GoFieldAccess(typeof(global::go.time_package.ΔLocation))]
+[assembly: GoFieldAccess(typeof(global::go.time_package.Location))]
 [assembly: GoFieldAccess(typeof(go.testing.quick_package.Config))]
 [assembly: GoFieldAccess(typeof(parsedTime))]
 [assembly: GoFieldAccess(typeof(tickerTimer))]
@@ -96,12 +82,12 @@ using static global::go.time_test_package;
 [assembly: GoBoundedGoroutine("sleep_test.cs", 1078, 9, 14)]
 [assembly: GoBoundedGoroutine("sleep_test.cs", 1229, 25, 15)]
 [assembly: GoBoundedGoroutine("sleep_test.cs", 1282, 9, 16)]
-[assembly: GoBoundedGoroutine("tick_test.cs", 197, 13, 0)]
-[assembly: GoBoundedGoroutine("tick_test.cs", 232, 9, 1)]
-[assembly: GoBoundedGoroutine("tick_test.cs", 658, 5, 2)]
-[assembly: GoBoundedGoroutine("tick_test.cs", 695, 5, 3)]
-[assembly: GoBoundedGoroutine("tick_test.cs", 710, 5, 4)]
-[assembly: GoBoundedGoroutine("tick_test.cs", 760, 9, 5)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 198, 13, 0)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 233, 9, 1)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 663, 5, 2)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 700, 5, 3)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 715, 5, 4)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 765, 9, 5)]
 [assembly: GoBoundedGoroutine("time_test.cs", 1995, 9, 1)]
 [assembly: GoBoundedGoroutine("time_test.cs", 2019, 9, 2)]
 [assembly: GoBoundedGoroutine("time_test.cs", 2031, 9, 3)]
@@ -119,7 +105,7 @@ using static global::go.time_test_package;
 [assembly: GoPositionMap("time/linkname_test.go", "linkname_test.cs", "AAwcxtbUgoKGooKmgoKmgoI=")]
 [assembly: GoPositionMap("time/mono_test.go", "mono_test.cs", "ADsagpKCppKCuIKCgoKCgoKUlIKCgoKUgoKCgoKCgpSCgoKCgoKCpoKClIKClIKmgoKUgqaCgpSCpoKCgoKClIKClIKUgpSClICSpICSyIKClIKUgpSCgpSCgpSCgqaCgoKmgoKClIKClIKClIKClIKCgqaCgoKUgoKClIKCgpSCgoKmgoKUgoKUgoKmgoKCgqaCgoKmgoKClIKCgqaCgoKCgpSClIKUgpSAkqSAkgAICAAKHIKClIKCgoKCgg==", "14-18:1;19-23:2;140-150:1;141-145:1.1;163-188:2;164-168:2.1")]
 [assembly: GoPositionMap("time/sleep_test.go", "sleep_test.cs", "ABoywoKQkoIAChzigpSCpKSCuIKCgoKUgoKCgoK+soKCgpKCgoKUuIKmgoKCgrimgoKUgqaCgoKCuKaCgoKCsoKCtKSCgqYADhqUvIKSgpSClJKUpoCSoqSmooKCgrKCgoKUoqSUgoKUgoLKgoKCgoKCkoKClKaCyoKCggAKCoKCgoK4goKC3IKCgoKCgoKUyoKCgoKCgqaC3IKCgoKClKaCgoKClMqCgoKCgoKCgoKmyoKCgoKCgpSCuIKCgoKClIKClIKCgoKUgriCgpSCuAAIDoKCgriCkoKCkJKCgoKUgoKUgrSCtILWgoK4goKmpoKmgoKUgviGooKCgoKmgrjugqbYlIKClIKCgoKClIKCppKCgoKmpoKClIKCgoKUgqam6oKCkoKUlIKCgoKUogAMBIKCgoKUgqTGgtamgpSm7oKCgoKClIKClAADEMKUgqamtPqCgvgACAzCgraUgrqSgqKkpubCgoKCtKSigoKipKKCgqLmkoKUgpSCgpKC+oKCpoKCgoKC/sKCpoKCgoKCgoKUpoKSgrSCgsbIgrTaspSCgpSCgpSCgpSUtsiCxoLGgtqCgtqCxoKCgoLagtqCpoKssoKCAAgKgpSCgpS4goKCgoLCgoKCgoK0psam6KSCqqKCpoKCgoKCsoKCAAsKpKqigqaCgoKCgrKCgvi0pAASDNKCgriCAAMSAAcQlJSCgoKCgoKSgqKCgpSCgoKUgqa4priUgoKCgoKClIKCqqKCgqaUgoKCgpQAAxKUlIKCkoKCgrKUgoKCgpSCgoKUgpSipJSCgoKCgpSClIKCAAYSooKCgoKCgsqCpqaCgriCkoKCgoKSlIKCgg==", "27-27:1;59-62:1;79-87:1;95-103:1;114-122:1;127-132:2;161-167:1;168-172:2;174-174:3;185-192:1;208-224:1;213-220:1.1;228-232:1;236-242:1;237-241:1.1;243-249:2;244-248:2.1;253-263:1;267-279:1;283-291:1;284-290:1.1;292-300:2;293-299:2.1;304-317:1;310-313:1.1;356-358:1;359-361:2;372-376:1;379-379:2;382-382:3;421-423:1;424-426:2;425-425:2.1;494-500:1;495-497:1.1;512-517:1;581-586:1;609-617:1;653-655:1;656-658:2;659-665:3;661-664:3.1;801-803:1;810-816:1;823-844:2;862-870:1;887-896:1;941-956:1;992-1053:1;995-1051:1.1;1016-1034:1.1.1;1064-1073:1;1085-1099:1;1090-1090:1.1", "", "", "843:25", "711:21,714:13")]
-[assembly: GoPositionMap("time/tick_test.go", "tick_test.cs", "ABUeogAHEIKm3IKmgoKCuAAHFJKCgoKUgoKUgoKCgoKCgqaUpoKkggAIDIKCpqaCqJKCgqiSlIKClIKCgrqkgrqygoKmoqaygoKmgqLkooKUgqaCgpaSgoKigqKkggAHEIKQtoKUlILigoKCgoKCgoKUxLSClLT6goKCpILEgsa06JKCgoKClLiCgoKClLiCgoKCgpQAEgiCgqaCgoKCgoKCgoKClIKmgoKCgqaCgpSCgoKCyoCSgJKAkoCSgJKAAAkGgoKCgoKClIKCABEkgoKCgqaCgoKCpoKCmgAKFJKCpMbukqa4ggALGKaSgqbmkoKmxIKCptaUkoKCgpSUgoKUgoKCpriCpoKUlIKCtqaCgoKCgriCgriCgoKCyoKCgpSCgqb4goKCgqTYuIKmgoKSgpSCpoKCpoK4gpSmgoKmgoKCgoKCorTWlKK01pSCgoKCgoKCgoKmAAgKAAgKpoKCgpK01qaCgoK4goKCgIKklIKCgIKkgoKCgpSUgIKkuLiCgqaC3IKCgoKCgpSUpoKUgoKCgoKClJQ=", "39-43:1;134-138:1;144-148:1;169-172:1;184-184:2;193-216:3;221-221:4;238-244:1;248-254:1;258-265:1;273-307:1;275-306:1.1;309-309:2;310-310:3;311-311:4;312-312:5;313-313:6;314-314:7;319-329:1;321-324:1.1;325-328:1.2;376-385:1;390-413:2;414-421:3;422-438:4;439-458:5;507-514:6;516-527:7;536-539:8;571-578:9;579-586:10;615-622:11", "", "", "226:21,237:29", "148:21,149:13,163:21,164:13")]
+[assembly: GoPositionMap("time/tick_test.go", "tick_test.cs", "ABYeogAHEIKm3IKmgoKCuAAHFJKCgoKUgoKUgoKCgoKCgqaUpoKkggAIDIKCpqaCqJKCgqiSlIKClIKCgrqkgrqygoKmoqaygoKmgqLkooKUgqaCgpaSgoKigqKkggAHEIKQtoKUlILigoKCgoKCgoKUxLSClLT6goKCpILEgsa06JKCgoKClLiCgoKClLiCgoKCgpQAEgiCgqaCgoKCgoKCgoKClIKmgoKCgqaCgpSCgoKCyoCSgJKAkoCSgJKAAAkGgoKCgoKClIKCABMkgoKCgqaCgoKCxoKCmgAKFJKCpMbukqa4ggALGKaSgqbmkoKmxIKCptaUkoKCgpSUgoKUgoKCpriCpoKUlIKCtqaCgoKCgriCgriCgoKCyoKCgpSCgqb4goKCgqTYuIKmgoKSgpSCpoKCpoK4gpSmgoKmgoKCgoKCorTWlKK01pSCgoKCgoKCgoKmAAgKAAgKpoKCgpK01qaCgoK4goKCgIKklIKCgIKkgoKCgpSUgIKkuLiCgqaC3IKCgoKCgpSUpoKUgoKCgoKClJQ=", "39-43:1;134-138:1;144-148:1;169-172:1;184-184:2;193-216:3;221-221:4;238-244:1;248-254:1;258-265:1;273-307:1;275-306:1.1;309-309:2;310-310:3;311-311:4;312-312:5;313-313:6;314-314:7;319-329:1;321-324:1.1;325-328:1.2;376-385:1;390-413:2;414-421:3;422-438:4;439-458:5;507-514:6;516-527:7;536-539:8;571-578:9;579-586:10;615-622:11", "", "", "227:21,238:29", "149:21,150:13,164:21,165:13")]
 [assembly: GoPositionMap("time/time_test.go", "time_test.cs", "ACI0grKQyIKCgoKCgoKCAAcSspSCggAUKgAIEsoACxjKtIKCgoamAAIUgrKCgoKCgpSCgoLKgrKCgoKCgpSCgoLKgrKCgoKCgpSCgoLKgrKCgoKCgpSCgoLKgoKSpoCCpICCyIKCgoKUkriAgqSAgsiCgoKUgoK4goKClIKCAAwckoKCqJKCgoKCgoKUlOYABxaiAAcUlPKUgoKClIK4goKCgqaCuIKmgqjckriCqJS4griCgoKCgsqCuIKCuJKCkoKC7pSUppKCgpSClKaSgoKUgoKUlJSmkoKUAAkUACNIlIKCgoLcgoIACxgARIoBAAcQgoKCgoKClKaClJSCgoKUggAJDAANIoKCgIKkgoIACgwAG0CCgoKCggANFgAGEoKCgoKCgtyCgoKC6AAHFLiCgoLcpoKCgoK4goKCpgAIEoKCgoKygoKCgoKClPgABRKCgoKCgpSCggAICgAFEoKCgoKUgoIACAoABhSCgpSCgoKCgIKCggASCoKagpS4gpQACRSClIKCgqaCgoIADwyCAAcWgoKClLS2goKUtLaCgoKUtAAJCgA6fIKCgoIACAoAGTqCgoKCgoLKlIKCgqaCgoKmpoKCgoLMkpSCkpSCgqYAChCaoqKi9oKClIKUgoKCAAgKlIKC3KaUgpSCAAwUABIuooKCggAICgAGFIKCgsoABBCCgoLKAAQQgoKCAAgKvoKCgsoABxaCgoLKAAcWgoKCAAkKAA4mgoKCygAUMoKCggAICgAMIIKCggAICgAHFoKC7oKCpoKCABQqgoIACBKCgoKCpoKCpoKCpoKCpoKCgoKCpoKCAAgSpoKCgoLKooK4ooK4ooK4ooK4goKCuIKCgviigoK4ooKCuKKCgrjGgoK4ooKCuKKCgriigoK4ooLsooK4lKKC7KKCuJSigriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgpSmooKCgriCgoKClIKClIL4goKClIKClIKCgqaCgoKmgoKUgsqCgoCSgpQACAqSkgAJCpKAkqSAkgANCIKCgpSCggADEtKCgoKCgoKygoK0pKiSgoKCgoKCsoKCtJKygqKkAA0GooKkgoKUgoKUlAAKHIKCgsakhJKCgoKCgoLKgoKCgoKCAAkMsoKkgoKmABUygoLGAAgEooKSgoK4soKCgoKC3IKCgsqCgoK4goKCggAeRoKCgtg=", "28-28:1;196-196:1;197-197:2;210-214:1;215-215:2;229-232:1;240-243:1;305-358:1;387-402:2;406-413:3;417-429:4;433-436:5;863-869:1;870-876:2;1087-1089:1;1757-1760:1;1805-1810:1;1823-1828:1;1829-1832:2;1979-1979:1", "", "134=Month/1/1/1,Day/1/1/2,Hour/1/1/3,Minute/1/1/4,Second/1/1/5,Nanosecond/1/1/6,Weekday/1/1/7;317=Date/1/4/4,Date/2/4/5,Date/3/4/6,Date/4/4/7,Unix/1/1/8;375=Format/1/2/2,Format/2/2/2,absString/1/3/3,absString/2/3/3,absString/3/3/3;391=Format/1/2/2,Format/2/2/2,absString/1/3/3,absString/2/3/3,absString/3/3/3;622=FixedZone/1/4/1,FixedZone/2/4/2,FixedZone/3/4/4,FixedZone/4/4/5;811=Date/1/4/1,FixedZone/1/3/2,Date/2/4/2,Unix/1/1/3,FixedZone/2/3/5,Date/3/4/5,FixedZone/3/3/6,Date/4/4/6;868=FixedZone/1/3/4,Date/1/3/4,FixedZone/2/3/5,Date/2/3/5,FixedZone/3/3/6,Date/3/3/6;891=Date/1/4/4,Date/2/4/5,FixedZone/1/2/6,Date/3/4/6,FixedZone/2/2/7,Date/4/4/7;981=Date/1/5/4,Date/2/5/5,Add/1/2/5,Date/3/5/6,Add/2/2/6,FixedZone/1/2/7,Date/4/5/7,FixedZone/2/2/8,Date/5/5/8;1263=Date/1/22/6,Date/2/22/6,Date/3/22/7,Date/4/22/7,Date/5/22/8,Date/6/22/8,Date/7/22/9,Date/8/22/9,Date/9/22/10,Date/10/22/11,Date/11/22/12,Date/12/22/13,Date/13/22/14,Date/14/22/14,Date/15/22/15,Date/16/22/15,Date/17/22/16,Date/18/22/16,Date/19/22/17,Date/20/22/17,Date/21/22/18,Date/22/22/18;2072=Date/1/8/4,Date/2/8/5,Date/3/8/6,Date/4/8/7,Date/5/8/8,Date/6/8/9,Date/7/8/10,Date/8/8/11;2137=Date/1/16/9,Date/2/16/9,Date/3/16/10,Date/4/16/10,Date/5/16/11,Date/6/16/11,Date/7/16/12,Date/8/16/12,Date/9/16/19,Date/10/16/19,Date/11/16/20,Date/12/16/20,Date/13/16/21,Date/14/16/21,Date/15/16/22,Date/16/16/22;2221=Date/1/13/6,Date/2/13/7,Date/3/13/8,Date/4/13/10,Date/5/13/11,Date/6/13/12,Date/7/13/16,Date/8/13/17,Date/9/13/18,Date/10/13/19,Date/11/13/20,Date/12/13/21,Date/13/13/22,Invoke/1/24/26,Invoke/2/24/26,Invoke/3/24/26,Invoke/4/24/27,Invoke/5/24/27,Invoke/6/24/27,Invoke/7/24/28,Invoke/8/24/28,Invoke/9/24/28,Invoke/10/24/29,Invoke/11/24/29,Invoke/12/24/29,Invoke/13/24/30,Invoke/14/24/30,Invoke/15/24/30,Invoke/16/24/31,Invoke/17/24/31,Invoke/18/24/31,Invoke/19/24/32,Invoke/20/24/32,Invoke/21/24/32,Invoke/22/24/33,Invoke/23/24/33,Invoke/24/24/33")]
 [assembly: GoPositionMap("time/tzdata_test.go", "tzdata_test.cs", "AA0cyqKCpIKCgoKmgoKClIKCgtyCgoKCgoKCgpSCgqaCxqiilIKUgoKmpIKCgqakpKSkpII=")]
 [assembly: GoPositionMap("time/zoneinfo_test.go", "zoneinfo_test.cs", "ABEigoIADwiilIKUpoKUgrTkgoKCgoKC+IKCgpTcgoKCyqKCkoKCtAANCtKCpIIADiiCgoKUgoKUgoLGpIKClIIACgiigqSCgoKmgoKUgoKUgoKmgrQACgaygqSCgoKmgoKAgqSAgsT0lIKCggAKCAAiUoKCgoKClIKCgqaCgoKUggAQCoIACiqCggALCoIABxqCggALCoIACiCCggALCoIACiCCgg==")]
@@ -229,3 +215,13 @@ public static partial class time_test_package
         builtin.initPackage(typeof(global::go.time_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(time_test_package.tickerTimer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class time_testᴛtickerTimer;
+// </MethodHolders>

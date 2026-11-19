@@ -7,8 +7,6 @@
 global using static global::go.image.jpeg_package;
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
-global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -51,9 +49,9 @@ using static global::go.image.jpeg_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("image/jpeg/dct_test.go", "dct_test.cs", "ABEggoKCosqCpoIAEAqCgqamgoKCqJKClKaCgoK4goKCgoKUAAcQgoKCgqaSlIKCuIKmgpKCsrKCgoKCgoKUgoKUlKaUggAEHAAOAoKCgoKCpoKmqJKClKiSgpSmACVMgoKClKiClgAlXgALAoKCgoKCgqqmqLKCgoKCgoKCgoKCgsqClJSCpgACGAALAoKCgoKCgqqmqLKCgoKCgoKCgoKCgoLKgpSUgqamgoKCgoKClJSCuA==", "79-85:1;86-86:2;100-126:1", "", "248=bigFloat/1/32/1,bigFloat/2/32/2,bigFloat/3/32/3,bigFloat/4/32/4,bigFloat/5/32/5,bigFloat/6/32/6,bigFloat/7/32/7,bigFloat/8/32/8,bigFloat/9/32/10,bigFloat/10/32/11,bigFloat/11/32/12,bigFloat/12/32/13,bigFloat/13/32/14,bigFloat/14/32/15,bigFloat/15/32/16,bigFloat/16/32/17,bigFloat/17/32/19,bigFloat/18/32/20,bigFloat/19/32/21,bigFloat/20/32/22,bigFloat/21/32/23,bigFloat/22/32/24,bigFloat/23/32/25,bigFloat/24/32/26,bigFloat/25/32/28,bigFloat/26/32/29,bigFloat/27/32/30,bigFloat/28/32/31,bigFloat/29/32/32,bigFloat/30/32/33,bigFloat/31/32/34,bigFloat/32/32/35")]
+[assembly: GoPositionMap("image/jpeg/dct_test.go", "dct_test.cs", "ABIggoKCosqCpoIAEAqCgqamgoKCqJKClKaCgoK4goKCgoKUAAcQgoKCgqaSlIKCuIKmgpKCsrKCgoKCgoKUgoKUlKaUggAEHAAOAoKCgoKCpoKmqJKClKiSgpSmACVMgoKClKiClgAlXgALAoKCgoKCgqqmqLKCgoKCgoKCgoKCgsqClJSCpgACGAALAoKCgoKCgqqmqLKCgoKCgoKCgoKCgoLKgpSUgqbGgoKCgoKClJSC2A==", "79-85:1;86-86:2;100-126:1", "", "249=bigFloat/1/32/1,bigFloat/2/32/2,bigFloat/3/32/3,bigFloat/4/32/4,bigFloat/5/32/5,bigFloat/6/32/6,bigFloat/7/32/7,bigFloat/8/32/8,bigFloat/9/32/10,bigFloat/10/32/11,bigFloat/11/32/12,bigFloat/12/32/13,bigFloat/13/32/14,bigFloat/14/32/15,bigFloat/15/32/16,bigFloat/16/32/17,bigFloat/17/32/19,bigFloat/18/32/20,bigFloat/19/32/21,bigFloat/20/32/22,bigFloat/21/32/23,bigFloat/22/32/24,bigFloat/23/32/25,bigFloat/24/32/26,bigFloat/25/32/28,bigFloat/26/32/29,bigFloat/27/32/30,bigFloat/28/32/31,bigFloat/29/32/32,bigFloat/30/32/33,bigFloat/31/32/34,bigFloat/32/32/35")]
 [assembly: GoPositionMap("image/jpeg/fuzz_test.go", "fuzz_test.cs", "ABogooKmgoKUgoKUgoKUpoKCgpSClIKClKKCgoKCpIKCgqSCgoI=", "36-66:1")]
-[assembly: GoPositionMap("image/jpeg/reader_test.go", "reader_test.cs", "ABkysgALGIKCgoKUgoKClIKCpoKCppSCgoKUgoKUgoLGgoKC1oLaooKClJIACxKygoKUgoKCgoK45pSCgqaCgoKCgpSClMySgpSCpoKC7qaCgoKCggAHEqaCgoKCgpSU9oKCgpSCgoKUgoKClIIACwiuAAdEgoKUpIKCtACkAQSEAAK8AoKClIK4lIKCgoCCpLiClICSpIK4goKUlIKCprimgoKCgpSCgoKUgoKCyoKCgqaUgoIACQiCgoKCgoKClJQADRyCgpSCgoKCgpSCyqKCgpSCgpSCgoKCuILmgg==", "252-255:1", "", "190=pixString/1/2/1,pixString/2/2/2", "105:21,262:21")]
+[assembly: GoPositionMap("image/jpeg/reader_test.go", "reader_test.cs", "ABoysgALGIKCgoKUgoKClIKCpoKCppSCgoKUgoKUgoLGgoKC1oLaooKClJIADRKygoKUgoKCgoK4AAgGlIKCpoKCgoKClIKUzJKClIKmgoLupoKCgoKCAAcSpoKCgoKClJT2goKClIKCgpSCgoKUggALCK4AB0SCgpSkgoK0AKQBBIQAArwCgoKUgriUgoKCgIKkuIKUgJKkgriCgpSUgoKmuKaCgoKClIKCgpSCgoLKgoKCppSCggAJCIKCgoKCgoKUlAANHIKClIKCgoKClILKooKClIKClIKCgoK4guaC", "252-255:1", "", "195=pixString/1/2/1,pixString/2/2/2", "106:21,267:21")]
 [assembly: GoPositionMap("image/jpeg/writer_test.go", "writer_test.cs", "ABguAAoWgoKClILuABYygoKCgoKCgoK4goKCgoKCgoKmlAAICAAIGoKCgpSmooKClJLWgpSCgoKWkoKCgqaCgoKUgoKmgoLOooKClIKClIKClIKUgqaCgryigpKCgoKCgoKCgoKmpoKClIKUgoLcgoKCgoKCuqKCgoK4ooKCgoKCAAcQgoKCgoK4ooKCgoKCgoKCgqaCgoKCgg==", "", "", "229=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3;263=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3", "131:21")]
 // </GoSourcePositionMaps>
 
@@ -103,3 +101,14 @@ public static partial class jpeg_internal_test_package
         builtin.initPackage(typeof(global::go.image.jpeg_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(global::go.image.jpeg_package.block)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jpeg_internal_testᴛblock;
+[GoMethodHost(typeof(jpeg_internal_test_package.eofReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jpeg_internal_testᴛeofReader;
+// </MethodHolders>

@@ -8,12 +8,8 @@ global using static global::go.crypto.x509_package;
 global using static global::go.crypto.x509_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using timeꓸLocation = go.time_package.ΔLocation;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,16 +24,15 @@ using static global::go.crypto.x509_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b206365727420737472696e673b20657870656374656420737472696e677d", "unknownAuthorityErrorTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b726177205b5d627974653b2076616c696420626f6f6c3b2073747220737472696e673b20696e7473205b5d75696e7436347d", "oidTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b736967416c676f2063727970746f2f783530392e5369676e6174757265416c676f726974686d3b2070656d4365727420737472696e677d", "ecdsaTestsᴛ1")]
-[assembly: GoTypeAlias("OID", "ΔOID")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<global::go.crypto.x509_package.OID, encoding_package.BinaryMarshaler>]
+[assembly: GoImplement<global::go.crypto.x509_package.OID, encoding_package.BinaryUnmarshaler>(Pointer = true)]
+[assembly: GoImplement<global::go.crypto.x509_package.OID, encoding_package.TextMarshaler>]
+[assembly: GoImplement<global::go.crypto.x509_package.OID, encoding_package.TextUnmarshaler>(Pointer = true)]
 [assembly: GoImplement<global::go.crypto.x509_package.SystemRootsError, error>]
-[assembly: GoImplement<global::go.crypto.x509_package.ΔOID, encoding_package.BinaryMarshaler>]
-[assembly: GoImplement<global::go.crypto.x509_package.ΔOID, encoding_package.BinaryUnmarshaler>(Pointer = true)]
-[assembly: GoImplement<global::go.crypto.x509_package.ΔOID, encoding_package.TextMarshaler>]
-[assembly: GoImplement<global::go.crypto.x509_package.ΔOID, encoding_package.TextUnmarshaler>(Pointer = true)]
 [assembly: GoImplement<go.crypto.ecdsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]
 [assembly: GoImplement<go.crypto.ed25519_package.PrivateKey, crypto_package.Signer>]
 [assembly: GoImplement<go.crypto.rsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]

@@ -7,6 +7,7 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using static global::go.runtime_internal_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -16,7 +17,11 @@ partial struct response {
 partial struct myError {
 }
 
+} partial class runtime_testᴛmyError {
+
 internal static @string Error(this myError _) { return ""u8; }
+
+} partial class runtime_test_package {
 
 internal partial struct doRequest_async /*dyn*/ {
     internal ж<response> resp;
@@ -31,13 +36,13 @@ internal static partial (ж<response>, error) doRequest(bool useSelect) {
         var chʗ1 = ch;
         var doneʗ1 = done;
         goǃ(() => {
-            var selᴛ66 = chʗ1.ᐸꟷ(Ꮡ(new doRequest_async(resp: nil, err: new myError())), ꓸꓸꓸ);
-            var selᴛ67 = doneʗ1;
-            switch (select(selᴛ66, ᐸꟷ(selᴛ67, ꓸꓸꓸ))) {
+            var chᴛ1 = chʗ1.ᐸꟷ(Ꮡ(new doRequest_async(resp: nil, err: new myError())), ꓸꓸꓸ);
+            var doneᴛ1 = doneʗ1;
+            switch (select(chᴛ1, ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
             case 0: {
                 break;
             }
-            case 1 when selᴛ67.ꟷᐳ(out _): {
+            case 1 when doneᴛ1.ꟷᐳ(out _): {
                 break;
             }}
         });

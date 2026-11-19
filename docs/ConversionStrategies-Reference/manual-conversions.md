@@ -3001,6 +3001,38 @@ over with exactly this call, so every `[]byte` field decoded as empty and `TestL
 reported a 2000-byte round trip diverging at byte 0. It is hand-owned now and writes where every other
 setter writes, through the addressable Value's aliased box.
 
+## `reflect` copies an array value when it moves it into another slot
+
+In Go an array is a value. `SetMapIndex`, `Send`, `Set`, a `Call` argument and `Interface()` each copy
+the array they are given, so the source and the stored value never share memory afterwards. golib's
+`array<T>`, and a struct holding one, are .NET structs over a shared `T[]` backing. Copying the struct
+copies the reference to the backing, not the elements.
+
+That difference was harmless until whole-array assignment began copying INTO the existing location
+(`ж<T>.WriteBoxSlot`'s in-place arm for an `IGoValueAssign` pointee). Since then, a slot that reflect
+hands out keeps its backing for life. A `Value` that came from `reflect.New(...).Elem()` therefore
+gives away the backing it will keep using. `encoding/gob`'s `decodeMap` decodes each key and element into
+one such pair of slots, stores them with `SetMapIndex`, and then clears them with `SetZero` for the
+next entry. Every array stored in the map was cleared with them: `TestEndToEnd` decoded
+`map[[2]string][2]*float64` elements as nil. `encoding/json` reuses a map element the same way
+(`decode.go`, `mapElem`).
+
+The transfer doors now copy an array-owning datum when the source `Value` is addressable
+(`transferDatum` and `packInterfaceValue` in `value_impl.cs`). "Array-owning" means an `IArray` that
+is not a slice, or a struct stamped `IGoValueClone`. A source that is not addressable already holds
+its own copy and is passed through. golib's `map<K,V>` already cloned array keys on insert, so only
+map values and the other doors were exposed.
+
+**Allocation.** `Interface()` of an addressable array allocates once, as Go's does. `SetMapIndex`,
+`Send`, `Set` and `Call` with an addressable array source allocate once more than Go, which copies
+into the destination without a new allocation. golib's `AllocationCounter` sees the copy, so an
+`AllocsPerRun` assert over such a call reads one higher than Go. No banked row moved at the cut
+(`reflect`, `encoding/json`, `encoding/gob`).
+
+Builtin `copy`, `append(s, t...)` and slice growth have the same sharing for a slice of arrays, and
+are not covered here. Guarded by `ReflectArrayStoreCopies` (seven reflect arms, a gob round trip and a
+json map of arrays, against `go run`).
+
 ## `new(T)` is Go's ZERO value — and for a container kind that means the NIL one
 
 `p := new([]int)` in Go yields a pointer to the zero slice, which is **nil**; likewise
@@ -4569,7 +4601,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3674-3695 -->
+<!-- source: src/core/reflect/value_impl.cs:3693-3714 -->
 ```csharp
 public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {

@@ -91,7 +91,7 @@ internal static void testAbsDate(testingT t) {
         return y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
     }
     nint wantYear = 0;
-    global::go.time_package.ΔMonth wantMonth = March;
+    global::go.time_package.Month wantMonth = March;
     nint wantMday = 1;
     nint wantYday = 31 + 29 + 1;
     nint bad = 0;
@@ -157,7 +157,7 @@ internal static void testDaysIn(testingT t) {
     var want = slice<nint>([0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
     nint bad = 0;
     for (nint year = 0; year <= 1600; year++) {
-        for (global::go.time_package.ΔMonth m = January; m <= December; m++) {
+        for (global::go.time_package.Month m = January; m <= December; m++) {
             nint w = want[m];
             if (m == February && isLeap(year)) {
                 w++;
@@ -175,7 +175,7 @@ internal static void testDaysIn(testingT t) {
 
 internal static void testDaysBefore(testingT t) {
     foreach (var (m, want) in range(slice<nint>([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365]))) {
-        nint d = daysBefore((global::go.time_package.ΔMonth)(m + 1));
+        nint d = daysBefore((global::go.time_package.Month)(m + 1));
         if (d != want) {
             t.Errorf("daysBefore(%d) = %d, want %d", m, d, want);
         }

@@ -45,6 +45,7 @@ using iter = iter_package;
 using static global::go.net.http_internal_test_package;
 using Δhttp = global::go.net.http_package;
 using ꓸꓸꓸany = Span<any>;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -63,17 +64,26 @@ partial struct testAddMode /*[]testMode*/;  // default, plus these
 
 partial struct testSkipMode /*[]testMode*/; // default, minus these
 
+} partial class http_testᴛtestMode {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string httpˢ => ref httpˢᵇ;
+private static readonly @string httpˢᵇ = "http"u8;
+internal static ref readonly @string httpsˢ => ref httpsˢᵇ;
+private static readonly @string httpsˢᵇ = "https"u8;
+
 internal static @string Scheme(this testMode m) {
-    var exprᴛ1 = m;
     switch (ᐧ) {
-    case {} when exprᴛ1 == http1Mode || exprᴛ1 == http2UnencryptedMode: {
+    case {} when m == http1Mode || m == http2UnencryptedMode: {
         return httpˢ;
     }
-    case {} when exprᴛ1 == https1Mode || exprᴛ1 == http2Mode: {
+    case {} when m == https1Mode || m == http2Mode: {
         return httpsˢ;
     }}
     throw panic("unknown testMode");
 }
+
+} partial class http_test_package {
 
 partial struct testNotParallelOpt {
 }
@@ -167,12 +177,14 @@ internal static void runSynctest(ж<testing.T> t, Action<ж<testing.T>, testMode
 partial struct clientServerTest {
     internal testing.TB t;
     internal bool h2;
-    internal httpꓸHandler h;
+    internal Δhttp.Handler h;
     internal ж<httptest.Server> ts;
     internal ж<Δhttp.Transport> tr;
     internal ж<Δhttp.Client> c;
     internal ж<fakeNetListener> li;
 }
+
+} partial class http_testᴛclientServerTest {
 
 internal static void close(this ref clientServerTest t) {
     t.tr.CloseIdleConnections();
@@ -200,12 +212,20 @@ internal static @string getURL(this ж<clientServerTest> Ꮡt, @string u) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string httpsˢ => ref httpsˢᵇ;
+private static readonly @string httpsˢᵇ = "https"u8;
+internal static ref readonly @string httpˢ => ref httpˢᵇ;
+private static readonly @string httpˢᵇ = "http"u8;
+
 internal static @string scheme(this ref clientServerTest t) {
     if (t.h2) {
         return httpsˢ;
     }
     return httpˢ;
 }
+
+} partial class http_test_package {
 
 internal static Action<ж<httptest.Server>> optQuietLog;
 internal static void initᴛoptQuietLog() { optQuietLog = (ж<httptest.Server> ts) => {
@@ -234,7 +254,7 @@ internal static ж<EmptyStruct> optFakeNet = @new<EmptyStruct>();
 //
 // The optFakeNet option configures the server and client to use a fake network implementation,
 // suitable for use in testing/synctest tests.
-internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode mode, httpꓸHandler h, params ꓸꓸꓸany optsʗp) {
+internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode mode, Δhttp.Handler h, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.slice();
     var transportFuncsᴷ = new stackAppend<Action<ж<Δhttp.Transport>>>();
 
@@ -298,22 +318,21 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
         cst.ts.Config.ErrorLog = log.New(new testLogWriter(t), ""u8, 0);
     }
 
-    var exprᴛ1 = mode;
     switch (ᐧ) {
-    case {} when exprᴛ1 == http1Mode: {
+    case {} when mode == http1Mode: {
         cst.ts.Start();
         break;
     }
-    case {} when exprᴛ1 == https1Mode: {
+    case {} when mode == https1Mode: {
         cst.ts.StartTLS();
         break;
     }
-    case {} when exprᴛ1 == http2UnencryptedMode: {
+    case {} when mode == http2UnencryptedMode: {
         http_internal_test_package.ExportHttp2ConfigureServer(cst.ts.Config, nil);
         cst.ts.Start();
         break;
     }
-    case {} when exprᴛ1 == http2Mode: {
+    case {} when mode == http2Mode: {
         http_internal_test_package.ExportHttp2ConfigureServer(cst.ts.Config, nil);
         cst.ts.TLS = cst.ts.Config.TLSConfig;
         cst.ts.StartTLS();
@@ -351,10 +370,14 @@ partial struct testLogWriter {
     internal testing.TB t;
 }
 
+} partial class http_testᴛtestLogWriter {
+
 internal static partial (nint, error) Write(this testLogWriter w, slice<byte> b) {
     w.t.Logf("server log: %v", strings.TrimSpace((@string)b));
     return (len(b), default);
 }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string realnetˢ => ref realnetˢᵇ;
@@ -406,25 +429,24 @@ internal static void testNewClientServerTest(ж<testing.T> t, testMode mode, par
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(h), opts.ꓸꓸꓸ);
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(h), opts.ꓸꓸꓸ);
     var (_, err) = cst.c.Head(cst.ts.URL); if (err != nil) {
         t.Fatal(err);
     }
     @string wantProto = default;
     bool wantTLS = default;
-    var exprᴛ1 = mode;
     switch (ᐧ) {
-    case {} when exprᴛ1 == http1Mode: {
+    case {} when mode == http1Mode: {
         wantProto = http11ˢ;
         wantTLS = false;
         break;
     }
-    case {} when exprᴛ1 == https1Mode: {
+    case {} when mode == https1Mode: {
         wantProto = http11ˢ;
         wantTLS = true;
         break;
     }
-    case {} when exprᴛ1 == http2Mode: {
+    case {} when mode == http2Mode: {
         wantProto = http20ˢ;
         wantTLS = true;
         break;
@@ -447,7 +469,7 @@ internal static void testChunkedResponseHeaders(ж<testing.T> t, testMode mode) 
     try {
         log.SetOutput(io.Discard); // is noisy otherwise
         defer(log.SetOutput, new os.FileжWriter(os.Stderr), ref ᒐ);
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w.Header().Set(contentLengthˢ, intentionalGibberishˢ); // we check that this is deleted
             w._<Flusher>().Flush();
             fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "I am a chunked response."u8);
@@ -477,7 +499,7 @@ internal static void testChunkedResponseHeaders(ж<testing.T> t, testMode mode) 
     finally { ᒐ.Run(); }
 }
 
-// type ΔreqFunc is a methodless func type — rendered inline as its base delegate
+// type reqFunc is a methodless func type — rendered inline as its base delegate
 
 // h12Compare is a test that compares HTTP/1 and HTTP/2 behavior
 // against each other.
@@ -489,21 +511,29 @@ partial struct h12Compare {
     public slice<any> Opts;
 }
 
+} partial class http_testᴛh12Compare {
+
 internal static Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)> reqFunc(this h12Compare tt) {
     if (tt.ReqFunc == nil) {
-        return ((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(Δhttp.Get));
+        return ((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(global::go.net.httpᴛClient.Get));
     }
     return tt.ReqFunc;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string http11ˢ => ref http11ˢᵇ;
+private static readonly @string http11ˢᵇ = "HTTP/1.1"u8;
+internal static ref readonly @string http20ˢ => ref http20ˢᵇ;
+private static readonly @string http20ˢᵇ = "HTTP/2.0"u8;
 
 internal static void run(this h12Compare tt, ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         setParallel(t);
-        var cst1 = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠΔHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(tt.Handler)), tt.Opts.ꓸꓸꓸ);
+        var cst1 = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(tt.Handler)), tt.Opts.ꓸꓸꓸ);
         var cst1ʗ1 = cst1;
         defer(cst1ʗ1.close, ref ᒐ);
-        var cst2 = newClientServerTest(new http_test_package.testing_TжTB(t), http2Mode, new http_test_package.http_HandlerFuncᴠΔHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(tt.Handler)), tt.Opts.ꓸꓸꓸ);
+        var cst2 = newClientServerTest(new http_test_package.testing_TжTB(t), http2Mode, new http_test_package.http_HandlerFuncᴠHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(tt.Handler)), tt.Opts.ꓸꓸꓸ);
         var cst2ʗ1 = cst2;
         defer(cst2ʗ1.close, ref ᒐ);
 
@@ -550,6 +580,8 @@ internal static void run(this h12Compare tt, ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
+} partial class http_test_package {
+
 internal static ж<Δhttp.Response> mostlyCopy(ж<Δhttp.Response> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -567,7 +599,11 @@ partial struct slurpResult {
     internal error err;
 }
 
+} partial class http_testᴛslurpResult {
+
 internal static @string String(this slurpResult sr) { return fmt.Sprintf("body %q; err %v"u8, sr.body, sr.err); }
+
+} partial class http_testᴛh12Compare {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dateˢ => ref dateˢᵇ;
@@ -600,10 +636,12 @@ internal static void normalizeRes(this h12Compare tt, ж<testing.T> t, ж<Δhttp
     }
 }
 
+} partial class http_test_package {
+
 // Issue 13532
 public static void TestH12_HeadContentLengthNoBody(ж<testing.T> t) {
     new h12Compare(
-        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(Δhttp.Head))),
+        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(global::go.net.httpᴛClient.Head))),
         Handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         }
     ).run(t);
@@ -615,7 +653,7 @@ private static readonly @string smallˢᵇ = "small"u8;
 
 public static void TestH12_HeadContentLengthSmallBody(ж<testing.T> t) {
     new h12Compare(
-        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(Δhttp.Head))),
+        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(global::go.net.httpᴛClient.Head))),
         Handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), smallˢ);
         }
@@ -624,7 +662,7 @@ public static void TestH12_HeadContentLengthSmallBody(ж<testing.T> t) {
 
 public static void TestH12_HeadContentLengthLargeBody(ж<testing.T> t) {
     new h12Compare(
-        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(Δhttp.Head))),
+        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(global::go.net.httpᴛClient.Head))),
         Handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             @string chunk = strings.Repeat("x", 512 << 10);
             for (nint i = 0; i < 10; i++) {
@@ -688,7 +726,7 @@ public static void TestH12_FlushMidBody(ж<testing.T> t) {
 
 public static void TestH12_Head_ExplicitLen(ж<testing.T> t) {
     new h12Compare(
-        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(Δhttp.Head))),
+        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(global::go.net.httpᴛClient.Head))),
         Handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if (r.Method != "HEAD"u8) {
                 t.Errorf("unexpected method %q", r.Method);
@@ -700,7 +738,7 @@ public static void TestH12_Head_ExplicitLen(ж<testing.T> t) {
 
 public static void TestH12_Head_ImplicitLen(ж<testing.T> t) {
     new h12Compare(
-        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(Δhttp.Head))),
+        ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(global::go.net.httpᴛClient.Head))),
         Handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if (r.Method != "HEAD"u8) {
                 t.Errorf("unexpected method %q", r.Method);
@@ -744,7 +782,7 @@ internal static void testHandlerWritesTooMuch(ж<testing.T> t, testMode mode) {
     try {
         var wantBody = slice<byte>("123"u8);
         var wantBodyʗ1 = wantBody;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var rc = NewResponseController(w);
             w.Header().Set(contentLengthˢ, fmt.Sprintf("%v"u8, len(wantBodyʗ1)));
             rc.Flush();
@@ -823,7 +861,7 @@ public static void Test304Responses(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, �
 internal static void test304Responses(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w.WriteHeader(StatusNotModified);
             var (_, errΔ1) = w.Write(slice<byte>("illegal body"u8));
             if (!AreEqual(errΔ1, ErrBodyNotAllowed)) {
@@ -924,14 +962,14 @@ internal static void testCancelRequestMidBody(ж<testing.T> t, testMode mode) {
         var didFlush = new channel<bool>(1);
         var didFlushʗ1 = didFlush;
         var unblockʗ1 = unblock;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloˢ2);
             w._<Flusher>().Flush();
             didFlushʗ1.ᐸꟷ(true);
             ᐸꟷ(unblockʗ1);
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), worldˢ);
         })));
-        defer(ᴛ1 => builtin.close(ᴛ1), unblock, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), unblock, ref ᒐ);
 
         var (req, _) = NewRequest(getˢ2, cst.ts.URL, default);
         var cancel = new channel<EmptyStruct>(0);
@@ -954,7 +992,7 @@ internal static void testCancelRequestMidBody(ж<testing.T> t, testMode mode) {
         }
         firstRead = firstRead.slice(0, n);
 
-        builtin.close(cancel);
+        close(cancel);
 
         (var rest, err) = io.ReadAll(res.Body);
         @string all = ((sstring)firstRead) + ((sstring)rest);
@@ -982,7 +1020,7 @@ internal static ref readonly @string declClientTrailerAClientˢ => ref declClien
 private static readonly @string declClientTrailerAClientˢᵇ = "decl: [Client-Trailer-A Client-Trailer-B], vals: valuea, valueb"u8;
 
 internal static void testTrailersClientToServer(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (slurp, errΔ1) = io.ReadAll(r.Body);
         if (errΔ1 != nil) {
             t.Errorf("Server reading request body: %v", errΔ1);
@@ -993,7 +1031,7 @@ internal static void testTrailersClientToServer(ж<testing.T> t, testMode mode) 
         if (r.Trailer == nil) {
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), nilTrailerˢ);
         } else {
-            var decl = slices.Sorted(maps.Keys<httpꓸHeader, @string, slice<@string>>(r.Trailer));
+            var decl = slices.Sorted(maps.Keys<Δhttp.Header, @string, slice<@string>>(r.Trailer));
             fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "decl: %v, vals: %s, %s"u8,
                 decl,
                 r.Trailer.Get(clientTrailerAˢ),
@@ -1010,7 +1048,7 @@ internal static void testTrailersClientToServer(ж<testing.T> t, testMode mode) 
         new http_test_package.eofReaderFuncᴠReader(new eofReaderFunc(() => {
             Ꮡreq.ValueSlot.Trailer[clientTrailerBˢ] = ["valueb"];
         }))));
-    req.Trailer = new httpꓸHeader(new map<@string, slice<@string>>{
+    req.Trailer = new Header(new map<@string, slice<@string>>{
         ["Client-Trailer-A"] = default, //  to be set later
         ["Client-Trailer-B"] = default  //  to be set later
     });
@@ -1062,7 +1100,7 @@ private static readonly @string bodyᶜ1ᵇ = "Some body"u8;
 
 internal static void testTrailersServerToClient(ж<testing.T> t, testMode mode, bool flush) {
     @string body = bodyᶜ1;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(trailerˢ, serverTrailerAServerˢ);
         w.Header().Add(trailerˢ, serverTrailerCˢ);
 
@@ -1085,7 +1123,7 @@ internal static void testTrailersServerToClient(ж<testing.T> t, testMode mode, 
         t.Fatal(err);
     }
 
-    var wantHeader = new httpꓸHeader(new map<@string, slice<@string>>{
+    var wantHeader = new Header(new map<@string, slice<@string>>{
         ["Content-Type"] = ["text/plain; charset=utf-8"]
     });
     nint wantLen = -1;
@@ -1108,7 +1146,7 @@ internal static void testTrailersServerToClient(ж<testing.T> t, testMode mode, 
     }
 
     {
-        var (got, want) = (res.Trailer, (new httpꓸHeader(new map<@string, slice<@string>>{
+        var (got, want) = (res.Trailer, (new Header(new map<@string, slice<@string>>{
             ["Server-Trailer-A"] = default,
             ["Server-Trailer-B"] = default,
             ["Server-Trailer-C"] = default
@@ -1122,7 +1160,7 @@ internal static void testTrailersServerToClient(ж<testing.T> t, testMode mode, 
     }
 
     {
-        var (got, want) = (res.Trailer, (new httpꓸHeader(new map<@string, slice<@string>>{
+        var (got, want) = (res.Trailer, (new Header(new map<@string, slice<@string>>{
             ["Server-Trailer-A"] = ["valuea"],
             ["Server-Trailer-B"] = default,
             ["Server-Trailer-C"] = ["valuec"]
@@ -1140,7 +1178,7 @@ private static readonly @string bodyᶜ2ᵇ = "Some body"u8;
 
 internal static void testResponseBodyReadAfterClose(ж<testing.T> t, testMode mode) {
     @string body = bodyᶜ2;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), body);
     })));
     var (res, err) = cst.c.Get(cst.ts.URL);
@@ -1174,7 +1212,7 @@ internal static void testConcurrentReadWriteReqBody(ж<testing.T> t, testMode mo
     try {
         @string reqBody = reqBodyᶜ;
         @string resBody = resBodyᶜ;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
             var didRead = new channel<bool>(1);
@@ -1245,7 +1283,7 @@ internal partial struct testConnectRequest_tests /*dyn*/ {
 internal static void testConnectRequest(ж<testing.T> t, testMode mode) {
     var gotc = new channel<ж<Δhttp.Request>>(1);
     var gotcʗ1 = gotc;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         gotcʗ1.ᐸꟷ(r);
     })));
 
@@ -1258,7 +1296,7 @@ internal static void testConnectRequest(ж<testing.T> t, testMode mode) {
         new(
             req: Ꮡ(new Request(
                 Method: "CONNECT",
-                Header: new httpꓸHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 URL: u
             )),
             want: u.Host
@@ -1266,7 +1304,7 @@ internal static void testConnectRequest(ж<testing.T> t, testMode mode) {
         new(
             req: Ꮡ(new Request(
                 Method: "CONNECT",
-                Header: new httpꓸHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 URL: u,
                 Host: "example.com:123"
             )),
@@ -1309,7 +1347,7 @@ internal partial struct testTransportUserAgent_tests /*dyn*/ {
 }
 
 internal static void testTransportUserAgent(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "%q"u8, r.Header[userAgentˢ2]);
     })));
 
@@ -1384,7 +1422,7 @@ public static void TestStarRequestMethod(ж<testing.T> t) {
 internal static void testStarRequest(ж<testing.T> t, @string method, testMode mode) {
     var gotc = new channel<ж<Δhttp.Request>>(1);
     var gotcʗ1 = gotc;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(fooˢ, barˢ);
         gotcʗ1.ᐸꟷ(r);
         w._<Flusher>().Flush();
@@ -1398,7 +1436,7 @@ internal static void testStarRequest(ж<testing.T> t, @string method, testMode m
 
     var req = Ꮡ(new Request(
         Method: method,
-        Header: new httpꓸHeader(new map<@string, slice<@string>>{}),
+        Header: new Header(new map<@string, slice<@string>>{}),
         URL: u
     ));
 
@@ -1423,9 +1461,9 @@ internal static void testStarRequest(ж<testing.T> t, @string method, testMode m
     @string got = res.Header.Get(fooˢ); if (got != wantFoo) {
         t.Errorf("response \"foo\" header = %q; want %q", got, wantFoo);
     }
-    var selᴛ8 = gotc;
-    switch (trySelect(ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
-    case 0 when selᴛ8.ꟷᐳ(out req): {
+    var gotcᴛ1 = gotc;
+    switch (trySelect(ᐸꟷ(gotcᴛ1, ꓸꓸꓸ))) {
+    case 0 when gotcᴛ1.ꟷᐳ(out req): {
         break;
     }
     default: {
@@ -1456,7 +1494,7 @@ public static void TestTransportDiscardsUnneededConns(ж<testing.T> t) {
 internal static partial void testTransportDiscardsUnneededConns(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "Hello, %v"u8, r.RemoteAddr);
         })));
         var cstʗ1 = cst;
@@ -1528,7 +1566,7 @@ internal static partial void testTransportDiscardsUnneededConns(ж<testing.T> t,
             });
         }
         Ꮡwg.Wait();
-        builtin.close(gotBody);
+        close(gotBody);
 
         @string last = default;
         foreach (var got in gotBody) {
@@ -1583,7 +1621,7 @@ internal static ref readonly @string helloˢ3 => ref helloˢ3ᵇ;
 private static readonly @string helloˢ3ᵇ = "Hello."u8;
 
 internal static void testTransportGCRequest(ж<testing.T> t, testMode mode, bool body) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         io.ReadAll(r.Body);
         if (body) {
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloˢ3);
@@ -1597,7 +1635,7 @@ internal static void testTransportGCRequest(ж<testing.T> t, testMode mode, bool
         var bodyΔ1 = strings.NewReader(someBodyˢ);
         var (req, _) = NewRequest(postˢ, cstʗ1.ts.URL, new http_test_package.strings_ReaderжReader(bodyΔ1));
         runtime.AddCleanup(req, (channel<EmptyStruct> ch) => {
-            builtin.close(ch);
+            close(ch);
         }, didGCʗ1);
         var (res, err) = cstʗ1.c.Do(req);
         if (err != nil) {
@@ -1611,10 +1649,10 @@ internal static void testTransportGCRequest(ж<testing.T> t, testMode mode, bool
         }
     })();
     for (;;) {
-        var selᴛ9 = didGC;
+        var didGCᴛ1 = didGC;
         var selᴛ10 = time.After(1 * time.Millisecond);
-        switch (select(ᐸꟷ(selᴛ9, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
-        case 0 when selᴛ9.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(didGCᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
+        case 0 when didGCᴛ1.ꟷᐳ(out _): {
             return;
         }
         case 1 when selᴛ10.ꟷᐳ(out _): {
@@ -1631,7 +1669,7 @@ internal partial struct testTransportRejectsInvalidHeaders_tests /*dyn*/ {
 }
 
 internal static void testTransportRejectsInvalidHeaders(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "Handler saw headers: %q"u8, r.Header);
     })), (optQuietLog).OrTypedNilFunc());
     cst.tr.DisableKeepAlives = true;
@@ -1663,9 +1701,9 @@ internal static void testTransportRejectsInvalidHeaders(ж<testing.T> t, testMod
             res.Body.Close();
         }
         bool dialed = default;
-        var selᴛ11 = dialedc;
-        switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
-        case 0 when selᴛ11.ꟷᐳ(out _): {
+        var dialedcᴛ1 = dialedc;
+        switch (trySelect(ᐸꟷ(dialedcᴛ1, ꓸꓸꓸ))) {
+        case 0 when dialedcᴛ1.ꟷᐳ(out _): {
             dialed = true;
             break;
         }
@@ -1722,24 +1760,24 @@ internal static void testInterruptWithPanic(ж<testing.T> t, testMode mode, any 
         @string msg = msgᶜ;
 
         var testDone = new channel<EmptyStruct>(0);
-        defer(ᴛ1 => builtin.close(ᴛ1), testDone, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), testDone, ref ᒐ);
 
         ref var errorLog = ref heap(new lockedBytesBuffer(), out var ᏑerrorLog);
         var gotHeaders = new channel<bool>(1);
         var gotHeadersʗ1 = gotHeaders;
         var testDoneʗ1 = testDone;
 
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), msg);
             w._<Flusher>().Flush();
 
-            var selᴛ12 = gotHeadersʗ1;
-            var selᴛ13 = testDoneʗ1;
-            switch (select(ᐸꟷ(selᴛ12, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
-            case 0 when selᴛ12.ꟷᐳ(out _): {
+            var gotHeadersᴛ1 = gotHeadersʗ1;
+            var testDoneᴛ1 = testDoneʗ1;
+            switch (select(ᐸꟷ(gotHeadersᴛ1, ꓸꓸꓸ), ᐸꟷ(testDoneᴛ1, ꓸꓸꓸ))) {
+            case 0 when gotHeadersᴛ1.ꟷᐳ(out _): {
                 break;
             }
-            case 1 when selᴛ13.ꟷᐳ(out _): {
+            case 1 when testDoneᴛ1.ꟷᐳ(out _): {
                 break;
             }}
             throw panic(panicValue);
@@ -1805,6 +1843,8 @@ partial struct lockedBytesBuffer {
     /*embed*/ public bytes_package.Buffer Buffer;
 }
 
+} partial class http_testᴛlockedBytesBuffer {
+
 internal static (nint, error) Write(this ж<lockedBytesBuffer> Ꮡb, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -1818,6 +1858,8 @@ internal static (nint, error) Write(this ж<lockedBytesBuffer> Ꮡb, slice<byte>
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡb.of(lockedBytesBuffer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string connectionCloseˢ => ref connectionCloseˢᵇ;
@@ -1861,7 +1903,7 @@ private static readonly @string xAddrˢᵇ = "X-Addr"u8;
 internal static readonly object didnTGetXAddrˢ = (@string)"didn't get X-Addr"u8;
 
 internal static void testCloseIdleConnections(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(xAddrˢ, r.RemoteAddr);
     })));
     var cstʗ1 = cst;
@@ -1890,14 +1932,20 @@ partial struct noteCloseConn {
     internal Action closeFunc;
 }
 
+} partial class http_testᴛnoteCloseConn {
+
 internal static error Close(this noteCloseConn x) {
     x.closeFunc();
     return x.Conn.Close();
 }
 
+} partial class http_test_package {
+
 partial struct testErrorReader {
     internal ж<testing.T> t;
 }
+
+} partial class http_testᴛtestErrorReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedReadCallˢ = (@string)"unexpected Read call"u8;
@@ -1907,11 +1955,13 @@ internal static partial (nint n, error err) Read(this testErrorReader r, slice<b
     return (0, io.EOF);
 }
 
+} partial class http_test_package {
+
 public static void TestNoSniffExpectRequestBody(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testNoSniffExpectRequestBody(Δp0, Δp1)); }
 internal static void testNoSniffExpectRequestBody(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w.WriteHeader(StatusUnauthorized);
         })));
 
@@ -1952,7 +2002,7 @@ internal static ref readonly @string quuxˢ => ref quuxˢᵇ;
 private static readonly @string quuxˢᵇ = "Quux"u8;
 
 internal static void testServerUndeclaredTrailers(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(fooˢ2, barˢ2);
         w.Header().Set(trailerFooˢ, bazˢ2);
         w._<Flusher>().Flush();
@@ -1971,12 +2021,12 @@ internal static void testServerUndeclaredTrailers(ж<testing.T> t, testMode mode
     delete(res.Header, "Content-Type"u8);
 
     {
-        var want = (new httpꓸHeader(new map<@string, slice<@string>>{["Foo"] = ["Bar"]})); if (!reflect.DeepEqual(res.Header, want)) {
+        var want = (new Header(new map<@string, slice<@string>>{["Foo"] = ["Bar"]})); if (!reflect.DeepEqual(res.Header, want)) {
             t.Errorf("Header = %#v; want %#v", res.Header, want);
         }
     }
     {
-        var want = (new httpꓸHeader(new map<@string, slice<@string>>{["Foo"] = ["Baz", "Baz2"], ["Bar"] = ["Quux"]})); if (!reflect.DeepEqual(res.Trailer, want)) {
+        var want = (new Header(new map<@string, slice<@string>>{["Foo"] = ["Baz", "Baz2"], ["Bar"] = ["Quux"]})); if (!reflect.DeepEqual(res.Trailer, want)) {
             t.Errorf("Trailer = %#v; want %#v", res.Trailer, want);
         }
     }
@@ -1990,7 +2040,7 @@ internal static readonly object someBogusCrapˢ = (@string)"some bogus crap"u8;
 internal static readonly object expectedAnErrorToBeˢ = (@string)"expected an error to be returned from Post"u8;
 
 internal static void testBadResponseAfterReadingBody(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         GoFrame ᒐ = default;
         try {
             var (_, errΔ1) = io.Copy(io.Discard, r.Body);
@@ -2029,10 +2079,10 @@ internal static readonly object expectedPanicInHandlerˢ = (@string)"expected pa
 internal static void testWriteHeader0(ж<testing.T> t, testMode mode) {
     var gotpanic = new channel<bool>(1);
     var gotpanicʗ1 = gotpanic;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         GoFrame ᒐ = default;
         try {
-            defer(ᴛ1 => builtin.close(ᴛ1), gotpanicʗ1, ref ᒐ);
+            defer(ᴛ1 => close(ᴛ1), gotpanicʗ1, ref ᒐ);
             var gotpanicʗ2 = gotpanicʗ1;
             defer(() => {
                 var e = recover(); if (e != nil) {
@@ -2089,7 +2139,7 @@ internal static void testWriteHeaderAfterWrite(ж<testing.T> t, testMode mode, b
     GoFrame ᒐ = default;
     try {
         ref var errorLog = ref heap(new lockedBytesBuffer(), out var ᏑerrorLog);
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             GoFrame ᒐ = default;
             try {
                 if (hijack) {
@@ -2157,7 +2207,7 @@ private static readonly @string timeoutˢᵇ = "timeout"u8;
 internal static partial void testBidiStreamReverseProxy(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var backend = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var backend = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var (_, errΔ1) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), r.Body); if (errΔ1 != nil) {
                 log.Printf("bidi backend copy: %v", errΔ1);
             }
@@ -2170,7 +2220,7 @@ internal static partial void testBidiStreamReverseProxy(ж<testing.T> t, testMod
         var rp = httputil.NewSingleHostReverseProxy(backURL);
         rp.Transport = new Δhttp.TransportжRoundTripper(backend.tr);
         var rpʗ1 = rp;
-        var proxy = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var proxy = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             rpʗ1.ServeHTTP(w, r);
         })));
 
@@ -2206,10 +2256,10 @@ internal static partial void testBidiStreamReverseProxy(ж<testing.T> t, testMod
         if (n != size) {
             t.Fatalf("got %d bytes; want %d", n, (nint)(size));
         }
-        var selᴛ14 = bodyRes;
+        var bodyResᴛ1 = bodyRes;
         var selᴛ15 = time.After((time.Duration)(10000000000L));
-        switch (select(ᐸꟷ(selᴛ14, ꓸꓸꓸ), ᐸꟷ(selᴛ15, ꓸꓸꓸ))) {
-        case 0 when selᴛ14.ꟷᐳ(out var v): {
+        switch (select(ᐸꟷ(bodyResᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ15, ꓸꓸꓸ))) {
+        case 0 when bodyResᴛ1.ꟷᐳ(out var v): {
             switch (v.type()) {
             default: {
                 var vΔ1 = v;
@@ -2278,7 +2328,7 @@ internal static void testIdentityTransferEncoding(ж<testing.T> t, testMode mode
     GoFrame ᒐ = default;
     try {
         @string body = bodyᶜ3;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var (gotBodyΔ1, _) = io.ReadAll(r.Body);
             @string got = (@string)gotBodyΔ1;
             @string want = body; if (got != want) {
@@ -2328,7 +2378,7 @@ internal static void testEarlyHintsRequest(ж<testing.T> t, testMode mode) {
     try {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var h = w.Header();
 
             h.Add(contentLengthˢ, "123"); // must be ignored
@@ -2396,7 +2446,7 @@ internal static void testEarlyHintsRequest(ж<testing.T> t, testMode mode) {
                 return default;
             }
         ));
-        var (req, _) = NewRequestWithContext(httptrace.WithClientTrace(context_package.Background(), trace), getˢ2, cst.ts.URL, default);
+        var (req, _) = NewRequestWithContext(httptrace.WithClientTrace(context.Background(), trace), getˢ2, cst.ts.URL, default);
 
         var (res, err) = cst.c.Do(req);
         if (err != nil) {

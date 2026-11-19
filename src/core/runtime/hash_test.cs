@@ -22,6 +22,8 @@ using exec = global::go.os.exec_package;
 using global::go.math;
 using global::go.os;
 using static global::go.runtime_internal_test_package;
+using runtime_test = runtime_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -102,6 +104,9 @@ partial struct HashSet {
 internal static partial ж<HashSet> newHashSet() {
     return Ꮡ(new HashSet(list: new slice<uintptr>(0, 1024)));
 }
+
+} partial class runtime_testᴛHashSet {
+
 internal static void add(this ref HashSet s, uintptr h) {
     s.list = append(s.list, h);
 }
@@ -128,7 +133,7 @@ internal static void check(this ref HashSet s, ж<testing.T> t) {
 
     const float64 SLOP = 50.0;
     var pairs = (int64)n * (int64)(n - 1) / 2;
-    var expected = (float64)pairs / Δmath.Pow(2.0D, (float64)hashSize);
+    var expected = (float64)pairs / Δmath.Pow(2.0D, (float64)runtime_test.hashSize);
     var stddev = Δmath.Sqrt(expected);
     if ((float64)collisions > expected + SLOP * (3D * stddev + 1D)) {
         t.Errorf("unexpected number of collisions: got=%d mean=%f stddev=%f threshold=%f", collisions, expected, stddev, expected + SLOP * (3D * stddev + 1D));
@@ -136,6 +141,8 @@ internal static void check(this ref HashSet s, ж<testing.T> t) {
     // Reset for reuse
     s.list = s.list[..0];
 }
+
+} partial class runtime_test_package {
 
 // a string plus adding zeros must make distinct hashes
 public static void TestSmhasherAppendedZeros(ж<testing.T> t) {
@@ -369,6 +376,8 @@ partial struct BytesKey {
     internal slice<byte> b;
 }
 
+} partial class runtime_testᴛBytesKey {
+
 internal static void clear(this ref BytesKey k) {
     builtin.clear(k.b);
 }
@@ -388,9 +397,13 @@ internal static @string name(this ref BytesKey k) {
     return fmt.Sprintf("bytes%d"u8, len(k.b));
 }
 
+} partial class runtime_test_package {
+
 partial struct Int32Key {
     internal uint32 i;
 }
+
+} partial class runtime_testᴛInt32Key {
 
 internal static void clear(this ref Int32Key k) {
     k.i = 0;
@@ -417,9 +430,13 @@ internal static @string name(this ref Int32Key k) {
     return int32ˢ;
 }
 
+} partial class runtime_test_package {
+
 partial struct Int64Key {
     internal uint64 i;
 }
+
+} partial class runtime_testᴛInt64Key {
 
 internal static void clear(this ref Int64Key k) {
     k.i = 0;
@@ -446,9 +463,13 @@ internal static @string name(this ref Int64Key k) {
     return int64ˢ;
 }
 
+} partial class runtime_test_package {
+
 partial struct EfaceKey {
     internal any i;
 }
+
+} partial class runtime_testᴛEfaceKey {
 
 internal static void clear(this ref EfaceKey k) {
     k.i = default;
@@ -478,14 +499,20 @@ internal static @string name(this ref EfaceKey k) {
     return efaceˢ;
 }
 
+} partial class runtime_test_package {
+
 
 partial struct IfaceKey {
     internal ifaceHash_i i;
 }
 partial struct fInter /*num:uint64*/;
 
+} partial class runtime_testᴛfInter {
+
 internal static void F(this fInter x) {
 }
+
+} partial class runtime_testᴛIfaceKey {
 
 internal static void clear(this ref IfaceKey k) {
     k.i = default;
@@ -514,6 +541,8 @@ private static readonly @string ifaceˢᵇ = "Iface"u8;
 internal static @string name(this ref IfaceKey k) {
     return ifaceˢ;
 }
+
+} partial class runtime_test_package {
 
 // Flipping a single bit of a key should flip each output bit with 50% probability.
 public static void TestSmhasherAvalanche(ж<testing.T> t) {

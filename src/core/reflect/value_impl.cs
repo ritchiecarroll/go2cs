@@ -274,6 +274,12 @@ public static (T, bool) TypeAssert<T>(Value v) {
 internal static any /*i*/ packInterfaceValue(Value v) {
     object? cur = v.live;
     if (cur is not null) {
+        if (v.addrBox is not null && ownsArrayStorage(cur)) {
+            // An array (or a struct holding one) boxed out of its slot still shares the slot's backing, so the box is no
+            // copy: a later in-place Set or SetZero of the slot reached the interface value. Clone() is packEface's one
+            // malloc here, and it charges the counter itself.
+            return ((ICloneable)cur).Clone();
+        }
         if (v.addrBox is not null && copiesAddressableValue(v.kind()) && cur.GetType().IsValueType) {
             // Go's packEface copies an ADDRESSABLE value of an indirect type into a fresh allocation, so a later
             // Set cannot reach the interface value it returned: one malloc, which reflect's TestTypeAssertAllocs
@@ -315,7 +321,20 @@ private static bool copiesAddressableValue(Kind k) =>
 // SetMapIndex). Append writes through Set. Any other slot keeps the datum: a typed nil is an
 // INTERFACE-space encoding, and a *T slot holds the plain null.
 internal static object? storedDatum(Value x, Kind slotKind) =>
-    slotKind == Interface ? packInterfaceValue(x) : x.live;
+    slotKind == Interface ? packInterfaceValue(x) : transferDatum(x);
+
+// transferDatum is the datum a value takes when it leaves an ADDRESSABLE location for another one (a map entry, a
+// channel, a call argument). Go copies the value there. A managed array (or a struct holding one) read out of its
+// slot is a second handle on the slot's backing, so it is cloned: a later in-place store to the slot (Set, SetZero,
+// which assign into the existing array since the in-place reassignment) would otherwise reach the stored value.
+// encoding/gob's decodeMap reuses one reflect.New element and zeroes it after every SetMapIndex.
+internal static object? transferDatum(Value x) {
+    object? cur = x.live;
+    return x.addrBox is not null && ownsArrayStorage(cur) ? ((ICloneable)cur!).Clone() : cur;
+}
+
+private static bool ownsArrayStorage([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? datum) =>
+    datum is IArray and not ISlice or IGoValueClone;
 
 } partial class reflectᴛValue {
 
@@ -2254,7 +2273,7 @@ internal static object? marshalCallArg(Value arg, System.Type want) {
 // bridge actually reads is dropped, so the receiving side gets null. Keeping the two on one
 // renderer is what makes a channel send and a call argument box a typed nil the same way.
 internal static bool marshalIntoSlot(Value arg, System.Type want, out object? marshalled) {
-    object? source = want.IsInterface || want == typeof(object) ? packInterfaceValue(arg) : arg.live;
+    object? source = want.IsInterface || want == typeof(object) ? packInterfaceValue(arg) : transferDatum(arg);
     return GoReflect.TryMarshalAssignable(source, want, out marshalled, GoReflect.GoTypeRelation.Assignable);
 }
 

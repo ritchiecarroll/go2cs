@@ -32,7 +32,7 @@ partial struct testImagesᴛ1 /*dyn*/ {
 }
 internal static slice<testImagesᴛ1> testImages;
 internal static void initᴛtestImages() { testImages = [
-    new("rgba", () => new image_internal_test_package.image_ΔRGBAжimage(NewRGBA(Rect(0, 0, 10, 10)))),
+    new("rgba", () => new image_internal_test_package.image_RGBAжimage(NewRGBA(Rect(0, 0, 10, 10)))),
     new("rgba64", () => new image_internal_test_package.image_RGBA64жimage(NewRGBA64(Rect(0, 0, 10, 10)))),
     new("nrgba", () => new image_internal_test_package.image_NRGBAжimage(NewNRGBA(Rect(0, 0, 10, 10)))),
     new("nrgba64", () => new image_internal_test_package.image_NRGBA64жimage(NewNRGBA64(Rect(0, 0, 10, 10)))),
@@ -40,7 +40,7 @@ internal static void initᴛtestImages() { testImages = [
     new("alpha16", () => new image_internal_test_package.image_Alpha16жimage(NewAlpha16(Rect(0, 0, 10, 10)))),
     new("gray", () => new image_internal_test_package.image_Grayжimage(NewGray(Rect(0, 0, 10, 10)))),
     new("gray16", () => new image_internal_test_package.image_Gray16жimage(NewGray16(Rect(0, 0, 10, 10)))),
-    new("paletted", () => new image_internal_test_package.image_Palettedжimage(NewPaletted(Rect(0, 0, 10, 10), new color.Palette(new color.Color[]{new image_test_package.image_UniformжColor(Transparent), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque)
+    new("paletted", () => new image_internal_test_package.image_Palettedжimage(NewPaletted(Rect(0, 0, 10, 10), new color.Palette(new color.Color[]{new image_test_package.image_UniformжColor(Transparent), new image_test_package.image_UniformжColor(go.image_package.Opaque)
         }.slice()))))
 ]; }
 
@@ -55,8 +55,8 @@ public static void TestImage(ж<testing.T> t) {
             t.Errorf("%T: at (6, 3), want a zero color, got %v", m, m.At(6, 3));
             continue;
         }
-        m.Set(6, 3, new image_test_package.image_UniformжColor(go.image_package.ΔOpaque));
-        if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque), m.At(6, 3))) {
+        m.Set(6, 3, new image_test_package.image_UniformжColor(go.image_package.Opaque));
+        if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.Opaque), m.At(6, 3))) {
             t.Errorf("%T: at (6, 3), want a non-zero color, got %v", m, m.At(6, 3));
             continue;
         }
@@ -69,7 +69,7 @@ public static void TestImage(ж<testing.T> t) {
             t.Errorf("%T: sub-image want bounds %v, got %v", m, Rect(3, 2, 9, 8), m.Bounds());
             continue;
         }
-        if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque), m.At(6, 3))) {
+        if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.Opaque), m.At(6, 3))) {
             t.Errorf("%T: sub-image at (6, 3), want a non-zero color, got %v", m, m.At(6, 3));
             continue;
         }
@@ -77,8 +77,8 @@ public static void TestImage(ж<testing.T> t) {
             t.Errorf("%T: sub-image at (3, 3), want a zero color, got %v", m, m.At(3, 3));
             continue;
         }
-        m.Set(3, 3, new image_test_package.image_UniformжColor(go.image_package.ΔOpaque));
-        if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque), m.At(3, 3))) {
+        m.Set(3, 3, new image_test_package.image_UniformжColor(go.image_package.Opaque));
+        if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.Opaque), m.At(3, 3))) {
             t.Errorf("%T: sub-image at (3, 3), want a non-zero color, got %v", m, m.At(3, 3));
             continue;
         }
@@ -231,7 +231,7 @@ public static void TestRGBA64Image(ж<testing.T> t) {
     }
 
     var r = Rect(0, 0, 3, 2);
-    var testCases = slice<global::go.image_package.Image>([new global::go.image_package.AlphaжImage(NewAlpha(r)), new global::go.image_package.Alpha16жImage(NewAlpha16(r)), new global::go.image_package.CMYKжImage(NewCMYK(r)), new global::go.image_package.GrayжImage(NewGray(r)), new global::go.image_package.Gray16жImage(NewGray16(r)), new global::go.image_package.NRGBAжImage(NewNRGBA(r)), new global::go.image_package.NRGBA64жImage(NewNRGBA64(r)), new global::go.image_package.NYCbCrAжImage(NewNYCbCrA(r, YCbCrSubsampleRatio444)), new global::go.image_package.PalettedжImage(NewPaletted(r, palette.Plan9)), new image_test_package.image_ΔRGBAжImage(NewRGBA(r)), new global::go.image_package.RGBA64жImage(NewRGBA64(r)), new global::go.image_package.UniformжImage(NewUniform(new color.RGBA64())), new global::go.image_package.YCbCrжImage(NewYCbCr(r, YCbCrSubsampleRatio444)), new image_test_package.image_RectangleᴠImage(r)
+    var testCases = slice<global::go.image_package.Image>([new global::go.image_package.AlphaжImage(NewAlpha(r)), new global::go.image_package.Alpha16жImage(NewAlpha16(r)), new global::go.image_package.CMYKжImage(NewCMYK(r)), new global::go.image_package.GrayжImage(NewGray(r)), new global::go.image_package.Gray16жImage(NewGray16(r)), new global::go.image_package.NRGBAжImage(NewNRGBA(r)), new global::go.image_package.NRGBA64жImage(NewNRGBA64(r)), new global::go.image_package.NYCbCrAжImage(NewNYCbCrA(r, YCbCrSubsampleRatio444)), new global::go.image_package.PalettedжImage(NewPaletted(r, palette.Plan9)), new global::go.image_package.RGBAжImage(NewRGBA(r)), new global::go.image_package.RGBA64жImage(NewRGBA64(r)), new global::go.image_package.UniformжImage(NewUniform(new color.RGBA64())), new global::go.image_package.YCbCrжImage(NewYCbCr(r, YCbCrSubsampleRatio444)), new image_test_package.image_RectangleᴠImage(r)
     ]);
     foreach (var (_, tc) in range(testCases)) {
         switch (tc.type()) {
@@ -348,7 +348,7 @@ public static void BenchmarkRGBASetRGBA(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = NewRGBA(Rect(0, 0, 10, 10));
-    var c = new colorꓸRGBA(0xff, 0xff, 0xff, 0x13);
+    var c = new color.RGBA(0xff, 0xff, 0xff, 0x13);
     b.ResetTimer();
 
     for (nint i = 0; i < b.N; i++) {

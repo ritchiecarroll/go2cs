@@ -26,14 +26,14 @@ public static void ExampleDuration_Round() {
     }
 
     var round = slice<Δtime.Duration>([
-        Δtime.ΔNanosecond,
+        Δtime.Nanosecond,
         Δtime.Microsecond,
         Δtime.Millisecond,
-        Δtime.ΔSecond,
-        2 * Δtime.ΔSecond,
-        Δtime.ΔMinute,
+        Δtime.Second,
+        2 * Δtime.Second,
+        Δtime.Minute,
         (Δtime.Duration)(600000000000L),
-        Δtime.ΔHour
+        Δtime.Hour
     ]);
 
     foreach (var (_, r) in range(round)) {
@@ -65,14 +65,14 @@ public static void ExampleDuration_Truncate() {
     }
 
     var trunc = slice<Δtime.Duration>([
-        Δtime.ΔNanosecond,
+        Δtime.Nanosecond,
         Δtime.Microsecond,
         Δtime.Millisecond,
-        Δtime.ΔSecond,
-        2 * Δtime.ΔSecond,
-        Δtime.ΔMinute,
+        Δtime.Second,
+        2 * Δtime.Second,
+        Δtime.Minute,
         (Δtime.Duration)(600000000000L),
-        Δtime.ΔHour
+        Δtime.Hour
     ]);
 
     foreach (var (_, t) in range(trunc)) {
@@ -189,10 +189,10 @@ internal static void handle(nint _) { }
 internal static readonly object timedOutˢ = (@string)"timed out"u8;
 
 public static void ExampleAfter() {
-    var selᴛ1 = c;
+    var cᴛ1 = c;
     var selᴛ2 = Δtime.After((Δtime.Duration)(10000000000L));
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out var m): {
+    switch (select(ᐸꟷ(cᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when cᴛ1.ꟷᐳ(out var m): {
         handle(m);
         break;
     }
@@ -226,7 +226,7 @@ public static void ExampleMonth() {
 }
 
 public static void ExampleDate() {
-    var t = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.ΔUTC);
+    var t = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.UTC);
     fmt.Printf("Go launched at %s\n"u8, t.Local());
     // Output: Go launched at 2009-11-10 15:00:00 -0800 PST
 }
@@ -238,7 +238,7 @@ internal static readonly object currentTimeˢ = (@string)"Current time: "u8;
 public static partial void ExampleNewTicker() {
     GoFrame ᒐ = default;
     try {
-        var ticker = Δtime.NewTicker(Δtime.ΔSecond);
+        var ticker = Δtime.NewTicker(Δtime.Second);
         var tickerʗ1 = ticker;
         defer(tickerʗ1.Stop, ref ᒐ);
         var done = new channel<bool>(0);
@@ -248,10 +248,10 @@ public static partial void ExampleNewTicker() {
             doneʗ1.ᐸꟷ(true);
         });
         for (;;) {
-            var selᴛ3 = done;
+            var doneᴛ1 = done;
             var selᴛ4 = ticker.C;
-            switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-            case 0 when selᴛ3.ꟷᐳ(out _): {
+            switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+            case 0 when doneᴛ1.ꟷᐳ(out _): {
                 fmt.Println(doneˢ);
                 return;
             }
@@ -466,7 +466,7 @@ internal static ref readonly @string feb32013At754pmUtcˢ => ref feb32013At754pm
 private static readonly @string feb32013At754pmUtcˢᵇ = "Feb 3, 2013 at 7:54pm (UTC)"u8;
 
 public static void ExampleTime_GoString() {
-    var t = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.ΔUTC);
+    var t = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.UTC);
     fmt.Println(t.GoString());
     t = t.Add((Δtime.Duration)(60000000000L));
     fmt.Println(t.GoString());
@@ -571,7 +571,7 @@ public static void ExampleParseInLocation() {
 }
 
 public static void ExampleUnix() {
-    var unixTime = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.ΔUTC);
+    var unixTime = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.UTC);
     fmt.Println(unixTime.Unix());
     var t = Δtime.Unix(unixTime.Unix(), 0).UTC();
     fmt.Println(t);
@@ -582,7 +582,7 @@ public static void ExampleUnix() {
 }
 
 public static void ExampleUnixMicro() {
-    var umt = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.ΔUTC);
+    var umt = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.UTC);
     fmt.Println(umt.UnixMicro());
     var t = Δtime.UnixMicro(umt.UnixMicro()).UTC();
     fmt.Println(t);
@@ -593,7 +593,7 @@ public static void ExampleUnixMicro() {
 }
 
 public static void ExampleUnixMilli() {
-    var umt = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.ΔUTC);
+    var umt = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.UTC);
     fmt.Println(umt.UnixMilli());
     var t = Δtime.UnixMilli(umt.UnixMilli()).UTC();
     fmt.Println(t);
@@ -609,7 +609,7 @@ public static void ExampleTime_Unix() {
     fmt.Println(Δtime.Unix(0, 1000000000000000000).UTC());           // 1e18 nanoseconds
     fmt.Println(Δtime.Unix(2000000000, -1000000000000000000).UTC()); // 2e9 seconds - 1e18 nanoseconds
 
-    var t = Δtime.Date(2001, Δtime.September, 9, 1, 46, 40, 0, Δtime.ΔUTC);
+    var t = Δtime.Date(2001, Δtime.September, 9, 1, 46, 40, 0, Δtime.UTC);
     fmt.Println(t.Unix());     // seconds since 1970
     fmt.Println(t.UnixNano()); // nanoseconds since 1970
 
@@ -622,16 +622,16 @@ public static void ExampleTime_Unix() {
 }
 
 public static void ExampleTime_Round() {
-    var t = Δtime.Date(0, 0, 0, 12, 15, 30, 918273645, Δtime.ΔUTC);
+    var t = Δtime.Date(0, 0, 0, 12, 15, 30, 918273645, Δtime.UTC);
     var round = slice<Δtime.Duration>([
-        Δtime.ΔNanosecond,
+        Δtime.Nanosecond,
         Δtime.Microsecond,
         Δtime.Millisecond,
-        Δtime.ΔSecond,
-        2 * Δtime.ΔSecond,
-        Δtime.ΔMinute,
+        Δtime.Second,
+        2 * Δtime.Second,
+        Δtime.Minute,
         (Δtime.Duration)(600000000000L),
-        Δtime.ΔHour
+        Δtime.Hour
     ]);
 
     foreach (var (_, d) in range(round)) {
@@ -657,12 +657,12 @@ private static readonly @string dec07121530918273645ˢᵇ = "2012 Dec 07 12:15:3
 public static void ExampleTime_Truncate() {
     var (t, _) = Δtime.Parse(jan02150405ˢ, dec07121530918273645ˢ);
     var trunc = slice<Δtime.Duration>([
-        Δtime.ΔNanosecond,
+        Δtime.Nanosecond,
         Δtime.Microsecond,
         Δtime.Millisecond,
-        Δtime.ΔSecond,
-        2 * Δtime.ΔSecond,
-        Δtime.ΔMinute,
+        Δtime.Second,
+        2 * Δtime.Second,
+        Δtime.Minute,
         (Δtime.Duration)(600000000000L)
     ]);
 
@@ -670,7 +670,7 @@ public static void ExampleTime_Truncate() {
         fmt.Printf("t.Truncate(%5s) = %s\n"u8, d, t.Truncate(d).Format("15:04:05.999999999"));
     }
     // To round to the last midnight in the local timezone, create a new Date.
-    var midnight = Δtime.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, Δtime.ΔLocal);
+    var midnight = Δtime.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, Δtime.Local);
     _ = midnight;
 
     // Output:
@@ -693,7 +693,7 @@ public static void ExampleLoadLocation() {
         throw panic(err);
     }
 
-    var timeInUTC = Δtime.Date(2018, 8, 30, 12, 0, 0, 0, Δtime.ΔUTC);
+    var timeInUTC = Δtime.Date(2018, 8, 30, 12, 0, 0, 0, Δtime.UTC);
     fmt.Println(timeInUTC.In(location));
     // Output: 2018-08-30 05:00:00 -0700 PDT
 }
@@ -712,7 +712,7 @@ public static void ExampleLocation() {
     //    newYork, err := time.LoadLocation("America/New_York")
 
     // Creating a time requires a location. Common locations are time.Local and time.UTC.
-    var timeInUTC = Δtime.Date(2009, 1, 1, 12, 0, 0, 0, Δtime.ΔUTC);
+    var timeInUTC = Δtime.Date(2009, 1, 1, 12, 0, 0, 0, Δtime.UTC);
     var sameTimeInBeijing = Δtime.Date(2009, 1, 1, 20, 0, 0, 0, beijing);
 
     // Although the UTC clock time is 1200 and the Beijing clock time is 2000, Beijing is
@@ -725,7 +725,7 @@ public static void ExampleLocation() {
 }
 
 public static void ExampleTime_Add() {
-    var start = Δtime.Date(2009, 1, 1, 12, 0, 0, 0, Δtime.ΔUTC);
+    var start = Δtime.Date(2009, 1, 1, 12, 0, 0, 0, Δtime.UTC);
     var afterTenSeconds = start.Add((Δtime.Duration)(10000000000L));
     var afterTenMinutes = start.Add((Δtime.Duration)(600000000000L));
     var afterTenHours = start.Add((Δtime.Duration)(36000000000000L));
@@ -750,7 +750,7 @@ internal static ref readonly @string europeZurichˢ => ref europeZurichˢᵇ;
 private static readonly @string europeZurichˢᵇ = "Europe/Zurich"u8;
 
 public static void ExampleTime_AddDate() {
-    var start = Δtime.Date(2023, 3, 25, 12, 0, 0, 0, Δtime.ΔUTC);
+    var start = Δtime.Date(2023, 3, 25, 12, 0, 0, 0, Δtime.UTC);
     var oneDayLater = start.AddDate(0, 0, 1);
     var dayDuration = oneDayLater.Sub(start);
     var oneMonthLater = start.AddDate(0, 1, 0);
@@ -780,8 +780,8 @@ public static void ExampleTime_AddDate() {
 }
 
 public static void ExampleTime_After() {
-    var year2000 = Δtime.Date(2000, 1, 1, 0, 0, 0, 0, Δtime.ΔUTC);
-    var year3000 = Δtime.Date(3000, 1, 1, 0, 0, 0, 0, Δtime.ΔUTC);
+    var year2000 = Δtime.Date(2000, 1, 1, 0, 0, 0, 0, Δtime.UTC);
+    var year3000 = Δtime.Date(3000, 1, 1, 0, 0, 0, 0, Δtime.UTC);
 
     var isYear3000AfterYear2000 = year3000.After(year2000); // True
     var isYear2000AfterYear3000 = year2000.After(year3000); // False
@@ -795,8 +795,8 @@ public static void ExampleTime_After() {
 }
 
 public static void ExampleTime_Before() {
-    var year2000 = Δtime.Date(2000, 1, 1, 0, 0, 0, 0, Δtime.ΔUTC);
-    var year3000 = Δtime.Date(3000, 1, 1, 0, 0, 0, 0, Δtime.ΔUTC);
+    var year2000 = Δtime.Date(2000, 1, 1, 0, 0, 0, 0, Δtime.UTC);
+    var year3000 = Δtime.Date(3000, 1, 1, 0, 0, 0, 0, Δtime.UTC);
 
     var isYear2000BeforeYear3000 = year2000.Before(year3000); // True
     var isYear3000BeforeYear2000 = year3000.Before(year2000); // False
@@ -810,7 +810,7 @@ public static void ExampleTime_Before() {
 }
 
 public static void ExampleTime_Date() {
-    var d = Δtime.Date(2000, 2, 1, 12, 30, 0, 0, Δtime.ΔUTC);
+    var d = Δtime.Date(2000, 2, 1, 12, 30, 0, 0, Δtime.UTC);
     var (year, month, day) = d.Date();
 
     fmt.Printf("year = %v\n"u8, year);
@@ -824,7 +824,7 @@ public static void ExampleTime_Date() {
 }
 
 public static void ExampleTime_Day() {
-    var d = Δtime.Date(2000, 2, 1, 12, 30, 0, 0, Δtime.ΔUTC);
+    var d = Δtime.Date(2000, 2, 1, 12, 30, 0, 0, Δtime.UTC);
     nint day = d.Day();
 
     fmt.Printf("day = %v\n"u8, day);
@@ -839,7 +839,7 @@ public static void ExampleTime_Equal() {
 
     // Unlike the equal operator, Equal is aware that d1 and d2 are the
     // same instant but in different time zones.
-    var d1 = Δtime.Date(2000, 2, 1, 12, 30, 0, 0, Δtime.ΔUTC);
+    var d1 = Δtime.Date(2000, 2, 1, 12, 30, 0, 0, Δtime.UTC);
     var d2 = Δtime.Date(2000, 2, 1, 20, 30, 0, 0, beijing);
 
     var datesEqualUsingEqualOperator = d1 == d2;
@@ -854,10 +854,10 @@ public static void ExampleTime_Equal() {
 }
 
 public static void ExampleTime_String() {
-    var timeWithNanoseconds = Δtime.Date(2000, 2, 1, 12, 13, 14, 15, Δtime.ΔUTC);
+    var timeWithNanoseconds = Δtime.Date(2000, 2, 1, 12, 13, 14, 15, Δtime.UTC);
     @string withNanoseconds = timeWithNanoseconds.String();
 
-    var timeWithoutNanoseconds = Δtime.Date(2000, 2, 1, 12, 13, 14, 0, Δtime.ΔUTC);
+    var timeWithoutNanoseconds = Δtime.Date(2000, 2, 1, 12, 13, 14, 0, Δtime.UTC);
     @string withoutNanoseconds = timeWithoutNanoseconds.String();
 
     fmt.Printf("withNanoseconds = %v\n"u8, withNanoseconds);
@@ -869,8 +869,8 @@ public static void ExampleTime_String() {
 }
 
 public static void ExampleTime_Sub() {
-    var start = Δtime.Date(2000, 1, 1, 0, 0, 0, 0, Δtime.ΔUTC);
-    var end = Δtime.Date(2000, 1, 1, 12, 0, 0, 0, Δtime.ΔUTC);
+    var start = Δtime.Date(2000, 1, 1, 0, 0, 0, 0, Δtime.UTC);
+    var end = Δtime.Date(2000, 1, 1, 12, 0, 0, 0, Δtime.UTC);
 
     var difference = end.Sub(start);
     fmt.Printf("difference = %v\n"u8, difference);
@@ -880,7 +880,7 @@ public static void ExampleTime_Sub() {
 }
 
 public static void ExampleTime_AppendBinary() {
-    var t = Δtime.Date(2025, 4, 1, 15, 30, 45, 123456789, Δtime.ΔUTC);
+    var t = Δtime.Date(2025, 4, 1, 15, 30, 45, 123456789, Δtime.UTC);
 
     slice<byte> buffer = default;
     (buffer, var err) = t.AppendBinary(buffer);
@@ -905,7 +905,7 @@ public static void ExampleTime_AppendBinary() {
 }
 
 public static void ExampleTime_AppendFormat() {
-    var t = Δtime.Date(2017, Δtime.November, 4, 11, 0, 0, 0, Δtime.ΔUTC);
+    var t = Δtime.Date(2017, Δtime.November, 4, 11, 0, 0, 0, Δtime.UTC);
     var text = slice<byte>("Time: "u8);
 
     text = t.AppendFormat(text, Δtime.Kitchen);
@@ -916,7 +916,7 @@ public static void ExampleTime_AppendFormat() {
 }
 
 public static void ExampleTime_AppendText() {
-    var t = Δtime.Date(2025, 4, 1, 15, 30, 45, 123456789, Δtime.ΔUTC);
+    var t = Δtime.Date(2025, 4, 1, 15, 30, 45, 123456789, Δtime.UTC);
 
     var buffer = slice<byte>("t: "u8);
 

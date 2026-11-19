@@ -120,9 +120,8 @@ public static partial void TestPSSGolden(ж<testing.T> t) {
         ));
 
         foreach (var marker in values) {
-            var exprᴛ1 = marker;
             switch (ᐧ) {
-            case {} when exprᴛ1 == newKeyMarker: {
+            case {} when marker == newKeyMarker: {
                 key = @new<rsa.PublicKey>();
                 var (nHex, ok) = ᐸꟷ(values, ꟷ);
                 if (!ok) {
@@ -136,7 +135,7 @@ public static partial void TestPSSGolden(ж<testing.T> t) {
                 }
                 break;
             }
-            case {} when exprᴛ1 == newSignatureMarker: {
+            case {} when marker == newSignatureMarker: {
                 var msg = fromHex(ᐸꟷ(values));
                 ᐸꟷ(values); // skip salt
                 var sig = fromHex(ᐸꟷ(values));
@@ -265,8 +264,8 @@ public static void TestPSS513(ж<testing.T> t) {
     }
 }
 
-internal static ж<bigꓸInt> bigFromHex(@string hex) {
-    var (n, ok) = @new<bigꓸInt>().SetString(hex, 16);
+internal static ж<big.Int> bigFromHex(@string hex) {
+    var (n, ok) = @new<big.Int>().SetString(hex, 16);
     if (!ok) {
         throw panic("bad hex: " + hex);
     }

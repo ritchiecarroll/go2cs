@@ -40686,6 +40686,42 @@ output; every site was read.
 
 — P1 (2026-11-18)
 
+## 2026-11-18 — P5 (.4 top blocker): reflect handed out an array slot's backing, so `encoding/gob` cleared the arrays it had stored in a map
+
+Found on the six-row re-read at master `8a86140f79`: `encoding/gob` fell BELOW its banked 106 on every
+platform read (linux-arm64, linux x64, windows per i9). `TestEndToEnd` decodes `Marr map[[2]string][2]*float64`
+and every element came back `[<nil> <nil>]`.
+
+**Root cause.** `5953f454d0` (R, whole-array assignment copies INTO the existing location, landed in the batch 311
+merge `1886e42693`) made `ж<T>.WriteBoxSlot` assign an `IGoValueAssign` pointee in place. reflect's transfer doors
+(`SetMapIndex`, `Send`, `Set`, `Call` arguments, `Interface()`) returned the slot's datum as it was: a struct sharing
+the slot's `T[]` backing. `decodeMap` calls `SetMapIndex` and then `SetZero` on the same key and element slots, so the
+stored arrays were cleared. i9 confirmed it on the first-parent line: `1886e42693^1` GOOD (106/106),
+`1886e42693` BAD, both as predicted. `5953f454d0` is correct; it exposed sharing that reflect already had.
+
+**Arms (linux x64, `encoding/gob` + `reflect` + `encoding/json`):** A, the in-place arm switched off: green.
+B, a copy at the transfer door: green. Cut 1 is arm B, because it puts the copy where Go copies and keeps R's
+in-place store.
+
+**Cut 1** (`claude/p5-reflect-array-copy`): `transferDatum` and a clone in `packInterfaceValue`
+(`src/core/reflect/value_impl.cs`), and the behavioral fixture `ReflectArrayStoreCopies` (10 lines: 9 differ from
+Go at the base, all 10 match at the cut). Rows at the cut: `reflect` 445+21, `encoding/json` 550, `encoding/gob`
+106, all AT. Disclosed in `manual-conversions.md`: `SetMapIndex`/`Send`/`Set`/`Call` from an addressable array
+source allocate once more than Go (COORD accepted, 183218Z). A trim of the `Set` copy is owed only if the .4
+re-bank moves an alloc row.
+
+**Not covered: class 2, routed to P2.** Builtin `copy`, `append(s, t...)` and slice growth move `array<T>` elements
+with `Span.CopyTo`/`Array.Copy`, so a slice of arrays shares inner backings with its source. This is older than 311
+and is direct code, not reflect. A probe of 11 arms is with P2.
+
+**Second finding, not fixed:** `json.Unmarshal` into a TOP-LEVEL `map[string][2]int` decodes each value as `[]`,
+where a map of arrays inside a struct field decodes correctly. It looks like the class read in the 2026-08-19
+`encoding/gob` array-length row above (a map descriptor carries no array dims, so its element type gets none). The
+fixture met the same class: `reflect.New(mapValue.Type().Key())` panics "array index out of range", so it builds
+its key and element types with `reflect.TypeOf`. Not measured further.
+
+— P5 (2026-11-18)
+
 ## 2026-11-18 — P2 (closes G's 2026-11-11 row "`sync.Mutex.Lock` has no try-first step: 230 ns and 64 bytes for an uncontended pair"; COORD ruling 14:11Z): cured on master by C2's fast path and W9a's CompareAndSwap — CLOSED; and `sync.RWMutex` is now Go's own code
 
 **The read.** One linux-x64 box with 4 CPUs, master `b63418fafc`, against Go 1.26.11's own build of the same loops in

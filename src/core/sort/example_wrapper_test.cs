@@ -6,12 +6,17 @@ namespace go;
 using fmt = fmt_package;
 using sort = sort_package;
 using static go.sort_internal_test_package;
+using static sort_test_package;
 
 partial class sort_test_package {
 
 partial struct Grams /*num:nint*/;
 
+} partial class sort_testᴛGrams {
+
 public static @string String(this Grams g) { return fmt.Sprintf("%dg"u8, (nint)g); }
+
+} partial class sort_test_package {
 
 partial struct Organ {
     public @string Name;
@@ -20,8 +25,12 @@ partial struct Organ {
 
 partial struct Organs /*[]ж<Organ>*/;
 
+} partial class sort_testᴛOrgans {
+
 public static nint Len(this Organs s) { return len(s); }
 public static void Swap(this Organs s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+
+} partial class sort_test_package {
 
 // ByName implements sort.Interface by providing Less and using the Len and
 // Swap methods of the embedded Organs value.
@@ -29,7 +38,11 @@ partial struct ByName {
     /*embed*/ public Organs Organs;
 }
 
+} partial class sort_testᴛByName {
+
 public static bool Less(this ByName s, nint i, nint j) { return s.Organs[i].Name < s.Organs[j].Name; }
+
+} partial class sort_test_package {
 
 // ByWeight implements sort.Interface by providing Less and using the Len and
 // Swap methods of the embedded Organs value.
@@ -37,7 +50,11 @@ partial struct ByWeight {
     /*embed*/ public Organs Organs;
 }
 
+} partial class sort_testᴛByWeight {
+
 public static bool Less(this ByWeight s, nint i, nint j) { return s.Organs[i].Weight < s.Organs[j].Weight; }
+
+} partial class sort_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object organsByWeightˢ = (@string)"Organs by weight:"u8;

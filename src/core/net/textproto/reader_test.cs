@@ -14,6 +14,7 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using static go.net.textproto_package;
+using static textproto_internal_test_package;
 
 partial class textproto_internal_test_package {
 
@@ -95,7 +96,7 @@ public static void TestReadCodeLine(ж<testing.T> t) {
     if (code != 345 || msg != "no way"u8 || err == nil) {
         t.Fatalf("Line 3: %d, %s, %v", code, msg, err);
     }
-    var (e, ok) = err._<ж<global::go.net.textproto_package.ΔError>>(ᐧ); if (!ok || e.Code != code || e.Msg != msg) {
+    var (e, ok) = err._<ж<global::go.net.textproto_package.Error>>(ᐧ); if (!ok || e.Code != code || e.Msg != msg) {
         t.Fatalf("Line 3: wrong error %v\n", err);
     }
     (code, msg, err) = r.ReadCodeLine(1);
@@ -397,7 +398,11 @@ internal partial struct testReader {
     internal Func<slice<byte>, (nint, error)> read;
 }
 
+} partial class textproto_internal_testᴛtestReader {
+
 internal static (nint n, error err) Read(this testReader r, slice<byte> p) { return r.read(p); }
+
+} partial class textproto_internal_test_package {
 
 public static void TestReadMIMEHeaderShortLimitLongLine(ж<testing.T> t) {
     // Small limit, long first line.

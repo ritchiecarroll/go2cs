@@ -7,7 +7,6 @@
 global using static global::go.crypto.@internal.fips140.mlkem_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 // </ImportedTypeAliases>
 
 using go;

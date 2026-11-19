@@ -30,6 +30,7 @@ using global::go.runtime;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
 using Δio = io_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -83,77 +84,76 @@ public static void TestReadMetrics(ж<testing.T> t) {
         }
 
         // Check to make sure the values we read line up with other values we read.
-        ж<metricsꓸFloat64Histogram> allocsBySize = default;
-        ж<metricsꓸFloat64Histogram> gcPauses = default;
-        ж<metricsꓸFloat64Histogram> schedPausesTotalGC = default;
+        ж<metrics.Float64Histogram> allocsBySize = default;
+        ж<metrics.Float64Histogram> gcPauses = default;
+        ж<metrics.Float64Histogram> schedPausesTotalGC = default;
         uint64 tinyAllocs = default;
         uint64 mallocs = default;
         uint64 frees = default;
         foreach (var i in range(len(samples))) {
             @string name = samples[i].Name;
-            var exprᴛ1 = name;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "/cgo/go-to-c-calls:calls"u8: {
+            case {} when name == "/cgo/go-to-c-calls:calls"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), (uint64)Δruntime.NumCgoCall());
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/heap/free:bytes"u8: {
+            case {} when name == "/memory/classes/heap/free:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapIdle - mstats.HeapReleased);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/heap/released:bytes"u8: {
+            case {} when name == "/memory/classes/heap/released:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapReleased);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/heap/objects:bytes"u8: {
+            case {} when name == "/memory/classes/heap/objects:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapAlloc);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/heap/unused:bytes"u8: {
+            case {} when name == "/memory/classes/heap/unused:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapInuse - mstats.HeapAlloc);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/heap/stacks:bytes"u8: {
+            case {} when name == "/memory/classes/heap/stacks:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.StackInuse);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/metadata/mcache/free:bytes"u8: {
+            case {} when name == "/memory/classes/metadata/mcache/free:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.MCacheSys - mstats.MCacheInuse);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/metadata/mcache/inuse:bytes"u8: {
+            case {} when name == "/memory/classes/metadata/mcache/inuse:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.MCacheInuse);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/metadata/mspan/free:bytes"u8: {
+            case {} when name == "/memory/classes/metadata/mspan/free:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.MSpanSys - mstats.MSpanInuse);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/metadata/mspan/inuse:bytes"u8: {
+            case {} when name == "/memory/classes/metadata/mspan/inuse:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.MSpanInuse);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/metadata/other:bytes"u8: {
+            case {} when name == "/memory/classes/metadata/other:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.GCSys);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/os-stacks:bytes"u8: {
+            case {} when name == "/memory/classes/os-stacks:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.StackSys - mstats.StackInuse);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/other:bytes"u8: {
+            case {} when name == "/memory/classes/other:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.OtherSys);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/profiling/buckets:bytes"u8: {
+            case {} when name == "/memory/classes/profiling/buckets:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.BuckHashSys);
                 break;
             }
-            case {} when exprᴛ1 == "/memory/classes/total:bytes"u8: {
+            case {} when name == "/memory/classes/total:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.Sys);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/allocs-by-size:bytes"u8: {
+            case {} when name == "/gc/heap/allocs-by-size:bytes"u8: {
                 var hist = samples[i].Value.Float64Histogram();
                 // Skip size class 0 in BySize, because it's always empty and not represented
                 // in the histogram.
@@ -170,11 +170,11 @@ public static void TestReadMetrics(ж<testing.T> t) {
                 allocsBySize = hist;
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/allocs:bytes"u8: {
+            case {} when name == "/gc/heap/allocs:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.TotalAlloc);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/frees-by-size:bytes"u8: {
+            case {} when name == "/gc/heap/frees-by-size:bytes"u8: {
                 var hist = samples[i].Value.Float64Histogram();
                 // Skip size class 0 in BySize, because it's always empty and not represented
                 // in the histogram.
@@ -190,11 +190,11 @@ public static void TestReadMetrics(ж<testing.T> t) {
                 }
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/frees:bytes"u8: {
+            case {} when name == "/gc/heap/frees:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.TotalAlloc - mstats.HeapAlloc);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/tiny/allocs:objects"u8: {
+            case {} when name == "/gc/heap/tiny/allocs:objects"u8: {
                 // Currently, MemStats adds tiny alloc count to both Mallocs AND Frees.
                 // The reason for this is because MemStats couldn't be extended at the time
                 // but there was a desire to have Mallocs at least be a little more representative,
@@ -210,15 +210,15 @@ public static void TestReadMetrics(ж<testing.T> t) {
                 // allocations included in Mallocs and Frees.
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/allocs:objects"u8: {
+            case {} when name == "/gc/heap/allocs:objects"u8: {
                 mallocs = samples[i].Value.Uint64();
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/frees:objects"u8: {
+            case {} when name == "/gc/heap/frees:objects"u8: {
                 frees = samples[i].Value.Uint64();
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/live:bytes"u8: {
+            case {} when name == "/gc/heap/live:bytes"u8: {
                 // Check for "obviously wrong" values. We can't check a stronger invariant,
                 // such as live <= HeapAlloc, because live is not 100% accurate. It's computed
                 // under racy conditions, and some objects may be double-counted (this is
@@ -235,39 +235,39 @@ public static void TestReadMetrics(ж<testing.T> t) {
                 }
                 break;
             }
-            case {} when exprᴛ1 == "/gc/gomemlimit:bytes"u8: {
+            case {} when name == "/gc/gomemlimit:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), (uint64)limit);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/objects:objects"u8: {
+            case {} when name == "/gc/heap/objects:objects"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.HeapObjects);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/heap/goal:bytes"u8: {
+            case {} when name == "/gc/heap/goal:bytes"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), mstats.NextGC);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/gogc:percent"u8: {
+            case {} when name == "/gc/gogc:percent"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), (uint64)gcPercent);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/cycles/automatic:gc-cycles"u8: {
+            case {} when name == "/gc/cycles/automatic:gc-cycles"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), (uint64)(mstats.NumGC - mstats.NumForcedGC));
                 break;
             }
-            case {} when exprᴛ1 == "/gc/cycles/forced:gc-cycles"u8: {
+            case {} when name == "/gc/cycles/forced:gc-cycles"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), (uint64)mstats.NumForcedGC);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/cycles/total:gc-cycles"u8: {
+            case {} when name == "/gc/cycles/total:gc-cycles"u8: {
                 checkUint64(t, name, samples[i].Value.Uint64(), (uint64)mstats.NumGC);
                 break;
             }
-            case {} when exprᴛ1 == "/gc/pauses:seconds"u8: {
+            case {} when name == "/gc/pauses:seconds"u8: {
                 gcPauses = samples[i].Value.Float64Histogram();
                 break;
             }
-            case {} when exprᴛ1 == "/sched/pauses/total/gc:seconds"u8: {
+            case {} when name == "/sched/pauses/total/gc:seconds"u8: {
                 schedPausesTotalGC = samples[i].Value.Float64Histogram();
                 break;
             }}
@@ -308,7 +308,7 @@ internal partial struct TestReadMetricsConsistency_totalVirtual /*dyn*/ {
 }
 
 internal partial struct TestReadMetricsConsistency_objects /*dyn*/ {
-    internal ж<metricsꓸFloat64Histogram> alloc, free;
+    internal ж<metrics.Float64Histogram> alloc, free;
     internal uint64 allocs, frees;
     internal uint64 allocdBytes, freedBytes;
     internal uint64 total, totalBytes;
@@ -684,9 +684,9 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> t) {
                 }
                 for (nint i = 0; i < len(readMetricsSink); i++) {
                     readMetricsSink[i] = new slice<byte>(1024);
-                    var selᴛ73 = doneʗ1;
-                    switch (trySelect(ᐸꟷ(selᴛ73, ꓸꓸꓸ))) {
-                    case 0 when selᴛ73.ꟷᐳ(out _): {
+                    var doneᴛ1 = doneʗ1;
+                    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+                    case 0 when doneᴛ1.ꟷᐳ(out _): {
                         return;
                     }
                     default: {
@@ -798,6 +798,8 @@ partial struct mutex {
     internal Δsync.Mutex mu;
 }
 
+} partial class runtime_testᴛmutex {
+
 internal static void Lock1(this ж<mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -822,32 +824,46 @@ internal static void Unlock2(this ж<mutex> Ꮡm) {
     m.mu.Unlock();
 }
 
+} partial class runtime_test_package {
+
 partial struct rwmutexWrite {
     internal Δsync.RWMutex mu;
 }
+
+} partial class runtime_testᴛrwmutexWrite {
 
 internal static void Lock1(this ж<rwmutexWrite> Ꮡm) { Ꮡm.Ꮡmu.Lock(); }
 internal static void Unlock1(this ж<rwmutexWrite> Ꮡm) { Ꮡm.Ꮡmu.Unlock(); }
 internal static void Lock2(this ж<rwmutexWrite> Ꮡm) { Ꮡm.Ꮡmu.Lock(); }
 internal static void Unlock2(this ж<rwmutexWrite> Ꮡm) { Ꮡm.Ꮡmu.Unlock(); }
 
+} partial class runtime_test_package {
+
 partial struct rwmutexReadWrite {
     internal Δsync.RWMutex mu;
 }
+
+} partial class runtime_testᴛrwmutexReadWrite {
 
 internal static void Lock1(this ж<rwmutexReadWrite> Ꮡm) { Ꮡm.Ꮡmu.RLock(); }
 internal static void Unlock1(this ж<rwmutexReadWrite> Ꮡm) { Ꮡm.Ꮡmu.RUnlock(); }
 internal static void Lock2(this ж<rwmutexReadWrite> Ꮡm) { Ꮡm.Ꮡmu.Lock(); }
 internal static void Unlock2(this ж<rwmutexReadWrite> Ꮡm) { Ꮡm.Ꮡmu.Unlock(); }
 
+} partial class runtime_test_package {
+
 partial struct rwmutexWriteRead {
     internal Δsync.RWMutex mu;
 }
+
+} partial class runtime_testᴛrwmutexWriteRead {
 
 internal static void Lock1(this ж<rwmutexWriteRead> Ꮡm) { Ꮡm.Ꮡmu.Lock(); }
 internal static void Unlock1(this ж<rwmutexWriteRead> Ꮡm) { Ꮡm.Ꮡmu.Unlock(); }
 internal static void Lock2(this ж<rwmutexWriteRead> Ꮡm) { Ꮡm.Ꮡmu.RLock(); }
 internal static void Unlock2(this ж<rwmutexWriteRead> Ꮡm) { Ꮡm.Ꮡmu.RUnlock(); }
+
+} partial class runtime_test_package {
 
 // generateMutexWaitTime causes a couple of goroutines
 // to block a whole bunch of times on a sync.Mutex, returning
@@ -1292,7 +1308,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
             }
 
             metricGrowth = afterMetrics[0].Value.Float64() - beforeMetrics[0].Value.Float64();
-            profileGrowth = (float64)(sumSamples(afterProfile, 1) - sumSamples(beforeProfile, 1)) * time.ΔNanosecond.Seconds();
+            profileGrowth = (float64)(sumSamples(afterProfile, 1) - sumSamples(beforeProfile, 1)) * time.Nanosecond.Seconds();
 
             // The internal/profile package does not support compaction; this delta
             // profile will include separate positive and negative entries.
@@ -1506,7 +1522,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                     var muʗ1 = mu;
                     marker(() => {
                         var t0 = runtime_internal_test_package.Cputicks();
-                        runtime_internal_test_package.ΔLock(muʗ1);
+                        runtime_internal_test_package.Lock(muʗ1);
                         maxTicksʗ2[role][n] = runtime_internal_test_package.Cputicks() - t0;
                         minTicksʗ2[role][n] = 0;
                         while ((nint)ᏑneedContention.Load() == n) {
@@ -1520,7 +1536,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
                                 break;
                             }
                         }
-                        runtime_internal_test_package.ΔUnlock(muʗ1);
+                        runtime_internal_test_package.Unlock(muʗ1);
                         ᏑneedContention.Store((int64)(n - 1));
                     });
 
@@ -1636,7 +1652,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
 
                         float64 totalProfileGrowth = default;
                         foreach (var (_, growth) in range(profileGrowth)) {
-                            totalProfileGrowth += (float64)growth * time.ΔNanosecond.Seconds();
+                            totalProfileGrowth += (float64)growth * time.Nanosecond.Seconds();
                         }
 
                         const float64 slop = 1.5; // account for nanotime vs cputicks
@@ -1695,7 +1711,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> t) {
 
                         float64 totalProfileGrowth = default;
                         foreach (var (_, growth) in range(profileGrowth)) {
-                            totalProfileGrowth += (float64)growth * time.ΔNanosecond.Seconds();
+                            totalProfileGrowth += (float64)growth * time.Nanosecond.Seconds();
                         }
 
                         const float64 timerSlop = /* 1.5 * samplingSlop */ 3.75; // account for nanotime vs cputicks, plus the two views' independent sampling
@@ -1790,6 +1806,8 @@ partial struct contentionWorker {
     internal Action after;
 }
 
+} partial class runtime_testᴛcontentionWorker {
+
 internal static void run(this ж<contentionWorker> Ꮡw) {
     GoFrame ᒐ = default;
     try {
@@ -1804,6 +1822,8 @@ internal static void run(this ж<contentionWorker> Ꮡw) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object totalTimeIsZeroˢ = (@string)"total time is zero"u8;
@@ -1863,9 +1883,9 @@ public static partial void TestMetricHeapUnusedLargeObjectOverflow(ж<testing.T>
                     abi.Escape(new slice<byte>((1 << 20)));
                 }
                 Δruntime.GC();
-                var selᴛ74 = doneʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ74, ꓸꓸꓸ))) {
-                case 0 when selᴛ74.ꟷᐳ(out _): {
+                var doneᴛ1 = doneʗ1;
+                switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+                case 0 when doneᴛ1.ꟷᐳ(out _): {
                     return;
                 }
                 default: {
@@ -1897,8 +1917,8 @@ internal static ref readonly @string gcCleanupsExecutedˢ => ref gcCleanupsExecu
 private static readonly @string gcCleanupsExecutedˢᵇ = "/gc/cleanups/executed:cleanups"u8;
 
 public static void TestReadMetricsCleanups(ж<testing.T> t) {
-    Δruntime.GC();                                                                        // End any in-progress GC.
-    runtime_internal_test_package.BlockUntilEmptyCleanupQueue((int64)(1 * time.ΔSecond)); // Flush any queued cleanups.
+    Δruntime.GC();                                                                       // End any in-progress GC.
+    runtime_internal_test_package.BlockUntilEmptyCleanupQueue((int64)(1 * time.Second)); // Flush any queued cleanups.
 
     array<metrics.Sample> before = new(2);
     before[0].Name = gcCleanupsQueuedCleanupsˢ;
@@ -1914,7 +1934,7 @@ public static void TestReadMetricsCleanups(ж<testing.T> t) {
     }
 
     Δruntime.GC();
-    runtime_internal_test_package.BlockUntilEmptyCleanupQueue((int64)(1 * time.ΔSecond));
+    runtime_internal_test_package.BlockUntilEmptyCleanupQueue((int64)(1 * time.Second));
 
     metrics.Read(after[..]);
 
@@ -1937,8 +1957,8 @@ internal static ref readonly @string gcFinalizersExecutedˢ => ref gcFinalizersE
 private static readonly @string gcFinalizersExecutedˢᵇ = "/gc/finalizers/executed:finalizers"u8;
 
 public static void TestReadMetricsFinalizers(ж<testing.T> t) {
-    Δruntime.GC();                                                                          // End any in-progress GC.
-    runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(1 * time.ΔSecond)); // Flush any queued finalizers.
+    Δruntime.GC();                                                                         // End any in-progress GC.
+    runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(1 * time.Second)); // Flush any queued finalizers.
 
     array<metrics.Sample> before = new(2);
     before[0].Name = gcFinalizersQueuedˢ;
@@ -1955,7 +1975,7 @@ public static void TestReadMetricsFinalizers(ж<testing.T> t) {
 
     Δruntime.GC();
     Δruntime.GC();
-    runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(1 * time.ΔSecond));
+    runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(1 * time.Second));
 
     metrics.Read(after[..]);
 

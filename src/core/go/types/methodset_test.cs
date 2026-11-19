@@ -210,7 +210,7 @@ public static void TestIssue60634(ж<testing.T> t) {
     // look up T.m and (*T).m
     var T = pkg.Scope().Lookup("T").Type();
     @string name = "m";
-    foreach (var (_, recv) in range(slice<typesꓸType>([T, new types.PointerжΔType(NewPointer(T))]))) {
+    foreach (var (_, recv) in range(slice<types.Type>([T, new types.PointerжType(NewPointer(T))]))) {
         // LookupFieldOrMethod and NewMethodSet must match:
         // either both find m or neither finds it.
         var (obj1, _, _) = LookupFieldOrMethod(recv, false, pkg, name);

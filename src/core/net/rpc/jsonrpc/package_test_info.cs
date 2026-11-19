@@ -7,8 +7,6 @@
 global using static global::go.net.rpc.jsonrpc_package;
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using rpcꓸCall = go.net.rpc_package.ΔCall;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,7 +26,7 @@ using static global::go.net.rpc.jsonrpc_internal_test_package;
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Writer>]
 [assembly: GoImplement<pipe, io_package.ReadWriteCloser>(Pointer = true)]
-[assembly: GoImplement<pipeAddr, net_package.ΔAddr>]
+[assembly: GoImplement<pipeAddr, net_package.Addr>]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
@@ -46,7 +44,7 @@ using static global::go.net.rpc.jsonrpc_internal_test_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Args))]
 [assembly: GoFieldAccess(typeof(Reply))]
-[assembly: GoFieldAccess(typeof(go.net.rpc_package.ΔCall))]
+[assembly: GoFieldAccess(typeof(go.net.rpc_package.Call))]
 [assembly: GoFieldAccess(typeof(pipe))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -57,7 +55,7 @@ using static global::go.net.rpc.jsonrpc_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/rpc/jsonrpc/all_test.go", "all_test.cs", "ACRGsoKmsoLmsoKUgqaC2qKCpqKCpqKCpoKCpqKCkoKUgoKClIK0pKKCkoKUgoKClIK0pKKCkoKmgoKCgoKUgpSClILGAAwExoKUgraCgoKClIKmgoKCgpSCuIKCgoKUgoKUgqaCgpSCuIKClIKCgrQACgSigpSCtoKCgoKUgriCgoKUgILIgoKClICCxKSCgpLWooKSlIKkgoKCgrQAFASCggAEEoKClIKCyoKUgpSC+IKCkqiSgpQADRSCpoKmgoKCgpSmgqaC5oKmgqaC", "", "", "368=NewReader/1/1/5,NopCloser/1/1/7", "106:21,128:21,150:21,197:21,274:21,318:15,330:19,331:19,335:21,402:21")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/all_test.go", "all_test.cs", "ACdGsoKmsoLmsoKUgqaCAAkKooKmooKmooLGgoKmooKSgpSCgoKUgrSkooKSgpSCgoKUgrSkooKSgqaCgoKCgpSClIKUgsYADATGgpSCtoKCgoKUgqaCgoKClIK4goKCgpSCgpSCpoKClIK4goKUgoKCtAAKBKKClIK2goKCgpSCuIKCgpSAgsiCgoKUgILEpIKCktaigpKUgqSCgoKCtAAUBIKCAAQSgoKUgoLKgpSClIL4goKSqJKClAAPFIKmgsaCgoKClKaCpoLmgqaCpoI=", "", "", "377=NewReader/1/1/5,NopCloser/1/1/7", "115:21,137:21,159:21,206:21,283:21,327:15,339:19,340:19,344:21,411:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.rpc;
@@ -99,3 +97,16 @@ public static partial class jsonrpc_internal_test_package
         builtin.initPackage(typeof(global::go.net.rpc.jsonrpc_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(jsonrpc_internal_test_package.Arith)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpc_internal_testᴛArith;
+[GoMethodHost(typeof(jsonrpc_internal_test_package.BuiltinTypes)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpc_internal_testᴛBuiltinTypes;
+[GoMethodHost(typeof(jsonrpc_internal_test_package.pipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpc_internal_testᴛpipe;
+[GoMethodHost(typeof(jsonrpc_internal_test_package.pipeAddr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpc_internal_testᴛpipeAddr;
+// </MethodHolders>

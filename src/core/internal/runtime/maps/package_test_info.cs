@@ -8,8 +8,6 @@ global using static global::go.@internal.runtime.maps_package;
 global using static global::go.@internal.runtime.maps_internal_test_package;
 
 // <ImportedTypeAliases>
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using mapsꓸMap = go.@internal.runtime.maps_package.ΔMap;
 // </ImportedTypeAliases>
 
 using go;
@@ -17,7 +15,6 @@ using static global::go.@internal.runtime.maps_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("CtrlGroup", "global::go.@internal.runtime.maps_package.ctrlGroup")]
-[assembly: GoTypeAlias("Map", "ΔMap")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -38,7 +35,7 @@ using static global::go.@internal.runtime.maps_test_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(fuzzCommand))]
 [assembly: GoFieldAccess(typeof(global::go.@internal.runtime.maps_package.table))]
-[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔMapType))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.MapType))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -49,7 +46,7 @@ using static global::go.@internal.runtime.maps_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/runtime/maps/fuzz_test.go", "fuzz_test.cs", "ACNEAAcUgoKClKamgoKUgoKCpqaCAAsYgoKCuIKCgri0ABAiADt4goKCpoKCspSClIKUgpSCgsaCtILY", "174-210:1")]
-[assembly: GoPositionMap("internal/runtime/maps/map_test.go", "map_test.cs", "ABIggoKCuIKUgpSCgoKUgriCpoKUgoKCgoKUgoLMkpSClIKCgpSCuIKmgpSCgoKCgpSCgsqClIKUgoKClIK4gpSCgqaCpoKUgoKCgoLKgpSClIKCgpSCuJSCpoKUgoKCgoL+opSCgpSCgqaCgoKmgqaCgoKSgqaCgoKUgroAChSUgpSCgpQACBKClIKC3LiClJSClKamgriClIKUgoKClIK4lIKCgoKSgqaCgqaCpoKUgoKCgoKClILMkpSClIKCgpSCuIKCgoKCgoKSgqaCgpSCuIKUuIKmgpSCgpSCgqaCgoKUgsySlIKUgoKClIK4goKCgoKCgpKCpoKClIK4griClIKCgpSCygAHEIKUgoKUgoKmgoKClILKgpSClIKCgpSCuIKCgoKCkoKmgoKClIKUpoKClIKCgpSCAA8WpIC2gAAJBoIAGj6CgoKUgsySlIKUlIKmgoKUgoKmgoKCgoLogpiCgpSCgoKUgriCpoKClIKCgoKClIKCzJKUgpSUgqaCgpSCgqaUgoLugoKUACEQqAAAFgBavAGSlIKCpoKCpoKmgoKmgoK4orKiooLKorKiooLKorKiooLKorKiooIACQ6CgoKCgoKktLSkgpSCgtyCgoKClIKCggAIEoKClII=", "552-552:1;555-555:2;827-853:1;855-864:2;857-862:2.1;858-861:2.1.1;865-874:3;867-872:3.1;868-871:3.1.1;875-884:4;877-882:4.1;878-881:4.1.1;885-894:5;887-892:5.1;888-891:5.1.1;911-947:1;912-934:1.1")]
+[assembly: GoPositionMap("internal/runtime/maps/map_test.go", "map_test.cs", "ABIggoKCuIKUgpSCgoKUgriCpoKUgoKCgoKUgoLMkpSClIKCgpSCuIKmgpSCgoKCgpSCgsqClIKUgoKClIK4gpSCgqaCpoKUgoKCgoLKgpSClIKCgpSCuJSCpoKUgoKCgoL+opSCgpSCgqaCgoKmgqaCgoKSgqaCgoKUgroAChSUgpSCgpQACBKClIKC3LiClJSClKamgriClIKUgoKClIK4lIKCgoKSgqaCgqaCpoKUgoKCgoKClILMkpSClIKCgpSCuIKCgoKCgoKSgqaCgpSCuIKUuIKmgpSCgpSCgqaCgoKUgsySlIKUgoKClIK4goKCgoKCgpKCpoKClIK4griClIKCgpSCygAHEIKUgoKUgoKmgoKClILKgpSClIKCgpSCuIKCgoKCkoKmgoKClIKUpoKClIKCgpSCAA8WpIC2gAAJBoIAGj6CgoKUgsySlIKUlIKmgoKUgoKmgoKCgoLogpiCgpSCgoKUgriCpoKClIKCgoKClIKCzJKUgpSUgqaCgpSCgqaUgoLugoKUACEQqAAAFgBavAGSlIKCpoKCpoKmgoKmgoK4orKiooLKorKiooLKorKiooLKorKiooIACQ6CgoKCgoKUtLSkgpSCgtyCgoKClIKCggAIEoKClII=", "552-552:1;555-555:2;827-853:1;855-864:2;857-862:2.1;858-861:2.1.1;865-874:3;867-872:3.1;868-871:3.1.1;875-884:4;877-882:4.1;878-881:4.1.1;885-894:5;887-892:5.1;888-891:5.1.1;911-947:1;912-934:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

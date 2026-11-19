@@ -557,7 +557,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
     }
 
     // Dynamically generate many new types.
-    var types = new slice<reflectꓸType>(maxTypes);
+    var types = new slice<reflect.Type>(maxTypes);
     var fs = slice<reflect.StructField>([new(
         Type: reflect.TypeFor<@string>(),
         Index: [0]

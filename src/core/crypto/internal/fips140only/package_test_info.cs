@@ -7,12 +7,7 @@
 global using static global::go.crypto.@internal.fips140only_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 global using cryptoꓸDecrypterOpts = object;
-global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
-global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
-global using hpkeꓸKEM = go.crypto.hpke_package.ΔKEM;
-global using hpkeꓸPublicKey = go.crypto.hpke_package.ΔPublicKey;
 // </ImportedTypeAliases>
 
 using go;

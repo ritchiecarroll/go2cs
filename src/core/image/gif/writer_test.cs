@@ -18,6 +18,7 @@ using go.image;
 using go.image.color;
 using math;
 using static go.image.gif_package;
+using static gif_internal_test_package;
 
 partial class gif_internal_test_package {
 
@@ -407,15 +408,15 @@ public static void TestEncodeNonZeroMinPoint(ж<testing.T> t) {
             Min: p,
             Max: p.Add(new image.Point(6, 6))
         ));
-        src.SetRGBA(2, 2, new colorꓸRGBA(0x22, 0x22, 0x22, 0xFF));
-        src.SetRGBA(3, 3, new colorꓸRGBA(0x33, 0x33, 0x33, 0xFF));
-        src.SetRGBA(4, 4, new colorꓸRGBA(0x44, 0x44, 0x44, 0xFF));
-        src.SetRGBA(5, 5, new colorꓸRGBA(0x55, 0x55, 0x55, 0xFF));
-        src.SetRGBA(6, 6, new colorꓸRGBA(0x66, 0x66, 0x66, 0xFF));
-        src.SetRGBA(7, 7, new colorꓸRGBA(0x77, 0x77, 0x77, 0xFF));
+        src.SetRGBA(2, 2, new Δcolor.RGBA(0x22, 0x22, 0x22, 0xFF));
+        src.SetRGBA(3, 3, new Δcolor.RGBA(0x33, 0x33, 0x33, 0xFF));
+        src.SetRGBA(4, 4, new Δcolor.RGBA(0x44, 0x44, 0x44, 0xFF));
+        src.SetRGBA(5, 5, new Δcolor.RGBA(0x55, 0x55, 0x55, 0xFF));
+        src.SetRGBA(6, 6, new Δcolor.RGBA(0x66, 0x66, 0x66, 0xFF));
+        src.SetRGBA(7, 7, new Δcolor.RGBA(0x77, 0x77, 0x77, 0xFF));
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-        var errΔ1 = Encode(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.ΔRGBAжImage(src), nil); if (errΔ1 != nil) {
+        var errΔ1 = Encode(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.RGBAжImage(src), nil); if (errΔ1 != nil) {
             t.Errorf("gray-diagonal: Encode: %v", errΔ1);
             return;
         }
@@ -488,20 +489,20 @@ public static void TestEncodePalettes(ж<testing.T> t) {
     const nint w = 5;
     const nint h = 5;
     var pals = slice<Δcolor.Palette>([slice<Δcolor.Color>([
-        new colorꓸRGBA(0x00, 0x00, 0x00, 0xff),
-        new colorꓸRGBA(0x01, 0x00, 0x00, 0xff),
-        new colorꓸRGBA(0x02, 0x00, 0x00, 0xff)]), slice<Δcolor.Color>([
-        new colorꓸRGBA(0x00, 0x00, 0x00, 0xff),
-        new colorꓸRGBA(0x00, 0x01, 0x00, 0xff)]), slice<Δcolor.Color>([
-        new colorꓸRGBA(0x00, 0x00, 0x03, 0xff),
-        new colorꓸRGBA(0x00, 0x00, 0x02, 0xff),
-        new colorꓸRGBA(0x00, 0x00, 0x01, 0xff),
-        new colorꓸRGBA(0x00, 0x00, 0x00, 0xff)]), slice<Δcolor.Color>([
-        new colorꓸRGBA(0x10, 0x07, 0xf0, 0xff),
-        new colorꓸRGBA(0x20, 0x07, 0xf0, 0xff),
-        new colorꓸRGBA(0x30, 0x07, 0xf0, 0xff),
-        new colorꓸRGBA(0x40, 0x07, 0xf0, 0xff),
-        new colorꓸRGBA(0x50, 0x07, 0xf0, 0xff)])
+        new Δcolor.RGBA(0x00, 0x00, 0x00, 0xff),
+        new Δcolor.RGBA(0x01, 0x00, 0x00, 0xff),
+        new Δcolor.RGBA(0x02, 0x00, 0x00, 0xff)]), slice<Δcolor.Color>([
+        new Δcolor.RGBA(0x00, 0x00, 0x00, 0xff),
+        new Δcolor.RGBA(0x00, 0x01, 0x00, 0xff)]), slice<Δcolor.Color>([
+        new Δcolor.RGBA(0x00, 0x00, 0x03, 0xff),
+        new Δcolor.RGBA(0x00, 0x00, 0x02, 0xff),
+        new Δcolor.RGBA(0x00, 0x00, 0x01, 0xff),
+        new Δcolor.RGBA(0x00, 0x00, 0x00, 0xff)]), slice<Δcolor.Color>([
+        new Δcolor.RGBA(0x10, 0x07, 0xf0, 0xff),
+        new Δcolor.RGBA(0x20, 0x07, 0xf0, 0xff),
+        new Δcolor.RGBA(0x30, 0x07, 0xf0, 0xff),
+        new Δcolor.RGBA(0x40, 0x07, 0xf0, 0xff),
+        new Δcolor.RGBA(0x50, 0x07, 0xf0, 0xff)])
     ]);
     var g0 = Ꮡ(new GIF(
         Image: slice<ж<image.Paletted>>([
@@ -578,14 +579,14 @@ internal static readonly object colorTablesMatchFalseˢ = (@string)"colorTablesM
 public static void TestColorTablesMatch(ж<testing.T> t) {
     const nint trIdx = 100;
     var global = (Δcolor.Palette)palette.Plan9;
-    var rgb = global[trIdx]._<colorꓸRGBA>(); if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) {
+    var rgb = global[trIdx]._<Δcolor.RGBA>(); if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) {
         t.Fatalf("trIdx (%d) is already black", (nint)(trIdx));
     }
 
     // Make a copy of the palette, substituting trIdx's slot with transparent,
     // just like decoder.decode.
     var local = appendꓸꓸꓸ((Δcolor.Palette)default, global);
-    local[trIdx] = new colorꓸRGBA();
+    local[trIdx] = new Δcolor.RGBA();
 
     const nint testLen = /* 3 * 256 */ 768;
     const nint padded = 7;
@@ -645,9 +646,13 @@ internal partial struct offsetImage {
     public image.Rectangle Rect;
 }
 
+} partial class gif_internal_testᴛoffsetImage {
+
 internal static image.Rectangle Bounds(this offsetImage i) {
     return i.Rect;
 }
+
+} partial class gif_internal_test_package {
 
 public static void TestEncodeWrappedImage(ж<testing.T> t) {
     var (m0, err) = readImg(testdataVideo001Gifˢ);
@@ -734,7 +739,7 @@ public static void BenchmarkEncodeRandomRGBA(ж<testing.B> Ꮡb) {
     var rnd = rand.New(rand.NewSource(123));
     for (nint y = bo.Min.Y; y < bo.Max.Y; y++) {
         for (nint x = bo.Min.X; x < bo.Max.X; x++) {
-            rgba.SetRGBA(x, y, new colorꓸRGBA(
+            rgba.SetRGBA(x, y, new Δcolor.RGBA(
                 (uint8)rnd.Intn(256),
                 (uint8)rnd.Intn(256),
                 (uint8)rnd.Intn(256),
@@ -747,7 +752,7 @@ public static void BenchmarkEncodeRandomRGBA(ж<testing.B> Ꮡb) {
     b.ReportAllocs();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        Encode(io.Discard, new image.ΔRGBAжImage(rgba), nil);
+        Encode(io.Discard, new image.RGBAжImage(rgba), nil);
     }
 }
 
@@ -787,13 +792,13 @@ public static void BenchmarkEncodeRealisticRGBA(ж<testing.B> Ꮡb) {
     // changing the source image), the conversion ensures that we're still
     // benchmarking encoding an RGBA image.
     var rgba = image.NewRGBA(bo);
-    draw.Draw(new gif_internal_test_package.image_ΔRGBAжImage(rgba), bo, img, bo.Min, draw.Src);
+    draw.Draw(new gif_internal_test_package.image_RGBAжImage(rgba), bo, img, bo.Min, draw.Src);
 
     b.SetBytes((int64)(bo.Dx() * bo.Dy() * 4));
     b.ReportAllocs();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
-        Encode(io.Discard, new image.ΔRGBAжImage(rgba), nil);
+        Encode(io.Discard, new image.RGBAжImage(rgba), nil);
     }
 }
 

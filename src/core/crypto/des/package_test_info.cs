@@ -14,7 +14,6 @@ using go;
 using static global::go.crypto.des_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("BlockSize", "const:ΔBlockSize")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

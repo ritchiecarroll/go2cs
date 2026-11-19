@@ -141,14 +141,14 @@ public static void TestMakeClonesStrings(ж<testing.T> t) {
     // Clean up s (hopefully) and run the cleanup.
     Δruntime.GC();
 
-    var selᴛ1 = time.After(1 * time.ΔSecond);
-    var selᴛ2 = ran;
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    var selᴛ1 = time.After(1 * time.Second);
+    var ranᴛ1 = ran;
+    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(ranᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out _): {
         t.Fatal(stringWasImproperlyˢ);
         break;
     }
-    case 1 when selᴛ2.ꟷᐳ(out _): {
+    case 1 when ranᴛ1.ꟷᐳ(out _): {
         break;
     }}
     Δruntime.KeepAlive(h);

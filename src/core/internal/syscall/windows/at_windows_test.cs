@@ -171,7 +171,7 @@ internal static void makeFileNotReadable(ж<testing.T> t, @string name) {
             t.Fatal(errΔ1);
         }
 
-        defer(syscall.LocalFree, (syscallꓸHandle)(uintptr)newAcl, ref ᒐ);
+        defer(syscall.LocalFree, (syscall.Handle)(uintptr)newAcl, ref ᒐ);
         var errΔ2 = Δwindows.SetNamedSecurityInfo(
             name,
             Δwindows.SE_FILE_OBJECT,

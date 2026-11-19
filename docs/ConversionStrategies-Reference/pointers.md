@@ -1480,11 +1480,11 @@ which converts to
 ```csharp
 internal static ж<bool> boolFieldAddr(ж<types.Config> conf, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(conf.OrTypedNil()));
-    return (ж<bool>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
+    return @unsafe.Pointer.To<bool>(v.FieldByName(name).Addr().UnsafePointer());
 }
 ```
 
-`ж<T>`'s `explicit operator ж<T>(uintptr)` builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. Without the table below it kills `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site. <!-- with 542 verdicts behind it, when measured -->
+The conversion back, `@unsafe.Pointer.To<T>`, is the number conversion: it and `ж<T>`'s `explicit operator ж<T>(uintptr)` share one body, `ж<T>.FromNumber`. <!-- src/core/unsafe/unsafe.cs:652 `return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);` (To<T>(Pointer? p)); src/core/golib/ж.cs:1136 `return FromNumber(value, carried: null);` (the uintptr operator). The sample spelled the cast (ж<bool>)(uintptr)(…) until the interior-pointer cut (837a413fdc); the .4 -tests regen moved the cited test file to the new spelling. --> That body builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. Without the table below it kills `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site. <!-- with 542 verdicts behind it, when measured -->
 
 The information needed to do better is never actually lost. `reflect.Value.Addr` surfaces the **real aliasing box** — an addressable Value already carries `addrBox`, minted by `GoReflect.FieldAliasBox` — and only the projection to a scalar discards it. So golib's `ManagedPointerTokens` (`golib/ж.PointerTokens.cs`) remembers the association the projection drops: the token that was handed out, and the box it named. `reflectPointerToken` registers on the way out, and the `uintptr → ж<T>` operator consults the table **first**, so a token that came from there recovers its own box and aliases the original storage exactly as Go's pointer would. Everything else keeps the native-address route.
 
@@ -1638,7 +1638,7 @@ change, and the decoder would return 0 for 23. So all three arms route through g
 reinterpret — `reinterpretManagedEmission`, the same emission this file produces for the identical
 conversion in a deref or raw-address context:
 
-<!-- source: src/core/encoding/gob/gobencdec_test.cs:118-121 -->
+<!-- source: src/core/encoding/gob/gobencdec_test.cs:131-134 -->
 ```csharp
 public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
     var (_, err) = fmt.Sscanf((@string)data, "VALUE=%d"u8, Ꮡg.Reinterpret<Gobber, nint>().OrTypedNil());
@@ -2568,7 +2568,7 @@ buf = (*windows.MountPointReparseBuffer)(unsafe.Pointer(&byteblob[0]))
 buf.SubstituteNameOffset = target.substituteName.offset   // … and three more
 ```
 
-<!-- source: src/core/os/os_windows_test.cs:263-265 -->
+<!-- source: src/core/os/os_windows_test.cs:268-270 -->
 ```csharp
 var byteblob = new slice<byte>(buflen);
 buf = Ꮡ(byteblob, 0).Reinterpret<byte, windows.MountPointReparseBuffer>();
@@ -3642,7 +3642,7 @@ internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡsa.Ꮡraw.Ꮡport, 2);
     p.ElementRef(0) = (byte)(sa.port >> 8);
     p.ElementRef(1) = (byte)sa.port;
-    sa.raw.addr = sa.addr.Clone();
+    sa.raw.addr.Assign(sa.addr);
 }
 ```
 

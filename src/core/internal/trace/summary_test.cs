@@ -115,7 +115,7 @@ internal partial struct TestSummarizeTasksTrace_task /*dyn*/ {
     internal @string name;
     internal ж<Δtrace.TaskID> parent;
     internal slice<Δtrace.TaskID> children;
-    internal slice<traceꓸLog> logs;
+    internal slice<Δtrace.Log> logs;
     internal slice<Δtrace.GoID> goroutines;
 }
 
@@ -317,7 +317,7 @@ internal static ж<Δtrace.Summary> summarizeTraceTest(ж<testing.T> t, @string 
     }
     // Process the trace.
     for (;;) {
-        ref var ev = ref heap<traceꓸEvent>(out var Ꮡev);
+        ref var ev = ref heap<Δtrace.Event>(out var Ꮡev);
         (ev, var errΔ1) = r.ReadEvent();
         if (AreEqual(errΔ1, io.EOF)) {
             break;
@@ -465,7 +465,7 @@ public static void TestRelatedGoroutinesV2Trace(ж<testing.T> t) {
     }
 
     // Collect all the events.
-    slice<traceꓸEvent> events = default;
+    slice<Δtrace.Event> events = default;
     for (;;) {
         var (ev, errΔ1) = r.ReadEvent();
         if (AreEqual(errΔ1, io.EOF)) {

@@ -19,6 +19,7 @@ using global::go.@internal;
 using global::go.path;
 using static global::go.go.build_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static build_internal_test_package;
 
 partial class build_internal_test_package {
 
@@ -374,9 +375,13 @@ internal partial struct readNopCloser {
     /*embed*/ public io_package.Reader Reader;
 }
 
+} partial class build_internal_testᴛreadNopCloser {
+
 internal static error Close(this readNopCloser r) {
     return default;
 }
+
+} partial class build_internal_test_package {
 
 internal static global::go.go.build_package.Context ctxtP9 = new Context(GOARCH: "arm", GOOS: "plan9");
 internal static global::go.go.build_package.Context ctxtAndroid = new Context(GOARCH: "arm", GOOS: "android");
@@ -508,6 +513,8 @@ public static void TestShellSafety(ж<testing.T> t) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string srcGoBuildˢ => ref srcGoBuildˢᵇ;
 private static readonly @string srcGoBuildˢᵇ = "src/go/build"u8;
+internal static ref readonly @string go111moduleˢ => ref go111moduleˢᵇ;
+private static readonly @string go111moduleˢᵇ = "GO111MODULE"u8;
 internal static ref readonly @string cannotFindPackageˢ => ref cannotFindPackageˢᵇ;
 private static readonly @string cannotFindPackageˢᵇ = "cannot find package"u8;
 internal static ref readonly @string cannotFindPackageErrorˢ => ref cannotFindPackageErrorˢᵇ;
@@ -786,6 +793,8 @@ public static void TestIssue56509(ж<testing.T> t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string goModˢ => ref goModˢᵇ;
+private static readonly @string goModˢᵇ = "go.mod"u8;
 internal static ref readonly @string gonoproxyˢ => ref gonoproxyˢᵇ;
 private static readonly @string gonoproxyˢᵇ = "GONOPROXY"u8;
 internal static ref readonly @string noneˢ => ref noneˢᵇ;

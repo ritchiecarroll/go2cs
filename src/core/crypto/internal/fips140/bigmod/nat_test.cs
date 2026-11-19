@@ -22,14 +22,17 @@ using go.testing;
 using io = io_package;
 using math;
 using static go.crypto.@internal.fips140.bigmod_package;
+using static bigmod_internal_test_package;
 
 partial class bigmod_internal_test_package {
+
+} partial class bigmod_internal_testᴛNat {
 
 // setBig assigns x = n, optionally resizing n to the appropriate size.
 //
 // The announced length of x is set based on the actual bit size of the input,
 // ignoring leading zeroes.
-internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> setBig(this ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡx, ж<bigꓸInt> Ꮡn) {
+internal static ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> setBig(this ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> Ꮡx, ж<big.Int> Ꮡn) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var n = ref Ꮡn.DerefOrNull();
 
@@ -41,15 +44,15 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> set
     return Ꮡx;
 }
 
-internal static ж<bigꓸInt> asBig(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
+internal static ж<big.Int> asBig(this ref global::go.crypto.@internal.fips140.bigmod_package.Nat n) {
     var bits = new slice<big.Word>(len(n.limbs));
     foreach (var i in range(len(n.limbs))) {
         bits[i] = (big.Word)n.limbs[i];
     }
-    return @new<bigꓸInt>().SetBits(bits);
+    return @new<big.Int>().SetBits(bits);
 }
 
-internal static @string String(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
+internal static @string String(this ref global::go.crypto.@internal.fips140.bigmod_package.Nat n) {
     var limbsᴷ = new stackAppend<@string>();
 
     slice<@string> limbs = default;
@@ -61,23 +64,25 @@ internal static @string String(this ref global::go.crypto.@internal.fips140.bigm
 
 // Generate generates an even nat. It's used by testing/quick to produce random
 // *nat values for quick.Check invocations.
-internal static reflectꓸValue Generate(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat _, ж<rand.Rand> Ꮡr, nint size) {
+internal static reflect.Value Generate(this ref global::go.crypto.@internal.fips140.bigmod_package.Nat _, ж<rand.Rand> Ꮡr, nint size) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var limbs = new slice<nuint>(size);
     for (nint i = 0; i < size; i++) {
         limbs[i] = (nuint)r.Uint64() & (nuint)(unchecked((nuint)(18446744073709551614UL)));
     }
-    return reflect.ValueOf(Ꮡ(new ΔNat(limbs)));
+    return reflect.ValueOf(Ꮡ(new Nat(limbs)));
 }
 
-internal static bool testModAddCommutative(ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡa, ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> b) {
+} partial class bigmod_internal_test_package {
+
+internal static bool testModAddCommutative(ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> Ꮡa, ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> b) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var m = maxModulus((nuint)len(a.limbs));
-    var aPlusB = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(Ꮡa);
+    var aPlusB = @new<global::go.crypto.@internal.fips140.bigmod_package.Nat>().set(Ꮡa);
     aPlusB.Add(b, m);
-    var bPlusA = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(b);
+    var bPlusA = @new<global::go.crypto.@internal.fips140.bigmod_package.Nat>().set(b);
     bPlusA.Add(Ꮡa, m);
     return aPlusB.Equal(bPlusA) == 1;
 }
@@ -89,11 +94,11 @@ public static partial void TestModAddCommutative(ж<testing.T> t) {
     }
 }
 
-internal static bool testModSubThenAddIdentity(ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡa, ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> b) {
+internal static bool testModSubThenAddIdentity(ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> Ꮡa, ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> b) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var m = maxModulus((nuint)len(a.limbs));
-    var original = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(Ꮡa);
+    var original = @new<global::go.crypto.@internal.fips140.bigmod_package.Nat>().set(Ꮡa);
     Ꮡa.Sub(b, m);
     Ꮡa.Add(b, m);
     return a.Equal(original) == 1;
@@ -107,15 +112,15 @@ public static partial void TestModSubThenAddIdentity(ж<testing.T> t) {
 }
 
 public static void TestMontgomeryRoundtrip(ж<testing.T> t) {
-    var err = quick.Check(bool (ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> a) => {
-        var one = Ꮡ(new ΔNat(new slice<nuint>(len(a.limbs))));
+    var err = quick.Check(bool (ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> a) => {
+        var one = Ꮡ(new Nat(new slice<nuint>(len(a.limbs))));
         one.limbs[0] = 1;
-        var aPlusOne = @new<bigꓸInt>().SetBytes(natBytes(a));
+        var aPlusOne = @new<big.Int>().SetBytes(natBytes(a));
         aPlusOne.Add(aPlusOne, big.NewInt(1));
         var (m, _) = NewModulus(aPlusOne.Bytes());
-        var monty = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(a);
+        var monty = @new<global::go.crypto.@internal.fips140.bigmod_package.Nat>().set(a);
         monty.montgomeryRepresentation(m);
-        var aAgain = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>().set(monty);
+        var aAgain = @new<global::go.crypto.@internal.fips140.bigmod_package.Nat>().set(monty);
         aAgain.montgomeryMul(monty, one, m);
         if (a.Equal(aAgain) != 1) {
             t.Errorf("%v != %v", a.OrTypedNil(), aAgain.OrTypedNil());
@@ -292,8 +297,8 @@ public static void TestExpand(ж<testing.T> t) {
     ]);
 
     foreach (var (i, tt) in range(examples)) {
-        var got = (Ꮡ(new ΔNat(tt.@in))).expand(tt.n);
-        if (len(got.limbs) != len(tt.@out) || got.Equal(Ꮡ(new ΔNat(tt.@out))) != 1) {
+        var got = (Ꮡ(new Nat(tt.@in))).expand(tt.n);
+        if (len(got.limbs) != len(tt.@out) || got.Equal(Ꮡ(new Nat(tt.@out))) != 1) {
             t.Errorf("%d: got %v, expected %v", i, got.OrTypedNil(), tt.@out);
         }
     }
@@ -302,7 +307,7 @@ public static void TestExpand(ж<testing.T> t) {
 public static void TestMod(ж<testing.T> t) {
     var m = modulusFromBytes([0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d]);
     var x = natFromBytes([0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01]);
-    var @out = @new<global::go.crypto.@internal.fips140.bigmod_package.ΔNat>();
+    var @out = @new<global::go.crypto.@internal.fips140.bigmod_package.Nat>();
     @out.Mod(x, m);
     var expected = natFromBytes([0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09]);
     if (@out.Equal(expected) != 1) {
@@ -312,15 +317,15 @@ public static void TestMod(ж<testing.T> t) {
 
 public static void TestModSub(ж<testing.T> t) {
     var m = modulusFromBytes([13]);
-    var x = Ꮡ(new ΔNat([6]));
-    var y = Ꮡ(new ΔNat([7]));
+    var x = Ꮡ(new Nat([6]));
+    var y = Ꮡ(new Nat([7]));
     x.Sub(y, m);
-    var expected = Ꮡ(new ΔNat([12]));
+    var expected = Ꮡ(new Nat([12]));
     if (x.Equal(expected) != 1) {
         t.Errorf("%+v != %+v", x.OrTypedNil(), expected.OrTypedNil());
     }
     x.Sub(y, m);
-    expected = Ꮡ(new ΔNat([5]));
+    expected = Ꮡ(new Nat([5]));
     if (x.Equal(expected) != 1) {
         t.Errorf("%+v != %+v", x.OrTypedNil(), expected.OrTypedNil());
     }
@@ -328,15 +333,15 @@ public static void TestModSub(ж<testing.T> t) {
 
 public static void TestModAdd(ж<testing.T> t) {
     var m = modulusFromBytes([13]);
-    var x = Ꮡ(new ΔNat([6]));
-    var y = Ꮡ(new ΔNat([7]));
+    var x = Ꮡ(new Nat([6]));
+    var y = Ꮡ(new Nat([7]));
     x.Add(y, m);
-    var expected = Ꮡ(new ΔNat([0]));
+    var expected = Ꮡ(new Nat([0]));
     if (x.Equal(expected) != 1) {
         t.Errorf("%+v != %+v", x.OrTypedNil(), expected.OrTypedNil());
     }
     x.Add(y, m);
-    expected = Ꮡ(new ΔNat([7]));
+    expected = Ꮡ(new Nat([7]));
     if (x.Equal(expected) != 1) {
         t.Errorf("%+v != %+v", x.OrTypedNil(), expected.OrTypedNil());
     }
@@ -344,10 +349,10 @@ public static void TestModAdd(ж<testing.T> t) {
 
 public static void TestExp(ж<testing.T> t) {
     var m = modulusFromBytes([13]);
-    var x = Ꮡ(new ΔNat([3]));
-    var @out = Ꮡ(new ΔNat([0]));
+    var x = Ꮡ(new Nat([3]));
+    var @out = Ꮡ(new Nat([0]));
     @out.Exp(x, [12], m);
-    var expected = Ꮡ(new ΔNat([1]));
+    var expected = Ꮡ(new Nat([1]));
     if (@out.Equal(expected) != 1) {
         t.Errorf("%+v != %+v", @out.OrTypedNil(), expected.OrTypedNil());
     }
@@ -355,10 +360,10 @@ public static void TestExp(ж<testing.T> t) {
 
 public static void TestExpShort(ж<testing.T> t) {
     var m = modulusFromBytes([13]);
-    var x = Ꮡ(new ΔNat([3]));
-    var @out = Ꮡ(new ΔNat([0]));
+    var x = Ꮡ(new Nat([3]));
+    var @out = Ꮡ(new Nat([0]));
     @out.ExpShortVarTime(x, 12, m);
-    var expected = Ꮡ(new ΔNat([1]));
+    var expected = Ꮡ(new Nat([1]));
     if (@out.Equal(expected) != 1) {
         t.Errorf("%+v != %+v", @out.OrTypedNil(), expected.OrTypedNil());
     }
@@ -373,9 +378,9 @@ internal static readonly object aInvAModB1ˢ = (@string)"a * inv(a) mod b != 1"u
 // return correct results. See https://go.dev/issue/13907.
 public static void TestMulReductions(ж<testing.T> t) {
     // Two short but multi-limb primes.
-    var (a, _) = @new<bigꓸInt>().SetString("773608962677651230850240281261679752031633236267106044359907", 10);
-    var (b, _) = @new<bigꓸInt>().SetString("180692823610368451951102211649591374573781973061758082626801", 10);
-    var n = @new<bigꓸInt>().Mul(a, b);
+    var (a, _) = @new<big.Int>().SetString("773608962677651230850240281261679752031633236267106044359907", 10);
+    var (b, _) = @new<big.Int>().SetString("180692823610368451951102211649591374573781973061758082626801", 10);
+    var n = @new<big.Int>().Mul(a, b);
 
     var (N, _) = NewModulus(n.Bytes());
     var A = NewNat().setBig(a).ExpandFor(N);
@@ -385,7 +390,7 @@ public static void TestMulReductions(ж<testing.T> t) {
         t.Error(aBModAB0ˢ);
     }
 
-    var i = @new<bigꓸInt>().ModInverse(a, b);
+    var i = @new<big.Int>().ModInverse(a, b);
     (N, _) = NewModulus(b.Bytes());
     A = NewNat().setBig(a).ExpandFor(N);
     var I = NewNat().setBig(i).ExpandFor(N);
@@ -445,10 +450,10 @@ internal static void testMul(ж<testing.T> t, nint n) {
     A.Mul(B, M);
     var ABytes = A.Bytes(M);
 
-    var mBig = @new<bigꓸInt>().SetBytes(m);
-    var aBig = @new<bigꓸInt>().SetBytes(a);
-    var bBig = @new<bigꓸInt>().SetBytes(b);
-    var nBig = @new<bigꓸInt>().Mul(aBig, bBig);
+    var mBig = @new<big.Int>().SetBytes(m);
+    var aBig = @new<big.Int>().SetBytes(a);
+    var bBig = @new<big.Int>().SetBytes(b);
+    var nBig = @new<big.Int>().Mul(aBig, bBig);
     nBig.Mod(nBig, mBig);
     var nBigBytes = new slice<byte>(len(ABytes));
     nBig.FillBytes(nBigBytes);
@@ -555,7 +560,7 @@ public static void TestIs(ж<testing.T> t) {
 }
 
 public static void TestTrailingZeroBits(ж<testing.T> t) {
-    var nb = @new<bigꓸInt>().SetBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7e]);
+    var nb = @new<big.Int>().SetBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7e]);
     nb.Lsh(nb, 128);
     nint expected = 129;
     while (expected >= 0) {
@@ -569,7 +574,7 @@ public static void TestTrailingZeroBits(ж<testing.T> t) {
 }
 
 public static void TestRightShift(ж<testing.T> t) {
-    var (nb, err) = cryptorand.Int(cryptorand.Reader, @new<bigꓸInt>().Lsh(big.NewInt(1), 1024));
+    var (nb, err) = cryptorand.Int(cryptorand.Reader, @new<big.Int>().Lsh(big.NewInt(1), 1024));
     if (err != nil) {
         t.Fatal(err);
     }
@@ -582,7 +587,7 @@ public static void TestRightShift(ж<testing.T> t) {
             if (len(n.limbs) != oldLen) {
                 tΔ1.Errorf("len(n.limbs) = %d, want %d", len(n.limbs), oldLen);
             }
-            var exp = @new<bigꓸInt>().Rsh(nbʗ1, shiftΔ1);
+            var exp = @new<big.Int>().Rsh(nbʗ1, shiftΔ1);
             if (n.asBig().Cmp(exp) != 0) {
                 tΔ1.Errorf("%v != %v", n.asBig().OrTypedNil(), exp.OrTypedNil());
             }
@@ -602,20 +607,20 @@ public static void TestRightShift(ж<testing.T> t) {
     }
 }
 
-internal static slice<byte> natBytes(ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> Ꮡn) {
+internal static slice<byte> natBytes(ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     return n.Bytes(maxModulus((nuint)len(n.limbs)));
 }
 
-internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> natFromBytes(slice<byte> b) {
+internal static ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> natFromBytes(slice<byte> b) {
     // Must not use Nat.SetBytes as it's used in TestSetBytes.
-    var bb = @new<bigꓸInt>().SetBytes(b);
+    var bb = @new<big.Int>().SetBytes(b);
     return NewNat().setBig(bb);
 }
 
 internal static ж<global::go.crypto.@internal.fips140.bigmod_package.Modulus> modulusFromBytes(slice<byte> b) {
-    var bb = @new<bigꓸInt>().SetBytes(b);
+    var bb = @new<big.Int>().SetBytes(b);
     var (m, _) = NewModulus(bb.Bytes());
     return m;
 }
@@ -633,12 +638,12 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.Modulus> m
     return maxModulus(32);
 }
 
-internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> makeBenchmarkValue() {
+internal static ж<global::go.crypto.@internal.fips140.bigmod_package.Nat> makeBenchmarkValue() {
     var x = new slice<nuint>(32);
     for (nint i = 0; i < 32; i++) {
         x[i]--;
     }
-    return Ꮡ(new ΔNat(limbs: x));
+    return Ꮡ(new Nat(limbs: x));
 }
 
 internal static slice<byte> makeBenchmarkExponent() {
@@ -717,12 +722,12 @@ public static void BenchmarkModMul(ж<testing.B> Ꮡb) {
 public static void BenchmarkExpBig(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var @out = @new<bigꓸInt>();
+    var @out = @new<big.Int>();
     var exponentBytes = makeBenchmarkExponent();
-    var x = @new<bigꓸInt>().SetBytes(exponentBytes);
-    var e = @new<bigꓸInt>().SetBytes(exponentBytes);
-    var n = @new<bigꓸInt>().SetBytes(exponentBytes);
-    var one = @new<bigꓸInt>().SetUint64(1);
+    var x = @new<big.Int>().SetBytes(exponentBytes);
+    var e = @new<big.Int>().SetBytes(exponentBytes);
+    var n = @new<big.Int>().SetBytes(exponentBytes);
+    var one = @new<big.Int>().SetUint64(1);
     n.Add(n, one);
 
     b.ResetTimer();
@@ -837,17 +842,16 @@ public static void TestInverse(ж<testing.T> t) {
         }
 
         var (k, v, _) = strings.Cut(line, " = ");
-        var exprᴛ1 = k;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "ModInv"u8: {
+        case {} when k == "ModInv"u8: {
             ModInv = v;
             break;
         }
-        case {} when exprᴛ1 == "A"u8: {
+        case {} when k == "A"u8: {
             A = v;
             break;
         }
-        case {} when exprᴛ1 == "M"u8: {
+        case {} when k == "M"u8: {
             M = v;
 
             t.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {

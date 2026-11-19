@@ -18,6 +18,7 @@ using io = io_package;
 using net = net_package;
 using static global::go.net.http_internal_test_package;
 using ꓸꓸꓸstring = Span<@string>;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -34,7 +35,7 @@ internal static ж<http1ServerTest> newHTTP1ServerTest(ж<testing.T> t, Δhttp.H
         h = (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
         };
     }
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠΔHandler(h), optFakeNet.OrTypedNil());
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠHandler(h), optFakeNet.OrTypedNil());
     var st = Ꮡ(new http1ServerTest(
         t: t,
         cst: cst,
@@ -42,6 +43,8 @@ internal static ж<http1ServerTest> newHTTP1ServerTest(ж<testing.T> t, Δhttp.H
     ));
     return st;
 }
+
+} partial class http_testᴛhttp1ServerTest {
 
 // client returns a Client that sends requests to the server.
 internal static ж<Δhttp.Client> client(this ref http1ServerTest st) {
@@ -54,6 +57,8 @@ internal static ж<Δhttp.Transport> transport(this ref http1ServerTest st) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 internal static ref readonly @string exampleTldˢ => ref exampleTldˢᵇ;
 private static readonly @string exampleTldˢᵇ = "example.tld"u8;
 
@@ -78,6 +83,8 @@ internal static ж<http1TestConn> dial(this ref http1ServerTest st) {
     ));
 }
 
+} partial class http_test_package {
+
 internal static error errWouldBlock = errors.New("would block");
 
 partial struct http1TestConn {
@@ -85,6 +92,8 @@ partial struct http1TestConn {
     internal ж<fakeNetConn> conn;
     internal ж<bufio.Reader> bufr;
 }
+
+} partial class http_testᴛhttp1TestConn {
 
 // writeMessage writes a number of CRLF-terminated lines to the connection.
 internal static void writeMessage(this ref http1TestConn tc, params ꓸꓸꓸstring linesʗp) {
@@ -129,4 +138,4 @@ internal static void wantClosed(this ref http1TestConn tc) {
     }
 }
 
-} // end http_test_package
+} // end http_testᴛhttp1TestConn

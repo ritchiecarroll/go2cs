@@ -552,7 +552,7 @@ has no dot), yielding `public io_package.ReaderFrom ReaderFrom;`. io's own test 
 (`io_test.go`'s `import . "io"`), and its converted test file carries both the field and the
 `using Δio = io_package;` alias.
 <!-- history: this paragraph said the io test suite remained blocked by import . "io" using-alias resolution issues (the
-Δio namespace emitted but never aliased); at 3e3f18925a src/core/io/io_test.cs:19 `using Δio = io_package;` and :26
+Δio namespace emitted but never aliased); at 3e3f18925a src/core/io/io_test.cs:19 `using Δio = io_package;` and :27
 `/*embed*/ public io_package.ReaderFrom ReaderFrom;`, and io is a validated row. -->
 
 ## Select statement lowering (terminating and empty clauses)

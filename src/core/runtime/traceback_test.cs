@@ -27,6 +27,7 @@ using global::go.runtime;
 using static global::go.runtime_internal_test_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸstring = Span<@string>;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -41,6 +42,8 @@ internal static ref readonly @string runtimeTestTtiSimple1ˢ => ref runtimeTestT
 private static readonly @string runtimeTestTtiSimple1ˢᵇ = "runtime_test.ttiSimple1()"u8;
 internal static ref readonly @string runtimeTestTtiSigpanic1ˢ => ref runtimeTestTtiSigpanic1ˢᵇ;
 private static readonly @string runtimeTestTtiSigpanic1ˢᵇ = "runtime_test.ttiSigpanic1.func1()"u8;
+internal static ref readonly @string panicˢ2 => ref panicˢ2ᵇ;
+private static readonly @string panicˢ2ᵇ = "panic"u8;
 internal static ref readonly @string runtimeTestTtiSigpanic3ˢ => ref runtimeTestTtiSigpanic3ˢᵇ;
 private static readonly @string runtimeTestTtiSigpanic3ˢᵇ = "runtime_test.ttiSigpanic3(...)"u8;
 internal static ref readonly @string runtimeTestTtiSigpanic2ˢ => ref runtimeTestTtiSigpanic2ˢᵇ;
@@ -182,16 +185,20 @@ internal static bool alwaysTrue = true;
 //go:noinline
 internal static partial ж<ttiResult> ttiWrapper1() {
     ref var w = ref heap(new ttiWrapper(), out var Ꮡw);
-    var m = ((Func<ж<ttiWrapper>, ж<ttiResult>>)([GoWrapper("(*ttiWrapper).m1")] (p0) => m1(panicwrapRecv(p0, "value method runtime_test.ttiWrapper.m1 called using nil *ttiWrapper pointer").Value)));
+    var m = ((Func<ж<ttiWrapper>, ж<ttiResult>>)([GoWrapper("(*ttiWrapper).m1")] (p0) => runtime_testᴛttiWrapper.m1(panicwrapRecv(p0, "value method runtime_test.ttiWrapper.m1 called using nil *ttiWrapper pointer").Value)));
     return m(Ꮡw);
 }
 
 partial struct ttiWrapper {
 }
 
+} partial class runtime_testᴛttiWrapper {
+
 internal static partial ж<ttiResult> m1(this ttiWrapper w) {
     return ttiLeaf();
 }
+
+} partial class runtime_test_package {
 
 //go:noinline
 internal static partial ж<ttiResult> ttiExcluded1() {
@@ -780,10 +787,10 @@ internal static partial nint testTracebackArgs11a(int32 a, int32 b, int32 c) {
 internal static partial nint testTracebackArgs11b(int32 a, int32 b, int32 c, int32 d) {
     int32 x = default;
     if (a < 0) {
-        builtin.print(); // spill b in a conditional
+        print(); // spill b in a conditional
         x = b;
     } else {
-        builtin.print(); // spill c in a conditional
+        print(); // spill c in a conditional
         x = c;
     }
     if (d < 0) { // d is always needed
@@ -964,6 +971,8 @@ partial struct testTracebackGenericTyp<P> {
     internal P x;
 }
 
+} partial class runtime_testᴛtestTracebackGenericTyp {
+
 //go:noinline
 internal static partial nint M<P>(this testTracebackGenericTyp<P> t, slice<byte> buf) {
     return Δruntime.Stack(buf[..], false);
@@ -972,6 +981,8 @@ internal static partial nint M<P>(this testTracebackGenericTyp<P> t, slice<byte>
 internal static partial nint Inlined<P>(this testTracebackGenericTyp<P> t, slice<byte> buf) {
     return Δruntime.Stack(buf[..], false);
 }
+
+} partial class runtime_test_package {
 
 internal partial struct TestTracebackGeneric_tests /*dyn*/ {
     internal Func<slice<byte>, nint> fn;

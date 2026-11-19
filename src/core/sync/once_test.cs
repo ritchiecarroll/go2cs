@@ -7,14 +7,19 @@ using static sync_package;
 using Δtesting = testing_package;
 using static go.sync_internal_test_package;
 using Δsync = sync_package;
+using static sync_test_package;
 
 partial class sync_test_package {
 
 partial struct one /*num:nint*/;
 
+} partial class sync_testᴛone {
+
 internal static void Increment(this ref one o) {
     o++;
 }
+
+} partial class sync_test_package {
 
 internal static void run(ж<Δtesting.T> t, ж<Δsync.Once> once, ж<one> Ꮡo, channel<bool> c) {
     ref var o = ref Ꮡo.DerefOrNull();

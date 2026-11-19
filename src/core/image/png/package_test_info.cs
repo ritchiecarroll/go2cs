@@ -8,8 +8,6 @@ global using static global::go.image.png_package;
 global using static global::go.image.png_internal_test_package;
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
-global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;

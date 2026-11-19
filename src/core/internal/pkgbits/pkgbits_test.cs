@@ -16,7 +16,7 @@ private static ref readonly @string packageIdˢ => ref packageIdˢᵇ;
 private static readonly @string packageIdˢᵇ = "package_id"u8;
 
 public static void TestRoundTrip(ж<testing.T> t) {
-    foreach (var (_, version) in range(slice<pkgbitsꓸVersion>([
+    foreach (var (_, version) in range(slice<pkgbits.Version>([
         pkgbits.V0,
         pkgbits.V1,
         pkgbits.V2
@@ -43,7 +43,7 @@ internal static array<bool> _ᴛ1ʗ = new bool[]{}.array();
 internal static array<bool> _ᴛ2ʗ = new bool[]{}.array(1);
 
 internal partial struct TestVersions_vfpair /*dyn*/ {
-    internal pkgbitsꓸVersion v;
+    internal pkgbits.Version v;
     internal pkgbits.Field f;
 }
 

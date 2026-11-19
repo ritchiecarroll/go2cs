@@ -14,7 +14,6 @@ using static global::go.hash.adler32_internal_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6f75742075696e7433323b20696e20737472696e673b2068616c66537461746520737472696e677d", "goldenᴛ1")]
-[assembly: GoTypeAlias("Size", "const:ΔSize")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

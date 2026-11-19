@@ -20,7 +20,7 @@ internal static (nint, error) readRawConn(syscall.RawConn c, slice<byte> b) {
         ref var buf = ref heap(new syscall.WSABuf(), out var Ꮡbuf);
         buf.Buf = Ꮡ(bʗ1, 0);
         buf.Len = (uint32)len(bʗ1);
-        Ꮡoperr.ValueSlot = syscall.WSARecv((syscallꓸHandle)s, Ꮡbuf, 1, Ꮡread, Ꮡflags, nil, nil);
+        Ꮡoperr.ValueSlot = syscall.WSARecv((syscall.Handle)s, Ꮡbuf, 1, Ꮡread, Ꮡflags, nil, nil);
         n = (nint)read;
         return true;
     });
@@ -38,7 +38,7 @@ internal static error writeRawConn(syscall.RawConn c, slice<byte> b) {
         ref var buf = ref heap(new syscall.WSABuf(), out var Ꮡbuf);
         buf.Buf = Ꮡ(bʗ1, 0);
         buf.Len = (uint32)len(bʗ1);
-        Ꮡoperr.ValueSlot = syscall.WSASend((syscallꓸHandle)s, Ꮡbuf, 1, Ꮡwritten, 0, nil, nil);
+        Ꮡoperr.ValueSlot = syscall.WSASend((syscall.Handle)s, Ꮡbuf, 1, Ꮡwritten, 0, nil, nil);
         return true;
     });
     if (err != nil) {
@@ -47,13 +47,13 @@ internal static error writeRawConn(syscall.RawConn c, slice<byte> b) {
     return operr;
 }
 
-internal static error controlRawConn(syscall.RawConn c, global::go.net_package.ΔAddr addr) {
+internal static error controlRawConn(syscall.RawConn c, global::go.net_package.Addr addr) {
     ref var operr = ref heap<error>(out var Ꮡoperr);
     var fn = (uintptr s) => {
         ref var v = ref heap(new int32(), out var Ꮡv);
         ref var l = ref heap(new int32(), out var Ꮡl);
         l = (int32)/* unsafe.Sizeof(v) */ (uintptr)4;
-        Ꮡoperr.ValueSlot = syscall.Getsockopt((syscallꓸHandle)s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, Ꮡv.Reinterpret<int32, byte>(), Ꮡl);
+        Ꮡoperr.ValueSlot = syscall.Getsockopt((syscall.Handle)s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, Ꮡv.Reinterpret<int32, byte>(), Ꮡl);
         if (Ꮡoperr.ValueSlot != nil) {
             return;
         }
@@ -80,9 +80,9 @@ internal static error controlRawConn(syscall.RawConn c, global::go.net_package.�
             //   addresses including IPv4-mapped or
             //   IPv4-embedded IPv6 addresses.
             if (addrΔ1.IP.To16() != nil && addrΔ1.IP.To4() == nil) {
-                Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscallꓸHandle)s, syscall.IPPROTO_IPV6, syscall.IPV6_UNICAST_HOPS, 1);
+                Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscall.Handle)s, syscall.IPPROTO_IPV6, syscall.IPV6_UNICAST_HOPS, 1);
             } else if (addrΔ1.IP.To16() == nil && addrΔ1.IP.To4() != nil) {
-                Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscallꓸHandle)s, syscall.IPPROTO_IP, syscall.IP_TTL, 1);
+                Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscall.Handle)s, syscall.IPPROTO_IP, syscall.IP_TTL, 1);
             }
             break;
         }}
@@ -96,15 +96,14 @@ internal static error controlRawConn(syscall.RawConn c, global::go.net_package.�
 internal static error controlOnConnSetup(@string network, @string address, syscall.RawConn c) {
     ref var operr = ref heap<error>(out var Ꮡoperr);
     Action<uintptr> fn = default;
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "ip"u8: {
+    case {} when network == "tcp"u8 || network == "udp"u8 || network == "ip"u8: {
         return errors.New("ambiguous network: "u8 + network);
     }
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8 || exprᴛ1 == "unixgram"u8: {
+    case {} when network == "unix"u8 || network == "unixpacket"u8 || network == "unixgram"u8: {
         fn = (uintptr s) => {
             const nint SO_ERROR = 0x1007;
-            (_, Ꮡoperr.ValueSlot) = syscall.GetsockoptInt((syscallꓸHandle)s, syscall.SOL_SOCKET, SO_ERROR);
+            (_, Ꮡoperr.ValueSlot) = syscall.GetsockoptInt((syscall.Handle)s, syscall.SOL_SOCKET, SO_ERROR);
         };
         break;
     }
@@ -112,13 +111,13 @@ internal static error controlOnConnSetup(@string network, @string address, sysca
         switch (network[len(network) - 1]) {
         case (byte)'4': {
             fn = (uintptr s) => {
-                Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscallꓸHandle)s, syscall.IPPROTO_IP, syscall.IP_TTL, 1);
+                Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscall.Handle)s, syscall.IPPROTO_IP, syscall.IP_TTL, 1);
             };
             break;
         }
         case (byte)'6': {
             fn = (uintptr s) => {
-                Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscallꓸHandle)s, syscall.IPPROTO_IPV6, syscall.IPV6_UNICAST_HOPS, 1);
+                Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscall.Handle)s, syscall.IPPROTO_IPV6, syscall.IPV6_UNICAST_HOPS, 1);
             };
             break;
         }

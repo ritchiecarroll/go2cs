@@ -349,14 +349,14 @@ public static void TestUDPServer(ж<testing.T> t) {
                     if (errΔ3 != nil) {
                         tΔ1.Fatal(errΔ3);
                     }
-                    goǃ(packetTransceiver, c2, slice<byte>("UDP SERVER TEST"u8), new global::go.net_package.UDPAddrжΔAddr(dst), trch.AsSendOnly());
+                    goǃ(packetTransceiver, c2, slice<byte>("UDP SERVER TEST"u8), new global::go.net_package.UDPAddrжAddr(dst), trch.AsSendOnly());
                 }
 
                 while (trch != nil || Ꮡtpch.ValueSlot != nil) {
-                    var selᴛ11 = trch;
-                    var selᴛ12 = Ꮡtpch.ValueSlot;
-                    switch (select(ᐸꟷ(selᴛ11, ꓸꓸꓸ), ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
-                    case 0 when selᴛ11.ꟷᐳ(out var errΔ4, out var ok): {
+                    var trchᴛ1 = trch;
+                    var tpchᴛ1 = Ꮡtpch.ValueSlot;
+                    switch (select(ᐸꟷ(trchᴛ1, ꓸꓸꓸ), ᐸꟷ(tpchᴛ1, ꓸꓸꓸ))) {
+                    case 0 when trchᴛ1.ꟷᐳ(out var errΔ4, out var ok): {
                         if (!ok) {
                             trch = default;
                         }
@@ -365,7 +365,7 @@ public static void TestUDPServer(ж<testing.T> t) {
                         }
                         break;
                     }
-                    case 1 when selᴛ12.ꟷᐳ(out var errΔ5, out var ok): {
+                    case 1 when tpchᴛ1.ꟷᐳ(out var errΔ5, out var ok): {
                         if (!ok) {
                             Ꮡtpch.ValueSlot = default;
                         }
@@ -430,7 +430,7 @@ public static void TestUnixgramServer(ж<testing.T> t) {
 
                 var trch = new channel<error>(1);
                 if (ttʗ1.dial) {
-                    ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Timeout: someTimeout, LocalAddr: new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(Net: "unixgram", Name: ttʗ1.caddr)))), out var Ꮡd);
+                    ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Timeout: someTimeout, LocalAddr: new global::go.net_package.UnixAddrжAddr(Ꮡ(new UnixAddr(Net: "unixgram", Name: ttʗ1.caddr)))), out var Ꮡd);
                     var (c2, errΔ2) = Ꮡd.Dial(unixgramˢ, ls.PacketConn.LocalAddr().String());
                     if (errΔ2 != nil) {
                         var perr = parseDialError(errΔ2); if (perr != nil) {
@@ -457,10 +457,10 @@ public static void TestUnixgramServer(ж<testing.T> t) {
                 }
 
                 while (trch != nil || Ꮡtpch.ValueSlot != nil) {
-                    var selᴛ13 = trch;
-                    var selᴛ14 = Ꮡtpch.ValueSlot;
-                    switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
-                    case 0 when selᴛ13.ꟷᐳ(out var errΔ4, out var ok): {
+                    var trchᴛ1 = trch;
+                    var tpchᴛ1 = Ꮡtpch.ValueSlot;
+                    switch (select(ᐸꟷ(trchᴛ1, ꓸꓸꓸ), ᐸꟷ(tpchᴛ1, ꓸꓸꓸ))) {
+                    case 0 when trchᴛ1.ꟷᐳ(out var errΔ4, out var ok): {
                         if (!ok) {
                             trch = default;
                         }
@@ -469,7 +469,7 @@ public static void TestUnixgramServer(ж<testing.T> t) {
                         }
                         break;
                     }
-                    case 1 when selᴛ14.ꟷᐳ(out var errΔ5, out var ok): {
+                    case 1 when tpchᴛ1.ꟷᐳ(out var errΔ5, out var ok): {
                         if (!ok) {
                             Ꮡtpch.ValueSlot = default;
                         }

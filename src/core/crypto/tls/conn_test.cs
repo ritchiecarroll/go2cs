@@ -9,6 +9,7 @@ using net = net_package;
 using testing = testing_package;
 using static go.crypto.tls_package;
 using time = time_package;
+using static tls_internal_test_package;
 
 partial class tls_internal_test_package {
 
@@ -310,9 +311,11 @@ internal partial struct hairpinConn {
     internal ж<global::go.crypto.tls_package.Conn> tlsConn;
 }
 
+} partial class tls_internal_testᴛhairpinConn {
+
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *hairpinConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr LocalAddr(this hairpinConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr(this hairpinConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.Read()' - provided ONLY by the embedded
 // interface field in *hairpinConn's method set; see the pointer-only satisfaction record.
@@ -320,7 +323,7 @@ internal static (nint, error) Read(this hairpinConn recvᴛ, slice<byte> b) => r
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *hairpinConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr RemoteAddr(this hairpinConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr(this hairpinConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *hairpinConn's method set; see the pointer-only satisfaction record.
@@ -342,6 +345,8 @@ internal static error Close(this ref hairpinConn conn) {
     conn.tlsConn.ConnectionState();
     return default;
 }
+
+} partial class tls_internal_test_package {
 
 public static void TestHairpinInClose(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -413,6 +418,10 @@ public static partial void TestRecordBadVersionTLS13(ж<testing.T> t) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tlsTooManyNonAdvancingˢ => ref tlsTooManyNonAdvancingˢᵇ;
+private static readonly @string tlsTooManyNonAdvancingˢᵇ = "tls: too many non-advancing records"u8;
 
 // TestKeyUpdateSpamPostHandshakeTLS13 tests that TLS 1.3 KeyUpdate messages do
 // not count as a state-advancing message after a handshake has been completed.

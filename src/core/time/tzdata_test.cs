@@ -70,9 +70,9 @@ public static void TestEmbeddedTZData(ж<Δtesting.T> t) {
 
 // equal is a small version of reflect.DeepEqual that we use to
 // compare the values of zoneinfo unexported fields.
-internal static bool equal(ж<Δtesting.T> t, reflectꓸValue f1, reflectꓸValue f2) {
+internal static bool equal(ж<Δtesting.T> t, reflect.Value f1, reflect.Value f2) {
     switch (f1.Type().Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         if (f1.Len() != f2.Len()) {
             return false;
         }
@@ -92,16 +92,16 @@ internal static bool equal(ж<Δtesting.T> t, reflectꓸValue f1, reflectꓸValu
         }
         return true;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return f1.String() == f2.String();
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return f1.Bool() == f2.Bool();
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return f1.Int() == f2.Int();
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return f1.Uint() == f2.Uint();
     }
     default: {

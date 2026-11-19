@@ -20,6 +20,7 @@ using global::go.go;
 using global::go.io;
 using path;
 using static global::go.@internal.reflectlite_internal_test_package;
+using static reflectlite_test_package;
 
 partial class reflectlite_test_package {
 
@@ -44,6 +45,9 @@ internal static visitor newVisitor() {
 
     return v;
 }
+
+} partial class reflectlite_testᴛvisitor {
+
 internal static bool filter(this visitor v, @string name) {
     return slices.Contains(typeNames, name);
 }
@@ -67,6 +71,8 @@ internal static ast.Visitor Visit(this visitor v, ast.Node n) {
     }}
     return v;
 }
+
+} partial class reflectlite_test_package {
 
 internal static void loadTypes(@string path, @string pkgName, visitor v) {
     var fset = token.NewFileSet();

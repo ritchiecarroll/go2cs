@@ -10,27 +10,30 @@ using testing = testing_package;
 using time = time_package;
 using io = io_package;
 using static go.log.slog_package;
+using static slog_internal_test_package;
 
 partial class slog_internal_test_package {
 
 // mockFailingHandler is a handler that always returns an error
 // from its Handle method.
 internal partial struct mockFailingHandler {
-    /*embed*/ public global::go.log.slog_package.ΔHandler Handler;
+    /*embed*/ public global::go.log.slog_package.Handler Handler;
     internal error err;
 }
 
+} partial class slog_internal_testᴛmockFailingHandler {
+
 // Go method set entry for the promoted 'Handler.Enabled()' - provided ONLY by the embedded
 // interface field in *mockFailingHandler's method set; see the pointer-only satisfaction record.
-internal static bool Enabled(this mockFailingHandler recvᴛ, context.Context arg1ᴛ, global::go.log.slog_package.ΔLevel arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
+internal static bool Enabled(this mockFailingHandler recvᴛ, context.Context arg1ᴛ, global::go.log.slog_package.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
 
 // Go method set entry for the promoted 'Handler.WithAttrs()' - provided ONLY by the embedded
 // interface field in *mockFailingHandler's method set; see the pointer-only satisfaction record.
-internal static global::go.log.slog_package.ΔHandler WithAttrs(this mockFailingHandler recvᴛ, slice<global::go.log.slog_package.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
+internal static global::go.log.slog_package.Handler WithAttrs(this mockFailingHandler recvᴛ, slice<global::go.log.slog_package.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
 
 // Go method set entry for the promoted 'Handler.WithGroup()' - provided ONLY by the embedded
 // interface field in *mockFailingHandler's method set; see the pointer-only satisfaction record.
-internal static global::go.log.slog_package.ΔHandler WithGroup(this mockFailingHandler recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
+internal static global::go.log.slog_package.Handler WithGroup(this mockFailingHandler recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
 
 internal static error Handle(this ref mockFailingHandler h, context.Context ctx, global::go.log.slog_package.Record r) {
     r = r.ΔClone();
@@ -38,6 +41,8 @@ internal static error Handle(this ref mockFailingHandler h, context.Context ctx,
     _ = h.Handler.Handle(ctx, r);
     return h.err;
 }
+
+} partial class slog_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string handleSendsLogToAllˢ => ref handleSendsLogToAllˢᵇ;
@@ -81,8 +86,8 @@ public static void TestMultiHandler(ж<testing.T> t) {
         var h1 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf1), nil);
         var h2 = NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf2), nil);
 
-        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжΔHandler(h1), new global::go.log.slog_package.JSONHandlerжΔHandler(h2));
-        var logger = New(new global::go.log.slog_package.MultiHandlerжΔHandler(multi));
+        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжHandler(h1), new global::go.log.slog_package.JSONHandlerжHandler(h2));
+        var logger = New(new global::go.log.slog_package.MultiHandlerжHandler(multi));
 
         logger.Info(helloWorldˢ, userˢ, testˢ);
 
@@ -94,7 +99,7 @@ public static void TestMultiHandler(ж<testing.T> t) {
         var h1 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡ(new bytes.Buffer())), Ꮡ(new HandlerOptions(Level: LevelError)));
         var h2 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡ(new bytes.Buffer())), Ꮡ(new HandlerOptions(Level: LevelInfo)));
 
-        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжΔHandler(h1), new global::go.log.slog_package.TextHandlerжΔHandler(h2));
+        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжHandler(h1), new global::go.log.slog_package.TextHandlerжHandler(h2));
 
         if (!multi.Enabled(context.Background(), LevelInfo)) {
             tΔ2.Error(enabledShouldBeTrueForˢ);
@@ -108,7 +113,7 @@ public static void TestMultiHandler(ж<testing.T> t) {
         var h1 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡ(new bytes.Buffer())), Ꮡ(new HandlerOptions(Level: LevelError)));
         var h2 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡ(new bytes.Buffer())), Ꮡ(new HandlerOptions(Level: LevelInfo)));
 
-        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжΔHandler(h1), new global::go.log.slog_package.TextHandlerжΔHandler(h2));
+        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжHandler(h1), new global::go.log.slog_package.TextHandlerжHandler(h2));
 
         if (multi.Enabled(context.Background(), LevelDebug)) {
             tΔ3.Error(enabledShouldBeFalseForˢ);
@@ -121,7 +126,7 @@ public static void TestMultiHandler(ж<testing.T> t) {
         var h1 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf1), nil);
         var h2 = NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf2), nil);
 
-        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжΔHandler(h1), new global::go.log.slog_package.JSONHandlerжΔHandler(h2)).WithAttrs(slice<global::go.log.slog_package.Attr>([go.log.slog_package.String(requestIdˢ, "123")]));
+        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжHandler(h1), new global::go.log.slog_package.JSONHandlerжHandler(h2)).WithAttrs(slice<global::go.log.slog_package.Attr>([go.log.slog_package.String(requestIdˢ, "123")]));
         var logger = New(multi);
 
         logger.Info(requestProcessedˢ);
@@ -136,7 +141,7 @@ public static void TestMultiHandler(ж<testing.T> t) {
         var h1 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf1), Ꮡ(new HandlerOptions(AddSource: false)));
         var h2 = NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf2), Ꮡ(new HandlerOptions(AddSource: false)));
 
-        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжΔHandler(h1), new global::go.log.slog_package.JSONHandlerжΔHandler(h2)).WithGroup(reqˢ);
+        var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжHandler(h1), new global::go.log.slog_package.JSONHandlerжHandler(h2)).WithGroup(reqˢ);
         var logger = New(multi);
 
         logger.Info(userLoginˢ, userIdˢ, (nint)42);
@@ -151,11 +156,11 @@ public static void TestMultiHandler(ж<testing.T> t) {
         ref var buf1 = ref heap(new bytes.Buffer(), out var Ꮡbuf1);
         ref var buf2 = ref heap(new bytes.Buffer(), out var Ꮡbuf2);
         var h1 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf1), nil);
-        var h2 = Ꮡ(new mockFailingHandler(Handler: new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf2), nil)), err: errFail));
+        var h2 = Ꮡ(new mockFailingHandler(Handler: new global::go.log.slog_package.JSONHandlerжHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf2), nil)), err: errFail));
 
-        var multi = NewMultiHandler(new slog_internal_test_package.mockFailingHandlerжΔHandler(h2), new global::go.log.slog_package.TextHandlerжΔHandler(h1));
+        var multi = NewMultiHandler(new slog_internal_test_package.mockFailingHandlerжHandler(h2), new global::go.log.slog_package.TextHandlerжHandler(h1));
 
-        var err = multi.Handle(context.Background(), NewRecord(time_package.Now(), LevelInfo, testMessageˢ, 0));
+        var err = multi.Handle(context.Background(), NewRecord(time.Now(), LevelInfo, testMessageˢ, 0));
         if (!errors.Is(err, errFail)) {
             tΔ6.Errorf("Expected error: %v, but got: %v", errFail, err);
         }
@@ -166,11 +171,11 @@ public static void TestMultiHandler(ж<testing.T> t) {
 
     t.Run(handleWithNoHandlersˢ, (ж<testing.T> tΔ7) => {
         var multi = NewMultiHandler();
-        var logger = New(new global::go.log.slog_package.MultiHandlerжΔHandler(multi));
+        var logger = New(new global::go.log.slog_package.MultiHandlerжHandler(multi));
 
         logger.Info(nothingˢ);
 
-        var err = multi.Handle(context.Background(), NewRecord(time_package.Now(), LevelInfo, testˢ, 0));
+        var err = multi.Handle(context.Background(), NewRecord(time.Now(), LevelInfo, testˢ, 0));
         if (err != nil) {
             tΔ7.Errorf("Handle with no sub-handlers should return nil, but got: %v", err);
         }
@@ -181,11 +186,11 @@ public static void TestMultiHandler(ж<testing.T> t) {
 public static void TestNewMultiHandlerCopy(ж<testing.T> t) {
     ref var buf1 = ref heap(new bytes.Buffer(), out var Ꮡbuf1);
     var h1 = NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf1), nil);
-    var Δslice = slice<global::go.log.slog_package.ΔHandler>([new global::go.log.slog_package.TextHandlerжΔHandler(h1)]);
+    var Δslice = slice<global::go.log.slog_package.Handler>([new global::go.log.slog_package.TextHandlerжHandler(h1)]);
     var multi = NewMultiHandler(Δslice.ꓸꓸꓸ);
     Δslice[0] = default;
 
-    var err = multi.Handle(context.Background(), NewRecord(time_package.Now(), LevelInfo, testMessageˢ, 0));
+    var err = multi.Handle(context.Background(), NewRecord(time.Now(), LevelInfo, testMessageˢ, 0));
     if (err != nil) {
         t.Errorf("Expected nil error, but got: %v", err);
     }

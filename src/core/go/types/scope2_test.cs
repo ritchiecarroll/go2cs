@@ -77,7 +77,7 @@ public static void TestScopeLookupParent(ж<testing.T> t) {
     var fset = token.NewFileSet();
     var imports = new testImporter(0);
     ref var conf = ref heap<types.Config>(new Config(Importer: imports), out var Ꮡconf);
-    ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
+    ref var info = ref heap(new types.Info(), out var Ꮡinfo);
     var fsetʗ1 = fset;
     var importsʗ1 = imports;
     void makePkg(@string path, params ꓸꓸꓸжastꓸFile filesʗp) {
@@ -157,8 +157,8 @@ public static void TestScopeLookupParent(ж<testing.T> t) {
         var (_, gotObj) = inner.LookupParent(id.Name, id.Pos());
         if (!AreEqual(gotObj, wantObj)) {
             // Print the scope tree of mainScope in case of error.
-            ref var printScopeTree = ref heap<Action<@string, ж<typesꓸScope>>>(out var ᏑprintScopeTree);
-            printScopeTree = (@string indent, ж<typesꓸScope> s) => {
+            ref var printScopeTree = ref heap<Action<@string, ж<types.Scope>>>(out var ᏑprintScopeTree);
+            printScopeTree = (@string indent, ж<types.Scope> s) => {
                 t.Logf("%sscope %s %v-%v = %v",
                     indent,
                     types_internal_test_package.ScopeComment(s),

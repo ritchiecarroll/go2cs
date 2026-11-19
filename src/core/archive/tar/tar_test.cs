@@ -23,6 +23,7 @@ using @internal;
 using go.io;
 using go.path;
 using static go.archive.tar_package;
+using static tar_internal_test_package;
 
 partial class tar_internal_test_package {
 
@@ -38,6 +39,8 @@ internal partial struct testFile {
     internal fileOps ops;
     internal int64 pos;
 }
+
+} partial class tar_internal_testᴛtestFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedReadOperationˢ => ref unexpectedReadOperationˢᵇ;
@@ -116,6 +119,8 @@ internal static (int64, error) Seek(this ref testFile f, int64 pos, nint whence)
     f.ops = f.ops[1..];
     return (f.pos, default);
 }
+
+} partial class tar_internal_test_package {
 
 internal partial struct TestSparseEntries_vectors /*dyn*/ {
     internal slice<global::go.archive.tar_package.sparseEntry> @in;
@@ -357,7 +362,7 @@ public static void TestRoundTrip(ж<testing.T> t) {
         Name: "file.txt",
         Uid: (1 << 21), // Too big for 8 octal digits
         Size: (int64)len(data),
-        ModTime: time.Now().Round(time.ΔSecond),
+        ModTime: time.Now().Round(time.Second),
         PAXRecords: new map<@string, @string>{["uid"] = "2097152"},
         Format: FormatPAX,
         Typeflag: TypeReg
@@ -976,6 +981,8 @@ internal static fileInfoNames _ᴛ1ʗ = new fileInfoNames();
 internal partial struct fileInfoNames {
 }
 
+} partial class tar_internal_testᴛfileInfoNames {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tmpˢ => ref tmpˢᵇ;
 private static readonly @string tmpˢᵇ = "tmp"u8;
@@ -1004,13 +1011,27 @@ internal static any Sys(this ref fileInfoNames f) {
     return default;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string unameˢ => ref unameˢᵇ;
+private static readonly @string unameˢᵇ = "Uname"u8;
+
 internal static (@string, error) Uname(this ref fileInfoNames f) {
     return (unameˢ, default);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string gnameˢ => ref gnameˢᵇ;
+private static readonly @string gnameˢᵇ = "Gname"u8;
+
 internal static (@string, error) Gname(this ref fileInfoNames f) {
     return (gnameˢ, default);
 }
+
+} partial class tar_internal_test_package {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object unameˢ = (@string)"Uname"u8;
+internal static readonly object gnameˢ = (@string)"Gname"u8;
 
 public static void TestFileInfoHeaderUseFileInfoNames(ж<testing.T> t) {
     var info = Ꮡ(new fileInfoNames());

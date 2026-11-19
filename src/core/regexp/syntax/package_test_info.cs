@@ -16,7 +16,6 @@ using static global::go.regexp.syntax_internal_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b52656765787020737472696e673b2050726f6720737472696e677d", "compileTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b52656765787020737472696e673b2053696d706c6520737472696e677d", "simplifyTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b726520737472696e673b206f757420737472696e677d", "stringTestsᴛ1")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

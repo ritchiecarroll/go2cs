@@ -172,17 +172,17 @@ public static void TestEncodeDecode(ж<testing.T> t) {
     // Compare ringCompressAndEncode to ringCompressAndEncodeN.
     var e1 = ringCompressAndEncode(default, f, 10);
     var e2 = ringCompressAndEncode10(default, f);
-    if (!bytes_package.Equal(e1, e2)) {
+    if (!bytes.Equal(e1, e2)) {
         t.Errorf("ringCompressAndEncode = %x, ringCompressAndEncode10 = %x", e1, e2);
     }
     e1 = ringCompressAndEncode(default, f, 4);
     e2 = ringCompressAndEncode4(default, f);
-    if (!bytes_package.Equal(e1, e2)) {
+    if (!bytes.Equal(e1, e2)) {
         t.Errorf("ringCompressAndEncode = %x, ringCompressAndEncode4 = %x", e1, e2);
     }
     e1 = ringCompressAndEncode(default, f, 1);
     e2 = ringCompressAndEncode1(default, f);
-    if (!bytes_package.Equal(e1, e2)) {
+    if (!bytes.Equal(e1, e2)) {
         t.Errorf("ringCompressAndEncode = %x, ringCompressAndEncode1 = %x", e1, e2);
     }
 
@@ -192,13 +192,13 @@ public static void TestEncodeDecode(ж<testing.T> t) {
     if (g1 != g2) {
         t.Errorf("ringDecodeAndDecompress = %v, ringDecodeAndDecompress10 = %v", g1, g2);
     }
-    g1 = ringDecodeAndDecompress(b[..(int)(encodingSize4)], 4);
-    g2 = ringDecodeAndDecompress4(ref (Ꮡ(array<byte>.Alias(b, 128))).DerefOrNull());
+    g1.Assign(ringDecodeAndDecompress(b[..(int)(encodingSize4)], 4));
+    g2.Assign(ringDecodeAndDecompress4(ref (Ꮡ(array<byte>.Alias(b, 128))).DerefOrNull()));
     if (g1 != g2) {
         t.Errorf("ringDecodeAndDecompress = %v, ringDecodeAndDecompress4 = %v", g1, g2);
     }
-    g1 = ringDecodeAndDecompress(b[..(int)(encodingSize1)], 1);
-    g2 = ringDecodeAndDecompress1(ref (Ꮡ(array<byte>.Alias(b, 32))).DerefOrNull());
+    g1.Assign(ringDecodeAndDecompress(b[..(int)(encodingSize1)], 1));
+    g2.Assign(ringDecodeAndDecompress1(ref (Ꮡ(array<byte>.Alias(b, 32))).DerefOrNull()));
     if (g1 != g2) {
         t.Errorf("ringDecodeAndDecompress = %v, ringDecodeAndDecompress1 = %v", g1, g2);
     }
@@ -208,7 +208,7 @@ public static void TestEncodeDecode(ж<testing.T> t) {
         nint encodingSize = d * (nint)n / 8;
         var gΔ1 = ringDecodeAndDecompress(b.slice(0, encodingSize), (uint8)d);
         var outΔ1 = ringCompressAndEncode(default, gΔ1, (uint8)d);
-        if (!bytes_package.Equal(outΔ1, b.slice(0, encodingSize))) {
+        if (!bytes.Equal(outΔ1, b.slice(0, encodingSize))) {
             t.Errorf("roundtrip failed for d = %d", d);
         }
     }
@@ -216,17 +216,17 @@ public static void TestEncodeDecode(ж<testing.T> t) {
     // Round-trip ringCompressAndEncodeN and ringDecodeAndDecompressN.
     var g = ringDecodeAndDecompress10(Ꮡ(array<byte>.Alias(b, 320)));
     var @out = ringCompressAndEncode10(default, g);
-    if (!bytes_package.Equal(@out, b[..(int)(encodingSize10)])) {
+    if (!bytes.Equal(@out, b[..(int)(encodingSize10)])) {
         t.Errorf("roundtrip failed for specialized 10");
     }
-    g = ringDecodeAndDecompress4(ref (Ꮡ(array<byte>.Alias(b, 128))).DerefOrNull());
+    g.Assign(ringDecodeAndDecompress4(ref (Ꮡ(array<byte>.Alias(b, 128))).DerefOrNull()));
     @out = ringCompressAndEncode4(default, g);
-    if (!bytes_package.Equal(@out, b[..(int)(encodingSize4)])) {
+    if (!bytes.Equal(@out, b[..(int)(encodingSize4)])) {
         t.Errorf("roundtrip failed for specialized 4");
     }
-    g = ringDecodeAndDecompress1(ref (Ꮡ(array<byte>.Alias(b, 32))).DerefOrNull());
+    g.Assign(ringDecodeAndDecompress1(ref (Ꮡ(array<byte>.Alias(b, 32))).DerefOrNull()));
     @out = ringCompressAndEncode1(default, g);
-    if (!bytes_package.Equal(@out, b[..(int)(encodingSize1)])) {
+    if (!bytes.Equal(@out, b[..(int)(encodingSize1)])) {
         t.Errorf("roundtrip failed for specialized 1");
     }
 }
@@ -251,7 +251,7 @@ public static void TestZetas(ж<testing.T> t) {
     var q = big.NewInt(mlkem_package.q);
     foreach (var (k, zeta) in range(zetas.ΔRangeSnapshot())) {
         // ζ^BitRev7(k) mod q
-        var exp = @new<bigꓸInt>().Exp(ζ, big.NewInt((int64)BitRev7((uint8)k)), q);
+        var exp = @new<big.Int>().Exp(ζ, big.NewInt((int64)BitRev7((uint8)k)), q);
         if (big.NewInt((int64)zeta).Cmp(exp) != 0) {
             t.Errorf("zetas[%d] = %v, expected %v", k, zeta, exp.OrTypedNil());
         }
@@ -263,7 +263,7 @@ public static void TestGammas(ж<testing.T> t) {
     var q = big.NewInt(mlkem_package.q);
     foreach (var (k, gamma) in range(gammas.ΔRangeSnapshot())) {
         // ζ^2BitRev7(i)+1
-        var exp = @new<bigꓸInt>().Exp(ζ, big.NewInt((int64)BitRev7((uint8)k) * 2 + 1), q);
+        var exp = @new<big.Int>().Exp(ζ, big.NewInt((int64)BitRev7((uint8)k) * 2 + 1), q);
         if (big.NewInt((int64)gamma).Cmp(exp) != 0) {
             t.Errorf("gammas[%d] = %v, expected %v", k, gamma, exp.OrTypedNil());
         }

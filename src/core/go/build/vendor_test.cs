@@ -28,12 +28,14 @@ internal static slice<@string> allowedPackagePrefixes = [
 ];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string listˢ => ref listˢᵇ;
+private static readonly @string listˢᵇ = "list"u8;
 internal static ref readonly @string stdˢ => ref stdˢᵇ;
 private static readonly @string stdˢᵇ = "std"u8;
 internal static ref readonly @string cmdˢ => ref cmdˢᵇ;
 private static readonly @string cmdˢᵇ = "cmd"u8;
-internal static ref readonly @string vendorˢ3 => ref vendorˢ3ᵇ;
-private static readonly @string vendorˢ3ᵇ = "/vendor/"u8;
+internal static ref readonly @string vendorˢ2 => ref vendorˢ2ᵇ;
+private static readonly @string vendorˢ2ᵇ = "/vendor/"u8;
 
 // Verify that the vendor directories contain only packages matching the list above.
 public static partial void TestVendorPackages(ж<testing.T> t) {
@@ -45,9 +47,9 @@ public static partial void TestVendorPackages(ж<testing.T> t) {
         t.Fatal(err);
     }
     foreach (var (_, fullPkg) in range(strings.Split((@string)@out, "\n"))) {
-        var (pkg, found) = strings.CutPrefix(fullPkg, vendorˢ2);
+        var (pkg, found) = strings.CutPrefix(fullPkg, vendorˢ);
         if (!found) {
-            (_, pkg, found) = strings.Cut(fullPkg, vendorˢ3);
+            (_, pkg, found) = strings.Cut(fullPkg, vendorˢ2);
             if (!found) {
                 continue;
             }

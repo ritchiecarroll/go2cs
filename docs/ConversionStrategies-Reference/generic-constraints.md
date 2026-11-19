@@ -53,7 +53,7 @@ real emission has been tried: a non-empty type set whose
 operator set is empty emits the union as a breadcrumb comment plus the one constraint C# can still
 express —
 
-<!-- source: src/core/runtime/pprof/pprof_test.cs:3711-3712 -->
+<!-- source: src/core/runtime/pprof/pprof_test.cs:3716-3717 -->
 ```csharp
 internal static void testProfileRecordNullPadding<T>(ж<testing.T> t, @string name, Func<slice<T>, (nint, bool)> fn)
     where T : /* runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord */ new()

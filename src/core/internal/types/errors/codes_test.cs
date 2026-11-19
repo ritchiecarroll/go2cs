@@ -37,7 +37,7 @@ public static void TestErrorCodeExamples(ж<testing.T> t) {
                 if (err == nil) {
                     tΔ1.Fatalf("no error in example #%d", i);
                 }
-                var (typerr, ok) = err._<typesꓸError>(ᐧ);
+                var (typerr, ok) = err._<Error>(ᐧ);
                 if (!ok) {
                     tΔ1.Fatalf("not a types.Error: %v", err);
                 }
@@ -63,7 +63,7 @@ internal static void walkCodes(ж<testing.T> t, Action<@string, nint, ж<ast.Val
         t.Fatal(err);
     }
     ref var conf = ref heap<types.Config>(new Config(Importer: importer.Default()), out var Ꮡconf);
-    var info = Ꮡ(new typesꓸInfo(
+    var info = Ꮡ(new Info(
         Types: new map<ast.Expr, types.TypeAndValue>(),
         Defs: new map<ж<ast.Ident>, types.Object>(),
         Uses: new map<ж<ast.Ident>, types.Object>()
@@ -99,7 +99,7 @@ internal static void walkCodes(ж<testing.T> t, Action<@string, nint, ж<ast.Val
 private static ref readonly @string go116codeˢ => ref go116codeˢᵇ;
 private static readonly @string go116codeˢᵇ = "go116code"u8;
 
-internal static nint readCode(typesꓸError err) {
+internal static nint readCode(types.Error err) {
     var v = reflect.ValueOf(err);
     return (nint)v.FieldByName(go116codeˢ).Int();
 }

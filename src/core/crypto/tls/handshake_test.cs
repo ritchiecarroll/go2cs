@@ -31,6 +31,7 @@ using go.crypto;
 using go.os;
 using rsa = go.crypto.rsa_package;
 using static go.crypto.tls_package;
+using static tls_internal_test_package;
 
 partial class tls_internal_test_package {
 
@@ -126,17 +127,19 @@ internal partial struct recordingConn {
     internal bool reading;
 }
 
+} partial class tls_internal_testᴛrecordingConn {
+
 // Go method set entry for the promoted 'Conn.Close()' - provided ONLY by the embedded
 // interface field in *recordingConn's method set; see the pointer-only satisfaction record.
 internal static error Close(this recordingConn recvᴛ) => recvᴛ.Conn.Close();
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *recordingConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr LocalAddr(this recordingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr(this recordingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *recordingConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr RemoteAddr(this recordingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr(this recordingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *recordingConn's method set; see the pointer-only satisfaction record.
@@ -208,6 +211,12 @@ internal static (nint n, error err) Write(this ж<recordingConn> Ꮡr, slice<byt
     ᒐdone: return (n, err);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string clientˢ => ref clientˢᵇ;
+private static readonly @string clientˢᵇ = "client"u8;
+internal static ref readonly @string serverˢ => ref serverˢᵇ;
+private static readonly @string serverˢᵇ = "server"u8;
+
 // WriteTo writes Go source code to w that contains the recorded traffic.
 internal static (int64, error) WriteTo(this ref recordingConn r, io.Writer w) {
     // TLS always starts with a client to server flow.
@@ -238,6 +247,8 @@ internal static (int64, error) WriteTo(this ref recordingConn r, io.Writer w) {
     }
     return (written, default);
 }
+
+} partial class tls_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidTestDataˢ => ref invalidTestDataˢᵇ;
@@ -302,6 +313,8 @@ internal partial struct replayingConn {
 }
 
 internal static net.Conn _ᴛ12ʗ = new tls_internal_test_package.replayingConnжConn(((ж<replayingConn>)nil));
+
+} partial class tls_internal_testᴛreplayingConn {
 
 internal static (nint n, error err) Read(this ж<replayingConn> Ꮡr, slice<byte> b) {
     nint n = default;
@@ -385,11 +398,13 @@ internal static error Close(this ж<replayingConn> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.of(replayingConn.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static netꓸAddr LocalAddr(this ref replayingConn r) { return default; }
-internal static netꓸAddr RemoteAddr(this ref replayingConn r) { return default; }
+internal static net.Addr LocalAddr(this ref replayingConn r) { return default; }
+internal static net.Addr RemoteAddr(this ref replayingConn r) { return default; }
 internal static error SetDeadline(this ref replayingConn r, time.Time t) { return default; }
 internal static error SetReadDeadline(this ref replayingConn r, time.Time t) { return default; }
 internal static error SetWriteDeadline(this ref replayingConn r, time.Time t) { return default; }
+
+} partial class tls_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string goTlsTestˢ => ref goTlsTestˢᵇ;
@@ -411,7 +426,7 @@ internal static @string tempFile(@string contents) {
 // pairs like net.Pipe, but connected by an actual buffered TCP connection.
 partial struct localListenerᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
-    internal netꓸAddr addr;
+    internal net.Addr addr;
     internal channel<net.Conn> ch;
 }
 internal static readonly ж<localListenerᴛ1> ᏑlocalListener = new StaticBox<localListenerᴛ1>(default(localListenerᴛ1));
@@ -447,7 +462,7 @@ internal static (net.Conn, net.Conn) localPipe(testing.TB t) {
 Dialing:
         for (nint i = 0; i < 5; i++) {
             // We expect a rare mismatch, but probably not 5 in a row.
-            var tooSlow = time_package.NewTimer(1 * time_package.ΔSecond);
+            var tooSlow = time.NewTimer(1 * time.Second);
             var tooSlowʗ1 = tooSlow;
             defer(() => tooSlowʗ1.Stop(), ref ᒐ);
             ref var c1 = ref heap<net.Conn>(out var Ꮡc1);
@@ -506,14 +521,18 @@ break_Dialing:;
 internal partial struct zeroSource {
 }
 
+} partial class tls_internal_testᴛzeroSource {
+
 internal static (nint n, error err) Read(this zeroSource _, slice<byte> b) {
     clear(b);
     return (len(b), default);
 }
 
+} partial class tls_internal_test_package {
+
 internal static slice<uint16> allCipherSuites() {
-    var ids = new slice<uint16>(len(ΔcipherSuites));
-    foreach (var (i, suite) in range(ΔcipherSuites)) {
+    var ids = new slice<uint16>(len(cipherSuites));
+    foreach (var (i, suite) in range(cipherSuites)) {
         ids[i] = suite.id;
     }
 
@@ -577,7 +596,7 @@ internal static partial nint runMain(ж<testing.M> m) {
         os.Setenv(godebugˢ, "cryptocustomrand=1,"u8 + os.Getenv(godebugˢ));
 
         testConfig = Ꮡ(new Config(
-            Time: () => time_package.Unix(0, 0),
+            Time: () => time.Unix(0, 0),
             Rand: new zeroSource(),
             Certificates: new slice<global::go.crypto.tls_package.Certificate>(2),
             InsecureSkipVerify: true,
@@ -621,9 +640,9 @@ internal static partial nint runMain(ж<testing.M> m) {
 internal static ref readonly @string sentinelᶜ => ref sentinelᶜᵇ;
 private static readonly @string sentinelᶜᵇ = "SENTINEL\n"u8;
 
-internal static partial (global::go.crypto.tls_package.ΔConnectionState serverState, global::go.crypto.tls_package.ΔConnectionState clientState, error err) testHandshake(ж<testing.T> t, ж<global::go.crypto.tls_package.Config> clientConfig, ж<global::go.crypto.tls_package.Config> serverConfig) {
-    global::go.crypto.tls_package.ΔConnectionState serverState = default;
-    global::go.crypto.tls_package.ΔConnectionState clientState = default;
+internal static partial (global::go.crypto.tls_package.ConnectionState serverState, global::go.crypto.tls_package.ConnectionState clientState, error err) testHandshake(ж<testing.T> t, ж<global::go.crypto.tls_package.Config> clientConfig, ж<global::go.crypto.tls_package.Config> serverConfig) {
+    global::go.crypto.tls_package.ConnectionState serverState = default;
+    global::go.crypto.tls_package.ConnectionState clientState = default;
     error err = default;
 
     @string sentinel = sentinelᶜ;
@@ -687,7 +706,7 @@ internal static slice<byte> fromHex(@string s) {
 // testTime is 2016-10-20T17:32:09.000Z, which is within the validity period of
 // [testRSACertificate], [testRSACertificateIssuer], [testRSA2048Certificate],
 // [testRSA2048CertificateIssuer], and [testECDSACertificate].
-internal static Func<time.Time> testTime = () => time_package.Unix(1476984729, 0);
+internal static Func<time.Time> testTime = () => time.Unix(1476984729, 0);
 
 internal static slice<byte> testRSACertificate = fromHex("3082024b308201b4a003020102020900e8f09d3fe25beaa6300d06092a864886f70d01010b0500301f310b3009060355040a1302476f3110300e06035504031307476f20526f6f74301e170d3136303130313030303030305a170d3235303130313030303030305a301a310b3009060355040a1302476f310b300906035504031302476f30819f300d06092a864886f70d010101050003818d0030818902818100db467d932e12270648bc062821ab7ec4b6a25dfe1e5245887a3647a5080d92425bc281c0be97799840fb4f6d14fd2b138bc2a52e67d8d4099ed62238b74a0b74732bc234f1d193e596d9747bf3589f6c613cc0b041d4d92b2b2423775b1c3bbd755dce2054cfa163871d1e24c4f31d1a508baab61443ed97a77562f414c852d70203010001a38193308190300e0603551d0f0101ff0404030205a0301d0603551d250416301406082b0601050507030106082b06010505070302300c0603551d130101ff0402300030190603551d0e041204109f91161f43433e49a6de6db680d79f60301b0603551d230414301280104813494d137e1631bba301d5acab6e7b30190603551d1104123010820e6578616d706c652e676f6c616e67300d06092a864886f70d01010b0500038181009d30cc402b5b50a061cbbae55358e1ed8328a9581aa938a495a1ac315a1a84663d43d32dd90bf297dfd320643892243a00bccf9c7db74020015faad3166109a276fd13c3cce10c5ceeb18782f16c04ed73bbb343778d0c1cf10fa1d8408361c94c722b9daedb4606064df4c1b33ec0d1bd42d4dbfe3d1360845c21d33be9fae7");
 
@@ -817,6 +836,8 @@ MC4CAQAwBQYDK2VwBCIEINifzf07d9qx3d44e0FSbV4mC/xQxT644RRbpgNpin7I
 """u8.Raw());
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tlsHandshakeBufferNotˢ => ref tlsHandshakeBufferNotˢᵇ;
+private static readonly @string tlsHandshakeBufferNotˢᵇ = "tls: handshake buffer not empty before setting read traffic secret"u8;
 internal static readonly object expectedErrorFromˢ2 = (@string)"expected error from incomplete handshake, got nil"u8;
 
 public static partial void TestServerHelloTrailingMessage(ж<testing.T> t) {
@@ -904,6 +925,10 @@ public static partial void TestClientHelloTrailingMessage(ж<testing.T> t) {
         }
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tlsHandshakeBufferNotˢ2 => ref tlsHandshakeBufferNotˢ2ᵇ;
+private static readonly @string tlsHandshakeBufferNotˢ2ᵇ = "tls: handshake buffer not empty before HelloRetryRequest"u8;
 
 public static partial void TestDoubleClientHelloHRR(ж<testing.T> t) {
     // If a client sends two ClientHello messages in a single record, and the
@@ -1004,8 +1029,8 @@ public static void TestMultipleKeyUpdate(ж<testing.T> t) {
             }
             ᐸꟷ(clientHandshakeDone);
 
-            c.SetReadDeadline(time_package.Now().Add(1 * time_package.ΔSecond));
-            s.SetReadDeadline(time_package.Now().Add(1 * time_package.ΔSecond));
+            c.SetReadDeadline(time.Now().Add(1 * time.Second));
+            s.SetReadDeadline(time.Now().Add(1 * time.Second));
 
             var (kuMsg, err) = (Ꮡ(new keyUpdateMsg(updateRequested: requestUpdateʗ1))).marshal();
             if (err != nil) {

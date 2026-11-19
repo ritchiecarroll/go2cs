@@ -35,9 +35,9 @@ partial class runtime_test_package {
 internal static channel<bool> stop = new channel<bool>(1);
 
 internal static partial void perpetuumMobile() {
-    var selᴛ81 = stop;
-    switch (trySelect(ᐸꟷ(selᴛ81, ꓸꓸꓸ))) {
-    case 0 when selᴛ81.ꟷᐳ(out _): {
+    var stopᴛ1 = stop;
+    switch (trySelect(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
+    case 0 when stopᴛ1.ꟷᐳ(out _): {
         break;
     }
     default: {
@@ -98,9 +98,9 @@ internal static partial void testYieldProgress(bool locked) {
             Δruntime.LockOSThread();
         }
         for (;;) {
-            var selᴛ82 = cʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ82, ꓸꓸꓸ))) {
-            case 0 when selᴛ82.ꟷᐳ(out _): {
+            var cᴛ1 = cʗ1;
+            switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+            case 0 when cᴛ1.ꟷᐳ(out _): {
                 cackʗ1.ᐸꟷ(true);
                 return;
             }
@@ -308,13 +308,13 @@ public static partial void TestTimerFairness(ж<testing.T> t) {
         var doneʗ1 = done;
         goǃ(() => {
             for (;;) {
-                var selᴛ83 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
-                var selᴛ84 = doneʗ1;
-                switch (select(selᴛ83, ᐸꟷ(selᴛ84, ꓸꓸꓸ))) {
+                var cᴛ1 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
+                var doneᴛ1 = doneʗ1;
+                switch (select(cᴛ1, ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
                 case 0: {
                     break;
                 }
-                case 1 when selᴛ84.ꟷᐳ(out _): {
+                case 1 when doneᴛ1.ꟷᐳ(out _): {
                     return;
                 }}
             }
@@ -323,13 +323,13 @@ public static partial void TestTimerFairness(ж<testing.T> t) {
 
     var timer = time.After(20 * time.Millisecond);
     for (;;) {
-        var selᴛ85 = c;
-        var selᴛ86 = timer;
-        switch (select(ᐸꟷ(selᴛ85, ꓸꓸꓸ), ᐸꟷ(selᴛ86, ꓸꓸꓸ))) {
-        case 0 when selᴛ85.ꟷᐳ(out _): {
+        var cᴛ2 = c;
+        var timerᴛ1 = timer;
+        switch (select(ᐸꟷ(cᴛ2, ꓸꓸꓸ), ᐸꟷ(timerᴛ1, ꓸꓸꓸ))) {
+        case 0 when cᴛ2.ꟷᐳ(out _): {
             break;
         }
-        case 1 when selᴛ86.ꟷᐳ(out _): {
+        case 1 when timerᴛ1.ꟷᐳ(out _): {
             close(done);
             return;
         }}
@@ -351,17 +351,17 @@ public static partial void TestTimerFairness2(ж<testing.T> t) {
             ref var buf = ref heap(new array<byte>(1), out var Ꮡbuf);
             for (;;) {
                 syscall.Read(0, buf[0..0]);
-                var selᴛ87 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
-                var selᴛ88 = cʗ1;
-                var selᴛ89 = timer;
-                switch (select(selᴛ87, ᐸꟷ(selᴛ88, ꓸꓸꓸ), ᐸꟷ(selᴛ89, ꓸꓸꓸ))) {
+                var cᴛ1 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
+                var cᴛ2 = cʗ1;
+                var timerᴛ1 = timer;
+                switch (select(cᴛ1, ᐸꟷ(cᴛ2, ꓸꓸꓸ), ᐸꟷ(timerᴛ1, ꓸꓸꓸ))) {
                 case 0: {
                     break;
                 }
-                case 1 when selᴛ88.ꟷᐳ(out _): {
+                case 1 when cᴛ2.ꟷᐳ(out _): {
                     break;
                 }
-                case 2 when selᴛ89.ꟷᐳ(out _): {
+                case 2 when timerᴛ1.ꟷᐳ(out _): {
                     doneʗ1.ᐸꟷ(true);
                     return;
                 }}
@@ -557,13 +557,13 @@ public static partial void TestPingPongHog(ж<testing.T> t) {
         var doneʗ1 = done;
         void run(nint limit, ж<nint> counter, channel<bool> wake) {
             for (;;) {
-                var selᴛ90 = doneʗ1;
-                var selᴛ91 = wake;
-                switch (select(ᐸꟷ(selᴛ90, ꓸꓸꓸ), ᐸꟷ(selᴛ91, ꓸꓸꓸ))) {
-                case 0 when selᴛ90.ꟷᐳ(out _): {
+                var doneᴛ1 = doneʗ1;
+                var wakeᴛ1 = wake;
+                switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(wakeᴛ1, ꓸꓸꓸ))) {
+                case 0 when doneᴛ1.ꟷᐳ(out _): {
                     return;
                 }
-                case 1 when selᴛ91.ꟷᐳ(out _): {
+                case 1 when wakeᴛ1.ꟷᐳ(out _): {
                     for (nint i = 0; i < limit; i++) {
                         counter.Value++;
                     }
@@ -624,9 +624,9 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
         var stopʗ1 = stop;
         goǃ(() => {
             for (;;) {
-                var selᴛ92 = stopʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ92, ꓸꓸꓸ))) {
-                case 0 when selᴛ92.ꟷᐳ(out _): {
+                var stopᴛ1 = stopʗ1;
+                switch (trySelect(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
+                case 0 when stopᴛ1.ꟷᐳ(out _): {
                     doneʗ1.ᐸꟷ(true);
                     return;
                 }
@@ -675,7 +675,7 @@ internal static array<uint64> padData = new(128);
 
 internal static void stackGrowthRecursive(nint i) {
     array<uint64> pad = new(128);
-    pad = padData.Clone();
+    pad.Assign(padData);
     foreach (var j in range(len(pad))) {
         if (pad[j] != 0) {
             return;
@@ -717,9 +717,9 @@ internal static nint big(channel<nint> stop) {
         bigframe(stop);
 
         // check if we've been asked to stop.
-        var selᴛ93 = stop;
-        switch (select(ᐸꟷ(selᴛ93, ꓸꓸꓸ))) {
-        case 0 when selᴛ93.ꟷᐳ(out _): {
+        var stopᴛ1 = stop;
+        switch (select(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
+        case 0 when stopᴛ1.ꟷᐳ(out _): {
             return n;
         }}
         return default;
@@ -754,9 +754,9 @@ internal static nint small(channel<nint> stop, /*[8192]*/ ж<array<byte>> Ꮡx) 
 
 internal static bool nonleaf(channel<nint> stop) {
     // do something that won't be inlined:
-    var selᴛ94 = stop;
-    switch (trySelect(ᐸꟷ(selᴛ94, ꓸꓸꓸ))) {
-    case 0 when selᴛ94.ꟷᐳ(out _): {
+    var stopᴛ1 = stop;
+    switch (trySelect(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
+    case 0 when stopᴛ1.ꟷᐳ(out _): {
         return true;
     }
     default: {
@@ -1327,7 +1327,7 @@ public static partial void TestNetpollBreak(ж<testing.T> t) {
     var cʗ1 = c;
     goǃ(() => {
         cʗ1.ᐸꟷ(true);
-        runtime_internal_test_package.Netpoll(10 * time.ΔSecond.Nanoseconds());
+        runtime_internal_test_package.Netpoll(10 * time.Second.Nanoseconds());
         cʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(c);
@@ -1339,9 +1339,9 @@ loop:
         runtime_internal_test_package.Usleep(100);
         runtime_internal_test_package.NetpollBreak();
         runtime_internal_test_package.NetpollBreak();
-        var selᴛ95 = c;
-        switch (trySelect(ᐸꟷ(selᴛ95, ꓸꓸꓸ))) {
-        case 0 when selᴛ95.ꟷᐳ(out _): {
+        var cᴛ1 = c;
+        switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+        case 0 when cᴛ1.ꟷᐳ(out _): {
             goto break_loop;
             break;
         }

@@ -170,9 +170,6 @@
     <ProjectReference Include="$(go2csPath)core/internal/msan/internal.msan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/maps/internal.runtime.maps.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/unsafeheader/internal.unsafeheader.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />

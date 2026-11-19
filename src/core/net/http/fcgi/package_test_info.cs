@@ -7,7 +7,6 @@
 global using static global::go.net.http.fcgi_package;
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
 // </ImportedTypeAliases>
 
 using go;
@@ -24,7 +23,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 [assembly: GoImplement<bytes_package.Buffer, io_package.ReadWriter>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 [assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
 [assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
 [assembly: GoImplement<nilCloser, io_package.ReadWriteCloser>(Pointer = true)]
@@ -56,7 +55,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("fcgi_test.cs", 460, 9, 0)]
+[assembly: GoBoundedGoroutine("fcgi_test.cs", 483, 9, 0)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,7 +65,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABUiAAcWgoKCgoKUgoKUggALCgAXPJSCgoKCgoKCgoKUlIKClIKClIKClIKCgoCCgqSAgoKkggAKEoKC5oKmguaCgpSCgoKCpoaCuIIACBSKgpSCgoIACRQAERoAGDiCpoKssrKCgoKCuoKCppSUAAgSgqiSAAcQgoK4ABckAA4usrKCgoKCqIKClIKUlIIADQiCABQyspKCgoKCgqiCgpSCgoIADhaCpoKC2sKUgqK4gpSUooKmgpSYgpSUgoKi", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "54=Join/1/1/12;197=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;215=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;302=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;381=Repeat/1/2/16,Repeat/2/2/21", "", "472:21,473:13")]
+[assembly: GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABYiAAcWgoKCgoKUgoKUggALCgAZPLSCgoKCgoKCgoKUlIKClIKClIKClIKCgoCCgqSAgoKkggAMEoKC5oKmggAIBoKClIKCgoKmhoK4ggAIFIqClIKCggAJFAARGgAaOIKmgsyysoKCgoK6goKmlJQAChKCyJIABxCCgrgAFyQADi6ysoKCgoKogoKUgpSUggAPCIIAFDKykoKCgoKCqIKClIKCggAQFoKmgoL6wpSCoriClJSigqaClJiClJSCgqI=", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "55=Join/1/1/12;206=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;224=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;319=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;400=Repeat/1/2/16,Repeat/2/2/21", "", "495:21,496:13")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -106,3 +105,17 @@ public static partial class fcgi_internal_test_package
         builtin.initPackage(typeof(global::go.net.http.fcgi_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fcgi_internal_test_package.nilCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛnilCloser;
+[GoMethodHost(typeof(fcgi_internal_test_package.nopWriteCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛnopWriteCloser;
+[GoMethodHost(typeof(fcgi_internal_test_package.rwNopCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛrwNopCloser;
+[GoMethodHost(typeof(fcgi_internal_test_package.signalingNopWriteCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛsignalingNopWriteCloser;
+[GoMethodHost(typeof(fcgi_internal_test_package.writeOnlyConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fcgi_internal_testᴛwriteOnlyConn;
+// </MethodHolders>
