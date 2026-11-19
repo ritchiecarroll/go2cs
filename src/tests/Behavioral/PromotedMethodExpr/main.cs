@@ -91,10 +91,10 @@ internal static void main() {
         pc(((Func<box<nint>, nint>)(mainᴛboxᴛpkg.Get))) == tablePC(reflect.TypeOf(new box<nint>()), "Get"));
     fmt.Println("(*bufio.ReadWriter).ReadString is one func:",
         pc(((Func<ж<bufio.ReadWriter>, byte, (@string, error)>)(global::go.bufioᴛReadWriterᴛpkg.ReadString))) == pc(((Func<ж<bufio.ReadWriter>, byte, (@string, error)>)(global::go.bufioᴛReadWriterᴛpkg.ReadString))));
-    fmt.Println("and not another's:", pc(((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))) != pc(((Func<ж<inner>, nint, nint>)(Add))), pc(((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))) != pc(((Func<ж<deep>, nint, nint>)(mainᴛdeepᴛpkg.Add))),
+    fmt.Println("and not another's:", pc(((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))) != pc(((Func<ж<inner>, nint, nint>)(main_package.Add))), pc(((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))) != pc(((Func<ж<deep>, nint, nint>)(mainᴛdeepᴛpkg.Add))),
         pc(((Func<outer, nint>)(mainᴛouterᴛpkg.Get))) != pc(((Func<box<nint>, nint>)(mainᴛboxᴛpkg.Get))));
     
-    var say = ((Func<own, @string, @string>)(Say));
+    var say = ((Func<own, @string, @string>)(main_package.Say));
     fmt.Println("own.Say:", say(new own("!"), "hi"));
     var recvʗ1 = new own("?");
     

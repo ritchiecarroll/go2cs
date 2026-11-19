@@ -32,7 +32,7 @@ internal static void main() {
     fmt.Println("func:  ", nameOf(passInt));
     fmt.Println("func:  ", nameOf(passString));
 
-    fmt.Println("method:", nameOf(((Action<receiver>)(method))));
+    fmt.Println("method:", nameOf(((Action<receiver>)(main_package.method))));
 
     var literal = () => {
     };

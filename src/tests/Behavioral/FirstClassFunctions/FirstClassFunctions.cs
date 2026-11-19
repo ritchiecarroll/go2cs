@@ -197,8 +197,8 @@ internal static void bump(this ref worker w) { w.n++; }
 internal static error /*err*/ initWorker(this ref worker w, nint level) {
     switch (ᐧ) {
     case {} when level is 0: {
-        w.fill = ((Func<ж<worker>, slice<byte>, nint>)(fillFast));
-        w.step = ((Action<ж<worker>>)(bump));
+        w.fill = ((Func<ж<worker>, slice<byte>, nint>)(main_package.fillFast));
+        w.step = ((Action<ж<worker>>)(main_package.bump));
         break;
     }
     default: {
