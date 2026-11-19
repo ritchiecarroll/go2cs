@@ -981,3 +981,36 @@ func (p plain) Size() int { return p.n }
 	requireEmitted(t, "the library's main.cs", library["main.cs"], []string{"partial class appᴛplain {"}, nil)
 	requireEmitted(t, "the library's package_info.cs", library["package_info.cs"], []string{"partial class appᴛplain;"}, nil)
 }
+
+// A file closes its own class with the class's name, and a method holder its last method left open with a bare
+// brace, as a holder closes wherever the next declaration switches class.
+func TestFileThatEndsInAHolderClosesItBare(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{
+		"box.go": `package app
+
+type Box struct{ n int }
+
+func Make() Box { return Box{1} }
+
+func (b Box) Size() int { return b.n }
+`,
+		"make.go": `package app
+
+func (b Box) Twice() int { return b.n * 2 }
+
+func Use() int { return Make().Twice() }
+`,
+	})
+
+	box, use := emitted["box.cs"], emitted["make.cs"]
+
+	if !strings.HasSuffix(box, "public static nint Size(this Box b) { return b.n; }\n\n}\n") {
+		t.Errorf("box.cs does not close the holder of Box with a bare brace\n%s", box)
+	}
+
+	requireEmitted(t, "box.cs", box, nil, []string{"// end appᴛBox", "// end app_package"})
+
+	if !strings.HasSuffix(use, "\n} // end app_package\n") {
+		t.Errorf("make.cs does not close its package class by name\n%s", use)
+	}
+}
