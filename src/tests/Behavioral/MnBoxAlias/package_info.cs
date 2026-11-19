@@ -53,7 +53,7 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 320, 5, 12)]
+[assembly: GoBoundedGoroutine("main.cs", 341, 5, 12)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,7 +63,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ADFcgsikgrSCgoLGgoKCxoKCgsiCgoKCgsqCgoKoggAGFIKCgqaCgoKqgoKCqoKmgoKCpoKosoKCpoLmsoKCpoLogoKCptKCgqaC5tKCgqaC5oKUkJKClJCSgpSCgoKQkoKClIKQkoKUgpCSgpSQkoKUgoKCkJKUgpCSlIKQkpSCkJKUgpCSlIKCkJKUgoKCkJKUgJKUgpCSlJCSlIKQkpSQkoKClJKUmII=", "141-145:1;151-155:1;168-172:1;178-182:1;190-190:1;194-194:2;201-201:3;207-207:4;212-212:5;216-216:6;223-223:7;227-227:8;231-231:9;235-235:10;239-239:11;244-244:12;250-250:13;253-253:14;257-257:15;260-260:16;264-264:17;267-267:18;272-272:19", "", "", "320:21", "148:21,149:13,165:21,166:13,190:21,191:13,209:21,210:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ADFcgsikgrSCgoLGgoKCxoKCgsiCgoKCgsqCgoKoggAGFIKCgqaCgoKqgoKCqoKmgoKCpoKosoKCpoLmsoKCpoLsgoKCpoKCgqiCgoKCgoKogoKCptKCgqaC5tKCgqaC5oKUkJKClJCSgpSCgoKQkoKClIKQkoKUgpCSgpSQkoKUgoKCkJKUgpCSlIKQkpSCkJKUgpCSlIKCkJKUgoKCkJKUgJKUgpCSlJCSlIKQkpSCsJKUkJKCgpSSlJiC", "141-145:1;151-155:1;193-197:1;203-207:1;215-215:1;219-219:2;226-226:3;232-232:4;237-237:5;241-241:6;248-248:7;252-252:8;256-256:9;260-260:10;264-264:11;269-269:12;275-275:13;278-278:14;282-282:15;285-285:16;289-289:17;293-293:18;293-293:19;296-296:20;301-301:21", "", "", "341:21", "148:21,149:13,165:21,166:13,211:21,212:13,230:21,231:13")]
 // </GoSourcePositionMaps>
 
 namespace go;

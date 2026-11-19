@@ -157,6 +157,31 @@ func nilParam(nh *holder) (out string) {
 	return fmt.Sprint(v)
 }
 
+// The spill (DESIGN-mn-box-twin.md 12.4): a parking call in a LATER argument of a byref-param call. Go evaluates the
+// pointer, then parkK (which parks once), then calls readCellK, which parks again and reads the write made during that
+// second park. The twin awaits parkK in place instead of blocking its carrier.
+func readCellK(c *cell, k int) int {
+	ready <- struct{}{}
+	<-resume
+	return c.v*100 + k
+}
+
+func parkK() int {
+	ready <- struct{}{}
+	<-resume
+	return 3
+}
+
+// writer2 serves two parks in order: first, then second.
+func writer2(first, second func()) {
+	<-ready
+	first()
+	resume <- struct{}{}
+	<-ready
+	second()
+	resume <- struct{}{}
+}
+
 // writer waits for the method to park, writes, and lets it resume.
 func writer(write func()) {
 	<-ready
@@ -263,6 +288,10 @@ func main() {
 	rn := &rnest{p: []int{1}, h: rholder{s: []int{2}, c: rcell{name: "r", v: 1}}}
 	go writer(func() { rn.h.c.v = 18 })
 	fmt.Println("param-chain-ref", chainRef(rn))
+
+	pk := &cell{v: 1}
+	go writer2(func() {}, func() { pk.v = 19 })
+	fmt.Println("param-later-call", readCellK(pk, parkK()))
 
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()

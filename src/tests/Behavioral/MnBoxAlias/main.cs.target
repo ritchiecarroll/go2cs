@@ -175,6 +175,27 @@ internal static @string /*out*/ nilParam(ref holder nh) {
     return @out;
 }
 
+internal static nint readCellK(ref cell c, nint k) {
+    ready.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(resume);
+    return c.v * 100 + k;
+}
+
+internal static nint parkK() {
+    ready.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(resume);
+    return 3;
+}
+
+internal static void writer2(Action first, Action second) {
+    ᐸꟷ(ready);
+    first();
+    resume.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(ready);
+    second();
+    resume.ᐸꟷ(new EmptyStruct());
+}
+
 internal static void writer(Action write) {
     ᐸꟷ(ready);
     write();
@@ -348,6 +369,15 @@ internal static partial void main() {
         rnʗ1.h.c.v = 18;
     });
     fmt.Println("param-chain-ref", chainRef(ref (rn).DerefOrNull()));
+
+    var pk = Ꮡ(new cell(v: 1));
+
+    var pkʗ1 = pk;
+    goǃ(writer2, () => {
+    }, () => {
+        pkʗ1.v = 19;
+    });
+    fmt.Println("param-later-call", readCellK(ref (pk).DerefOrNull(), parkK()));
 
     var aʗ3 = a;
     goǃ(writer, () => {

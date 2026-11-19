@@ -29,6 +29,12 @@ public sealed partial class TwinGenerator
         private List<StatementSyntax> m_spills = [];
         private readonly HashSet<SyntaxNode> m_spilled = [];
 
+        // The spill (12.1 item 5, section 12.4): each call this visit turns into a byref-param box twin call, with the box
+        // each argument hands (null for a by-value argument). Such an argument is a VALUE in the rewritten call, so a
+        // later awaitable in the same argument list holds no reference across its await: C# evaluates the box once, in
+        // argument order, and keeps it in a temp over the await.
+        private readonly Dictionary<SyntaxNode, string?[]> m_boxCalls = [];
+
         public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits, Spills, RefBlocked;
 
         // N3's D3 core: the method's own func-value parameters whose pair test is HOISTED to the twin's entry (never
@@ -127,6 +133,9 @@ public sealed partial class TwinGenerator
                 return base.VisitInvocationExpression(node);
             }
 
+            if (HandsArgBoxes(site, node.ArgumentList.Arguments.Count) is { } handsBoxes)
+                m_boxCalls[node] = handsBoxes;
+
             InvocationExpressionSyntax visited = (InvocationExpressionSyntax)base.VisitInvocationExpression(node)!;
 
             // An interface call reaches its twin through the hidden interface's call helper, or by name where the
@@ -147,7 +156,7 @@ public sealed partial class TwinGenerator
             }
             // byref-param (12.1): each by-ref argument becomes the box it names, read once, at the call; under
             // GoTwinsBoxArgCopy (the call-site control) a fresh COPY of the argument's value instead.
-            else if (site.ArgBoxes is { } boxes && m_run.IsParamBoxTwin(site.Target) && boxes.Length == call.ArgumentList.Arguments.Count)
+            else if (HandsArgBoxes(site, call.ArgumentList.Arguments.Count) is { } boxes)
             {
                 SeparatedSyntaxList<ArgumentSyntax> arguments = call.ArgumentList.Arguments;
 
@@ -193,6 +202,13 @@ public sealed partial class TwinGenerator
 
             return awaited.WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
         }
+
+        // The boxes an awaited call hands its byref-param box twin, when the call becomes one: the branch order above (a
+        // receiver box and a box overload come first).
+        private string?[]? HandsArgBoxes(Site site, int arguments) =>
+            site.BoxOf is not null && !site.ViaBoxOverload && m_run.IsBoxTwinTarget(site.Target) ? null :
+            site.ViaBoxOverload && m_run.IsBoxTwinTarget(site.Target) ? null :
+            site.ArgBoxes is { } boxes && m_run.IsParamBoxTwin(site.Target) && boxes.Length == arguments ? boxes : null;
 
         // Whether a ref struct value is evaluated before this call inside its statement, and whether the call can
         // move ahead of that statement: it can when the enclosing statement list is visiting the statement, the
@@ -249,14 +265,19 @@ public sealed partial class TwinGenerator
                         inert &= declaration.Variables.Count == 1;
                         break;
                     case BaseArgumentListSyntax list:
-                        foreach (ArgumentSyntax argument in list.Arguments)
+                        m_boxCalls.TryGetValue(list.Parent!, out string?[]? handed);
+
+                        for (int index = 0; index < list.Arguments.Count; index++)
                         {
+                            ArgumentSyntax argument = list.Arguments[index];
+
                             if (argument == child)
                                 break;
 
                             // Stage (c): net/http's `refererForURL(…, ref (req.URL).DerefOrNull(), req.Header.Get(…))`. A
                             // by-ref argument evaluated before the await would hold its reference across it (CS8178).
-                            refLike |= !argument.RefKindKeyword.IsKind(SyntaxKind.None);
+                            // The spill (12.4): not one the box call hands as a box, which is a value.
+                            refLike |= !argument.RefKindKeyword.IsKind(SyntaxKind.None) && handed?[index] is null;
                             Earlier(argument.Expression);
                         }
 

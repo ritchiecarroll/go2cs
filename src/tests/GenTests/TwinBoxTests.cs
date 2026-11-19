@@ -426,6 +426,32 @@ public class TwinBoxTests
 
         """;
 
+    // The spill (12.1 item 5, section 12.4): a parking CALL in a later argument of a box call. Its box is a value, so
+    // C# evaluates it once, ahead of the await, and the inner call awaits in place. A named-plain call keeps its `ref`
+    // and the inner call stays plain (CS8178); a ref local read after the call keeps the existing spill rule.
+    private const string LaterParkingCall = """
+            internal static nint parksN() { ᐸꟷ(ch); return 1; }
+
+            internal static nint add(nint a, nint b) => a + b;
+
+            internal static void rwv(ref T c, nint k) { ᐸꟷ(ch); c.x = k; }
+
+            internal static void rwv2(nint j, ref T c, nint k) { ᐸꟷ(ch); c.x = j + k; }
+
+            public static void runCall(ж<T> px) { rwv(ref (px).DerefOrNull(), parksN()); }
+
+            public static void runNested(ж<T> px) { rwv(ref (px).DerefOrNull(), add(1, parksN())); }
+
+            public static void runMid(ж<T> px) { rwv2(parksN(), ref (px).DerefOrNull(), parksN()); }
+
+            public static void runStack()
+            {
+                T v = default;
+                rwv(ref v, parksN());
+            }
+
+        """;
+
     // A hand-written `this ref` method with another `ref` parameter (the converter emits none: ref-lowering skips methods).
     private const string MixedRef = """
             internal static void mx(this ref T t, ref T u) { ᐸꟷ(ch); }
@@ -1018,8 +1044,55 @@ public class TwinBoxTests
         (string twins, Diagnostic[] errors) = Run(null, ByRefParams, LaterParkingArgument);
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
-        StringAssert.Contains(twins, "await rwꞏtwin(px, ᐸꟷ(ch))", "the inner receive stays in place, plain, after the box");
+        // Amended by the spill (12.4): the receive now awaits in place; the box px is still read first, where the plain
+        // emission reads it, so the f(p, <-ch) divergence (MnLaterArg) is unchanged and nothing moves ahead of the statement.
+        StringAssert.Contains(twins, "await rwꞏtwin(px, (await ᐸꟷꞏtwin(ch)))", "the inner receive stays in place, after the box, and awaits");
         Assert.IsFalse(twins.Contains("runLaterꞏtwin(ж<T> px) { var ᴛtwin", StringComparison.Ordinal), "nothing spilled ahead of the statement");
+    }
+
+    [TestMethod]
+    public void P25_ALaterParkingCallUnderABoxCallAwaitsInPlace()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, LaterParkingCall);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await rwvꞏtwin(px, (await parksNꞏtwin()))", "the later call awaits; the box px is read once, ahead of it");
+    }
+
+    [TestMethod]
+    public void P26_ANestedLaterParkingCallUnderABoxCallAwaitsInPlace()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, LaterParkingCall);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await rwvꞏtwin(px, add(1, (await parksNꞏtwin())))", "a call nested in a later argument awaits too");
+    }
+
+    [TestMethod]
+    public void P27_ParkingCallsOnBothSidesOfABoxArgumentAwaitInArgumentOrder()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, LaterParkingCall);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await rwv2ꞏtwin((await parksNꞏtwin()), px, (await parksNꞏtwin()))", "left to right: call, box, call");
+    }
+
+    [TestMethod]
+    public void P28_ANamedPlainCallKeepsItsLaterParkingCallPlain()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, LaterParkingCall);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "rwv(ref v, parksN())", "no box for a stack local: the ref stays, so the inner call stays plain (CS8178)");
+    }
+
+    [TestMethod]
+    public void P29_TheCallSiteCopyControlAlsoAwaitsTheLaterCall()
+    {
+        (string twins, Diagnostic[] errors) = Run(new() { ["build_property.GoTwinsBoxArgCopy"] = "true" }, LaterParkingCall);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "await rwvꞏtwin(global::go.builtin.Ꮡ((px).DerefOrNull()), (await parksNꞏtwin()))", "the copy is a value too");
     }
 
     [TestMethod]
