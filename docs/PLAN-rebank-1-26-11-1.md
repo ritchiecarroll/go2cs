@@ -134,3 +134,13 @@ delta.**
 2. **The darwin collector must not stop at a void row.** In the first pass at `6e870821d6`, `collect_darwin.py` exited
    at the first row with no comparison record, and every later row of that shard lost its evidence line. Fixed in
    batch 314 (`f5e51abe33`): the row is printed as `no-record` and the read goes on.
+3. **Deal linux-arm64 in a form the annotator can read.** Since S7 every linux segment carries a linux-arm64 note, so
+   `annotate_linux.py`'s single-RID mode refuses every row, and its `--rids` mode needs a linux-x64 and a linux-arm64
+   line for the row from ONE dispatch. This deal read linux-x64 on the lanes and linux-arm64 hosted alone, so no
+   annotator could derive the bank's linux segments; the bank was matched cell by cell instead
+   (`data/rebank-1.26.11.1/bank_check.py`, COORD 20261119T091154Z). The next deal dispatches the hosted arm64 shards
+   arch-both (the sweep-shard `arch` input), so the same artifacts carry both RIDs, and keeps the lanes' linux-x64
+   reads as the timing record.
+4. **A cancelled job leaves rows the darwin annotator cannot read.** DW-7's osx-x64 job was cancelled by the runner, so
+   its 18 finished rows have PASS lines and no comparison record (`ev/XDW-7.tsv`). A re-dispatch of the whole shard
+   (an extending stem, DW-7R) keeps the evidence in the annotator's form; re-reading only the unread rows does not.
