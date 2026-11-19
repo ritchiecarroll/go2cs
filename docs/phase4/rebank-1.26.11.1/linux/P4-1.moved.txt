@@ -1,0 +1,24 @@
+bytes	src/core/bytes/README.md
+bytes	src/core/bytes/bytes.tests.csproj
+bytes	src/core/bytes/go2cs_test_host.cs
+bytes	src/core/bytes/package_info_internal_test.cs
+bytes	src/core/bytes/package_test_info.cs
+bytes	untracked	src/core/bytes/boundary_test.cs
+crypto.sha1	src/core/crypto/sha1/README.md
+crypto.sha1	src/core/crypto/sha1/crypto.sha1.tests.csproj
+crypto.sha1	src/core/crypto/sha1/go2cs_test_host.cs
+crypto.sha1	src/core/crypto/sha1/package_info_internal_test.cs
+crypto.sha1	src/core/crypto/sha1/package_test_info.cs
+crypto.sha1	untracked	src/core/crypto/sha1/issue15617_test.cs
+crypto.subtle	src/core/crypto/subtle/README.md
+crypto.subtle	src/core/crypto/subtle/crypto.subtle.tests.csproj
+crypto.subtle	src/core/crypto/subtle/go2cs_test_host.cs
+crypto.subtle	src/core/crypto/subtle/package_info_internal_test.cs
+crypto.subtle	src/core/crypto/subtle/package_test_info.cs
+crypto.subtle	untracked	src/core/crypto/subtle/xor_linux_test.cs
+internal.syscall.unix	src/core/internal/syscall/unix/README.md
+internal.syscall.unix	src/core/internal/syscall/unix/go2cs_test_host.cs
+internal.syscall.unix	src/core/internal/syscall/unix/internal.syscall.unix.tests.csproj
+internal.syscall.unix	src/core/internal/syscall/unix/package_test_info.cs
+internal.syscall.unix	untracked	src/core/internal/syscall/unix/fchmodat_test.cs
+internal.syscall.unix	untracked	src/core/internal/syscall/unix/siginfo_linux_test.cs
