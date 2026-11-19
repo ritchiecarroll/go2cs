@@ -4126,6 +4126,12 @@ func writeExternalVariantMetadata(testInfoPath, outputPath, productionPackageNam
 		metadataAnchorClassPrefix = testAnchor
 		writePackageInfoFile(unitPath, true)
 
+		// The unit now declares the variant's method holders. Both info files compile into the one
+		// tests assembly, so declaring them again in package_test_info.cs is CS0579, a duplicate
+		// [GoMethodHost] (text/tabwriter's buffer and panicWriter); its merge keeps the production and
+		// internal-variant holders already there. Without a unit they are declared there, once.
+		packageMethodHolders = map[string]string{}
+
 		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
 		unitName = externalTestPackageInfoFileName
 	}

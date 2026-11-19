@@ -1103,6 +1103,7 @@
     <Project Path="tests/Behavioral/ReflectNewAtField/ReflectNewAtField.csproj" />
     <Project Path="tests/Behavioral/RefusalDowngradeProxy/RefusalDowngradeProxy.csproj" />
     <Project Path="tests/Behavioral/ReflectArrayOf/ReflectArrayOf.csproj" />
+    <Project Path="tests/Behavioral/ReflectArrayStoreCopies/ReflectArrayStoreCopies.csproj" />
     <Project Path="tests/Behavioral/ReflectAssignabilityNamed/ReflectAssignabilityNamed.csproj" />
     <Project Path="tests/Behavioral/ReflectBridgeClosure/ReflectBridgeClosure.csproj" />
     <Project Path="tests/Behavioral/ReflectChanDirection/ReflectChanDirection.csproj" />
@@ -1208,6 +1209,7 @@
     <Project Path="tests/Behavioral/SignalPrimitives/SignalPrimitives.csproj" />
     <Project Path="tests/Behavioral/Slice3IndexWideBound/Slice3IndexWideBound.csproj" />
     <Project Path="tests/Behavioral/SliceAliasing/SliceAliasing.csproj" />
+    <Project Path="tests/Behavioral/SliceArrayElementCopies/SliceArrayElementCopies.csproj" />
     <Project Path="tests/Behavioral/SliceBoundsEscapeRoutes/SliceBoundsEscapeRoutes.csproj" />
     <Project Path="tests/Behavioral/SliceBoundsRecover/SliceBoundsRecover.csproj" />
     <Project Path="tests/Behavioral/SliceElementFieldAddress/SliceElementFieldAddress.csproj" />

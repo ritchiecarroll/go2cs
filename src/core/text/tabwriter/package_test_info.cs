@@ -101,8 +101,6 @@ public static partial class tabwriter_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(tabwriter_test_package.buffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tabwriter_testᴛbuffer;
-[GoMethodHost(typeof(tabwriter_test_package.panicWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tabwriter_testᴛpanicWriter;
 [GoMethodHost(typeof(tabwriter_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tabwriterᴛWriter;
 // </MethodHolders>
 
