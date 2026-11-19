@@ -89,6 +89,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         // byref-param (12.1): the names of the plain `ref` parameters whose boxes this function's twin takes (`Ꮡp`).
         public List<string>? BoxParams;
+
+        // PB-5 (12.5): the stack locals a box can be named for (`Ꮡx`, the twin declares x a heap local), by name with
+        // their type, and those refused, with the reason a `// P` row names.
+        public readonly Dictionary<string, ITypeSymbol> Promotable = new(System.StringComparer.Ordinal);
+        public readonly Dictionary<string, string> PromoteRefused = new(System.StringComparer.Ordinal);
         public readonly List<Site> Sites = [];
         public bool Twinned => Refusal is null && Parks;
     }

@@ -94,11 +94,45 @@ public sealed partial class TwinGenerator
             EmitReport();
         }
 
+        // PB-5 (12.5): the stack locals this twin declares as heap locals: those whose box an awaited box call hands
+        // (an argument box of a byref-param twin, or a receiver box), by name with their type.
+        private Dictionary<string, ITypeSymbol>? PromotedLocals(Candidate candidate)
+        {
+            if (candidate.Promotable.Count == 0)
+                return null;
+
+            Dictionary<string, ITypeSymbol> promoted = new(System.StringComparer.Ordinal);
+
+            foreach (Site site in candidate.Sites)
+            {
+                if (!site.Active || !site.Direct || !ShouldAwait(site))
+                    continue;
+
+                List<string> boxes = [];
+
+                if (site.ArgBoxes is { } argBoxes && IsParamBoxTwin(site.Target))
+                    boxes.AddRange(argBoxes.Where(box => box is not null)!);
+
+                if (site.BoxOf is { } receiverBox && !site.ViaBoxOverload && IsBoxTwinTarget(site.Target))
+                    boxes.Add(receiverBox);
+
+                foreach (KeyValuePair<string, ITypeSymbol> local in candidate.Promotable)
+                {
+                    string own = "Ꮡ" + local.Key;
+
+                    if (boxes.Any(box => box == own || box.StartsWith(own + ".", System.StringComparison.Ordinal)))
+                        promoted[local.Key] = local.Value;
+                }
+            }
+
+            return promoted.Count == 0 ? null : promoted;
+        }
+
         private string TwinText(Candidate candidate, string indent)
         {
             MethodDeclarationSyntax method = candidate.Syntax;
             SyntaxTree tree = method.SyntaxTree;
-            Rewriter rewriter = new(this, Model(tree), method) { BoxReceiver = candidate.BoxReceiver, BoxParams = candidate.BoxParams };
+            Rewriter rewriter = new(this, Model(tree), method) { BoxReceiver = candidate.BoxReceiver, BoxParams = candidate.BoxParams, Promoted = PromotedLocals(candidate) };
             BlockSyntax? body = (BlockSyntax?)rewriter.Visit(method.Body);
             ArrowExpressionClauseSyntax? arrow = (ArrowExpressionClauseSyntax?)rewriter.Visit(method.ExpressionBody);
 

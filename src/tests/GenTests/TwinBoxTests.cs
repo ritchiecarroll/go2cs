@@ -141,6 +141,7 @@ public class TwinBoxTests
             public static void onlyF()
             {
                 S v = default;
+                Action keepV = () => v.y++; // PB-5 (12.5): captured, so v stays unboxable
                 v.sPark();
             }
 
@@ -314,6 +315,7 @@ public class TwinBoxTests
             public static void runStack()
             {
                 T st = default;
+                Action keepSt = () => st.x++; // PB-5 (12.5): captured, so st stays a stack local and the call plain
                 pp(ref st);
                 ᐸꟷ(ch);
             }
@@ -327,6 +329,7 @@ public class TwinBoxTests
             public static void runMixed(ж<T> px)
             {
                 T st = default;
+                Action keepSt = () => st.x++; // PB-5 (12.5): captured, so st stays unboxable
                 mixed2(ref (px).DerefOrNull(), ref st);
                 ᐸꟷ(ch);
             }
@@ -447,6 +450,7 @@ public class TwinBoxTests
             public static void runStack()
             {
                 T v = default;
+                Action keepV = () => v.x++; // PB-5 (12.5): captured, so v stays unboxable
                 rwv(ref v, parksN());
             }
 
@@ -478,6 +482,59 @@ public class TwinBoxTests
             {
                 ref var q = ref Ꮡq.DerefOrNull();
                 q.x = rvs(ref (px).DerefOrNull(), parksM()) + q.x;
+            }
+
+        """;
+
+    // PB-5 (section 12.5): a STACK local whose reference reaches a box twin. The twin declares it as the converter declares
+    // a heap local, `ref var x = ref heap<T>(init, out var Ꮡx)`, and hands Ꮡx; Go heap-allocates such an escaping
+    // address too. Refused, named-plain with a reason: captured, not a single block-level declaration, in a loop, or a
+    // name Ꮡx already taken.
+    private const string StackLocals = """
+            internal static void bump(ref nint n) { ᐸꟷ(ch); n++; }
+
+            public static nint runSwaps()
+            {
+                nint swaps = default;
+                bump(ref swaps);
+                bump(ref swaps);
+                return swaps;
+            }
+
+            public static void runStackRecv()
+            {
+                var tl = new T();
+                tl.b();
+            }
+
+            public static void runCaptured()
+            {
+                nint cp = default;
+                Action a = () => cp++;
+                bump(ref cp);
+                a();
+            }
+
+            public static void runLoopLocal(nint n)
+            {
+                for (nint i = 0; i < n; i++)
+                {
+                    nint lp = default;
+                    bump(ref lp);
+                }
+            }
+
+            public static void runDeconstructed()
+            {
+                var (dc, ec) = (default(nint), default(nint));
+                bump(ref dc);
+            }
+
+            public static void runNameTaken()
+            {
+                nint nm = default;
+                ж<nint> Ꮡnm = default;
+                bump(ref nm);
             }
 
         """;
@@ -1150,6 +1207,68 @@ public class TwinBoxTests
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.IsFalse(twins.Contains("rvsꞏtwin(px, (await parksMꞏtwin())) + q.x", StringComparison.Ordinal), "q.x is read after the call: never awaited in place before it");
+    }
+
+    [TestMethod]
+    public void P33_AStackLocalHandedToABoxTwinBecomesAHeapLocalInTheTwin()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "ref var swaps = ref global::go.builtin.heap<nint>(default, out var Ꮡswaps);", "declared as a heap local, in the twin only");
+        StringAssert.Contains(twins, "await bumpꞏtwin(Ꮡswaps)", "the call hands the box");
+        StringAssert.Contains(twins, "swaps = ref Ꮡswaps.ValueSlot;", "Rule R derives it again after the await");
+        Assert.IsFalse(twins.Contains("|bump|swaps", StringComparison.Ordinal), "no longer named-plain");
+    }
+
+    [TestMethod]
+    public void P34_AStackLocalReceiverOfABoxTwinBecomesAHeapLocalInTheTwin()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "ref var tl = ref global::go.builtin.heap<global::go.box_package.T>(new T(), out var Ꮡtl);", "the receiver local, a heap local in the twin");
+        StringAssert.Contains(twins, "await Ꮡtl.bꞏtwin()", "the receiver's box");
+    }
+
+    [TestMethod]
+    public void P35_ACapturedStackLocalStaysPlainWithItsReason()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡcp", StringComparison.Ordinal), "a ref local cannot be captured");
+        StringAssert.Contains(twins, "|bump|cp (captured)", "named, with the reason");
+    }
+
+    [TestMethod]
+    public void P36_ALoopBodyLocalStaysPlainWithItsReason()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡlp", StringComparison.Ordinal), "first cut: no box per iteration");
+        StringAssert.Contains(twins, "|bump|lp (loop)", "named, with the reason");
+    }
+
+    [TestMethod]
+    public void P37_ADeconstructedLocalStaysPlainWithItsReason()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡdc", StringComparison.Ordinal), "not a single local declaration");
+        StringAssert.Contains(twins, "|bump|dc (declaration)", "named, with the reason");
+    }
+
+    [TestMethod]
+    public void P38_ATakenBoxNameStaysPlainWithItsReason()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("heap<nint>(default, out var Ꮡnm)", StringComparison.Ordinal), "Ꮡnm is taken");
+        StringAssert.Contains(twins, "|bump|nm (name)", "named, with the reason");
     }
 
     [TestMethod]

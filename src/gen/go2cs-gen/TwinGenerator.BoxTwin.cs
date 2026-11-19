@@ -161,6 +161,11 @@ public sealed partial class TwinGenerator
                 if (box is null)
                 {
                     plain = argument.Expression.ToString().Replace("\r", " ").Replace("\n", " ");
+
+                    // PB-5 (12.5): a stack local refused promotion names its reason.
+                    if (argument.Expression is IdentifierNameSyntax refusedName && caller.PromoteRefused.TryGetValue(refusedName.Identifier.ValueText, out string? reason))
+                        plain += " (" + reason + ")";
+
                     return null;
                 }
 
@@ -417,6 +422,18 @@ public sealed partial class TwinGenerator
                 }
             }
 
+            // PB-5 (12.5): a promoted stack local's box, which exists only in the twin.
+            foreach (KeyValuePair<string, ITypeSymbol> promoted in caller.Promotable)
+            {
+                string own = "Ꮡ" + promoted.Key;
+
+                if (check == box && (box == own || box.StartsWith(own + ".", StringComparison.Ordinal)))
+                {
+                    check = "((global::go.ж<" + promoted.Value.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + ">)default!)" + box.Substring(own.Length);
+                    break;
+                }
+            }
+
             TypeInfo bound = model.GetSpeculativeTypeInfo(position, SyntaxFactory.ParseExpression(check), SpeculativeBindingOption.BindAsExpression);
 
             return bound.Type is INamedTypeSymbol { Name: "ж", TypeArguments.Length: 1 } boxType &&
@@ -509,6 +526,32 @@ public sealed partial class TwinGenerator
                     return aliases.Rederivable(root, name.Identifier.ValueText) ? root : null;
                 }
 
+                // PB-5 (12.5): a STACK local whose reference reaches a box twin. Its twin declares it a heap local
+                // (`ref var x = ref heap<T>(init, out var Ꮡx)`), as Go heap-allocates an address that escapes, and hands
+                // Ꮡx. Gated on GoTwinsBoxParam, so the switch-off arm equals arm N.
+                case IdentifierNameSyntax name when BoxParam && symbol is ILocalSymbol { RefKind: RefKind.None, IsConst: false } stackLocal &&
+                                                    stackLocal.Type is { IsRefLikeType: false }:
+                {
+                    string local = stackLocal.Name;
+
+                    if (caller.Promotable.ContainsKey(local))
+                        return "Ꮡ" + local;
+
+                    if (caller.PromoteRefused.ContainsKey(local))
+                        return null;
+
+                    string? refusal = PromoteRefusal(stackLocal, caller);
+
+                    if (refusal is not null)
+                    {
+                        caller.PromoteRefused[local] = refusal;
+                        return null;
+                    }
+
+                    caller.Promotable[local] = stackLocal.Type;
+                    return "Ꮡ" + local;
+                }
+
                 // `Ꮡx.DerefOrNull()` as the receiver.
                 case InvocationExpressionSyntax { ArgumentList.Arguments.Count: 0, Expression: MemberAccessExpressionSyntax { Name.Identifier.ValueText: "DerefOrNull", Expression: IdentifierNameSyntax r } }:
                     return r.Identifier.ValueText;
@@ -536,6 +579,47 @@ public sealed partial class TwinGenerator
                 default:
                     return null;
             }
+        }
+
+        // PB-5 (12.5): why a stack local cannot become a heap local in the twin, or null. `captured`: a lambda or local
+        // function names it (a ref local cannot be captured); `declaration`: not the one variable of a local declaration
+        // statement directly in a block of the function itself (a deconstruction, a for or using header, a pattern, a
+        // switch section); `loop`: declared inside a loop body (fresh-per-iteration aliasing, refused in the first cut);
+        // `name`: the name Ꮡx is already taken in the function; `shadow`: another local of the same name.
+        private static string? PromoteRefusal(ILocalSymbol local, Candidate caller)
+        {
+            SyntaxNode body = caller.Syntax;
+
+            if (local.DeclaringSyntaxReferences is not [var reference] ||
+                reference.GetSyntax() is not VariableDeclaratorSyntax declarator ||
+                declarator.Parent is not VariableDeclarationSyntax { Variables.Count: 1, Type: not RefTypeSyntax } ||
+                declarator.Parent.Parent is not LocalDeclarationStatementSyntax { UsingKeyword.RawKind: 0, AwaitKeyword.RawKind: 0 } statement ||
+                statement.Parent is not BlockSyntax ||
+                !body.Span.Contains(statement.Span) ||
+                statement.Ancestors().TakeWhile(ancestor => ancestor != body).Any(ancestor => ancestor is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax))
+            {
+                return "declaration";
+            }
+
+            if (statement.Ancestors().TakeWhile(ancestor => ancestor != body).Any(ancestor => ancestor is ForStatementSyntax or ForEachStatementSyntax or WhileStatementSyntax or DoStatementSyntax))
+                return "loop";
+
+            string name = local.Name;
+            List<IdentifierNameSyntax> uses = [.. body.DescendantNodes().OfType<IdentifierNameSyntax>().Where(use => use.Identifier.ValueText == name)];
+
+            if (uses.Any(use => use.Ancestors().TakeWhile(ancestor => ancestor != body).Any(ancestor => ancestor is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax)))
+                return "captured";
+
+            if (body.DescendantTokens().Any(token => token.ValueText == "Ꮡ" + name))
+                return "name";
+
+            if (body.DescendantNodes().OfType<VariableDeclaratorSyntax>().Count(other => other.Identifier.ValueText == name) +
+                body.DescendantNodes().OfType<SingleVariableDesignationSyntax>().Count(other => other.Identifier.ValueText == name) > 1)
+            {
+                return "shadow";
+            }
+
+            return null;
         }
 
         // The box a ref local's source derives from: `Ꮡx.DerefOrNull()`, `Ꮡx.Value` or a heap local's `Ꮡv.ValueSlot`.

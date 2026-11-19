@@ -187,6 +187,12 @@ internal static nint parkK() {
     return 3;
 }
 
+internal static void bumpCell(ref cell c) {
+    ready.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(resume);
+    c.v += 20;
+}
+
 internal static void writer2(Action first, Action second) {
     ᐸꟷ(ready);
     first();
@@ -378,6 +384,13 @@ internal static partial void main() {
         pkʗ1.v = 19;
     });
     fmt.Println("param-later-call", readCellK(ref (pk).DerefOrNull(), parkK()));
+
+    cell sv = default;
+    sv.v = 1;
+    goǃ(writer, () => {
+    });
+    bumpCell(ref sv);
+    fmt.Println("param-stack", sv.v);
 
     var aʗ3 = a;
     goǃ(writer, () => {

@@ -53,7 +53,7 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 341, 5, 12)]
+[assembly: GoBoundedGoroutine("main.cs", 347, 5, 12)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,7 +63,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ADFcgsikgrSCgoLGgoKCxoKCgsiCgoKCgsqCgoKoggAGFIKCgqaCgoKqgoKCqoKmgoKCpoKosoKCpoLmsoKCpoLsgoKCpoKCgqiCgoKCgoKogoKCptKCgqaC5tKCgqaC5oKUkJKClJCSgpSCgoKQkoKClIKQkoKUgpCSgpSQkoKUgoKCkJKUgpCSlIKQkpSCkJKUgpCSlIKCkJKUgoKCkJKUgJKUgpCSlJCSlIKQkpSCsJKUkJKCgpSSlJiC", "141-145:1;151-155:1;193-197:1;203-207:1;215-215:1;219-219:2;226-226:3;232-232:4;237-237:5;241-241:6;248-248:7;252-252:8;256-256:9;260-260:10;264-264:11;269-269:12;275-275:13;278-278:14;282-282:15;285-285:16;289-289:17;293-293:18;293-293:19;296-296:20;301-301:21", "", "", "341:21", "148:21,149:13,165:21,166:13,211:21,212:13,230:21,231:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ADFcgsikgrSCgoLGgoKCxoKCgsiCgoKCgsqCgoKoggAGFIKCgqaCgoKqgoKCqoKmgoKCpoKosoKCpoLmsoKCpoLsgoKCpoKCgqqCgoKogoKCgoKCqIKCgqbSgoKmgubSgoKmguaClJCSgpSQkoKUgoKCkJKCgpSCkJKClIKQkoKUkJKClIKCgpCSlIKQkpSCkJKUgpCSlIKQkpSCgpCSlIKCgpCSlICSlIKQkpSQkpSCkJKUgrCSlIKCkoKUkJKCgpSSlJiC", "141-145:1;151-155:1;201-205:1;211-215:1;223-223:1;227-227:2;234-234:3;240-240:4;245-245:5;249-249:6;256-256:7;260-260:8;264-264:9;268-268:10;272-272:11;277-277:12;283-283:13;286-286:14;290-290:15;293-293:16;297-297:17;301-301:18;301-301:19;306-306:20;310-310:21;315-315:22", "", "", "347:21", "148:21,149:13,165:21,166:13,217:21,218:13,236:21,237:13")]
 // </GoSourcePositionMaps>
 
 namespace go;

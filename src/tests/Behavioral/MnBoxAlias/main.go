@@ -172,6 +172,14 @@ func parkK() int {
 	return 3
 }
 
+// PB-5 (DESIGN-mn-box-twin.md 12.5): a STACK local handed by address to a callee that parks and then writes through
+// the pointer; the caller reads the write after the return. The twin declares the local a heap local and hands its box.
+func bumpCell(c *cell) {
+	ready <- struct{}{}
+	<-resume
+	c.v += 20
+}
+
 // writer2 serves two parks in order: first, then second.
 func writer2(first, second func()) {
 	<-ready
@@ -292,6 +300,12 @@ func main() {
 	pk := &cell{v: 1}
 	go writer2(func() {}, func() { pk.v = 19 })
 	fmt.Println("param-later-call", readCellK(pk, parkK()))
+
+	var sv cell
+	sv.v = 1
+	go writer(func() {})
+	bumpCell(&sv)
+	fmt.Println("param-stack", sv.v)
 
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()

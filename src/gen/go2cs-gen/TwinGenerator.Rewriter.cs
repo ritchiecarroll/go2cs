@@ -58,6 +58,10 @@ public sealed partial class TwinGenerator
         // byref-param (12.1): the boxed `ref` parameters (`ref T p` becomes `ж<T> Ꮡp`), each a ref local of the twin as the
         // receiver is, declared by the prologue and derived again by Rule R.
         public List<string>? BoxParams { get; init; }
+
+        // PB-5 (12.5): the stack locals this twin declares as heap locals (`ref var x = ref heap<T>(init, out var Ꮡx)`),
+        // each then a ref local over its box that Rule R derives again after each await.
+        public Dictionary<string, ITypeSymbol>? Promoted { get; init; }
         private bool m_boxSeeded, m_paramsSeeded;
 
         public Rewriter(Run run, SemanticModel model, MethodDeclarationSyntax method)
@@ -392,6 +396,8 @@ public sealed partial class TwinGenerator
         // CS9217 in runtime's gcWork.putObjBatch).
         private bool IsRefLocal(ISymbol? symbol) =>
             symbol is ILocalSymbol { RefKind: not RefKind.None } ||
+            Promoted is { } promotedLocals && symbol is ILocalSymbol { RefKind: RefKind.None } promotedLocal && promotedLocals.ContainsKey(promotedLocal.Name) &&
+            SymbolEqualityComparer.Default.Equals(promotedLocal.ContainingSymbol, m_method) ||
             BoxReceiver is { } receiver && symbol is IParameterSymbol { Ordinal: 0, RefKind: RefKind.Ref, ContainingSymbol: IMethodSymbol { IsExtensionMethod: true } } parameter &&
             parameter.Name == receiver ||
             BoxParams is { } boxed && symbol is IParameterSymbol { RefKind: RefKind.Ref } boxedParameter &&
@@ -521,6 +527,27 @@ public sealed partial class TwinGenerator
             SyntaxNode? visited = base.VisitSimpleLambdaExpression(node);
             m_passive--;
             return visited;
+        }
+
+        // PB-5 (12.5): the one variable of a promoted stack local's declaration, or null.
+        private string? PromotedName(StatementSyntax statement) =>
+            m_passive == 0 && Promoted is { } promoted &&
+            statement is LocalDeclarationStatementSyntax { Declaration: { Type: not RefTypeSyntax, Variables: [var variable] } } &&
+            promoted.ContainsKey(variable.Identifier.ValueText) && m_model.GetDeclaredSymbol(variable) is ILocalSymbol
+                ? variable.Identifier.ValueText
+                : null;
+
+        public override SyntaxNode? VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
+        {
+            if (PromotedName(node) is not { } name)
+                return base.VisitLocalDeclarationStatement(node);
+
+            LocalDeclarationStatementSyntax visited = (LocalDeclarationStatementSyntax)base.VisitLocalDeclarationStatement(node)!;
+            ExpressionSyntax? init = visited.Declaration.Variables[0].Initializer?.Value;
+            string type = Promoted![name].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string heap = "global::go.builtin.heap<" + type + ">(" + (init is null ? "" : init.WithoutTrivia().ToFullString() + ", ") + "out var Ꮡ" + name + ")";
+
+            return ParseStatement("ref var " + Run.Local(name) + " = ref " + heap + ";").WithTriviaFrom(node);
         }
 
         public override SyntaxNode? VisitExpressionStatement(ExpressionStatementSyntax node)
@@ -771,6 +798,12 @@ public sealed partial class TwinGenerator
 
         private void Register(StatementSyntax statement)
         {
+            if (PromotedName(statement) is { } promoted)
+            {
+                m_scopes[m_scopes.Count - 1].Add(Run.Local(promoted) + " = ref Ꮡ" + promoted + ".ValueSlot;");
+                return;
+            }
+
             string? rederive = m_aliases.Rederive(statement, out string? name);
 
             if (name is null)
