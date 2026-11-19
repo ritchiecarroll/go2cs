@@ -3657,9 +3657,17 @@ queue per word that is in use. It had a `GetOrAdd` and no removal, so a word tha
 word's owner alive. Whoever leaves a bucket with an empty queue now retires it under its lock: it marks
 the bucket and removes exactly that key and value from the table. A thread that fetched the bucket
 before then sees the mark under the same lock and fetches again, so every live bucket is the one the
-table holds, and the count is only read and written under that bucket's lock. A retired bucket is never
-reused, because a holder of the old reference would take it for another word's. In Go an address is in
-its `semaRoot`'s tree only while a goroutine waits on it.
+table holds. A retired bucket is never reused, because a holder of the old reference would take it for
+another word's. In Go an address is in its `semaRoot`'s tree only while a goroutine waits on it.
+
+The count changes atomically, as in Go: `Acquire` first takes a permit by compare-and-swap
+(`cansemacquire`) and `Release` adds one and then looks the word up (`semrelease1` reads `nwait`), so an
+uncontended pair touches no bucket and allocates nothing. Only an acquirer that finds the count at zero
+takes a bucket, and it re-reads the count under the bucket's lock after publishing it, so a release whose
+add came later finds the bucket and the waiter. A handoff takes the added permit for the waiter by the
+same compare-and-swap; if an acquirer took it first, the waiter is only readied and competes again, as in
+Go. Retiring a bucket on every uncontended pair had cost 240 bytes a pair, and `runtime.ReadMemStats`,
+which stops the world on this table and is held to zero allocations, read 240 bytes a call.
 
 Measured on one linux-x64 box with 4 CPUs, against Go 1.26.11 on the same box:
 
@@ -3678,8 +3686,9 @@ size; without the retire, every such word kept a bucket.
 Guarded by `GolibTests.SyncRWMutexLayoutTests` (the layout; a copy of a write-locked and of a read-locked
 `RWMutex`; exclusive writers and consistent readers in native memory; `DeepEqual` of a held and a free
 lock) and `GolibTests.RuntimeSemaphoreBucketTests` (a word that blocked once keeps no bucket; a release
-with no waiter keeps none; the owner of a word that blocked once is collected; exact counts with
-buckets retiring under 2, 4 and 8 threads). Every arm failed before this change.
+with no waiter keeps none; an uncontended pair allocates nothing; the owner of a word that blocked once
+is collected; exact counts with buckets retiring under 2, 4 and 8 threads). Every arm failed before this
+change.
 
 ## `sync.Pool` — a managed-reference ring slot, and a thread-affine stand-in for the P pin
 

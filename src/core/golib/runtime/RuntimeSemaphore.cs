@@ -41,11 +41,17 @@ namespace go.golib;
 /// <para>
 /// <b>A bucket lives only while someone needs it.</b> Whoever leaves a bucket with an empty queue, under
 /// its lock, retires it: marks it and removes it from the table. A thread that fetched it before then
-/// finds the mark under the same lock and fetches again, so every live bucket is the one the table holds
-/// and the count is only ever read and written under that bucket's lock. A retired bucket is never
-/// reused (a holder of the old reference would take it for another word's). So a word that blocked once
-/// keeps nothing, and its key (the pointer box) no longer keeps the word's owner alive. In Go an address
-/// is in its semaRoot's tree only while a goroutine waits on it (sema.go, semaRoot.queue and dequeue).
+/// finds the mark under the same lock and fetches again, so every live bucket is the one the table holds.
+/// A retired bucket is never reused (a holder of the old reference would take it for another word's). So a
+/// word that blocked once keeps nothing, and its key (the pointer box) no longer keeps the word's owner
+/// alive. In Go an address is in its semaRoot's tree only while a goroutine waits on it (sema.go,
+/// semaRoot.queue and dequeue).
+/// </para>
+/// <para>
+/// <b>The count is changed atomically, as Go changes it</b> (<c>cansemacquire</c>'s compare-and-swap,
+/// <c>semrelease1</c>'s <c>xadd</c>), so the uncontended acquire and release touch no bucket: neither makes
+/// one, and neither allocates. Only an acquirer that finds the count at zero takes a bucket, and only a
+/// releaser that finds a bucket in the table looks for a waiter.
 /// The table had a <c>GetOrAdd</c> and no removal until sync.RWMutex took Go's layout and began to block
 /// here; each RWMutex that ever blocked would then have kept a bucket and its owner for the process.
 /// </para>
@@ -92,6 +98,25 @@ namespace go.golib;
 
     private static SemaBucket bucketFor(ж<uint32> s) => semaTable.GetOrAdd(s, static _ => new SemaBucket());
 
+    // Go's cansemacquire (sema.go): take one permit if the count is above zero, by compare-and-swap, with
+    // no bucket and no lock. A permit that is there can always be taken without losing a wakeup; a zero
+    // count sends the acquirer to its bucket.
+    private static bool cansemacquire(ж<uint32> s)
+    {
+        ref uint32 count = ref s.Value;
+
+        while (true)
+        {
+            uint32 v = Volatile.Read(ref count);
+
+            if (v == 0)
+                return false;
+
+            if (Interlocked.CompareExchange(ref count, v - 1, v) == v)
+                return true;
+        }
+    }
+
     // Called under b's lock by whoever may have left its queue empty. Removes exactly this bucket: the key
     // and value pair, so a newer bucket for the same word is never touched.
     private static void retireIfIdle(ж<uint32> s, SemaBucket b)
@@ -117,6 +142,11 @@ namespace go.golib;
     {
         while (true)
         {
+            // Go's easy case (semacquire1: `if cansemacquire(addr) { return }`): an available permit is
+            // taken without a bucket, so an uncontended acquire allocates nothing and leaves nothing behind.
+            if (cansemacquire(s))
+                return;
+
             // Fetched on every pass: a woken waiter's bucket may have been retired by the Release that woke it.
             SemaBucket b = bucketFor(s);
             SemaWaiter w;
@@ -129,10 +159,11 @@ namespace go.golib;
                 if (b.Retired)
                     continue; // removed after we fetched it; the finally releases its lock
 
-                if (s.Value > 0)
+                // Re-checked under the lock, which is a full fence after the bucket was published: a Release
+                // whose add came later finds this bucket (Release's TryGetValue) and the waiter queued below.
+                if (cansemacquire(s))
                 {
-                    s.Value--; // acquired without parking
-                    retireIfIdle(s, b);
+                    retireIfIdle(s, b); // acquired without parking
                     return;
                 }
 
@@ -190,26 +221,29 @@ namespace go.golib;
     {
         SemaWaiter? w = null;
 
-        // The count is added under the word's live bucket, never beside it, so an Acquire that read zero and
-        // queued itself under that lock is always seen here (Go reads nwait for the same reason).
-        while (true)
-        {
-            SemaBucket b = bucketFor(s);
+        // Go's order (semrelease1): add the permit, then look for waiters (`atomic.Load(&root.nwait) == 0`
+        // returns at once). Here a word with waiters has a bucket in the table, and an Acquire publishes its
+        // bucket before it reads the count under the bucket's lock; the add below is a full fence, so either
+        // that read sees the permit or this lookup sees the bucket. A word nobody waits on is looked up and
+        // left alone: no bucket is made, so an uncontended release allocates nothing.
+        Interlocked.Increment(ref s.Value);
 
+        while (semaTable.TryGetValue(s, out SemaBucket? b))
+        {
             lock (b)
             {
                 if (b.Retired)
-                    continue; // removed after we fetched it
-
-                s.Value++;
+                    continue; // removed after we fetched it; look again
 
                 if (b.Waiters.Count > 0)
                 {
                     w = b.Waiters.Dequeue();
 
-                    if (handoff)
+                    // Go: `if handoff && cansemacquire(addr) { s.ticket = 1 }`. The permit just added may
+                    // already have been taken by an acquirer's easy case; then w is only readied and
+                    // re-competes, as in Go.
+                    if (handoff && cansemacquire(s))
                     {
-                        s.Value--;        // hand the just-added permit directly to w
                         w.HandedOff = true;
                         w.Resumed = new ManualResetEventSlim(false, spinCount: 0);
                     }
