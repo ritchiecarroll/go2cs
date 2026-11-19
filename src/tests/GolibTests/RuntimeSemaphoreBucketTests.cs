@@ -65,6 +65,36 @@ public class RuntimeSemaphoreBucketTests
         Assert.IsFalse(SemaTable().Contains(word), "an Acquire that did not park left a bucket behind");
     }
 
+    // Go's easy cases (cansemacquire, and semrelease1's nwait check) touch no semaRoot and allocate nothing.
+    // A bucket made and retired on every uncontended pair cost 240 B a pair: runtime.ReadMemStats stops the
+    // world on this table and is held to zero allocations (GcMeasurementSurfaceProbes).
+    [TestMethod]
+    public void AnUncontendedPairAllocatesNothing()
+    {
+        heap<uint32>(out var word);
+
+        for (int i = 0; i < 64; i++)
+        {
+            RuntimeSemaphore.Release(word, handoff: true);
+            RuntimeSemaphore.Acquire(word, WaitReason.Semacquire);
+        }
+
+        const int pairs = 2000;
+        long before = GC.GetAllocatedBytesForCurrentThread();
+
+        for (int i = 0; i < pairs; i++)
+        {
+            RuntimeSemaphore.Release(word, handoff: true);
+            RuntimeSemaphore.Acquire(word, WaitReason.Semacquire);
+        }
+
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+        Assert.AreEqual(0L, allocated, $"{pairs} uncontended Release/Acquire pairs allocated {allocated} B ({allocated / (double)pairs:F1} B a pair)");
+        Assert.AreEqual(0u, word.Value, "every permit released was acquired");
+        Assert.IsFalse(SemaTable().Contains(word), "an uncontended pair left a bucket behind");
+    }
+
     // The owner of a word that blocked once must be collectable once nothing else holds it.
     [TestMethod]
     public void TheOwnerOfAWordThatBlockedOnceIsCollected()
