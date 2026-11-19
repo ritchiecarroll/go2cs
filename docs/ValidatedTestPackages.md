@@ -26,15 +26,19 @@ says what that proves and what it does not.
 >
 > **Linux: 236 of 236 applicable rows validated at their linux-x64 counts** — 77,524 matching verdicts · 404 disclosed · linux-arm64: 236 of 236 banked, 0 pending · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
 >
-> **macOS: 236 of 236 applicable rows validated on Intel (`osx-x64`) and on Apple silicon (`osx-arm64`)** — at their osx-x64 counts, 73,765 matching verdicts · 373 disclosed · 2 rows Windows-only, the same two as Linux's `linux: n/a` rows, with no `darwin:` annotation. Each chip is compared with Go built for that chip; a row whose chips differ names both readings (see [Reading the table](#reading-the-table)). One cell is not re-validated at 1.26.11.1: `runtime`'s `osx-x64` reading is the 1.26.10.3 bank's. At 1.26.11.1 it read below its count twice, for two different causes (both recorded on the project's findings board on 2026-11-19)<!-- docs/phase4/BOARD-next-validation-candidates.md, the block "2026-11-19 — P5 (.4 final hosted re-bank at 280a01952c)"; the board is excluded from the site, so the link stays here -->, while its `osx-arm64` reading re-read at its count.
+> **macOS: 236 of 236 applicable rows validated on Intel (`osx-x64`) and on Apple silicon (`osx-arm64`)** — at their osx-x64 counts, 73,765 matching verdicts · 373 disclosed · 2 rows Windows-only, the same two as Linux's `linux: n/a` rows, with no `darwin:` annotation. Each chip is compared with Go built for that chip; a row whose chips differ names both readings (see [Reading the table](#reading-the-table)). One cell is not re-validated at 1.26.11.1: `runtime`'s `osx-x64` reading is the 1.26.10.3 bank's. At 1.26.11.1 it read below its count twice, for two different causes (both recorded on the project's findings board on 2026-11-19)<!-- docs/phase4/BOARD-next-validation-candidates.md, the block "2026-11-19 — P5 (.4 final hosted re-bank at 280a01952c)"; the board is excluded from the site, so the link stays here -->, while its `osx-arm64` reading re-read at its count. Eighteen rows' `osx-x64` readings at 1.26.11.1 come from their sweep's PASS lines, which carry the count but no comparison record, because the hosted runner cancelled that job (DW-7).
 >
 > **Every package that applies to a platform is validated on it.** Windows, 238 of 238; Linux, 236 of 236 on x64 and 236 of 236 on arm64; macOS, 236 of 236 on Intel and on Apple silicon. The two packages missing from Linux and macOS are Windows-only.
 
 <!-- Updated 2026-11-19 (the 1.26.11.1 bank, all platforms; P5 assembly, COORD rulings 09:11Z on P5's b17b5b8aa8):
-     every banked (row, RID) cell was re-read at master 280a01952c and reads its banked count, so NO segment value
+     every banked (row, RID) cell was re-read at master 280a01952c and reads its banked count, except runtime osx-x64,
+     which is not banked at this bank and keeps its 1.26.10.3 reading (the darwin block below), so NO segment value
      moves on any platform and every figure above is unchanged. The cells are matched to their readings of record by
-     docs/phase4/data/rebank-1.26.11.1/bank_check.py (1182 cells: windows 238, linux-x64 236, linux-arm64 236,
-     osx-x64 236, osx-arm64 236; made to fail first on six planted defects). The annotators cannot derive this bank's
+     docs/phase4/data/rebank-1.26.11.1/bank_check.py (1182 cells read: windows 238, linux-x64 236, linux-arm64 236,
+     osx-x64 236, osx-arm64 236; 1181 banked and 1 ruled not banked, runtime osx-x64). It checks each count, not only
+     each label, and was made to fail first on eight planted defects: six in the roster, a hosted matched count one
+     below its roster count with its verdict left AT (archive/tar linux-arm64 98 to 97), and a linux disclosed count
+     one below the banked + N plus the row's host-fatal entries (runtime/debug 2 to 1). The annotators cannot derive this bank's
      segments: annotate_linux.py refuses its single-RID mode on every row once the row carries a linux-arm64 note, and
      its --rids mode needs both linux RIDs from one dispatch, which this deal did not read (PLAN-rebank-1-26-11-1.md).
      The guard's evidence declarations are unchanged. The columns sentence read "... in that patch release." alone
@@ -43,7 +47,8 @@ says what that proves and what it does not.
      53 (claude/g-rebank-dot4-final-gs @ a85c800ad3), H-S-F runtime 11083 (claude/h-rebank-12611-final-win @
      5af1d78ab8), R-S crypto/tls 4920 (claude/r-rebank-12611-final @ 61c83c1c59), net 506 + 3 on a GitHub-hosted
      runner (GH-S, run 44449778232): all PASS at their banked counts. Evidence docs/phase4/rebank-1.26.11.1/sweep and,
-     for GH-S, docs/phase4/data/rebank-1.26.11.1/hosted-280a01952c. -->
+     for GH-S, docs/phase4/data/rebank-1.26.11.1/hosted-280a01952c. i9-S internal/syscall/windows reads real_drift 1:
+     the known exec_windows_test.cs.auto review sibling (+1/-1), restored by the sweep, not corpus drift. -->
 <!-- Updated 2026-11-19 (the 1.26.11.1 bank, linux): linux-x64 on the lanes, P1-1 109 rows (claude/p1-rebank-final-p1-1
      @ 55bcb1a5b6), P2-1 52 (claude/p2-rebank-12611-final-p2-1 @ a35410543f), P4-1 59 (claude/p4-rebank-12611-final-p4-1
      @ a2e83a280c), RWSL-1 14 (claude/r-rebank-12611-final @ 61c83c1c59), all PASS (docs/phase4/rebank-1.26.11.1/linux).
@@ -56,12 +61,17 @@ says what that proves and what it does not.
      @ c0afd5d29b). annotate_darwin.py over those lines: 216 of 236 rows 0 change; the other 20 differ by the evidence's
      shape, never its count: 18 rows whose osx-x64 reading of record is the cancelled DW-7 job's PASS lines (COORD
      060123Z; ev/XDW-7.tsv), internal/trace (the annotator has no host-conditional rule; the row banks its floor, 187,
-     and DW-7R's osx-x64 186 + 1 is absorbed by Test-HostConditionalDisclosureDelta; osx-arm64 read 187) and runtime (below). net reads
+     and was read twice: DW-7 read osx-arm64 186 + 1 (TestTraceCPUProfile/AsyncPreemptOff fired) and has no osx-x64
+     record, the job being cancelled; DW-7R, the reading of record on both RIDs, read osx-x64 186 + 1
+     (TestTraceCPUProfile/Default fired), absorbed by Test-HostConditionalDisclosureDelta, and osx-arm64 187) and runtime (below). net reads
      553 + 3 on both RIDs from DW-5R, read with the sweep's dns option as the banked segment was. runtime: osx-arm64
      re-read 11063 + 57 (DW-1R, run 44464066634); osx-x64 is NOT re-validated at 1.26.11.1 (DW-1 44449541821: the Go
      oracle failed TestPingPongHog; DW-1R: TestChanSendBarrier and TestChanSendSelectBarrier hit the 60 m per-test
      deadline, 3600 s each), COORD 085746Z and 09:11Z, BOARD 2026-11-19. Its segment keeps the 1.26.10.3 reading, and
-     the macOS line says so. -->
+     the macOS line says so. The macOS line's sums are each segment's osx-x64 reading (Get-DarwinHeaderPopulation in
+     src/check-roster-format.ps1, asserted by its fixture), so crypto/subtle, whose segment headlines osx-arm64
+     7 + 3 with osx-x64 10, counts 10 + 0: 73,765 and 373, where summing each segment's headline reading gives 73,762
+     and 376. Unchanged by this bank (P3 review, 2026-11-19). -->
 
 <!-- Added 2026-11-16 (user-facing docs audit, section 3 (a) and (b); COORD 2026-11-16 00:18Z): the macOS line and the
      parity sentence. src/check-roster-format.ps1 (Get-DarwinHeaderPopulation) derives every number in both: the macOS
