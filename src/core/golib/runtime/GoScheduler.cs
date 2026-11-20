@@ -121,6 +121,13 @@ public static class GoScheduler
     // two ticks in a row, while work waits, has its P taken back, outside the injection budget. The seam
     // itself is not changed: the carrier settles the account when the step ends or parks.
     private static readonly bool s_retake = Environment.GetEnvironmentVariable("GO2CS_MN_RETAKE") != "0";
+
+    // The pin's made-to-fail switches (DESIGN-mn-pin.md 10.1, 10.5, 11.1), each the line as it was before the pin:
+    // GO2CS_MN_INJECT_WAITERS=0 injects for the run queue only, GO2CS_MN_RETIRE_RAW=1 retires on the raw carrier count,
+    // GO2CS_MN_ROOM_RAW=1 reads the injection room on the raw count. Arms only; never set in a build anyone ships.
+    private static readonly bool s_injectWaiters = Environment.GetEnvironmentVariable("GO2CS_MN_INJECT_WAITERS") != "0";
+    private static readonly bool s_retireRaw = Environment.GetEnvironmentVariable("GO2CS_MN_RETIRE_RAW") == "1";
+    private static readonly bool s_roomRaw = Environment.GetEnvironmentVariable("GO2CS_MN_ROOM_RAW") == "1";
     private static long s_retakes;
     private static int s_pWaiters;
 
@@ -556,7 +563,7 @@ public static class GoScheduler
             // DESIGN-mn-pin.md 10.5 and 11.2: a carrier waiting for a P (a pinned wake, or a thread back from a block) is
             // waiting work too, as the retake already reads it. With the run queue empty a tick injects at most one P per
             // such waiter, net of the permits already free, and adds no carrier: the waiters are threads already.
-            int waiters = Volatile.Read(ref s_pWaiters) - s_p.CurrentCount;
+            int waiters = s_injectWaiters ? Volatile.Read(ref s_pWaiters) - s_p.CurrentCount : 0;
 
             if (s_preemptTicks == 0 || (!queued && waiters <= 0))
                 continue;
@@ -604,7 +611,7 @@ public static class GoScheduler
                 // DESIGN-mn-pin.md 11.1: the UNBLOCKED count, as the retire and EnsureCarrier read it; a pinned carrier
                 // waiting for its goroutine is blocked and runs nothing queued.
                 lock (s_carriersLock)
-                    room = s_carriers.Count - Volatile.Read(ref s_blocked) < s_procs + over;
+                    room = s_carriers.Count - (s_roomRaw ? 0 : Volatile.Read(ref s_blocked)) < s_procs + over;
 
                 if (room)
                     AddCarrier();
@@ -730,7 +737,7 @@ public static class GoScheduler
                         // counting them would let every shared carrier retire under K >= P pinned and parked.
                         lock (s_carriersLock)
                         {
-                            if (s_carriers.Count - Volatile.Read(ref s_blocked) > s_procs)
+                            if (s_carriers.Count - (s_retireRaw ? 0 : Volatile.Read(ref s_blocked)) > s_procs)
                             {
                                 s_carriers.Remove(this);
                                 return;

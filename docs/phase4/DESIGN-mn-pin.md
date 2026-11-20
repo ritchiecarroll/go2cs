@@ -390,3 +390,40 @@ the unbuffered ping-pong against the same run with no pinned goroutine.
    injection rules, the readings.
 2. GolibTests for M4 and M5, and the invariants of 10.3, each made to fail first.
 3. The arms M0-M7, M1b and M3b on this box, and the record.
+
+## 13. As built and as measured: two stop lines hit (dated block, 2026-11-20)
+
+Built at `a84f835512` and `ebc75a5661` (MnLockPin's watchdog); measured with MnPinBench (src/tools/mnspike2) on this
+box (12 logical processors, so P = 12; JIT, Release, `GO2CS_MN=1`), relay hold open. Three arm switches are added to
+golib: `GO2CS_MN_INJECT_WAITERS=0`, `GO2CS_MN_RETIRE_RAW=1` and `GO2CS_MN_ROOM_RAW=1`. Each restores one line as
+it was before the pin, and they exist only for the made-to-fail runs. One process per run, 5 runs for the
+timings and 3 for the latencies. The base arm is the same program with golib built at `a231279143` swapped in
+(golib-base `99cb5ff3`, golib-pin `13ba6de5`).
+
+| # | reading | prediction | result |
+|---|---|---|---|
+| P1 | ping-pong, base vs pin, INTERLEAVED 8 + 8 | within the A/A band or 2% | MET: medians 1,042.7 vs 1,052.8 ns, +1.0% (base alone spreads 1,025 to 1,197). The block-ordered first read showed +7% (A/A 1,113.8 / 1,104.8, pin 1,192.5): drift between blocks, not the pin |
+| P1 | never-park iteration | as above | MET: 24.9 / 24.8 base, 24.9 pin |
+| P2 | one side locked | 1.6-2.1 µs; stop over 2x the thread path | **STOP**: 2,712.9 ns (2,692 to 2,725), 2.9x today's thread path of 935.1 ns (870 to 985). The thread path itself reads well under spike-2's 1,677-1,715 on this box now |
+| P3 | both sides locked | 1.8-2.4 µs; stop over 2.5x | MISSED LOW, inside the line: 1,610.5 ns (1,578 to 1,683), 1.72x the thread path |
+| P4 | peak carriers with K pinned parked | P + K (+0 to 2) | MET: 14, 29-30, 37-38, 269-270 at K = 1, 16, 24, 256; OS threads rise by K |
+| P5 | K = 2P beside 5,000 pairs | no hang, rate within 10% of K = 0 | MET: 976,233 vs 990,400 trips/s (-1.4%). K = 256 reads -10.4% |
+| P10 | M7, 12 CPU twins in 200 ms steps, a wake every 25 ms | pinned p50 1-3 ms, p99 10-13 ms, within 1.5x of control; stop: p99 over 25 ms or over 2x control | **STOP on the absolute line**: pinned p50 12.7 ms, p99 43.6 ms (38.1 to 57.5); the unlocked control p50 15.0, p99 59.9 (48.9 to 65.5). Pinned is 0.73x the control, so the relative line holds. With the waiter fix off: p99 599 ms, max 774 ms (the fix cuts the pinned tail 14x). Unsaturated: p99 0.216 ms (MISSED, predicted under 0.1; no line) |
+| P11 | unlocked wake beside K = 1 and K = 12 pinned | within 1.25x of control | MET: K = 1 p50 11.6 ms, p99 52.4; K = 12 p50 16.2, p99 64.5 |
+| P12 | M1b, ping-pong beside 11 CPU twins, a pin alive all run | within 1.05x of no pin | MET: 1,682.9 ns with the pin vs 1,989.4 without (the no-pin arm is noisy: 1,736 to 2,259) |
+| M3b | K = 2P pinned parked, wakes every 100 ms / 250 ms for 30 s | every tick within 5 ms, no churn | MET: p99 0.548 / 0.361 ms, max 1.75 / 1.59 ms, carriers started 36 (12 + 24), flat. Made to fail: with the old retire rule the run STALLED to its 300 s deadline, a stranded queue |
+| 11.1 red | the old injection-room line at K = 1 | must starve | **NOT SHOWN.** At 200 ms steps, and at 2 s steps with wakes every 25 ms and every 250 ms, the old line and the fixed one read alike (p99 about 1.75-1.9 s at 2 s steps, in BOTH arms). So unlocked wakes wait nearly a full step even inside the once-per-step budget: an injection-policy finding for item 5, present with or without the fix |
+| M7, 4th | 5 ms wakes (a reading) | none | locked p50 16.1, p99 65.0 ms; control p50 15.4, p99 57.8 |
+
+**Mechanism read for P2 (a hypothesis, not tuned):** a LOCKED waker may not use its run-next slot (3.3), so the
+unlocked partner it wakes goes through the global queue and an idle carrier. Each round trip then costs two OS
+thread wakes plus a queue hop and a P hand-off. With both sides locked each wake is one direct semaphore release,
+which is why P3 is faster than P2.
+
+**What the design says now:** a P2 miss stops the seat for a ruling (7). The options: (i) accept 2.7 µs per one-sided
+locked round trip, paid only by code that locks; Go itself pays a thread hop for each locked wake. (ii) Price one cure
+first: let a locked waker hand the goroutine it readies to a specific idle carrier's run-next slot, so that carrier
+needs no queue hop. (iii) The falsifier's alternative design: move a locked twin to a plain thread goroutine for the
+length of its lock. For P10, the absolute line assumed that injection bounds the wait near the preemption threshold.
+The unlocked control (no pin anywhere, p99 60 ms) shows that today's policy does not bound it. Ruling asked: score P10
+on its relative line, and move the absolute bound to item 5 (N5's policy), whose 2 s-step reading is above.
