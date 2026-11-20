@@ -581,4 +581,5 @@ On Windows, the directory is `%LocalAppData%\go2cs\probe-cache`; on macOS, `~/Li
 
 With no user cache directory (neither `HOME` nor `XDG_CACHE_HOME` set), the cache is `go2cs-probe-cache-<uid>` under
 the temporary directory, created with mode 0700. Because that directory is shared, go2cs uses it only while it is a
-directory owned by you that no other user can open, and otherwise stops before converting and asks for `-probe-cache`.
+directory owned by you that no other user can open; otherwise the run stops before its first probe and asks for
+`-probe-cache`. A run that does not probe, such as `-test-action build`, never needs the directory.

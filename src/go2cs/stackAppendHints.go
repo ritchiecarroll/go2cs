@@ -699,7 +699,7 @@ func newStackAppendHarvestCommand(tests bool, target string, options Options) st
 	return stackAppendHarvestCommand{
 		goTool: goTool,
 		args:   args,
-		env:    []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS=", "GOCACHE=" + probeCacheDir()},
+		env:    []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS=", "GOCACHE=" + probeCacheDirOrExit()},
 	}
 }
 
@@ -997,9 +997,9 @@ const probeCacheEnv = "GO2CS_PROBE_CACHE"
 // probeCacheFlag is -probe-cache, set by main; empty when the flag was not passed.
 var probeCacheFlag string
 
-// probeCacheDir is the GOCACHE every harvest command runs with (resolveProbeCacheDir). main refuses the run before any
-// conversion when the directory cannot be resolved, so the fallback here is never reached by a run; it names "off",
-// which go refuses outright, rather than an empty GOCACHE, which would mean the user's own cache.
+// probeCacheDir is the probe cache (resolveProbeCacheDir), or "off" when it cannot be resolved: go refuses "off"
+// outright, where an empty GOCACHE would mean the user's own cache. A run never reaches that fallback, because every
+// harvest command takes its GOCACHE from probeCacheDirOrExit.
 func probeCacheDir() string {
 	dir, err := resolveProbeCacheDir()
 
@@ -1068,15 +1068,17 @@ func probeCacheTempFallback() (string, error) {
 	return dir, nil
 }
 
-// probeCacheFlagOrExit takes the -probe-cache value and refuses the run, before any conversion, when the probe cache
-// cannot be resolved: a harvest whose go commands fail reports nothing, which would change the emission silently.
-func probeCacheFlagOrExit(value string) string {
-	probeCacheFlag = strings.TrimSpace(value)
+// probeCacheDirOrExit is the GOCACHE of every harvest command, resolved when the command is built rather than at
+// start-up, so only a run that would probe can be refused: a mode that converts nothing (the ref-lowering census,
+// -test-action build, run or compare) never resolves the cache. The refusal ends the run before the first probe,
+// because a harvest whose go commands fail reports nothing, which would change the emission silently.
+func probeCacheDirOrExit() string {
+	dir, err := resolveProbeCacheDir()
 
-	if _, err := resolveProbeCacheDir(); err != nil {
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	return probeCacheFlag
+	return dir
 }

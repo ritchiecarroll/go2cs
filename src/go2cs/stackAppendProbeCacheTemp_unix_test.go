@@ -68,7 +68,7 @@ func TestStackAppendProbeCacheWithoutUserCacheDir(t *testing.T) {
 		t.Errorf("a %s with mode 0777 was used as the probe cache", want)
 	}
 
-	// The refusal names the way out, and main exits on it before any conversion (probeCacheFlagOrExit).
+	// The refusal names the way out, and a harvest exits on it before its go command runs (probeCacheDirOrExit).
 	if err := withProbeCacheFlag(t, "", func() error { _, err := resolveProbeCacheDir(); return err }); err == nil || !strings.Contains(err.Error(), "-probe-cache") {
 		t.Errorf("the refusal of a mode-0777 %s does not name -probe-cache: %v", want, err)
 	}
