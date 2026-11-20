@@ -8686,7 +8686,17 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 		return nil, unchecked
 	}
 
-	page := filepath.Join(dir, validationProofDotID(importPath)+".md")
+	return hostFatalMintAgainstPage(filepath.Join(dir, validationProofDotID(importPath)+".md"), importPath, dir,
+		"the pages are the Windows record and a unix-only test is absent from them by construction", names, fatal, disclosures)
+}
+
+// hostFatalMintAgainstPage is the mint rule's judgement once the disclosing package's evidence page is known: page is
+// that package's committed proof page (which may not exist), importPath names the package in the messages, and dir is
+// where its pages are kept. hostFatalMintViolations reaches it for a standard-library package and
+// hostFatalMintViolationsFor for a module row; the rule itself is one.
+//
+// absentReason completes the line for a name the page does not carry: why that is not evidence either way.
+func hostFatalMintAgainstPage(page, importPath, dir, absentReason string, names []string, fatal map[string]bool, disclosures map[string]testDisclosure) (violations []string, unchecked []string) {
 	data, err := os.ReadFile(page)
 	if err != nil {
 		// No page for THIS package is not a violation -- an unbanked row, a fresh clone and a staging
@@ -8739,9 +8749,8 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 	for _, name := range names {
 		if !seen[name] {
 			unchecked = append(unchecked, fmt.Sprintf(
-				"%s: not named by %s's own proof page, so its exclusion was NOT cleared against any "+
-					"platform -- the pages are the Windows record and a unix-only test is absent from "+
-					"them by construction", name, importPath))
+				"%s: not named by %s's own proof page (%s), so its exclusion was NOT cleared against any "+
+					"platform -- %s", name, importPath, filepath.Base(page), absentReason))
 		}
 	}
 	sort.Strings(violations)
@@ -8749,9 +8758,77 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 	return violations, unchecked
 }
 
-// hostFatalMintViolationsFor: RED-COMMIT STUB, the std rule for every row.
+// hostFatalMintViolationsFor is the mint rule for the package a -tests run compares: hostFatalMintViolations for a
+// standard-library package, and for a MODULE row (options.mainModulePath set) the same rule against the module's
+// committed proof page (COORD 20261120T091624Z, GAP 2). A module row's banked record is the page copied into the go2cs
+// checkout the run converts against: docs/validation/modules/<module>@<version>/<package path in the module>.md, the
+// module's root package as index.md. Before this, a module output, never under <root>/core, reported every host-fatal
+// entry UNCHECKED and no module page was read.
+//
+// The checkout is the parent of -go2cspath, and the version is the one -module-disclosures resolves
+// (moduleDisclosureVersion: the module-cache directory's, or -module-version's for a copy). Without either, the rule
+// can key no page, and every entry is reported unchecked with that reason.
 func hostFatalMintViolationsFor(outputPath, inputPath string, disclosures map[string]testDisclosure, options Options) ([]string, []string) {
-	return hostFatalMintViolations(outputPath, disclosures)
+	if options.mainModulePath == "" {
+		return hostFatalMintViolations(outputPath, disclosures)
+	}
+
+	fatal := map[string]bool{}
+	var names []string
+
+	for name, d := range disclosures {
+		if d.Class == hostFatalClass {
+			fatal[name] = true
+			names = append(names, name)
+		}
+	}
+
+	if len(names) == 0 {
+		return nil, nil
+	}
+
+	sort.Strings(names)
+
+	uncheckedAll := func(reason string) ([]string, []string) {
+		var unchecked []string
+
+		for _, name := range names {
+			unchecked = append(unchecked, name+": "+reason)
+		}
+
+		return nil, unchecked
+	}
+
+	if options.go2csPath == "" {
+		return uncheckedAll("no go2cs checkout (-go2cspath) to read the module's committed proof page from")
+	}
+
+	_, version, err := moduleDisclosureVersion(options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, options.testModuleVersion)
+
+	if err != nil {
+		return uncheckedAll(fmt.Sprintf("no module version to key the committed proof page by (%v)", err))
+	}
+
+	rel, err := filepath.Rel(options.mainModuleDir, inputPath)
+
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return uncheckedAll(fmt.Sprintf("%s is not inside module %s at %s", inputPath, options.mainModulePath, options.mainModuleDir))
+	}
+
+	pageName := "index"
+	importPath := options.mainModulePath
+
+	if rel != "." {
+		pageName = filepath.ToSlash(rel)
+		importPath += "/" + pageName
+	}
+
+	dir := filepath.Join(filepath.Dir(filepath.Clean(options.go2csPath)), "docs", validationDocsDirName, "modules",
+		filepath.FromSlash(options.mainModulePath)+"@"+version)
+
+	return hostFatalMintAgainstPage(filepath.Join(dir, filepath.FromSlash(pageName)+".md"), importPath, dir,
+		"the page is the record of the one platform it names, and a test that platform does not build is absent from it",
+		names, fatal, disclosures)
 }
 
 // hostFatalNames lists the excluded tests for the DISCLOSED column, sorted. They appear in
