@@ -647,6 +647,11 @@ Examples:
 	options.testModuleDisclosures = absPathOrEmpty(strings.TrimSpace(*testModuleDisclosuresCmd))
 	options.testModuleVersion = strings.TrimSpace(*testModuleVersionCmd)
 
+	// Refused where they cannot take effect, rather than accepted and ignored (moduleDisclosureFlagsError).
+	if err := moduleDisclosureFlagsError(options); err != nil {
+		log.Fatalln(err)
+	}
+
 	// -dual-recv-params (S1) is a refinement of -dual-recv (S0), never standalone: the parameter
 	// half emits into the ref-return primaries S0 declares, and the X3 relaxation only pays off
 	// once those primaries exist. Rejecting the lone form keeps the S0-floor state (`-dual-recv`

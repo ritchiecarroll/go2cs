@@ -10880,6 +10880,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	}
 	environment := testEnvironmentFromOptions(options)
 	environment.OracleGoVersion = oracleVersion
+	environment.ModuleVersionClaimed = moduleVersionClaimed(options)
 	environment.Terminal = terminal
 	result := testComparison{
 		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,

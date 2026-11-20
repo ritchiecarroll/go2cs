@@ -369,6 +369,13 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 
 	if provenance.convertedPath != "" {
 		fmt.Fprintf(&page, "\nBoth sides were built with %s.\n", proofBuildTagsText(provenance.buildTags))
+
+		// A module COPY read under a version -module-version claimed, not one a module-cache directory resolved
+		// (moduleVersionClaimed): said on the page, so the row cannot be banked unnoticed.
+		if claimed := comparison.Environment.ModuleVersionClaimed; claimed != "" {
+			fmt.Fprintf(&page, "\nThe module version `%s` was claimed by -module-version for a copy of the module, not resolved "+
+				"from a module-cache directory.\n", claimed)
+		}
 	}
 
 	if provenance.inputDigest != "" {
