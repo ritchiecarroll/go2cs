@@ -208,3 +208,54 @@ GoFuncPair if ruled so. It is written by the same GO2CS_PUBLIC_SURFACE_MEMBERS p
 `[tier1-members]` is. By that file's own header it needs a COORD ruling.
 
 Kit: C:\go2cs\scratch\mn2\proto\b1sheet (builds, reader output, tally, prediction.md; G-LAPTOP).
+
+## 7b, after P3's read and COORD's rulings (dated block, 2026-11-20)
+
+P3 CLEARED 7b at 9c5bb33a7f, and COORD ruled on its two asks and two more items. The owner then moved M:N from .5
+to .6 (2026-11-20); every ".5" in the block above reads ".6", and the work continues without pause.
+
+### What is frozen: the test
+
+- **Frozen** = named by generated IL OUTSIDE golib, and required to hold across a break floor (a twin-built
+  assembly is not rebuilt against a newer golib in the same Go minor).
+- **Tier 2** = named only by golib itself or by hand-written twins. Tier-2 members still may not change within a
+  Go minor once they have shipped: the break floor binds them too, and the freeze only adds the promise across
+  minors for the frozen set.
+- **GoFuncPair is FROZEN, as a family** (COORD): its constructor, `Plain`, `Twin`, `Underlying` and its shape. The
+  table above read it as ASKED; the answer is frozen. N3's design carries the same correction as a dated note.
+
+### The guard: PublicSurface.golib.txt `[mn-frozen]`, built
+
+- 56 lines, written by GolibTests with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path> and read red by the line, as
+  `[tier1-members]` is. 49 are member signatures: every public or protected member of the six task types and of
+  GoFuncPair, hidden or not, and the named twin entry points with each name's whole overload family
+  (`goǃtwin`'s 17 arities). The other 7 are SHAPE lines (P3's should-fix), one per frozen type: its kind, its public
+  interfaces, a base other than object, and its async method builder.
+- PublicSurfaceTests' negative control gains one removed and one invented `[mn-frozen]` line, and requires exactly
+  those two violations.
+- Made to fail before it was trusted, then restored byte-identical (sha-256 prefixes 2771d278e0e7eba4 for
+  PublicSurface.golib.txt, b07420a85b585646 for GoTask.cs, before and after):
+  1. one baseline line dropped (`GoTaskBuilder :: SetResult()`): the guard failed, naming that member;
+  2. `ICriticalNotifyCompletion` removed from GoTaskAwaiter in golib: the guard failed, naming the awaiter's shape
+     line, the old one as removed and the new one as new.
+- Green after: the surface tests and GolibTests' M:N subset, 67 passed, 1 skipped.
+
+### The hand-written stdlib twins do not ship public (COORD's ruling)
+
+- sync's `Mutex.Lockꞏtwin` and time's `Sleepꞏtwin` are `internal` now, in every build. My call, over excluding them
+  from the packed assembly: one source and no build variant, and no generator change is needed. Roslyn imports
+  only the public and protected members of a referenced assembly, so no other assembly's generator sees them.
+  Measured: the 20 builds again, all green; each twin build still prints its plain build's output under the
+  scheduler (MnAotGeneric 1,490 parks, MnBoxAlias 48, MnFuncPair 2,148). MnStormTwin, the spike's hand-twin tool,
+  called both by name and now fails CS0117/CS1061 on them, besides its old CS1555: that is the proof they are not
+  visible.
+- **The cost, to be stated with every .6 thread figure:** an opted-in program holds its carrier on a contended
+  `sync.Mutex.Lock` and on `time.Sleep`, as it does on any plain call. Under L-min the stdlib ships without twins,
+  so this is one case of the L-min reading (DESIGN-mn-twin-set.md 11.3): a stdlib call stays plain when opted in.
+- **Owed before any release builds sync with twins:** Lockꞏtwin's receiver becomes canonical (`this ж<Mutex>`). It
+  is not done now. The generator's own-shape rule (TwinGenerator.BoxTwin.cs, IsBoxTwinTarget) keys on a
+  hand-written `this ref T` twin. A sync built with twins also gets the generator's box forwarder
+  `Lockꞏtwin(this ж<Mutex>)`, which a hand-written one of that shape would collide with (CS0111). The change and
+  that rule move together, in the stdlib-twins arm.
+
+Kit: C:\go2cs\scratch\mn2\proto\b1sheet (sheet-7b holds the first read; the second build ran over it; G-LAPTOP).

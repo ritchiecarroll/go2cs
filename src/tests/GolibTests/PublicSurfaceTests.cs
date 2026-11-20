@@ -57,7 +57,7 @@ public class PublicSurfaceTests
             current.Add(line);
         }
 
-        foreach (string section in new[] { "tier1", "go-tier2", "builtin", "tier1-members" })
+        foreach (string section in new[] { "tier1", "go-tier2", "builtin", "tier1-members", "mn-frozen" })
         {
             if (!sections.ContainsKey(section))
                 throw new InvalidDataException($"{BaselineFile} has no [{section}] section");
@@ -160,10 +160,13 @@ public class PublicSurfaceTests
 
     private static bool IsVisible(FieldInfo field) => field.IsPublic || field.IsFamily || field.IsFamilyOrAssembly;
 
-    internal static SortedSet<string> MemberSignatures(IEnumerable<Type> types)
+    // includeHidden: also the members that carry [EditorBrowsable(Never)] ([mn-frozen] freezes hidden members); names:
+    // only the members of those names (".ctor" for a constructor). The defaults are [tier1-members]' read, unchanged.
+    internal static SortedSet<string> MemberSignatures(IEnumerable<Type> types, bool includeHidden = false, ISet<string>? names = null)
     {
         SortedSet<string> lines = new(StringComparer.Ordinal);
         const BindingFlags all = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+        bool Skip(MemberInfo member) => (!includeHidden && IsHidden(member)) || (names is not null && !names.Contains(member.Name));
 
         foreach (Type type in types)
         {
@@ -175,7 +178,7 @@ public class PublicSurfaceTests
                 MethodInfo?[] methods = [property.GetMethod, property.SetMethod];
                 accessors.UnionWith(methods.OfType<MethodInfo>());
 
-                if (!methods.Any(IsVisible) || IsHidden(property))
+                if (!methods.Any(IsVisible) || Skip(property))
                     continue;
 
                 MethodInfo any = methods.First(IsVisible)!;
@@ -190,13 +193,13 @@ public class PublicSurfaceTests
                 MethodInfo?[] methods = [@event.AddMethod, @event.RemoveMethod, @event.RaiseMethod];
                 accessors.UnionWith(methods.OfType<MethodInfo>());
 
-                if (methods.Any(IsVisible) && !IsHidden(@event))
+                if (methods.Any(IsVisible) && !Skip(@event))
                     lines.Add($"{owner}event {TypeName(@event.EventHandlerType!)} {@event.Name}");
             }
 
             foreach (FieldInfo field in type.GetFields(all))
             {
-                if (!IsVisible(field) || IsHidden(field))
+                if (!IsVisible(field) || Skip(field))
                     continue;
 
                 string kind = field.IsLiteral ? "const " : (field.IsStatic ? "static " : "") + (field.IsInitOnly ? "readonly " : "");
@@ -205,13 +208,13 @@ public class PublicSurfaceTests
 
             foreach (ConstructorInfo constructor in type.GetConstructors(all))
             {
-                if (IsVisible(constructor) && !constructor.IsStatic && !IsHidden(constructor))
+                if (IsVisible(constructor) && !constructor.IsStatic && !Skip(constructor))
                     lines.Add($"{owner}ctor {Parameters(constructor.GetParameters())}");
             }
 
             foreach (MethodInfo method in type.GetMethods(all))
             {
-                if (!IsVisible(method) || accessors.Contains(method) || IsHidden(method))
+                if (!IsVisible(method) || accessors.Contains(method) || Skip(method))
                     continue;
 
                 string generic = method.IsGenericMethodDefinition ? "<" + string.Join(", ", method.GetGenericArguments().Select(argument => argument.Name)) + ">" : "";
@@ -219,6 +222,68 @@ public class PublicSurfaceTests
                 lines.Add($"{owner}method {(method.IsStatic ? "static " : "")}{returns} {method.Name}{generic}{Parameters(method.GetParameters())}");
             }
         }
+
+        return lines;
+    }
+
+    // ---- [mn-frozen]: the M:N surface frozen for L-min (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b) -------
+    //
+    // Every public or protected member of the six task types and of GoFuncPair, hidden or not, and the named twin entry
+    // points (each name's whole overload family). They are tier 2 by their EditorBrowsable marks, so [tier1-members] does
+    // not see them; a twin-built assembly binds them, so they never disappear and change shape only where their plain
+    // member does. Same spelling as [tier1-members].
+    private static readonly string[] s_mnFrozenTypes =
+    [
+        "go.golib.GoTask", "go.golib.GoTask`1", "go.golib.GoTaskAwaiter", "go.golib.GoTaskAwaiter`1",
+        "go.golib.GoTaskBuilder", "go.golib.GoTaskBuilder`1", "go.golib.GoFuncPair"
+    ];
+
+    private static readonly (string Type, string[] Names)[] s_mnFrozenMembers =
+    [
+        ("go.builtin", ["RunMainꞏtwin", "goǃtwin", "selectꞏtwin", "ᐸꟷꞏtwin"]),
+        ("go.channel`1", ["ᐸꟷꞏtwin"])
+    ];
+
+    private static string ShapeSignature(Type type)
+    {
+        bool readOnly = type.GetCustomAttributesData().Any(attribute => attribute.AttributeType.FullName == "System.Runtime.CompilerServices.IsReadOnlyAttribute");
+
+        string kind = type.IsInterface ? "interface" :
+            type.IsValueType ? (readOnly ? "readonly struct" : "struct") :
+            type.IsAbstract && type.IsSealed ? "static class" : type.IsAbstract ? "abstract class" : type.IsSealed ? "sealed class" : "class";
+
+        List<string> parts = [];
+
+        if (!type.IsValueType && type.BaseType is { } baseType && baseType != typeof(object))
+            parts.Add("base " + TypeName(baseType));
+
+        string[] interfaces = type.GetInterfaces().Where(face => face.IsPublic || face.IsNestedPublic).Select(TypeName).OrderBy(name => name, StringComparer.Ordinal).ToArray();
+
+        if (interfaces.Length > 0)
+            parts.Add("implements " + string.Join(", ", interfaces));
+
+        if (type.GetCustomAttributesData().FirstOrDefault(attribute => attribute.AttributeType.FullName == "System.Runtime.CompilerServices.AsyncMethodBuilderAttribute") is { } builder &&
+            builder.ConstructorArguments is [{ Value: Type builderType }])
+            parts.Add("builder " + TypeName(builderType));
+
+        return $"{TypeName(type)} :: shape {kind}" + (parts.Count > 0 ? "; " + string.Join("; ", parts) : "");
+    }
+
+    internal static SortedSet<string> MnFrozenSignatures()
+    {
+        Assembly golib = typeof(builtin).Assembly;
+        Type Load(string name) => golib.GetType(name, throwOnError: true)!;
+
+        SortedSet<string> lines = MemberSignatures(s_mnFrozenTypes.Select(Load), includeHidden: true);
+
+        // One SHAPE line per frozen type: its kind, its public interfaces, a base other than object, and its async
+        // method builder. A twin-built caller binds these too (P3's read of 7b): an awaiter that stops implementing
+        // ICriticalNotifyCompletion breaks every await on it.
+        foreach (Type type in s_mnFrozenTypes.Select(Load))
+            lines.Add(ShapeSignature(type));
+
+        foreach ((string type, string[] names) in s_mnFrozenMembers)
+            lines.UnionWith(MemberSignatures([Load(type)], includeHidden: true, names: new HashSet<string>(names, StringComparer.Ordinal)));
 
         return lines;
     }
@@ -270,6 +335,16 @@ public class PublicSurfaceTests
         foreach (string line in signatures.Where(line => !baselineMembers.Contains(line)))
             violations.Add($"[tier1-members] {line}: a new tier-1 member; add the line once it is meant to be a promise, or hide it");
 
+        // The frozen M:N surface, signature for signature.
+        HashSet<string> baselineFrozen = baseline["mn-frozen"];
+        SortedSet<string> frozen = MnFrozenSignatures();
+
+        foreach (string line in baselineFrozen.Where(line => !frozen.Contains(line)).OrderBy(line => line, StringComparer.Ordinal))
+            violations.Add($"[mn-frozen] {line}: removed or changed; a frozen M:N member never disappears and changes shape only where its plain member does (FREEZE-SHEET.md)");
+
+        foreach (string line in frozen.Where(line => !baselineFrozen.Contains(line)))
+            violations.Add($"[mn-frozen] {line}: a new member of the frozen M:N surface; add the line once it is meant to be frozen, or make it non-public");
+
         return violations;
     }
 
@@ -288,6 +363,10 @@ public class PublicSurfaceTests
             File.WriteAllLines(membersPath, MemberSignatures(typeof(builtin).Assembly.GetExportedTypes()
                 .Where(type => tier1Names.Contains(type.FullName!)).OrderBy(type => type.FullName, StringComparer.Ordinal)));
         }
+
+        // The same for [mn-frozen]: GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path> writes its lines there.
+        if (Environment.GetEnvironmentVariable("GO2CS_PUBLIC_SURFACE_MN_FROZEN") is { Length: > 0 } frozenPath)
+            File.WriteAllLines(frozenPath, MnFrozenSignatures());
 
         List<string> violations = Violations(baseline);
 
@@ -318,9 +397,14 @@ public class PublicSurfaceTests
         string member = baseline["tier1-members"].Where(line => line.StartsWith("go.slice<T> :: ", StringComparison.Ordinal)).Min(StringComparer.Ordinal)!;
         Assert.IsTrue(baseline["tier1-members"].Remove(member));
         baseline["tier1-members"].Add("go.slice<T> :: method ᴛNoSuchMember()");
+        string frozen = baseline["mn-frozen"].Where(line => line.StartsWith("go.golib.GoTaskBuilder :: ", StringComparison.Ordinal)).Min(StringComparer.Ordinal)!;
+        Assert.IsTrue(baseline["mn-frozen"].Remove(frozen));
+        baseline["mn-frozen"].Add("go.golib.GoTask :: method ᴛNoSuchFrozenMember()");
 
         CollectionAssert.AreEquivalent(new[]
         {
+            "[mn-frozen] go.golib.GoTask :: method ᴛNoSuchFrozenMember(): removed or changed; a frozen M:N member never disappears and changes shape only where its plain member does (FREEZE-SHEET.md)",
+            $"[mn-frozen] {frozen}: a new member of the frozen M:N surface; add the line once it is meant to be frozen, or make it non-public",
             "go.NilType: not in [tier1] and not hidden; mark it [EditorBrowsable(EditorBrowsableState.Never)], or list it in [tier1] if C# programs use it directly",
             "go.NilType: a new non-Go name in namespace go; new golib names go in namespace go.golib",
             "go.GoFrame: a new non-Go name in namespace go; new golib names go in namespace go.golib",

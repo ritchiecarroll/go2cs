@@ -519,7 +519,7 @@ internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Se
 // completes an awaited wait on the ThreadPool, which is one hop per contended Lock). The profiling arms
 // of Lock are not twinned here.
 [GoRecv, System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-public static global::go.golib.GoTask Lockꞏtwin(this ref Mutex m) {
+internal static global::go.golib.GoTask Lockꞏtwin(this ref Mutex m) {
     SemaphoreSlim gate = gateOf(ref m);
     if (gate.Wait(0)) {
         return default;

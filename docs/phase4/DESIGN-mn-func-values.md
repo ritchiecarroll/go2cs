@@ -404,3 +404,10 @@ fix 4 as 10.4 restates it.
 - **Predictions, scored:** twins in net/http's closure TRUE (2,919 in 2,400..3,100); awaited FALSE (11, not
   24..28); holes FALSE (12, not 0); TypeScript FALSE (8,315 above 4,000..8,000; awaited 5, not 12..16); the
   opt-out's real cost TRUE (128, far over the 5 predicted); the sort bench under (a) TRUE.
+
+## Dated note (2026-11-20): GoFuncPair is FROZEN, not [go-tier2]
+
+Section 3's "(tier 2, `[go-tier2]`)" is superseded by COORD's ruling on 7b (2026-11-20): generated twins in a USER
+assembly bind GoFuncPair's constructor and `Twin` (MnFuncPair, read with TwinRefs), so it is frozen, as a family:
+constructor, `Plain`, `Twin`, `Underlying`, and its shape (an abstract class). Its lines are in PublicSurface.golib.txt's
+`[mn-frozen]` section (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b). It stays hidden from IntelliSense.

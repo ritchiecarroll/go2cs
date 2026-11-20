@@ -571,7 +571,7 @@ partial class time_package
     // takes the thread path. The timer and the slot are allocated per sleep here; a real build hangs the
     // timer off the goroutine, as Go's gp.timer.
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static global::go.golib.GoTask Sleepꞏtwin(Duration d)
+    internal static global::go.golib.GoTask Sleepꞏtwin(Duration d)
     {
         if (d <= 0)
             return default;
