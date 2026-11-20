@@ -45,6 +45,11 @@ import (
 // A package variable, a field, an element, a call result, a *unsafe.Pointer variable or parameter and every pointer
 // derived from a number stay on the doors. A mistake in this predicate fails LOUD: W4 refuses a `.Value` over a native
 // box by name, so a slot wrongly called managed is a refusal and never a silent wrong read.
+//
+// ONE SILENT CASE, and it is master's behavior rather than this predicate's: a STORE through shape (a) writes into the
+// fresh box, which nothing else reads, so the write is lost (reinterpretManagedEmission's own comment names it). The
+// corpus has it at runtime's debugcall.cs (debugCallWrap2's dispatchF) and the per-OS cgocall.cs (cgocallbackg1's cb),
+// both a pointer word stored into a func variable: the BOARD's (ff) LOST WRITE row of 2026-11-20.
 
 // isUnsafePointerPointerType reports whether t is exactly *unsafe.Pointer.
 func isUnsafePointerPointerType(t types.Type) bool {
@@ -96,6 +101,7 @@ func (v *Visitor) unsafePointerWordOperand(expr ast.Expr) (ast.Expr, bool) {
 // in managed memory: shapes (a) and (b) of the door's header comment.
 func (v *Visitor) unsafePointerWordSlotIsManaged(operand ast.Expr) bool {
 	expr := ast.Unparen(operand)
+	stripped := false
 
 	// (a) at any level: the deref of a carrying conversion's fresh box is itself a fresh box.
 	for {
@@ -106,13 +112,16 @@ func (v *Visitor) unsafePointerWordSlotIsManaged(operand ast.Expr) bool {
 		}
 
 		expr = ast.Unparen(star.X)
+		stripped = true
 	}
 
 	call, isCall := expr.(*ast.CallExpr)
 
 	if isCall && len(call.Args) == 1 {
+		// The carrying arm's own test, asked of the function that makes it (never re-derived here), so the two cannot
+		// drift: a source it declines is rendered by another route, which is not a fresh box.
 		if _, isWordTarget := unsafePointerTargetLevels(v.info.TypeOf(call)); isWordTarget {
-			if src, srcPtr, targetPtr := v.pointerConversionSource(call, call.Args[0]); src != nil && !types.Identical(srcPtr.Elem(), targetPtr.Elem()) {
+			if src, _, _ := v.pointerReinterpretManagedSource(call, call.Args[0]); src != nil {
 				return true
 			}
 		}
@@ -123,10 +132,11 @@ func (v *Visitor) unsafePointerWordSlotIsManaged(operand ast.Expr) bool {
 		}
 	}
 
-	// (b) &x, x a local variable or a parameter.
+	// (b) &x, x a local variable or a parameter, and only as the operand itself: a stripped star means the slot is read
+	// out of x (`**&x`, x a local *unsafe.Pointer), and what x holds may be a native box.
 	unary, isAddr := expr.(*ast.UnaryExpr)
 
-	if !isAddr || unary.Op != token.AND {
+	if stripped || !isAddr || unary.Op != token.AND {
 		return false
 	}
 

@@ -93,6 +93,12 @@ func nativeNumberStore(k uintptr, v unsafe.Pointer)  { *(*unsafe.Pointer)(unsafe
 func nativePackageVarRead() unsafe.Pointer           { return *yield }
 func nativePackageVarStore(v unsafe.Pointer)         { *yield = v }
 func nativeGlobalAddressRead() unsafe.Pointer        { return *(*unsafe.Pointer)(unsafe.Pointer(&global)) }
+
+// NATIVE-REACHABLE through a local: **&x reads the slot OUT of x, a *unsafe.Pointer that may hold a native box.
+func nativeStarredLocal(k uintptr) unsafe.Pointer {
+	x := (*unsafe.Pointer)(unsafe.Pointer(k))
+	return **&x
+}
 `)
 
 	goRoot := build.Default.GOROOT
@@ -181,6 +187,7 @@ func nativeGlobalAddressRead() unsafe.Pointer        { return *(*unsafe.Pointer)
 		"nativePackageVarRead":    "LoadWord(",
 		"nativePackageVarStore":   "StoreWord(",
 		"nativeGlobalAddressRead": "LoadWord(",
+		"nativeStarredLocal":      "LoadWord(",
 	} {
 		if body := bodyOf(name); !strings.Contains(body, door) {
 			t.Errorf("%s: a slot native memory can reach stays on the door (%s):\n%s", name, door, body)
