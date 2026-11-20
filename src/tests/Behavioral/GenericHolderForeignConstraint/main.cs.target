@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using text = GenericHolderForeignConstraint.text_package;
 using GenericHolderForeignConstraint;
-using static main_package;
 
 partial class main_package {
 
@@ -13,8 +12,6 @@ partial struct Iterator<T>
     internal T data;
     internal nint pos;
 }
-
-} partial class mainᴛIterator {
 
 public static void SetText<T>(this ref Iterator<T> it, T data)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
@@ -39,16 +36,12 @@ public static nint Pos<T>(this Iterator<T> it)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 { return it.pos; }
 
-} partial class main_package {
-
 partial struct Window<K, T>
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 {
     internal K key;
     internal T data;
 }
-
-} partial class mainᴛWindow {
 
 public static nint Len<K, T>(this Window<K, T> w)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
@@ -57,8 +50,6 @@ public static nint Len<K, T>(this Window<K, T> w)
 public static K Key<K, T>(this ref Window<K, T> w)
     where T : /* text.Text */ IByteSeq<T, byte>, new()
 { return w.key; }
-
-} partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string gopherˢ = "gopher"u8;
