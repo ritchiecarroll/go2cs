@@ -16,6 +16,7 @@ package main
 import (
 	"go/build"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -61,6 +62,37 @@ func main() {
 	swapBoth(&a, &b)
 	println(load(unsafe.Pointer(&w)) == nil, x)
 }
+`)
+
+	// THE NARROWING, both ways (unsafePointerWordSlotIsManaged): a provably managed slot keeps master's emission, and a
+	// slot native memory can reach stays on the doors. Its own file, so main.cs's counts above stay its own.
+	writeModuleFile(t, filepath.Join(appDir, "narrow.go"), `package main
+
+import "unsafe"
+
+var global unsafe.Pointer
+var yield = &global
+
+// MANAGED: the converter allocated the slot, so no door.
+func managedFuncRead(f func()) uintptr                 { return uintptr(*(*unsafe.Pointer)(unsafe.Pointer(&f))) }
+func managedFuncStore(f func(), v unsafe.Pointer)      { *(*unsafe.Pointer)(unsafe.Pointer(&f)) = v }
+func managedDoubleFunc(fn func()) unsafe.Pointer       { return **(**unsafe.Pointer)(unsafe.Pointer(&fn)) }
+func managedParamRead(u unsafe.Pointer) unsafe.Pointer { return *(*unsafe.Pointer)(unsafe.Pointer(&u)) }
+func managedParamStore(u, v unsafe.Pointer) unsafe.Pointer {
+	*(*unsafe.Pointer)(unsafe.Pointer(&u)) = v
+	return u
+}
+func managedLocalRead() unsafe.Pointer {
+	var l unsafe.Pointer
+	return *(*unsafe.Pointer)(unsafe.Pointer(&l))
+}
+
+// NATIVE-REACHABLE: a number, a package variable, a package variable's address. Always a door's.
+func nativeNumberRead(k uintptr) unsafe.Pointer      { return *(*unsafe.Pointer)(unsafe.Pointer(k)) }
+func nativeNumberStore(k uintptr, v unsafe.Pointer)  { *(*unsafe.Pointer)(unsafe.Pointer(k)) = v }
+func nativePackageVarRead() unsafe.Pointer           { return *yield }
+func nativePackageVarStore(v unsafe.Pointer)         { *yield = v }
+func nativeGlobalAddressRead() unsafe.Pointer        { return *(*unsafe.Pointer)(unsafe.Pointer(&global)) }
 `)
 
 	goRoot := build.Default.GOROOT
@@ -119,5 +151,39 @@ func main() {
 	// Every other pointee keeps its emission: the one load is load's.
 	if got := strings.Count(mainCs, "LoadWord("); got != 1 {
 		t.Errorf("exactly one load is the word door's, got %d:\n%s", got, mainCs)
+	}
+
+	narrowCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "worddoor", "narrow.cs"))
+
+	bodyOf := func(name string) string {
+		match := regexp.MustCompile(`(?m)^( *)[^\n]*\b` + name + `\([^\n]*\n(?s:.*?)^( *)\}\s*$`).FindString(narrowCs)
+
+		if match == "" {
+			match = regexp.MustCompile(`(?m)^[^\n]*\b` + name + `\([^\n]*$`).FindString(narrowCs)
+		}
+
+		if match == "" {
+			t.Fatalf("%s: not found in the emission:\n%s", name, narrowCs)
+		}
+
+		return match
+	}
+
+	for _, name := range []string{"managedFuncRead", "managedFuncStore", "managedDoubleFunc", "managedParamRead", "managedParamStore", "managedLocalRead"} {
+		if body := bodyOf(name); strings.Contains(body, "LoadWord(") || strings.Contains(body, "StoreWord(") {
+			t.Errorf("%s: a provably managed slot is no door's:\n%s", name, body)
+		}
+	}
+
+	for name, door := range map[string]string{
+		"nativeNumberRead":        "LoadWord(",
+		"nativeNumberStore":       "StoreWord(",
+		"nativePackageVarRead":    "LoadWord(",
+		"nativePackageVarStore":   "StoreWord(",
+		"nativeGlobalAddressRead": "LoadWord(",
+	} {
+		if body := bodyOf(name); !strings.Contains(body, door) {
+			t.Errorf("%s: a slot native memory can reach stays on the door (%s):\n%s", name, door, body)
+		}
 	}
 }

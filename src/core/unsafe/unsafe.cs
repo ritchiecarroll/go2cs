@@ -1302,6 +1302,10 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     private static bool NamesGoMemory(object? referent, nuint word) =>
         (referent is not null && !GoPointerWords.IsCMemoryAlone(referent)) || GoPointerWords.NamesGoMemory(word);
 
+    // The LOADED word (interiorPointerMintCensus's FromWord row): the number is what StoreWord stored in the slot, the
+    // BaseOf projection of the stored pointer: a pinned address (pinned by the slot's bag entry for as long as the word is
+    // stored) or an order token (the referent is the entry's), never FromBox's transient number. A slot of C memory reads
+    // a number with no referent.
     private static Pointer FromWord(nuint word, object? referent) =>
         word == 0 ? Nil : referent is null ? new Pointer((uintptr)word) : new Pointer((uintptr)word, referent);
 

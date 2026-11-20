@@ -1,8 +1,10 @@
 // unsafePointerWordDoor.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 package main
 
@@ -29,6 +31,20 @@ import (
 // SCOPE: exactly the dereference of an expression whose type is *unsafe.Pointer. A named pointer type, a pointer to a
 // named type whose underlying type is unsafe.Pointer, and every other pointee keep their emission. A tuple assignment
 // target (`*p, x = a, b`) keeps `.Value`: the door is a statement, and a tuple element is not one.
+//
+// A PROVABLY MANAGED SLOT keeps its emission too (unsafePointerWordSlotIsManaged): a slot the converter itself allocated
+// in managed memory, which no native box can be. Over it the doors would take their `.Value` arm anyway, so the call
+// buys no behavior and costs the Go-like shape. Two shapes, and only these:
+//
+//	(a) the reinterpret CARRYING arm, `(*unsafe.Pointer)(unsafe.Pointer(p))` of a Go pointer p whose pointee is not
+//	    unsafe.Pointer (and its deref at more than one level), which reinterpretManagedEmission renders as a fresh
+//	    `Ꮡ(<rvalue>)` box: `new Pointer(..)`, `OfFunc(f)`, `FromPinnedBox(..)`;
+//	(b) `&x`, through the identity round trip `(*unsafe.Pointer)(unsafe.Pointer(&x))`, where x is a LOCAL variable or a
+//	    PARAMETER: its box is the converter's `heap(..)`.
+//
+// A package variable, a field, an element, a call result, a *unsafe.Pointer variable or parameter and every pointer
+// derived from a number stay on the doors. A mistake in this predicate fails LOUD: W4 refuses a `.Value` over a native
+// box by name, so a slot wrongly called managed is a refusal and never a silent wrong read.
 
 // isUnsafePointerPointerType reports whether t is exactly *unsafe.Pointer.
 func isUnsafePointerPointerType(t types.Type) bool {
@@ -69,7 +85,88 @@ func (v *Visitor) unsafePointerWordOperand(expr ast.Expr) (ast.Expr, bool) {
 		return nil, false
 	}
 
+	if v.unsafePointerWordSlotIsManaged(star.X) {
+		return nil, false
+	}
+
 	return star.X, true
+}
+
+// unsafePointerWordSlotIsManaged reports whether a *unsafe.Pointer operand provably names a slot the converter allocated
+// in managed memory: shapes (a) and (b) of the door's header comment.
+func (v *Visitor) unsafePointerWordSlotIsManaged(operand ast.Expr) bool {
+	expr := ast.Unparen(operand)
+
+	// (a) at any level: the deref of a carrying conversion's fresh box is itself a fresh box.
+	for {
+		star, isStar := expr.(*ast.StarExpr)
+
+		if !isStar {
+			break
+		}
+
+		expr = ast.Unparen(star.X)
+	}
+
+	call, isCall := expr.(*ast.CallExpr)
+
+	if isCall && len(call.Args) == 1 {
+		if _, isWordTarget := unsafePointerTargetLevels(v.info.TypeOf(call)); isWordTarget {
+			if src, srcPtr, targetPtr := v.pointerConversionSource(call, call.Args[0]); src != nil && !types.Identical(srcPtr.Elem(), targetPtr.Elem()) {
+				return true
+			}
+		}
+
+		// (b)'s identity round trip: (*unsafe.Pointer)(unsafe.Pointer(x)), x itself a *unsafe.Pointer.
+		if inner, isRoundTrip := v.unsafePointerIdentityRoundTrip(call); isRoundTrip {
+			expr = ast.Unparen(inner)
+		}
+	}
+
+	// (b) &x, x a local variable or a parameter.
+	unary, isAddr := expr.(*ast.UnaryExpr)
+
+	if !isAddr || unary.Op != token.AND {
+		return false
+	}
+
+	ident, isIdent := ast.Unparen(unary.X).(*ast.Ident)
+
+	if !isIdent {
+		return false
+	}
+
+	variable, isVar := v.info.ObjectOf(ident).(*types.Var)
+
+	return isVar && !variable.IsField() && variable.Pkg() != nil && variable.Parent() != nil && variable.Parent() != variable.Pkg().Scope()
+}
+
+// unsafePointerIdentityRoundTrip answers x for the conversion `(*unsafe.Pointer)(unsafe.Pointer(x))` where x is itself a
+// *unsafe.Pointer, and false for every other call.
+func (v *Visitor) unsafePointerIdentityRoundTrip(call *ast.CallExpr) (ast.Expr, bool) {
+	if tv, isType := v.info.Types[call.Fun]; !isType || !tv.IsType() || !isUnsafePointerPointerType(v.info.TypeOf(call)) {
+		return nil, false
+	}
+
+	inner, isCall := ast.Unparen(call.Args[0]).(*ast.CallExpr)
+
+	if !isCall || len(inner.Args) != 1 {
+		return nil, false
+	}
+
+	if tv, isType := v.info.Types[inner.Fun]; !isType || !tv.IsType() {
+		return nil, false
+	}
+
+	if basic, isBasic := types.Unalias(v.info.TypeOf(inner)).(*types.Basic); !isBasic || basic.Kind() != types.UnsafePointer {
+		return nil, false
+	}
+
+	if !isUnsafePointerPointerType(v.info.TypeOf(inner.Args[0])) {
+		return nil, false
+	}
+
+	return inner.Args[0], true
 }
 
 // unsafePointerWordBox renders the BOX a *unsafe.Pointer operand names: never a parameter's deref alias.
