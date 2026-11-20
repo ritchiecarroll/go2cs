@@ -9,9 +9,11 @@ using token = global::go.go.token_package;
 using strings = strings_package;
 using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.go;
 using global::go.sync;
+using static types_package;
 
 partial class types_package {
 
@@ -112,12 +114,12 @@ partial struct Named {
     // flags indicating temporary violations of the invariants for fromRHS and underlying
     internal bool allowNilRHS;        // same as below, as well as briefly during checking of a type declaration
     internal bool allowNilUnderlying; // may be true from creation via [NewNamed] until [Named.SetUnderlying]
-    internal ж<Δinstance> inst; // information for instantiated types; nil otherwise
+    internal ж<instance> inst; // information for instantiated types; nil otherwise
     internal sync.Mutex mu;            // guards all fields below
     internal uint32 state_;            // the current state of this type; must only be accessed atomically or when mu is held
-    internal ΔType fromRHS;            // the declaration RHS this type is derived from
+    internal Type fromRHS;             // the declaration RHS this type is derived from
     internal ж<TypeParamList> tparams; // type parameters, or nil
-    internal ΔType underlying;         // underlying type, or nil
+    internal Type underlying;          // underlying type, or nil
     internal bool finite;              // whether the type has finite size
     // methods declared for this type (not the method set of this type)
     // Signatures are type-checked lazily.
@@ -126,12 +128,12 @@ partial struct Named {
     // accessed.
     internal slice<ж<Func>> methods;
     // loader may be provided to lazily load type parameters, underlying type, methods, and delayed functions
-    internal Func<ж<Named>, (slice<ж<TypeParam>>, ΔType, slice<ж<Func>>, slice<Action>)> loader;
+    internal Func<ж<Named>, (slice<ж<TypeParam>>, Type, slice<ж<Func>>, slice<Action>)> loader;
 }
 
 // instance holds information that is only necessary for instantiated named
 // types.
-partial struct Δinstance {
+partial struct instance {
     internal ж<Named> orig;        // original, uninstantiated type
     internal ж<TypeList> targs;    // type arguments
     internal nint expandedMethods; // number of expanded methods; expandedMethods <= len(orig.methods)
@@ -182,7 +184,7 @@ internal static stateMask hasFinite => 16;                 // size finiteness is
 // NewNamed returns a new named type for the given type name, underlying type, and associated methods.
 // If the given type name obj doesn't have a type yet, its type is set to the returned named type.
 // The underlying type must not be a *Named.
-public static ж<Named> NewNamed(ж<TypeName> obj, ΔType underlying, slice<ж<Func>> methods) {
+public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Func>> methods) {
     if (asNamed(underlying) != nil) {
         throw panic("underlying type must not be *Named");
     }
@@ -195,6 +197,8 @@ public static ж<Named> NewNamed(ж<TypeName> obj, ΔType underlying, slice<ж<F
     }
     return n;
 }
+
+} partial class typesᴛNamed {
 
 // unpack populates the type parameters, methods, and RHS of n.
 //
@@ -321,14 +325,16 @@ internal static void setState(this ж<Named> Ꮡn, stateMask m) {
     }
 }
 
+} partial class typesᴛChecker {
+
 // newNamed is like NewNamed but with a *Checker receiver.
-internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ΔType fromRHS, slice<ж<Func>> methods) {
+internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type fromRHS, slice<ж<Func>> methods) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     var typ = Ꮡ(new Named(check: Ꮡcheck, obj: Ꮡobj, fromRHS: fromRHS, methods: methods));
     if (obj.typ == nil) {
-        obj.typ = new NamedжΔType(typ);
+        obj.typ = new NamedжType(typ);
     }
     // Ensure that typ is always sanity-checked.
     if (Ꮡcheck != nil) {
@@ -343,7 +349,7 @@ internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
 //
 // If set, expanding is the named type instance currently being expanded, that
 // led to the creation of this instance.
-internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Named> Ꮡorig, slice<ΔType> targs, ж<Named> Ꮡexpanding) {
+internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, token.Pos pos, ж<Named> Ꮡorig, slice<Type> targs, ж<Named> Ꮡexpanding) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var orig = ref Ꮡorig.DerefOrNull();
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
@@ -351,7 +357,7 @@ internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, tokenꓸPo
     assert(len(targs) > 0);
 
     var obj = NewTypeName(pos, orig.obj.pkg, orig.obj.name, default);
-    var inst = Ꮡ(new Δinstance(orig: Ꮡorig, targs: newTypeList(targs)));
+    var inst = Ꮡ(new instance(orig: Ꮡorig, targs: newTypeList(targs)));
 
     // Only pass the expanding context to the new instance if their packages
     // match. Since type reference cycles are only possible within a single
@@ -362,13 +368,15 @@ internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, tokenꓸPo
         inst.ctxt = expanding.inst.ctxt;
     }
     var typ = Ꮡ(new Named(check: Ꮡcheck, obj: obj, inst: inst));
-    obj.typ = new NamedжΔType(typ);
+    obj.typ = new NamedжType(typ);
     // Ensure that typ is always sanity-checked.
     if (Ꮡcheck != nil) {
         check.needsCleanup(new Namedжcleaner(typ));
     }
     return typ;
 }
+
+} partial class typesᴛNamed {
 
 internal static void cleanup(this ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -496,7 +504,7 @@ internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) {
         check.objDecl(new FuncжObject(origm));
     }
 
-    var origSig = origm.typ._<ж<ΔSignature>>();
+    var origSig = origm.typ._<ж<Signature>>();
     var (rbase, _) = deref(origSig.Recv().of(Var.Ꮡobject).Type());
 
     // If rbase is t, then origm is already the instantiated method we're looking
@@ -520,30 +528,30 @@ internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) {
         if (check != nil) {
             ctxt = check.context();
         }
-        sig = check.subst(origm.pos, new ΔSignatureжΔType(origSig), smap, Ꮡt, ctxt)._<ж<ΔSignature>>();
+        sig = check.subst(origm.pos, new SignatureжType(origSig), smap, Ꮡt, ctxt)._<ж<Signature>>();
     }
 
     if (sig == origSig) {
         // No substitution occurred, but we still need to create a new signature to
         // hold the instantiated receiver.
-        ref var copy = ref heap<ΔSignature>(origSig.Value, out var Ꮡcopy);
+        ref var copy = ref heap<Signature>(origSig.Value, out var Ꮡcopy);
         sig = Ꮡcopy;
     }
 
-    ΔType rtyp = default;
+    Type rtyp = default;
     if (origm.hasPtrRecv()) {
-        rtyp = new PointerжΔType(NewPointer(new NamedжΔType(Ꮡt)));
+        rtyp = new PointerжType(NewPointer(new NamedжType(Ꮡt)));
     } else {
-        rtyp = new NamedжΔType(Ꮡt);
+        rtyp = new NamedжType(Ꮡt);
     }
 
     sig.recv = cloneVar(origSig.recv, rtyp);
-    return cloneFunc(origm, new ΔSignatureжΔType(sig));
+    return cloneFunc(origm, new SignatureжType(sig));
 }
 
 // SetUnderlying sets the underlying type and marks t as complete.
 // t must not have type arguments.
-public static void SetUnderlying(this ж<Named> Ꮡt, ΔType u) {
+public static void SetUnderlying(this ж<Named> Ꮡt, Type u) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -613,7 +621,7 @@ internal static nint methodIndex(this ref Named t, @string name, bool foldCase) 
 // rhs returns [Named.fromRHS].
 //
 // In debug mode, it also asserts that n is in an appropriate state.
-internal static ΔType rhs(this ж<Named> Ꮡn) {
+internal static Type rhs(this ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (debug) {
@@ -627,7 +635,7 @@ internal static ΔType rhs(this ж<Named> Ꮡn) {
 // Alias types.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-public static ΔType Underlying(this ж<Named> Ꮡn) {
+public static Type Underlying(this ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     Ꮡn.unpack();
@@ -649,7 +657,7 @@ public static ΔType Underlying(this ж<Named> Ꮡn) {
     return n.underlying;
 }
 
-public static @string String(this ж<Named> Ꮡt) { return TypeString(new NamedжΔType(Ꮡt), default); }
+public static @string String(this ж<Named> Ꮡt) { return TypeString(new NamedжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -679,11 +687,11 @@ internal static void resolveUnderlying(this ж<Named> Ꮡn) {
     }
 
     slice<ж<Named>> path = default;
-    ΔType u = default;
-    for (var rhs = ((ΔType)new NamedжΔType(Ꮡn)); u == nil; ) {
+    Type u = default;
+    for (var rhs = ((Type)new NamedжType(Ꮡn)); u == nil; ) {
         switch (rhs.type()) {
         case null: {
-            u = new BasicжΔType(Typ[Invalid]);
+            u = new BasicжType(Typ[Invalid]);
             break;
         }
         case ж<Alias> t: {
@@ -760,6 +768,8 @@ internal static (nint, ж<Func>) lookupMethod(this ж<Named> Ꮡn, ж<Package> �
     return (-1, default);
 }
 
+} partial class typesᴛChecker {
+
 // context returns the type-checker context.
 internal static ж<Context> context(this ref Checker check) {
     if (check.ctxt == nil) {
@@ -767,6 +777,8 @@ internal static ж<Context> context(this ref Checker check) {
     }
     return check.ctxt;
 }
+
+} partial class typesᴛNamed {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string namedExpandRHSSˢ => ref namedExpandRHSSˢᵇ;
@@ -805,8 +817,8 @@ private static readonly @string sRhsSˢᵇ = "=> %s (rhs = %s)"u8;
 //	type T[U] U
 //
 // Whereas the underlying of V is int, not U.
-internal static ΔType /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
-    ΔType rhs = default;
+internal static Type /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
+    Type rhs = default;
     GoFrame ᒐ = default;
     try {
         ref var n = ref Ꮡn.DerefOrNull();
@@ -836,11 +848,11 @@ internal static ΔType /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
         var tpars = orig.tparams;
 
         if (targs.Len() != tpars.Len()) {
-            rhs = new BasicжΔType(Typ[Invalid]); goto ᒐdone;
+            rhs = new BasicжType(Typ[Invalid]); goto ᒐdone;
         }
 
-        @string h = ctxt.instanceHash(new NamedжΔType(orig), targs.list());
-        var u = ctxt.update(h, new NamedжΔType(orig), targs.list(), new NamedжΔType(Ꮡn)); // block fixed point infinite instantiation
+        @string h = ctxt.instanceHash(new NamedжType(orig), targs.list());
+        var u = ctxt.update(h, new NamedжType(orig), targs.list(), new NamedжType(Ꮡn)); // block fixed point infinite instantiation
         assert(AreEqual(Ꮡn, u));
 
         var m = makeSubstMap(tpars.list(), targs.list());
@@ -854,7 +866,7 @@ internal static ΔType /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
         // If the RHS is an interface, we must set the receiver of interface methods
         // to the named type.
         var (iface, _) = rhs._<ж<Interface>>(ᐧ); if (iface != nil) {
-            var (methods, copied) = replaceRecvType(iface.methods, new NamedжΔType(orig), new NamedжΔType(Ꮡn)); if (copied) {
+            var (methods, copied) = replaceRecvType(iface.methods, new NamedжType(orig), new NamedжType(Ꮡn)); if (copied) {
                 // If the RHS doesn't use type parameters, it may not have been
                 // substituted; we need to craft a new interface first.
                 if (AreEqual(iface, orig.rhs())) {
@@ -875,7 +887,7 @@ internal static ΔType /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
                     iface.typeSet();
                 }
 
-                rhs = new InterfaceжΔType(iface); goto ᒐdone;
+                rhs = new InterfaceжType(iface); goto ᒐdone;
             }
         }
     }
@@ -884,11 +896,13 @@ internal static ΔType /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
     ᒐdone: return rhs;
 }
 
+} partial class types_package {
+
 // safeUnderlying returns the underlying type of typ without expanding
 // instances, to avoid infinite recursion.
 //
 // TODO(rfindley): eliminate this function or give it a better name.
-internal static ΔType safeUnderlying(ΔType typ) {
+internal static Type safeUnderlying(Type typ) {
     var t = asNamed(typ); if (t != nil) {
         return t.underlying;
     }

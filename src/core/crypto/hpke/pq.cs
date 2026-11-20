@@ -18,6 +18,7 @@ using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using io = io_package;
+using static hpke_package;
 
 partial class hpke_package {
 
@@ -45,8 +46,8 @@ internal static ж<hybridKEM> mlkem768X25519 = Ꮡ(new hybridKEM(
 
 // MLKEM768X25519 returns a KEM implementing MLKEM768-X25519 (a.k.a. X-Wing)
 // from draft-ietf-hpke-pq.
-public static ΔKEM MLKEM768X25519() {
-    return new hybridKEMжΔKEM(mlkem768X25519);
+public static KEM MLKEM768X25519() {
+    return new hybridKEMжKEM(mlkem768X25519);
 }
 
 internal static ж<hybridKEM> mlkem768P256 = Ꮡ(new hybridKEM(
@@ -70,8 +71,8 @@ internal static ж<hybridKEM> mlkem768P256 = Ꮡ(new hybridKEM(
 ));
 
 // MLKEM768P256 returns a KEM implementing MLKEM768-P256 from draft-ietf-hpke-pq.
-public static ΔKEM MLKEM768P256() {
-    return new hybridKEMжΔKEM(mlkem768P256);
+public static KEM MLKEM768P256() {
+    return new hybridKEMжKEM(mlkem768P256);
 }
 
 internal static ж<hybridKEM> mlkem1024P384 = Ꮡ(new hybridKEM(
@@ -95,14 +96,14 @@ internal static ж<hybridKEM> mlkem1024P384 = Ꮡ(new hybridKEM(
 ));
 
 // MLKEM1024P384 returns a KEM implementing MLKEM1024-P384 from draft-ietf-hpke-pq.
-public static ΔKEM MLKEM1024P384() {
-    return new hybridKEMжΔKEM(mlkem1024P384);
+public static KEM MLKEM1024P384() {
+    return new hybridKEMжKEM(mlkem1024P384);
 }
 
 partial struct hybridKEM {
     internal uint16 id;
     internal @string label;
-    internal ecdhꓸCurve curve;
+    internal ecdh.Curve curve;
     internal nint curveSeedSize;
     internal nint curvePointSize;
     internal nint pqEncapsKeySize;
@@ -110,6 +111,8 @@ partial struct hybridKEM {
     internal Func<slice<byte>, (crypto.Encapsulator, error)> pqNewPublicKey;
     internal Func<slice<byte>, (crypto.Decapsulator, error)> pqNewPrivateKey;
 }
+
+} partial class hpkeᴛhybridKEM {
 
 internal static uint16 ID(this ref hybridKEM kem) {
     return kem.id;
@@ -129,9 +132,11 @@ internal static slice<byte> sharedSecret(this ref hybridKEM kem, slice<byte> ssP
     return h.Sum(default);
 }
 
+} partial class hpke_package {
+
 partial struct hybridPublicKey {
     internal ж<hybridKEM> kem;
-    internal ж<ecdhꓸPublicKey> t;
+    internal ж<ecdh.PublicKey> t;
     internal crypto.Encapsulator pq;
 }
 
@@ -156,7 +161,7 @@ private static readonly @string invalidPqKemForP384ˢᵇ = "invalid PQ KEM for P
 // This function is meant for applications that already have instantiated
 // crypto/ecdh and crypto/mlkem public keys. Otherwise, applications should use
 // the [KEM.NewPublicKey] method of e.g. [MLKEM768X25519].
-public static (ΔPublicKey, error) NewHybridPublicKey(crypto.Encapsulator pq, ж<ecdhꓸPublicKey> Ꮡt) {
+public static (PublicKey, error) NewHybridPublicKey(crypto.Encapsulator pq, ж<ecdh.PublicKey> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Curve()) {
@@ -164,30 +169,32 @@ public static (ΔPublicKey, error) NewHybridPublicKey(crypto.Encapsulator pq, ж
         if (!pq._<ж<mlkem.EncapsulationKey768>>(out _)) {
             return (default, errors.New(invalidPqKemForX25519ˢ));
         }
-        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem768X25519, Ꮡt, pq))), default);
+        return (new hybridPublicKeyжPublicKey(Ꮡ(new hybridPublicKey(mlkem768X25519, Ꮡt, pq))), default);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P256()): {
         if (!pq._<ж<mlkem.EncapsulationKey768>>(out _)) {
             return (default, errors.New(invalidPqKemForP256ˢ));
         }
-        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem768P256, Ꮡt, pq))), default);
+        return (new hybridPublicKeyжPublicKey(Ꮡ(new hybridPublicKey(mlkem768P256, Ꮡt, pq))), default);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P384()): {
         if (!pq._<ж<mlkem.EncapsulationKey1024>>(out _)) {
             return (default, errors.New(invalidPqKemForP384ˢ));
         }
-        return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem1024P384, Ꮡt, pq))), default);
+        return (new hybridPublicKeyжPublicKey(Ꮡ(new hybridPublicKey(mlkem1024P384, Ꮡt, pq))), default);
     }
     default: {
         return (default, errors.New(unsupportedCurveˢ));
     }}
 }
 
+} partial class hpkeᴛhybridKEM {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidPublicKeySizeˢ => ref invalidPublicKeySizeˢᵇ;
 private static readonly @string invalidPublicKeySizeˢᵇ = "invalid public key size"u8;
 
-internal static (ΔPublicKey, error) NewPublicKey(this ж<hybridKEM> Ꮡkem, slice<byte> data) {
+internal static (PublicKey, error) NewPublicKey(this ж<hybridKEM> Ꮡkem, slice<byte> data) {
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     if (len(data) != kem.pqEncapsKeySize + kem.curvePointSize) {
@@ -198,7 +205,7 @@ internal static (ΔPublicKey, error) NewPublicKey(this ж<hybridKEM> Ꮡkem, sli
     if (err != nil) {
         return (default, err);
     }
-    ref var k = ref heap<ж<ecdhꓸPublicKey>>(out var Ꮡk);
+    ref var k = ref heap<ж<ecdh.PublicKey>>(out var Ꮡk);
     var dataʗ1 = data;
     fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
         (Ꮡk.ValueSlot, Ꮡerr.ValueSlot) = Ꮡkem.Value.curve.NewPublicKey(dataʗ1.slice(Ꮡkem.Value.pqEncapsKeySize));
@@ -209,15 +216,21 @@ internal static (ΔPublicKey, error) NewPublicKey(this ж<hybridKEM> Ꮡkem, sli
     return NewHybridPublicKey(pq, k);
 }
 
-internal static ΔKEM KEM(this ref hybridPublicKey pk) {
-    return new hybridKEMжΔKEM(pk.kem);
+} partial class hpkeᴛhybridPublicKey {
+
+internal static KEM KEM(this ref hybridPublicKey pk) {
+    return new hybridKEMжKEM(pk.kem);
 }
 
 internal static slice<byte> Bytes(this ref hybridPublicKey pk) {
     return appendꓸꓸꓸ(pk.pq.Bytes(), pk.t.Bytes());
 }
 
+} partial class hpke_package {
+
 internal static Func<(slice<byte>, slice<byte>)> testingOnlyEncapsulate;
+
+} partial class hpkeᴛhybridPublicKey {
 
 internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ж<hybridPublicKey> Ꮡpk) {
     error err = default;
@@ -252,6 +265,8 @@ internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) enca
     return (ss, ct, default);
 }
 
+} partial class hpke_package {
+
 partial struct hybridPrivateKey {
     internal ж<hybridKEM> kem;
     internal slice<byte> seed; // can be nil
@@ -277,6 +292,8 @@ partial struct hybridPrivateKey {
 public static (PrivateKey, error) NewHybridPrivateKey(crypto.Decapsulator pq, ecdh.KeyExchanger t) {
     return newHybridPrivateKey(pq, t, default);
 }
+
+} partial class hpkeᴛhybridKEM {
 
 internal static (PrivateKey, error) GenerateKey(this ж<hybridKEM> Ꮡkem) {
     var seed = new slice<byte>(32);
@@ -322,6 +339,8 @@ internal static (PrivateKey, error) NewPrivateKey(this ж<hybridKEM> Ꮡkem, sli
     }
 }
 
+} partial class hpke_package {
+
 internal static (PrivateKey, error) newHybridPrivateKey(crypto.Decapsulator pq, ecdh.KeyExchanger t, slice<byte> seed) {
     switch (t.Curve()) {
     case var ᴛ when AreEqual(ᴛ, ecdh.X25519()): {
@@ -347,6 +366,8 @@ internal static (PrivateKey, error) newHybridPrivateKey(crypto.Decapsulator pq, 
     }}
 }
 
+} partial class hpkeᴛhybridKEM {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string deriveKeyPairˢ => ref deriveKeyPairˢᵇ;
 private static readonly @string deriveKeyPairˢᵇ = "DeriveKeyPair"u8;
@@ -362,8 +383,10 @@ internal static (PrivateKey, error) DeriveKeyPair(this ж<hybridKEM> Ꮡkem, sli
     return Ꮡkem.NewPrivateKey(dk);
 }
 
-internal static ΔKEM KEM(this ref hybridPrivateKey k) {
-    return new hybridKEMжΔKEM(k.kem);
+} partial class hpkeᴛhybridPrivateKey {
+
+internal static KEM KEM(this ref hybridPrivateKey k) {
+    return new hybridKEMжKEM(k.kem);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -377,8 +400,8 @@ internal static (slice<byte>, error) Bytes(this ref hybridPrivateKey k) {
     return (k.seed, default);
 }
 
-internal static ΔPublicKey PublicKey(this ref hybridPrivateKey k) {
-    return new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(
+internal static PublicKey PublicKey(this ref hybridPrivateKey k) {
+    return new hybridPublicKeyжPublicKey(Ꮡ(new hybridPublicKey(
         kem: k.kem,
         t: k.t.PublicKey(),
         pq: k.pq.Encapsulator()
@@ -401,7 +424,7 @@ internal static (slice<byte>, error) decap(this ж<hybridPrivateKey> Ꮡk, slice
     if (err != nil) {
         return (default, err);
     }
-    ref var pub = ref heap<ж<ecdhꓸPublicKey>>(out var Ꮡpub);
+    ref var pub = ref heap<ж<ecdh.PublicKey>>(out var Ꮡpub);
     var ctTʗ1 = ctT;
     fips140.WithoutEnforcement(() => { // Hybrid of ML-KEM, which is Approved.
         (Ꮡpub.ValueSlot, Ꮡerr.ValueSlot) = Ꮡk.Value.t.Curve().NewPublicKey(ctTʗ1);
@@ -419,6 +442,8 @@ internal static (slice<byte>, error) decap(this ж<hybridPrivateKey> Ꮡk, slice
     var ss = k.kem.sharedSecret(ssPQ, ssT, ctT, k.t.PublicKey().Bytes());
     return (ss, default);
 }
+
+} partial class hpke_package {
 
 [GoLazy] partial class lazyᴛmlkem768 { internal static ж<mlkemKEM> mlkem768 = Ꮡ(new mlkemKEM(
     id: 0x0041,
@@ -438,8 +463,8 @@ internal static (slice<byte>, error) decap(this ж<hybridPrivateKey> Ꮡk, slice
 )); }
 
 // MLKEM768 returns a KEM implementing ML-KEM-768 from draft-ietf-hpke-pq.
-public static ΔKEM MLKEM768() {
-    return new mlkemKEMжΔKEM(mlkem768);
+public static KEM MLKEM768() {
+    return new mlkemKEMжKEM(mlkem768);
 }
 
 [GoLazy] partial class lazyᴛmlkem1024 { internal static ж<mlkemKEM> mlkem1024 = Ꮡ(new mlkemKEM(
@@ -460,8 +485,8 @@ public static ΔKEM MLKEM768() {
 )); }
 
 // MLKEM1024 returns a KEM implementing ML-KEM-1024 from draft-ietf-hpke-pq.
-public static ΔKEM MLKEM1024() {
-    return new mlkemKEMжΔKEM(mlkem1024);
+public static KEM MLKEM1024() {
+    return new mlkemKEMжKEM(mlkem1024);
 }
 
 partial struct mlkemKEM {
@@ -472,6 +497,8 @@ partial struct mlkemKEM {
     internal Func<(crypto.Decapsulator, error)> generateKey;
 }
 
+} partial class hpkeᴛmlkemKEM {
+
 internal static uint16 ID(this ref mlkemKEM kem) {
     return kem.id;
 }
@@ -479,6 +506,8 @@ internal static uint16 ID(this ref mlkemKEM kem) {
 internal static nint encSize(this ref mlkemKEM kem) {
     return kem.ciphertextSize;
 }
+
+} partial class hpke_package {
 
 partial struct mlkemPublicKey {
     internal ж<mlkemKEM> kem;
@@ -500,20 +529,22 @@ private static readonly @string unsupportedPublicKeyTypeˢᵇ = "unsupported pub
 // This function is meant for applications that already have an instantiated
 // crypto/mlkem public key. Otherwise, applications should use the
 // [KEM.NewPublicKey] method of e.g. [MLKEM768].
-public static (ΔPublicKey, error) NewMLKEMPublicKey(crypto.Encapsulator pub) {
+public static (PublicKey, error) NewMLKEMPublicKey(crypto.Encapsulator pub) {
     switch (pub.type()) {
     case ж<mlkem.EncapsulationKey768>: {
-        return (new mlkemPublicKeyжΔPublicKey(Ꮡ(new mlkemPublicKey(mlkem768, pub))), default);
+        return (new mlkemPublicKeyжPublicKey(Ꮡ(new mlkemPublicKey(mlkem768, pub))), default);
     }
     case ж<mlkem.EncapsulationKey1024>: {
-        return (new mlkemPublicKeyжΔPublicKey(Ꮡ(new mlkemPublicKey(mlkem1024, pub))), default);
+        return (new mlkemPublicKeyжPublicKey(Ꮡ(new mlkemPublicKey(mlkem1024, pub))), default);
     }
     default: {
         return (default, errors.New(unsupportedPublicKeyTypeˢ));
     }}
 }
 
-internal static (ΔPublicKey, error) NewPublicKey(this ref mlkemKEM kem, slice<byte> data) {
+} partial class hpkeᴛmlkemKEM {
+
+internal static (PublicKey, error) NewPublicKey(this ref mlkemKEM kem, slice<byte> data) {
     var (pq, err) = kem.newPublicKey(data);
     if (err != nil) {
         return (default, err);
@@ -521,8 +552,10 @@ internal static (ΔPublicKey, error) NewPublicKey(this ref mlkemKEM kem, slice<b
     return NewMLKEMPublicKey(pq);
 }
 
-internal static ΔKEM KEM(this ref mlkemPublicKey pk) {
-    return new mlkemKEMжΔKEM(pk.kem);
+} partial class hpkeᴛmlkemPublicKey {
+
+internal static KEM KEM(this ref mlkemPublicKey pk) {
+    return new mlkemKEMжKEM(pk.kem);
 }
 
 internal static slice<byte> Bytes(this ref mlkemPublicKey pk) {
@@ -536,6 +569,8 @@ internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) enca
     }
     return (ss, ct, default);
 }
+
+} partial class hpke_package {
 
 partial struct mlkemPrivateKey {
     internal ж<mlkemKEM> kem;
@@ -566,6 +601,8 @@ public static (PrivateKey, error) NewMLKEMPrivateKey(crypto.Decapsulator priv) {
     }}
 }
 
+} partial class hpkeᴛmlkemKEM {
+
 internal static (PrivateKey, error) GenerateKey(this ref mlkemKEM kem) {
     var (pq, err) = kem.generateKey();
     if (err != nil) {
@@ -582,6 +619,10 @@ internal static (PrivateKey, error) NewPrivateKey(this ref mlkemKEM kem, slice<b
     return NewMLKEMPrivateKey(pq);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string deriveKeyPairˢ => ref deriveKeyPairˢᵇ;
+private static readonly @string deriveKeyPairˢᵇ = "DeriveKeyPair"u8;
+
 internal static (PrivateKey, error) DeriveKeyPair(this ref mlkemKEM kem, slice<byte> ikm) {
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
     var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢ, default, 64);
@@ -591,13 +632,23 @@ internal static (PrivateKey, error) DeriveKeyPair(this ref mlkemKEM kem, slice<b
     return kem.NewPrivateKey(dk);
 }
 
-internal static ΔKEM KEM(this ref mlkemPrivateKey k) {
-    return new mlkemKEMжΔKEM(k.kem);
+} partial class hpkeᴛmlkemPrivateKey {
+
+internal static KEM KEM(this ref mlkemPrivateKey k) {
+    return new mlkemKEMжKEM(k.kem);
 }
+
+} partial class hpke_package {
 
 internal partial interface Bytes_type /*dyn*/ {
     slice<byte> Bytes();
 }
+
+} partial class hpkeᴛmlkemPrivateKey {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string privateKeySeedNotˢ => ref privateKeySeedNotˢᵇ;
+private static readonly @string privateKeySeedNotˢᵇ = "private key seed not available"u8;
 
 internal static (slice<byte>, error) Bytes(this ref mlkemPrivateKey k) {
     var (pq, ok) = k.pq._<Bytes_type>(ᐧ);
@@ -607,8 +658,8 @@ internal static (slice<byte>, error) Bytes(this ref mlkemPrivateKey k) {
     return (pq.Bytes(), default);
 }
 
-internal static ΔPublicKey PublicKey(this ref mlkemPrivateKey k) {
-    return new mlkemPublicKeyжΔPublicKey(Ꮡ(new mlkemPublicKey(
+internal static PublicKey PublicKey(this ref mlkemPrivateKey k) {
+    return new mlkemPublicKeyжPublicKey(Ꮡ(new mlkemPublicKey(
         kem: k.kem,
         pq: k.pq.Encapsulator()
     )));
@@ -618,4 +669,4 @@ internal static (slice<byte>, error) decap(this ref mlkemPrivateKey k, slice<byt
     return k.pq.Decapsulate(enc);
 }
 
-} // end hpke_package
+} // end hpkeᴛmlkemPrivateKey

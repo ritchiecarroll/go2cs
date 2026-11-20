@@ -39,7 +39,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
         var dst1 = image.NewRGBA(image.Rect(0, 0, dstw, dsth));
         for (nint y = 0; y < dsth; y++) {
             for (nint x = 0; x < dstw; x++) {
-                dst1.SetRGBA(x, y, new colorꓸRGBA(
+                dst1.SetRGBA(x, y, new color.RGBA(
                     (uint8)(5 * x % 0x100),
                     (uint8)(7 * y % 0x100),
                     (uint8)((7 * x + 5 * y) % 0x100),
@@ -47,7 +47,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
                 ));
             }
         }
-        dst = new draw_test_package.image_ΔRGBAжImage(dst1);
+        dst = new draw_test_package.image_RGBAжImage(dst1);
         break;
     }
     case var ᴛ when AreEqual(ᴛ, color.RGBA64Model): {
@@ -85,7 +85,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
     image.Image src = default;
     switch (scm) {
     case var ᴛ when AreEqual(ᴛ, default): {
-        src = new image.UniformжImage(Ꮡ(new image.Uniform(C: new colorꓸRGBA(0x11, 0x22, 0x33, 0x44))));
+        src = new image.UniformжImage(Ꮡ(new image.Uniform(C: new color.RGBA(0x11, 0x22, 0x33, 0x44))));
         break;
     }
     case var ᴛ when AreEqual(ᴛ, color.CMYKModel): {
@@ -119,7 +119,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
         var src1 = image.NewRGBA(image.Rect(0, 0, srcw, srch));
         for (nint y = 0; y < srch; y++) {
             for (nint x = 0; x < srcw; x++) {
-                src1.SetRGBA(x, y, new colorꓸRGBA(
+                src1.SetRGBA(x, y, new color.RGBA(
                     (uint8)(13 * x % 0x80),
                     (uint8)(11 * y % 0x80),
                     (uint8)((11 * x + 13 * y) % 0x80),
@@ -127,7 +127,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
                 ));
             }
         }
-        src = new image.ΔRGBAжImage(src1);
+        src = new image.RGBAжImage(src1);
         break;
     }
     case var ᴛ when AreEqual(ᴛ, color.RGBA64Model): {

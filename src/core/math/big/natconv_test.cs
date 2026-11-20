@@ -27,7 +27,7 @@ internal static nint log2(global::go.math.big_package.Word x) {
     return bits.Len((nuint)x) - 1;
 }
 
-internal static slice<byte> itoa(global::go.math.big_package.Δnat x, nint @base) {
+internal static slice<byte> itoa(global::go.math.big_package.nat x, nint @base) {
     // special cases
     switch (ᐧ) {
     case {} when @base is < 2: {
@@ -43,7 +43,7 @@ internal static slice<byte> itoa(global::go.math.big_package.Δnat x, nint @base
     var s = new slice<byte>(i);
 
     // don't destroy x
-    var q = ((global::go.math.big_package.Δnat)default).set(x);
+    var q = ((global::go.math.big_package.nat)default).set(x);
 
     // convert
     while (len(q) > 0) {
@@ -57,21 +57,21 @@ internal static slice<byte> itoa(global::go.math.big_package.Δnat x, nint @base
 }
 
 partial struct strTestsᴛ1 /*dyn*/ {
-    internal global::go.math.big_package.Δnat x; // nat value to be converted
-    internal nint b;                             // conversion base
-    internal @string s;                          // expected result
+    internal global::go.math.big_package.nat x; // nat value to be converted
+    internal nint b;                            // conversion base
+    internal @string s;                         // expected result
 }
 internal static slice<strTestsᴛ1> strTests = [
     new(default, 2, "0"),
-    new(new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 2, "1"),
-    new(new Δnat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, "11000101"),
-    new(new Δnat(new global::go.math.big_package.Word[]{1721}.slice()), 8, "3271"),
-    new(new Δnat(new global::go.math.big_package.Word[]{10}.slice()), 10, "10"),
-    new(new Δnat(new global::go.math.big_package.Word[]{1234567890}.slice()), 10, "1234567890"),
-    new(new Δnat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, "deadbeef"),
-    new(new Δnat(new global::go.math.big_package.Word[]{0x229be7}.slice()), 17, "1a2b3c"),
-    new(new Δnat(new global::go.math.big_package.Word[]{0x309663e6}.slice()), 32, "o9cov6"),
-    new(new Δnat(new global::go.math.big_package.Word[]{0x309663e6}.slice()), 62, "TakXI")
+    new(new nat(new global::go.math.big_package.Word[]{1}.slice()), 2, "1"),
+    new(new nat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, "11000101"),
+    new(new nat(new global::go.math.big_package.Word[]{1721}.slice()), 8, "3271"),
+    new(new nat(new global::go.math.big_package.Word[]{10}.slice()), 10, "10"),
+    new(new nat(new global::go.math.big_package.Word[]{1234567890}.slice()), 10, "1234567890"),
+    new(new nat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, "deadbeef"),
+    new(new nat(new global::go.math.big_package.Word[]{0x229be7}.slice()), 17, "1a2b3c"),
+    new(new nat(new global::go.math.big_package.Word[]{0x309663e6}.slice()), 32, "o9cov6"),
+    new(new nat(new global::go.math.big_package.Word[]{0x309663e6}.slice()), 62, "TakXI")
 ];
 
 public static void TestString(ж<testing.T> t) {
@@ -98,7 +98,7 @@ public static void TestString(ж<testing.T> t) {
             t.Errorf("string%+v\n\tgot s = %s; want %s", a, s, a.s);
         }
 
-        var (x, b, _, err) = ((global::go.math.big_package.Δnat)default).scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(a.s)), a.b, false);
+        var (x, b, _, err) = ((global::go.math.big_package.nat)default).scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(a.s)), a.b, false);
         if (x.cmp(a.x) != 0) {
             t.Errorf("scan%+v\n\tgot z = %v; want %v", a, x, a.x);
         }
@@ -112,14 +112,14 @@ public static void TestString(ж<testing.T> t) {
 }
 
 partial struct natScanTestsᴛ1 /*dyn*/ {
-    internal @string s;                          // string to be scanned
-    internal nint @base;                         // input base
-    internal bool frac;                          // fraction ok
-    internal global::go.math.big_package.Δnat x; // expected nat
-    internal nint b;                             // expected base
-    internal nint count;                         // expected digit count
-    internal error err;                          // expected error
-    internal rune next;                          // next character (or 0, if at EOF)
+    internal @string s;                         // string to be scanned
+    internal nint @base;                        // input base
+    internal bool frac;                         // fraction ok
+    internal global::go.math.big_package.nat x; // expected nat
+    internal nint b;                            // expected base
+    internal nint count;                        // expected digit count
+    internal error err;                         // expected error
+    internal rune next;                         // next character (or 0, if at EOF)
 }
 internal static slice<natScanTestsᴛ1> natScanTests;
 internal static void initᴛnatScanTests() { natScanTests = [
@@ -159,85 +159,85 @@ internal static void initᴛnatScanTests() { natScanTests = [
     new("0x___0", 0, false, default, 16, 1, errInvalSep, 0),
     new("0_x", 0, false, default, 10, 1, errInvalSep, 'x'),
     new("0_8", 0, false, default, 10, 1, errInvalSep, '8'),
-    new("123_.", 0, true, new Δnat(new global::go.math.big_package.Word[]{123}.slice()), 10, 0, errInvalSep, 0),
-    new("._123", 0, true, new Δnat(new global::go.math.big_package.Word[]{123}.slice()), 10, -3, errInvalSep, 0),
-    new("0b__1000", 0, false, new Δnat(new global::go.math.big_package.Word[]{0x8}.slice()), 2, 4, errInvalSep, 0),
-    new("0o60___0", 0, false, new Δnat(new global::go.math.big_package.Word[]{384}.slice()), 8, 3, errInvalSep, 0),
-    new("0466_", 0, false, new Δnat(new global::go.math.big_package.Word[]{310}.slice()), 8, 3, errInvalSep, 0),
-    new("01234567_8", 0, false, new Δnat(new global::go.math.big_package.Word[]{342391}.slice()), 8, 7, errInvalSep, '8'),
-    new("1_.", 0, true, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 10, 0, errInvalSep, 0),
-    new("0._1", 0, true, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 10, -1, errInvalSep, 0),
-    new("2.7_", 0, true, new Δnat(new global::go.math.big_package.Word[]{27}.slice()), 10, -1, errInvalSep, 0),
-    new("0x1.0_", 0, true, new Δnat(new global::go.math.big_package.Word[]{0x10}.slice()), 16, -1, errInvalSep, 0),
+    new("123_.", 0, true, new nat(new global::go.math.big_package.Word[]{123}.slice()), 10, 0, errInvalSep, 0),
+    new("._123", 0, true, new nat(new global::go.math.big_package.Word[]{123}.slice()), 10, -3, errInvalSep, 0),
+    new("0b__1000", 0, false, new nat(new global::go.math.big_package.Word[]{0x8}.slice()), 2, 4, errInvalSep, 0),
+    new("0o60___0", 0, false, new nat(new global::go.math.big_package.Word[]{384}.slice()), 8, 3, errInvalSep, 0),
+    new("0466_", 0, false, new nat(new global::go.math.big_package.Word[]{310}.slice()), 8, 3, errInvalSep, 0),
+    new("01234567_8", 0, false, new nat(new global::go.math.big_package.Word[]{342391}.slice()), 8, 7, errInvalSep, '8'),
+    new("1_.", 0, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, 0, errInvalSep, 0),
+    new("0._1", 0, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, -1, errInvalSep, 0),
+    new("2.7_", 0, true, new nat(new global::go.math.big_package.Word[]{27}.slice()), 10, -1, errInvalSep, 0),
+    new("0x1.0_", 0, true, new nat(new global::go.math.big_package.Word[]{0x10}.slice()), 16, -1, errInvalSep, 0),
 
     // valid: separators are not accepted for base != 0
     new("0_", 10, false, default, 10, 1, default, '_'),
-    new("1__0", 10, false, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default, '_'),
+    new("1__0", 10, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default, '_'),
     new("0__8", 10, false, default, 10, 1, default, '_'),
-    new("xy_z_", 36, false, new Δnat(new global::go.math.big_package.Word[]{33 * 36 + 34}.slice()), 36, 2, default, '_'),
+    new("xy_z_", 36, false, new nat(new global::go.math.big_package.Word[]{33 * 36 + 34}.slice()), 36, 2, default, '_'),
 
     // valid, no decimal point
     new("0", 0, false, default, 10, 1, default, 0),
     new("0", 36, false, default, 36, 1, default, 0),
     new("0", 62, false, default, 62, 1, default, 0),
-    new("1", 0, false, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default, 0),
-    new("1", 10, false, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default, 0),
+    new("1", 0, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default, 0),
+    new("1", 10, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default, 0),
     new("0 ", 0, false, default, 10, 1, default, ' '),
     new("00 ", 0, false, default, 8, 1, default, ' '), // octal 0
-    new("0b1", 0, false, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 2, 1, default, 0),
-    new("0B11000101", 0, false, new Δnat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, 8, default, 0),
-    new("0B110001012", 0, false, new Δnat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, 8, default, '2'),
-    new("07", 0, false, new Δnat(new global::go.math.big_package.Word[]{7}.slice()), 8, 1, default, 0),
+    new("0b1", 0, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 2, 1, default, 0),
+    new("0B11000101", 0, false, new nat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, 8, default, 0),
+    new("0B110001012", 0, false, new nat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, 8, default, '2'),
+    new("07", 0, false, new nat(new global::go.math.big_package.Word[]{7}.slice()), 8, 1, default, 0),
     new("08", 0, false, default, 10, 1, default, '8'),
-    new("08", 10, false, new Δnat(new global::go.math.big_package.Word[]{8}.slice()), 10, 2, default, 0),
-    new("018", 0, false, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 8, 1, default, '8'),
-    new("0o7", 0, false, new Δnat(new global::go.math.big_package.Word[]{7}.slice()), 8, 1, default, 0),
-    new("0o18", 0, false, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 8, 1, default, '8'),
-    new("0O17", 0, false, new Δnat(new global::go.math.big_package.Word[]{15}.slice()), 8, 2, default, 0),
-    new("03271", 0, false, new Δnat(new global::go.math.big_package.Word[]{1721}.slice()), 8, 4, default, 0),
-    new("10ab", 0, false, new Δnat(new global::go.math.big_package.Word[]{10}.slice()), 10, 2, default, 'a'),
-    new("1234567890", 0, false, new Δnat(new global::go.math.big_package.Word[]{1234567890}.slice()), 10, 10, default, 0),
-    new("A", 36, false, new Δnat(new global::go.math.big_package.Word[]{10}.slice()), 36, 1, default, 0),
-    new("A", 37, false, new Δnat(new global::go.math.big_package.Word[]{36}.slice()), 37, 1, default, 0),
-    new("xyz", 36, false, new Δnat(new global::go.math.big_package.Word[]{(33 * 36 + 34) * 36 + 35}.slice()), 36, 3, default, 0),
-    new("XYZ?", 36, false, new Δnat(new global::go.math.big_package.Word[]{(33 * 36 + 34) * 36 + 35}.slice()), 36, 3, default, '?'),
-    new("XYZ?", 62, false, new Δnat(new global::go.math.big_package.Word[]{(59 * 62 + 60) * 62 + 61}.slice()), 62, 3, default, '?'),
+    new("08", 10, false, new nat(new global::go.math.big_package.Word[]{8}.slice()), 10, 2, default, 0),
+    new("018", 0, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 8, 1, default, '8'),
+    new("0o7", 0, false, new nat(new global::go.math.big_package.Word[]{7}.slice()), 8, 1, default, 0),
+    new("0o18", 0, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 8, 1, default, '8'),
+    new("0O17", 0, false, new nat(new global::go.math.big_package.Word[]{15}.slice()), 8, 2, default, 0),
+    new("03271", 0, false, new nat(new global::go.math.big_package.Word[]{1721}.slice()), 8, 4, default, 0),
+    new("10ab", 0, false, new nat(new global::go.math.big_package.Word[]{10}.slice()), 10, 2, default, 'a'),
+    new("1234567890", 0, false, new nat(new global::go.math.big_package.Word[]{1234567890}.slice()), 10, 10, default, 0),
+    new("A", 36, false, new nat(new global::go.math.big_package.Word[]{10}.slice()), 36, 1, default, 0),
+    new("A", 37, false, new nat(new global::go.math.big_package.Word[]{36}.slice()), 37, 1, default, 0),
+    new("xyz", 36, false, new nat(new global::go.math.big_package.Word[]{(33 * 36 + 34) * 36 + 35}.slice()), 36, 3, default, 0),
+    new("XYZ?", 36, false, new nat(new global::go.math.big_package.Word[]{(33 * 36 + 34) * 36 + 35}.slice()), 36, 3, default, '?'),
+    new("XYZ?", 62, false, new nat(new global::go.math.big_package.Word[]{(59 * 62 + 60) * 62 + 61}.slice()), 62, 3, default, '?'),
     new("0x", 16, false, default, 16, 1, default, 'x'),
-    new("0xdeadbeef", 0, false, new Δnat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, 8, default, 0),
-    new("0XDEADBEEF", 0, false, new Δnat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, 8, default, 0),
+    new("0xdeadbeef", 0, false, new nat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, 8, default, 0),
+    new("0XDEADBEEF", 0, false, new nat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, 8, default, 0),
 
     // valid, with decimal point
     new("0.", 0, false, default, 10, 1, default, '.'),
     new("0.", 10, true, default, 10, 0, default, 0),
-    new("0.1.2", 10, true, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 10, -1, default, '.'),
+    new("0.1.2", 10, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, -1, default, '.'),
     new(".000", 10, true, default, 10, -3, default, 0),
-    new("12.3", 10, true, new Δnat(new global::go.math.big_package.Word[]{123}.slice()), 10, -1, default, 0),
-    new("012.345", 10, true, new Δnat(new global::go.math.big_package.Word[]{12345}.slice()), 10, -3, default, 0),
-    new("0.1", 0, true, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 10, -1, default, 0),
-    new("0.1", 2, true, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 2, -1, default, 0),
-    new("0.12", 2, true, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 2, -1, default, '2'),
-    new("0b0.1", 0, true, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 2, -1, default, 0),
-    new("0B0.12", 0, true, new Δnat(new global::go.math.big_package.Word[]{1}.slice()), 2, -1, default, '2'),
-    new("0o0.7", 0, true, new Δnat(new global::go.math.big_package.Word[]{7}.slice()), 8, -1, default, 0),
-    new("0O0.78", 0, true, new Δnat(new global::go.math.big_package.Word[]{7}.slice()), 8, -1, default, '8'),
-    new("0xdead.beef", 0, true, new Δnat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, -4, default, 0),
+    new("12.3", 10, true, new nat(new global::go.math.big_package.Word[]{123}.slice()), 10, -1, default, 0),
+    new("012.345", 10, true, new nat(new global::go.math.big_package.Word[]{12345}.slice()), 10, -3, default, 0),
+    new("0.1", 0, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, -1, default, 0),
+    new("0.1", 2, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 2, -1, default, 0),
+    new("0.12", 2, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 2, -1, default, '2'),
+    new("0b0.1", 0, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 2, -1, default, 0),
+    new("0B0.12", 0, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 2, -1, default, '2'),
+    new("0o0.7", 0, true, new nat(new global::go.math.big_package.Word[]{7}.slice()), 8, -1, default, 0),
+    new("0O0.78", 0, true, new nat(new global::go.math.big_package.Word[]{7}.slice()), 8, -1, default, '8'),
+    new("0xdead.beef", 0, true, new nat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, -4, default, 0),
 
     // valid, with separators
-    new("1_000", 0, false, new Δnat(new global::go.math.big_package.Word[]{1000}.slice()), 10, 4, default, 0),
-    new("0_466", 0, false, new Δnat(new global::go.math.big_package.Word[]{310}.slice()), 8, 3, default, 0),
-    new("0o_600", 0, false, new Δnat(new global::go.math.big_package.Word[]{384}.slice()), 8, 3, default, 0),
-    new("0x_f0_0d", 0, false, new Δnat(new global::go.math.big_package.Word[]{0xf00d}.slice()), 16, 4, default, 0),
-    new("0b1000_0001", 0, false, new Δnat(new global::go.math.big_package.Word[]{0x81}.slice()), 2, 8, default, 0),
-    new("1_000.000_1", 0, true, new Δnat(new global::go.math.big_package.Word[]{10000001}.slice()), 10, -4, default, 0),
-    new("0x_f00d.1e", 0, true, new Δnat(new global::go.math.big_package.Word[]{0xf00d1e}.slice()), 16, -2, default, 0),
-    new("0x_f00d.1E2", 0, true, new Δnat(new global::go.math.big_package.Word[]{0xf00d1e2}.slice()), 16, -3, default, 0),
-    new("0x_f00d.1eg", 0, true, new Δnat(new global::go.math.big_package.Word[]{0xf00d1e}.slice()), 16, -2, default, 'g')
+    new("1_000", 0, false, new nat(new global::go.math.big_package.Word[]{1000}.slice()), 10, 4, default, 0),
+    new("0_466", 0, false, new nat(new global::go.math.big_package.Word[]{310}.slice()), 8, 3, default, 0),
+    new("0o_600", 0, false, new nat(new global::go.math.big_package.Word[]{384}.slice()), 8, 3, default, 0),
+    new("0x_f0_0d", 0, false, new nat(new global::go.math.big_package.Word[]{0xf00d}.slice()), 16, 4, default, 0),
+    new("0b1000_0001", 0, false, new nat(new global::go.math.big_package.Word[]{0x81}.slice()), 2, 8, default, 0),
+    new("1_000.000_1", 0, true, new nat(new global::go.math.big_package.Word[]{10000001}.slice()), 10, -4, default, 0),
+    new("0x_f00d.1e", 0, true, new nat(new global::go.math.big_package.Word[]{0xf00d1e}.slice()), 16, -2, default, 0),
+    new("0x_f00d.1E2", 0, true, new nat(new global::go.math.big_package.Word[]{0xf00d1e2}.slice()), 16, -3, default, 0),
+    new("0x_f00d.1eg", 0, true, new nat(new global::go.math.big_package.Word[]{0xf00d1e}.slice()), 16, -2, default, 'g')
 ]; }
 
 public static void TestScanBase(ж<testing.T> t) {
     foreach (var (_, a) in range(natScanTests)) {
         var r = strings.NewReader(a.s);
-        var (x, b, count, err) = ((global::go.math.big_package.Δnat)default).scan(new big_test_package.strings_ReaderжByteScanner(r), a.@base, a.frac);
+        var (x, b, count, err) = ((global::go.math.big_package.nat)default).scan(new big_test_package.strings_ReaderжByteScanner(r), a.@base, a.frac);
         if (!AreEqual(err, a.err)) {
             t.Errorf("scan%+v\n\tgot error = %v; want %v", a, err, a.err);
         }
@@ -265,7 +265,7 @@ internal static @string pi = "3"u8 + "141592653589793238462643383279502884197169
 
 // Test case for BenchmarkScanPi.
 public static void TestScanPi(ж<testing.T> t) {
-    global::go.math.big_package.Δnat x = default;
+    global::go.math.big_package.nat x = default;
     var (z, _, _, err) = x.scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(pi)), 10, false);
     if (err != nil) {
         t.Errorf("scanning pi: %s", err);
@@ -294,13 +294,13 @@ public static void BenchmarkScanPi(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        global::go.math.big_package.Δnat x = default;
+        global::go.math.big_package.nat x = default;
         x.scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(pi)), 10, false);
     }
 }
 
 public static void BenchmarkStringPiParallel(ж<testing.B> b) {
-    global::go.math.big_package.Δnat x = default;
+    global::go.math.big_package.nat x = default;
     (x, _, _, _) = x.scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(pi)), 0, false);
     if (((sstring)x.utoa(10)) != pi) {
         throw panic("benchmark incorrect: conversion failed");
@@ -329,17 +329,17 @@ public static void BenchmarkScan(ж<testing.B> b) {
                 var stkʗ2 = stk;
                 b.Run(fmt.Sprintf("%d/Base%d"u8, y, @base), (ж<testing.B> bΔ1) => {
                     bΔ1.StopTimer();
-                    global::go.math.big_package.Δnat z = default;
+                    global::go.math.big_package.nat z = default;
                     z = z.expWW(stkʗ2, x, y);
 
                     var s = z.utoa(@base);
-                    var t = itoa(z, @base); if (!bytes_package.Equal(s, t)) {
+                    var t = itoa(z, @base); if (!bytes.Equal(s, t)) {
                         bΔ1.Fatalf("scanning: got %s; want %s", s, t);
                     }
                     bΔ1.StartTimer();
 
                     for (nint i = 0; i < (~bΔ1).N; i++) {
-                        z.scan(new big_test_package.bytes_ReaderжByteScanner(bytes_package.NewReader(s)), @base, false);
+                        z.scan(new big_test_package.bytes_ReaderжByteScanner(bytes.NewReader(s)), @base, false);
                     }
                 });
             }
@@ -365,7 +365,7 @@ public static void BenchmarkString(ж<testing.B> b) {
                 var stkʗ2 = stk;
                 b.Run(fmt.Sprintf("%d/Base%d"u8, y, @base), (ж<testing.B> bΔ1) => {
                     bΔ1.StopTimer();
-                    global::go.math.big_package.Δnat z = default;
+                    global::go.math.big_package.nat z = default;
                     z = z.expWW(stkʗ2, x, y);
                     z.utoa(@base); // warm divisor cache
                     bΔ1.StartTimer();
@@ -408,7 +408,7 @@ public static void LeafSizeHelper(ж<testing.B> Ꮡb, nint @base, nint size) {
     for (nint d = 1; d <= 10000; d *= 10) {
         b.StopTimer();
         var stk = getStack();
-        global::go.math.big_package.Δnat z = default;
+        global::go.math.big_package.nat z = default;
         z = z.expWW(stk, (global::go.math.big_package.Word)(nuint)@base, (global::go.math.big_package.Word)(nuint)d); // build target number
         _ = z.utoa(@base);                                                                                            // warm divisor cache
         stk.free();
@@ -448,10 +448,10 @@ public static void TestStringPowers(ж<testing.T> t) {
                 if (testing.Short() && p > 10) {
                     break;
                 }
-                var x = ((global::go.math.big_package.Δnat)default).expWW(stk, (global::go.math.big_package.Word)(nuint)b, p);
+                var x = ((global::go.math.big_package.nat)default).expWW(stk, (global::go.math.big_package.Word)(nuint)b, p);
                 var xs = x.utoa(b);
                 var xs2 = itoa(x, b);
-                if (!bytes_package.Equal(xs, xs2)) {
+                if (!bytes.Equal(xs, xs2)) {
                     t.Errorf("failed at %d ** %d in base %d: %s != %s", b, p, b, xs, xs2);
                 }
             }

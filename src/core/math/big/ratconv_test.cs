@@ -190,7 +190,7 @@ public static void TestRatSetString(ж<testing.T> t) {
     tests = appendꓸꓸꓸ(tests, setStringTests2);
 
     foreach (var (i, test) in range(tests)) {
-        var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(test.@in);
+        var (x, ok) = @new<global::go.math.big_package.Rat>().SetString(test.@in);
 
         if (ok) {
             if (!test.ok) {
@@ -209,8 +209,8 @@ public static void TestRatSetString(ж<testing.T> t) {
 }
 
 public static void TestRatSetStringZero(ж<testing.T> t) {
-    var (got, _) = @new<global::go.math.big_package.ΔRat>().SetString("0");
-    var want = @new<global::go.math.big_package.ΔRat>().SetInt64(0);
+    var (got, _) = @new<global::go.math.big_package.Rat>().SetString("0");
+    var want = @new<global::go.math.big_package.Rat>().SetInt64(0);
     if (!reflect.DeepEqual(got.OrTypedNil(), want.OrTypedNil())) {
         t.Errorf("got %#+v, want %#+v", got.OrTypedNil(), want.OrTypedNil());
     }
@@ -219,7 +219,7 @@ public static void TestRatSetStringZero(ж<testing.T> t) {
 public static void TestRatScan(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (i, test) in range(setStringTests)) {
-        var x = @new<global::go.math.big_package.ΔRat>();
+        var x = @new<global::go.math.big_package.Rat>();
         buf.Reset();
         buf.WriteString(test.@in);
 
@@ -265,7 +265,7 @@ internal static slice<floatStringTestsᴛ1> floatStringTests = [
 
 public static void TestFloatString(ж<testing.T> t) {
     foreach (var (i, test) in range(floatStringTests)) {
-        var (x, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.@in);
+        var (x, _) = @new<global::go.math.big_package.Rat>().SetString(test.@in);
 
         if (x.FloatString(test.prec) != test.@out) {
             t.Errorf("#%d got %s want %s", i, x.FloatString(test.prec), test.@out);
@@ -492,7 +492,7 @@ public static void TestFloat32SpecialCases(ж<testing.T> t) {
             input = input[(int)(len("long:"))..];
         }
 
-        var (r, ok) = @new<global::go.math.big_package.ΔRat>().SetString(input);
+        var (r, ok) = @new<global::go.math.big_package.Rat>().SetString(input);
         if (!ok) {
             t.Errorf("Rat.SetString(%q) failed", input);
             continue;
@@ -538,7 +538,7 @@ public static void TestFloat32SpecialCases(ж<testing.T> t) {
         checkNonLossyRoundtrip32(t, f);
 
         // 4. Check exactness using slow algorithm.
-        var wasExact = @new<global::go.math.big_package.ΔRat>().SetFloat64((float64)f).Cmp(r) == 0; if (wasExact != exact) {
+        var wasExact = @new<global::go.math.big_package.Rat>().SetFloat64((float64)f).Cmp(r) == 0; if (wasExact != exact) {
             t.Errorf("Rat.SetString(%q).Float32().exact = %t, want %t", input, exact, wasExact);
         }
     }
@@ -555,7 +555,7 @@ public static void TestFloat64SpecialCases(ж<testing.T> t) {
             input = input[(int)(len("long:"))..];
         }
 
-        var (r, ok) = @new<global::go.math.big_package.ΔRat>().SetString(input);
+        var (r, ok) = @new<global::go.math.big_package.Rat>().SetString(input);
         if (!ok) {
             t.Errorf("Rat.SetString(%q) failed", input);
             continue;
@@ -600,14 +600,14 @@ public static void TestFloat64SpecialCases(ж<testing.T> t) {
         checkNonLossyRoundtrip64(t, f);
 
         // 4. Check exactness using slow algorithm.
-        var wasExact = @new<global::go.math.big_package.ΔRat>().SetFloat64(f).Cmp(r) == 0; if (wasExact != exact) {
+        var wasExact = @new<global::go.math.big_package.Rat>().SetFloat64(f).Cmp(r) == 0; if (wasExact != exact) {
             t.Errorf("Rat.SetString(%q).Float64().exact = %t, want %t", input, exact, wasExact);
         }
     }
 }
 
 public static void TestIssue31184(ж<testing.T> t) {
-    ref var x = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡx);
+    ref var x = ref heap(new global::go.math.big_package.Rat(), out var Ꮡx);
     foreach (var (_, want) in range(slice<@string>([
         "-213.090",
         "8.192",
@@ -627,7 +627,7 @@ internal partial struct TestIssue45910_type /*dyn*/ {
 }
 
 public static void TestIssue45910(ж<testing.T> t) {
-    ref var x = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡx);
+    ref var x = ref heap(new global::go.math.big_package.Rat(), out var Ꮡx);
     foreach (var (_, test) in range(slice<TestIssue45910_type>([
         new("1e-1000001", false),
         new("1e-1000000", true),
@@ -692,7 +692,7 @@ public static void TestFloatPrec(ж<testing.T> t) {
     ]);
 
     foreach (var (_, test) in range(tests)) {
-        ref var f = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡf);
+        ref var f = ref heap(new global::go.math.big_package.Rat(), out var Ꮡf);
 
         // check uninitialized zero value
         if (test.f != "zero"u8) {
@@ -730,7 +730,7 @@ public static void BenchmarkFloatPrecExact(ж<testing.B> b) {
         d.Exp(d, p, nil);
 
         // r := 1/d
-        ref var r = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡr);
+        ref var r = ref heap(new global::go.math.big_package.Rat(), out var Ꮡr);
         Ꮡr.SetFrac(NewInt(1), d);
 
         b.Run(fmt.Sprint(n), (ж<testing.B> bΔ1) => {
@@ -752,7 +752,7 @@ public static void BenchmarkFloatPrecMixed(ж<testing.B> b) {
         d.Exp(d, p, nil);
 
         // r := 1/d
-        ref var r = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡr);
+        ref var r = ref heap(new global::go.math.big_package.Rat(), out var Ꮡr);
         Ꮡr.SetFrac(NewInt(1), d);
 
         b.Run(fmt.Sprint(n), (ж<testing.B> bΔ1) => {
@@ -775,7 +775,7 @@ public static void BenchmarkFloatPrecInexact(ж<testing.B> b) {
         d.Add(d, NewInt(1));
 
         // r := 1/d
-        ref var r = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡr);
+        ref var r = ref heap(new global::go.math.big_package.Rat(), out var Ꮡr);
         Ꮡr.SetFrac(NewInt(1), d);
 
         b.Run(fmt.Sprint(n), (ж<testing.B> bΔ1) => {

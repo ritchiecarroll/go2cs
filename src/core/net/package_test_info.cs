@@ -8,16 +8,6 @@ global using static global::go.net_package;
 global using static global::go.net_internal_test_package;
 
 // <ImportedTypeAliases>
-global using dnsmessageꓸAAAAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔAAAAResource;
-global using dnsmessageꓸAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔAResource;
-global using dnsmessageꓸQuestion = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔQuestion;
-global using dnsmessageꓸSRVResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSRVResource;
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using socktestꓸSockets = go.net.@internal.socktest_package.ΔSockets;
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,20 +51,18 @@ using static global::go.net_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b736e657420737472696e673b20736164647220737472696e673b20746e657420737472696e673b20746164647220737472696e673b206469616c20626f6f6c7d", "udpServerTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b736e657420737472696e673b20736164647220737472696e673b20746e657420737472696e673b20746164647220737472696e677d", "tcpServerTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b74696d656f75742074696d652e4475726174696f6e3b207865727273205b325d6572726f727d", "readTimeoutTestsᴛ1")]
-[assembly: GoTypeAlias("Addr", "ΔAddr")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
 [assembly: GoImplement<global::go.net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<global::go.net_package.Conn, io_package.Writer>]
-[assembly: GoImplement<global::go.net_package.InvalidAddrError, global::go.net_package.ΔError>]
+[assembly: GoImplement<global::go.net_package.InvalidAddrError, global::go.net_package.Error>]
 [assembly: GoImplement<global::go.net_package.TCPConn, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<global::go.net_package.TCPConn, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<global::go.net_package.UnknownNetworkError, error>]
-[assembly: GoImplement<global::go.net_package.UnknownNetworkError, global::go.net_package.ΔError>]
+[assembly: GoImplement<global::go.net_package.UnknownNetworkError, global::go.net_package.Error>]
 [assembly: GoImplement<global::go.net_package.canceledError, error>]
-[assembly: GoImplement<global::go.net_package.timeoutError, global::go.net_package.ΔError>(Pointer = true)]
+[assembly: GoImplement<global::go.net_package.timeoutError, global::go.net_package.Error>(Pointer = true)]
 [assembly: GoImplement<go.math.rand_package.Rand, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]

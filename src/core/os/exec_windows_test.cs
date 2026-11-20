@@ -144,7 +144,7 @@ public static void TestProcessWithHandleWindows(ж<Δtesting.T> t) {
             called = true;
             // Check the handle is valid.
             ref var u = ref heap(new syscall.Rusage(), out var Ꮡu);
-            var e = syscall.GetProcessTimes((syscallꓸHandle)handle, Ꮡu.ᏑCreationTime, Ꮡu.ᏑExitTime, Ꮡu.ᏑKernelTime, Ꮡu.ᏑUserTime);
+            var e = syscall.GetProcessTimes((syscall.Handle)handle, Ꮡu.ᏑCreationTime, Ꮡu.ᏑExitTime, Ꮡu.ᏑKernelTime, Ꮡu.ᏑUserTime);
             if (e != nil) {
                 t.Errorf("Using process handle failed: %v", NewSyscallError(getProcessTimesˢ, e));
             }

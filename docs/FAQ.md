@@ -31,17 +31,34 @@ to choose.
 ## Does converted code really behave like Go?
 
 That is measured, not claimed. Each standard-library package's own Go test suite is converted to C#, run,
-and compared with `go test`, verdict for verdict, on Windows and Linux. A difference is never hidden: it
+and compared with `go test`, verdict for verdict, on Windows, Linux and macOS. A difference is never hidden: it
 is disclosed by name, with its reason, on the package's row in
 [Validated Test Packages](ValidatedTestPackages.md).
 [What "validated" means, and what it doesn't](Limitations.md#what-validated-means-and-what-it-doesnt)
 says what that proves.
 
-Some things do differ, and you should know them before you start. A goroutine is an operating-system
-thread, so thousands are fine and hundreds of thousands are not. A deadlock usually hangs where Go would
+Some things do differ, and you should know them before you start. By default a goroutine is an
+operating-system thread, so thousands are fine and hundreds of thousands are not. A deadlock usually hangs where Go would
 report it. A goroutine's stack does not grow.
 [What converts, but doesn't behave exactly like Go](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)
 lists them all.
+
+## Did AI write this?
+
+Not the foundation. I started go2cs in 2018 as a one-person, nights-and-weekends project, believing that Go's
+simplicity could be brought to .NET. The runtime library, the conversion strategies and the shape of the generated
+C# all come from that hand-built groundwork.
+
+What changed recently is pace. Leaning on Claude took go2cs from an experiment to a tool in a matter of months — the
+entire Go standard library now converts and compiles clean, and
+[every package that can be validated](ValidatedTestPackages.md) passes its own Go test suite in C#.
+
+The bar is the same whether I wrote the code or Claude did, and nothing lands because it looked right. More than a
+thousand converted programs are compiled and their output compared against `go run`, every converter change is
+measured by re-transpiling the corpus and byte-comparing the result, and each validated package carries a proof page
+showing Go's verdicts beside C#'s.
+
+Read about the journey: [How AI is used in this project](AIAssistance.md).
 
 ## What does not convert?
 
@@ -58,7 +75,8 @@ lists them all.
 - **One form of generic type alias**, an alias of an anonymous struct or interface.
 - **A generic call over a pointer element whose constraint shares the element's storage.** `Walk[*Node]`
   under `Walk[N Tree[N]]`, where `Children()` returns `[]N`, is refused with `GO2CS2002`, naming the site
-  and the method. The same code over a value element converts.
+  and the method. The same code over a value element converts. Two related shapes are refused as
+  `GO2CS2005` and `GO2CS2006` ([diagnostic codes](DiagnosticCodes.md)).
 
 [What won't make the trip](Limitations.md#what-wont-make-the-trip) has the detail and the workarounds.
 
@@ -70,9 +88,9 @@ Exactly one Go release and one .NET release at a time, both named in the README'
 
 ## Which platforms are supported?
 
-Windows and Linux on x64, where the converted standard library is validated against Go's own tests.
-macOS, on Intel and Apple silicon, has packages; a row on the [roster](ValidatedTestPackages.md) shows a
-macOS count once its package validates there. One conversion targets one operating system, so you convert
+Windows on x64, Linux on x64 and Arm64, and macOS on Intel and Apple silicon: the converted standard
+library is validated against Go's own tests on each, and the [roster](ValidatedTestPackages.md) shows
+each package's counts. One conversion targets one operating system, so you convert
 once for each. [Platforms](Roadmap.md#platforms) has the rest.
 
 ## What does the generated C# look like?
@@ -130,7 +148,9 @@ than under the JIT on most rows of the [performance comparison](Performance.md),
 [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
 has the measured cost and the platform it was measured on, and the
 [Roadmap](Roadmap.md#native-aot-and-trimming) has the work under way to reduce it.
-[Tuning converted code](Tuning.md#choosing-a-deployment) compares Native AOT with the JIT and ReadyToRun.
+[Tuning converted code](Tuning.md#choosing-a-deployment) compares Native AOT with the JIT and ReadyToRun,
+and says how to publish: put `<PublishAot>true</PublishAot>` in the program's own project file and name that
+project to `dotnet publish`. On Linux the publish needs `clang` and `zlib1g-dev`.
 
 ## What does converted code depend on at run time?
 

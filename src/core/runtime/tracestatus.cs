@@ -8,8 +8,11 @@ using atomic = @internal.runtime.atomic_package;
 using tracev2 = @internal.trace.tracev2_package;
 using @internal.runtime;
 using @internal.trace;
+using static runtime_package;
 
 partial class runtime_package {
+
+} partial class runtimeᴛtraceWriter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string attemptedToTraceABadˢ => ref attemptedToTraceABadˢᵇ;
@@ -55,10 +58,10 @@ private static readonly @string attemptToTraceInvalidOrˢᵇ = "attempt to trace
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡpp, bool inSTW) {
+internal static traceWriter writeProcStatusForP(this traceWriter w, ж<p> Ꮡpp, bool inSTW) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
-    if (!Ꮡpp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(w.gen)) {
+    if (!Ꮡpp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(w.gen)) {
         return w;
     }
     tracev2.ProcStatus status = default;
@@ -121,6 +124,8 @@ internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, trac
     }
     return w;
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string triedToTraceDeadˢ => ref triedToTraceDeadˢᵇ;
@@ -197,6 +202,8 @@ partial struct traceSchedResourceState {
     internal array<uint64> seq = new(2);
 }
 
+} partial class runtimeᴛtraceSchedResourceState {
+
 // acquireStatus acquires the right to emit a Status event for the scheduling resource.
 //
 // nosplit because it's part of writing an event for an M, which must not
@@ -235,4 +242,4 @@ internal static traceArg nextSeq(this ref traceSchedResourceState r, uintptr gen
     return (traceArg)r.seq[gen % 2];
 }
 
-} // end runtime_package
+} // end runtimeᴛtraceSchedResourceState

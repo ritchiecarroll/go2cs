@@ -7,6 +7,7 @@ using binary = encoding.binary_package;
 using bits = math.bits_package;
 using encoding;
 using math;
+using static zstd_package;
 
 partial class zstd_package {
 
@@ -23,6 +24,8 @@ partial struct xxhash64 {
     internal array<byte> buf = new(32); // buffer
     internal nint cnt;                  // number of bytes in buffer
 }
+
+} partial class zstdᴛxxhash64 {
 
 // reset discards the current state and prepares to compute a new hash.
 // We assume a seed of 0 since that is what zstd uses.
@@ -46,11 +49,11 @@ internal static void reset(this ref xxhash64 xh) {
 
 // update adds a buffer to the has.
 internal static void update(this ref xxhash64 xh, slice<byte> b) {
-    xh.len += (uint64)builtin.len(b);
+    xh.len += (uint64)len(b);
 
-    if (xh.cnt + builtin.len(b) < builtin.len(xh.buf)) {
+    if (xh.cnt + len(b) < len(xh.buf)) {
         copy(xh.buf.slice(xh.cnt), b);
-        xh.cnt += builtin.len(b);
+        xh.cnt += len(b);
         return;
     }
 
@@ -64,7 +67,7 @@ internal static void update(this ref xxhash64 xh, slice<byte> b) {
         xh.cnt = 0;
     }
 
-    while (builtin.len(b) >= 32) {
+    while (len(b) >= 32) {
         xh.v[0] = xh.round(xh.v[0], binary.LittleEndian.Uint64(b));
         xh.v[1] = xh.round(xh.v[1], binary.LittleEndian.Uint64(b[8..]));
         xh.v[2] = xh.round(xh.v[2], binary.LittleEndian.Uint64(b[16..]));
@@ -72,9 +75,9 @@ internal static void update(this ref xxhash64 xh, slice<byte> b) {
         b = b[32..];
     }
 
-    if (builtin.len(b) > 0) {
+    if (len(b) > 0) {
         copy(xh.buf[..], b);
-        xh.cnt = builtin.len(b);
+        xh.cnt = len(b);
     }
 }
 
@@ -141,4 +144,4 @@ internal static uint64 mergeRound(this ref xxhash64 xh, uint64 v, uint64 n) {
     return v;
 }
 
-} // end zstd_package
+} // end zstdᴛxxhash64

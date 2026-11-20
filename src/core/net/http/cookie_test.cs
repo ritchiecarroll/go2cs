@@ -16,115 +16,116 @@ using time = time_package;
 using encoding;
 using io = io_package;
 using static global::go.net.http_package;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
 partial struct writeSetCookiesTestsᴛ1 /*dyn*/ {
-    public ж<global::go.net.http_package.ΔCookie> Cookie;
+    public ж<global::go.net.http_package.Cookie> Cookie;
     public @string Raw;
 }
 internal static slice<writeSetCookiesTestsᴛ1> writeSetCookiesTests = slice<writeSetCookiesTestsᴛ1>([
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-1", Value: "v$1")),
+        Ꮡ(new Cookie(Name: "cookie-1", Value: "v$1")),
         "cookie-1=v$1"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-2", Value: "two", MaxAge: 3600)),
+        Ꮡ(new Cookie(Name: "cookie-2", Value: "two", MaxAge: 3600)),
         "cookie-2=two; Max-Age=3600"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-3", Value: "three", Domain: ".example.com")),
+        Ꮡ(new Cookie(Name: "cookie-3", Value: "three", Domain: ".example.com")),
         "cookie-3=three; Domain=example.com"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-4", Value: "four", Path: "/restricted/")),
+        Ꮡ(new Cookie(Name: "cookie-4", Value: "four", Path: "/restricted/")),
         "cookie-4=four; Path=/restricted/"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-5", Value: "five", Domain: "wrong;bad.abc")),
+        Ꮡ(new Cookie(Name: "cookie-5", Value: "five", Domain: "wrong;bad.abc")),
         "cookie-5=five"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-6", Value: "six", Domain: "bad-.abc")),
+        Ꮡ(new Cookie(Name: "cookie-6", Value: "six", Domain: "bad-.abc")),
         "cookie-6=six"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-7", Value: "seven", Domain: "127.0.0.1")),
+        Ꮡ(new Cookie(Name: "cookie-7", Value: "seven", Domain: "127.0.0.1")),
         "cookie-7=seven; Domain=127.0.0.1"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-8", Value: "eight", Domain: "::1")),
+        Ꮡ(new Cookie(Name: "cookie-8", Value: "eight", Domain: "::1")),
         "cookie-8=eight"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-9", Value: "expiring", Expires: time.Unix(1257894000, 0))),
+        Ꮡ(new Cookie(Name: "cookie-9", Value: "expiring", Expires: time.Unix(1257894000, 0))),
         "cookie-9=expiring; Expires=Tue, 10 Nov 2009 23:00:00 GMT"
     ),
     // According to IETF 6265 Section 5.1.1.5, the year cannot be less than 1601
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-10", Value: "expiring-1601", Expires: time.Date(1601, 1, 1, 1, 1, 1, 1, time.ΔUTC))),
+        Ꮡ(new Cookie(Name: "cookie-10", Value: "expiring-1601", Expires: time.Date(1601, 1, 1, 1, 1, 1, 1, time.UTC))),
         "cookie-10=expiring-1601; Expires=Mon, 01 Jan 1601 01:01:01 GMT"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-11", Value: "invalid-expiry", Expires: time.Date(1600, 1, 1, 1, 1, 1, 1, time.ΔUTC))),
+        Ꮡ(new Cookie(Name: "cookie-11", Value: "invalid-expiry", Expires: time.Date(1600, 1, 1, 1, 1, 1, 1, time.UTC))),
         "cookie-11=invalid-expiry"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-12", Value: "samesite-default", SameSite: SameSiteDefaultMode)),
+        Ꮡ(new Cookie(Name: "cookie-12", Value: "samesite-default", SameSite: SameSiteDefaultMode)),
         "cookie-12=samesite-default"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-13", Value: "samesite-lax", SameSite: SameSiteLaxMode)),
+        Ꮡ(new Cookie(Name: "cookie-13", Value: "samesite-lax", SameSite: SameSiteLaxMode)),
         "cookie-13=samesite-lax; SameSite=Lax"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-14", Value: "samesite-strict", SameSite: SameSiteStrictMode)),
+        Ꮡ(new Cookie(Name: "cookie-14", Value: "samesite-strict", SameSite: SameSiteStrictMode)),
         "cookie-14=samesite-strict; SameSite=Strict"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-15", Value: "samesite-none", SameSite: SameSiteNoneMode)),
+        Ꮡ(new Cookie(Name: "cookie-15", Value: "samesite-none", SameSite: SameSiteNoneMode)),
         "cookie-15=samesite-none; SameSite=None"
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie-16", Value: "partitioned", SameSite: SameSiteNoneMode, Secure: true, Path: "/", Partitioned: true)),
+        Ꮡ(new Cookie(Name: "cookie-16", Value: "partitioned", SameSite: SameSiteNoneMode, Secure: true, Path: "/", Partitioned: true)),
         "cookie-16=partitioned; Path=/; Secure; SameSite=None; Partitioned"
     ),
     // The "special" cookies have values containing commas or spaces which
     // are disallowed by RFC 6265 but are common in the wild.
     new(
-        Ꮡ(new ΔCookie(Name: "special-1", Value: "a z")),
+        Ꮡ(new Cookie(Name: "special-1", Value: "a z")),
         @"special-1=""a z"""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "special-2", Value: " z")),
+        Ꮡ(new Cookie(Name: "special-2", Value: " z")),
         @"special-2="" z"""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "special-3", Value: "a ")),
+        Ꮡ(new Cookie(Name: "special-3", Value: "a ")),
         @"special-3=""a """
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "special-4", Value: " ")),
+        Ꮡ(new Cookie(Name: "special-4", Value: " ")),
         @"special-4="" """
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "special-5", Value: "a,z")),
+        Ꮡ(new Cookie(Name: "special-5", Value: "a,z")),
         @"special-5=""a,z"""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "special-6", Value: ",z")),
+        Ꮡ(new Cookie(Name: "special-6", Value: ",z")),
         @"special-6="",z"""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "special-7", Value: "a,")),
+        Ꮡ(new Cookie(Name: "special-7", Value: "a,")),
         @"special-7=""a,"""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "special-8", Value: ",")),
+        Ꮡ(new Cookie(Name: "special-8", Value: ",")),
         @"special-8="","""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "empty-value", Value: "")),
+        Ꮡ(new Cookie(Name: "empty-value", Value: "")),
         @"empty-value="
     ),
     new(
@@ -132,40 +133,40 @@ internal static slice<writeSetCookiesTestsᴛ1> writeSetCookiesTests = slice<wri
         @""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "")),
+        Ꮡ(new Cookie(Name: "")),
         @""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "\t")),
+        Ꮡ(new Cookie(Name: "\t")),
         @""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "\r")),
+        Ꮡ(new Cookie(Name: "\r")),
         @""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "a\nb", Value: "v")),
+        Ꮡ(new Cookie(Name: "a\nb", Value: "v")),
         @""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "a\nb", Value: "v")),
+        Ꮡ(new Cookie(Name: "a\nb", Value: "v")),
         @""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "a\rb", Value: "v")),
+        Ꮡ(new Cookie(Name: "a\rb", Value: "v")),
         @""
     ),
     // Quoted values (issue #46443)
     new(
-        Ꮡ(new ΔCookie(Name: "cookie", Value: "quoted", Quoted: true)),
+        Ꮡ(new Cookie(Name: "cookie", Value: "quoted", Quoted: true)),
         @"cookie=""quoted"""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie", Value: "quoted with spaces", Quoted: true)),
+        Ꮡ(new Cookie(Name: "cookie", Value: "quoted with spaces", Quoted: true)),
         @"cookie=""quoted with spaces"""
     ),
     new(
-        Ꮡ(new ΔCookie(Name: "cookie", Value: "quoted,with,commas", Quoted: true)),
+        Ꮡ(new Cookie(Name: "cookie", Value: "quoted,with,commas", Quoted: true)),
         @"cookie=""quoted,with,commas"""
     )
 ]);
@@ -197,10 +198,12 @@ public static void TestWriteSetCookies(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal partial struct headerOnlyResponseWriter /*global::go.net.http_package.ΔHeader*/;
+internal partial struct headerOnlyResponseWriter /*global::go.net.http_package.Header*/;
 
-internal static global::go.net.http_package.ΔHeader Header(this headerOnlyResponseWriter ho) {
-    return (global::go.net.http_package.ΔHeader)ho;
+} partial class http_internal_testᴛheaderOnlyResponseWriter {
+
+internal static global::go.net.http_package.Header Header(this headerOnlyResponseWriter ho) {
+    return (global::go.net.http_package.Header)ho;
 }
 
 internal static (nint, error) Write(this headerOnlyResponseWriter ho, slice<byte> _) {
@@ -211,6 +214,8 @@ internal static void WriteHeader(this headerOnlyResponseWriter ho, nint _) {
     throw panic("NOIMPL");
 }
 
+} partial class http_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cookie1OnePathRestrictedˢ => ref cookie1OnePathRestrictedˢᵇ;
 private static readonly @string cookie1OnePathRestrictedˢᵇ = "cookie-1=one; Path=/restricted/"u8;
@@ -218,10 +223,10 @@ internal static ref readonly @string cookie2TwoMaxAge3600ˢ => ref cookie2TwoMax
 private static readonly @string cookie2TwoMaxAge3600ˢᵇ = "cookie-2=two; Max-Age=3600"u8;
 
 public static void TestSetCookie(ж<testing.T> t) {
-    var m = new global::go.net.http_package.ΔHeader(0);
-    SetCookie((headerOnlyResponseWriter)m, Ꮡ(new ΔCookie(Name: "cookie-1", Value: "one", Path: "/restricted/")));
-    SetCookie((headerOnlyResponseWriter)m, Ꮡ(new ΔCookie(Name: "cookie-2", Value: "two", MaxAge: 3600)));
-    nint l = builtin.len(m[setCookieˢ]); if (l != 2) {
+    var m = new global::go.net.http_package.Header(0);
+    SetCookie((headerOnlyResponseWriter)m, Ꮡ(new Cookie(Name: "cookie-1", Value: "one", Path: "/restricted/")));
+    SetCookie((headerOnlyResponseWriter)m, Ꮡ(new Cookie(Name: "cookie-2", Value: "two", MaxAge: 3600)));
+    nint l = len(m[setCookieˢ]); if (l != 2) {
         t.Fatalf("expected %d cookies, got %d", (nint)2, l);
     }
     {
@@ -239,7 +244,7 @@ public static void TestSetCookie(ж<testing.T> t) {
 }
 
 partial struct addCookieTestsᴛ1 /*dyn*/ {
-    public slice<ж<global::go.net.http_package.ΔCookie>> Cookies;
+    public slice<ж<global::go.net.http_package.Cookie>> Cookies;
     public @string Raw;
 }
 internal static slice<addCookieTestsᴛ1> addCookieTests = [
@@ -248,23 +253,23 @@ internal static slice<addCookieTestsᴛ1> addCookieTests = [
         ""
     ),
     new(
-        [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie-1", Value: "v$1"))],
+        [Ꮡ(new global::go.net.http_package.Cookie(Name: "cookie-1", Value: "v$1"))],
         "cookie-1=v$1"
     ),
     new(
         [
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie-1", Value: "v$1")),
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie-2", Value: "v$2")),
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie-3", Value: "v$3"))
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "cookie-1", Value: "v$1")),
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "cookie-2", Value: "v$2")),
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "cookie-3", Value: "v$3"))
         ],
         "cookie-1=v$1; cookie-2=v$2; cookie-3=v$3"
     ),
     // Quoted values (issue #46443)
     new(
         [
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie-1", Value: "quoted", Quoted: true)),
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie-2", Value: "quoted with spaces", Quoted: true)),
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie-3", Value: "quoted,with,commas", Quoted: true))
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "cookie-1", Value: "quoted", Quoted: true)),
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "cookie-2", Value: "quoted with spaces", Quoted: true)),
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "cookie-3", Value: "quoted,with,commas", Quoted: true))
         ],
         @"cookie-1=""quoted""; cookie-2=""quoted with spaces""; cookie-3=""quoted,with,commas"""
     )
@@ -287,43 +292,43 @@ public static void TestAddCookie(ж<testing.T> t) {
 }
 
 partial struct readSetCookiesTestsᴛ1 /*dyn*/ {
-    internal global::go.net.http_package.ΔHeader header;
-    internal slice<ж<global::go.net.http_package.ΔCookie>> cookies;
+    internal global::go.net.http_package.Header header;
+    internal slice<ж<global::go.net.http_package.Cookie>> cookies;
     internal @string godebug;
 }
 internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = slice<readSetCookiesTestsᴛ1>([
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = ["Cookie-1=v$1"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "Cookie-1", Value: "v$1", Raw: "Cookie-1=v$1"))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = ["Cookie-1=v$1"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "Cookie-1", Value: "v$1", Raw: "Cookie-1=v$1"))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = ["NID=99=YsDT5i3E-CXax-; expires=Wed, 23-Nov-2011 01:05:03 GMT; path=/; domain=.google.ch; HttpOnly"]}),
-        cookies: slice<ж<global::go.net.http_package.ΔCookie>>([Ꮡ(new global::go.net.http_package.ΔCookie(
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = ["NID=99=YsDT5i3E-CXax-; expires=Wed, 23-Nov-2011 01:05:03 GMT; path=/; domain=.google.ch; HttpOnly"]}),
+        cookies: slice<ж<global::go.net.http_package.Cookie>>([Ꮡ(new global::go.net.http_package.Cookie(
             Name: "NID",
             Value: "99=YsDT5i3E-CXax-",
             Path: "/",
             Domain: ".google.ch",
             HttpOnly: true,
-            Expires: time.Date(2011, 11, 23, 1, 5, 3, 0, time.ΔUTC),
+            Expires: time.Date(2011, 11, 23, 1, 5, 3, 0, time.UTC),
             RawExpires: "Wed, 23-Nov-2011 01:05:03 GMT",
             Raw: "NID=99=YsDT5i3E-CXax-; expires=Wed, 23-Nov-2011 01:05:03 GMT; path=/; domain=.google.ch; HttpOnly"))
         ])
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [".ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"]}),
-        cookies: slice<ж<global::go.net.http_package.ΔCookie>>([Ꮡ(new global::go.net.http_package.ΔCookie(
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [".ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"]}),
+        cookies: slice<ж<global::go.net.http_package.Cookie>>([Ꮡ(new global::go.net.http_package.Cookie(
             Name: ".ASPXAUTH",
             Value: "7E3AA",
             Path: "/",
-            Expires: time.Date(2012, 3, 7, 14, 25, 6, 0, time.ΔUTC),
+            Expires: time.Date(2012, 3, 7, 14, 25, 6, 0, time.UTC),
             RawExpires: "Wed, 07-Mar-2012 14:25:06 GMT",
             HttpOnly: true,
             Raw: ".ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"))
         ])
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = ["ASP.NET_SessionId=foo; path=/; HttpOnly"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = ["ASP.NET_SessionId=foo; path=/; HttpOnly"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(
             Name: "ASP.NET_SessionId",
             Value: "foo",
             Path: "/",
@@ -332,8 +337,8 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = slice<readS
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesitedefault=foo; SameSite"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesitedefault=foo; SameSite"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(
             Name: "samesitedefault",
             Value: "foo",
             SameSite: SameSiteDefaultMode,
@@ -341,8 +346,8 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = slice<readS
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesiteinvalidisdefault=foo; SameSite=invalid"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesiteinvalidisdefault=foo; SameSite=invalid"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(
             Name: "samesiteinvalidisdefault",
             Value: "foo",
             SameSite: SameSiteDefaultMode,
@@ -350,8 +355,8 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = slice<readS
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesitelax=foo; SameSite=Lax"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesitelax=foo; SameSite=Lax"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(
             Name: "samesitelax",
             Value: "foo",
             SameSite: SameSiteLaxMode,
@@ -359,8 +364,8 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = slice<readS
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesitestrict=foo; SameSite=Strict"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesitestrict=foo; SameSite=Strict"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(
             Name: "samesitestrict",
             Value: "foo",
             SameSite: SameSiteStrictMode,
@@ -368,8 +373,8 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = slice<readS
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesitenone=foo; SameSite=None"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = ["samesitenone=foo; SameSite=None"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(
             Name: "samesitenone",
             Value: "foo",
             SameSite: SameSiteNoneMode,
@@ -379,65 +384,65 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = slice<readS
     // Make sure we can properly read back the Set-Cookie headers we create
     // for values containing spaces or commas:
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-1=a z"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-1", Value: "a z", Raw: @"special-1=a z"))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-1=a z"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-1", Value: "a z", Raw: @"special-1=a z"))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-2="" z"""]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-2", Value: " z", Quoted: true, Raw: @"special-2="" z"""))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-2="" z"""]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-2", Value: " z", Quoted: true, Raw: @"special-2="" z"""))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-3=""a """]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-3", Value: "a ", Quoted: true, Raw: @"special-3=""a """))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-3=""a """]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-3", Value: "a ", Quoted: true, Raw: @"special-3=""a """))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-4="" """]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-4", Value: " ", Quoted: true, Raw: @"special-4="" """))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-4="" """]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-4", Value: " ", Quoted: true, Raw: @"special-4="" """))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-5=a,z"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-5", Value: "a,z", Raw: @"special-5=a,z"))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-5=a,z"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-5", Value: "a,z", Raw: @"special-5=a,z"))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-6="",z"""]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-6", Value: ",z", Quoted: true, Raw: @"special-6="",z"""))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-6="",z"""]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-6", Value: ",z", Quoted: true, Raw: @"special-6="",z"""))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-7=a,"]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-7", Value: "a,", Raw: @"special-7=a,"))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-7=a,"]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-7", Value: "a,", Raw: @"special-7=a,"))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-8="","""]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-8", Value: ",", Quoted: true, Raw: @"special-8="","""))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-8="","""]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-8", Value: ",", Quoted: true, Raw: @"special-8="","""))]
     ),
     // Make sure we can properly read back the Set-Cookie headers
     // for names containing spaces:
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-9 ="","""]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-9", Value: ",", Quoted: true, Raw: @"special-9 ="","""))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"special-9 ="","""]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "special-9", Value: ",", Quoted: true, Raw: @"special-9 ="","""))]
     ),
     // Quoted values (issue #46443)
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [@"cookie=""quoted"""]}),
-        cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie", Value: "quoted", Quoted: true, Raw: @"cookie=""quoted"""))]
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = [@"cookie=""quoted"""]}),
+        cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "cookie", Value: "quoted", Quoted: true, Raw: @"cookie=""quoted"""))]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = slices.Repeat<slice<@string>, @string>(slice<@string>(["a="]), defaultCookieMaxNum + 1)}),
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = slices.Repeat<slice<@string>, @string>(slice<@string>(["a="]), defaultCookieMaxNum + 1)}),
         cookies: []
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = slices.Repeat<slice<@string>, @string>(slice<@string>(["a="]), 10)}),
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = slices.Repeat<slice<@string>, @string>(slice<@string>(["a="]), 10)}),
         cookies: [],
         godebug: "httpcookiemaxnum=5"
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = strings.Split(strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..], ";")}),
-        cookies: slices.Repeat<slice<ж<global::go.net.http_package.ΔCookie>>, ж<global::go.net.http_package.ΔCookie>>(slice<ж<global::go.net.http_package.ΔCookie>>([Ꮡ(new global::go.net.http_package.ΔCookie(Name: "a", Value: "", Quoted: false, Raw: "a="))]), defaultCookieMaxNum + 1),
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = strings.Split(strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..], ";")}),
+        cookies: slices.Repeat<slice<ж<global::go.net.http_package.Cookie>>, ж<global::go.net.http_package.Cookie>>(slice<ж<global::go.net.http_package.Cookie>>([Ꮡ(new global::go.net.http_package.Cookie(Name: "a", Value: "", Quoted: false, Raw: "a="))]), defaultCookieMaxNum + 1),
         godebug: "httpcookiemaxnum=0"
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"] = strings.Split(strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..], ";")}),
-        cookies: slices.Repeat<slice<ж<global::go.net.http_package.ΔCookie>>, ж<global::go.net.http_package.ΔCookie>>(slice<ж<global::go.net.http_package.ΔCookie>>([Ꮡ(new global::go.net.http_package.ΔCookie(Name: "a", Value: "", Quoted: false, Raw: "a="))]), defaultCookieMaxNum + 1),
+        header: new Header(new map<@string, slice<@string>>{["Set-Cookie"] = strings.Split(strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..], ";")}),
+        cookies: slices.Repeat<slice<ж<global::go.net.http_package.Cookie>>, ж<global::go.net.http_package.Cookie>>(slice<ж<global::go.net.http_package.Cookie>>([Ꮡ(new global::go.net.http_package.Cookie(Name: "a", Value: "", Quoted: false, Raw: "a="))]), defaultCookieMaxNum + 1),
         godebug: fmt.Sprintf("httpcookiemaxnum=%v"u8, (nint)(defaultCookieMaxNum + 1))
     )
 
@@ -473,82 +478,82 @@ public static void TestReadSetCookies(ж<testing.T> t) {
 }
 
 partial struct readCookiesTestsᴛ1 /*dyn*/ {
-    internal global::go.net.http_package.ΔHeader header;
+    internal global::go.net.http_package.Header header;
     internal @string filter;
-    internal slice<ж<global::go.net.http_package.ΔCookie>> cookies;
+    internal slice<ж<global::go.net.http_package.Cookie>> cookies;
     internal @string godebug;
 }
 internal static slice<readCookiesTestsᴛ1> readCookiesTests = slice<readCookiesTestsᴛ1>([
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = ["Cookie-1=v$1", "c2=v2"]}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = ["Cookie-1=v$1", "c2=v2"]}),
         filter: "",
         cookies: [
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "Cookie-1", Value: "v$1")),
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "c2", Value: "v2"))
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "Cookie-1", Value: "v$1")),
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "c2", Value: "v2"))
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = ["Cookie-1=v$1", "c2=v2"]}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = ["Cookie-1=v$1", "c2=v2"]}),
         filter: "c2",
         cookies: [
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "c2", Value: "v2"))
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "c2", Value: "v2"))
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = ["Cookie-1=v$1; c2=v2"]}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = ["Cookie-1=v$1; c2=v2"]}),
         filter: "",
         cookies: [
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "Cookie-1", Value: "v$1")),
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "c2", Value: "v2"))
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "Cookie-1", Value: "v$1")),
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "c2", Value: "v2"))
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = ["Cookie-1=v$1; c2=v2"]}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = ["Cookie-1=v$1; c2=v2"]}),
         filter: "c2",
         cookies: [
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "c2", Value: "v2"))
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "c2", Value: "v2"))
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = [@"Cookie-1=""v$1""; c2=""v2"""]}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = [@"Cookie-1=""v$1""; c2=""v2"""]}),
         filter: "",
         cookies: [
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "Cookie-1", Value: "v$1", Quoted: true)),
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "c2", Value: "v2", Quoted: true))
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "Cookie-1", Value: "v$1", Quoted: true)),
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "c2", Value: "v2", Quoted: true))
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = [@"Cookie-1=""v$1""; c2=v2;"]}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = [@"Cookie-1=""v$1""; c2=v2;"]}),
         filter: "",
         cookies: [
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "Cookie-1", Value: "v$1", Quoted: true)),
-            Ꮡ(new global::go.net.http_package.ΔCookie(Name: "c2", Value: "v2"))
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "Cookie-1", Value: "v$1", Quoted: true)),
+            Ꮡ(new global::go.net.http_package.Cookie(Name: "c2", Value: "v2"))
         ]
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = [@""]}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = [@""]}),
         filter: "",
         cookies: []
     ),
     // GODEBUG=httpcookiemaxnum should work regardless if all cookies are sent
     // via one "Cookie" field, or multiple fields.
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = slice<@string>([strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..]])}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = slice<@string>([strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..]])}),
         cookies: []
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = slices.Repeat<slice<@string>, @string>(slice<@string>(["a="]), 10)}),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = slices.Repeat<slice<@string>, @string>(slice<@string>(["a="]), 10)}),
         cookies: [],
         godebug: "httpcookiemaxnum=5"
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = slice<@string>([strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..]])}),
-        cookies: slices.Repeat<slice<ж<global::go.net.http_package.ΔCookie>>, ж<global::go.net.http_package.ΔCookie>>(slice<ж<global::go.net.http_package.ΔCookie>>([Ꮡ(new global::go.net.http_package.ΔCookie(Name: "a", Value: "", Quoted: false))]), defaultCookieMaxNum + 1),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = slice<@string>([strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..]])}),
+        cookies: slices.Repeat<slice<ж<global::go.net.http_package.Cookie>>, ж<global::go.net.http_package.Cookie>>(slice<ж<global::go.net.http_package.Cookie>>([Ꮡ(new global::go.net.http_package.Cookie(Name: "a", Value: "", Quoted: false))]), defaultCookieMaxNum + 1),
         godebug: "httpcookiemaxnum=0"
     ),
     new(
-        header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"] = slices.Repeat<slice<@string>, @string>(slice<@string>(["a="]), defaultCookieMaxNum + 1)}),
-        cookies: slices.Repeat<slice<ж<global::go.net.http_package.ΔCookie>>, ж<global::go.net.http_package.ΔCookie>>(slice<ж<global::go.net.http_package.ΔCookie>>([Ꮡ(new global::go.net.http_package.ΔCookie(Name: "a", Value: "", Quoted: false))]), defaultCookieMaxNum + 1),
+        header: new Header(new map<@string, slice<@string>>{["Cookie"] = slices.Repeat<slice<@string>, @string>(slice<@string>(["a="]), defaultCookieMaxNum + 1)}),
+        cookies: slices.Repeat<slice<ж<global::go.net.http_package.Cookie>>, ж<global::go.net.http_package.Cookie>>(slice<ж<global::go.net.http_package.Cookie>>([Ꮡ(new global::go.net.http_package.Cookie(Name: "a", Value: "", Quoted: false))]), defaultCookieMaxNum + 1),
         godebug: fmt.Sprintf("httpcookiemaxnum=%v"u8, (nint)(defaultCookieMaxNum + 1))
     )
 ]);
@@ -576,20 +581,20 @@ internal static ref readonly @string quoted3BothMaxAge33ˢ => ref quoted3BothMax
 private static readonly @string quoted3BothMaxAge33ˢᵇ = @"quoted3=""both""; max-age=""33"""u8;
 
 public static void TestSetCookieDoubleQuotes(ж<testing.T> t) {
-    var res = Ꮡ(new Response(Header: new ΔHeader(new map<@string, slice<@string>>{})));
+    var res = Ꮡ(new Response(Header: new Header(new map<@string, slice<@string>>{})));
     res.Header.Add(setCookieˢ, quoted0NoneMaxAge30ˢ);
     res.Header.Add(setCookieˢ, quoted1CookieValueMaxAgeˢ);
     res.Header.Add(setCookieˢ, quoted2CookieAVMaxAge32ˢ);
     res.Header.Add(setCookieˢ, quoted3BothMaxAge33ˢ);
     var got = res.Cookies();
-    var want = slice<ж<global::go.net.http_package.ΔCookie>>([
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "quoted0", Value: "none", MaxAge: 30)),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "quoted1", Value: "cookieValue", MaxAge: 31)),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "quoted2", Value: "cookieAV")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "quoted3", Value: "both"))
+    var want = slice<ж<global::go.net.http_package.Cookie>>([
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "quoted0", Value: "none", MaxAge: 30)),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "quoted1", Value: "cookieValue", MaxAge: 31)),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "quoted2", Value: "cookieAV")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "quoted3", Value: "both"))
     ]);
-    if (builtin.len(got) != builtin.len(want)) {
-        t.Fatalf("got %d cookies, want %d", builtin.len(got), builtin.len(want));
+    if (len(got) != len(want)) {
+        t.Fatalf("got %d cookies, want %d", len(got), len(want));
     }
     foreach (var (i, w) in range(want)) {
         var g = got[i];
@@ -683,24 +688,24 @@ public static void TestCookieSanitizePath(ж<testing.T> t) {
 }
 
 internal partial struct TestCookieValid_tests /*dyn*/ {
-    internal ж<global::go.net.http_package.ΔCookie> cookie;
+    internal ж<global::go.net.http_package.Cookie> cookie;
     internal bool valid;
 }
 
 public static void TestCookieValid(ж<testing.T> t) {
     var tests = slice<TestCookieValid_tests>([
         new(nil, false),
-        new(Ꮡ(new ΔCookie(Name: "")), false),
-        new(Ꮡ(new ΔCookie(Name: "invalid-value", Value: "foo\"bar")), false),
-        new(Ꮡ(new ΔCookie(Name: "invalid-path", Path: "/foo;bar/")), false),
-        new(Ꮡ(new ΔCookie(Name: "invalid-secure-for-partitioned", Value: "foo", Path: "/", Secure: false, Partitioned: true)), false),
-        new(Ꮡ(new ΔCookie(Name: "invalid-domain", Domain: "example.com:80")), false),
-        new(Ꮡ(new ΔCookie(Name: "invalid-expiry", Value: "", Expires: time.Date(1600, 1, 1, 1, 1, 1, 1, time.ΔUTC))), false),
-        new(Ꮡ(new ΔCookie(Name: "valid-empty")), true),
-        new(Ꮡ(new ΔCookie(Name: "valid-expires", Value: "foo", Path: "/bar", Domain: "example.com", Expires: time.Unix(0, 0))), true),
-        new(Ꮡ(new ΔCookie(Name: "valid-max-age", Value: "foo", Path: "/bar", Domain: "example.com", MaxAge: 60)), true),
-        new(Ꮡ(new ΔCookie(Name: "valid-all-fields", Value: "foo", Path: "/bar", Domain: "example.com", Expires: time.Unix(0, 0), MaxAge: 0)), true),
-        new(Ꮡ(new ΔCookie(Name: "valid-partitioned", Value: "foo", Path: "/", Secure: true, Partitioned: true)), true)
+        new(Ꮡ(new Cookie(Name: "")), false),
+        new(Ꮡ(new Cookie(Name: "invalid-value", Value: "foo\"bar")), false),
+        new(Ꮡ(new Cookie(Name: "invalid-path", Path: "/foo;bar/")), false),
+        new(Ꮡ(new Cookie(Name: "invalid-secure-for-partitioned", Value: "foo", Path: "/", Secure: false, Partitioned: true)), false),
+        new(Ꮡ(new Cookie(Name: "invalid-domain", Domain: "example.com:80")), false),
+        new(Ꮡ(new Cookie(Name: "invalid-expiry", Value: "", Expires: time.Date(1600, 1, 1, 1, 1, 1, 1, time.UTC))), false),
+        new(Ꮡ(new Cookie(Name: "valid-empty")), true),
+        new(Ꮡ(new Cookie(Name: "valid-expires", Value: "foo", Path: "/bar", Domain: "example.com", Expires: time.Unix(0, 0))), true),
+        new(Ꮡ(new Cookie(Name: "valid-max-age", Value: "foo", Path: "/bar", Domain: "example.com", MaxAge: 60)), true),
+        new(Ꮡ(new Cookie(Name: "valid-all-fields", Value: "foo", Path: "/bar", Domain: "example.com", Expires: time.Unix(0, 0), MaxAge: 0)), true),
+        new(Ꮡ(new Cookie(Name: "valid-partitioned", Value: "foo", Path: "/", Secure: true, Partitioned: true)), true)
     ]);
 
     foreach (var (_, tt) in range(tests)) {
@@ -722,7 +727,7 @@ public static void BenchmarkCookieString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     @string wantCookieString = wantCookieStringᶜ;
-    var c = Ꮡ(new ΔCookie(
+    var c = Ꮡ(new Cookie(
         Name: "cookie-9",
         Value: "i3e01nf61b6t23bvfmplnanol3",
         Expires: time.Unix(1257894000, 0),
@@ -745,31 +750,31 @@ public static void BenchmarkCookieString(ж<testing.B> Ꮡb) {
 public static void BenchmarkReadSetCookies(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var header = new ΔHeader(new map<@string, slice<@string>>{
+    var header = new Header(new map<@string, slice<@string>>{
         ["Set-Cookie"] = [
             "NID=99=YsDT5i3E-CXax-; expires=Wed, 23-Nov-2011 01:05:03 GMT; path=/; domain=.google.ch; HttpOnly",
             ".ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"]
     });
-    var wantCookies = slice<ж<global::go.net.http_package.ΔCookie>>([
-        Ꮡ(new global::go.net.http_package.ΔCookie(
+    var wantCookies = slice<ж<global::go.net.http_package.Cookie>>([
+        Ꮡ(new global::go.net.http_package.Cookie(
             Name: "NID",
             Value: "99=YsDT5i3E-CXax-",
             Path: "/",
             Domain: ".google.ch",
             HttpOnly: true,
-            Expires: time.Date(2011, 11, 23, 1, 5, 3, 0, time.ΔUTC),
+            Expires: time.Date(2011, 11, 23, 1, 5, 3, 0, time.UTC),
             RawExpires: "Wed, 23-Nov-2011 01:05:03 GMT",
             Raw: "NID=99=YsDT5i3E-CXax-; expires=Wed, 23-Nov-2011 01:05:03 GMT; path=/; domain=.google.ch; HttpOnly")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(
+        Ꮡ(new global::go.net.http_package.Cookie(
             Name: ".ASPXAUTH",
             Value: "7E3AA",
             Path: "/",
-            Expires: time.Date(2012, 3, 7, 14, 25, 6, 0, time.ΔUTC),
+            Expires: time.Date(2012, 3, 7, 14, 25, 6, 0, time.UTC),
             RawExpires: "Wed, 07-Mar-2012 14:25:06 GMT",
             HttpOnly: true,
             Raw: ".ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"))
     ]);
-    slice<ж<global::go.net.http_package.ΔCookie>> c = default;
+    slice<ж<global::go.net.http_package.Cookie>> c = default;
     b.ReportAllocs();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -783,23 +788,23 @@ public static void BenchmarkReadSetCookies(ж<testing.B> Ꮡb) {
 public static void BenchmarkReadCookies(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var header = new ΔHeader(new map<@string, slice<@string>>{
+    var header = new Header(new map<@string, slice<@string>>{
         ["Cookie"] = [
             @"de=; client_region=0; rpld1=0:hispeed.ch|20:che|21:zh|22:zurich|23:47.36|24:8.53|; rpld0=1:08|; backplane-channel=newspaper.com:1471; devicetype=0; osfam=0; rplmct=2; s_pers=%20s_vmonthnum%3D1472680800496%2526vn%253D1%7C1472680800496%3B%20s_nr%3D1471686767664-New%7C1474278767664%3B%20s_lv%3D1471686767669%7C1566294767669%3B%20s_lv_s%3DFirst%2520Visit%7C1471688567669%3B%20s_monthinvisit%3Dtrue%7C1471688567677%3B%20gvp_p5%3Dsports%253Ablog%253Aearly-lead%2520-%2520184693%2520-%252020160820%2520-%2520u-s%7C1471688567681%3B%20gvp_p51%3Dwp%2520-%2520sports%7C1471688567684%3B; s_sess=%20s_wp_ep%3Dhomepage%3B%20s._ref%3Dhttps%253A%252F%252Fwww.google.ch%252F%3B%20s_cc%3Dtrue%3B%20s_ppvl%3Dsports%25253Ablog%25253Aearly-lead%252520-%252520184693%252520-%25252020160820%252520-%252520u-lawyer%252C12%252C12%252C502%252C1231%252C502%252C1680%252C1050%252C2%252CP%3B%20s_ppv%3Dsports%25253Ablog%25253Aearly-lead%252520-%252520184693%252520-%25252020160820%252520-%252520u-s-lawyer%252C12%252C12%252C502%252C1231%252C502%252C1680%252C1050%252C2%252CP%3B%20s_dslv%3DFirst%2520Visit%3B%20s_sq%3Dwpninewspapercom%253D%252526pid%25253Dsports%2525253Ablog%2525253Aearly-lead%25252520-%25252520184693%25252520-%2525252020160820%25252520-%25252520u-s%252526pidt%25253D1%252526oid%25253Dhttps%2525253A%2525252F%2525252Fwww.newspaper.com%2525252F%2525253Fnid%2525253Dmenu_nav_homepage%252526ot%25253DA%3B"]
     });
-    var wantCookies = slice<ж<global::go.net.http_package.ΔCookie>>([
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "de", Value: "")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "client_region", Value: "0")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "rpld1", Value: "0:hispeed.ch|20:che|21:zh|22:zurich|23:47.36|24:8.53|")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "rpld0", Value: "1:08|")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "backplane-channel", Value: "newspaper.com:1471")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "devicetype", Value: "0")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "osfam", Value: "0")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "rplmct", Value: "2")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "s_pers", Value: "%20s_vmonthnum%3D1472680800496%2526vn%253D1%7C1472680800496%3B%20s_nr%3D1471686767664-New%7C1474278767664%3B%20s_lv%3D1471686767669%7C1566294767669%3B%20s_lv_s%3DFirst%2520Visit%7C1471688567669%3B%20s_monthinvisit%3Dtrue%7C1471688567677%3B%20gvp_p5%3Dsports%253Ablog%253Aearly-lead%2520-%2520184693%2520-%252020160820%2520-%2520u-s%7C1471688567681%3B%20gvp_p51%3Dwp%2520-%2520sports%7C1471688567684%3B")),
-        Ꮡ(new global::go.net.http_package.ΔCookie(Name: "s_sess", Value: "%20s_wp_ep%3Dhomepage%3B%20s._ref%3Dhttps%253A%252F%252Fwww.google.ch%252F%3B%20s_cc%3Dtrue%3B%20s_ppvl%3Dsports%25253Ablog%25253Aearly-lead%252520-%252520184693%252520-%25252020160820%252520-%252520u-lawyer%252C12%252C12%252C502%252C1231%252C502%252C1680%252C1050%252C2%252CP%3B%20s_ppv%3Dsports%25253Ablog%25253Aearly-lead%252520-%252520184693%252520-%25252020160820%252520-%252520u-s-lawyer%252C12%252C12%252C502%252C1231%252C502%252C1680%252C1050%252C2%252CP%3B%20s_dslv%3DFirst%2520Visit%3B%20s_sq%3Dwpninewspapercom%253D%252526pid%25253Dsports%2525253Ablog%2525253Aearly-lead%25252520-%25252520184693%25252520-%2525252020160820%25252520-%25252520u-s%252526pidt%25253D1%252526oid%25253Dhttps%2525253A%2525252F%2525252Fwww.newspaper.com%2525252F%2525253Fnid%2525253Dmenu_nav_homepage%252526ot%25253DA%3B"))
+    var wantCookies = slice<ж<global::go.net.http_package.Cookie>>([
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "de", Value: "")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "client_region", Value: "0")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "rpld1", Value: "0:hispeed.ch|20:che|21:zh|22:zurich|23:47.36|24:8.53|")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "rpld0", Value: "1:08|")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "backplane-channel", Value: "newspaper.com:1471")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "devicetype", Value: "0")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "osfam", Value: "0")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "rplmct", Value: "2")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "s_pers", Value: "%20s_vmonthnum%3D1472680800496%2526vn%253D1%7C1472680800496%3B%20s_nr%3D1471686767664-New%7C1474278767664%3B%20s_lv%3D1471686767669%7C1566294767669%3B%20s_lv_s%3DFirst%2520Visit%7C1471688567669%3B%20s_monthinvisit%3Dtrue%7C1471688567677%3B%20gvp_p5%3Dsports%253Ablog%253Aearly-lead%2520-%2520184693%2520-%252020160820%2520-%2520u-s%7C1471688567681%3B%20gvp_p51%3Dwp%2520-%2520sports%7C1471688567684%3B")),
+        Ꮡ(new global::go.net.http_package.Cookie(Name: "s_sess", Value: "%20s_wp_ep%3Dhomepage%3B%20s._ref%3Dhttps%253A%252F%252Fwww.google.ch%252F%3B%20s_cc%3Dtrue%3B%20s_ppvl%3Dsports%25253Ablog%25253Aearly-lead%252520-%252520184693%252520-%25252020160820%252520-%252520u-lawyer%252C12%252C12%252C502%252C1231%252C502%252C1680%252C1050%252C2%252CP%3B%20s_ppv%3Dsports%25253Ablog%25253Aearly-lead%252520-%252520184693%252520-%25252020160820%252520-%252520u-s-lawyer%252C12%252C12%252C502%252C1231%252C502%252C1680%252C1050%252C2%252CP%3B%20s_dslv%3DFirst%2520Visit%3B%20s_sq%3Dwpninewspapercom%253D%252526pid%25253Dsports%2525253Ablog%2525253Aearly-lead%25252520-%25252520184693%25252520-%2525252020160820%25252520-%25252520u-s%252526pidt%25253D1%252526oid%25253Dhttps%2525253A%2525252F%2525252Fwww.newspaper.com%2525252F%2525253Fnid%2525253Dmenu_nav_homepage%252526ot%25253DA%3B"))
     ]);
-    slice<ж<global::go.net.http_package.ΔCookie>> c = default;
+    slice<ж<global::go.net.http_package.Cookie>> c = default;
     b.ReportAllocs();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -812,7 +817,7 @@ public static void BenchmarkReadCookies(ж<testing.B> Ꮡb) {
 
 internal partial struct TestParseCookie_tests /*dyn*/ {
     internal @string line;
-    internal slice<ж<global::go.net.http_package.ΔCookie>> cookies;
+    internal slice<ж<global::go.net.http_package.Cookie>> cookies;
     internal error err;
     internal @string godebug;
 }
@@ -821,19 +826,19 @@ public static void TestParseCookie(ж<testing.T> t) {
     var tests = slice<TestParseCookie_tests>([
         new(
             line: "Cookie-1=v$1",
-            cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "Cookie-1", Value: "v$1"))]
+            cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "Cookie-1", Value: "v$1"))]
         ),
         new(
             line: "Cookie-1=v$1;c2=v2",
-            cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "Cookie-1", Value: "v$1")), Ꮡ(new global::go.net.http_package.ΔCookie(Name: "c2", Value: "v2"))]
+            cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "Cookie-1", Value: "v$1")), Ꮡ(new global::go.net.http_package.Cookie(Name: "c2", Value: "v2"))]
         ),
         new(
             line: @"Cookie-1=""v$1"";c2=""v2""",
-            cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "Cookie-1", Value: "v$1", Quoted: true)), Ꮡ(new global::go.net.http_package.ΔCookie(Name: "c2", Value: "v2", Quoted: true))]
+            cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "Cookie-1", Value: "v$1", Quoted: true)), Ꮡ(new global::go.net.http_package.Cookie(Name: "c2", Value: "v2", Quoted: true))]
         ),
         new(
             line: "k1=",
-            cookies: [Ꮡ(new global::go.net.http_package.ΔCookie(Name: "k1", Value: ""))]
+            cookies: [Ꮡ(new global::go.net.http_package.Cookie(Name: "k1", Value: ""))]
         ),
         new(
             line: "",
@@ -862,12 +867,12 @@ public static void TestParseCookie(ж<testing.T> t) {
         ),
         new(
             line: strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..],
-            cookies: slices.Repeat<slice<ж<global::go.net.http_package.ΔCookie>>, ж<global::go.net.http_package.ΔCookie>>(slice<ж<global::go.net.http_package.ΔCookie>>([Ꮡ(new global::go.net.http_package.ΔCookie(Name: "a", Value: "", Quoted: false))]), defaultCookieMaxNum + 1),
+            cookies: slices.Repeat<slice<ж<global::go.net.http_package.Cookie>>, ж<global::go.net.http_package.Cookie>>(slice<ж<global::go.net.http_package.Cookie>>([Ꮡ(new global::go.net.http_package.Cookie(Name: "a", Value: "", Quoted: false))]), defaultCookieMaxNum + 1),
             godebug: "httpcookiemaxnum=0"
         ),
         new(
             line: strings.Repeat(";a=", defaultCookieMaxNum + 1)[1..],
-            cookies: slices.Repeat<slice<ж<global::go.net.http_package.ΔCookie>>, ж<global::go.net.http_package.ΔCookie>>(slice<ж<global::go.net.http_package.ΔCookie>>([Ꮡ(new global::go.net.http_package.ΔCookie(Name: "a", Value: "", Quoted: false))]), defaultCookieMaxNum + 1),
+            cookies: slices.Repeat<slice<ж<global::go.net.http_package.Cookie>>, ж<global::go.net.http_package.Cookie>>(slice<ж<global::go.net.http_package.Cookie>>([Ꮡ(new global::go.net.http_package.Cookie(Name: "a", Value: "", Quoted: false))]), defaultCookieMaxNum + 1),
             godebug: fmt.Sprintf("httpcookiemaxnum=%v"u8, (nint)(defaultCookieMaxNum + 1))
         )
     ]);
@@ -885,7 +890,7 @@ public static void TestParseCookie(ж<testing.T> t) {
 
 internal partial struct TestParseSetCookie_tests /*dyn*/ {
     internal @string line;
-    internal ж<global::go.net.http_package.ΔCookie> cookie;
+    internal ж<global::go.net.http_package.Cookie> cookie;
     internal error err;
 }
 
@@ -893,28 +898,28 @@ public static void TestParseSetCookie(ж<testing.T> t) {
     var tests = slice<TestParseSetCookie_tests>([
         new(
             line: "Cookie-1=v$1",
-            cookie: Ꮡ(new ΔCookie(Name: "Cookie-1", Value: "v$1", Raw: "Cookie-1=v$1"))
+            cookie: Ꮡ(new Cookie(Name: "Cookie-1", Value: "v$1", Raw: "Cookie-1=v$1"))
         ),
         new(
             line: "NID=99=YsDT5i3E-CXax-; expires=Wed, 23-Nov-2011 01:05:03 GMT; path=/; domain=.google.ch; HttpOnly",
-            cookie: Ꮡ(new ΔCookie(
+            cookie: Ꮡ(new Cookie(
                 Name: "NID",
                 Value: "99=YsDT5i3E-CXax-",
                 Path: "/",
                 Domain: ".google.ch",
                 HttpOnly: true,
-                Expires: time.Date(2011, 11, 23, 1, 5, 3, 0, time.ΔUTC),
+                Expires: time.Date(2011, 11, 23, 1, 5, 3, 0, time.UTC),
                 RawExpires: "Wed, 23-Nov-2011 01:05:03 GMT",
                 Raw: "NID=99=YsDT5i3E-CXax-; expires=Wed, 23-Nov-2011 01:05:03 GMT; path=/; domain=.google.ch; HttpOnly"
             ))
         ),
         new(
             line: ".ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly",
-            cookie: Ꮡ(new ΔCookie(
+            cookie: Ꮡ(new Cookie(
                 Name: ".ASPXAUTH",
                 Value: "7E3AA",
                 Path: "/",
-                Expires: time.Date(2012, 3, 7, 14, 25, 6, 0, time.ΔUTC),
+                Expires: time.Date(2012, 3, 7, 14, 25, 6, 0, time.UTC),
                 RawExpires: "Wed, 07-Mar-2012 14:25:06 GMT",
                 HttpOnly: true,
                 Raw: ".ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"
@@ -922,7 +927,7 @@ public static void TestParseSetCookie(ж<testing.T> t) {
         ),
         new(
             line: "ASP.NET_SessionId=foo; path=/; HttpOnly",
-            cookie: Ꮡ(new ΔCookie(
+            cookie: Ꮡ(new Cookie(
                 Name: "ASP.NET_SessionId",
                 Value: "foo",
                 Path: "/",
@@ -932,7 +937,7 @@ public static void TestParseSetCookie(ж<testing.T> t) {
         ),
         new(
             line: "samesitedefault=foo; SameSite",
-            cookie: Ꮡ(new ΔCookie(
+            cookie: Ꮡ(new Cookie(
                 Name: "samesitedefault",
                 Value: "foo",
                 SameSite: SameSiteDefaultMode,
@@ -941,7 +946,7 @@ public static void TestParseSetCookie(ж<testing.T> t) {
         ),
         new(
             line: "samesiteinvalidisdefault=foo; SameSite=invalid",
-            cookie: Ꮡ(new ΔCookie(
+            cookie: Ꮡ(new Cookie(
                 Name: "samesiteinvalidisdefault",
                 Value: "foo",
                 SameSite: SameSiteDefaultMode,
@@ -950,7 +955,7 @@ public static void TestParseSetCookie(ж<testing.T> t) {
         ),
         new(
             line: "samesitelax=foo; SameSite=Lax",
-            cookie: Ꮡ(new ΔCookie(
+            cookie: Ꮡ(new Cookie(
                 Name: "samesitelax",
                 Value: "foo",
                 SameSite: SameSiteLaxMode,
@@ -959,7 +964,7 @@ public static void TestParseSetCookie(ж<testing.T> t) {
         ),
         new(
             line: "samesitestrict=foo; SameSite=Strict",
-            cookie: Ꮡ(new ΔCookie(
+            cookie: Ꮡ(new Cookie(
                 Name: "samesitestrict",
                 Value: "foo",
                 SameSite: SameSiteStrictMode,
@@ -968,7 +973,7 @@ public static void TestParseSetCookie(ж<testing.T> t) {
         ),
         new(
             line: "samesitenone=foo; SameSite=None",
-            cookie: Ꮡ(new ΔCookie(
+            cookie: Ꮡ(new Cookie(
                 Name: "samesitenone",
                 Value: "foo",
                 SameSite: SameSiteNoneMode,
@@ -979,41 +984,41 @@ public static void TestParseSetCookie(ж<testing.T> t) {
         // for values containing spaces or commas:
         new(
             line: @"special-1=a z",
-            cookie: Ꮡ(new ΔCookie(Name: "special-1", Value: "a z", Raw: @"special-1=a z"))
+            cookie: Ꮡ(new Cookie(Name: "special-1", Value: "a z", Raw: @"special-1=a z"))
         ),
         new(
             line: @"special-2="" z""",
-            cookie: Ꮡ(new ΔCookie(Name: "special-2", Value: " z", Quoted: true, Raw: @"special-2="" z"""))
+            cookie: Ꮡ(new Cookie(Name: "special-2", Value: " z", Quoted: true, Raw: @"special-2="" z"""))
         ),
         new(
             line: @"special-3=""a """,
-            cookie: Ꮡ(new ΔCookie(Name: "special-3", Value: "a ", Quoted: true, Raw: @"special-3=""a """))
+            cookie: Ꮡ(new Cookie(Name: "special-3", Value: "a ", Quoted: true, Raw: @"special-3=""a """))
         ),
         new(
             line: @"special-4="" """,
-            cookie: Ꮡ(new ΔCookie(Name: "special-4", Value: " ", Quoted: true, Raw: @"special-4="" """))
+            cookie: Ꮡ(new Cookie(Name: "special-4", Value: " ", Quoted: true, Raw: @"special-4="" """))
         ),
         new(
             line: @"special-5=a,z",
-            cookie: Ꮡ(new ΔCookie(Name: "special-5", Value: "a,z", Raw: @"special-5=a,z"))
+            cookie: Ꮡ(new Cookie(Name: "special-5", Value: "a,z", Raw: @"special-5=a,z"))
         ),
         new(
             line: @"special-6="",z""",
-            cookie: Ꮡ(new ΔCookie(Name: "special-6", Value: ",z", Quoted: true, Raw: @"special-6="",z"""))
+            cookie: Ꮡ(new Cookie(Name: "special-6", Value: ",z", Quoted: true, Raw: @"special-6="",z"""))
         ),
         new(
             line: @"special-7=a,",
-            cookie: Ꮡ(new ΔCookie(Name: "special-7", Value: "a,", Raw: @"special-7=a,"))
+            cookie: Ꮡ(new Cookie(Name: "special-7", Value: "a,", Raw: @"special-7=a,"))
         ),
         new(
             line: @"special-8="",""",
-            cookie: Ꮡ(new ΔCookie(Name: "special-8", Value: ",", Quoted: true, Raw: @"special-8="","""))
+            cookie: Ꮡ(new Cookie(Name: "special-8", Value: ",", Quoted: true, Raw: @"special-8="","""))
         ),
         // Make sure we can properly read back the Set-Cookie headers
         // for names containing spaces:
         new(
             line: @"special-9 ="",""",
-            cookie: Ꮡ(new ΔCookie(Name: "special-9", Value: ",", Quoted: true, Raw: @"special-9 ="","""))
+            cookie: Ꮡ(new Cookie(Name: "special-9", Value: ",", Quoted: true, Raw: @"special-9 ="","""))
         ),
         new(
             line: "",

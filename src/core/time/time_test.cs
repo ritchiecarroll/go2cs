@@ -50,7 +50,7 @@ public static void TestZeroTime(ж<Δtesting.T> t) {
     var (hour, min, sec) = zero.Clock();
     nint nsec = zero.Nanosecond();
     nint yday = zero.YearDay();
-    timeꓸWeekday wday = zero.Weekday();
+    Δtime.Weekday wday = zero.Weekday();
     if (year != 1 || month != January || day != 1 || hour != 0 || min != 0 || sec != 0 || nsec != 0 || yday != 1 || wday != Monday) {
         t.Errorf("zero time = %v %v %v year %v %02d:%02d:%02d.%09d yday %d want Monday Jan 1 year 1 00:00:00.000000000 yday 1",
             wday, month, day, year, hour, min, sec, nsec, yday);
@@ -75,11 +75,11 @@ public static void TestZoneData(ж<Δtesting.T> t) {
 // parsedTime is the struct representing a parsed time value.
 partial struct parsedTime {
     public nint Year;
-    public timeꓸMonth Month;
+    public Δtime.Month Month;
     public nint Day;
     public nint Hour, Minute, Second; // 15:04:05 is 15, 4, 5.
     public nint Nanosecond;           // Fractional second.
-    public timeꓸWeekday Weekday;
+    public Δtime.Weekday Weekday;
     public nint ZoneOffset; // seconds east of UTC, e.g. -7*60*60 for -0700
     public @string Zone;    // e.g., "MST"
 }
@@ -315,23 +315,23 @@ partial struct truncateRoundTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
 }
 internal static slice<truncateRoundTestsᴛ1> truncateRoundTests = slice<truncateRoundTestsᴛ1>([
-    new(Date(-1, January, 1, 12, 15, 30, 500000000, ΔUTC), 3),
-    new(Date(-1, January, 1, 12, 15, 31, 500000000, ΔUTC), 3),
-    new(Date(2012, January, 1, 12, 15, 30, 500000000, ΔUTC), ΔSecond),
-    new(Date(2012, January, 1, 12, 15, 31, 500000000, ΔUTC), ΔSecond),
+    new(Date(-1, January, 1, 12, 15, 30, 500000000, UTC), 3),
+    new(Date(-1, January, 1, 12, 15, 31, 500000000, UTC), 3),
+    new(Date(2012, January, 1, 12, 15, 30, 500000000, UTC), Second),
+    new(Date(2012, January, 1, 12, 15, 31, 500000000, UTC), Second),
     new(Unix(-19012425939L, 649146258), 7435029458905025217L) // 5.8*d rounds to 6*d, but .8*d+.8*d < 0 < d
 ]);
 
 public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    ж<bigꓸInt> bsec = @new<bigꓸInt>();
-    ж<bigꓸInt> bnsec = @new<bigꓸInt>();
-    ж<bigꓸInt> bd = @new<bigꓸInt>();
-    ж<bigꓸInt> bt = @new<bigꓸInt>();
-    ж<bigꓸInt> br = @new<bigꓸInt>();
-    ж<bigꓸInt> bq = @new<bigꓸInt>();
-    ж<bigꓸInt> b1e9 = @new<bigꓸInt>();
+    ж<big.Int> bsec = @new<big.Int>();
+    ж<big.Int> bnsec = @new<big.Int>();
+    ж<big.Int> bd = @new<big.Int>();
+    ж<big.Int> bt = @new<big.Int>();
+    ж<big.Int> br = @new<big.Int>();
+    ж<big.Int> bq = @new<big.Int>();
+    ж<big.Int> b1e9 = @new<big.Int>();
 
     b1e9.SetInt64(1000000000);
 
@@ -446,7 +446,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
     // multiples of Second
     var testOneʗ2 = testOne;
     var f2 = [MethodImpl(MethodImplOptions.NoInlining)] (int64 ti, int32 tns, int32 di) => {
-        var d = ((Δtime.Duration)(int64)di) * ΔSecond;
+        var d = ((Δtime.Duration)(int64)di) * Second;
         if (d < 0) {
             d = -d;
         }
@@ -527,7 +527,7 @@ internal static slice<ISOWeekTest> isoWeekTests = [
 public static void TestISOWeek(ж<Δtesting.T> t) {
     // Selected dates and corner cases
     foreach (var (_, wt) in range(isoWeekTests)) {
-        var dt = Date(wt.year, (timeꓸMonth)wt.month, wt.day, 0, 0, 0, 0, ΔUTC);
+        var dt = Date(wt.year, (Δtime.Month)wt.month, wt.day, 0, 0, 0, 0, UTC);
         var (y, w) = dt.ISOWeek();
         if (w != wt.wex || y != wt.yex) {
             t.Errorf("got %d/%d; expected %d/%d for %d-%02d-%02d",
@@ -537,7 +537,7 @@ public static void TestISOWeek(ж<Δtesting.T> t) {
 
     // The only real invariant: Jan 04 is in week 1
     for (nint year = 1950; year < 2100; year++) {
-        var (y, w) = Date(year, January, 4, 0, 0, 0, 0, ΔUTC).ISOWeek(); if (y != year || w != 1) {
+        var (y, w) = Date(year, January, 4, 0, 0, 0, 0, UTC).ISOWeek(); if (y != year || w != 1) {
             t.Errorf("got %d/%d; expected %d/1 for Jan 04", y, w, year);
         }
     }
@@ -619,10 +619,10 @@ internal static slice<YearDayTest> yearDayTests = [
 ];
 
 // Check to see if YearDay is location sensitive
-internal static slice<ж<timeꓸLocation>> yearDayLocations = slice<ж<timeꓸLocation>>([
+internal static slice<ж<Δtime.Location>> yearDayLocations = slice<ж<Δtime.Location>>([
     FixedZone("UTC-8", -8 * 60 * 60),
     FixedZone("UTC-4", -4 * 60 * 60),
-    ΔUTC,
+    UTC,
     FixedZone("UTC+4", 4 * 60 * 60),
     FixedZone("UTC+8", 8 * 60 * 60)
 ]);
@@ -630,7 +630,7 @@ internal static slice<ж<timeꓸLocation>> yearDayLocations = slice<ж<timeꓸLo
 public static void TestYearDay(ж<Δtesting.T> t) {
     foreach (var (i, loc) in range(yearDayLocations)) {
         foreach (var (_, ydt) in range(yearDayTests)) {
-            var dt = Date(ydt.year, (timeꓸMonth)ydt.month, ydt.day, 0, 0, 0, 0, loc);
+            var dt = Date(ydt.year, (Δtime.Month)ydt.month, ydt.day, 0, 0, 0, 0, loc);
             nint yday = dt.YearDay();
             if (yday != ydt.yday) {
                 t.Errorf("Date(%d-%02d-%02d in %v).YearDay() = %d, want %d",
@@ -661,8 +661,8 @@ partial struct durationTestsᴛ1 /*dyn*/ {
 }
 internal static slice<durationTestsᴛ1> durationTests = [
     new("0s", 0),
-    new("1ns", 1 * ΔNanosecond),
-    new("1.1µs", 1100 * ΔNanosecond),
+    new("1ns", 1 * Nanosecond),
+    new("1.1µs", 1100 * Nanosecond),
     new("2.2ms", 2200 * Microsecond),
     new("3.3s", (Δtime.Duration)(3300000000L)),
     new("4m5s", (Δtime.Duration)(245000000000L)),
@@ -690,40 +690,40 @@ public static void TestDurationString(ж<Δtesting.T> t) {
 
 partial struct dateTestsᴛ1 /*dyn*/ {
     internal nint year, month, day, hour, min, sec, nsec;
-    internal ж<timeꓸLocation> z;
+    internal ж<Δtime.Location> z;
     internal int64 unix;
 }
 internal static slice<dateTestsᴛ1> dateTests = [
-    new(2011, 11, 6, 1, 0, 0, 0, ΔLocal, 1320566400),   // 1:00:00 PDT
-    new(2011, 11, 6, 1, 59, 59, 0, ΔLocal, 1320569999), // 1:59:59 PDT
-    new(2011, 11, 6, 2, 0, 0, 0, ΔLocal, 1320573600),   // 2:00:00 PST
+    new(2011, 11, 6, 1, 0, 0, 0, Local, 1320566400),   // 1:00:00 PDT
+    new(2011, 11, 6, 1, 59, 59, 0, Local, 1320569999), // 1:59:59 PDT
+    new(2011, 11, 6, 2, 0, 0, 0, Local, 1320573600),   // 2:00:00 PST
 
-    new(2011, 3, 13, 1, 0, 0, 0, ΔLocal, 1300006800),   // 1:00:00 PST
-    new(2011, 3, 13, 1, 59, 59, 0, ΔLocal, 1300010399), // 1:59:59 PST
-    new(2011, 3, 13, 3, 0, 0, 0, ΔLocal, 1300010400),   // 3:00:00 PDT
-    new(2011, 3, 13, 2, 30, 0, 0, ΔLocal, 1300008600),  // 2:30:00 PDT ≡ 1:30 PST
-    new(2012, 12, 24, 0, 0, 0, 0, ΔLocal, 1356336000),  // Leap year
+    new(2011, 3, 13, 1, 0, 0, 0, Local, 1300006800),   // 1:00:00 PST
+    new(2011, 3, 13, 1, 59, 59, 0, Local, 1300010399), // 1:59:59 PST
+    new(2011, 3, 13, 3, 0, 0, 0, Local, 1300010400),   // 3:00:00 PDT
+    new(2011, 3, 13, 2, 30, 0, 0, Local, 1300008600),  // 2:30:00 PDT ≡ 1:30 PST
+    new(2012, 12, 24, 0, 0, 0, 0, Local, 1356336000),  // Leap year
 
     // Many names for Fri Nov 18 7:56:35 PST 2011
-    new(2011, 11, 18, 7, 56, 35, 0, ΔLocal, 1321631795),                    // Nov 18 7:56:35
-    new(2011, 11, 19, -17, 56, 35, 0, ΔLocal, 1321631795),                  // Nov 19 -17:56:35
-    new(2011, 11, 17, 31, 56, 35, 0, ΔLocal, 1321631795),                   // Nov 17 31:56:35
-    new(2011, 11, 18, 6, 116, 35, 0, ΔLocal, 1321631795),                   // Nov 18 6:116:35
-    new(2011, 10, 49, 7, 56, 35, 0, ΔLocal, 1321631795),                    // Oct 49 7:56:35
-    new(2011, 11, 18, 7, 55, 95, 0, ΔLocal, 1321631795),                    // Nov 18 7:55:95
-    new(2011, 11, 18, 7, 56, 34, 1000000000, ΔLocal, 1321631795),           // Nov 18 7:56:34 + 10⁹ns
-    new(2011, 12, -12, 7, 56, 35, 0, ΔLocal, 1321631795),                   // Dec -21 7:56:35
-    new(2012, 1, -43, 7, 56, 35, 0, ΔLocal, 1321631795),                    // Jan -52 7:56:35 2012
-    new(2012, (nint)(January - 2), 18, 7, 56, 35, 0, ΔLocal, 1321631795),   // (Jan-2) 18 7:56:35 2012
-    new(2010, (nint)(December + 11), 18, 7, 56, 35, 0, ΔLocal, 1321631795), // (Dec+11) 18 7:56:35 2010
-    new(1970, 1, 15297, 7, 56, 35, 0, ΔLocal, 1321631795),                  // large number of days
+    new(2011, 11, 18, 7, 56, 35, 0, Local, 1321631795),                    // Nov 18 7:56:35
+    new(2011, 11, 19, -17, 56, 35, 0, Local, 1321631795),                  // Nov 19 -17:56:35
+    new(2011, 11, 17, 31, 56, 35, 0, Local, 1321631795),                   // Nov 17 31:56:35
+    new(2011, 11, 18, 6, 116, 35, 0, Local, 1321631795),                   // Nov 18 6:116:35
+    new(2011, 10, 49, 7, 56, 35, 0, Local, 1321631795),                    // Oct 49 7:56:35
+    new(2011, 11, 18, 7, 55, 95, 0, Local, 1321631795),                    // Nov 18 7:55:95
+    new(2011, 11, 18, 7, 56, 34, 1000000000, Local, 1321631795),           // Nov 18 7:56:34 + 10⁹ns
+    new(2011, 12, -12, 7, 56, 35, 0, Local, 1321631795),                   // Dec -21 7:56:35
+    new(2012, 1, -43, 7, 56, 35, 0, Local, 1321631795),                    // Jan -52 7:56:35 2012
+    new(2012, (nint)(January - 2), 18, 7, 56, 35, 0, Local, 1321631795),   // (Jan-2) 18 7:56:35 2012
+    new(2010, (nint)(December + 11), 18, 7, 56, 35, 0, Local, 1321631795), // (Dec+11) 18 7:56:35 2010
+    new(1970, 1, 15297, 7, 56, 35, 0, Local, 1321631795),                  // large number of days
 
-    new(1970, 1, -25508, 0, 0, 0, 0, ΔLocal, -2203948800L) // negative Unix time
+    new(1970, 1, -25508, 0, 0, 0, 0, Local, -2203948800L) // negative Unix time
 ];
 
 public static void TestDate(ж<Δtesting.T> t) {
     foreach (var (_, tt) in range(dateTests)) {
-        var time = Date(tt.year, (timeꓸMonth)tt.month, tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z);
+        var time = Date(tt.year, (Δtime.Month)tt.month, tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z);
         var want = Unix(tt.unix, 0);
         if (!time.Equal(want)) {
             t.Errorf("Date(%d, %d, %d, %d, %d, %d, %d, %s) = %v, want %v",
@@ -748,8 +748,8 @@ internal static slice<addDateTestsᴛ1> addDateTests = [
 ];
 
 public static void TestAddDate(ж<Δtesting.T> t) {
-    var t0 = Date(2011, 11, 18, 7, 56, 35, 0, ΔUTC);
-    var t1 = Date(2016, 3, 19, 7, 56, 35, 0, ΔUTC);
+    var t0 = Date(2011, 11, 18, 7, 56, 35, 0, UTC);
+    var t1 = Date(2016, 3, 19, 7, 56, 35, 0, UTC);
     foreach (var (_, at) in range(addDateTests)) {
         var time = t0.AddDate(at.years, at.months, at.days);
         if (!time.Equal(t1)) {
@@ -759,7 +759,7 @@ public static void TestAddDate(ж<Δtesting.T> t) {
         }
     }
 
-    var t2 = Date(1899, 12, 31, 0, 0, 0, 0, ΔUTC);
+    var t2 = Date(1899, 12, 31, 0, 0, 0, 0, UTC);
     var days = t2.Unix() / (24 * 60 * 60);
     var t3 = Unix(0, 0).AddDate(0, 0, (nint)days);
     if (!t2.Equal(t3)) {
@@ -783,7 +783,7 @@ public static void TestDaysIn(ж<Δtesting.T> t) {
     // Test the daysIn function via the `var DaysIn = daysIn`
     // statement in the internal_test.go file.
     foreach (var (_, tt) in range(daysInTests)) {
-        nint di = time_internal_test_package.DaysIn((timeꓸMonth)tt.month, tt.year);
+        nint di = time_internal_test_package.DaysIn((Δtime.Month)tt.month, tt.year);
         if (di != tt.di) {
             t.Errorf("got %d; expected %d for %d-%02d",
                 di, tt.di, tt.year, tt.month);
@@ -795,7 +795,7 @@ public static void TestAddToExactSecond(ж<Δtesting.T> t) {
     // Add an amount to the current time to round it up to the next exact second.
     // This test checks that the nsec field still lies within the range [0, 999999999].
     var t1 = Now();
-    var t2 = t1.Add(ΔSecond - ((Δtime.Duration)(int64)t1.Nanosecond()));
+    var t2 = t1.Add(Second - ((Δtime.Duration)(int64)t1.Nanosecond()));
     nint sec = (t1.Second() + 1) % 60;
     if (t2.Second() != sec || t2.Nanosecond() != 0) {
         t.Errorf("sec = %d, nsec = %d, want sec = %d, nsec = 0", t2.Second(), t2.Nanosecond(), sec);
@@ -809,7 +809,7 @@ internal static bool equalTimeAndZone(Δtime.Time a, Δtime.Time b) {
 }
 
 internal static slice<Δtime.Time> gobTests = slice<Δtime.Time>([
-    Date(0, 1, 2, 3, 4, 5, 6, ΔUTC),
+    Date(0, 1, 2, 3, 4, 5, 6, UTC),
     Date(7, 8, 9, 10, 11, 12, 13, FixedZone("", 0)),
     Unix(81985467080890095L, 0x76543210), // Time.sec: 0x0123456789ABCDEF
     new(),                                // nil location
@@ -889,8 +889,8 @@ partial struct jsonTestsᴛ1 /*dyn*/ {
     internal @string json;
 }
 internal static slice<jsonTestsᴛ1> jsonTests = slice<jsonTestsᴛ1>([
-    new(Date(9999, 4, 12, 23, 20, 50, 520 * 1000000, ΔUTC), @"""9999-04-12T23:20:50.52Z"""),
-    new(Date(1996, 12, 19, 16, 39, 57, 0, ΔLocal), @"""1996-12-19T16:39:57-08:00"""),
+    new(Date(9999, 4, 12, 23, 20, 50, 520 * 1000000, UTC), @"""9999-04-12T23:20:50.52Z"""),
+    new(Date(1996, 12, 19, 16, 39, 57, 0, Local), @"""1996-12-19T16:39:57-08:00"""),
     new(Date(0, 1, 1, 0, 0, 0, 1, FixedZone("", 1 * 60)), @"""0000-01-01T00:00:00.000000001+00:01"""),
     new(Date(2020, 1, 1, 0, 0, 0, 0, FixedZone("", 23 * 60 * 60 + 59 * 60)), @"""2020-01-01T00:00:00+23:59""")
 ]);
@@ -979,9 +979,9 @@ private static readonly @string appendTextˢᵇ = "AppendText"u8;
 
 public static void TestMarshalInvalidTimes(ж<Δtesting.T> t) {
     var tests = slice<notEncodableTimesᴛ1>([
-        new(Date(10000, 1, 1, 0, 0, 0, 0, ΔUTC), "Time.MarshalJSON: year outside of range [0,9999]"),
-        new(Date(-998, 1, 1, 0, 0, 0, 0, ΔUTC).Add(-ΔSecond), "Time.MarshalJSON: year outside of range [0,9999]"),
-        new(Date(0, 1, 1, 0, 0, 0, 0, ΔUTC).Add(-ΔNanosecond), "Time.MarshalJSON: year outside of range [0,9999]"),
+        new(Date(10000, 1, 1, 0, 0, 0, 0, UTC), "Time.MarshalJSON: year outside of range [0,9999]"),
+        new(Date(-998, 1, 1, 0, 0, 0, 0, UTC).Add(-Second), "Time.MarshalJSON: year outside of range [0,9999]"),
+        new(Date(0, 1, 1, 0, 0, 0, 0, UTC).Add(-Nanosecond), "Time.MarshalJSON: year outside of range [0,9999]"),
         new(Date(2020, 1, 1, 0, 0, 0, 0, FixedZone(""u8, 24 * 60 * 60)), "Time.MarshalJSON: timezone hour outside of range [0,23]"),
         new(Date(2020, 1, 1, 0, 0, 0, 0, FixedZone(""u8, 123 * 60 * 60)), "Time.MarshalJSON: timezone hour outside of range [0,23]")
     ]);
@@ -1046,13 +1046,13 @@ internal static slice<parseDurationTestsᴛ1> parseDurationTests = [
     new("5.6s", (Δtime.Duration)(5600000000L)),
     new("5.s", (Δtime.Duration)(5000000000L)),
     new(".5s", 500 * Millisecond),
-    new("1.0s", 1 * ΔSecond),
-    new("1.00s", 1 * ΔSecond),
-    new("1.004s", 1 * ΔSecond + 4 * Millisecond),
-    new("1.0040s", 1 * ΔSecond + 4 * Millisecond),
+    new("1.0s", 1 * Second),
+    new("1.00s", 1 * Second),
+    new("1.004s", 1 * Second + 4 * Millisecond),
+    new("1.0040s", 1 * Second + 4 * Millisecond),
     new("100.00100s", (Δtime.Duration)(100001000000L)),
     // different units
-    new("10ns", 10 * ΔNanosecond),
+    new("10ns", 10 * Nanosecond),
     new("11us", 11 * Microsecond),
     new("12µs", 12 * Microsecond), // U+00B5
     new("12μs", 12 * Microsecond), // U+03BC
@@ -1262,19 +1262,19 @@ partial struct subTestsᴛ1 /*dyn*/ {
 }
 internal static slice<subTestsᴛ1> subTests = slice<subTestsᴛ1>([
     new(new Time(), new Time(), (Δtime.Duration)0),
-    new(Date(2009, 11, 23, 0, 0, 0, 1, ΔUTC), Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)1),
-    new(Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), Date(2009, 11, 24, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(-86400000000000L)),
-    new(Date(2009, 11, 24, 0, 0, 0, 0, ΔUTC), Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(86400000000000L)),
-    new(Date(-2009, 11, 24, 0, 0, 0, 0, ΔUTC), Date(-2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(86400000000000L)),
-    new(new Time(), Date(2109, 11, 23, 0, 0, 0, 0, ΔUTC), minDuration),
-    new(Date(2109, 11, 23, 0, 0, 0, 0, ΔUTC), new Time(), maxDuration),
-    new(new Time(), Date(-2109, 11, 23, 0, 0, 0, 0, ΔUTC), maxDuration),
-    new(Date(-2109, 11, 23, 0, 0, 0, 0, ΔUTC), new Time(), minDuration),
-    new(Date(2290, 1, 1, 0, 0, 0, 0, ΔUTC), Date(2000, 1, 1, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(9151574400000000000L)),
-    new(Date(2300, 1, 1, 0, 0, 0, 0, ΔUTC), Date(2000, 1, 1, 0, 0, 0, 0, ΔUTC), maxDuration),
-    new(Date(2000, 1, 1, 0, 0, 0, 0, ΔUTC), Date(2290, 1, 1, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(-9151574400000000000L)),
-    new(Date(2000, 1, 1, 0, 0, 0, 0, ΔUTC), Date(2300, 1, 1, 0, 0, 0, 0, ΔUTC), minDuration),
-    new(Date(2311, 11, 26, 2, 16, 47, 63535996, ΔUTC), Date(2019, 8, 16, 2, 29, 30, 268436582, ΔUTC), 9223372036795099414L),
+    new(Date(2009, 11, 23, 0, 0, 0, 1, UTC), Date(2009, 11, 23, 0, 0, 0, 0, UTC), (Δtime.Duration)1),
+    new(Date(2009, 11, 23, 0, 0, 0, 0, UTC), Date(2009, 11, 24, 0, 0, 0, 0, UTC), (Δtime.Duration)(-86400000000000L)),
+    new(Date(2009, 11, 24, 0, 0, 0, 0, UTC), Date(2009, 11, 23, 0, 0, 0, 0, UTC), (Δtime.Duration)(86400000000000L)),
+    new(Date(-2009, 11, 24, 0, 0, 0, 0, UTC), Date(-2009, 11, 23, 0, 0, 0, 0, UTC), (Δtime.Duration)(86400000000000L)),
+    new(new Time(), Date(2109, 11, 23, 0, 0, 0, 0, UTC), minDuration),
+    new(Date(2109, 11, 23, 0, 0, 0, 0, UTC), new Time(), maxDuration),
+    new(new Time(), Date(-2109, 11, 23, 0, 0, 0, 0, UTC), maxDuration),
+    new(Date(-2109, 11, 23, 0, 0, 0, 0, UTC), new Time(), minDuration),
+    new(Date(2290, 1, 1, 0, 0, 0, 0, UTC), Date(2000, 1, 1, 0, 0, 0, 0, UTC), (Δtime.Duration)(9151574400000000000L)),
+    new(Date(2300, 1, 1, 0, 0, 0, 0, UTC), Date(2000, 1, 1, 0, 0, 0, 0, UTC), maxDuration),
+    new(Date(2000, 1, 1, 0, 0, 0, 0, UTC), Date(2290, 1, 1, 0, 0, 0, 0, UTC), (Δtime.Duration)(-9151574400000000000L)),
+    new(Date(2000, 1, 1, 0, 0, 0, 0, UTC), Date(2300, 1, 1, 0, 0, 0, 0, UTC), minDuration),
+    new(Date(2311, 11, 26, 2, 16, 47, 63535996, UTC), Date(2019, 8, 16, 2, 29, 30, 268436582, UTC), 9223372036795099414L),
     new(time_internal_test_package.MinMonoTime, time_internal_test_package.MaxMonoTime, minDuration),
     new(time_internal_test_package.MaxMonoTime, time_internal_test_package.MinMonoTime, maxDuration)
 ]);
@@ -1389,18 +1389,18 @@ partial struct durationTruncateTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration want;
 }
 internal static slice<durationTruncateTestsᴛ1> durationTruncateTests = [
-    new(0, ΔSecond, 0),
-    new(ΔMinute, (Δtime.Duration)(-7000000000L), ΔMinute),
-    new(ΔMinute, 0, ΔMinute),
-    new(ΔMinute, 1, ΔMinute),
+    new(0, Second, 0),
+    new(Minute, (Δtime.Duration)(-7000000000L), Minute),
+    new(Minute, 0, Minute),
+    new(Minute, 1, Minute),
     new((Δtime.Duration)(70000000000L), (Δtime.Duration)(10000000000L), (Δtime.Duration)(70000000000L)),
-    new((Δtime.Duration)(130000000000L), ΔMinute, (Δtime.Duration)(120000000000L)),
+    new((Δtime.Duration)(130000000000L), Minute, (Δtime.Duration)(120000000000L)),
     new((Δtime.Duration)(610000000000L), (Δtime.Duration)(180000000000L), (Δtime.Duration)(540000000000L)),
     new((Δtime.Duration)(70000000000L), (Δtime.Duration)(70000000001L), 0),
-    new((Δtime.Duration)(70000000000L), ΔHour, 0),
-    new(-ΔMinute, ΔSecond, -ΔMinute),
+    new((Δtime.Duration)(70000000000L), Hour, 0),
+    new(-Minute, Second, -Minute),
     new((Δtime.Duration)(-600000000000L), (Δtime.Duration)(180000000000L), (Δtime.Duration)(-540000000000L)),
-    new((Δtime.Duration)(-600000000000L), ΔHour, 0)
+    new((Δtime.Duration)(-600000000000L), Hour, 0)
 ];
 
 public static void TestDurationTruncate(ж<Δtesting.T> t) {
@@ -1412,19 +1412,19 @@ public static void TestDurationTruncate(ж<Δtesting.T> t) {
 }
 
 internal static slice<durationTruncateTestsᴛ1> durationRoundTests = [
-    new(0, ΔSecond, 0),
-    new(ΔMinute, (Δtime.Duration)(-11000000000L), ΔMinute),
-    new(ΔMinute, 0, ΔMinute),
-    new(ΔMinute, 1, ΔMinute),
-    new((Δtime.Duration)(120000000000L), ΔMinute, (Δtime.Duration)(120000000000L)),
-    new((Δtime.Duration)(130000000000L), ΔMinute, (Δtime.Duration)(120000000000L)),
-    new((Δtime.Duration)(150000000000L), ΔMinute, (Δtime.Duration)(180000000000L)),
-    new((Δtime.Duration)(170000000000L), ΔMinute, (Δtime.Duration)(180000000000L)),
-    new(-ΔMinute, 1, -ΔMinute),
-    new((Δtime.Duration)(-120000000000L), ΔMinute, (Δtime.Duration)(-120000000000L)),
-    new((Δtime.Duration)(-130000000000L), ΔMinute, (Δtime.Duration)(-120000000000L)),
-    new((Δtime.Duration)(-150000000000L), ΔMinute, (Δtime.Duration)(-180000000000L)),
-    new((Δtime.Duration)(-170000000000L), ΔMinute, (Δtime.Duration)(-180000000000L)),
+    new(0, Second, 0),
+    new(Minute, (Δtime.Duration)(-11000000000L), Minute),
+    new(Minute, 0, Minute),
+    new(Minute, 1, Minute),
+    new((Δtime.Duration)(120000000000L), Minute, (Δtime.Duration)(120000000000L)),
+    new((Δtime.Duration)(130000000000L), Minute, (Δtime.Duration)(120000000000L)),
+    new((Δtime.Duration)(150000000000L), Minute, (Δtime.Duration)(180000000000L)),
+    new((Δtime.Duration)(170000000000L), Minute, (Δtime.Duration)(180000000000L)),
+    new(-Minute, 1, -Minute),
+    new((Δtime.Duration)(-120000000000L), Minute, (Δtime.Duration)(-120000000000L)),
+    new((Δtime.Duration)(-130000000000L), Minute, (Δtime.Duration)(-120000000000L)),
+    new((Δtime.Duration)(-150000000000L), Minute, (Δtime.Duration)(-180000000000L)),
+    new((Δtime.Duration)(-170000000000L), Minute, (Δtime.Duration)(-180000000000L)),
     new(8000000000000000000, 3000000000000000000, 9000000000000000000),
     new(9000000000000000000, 5000000000000000000, (Δtime.Duration)(9223372036854775807L)),
     new(-8000000000000000000, 3000000000000000000, -9000000000000000000),
@@ -1502,7 +1502,7 @@ internal static slice<defaultLocTestsᴛ1> defaultLocTests = [
     new("YearDay", (Δtime.Time t1, Δtime.Time t2) => t1.YearDay() == t2.YearDay()),
 
     // Using Equal since Add don't modify loc using "==" will cause a fail
-    new("Add", (Δtime.Time t1, Δtime.Time t2) => t1.Add(ΔHour).Equal(t2.Add(ΔHour))),
+    new("Add", (Δtime.Time t1, Δtime.Time t2) => t1.Add(Hour).Equal(t2.Add(Hour))),
     new("Sub", (Δtime.Time t1, Δtime.Time t2) => t1.Sub(t2) == t2.Sub(t1)),
 
     // Original cause for this test case bug 15852
@@ -1510,7 +1510,7 @@ internal static slice<defaultLocTestsᴛ1> defaultLocTests = [
 
     new("UTC", (Δtime.Time t1, Δtime.Time t2) => t1.UTC() == t2.UTC()),
     new("Local", (Δtime.Time t1, Δtime.Time t2) => t1.Local() == t2.Local()),
-    new("In", (Δtime.Time t1, Δtime.Time t2) => t1.In(ΔUTC) == t2.In(ΔUTC)),
+    new("In", (Δtime.Time t1, Δtime.Time t2) => t1.In(UTC) == t2.In(UTC)),
 
     new("Local", (Δtime.Time t1, Δtime.Time t2) => t1.Local() == t2.Local()),
     new("Zone", (Δtime.Time t1, Δtime.Time t2) => {
@@ -1560,8 +1560,8 @@ internal static slice<defaultLocTestsᴛ1> defaultLocTests = [
         return bytes.Equal(a1, a2) && AreEqual(b1, b2);
     }),
 
-    new("Truncate", (Δtime.Time t1, Δtime.Time t2) => t1.Truncate(ΔHour).Equal(t2.Truncate(ΔHour))),
-    new("Round", (Δtime.Time t1, Δtime.Time t2) => t1.Round(ΔHour).Equal(t2.Round(ΔHour))),
+    new("Truncate", (Δtime.Time t1, Δtime.Time t2) => t1.Truncate(Hour).Equal(t2.Truncate(Hour))),
+    new("Round", (Δtime.Time t1, Δtime.Time t2) => t1.Round(Hour).Equal(t2.Round(Hour))),
 
     new("== Time{}", (Δtime.Time t1, Δtime.Time t2) => (t1 == new Time()) == (t2 == new Time()))
 ];
@@ -1847,7 +1847,7 @@ public static void BenchmarkDateFunc(ж<Δtesting.B> Ꮡb) {
 
     Δtime.Time t = default;
     foreach (var _ᴛ1 in range(b.N)) {
-        t = Date(2020, 8, 22, 11, 27, 43, 123456789, ΔUTC);
+        t = Date(2020, 8, 22, 11, 27, 43, 123456789, UTC);
     }
     _ = t;
 }
@@ -1931,7 +1931,7 @@ private static readonly @string month0ˢᵇ = "%!Month(0)"u8;
 
 // Issue 17720: Zero value of time.Month fails to print
 public static partial void TestZeroMonthString(ж<Δtesting.T> t) {
-    @string got = ((timeꓸMonth)0).String();
+    @string got = ((Δtime.Month)0).String();
     @string want = month0ˢ; if (got != want) {
         t.Errorf("zero month = %q; want %q", got, want);
     }
@@ -1952,7 +1952,7 @@ public static void TestWeekdayString(ж<Δtesting.T> t) {
         }
     }
     {
-        @string got = ((timeꓸWeekday)14).String();
+        @string got = ((Δtime.Weekday)14).String();
         @string want = weekday14ˢ; if (got != want) {
             t.Errorf("14th weekday = %q; want %q", got, want);
         }
@@ -1989,7 +1989,7 @@ public static partial void TestConcurrentTimerReset(ж<Δtesting.T> t) {
     const nint tries = 1000;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(goroutines);
-    var timer = NewTimer(ΔHour);
+    var timer = NewTimer(Hour);
     for (nint i = 0; i < goroutines; i++) {
         var timerʗ1 = timer;
         goǃ((nint iΔ1) => {
@@ -1997,7 +1997,7 @@ public static partial void TestConcurrentTimerReset(ж<Δtesting.T> t) {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 for (nint j = 0; j < tries; j++) {
-                    timerʗ1.Reset(ΔHour + ((Δtime.Duration)(int64)(iΔ1 * j)));
+                    timerʗ1.Reset(Hour + ((Δtime.Duration)(int64)(iΔ1 * j)));
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2013,7 +2013,7 @@ public static partial void TestConcurrentTimerResetStop(ж<Δtesting.T> t) {
     const nint tries = 1000;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(goroutines * 2);
-    var timer = NewTimer(ΔHour);
+    var timer = NewTimer(Hour);
     for (nint i = 0; i < goroutines; i++) {
         var timerʗ1 = timer;
         goǃ((nint iΔ1) => {
@@ -2021,7 +2021,7 @@ public static partial void TestConcurrentTimerResetStop(ж<Δtesting.T> t) {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 for (nint j = 0; j < tries; j++) {
-                    timerʗ1.Reset(ΔHour + ((Δtime.Duration)(int64)(iΔ1 * j)));
+                    timerʗ1.Reset(Hour + ((Δtime.Duration)(int64)(iΔ1 * j)));
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2070,8 +2070,8 @@ public static void TestTimeIsDST(ж<Δtesting.T> t) {
         var tzFixed = FixedZone(fixedTimeˢ, 12345);
 
         var tests = new array<TestTimeIsDST_tests>(8){
-            [0] = new(Date(2009, 1, 1, 12, 0, 0, 0, ΔUTC), false),
-            [1] = new(Date(2009, 6, 1, 12, 0, 0, 0, ΔUTC), false),
+            [0] = new(Date(2009, 1, 1, 12, 0, 0, 0, UTC), false),
+            [1] = new(Date(2009, 6, 1, 12, 0, 0, 0, UTC), false),
             [2] = new(Date(2009, 1, 1, 12, 0, 0, 0, tzWithDST), true),
             [3] = new(Date(2009, 6, 1, 12, 0, 0, 0, tzWithDST), false),
             [4] = new(Date(2009, 1, 1, 12, 0, 0, 0, tzWithoutDST), false),
@@ -2140,20 +2140,20 @@ public static void TestTimeWithZoneTransition(ж<Δtesting.T> t) {
             // Sunday, 14 April 1991, 02:00:00 clocks were turned forward 1 hour to
             // Sunday, 14 April 1991, 03:00:00 local daylight time instead.
             // The UTC time was 13 April 1991, 18:00:00
-            [0] = new(Date(1991, April, 13, 17, 50, 0, 0, loc), Date(1991, April, 13, 9, 50, 0, 0, ΔUTC)),
-            [1] = new(Date(1991, April, 13, 18, 0, 0, 0, loc), Date(1991, April, 13, 10, 0, 0, 0, ΔUTC)),
-            [2] = new(Date(1991, April, 14, 1, 50, 0, 0, loc), Date(1991, April, 13, 17, 50, 0, 0, ΔUTC)),
-            [3] = new(Date(1991, April, 14, 3, 0, 0, 0, loc), Date(1991, April, 13, 18, 0, 0, 0, ΔUTC)),
+            [0] = new(Date(1991, April, 13, 17, 50, 0, 0, loc), Date(1991, April, 13, 9, 50, 0, 0, UTC)),
+            [1] = new(Date(1991, April, 13, 18, 0, 0, 0, loc), Date(1991, April, 13, 10, 0, 0, 0, UTC)),
+            [2] = new(Date(1991, April, 14, 1, 50, 0, 0, loc), Date(1991, April, 13, 17, 50, 0, 0, UTC)),
+            [3] = new(Date(1991, April, 14, 3, 0, 0, 0, loc), Date(1991, April, 13, 18, 0, 0, 0, UTC)),
 
             // 15 Sep 1991 - Daylight Saving Time Ended
             // When local daylight time of "Asia/Shanghai" was about to reach
             // Sunday, 15 September 1991, 02:00:00 clocks were turned backward 1 hour to
             // Sunday, 15 September 1991, 01:00:00 local standard time instead.
             // The UTC time was 14 September 1991, 17:00:00
-            [4] = new(Date(1991, September, 14, 16, 50, 0, 0, loc), Date(1991, September, 14, 7, 50, 0, 0, ΔUTC)),
-            [5] = new(Date(1991, September, 14, 17, 0, 0, 0, loc), Date(1991, September, 14, 8, 0, 0, 0, ΔUTC)),
-            [6] = new(Date(1991, September, 15, 0, 50, 0, 0, loc), Date(1991, September, 14, 15, 50, 0, 0, ΔUTC)),
-            [7] = new(Date(1991, September, 15, 2, 0, 0, 0, loc), Date(1991, September, 14, 18, 0, 0, 0, ΔUTC))
+            [4] = new(Date(1991, September, 14, 16, 50, 0, 0, loc), Date(1991, September, 14, 7, 50, 0, 0, UTC)),
+            [5] = new(Date(1991, September, 14, 17, 0, 0, 0, loc), Date(1991, September, 14, 8, 0, 0, 0, UTC)),
+            [6] = new(Date(1991, September, 15, 0, 50, 0, 0, loc), Date(1991, September, 14, 15, 50, 0, 0, UTC)),
+            [7] = new(Date(1991, September, 15, 2, 0, 0, 0, loc), Date(1991, September, 14, 18, 0, 0, 0, UTC))
         };
 
         foreach (var (i, tt) in range(tests.ΔRangeSnapshot())) {

@@ -259,12 +259,21 @@ const move2heapLine = `[\pL\pN_@]+ = move2heap\([\pL\pN_@]+ᴷ, [\pL\pN_@]+\);`
 // gotoLabelRe matches the goto a labeled continue or break becomes; its label is Go's.
 var gotoLabelRe = regexp.MustCompile(`\bgoto (?:continue|break)_([\pL_][\pL\pN_]*);`)
 
-// anchorIdents is csIdents for a comment's anchor line, plus the Go label of a labeled continue or break.
+// copyDoorRe matches golib's copy doors, which a builtin copy through an array pointer's open view becomes
+// (`copy((*[4]byte)(p)[:], src)` is `@unsafe.Pointer.CopyInto<byte>(p, 0, 4, src);`): the line translates Go's copy.
+var copyDoorRe = regexp.MustCompile(`@unsafe\.Pointer\.Copy(?:Into|From)\b`)
+
+// anchorIdents is csIdents for a comment's anchor line, plus the Go label of a labeled continue or break, plus
+// `copy` where the line is one of the copy doors.
 func anchorIdents(code string) map[string]bool {
 	m := csIdents(code)
 
 	for _, match := range gotoLabelRe.FindAllStringSubmatch(code, -1) {
 		m[match[1]] = true
+	}
+
+	if copyDoorRe.MatchString(code) {
+		m["copy"] = true
 	}
 
 	return m

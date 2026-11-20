@@ -49,6 +49,17 @@ internal class ValueAdapterImplTemplate : TemplateBase
     /// </remarks>
     public Dictionary<string, string>? PromotedFieldForwards;
 
+    /// <summary>
+    /// The class that holds each method the wrapped type does not keep in the class it nests in, by the method's
+    /// simple name: the type's method holder, or its promoted-method class (GoMethodHosts.HostOf).
+    /// </summary>
+    /// <remarks>
+    /// The converter declares a type's methods in the type's holder, beside the package class, so the
+    /// container-qualified call names that class: the package class holds no such method (CS0117), or holds a
+    /// function of the name with other parameters (CS1501).
+    /// </remarks>
+    public Dictionary<string, string>? MethodClasses;
+
     public override string TemplateBody =>
         $$"""
              /// <summary>
@@ -148,12 +159,14 @@ internal class ValueAdapterImplTemplate : TemplateBase
                     continue;
                 }
 
-                if (container.Length > 0)
+                string methodContainer = MethodClasses is not null && MethodClasses.TryGetValue(simpleMethodName, out string? methodClass) ? methodClass : container;
+
+                if (methodContainer.Length > 0)
                 {
                     string callParameters = method.CallParameters;
                     string forwardedParameters = callParameters.Length > 0 ? $"m_value, {callParameters}" : "m_value";
 
-                    result.Append($"{method.ReturnType} {method.GetSignature()} => {container}.{forwardName}{method.GetGenericSignature()}({forwardedParameters});");
+                    result.Append($"{method.ReturnType} {method.GetSignature()} => {methodContainer}.{forwardName}{method.GetGenericSignature()}({forwardedParameters});");
                 }
                 else
                 {

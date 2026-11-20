@@ -15,6 +15,7 @@ using testing = testing_package;
 using encoding;
 using net;
 using static go.mime.multipart_package;
+using static multipart_internal_test_package;
 
 partial class multipart_internal_test_package {
 
@@ -165,6 +166,8 @@ internal static ref readonly @string valueOfFirstPartˢ => ref valueOfFirstPart�
 private static readonly @string valueOfFirstPartˢᵇ = "Value of first part"u8;
 internal static ref readonly @string bigsectionˢ => ref bigsectionˢᵇ;
 private static readonly @string bigsectionˢᵇ = "bigsection"u8;
+internal static ref readonly @string nameˢ => ref nameˢᵇ;
+private static readonly @string nameˢᵇ = "name"u8;
 internal static readonly object expectedPart3ˢ = (@string)"Expected part3"u8;
 internal static readonly object expectedFooBarBazbˢ = (@string)"Expected foo-bar: bazb"u8;
 internal static ref readonly @string line1Line2Line3EndsInAˢ => ref line1Line2Line3EndsInAˢᵇ;
@@ -323,6 +326,8 @@ internal partial struct maliciousReader {
 
 internal static UntypedInt maxReadThreshold => /* 1 << 20 */ 1048576;
 
+} partial class multipart_internal_testᴛmaliciousReader {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object tooMuchWasReadˢ = (@string)"too much was read"u8;
 
@@ -334,6 +339,8 @@ internal static (nint n, error err) Read(this ref maliciousReader mr, slice<byte
     }
     return (len(b), default);
 }
+
+} partial class multipart_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooBoundaryˢ => ref fooBoundaryˢᵇ;
@@ -396,6 +403,8 @@ internal partial struct slowReader {
     internal io.Reader r;
 }
 
+} partial class multipart_internal_testᴛslowReader {
+
 internal static (nint, error) Read(this ref slowReader s, slice<byte> p) {
     if (len(p) == 0) {
         return s.r.Read(p);
@@ -403,18 +412,24 @@ internal static (nint, error) Read(this ref slowReader s, slice<byte> p) {
     return s.r.Read(p[..1]);
 }
 
+} partial class multipart_internal_test_package {
+
 internal partial struct sentinelReader {
     // done is closed when this reader is read from.
     internal channel<EmptyStruct> done;
 }
 
+} partial class multipart_internal_testᴛsentinelReader {
+
 internal static (nint, error) Read(this ref sentinelReader s, slice<byte> _) {
     if (s.done != nil) {
-        builtin.close(s.done);
+        close(s.done);
         s.done = default;
     }
     return (0, io.EOF);
 }
+
+} partial class multipart_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string thisIsAMultiPartMessageˢ2 => ref thisIsAMultiPartMessageˢ2ᵇ;
@@ -476,9 +491,9 @@ public static void TestMultipartStreamReadahead(ж<testing.T> t) {
 
     readPart(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo-Bar"] = ["baz"]}), bodyˢ);
 
-    var selᴛ1 = done1;
-    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out _): {
+    var done1ᴛ1 = done1;
+    switch (trySelect(ᐸꟷ(done1ᴛ1, ꓸꓸꓸ))) {
+    case 0 when done1ᴛ1.ꟷᐳ(out _): {
         t.Errorf("Reader read past second boundary");
         break;
     }

@@ -7,6 +7,7 @@ using errors = errors_package;
 using synctest = global::go.@internal.synctest_package;
 using global::go.@internal;
 using static global::go.net.http_internal_test_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -30,7 +31,7 @@ internal static partial ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
-            defer(ᴛ1 => builtin.close(ᴛ1), rʗ1.donec, ref ᒐ);
+            defer(ᴛ1 => close(ᴛ1), rʗ1.donec, ref ᒐ);
             (rʗ1.res, rʗ1.err) = f();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -39,6 +40,8 @@ internal static partial ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
     synctest.Wait();
     return r;
 }
+
+} partial class http_testᴛasyncResult {
 
 // done reports whether the function has returned.
 internal static bool done<T>(this ref asyncResult<T> r) {
@@ -60,4 +63,4 @@ internal static (T, error) result<T>(this ref asyncResult<T> r) {
     }}
 }
 
-} // end http_test_package
+} // end http_testᴛasyncResult

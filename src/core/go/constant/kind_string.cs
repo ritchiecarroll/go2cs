@@ -2,6 +2,7 @@
 namespace go.go;
 
 using strconv = strconv_package;
+using static constant_package;
 
 partial class constant_package {
 
@@ -11,7 +12,7 @@ internal static void _ᴛ1() {
     array<EmptyStruct> x = new(1);
     _ = x[Unknown - 0];
     _ = x[Bool - 1];
-    _ = x[ΔString - 2];
+    _ = x[String - 2];
     _ = x[Int - 3];
     _ = x[Float - 4];
     _ = x[Complex - 5];
@@ -22,11 +23,13 @@ private static readonly @string _Kind_nameᵇ = "UnknownBoolStringIntFloatComple
 
 internal static array<uint8> _Kind_index = new uint8[]{0, 7, 11, 17, 20, 25, 32}.array();
 
-public static @string String(this ΔKind i) {
-    if (i < 0 || i >= ((ΔKind)(len(_Kind_index) - 1))) {
+} partial class constantᴛKind {
+
+public static @string String(this Kind i) {
+    if (i < 0 || i >= ((Kind)(len(_Kind_index) - 1))) {
         return "Kind("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _Kind_name.slice(_Kind_index[i], _Kind_index[i + 1]);
 }
 
-} // end constant_package
+} // end constantᴛKind

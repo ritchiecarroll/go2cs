@@ -6,6 +6,7 @@ namespace go;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -14,9 +15,11 @@ partial struct sigctxt {
     internal @unsafe.Pointer ctxt;
 }
 
+} partial class runtimeᴛsigctxt {
+
 //go:nosplit
 //go:nowritebarrierrec
-internal static ж<sigcontext> regs(this ref sigctxt c) { return Ꮡ((@unsafe.Pointer.To<ucontext>(c.ctxt)).Value.uc_mcontext); }
+internal static ж<sigcontext> regs(this ref sigctxt c) { return @unsafe.Pointer.To<ucontext>(c.ctxt).Ꮡuc_mcontext; }
 
 internal static uint64 r0(this ref sigctxt c) { return c.regs().regs[0]; }
 internal static uint64 r1(this ref sigctxt c) { return c.regs().regs[1]; }
@@ -70,13 +73,15 @@ internal static void set_sigaddr(this ref sigctxt c, uint64 x) {
     (@unsafe.Pointer.To<uintptr>(add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
 }
 
+} partial class runtime_package {
+
 internal static void dumpSigStack(@string s, uintptr sp, uintptr stackhi, uintptr ctx) {
     println(s);
-    println((@string)"SP:\t", (Δhex)(uint64)sp);
-    println((@string)"ctx:\t", (Δhex)(uint64)ctx);
-    var entriesStart = (uintptr)Ꮡ((@unsafe.Pointer.To<ucontext>((@unsafe.Pointer)ctx)).Value.uc_mcontext).Ꮡ__reserved;
-    hexdumpWords(sp, stackhi, (uintptr Δp, hexdumpMarker hm) => {
-        switch (Δp) {
+    println((@string)"SP:\t", (hex)(uint64)sp);
+    println((@string)"ctx:\t", (hex)(uint64)ctx);
+    var entriesStart = (uintptr)@unsafe.Pointer.To<ucontext>((@unsafe.Pointer)ctx).Ꮡuc_mcontext.Ꮡ__reserved;
+    hexdumpWords(sp, stackhi, (uintptr p, hexdumpMarker hm) => {
+        switch (p) {
         case var ᴛ when ᴛ == ctx: {
             hm.start();
             print((@string)"C");

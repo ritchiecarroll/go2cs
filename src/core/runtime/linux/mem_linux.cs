@@ -17,7 +17,7 @@ internal static UntypedInt _EINVAL => 22;
 //
 //go:nosplit
 internal static @unsafe.Pointer sysAllocOS(uintptr n, @string vmaName) {
-    var (Δp, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
+    var (p, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
         if (err == _EACCES) {
             print((@string)"runtime: mmap: access denied\n");
@@ -29,8 +29,8 @@ internal static @unsafe.Pointer sysAllocOS(uintptr n, @string vmaName) {
         }
         return default;
     }
-    setVMAName(Δp, n, vmaName);
-    return Δp;
+    setVMAName(p, n, vmaName);
+    return p;
 }
 
 internal static readonly ж<uint32> ᏑadviseUnused = new StaticBox<uint32>((uint32)_MADV_FREE);
@@ -58,9 +58,8 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
     if (debug.madvdontneed != 0 && advise != madviseUnsupported) {
         advise = _MADV_DONTNEED;
     }
-    var exprᴛ1 = advise;
     var matchᴛ1 = false;
-    if (exprᴛ1 == _MADV_FREE) { matchᴛ1 = true;
+    if (advise == _MADV_FREE) { matchᴛ1 = true;
         do {
             if (madvise(v, n, _MADV_FREE) == 0) {
                 break;
@@ -69,7 +68,7 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
             fallthrough = true;
         } while (false);
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == _MADV_DONTNEED) {
+    if (fallthrough || !matchᴛ1 && advise == _MADV_DONTNEED) {
         do {
             // MADV_FREE was added in Linux 4.5. Fall back on MADV_DONTNEED if it's
             // not supported.
@@ -80,23 +79,23 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
             fallthrough = true;
         } while (false);
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == madviseUnsupported) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && advise == madviseUnsupported) { matchᴛ1 = true;
         // Since Linux 3.18, support for madvise is optional.
         // Fall back on mmap if it's not supported.
         // _MAP_ANON|_MAP_FIXED|_MAP_PRIVATE will unmap all the
         // pages in the old mapping, and remap the memory region.
-        var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
-        if (err == 0 && Δp != nil) {
-            setVMAName(Δp, n, unusedˢ);
+        var (p, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
+        if (err == 0 && p != nil) {
+            setVMAName(p, n, unusedˢ);
         }
     }
 
     if (debug.harddecommit > 0) {
-        var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
-        if (Δp != v || err != 0) {
+        var (p, err) = mmap(v, n, _PROT_NONE, (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
+        if (p != v || err != 0) {
             @throw(runtimeCannotDisableˢ);
         }
-        setVMAName(Δp, n, unusedˢ);
+        setVMAName(p, n, unusedˢ);
     }
 }
 
@@ -110,14 +109,14 @@ private static readonly @string usedˢᵇ = "used"u8;
 
 internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
     if (debug.harddecommit > 0) {
-        var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
+        var (p, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
         if (err == _ENOMEM) {
             @throw(runtimeOutOfMemoryˢ);
         }
-        if (Δp != v || err != 0) {
+        if (p != v || err != 0) {
             @throw(runtimeCannotRemapPagesˢ);
         }
-        setVMAName(Δp, n, usedˢ);
+        setVMAName(p, n, usedˢ);
         return;
     }
 }
@@ -191,12 +190,12 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
 }
 
 internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string vmaName) {
-    var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
+    var (p, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
         return default;
     }
-    setVMAName(Δp, n, vmaName);
-    return Δp;
+    setVMAName(p, n, vmaName);
+    return p;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -204,15 +203,15 @@ internal static ref readonly @string runtimeCannotMapPagesInˢ => ref runtimeCan
 private static readonly @string runtimeCannotMapPagesInˢᵇ = "runtime: cannot map pages in arena address space"u8;
 
 internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string vmaName) {
-    var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
+    var (p, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
     if (err == _ENOMEM) {
         @throw(runtimeOutOfMemoryˢ);
     }
-    if (Δp != v || err != 0) {
-        print((@string)"runtime: mmap(", @unsafe.Pointer.OrTypedNil(v), (@string)", ", n, (@string)") returned ", @unsafe.Pointer.OrTypedNil(Δp), (@string)", ", err, (@string)"\n");
+    if (p != v || err != 0) {
+        print((@string)"runtime: mmap(", @unsafe.Pointer.OrTypedNil(v), (@string)", ", n, (@string)") returned ", @unsafe.Pointer.OrTypedNil(p), (@string)", ", err, (@string)"\n");
         @throw(runtimeCannotMapPagesInˢ);
     }
-    setVMAName(Δp, n, vmaName);
+    setVMAName(p, n, vmaName);
 
     // Disable huge pages if the GODEBUG for it is set.
     //

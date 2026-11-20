@@ -68,14 +68,14 @@ using static go.strings_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("strings/builder.go", "builder.cs", "ABlAAAgC3IKCupKogJqglpKCqqKCgqzSgoKUgrzCgoKqwoKCqsKCgoKqwoKC")]
+[assembly: GoPositionMap("strings/builder.go", "builder.cs", "ABxAAAgC3IKCupKogJqglpKCqqKCgqzSgoKUgrzCgoKqwoKCqsKCgoKqwoKC")]
 [assembly: GoPositionMap("strings/clone.go", "clone.cs", "AAoqAAoC")]
 [assembly: GoPositionMap("strings/compare.go", "compare.cs", "AAoe4g==")]
 [assembly: GoPositionMap("strings/iter.go", "iter.cs", "AAwk0oKCgoKUlIIABRCigoKCgoKUlJSCgoKUgoKUlAADEMKuwq7CgoKCgoKCgoKUgoKClJSClJSCAAQSwoKCgoKCgoKUlIKUlII=", "19-31:1;37-60:1;84-109:1;117-136:1")]
-[assembly: GoPositionMap("strings/reader.go", "reader.cs", "ABYyooKUrrCWwoKUgoKC6NSClIKUgoKUqJKCgpSCguiSgpSCgqjSgoKUgoKCAAgIkoKUgpSCggAICJKCgpS0tLSUgpSCqMKCgpSCgoKUgoKClKiAmJA=")]
-[assembly: GoPositionMap("strings/replace.go", "replace.cs", "ABlAAAgCgpSmgoKmgoKCpoKCgpSCuIKCgriCgoKUpqaCgpS4lJaosoKosoIANG6igoKClKaEkoKCpoKCiLKClMqCgoKCgoKmuIKClJSCgpSUgoK49oKCgoKCgoKCpoKUgoKClIKCgoKCgpSmAA0cgpSCgoK4gqaCgoKUgriUgpTMkoKokoLugqaCgoKUpoKCgqbCgpKClIKCgoLKgoKCgoKClIKCgpSCgpSUgoKUAAoWgqaCgpKCgoKUgoKCgpSClIKmsoKSgoKClIKCgpSCgoKUlIKCAAcQgoKCgoKClKaClKaigoKCgoKUgoKCgqaCgoKCpoKCgoKmABcwgoKUgoKUgrqCgpSCuIKUgoKCgoKUgqamsoKCgoKClIKCgoKmgoKCgqaCgoKU")]
-[assembly: GoPositionMap("strings/search.go", "search.cs", "AC5ggsq4gsqC3IKCgqamgoKUuKaigoKmqqKClIKCgpSClJQ=")]
-[assembly: GoPositionMap("strings/strings.go", "strings.cs", "ABYusoKClIKCgoKUgpSqtIKUgpSCgoKClIK6kqiSqJKokqiSgpSkpIKUpKaCgoKClIKUgoKCgoKmqJKuwoKUpIKCpqTagoKCgoKCgoKUpoKCpoKCgoKEppSEkoKmgoKCgoKCgqbYvKKUlJSCgpSUgoKCgqamgoKmrLKUlIKCgpSClJSCgoKCpqaCgoKUgoKCgqaUgoKCgqaokqqigpSClIKmgpSCgoKCgoKUgoKUggACHgALAAABGAAKAgACHgALAAABGAAKAqae9oKUgoKCgoKCppSmgoKClIKUgoKCgpSCgpSClJSClAAJFgAKBgAFFIKCgoK4poLcgriCgqaqopSkpoKCgpSUgoKUpoKCgoKClKiSqJKs/rSigoKmgoKCgqamgoKCpoK4gqaClLiCpsoAETjClKTcgpSCgpSUgriUlKSkpKQABBwACgKCgoKCuIKCgoKClKiSgoKCgoKUpoKClJiCgoKCgoKUgqaClJSokoKCgoKClKaCgpSYgoKCgoKClIKmgpSUqpCYorqiuqK6opSCgqaCgoKCgsqCpoKCgoKCgoKUgoKCgoKUlIKCpqq0gpSkpKSUpoKmAAIQAAgIgpSCgpSCzqKCgpSqooKCgpSUqqKqoqqirLKCgqassoKCgoKmAAwewoKCgpSUqJKqooKUgpSSlK7CgpSClJKUpoKClKaigoKUlKaCgoKClJSuwoKUgpSSlKaCgpSmooKClJSmgoKSgpSClJSsxIKmlIKUlIKCgpS4uKqiqqIAAhLigriCgoKokoKCgoKCgoKmgoKCgoKCpoIAAhDSrMSCgoKCgriCuIKmgpSmlIKCgrSCuILKgriCppSClMqCgpSClLiokq7CrsKuwg==", "874-881:1", "773=unicode.SpecialCase.ToUpper;779=unicode.SpecialCase.ToLower;785=unicode.SpecialCase.ToTitle")]
+[assembly: GoPositionMap("strings/reader.go", "reader.cs", "ABkyooKUrrCWwoKUgoKC6NSClIKUgoKUqJKCgpSCguiSgpSCgqjSgoKUgoKCAAgIkoKUgpSCggAICJKCgpS0tLSUgpSCqMKCgpSCgoKUgoKClKiAuJA=")]
+[assembly: GoPositionMap("strings/replace.go", "replace.cs", "ABpAAAgCgpTGgoKmgoKCpoKCgpSCuIKCgriCgoKUpqaCgpS4lJaosoKosoIAOG6igoKClKaEkoKCpoKCiLKClMqCgoKCgoKmuIKClJSCgpSUgoLY9oKCgoKCgoKCpoKUgoKClIKCgoKCgpSmAA8cgpSCgoK4gqaCgoKUgriUgpTskoKokoIACg6CxoKCgpTGgoKCpsKCkoKUgoKCgsqCgoKCgoKUgoKClIKClJSCgpQADBaCxoKCkoKCgpSCgoKClIKUgqaygpKCgoKUgoKClIKCgpSUgoIACxCCgoKCgoKUpoKUpqKCgoKCgpSCgoKCpoKCgoKmgoKCgqYAGzCCgpSCgpSCuoKClIK4gpSCgoKCgpSCpqaygoKCgoKUgoKCgqaCgoKCpoKCgpQ=")]
+[assembly: GoPositionMap("strings/search.go", "search.cs", "ADBggsq4gsqC3IKCgqamgoKUuKaigoKmyqKClIKCgpSClJQ=")]
+[assembly: GoPositionMap("strings/strings.go", "strings.cs", "ABcusoKClIKCgoKUgpSqtIKUgpSCgoKClIK6kqiSqJKokqiSgpSkpIKUpKaCgoKClIKUgoKCgoKmqJKuwoKUpIKCpqTagoKCgoKCgoKUpoKCpoKCgoKEppSEkoKmgoKCgoKCgqbYvKKUlJSCgpSUgoKCgqamgoKmrLKUlIKCgpSClJSCgoKCpqaCgoKUgoKCgqaUgoKCgqaokqqigpSClIKmgpSCgoKCgoKUgoKUggACHgALAAABGAAKAgACHgALAAABGAAKAqae9oKUgoKCgoKCppSmgoKClIKUgoKCgpSCgpSClJSClAAJFgAKBgAFFIKCgoK4poLcgriCgqaqopSkpoKCgpSUgoKUpoKCgoKClKiSqJKs/rSigoKmgoKCgqamgoKCpoK4gqaClLiCpsoAETjClKTcgpSCgpSUgriUlKSkpKQABBwACgKCgoKCuIKCgoKClKiSgoKCgoKUpoKClJiCgoKCgoKUgqaClJSokoKCgoKClKaCgpSYgoKCgoKClIKmgpSUqpCYorqiuqK6opSCgqaCgoKCgsqCpoKCgoKCgoKUgoKCgoKUlIKCpqq0gpSkpKSUpoKmAAIQAAgIgpSCgpSCzqKCgpSqooKCgpSUqqKqoqqirLKCgqassoKCgoKmAAwewoKCgpSUyJLKooKUgpSSlK7CgpSClJKUpoKClKaigoKUlKaCgoKClJSuwoKUgpSSlKaCgpSmooKClJSmgoKSgpSClJSsxIKmlIKUlIKCgpS4uKqiqqIAAhLigriCgoKokoKCgoKCgoKmgoKCgoKCpoIAAhDSrMSCgoKCgriCuIKmgpSmlIKCgrSCuILKgriCppSClMqCgpSClLiokq7CrsKuwg==", "874-881:1", "773=unicode.SpecialCase.ToUpper;779=unicode.SpecialCase.ToLower;785=unicode.SpecialCase.ToTitle")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -125,3 +125,24 @@ public static partial class strings_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(strings_package.Builder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛBuilder;
+[GoMethodHost(typeof(strings_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛReader;
+[GoMethodHost(typeof(strings_package.Replacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛReplacer;
+[GoMethodHost(typeof(strings_package.appendSliceWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛappendSliceWriter;
+[GoMethodHost(typeof(strings_package.asciiSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛasciiSet;
+[GoMethodHost(typeof(strings_package.byteReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛbyteReplacer;
+[GoMethodHost(typeof(strings_package.byteStringReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛbyteStringReplacer;
+[GoMethodHost(typeof(strings_package.genericReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛgenericReplacer;
+[GoMethodHost(typeof(strings_package.singleStringReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛsingleStringReplacer;
+[GoMethodHost(typeof(strings_package.stringFinder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛstringFinder;
+[GoMethodHost(typeof(strings_package.stringWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛstringWriter;
+[GoMethodHost(typeof(strings_package.trieNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛtrieNode;
+// </MethodHolders>

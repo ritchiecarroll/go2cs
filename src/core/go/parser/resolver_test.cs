@@ -64,7 +64,7 @@ public static void TestResolution(ж<testing.T> t) {
             var fromComments = declsFromComments(handle, src);
 
             var handleʗ1 = handle;
-            tokenꓸPosition pos(tokenꓸPos posΔ1) {
+            token.Position pos(token.Pos posΔ1) {
                 var p = handleʗ1.Position(posΔ1);
                 // The file name is implied by the subtest, so remove it to avoid
                 // clutter in error messages.
@@ -72,7 +72,7 @@ public static void TestResolution(ж<testing.T> t) {
                 return p;
             }
             foreach (var (k, want) in fromComments) {
-                tokenꓸPos got = fromParser[k]; if (got != want) {
+                token.Pos got = fromParser[k]; if (got != want) {
                     tΔ1.Errorf("%s resolved to %s, want %s", pos(k), pos(got), pos(want));
                 }
                 delete(fromParser, k);
@@ -87,8 +87,8 @@ public static void TestResolution(ж<testing.T> t) {
 
 // declsFromParser walks the file and collects the map associating an
 // identifier position with its declaration position.
-internal static map<tokenꓸPos, tokenꓸPos> declsFromParser(ж<ast.File> @file) {
-    var objmap = new map<tokenꓸPos, tokenꓸPos>{};
+internal static map<token.Pos, token.Pos> declsFromParser(ж<ast.File> @file) {
+    var objmap = new map<token.Pos, token.Pos>{};
     var objmapʗ1 = objmap;
     ast.Inspect(new ast.FileжNode(@file), (ast.Node node) => {
         // Ignore blank identifiers to reduce noise.
@@ -103,10 +103,10 @@ internal static map<tokenꓸPos, tokenꓸPos> declsFromParser(ж<ast.File> @file
 // declsFromComments looks at comments annotating uses and declarations, and
 // maps each identifier use to its corresponding declaration. See the
 // description of these annotations in the documentation for TestResolution.
-internal static map<tokenꓸPos, tokenꓸPos> declsFromComments(ж<tokenꓸFile> handle, slice<byte> src) {
+internal static map<token.Pos, token.Pos> declsFromComments(ж<token.File> handle, slice<byte> src) {
     var (decls, uses) = positionMarkers(handle, src);
 
-    var objmap = new map<tokenꓸPos, tokenꓸPos>();
+    var objmap = new map<token.Pos, token.Pos>();
     // Join decls and uses on name, to build the map of use->decl.
     foreach (var (name, posns) in uses) {
         var (declpos, ok) = decls[name, ꟷ];
@@ -124,25 +124,24 @@ internal static map<tokenꓸPos, tokenꓸPos> declsFromComments(ж<tokenꓸFile>
 // prefixed with '=' (declarations) and '@' (uses): for example '@foo' or
 // '=@bar'. It returns a map of name->position for declarations, and
 // name->position(s) for uses.
-internal static (map<@string, tokenꓸPos> decls, map<@string, slice<tokenꓸPos>> uses) positionMarkers(ж<tokenꓸFile> handle, slice<byte> src) {
-    map<@string, tokenꓸPos> decls = default;
-    map<@string, slice<tokenꓸPos>> uses = default;
+internal static (map<@string, token.Pos> decls, map<@string, slice<token.Pos>> uses) positionMarkers(ж<token.File> handle, slice<byte> src) {
+    map<@string, token.Pos> decls = default;
+    map<@string, slice<token.Pos>> uses = default;
 
     scanner.Scanner s = default;
     s.Init(handle, src, default, scanner.ScanComments);
-    decls = new map<@string, tokenꓸPos>();
-    uses = new map<@string, slice<tokenꓸPos>>();
-    tokenꓸPos prev = default; // position of last non-comment, non-semicolon token
+    decls = new map<@string, token.Pos>();
+    uses = new map<@string, slice<token.Pos>>();
+    token.Pos prev = default; // position of last non-comment, non-semicolon token
 
 scanFile:
     for (;;) {
         var (pos, tok, lit) = s.Scan();
-        var exprᴛ1 = tok;
         var matchᴛ1 = false;
-        if (exprᴛ1 == token.EOF) { matchᴛ1 = true;
+        if (tok == token.EOF) { matchᴛ1 = true;
             goto break_scanFile;
         }
-        else if (exprᴛ1 == token.COMMENT) { matchᴛ1 = true;
+        else if (tok == token.COMMENT) { matchᴛ1 = true;
             var (name, decl, use) = annotatedObj(lit);
             if (len(name) > 0) {
                 if (decl) {
@@ -156,7 +155,7 @@ scanFile:
                 }
             }
         }
-        else if (exprᴛ1 == token.SEMICOLON) { matchᴛ1 = true;
+        else if (tok == token.SEMICOLON) { matchᴛ1 = true;
             // ignore automatically inserted semicolon
             if (lit == "\n"u8) {
                 goto continue_scanFile;

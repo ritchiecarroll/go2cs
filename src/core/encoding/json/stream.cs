@@ -11,13 +11,14 @@
 //   - [Number], for JSON numbers
 //   - string, for JSON string literals
 //   - nil, for JSON null
-global using ΔToken = object;
+global using Token = object;
 
 namespace go.encoding;
 
 using bytes = bytes_package;
 using errors = errors_package;
 using io = io_package;
+using static json_package;
 
 partial class json_package {
 
@@ -41,6 +42,8 @@ partial struct Decoder {
 public static ж<Decoder> NewDecoder(io.Reader r) {
     return Ꮡ(new Decoder(r: r));
 }
+
+} partial class jsonᴛDecoder {
 
 // UseNumber causes the Decoder to unmarshal a number into an
 // interface value as a [Number] instead of as a float64.
@@ -188,6 +191,8 @@ internal static error refill(this ref Decoder dec) {
     return err;
 }
 
+} partial class json_package {
+
 internal static bool nonSpace(slice<byte> b) {
     foreach (var (_, c) in range(b)) {
         if (!isSpace(c)) {
@@ -211,6 +216,8 @@ partial struct Encoder {
 public static ж<Encoder> NewEncoder(io.Writer w) {
     return Ꮡ(new Encoder(w: w, escapeHTML: true));
 }
+
+} partial class jsonᴛEncoder {
 
 // Encode writes the JSON encoding of v to the stream,
 // with insignificant space characters elided,
@@ -279,10 +286,14 @@ public static void SetEscapeHTML(this ref Encoder enc, bool on) {
     enc.escapeHTML = on;
 }
 
+} partial class json_package {
+
 // RawMessage is a raw encoded JSON value.
 // It implements [Marshaler] and [Unmarshaler] and can
 // be used to delay JSON decoding or precompute a JSON encoding.
 partial struct RawMessage /*[]byte*/;
+
+} partial class jsonᴛRawMessage {
 
 // MarshalJSON returns m as the JSON encoding of m.
 public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
@@ -307,6 +318,8 @@ public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
     return default;
 }
 
+} partial class json_package {
+
 internal static Marshaler _ᴛ1ʗ = new RawMessageжMarshaler(((ж<RawMessage>)nil));
 internal static Unmarshaler _ᴛ2ʗ = new RawMessageжUnmarshaler(((ж<RawMessage>)nil));
 
@@ -319,6 +332,8 @@ internal static UntypedInt tokenObjectKey => 5;
 internal static UntypedInt tokenObjectColon => 6;
 internal static UntypedInt tokenObjectValue => 7;
 internal static UntypedInt tokenObjectComma => 8;
+
+} partial class jsonᴛDecoder {
 
 // advance tokenstate from a separator state to a value state
 internal static error tokenPrepareForDecode(this ref Decoder dec) {
@@ -373,12 +388,18 @@ internal static void tokenValueEnd(this ref Decoder dec) {
     }}
 }
 
+} partial class json_package {
+
 // A Delim is a JSON array or object delimiter, one of [ ] { or }.
 partial struct Delim /*num:rune*/;
+
+} partial class jsonᴛDelim {
 
 public static @string String(this Delim d) {
     return (@string)(rune)d;
 }
+
+} partial class jsonᴛDecoder {
 
 // Token returns the next JSON token in the input stream.
 // At the end of the input stream, Token returns nil, [io.EOF].
@@ -391,7 +412,7 @@ public static @string String(this Delim d) {
 // number, and null—along with delimiters [ ] { } of type [Delim]
 // to mark the start and end of arrays and objects.
 // Commas and colons are elided.
-public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
+public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     for (;;) {
@@ -399,9 +420,8 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
         if (err != nil) {
             return (default, err);
         }
-        var exprᴛ1 = c;
         var matchᴛ1 = false;
-        if (exprᴛ1 is (byte)'[') { matchᴛ1 = true;
+        if (c is (byte)'[') { matchᴛ1 = true;
             if (!dec.tokenValueAllowed()) {
                 return dec.tokenError(c);
             }
@@ -410,7 +430,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = tokenArrayStart;
             return ((Delim)(rune)'[', default);
         }
-        if (exprᴛ1 is (byte)']') { matchᴛ1 = true;
+        if (c is (byte)']') { matchᴛ1 = true;
             if (dec.tokenState != tokenArrayStart && dec.tokenState != tokenArrayComma) {
                 return dec.tokenError(c);
             }
@@ -420,7 +440,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenValueEnd();
             return ((Delim)(rune)']', default);
         }
-        if (exprᴛ1 is (byte)'{') { matchᴛ1 = true;
+        if (c is (byte)'{') { matchᴛ1 = true;
             if (!dec.tokenValueAllowed()) {
                 return dec.tokenError(c);
             }
@@ -429,7 +449,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = tokenObjectStart;
             return ((Delim)(rune)'{', default);
         }
-        if (exprᴛ1 is (byte)'}') { matchᴛ1 = true;
+        if (c is (byte)'}') { matchᴛ1 = true;
             if (dec.tokenState != tokenObjectStart && dec.tokenState != tokenObjectComma) {
                 return dec.tokenError(c);
             }
@@ -439,7 +459,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenValueEnd();
             return ((Delim)(rune)'}', default);
         }
-        if (exprᴛ1 is (byte)':') { matchᴛ1 = true;
+        if (c is (byte)':') { matchᴛ1 = true;
             if (dec.tokenState != tokenObjectColon) {
                 return dec.tokenError(c);
             }
@@ -447,7 +467,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = tokenObjectValue;
             continue;
         }
-        else if (exprᴛ1 is (byte)',') { matchᴛ1 = true;
+        else if (c is (byte)',') { matchᴛ1 = true;
             if (dec.tokenState == tokenArrayComma) {
                 dec.scanp++;
                 dec.tokenState = tokenArrayValue;
@@ -460,7 +480,7 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             }
             return dec.tokenError(c);
         }
-        else if (exprᴛ1 is (byte)'"') { matchᴛ1 = true;
+        else if (c is (byte)'"') { matchᴛ1 = true;
             if (dec.tokenState == tokenObjectStart || dec.tokenState == tokenObjectKey) {
                 ref var x = ref heap(new @string(), out var Ꮡx);
                 nint old = dec.tokenState;
@@ -500,7 +520,7 @@ private static readonly @string afterObjectKeyˢ2ᵇ = " after object key"u8;
 internal static ref readonly @string afterObjectKeyValuePairˢ2 => ref afterObjectKeyValuePairˢ2ᵇ;
 private static readonly @string afterObjectKeyValuePairˢ2ᵇ = " after object key:value pair"u8;
 
-internal static (ΔToken, error) tokenError(this ref Decoder dec, byte c) {
+internal static (Token, error) tokenError(this ref Decoder dec, byte c) {
     @string context = default;
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenTopValue: {
@@ -563,4 +583,4 @@ public static int64 InputOffset(this ref Decoder dec) {
     return dec.scanned + (int64)dec.scanp;
 }
 
-} // end json_package
+} // end jsonᴛDecoder

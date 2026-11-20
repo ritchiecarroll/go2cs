@@ -65,6 +65,34 @@ architecture-specific path in the standard library.
 
 
 <a id="the-packages-do-not-ship-linux-arm64"></a>
+## Converting modernc sqlite for Windows needs a seed for libc's `largeInteger` {#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger}
+
+A converted `modernc.org/sqlite` program on Windows panics the first time it opens a database in WAL mode, unless
+the conversion passed `-inline-arrays=modernc.org/libc#largeInteger`. The panic names both delegate types:
+
+```text
+panic: go2cs: func cookie 0x... holds a
+  System.Func<ж<libc_package+TLS>, uintptr, libc_package+largeIntegerᴛ1, uintptr, UInt32, Int32>,
+  which cannot be read as
+  System.Func<ж<libc_package+TLS>, uintptr, sqlite.lib.sqlite3_package+TLARGE_INTEGERᴛ1, uintptr, UInt32, Int32>
+```
+
+Go calls sqlite's `TLARGE_INTEGER` and libc's `largeInteger` one type. sqlite converts its spelling whole through
+`unsafe.Pointer`, so it holds that struct's arrays inline. libc never does, so without the seed its spelling keeps
+golib's `array<T>`, and the two are different C# types. A function word that libc builds over its own type is
+then called through sqlite's type, and the call fails. The seed makes libc lay the type out as sqlite does, so both
+packages share one lift. A database that is never opened in WAL mode does not reach the call.
+
+**To avoid it**, convert the sqlite module and libc together (`-recurse`) and pass
+`-inline-arrays=modernc.org/libc#largeInteger`; the same value is harmless on other targets, where libc declares
+no `largeInteger`. A libc converted on its own (as a separate package) carries no seed, so sqlite on Windows hits
+the panic again when built against it.
+<!-- Source: COORD ruling C, 2026-11-17 12:14Z (C2, claude/c2-c-inline-seed). G's windows WAL read at 6bcc05d11f
+     (mailbox 01d7b332fe): delete pass equal to Go, WAL pass panics at _winHandleSeek <- _winHandleTruncate <-
+     _winLockSharedMemory <- _winShmMap with the message above; it was ruling A's known limit. Census at bd2a09c423:
+     sqlite/lib <- libc largeIntegerᴛ1 need=true have=false (valueclone record), so sqlite/lib kept its own lift.
+     The seed's end-to-end arm is TestAdmittedUnionByValueCrossingWithTheSeedReadsAsGo (libc's union verbatim). -->
+
 ## Platforms the packages do not ship
 
 The go.* packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. A package
@@ -109,14 +137,16 @@ architecture (`linux-x64` run on `linux-arm64`).
      example moved to linux-riscv64, as S0's gate did. The old anchor is kept as an explicit id: go.lib.targets in the
      packages already published links to it. -->
 
-## On linux-arm64, 15 standard-library members throw when called
+## On linux-arm64, a few standard-library members throw when called {#on-linux-arm64-15-standard-library-members-throw-when-called}
 
-The linux-arm64 build of the standard library has 15 members that Go implements in arm64 assembly and that have no
-managed body yet, so each throws when called: `getisar0` and `getpfr0` in `internal/cpu`; `getisar0`, `getisar1`,
+The linux-arm64 build of the standard library has a few members that Go implements in arm64 assembly and that have
+no managed body yet, so each throws when called: `getisar0` and `getpfr0` in `internal/cpu`; `getisar0`, `getisar1`,
 `getpfr0` and `getzfr0` in `vendor/golang.org/x/sys/cpu`; `load_g`, `save_g`, `spillArgs`, `unspillArgs`,
 `asmcgocall_no_g`, `emptyfunc`, `panicBounds` and `panicExtend` in `runtime`; and `rawVforkSyscall` in `syscall`.
-Nine of them exist only in the linux-arm64 build; the other six are routines that the other builds also leave
-without a body.
+Most of them exist only in the linux-arm64 build; the rest are routines that the other builds also leave without a
+body.
+<!-- 2026-11-15 (P4, docs audit Q3): the heading and text no longer carry the census counts (15; nine and six), which
+     no standing process re-measures; the explicit id keeps the old anchor, which published pages link. -->
 
 **To avoid it**, do not call these members. All of them are internal to the standard library, so a program reaches
 one only through a standard-library path; if yours does, report the call path.
@@ -128,7 +158,7 @@ one only through a standard-library path; if yours does, report the call path.
 
 ## On macOS, a `go` statement past the system's thread limit ends the program
 
-Each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
+By default each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
 program already has nearly that many goroutines alive, the next `go` statement throws
 `System.OutOfMemoryException`, and the program ends unless something catches it. On the macOS 15 machines measured
 the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; a Mac's own limit is the
@@ -143,9 +173,9 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
 
 ## On Linux, a program with more than about 16,000 goroutines alive ends
 
-Each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
+By default each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
 mappings. Linux caps the mappings at the `vm.max_map_count` setting, 65,530 by default. When a program has about
-16,000 goroutines alive, the next `go` statement fails with `Fatal error. Failed to create RW mapping for RX memory`,
+16,000 goroutines alive (measured on `linux-x64`, Ubuntu 22.04 under WSL, at the default setting), the next `go` statement fails with `Fatal error. Failed to create RW mapping for RX memory`,
 and the program ends; nothing can catch it. A Go goroutine is not a thread, so the limit does not apply to Go itself.
 
 **To avoid it**, bound how many goroutines are alive at once, with a worker pool for example. Two settings may raise
@@ -298,8 +328,8 @@ framework-dependent build run the same code under the JIT.
      on every publish), in master through the merge 4d9046eb70. -->
 
 A program that references the `go.*` packages and publishes with Native AOT (`PublishAot`) runs. The check
-that gates each release publishes a C# consumer of the packages and runs it on `linux-x64`, `win-x64` and
-`osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and reported as
+that gates each release publishes a C# consumer of the packages and runs it on `linux-x64`, `linux-arm64`,
+`win-x64` and `osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and reported as
 not measured when it does not. A project that sets no trim mode of its own gets the packages' default, `partial`,
 which is the setting a converted project carries in its generated project file.
 
@@ -307,13 +337,24 @@ A full trim (`TrimMode` set to `full`) produces a program that runs as well. Tha
 one development machine, with the 1.24.13.5 packages; the hosted check measures the default.
 
 **What it costs.** With `partial`, Native AOT compiles every `go.*` assembly the program references in
-full, not only the parts the program uses. For a small program that references about thirty of them, the
-publish took under four minutes on a hosted CI runner for Linux and for Windows, about six minutes on a Mac
-with Apple silicon and about eleven on an Intel Mac (measured 2026-10-14, with packages converted from Go
-1.24.13). A converted project pays the same cost, because it uses the same setting. A build, `dotnet run` and a publish without
+full, not only the parts the program uses. On a 4-core Linux cloud machine, converted from source at the
+tree of the coming 1.26.11.1 release, a hello world that imports `strings` and `fmt` took about 19 minutes to publish, and the README
+walkthrough's program, which uses github.com/fatih/color, about 26 minutes. A converted project pays the same
+cost, because it uses the same setting. With the 1.26.10.3 packages the walkthrough's program does not publish at
+all on `linux-x64`: the compiler stops at the native string table's 2 GiB ceiling
+([how to recognize it](Tuning.md#native-aot-method-body-folding)). A build, `dotnet run` and a publish without
 Native AOT are not affected. For the 1.24.13.7 packages and earlier, see the section that follows.
 
-<!-- 2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
+<!-- 2026-11-16 (P4, P3's docs item 3 and COORD's AOT ruling): the cost sentence's figures were "under four minutes
+     on a hosted CI runner for Linux and for Windows, about six minutes on a Mac with Apple silicon and about eleven on
+     an Intel Mac (measured 2026-10-14, with packages converted from Go 1.24.13)", a reading of the 1.24.13 packages
+     that no 1.26 run repeats. Replaced by P1's readings, 2026-11-16, a linux-x64 cloud box (4 cores, SDK 10.0.403,
+     ILCompiler 10.0.14), local -recurse at master 0c1d295ea8 with <PublishAot>true</PublishAot> in the program's
+     csproj: the strings/fmt hello 1146 s, colordemo (fatih/color v1.18.0) 1545 s, both executables ran, 0 'will
+     always throw'. The 1.26.10.3 failure: P3 runs A and B (2026-11-15) and P1 row 2 (2026-11-16): ILC fails at
+     StringTableBuilder.CreateIndex after 1509-1599 s with 6,188 'will always throw' lines; batch 308's lever G
+     (merge 055f4e6230) removed the generic cycle that caused it.
+     2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
      fix (e2move, merge b1ba1380b4, 2026-10-14), from the BOARD's 2026-10-14 entry under "the AOT-cost row" and
      docs/CIMatrix.md's aot-smoke budget row: 0 ILC cycle cut-offs on every RID; linux 224 s, windows 230 s, osx-x64 654 s
      on the e2move tip (run 38575258530); linux 212 s, windows 167 s, osx-arm64 354 s from master (run 38587876788).

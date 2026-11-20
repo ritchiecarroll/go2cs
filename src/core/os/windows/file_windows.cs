@@ -18,6 +18,7 @@ using @internal.syscall;
 using fs = go.io.fs_package;
 using go.io;
 using go.sync;
+using static os_package;
 
 partial class os_package {
 
@@ -35,6 +36,8 @@ partial struct @file {
     internal bool appendMode;                 // whether file is opened for appending
 }
 
+} partial class osᴛFile {
+
 // fd is the Windows implementation of Fd.
 internal static uintptr fd(this ж<File> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
@@ -49,6 +52,8 @@ internal static uintptr fd(this ж<File> Ꮡfile) {
     _ = Ꮡfile.of(File.Ꮡpfd).DisassociateIOCP();
     return (uintptr)@file.pfd.Sysfd;
 }
+
+} partial class os_package {
 
 // newFileKind describes the kind of file to newFile.
 partial struct newFileKind /*num:nint*/;
@@ -79,7 +84,7 @@ private static readonly @string fileNetˢᵇ = "file+net"u8;
 // newFile returns a new File with the given file handle and name.
 // Unlike NewFile, it does not check that h is syscall.InvalidHandle.
 // If nonBlocking is true, it tries to add the file to the runtime poller.
-internal static ж<File> newFile(syscallꓸHandle h, @string name, newFileKind kind, bool nonBlocking) {
+internal static ж<File> newFile(syscall.Handle h, @string name, newFileKind kind, bool nonBlocking) {
     @string typ = fileˢ;
     switch (kind) {
     case var ᴛ when ᴛ == kindNewFile || ᴛ == kindOpenFile: {
@@ -136,7 +141,7 @@ internal static ж<File> newFile(syscallꓸHandle h, @string name, newFileKind k
         name: name
     ))
     ));
-    runtime.SetFinalizer(f.@file.OrTypedNil(), ((Func<ж<@file>, error>)(close)));
+    runtime.SetFinalizer(f.@file.OrTypedNil(), ((Func<ж<@file>, error>)(osᴛfile.close)));
 
     // Ignore initialization errors.
     // Assume any problems will show up in later I/O.
@@ -145,13 +150,13 @@ internal static ж<File> newFile(syscallꓸHandle h, @string name, newFileKind k
 }
 
 // newConsoleFile creates new File that will be used as console.
-internal static ж<File> newConsoleFile(syscallꓸHandle h, @string name) {
+internal static ж<File> newConsoleFile(syscall.Handle h, @string name) {
     return newFile(h, name, kindConsole, false);
 }
 
 // newFileFromNewFile is called by [NewFile].
 internal static ж<File> newFileFromNewFile(uintptr fd, @string name) {
-    var h = (syscallꓸHandle)fd;
+    var h = (syscall.Handle)fd;
     if (h == syscall.InvalidHandle) {
         return default;
     }
@@ -163,7 +168,7 @@ internal static ж<File> newFileFromNewFile(uintptr fd, @string name) {
 // instead of [syscall.CloseHandle].
 //
 //go:linkname net_newWindowsFile net.newWindowsFile
-public static ж<File> net_newWindowsFile(syscallꓸHandle h, @string name) {
+public static ж<File> net_newWindowsFile(syscall.Handle h, @string name) {
     if (h == syscall.InvalidHandle) {
         throw panic("invalid FD");
     }
@@ -196,6 +201,8 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     return openFileNolog(name, (nint)(O_RDONLY | (nint)windows.O_DIRECTORY), 0);
 }
 
+} partial class osᴛfile {
+
 internal static error close(this ж<@file> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
@@ -218,6 +225,8 @@ internal static error close(this ж<@file> Ꮡfile) {
     return err;
 }
 
+} partial class osᴛFile {
+
 // seek sets the offset for the next Read or Write on file to offset, interpreted
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
@@ -235,6 +244,8 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
     runtime.KeepAlive(Ꮡf.OrTypedNil());
     return (ret, err);
 }
+
+} partial class os_package {
 
 // Truncate changes the size of the named file.
 // If the file is a symbolic link, it changes the size of the link's target.
@@ -308,7 +319,7 @@ internal static error rename(@string oldname, @string newname) {
 // It returns the files and an error, if any. The Windows handles underlying
 // the returned files are marked as inheritable by child processes.
 public static (ж<File> r, ж<File> w, error err) Pipe() {
-    array<syscallꓸHandle> p = new(2);
+    array<syscall.Handle> p = new(2);
     var e = syscall.Pipe(p[..]);
     if (e != nil) {
         return (default, default, NewSyscallError(pipeˢ, e));
@@ -426,7 +437,7 @@ public static error Symlink(@string oldname, @string newname) {
 // openSymlink calls CreateFile Windows API with FILE_FLAG_OPEN_REPARSE_POINT
 // parameter, so that Windows does not follow symlink, if path is a symlink.
 // openSymlink returns opened file handle.
-internal static (syscallꓸHandle, error) openSymlink(@string path) {
+internal static (syscall.Handle, error) openSymlink(@string path) {
     var (p, err) = syscall.UTF16PtrFromString(path);
     if (err != nil) {
         return (0, err);

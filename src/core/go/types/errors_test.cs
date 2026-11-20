@@ -11,6 +11,8 @@ using static global::go.go.types_package;
 partial class types_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string noErrorˢ => ref noErrorˢᵇ;
+private static readonly @string noErrorˢᵇ = "no error"u8;
 internal static ref readonly @string foo42ˢ => ref foo42ˢᵇ;
 private static readonly @string foo42ˢᵇ = "foo 42"u8;
 internal static ref readonly @string foo42Bar43ˢ => ref foo42Bar43ˢᵇ;

@@ -69,7 +69,7 @@ public static partial void TestReadUnixgramWithUnnamedSocket(ж<testing.T> t) {
                 }
                 defer(syscall.Close, s, ref ᒐ);
                 var rsa = Ꮡ(new syscall.SockaddrUnix(Name: addrʗ2));
-                var errΔ2 = syscall.Sendto(s, dataʗ1[..], 0, new syscall.SockaddrUnixжΔSockaddr(rsa)); if (errΔ2 != nil) {
+                var errΔ2 = syscall.Sendto(s, dataʗ1[..], 0, new syscall.SockaddrUnixжSockaddr(rsa)); if (errΔ2 != nil) {
                     t.Error(errΔ2);
                     return;
                 }
@@ -126,7 +126,7 @@ public static void TestUnixgramZeroBytePayload(ж<testing.T> t) {
             }
             c1.SetReadDeadline(time.Now().Add(100 * time.Millisecond));
             array<byte> b = new(1);
-            global::go.net_package.ΔAddr peer = default;
+            global::go.net_package.Addr peer = default;
             if (genericRead) {
                 (_, errΔ1) = c1._<Conn>().Read(b[..]);
             } else {
@@ -183,7 +183,7 @@ public static void TestUnixgramZeroByteBuffer(ж<testing.T> t) {
                 t.Errorf("got %d; want %d", n, len(b));
             }
             c1.SetReadDeadline(time.Now().Add(100 * time.Millisecond));
-            global::go.net_package.ΔAddr peer = default;
+            global::go.net_package.Addr peer = default;
             if (genericRead) {
                 (_, errΔ1) = c1._<Conn>().Read(default);
             } else {
@@ -251,7 +251,7 @@ internal static void testUnixgramWriteConn(ж<testing.T> t, ж<global::go.net_pa
         } else if (!AreEqual(errΔ1._<ж<global::go.net_package.OpError>>().Err, ErrWriteToConnected)) {
             t.Fatalf("should fail as ErrWriteToConnected: %v", errΔ1);
         }
-        (_, err) = c._<ж<global::go.net_package.UnixConn>>().WriteTo(b, new global::go.net_package.UnixAddrжΔAddr(raddr)); if (err == nil) {
+        (_, err) = c._<ж<global::go.net_package.UnixConn>>().WriteTo(b, new global::go.net_package.UnixAddrжAddr(raddr)); if (err == nil) {
             t.Fatal(shouldFailˢ);
         } else if (!AreEqual(err._<ж<global::go.net_package.OpError>>().Err, ErrWriteToConnected)) {
             t.Fatalf("should fail as ErrWriteToConnected: %v", err);
@@ -285,7 +285,7 @@ internal static void testUnixgramWritePacketConn(ж<testing.T> t, ж<global::go.
         var (_, errΔ1) = c._<ж<global::go.net_package.UnixConn>>().WriteToUnix(b, raddr); if (errΔ1 != nil) {
             t.Fatal(errΔ1);
         }
-        var (_, errΔ2) = c.WriteTo(b, new global::go.net_package.UnixAddrжΔAddr(raddr)); if (errΔ2 != nil) {
+        var (_, errΔ2) = c.WriteTo(b, new global::go.net_package.UnixAddrжAddr(raddr)); if (errΔ2 != nil) {
             t.Fatal(errΔ2);
         }
         var (_, _, errΔ3) = c._<ж<global::go.net_package.UnixConn>>().WriteMsgUnix(b, default, raddr); if (errΔ3 != nil) {
@@ -300,7 +300,7 @@ internal static void testUnixgramWritePacketConn(ж<testing.T> t, ж<global::go.
 }
 
 internal partial struct TestUnixConnLocalAndRemoteNames_type /*dyn*/ {
-    internal global::go.net_package.ΔAddr got, want;
+    internal global::go.net_package.Addr got, want;
 }
 
 public static void TestUnixConnLocalAndRemoteNames(ж<testing.T> t) {
@@ -367,9 +367,9 @@ public static void TestUnixConnLocalAndRemoteNames(ж<testing.T> t) {
                 break;
             }}
             array<TestUnixConnLocalAndRemoteNames_type> connAddrs = new TestUnixConnLocalAndRemoteNames_type[]{
-                new(ln.Addr(), new global::go.net_package.UnixAddrжΔAddr(ta)),
-                new(c.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unix")))),
-                new(c.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжΔAddr(ta))
+                new(ln.Addr(), new global::go.net_package.UnixAddrжAddr(ta)),
+                new(c.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unix")))),
+                new(c.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжAddr(ta))
             }.array();
             foreach (var (_, ca) in range(connAddrs.ΔRangeSnapshot())) {
                 if (!reflect.DeepEqual(ca.got, ca.want)) {
@@ -383,7 +383,7 @@ public static void TestUnixConnLocalAndRemoteNames(ж<testing.T> t) {
 }
 
 internal partial struct TestUnixgramConnLocalAndRemoteNames_type /*dyn*/ {
-    internal global::go.net_package.ΔAddr got, want;
+    internal global::go.net_package.Addr got, want;
 }
 
 public static void TestUnixgramConnLocalAndRemoteNames(ж<testing.T> t) {
@@ -446,10 +446,10 @@ public static void TestUnixgramConnLocalAndRemoteNames(ж<testing.T> t) {
             }}
 
             array<TestUnixgramConnLocalAndRemoteNames_type> connAddrs = new TestUnixgramConnLocalAndRemoteNames_type[]{
-                new(c1.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжΔAddr(ta)),
+                new(c1.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжAddr(ta)),
                 new(c1.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), default),
-                new(c2.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unixgram")))),
-                new(c2.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжΔAddr(ta))
+                new(c2.of(global::go.net_package.UnixConn.Ꮡconn).LocalAddr(), new global::go.net_package.UnixAddrжAddr(Ꮡ(new UnixAddr(Name: laddr, Net: "unixgram")))),
+                new(c2.of(global::go.net_package.UnixConn.Ꮡconn).RemoteAddr(), new global::go.net_package.UnixAddrжAddr(ta))
             }.array();
             foreach (var (_, ca) in range(connAddrs.ΔRangeSnapshot())) {
                 if (!reflect.DeepEqual(ca.got, ca.want)) {
@@ -463,8 +463,8 @@ public static void TestUnixgramConnLocalAndRemoteNames(ж<testing.T> t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢ2 => ref listenˢ2ᵇ;
-private static readonly @string listenˢ2ᵇ = "Listen"u8;
+internal static ref readonly @string listenˢ => ref listenˢᵇ;
+private static readonly @string listenˢᵇ = "Listen"u8;
 internal static ref readonly @string afterListenˢ => ref afterListenˢᵇ;
 private static readonly @string afterListenˢᵇ = "after Listen"u8;
 internal static ref readonly @string afterListenerCloseˢ => ref afterListenerCloseˢᵇ;
@@ -538,7 +538,7 @@ public static void TestUnixUnlink(ж<testing.T> t) {
     var checkExistsʗ1 = checkExists;
     var checkNotExistsʗ1 = checkNotExists;
     var listenʗ1 = listen;
-    t.Run(listenˢ2, (ж<testing.T> tΔ5) => {
+    t.Run(listenˢ, (ж<testing.T> tΔ5) => {
         var l = listenʗ1(tΔ5);
         checkExistsʗ1(tΔ5, afterListenˢ);
         l.Close();

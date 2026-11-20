@@ -353,7 +353,7 @@ internal static nint typedslicecopy(ж<_type> Ꮡtyp, @unsafe.Pointer dstPtr, ni
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_typedslicecopy reflect.typedslicecopy
-internal static nint reflect_typedslicecopy(ж<_type> ᏑelemType, Δsliceᴛ dst, Δsliceᴛ src) {
+internal static nint reflect_typedslicecopy(ж<_type> ᏑelemType, Δslice dst, Δslice src) {
     ref var elemType = ref ᏑelemType.DerefOrNull();
 
     if (!elemType.Pointers()) {

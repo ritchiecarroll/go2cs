@@ -8,14 +8,8 @@ global using static global::go.crypto.tls_package;
 global using static global::go.crypto.tls_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using tls13ꓸExporterMasterSecret = go.crypto.@internal.fips140.tls13_package.ΔExporterMasterSecret;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +23,6 @@ using static global::go.crypto.tls_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b6d752073796e632e4d757465783b2061646472206e65742e416464723b206368206368616e206e65742e436f6e6e7d", "localListenerᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b73657475702066756e63282a63727970746f2f746c732e436f6e6669672c202a63727970746f2f746c732e436f6e666967293b206578706563746564436c69656e744572726f7220737472696e673b207665726966792066756e63282a74657374696e672e542c20696e742c202a63727970746f2f746c732e436f6e6e656374696f6e5374617465297d", "getClientCertificateTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b73657475702066756e6328636f6e666967202a63727970746f2f746c732e436f6e666967293b2063616c6c6261636b2066756e6328636c69656e7448656c6c6f202a63727970746f2f746c732e436c69656e7448656c6c6f496e666f2920282a63727970746f2f746c732e436f6e6669672c206572726f72293b206572726f72537562737472696e6720737472696e673b207665726966792066756e6328636f6e666967202a63727970746f2f746c732e436f6e66696729206572726f727d", "getConfigForClientTestsᴛ1")]
-[assembly: GoTypeAlias("ConnectionState", "ΔConnectionState")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -59,6 +52,7 @@ using static global::go.crypto.tls_test_package;
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.ClientSessionState))]
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.Config))]
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.Conn))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.ConnectionState))]
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.ECHRejectionError))]
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.QUICConfig))]
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.QUICConn))]
@@ -84,7 +78,6 @@ using static global::go.crypto.tls_test_package;
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.serverHandshakeState))]
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.serverHandshakeStateTLS13))]
 [assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.serverHelloMsg))]
-[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.ΔConnectionState))]
 [assembly: GoFieldAccess(typeof(go.crypto.ecdsa_package.PrivateKey))]
 [assembly: GoFieldAccess(typeof(go.crypto.elliptic_package.CurveParams))]
 [assembly: GoFieldAccess(typeof(go.crypto.rsa_package.PrivateKey))]

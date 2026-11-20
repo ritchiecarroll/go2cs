@@ -93,9 +93,9 @@ using static go.io_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("io/io.go", "io.cs", "ABo6pqYACBK4ygCLAooEsoKUAAIWAAsCgpSCgoKUgoKClAACFPIAAhIACQKCgpSUlAACHgAMAgACFPKClKr2gqaClIKCgoKUppSCgoKCgoKCpoKCgpSCgqaCgpSmrKAAChaygpSClIKCqqKCgoK4lAAMGrKClIKUgoKmgpSClKS0tKSClIKmsoKUgoKCgoKUlKiAnMIACRiiprKCgqaCgqaCpoKUpLSkgpSCAAIQ0gAHELKCgoKmyuyUgqaCppSCyLKCgoKCgoKCgpQABBLCgpTu3JSCrgAIBsqChJKCgoKCgpSCuIKCgpSCppSCgoI=")]
-[assembly: GoPositionMap("io/multi.go", "multi.cs", "AA0Sgu6ylIKCgqaCpoKUgpSUpqaCprKCgoKUlIKCgpSUgqac4oKC7rKCgoKUgoKmppSygoKClIKUlIKUgoKmAAISAAgCgoKClKY=")]
-[assembly: GoPositionMap("io/pipe.go", "pipe.cs", "ABIq0oKCgpSiktKCgugADByipNi0goKkyIKClIKAkqbipKSCtoK0goK0puaCgpSCgJKokoKClKiSgoKUAAcW0qqiAAIQ0gAHFtKqogACEuIAAiQADwLq", "72-72:1;103-103:1")]
+[assembly: GoPositionMap("io/io.go", "io.cs", "ABs6pqYACBK4ygCLAooEsoKUAAIWAAsCgpSCgoKUgoKClAACFPIAAhIACQKCgpSUlAACHgAMAgACFPKClKr2gqaClIKCgoKUppSCgoKCgoKCpoKCgpSCgqaCgpSmrKAADBaygpSClIKCyqKCgoK4lAAOGrKClIKUgoLGgrSClKS0tKSClIKmsoKUgoKCgoKUlKiAnMIACxiixrKCgqaCgqaCpoKUpLSkgpSCAAQQ0gAJELKCgoKm6uy0gqaCxpSC6LKCgoKCgoKCgpQABhLCgpQACA4ACQyUgs4ACAbKgoSSgoKCgoKUgriCgoKUgqaUgoKC")]
+[assembly: GoPositionMap("io/multi.go", "multi.cs", "ABASggAKDrKUgoKCpoKmgpSClJSmpoKmsoKCgpSUgoKClJSCxpzigoIACA6ygoKClIKCpsa0soKCgpSClJSClIKCpgAEEgAIAoKCgpSm")]
+[assembly: GoPositionMap("io/pipe.go", "pipe.cs", "ABUq0oKCgpSiktKCggAICAAOHKKk2LSCgqTIgoKUgoCSpuKkpIK2grSCgrSm5oKClIKAkqiSgoKUqJKCgpQACxbSqqIAAhDSAAsW0qqiAAIS4gAEJAAPAuo=", "72-72:1;103-103:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -159,3 +159,26 @@ public static partial class io_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(io_package.LimitedReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛLimitedReader;
+[GoMethodHost(typeof(io_package.OffsetWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛOffsetWriter;
+[GoMethodHost(typeof(io_package.PipeReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛPipeReader;
+[GoMethodHost(typeof(io_package.PipeWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛPipeWriter;
+[GoMethodHost(typeof(io_package.SectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛSectionReader;
+[GoMethodHost(typeof(io_package.discard)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛdiscard;
+[GoMethodHost(typeof(io_package.eofReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛeofReader;
+[GoMethodHost(typeof(io_package.multiReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛmultiReader;
+[GoMethodHost(typeof(io_package.multiWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛmultiWriter;
+[GoMethodHost(typeof(io_package.nopCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛnopCloser;
+[GoMethodHost(typeof(io_package.nopCloserWriterTo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛnopCloserWriterTo;
+[GoMethodHost(typeof(io_package.onceError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛonceError;
+[GoMethodHost(typeof(io_package.pipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛpipe;
+[GoMethodHost(typeof(io_package.teeReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛteeReader;
+// </MethodHolders>

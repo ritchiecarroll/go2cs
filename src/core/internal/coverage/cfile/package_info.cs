@@ -63,9 +63,9 @@ using static go.@internal.coverage.cfile_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCpoK4qJKCgpSCADt4goKUgoKmgoKmpg==")]
-[assembly: GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFOgAbKClIKCgoKmgoKmgoKCpoKCgsqCgpSCgpSmgoKClKzE7oKm7pSCgoKigoKUlIKCgsqCgqKClIKCgpSCgsqCpoKCgpSqooKClIKmlO6CuIKCpqyygpSCgoLMpIKUpoK4ggAHEICCpIK4gIKkgILagIK2qJKClAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKCpoKCpqzSgIKkgILagIK2rLLmspSCooKUpoKUgoKClKaCgoKUgoK4goKCgsqCgoKCppSCpoKCgqYACBKCgoKCgoKUggAHEKaCgriUgqYAChDSgoKClIKCqsKCgpQAAhDSpoKClIKUgoKCgqKCgpSUgoI=", "455-461:1", "", "189=Getenv/1/1/2;263=Getenv/1/1/2;313=Getenv/1/1/4")]
+[assembly: GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACVKAFOgAbKClIKCgoKmgoKmgoKCpoKCgsqCgpSCgpSmgoKClKzE7oKm7pSCgoKigoKUlIKCgsqCgqKClIKCgpSCgsqCpoKCgpSqooKClIKmlO6CuIKCpqyygpSCgoLMpIKUpoK4ggAHEICCpIK4gIKkgILagIK2yJKClAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKCpoKCpqzSgIKkgILagIK2rLIACAaylIKigpTGgpSCgoKUpoKCgpSCgriCgoKCyoKCgoKmlIKmgoKCpgAIEoKCgoKCgpSCAAcQpoKCuJSCpgAMENKCgoKUgoLKwoKClAAEENKmgoKUgpSCgoKCooKClJSCgg==", "455-461:1", "", "190=Getenv/1/1/2;264=Getenv/1/1/2;314=Getenv/1/1/4")]
 [assembly: GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
-[assembly: GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484oKCuILKgpSCAAcQgoKokoKCgoKClJKCgtwACBKCgoKClIK4goKCyoK4goKUgoK4AAwW5IKClJKUgoKClIKClIKCuKaygoKUkoKCgpSCgoKClIK4gpSCpoKClOiCgsqCgoKCgoKUgoKCgoKCpoKCgqaClIKClLgACQ6GooKClIIABxCCgoKUgoKCpgACEuKClKaCgoKCgpSCpoKUgpSCgoKmpoKU", "69-74:1;138-140:1;159-193:2", "", "86=NewFormatter/1/1/2", "184:29", "77:25,78:17,154:21,155:13")]
+[assembly: GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB884oKCuILKgpSCAAcQgoKokoKCgoKClJKCgtwACBKCgoKClIK4goKCyoK4goKUgoK4AA4W5IKClJKUgoKClIKClIKCuKaygoKUkoKCgpSCgoKClIK4gpSCpoKClOiCgsqCgoKCgoKUgoKCgoKCpoKCgqaClIKClLgADQ6GooKClIIABxCCgoKUgoKCpgAEEuKClKaCgoKCgpSCpoKUgpSCgoKmpoKU", "69-74:1;138-140:1;159-193:2", "", "87=NewFormatter/1/1/2", "187:29", "78:25,79:17,157:21,158:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -114,3 +114,14 @@ public static partial class cfile_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cfile_package.emitState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cfileᴛemitState;
+[GoMethodHost(typeof(cfile_package.tstate)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cfileᴛtstate;
+// </MethodHolders>

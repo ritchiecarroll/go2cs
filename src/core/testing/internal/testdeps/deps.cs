@@ -26,6 +26,8 @@ using time = time_package;
 using global::go.@internal;
 using global::go.os;
 using runtime;
+using testdeps = testdeps_package;
+using static testdeps_package;
 
 partial class testdeps_package {
 
@@ -40,6 +42,8 @@ partial struct TestDeps {
 
 internal static @string matchPat;
 internal static ж<regexp.Regexp> matchRe;
+
+} partial class testdepsᴛTestDeps {
 
 public static (bool result, error err) MatchString(this TestDeps _, @string pat, @string str) {
     bool result = default;
@@ -67,20 +71,30 @@ public static error WriteProfileTo(this TestDeps _, @string name, io.Writer w, n
     return pprof.Lookup(name).WriteTo(w, debug);
 }
 
+} partial class testdeps_package {
+
 // ImportPath is the import path of the testing binary, set by the generated main function.
-public static readonly ж<@string> ᏑΔImportPath = new StaticBox<@string>(default(@string));
-public static ref @string ΔImportPath => ref ((StaticBox<@string>)ᏑΔImportPath).ValueSlot;
+public static readonly ж<@string> ᏑImportPath = new StaticBox<@string>(default(@string));
+public static ref @string ImportPath => ref ((StaticBox<@string>)ᏑImportPath).ValueSlot;
+
+} partial class testdepsᴛTestDeps {
 
 public static @string ImportPath(this TestDeps _) {
-    return ΔImportPath;
+    return testdeps.ImportPath;
 }
 
-public static readonly ж<@string> ᏑΔModulePath = new StaticBox<@string>(default(@string));
-public static ref @string ΔModulePath => ref ((StaticBox<@string>)ᏑΔModulePath).ValueSlot;
+} partial class testdeps_package {
+
+public static readonly ж<@string> ᏑModulePath = new StaticBox<@string>(default(@string));
+public static ref @string ModulePath => ref ((StaticBox<@string>)ᏑModulePath).ValueSlot;
+
+} partial class testdepsᴛTestDeps {
 
 public static @string ModulePath(this TestDeps _) {
-    return ΔModulePath;
+    return testdeps.ModulePath;
 }
+
+} partial class testdeps_package {
 
 // testLog implements testlog.Interface, logging actions by package os.
 partial struct testLog {
@@ -88,6 +102,8 @@ partial struct testLog {
     internal ж<bufio.Writer> w;
     internal bool set;
 }
+
+} partial class testdepsᴛtestLog {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string getenvˢ => ref getenvˢᵇ;
@@ -146,8 +162,12 @@ internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
     finally { if (ᒐd1) Ꮡl.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class testdeps_package {
+
 internal static readonly ж<testLog> Ꮡlog = new StaticBox<testLog>(default(testLog));
 internal static ref testLog log => ref ((StaticBox<testLog>)Ꮡlog).ValueSlot;
+
+} partial class testdepsᴛTestDeps {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string testLogˢ => ref testLogˢᵇ;
@@ -186,7 +206,7 @@ public static void SetPanicOnExit0(this TestDeps _, bool v) {
     testlog.SetPanicOnExit0(v);
 }
 
-public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflectꓸType> types, @string corpusDir, @string cacheDir) {
+public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflect.Type> types, @string corpusDir, @string cacheDir) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -239,11 +259,11 @@ public static error RunFuzzWorker(this TestDeps _, Func<fuzzꓸCorpusEntry, erro
     finally { ᒐ.Run(); }
 }
 
-public static (slice<fuzzꓸCorpusEntry>, error) ReadCorpus(this TestDeps _, @string dir, slice<reflectꓸType> types) {
+public static (slice<fuzzꓸCorpusEntry>, error) ReadCorpus(this TestDeps _, @string dir, slice<reflect.Type> types) {
     return fuzz.ReadCorpus(dir, types);
 }
 
-public static error CheckCorpus(this TestDeps _, slice<any> vals, slice<reflectꓸType> types) {
+public static error CheckCorpus(this TestDeps _, slice<any> vals, slice<reflect.Type> types) {
     return fuzz.CheckCorpus(vals, types);
 }
 
@@ -254,6 +274,8 @@ public static void ResetCoverage(this TestDeps _) {
 public static void SnapshotCoverage(this TestDeps _) {
     fuzz.SnapshotCoverage();
 }
+
+} partial class testdeps_package {
 
 public static readonly ж<@string> ᏑCoverMode = new StaticBox<@string>(default(@string));
 public static ref @string CoverMode => ref ((StaticBox<@string>)ᏑCoverMode).ValueSlot;
@@ -273,6 +295,8 @@ public static ref Func<@string, @string, @string, @string, io.Writer, slice<@str
 public static readonly ж<Action<bool>> ᏑCoverMarkProfileEmittedFunc = new StaticBox<Action<bool>>(default(Action<bool>));
 public static ref Action<bool> CoverMarkProfileEmittedFunc => ref ((StaticBox<Action<bool>>)ᏑCoverMarkProfileEmittedFunc).ValueSlot;
 
+} partial class testdepsᴛTestDeps {
+
 public static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) {
     @string mode = default;
     Func<@string, @string, (@string, error)> tearDown = default;
@@ -283,6 +307,8 @@ public static (@string mode, Func<@string, @string, (@string, error)> tearDown, 
     }
     return (CoverMode, coverTearDown, CoverSnapshotFunc);
 }
+
+} partial class testdeps_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string gocoverdirˢ => ref gocoverdirˢᵇ;

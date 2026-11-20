@@ -4,6 +4,7 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System.Collections.Generic;
 using static go2cs.Common;
 using static go2cs.Symbols;
 
@@ -27,7 +28,7 @@ namespace go2cs.Templates.InheritedType;
 /// </remarks>
 internal static class IArrayViewTypeTemplate
 {
-    public static string Generate(string objectName, string typeName, string targetTypeName) =>
+    public static string Generate(string objectName, string typeName, string targetTypeName, ICollection<string> goMethods) =>
         $$"""
 
                 // View over the underlying array wrapper: first touches m_value.Value ON THE FIELD
@@ -100,5 +101,16 @@ internal static class IArrayViewTypeTemplate
                 public {{objectName}} {{ValueCloneMethod}}() => Clone();
 
                 object global::System.ICloneable.Clone() => Clone();
+
+                // Go's whole assignment into this array's own storage, through `view` so the underlying wrapper's lazy
+                // backing lands in THIS wrapper's field (see IArrayTypeTemplate's Assign; P5's Q2).
+                public void {{IArrayTypeTemplate.AssignMethod(goMethods)}}({{objectName}} source) => view.Assign(source.view);
+
+                {{objectName}} global::go.golib.IGoValueAssign<{{objectName}}>.AssignedFrom(in {{objectName}} source)
+                {
+                    {{objectName}} target = this;
+                    target.{{IArrayTypeTemplate.AssignMethod(goMethods)}}(source);
+                    return target;
+                }
         """;
 }

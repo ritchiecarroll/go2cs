@@ -24,8 +24,8 @@ using static go.image_internal_test_package;
 [assembly: GoImplement<global::go.image_package.NRGBA, image>(Pointer = true)]
 [assembly: GoImplement<global::go.image_package.NRGBA64, image>(Pointer = true)]
 [assembly: GoImplement<global::go.image_package.Paletted, image>(Pointer = true)]
+[assembly: GoImplement<global::go.image_package.RGBA, image>(Pointer = true)]
 [assembly: GoImplement<global::go.image_package.RGBA64, image>(Pointer = true)]
-[assembly: GoImplement<global::go.image_package.ΔRGBA, image>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

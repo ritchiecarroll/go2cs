@@ -69,7 +69,7 @@ using static go.go.build.constraint_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ACxalIKmgqbulIKmgoKkpKbulJSCgqaCpoKCgpSmggAHEJSUgoKmgqaCgoKUpoIACBKCppiigIKkgIKkqqKC6rSClIKmgqaC3IKCpgAMINKCgoKClLiCgoKU7NKCgpSs0oKClKzSgoKUgoKCgpSU7AAIBIKCgoKClKaCgpSCpoKClJSCggAFEuKCgpSCgoKUlIKCgqaClIKCgqaCgoKCpoKCpoKCgqqiguq0gpSCpoKUlJSClNyCgqbomLKUgoKCkoKCgpSCgpSClJSCpoKUgpSmgpSClKaClKyygpSCgqam2AAICJaSgoKCgoKktKaU3IKCgqaCgoKUqJKCgoKCgoKClKamvLK2pIKUpIKUpIKCgpSClKSCgoKUgpS8ooKCgpSqooKCgpQ=", "214-222:1;280-287:1", "", "", "", "226:21,227:13,310:25,311:17")]
+[assembly: GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ADBalIKmgsYACA6UgqaCgqSkxgAIDpSUgoKmgsaCgoKUpoIACRCUlIKCpoLGgoKClKaCAAoSgsaYooCCpICCpKqiguq0gpSCpoKmgtyCgqYADCDSgoKCgpS4goKClAAIDNKCgpSs0oKClKzSgoKUgoKCgpSU7AAIBIKCgoKClKaCgpSCpoKClJSCggAFEuKCgpSCgoKUlIKCgqaClIKCgqaCgoKCpoKCpoKCgsqiguq0gpSCpoKUlJSClNyCgqbomLKUgoKCkoKCgpSCgpSClJSCpoKUgpSmgpSClKaClKyygpSCgqam2AAICJaSgoKCgoKktKaU3IKCgqaCgoKUqJKCgoKCgoKClKamvLK2pIKUpIKUpIKCgpSClKSCgoKUgpS8ooKCgpSqooKCgpQ=", "214-222:1;280-287:1", "", "", "", "248:21,249:13,334:25,335:17")]
 [assembly: GoPositionMap("go/build/constraint/vers.go", "vers.cs", "AA48ABICgoKUgpTqoqSkgoKUpIKClKSklJSClIKClJS+soKUrLKClA==")]
 // </GoSourcePositionMaps>
 
@@ -108,3 +108,18 @@ public static partial class constraint_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(global::go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(constraint_package.AndExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛAndExpr;
+[GoMethodHost(typeof(constraint_package.NotExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛNotExpr;
+[GoMethodHost(typeof(constraint_package.OrExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛOrExpr;
+[GoMethodHost(typeof(constraint_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛSyntaxError;
+[GoMethodHost(typeof(constraint_package.TagExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛTagExpr;
+[GoMethodHost(typeof(constraint_package.exprParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛexprParser;
+// </MethodHolders>

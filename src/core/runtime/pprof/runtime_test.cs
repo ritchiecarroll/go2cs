@@ -107,7 +107,7 @@ public static void TestDo(ж<testing.T> t) {
 }
 
 internal static map<@string, @string> getProfLabel() {
-    var l = (ж<global::go.runtime.pprof_package.labelMap>)(uintptr)(runtime_getProfLabel());
+    var l = @unsafe.Pointer.To<global::go.runtime.pprof_package.labelMap>(runtime_getProfLabel());
     if (l == nil) {
         return new map<@string, @string>{};
     }

@@ -14,6 +14,7 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using static go.encoding.gob_package;
+using static gob_internal_test_package;
 
 partial class gob_internal_test_package {
 
@@ -41,6 +42,8 @@ public partial struct BinaryValueGobber /*@string*/;
 public partial struct TextGobber /*num:nint*/;
 
 public partial struct TextValueGobber /*@string*/;
+
+} partial class gob_internal_testᴛByteStruct {
 
 // The relevant methods
 public static (slice<byte>, error) GobEncode(this ref ByteStruct g) {
@@ -76,9 +79,15 @@ public static error GobDecode(this ж<ByteStruct> Ꮡg, slice<byte> data) {
     return default;
 }
 
+} partial class gob_internal_testᴛStringStruct {
+
 public static (slice<byte>, error) GobEncode(this ref StringStruct g) {
     return (slice<byte>(g.s), default);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string invalidDataSequenceˢ => ref invalidDataSequenceˢᵇ;
+private static readonly @string invalidDataSequenceˢᵇ = "invalid data sequence"u8;
 
 public static error GobDecode(this ref StringStruct g, slice<byte> data) {
     // Expect N sequential-valued bytes.
@@ -94,6 +103,8 @@ public static error GobDecode(this ref StringStruct g, slice<byte> data) {
     g.s = (@string)data;
     return default;
 }
+
+} partial class gob_internal_testᴛArrayStruct {
 
 public static (slice<byte>, error) GobEncode(this ref ArrayStruct a) {
     return (a.a[..], default);
@@ -111,6 +122,8 @@ public static error GobDecode(this ref ArrayStruct a, slice<byte> data) {
     return default;
 }
 
+} partial class gob_internal_testᴛGobber {
+
 public static (slice<byte>, error) GobEncode(this ref Gobber g) {
     return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default);
 }
@@ -119,6 +132,8 @@ public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
     var (_, err) = fmt.Sscanf((@string)data, "VALUE=%d"u8, Ꮡg.Reinterpret<Gobber, nint>().OrTypedNil());
     return err;
 }
+
+} partial class gob_internal_testᴛBinaryGobber {
 
 public static (slice<byte>, error) MarshalBinary(this ref BinaryGobber g) {
     return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default);
@@ -129,6 +144,8 @@ public static error UnmarshalBinary(this ж<BinaryGobber> Ꮡg, slice<byte> data
     return err;
 }
 
+} partial class gob_internal_testᴛTextGobber {
+
 public static (slice<byte>, error) MarshalText(this ref TextGobber g) {
     return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default);
 }
@@ -137,6 +154,8 @@ public static error UnmarshalText(this ж<TextGobber> Ꮡg, slice<byte> data) {
     var (_, err) = fmt.Sscanf((@string)data, "VALUE=%d"u8, Ꮡg.Reinterpret<TextGobber, nint>().OrTypedNil());
     return err;
 }
+
+} partial class gob_internal_testᴛValueGobber {
 
 public static (slice<byte>, error) GobEncode(this ValueGobber v) {
     return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default);
@@ -147,6 +166,8 @@ public static error GobDecode(this ж<ValueGobber> Ꮡv, slice<byte> data) {
     return err;
 }
 
+} partial class gob_internal_testᴛBinaryValueGobber {
+
 public static (slice<byte>, error) MarshalBinary(this BinaryValueGobber v) {
     return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default);
 }
@@ -156,6 +177,8 @@ public static error UnmarshalBinary(this ж<BinaryValueGobber> Ꮡv, slice<byte>
     return err;
 }
 
+} partial class gob_internal_testᴛTextValueGobber {
+
 public static (slice<byte>, error) MarshalText(this TextValueGobber v) {
     return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default);
 }
@@ -164,6 +187,8 @@ public static error UnmarshalText(this ж<TextValueGobber> Ꮡv, slice<byte> dat
     var (_, err) = fmt.Sscanf((@string)data, "VALUE=%s"u8, Ꮡv.Reinterpret<TextValueGobber, @string>().OrTypedNil());
     return err;
 }
+
+} partial class gob_internal_test_package {
 
 // Structs that include GobEncodable fields.
 public partial struct GobTest0 {
@@ -741,6 +766,8 @@ internal partial struct gobDecoderBug0 {
     internal @string foo, bar;
 }
 
+} partial class gob_internal_testᴛgobDecoderBug0 {
+
 internal static @string String(this ref gobDecoderBug0 br) {
     return br.foo + "-"u8 + br.bar;
 }
@@ -749,11 +776,19 @@ internal static (slice<byte>, error) GobEncode(this ref gobDecoderBug0 br) {
     return (slice<byte>(br.String()), default);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "foo"u8;
+internal static ref readonly @string barˢ => ref barˢᵇ;
+private static readonly @string barˢᵇ = "bar"u8;
+
 internal static error GobDecode(this ref gobDecoderBug0 br, slice<byte> b) {
     br.foo = fooˢ;
     br.bar = barˢ;
     return default;
 }
+
+} partial class gob_internal_test_package {
 
 // This was a bug: the receiver has a different indirection level
 // than the variable.
@@ -791,6 +826,8 @@ internal partial struct isZeroBug {
 
 public partial struct isZeroBugArray /*[2]uint8*/;
 
+} partial class gob_internal_testᴛisZeroBugArray {
+
 // Receiver is value, not pointer, to test isZero of array.
 public static (slice<byte> b, error e) GobEncode(this isZeroBugArray a) {
     slice<byte> b = default;
@@ -811,9 +848,13 @@ public static error GobDecode(this ж<isZeroBugArray> Ꮡa, slice<byte> data) {
     return default;
 }
 
+} partial class gob_internal_test_package {
+
 public partial struct isZeroBugInterface {
     public any I;
 }
+
+} partial class gob_internal_testᴛisZeroBugInterface {
 
 public static (slice<byte> b, error e) GobEncode(this isZeroBugInterface i) {
     return (slice<byte>([]), default);
@@ -822,6 +863,8 @@ public static (slice<byte> b, error e) GobEncode(this isZeroBugInterface i) {
 public static error GobDecode(this ref isZeroBugInterface i, slice<byte> data) {
     return default;
 }
+
+} partial class gob_internal_test_package {
 
 public static void TestGobEncodeIsZero(ж<testing.T> t) {
     var x = new isZeroBug(time.Unix(1000000000, 0), "hello", -55, new isZeroBugArray(new uint8[]{1, 2}.array()), new isZeroBugInterface());
@@ -874,6 +917,10 @@ public static void TestNetIP(ж<testing.T> t) {
         t.Errorf("decoded to %v, want 1.2.3.4", ip.String());
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string invalidNestingDepthˢ => ref invalidNestingDepthˢᵇ;
+private static readonly @string invalidNestingDepthˢᵇ = "invalid nesting depth"u8;
 
 internal partial struct TestIgnoreDepthLimit_output /*dyn*/ {
     public nint Hello;

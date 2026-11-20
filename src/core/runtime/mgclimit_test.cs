@@ -51,7 +51,7 @@ public static void TestGCCPULimiter(ж<testing.T> t) {
         // Test filling the bucket with just mutator time.
 
         l.Update(advance(10 * time.Millisecond));
-        l.Update(advance(1 * time.ΔSecond));
+        l.Update(advance(1 * time.Second));
         l.Update(advance((time.Duration)(3600000000000L)));
         if (l.Fill() != 0) {
             t.Fatalf("expected empty bucket from only accumulating mutator time, got fill of %d cpu-ns", l.Fill());
@@ -146,8 +146,8 @@ public static void TestGCCPULimiter(ж<testing.T> t) {
 
         // Test adding with a delta of exactly zero. That is, GC work is exactly 50% of all resources.
         // Specifically, the limiter should still be on, and no overflow should accumulate.
-        l.AddAssistTime(assistTime(1 * time.ΔSecond, 0.5D - runtime_internal_test_package.GCBackgroundUtilization));
-        l.Update(advance(1 * time.ΔSecond));
+        l.AddAssistTime(assistTime(1 * time.Second, 0.5D - runtime_internal_test_package.GCBackgroundUtilization));
+        l.Update(advance(1 * time.Second));
         if (l.Fill() != l.Capacity()) {
             t.Errorf("expected bucket filled to capacity %d, got %d", l.Capacity(), l.Fill());
         }

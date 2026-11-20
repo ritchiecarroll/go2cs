@@ -13,6 +13,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using static go.compress.lzw_package;
+using static lzw_internal_test_package;
 
 partial class lzw_internal_test_package {
 
@@ -194,10 +195,14 @@ public static void TestReaderReset(ж<testing.T> t) {
 internal partial struct devZero {
 }
 
+} partial class lzw_internal_testᴛdevZero {
+
 internal static (nint, error) Read(this devZero _, slice<byte> p) {
     clear(p);
     return (len(p), default);
 }
+
+} partial class lzw_internal_test_package {
 
 public static void TestHiCodeDoesNotOverflow(ж<testing.T> t) {
     var r = NewReader(new devZero(), LSB, 8);

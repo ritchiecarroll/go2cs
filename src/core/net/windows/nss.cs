@@ -11,6 +11,7 @@ using time = time_package;
 using @internal;
 using fs = go.io.fs_package;
 using go.io;
+using static net_package;
 
 partial class net_package {
 
@@ -37,6 +38,8 @@ internal static ж<nssConf> getSystemNSS() {
     ᏑnssConfig.Ꮡmu.Unlock();
     return conf;
 }
+
+} partial class netᴛnsswitchConfig {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string etcNsswitchConfˢ => ref etcNsswitchConfˢᵇ;
@@ -106,6 +109,8 @@ internal static void releaseSema(this ref nsswitchConfig conf) {
     ᐸꟷ(conf.ch);
 }
 
+} partial class net_package {
+
 // nssConf represents the state of the machine's /etc/nsswitch.conf file.
 partial struct nssConf {
     internal time.Time mtime;                        // time of nsswitch.conf modification
@@ -118,6 +123,8 @@ partial struct nssSource {
     internal slice<nssCriterion> criteria;
 }
 
+} partial class netᴛnssSource {
+
 // standardCriteria reports all specified criteria have the default
 // status actions.
 internal static bool standardCriteria(this nssSource s) {
@@ -129,6 +136,8 @@ internal static bool standardCriteria(this nssSource s) {
     return true;
 }
 
+} partial class net_package {
+
 // nssCriterion is the parsed structure of one of the criteria in brackets
 // after an NSS source name.
 partial struct nssCriterion {
@@ -136,6 +145,8 @@ partial struct nssCriterion {
     internal @string status; // e.g. "success", "unavail" (lowercase)
     internal @string action; // e.g. "return", "continue" (lowercase)
 }
+
+} partial class netᴛnssCriterion {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string returnˢ => ref returnˢᵇ;
@@ -171,10 +182,12 @@ internal static bool standardStatusAction(this nssCriterion c, bool last) {
     return c.action == def;
 }
 
-internal static ж<nssConf> parseNSSConfFile(@string Δfile) {
+} partial class net_package {
+
+internal static ж<nssConf> parseNSSConfFile(@string @file) {
     GoFrame ᒐ = default;
     try {
-        var (f, err) = open(Δfile);
+        var (f, err) = open(@file);
         if (err != nil) {
             return Ꮡ(new nssConf(err: err));
         }
@@ -199,7 +212,7 @@ private static readonly @string noColonOnLineˢᵇ = "no colon on line"u8;
 internal static ref readonly @string unclosedCriterionBracketˢ => ref unclosedCriterionBracketˢᵇ;
 private static readonly @string unclosedCriterionBracketˢᵇ = "unclosed criterion bracket"u8;
 
-internal static ж<nssConf> parseNSSConf(ж<Δfile> Ꮡf) {
+internal static ж<nssConf> parseNSSConf(ж<@file> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var conf = @new<nssConf>();

@@ -12,6 +12,7 @@ using os = os_package;
 using strings = strings_package;
 using testing = testing_package;
 using cryptobyte_asn1 = vendor.golang.org.x.crypto.cryptobyte.asn1_package;
+using big = go.math.big_package;
 using go.crypto;
 using go.encoding;
 using io = io_package;
@@ -193,11 +194,11 @@ public static void TestPolicyParse(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    if (builtin.len(c.Policies) != 9) {
-        t.Errorf("unexpected number of policies: got %d, want %d", builtin.len(c.Policies), (nint)9);
+    if (len(c.Policies) != 9) {
+        t.Errorf("unexpected number of policies: got %d, want %d", len(c.Policies), (nint)9);
     }
-    if (builtin.len(c.PolicyMappings) != 9) {
-        t.Errorf("unexpected number of policy mappings: got %d, want %d", builtin.len(c.PolicyMappings), (nint)9);
+    if (len(c.PolicyMappings) != 9) {
+        t.Errorf("unexpected number of policy mappings: got %d, want %d", len(c.PolicyMappings), (nint)9);
     }
     if (!c.RequireExplicitPolicyZero) {
         t.Error(expectedˢ);
@@ -342,7 +343,7 @@ public static void TestDomainNameValid(ж<testing.T> t) {
             }
             // Also check that we enforce the same properties as domainToReverseLabels
             @string trimmedName = tcʗ1.dnsName;
-            if (tcʗ1.constraint && builtin.len(trimmedName) > 1 && trimmedName[0] == '.') {
+            if (tcʗ1.constraint && len(trimmedName) > 1 && trimmedName[0] == '.') {
                 trimmedName = trimmedName[1..];
             }
             var (_, revValid) = domainToReverseLabels(trimmedName);

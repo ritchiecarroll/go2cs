@@ -27,14 +27,14 @@ public static void TestSizeof(ж<testing.T> t) {
         new(new Struct(), 24, 48),
         new(new Pointer(), 8, 16),
         new(new Tuple(), 12, 24),
-        new(new ΔSignature(), 28, 56),
+        new(new Signature(), 28, 56),
         new(new Union(), 12, 24),
         new(new Interface(), 40, 80),
         new(new Map(), 16, 32),
         new(new Chan(), 12, 24),
         new(new Named(), 68, 128),
         new(new TypeParam(), 28, 48),
-        new(new Δterm(), 12, 24),
+        new(new term(), 12, 24),
 
         // Objects
         new(new PkgName(), 40, 80),
@@ -47,7 +47,7 @@ public static void TestSizeof(ж<testing.T> t) {
         new(new Nil(), 36, 72),
 
         // Misc
-        new(new ΔScope(), 44, 88),
+        new(new Scope(), 44, 88),
         new(new Package(), 44, 88),
         new(new _TypeSet(), 28, 56)
     ]);

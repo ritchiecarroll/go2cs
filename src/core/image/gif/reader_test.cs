@@ -146,7 +146,7 @@ public static void TestDecode(ж<testing.T> t) {
             Pix: [0, 0],
             Stride: 2,
             Rect: image.Rect(0, 0, 2, 1),
-            Palette: new Δcolor.Palette(new Δcolor.Color[]{new colorꓸRGBA(0x10, 0x20, 0x30, 0xff), new colorꓸRGBA(0x40, 0x50, 0x60, 0xff)
+            Palette: new Δcolor.Palette(new Δcolor.Color[]{new Δcolor.RGBA(0x10, 0x20, 0x30, 0xff), new Δcolor.RGBA(0x40, 0x50, 0x60, 0xff)
             }.slice())
         ));
         if (!reflect.DeepEqual(got, want.OrTypedNil())) {
@@ -183,9 +183,9 @@ public static void TestTransparentIndex(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("DecodeAll: %v", err);
     }
-    var c0 = new colorꓸRGBA(paletteStr[0], paletteStr[1], paletteStr[2], 0xff);
-    var c1 = new colorꓸRGBA(paletteStr[3], paletteStr[4], paletteStr[5], 0xff);
-    var cz = new colorꓸRGBA();
+    var c0 = new Δcolor.RGBA(paletteStr[0], paletteStr[1], paletteStr[2], 0xff);
+    var c1 = new Δcolor.RGBA(paletteStr[3], paletteStr[4], paletteStr[5], 0xff);
+    var cz = new Δcolor.RGBA();
     var wants = slice<Δcolor.Palette>([
         slice<Δcolor.Color>([cz, c1]),
         slice<Δcolor.Color>([c0, cz]),
@@ -231,6 +231,8 @@ internal static void @try(ж<testing.T> t, slice<byte> b, @string want) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string gifFrameBoundsLargerThanˢ => ref gifFrameBoundsLargerThanˢᵇ;
+private static readonly @string gifFrameBoundsLargerThanˢᵇ = "gif: frame bounds larger than image bounds"u8;
 internal static ref readonly @string gifTooMuchImageDataˢ => ref gifTooMuchImageDataˢᵇ;
 private static readonly @string gifTooMuchImageDataˢᵇ = "gif: too much image data"u8;
 
@@ -257,6 +259,10 @@ public static void TestBounds(ж<testing.T> t) {
     }
     @try(t, gif, want);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string gifNoColorTableˢ => ref gifNoColorTableˢᵇ;
+private static readonly @string gifNoColorTableˢᵇ = "gif: no color table"u8;
 
 public static void TestNoPalette(ж<testing.T> t) {
     var b = Ꮡ(new bytes.Buffer());

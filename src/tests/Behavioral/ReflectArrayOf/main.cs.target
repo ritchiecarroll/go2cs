@@ -12,7 +12,7 @@ partial struct pair {
     public array<uint8> B = new(2);
 }
 
-internal static void describe(@string label, reflectꓸType t) {
+internal static void describe(@string label, reflect.Type t) {
     fmt.Printf("%s: %v | kind=%v len=%d elem=%v size=%d align=%d name=%q\n"u8,
         label, t, t.Kind(), t.Len(), t.Elem(), t.Size(), t.Align(), t.Name());
 }
@@ -34,7 +34,7 @@ internal static @string /*msg*/ recovered(Action fn) {
     return msg;
 }
 
-internal static reflectꓸType nest(nint depth, reflectꓸType elem) {
+internal static reflect.Type nest(nint depth, reflect.Type elem) {
     for (nint i = 0; i < depth; i++) {
         elem = reflect.ArrayOf(2, elem);
     }
@@ -109,7 +109,7 @@ internal static void main() {
     }));
 }
 
-internal static void describeSlice(@string label, reflectꓸType t) {
+internal static void describeSlice(@string label, reflect.Type t) {
     fmt.Printf("%s: %v | kind=%v elem=%v size=%d align=%d name=%q\n"u8,
         label, t, t.Kind(), t.Elem(), t.Size(), t.Align(), t.Name());
 }

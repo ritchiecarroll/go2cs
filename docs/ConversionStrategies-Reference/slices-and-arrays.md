@@ -79,7 +79,7 @@ A literal whose element holds a function call keeps the builtin in every positio
 call inside an element on its own Go line in an optimized build. A span target, which is what `SliceBuilder.Create`
 takes, lowers to an inline stack buffer whose element stores the optimizing JIT maps to no IL offset of their own, so
 `runtime.Caller` inside a struct element answered its literal's spec line, and with tiering off even the previous
-statement's (seat #54).
+statement's.<!-- seat #54 -->
 
 An element that begins with a call to a Go function named `with` is written `@with(…)`: from C# 15, a
 collection-expression element spelled `with(…)` is the collection's construction arguments, not a call, so
@@ -97,7 +97,7 @@ A keyed literal keeps its sparse form, a fixed array its `.array()` projection, 
 type's own literal its constructor (below). (Guarded by the converter test
 `TestSliceLiteralsAtTargetedPositionsAreCollectionExpressions`, by the behavioral test `CollectionExpressionSlices`, by golib's
 `SliceLiteralBindingTests` and, for the lines, `CallerLineSliceLiteralsReleaseTests` over the behavioral project
-`CallerLineSliceLiterals`; 1.26.10.2 parity seats #30 and #54.)
+`CallerLineSliceLiterals`.)<!-- 1.26.10.2 parity seats #30 and #54 -->
 
 A **named** slice/array type (`type d [3]rune`, `type s []int`) lowers to a struct wrapping `array<T>`/`slice<T>`; its composite literal cannot use C# collection-initializer braces (the lowered struct has no `Add`), so it is constructed through the underlying-collection constructor: `d{0, 32, 0}` → `new d(new rune[]{0, 32, 0}.array())`.
 
@@ -151,7 +151,7 @@ so a nil `p` ranges N times as in Go, and a deref-aliased pointer parameter or r
 
 **Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
 
-<!-- source: src/core/net/windows/fd_windows.cs:256 -->
+<!-- source: src/core/net/windows/fd_windows.cs:262 -->
 ```csharp
     var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
 ```
@@ -181,21 +181,20 @@ a struct-**field** `(*Buf)(&h.preformatted)` appended across a reallocating grow
 derived pointer — output-compared vs Go.)
 
 **Pointer-cast slice (`(*[N]T)(ptr)[:n]`).** A Go conversion that casts an `unsafe.Pointer` to a pointer-to-array and
-slices it produces a `[]T` over the pointed-to memory. It is emitted as the golib **`slice<T>`** — the C# representation
-of *every* `[]T` — built from a `ReadOnlySpan<T>` over the raw pointer:
-`new slice<T>(new ReadOnlySpan<T>((T*)ptr, (int)n))`. (A bare `Span<T>` would not do: it does **not** range as
-`(index, element)` tuples — `for i := range s` → CS8130 — and has no `Ꮡ(s, i)` element-address — CS0411; `slice<T>`
-supports both, since it is `IArray<T>`.) The `ReadOnlySpan<T>` constructor takes a C# `int`, so a Go `int`/`uint` length
-(`nint`/`nuint`) is narrowed via `getRangeIndexer` (through the underlying for a named numeric); an int literal is left
-as-is. The slice **copies** the pointed-to memory (`ReadOnlySpan.ToArray()`), which is self-consistent for code that
-only uses the resulting slice (e.g. runtime's `os_windows` ranges an unsafe `[]byte` read-only). Since this is always the `(*[N]T)(ptr)` unsafe-cast
-form, it is memory-layout-dependent code whose raw values flow through the `unsafe.Pointer`=`nuint` round-trip (a
-transient `fixed` address → not GC-stable), so the runtime values are not the contract — only compilable, rangeable,
-element-addressable C#. No behavioral test emits this Span form: the `PointerCastSliceRange` test's source is already a `*[4]int`, so its
-`(*[4]int)(unsafe.Pointer(&arr))[:4]` is an identity cast that the converter collapses to the array box and slices
-directly (`Ꮡarr.slice(0, 4)`), and that test guards the index range, value range and `&s[i]` element-address over the
-result. The standard-library sites of the Span form are runtime's `os_windows`, `heapdump` and `mbitmap`. The length
-narrowing is covered by `StdLibInternalAbi`.
+slices it produces a `[]T` over the pointed-to memory, and the conversion keeps that aliasing: it is emitted as a golib
+view door that receives the pointer itself and the array's length `N` as a constant, `@unsafe.Pointer.View<E>(p, lo, hi, N)`
+(with `max` for a three-index slice), and, for a named array type, `copy` into or out of such a slice takes `CopyInto` / `CopyFrom`. What the
+view is (a window on a Go array, a window on native memory, or a copy of another Go value) is decided at run time by
+what the pointer names. An element type that holds references is refused by name. A conversion that another route
+already renders as a view keeps that route when it is sliced, and an identity cast such as
+`(*[4]int)(unsafe.Pointer(&arr))[:4]` over a `*[4]int` collapses to the array box (`Ꮡarr.slice(0, 4)`). The full rule,
+its limits and its guards are in [A slice taken through `(*[N]T)(p)` ALIASES the memory p names](pointers.md#a-slice-taken-through-ntp-aliases-the-memory-p-names-the-view-doors).
+<!-- 2026-11-15 (user-facing docs audit, seat 3b): the paragraph described the form the view doors replaced, a
+     `new slice<T>(new ReadOnlySpan<T>((T*)ptr, (int)n))` that COPIED the memory (writes never reached it, cap = len, the
+     length narrowed to int). Source of the new text: src/go2cs/arrayPointerViewDoor.go (header comment) and
+     src/core/runtime/heapdump.cs:61 (`@unsafe.Pointer.View<byte>(data, 0, (nint)(len), 4096)`). The old text's
+     PointerCastSliceRange note (an identity cast, guarded index/value range and &s[i]) and StdLibInternalAbi (length
+     narrowing) are kept above and here. -->
 
 An **untyped (type-inferred) composite literal** — the inner `{…}` of a `[][]rank{ key: {…} }`, which has no explicit type node — is emitted as a target-typed `new(…)` when its inferred type is a struct (the struct constructor takes the field values). When the inferred type is a **slice or array**, that form is wrong (`slice<rank>`/`array<rank>` have no element-list constructor → CS1729); the converter emits the [slice-literal form](#a-slice-literal-is-a-collection-expression-where-c-knows-its-target) for a slice — `{rA, rB}` (inferred `[]rank`) → `slice<rank>([rA, rB])` — and the element-array projection for an array — an inferred `[2]int` → `new nint[]{…}.array()`. When the inferred type is a **pointer-to-struct** — the `[]*T{ {…} }` shorthand for `&T{…}` — it is emitted as the boxed struct constructor `Ꮡ(new T(field: val, …))` (a bare `new(…)` would target the box `ж<T>`, whose constructor lacks the struct's fields → CS1739). When such an untyped slice/array literal is **keyed** (`{joiningL: stateBefore, …}` — the inner `{…}` of x/net/idna's `joinStates = [][numJoinTypes]joinState{stateStart: {…}, …}`), the element-array projection above cannot take Go's `key: value` syntax — `new joinState[]{ joiningL: stateBefore }` is a C# array initializer, which has no keyed element form (CS1003 ×62). The keyed case is routed to a golib `golib.SparseArray<T>` collection initializer instead — `new golib.SparseArray<joinState>{ [joiningL] = stateBefore, … }.array()` (`.slice()` for a slice element) — the same form the *typed* keyed slice/array path emits (see below); the `.array()`/`.slice()` `IEnumerable<T>` extension materializes the dense backing, and a defined-integer key takes the `[(int)key]` cast exactly as in the typed path. (Guarded by `UntypedNestedSliceComposite`; runtime/lockrank.go's `lockPartialOrder` is a `[][]lockRank` and runtime1.go's `dbgvars` is a `[]*dbgVar` of the positional forms, and x/net/idna's `joinStates` is the keyed form.)
 
@@ -502,7 +501,7 @@ through a **per-box atomic publish** (see *The array-backing publish is atomic p
 <!-- history: first a reflection-built constrained delegate (fatal under Native AOT, d5c0c9c10), then an
 unsynchronized box-touch-copy-back, and since 2026-08-30 the per-box atomic publish. --> The base is
 rendered in POINTER context so it yields the box: a deref-aliased pointer
-PARAMETER gives `Ꮡt` (the parameter is `ж<[N]E> Ꮡt`, deref-aliased to `ref var t = ref Ꮡt.Value` in
+PARAMETER gives `Ꮡt` (the parameter is `ж<[N]E> Ꮡt`, deref-aliased to `ref var t = ref Ꮡt.DerefOrNull()` in
 the prologue), while a box-valued LOCAL from `new([N]E)` gives the plain `t`. The generic `Ꮡ(t.Value[i])`
 **copy** form would box a snapshot of the element and silently drop any write made through the returned
 pointer — hash/crc32's `simplePopulateTable(poly, &t[0])` would populate a throwaway copy and leave every
@@ -697,12 +696,30 @@ must write through. Its `unsafe.Pointer` half emits the load door and stays comp
 results deliberately discarded; the load door's values are compared against Go by the
 `ArrayPointerElementDoors` program.)
 
-**Known gaps:** (1) golib-internal
-element-wise transfers of nested-array elements (`copy(dst, src)`, spread `append(dst, src...)`)
-copy element structs without re-cloning; (2) an array-typed map KEY at an index-STORE (`mk[k] = v`
-stores `k` uncloned — only the composite-literal key form clones); (3) a named↔underlying array
+**`copy` and a spread `append` copy each element's VALUE** (golib `GoElementCopy`). An element that
+owns array storage (an array, a named array, a struct carrying array fields) is a struct over storage
+of its own, so moving the elements with a span copy left two slices holding one inner array:
+`copy(dst, src)` then `src[0][1] = 9` changed `dst` too. golib now copies such elements one by one, in
+the two ways Go's memmove behaves:
+
+- **into existing elements** (`copy`, a spread `append` within capacity, a growth into the stack
+  buffer): each element is assigned IN PLACE through `IGoValueAssign`, top-down when two windows over
+  one backing overlap with the destination above, so a slice taken from a destination element before
+  the copy (`q := dst[0][:]`) sees the copied values, as in Go;
+- **into new storage** (append's first backing and every growth, reflect's `Value.Grow`, `[N]T(s)`):
+  each element is a copy of its own, through `ICloneable`. That is one counted malloc per moved element
+  that owns an array, where Go's memmove has none.
+
+Every other element type keeps its single span copy (the test is a per-`T` constant), and append's
+element LIST (`append(s, a.Clone())`) is not copied a second time. Guarded by the
+`SliceArrayElementCopies` behavioral test and GolibTests' `SliceArrayElementCopyTests`.
+<!-- 2026-11-18, .4 blocker (P5's class 2, found closing the gob root cause): red at master 8a86140f79,
+     20 of the fixture's 24 lines differed from go run and all 10 GolibTests arms failed. -->
+
+**Known gaps:** (1) an array-typed map KEY at an index-STORE (`mk[k] = v`
+stores `k` uncloned — only the composite-literal key form clones); (2) a named↔underlying array
 CONVERSION (`[4]int(named)`) hands the wrapper's backing through the implicit operator uncloned;
-(4) a fixed-size ARRAY reached only through an EMBEDDED struct member keeps a shared backing. An
+(3) a fixed-size ARRAY reached only through an EMBEDDED struct member keeps a shared backing. An
 embed is an INLINE field (see
 [An embedded struct is an INLINE field, so a value copy copies it](struct-embedding.md#an-embedded-struct-is-an-inline-field-so-a-value-copy-copies-it)),
 so a struct copy copies the embed itself, but the clone walk in the section below skips embeds.
@@ -738,7 +755,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:51-57, 210, 213-214 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-225 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);
@@ -1100,7 +1117,7 @@ binds `appendꓸꓸꓸ<T>(slice<T>, in sslice<T>)` and is read as the span it al
 reach the call. The `ISlice<T>` overload remains for other operands. Its interface parameter boxes a
 struct operand, which is why a `slice<T>` has its own exact overload. The constrained form,
 `appendꓸꓸꓸ<S, E>`, takes `ISlice<E>`, with an `sslice<E>` twin.
-<!-- src/core/golib/builtin.cs:543 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :556 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :530 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1447 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1455 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
+<!-- src/core/golib/builtin.cs:543 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :556 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :530 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1451 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1459 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
 <!-- The exact slice<T> overload landed in golib 17785ec85 (2026-10-22). Before it a slice<T> operand bound the ISlice<T> overload and was boxed: 56 B per call that AllocationCounter never sees; Go 1.26's bytes TestReplace read it as 56 objects per run for `append([]byte(nil), s...)`, which allocates nothing in Go (builtin.cs's doc comment on that overload). -->
 
 Inside golib the window's own span serves every copy a span can express (managed backings are
@@ -1159,8 +1176,8 @@ green while leaving the storage-free path unsound for the next consumer.)
 
 **Named slice/map/channel wrappers (defined types).** The distinction extends to DEFINED types
 (`type S []int`, generated as go2cs-gen `InheritedTypeTemplate` wrappers). The comparison Go permits on
-a named slice/map/channel is `x == nil`; the converter renders it as `s == nil` (before parity seat #24,
-`s == default!` in value context), and — verified against the emitted C# — **both spellings bind the
+a named slice/map/channel is `x == nil`; the converter renders it as `s == nil` (formerly
+`s == default!` in value context),<!-- before parity seat #24 --> and — verified against the emitted C# — **both spellings bind the
 wrapper's `operator ==(S, NilType)` overload**, not the same-type `operator ==(S, S)` (reverting the
 latter has no observable effect; reverting the former flips the result). For a **slice** wrapper that
 overload delegates to `slice<T>`'s own `== NilType` — REPRESENTATION nilness (null backing array) — via
@@ -1694,7 +1711,7 @@ Go gives `type fermat nat`, where `type nat []uint64`, every slice operation: `m
 slicing, `append`, `range`, `len` and `cap`, plus the conversions `fermat(n)` and `nat(f)`. Methods are
 not inherited. The converter writes the definition as the Go source does, `partial struct fermat /*nat*/;`,
 and go2cs-gen used to generate a plain wrapper over the `nat` struct, which has none of that surface
-(CS1503, CS0021, CS0315; github.com/remyoudompheng/bigfft, sqlite-cs row S4). The generator now follows
+(CS1503, CS0021, CS0315; github.com/remyoudompheng/bigfft). The generator now follows
 the chain of definitions down to the `[]elem` at its bottom, as it already does for a named array
 (`type pallocBits pageBits`), and generates the slice wrapper over `slice<uint64>`, with an implicit
 conversion to and from `nat` through that slice. The walk stays inside one compilation: an element spelled
@@ -1928,7 +1945,7 @@ read/write vs Go.)
 
 ## Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:159-160 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:188-189 -->
 ```csharp
     pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));

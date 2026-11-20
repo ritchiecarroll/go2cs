@@ -12,6 +12,7 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using static go.crypto.tls_package;
+using static tls_internal_test_package;
 
 partial class tls_internal_test_package {
 
@@ -57,6 +58,8 @@ internal partial struct suiteSecret {
     internal slice<byte> secret;
 }
 
+} partial class tls_internal_testᴛtestQUICConn {
+
 internal static void setReadSecret(this ref testQUICConn q, global::go.crypto.tls_package.QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
     var (_, ok) = q.writeSecret[level, ꟷ]; if (!ok && level != QUICEncryptionLevelEarly) {
         q.t.Errorf("SetReadSecret for level %v called before SetWriteSecret", level);
@@ -98,6 +101,8 @@ internal static void setWriteSecret(this ref testQUICConn q, global::go.crypto.t
         break;
     }}
 }
+
+} partial class tls_internal_test_package {
 
 internal static error errTransportParametersRequired = errors.New("transport parameters required");
 

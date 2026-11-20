@@ -6,7 +6,7 @@ namespace go.runtime;
 partial class metrics_package {
 
 // Float64Histogram represents a distribution of float64 values.
-partial struct ΔFloat64Histogram {
+partial struct Float64Histogram {
     // Counts contains the weights for each histogram bucket.
     //
     // Given N buckets, Count[n] is the weight of the range

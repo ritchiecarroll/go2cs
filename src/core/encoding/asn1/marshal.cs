@@ -13,6 +13,7 @@ using time = time_package;
 using utf8 = unicode.utf8_package;
 using go.math;
 using unicode;
+using static asn1_package;
 
 partial class asn1_package {
 
@@ -29,6 +30,8 @@ partial interface encoder {
 
 partial struct byteEncoder /*num:byte*/;
 
+} partial class asn1ᴛbyteEncoder {
+
 internal static nint Len(this byteEncoder c) {
     return 1;
 }
@@ -37,7 +40,11 @@ internal static void Encode(this byteEncoder c, slice<byte> dst) {
     dst[0] = (byte)c;
 }
 
+} partial class asn1_package {
+
 partial struct bytesEncoder /*[]byte*/;
+
+} partial class asn1ᴛbytesEncoder {
 
 internal static nint Len(this bytesEncoder b) {
     return len(b);
@@ -49,7 +56,11 @@ internal static void Encode(this bytesEncoder b, slice<byte> dst) {
     }
 }
 
+} partial class asn1_package {
+
 partial struct stringEncoder /*@string*/;
+
+} partial class asn1ᴛstringEncoder {
 
 internal static nint Len(this stringEncoder s) {
     return len(s);
@@ -61,7 +72,11 @@ internal static void Encode(this stringEncoder s, slice<byte> dst) {
     }
 }
 
+} partial class asn1_package {
+
 partial struct multiEncoder /*[]encoder*/;
+
+} partial class asn1ᴛmultiEncoder {
 
 internal static nint Len(this multiEncoder m) {
     nint size = default;
@@ -79,7 +94,11 @@ internal static void Encode(this multiEncoder m, slice<byte> dst) {
     }
 }
 
+} partial class asn1_package {
+
 partial struct setEncoder /*[]encoder*/;
+
+} partial class asn1ᴛsetEncoder {
 
 internal static nint Len(this setEncoder s) {
     nint size = default;
@@ -119,6 +138,8 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
     }
 }
 
+} partial class asn1_package {
+
 partial struct taggedEncoder {
     // scratch contains temporary space for encoding the tag and length of
     // an element in order to avoid extra allocations.
@@ -126,6 +147,8 @@ partial struct taggedEncoder {
     internal encoder tag;
     internal encoder body;
 }
+
+} partial class asn1ᴛtaggedEncoder {
 
 internal static nint Len(this ref taggedEncoder t) {
     return t.tag.Len() + t.body.Len();
@@ -136,7 +159,11 @@ internal static void Encode(this ref taggedEncoder t, slice<byte> dst) {
     t.body.Encode(dst.slice(t.tag.Len()));
 }
 
+} partial class asn1_package {
+
 partial struct int64Encoder /*num:int64*/;
+
+} partial class asn1ᴛint64Encoder {
 
 internal static nint Len(this int64Encoder i) {
     nint n = 1;
@@ -161,6 +188,8 @@ internal static void Encode(this int64Encoder i, slice<byte> dst) {
         dst[j] = (byte)(i >> (nuint)((n - 1 - j) * 8));
     }
 }
+
+} partial class asn1_package {
 
 internal static nint base128IntLength(int64 n) {
     if (n == 0) {
@@ -191,7 +220,7 @@ internal static slice<byte> appendBase128Int(slice<byte> dst, int64 n) {
     return dst;
 }
 
-internal static (encoder, error) makeBigInt(ж<bigꓸInt> Ꮡn) {
+internal static (encoder, error) makeBigInt(ж<big.Int> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -203,7 +232,7 @@ internal static (encoder, error) makeBigInt(ж<bigꓸInt> Ꮡn) {
         // form. So we'll invert and subtract 1. If the
         // most-significant-bit isn't set then we'll need to pad the
         // beginning with 0xff in order to keep the number negative.
-        var nMinus1 = @new<bigꓸInt>().Neg(Ꮡn);
+        var nMinus1 = @new<big.Int>().Neg(Ꮡn);
         nMinus1.Sub(nMinus1, bigOne);
         var bytes = nMinus1.Bytes();
         foreach (var i in range(len(bytes))) {
@@ -275,6 +304,8 @@ internal static slice<byte> appendTagAndLength(slice<byte> dst, tagAndLength t) 
 
 partial struct bitStringEncoder /*BitString*/;
 
+} partial class asn1ᴛbitStringEncoder {
+
 internal static nint Len(this bitStringEncoder b) {
     return len(b.Bytes) + 1;
 }
@@ -286,7 +317,11 @@ internal static void Encode(this bitStringEncoder b, slice<byte> dst) {
     }
 }
 
+} partial class asn1_package {
+
 partial struct oidEncoder /*[]nint*/;
+
+} partial class asn1ᴛoidEncoder {
 
 internal static nint Len(this oidEncoder oid) {
     nint l = base128IntLength((int64)(oid[0] * 40 + oid[1]));
@@ -302,6 +337,8 @@ internal static void Encode(this oidEncoder oid, slice<byte> dst) {
         dst = appendBase128Int(dst, (int64)oid[i]);
     }
 }
+
+} partial class asn1_package {
 
 internal static (encoder e, error err) makeObjectIdentifier(slice<nint> oid) {
     if (len(oid) < 2 || oid[0] > 2 || (oid[0] < 2 && oid[1] >= 40)) {
@@ -470,7 +507,7 @@ internal static slice<byte> stripTagAndLength(slice<byte> @in) {
     return @in.slice(offset);
 }
 
-internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldParameters @params) {
+internal static (encoder e, error err) makeBody(reflect.Value value, fieldParameters @params) {
     error err = default;
 
     switch (value.Type()) {
@@ -493,20 +530,20 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
         return makeObjectIdentifier(v);
     }
     case var ᴛ when AreEqual(ᴛ, bigIntType): {
-        var (v, _) = reflect.TypeAssert<ж<bigꓸInt>>(value);
+        var (v, _) = reflect.TypeAssert<ж<big.Int>>(value);
         return makeBigInt(v);
     }}
 
     {
         var v = value;
         switch (v.Kind()) {
-        case var ᴛ when ᴛ == reflect.ΔBool: {
+        case var ᴛ when ᴛ == reflect.Bool: {
             if (v.Bool()) {
                 return (byteFFEncoder, default);
             }
             return (byte00Encoder, default);
         }
-        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+        case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
             return (((int64Encoder)v.Int()), default);
         }
         case var ᴛ when ᴛ == reflect.Struct: {
@@ -562,7 +599,7 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
             }}
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
+        case var ᴛ when ᴛ == reflect.Slice: {
             var sliceType = v.Type();
             if (sliceType.Elem().Kind() == reflect.Uint8) {
                 return (((bytesEncoder)v.Bytes()), default);
@@ -595,7 +632,7 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
             }}
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔString: {
+        case var ᴛ when ᴛ == reflect.String: {
             switch (@params.stringType) {
             case var ᴛ2 when ᴛ2 == TagIA5String: {
                 return makeIA5String(v.String());
@@ -620,18 +657,18 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
 internal static ref readonly @string asn1StringNotValidUtf8ˢ => ref asn1StringNotValidUtf8ˢᵇ;
 private static readonly @string asn1StringNotValidUtf8ˢᵇ = "asn1: string not valid UTF-8"u8;
 
-internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParameters @params) {
+internal static (encoder e, error err) makeField(reflect.Value v, fieldParameters @params) {
     error err = default;
 
     if (!v.IsValid()) {
         return (default, fmt.Errorf("asn1: cannot marshal nil value"u8));
     }
     // If the field is an interface{} then recurse into it.
-    if (v.Kind() == reflect.ΔInterface && v.Type().NumMethod() == 0) {
+    if (v.Kind() == reflect.Interface && v.Type().NumMethod() == 0) {
         return makeField(v.Elem(), @params);
     }
 
-    if (v.Kind() == reflect.ΔSlice && v.Len() == 0 && @params.omitEmpty) {
+    if (v.Kind() == reflect.Slice && v.Len() == 0 && @params.omitEmpty) {
         return (((bytesEncoder)default), default);
     }
 

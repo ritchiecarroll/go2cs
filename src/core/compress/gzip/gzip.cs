@@ -12,6 +12,7 @@ using time = time_package;
 using encoding;
 using go.compress;
 using hash;
+using static gzip_package;
 
 partial class gzip_package {
 
@@ -66,19 +67,21 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
     return (z, default);
 }
 
+} partial class gzipᴛWriter {
+
 internal static void init(this ref Writer z, io.Writer w, nint level) {
     var compressor = z.compressor;
     if (compressor != nil) {
         compressor.Reset(w);
     }
-    z = new Writer(
+    z.AssignFrom(new Writer(
         Header: new Header(
             OS: 255 // unknown
         ),
         w: w,
         level: level,
         compressor: compressor
-    );
+    ));
 }
 
 // Reset discards the [Writer] z's state and makes it equivalent to the
@@ -154,7 +157,7 @@ public static (nint, error) Write(this ref Writer z, slice<byte> p) {
     // Write the GZIP header lazily.
     if (!z.wroteHeader) {
         z.wroteHeader = true;
-        z.buf = new array<byte>(10){[0] = gzipID1, [1] = gzipID2, [2] = gzipDeflate};
+        z.buf.Assign(new array<byte>(10){[0] = gzipID1, [1] = gzipID2, [2] = gzipDeflate});
         if (z.Extra != nil) {
             z.buf[3] |= (byte)(0x04);
         }
@@ -259,4 +262,4 @@ public static error Close(this ref Writer z) {
     return z.err;
 }
 
-} // end gzip_package
+} // end gzipᴛWriter

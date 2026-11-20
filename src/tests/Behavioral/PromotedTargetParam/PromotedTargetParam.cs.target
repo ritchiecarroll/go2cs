@@ -3,12 +3,15 @@ namespace go;
 using fmt = fmt_package;
 using targetlib = PromotedTargetParam.targetlib_package;
 using PromotedTargetParam;
+using static main_package;
 
 partial class main_package {
 
 partial struct Base {
     internal @string name;
 }
+
+} partial class mainᴛBase {
 
 public static @string Pair(this Base b, @string target) {
     return b.name + "->"u8 + target;
@@ -17,6 +20,8 @@ public static @string Pair(this Base b, @string target) {
 public static void Rename(this ref Base b, @string target) {
     b.name = target;
 }
+
+} partial class main_package {
 
 partial struct ByValue {
     /*embed*/ public Base Base;

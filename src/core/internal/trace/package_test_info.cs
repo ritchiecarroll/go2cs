@@ -8,29 +8,12 @@ global using static global::go.@internal.trace_package;
 global using static global::go.@internal.trace_internal_test_package;
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using traceꓸEvent = go.@internal.trace_package.ΔEvent;
-global using traceꓸLog = go.@internal.trace_package.ΔLog;
-global using traceꓸStack = go.@internal.trace_package.ΔStack;
-global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.@internal.trace_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Event", "ΔEvent")]
-[assembly: GoTypeAlias("Label", "ΔLabel")]
-[assembly: GoTypeAlias("Log", "ΔLog")]
-[assembly: GoTypeAlias("Metric", "ΔMetric")]
-[assembly: GoTypeAlias("Range", "ΔRange")]
-[assembly: GoTypeAlias("Region", "ΔRegion")]
-[assembly: GoTypeAlias("Stack", "ΔStack")]
-[assembly: GoTypeAlias("StateTransition", "ΔStateTransition")]
-[assembly: GoTypeAlias("Sync", "ΔSync")]
-[assembly: GoTypeAlias("Task", "ΔTask")]
-[assembly: GoTypeAlias("Time", "ΔTime")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -43,12 +26,6 @@ using static global::go.@internal.trace_test_package;
 
 // <ImplicitConversions>
 // </ImplicitConversions>
-
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: GoHoistedLiterals]
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.

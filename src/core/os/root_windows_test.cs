@@ -422,7 +422,7 @@ public static void TestRootOpenFileFlags(ж<Δtesting.T> t) {
                     var fʗ1 = f;
                     defer(() => fʗ1.Close(), ref ᒐ);
                     ref var info = ref heap(new windows.FILE_MODE_INFORMATION(), out var Ꮡinfo);
-                    var errΔ2 = windows.NtQueryInformationFile((syscallꓸHandle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK()),
+                    var errΔ2 = windows.NtQueryInformationFile((syscall.Handle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK()),
                         @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileModeInformation); if (errΔ2 != nil) {
                         tΔ1.Fatal(errΔ2);
                     }

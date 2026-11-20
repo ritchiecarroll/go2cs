@@ -36,6 +36,7 @@ using encoding;
 using go.debug;
 using go.io;
 using runtime;
+using static buildinfo_package;
 
 partial class buildinfo_package {
 
@@ -472,6 +473,8 @@ partial struct elfExe {
     internal ж<elf.File> f;
 }
 
+} partial class buildinfoᴛelfExe {
+
 internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) {
     foreach (var (_, prog) in range(x.f.Progs)) {
         if (prog.Vaddr <= addr && addr <= prog.Vaddr + prog.Filesz - 1) {
@@ -496,10 +499,14 @@ internal static (uint64, uint64) DataStart(this ref elfExe x) {
     return (0, 0);
 }
 
+} partial class buildinfo_package {
+
 // peExe is the PE (Windows Portable Executable) implementation of the exe interface.
 partial struct peExe {
     internal ж<pe.File> f;
 }
+
+} partial class buildinfoᴛpeExe {
 
 internal static uint64 imageBase(this ref peExe x) {
     switch (x.f.OptionalHeader.type()) {
@@ -517,7 +524,7 @@ internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) {
     foreach (var (_, sect) in range(x.f.Sections)) {
         if ((uint64)sect.VirtualAddress <= addr && addr <= (uint64)(sect.VirtualAddress + sect.Size - 1)) {
             var remaining = (uint64)(sect.VirtualAddress + sect.Size) - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new pe_ΔSectionжReaderAt(sect), (int64)(addr - (uint64)sect.VirtualAddress), (int64)remaining)), default);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new pe_SectionжReaderAt(sect), (int64)(addr - (uint64)sect.VirtualAddress), (int64)remaining)), default);
         }
     }
     return (default, errUnrecognizedFormat);
@@ -542,14 +549,18 @@ internal static (uint64, uint64) DataStart(this ref peExe x) {
     return (0, 0);
 }
 
+} partial class buildinfo_package {
+
 // machoExe is the Mach-O (Apple macOS/iOS) implementation of the exe interface.
 partial struct machoExe {
     internal ж<macho.File> f;
 }
 
+} partial class buildinfoᴛmachoExe {
+
 internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) {
     foreach (var (_, load) in range(x.f.Loads)) {
-        var (seg, ok) = load._<ж<machoꓸSegment>>(ᐧ);
+        var (seg, ok) = load._<ж<macho.Segment>>(ᐧ);
         if (!ok) {
             continue;
         }
@@ -558,7 +569,7 @@ internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr
                 continue;
             }
             var remaining = seg.Addr + seg.Filesz - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new macho_ΔSegmentжReaderAt(seg), (int64)(addr - seg.Addr), (int64)remaining)), default);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new macho_SegmentжReaderAt(seg), (int64)(addr - seg.Addr), (int64)remaining)), default);
         }
     }
     return (default, errUnrecognizedFormat);
@@ -574,7 +585,7 @@ internal static (uint64, uint64) DataStart(this ref machoExe x) {
     // Try the first non-empty writable segment.
     const uint32 RW = 3;
     foreach (var (_, load) in range(x.f.Loads)) {
-        var (seg, ok) = load._<ж<machoꓸSegment>>(ᐧ);
+        var (seg, ok) = load._<ж<macho.Segment>>(ᐧ);
         if (ok && seg.Addr != 0 && seg.Filesz != 0 && seg.Prot == RW && seg.Maxprot == RW) {
             return (seg.Addr, seg.Memsz);
         }
@@ -582,10 +593,14 @@ internal static (uint64, uint64) DataStart(this ref machoExe x) {
     return (0, 0);
 }
 
+} partial class buildinfo_package {
+
 // xcoffExe is the XCOFF (AIX eXtended COFF) implementation of the exe interface.
 partial struct xcoffExe {
     internal ж<xcoff.File> f;
 }
+
+} partial class buildinfoᴛxcoffExe {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string addressNotMappedˢ => ref addressNotMappedˢᵇ;
@@ -595,7 +610,7 @@ internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr
     foreach (var (_, sect) in range(x.f.Sections)) {
         if (sect.VirtualAddress <= addr && addr <= sect.VirtualAddress + sect.Size - 1) {
             var remaining = sect.VirtualAddress + sect.Size - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new xcoff_ΔSectionжReaderAt(sect), (int64)(addr - sect.VirtualAddress), (int64)remaining)), default);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new xcoff_SectionжReaderAt(sect), (int64)(addr - sect.VirtualAddress), (int64)remaining)), default);
         }
     }
     return (default, errors.New(addressNotMappedˢ));
@@ -608,10 +623,14 @@ internal static (uint64, uint64) DataStart(this ref xcoffExe x) {
     return (0, 0);
 }
 
+} partial class buildinfo_package {
+
 // plan9objExe is the Plan 9 a.out implementation of the exe interface.
 partial struct plan9objExe {
     internal ж<plan9obj.File> f;
 }
+
+} partial class buildinfoᴛplan9objExe {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dataˢ => ref dataˢᵇ;
@@ -624,14 +643,18 @@ internal static (uint64, uint64) DataStart(this ref plan9objExe x) {
     return (0, 0);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string addressNotMappedˢ => ref addressNotMappedˢᵇ;
+private static readonly @string addressNotMappedˢᵇ = "address not mapped"u8;
+
 internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) {
     foreach (var (_, sect) in range(x.f.Sections)) {
         if ((uint64)sect.Offset <= addr && addr <= (uint64)(sect.Offset + sect.Size - 1)) {
             var remaining = (uint64)(sect.Offset + sect.Size) - addr;
-            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new plan9obj_ΔSectionжReaderAt(sect), (int64)(addr - (uint64)sect.Offset), (int64)remaining)), default);
+            return (new io.SectionReaderжReaderAt(io.NewSectionReader(new plan9obj_SectionжReaderAt(sect), (int64)(addr - (uint64)sect.Offset), (int64)remaining)), default);
         }
     }
     return (default, errors.New(addressNotMappedˢ));
 }
 
-} // end buildinfo_package
+} // end buildinfoᴛplan9objExe

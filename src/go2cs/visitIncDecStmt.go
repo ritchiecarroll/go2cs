@@ -32,6 +32,15 @@ func (v *Visitor) visitIncDecStmt(incDecStmt *ast.IncDecStmt, format FormattingC
 		contexts = append(contexts, indexContext)
 	}
 
+	// A dereferenced pointer-cast operand (`*(*int32)(unsafe.Pointer(p))++`) is a write as well: it takes the
+	// box's `.Value`, as the same operand does on the left of an assignment (visitAssignStmt). The prefix `~`
+	// form is a value, and incrementing it does not compile (CS1059).
+	if _, isStar := incDecStmt.X.(*ast.StarExpr); isStar {
+		starExprContext := DefaultStarExprContext()
+		starExprContext.inLhsAssign = true
+		contexts = append(contexts, starExprContext)
+	}
+
 	ident := v.convExpr(incDecStmt.X, contexts)
 
 	if format.useNewLine {

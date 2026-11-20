@@ -49,7 +49,7 @@ using static go.XpkgPromotedMidLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA4cAAoWgIAACQ4AFSQ=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "ABMcAA4WgIAACw4AFyQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -88,3 +88,15 @@ public static partial class XpkgPromotedMidLib_package
     [GoInit] internal static void initᴛᴛimportꓸXpkgPromotedInnerLib() => builtin.initPackage(typeof(XpkgPromotedInnerLib_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(XpkgPromotedMidLib_package.inner3)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛinner3;
+[GoMethodHost(typeof(XpkgPromotedMidLib_package.loc2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛloc2;
+[GoMethodHost(typeof(XpkgPromotedMidLib_package.r1)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class XpkgPromotedMidLibᴛr1;
+// </MethodHolders>

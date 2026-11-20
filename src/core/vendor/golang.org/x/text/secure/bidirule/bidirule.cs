@@ -15,6 +15,7 @@ using bidi = go.vendor.golang.org.x.text.unicode.bidi_package;
 using go.unicode;
 using go.vendor.golang.org.x.text;
 using go.vendor.golang.org.x.text.unicode;
+using static bidirule_package;
 
 partial class bidirule_package {
 
@@ -126,13 +127,13 @@ internal const uint16 exclusiveRTL = /* uint16(1<<bidi.EN | 1<<bidi.AN) */ 36;
 // Direction reports the direction of the given label as defined by RFC 5893.
 // The Bidi Rule does not have to be applied to labels of the category
 // LeftToRight.
-public static bidiꓸDirection Direction(slice<byte> b) {
+public static bidi.Direction Direction(slice<byte> b) {
     for (nint i = 0; i < len(b); ) {
         var (e, sz) = bidi.Lookup(b.slice(i));
         if (sz == 0) {
             i++;
         }
-        bidiꓸClass c = e.Class();
+        bidi.Class c = e.Class();
         if (c == bidi.R || c == bidi.AL || c == bidi.AN) {
             return bidi.RightToLeft;
         }
@@ -144,14 +145,14 @@ public static bidiꓸDirection Direction(slice<byte> b) {
 // DirectionString reports the direction of the given label as defined by RFC
 // 5893. The Bidi Rule does not have to be applied to labels of the category
 // LeftToRight.
-public static bidiꓸDirection DirectionString(@string s) {
+public static bidi.Direction DirectionString(@string s) {
     for (nint i = 0; i < len(s); ) {
         var (e, sz) = bidi.LookupString(s.slice(i));
         if (sz == 0) {
             i++;
             continue;
         }
-        bidiꓸClass c = e.Class();
+        bidi.Class c = e.Class();
         if (c == bidi.R || c == bidi.AL || c == bidi.AN) {
             return bidi.RightToLeft;
         }
@@ -189,6 +190,8 @@ partial struct Transformer {
     internal bool hasRTL;
     internal uint16 seen;
 }
+
+} partial class bidiruleᴛTransformer {
 
 // A rule can only be violated for "Bidi Domain names", meaning if one of the
 // following categories has been observed.
@@ -247,6 +250,8 @@ public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, 
     return (n, err);
 }
 
+} partial class bidirule_package {
+
 // Precomputing the ASCII values decreases running time for the ASCII fast path
 // by about 30%.
 internal static array<bidi.Properties> asciiTable = new(128);
@@ -257,6 +262,8 @@ internal static array<bidi.Properties> asciiTable = new(128);
         asciiTable[i] = p;
     }
 }
+
+} partial class bidiruleᴛTransformer {
 
 internal static (nint n, bool ok) advance(this ref Transformer t, slice<byte> s) {
     nint n = default;
@@ -355,4 +362,4 @@ internal static (nint n, bool ok) advanceString(this ref Transformer t, @string 
     return (n, true);
 }
 
-} // end bidirule_package
+} // end bidiruleᴛTransformer

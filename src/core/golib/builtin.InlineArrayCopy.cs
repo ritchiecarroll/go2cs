@@ -28,7 +28,7 @@ public static partial class builtin
         Span<T> window = InlineArrayWindow<TArray, T>(ref dst, low, high);
         int count = (int)Math.Min(window.Length, src.Length);
 
-        src.ToSpan()[..count].CopyTo(window);
+        GoElementCopy.CopyInto<T>(src.ToSpan()[..count], window[..count]);
 
         return count;
     }
@@ -43,7 +43,7 @@ public static partial class builtin
         Span<T> window = InlineArrayWindow<TArray, T>(ref src, low, high);
         int count = (int)Math.Min(window.Length, dst.Length);
 
-        window[..count].CopyTo(dst.ToSpan());
+        GoElementCopy.CopyInto<T>(window[..count], dst.ToSpan()[..count]);
 
         return count;
     }

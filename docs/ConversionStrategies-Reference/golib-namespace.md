@@ -10,7 +10,9 @@ The general form of this collision — a REAL parent/child package pair — is h
 Three properties of the rename, established empirically:<!-- 2026-07-16 review of the Δmath emissions; ruled working-as-designed --> **(1) The trigger is per-file and, for a top-level parent package, fires only in packages emitting into `namespace go`.** The collision key is `<packageNS>.<alias>`, and usings are per-file — so `math` (whose own closure always contains `math/bits`, hence `go.math`) renders as `Δmath` in exactly the `namespace go` importers' math-importing files (fmt's scan, reflect's value, expvar, …), while every nested-namespace importer (`go.compress`, `go.crypto`, …) keeps the clean `using math = math_package;`: an alias declared inside the file-scoped nested namespace wins simple-name lookup before the outer `go.math` is consulted. That inner-scope exemption is why the clean form dominates the corpus. **(2) The rename is required wherever the closure is visible.** Every consumption has transitive reference visibility — `src/core` itself, NuGet packages, `-recurse` apps — and there the clean alias is CS0576 at every use, and hoisting it to compilation-unit scope merely trades that for CS0234 (inside `namespace go` the child namespace shadows the alias). Output must be context-independent, so the conservative rename stands.<!-- When this was written the clean alias still compiled against the hand-owned stub baseline, whose csprojs omitted the Go closure (core/math referenced just golib); that baseline retired 2026-08-01 (commit 2e8066da6). --> **(3) The marker cannot be swapped onto "the colliding item".** That item is the child namespace itself — the import-path-mirroring namespace of `math/bits` et al., baked into separately-compiled referenced assemblies — so there is nothing local to rename, and renaming the namespace would break the path-mirroring invariant corpus-wide (the mechanism covers `Δruntime`, `Δsync`, `Δio`, `Δsyscall`, `Δunicode`, …)<!-- ×48, ×38, ×23 files at the time -->. The `MathFloatBits` and `GoNamespaceShadow` goldens pin the `Δmath` form.
 
 ## Foreign renamed types reference the recorded imported-type alias
-A cross-package type that is renamed (or Go-aliased) inside its own package -- `syscall` declares `ΔHandle` for its type-vs-method-colliding `Handle` -- must be referenced through the recorded imported-type alias (`global using syscallꓸHandle = go.syscall_package.ΔHandle`): the raw qualified render (`Δsyscall.Handle`) names a type that does not exist (CS0426 x26, internal/poll). The substitution lives at the C#-NAME layers -- `getCSharpTypeName` (delegate elements, parameters, results) and `getScopeCheckedTypeName` (named struct fields) -- and deliberately NOT in `getAliasQualifiedTypeName`: the Go-shaped name layer also feeds promoted-embed MEMBER naming, where the substitution renamed and rescoped the generated accessors (reflect CS8799 regression on the first cut). The GoImplicitConv assembly attributes record type names under the file-local import qualifier, so the resolving `using` in package_info.cs declares that same qualifier (`using Δsyscall = go.syscall_package;`).
+Since 2026-11-11 no type, constant or variable is renamed because a method shares its name: methods stand in their receiver's holder. A foreign type is renamed today only by a remaining package-level rename (a type named `any`, `rune`, `nint`, `nuint`, `closed` or `union`), or reached through a Go type alias (`type Temperature = Celsius`, exported as `global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius`). The `time`, `syscall`, `reflect`, `internal/abi`, `go/types` and `encoding/json` examples in this section and the three after it are type-vs-method renames from before that date; the mechanisms they describe serve the aliases and the remaining renames unchanged.
+
+A cross-package type that is renamed (or Go-aliased) inside its own package -- `syscall` declared `ΔHandle` for its type-vs-method-colliding `Handle` -- must be referenced through the recorded imported-type alias (`global using syscallꓸHandle = go.syscall_package.ΔHandle`): the raw qualified render (`Δsyscall.Handle`) names a type that does not exist (CS0426 x26, internal/poll). The substitution lives at the C#-NAME layers -- `getCSharpTypeName` (delegate elements, parameters, results) and `getScopeCheckedTypeName` (named struct fields) -- and deliberately NOT in `getAliasQualifiedTypeName`: the Go-shaped name layer also feeds promoted-embed MEMBER naming, where the substitution renamed and rescoped the generated accessors (reflect CS8799 regression on the first cut). The GoImplicitConv assembly attributes record type names under the file-local import qualifier, so the resolving `using` in package_info.cs declares that same qualifier (`using Δsyscall = go.syscall_package;`).
 
 A **pointer/box (or other composite) element** — `*time.Location` as a func result (archive/zip's `timeZone`), a `*syscall.Handle` parameter, a slice/map element — is renamed too, but by a *different route* that does not need `getAliasQualifiedTypeName` (so the CS8799 landmine is untouched): `getAliasQualifiedTypeName` renders the Go-shaped `*time.Location` (unrenamed, per above), then the downstream `convertToCSFullTypeName` applies `getAliasedTypeName` to the FINAL string identifier — substituting `time.Location → timeꓸLocation` before boxing — yielding `ж<timeꓸLocation>`. So the alias reaches every position that flows through the C# type-name conversion (values, pointers, boxes, composite elements alike), **provided `importedTypeAliases` is populated**. That map is loaded from the imported package's `package_info.cs` (the `[GoTypeAlias]` round-trip), so a *fresh full reconvert* renders the alias everywhere; a **stale/partial overlay** that lacks the up-to-date `package_info.cs` renders the raw name and mis-reports CS0426 — the failure is in the measurement tree, not the converter (a clean reconvert renders internal/trace/testtrace's `trace.Time`/`Event`/`Stack` as `traceꓸTime` and archive/zip's `*time.Location` as `ж<timeꓸLocation>`).<!-- both were bank-diagnosed as converter roots before a clean reconvert showed otherwise -->
 
@@ -206,6 +208,56 @@ instead of a compile-time adapter would leave no per-pair record to be missing.
 are under test, and the `other` it re-exports from — carrying one declaration of every published shape and
 every declined one, asserting the derivation, its independence from run-accumulated state, and the end-to-end
 render with no `package_info.cs` present.)
+
+## A type reached only through another package's alias keeps its Go name
+
+Alias keys are loaded per **import** (and on demand for a delegate element, above). A package can still name a
+type of a package it never imports, because another package re-exports it under a Go alias:
+`golang.org/x/sys/unix` declares `type Signal = syscall.Signal`, and modernc.org/libc writes
+`ch <- unix.Signal(sig)` on a `chan os.Signal` without importing `syscall`. While a type-vs-method collision renamed
+the TYPE, `syscall` declared `ΔSignal`, libc held no key for it, and the Go name it spelled did not exist (CS0426);
+the renderers then asked the producer for its member. Methods now stand in their receiver's holder and no type is
+renamed for a method, so the Go name is the producer's own spelling in every position and the producer lookup went
+with the collision table.
+
+The fixture's `tone` declares a type `Pitch` and a method `Pitch`, and `main` imports only `tonealias`. The target
+of its alias of the alias, an adapter over a value, and a box with the adapter over its pointer:
+
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/main.cs:1 -->
+```csharp
+global using localTone = go.RenamedTypeAliasReexportRecords.tone_package.Tone;
+```
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/main.cs:26 -->
+```csharp
+    toner t = new tone_Toneᴠtoner(((tone.Tone)3));
+```
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/main.cs:34-35 -->
+```csharp
+    ref var p = ref heap<RenamedTypeAliasReexportRecords.tone_package.Pitch>(lt.Pitch(), out var Ꮡp);
+    raiser r = new tone_Pitchжraiser(Ꮡp);
+```
+
+Its records:
+
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/package_info.cs:39-40 -->
+```csharp
+[assembly: GoImplement<go.RenamedTypeAliasReexportRecords.tone_package.Pitch, raiser>(Pointer = true)]
+[assembly: GoImplement<go.RenamedTypeAliasReexportRecords.tone_package.Tone, toner>]
+```
+<!-- source: src/tests/Behavioral/RenamedTypeAliasReexportRecords/package_info.cs:48 -->
+```csharp
+[assembly: GoFieldAccess(typeof(go.RenamedTypeAliasReexportRecords.tone_package.Pitch))]
+```
+
+Guarded by `RenamedTypeAliasReexport` (every position the type takes in code: parameter, result, field, slice,
+map value, local, conversion, composite literal, assertion, type switch, method value, the two-hop form) and by
+`RenamedTypeAliasReexportRecords` (the spellings above). Not covered: a type that one of the remaining package-level
+renames above still renames, reached only through another package's alias. No such type is known; none was measured.
+<!-- sqlite-cs W11, 2026-11-15, at master 091935257c: the second fixture read CS0426 x8 with the Go name in all
+six spellings (two GoImplement records, GoFieldAccess, the global using target, the heap type argument and the
+two adapter names), found as libc's package_info.cs
+`[assembly: GoImplement<syscall_package.Signal, os_package.ΔSignal>]`. The first renderer's arm is TS readiness
+C22e. -->
 
 ## A DOT-IMPORTED renamed type is spelled through the same alias as the qualified reference
 

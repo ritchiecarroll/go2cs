@@ -123,7 +123,7 @@ public static void TestInvalidOID(ж<testing.T> t) {
             t.Errorf("ParseOID(%v) = (%v, %v); want = (OID{}, %v)", tt.str, oid2, err, errInvalidOID);
         }
 
-        global::go.crypto.x509_package.ΔOID oid3 = default;
+        global::go.crypto.x509_package.OID oid3 = default;
         err = oid3.UnmarshalText(slice<byte>(tt.str));
         if (err == nil) {
             t.Errorf("(*OID).UnmarshalText(%v) = (%v, %v); want = (OID{}, %v)", tt.str, oid3, err, errInvalidOID);
@@ -132,8 +132,8 @@ public static void TestInvalidOID(ж<testing.T> t) {
 }
 
 internal partial struct TestOIDEqual_type /*dyn*/ {
-    internal global::go.crypto.x509_package.ΔOID oid;
-    internal global::go.crypto.x509_package.ΔOID oid2;
+    internal global::go.crypto.x509_package.OID oid;
+    internal global::go.crypto.x509_package.OID oid2;
     internal bool eq;
 }
 
@@ -143,8 +143,8 @@ public static void TestOIDEqual(ж<testing.T> t) {
         new(oid: mustNewOIDFromInts([1, 2, 3]), oid2: mustNewOIDFromInts([1, 2, 4]), eq: false),
         new(oid: mustNewOIDFromInts([1, 2, 3]), oid2: mustNewOIDFromInts([1, 2, 3, 4]), eq: false),
         new(oid: mustNewOIDFromInts([2, 33, 22]), oid2: mustNewOIDFromInts([2, 33, 23]), eq: false),
-        new(oid: new ΔOID(), oid2: new ΔOID(), eq: true),
-        new(oid: new ΔOID(), oid2: mustNewOIDFromInts([2, 33, 23]), eq: false)
+        new(oid: new OID(), oid2: new OID(), eq: true),
+        new(oid: new OID(), oid2: mustNewOIDFromInts([2, 33, 23]), eq: false)
     ]);
 
     foreach (var (_, tt) in range(cases)) {
@@ -154,14 +154,14 @@ public static void TestOIDEqual(ж<testing.T> t) {
     }
 }
 
-internal static encoding.BinaryMarshaler _ᴛ1ʗ = new x509_test_package.x509_ΔOIDᴠBinaryMarshaler(new ΔOID());
-internal static encoding.BinaryUnmarshaler _ᴛ2ʗ = new x509_test_package.x509_ΔOIDжBinaryUnmarshaler(@new<global::go.crypto.x509_package.ΔOID>());
-internal static encoding.TextMarshaler _ᴛ3ʗ = new x509_test_package.x509_ΔOIDᴠTextMarshaler(new ΔOID());
-internal static encoding.TextUnmarshaler _ᴛ4ʗ = new x509_test_package.x509_ΔOIDжTextUnmarshaler(@new<global::go.crypto.x509_package.ΔOID>());
+internal static encoding.BinaryMarshaler _ᴛ1ʗ = new x509_test_package.x509_OIDᴠBinaryMarshaler(new OID());
+internal static encoding.BinaryUnmarshaler _ᴛ2ʗ = new x509_test_package.x509_OIDжBinaryUnmarshaler(@new<global::go.crypto.x509_package.OID>());
+internal static encoding.TextMarshaler _ᴛ3ʗ = new x509_test_package.x509_OIDᴠTextMarshaler(new OID());
+internal static encoding.TextUnmarshaler _ᴛ4ʗ = new x509_test_package.x509_OIDжTextUnmarshaler(@new<global::go.crypto.x509_package.OID>());
 
 internal partial struct TestOIDMarshal_cases /*dyn*/ {
     internal @string @in;
-    internal global::go.crypto.x509_package.ΔOID @out;
+    internal global::go.crypto.x509_package.OID @out;
     internal error err;
 }
 
@@ -203,7 +203,7 @@ public static void TestOIDMarshal(ж<testing.T> t) {
             continue;
         }
 
-        global::go.crypto.x509_package.ΔOID o2 = default;
+        global::go.crypto.x509_package.OID o2 = default;
         err = o2.UnmarshalText(slice<byte>(tt.@in));
         if (!AreEqual(err, tt.err)) {
             t.Errorf("(*OID).UnmarshalText(%q) = %v; want = %v", tt.@in, err, tt.err);
@@ -243,7 +243,7 @@ public static void TestOIDMarshal(ж<testing.T> t) {
             t.Errorf("(%#v).MarshalBinary() = %v; want = nil", o, err);
         }
 
-        global::go.crypto.x509_package.ΔOID o3 = default;
+        global::go.crypto.x509_package.OID o3 = default;
         var errΔ1 = o3.UnmarshalBinary(binary); if (errΔ1 != nil) {
             t.Errorf("(*OID).UnmarshalBinary(%v) = %v; want = nil", binary, errΔ1);
         }
@@ -260,7 +260,7 @@ public static void TestOIDMarshal(ж<testing.T> t) {
             t.Errorf("(%#v).AppendBinary() = %v; want = nil", o, err);
         }
 
-        global::go.crypto.x509_package.ΔOID o4 = default;
+        global::go.crypto.x509_package.OID o4 = default;
         var errΔ2 = o4.UnmarshalBinary(binaryAppend); if (errΔ2 != nil) {
             t.Errorf("(*OID).UnmarshalBinary(%v) = %v; want = nil", binaryAppend, errΔ2);
         }
@@ -273,7 +273,7 @@ public static void TestOIDMarshal(ж<testing.T> t) {
 }
 
 internal partial struct TestOIDEqualASN1OID_type /*dyn*/ {
-    internal global::go.crypto.x509_package.ΔOID oid;
+    internal global::go.crypto.x509_package.OID oid;
     internal asn1.ObjectIdentifier oid2;
     internal bool eq;
 }
@@ -307,8 +307,8 @@ public static void TestOIDEqualASN1OID(ж<testing.T> t) {
         ),
 
         new(oid: mustNewOIDFromInts([1, 33, 256]), oid2: new asn1.ObjectIdentifier(new nint[]{}.slice()), eq: false),
-        new(oid: new ΔOID(), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, 256}.slice()), eq: false),
-        new(oid: new ΔOID(), oid2: new asn1.ObjectIdentifier(new nint[]{}.slice()), eq: false)
+        new(oid: new OID(), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, 256}.slice()), eq: false),
+        new(oid: new OID(), oid2: new asn1.ObjectIdentifier(new nint[]{}.slice()), eq: false)
     ]);
 
     foreach (var (_, tt) in range(cases)) {
@@ -320,7 +320,7 @@ public static void TestOIDEqualASN1OID(ж<testing.T> t) {
 
 public static void TestOIDUnmarshalBinary(ж<testing.T> t) {
     foreach (var (_, tt) in range(oidTests)) {
-        global::go.crypto.x509_package.ΔOID o = default;
+        global::go.crypto.x509_package.OID o = default;
         var err = o.UnmarshalBinary(tt.raw);
 
         var expectErr = errInvalidOID;
@@ -343,7 +343,7 @@ public static void BenchmarkOIDMarshalUnmarshalText(ж<testing.B> Ꮡb) {
         if (err != nil) {
             Ꮡb.Fatal(err);
         }
-        global::go.crypto.x509_package.ΔOID o = default;
+        global::go.crypto.x509_package.OID o = default;
         var errΔ1 = o.UnmarshalText(text); if (errΔ1 != nil) {
             Ꮡb.Fatal(errΔ1);
         }

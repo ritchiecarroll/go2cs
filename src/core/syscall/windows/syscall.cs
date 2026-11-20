@@ -27,6 +27,7 @@ namespace go;
 
 using bytealg = @internal.bytealg_package;
 using @internal;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -79,25 +80,35 @@ public static (ж<byte>, error) BytePtrFromString(@string s) {
 // See mksyscall.pl.
 internal static uintptr _zero;
 
+} partial class syscallᴛTimespec {
+
 // Unix returns the time stored in ts as seconds plus nanoseconds.
 public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) {
     return ((int64)ts.Sec, (int64)ts.Nsec);
 }
+
+} partial class syscallᴛTimeval {
 
 // Unix returns the time stored in tv as seconds plus nanoseconds.
 public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) {
     return ((int64)tv.Sec, (int64)tv.Usec * 1000);
 }
 
+} partial class syscallᴛTimespec {
+
 // Nano returns the time stored in ts as nanoseconds.
 public static int64 Nano(this ref Timespec ts) {
     return (int64)ts.Sec * 1000000000 + (int64)ts.Nsec;
 }
 
+} partial class syscallᴛTimeval {
+
 // Nano returns the time stored in tv as nanoseconds.
 public static int64 Nano(this ref Timeval tv) {
     return (int64)tv.Sec * 1000000000 + (int64)tv.Usec * 1000;
 }
+
+} partial class syscall_package {
 
 // Getpagesize and Exit are provided by the runtime.
 public static partial nint Getpagesize();

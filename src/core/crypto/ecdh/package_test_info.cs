@@ -9,8 +9,6 @@ global using static global::go.crypto.ecdh_package;
 // <ImportedTypeAliases>
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
-global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 // </ImportedTypeAliases>
 
 using go;
@@ -26,7 +24,7 @@ using static global::go.crypto.ecdh_test_package;
 [assembly: GoImplement<countingReader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<go.crypto.cipher_package.StreamReader, io_package.Reader>]
 [assembly: GoImplement<go.crypto.ecdh_package.PrivateKey, _ᴛ2>(Pointer = true)]
-[assembly: GoImplement<go.crypto.ecdh_package.ΔPublicKey, _ᴛ1>(Pointer = true)]
+[assembly: GoImplement<go.crypto.ecdh_package.PublicKey, _ᴛ1>(Pointer = true)]
 [assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 [assembly: GoImplement<zr, io_package.Reader>]
 // </InterfaceImplementations>
@@ -53,7 +51,7 @@ using static global::go.crypto.ecdh_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ecdh/ecdh_test.go", "ecdh_test.cs", "ACc6xuqCgoKClIKCpoKClIKUgqaCgpSClIKmgoKUgoKmggAJFIKCgqaCgoKCggAHEJIACQoAIlSCgoKCgpSClIKClIKClIIACAyCgoKUpoKCgoIACgqCgoKClKCSoOaCgoKUgoKUgoKUgrgANmyCgoKCgoKCgoLcADNogoKCgoKCgoKCAA8MgoCSgJKAkoC2goKCgpS4goKUgoKUlIKCgpSCgoKUgoKUyoKAkoCSgJKA7JKCpgAwMLKCpoKCgoKmkoKCgoKUpoKAgrqigoKCgpSCpoIADAiCAAYUgoKCprKClKKCgpSCgoI=", "38-82:1;97-112:1;158-179:1;191-196:1;205-205:1;206-206:2;282-293:1;349-360:1;364-364:1;365-365:2;366-366:3;367-367:4;371-406:1;410-410:1;411-411:2;412-412:3;413-413:4;460-468:1;514-524:1", "", "136=P256/1/1/6,P384/1/1/14,P521/1/1/25,X25519/1/1/34;190=hexDecode/1/1/1,Sum256/2/2/1;261=P256/1/1/1,Repeat/1/4/7,P384/1/1/15,Repeat/2/4/21,P521/1/1/29,Repeat/3/4/35,X25519/1/1/44,Repeat/4/4/50;331=P256/1/1/1,Repeat/1/3/5,P384/1/1/17,Repeat/2/3/21,P521/1/1/33,Repeat/3/3/37,X25519/1/1/49;596=P256/1/1/4,P384/1/1/5,P521/1/1/6,X25519/1/1/7")]
+[assembly: GoPositionMap("crypto/ecdh/ecdh_test.go", "ecdh_test.cs", "ACg6xuqCgoKClIKCpoKClIKUgqaCgpSClIKmgoKUgoKmggALFIKCgsaCgoKCggAHEJIACQoAIlSCgoKCgpSClIKClIKClIIACAyCgoKUpoKCgoIACgqCgoKClKCSoOaCgoKUgoKUgoKUgrgANmyCgoKCgoKCgoLcADNogoKCgoKCgoKCAA8MgoCSgJKAkoC2goKCgpS4goKUgoKUlIKCgpSCgoKUgoKUyoKAkoCSgJKAAAgMkoLGADAwsoKmgoKCgqaSgoKCgpSmgoCCuqKCgoKClIKmggAMCIIABhSCgoKmsoKUooKClIKCgg==", "38-82:1;97-112:1;158-179:1;191-196:1;205-205:1;206-206:2;282-293:1;349-360:1;364-364:1;365-365:2;366-366:3;367-367:4;371-406:1;410-410:1;411-411:2;412-412:3;413-413:4;460-468:1;514-524:1", "", "141=P256/1/1/6,P384/1/1/14,P521/1/1/25,X25519/1/1/34;195=hexDecode/1/1/1,Sum256/2/2/1;266=P256/1/1/1,Repeat/1/4/7,P384/1/1/15,Repeat/2/4/21,P521/1/1/29,Repeat/3/4/35,X25519/1/1/44,Repeat/4/4/50;336=P256/1/1/1,Repeat/1/3/5,P384/1/1/17,Repeat/2/3/21,P521/1/1/33,Repeat/3/3/37,X25519/1/1/49;605=P256/1/1/4,P384/1/1/5,P521/1/1/6,X25519/1/1/7")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -108,3 +106,14 @@ public static partial class ecdh_test_package
         builtin.initPackage(typeof(global::go.crypto.ecdh_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ecdh_test_package.countingReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdh_testᴛcountingReader;
+[GoMethodHost(typeof(ecdh_test_package.zr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdh_testᴛzr;
+// </MethodHolders>

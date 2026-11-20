@@ -9,6 +9,7 @@ using sort = sort_package;
 using strings = strings_package;
 using time = time_package;
 using container;
+using static trace_package;
 
 partial class trace_package {
 
@@ -67,7 +68,7 @@ internal partial struct MutatorUtilizationV2_procsCount /*dyn*/ {
 //
 // If the UtilPerProc flag is not given, this always returns a single
 // utilization function. Otherwise, it returns one function per P.
-public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> events, UtilFlags flags) {
+public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<Event> events, UtilFlags flags) {
     var outᴷ = new stackAppend<slice<MutatorUtil>>(moves: true);
     var psᴷ = new stackAppend<MutatorUtilizationV2_perP>();
     var procsᴷ = new stackAppend<MutatorUtilizationV2_procsCount>();
@@ -82,12 +83,12 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     nint nSync = 0;
 
     // Helpers.
-    bool handleSTW(ΔRange r) => (UtilFlags)(flags & UtilSTW) != 0 && isGCSTW(r);
-    bool handleMarkAssist(ΔRange r) => (UtilFlags)(flags & UtilAssist) != 0 && isGCMarkAssist(r);
-    bool handleSweep(ΔRange r) => (UtilFlags)(flags & UtilSweep) != 0 && isGCSweep(r);
+    bool handleSTW(Range r) => (UtilFlags)(flags & UtilSTW) != 0 && isGCSTW(r);
+    bool handleMarkAssist(Range r) => (UtilFlags)(flags & UtilAssist) != 0 && isGCMarkAssist(r);
+    bool handleSweep(Range r) => (UtilFlags)(flags & UtilSweep) != 0 && isGCSweep(r);
 
     // Iterate through the trace, tracking mutator utilization.
-    ж<ΔEvent> lastEv = default;
+    ж<Event> lastEv = default;
     foreach (var i in range(len(events))) {
         var ev = Ꮡ(events, i);
         lastEv = ev;
@@ -118,12 +119,12 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 nint series = 0;
                 if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
                     series = len(@out);
-                    @out = builtin.append(outᴷ, @out, slice<MutatorUtil>([new((int64)ev.Time(), 1D)]));
+                    @out = append(outᴷ, @out, slice<MutatorUtil>([new((int64)ev.Time(), 1D)]));
                 }
-                ps = builtin.append(psᴷ, ps, new MutatorUtilizationV2_perP(series: series));
+                ps = append(psᴷ, ps, new MutatorUtilizationV2_perP(series: series));
             }
             if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
-                procs = builtin.append(procsᴷ, procs, new MutatorUtilizationV2_procsCount(time: (int64)ev.Time(), n: gomaxprocs));
+                procs = append(procsᴷ, procs, new MutatorUtilizationV2_procsCount(time: (int64)ev.Time(), n: gomaxprocs));
             }
             break;
         }}
@@ -245,7 +246,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
         }
         else if (exprᴛ2 == EventLabel) { matchᴛ1 = true;
             var l = ev.Label();
-            if ((UtilFlags)(flags & UtilBackground) != 0 && strings.HasPrefix(l.ΔΔLabel, "GC ") && l.ΔΔLabel != "GC (idle)"u8) {
+            if ((UtilFlags)(flags & UtilBackground) != 0 && strings.HasPrefix(l.ΔLabel, "GC ") && l.ΔLabel != "GC (idle)"u8) {
                 // Background mark worker.
                 //
                 // If we're in per-proc mode, we don't
@@ -253,7 +254,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 // they kick all of the goroutines off
                 // that P, so don't directly
                 // contribute to goroutine latency.
-                if (!((UtilFlags)(flags & UtilPerProc) != 0 && l.ΔΔLabel == "GC (dedicated)"u8)) {
+                if (!((UtilFlags)(flags & UtilPerProc) != 0 && l.ΔLabel == "GC (dedicated)"u8)) {
                     bgMark[ev.Goroutine()] = true;
                     ps[(nint)(ev.Proc())].gc++;
                 }
@@ -324,7 +325,7 @@ internal static slice<MutatorUtil> addUtil(slice<MutatorUtil> util, MutatorUtil 
             return util;
         }
     }
-    return builtin.append(util, mu);
+    return append(util, mu);
 }
 
 // totalUtil is total utilization, measured in nanoseconds. This is a
@@ -336,10 +337,14 @@ internal static totalUtil totalUtilOf(float64 meanUtil, int64 dur) {
     return (totalUtil)(meanUtil * (float64)dur);
 }
 
+} partial class traceᴛtotalUtil {
+
 // mean returns the mean utilization over dur.
 internal static float64 mean(this totalUtil u, time.Duration dur) {
     return (float64)u / (float64)dur;
 }
+
+} partial class trace_package {
 
 // An MMUCurve is the minimum mutator utilization curve across
 // multiple window sizes.
@@ -430,6 +435,8 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
     return s;
 }
 
+} partial class traceᴛmmuSeries {
+
 internal static (int64 start, int64 end) bandTime(this ref mmuSeries s, nint i) {
     int64 start = default;
     int64 end = default;
@@ -438,6 +445,8 @@ internal static (int64 start, int64 end) bandTime(this ref mmuSeries s, nint i) 
     end = start + s.bandDur;
     return (start, end);
 }
+
+} partial class trace_package {
 
 partial struct bandUtil {
     // Utilization series index
@@ -450,6 +459,8 @@ partial struct bandUtil {
 }
 
 partial struct bandUtilHeap /*[]bandUtil*/;
+
+} partial class traceᴛbandUtilHeap {
 
 internal static nint Len(this bandUtilHeap h) {
     return len(h);
@@ -464,7 +475,7 @@ internal static void Swap(this bandUtilHeap h, nint i, nint j) {
 }
 
 internal static void Push(this ref bandUtilHeap h, any x) {
-    h = builtin.append(h, x._<bandUtil>());
+    h = append(h, x._<bandUtil>());
 }
 
 internal static any Pop(this ref bandUtilHeap h) {
@@ -472,6 +483,8 @@ internal static any Pop(this ref bandUtilHeap h) {
     h = (h).slice(0, len(h) - 1);
     return x;
 }
+
+} partial class trace_package {
 
 // UtilWindow is a specific window at Time.
 partial struct UtilWindow {
@@ -481,6 +494,8 @@ partial struct UtilWindow {
 }
 
 partial struct utilHeap /*[]UtilWindow*/;
+
+} partial class traceᴛutilHeap {
 
 internal static nint Len(this utilHeap h) {
     return len(h);
@@ -498,7 +513,7 @@ internal static void Swap(this utilHeap h, nint i, nint j) {
 }
 
 internal static void Push(this ref utilHeap h, any x) {
-    h = builtin.append(h, x._<UtilWindow>());
+    h = append(h, x._<UtilWindow>());
 }
 
 internal static any Pop(this ref utilHeap h) {
@@ -506,6 +521,8 @@ internal static any Pop(this ref utilHeap h) {
     h = (h).slice(0, len(h) - 1);
     return x;
 }
+
+} partial class trace_package {
 
 // An accumulator takes a windowed mutator utilization function and
 // tracks various statistics for that function.
@@ -528,6 +545,8 @@ partial struct accumulator {
     internal int64 lastTime;
     internal float64 lastMU;
 }
+
+} partial class traceᴛaccumulator {
 
 // resetTime declares a discontinuity in the windowed mutator
 // utilization function by resetting the current time.
@@ -614,6 +633,8 @@ keep:;
     // If we've found enough 0 utilizations, we can stop immediately.
     return len(acc.wHeap) == acc.nWorst && acc.wHeap[0].MutatorUtil == 0D;
 }
+
+} partial class traceᴛMMUCurve {
 
 // MMU returns the minimum mutator utilization for the given time
 // window. This is the minimum utilization for all windows of this
@@ -738,7 +759,7 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
         if (bandU == nil) {
             bandU = bandU1;
         } else {
-            bandU = builtin.appendꓸꓸꓸ(bandU, bandU1);
+            bandU = appendꓸꓸꓸ(bandU, bandU1);
         }
     }
 
@@ -754,6 +775,8 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
         heap.Pop(new bandUtilHeapжInterface(ᏑbandU));
     }
 }
+
+} partial class traceᴛmmuSeries {
 
 internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, time.Duration window) {
     // For each band, compute the worst-possible total mutator
@@ -887,6 +910,8 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
     }
 }
 
+} partial class trace_package {
+
 // An integrator tracks a position in a utilization function and
 // integrates it.
 partial struct integrator {
@@ -895,6 +920,8 @@ partial struct integrator {
     // predecessor.
     internal nint pos;
 }
+
+} partial class traceᴛintegrator {
 
 // advance returns the integral of the utilization function from 0 to
 // time. advance must be called on monotonically increasing values of
@@ -947,19 +974,21 @@ internal static int64 next(this ref integrator @in, int64 time) {
     return 9223372036854775807L;
 }
 
+} partial class trace_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stopTheWorldˢ => ref stopTheWorldˢᵇ;
 private static readonly @string stopTheWorldˢᵇ = "stop-the-world"u8;
 
-internal static bool isGCSTW(ΔRange r) {
+internal static bool isGCSTW(Range r) {
     return strings.HasPrefix(r.Name, stopTheWorldˢ) && strings.Contains(r.Name, "GC");
 }
 
-internal static bool isGCMarkAssist(ΔRange r) {
+internal static bool isGCMarkAssist(Range r) {
     return r.Name == "GC mark assist"u8;
 }
 
-internal static bool isGCSweep(ΔRange r) {
+internal static bool isGCSweep(Range r) {
     return r.Name == "GC incremental sweep"u8;
 }
 

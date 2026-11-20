@@ -104,18 +104,18 @@ internal static (rune r, nint pos) decoderune(@string s, nint k) {
 
 // encoderune writes into p (which must be large enough) the UTF-8 encoding of the rune.
 // It returns the number of bytes written.
-internal static nint encoderune(slice<byte> Δp, rune r) {
+internal static nint encoderune(slice<byte> p, rune r) {
     // Negative values are erroneous. Making it unsigned addresses the problem.
     var i = (uint32)r;
     var matchᴛ1 = false;
     if (i <= rune1Max) { matchᴛ1 = true;
-        Δp[0] = (byte)r;
+        p[0] = (byte)r;
         return 1;
     }
     if (i <= rune2Max) { matchᴛ1 = true;
-        _ = Δp[1]; // eliminate bounds checks
-        Δp[0] = (byte)((byte)t2 | (byte)(r >> 6));
-        Δp[1] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
+        _ = p[1]; // eliminate bounds checks
+        p[0] = (byte)((byte)t2 | (byte)(r >> 6));
+        p[1] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
         return 2;
     }
     if ((i > maxRune) || (surrogateMin <= i && i <= surrogateMax)) { matchᴛ1 = true;
@@ -123,18 +123,18 @@ internal static nint encoderune(slice<byte> Δp, rune r) {
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && (i <= rune3Max)) {
-        _ = Δp[2]; // eliminate bounds checks
-        Δp[0] = (byte)((byte)t3 | (byte)(r >> 12));
-        Δp[1] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
-        Δp[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
+        _ = p[2]; // eliminate bounds checks
+        p[0] = (byte)((byte)t3 | (byte)(r >> 12));
+        p[1] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
+        p[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
         return 3;
     }
     if (!matchᴛ1) { /* default: */
-        _ = Δp[3]; // eliminate bounds checks
-        Δp[0] = (byte)((byte)t4 | (byte)(r >> 18));
-        Δp[1] = (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx));
-        Δp[2] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
-        Δp[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
+        _ = p[3]; // eliminate bounds checks
+        p[0] = (byte)((byte)t4 | (byte)(r >> 18));
+        p[1] = (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx));
+        p[2] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
+        p[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
         return 4;
     }
     return default;

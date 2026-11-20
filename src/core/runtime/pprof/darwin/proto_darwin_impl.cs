@@ -18,11 +18,14 @@
 namespace go.runtime;
 
 using errors = errors_package;
+using static pprof_package;
 
 partial class pprof_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string machVMInfoFailedˢ = "machVMInfo failed"u8;
+
+} partial class pprofᴛprofileBuilder {
 
 // readMapping adds a mapping entry for the text region of the running process.
 // It uses the mach_vm_region region system call to add mapping entries for the
@@ -41,6 +44,8 @@ internal static void readMapping(this ж<profileBuilder> Ꮡb) {
         b.addMappingEntry(0, 0, 0, ""u8, ""u8, true);
     }
 }
+
+} partial class pprof_package {
 
 internal static (uint64 start, uint64 end, @string exe, @string buildID, error err) readMainModuleMapping() {
     uint64 start = default!;

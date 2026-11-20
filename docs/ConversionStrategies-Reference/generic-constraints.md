@@ -2,7 +2,7 @@
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#generic-constraints)
 A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `[N]E` array-core to `IArray<E>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` emits no C# constraint at all (see [The `comparable` constraint](#the-comparable-constraint)).
-<!-- src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:58 `internal static bool eq<T>(T a, T b) {`
+<!-- src/tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.cs.target:67 `internal static bool eq<T>(T a, T b) {`
 (Go: `func eq[T comparable](a, b T) bool`). history: comparable once mapped to golib's CRTP comparable<T>. -->
 
 ## An array-core constraint `~[N]E` lifts to `IArray<E>`
@@ -53,7 +53,7 @@ real emission has been tried: a non-empty type set whose
 operator set is empty emits the union as a breadcrumb comment plus the one constraint C# can still
 express —
 
-<!-- source: src/core/runtime/pprof/pprof_test.cs:3711-3712 -->
+<!-- source: src/core/runtime/pprof/pprof_test.cs:3716-3717 -->
 ```csharp
 internal static void testProfileRecordNullPadding<T>(ж<testing.T> t, @string name, Func<slice<T>, (nint, bool)> fn)
     where T : /* runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord */ new()
@@ -103,7 +103,7 @@ emitted `<…>` list and `where` clauses (a breadcrumb comment preserves the Go 
 classification treats a `p P` exactly like a `p *T` (`paramPointerType` — deref alias, `Ꮡ` box naming),
 so the entire existing pointer machinery applies unchanged:
 
-<!-- source: src/core/go/types/predicates.cs:610-617 -->
+<!-- source: src/core/go/types/predicates.cs:619-626 -->
 ```csharp
 internal static ж<T> clone<T>(ж<T> Ꮡp)
     /* where P : *T (erased: P renders as ж<T>) */
@@ -274,7 +274,7 @@ C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int
 
 ### A float converted to an integer type parameter takes gc's answer for the process's architecture
 
-`T(value.(float64))` with `T ~int32` (typescript-go's internal/tsoptions) emits the same
+`T(value.(float64))` with `T ~int32` emits the same
 `ConvertToType<T>(value._<float64>())`, and golib's `double` overload decides it. An in-range value truncates
 toward zero, as Go's float-to-integer conversion does. An out-of-range value or NaN is implementation-defined in
 Go, and gc's answer differs by GOARCH, so golib gives the answer for the architecture the process runs on:
@@ -342,7 +342,7 @@ The companion **shift-*count*** case —
 (the same coercion the shift-width machinery uses) — routes through the same bridge, with the constant
 operand materialized as the type parameter:
 `(uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))` (a bare `(int)(EI)` is CS0030).
-<!-- src/core/internal/trace/base.cs:162 `(uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))`.
+<!-- src/core/internal/trace/base.cs:173 `(uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))`.
 at the fix: cleared ~11 of internal/trace's index CS1503/CS0030 (17 -> 6) and its last two shift-count CS0030
 (6 -> 4). --> Guarded by `NamedNumericSliceIndex` (a generic `lookup[K ~uint64]`
 indexing by the type parameter and an arithmetic result, a `pick` indexing by a named `int64`, a
@@ -364,7 +364,7 @@ A **pointer** instantiation (`walkList(v, n.Names)` with `N=*Ident`) cannot: the
 does not implement the interface — its generated pointer adapter does. The call site (the last line
 below) projects the slice element-wise through the adapter, instantiating `N` as the interface itself:
 
-<!-- source: src/core/go/ast/walk.cs:18-24, 56 -->
+<!-- source: src/core/go/ast/walk.cs:19-57 -->
 ```csharp
 internal static void walkList<N>(Visitor v, slice<N> list)
     where N : Node
@@ -642,11 +642,12 @@ interface and each method). An instantiation over a VALUE element needs no proxy
 `Children()` slice aliases the element's backing array exactly as in Go. Because go2cs-gen publishes the
 generic proxy for every self-referential constraint, it also gives such a method no slot and makes its
 forwarder throw the same refusal. The interface's own package still compiles: without the slot rule, a single
-`Children() []N` would break that package's build (CS0029), even when only value elements used it. The
-refusal is fatal to a conversion, so the converted standard library, which converts, reaches no refused
-shape, and no behavioral fixture does either.
+`Children() []N` would break that package's build (CS0029), even when only value elements used it. By
+default the refusal is fatal to the conversion; `-warn GO2CS2002` downgrades it to a warning, and each refused site
+then panics with the refusal text when it is reached. The converted standard library reaches no refused shape, and
+no behavioral fixture does either.
 <!-- census of 2026-10-19 (Go 1.24 corpus): 6 self-referential interfaces in std, 12 in the behavioral tree, 0 sharing
-shapes. src/go2cs/conversionDriver.go:365 `return refusePackage(options, diagnosticProxyRefused, refusal)`, fatal outside -recurse: src/go2cs/recurseRefusal.go:41 `log.Fatalf("Refusing to convert: %s\n", err)`. -->
+shapes. src/go2cs/conversionDriver.go:366 `return refusePackage(options, diagnosticProxyRefused, refusal)`, fatal outside -recurse: src/go2cs/recurseRefusal.go:44 `log.Fatalf("Refusing to convert: %s\n", err)`. -->
 
 Two exact designs remain open, and nothing in the corpus needs them: a per-element copy of the generic function
 in which `N` is the box itself (monomorphization), or static-abstract witness types in place of the proxy.
@@ -1007,8 +1008,8 @@ Then every instantiation satisfies the interface the same way. The converter rec
 package-qualified, and names the adapter at each cast site with the instantiation's arguments as C# type
 arguments. `ImplementGenerator` emits ONE generic adapter, package-prefixed like every foreign adapter
 (`fieldlib_ExpectedжField<T>`, wrapping `ж<global::…fieldlib_package.Expected<T>>`). Several instantiations of
-one pair in one package therefore share it (tsc's internal/module, C33: `Expected[string]` and
-`Expected[map[string]string]` as `TypeValidatedField`):
+one pair in one package therefore share it (`Expected[string]` and `Expected[map[string]string]` as
+`TypeValidatedField`):
 
 <!-- source: src/tests/Behavioral/GenericForeignAdapterInstantiations/package_info.cs:39 -->
 ```csharp
@@ -1078,7 +1079,7 @@ Measured: **0 B/parse** on `slice<byte>`; on `@string` what remains is exactly t
 
 ## Explicit type arguments come from the callee's instantiation
 A generic function's explicit type arguments are read from the CALLEE's resolved instantiation (`info.Instances`), not from the RESULT type's arguments -- the two lists differ whenever the callee has more type parameters than the result names. reflect's `rangeNum[T, N](num N, t Type) iter.Seq[Value]` called `rangeNum[int8](v.Int(), v.Type())`: the result `Seq[Value]` carries ONE argument where the method needs TWO (CS0305). The result's own arguments still gate *whether* to emit, so a generic callee returning a plain named type keeps C# inference:
-<!-- source: src/core/reflect/iter.cs:51 -->
+<!-- source: src/core/reflect/iter.cs:55 -->
 ```csharp
         return rangeNum<int8, int64>(v.Int(), v.Type());
 ```

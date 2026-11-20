@@ -58,7 +58,7 @@ Each `visit*` file handles one Go AST node category, emitting the corresponding 
 | `visitIfStmt.go` / `visitForStmt.go` / `visitRangeStmt.go` | Conditionals & loops (range handles ptr deref). |
 | `visitSwitchStmt.go` / `visitTypeSwitchStmt.go` / `visitSelectStmt.go` / `visitCommClause.go` | switch / type-switch / select + comm clauses. |
 | `visitReturnStmt.go` / `visitBranchStmt.go` / `visitLabeledStmt.go` | return, break/continue/goto, labels. |
-| `visitDeferStmt.go` / `visitGoStmt.go` | `defer` (registers into the enclosing `GoFrame`, drained LIFO), `go` (goroutine → its own OS thread, reused through `GoroutineThreadPool`). |
+| `visitDeferStmt.go` / `visitGoStmt.go` | `defer` (registers into the enclosing `GoFrame`, drained LIFO), `go` (a `goǃ` call; golib runs the goroutine on its own OS thread by default, reused through `GoroutineThreadPool`). |
 | `visitIdent.go` | Identifier emission / name sanitization. |
 
 ## `conv*.go` — expression & type converters
@@ -115,9 +115,12 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `BoundedGoroutineInterceptorGenerator` | `[assembly: GoBoundedGoroutine(...)]` records (in `package_info.cs`), each naming a `goǃ` call the converter proved cannot recurse | An interceptor of that `goǃ` call that starts the goroutine on golib's smaller stack reservation; a record that lands on no such call fails the build (`GO2CS0010`). |
 | `ExtensionHostListGenerator` | every converted project | `[assembly: GoExtensionHostList]` and one `[assembly: GoExtensionHost(typeof(X))]` per top-level static class, which golib's extension-method scan reads in place of `Assembly.GetTypes()` under Native AOT. |
 
-Two analyzers ship beside them: `StringLiteralBindingAnalyzer` fails the build when a C# string literal in
-converted code binds a C# type where Go has a `string`, and `StackAppendBufferAnalyzer` fails it when a
-stack-append buffer is passed as anything but a plain local.
+Four analyzers ship beside them: `StringLiteralBindingAnalyzer` fails the build when a C# string literal in
+converted code binds a C# type where Go has a `string`; `StackAppendBufferAnalyzer` fails it when a
+stack-append buffer is passed as anything but a plain local; `MethodLimitAnalyzer` fails it on a type with
+more methods than the .NET runtime loads (`GO2CS0012`); `MethodHolderNameAnalyzer` fails it when a name in a
+method-holder class binds another member than its package's (`GO2CS0013`); and `RefusalDowngradedAnalyzer`
+warns, in every build, on each refusal a conversion downgraded with `-warn` (`GO2CS0011`).
 
 ## Runtime type map (`src/core/golib/`)
 

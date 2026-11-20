@@ -131,7 +131,7 @@ partial class os_package
     // The handle is NOT closed here. readReparseLink closes what readReparseLink opened; the
     // root_windows callers close what they opened. Go's ownership, kept exactly -- and the reason
     // the eager finally stays up there rather than moving down with the body.
-    internal static (@string, error) readReparseLinkHandle(syscallꓸHandle h) {
+    internal static (@string, error) readReparseLinkHandle(syscall.Handle h) {
         var rdbbuf = new slice<byte>(syscall.MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
         ref var bytesReturned = ref heap(new uint32(), out var ᏑbytesReturned);
         var err = syscall.DeviceIoControl(h, syscall.FSCTL_GET_REPARSE_POINT, nil, 0, Ꮡ(rdbbuf, 0), (uint32)len(rdbbuf), ᏑbytesReturned, nil);

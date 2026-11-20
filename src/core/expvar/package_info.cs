@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,7 +27,6 @@ using static go.expvar_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("String", "ΔString")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -42,8 +40,8 @@ using static go.expvar_package;
 [assembly: GoImplement<Int, Var>(Pointer = true)]
 [assembly: GoImplement<Map, Var>(Pointer = true)]
 [assembly: GoImplement<go.expvar_package.Func, Var>]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
-[assembly: GoImplement<ΔString, Var>(Pointer = true)]
+[assembly: GoImplement<go.expvar_package.String, Var>(Pointer = true)]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -60,7 +58,7 @@ using static go.expvar_package;
 [assembly: GoFieldAccess(typeof(Float))]
 [assembly: GoFieldAccess(typeof(Int))]
 [assembly: GoFieldAccess(typeof(Map))]
-[assembly: GoFieldAccess(typeof(ΔString))]
+[assembly: GoFieldAccess(typeof(go.expvar_package.String))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -70,7 +68,7 @@ using static go.expvar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("expvar/expvar.go", "expvar.cs", "AD50gqaCpoKmgqaCAAcQgqaCpoKokoKCgoKCgsySAA8ggqaCpoKCgoKCpoKCgoKClIKCgpS0xLaCgoKo4oKCgoLY4oKUgoKUoqSCgoKmuIKCgriokoKCgoKCyoK6koKCgoKCyoK64oKCgoKCtKoACAKCgoKCgrT+goKqoqaCpoLugqaCggAJEtKClIKCgqKooqqSgoKmgoKCpoKCgqaCgoKssgAIBoKCrLKmgqaCgoKmgoKUlILokoKCgpSUtLS0tNa0toI=", "136-136:1;139-139:2;145-160:3")]
+[assembly: GoPositionMap("expvar/expvar.go", "expvar.cs", "AEF0gqaCpoKmgqaCAAsQgqaCpoKokoKCgoKCgsySABMggqaCpoKCgoKCpoKCgoKClIKCgpS0xLaCgoKo4oKCgoLY4oKUgoKUoqSCgoKmuIKCgriokoKCgoKCyoK6koKCgoKCyoK64oKCgoKCtKoACAKCgoKCgrQACw6CgqqipoKmggAKDoKmgoIACxLSgpSCgoKiqKKqkoKCpoKCgqaCgoKmgoKCrLIACAaCgqyypoKmgoKCpoKClJSC6JKCgoKUlLS0tLTWtLaC", "136-136:1;139-139:2;145-160:3")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -91,7 +89,7 @@ public static partial class expvar_package
     public partial struct Int {}
     public partial struct KeyValue {}
     public partial struct Map {}
-    public partial struct ΔString {}
+    public partial struct String {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -115,3 +113,17 @@ public static partial class expvar_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(expvar_package.Float)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛFloat;
+[GoMethodHost(typeof(expvar_package.Func)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛFunc;
+[GoMethodHost(typeof(expvar_package.Int)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛInt;
+[GoMethodHost(typeof(expvar_package.Map)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛMap;
+[GoMethodHost(typeof(expvar_package.String)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛString;
+// </MethodHolders>

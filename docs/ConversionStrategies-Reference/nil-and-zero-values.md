@@ -25,7 +25,7 @@ func typedNilErr() error {
 	fmt.Println("typed nil pointer in error != nil:", err != nil)
 	fmt.Println("nil == typed nil pointer in error:", nil == err)
 ```
-<!-- source: src/tests/Behavioral/NilCompareShapes/main.cs.target:13-16, 60-62 -->
+<!-- source: src/tests/Behavioral/NilCompareShapes/main.cs.target:18-21, 65-67 -->
 ```csharp
 internal static error typedNilErr() {
     ж<myErr> p = default;
@@ -207,9 +207,9 @@ the dereference guard):
   `PointerNilIdentity<T>` applies the same rule there: when the STATIC type `T` is a Go pointer (a ж
   box or a generated named-pointer wrapper), a value is nil when it is null or `IsNilPointer`. The
   test reads the type, never the value, so an interface type argument still keeps a typed nil apart
-  from the nil interface. Without it, typescript-go's `core.OrElse(nil, x)` (`value != *new(T)`)
+  from the nil interface. Without it, a generic `OrElse(nil, x)` (`value != *new(T)`)
   returned the nil, generic `==` answered false, and a `map[*T]V` or `map[[1]*T]V` held two nil keys
-  (TS C49; the `NilPtrIdentity` behavioral test).
+  (the `NilPtrIdentity` behavioral test).<!-- TS C49 -->
 
 **Every consumer that asks "is this THE nil pointer" must ask the structural predicate.** The
 managed-slot `atomic.Pointer<T>` (`core/sync/atomic/type.cs`) canonicalizes the nil pointer to a null
@@ -247,7 +247,7 @@ saw a null descriptor:
 tBytes     = bootstrapType("bytes", (*[]byte)(nil))
 tReserved7 = bootstrapType("_reserved1", (*struct{ r7 int })(nil))
 ```
-<!-- source: src/core/encoding/gob/type.cs:272, 277-280 -->
+<!-- source: src/core/encoding/gob/type.cs:281-289 -->
 ```csharp
 internal static typeId tBytes = bootstrapType("bytes", (ж<slice<byte>>)nil);
 …
@@ -259,7 +259,7 @@ internal static typeId tReserved7 = bootstrapType("_reserved1", (ж<eᴛ1>)nil);
 
 Guarded by `TypedNilInterface` (extended with the slice/map/anonymous-struct type-literal targets),
 `PointerToNilPointerIdentity`, and `NamedPointerReinterpret` (the canonical singleton keeps its
-`object`-reference nil compare working). Design: `docs/phase4/DESIGN-reflection-bridge.md`.
+`object`-reference nil compare working). <!-- Design: docs/phase4/DESIGN-reflection-bridge.md (internal record). -->
 
 **A nil converted to an unnamed MAP type is a cast, not an invocation.** The star form above is one
 half of the type-literal problem; `map[string]int(nil)` — no pointer, the map type literal written
@@ -512,7 +512,7 @@ func assignDescriber(h *holder, s *Setting) {
     h.d = s
 }
 ```
-<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:25-27 -->
+<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:30-32 -->
 ```csharp
 internal static void assignDescriber(ref holder h, ж<Setting> s) {
     h.d = new SettingжDescriber(s);

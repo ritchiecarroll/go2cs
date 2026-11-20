@@ -15,6 +15,10 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string fileNetˢ => ref fileNetˢᵇ;
+private static readonly @string fileNetˢᵇ = "file+net"u8;
+
 // The full stack test cases for IPConn have been moved to the
 // following:
 //	golang.org/x/net/ipv4
@@ -41,11 +45,11 @@ public static void TestTCPListenerSpecificMethods(ж<testing.T> t) {
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
         ln.Addr();
-        mustSetDeadline(new net_test_package.testing_TжTB(t), ln.SetDeadline, 30 * time.ΔNanosecond);
+        mustSetDeadline(new net_test_package.testing_TжTB(t), ln.SetDeadline, 30 * time.Nanosecond);
 
         {
             var (c, errΔ1) = ln.Accept(); if (errΔ1 != nil) {
-                if (!errΔ1._<ΔError>().Timeout()) {
+                if (!errΔ1._<Error>().Timeout()) {
                     t.Fatal(errΔ1);
                 }
             } else {
@@ -54,7 +58,7 @@ public static void TestTCPListenerSpecificMethods(ж<testing.T> t) {
         }
         {
             var (c, errΔ2) = ln.AcceptTCP(); if (errΔ2 != nil) {
-                if (!errΔ2._<ΔError>().Timeout()) {
+                if (!errΔ2._<Error>().Timeout()) {
                     t.Fatal(errΔ2);
                 }
             } else {
@@ -265,11 +269,11 @@ public static void TestUnixListenerSpecificMethods(ж<testing.T> t) {
         defer(() => lnʗ1.Close(), ref ᒐ);
         defer(Δos.Remove, addr, ref ᒐ);
         ln.Addr();
-        mustSetDeadline(new net_test_package.testing_TжTB(t), ln.SetDeadline, 30 * time.ΔNanosecond);
+        mustSetDeadline(new net_test_package.testing_TжTB(t), ln.SetDeadline, 30 * time.Nanosecond);
 
         {
             var (c, errΔ1) = ln.Accept(); if (errΔ1 != nil) {
-                if (!errΔ1._<ΔError>().Timeout()) {
+                if (!errΔ1._<Error>().Timeout()) {
                     t.Fatal(errΔ1);
                 }
             } else {
@@ -278,7 +282,7 @@ public static void TestUnixListenerSpecificMethods(ж<testing.T> t) {
         }
         {
             var (c, errΔ2) = ln.AcceptUnix(); if (errΔ2 != nil) {
-                if (!errΔ2._<ΔError>().Timeout()) {
+                if (!errΔ2._<Error>().Timeout()) {
                     t.Fatal(errΔ2);
                 }
             } else {

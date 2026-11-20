@@ -25,6 +25,33 @@ A converted program can run three ways. All three run the same converted code; t
 | **ReadyToRun** | `dotnet publish -c Release` of a converted program, which turns it on | golib and the standard library ahead of time, then the JIT can still recompile hot methods; the program's own code as it runs |
 | **Native AOT** | `dotnet publish -r <rid> -p:PublishAot=true` | entirely ahead of time, to a native executable with no JIT |
 
+In a folder that `go2cs -recurse` wrote, run that command in the program's own folder or name the program's project
+file: the converted libraries are compiled into the program and are not published on their own.
+
+<!-- Source: P1's AOT reproduction and its seat, 2026-11-16, a linux-x64 cloud box (4 cores, SDK 10.0.403, ILCompiler
+     10.0.14). Before the seat the table's command failed on both -recurse routes: a local conversion stopped with
+     NETSDK1207 on the netstandard2.0 analyzer projects the global property reached through their analyzer references
+     (src/gen/go2cs-gen/go2cs-gen.csproj for a strings/fmt hello, and also
+     src/gen/go2cs-arrays-gen/go2cs-arrays-gen.csproj for colordemo; the i9 read both on win-x64); a -recurse=nuget
+     folder's .slnx was taken and each converted library was published as its own .so (P3 run A, 2026-11-15,
+     reproduced). The seat: both analyzer projects keep PublishAot false (TreatAsLocalProperty; repoguard's
+     TestAnalyzerProjectsKeepPublishAotOff), and the -recurse root's Directory.Build.targets sets IsPublishable false on
+     a Library. After it the table's command published the hello and colordemo and ran them, and the nuget folder
+     published no library. The README walkthrough's colordemo (fatih/color v1.18.0) published at master 0c1d295ea8 in
+     1545 s with 0 'will always throw' lines and ran; at go.* 1.26.10.3 it fails in ILC at the object string table
+     (StringTableBuilder.CreateIndex, 6,188 'will always throw' lines), the generic expansion batch 308 removed. -->
+
+A Native AOT publish also needs the platform's native toolchain: on Linux, `clang` and `zlib1g-dev` (Debian and
+Ubuntu: `sudo apt install clang zlib1g-dev`; Fedora: `clang zlib-devel`); on Windows, the MSVC C++ build tools; on
+macOS, the Xcode command line tools. A publish that fails leaves its output folder as it was. A program from an
+earlier publish into the same folder, such as the small launcher a Release publish writes, is still there and still
+runs. Read the publish's own result, its `error` lines and its exit status, before you run what is in the folder.
+
+<!-- Prerequisites: Performance.md's Native AOT prerequisite table ("Running it"), the benchmark runner's
+     requirements, which name the same toolchains. The stale launcher: P3's new-user docs run part 2, 2026-11-15
+     (linux-x64, go.* 1.26.10.3): after the failed AOT publish the publish folder still held the colordemo launcher
+     from the earlier Release publish (78 KB, dated before the AOT run); it ran and printed the right line. -->
+
 Which wins depends on what the program spends its time on. The `win-x64` comparisons below come from the
 performance comparison's current table, measured on one Windows machine (an AMD Ryzen 5 PRO 6650U) against the
 `go.*` 1.26.10.2 packages; a bullet that uses another source names it.
@@ -97,7 +124,7 @@ another assembly, and a loop that runs only once never leaves its precompiled fo
 
 To precompile your own code as well, set `<GoReadyToRunUserCode>true</GoReadyToRunUserCode>`. That is rarely
 worth it. Across the [performance suite](Performance.md), on the same machine, precompiling the program's own code
-makes 11 of the 17 programs slower than the default ReadyToRun publish and none faster. FieldView, Fib, RefLower,
+makes 11 of the 17 programs measured slower than the default ReadyToRun publish and none faster. FieldView, Fib, RefLower,
 Sort, Startup and TlsHandshake stay within measurement noise. Medians in ms; the ratio is precompiled-user-code
 against the default:
 
@@ -142,7 +169,16 @@ same; it is larger, and its symbol table is larger.
 Turn folding off where build time matters more than size: a development loop, or a CI job that publishes Native
 AOT to test it. Keep the default for what you ship when the executable's size matters, and for a very large program:
 the symbol names grow, and the native symbol table has a 2 GiB ceiling, so a program already close to it can stop
-fitting. Folding only removes symbols, so a program that builds with folding off also builds with it on.
+fitting. Folding only removes symbols, so a program that builds with folding off also builds with it on. A program
+past the ceiling fails late in the publish, on Linux with `System.OutOfMemoryException: Insufficient memory to
+continue the execution of the program.` and this line in the stack:
+`at ILCompiler.ObjectWriter.StringTableBuilder.CreateIndex(String)`. The message names memory, but the limit is the
+string table's size, not the machine's RAM.
+<!-- The stack: P3's new-user docs run part 2, 2026-11-15, linux-x64 (4 cores, 15 GB, 11 GB free at the failure),
+     SDK 10.0.404, ILCompiler 10.0.15, the README walkthrough's colordemo on go.* 1.26.10.3, with folding on and
+     with folding off; reproduced by P1 2026-11-16 (ILCompiler 10.0.14), StringTableBuilder.CreateIndex in both
+     runs. Windows and macOS write other object formats and were not read. With the 1.26.11.1 tree the same
+     program's string table is 250 MiB (P1, colordemo.o .strtab 262,013,197 bytes). -->
 
 The setting is a project property, `IlcFoldIdenticalMethodBodies`. Set it in one of three places:
 
@@ -185,7 +221,7 @@ that the tiers collect, and the profile is worth more.
      than either setting. -->
 
 Across the [performance suite](Performance.md), on `win-x64` (an AMD Ryzen 5 PRO 6650U), turning
-dynamic PGO off with `DOTNET_TieredPGO=0` makes 13 of the 17 programs slower under the JIT and none faster; Startup,
+dynamic PGO off with `DOTNET_TieredPGO=0` makes 13 of the 17 programs measured slower under the JIT and none faster; Startup,
 Fib, Sieve and Channel stay within measurement noise. Turning it off is not recommended. Medians in ms, in-program
 time; the ratio is PGO off against the default:
 
@@ -313,7 +349,7 @@ on Windows) and time a few runs with `DOTNET_TC_CallCountingDelayMs=0`, then wit
 [performance suite's](Performance.md) programs ran with the template's delay of 0 and with .NET's own 100 ms. These
 programs run for about 0.1 to 2.5 s, so the delay decides how much of each run executes before the optimized code
 arrives. In a long-running service the delay is only a start-up transient, so the table overstates what the setting
-costs once a service is warm. With the delay at 100, 13 of the 17 programs are slower under the JIT and 11 under
+costs once a service is warm. With the delay at 100, 13 of the 17 programs measured are slower under the JIT and 11 under
 ReadyToRun; Startup is faster under both. Medians in ms, in-program time except Startup's process wall time; the
 ratio is delay 100 against delay 0:
 
@@ -437,7 +473,7 @@ Every use still reads `Version` and `Name`, so the Go function bodies are unchan
 The second and third bullets, and the URL-query reading, were measured against the direct field read; the accessor
 reads faster than that field.
 
-**Before and after, across the performance suite.** Of the [performance suite's](Performance.md) 17 programs, only
+**Before and after, across the performance suite.** Of the 17 [performance suite](Performance.md) programs measured, only
 StringMatch moves beyond measurement noise with `-hoist-literals`. The other 16 stay within noise under both the JIT
 and ReadyToRun, including TlsHandshake and StringView, which also get hoisted fields. Native AOT was timed for
 StringMatch only. Medians in ms, in-program time; the ratio is hoisted against plain:
@@ -494,9 +530,10 @@ describes both forms.
 
 ### Goroutine stacks
 
-Each goroutine runs on its own thread, and the thread reserves a fixed stack, because a .NET stack cannot grow the
-way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot recurse
-([how](ConversionStrategies.md#goroutines)). It is address space, not memory, but it is what a thread start pays for:
+By default, each goroutine other than `main` runs on its own thread, and the thread reserves a fixed stack, because a .NET stack
+cannot grow the way a Go stack does. The reserve is 256 MiB, or 16 MiB for a goroutine the converter proves cannot
+recurse ([how](ConversionStrategies.md#goroutines)). `main` runs on a thread that reserves 1 GiB, Go's own limit,
+and the settings below do not change it. It is address space, not memory, but it is what a thread start pays for:
 on `win-x64`, parking 100,000 goroutines at once took roughly five times as long with the 256 MiB reserve as with
 16 MiB. On `linux-x64`, at 10,000 goroutines, the reserve made no measurable difference, and a kernel limit on
 memory mappings, not the reserve, stopped thread creation at around 16,000.

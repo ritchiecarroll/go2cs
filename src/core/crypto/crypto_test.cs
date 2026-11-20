@@ -25,12 +25,15 @@ using global::go.io;
 using hash = hash_package;
 using iter = iter_package;
 using path;
+using static crypto_test_package;
 
 partial class crypto_test_package {
 
 partial struct messageSignerOnly {
     internal ж<rsa.PrivateKey> k;
 }
+
+} partial class crypto_testᴛmessageSignerOnly {
 
 internal static cryptoꓸPublicKey Public(this ref messageSignerOnly s) {
     return s.k.Public();
@@ -50,6 +53,8 @@ internal static (slice<byte>, error) SignMessage(this ref messageSignerOnly s, �
     var digest = h.Sum(default);
     return s.k.Sign(rand, digest, opts);
 }
+
+} partial class crypto_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string beginRsaTestingKeyˢ => ref beginRsaTestingKeyˢᵇ;

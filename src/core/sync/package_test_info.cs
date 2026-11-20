@@ -8,8 +8,6 @@ global using static global::go.sync_package;
 global using static global::go.sync_internal_test_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -43,8 +41,8 @@ using static global::go.sync_test_package;
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
 [assembly: GoBoundedGoroutine("cond_test.cs", 264, 9, 7)]
-[assembly: GoBoundedGoroutine("example_test.cs", 53, 9, 0)]
-[assembly: GoBoundedGoroutine("map_test.cs", 415, 9, 3)]
+[assembly: GoBoundedGoroutine("example_test.cs", 58, 9, 0)]
+[assembly: GoBoundedGoroutine("map_test.cs", 424, 9, 3)]
 [assembly: GoBoundedGoroutine("mutex_test.cs", 110, 13, 3)]
 [assembly: GoBoundedGoroutine("mutex_test.cs", 241, 9, 4)]
 [assembly: GoBoundedGoroutine("mutex_test.cs", 258, 9, 5)]
@@ -66,12 +64,12 @@ using static global::go.sync_test_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("sync/cond_test.go", "cond_test.cs", "ABIcgoKCgoKCgrKCgoKCpoKUgqTWgoKCgqTWlKaCgoKCgoKCsoKCgoKUgoKCpoKCgviCgoKCgoKCgrKCgoKClKaCgpSCgoKUpNaCgoKCgoKClKak1uaCgoKCooKCgoKUgoKClKKCgoKCgpSCgpSClKKCgoKCgpSUgpSCgpSClIKCpoKCgqaCooKCgpSmgoIAChaCkqaSgoKUuLiCgoK4ooKCgqaCgoKCoqSCpoKmgqaCpoKmgqaCgoKUgqKCgoKClIKCgpSUlIKCgoKmgg==", "21-27:1;59-65:1;87-95:1;135-146:1;147-161:2;162-181:3;194-201:1;217-219:2;221-227:3;242-247:1;285-306:1", "", "", "", "292:21,293:13")]
 [assembly: GoPositionMap("sync/example_pool_test.go", "example_pool_test.cs", "AA4eysqSpoKClIKCgoKCggAIBoI=")]
-[assembly: GoPositionMap("sync/example_test.go", "example_test.cs", "AA8evKKCypSUuKqigsqUlLSUorbWgoKClIKCooKmggAKEKKCgoKUgpSCgqKCgoKUpoIACw6SgoKUgoKigoKUgqaC", "30-33:1;52-57:1;65-67:1;70-73:2;85-92:1;95-102:2;113-116:1;119-126:2")]
+[assembly: GoPositionMap("sync/example_test.go", "example_test.cs", "ABIe3KKCypSUuKqigsqUlLSUorbWgoKClIKCooKmggAKEKKCgoKUgpSCgqKCgoKUpoIACw6SgoKUgoKigoKUgqaC", "30-33:1;52-57:1;65-67:1;70-73:2;85-92:1;95-102:2;113-116:1;119-126:2")]
 [assembly: GoPositionMap("sync/map_bench_test.go", "map_bench_test.cs", "ABUqgqKigoKmgpSCooLcgqSUgqaCyoLcgqSUgqaCyoIACAyCpJSClIKmgsqCgoKCpoIABxCClILKgtyClLiC3IKklIKUgqaCyoKCgpTugpSCyoLcgpS4goLugpSUgsqCAAUW0pSSgoKCgoIABhjSlJSCyoKUgoKClO6ClLiC3IKUuILcgqSUgqaCyoKCgpSC7oKklIKmgsqCgoKUgu6ClLiCgu6ClIKC7oKUuILcgqSUgqaCpoLKgoKClNyCpJSCpoLKgoKClNyClLiCgu6CpJSCpoKmgsqCgoKUgu6CpJSCpoLKgoKClILugpSCkoI=", "23-37:1;33-36:1.1;45-53:1;55-59:2;67-75:1;77-81:2;89-100:1;102-115:2;121-125:1;127-131:2;137-139:1;141-145:2;153-164:1;166-175:2;181-185:1;187-191:2;197-199:1;201-207:2;215-219:1;221-225:2;223-223:2.1;236-246:1;259-263:1;265-277:2;270-273:2.1;283-285:1;287-291:2;297-299:1;301-305:2;313-321:1;323-333:2;341-349:1;351-361:2;367-369:1;371-377:2;383-389:1;395-397:1;399-403:2;411-423:1;425-433:2;441-449:1;451-459:2;465-467:1;469-475:2;483-495:1;497-507:2;515-523:1;525-535:2;541-547:1")]
-[assembly: GoPositionMap("sync/map_reference_test.go", "map_reference_test.cs", "AB08goIABxLCgoKCpqKCgpSCpsKCgoKCgpSUgqbCgoKmgoKCpsKCgoKClIKCpqKCgqbSgoKCpoKCgpTm0oKCgqaCgoKU5rKCgoKUlIKCgpSCytKClKIAChSygoKmooKCgoKmwoKCgqaUgoKCgoKClIKmwoKCgoKCgqbCgoKCgoKCpqKCgoKCptKCgqaCgoKCgoKClObSgoKmgpSCgoKCgpTmgoKCgsqCgoKClKbSgpSi")]
-[assembly: GoPositionMap("sync/map_test.go", "map_test.cs", "ACtCABEkgqSkgqSkpIKkpIKClKSCgqakgqQACRKigoKUpoKCpKSmwoKCpoKSgqa2gqaCpoKmgqaCgriCgriCgriilIKCpoKCkoKUgoKC0oKCpMaCgpQACQ6CgpSClJKCgpSClIKmgsakgsqUuIKCgJKCggAICJKCgpSCpoCC7ICC/oKCgIKkuILKgoKCpoK4goKUuJKCgoKYgryilIKmgqKCosiCooKClLTIgqKCoraUlIKUuIKCgoKUgg==", "117-120:1;169-172:1;176-192:2;202-212:3;234-234:1;246-276:1;247-271:1.1;281-284:2;302-306:1;303-305:1.1;322-325:1;330-337:2;342-345:3;352-356:4;362-364:1", "", "", "", "204:21,205:13")]
+[assembly: GoPositionMap("sync/map_reference_test.go", "map_reference_test.cs", "AB48goIACRLCgoKCpqKCgpSCpsKCgoKCgpSUgqbCgoKmgoKCpsKCgoKClIKCpqKCgqbSgoKCpoKCgpTm0oKCgqaCgoKU5rKCgoKUlIKCgpSCytKClKIADhSygoKmooKCgoKmwoKCgqaUgoKCgoKClIKmwoKCgoKCgqbCgoKCgoKCpqKCgoKCptKCgqaCgoKCgoKClObSgoKmgpSCgoKCgpTmgoKCgsqCgoKClKbSgpSi")]
+[assembly: GoPositionMap("sync/map_test.go", "map_test.cs", "ACxCABMkgqSkgqSkpIKkpIKClKSCgqakgqQACxKigoKUxoKCpKTGwoKCpoKSgqa2gqaCpoKmgqaCgriCgriCgriilIKCpoKCkoKUgoKC0oKCpMaCgpQACQ6CgpSClJKCgpSClIKmgsakgsqUuIKCgJKCggAICJKCgpSCpoCC7ICC/oKCgIKkuILKgoKCpoK4goKUuJKCgoKYgryilIKmgqKCosiCooKClLTIgqKCoraUlIKUuIKCgoKUgg==", "117-120:1;169-172:1;176-192:2;202-212:3;234-234:1;246-276:1;247-271:1.1;281-284:2;302-306:1;303-305:1.1;322-325:1;330-337:2;342-345:3;352-356:4;362-364:1", "", "", "", "213:21,214:13")]
 [assembly: GoPositionMap("sync/mutex_test.go", "mutex_test.cs", "ABgqgoKClKaCgoKCgpSCuKKCgqbCgoKCgoKUgoKCoqSCgoKClJSClKaigpSUlIKClIKClJSCgpSCtOS+gtyCgoLcgtyCgtyCgoLcgtyCgtyCgoLKgoKygrKAkqKSgqaCAAkIgoKCgsqigoKCkoKCgoKk6oKSgoKClJTmxPSCioKCgsqigoKUgoKCgoKCgoK4uIKmgqaCpoKmruKSgoKCgoKCgoKClIK4kpTcisKSgoKCgoKCgoI=", "176-179:1;177-177:1.1;202-213:1;215-222:2;235-241:1;249-262:1;291-312:1;306-308:1.1;322-333:1", "", "", "239:21", "202:37,203:29")]
-[assembly: GoPositionMap("sync/once_test.go", "once_test.cs", "AA4cgqaigJKClKaCgoKCgoKUgpSCuIKCooKCpoK0pIK4goKSkoI=", "19-19:1;44-53:1;45-49:1.1;50-52:1.2;55-57:2;62-62:1;63-67:2", "", "", "", "52:25,53:17")]
+[assembly: GoPositionMap("sync/once_test.go", "once_test.cs", "ABEcgsaigJKClKaCgoKCgoKUgpSCuIKCooKCpoK0pIK4goKSkoI=", "19-19:1;44-53:1;45-49:1.1;50-52:1.2;55-57:2;62-62:1;63-67:2", "", "", "", "57:25,58:17")]
 [assembly: GoPositionMap("sync/oncefunc_test.go", "oncefunc_test.cs", "ABUokoKAkoKCgpSClJKUgriCgoKClIKAkoKClIKUgpSSlIK4goKCgpSCgJKCgpSClIKUkpSCuIKCgsrGgoKCooKUgqKSgpSUgriCgoKClKaCgoKClJC2goKCgpSQtoKCgoKUgqSUuKaCgoKUgoKCsoKAkqKSlIL4xpSCgpSCgoKmoqSC5oLUkLaQgJKQtpCAkpC2kIC2kICSkLaQgJKQtoKSgoKAkoKCgpSygJKikoKmlLKAkqLckoKoxv6CAA0GgoKClKaCgrimgriSgqaCgoLcAAcQgoKUppSCgoKSuIKCgpK4goKCgpK4goKCAAcWAAgWgoKClKaUgoKCgoKCuIKCgoKCgriCgoaCgoKCuIKCgg==", "22-22:1;31-33:2;41-44:1;46-46:2;57-59:3;67-70:1;72-72:2;83-85:3;92-96:1;105-111:1;106-108:1.1;124-127:1;133-136:1;137-137:2;142-145:1;146-146:2;151-154:1;155-161:2;168-171:1;175-179:2;177-177:2.1;192-201:1;211-213:1;212-212:1.1;214-217:2;215-215:2.1;216-216:2.2;218-221:3;219-219:3.1;220-220:3.2;222-224:4;223-223:4.1;225-228:5;226-226:5.1;227-227:5.2;229-232:6;230-230:6.1;231-231:6.2;235-258:7;238-238:7.1;244-247:7.2;245-245:7.2.1;254-257:7.3;255-255:7.3.1;280-280:1;284-290:1;291-299:2;300-309:3;305-305:3.1;310-315:4;313-313:4.1;328-330:1;336-343:1;344-351:2;352-360:3;354-354:3.1;361-366:4;364-364:4.1;387-390:1;396-405:1;406-415:2;416-428:3;418-420:3.1;429-436:4;432-434:4.1", "", "", "", "122:29,123:21,206:29,207:21,232:64,233:13,337:33,338:25,355:33,356:25")]
 [assembly: GoPositionMap("sync/pool_test.go", "pool_test.cs", "ABkqtIKCgsqCgoKAgqSAgqSAgqS4gqaCgIK2goCCxKS0lIKUgqaAgqSAgtqCgoCCpJSAgsSmkqiSpqIACBKmgoKCgpSSgoKAkpSCgri4gqaCxqSCgoKClIKCgpKCgoKUgoKCgqamgriCpoKmgoKCgpSCgoKSgoLKgoKSgoKCgoK4grjKgoKSgpSUgoKCgriUpoKCAAcQggALCIKigrSkgsKSgpSiksKSgqK2goKCgoLKgoKCgoKUggAFEKKCpoKCgoKUggAPEOSUgpSChJKCgqaUgriCgoKmgoKiAAgEAAkMgoCmkoKCgoKUkoKmgoKUgqaUgoKmlJSCog==", "68-71:1;126-126:1;158-172:1;196-201:1;206-222:2;228-243:3;263-267:1;270-276:2;277-281:3;286-291:1;296-305:1;316-325:1;371-371:1;376-380:2;383-402:3", "", "", "", "471:21,472:13")]
 [assembly: GoPositionMap("sync/runtime_sema_test.go", "runtime_sema_test.cs", "ABEagoqCgoLKwoKUgoKCkoKUlJKmgoKCgoKCgqaUgrSkgqaCpoKmgg==", "18-24:1;34-39:1;40-42:2;44-58:3", "", "", "", "47:25,48:17")]
@@ -143,3 +141,17 @@ public static partial class sync_test_package
         builtin.initPackage(typeof(global::go.sync_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sync_test_package.DeepCopyMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sync_testᴛDeepCopyMap;
+[GoMethodHost(typeof(sync_test_package.RWMutexMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sync_testᴛRWMutexMap;
+[GoMethodHost(typeof(sync_test_package.httpPkg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sync_testᴛhttpPkg;
+[GoMethodHost(typeof(sync_test_package.mapCall)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sync_testᴛmapCall;
+[GoMethodHost(typeof(sync_test_package.one)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sync_testᴛone;
+// </MethodHolders>

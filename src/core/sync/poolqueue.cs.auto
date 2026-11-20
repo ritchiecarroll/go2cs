@@ -12,6 +12,7 @@ namespace go;
 using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using go.sync;
+using static sync_package;
 
 partial class sync_package {
 
@@ -66,6 +67,8 @@ internal static UntypedInt dequeueLimit => /* (1 << dequeueBits) / 4 */ 10737418
 // Since we use nil to represent empty slots, we need a sentinel value
 // to represent nil.
 partial class dequeueNil /*ж<EmptyStruct>*/;
+
+} partial class syncᴛpoolDequeue {
 
 internal static (uint32 head, uint32 tail) unpack(this ref poolDequeue d, uint64 ptrs) {
     uint32 head = default;
@@ -197,6 +200,8 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
     return (val, true);
 }
 
+} partial class sync_package {
+
 // poolChain is a dynamically-sized version of poolDequeue.
 //
 // This is implemented as a doubly-linked list queue of poolDequeues
@@ -227,6 +232,8 @@ partial struct poolChainElt {
     // non-nil to nil.
     internal atomic.Pointer<poolChainElt> next, prev;
 }
+
+} partial class syncᴛpoolChain {
 
 internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -314,4 +321,4 @@ internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
     }
 }
 
-} // end sync_package
+} // end syncᴛpoolChain

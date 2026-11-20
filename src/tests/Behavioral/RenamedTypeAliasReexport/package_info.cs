@@ -10,8 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using wrapꓸEncoder = go.RenamedTypeAliasReexport.lib_package.ΔEncoder;
-global using wrapꓸKind = go.RenamedTypeAliasReexport.lib_package.ΔKind;
+global using wrapꓸEncoder = go.RenamedTypeAliasReexport.lib_package.Encoder;
+global using wrapꓸKind = go.RenamedTypeAliasReexport.lib_package.Kind;
 global using wrapꓸTok = go.RenamedTypeAliasReexport.lib_package.Tok;
 // </ImportedTypeAliases>
 

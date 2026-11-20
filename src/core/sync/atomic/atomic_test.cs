@@ -300,7 +300,7 @@ public static void TestSwapPointer(ж<testing.T> t) {
     @unsafe.Pointer j = default;
 
     foreach (var (_, p) in range(testPointers())) {
-        @unsafe.Pointer k = (uintptr)SwapPointer(Ꮡx.of(TestSwapPointer_x.Ꮡi), p);
+        @unsafe.Pointer k = SwapPointer(Ꮡx.of(TestSwapPointer_x.Ꮡi), p);
         if (x.i != p || k != j) {
             t.Fatalf("p=%p i=%p j=%p k=%p", @unsafe.Pointer.OrTypedNil(p), @unsafe.Pointer.OrTypedNil(x.i), @unsafe.Pointer.OrTypedNil(j), @unsafe.Pointer.OrTypedNil(k));
         }
@@ -325,7 +325,7 @@ public static void TestSwapPointerMethod(ж<testing.T> t) {
     x.after = magicptr;
     ж<byte> j = default;
     foreach (var (_, p) in range(testPointers())) {
-        var pΔ1 = (ж<byte>)(uintptr)(p);
+        var pΔ1 = @unsafe.Pointer.To<byte>(p);
         var k = Ꮡx.of(TestSwapPointerMethod_x.Ꮡi).Swap(pΔ1);
         if (Ꮡx.of(TestSwapPointerMethod_x.Ꮡi).Load() != pΔ1 || k != j) {
             t.Fatalf("p=%p i=%p j=%p k=%p", pΔ1.OrTypedNil(), Ꮡx.of(TestSwapPointerMethod_x.Ꮡi).Load().OrTypedNil(), j.OrTypedNil(), k.OrTypedNil());
@@ -1450,7 +1450,7 @@ public static void TestCompareAndSwapPointerMethod(ж<testing.T> t) {
     x.after = magicptr;
     var q = @new<byte>();
     foreach (var (_, p) in range(testPointers())) {
-        var pΔ1 = (ж<byte>)(uintptr)(p);
+        var pΔ1 = @unsafe.Pointer.To<byte>(p);
         Ꮡx.of(TestCompareAndSwapPointerMethod_x.Ꮡi).Store(pΔ1);
         if (!Ꮡx.of(TestCompareAndSwapPointerMethod_x.Ꮡi).CompareAndSwap(pΔ1, q)) {
             t.Fatalf("should have swapped %p %p", pΔ1.OrTypedNil(), q.OrTypedNil());
@@ -1722,7 +1722,7 @@ public static void TestLoadPointer(ж<testing.T> t) {
     x.after = magicptr;
     foreach (var (_, p) in range(testPointers())) {
         x.i = p;
-        @unsafe.Pointer k = (uintptr)LoadPointer(Ꮡx.of(TestLoadPointer_x.Ꮡi));
+        @unsafe.Pointer k = LoadPointer(Ꮡx.of(TestLoadPointer_x.Ꮡi));
         if (k != p) {
             t.Fatalf("p=%x k=%x", @unsafe.Pointer.OrTypedNil(p), @unsafe.Pointer.OrTypedNil(k));
         }
@@ -1745,7 +1745,7 @@ public static void TestLoadPointerMethod(ж<testing.T> t) {
     x.before = magicptr;
     x.after = magicptr;
     foreach (var (_, p) in range(testPointers())) {
-        var pΔ1 = (ж<byte>)(uintptr)(p);
+        var pΔ1 = @unsafe.Pointer.To<byte>(p);
         Ꮡx.of(TestLoadPointerMethod_x.Ꮡi).Store(pΔ1);
         var k = Ꮡx.of(TestLoadPointerMethod_x.Ꮡi).Load();
         if (k != pΔ1) {
@@ -2031,7 +2031,7 @@ public static void TestStorePointerMethod(ж<testing.T> t) {
     x.before = magicptr;
     x.after = magicptr;
     foreach (var (_, p) in range(testPointers())) {
-        var pΔ1 = (ж<byte>)(uintptr)(p);
+        var pΔ1 = @unsafe.Pointer.To<byte>(p);
         Ꮡx.of(TestStorePointerMethod_x.Ꮡi).Store(pΔ1);
         if (Ꮡx.of(TestStorePointerMethod_x.Ꮡi).Load() != pΔ1) {
             t.Fatalf("x.i=%p p=%p", Ꮡx.of(TestStorePointerMethod_x.Ꮡi).Load().OrTypedNil(), pΔ1.OrTypedNil());
@@ -2636,7 +2636,7 @@ public static partial void TestHammer64(ж<testing.T> t) {
 }
 
 internal static void hammerStoreLoadInt32(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<int32>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<int32>(paddr);
     var v = LoadInt32(addr);
     var vlo = (int32)(v & ((1 << 16) - 1));
     var vhi = v >> 16;
@@ -2651,7 +2651,7 @@ internal static void hammerStoreLoadInt32(ж<testing.T> t, @unsafe.Pointer paddr
 }
 
 internal static void hammerStoreLoadInt32Method(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<int32>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<int32>(paddr);
     var v = LoadInt32(addr);
     var vlo = (int32)(v & ((1 << 16) - 1));
     var vhi = v >> 16;
@@ -2666,7 +2666,7 @@ internal static void hammerStoreLoadInt32Method(ж<testing.T> t, @unsafe.Pointer
 }
 
 internal static void hammerStoreLoadUint32(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<uint32>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<uint32>(paddr);
     var v = LoadUint32(addr);
     var vlo = (uint32)(v & ((1 << 16) - 1));
     var vhi = v >> 16;
@@ -2681,7 +2681,7 @@ internal static void hammerStoreLoadUint32(ж<testing.T> t, @unsafe.Pointer padd
 }
 
 internal static void hammerStoreLoadUint32Method(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<atomic.Uint32>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<atomic.Uint32>(paddr);
     var v = addr.Load();
     var vlo = (uint32)(v & ((1 << 16) - 1));
     var vhi = v >> 16;
@@ -2696,7 +2696,7 @@ internal static void hammerStoreLoadUint32Method(ж<testing.T> t, @unsafe.Pointe
 }
 
 internal static void hammerStoreLoadInt64(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<int64>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<int64>(paddr);
     var v = LoadInt64(addr);
     var vlo = (int64)(v & (4294967295L));
     var vhi = v >> 32;
@@ -2708,7 +2708,7 @@ internal static void hammerStoreLoadInt64(ж<testing.T> t, @unsafe.Pointer paddr
 }
 
 internal static void hammerStoreLoadInt64Method(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<atomic.Int64>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<atomic.Int64>(paddr);
     var v = addr.Load();
     var vlo = (int64)(v & (4294967295L));
     var vhi = v >> 32;
@@ -2720,7 +2720,7 @@ internal static void hammerStoreLoadInt64Method(ж<testing.T> t, @unsafe.Pointer
 }
 
 internal static void hammerStoreLoadUint64(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<uint64>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<uint64>(paddr);
     var v = LoadUint64(addr);
     var vlo = (uint64)(v & ((uint64)((4294967296L) - 1)));
     var vhi = v >> 32;
@@ -2732,7 +2732,7 @@ internal static void hammerStoreLoadUint64(ж<testing.T> t, @unsafe.Pointer padd
 }
 
 internal static void hammerStoreLoadUint64Method(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<atomic.Uint64>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<atomic.Uint64>(paddr);
     var v = addr.Load();
     var vlo = (uint64)(v & ((uint64)((4294967296L) - 1)));
     var vhi = v >> 32;
@@ -2744,7 +2744,7 @@ internal static void hammerStoreLoadUint64Method(ж<testing.T> t, @unsafe.Pointe
 }
 
 internal static void hammerStoreLoadUintptr(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<uintptr>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<uintptr>(paddr);
     var v = LoadUintptr(addr);
     var @new = v;
     if (arch32) {
@@ -2771,7 +2771,7 @@ internal static void hammerStoreLoadUintptr(ж<testing.T> t, @unsafe.Pointer pad
 
 //go:nocheckptr
 internal static void hammerStoreLoadUintptrMethod(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<atomic.Uintptr>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<atomic.Uintptr>(paddr);
     var v = addr.Load();
     var @new = v;
     if (arch32) {
@@ -2801,8 +2801,8 @@ internal static void hammerStoreLoadUintptrMethod(ж<testing.T> t, @unsafe.Point
 //
 //go:nocheckptr
 internal static void hammerStoreLoadPointer(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<@unsafe.Pointer>)(uintptr)(paddr);
-    var v = (uintptr)(uintptr)LoadPointer(addr);
+    var addr = @unsafe.Pointer.To<@unsafe.Pointer>(paddr);
+    var v = (uintptr)LoadPointer(addr);
     var @new = v;
     if (arch32) {
         var vlo = (uintptr)(v & (uintptr)((1 << 16) - 1));
@@ -2831,7 +2831,7 @@ internal static void hammerStoreLoadPointer(ж<testing.T> t, @unsafe.Pointer pad
 //
 //go:nocheckptr
 internal static void hammerStoreLoadPointerMethod(ж<testing.T> t, @unsafe.Pointer paddr) {
-    var addr = (ж<atomic.Pointer<byte>>)(uintptr)(paddr);
+    var addr = @unsafe.Pointer.To<atomic.Pointer<byte>>(paddr);
     var v = (uintptr)addr.Load();
     var @new = v;
     if (arch32) {
@@ -2853,7 +2853,7 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> t, @unsafe.Point
         var inc = (uint64)(1 + 4294967296L);
         @new = v + (uintptr)inc;
     }
-    addr.Store((ж<byte>)(uintptr)((@unsafe.Pointer)@new));
+    addr.Store(@unsafe.Pointer.To<byte>((@unsafe.Pointer)@new));
 }
 
 public static partial void TestHammerStoreLoad(ж<testing.T> t) {

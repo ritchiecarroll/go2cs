@@ -189,7 +189,7 @@ internal static readonly object blockAndBlockGenericˢ = (@string)"block and blo
 // Tests that blockGeneric (pure Go) and block (in assembly for amd64, 386, arm) match.
 public static void TestBlockGeneric(ж<testing.T> t) {
     var (gen, asm) = (New()._<ж<global::go.crypto.md5_package.digest>>(), New()._<ж<global::go.crypto.md5_package.digest>>());
-    var buf = new slice<byte>(ΔBlockSize * 20); // arbitrary factor
+    var buf = new slice<byte>(BlockSize * 20); // arbitrary factor
     rand.Read(buf);
     blockGeneric(ref (gen).DerefOrNull(), buf);
     block(ref (asm).DerefOrNull(), buf);
@@ -265,7 +265,7 @@ public static void TestLargeHashes(ж<testing.T> t) {
 public static void TestAllocations(ж<testing.T> t) {
     cryptotest.SkipTestAllocations(t);
     var @in = slice<byte>("hello, world!"u8);
-    ref var @out = ref heap<slice<byte>>(new slice<byte>(0, ΔSize), out var Ꮡout);
+    ref var @out = ref heap<slice<byte>>(new slice<byte>(0, Size), out var Ꮡout);
     var h = New();
     var hʗ1 = h;
     var inʗ1 = @in;

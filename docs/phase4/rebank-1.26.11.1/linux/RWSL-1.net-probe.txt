@@ -1,0 +1,5 @@
+# The blackhole-dial probe COORD asked for before any R-WSL second read of net (COORD 2026-11-19 04:35Z).
+# A bash /dev/tcp connect to the test's slowDst4 address on port 1234, from R-WSL, with the default route present.
+2026-11-19T04:32:53Z  connect: Network is unreachable (immediately)  -- during RWSL-1, after row 6
+2026-11-19T06:48:41Z  connect: Network is unreachable (immediately)  -- after RWSL-1 ended
+# Still failing fast, so the R-WSL second read is SKIPPED, as ruled. The hosted linux-x64 row (P5) is the read of record.

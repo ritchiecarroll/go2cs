@@ -134,8 +134,8 @@ public static void TestUnaligned64(ж<testing.T> t) {
     var x = new slice<uint32>(4);
     @unsafe.Pointer u = (@unsafe.Pointer)((uintptr)((uintptr)Ꮡ(x, 0) | 4)); // force alignment to 4
 
-    var up64 = (ж<uint64>)(uintptr)(u); // misaligned
-    var p64 = (ж<int64>)(uintptr)(u);   // misaligned
+    var up64 = @unsafe.Pointer.To<uint64>(u); // misaligned
+    var p64 = @unsafe.Pointer.To<int64>(u);   // misaligned
 
     var up64ʗ1 = up64;
     shouldPanic(t, load64ˢ, () => {

@@ -484,7 +484,7 @@ public static void BenchmarkGoMapClear(ж<testing.B> b) {
                 var m = new map<nint, nint>(size);
                 for (nint i = 0; i < (~bΔ2).N; i++) {
                     m[0] = size; // Add one element so len(m) != 0 avoiding fast paths.
-                    builtin.clear(m);
+                    clear(m);
                 }
             });
         }
@@ -496,7 +496,7 @@ public static void BenchmarkGoMapClear(ж<testing.B> b) {
                 var m = new map<float64, nint>(size);
                 for (nint i = 0; i < (~bΔ4).N; i++) {
                     m[1.0D] = size; // Add one element so len(m) != 0 avoiding fast paths.
-                    builtin.clear(m);
+                    clear(m);
                 }
             });
         }
@@ -1198,7 +1198,7 @@ internal static void benchmarkMapAssignFillClear<K, E>(ж<testing.B> Ꮡb, nint 
 
     for (nint i = 0; i < b.N; i++) {
         if (rem(i, n) == 0) {
-            builtin.clear(m);
+            clear(m);
         }
         m[k[rem(i, n)]] = e[rem(i, n)];
     }
@@ -1432,7 +1432,7 @@ internal static void mapAccessEmptyBenchmark<K>(ж<testing.B> Ꮡb) {
     foreach (var (i, v) in range(genValues<K>(0, 1000))) {
         m[v] = (uint64)i;
     }
-    builtin.clear(m);
+    clear(m);
     K key = GoZero<K>();
     for (nint i = 0; i < b.N; i++) {
         sink = m[key];

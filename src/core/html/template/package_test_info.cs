@@ -16,7 +16,6 @@ using static global::go.html.template_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6120696e743b206220737472696e677d", "Δtype")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -49,7 +48,7 @@ using static global::go.html.template_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABsqooKClIKCgpSSgoKmAAkMAAgIAAgSpsqkgoLYAAgG6MrckoLcuKSCgtgADg4ACgjuprikgoKmgoK4goKUgoLqAA8MAAkI7qa47IKCpoKCyoKCpoKCyoKClIKC/A==", "90-94:1", "", "130=Join/1/2/1,Join/2/2/2", "41:25,121:27")]
-[assembly: GoPositionMap("html/template/template_test.go", "template_test.cs", "ABwglIKCgpSCpoKSgoKClIIACwiCgoKCpoKCgoKCAAoGgoKCgoLmgoKCgoLmgoKCgoKmgoKCgoIACgaCgoK4ggAIBoKCgoKCAAoGgoKCgoCCpICCpICCAAgIgoKCABYGlAALGKqSsqKCgIKkgoKAgqSCAAsMgoKCgoKClIKClAAHEILcgqaigoK4ooKCuKKCgoKUgg==", "147-160:1", "", "289=New/1/1/2")]
+[assembly: GoPositionMap("html/template/template_test.go", "template_test.cs", "AB0glIKCgpSCpoKSgoKClIIACwiCgoKCpoKCgoKCAAoGgoKCgoLmgoKCgoLmgoKCgoKmgoKCgoIACgaCgoK4ggAIBoKCgoKCAAoGgoKCgoCCpICCpICCAAgIgoKCABYGlAALGKqSsqKCgIKkgoKAgqSCAAsMgoKCgoKClIKClAAHEIL8gqaigoK4ooKCuKKCgoKUgg==", "147-160:1", "", "290=New/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.html;
@@ -105,3 +104,13 @@ public static partial class template_test_package
         builtin.initPackage(typeof(global::go.html.template_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(template_test_package.testCase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class template_testᴛtestCase;
+// </MethodHolders>

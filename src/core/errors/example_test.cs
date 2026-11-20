@@ -9,6 +9,7 @@ using fs = io.fs_package;
 using os = os_package;
 using time = time_package;
 using io;
+using static errors_test_package;
 
 partial class errors_test_package {
 
@@ -18,13 +19,17 @@ partial struct MyError {
     public @string What;
 }
 
+} partial class errors_testᴛMyError {
+
 public static @string Error(this MyError e) {
     return fmt.Sprintf("%v: %v"u8, e.When, e.What);
 }
 
+} partial class errors_test_package {
+
 internal static error oops() {
     return new MyError(
-        time.Date(1989, 3, 15, 22, 30, 0, 0, time.ΔUTC),
+        time.Date(1989, 3, 15, 22, 30, 0, 0, time.UTC),
         "the file system has gone away"
     );
 }
@@ -159,12 +164,16 @@ partial struct MyIsError {
     internal @string err;
 }
 
+} partial class errors_testᴛMyIsError {
+
 public static @string Error(this MyIsError e) {
     return e.err;
 }
 public static bool Is(this MyIsError e, error err) {
     return AreEqual(err, fs.ErrPermission);
 }
+
+} partial class errors_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object errorEqualsFsˢ = (@string)"Error equals fs.ErrPermission:"u8;
@@ -215,6 +224,8 @@ partial struct MyAsError {
     internal @string err;
 }
 
+} partial class errors_testᴛMyAsError {
+
 public static @string Error(this MyAsError e) {
     return e.err;
 }
@@ -230,6 +241,8 @@ public static bool As(this MyAsError e, any target) {
     ));
     return true;
 }
+
+} partial class errors_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object errorˢ = (@string)"Error:"u8;

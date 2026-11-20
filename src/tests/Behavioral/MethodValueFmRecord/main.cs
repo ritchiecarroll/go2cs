@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
+using static main_package;
 
 partial class main_package {
 
@@ -10,7 +11,11 @@ partial struct T {
     internal nint n;
 }
 
+} partial class mainᴛT {
+
 internal static nint valueMethod(this T t) { return t.n; }
+
+} partial class main_package {
 
 internal static @string nameOf(any fn) {
     var f = runtime.FuncForPC(reflect.ValueOf(fn).Pointer());
@@ -44,6 +49,8 @@ internal static void main() {
     call(() => tʗ3.walk());
 }
 
+} partial class mainᴛT {
+
 internal static partial nint walk(this T t) {
     var pc = new slice<uintptr>(8);
     var frames = runtime.CallersFrames(pc.slice(0, runtime.Callers(1, pc)));
@@ -55,6 +62,8 @@ internal static partial nint walk(this T t) {
         }
     }
 }
+
+} partial class main_package {
 
 internal static partial nint call(Func<nint> f) { return f(); }
 

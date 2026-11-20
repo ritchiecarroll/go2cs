@@ -9,6 +9,7 @@ using net = net_package;
 using strings = strings_package;
 using testing = testing_package;
 using static global::go.net.rpc_package;
+using static rpc_internal_test_package;
 
 partial class rpc_internal_test_package {
 
@@ -16,6 +17,8 @@ internal partial struct shutdownCodec {
     internal channel<nint> responded;
     internal bool closed;
 }
+
+} partial class rpc_internal_testᴛshutdownCodec {
 
 internal static error WriteRequest(this ref shutdownCodec c, ж<global::go.net.rpc_package.Request> _Δp1, any _Δp2) { return default; }
 internal static error ReadResponseBody(this ref shutdownCodec c, any _) { return default; }
@@ -31,6 +34,8 @@ internal static error Close(this ref shutdownCodec c) {
     c.closed = true;
     return default;
 }
+
+} partial class rpc_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object clientCloseDidNotCloseˢ = (@string)"client.Close did not close codec"u8;
@@ -53,12 +58,16 @@ public partial struct R {
 public partial struct S {
 }
 
+} partial class rpc_internal_testᴛS {
+
 public static error Recv(this ref S s, ж<EmptyStruct> nul, ж<R> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply = new R(slice<byte>("foo"u8));
     return default;
 }
+
+} partial class rpc_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noErrorˢ = (@string)"no error"u8;

@@ -9,6 +9,7 @@ using strings = strings_package;
 using goexperiment = go.@internal.goexperiment_package;
 using go.@internal;
 using iter = iter_package;
+using static buildcfg_package;
 
 partial class buildcfg_package {
 
@@ -71,14 +72,13 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
     // always on.
     bool regabiSupported = default;
     bool regabiAlwaysOn = default;
-    var exprᴛ1 = goarch;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "riscv64"u8: {
+    case {} when goarch == "amd64"u8 || goarch == "arm64"u8 || goarch == "loong64"u8 || goarch == "ppc64le"u8 || goarch == "ppc64"u8 || goarch == "riscv64"u8: {
         regabiAlwaysOn = true;
         regabiSupported = true;
         break;
     }
-    case {} when exprᴛ1 == "s390x"u8: {
+    case {} when goarch == "s390x"u8: {
         regabiSupported = true;
         break;
     }}
@@ -171,11 +171,15 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
     return (flags, default);
 }
 
+} partial class buildcfgᴛExperimentFlags {
+
 // String returns the canonical GOEXPERIMENT string to enable this experiment
 // configuration. (Experiments in the same state as in the baseline are elided.)
 public static @string String(this ж<ExperimentFlags> Ꮡexp) {
     return strings.Join(expList(Ꮡexp.ᏑFlags, Ꮡexp.Ꮡbaseline, false), ",");
 }
+
+} partial class buildcfg_package {
 
 // expList returns the list of lower-cased experiment names for
 // experiments that differ from base. base may be nil to indicate no
@@ -184,7 +188,7 @@ public static @string String(this ж<ExperimentFlags> Ꮡexp) {
 internal static slice<@string> expList(ж<goexperiment.Flags> exp, ж<goexperiment.Flags> @base, bool all) {
     slice<@string> list = default;
     var rv = reflect.ValueOf(exp.OrTypedNil()).Elem();
-    reflectꓸValue rBase = new(nil);
+    reflect.Value rBase = new(nil);
     if (@base != nil) {
         rBase = reflect.ValueOf(@base.OrTypedNil()).Elem();
     }
@@ -207,6 +211,8 @@ internal static slice<@string> expList(ж<goexperiment.Flags> exp, ж<goexperime
     return list;
 }
 
+} partial class buildcfgᴛExperimentFlags {
+
 // Enabled returns a list of enabled experiments, as
 // lower-cased experiment names.
 public static slice<@string> Enabled(this ж<ExperimentFlags> Ꮡexp) {
@@ -219,4 +225,4 @@ public static slice<@string> All(this ж<ExperimentFlags> Ꮡexp) {
     return expList(Ꮡexp.ᏑFlags, nil, true);
 }
 
-} // end buildcfg_package
+} // end buildcfgᴛExperimentFlags

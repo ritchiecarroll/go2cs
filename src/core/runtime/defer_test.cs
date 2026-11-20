@@ -9,6 +9,7 @@ using testing = testing_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -451,6 +452,8 @@ public static void TestIssue37688(ж<testing.T> t) {
 partial struct foo {
 }
 
+} partial class runtime_testᴛfoo {
+
 //go:noinline
 internal static partial void method1(this ref foo f) {
 }
@@ -458,6 +461,8 @@ internal static partial void method1(this ref foo f) {
 //go:noinline
 internal static partial void method2(this ref foo f) {
 }
+
+} partial class runtime_test_package {
 
 internal static void g2() {
     GoFrame ᒐ = default;

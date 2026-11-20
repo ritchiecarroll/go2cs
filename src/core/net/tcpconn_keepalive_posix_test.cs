@@ -11,7 +11,7 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-internal static (global::go.net_package.KeepAliveConfig cfg, error err) getCurrentKeepAliveSettings(syscallꓸHandle fd) {
+internal static (global::go.net_package.KeepAliveConfig cfg, error err) getCurrentKeepAliveSettings(fdType fd) {
     global::go.net_package.KeepAliveConfig cfg = default;
     error err = default;
 
@@ -33,14 +33,14 @@ internal static (global::go.net_package.KeepAliveConfig cfg, error err) getCurre
     }
     cfg = new KeepAliveConfig(
         Enable: tcpKeepAlive != 0,
-        Idle: ((time.Duration)(int64)tcpKeepAliveIdle) * time.ΔSecond,
-        Interval: ((time.Duration)(int64)tcpKeepAliveInterval) * time.ΔSecond,
+        Idle: ((time.Duration)(int64)tcpKeepAliveIdle) * time.Second,
+        Interval: ((time.Duration)(int64)tcpKeepAliveInterval) * time.Second,
         Count: tcpKeepAliveCount
     );
     return (cfg, err);
 }
 
-internal static void verifyKeepAliveSettings(ж<testing.T> t, syscallꓸHandle fd, global::go.net_package.KeepAliveConfig oldCfg, global::go.net_package.KeepAliveConfig cfg) {
+internal static void verifyKeepAliveSettings(ж<testing.T> t, fdType fd, global::go.net_package.KeepAliveConfig oldCfg, global::go.net_package.KeepAliveConfig cfg) {
     if (cfg.Idle == 0) {
         cfg.Idle = defaultTCPKeepAliveIdle;
     }
@@ -72,7 +72,7 @@ internal static void verifyKeepAliveSettings(ж<testing.T> t, syscallꓸHandle f
     if (err != nil) {
         t.Fatal(err);
     }
-    if (((time.Duration)(int64)tcpKeepAliveIdle) * time.ΔSecond != cfg.Idle) {
+    if (((time.Duration)(int64)tcpKeepAliveIdle) * time.Second != cfg.Idle) {
         t.Fatalf("TCP_KEEPIDLE: got %ds; want %v", tcpKeepAliveIdle, cfg.Idle);
     }
 
@@ -80,7 +80,7 @@ internal static void verifyKeepAliveSettings(ж<testing.T> t, syscallꓸHandle f
     if (err != nil) {
         t.Fatal(err);
     }
-    if (((time.Duration)(int64)tcpKeepAliveInterval) * time.ΔSecond != cfg.Interval) {
+    if (((time.Duration)(int64)tcpKeepAliveInterval) * time.Second != cfg.Interval) {
         t.Fatalf("TCP_KEEPINTVL: got %ds; want %v", tcpKeepAliveInterval, cfg.Interval);
     }
 

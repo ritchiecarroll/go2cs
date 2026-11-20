@@ -56,7 +56,7 @@ namespace go;
 /// never reaches the word.
 /// </para>
 /// </remarks>
-internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordArray<ж<E>>, IGoReflectBox
+internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordArray<ж<E>>, IGoReflectBox, INativeArrayStore<ж<E>>
 {
     private readonly nuint m_nativeAddr;
     private readonly NativePointerWords<E> m_words;
@@ -101,12 +101,22 @@ internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordAr
     // reflect's store of the pointee, `*p = arr` (Value.Elem().Set): Go's array assignment, N element stores. Each goes
     // through p[i]'s element door, so the whole store behaves exactly as `p[i] = arr[i]` for every i, refusals included:
     // a value that differs from the word is refused by name at the next access, and never reaches the word.
-    void IGoReflectBox.WriteBoxSlot(object? value)
-    {
-        array<ж<E>> source = (array<ж<E>>)value!;
+    void IGoReflectBox.WriteBoxSlot(object? value) => StoreElements((array<ж<E>>)value!);
 
-        for (nint i = 0; i < source.Length; i++)
+    // `*p = source` (ArrayExtensions.Assign over this box, and reflect's store above): min(N, len(source)) word stores
+    // through the element door, then the nil pointer for the rest (P5's C1). The source's own length never decides how
+    // far the words are written.
+    public void StoreElements(in array<ж<E>> source)
+    {
+        nint count = Math.Min(m_words.Length, source.Length);
+
+        for (nint i = 0; i < count; i++)
             m_words[i] = source[i];
+
+        // The nil pointer a word slot holds is null: mint answers null for a zero word, and a default array<ж<E>>
+        // element is null too. NilBox here would read as a CHANGED value on a zero word, refused at the next access.
+        for (nint i = count; i < m_words.Length; i++)
+            m_words[i] = default!;
     }
 
     private PanicException noMaterializableArray() =>

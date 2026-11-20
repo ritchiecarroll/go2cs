@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,18 +9,26 @@ partial struct validator {
     internal nint @base;
 }
 
+} partial class mainᴛvalidator {
+
 internal static nint check(this validator v, nint n) {
     return v.@base + n;
 }
+
+} partial class main_package {
 
 partial struct counter {
     internal nint n;
 }
 
+} partial class mainᴛcounter {
+
 internal static nint bump(this ref counter c, nint by) {
     c.n += by;
     return c.n;
 }
+
+} partial class main_package {
 
 internal static void main() {
     Func<nint, nint> fn = default;

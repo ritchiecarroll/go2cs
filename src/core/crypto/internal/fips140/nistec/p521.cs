@@ -10,6 +10,7 @@ using errors = errors_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
+using static nistec_package;
 
 partial class nistec_package {
 
@@ -32,6 +33,8 @@ public static ж<P521Point> NewP521Point() {
         z: @new<fiat.P521Element>()
     ));
 }
+
+} partial class nistecᴛP521Point {
 
 // SetGenerator sets p to the canonical generator and returns p.
 public static ж<P521Point> SetGenerator(this ж<P521Point> Ꮡp) {
@@ -120,6 +123,8 @@ public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byt
     }}
 }
 
+} partial class nistec_package {
+
 internal static ж<fiat.P521Element> _p521B;
 internal static readonly ж<sync.Once> Ꮡ_p521BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p521BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p521BOnce).ValueSlot;
@@ -156,6 +161,8 @@ internal static error p521CheckOnCurve(ж<fiat.P521Element> x, ж<fiat.P521Eleme
     }
     return default;
 }
+
+} partial class nistecᴛP521Point {
 
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
@@ -359,10 +366,14 @@ public static ж<P521Point> Select(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1,
     return Ꮡq;
 }
 
+} partial class nistec_package {
+
 // A p521Table holds the first 15 multiples of a point at offset -1, so [1]P
 // is at table[0], [15]P is at table[14], and [0]P is implicitly the identity
 // point.
 partial struct p521Table /*[15]ж<P521Point>*/;
+
+} partial class nistecᴛp521Table {
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
@@ -376,6 +387,8 @@ internal static void Select(this ref p521Table table, ж<P521Point> p, uint8 n) 
         p.Select(table.Value[(uint8)(i - 1)], p, cond);
     }
 }
+
+} partial class nistecᴛP521Point {
 
 // ScalarMult sets p = scalar * q, and returns p.
 public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) {
@@ -422,9 +435,13 @@ public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521
     return (Ꮡp, default);
 }
 
+} partial class nistec_package {
+
 internal static ж<array<p521Table>> p521GeneratorTable;
 internal static readonly ж<sync.Once> Ꮡp521GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p521GeneratorTableOnce => ref ((StaticBox<sync.Once>)Ꮡp521GeneratorTableOnce).ValueSlot;
+
+} partial class nistecᴛP521Point {
 
 // generatorTable returns a sequence of p521Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
@@ -446,6 +463,10 @@ internal static ж<array<p521Table>> generatorTable(this ref P521Point p) {
     });
     return p521GeneratorTable;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string invalidScalarLengthˢ => ref invalidScalarLengthˢᵇ;
+private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar length"u8;
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
@@ -480,6 +501,8 @@ public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, sli
 
     return (Ꮡp, default);
 }
+
+} partial class nistec_package {
 
 // p521Sqrt sets e to a square root of x. If x is not a square, p521Sqrt returns
 // false and e is unchanged. e and x can overlap.

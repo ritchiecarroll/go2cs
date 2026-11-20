@@ -19,6 +19,7 @@ using crypto;
 using go.net;
 using httptrace = go.net.http.httptrace_package;
 using vendor.golang.org.x.net.http;
+using static http_package;
 
 partial class http_package {
 
@@ -48,7 +49,7 @@ partial struct Response {
     // authoritative.
     //
     // Keys in the map are canonicalized (see CanonicalHeaderKey).
-    public ΔHeader Header;
+    public Header Header;
     // Body represents the response body.
     //
     // The response body is streamed on demand as the Body field
@@ -101,7 +102,7 @@ partial struct Response {
     //
     // After Body.Read has returned io.EOF, Trailer will contain
     // any trailer values sent by the server.
-    public ΔHeader Trailer;
+    public Header Trailer;
     // Request is the request that was sent to obtain this Response.
     // Request's Body is nil (having already been consumed).
     // This is only populated for Client requests.
@@ -110,17 +111,27 @@ partial struct Response {
     // response was received. It is nil for unencrypted responses.
     // The pointer is shared between responses and should not be
     // modified.
-    public ж<tlsꓸConnectionState> TLS;
+    public ж<tls.ConnectionState> TLS;
 }
 
+} partial class httpᴛResponse {
+
 // Cookies parses and returns the cookies set in the Set-Cookie headers.
-public static slice<ж<ΔCookie>> Cookies(this ref Response r) {
+public static slice<ж<Cookie>> Cookies(this ref Response r) {
     return readSetCookies(r.Header);
 }
+
+} partial class http_package {
 
 // ErrNoLocation is returned by the [Response.Location] method
 // when no Location header is present.
 public static error ErrNoLocation = errors.New("http: no Location header in response");
+
+} partial class httpᴛResponse {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string locationˢ => ref locationˢᵇ;
+private static readonly @string locationˢᵇ = "Location"u8;
 
 // Location returns the URL of the response's "Location" header,
 // if present. Relative redirects are resolved relative to
@@ -136,6 +147,8 @@ public static (ж<url.URL>, error) Location(this ref Response r) {
     }
     return url.Parse(lv);
 }
+
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string malformedHttpResponseˢ => ref malformedHttpResponseˢᵇ;
@@ -171,7 +184,7 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> r, ж<Request>
     resp.Status = strings.TrimLeft(status, " ");
 
     var (statusCode, _, _) = strings.Cut(resp.Status, " ");
-    if (builtin.len(statusCode) != 3) {
+    if (len(statusCode) != 3) {
         return (default, badStringError(malformedHttpStatusCodeˢ, statusCode));
     }
     (resp.StatusCode, err) = strconv.Atoi(statusCode);
@@ -190,7 +203,7 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> r, ж<Request>
         }
         return (default, err);
     }
-    resp.Header = (ΔHeader)(map<@string, slice<@string>>)mimeHeader;
+    resp.Header = (Header)(map<@string, slice<@string>>)mimeHeader;
 
     fixPragmaCacheControl(resp.Header);
 
@@ -215,13 +228,15 @@ private static readonly @string cacheControlˢᵇ = "Cache-Control"u8;
 // like
 //
 //	Cache-Control: no-cache
-internal static void fixPragmaCacheControl(ΔHeader header) {
-    var (hp, ok) = header[pragmaˢ, ꟷ]; if (ok && builtin.len(hp) > 0 && hp[0] == "no-cache") {
+internal static void fixPragmaCacheControl(Header header) {
+    var (hp, ok) = header[pragmaˢ, ꟷ]; if (ok && len(hp) > 0 && hp[0] == "no-cache") {
         var (_, presentcc) = header[cacheControlˢ, ꟷ]; if (!presentcc) {
             header[cacheControlˢ] = ["no-cache"];
         }
     }
 }
+
+} partial class httpᴛResponse {
 
 // ProtoAtLeast reports whether the HTTP protocol used
 // in the response is at least major.minor.
@@ -229,14 +244,18 @@ public static bool ProtoAtLeast(this ref Response r, nint major, nint minor) {
     return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentLength0ˢ => ref contentLength0ˢᵇ;
-private static readonly @string contentLength0ˢᵇ = "Content-Length: 0\r\n"u8;
+} partial class http_package {
 
 internal partial struct Write_r1 /*dyn*/ {
     /*embed*/ public io_package.Reader Reader;
     /*embed*/ public io_package.Closer Closer;
 }
+
+} partial class httpᴛResponse {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentLength0ˢ => ref contentLength0ˢᵇ;
+private static readonly @string contentLength0ˢᵇ = "Content-Length: 0\r\n"u8;
 
 // Write writes r to w in the HTTP/1.x server response format,
 // including the status line, headers, body, and optional trailer.
@@ -366,15 +385,21 @@ internal static bool isProtocolSwitch(this ref Response r) {
     return isProtocolSwitchResponse(r.StatusCode, r.Header);
 }
 
+} partial class http_package {
+
 // isProtocolSwitchResponse reports whether the response code and
 // response header indicate a successful protocol upgrade response.
-internal static bool isProtocolSwitchResponse(nint code, ΔHeader h) {
+internal static bool isProtocolSwitchResponse(nint code, Header h) {
     return code == StatusSwitchingProtocols && isProtocolSwitchHeader(h);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string upgradeˢ2 => ref upgradeˢ2ᵇ;
+private static readonly @string upgradeˢ2ᵇ = "Upgrade"u8;
+
 // isProtocolSwitchHeader reports whether the request or response header
 // is for a protocol switch.
-internal static bool isProtocolSwitchHeader(ΔHeader h) {
+internal static bool isProtocolSwitchHeader(Header h) {
     return h.Get(upgradeˢ2) != ""u8 && httpguts.HeaderValuesContainsToken(h[connectionˢ], upgradeˢ2);
 }
 

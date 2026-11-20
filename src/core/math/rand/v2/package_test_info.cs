@@ -8,7 +8,6 @@ global using static global::go.math.rand.rand_package;
 global using static global::go.math.rand.rand_internal_test_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +49,7 @@ using static global::go.math.rand.rand_test_package;
 [assembly: GoPositionMap("math/rand/v2/example_test.go", "example_test.cs", "ABUmogAVLAAaCvimgpKSuIKmpsqCgriCgqYADhqkgoIABxCUpuaCgpKUpoKClKKClIK4goKC", "56-58:1;119-121:1;129-132:1", "", "", "87:21")]
 [assembly: GoPositionMap("math/rand/v2/pcg_test.go", "pcg_test.cs", "AA0YooKCgpQACgaCgryCgoKmgoKCpoKClIKmgoKCuIKCABYugoI=")]
 [assembly: GoPositionMap("math/rand/v2/race_test.go", "race_test.cs", "AAwewpiCgoKCooKCgoKCgoKCgoKCgoKmosQ=", "24-42:1")]
-[assembly: GoPositionMap("math/rand/v2/rand_test.go", "rand_test.cs", "ABkwwgAMEoKCgpSmmMKCgoKUgoKClKaCgpKCgpSCgqaCgoKCgriCgoKCgoKClJQAAxCygoKClKamgoKmpqaqkoK4goKCgoKUgoKCgoIABhaygoKClKamgpSCgqampqqSgriCgoKCggAFFPKCvIKClIKCgoKCgoKCgoKCgpSmwoK8goKUgoKCgoKCgoKCgoKClKyygoKUlIKCpqyygoKUlIKCpqaCgoCCpICCpICCyIKCgIKkgIKkgIIACAiCpNqU1pS4gqaCgoKCypSCkoDOxIKCgoLKgoKCgpT4koKCgpSSpIKCuIIAChCClJCSuLLagoKUgoSSgoKmgoKCgpSCuIKCgoKCAAoWgqaigoKClKaigoKUpoKCgoKUuKKCgpSmgoKCgpS4ooKCgpTaooKUpqKCgoKUpqKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKUpqKCgoKUpqKCgoKUpqKCgoKUpqKCgoKUqKKCgoKUpqKCgoKCgpSQkpSqwoKCgoLcgoKCgoKigoK0pKaCgoKC", "365-365:1;400-463:1;413-413:1.1;414-414:1.2;415-422:1.3;420-420:1.3.1;426-461:1.4;493-499:1;511-517:1;739-739:1;750-754:1;763-768:1")]
+[assembly: GoPositionMap("math/rand/v2/rand_test.go", "rand_test.cs", "ABowwgAMEoKCgpSmuMKCgoKUgoKClMaCgpKCgpSCgqaCgoKCgriCgoKCgoKClJQAAxCygoKClKamgoKmpqaqkoK4goKCgoKUgoKCgoIABhaygoKClKamgpSCgqampqqSgriCgoKCggAFFPKCvIKClIKCgoKCgoKCgoKCgpSmwoK8goKUgoKCgoKCgoKCgoKClKyygoKUlIKCpqyygoKUlIKCpqaCgoCCpICCpICCyIKCgIKkgIKkgIIACAiCpNqU1pS4gqaCgoKCypSCkoDOxIKCgoLKgoKCgpT4koKCgpSSpIKCuIIAChCClJCSuLLagoKUgoSSgoKmgoKCgpSCuIKCgoKCAAoWgqaigoKClKaigoKUpoKCgoKUuKKCgpSmgoKCgpS4ooKCgpTaooKUpqKCgoKUpqKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKClKaigoKCgpSmooKCgoKUpqKCgoKUpqKCgoKUpqKCgoKUpqKCgoKUpqKCgoKUqKKCgoKUpqKCgoKCgpSQkpSqwoKCgoLcgoKCgoKigoK0pKaCgoKC", "365-365:1;400-463:1;413-413:1.1;414-414:1.2;415-422:1.3;420-420:1.3.1;426-461:1.4;493-499:1;511-517:1;739-739:1;750-754:1;763-768:1")]
 [assembly: GoPositionMap("math/rand/v2/regress_test.go", "regress_test.cs", "AB029KKCgoKClIKCgoKUgoKUgoKCgoKClIKCgoKClLaCgpSCuIKClIKUtoKUgoKCgpSClLa2trakgqaCgoKUgpSCgoKUgoKUlIKClIKClIKUgqamggAICKKCpoKSpoKClJKkooKCgpSCgqaCgoKCuKaCogACGAAKAoKCgoKUgoKUgoKUgoKClIK4", "161-163:1;172-177:2", "", "", "196:21,198:21", "187:21,188:13")]
 // </GoSourcePositionMaps>
 
@@ -107,3 +106,13 @@ public static partial class rand_test_package
         builtin.initPackage(typeof(global::go.math.rand.rand_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(rand_test_package.statsResults)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rand_testᴛstatsResults;
+// </MethodHolders>

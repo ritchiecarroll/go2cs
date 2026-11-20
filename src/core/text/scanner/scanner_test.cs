@@ -11,6 +11,7 @@ using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using static go.text.scanner_package;
+using static scanner_internal_test_package;
 
 partial class scanner_internal_test_package {
 
@@ -19,6 +20,8 @@ public partial struct StringReader {
     internal slice<@string> data;
     internal nint step;
 }
+
+} partial class scanner_internal_testᴛStringReader {
 
 public static (nint n, error err) Read(this ref StringReader r, slice<byte> p) {
     nint n = default;
@@ -33,6 +36,8 @@ public static (nint n, error err) Read(this ref StringReader r, slice<byte> p) {
     }
     return (n, err);
 }
+
+} partial class scanner_internal_test_package {
 
 internal static void readRuneSegments(ж<testing.T> t, slice<@string> segments) {
     @string got = ""u8;
@@ -191,26 +196,26 @@ internal static slice<token> tokenList = [
     new(Char, @"'\U0000ffAB'"),
 
     new(Comment, "// strings"),
-    new(ΔString, @""" """),
-    new(ΔString, @"""a"""),
-    new(ΔString, @"""本"""),
-    new(ΔString, @"""\a"""),
-    new(ΔString, @"""\b"""),
-    new(ΔString, @"""\f"""),
-    new(ΔString, @"""\n"""),
-    new(ΔString, @"""\r"""),
-    new(ΔString, @"""\t"""),
-    new(ΔString, @"""\v"""),
-    new(ΔString, @"""\"""""),
-    new(ΔString, @"""\000"""),
-    new(ΔString, @"""\777"""),
-    new(ΔString, @"""\x00"""),
-    new(ΔString, @"""\xff"""),
-    new(ΔString, @"""\u0000"""),
-    new(ΔString, @"""\ufA16"""),
-    new(ΔString, @"""\U00000000"""),
-    new(ΔString, @"""\U0000ffAB"""),
-    new(ΔString, @""""u8 + f100 + @""""u8),
+    new(String, @""" """),
+    new(String, @"""a"""),
+    new(String, @"""本"""),
+    new(String, @"""\a"""),
+    new(String, @"""\b"""),
+    new(String, @"""\f"""),
+    new(String, @"""\n"""),
+    new(String, @"""\r"""),
+    new(String, @"""\t"""),
+    new(String, @"""\v"""),
+    new(String, @"""\"""""),
+    new(String, @"""\000"""),
+    new(String, @"""\777"""),
+    new(String, @"""\x00"""),
+    new(String, @"""\xff"""),
+    new(String, @"""\u0000"""),
+    new(String, @"""\ufA16"""),
+    new(String, @"""\U00000000"""),
+    new(String, @"""\U0000ffAB"""),
+    new(String, @""""u8 + f100 + @""""u8),
 
     new(Comment, "// raw strings"),
     new(RawString, "``"),
@@ -397,7 +402,7 @@ public static void TestScanSelectedMask(ж<testing.T> t) {
     // the floats in the source look like (invalid) octal ints
     // and ScanNumbers may return either Int or Float.
     testScanSelectedMode(t, ScanChars, Char);
-    testScanSelectedMode(t, ScanStrings, ΔString);
+    testScanSelectedMode(t, ScanStrings, String);
     testScanSelectedMode(t, SkipComments, 0);
     testScanSelectedMode(t, ScanComments, Comment);
 }
@@ -506,6 +511,10 @@ internal static void testError(ж<testing.T> t, @string src, @string pos, @strin
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string input11ˢ => ref input11ˢᵇ;
 private static readonly @string input11ˢᵇ = "<input>:1:1"u8;
+internal static ref readonly @string invalidCharacterNulˢ => ref invalidCharacterNulˢᵇ;
+private static readonly @string invalidCharacterNulˢᵇ = "invalid character NUL"u8;
+internal static ref readonly @string invalidUtf8Encodingˢ => ref invalidUtf8Encodingˢᵇ;
+private static readonly @string invalidUtf8Encodingˢᵇ = "invalid UTF-8 encoding"u8;
 internal static ref readonly @string input12ˢ => ref input12ˢᵇ;
 private static readonly @string input12ˢᵇ = "<input>:1:2"u8;
 internal static ref readonly @string input13ˢ => ref input13ˢᵇ;
@@ -514,6 +523,8 @@ internal static ref readonly @string input14ˢ => ref input14ˢᵇ;
 private static readonly @string input14ˢᵇ = "<input>:1:4"u8;
 internal static ref readonly @string input15ˢ => ref input15ˢᵇ;
 private static readonly @string input15ˢᵇ = "<input>:1:5"u8;
+internal static ref readonly @string invalidCharEscapeˢ => ref invalidCharEscapeˢᵇ;
+private static readonly @string invalidCharEscapeˢᵇ = "invalid char escape"u8;
 internal static ref readonly @string input16ˢ => ref input16ˢᵇ;
 private static readonly @string input16ˢᵇ = "<input>:1:6"u8;
 internal static ref readonly @string invalidDigit8InOctalˢ => ref invalidDigit8InOctalˢᵇ;
@@ -522,12 +533,20 @@ internal static ref readonly @string input19ˢ => ref input19ˢᵇ;
 private static readonly @string input19ˢᵇ = "<input>:1:9"u8;
 internal static ref readonly @string hexadecimalLiteralHasNoˢ => ref hexadecimalLiteralHasNoˢᵇ;
 private static readonly @string hexadecimalLiteralHasNoˢᵇ = "hexadecimal literal has no digits"u8;
+internal static ref readonly @string invalidCharLiteralˢ => ref invalidCharLiteralˢᵇ;
+private static readonly @string invalidCharLiteralˢᵇ = "invalid char literal"u8;
+internal static ref readonly @string exponentHasNoDigitsˢ => ref exponentHasNoDigitsˢᵇ;
+private static readonly @string exponentHasNoDigitsˢᵇ = "exponent has no digits"u8;
+internal static ref readonly @string literalNotTerminatedˢ => ref literalNotTerminatedˢᵇ;
+private static readonly @string literalNotTerminatedˢᵇ = "literal not terminated"u8;
 internal static ref readonly @string abcˢ => ref abcˢᵇ;
 private static readonly @string abcˢᵇ = @"""abc"u8;
 internal static ref readonly @string abcˢ2 => ref abcˢ2ᵇ;
 private static readonly @string abcˢ2ᵇ = "`abc\n"u8;
 internal static ref readonly @string input21ˢ => ref input21ˢᵇ;
 private static readonly @string input21ˢᵇ = "<input>:2:1"u8;
+internal static ref readonly @string commentNotTerminatedˢ => ref commentNotTerminatedˢᵇ;
+private static readonly @string commentNotTerminatedˢᵇ = "comment not terminated"u8;
 
 public static void TestError(ж<testing.T> t) {
     testError(t, "\x00", input11ˢ, invalidCharacterNulˢ, 0);
@@ -538,16 +557,16 @@ public static void TestError(ж<testing.T> t) {
     testError(t, ((@string)(new byte[]{0x61, 0x62, 0x80})), input13ˢ, invalidUtf8Encodingˢ, Ident);
     testError(t, ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff})), input14ˢ, invalidUtf8Encodingˢ, Ident);
 
-    testError(t, @"""a"u8 + "\x00"u8, input13ˢ, invalidCharacterNulˢ, ΔString);
-    testError(t, @"""ab"u8 + ((@string)(new byte[]{0x80})), input14ˢ, invalidUtf8Encodingˢ, ΔString);
-    testError(t, @"""abc"u8 + ((@string)(new byte[]{0xff})), input15ˢ, invalidUtf8Encodingˢ, ΔString);
+    testError(t, @"""a"u8 + "\x00"u8, input13ˢ, invalidCharacterNulˢ, String);
+    testError(t, @"""ab"u8 + ((@string)(new byte[]{0x80})), input14ˢ, invalidUtf8Encodingˢ, String);
+    testError(t, @"""abc"u8 + ((@string)(new byte[]{0xff})), input15ˢ, invalidUtf8Encodingˢ, String);
 
     testError(t, "`a"u8 + "\x00"u8, input13ˢ, invalidCharacterNulˢ, RawString);
     testError(t, "`ab"u8 + ((@string)(new byte[]{0x80})), input14ˢ, invalidUtf8Encodingˢ, RawString);
     testError(t, "`abc"u8 + ((@string)(new byte[]{0xff})), input15ˢ, invalidUtf8Encodingˢ, RawString);
 
     testError(t, @"'\""'", input13ˢ, invalidCharEscapeˢ, Char);
-    testError(t, @"""\'""", input13ˢ, invalidCharEscapeˢ, ΔString);
+    testError(t, @"""\'""", input13ˢ, invalidCharEscapeˢ, String);
 
     testError(t, @"01238", input16ˢ, invalidDigit8InOctalˢ, Int);
     testError(t, @"01238123", input19ˢ, invalidDigit8InOctalˢ, Int);
@@ -561,8 +580,8 @@ public static void TestError(ж<testing.T> t) {
 
     testError(t, @"'", input12ˢ, literalNotTerminatedˢ, Char);
     testError(t, @"'"u8 + "\n"u8, input12ˢ, literalNotTerminatedˢ, Char);
-    testError(t, abcˢ, input15ˢ, literalNotTerminatedˢ, ΔString);
-    testError(t, @"""abc"u8 + "\n"u8, input15ˢ, literalNotTerminatedˢ, ΔString);
+    testError(t, abcˢ, input15ˢ, literalNotTerminatedˢ, String);
+    testError(t, @"""abc"u8 + "\n"u8, input15ˢ, literalNotTerminatedˢ, String);
     testError(t, abcˢ2, input21ˢ, literalNotTerminatedˢ, RawString);
     testError(t, @"/*/", input14ˢ, commentNotTerminatedˢ, EOF);
 }
@@ -571,9 +590,13 @@ public static void TestError(ж<testing.T> t) {
 internal partial struct errReader {
 }
 
+} partial class scanner_internal_testᴛerrReader {
+
 internal static (nint, error) Read(this errReader _, slice<byte> b) {
     return (0, io.ErrNoProgress); // some error that is not io.EOF
 }
+
+} partial class scanner_internal_test_package {
 
 public static void TestIOError(ж<testing.T> t) {
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new errReader());
@@ -713,10 +736,14 @@ public static void TestPos(ж<testing.T> t) {
 
 internal partial struct countReader /*num:nint*/;
 
+} partial class scanner_internal_testᴛcountReader {
+
 internal static (nint, error) Read(this ref countReader r, slice<byte> _) {
     r++;
     return (0, io.EOF);
 }
+
+} partial class scanner_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object eofNotReportedˢ = (@string)"1) EOF not reported"u8;

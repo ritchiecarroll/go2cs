@@ -6,6 +6,7 @@ namespace go.text.template;
 using fmt = fmt_package;
 using testing = testing_package;
 using static go.text.template.parse_package;
+using static parse_internal_test_package;
 
 partial class parse_internal_test_package {
 
@@ -47,6 +48,8 @@ internal static map<global::go.text.template.parse_package.itemType, @string> it
     [itemWith] = "with"
 };
 
+} partial class parse_internal_testᴛitemType {
+
 internal static @string String(this global::go.text.template.parse_package.itemType i) {
     @string s = itemName[i];
     if (s == ""u8) {
@@ -54,6 +57,8 @@ internal static @string String(this global::go.text.template.parse_package.itemT
     }
     return s;
 }
+
+} partial class parse_internal_test_package {
 
 internal partial struct lexTest {
     internal @string name;
@@ -402,7 +407,7 @@ internal static slice<global::go.text.template.parse_package.item> /*items*/ col
     );
     for (;;) {
         var item = l.nextItem();
-        items = builtin.append(items, item);
+        items = append(items, item);
         if (item.typ == itemEOF || item.typ == itemError) {
             break;
         }

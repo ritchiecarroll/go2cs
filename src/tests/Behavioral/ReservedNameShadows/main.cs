@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -57,11 +58,15 @@ partial struct box {
     internal slice<nint> items;
 }
 
+} partial class mainᴛbox {
+
 internal static nint len(this ref box b) { return builtin.len(b.items) + 1; }
+
+} partial class main_package {
 
 internal static nint freeLen() {
     var s = slice<nint>([1, 2, 3]);
-    return builtin.len(s);
+    return len(s);
 }
 
 internal static nint nilShadow() {
@@ -93,7 +98,7 @@ internal static nint viewLen(slice<byte> b) {
     if (s == "ok"u8) {
         return Δsstring;
     }
-    return builtin.len(s) + Δsstring;
+    return len(s) + Δsstring;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -112,7 +117,7 @@ internal static void main() {
     var sc = new @scoped(b: 2);
     var rc = new record(a: 1);
     var bx = new box(items: [4, 5]);
-    fmt.Println(a.x, builtin.len(vals), vals[1], (nint)c, r.r, n.d, bi.z, sv.n, rq.c, sc.b, rc.a);
+    fmt.Println(a.x, len(vals), vals[1], (nint)c, r.r, n.d, bi.z, sv.n, rq.c, sc.b, rc.a);
     var (pd, es) = predeclLocals();
     fmt.Println(freeLen(), bx.len(), nilShadow(), keywordLocals(), pd, es, viewLen(slice<byte>("xyz"u8)), deferInShadowedPackage());
 }

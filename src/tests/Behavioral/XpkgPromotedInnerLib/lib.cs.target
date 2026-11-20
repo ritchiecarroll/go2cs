@@ -1,6 +1,7 @@
 namespace go;
 
 using runtime = runtime_package;
+using static XpkgPromotedInnerLib_package;
 
 partial class XpkgPromotedInnerLib_package {
 
@@ -11,6 +12,8 @@ partial struct Token {
 partial struct Inner {
     public nint X;
 }
+
+} partial class XpkgPromotedInnerLibᴛInner {
 
 public static Token Tok(this Inner i) { return new Token(i.X); }
 public static @string Name(this Inner i) { return "inner"; }
@@ -24,4 +27,4 @@ public static partial bool Where(this Inner i) {
     return ok;
 }
 
-} // end XpkgPromotedInnerLib_package
+} // end XpkgPromotedInnerLibᴛInner

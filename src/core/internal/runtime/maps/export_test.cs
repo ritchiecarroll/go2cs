@@ -9,6 +9,7 @@ using abi = go.@internal.abi_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 using static go.@internal.runtime.maps_package;
+using static maps_internal_test_package;
 
 partial class maps_internal_test_package {
 
@@ -24,19 +25,21 @@ public static UntypedInt MaxAvgGroupLoad => /* maxAvgGroupLoad */ 7;
 // we can't properly test hint alloc overflows with this.
 internal static UntypedInt maxAllocTest => /* 1 << 30 */ 1073741824;
 
-internal static ж<abiꓸMapType> newTestMapType<K, V>() {
+internal static ж<abi.MapType> newTestMapType<K, V>() {
     map<K, V> m = default;
     var mTyp = abi.TypeOf(m);
-    var mt = mTyp.Reinterpret<abi.Type, abiꓸMapType>();
+    var mt = mTyp.Reinterpret<abi.Type, abi.MapType>();
     return mt;
 }
 
-public static (ж<global::go.@internal.runtime.maps_package.ΔMap>, ж<abiꓸMapType>) NewTestMap<K, V>(uintptr hint) {
+public static (ж<global::go.@internal.runtime.maps_package.Map>, ж<abi.MapType>) NewTestMap<K, V>(uintptr hint) {
     var mt = newTestMapType<K, V>();
     return (NewMap(mt, hint, nil, maxAllocTest), mt);
 }
 
-internal static nint TableCount(this ref global::go.@internal.runtime.maps_package.ΔMap m) {
+} partial class maps_internal_testᴛMap {
+
+internal static nint TableCount(this ref global::go.@internal.runtime.maps_package.Map m) {
     if (m.dirLen <= 0) {
         return 0;
     }
@@ -44,7 +47,7 @@ internal static nint TableCount(this ref global::go.@internal.runtime.maps_packa
 }
 
 // Total group count, summed across all tables.
-internal static uint64 GroupCount(this ref global::go.@internal.runtime.maps_package.ΔMap m) {
+internal static uint64 GroupCount(this ref global::go.@internal.runtime.maps_package.Map m) {
     if (m.dirLen <= 0) {
         if (m.dirPtr == nil) {
             return 0;
@@ -70,7 +73,7 @@ internal static uint64 GroupCount(this ref global::go.@internal.runtime.maps_pac
 // Returns nil if there are no full groups.
 // Returns nil if a group is full but contains entirely deleted slots.
 // Returns nil if the map is small.
-internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
+internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.runtime.maps_package.Map m, ж<abi.MapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.dirLen <= 0) {
@@ -97,9 +100,9 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
                 if (g.ctrls().get(j) == ctrlDeleted) {
                     continue;
                 }
-                @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, j);
+                @unsafe.Pointer slotKey = g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
-                    slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
+                    slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
                 }
                 return slotKey;
             }
@@ -110,7 +113,7 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
 }
 
 // Returns nil if the map is small.
-internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(this ref global::go.@internal.runtime.maps_package.Map m, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.dirLen <= 0) {
@@ -121,6 +124,8 @@ internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(thi
     var idx = m.directoryIndex(hash);
     return m.directoryAt(idx);
 }
+
+} partial class maps_internal_testᴛtable {
 
 internal static uint64 GrowthLeft(this ref global::go.@internal.runtime.maps_package.table t) {
     return (uint64)t.growthLeft;
@@ -136,4 +141,4 @@ internal static uintptr GroupsLength(this ref global::go.@internal.runtime.maps_
     return (uintptr)(t.groups.lengthMask + 1);
 }
 
-} // end maps_internal_test_package
+} // end maps_internal_testᴛtable

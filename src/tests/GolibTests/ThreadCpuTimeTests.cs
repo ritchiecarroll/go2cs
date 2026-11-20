@@ -6,6 +6,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go.golib;
@@ -69,18 +70,61 @@ public class ThreadCpuTimeTests
         }
     }
 
+    // The spinner's work is a fixed count of chunks, each a fixed run of a serial xorshift chain: every step depends on
+    // the one before and the result is published, so the JIT cannot shorten it. Optimized from the first call, so the
+    // first chunk runs the same code as the last.
+    private const int SpinChunks = 2000;
+    private const int SpinChunkSteps = 1 << 16;
+    private static ulong s_spinSink;
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+    private static ulong SpinChunk(ulong state)
+    {
+        for (int i = 0; i < SpinChunkSteps; i++)
+        {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+        }
+
+        return state;
+    }
+
     [TestMethod]
     public void ASpinningThreadsCpuTimeAdvancesWithItsWallTime()
     {
+        // The CPU reading is bounded by the spinner's own work, not by a wall window: on a shared core (another
+        // process on it, a VM whose host is busy) a spinner is runnable for its whole wall time and runs for only
+        // part of it, so a bound against wall time measures the machine's load, not the clock.
+        long fastestChunk = long.MaxValue;
+        ulong state = 0x9E3779B97F4A7C15UL;
+
         (TimeSpan cpu, TimeSpan wall) = Measure(() =>
         {
-            Stopwatch spin = Stopwatch.StartNew();
+            for (int chunk = 0; chunk < SpinChunks; chunk++)
+            {
+                long start = Stopwatch.GetTimestamp();
+                state = SpinChunk(state);
+                long elapsed = Stopwatch.GetTimestamp() - start;
 
-            while (spin.ElapsedMilliseconds < 200)
-                Thread.SpinWait(64);
+                if (elapsed < fastestChunk)
+                    fastestChunk = elapsed;
+            }
+
+            Volatile.Write(ref s_spinSink, state);
         });
 
-        Assert.IsTrue(cpu >= wall * 0.8 - Tick, $"a spinner used {cpu.TotalMilliseconds:F1} ms of CPU in {wall.TotalMilliseconds:F1} ms");
+        // Preemption, a lost VM slice or a slower core only lengthen a chunk's wall time, so the fastest chunk is
+        // one that ran without interruption, on the fastest core the thread saw. Every chunk does the same work,
+        // so the whole run cost the thread at least SpinChunks of those.
+        TimeSpan fastest = TimeSpan.FromSeconds((double)fastestChunk / Stopwatch.Frequency);
+        TimeSpan work = fastest * SpinChunks;
+        Console.WriteLine($"work {work.TotalMilliseconds:F2} ms ({SpinChunks} chunks, fastest {fastest.TotalMilliseconds:F4} ms)");
+
+        Assert.IsTrue(cpu >= work * 0.8 - Tick, $"a spinner used {cpu.TotalMilliseconds:F1} ms of CPU for {work.TotalMilliseconds:F1} ms of work, in {wall.TotalMilliseconds:F1} ms");
+
+        // One thread cannot use more CPU time than the wall time it ran in.
+        Assert.IsTrue(cpu <= wall + Tick, $"a spinner used {cpu.TotalMilliseconds:F1} ms of CPU in {wall.TotalMilliseconds:F1} ms");
     }
 
     [TestMethod]

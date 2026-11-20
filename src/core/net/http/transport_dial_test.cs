@@ -21,6 +21,7 @@ using global::go.testing;
 using static global::go.net.http_internal_test_package;
 using time = time_package;
 using ꓸꓸꓸany = Span<any>;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -463,7 +464,7 @@ internal static ж<transportDialTester> newTransportDialTester(ж<testing.T> t, 
 
     var dialContextʗ1 = dialContext;
     var dtʗ2 = dt;
-    dt.cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    dt.cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         // Write response headers when we receive a request.
         Δhttp.NewResponseController(w).EnableFullDuplex();
         w.WriteHeader(200);
@@ -503,9 +504,17 @@ internal static ж<transportDialTester> newTransportDialTester(ж<testing.T> t, 
     return dt;
 }
 
+} partial class http_testᴛtransportDialTester {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fakeTldˢ => ref fakeTldˢᵇ;
 private static readonly @string fakeTldˢᵇ = "fake.tld"u8;
+internal static ref readonly @string postˢ => ref postˢᵇ;
+private static readonly @string postˢᵇ = "POST"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
+internal static ref readonly @string textPlainˢ => ref textPlainˢᵇ;
+private static readonly @string textPlainˢᵇ = "text/plain"u8;
 
 // roundTrip starts a RoundTrip.
 // It returns immediately, without waiting for the RoundTrip call to complete.
@@ -528,7 +537,7 @@ internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<trans
         }}
     }
     ref var ctx = ref heap<context.Context>(out var Ꮡctx);
-    (ctx, var cancel) = context_package.WithCancel(context_package.Background());
+    (ctx, var cancel) = context.WithCancel(context.Background());
     var (pr, pw) = io.Pipe();
     dt.roundTripCount++;
     var rt = Ꮡ(new transportDialTesterRoundTrip(
@@ -565,6 +574,8 @@ internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<trans
     });
     return rt;
 }
+
+} partial class http_testᴛtransportDialTesterRoundTrip {
 
 // wantDone indicates that a RoundTrip should have returned.
 internal static void wantDone(this ref transportDialTesterRoundTrip rt, ж<transportDialTesterConn> Ꮡc, @string wantProto) {
@@ -629,6 +640,8 @@ internal static void finish(this ref transportDialTesterRoundTrip rt) {
     rt.t.Logf("RoundTrip %v: closed request body", rt.roundTripID);
 }
 
+} partial class http_testᴛtransportDialTester {
+
 // wantDial waits for the Transport to start a Dial.
 internal static ж<transportDialTesterConn> wantDial(this ж<transportDialTester> Ꮡdt) {
     GoFrame ᒐ = default;
@@ -654,12 +667,14 @@ internal static ж<transportDialTesterConn> wantDial(this ж<transportDialTester
     finally { if (ᒐd1) Ꮡdt.DerefOrNull().dialsMu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class http_testᴛtransportDialTesterConn {
+
 // finish completes a Dial.
 internal static void finish(this ref transportDialTesterConn c, error err) {
     c.t.Helper();
     c.t.Logf("Dial %v: finished (err:%v)", c.connID, err);
     c.ready.ᐸꟷ(err);
-    builtin.close(c.ready);
+    close(c.ready);
 }
 
 internal static partial void wantClosed(this ref transportDialTesterConn c) {
@@ -675,10 +690,10 @@ internal static error Close(this ref transportDialTesterConn c) {
     }
     default: {
         c.t.Logf("Conn %v: closed", c.connID);
-        builtin.close(c.closed);
+        close(c.closed);
         break;
     }}
     return default;
 }
 
-} // end http_test_package
+} // end http_testᴛtransportDialTesterConn

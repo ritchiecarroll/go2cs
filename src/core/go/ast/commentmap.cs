@@ -11,6 +11,7 @@ using slices = slices_package;
 using strings = strings_package;
 using global::go.go;
 using io = io_package;
+using static ast_package;
 
 partial class ast_package {
 
@@ -24,6 +25,8 @@ internal static void sortComments(slice<ж<CommentGroup>> list) {
 // the association.
 partial struct CommentMap /*map[Node, slice<ж<CommentGroup>>]*/;
 
+} partial class astᴛCommentMap {
+
 internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> c) {
     var list = cmap[n];
     if (len(list) == 0) {
@@ -33,6 +36,8 @@ internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> c
     }
     cmap[n] = list;
 }
+
+} partial class ast_package {
 
 // nodeList returns the list of nodes of the AST n in source order.
 internal static slice<Node> nodeList(Node n) {
@@ -70,8 +75,10 @@ partial struct commentListReader {
     internal slice<ж<CommentGroup>> list;
     internal nint index;
     internal ж<CommentGroup> comment; // comment group at current index
-    internal tokenꓸPosition pos, end; // source interval of comment group at current index
+    internal token.Position pos, end; // source interval of comment group at current index
 }
+
+} partial class astᴛcommentListReader {
 
 internal static bool eol(this ref commentListReader r) {
     return r.index >= len(r.list);
@@ -86,9 +93,13 @@ internal static void next(this ref commentListReader r) {
     }
 }
 
+} partial class ast_package {
+
 // A nodeStack keeps track of nested nodes.
 // A node lower on the stack lexically contains the nodes higher on the stack.
 partial struct nodeStack /*[]Node*/;
+
+} partial class astᴛnodeStack {
 
 // push pops all nodes that appear lexically before n
 // and then pushes n on the stack.
@@ -100,7 +111,7 @@ internal static void push(this ref nodeStack s, Node n) {
 // pop pops all nodes that appear lexically before pos
 // (i.e., whose lexical extent has ended before or at pos).
 // It returns the last node popped.
-internal static Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
+internal static Node /*top*/ pop(this ref nodeStack s, token.Pos pos) {
     Node top = default;
 
     nint i = len(s);
@@ -111,6 +122,8 @@ internal static Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
     s = (s).slice(0, i);
     return top;
 }
+
+} partial class ast_package {
 
 // NewCommentMap creates a new comment map by associating comment groups
 // of the comments list with the nodes of the AST specified by node.
@@ -149,13 +162,13 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
 
     // set up iteration variables
     Node p = default;               // previous node
-    tokenꓸPosition pend = default;  // end of p
+    token.Position pend = default;  // end of p
     Node pg = default;              // previous node group (enclosing nodes of "importance")
-    tokenꓸPosition pgend = default; // end of pg
+    token.Position pgend = default; // end of pg
     nodeStack stack = default;      // stack of node groups
 
     foreach (var (_, q) in range(nodes)) {
-        tokenꓸPosition qpos = default;
+        token.Position qpos = default;
         if (q != nil) {
             qpos = fset.Position(q.Pos()); // current node position
         } else {
@@ -231,6 +244,8 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
     return cmap;
 }
 
+} partial class astᴛCommentMap {
+
 // Update replaces an old node in the comment map with the new node
 // and returns the new node. Comments that were associated with the
 // old node are associated with the new node.
@@ -268,6 +283,8 @@ public static slice<ж<CommentGroup>> Comments(this CommentMap cmap) {
     sortComments(list);
     return list;
 }
+
+} partial class ast_package {
 
 internal static @string summary(slice<ж<CommentGroup>> list) {
     UntypedInt maxLen = 40;
@@ -308,6 +325,8 @@ break_loop:;
     return (@string)bytesΔ1;
 }
 
+} partial class astᴛCommentMap {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object commentMapˢ = (@string)"CommentMap {"u8;
 
@@ -344,4 +363,4 @@ public static @string String(this CommentMap cmap) {
     return buf.String();
 }
 
-} // end ast_package
+} // end astᴛCommentMap

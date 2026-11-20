@@ -12,11 +12,12 @@ using testing = testing_package;
 using time = time_package;
 using go.net;
 using static go.net.http.cookiejar_package;
+using static cookiejar_internal_test_package;
 
 partial class cookiejar_internal_test_package {
 
 // tNow is the synthetic current time used as now during testing.
-internal static time.Time tNow = time.Date(2013, 1, 1, 12, 0, 0, 0, time.ΔUTC);
+internal static time.Time tNow = time.Date(2013, 1, 1, 12, 0, 0, 0, time.UTC);
 
 // testPSL implements PublicSuffixList with just two rules: "co.uk"
 // and the default rule "*".
@@ -26,6 +27,8 @@ internal static time.Time tNow = time.Date(2013, 1, 1, 12, 0, 0, 0, time.ΔUTC);
 //	PublicSuffix("www2.buggy.psl") == "com"
 internal partial struct testPSL {
 }
+
+} partial class cookiejar_internal_testᴛtestPSL {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testPSLˢ => ref testPSLˢᵇ;
@@ -54,6 +57,8 @@ internal static @string PublicSuffix(this testPSL _, @string d) {
     }
     return d.slice(strings.LastIndex(d, ".") + 1);
 }
+
+} partial class cookiejar_internal_test_package {
 
 // newTestJar creates an empty Jar with testPSL as the public suffix list.
 internal static ж<global::go.net.http.cookiejar_package.Jar> newTestJar() {
@@ -363,7 +368,7 @@ public static void TestDomainAndType(ж<testing.T> t) {
 
 // expiresIn creates an expires attribute delta seconds from tNow.
 internal static @string expiresIn(nint delta) {
-    var t = tNow.Add(((time.Duration)(int64)delta) * time.ΔSecond);
+    var t = tNow.Add(((time.Duration)(int64)delta) * time.Second);
     return "expires="u8 + t.Format(time.RFC1123);
 }
 
@@ -398,6 +403,8 @@ internal partial struct query {
     internal @string want;  // the expected list of cookies (order matters)
 }
 
+} partial class cookiejar_internal_testᴛjarTest {
+
 // run runs the jarTest.
 internal static void run(this jarTest test, ж<testing.T> t, ж<global::go.net.http.cookiejar_package.Jar> Ꮡjar) {
     ref var jar = ref Ꮡjar.DerefOrNull();
@@ -407,9 +414,9 @@ internal static void run(this jarTest test, ж<testing.T> t, ж<global::go.net.h
     var now = tNow;
 
     // Populate jar with cookies.
-    var setCookies = new slice<ж<httpꓸCookie>>(len(test.setCookies));
+    var setCookies = new slice<ж<http.Cookie>>(len(test.setCookies));
     foreach (var (i, csΔ1) in range(test.setCookies)) {
-        var cookies = (Ꮡ(new http.Response(Header: new httpꓸHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [csΔ1]})))).Cookies();
+        var cookies = (Ꮡ(new http.Response(Header: new http.Header(new map<@string, slice<@string>>{["Set-Cookie"] = [csΔ1]})))).Cookies();
         if (len(cookies) != 1) {
             throw panic(fmt.Sprintf("Wrong cookie line %q: %#v"u8, csΔ1, cookies));
         }
@@ -454,6 +461,8 @@ internal static void run(this jarTest test, ж<testing.T> t, ж<global::go.net.h
         }
     }
 }
+
+} partial class cookiejar_internal_test_package {
 
 // basicsTests contains fundamental tests. Each jarTest has to be performed on
 // a fresh, empty Jar.
@@ -1437,7 +1446,7 @@ public static void TestDomainHandling(ж<testing.T> t) {
 }
 
 public static void TestIssue19384(ж<testing.T> t) {
-    var cookies = slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "name", Value: "value"))]);
+    var cookies = slice<ж<http.Cookie>>([Ꮡ(new http.Cookie(Name: "name", Value: "value"))]);
     foreach (var (_, vᴛ1) in range(slice<@string>(["", ".", "..", "..."]))) {
         ref var host = ref heap(new @string(), out var Ꮡhost);
         host = vᴛ1;

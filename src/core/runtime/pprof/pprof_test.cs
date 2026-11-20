@@ -41,6 +41,7 @@ using go.sync;
 using static go.runtime.pprof_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸstring = Span<@string>;
+using static pprof_internal_test_package;
 
 partial class pprof_internal_test_package {
 
@@ -242,7 +243,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> t) {
                     // against all samples in our profile.
                     time.Duration value = default;
                     foreach (var (_, sample) in range(p.Sample)) {
-                        value += ((time.Duration)(~sample).Value[1]) * time.ΔNanosecond;
+                        value += ((time.Duration)(~sample).Value[1]) * time.Nanosecond;
                     }
 
                     var totalTime = userTime + systemTime;
@@ -256,7 +257,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> t) {
                 };
 
                 var tcʗ2 = tcʗ1;
-                testCPUProfile(tΔ1, new Func<ж<testing.T>, ж<profile.Profile>, bool>(acceptProfile), (time.Duration dur) => {
+                testCPUProfile(tΔ1, acceptProfile, (time.Duration dur) => {
                     var tcʗ3 = tcʗ2;
                     (userTime, systemTime) = diffCPUTime(tΔ1, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -390,9 +391,13 @@ internal partial interface inlineWrapperInterface {
 internal partial struct inlineWrapper {
 }
 
+} partial class pprof_internal_testᴛinlineWrapper {
+
 internal static partial void dump(this inlineWrapper h, slice<uintptr> pcs) {
     dumpCallers(pcs);
 }
+
+} partial class pprof_internal_test_package {
 
 internal static void inlinedWrapperCallerDump(slice<uintptr> pcs) {
     ref var h = ref heap<inlineWrapperInterface>(out var Ꮡh);
@@ -509,7 +514,7 @@ internal static ж<profile.Profile> testCPUProfile(ж<testing.T> Ꮡt, Func<ж<t
     if (broken || !ok) {
         if (broken && testing.Short()) {
             // If it's expected to be broken, no point waiting around.
-            deadline = time.Now().Add(1 * time.ΔSecond);
+            deadline = time.Now().Add(1 * time.Second);
         } else {
             deadline = time.Now().Add((time.Duration)(10000000000L));
         }
@@ -575,7 +580,7 @@ internal static (time.Duration user, time.Duration system) diffCPUTime(ж<testin
 internal static bool stackContains(@string spec, uintptr count, slice<ж<profile.Location>> stk, map<@string, slice<@string>> labels) {
     foreach (var (_, loc) in range(stk)) {
         foreach (var (_, line) in range(loc.Line)) {
-            if (strings_package.Contains(line.Function.Name, spec)) {
+            if (strings.Contains(line.Function.Name, spec)) {
                 return true;
             }
         }
@@ -618,7 +623,7 @@ internal static (ж<profile.Profile>, bool ok) profileOk(ж<testing.T> t, Func<�
     // but that is too hard to guarantee on a loaded system.
     // Now we accept 10 or more samples, which we take to be
     // enough to show that at least some profiling is occurring.
-    var ideal = (uintptr)(duration * 100 / time.ΔSecond); if (samples == 0 || (samples < ideal / 4 && samples < 10)) {
+    var ideal = (uintptr)(duration * 100 / time.Second); if (samples == 0 || (samples < ideal / 4 && samples < 10)) {
         t.Logf("too few samples; got %d, want at least %d, ideally %d", samples, ideal / 4, ideal);
         ok = false;
     }
@@ -654,7 +659,7 @@ internal static Func<ж<testing.T>, ж<profile.Profile>, bool> matchAndAvoidStac
             foreach (var (i, name) in range(avoidʗ1)) {
                 foreach (var (_, loc) in range(sample.Location)) {
                     foreach (var (_, line) in range(loc.Line)) {
-                        if (strings_package.Contains(line.Function.Name, name)) {
+                        if (strings.Contains(line.Function.Name, name)) {
                             avoidSamples[i] += count;
                         }
                     }
@@ -828,16 +833,16 @@ internal static void fprintStack(io.Writer w, slice<ж<profile.Location>> stk) {
 public static void TestMathBigDivide(ж<testing.T> t) {
     testCPUProfile(t, default, (time.Duration duration) => {
         var tΔ1 = time.After(duration);
-        var pi = @new<bigꓸInt>();
+        var pi = @new<big.Int>();
         for (;;) {
             for (nint i = 0; i < 100; i++) {
                 var n = big.NewInt(2646693125139304345L);
                 var d = big.NewInt(842468587426513207L);
                 pi.Div(n, d);
             }
-            var selᴛ1 = tΔ1;
-            switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-            case 0 when selᴛ1.ꟷᐳ(out _): {
+            var tᴛ1 = tΔ1;
+            switch (trySelect(ᐸꟷ(tᴛ1, ꓸꓸꓸ))) {
+            case 0 when tᴛ1.ꟷᐳ(out _): {
                 return;
             }
             default: {
@@ -849,7 +854,7 @@ public static void TestMathBigDivide(ж<testing.T> t) {
 
 // stackContainsAll matches if all functions in spec (comma-separated) appear somewhere in the stack trace.
 internal static bool stackContainsAll(@string spec, uintptr count, slice<ж<profile.Location>> stk, map<@string, slice<@string>> labels) {
-    foreach (var (_, f) in range(strings_package.Split(spec, ","))) {
+    foreach (var (_, f) in range(strings.Split(spec, ","))) {
         if (!stackContains(f, count, stk, labels)) {
             return false;
         }
@@ -867,9 +872,9 @@ public static void TestMorestack(ж<testing.T> t) {
             goǃ(() => {
                 growstack1();
                 // NOTE(vsaioc): This goroutine may leak without this select.
-                var selᴛ2 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
+                var cᴛ1 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
                 var selᴛ3 = time.After(duration);
-                switch (select(selᴛ2, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+                switch (select(cᴛ1, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
                 case 0: {
                     break;
                 }
@@ -877,13 +882,13 @@ public static void TestMorestack(ж<testing.T> t) {
                     break;
                 }}
             });
-            var selᴛ4 = tΔ1;
-            var selᴛ5 = c;
-            switch (select(ᐸꟷ(selᴛ4, ꓸꓸꓸ), ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
-            case 0 when selᴛ4.ꟷᐳ(out _): {
+            var tᴛ1 = tΔ1;
+            var cᴛ2 = c;
+            switch (select(ᐸꟷ(tᴛ1, ꓸꓸꓸ), ᐸꟷ(cᴛ2, ꓸꓸꓸ))) {
+            case 0 when tᴛ1.ꟷᐳ(out _): {
                 return;
             }
-            case 1 when selᴛ5.ꟷᐳ(out _): {
+            case 1 when cᴛ2.ꟷᐳ(out _): {
                 break;
             }}
         }
@@ -1051,16 +1056,16 @@ public static void TestBlockProfile(ж<testing.T> t) {
             Lookup(blockˢ).WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
             @string prof = w.String();
 
-            if (!strings_package.HasPrefix(prof, contentionCyclesSecondˢ)) {
+            if (!strings.HasPrefix(prof, contentionCyclesSecondˢ)) {
                 tΔ1.Fatalf("Bad profile header:\n%v", prof);
             }
 
-            if (strings_package.HasSuffix(prof, "#\t0x0\n\n")) {
+            if (strings.HasSuffix(prof, "#\t0x0\n\n")) {
                 tΔ1.Errorf("Useless 0 suffix:\n%v", prof);
             }
 
             foreach (var (_, test) in range(testsʗ1.ΔRangeSnapshot())) {
-                if (!regexp.MustCompile(strings_package.ReplaceAll(test.re, "\t", "\t+")).MatchString(prof)) {
+                if (!regexp.MustCompile(strings.ReplaceAll(test.re, "\t", "\t+")).MatchString(prof)) {
                     tΔ1.Errorf("Bad %v entry, expect:\n%v\ngot:\n%v", test.name, test.re, prof);
                 }
             }
@@ -1113,7 +1118,7 @@ internal static partial slice<slice<@string>> /*res*/ blockRecordStacks(slice<ru
     var resᴷ = new stackAppend<slice<@string>>(moves: true);
 
     foreach (var (_, vᴛ1) in range(records)) {
-        var record = vᴛ1;
+        var record = vᴛ1.ΔClone();
 
         var frames = runtime.CallersFrames(record.StackRecord.Stack());
         slice<@string> stk = default;
@@ -1165,8 +1170,8 @@ internal static partial void awaitBlockedGoroutine(ж<testing.T> Ꮡt, @string s
         {
             var (deadline, ok) = t.Deadline(); if (ok) {
                 {
-                    var d = time.Until(deadline); if (d > 1 * time.ΔSecond) {
-                        var timer = time.AfterFunc(d - 1 * time.ΔSecond, () => {
+                    var d = time.Until(deadline); if (d > 1 * time.Second) {
+                        var timer = time.AfterFunc(d - 1 * time.Second, () => {
                             debug.SetTraceback(allˢ);
                             throw panic(fmt.Sprintf("timed out waiting for %#q"u8, re));
                         });
@@ -1260,13 +1265,13 @@ internal static partial void blockSelectRecvAsync(ж<testing.T> t) {
         }
     });
     for (nint i = 0; i < numTries; i++) {
-        var selᴛ6 = c;
-        var selᴛ7 = c2;
-        switch (select(ᐸꟷ(selᴛ6, ꓸꓸꓸ), ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
-        case 0 when selᴛ6.ꟷᐳ(out _): {
+        var cᴛ1 = c;
+        var c2ᴛ1 = c2;
+        switch (select(ᐸꟷ(cᴛ1, ꓸꓸꓸ), ᐸꟷ(c2ᴛ1, ꓸꓸꓸ))) {
+        case 0 when cᴛ1.ꟷᐳ(out _): {
             break;
         }
-        case 1 when selᴛ7.ꟷᐳ(out _): {
+        case 1 when c2ᴛ1.ꟷᐳ(out _): {
             break;
         }}
     }
@@ -1284,9 +1289,9 @@ internal static partial void blockSelectSendSync(ж<testing.T> t) {
         awaitBlockedGoroutine(t, selectˢ, blockSelectSendSyncˢ, 1);
         ᐸꟷ(cʗ1);
     });
-    var selᴛ8 = c.ᐸꟷ(true, ꓸꓸꓸ);
-    var selᴛ9 = c2.ᐸꟷ(true, ꓸꓸꓸ);
-    switch (select(selᴛ8, selᴛ9)) {
+    var cᴛ1 = c.ᐸꟷ(true, ꓸꓸꓸ);
+    var c2ᴛ1 = c2.ᐸꟷ(true, ꓸꓸꓸ);
+    switch (select(cᴛ1, c2ᴛ1)) {
     case 0: {
         break;
     }
@@ -1478,11 +1483,11 @@ public static void TestMutexProfile(ж<testing.T> t) {
             @string prof = w.String();
             tΔ1.Logf("received profile: %v", prof);
 
-            if (!strings_package.HasPrefix(prof, mutexCyclesSecondˢ)) {
+            if (!strings.HasPrefix(prof, mutexCyclesSecondˢ)) {
                 tΔ1.Errorf("Bad profile header:\n%v", prof);
             }
-            prof = strings_package.Trim(prof, "\n");
-            var lines = strings_package.Split(prof, "\n");
+            prof = strings.Trim(prof, "\n");
+            var lines = strings.Split(prof, "\n");
             if (len(lines) < 6) {
                 tΔ1.Fatalf("expected >=6 lines, got %d %q\n%s", len(lines), prof, prof);
             }
@@ -1802,7 +1807,7 @@ internal static bool containsInOrder(@string s, params ꓸꓸꓸstring allʗp) {
 
     foreach (var (_, t) in range(all)) {
         bool ok = default;
-        (_, s, ok) = strings_package.Cut(s, t); if (!ok) {
+        (_, s, ok) = strings.Cut(s, t); if (!ok) {
             return false;
         }
     }
@@ -2007,8 +2012,8 @@ public static partial void TestGoroutineLeakProfileConcurrency(ж<testing.T> t) 
 
         // Wait a little longer to avoid spamming the log.
         waitFor *= 2;
-        if (waitFor > time.ΔSecond) {
-            waitFor = time.ΔSecond;
+        if (waitFor > time.Second) {
+            waitFor = time.Second;
         }
     }
 
@@ -2033,7 +2038,7 @@ public static partial void TestGoroutineLeakProfileConcurrency(ж<testing.T> t) 
     // Concurrent calls to the goroutine leak profiler should not trigger data races
     // or corruption.
     void quickCheckForGoroutine(ж<testing.T> tΔ6, @string profType, @string leak, @string profText) {
-        if (!strings_package.Contains(profText, leak)) {
+        if (!strings.Contains(profText, leak)) {
             tΔ6.Errorf("%s profile does not contain expected leaked goroutine %s: %s", profType, leak, profText);
         }
     }
@@ -2044,7 +2049,7 @@ public static partial void TestGoroutineLeakProfileConcurrency(ж<testing.T> t) 
         GoFrame ᒐ = default;
         try {
             ref var ctx = ref heap<context.Context>(context.Background(), out var Ꮡctx);
-            (Ꮡctx.ValueSlot, var cancel) = context.WithTimeout(Ꮡctx.ValueSlot, time.ΔSecond);
+            (Ꮡctx.ValueSlot, var cancel) = context.WithTimeout(Ꮡctx.ValueSlot, time.Second);
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
 
@@ -2092,7 +2097,7 @@ public static partial void TestGoroutineLeakProfileConcurrency(ж<testing.T> t) 
         GoFrame ᒐ = default;
         try {
             ref var ctx = ref heap<context.Context>(context.Background(), out var Ꮡctx);
-            (Ꮡctx.ValueSlot, var cancel) = context.WithTimeout(Ꮡctx.ValueSlot, time.ΔSecond);
+            (Ꮡctx.ValueSlot, var cancel) = context.WithTimeout(Ꮡctx.ValueSlot, time.Second);
             var cancelʗ2 = cancel;
             defer(() => cancelʗ2(), ref ᒐ);
 
@@ -2174,9 +2179,9 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> t) {
 
     var goroutineProf = Lookup(goroutineˢ);
 
-    nint profilerCalls(@string s) => strings_package.Count(s, runtimePprofRuntimeˢ);
+    nint profilerCalls(@string s) => strings.Count(s, runtimePprofRuntimeˢ);
 
-    bool includesFinalizerOrCleanup(@string s) => strings_package.Contains(s, runtimeRunFinalizersˢ) || strings_package.Contains(s, runtimeRunCleanupsˢ);
+    bool includesFinalizerOrCleanup(@string s) => strings.Contains(s, runtimeRunFinalizersˢ) || strings.Contains(s, runtimeRunCleanupsˢ);
 
     // Concurrent calls to the goroutine profiler should not trigger data races
     // or corruption.
@@ -2256,9 +2261,9 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> t) {
             });
             obj = default;
             for (nint i = 10; i >= 0; i--) {
-                var selᴛ10 = ch1;
-                switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
-                case 0 when selᴛ10.ꟷᐳ(out _): {
+                var ch1ᴛ1 = ch1;
+                switch (trySelect(ᐸꟷ(ch1ᴛ1, ꓸꓸꓸ))) {
+                case 0 when ch1ᴛ1.ꟷᐳ(out _): {
                     break;
                 }
                 default: {
@@ -2446,9 +2451,9 @@ public static partial void TestGoroutineProfileCoro(ж<testing.T> t) {
             defer(Ꮡwg.Done, ref ᒐ);
             for (;;) {
                 iterFuncʗ1();
-                var selᴛ11 = doneʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
-                case 0 when selᴛ11.ꟷᐳ(out _): {
+                var doneᴛ1 = doneʗ1;
+                switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+                case 0 when doneᴛ1.ꟷᐳ(out _): {
                     break;
                 }
                 default: {
@@ -2630,11 +2635,11 @@ public static void TestEmptyCallStack(ж<testing.T> t) {
     p.Remove(fooˢ);
     @string got = buf.String();
     @string prefix = name + " profile: total 1\n"u8;
-    if (!strings_package.HasPrefix(got, prefix)) {
+    if (!strings.HasPrefix(got, prefix)) {
         t.Fatalf("got:\n\t%q\nwant prefix:\n\t%q\n", got, prefix);
     }
     @string lostevent = lostProfileEventˢ;
-    if (!strings_package.Contains(got, lostevent)) {
+    if (!strings.Contains(got, lostevent)) {
         t.Fatalf("got:\n\t%q\ndoes not contain:\n\t%q\n", got, lostevent);
     }
 }
@@ -2642,11 +2647,11 @@ public static void TestEmptyCallStack(ж<testing.T> t) {
 // stackContainsLabeled takes a spec like funcname;key=value and matches if the stack has that key
 // and value and has funcname somewhere in the stack.
 internal static bool stackContainsLabeled(@string spec, uintptr count, slice<ж<profile.Location>> stk, map<@string, slice<@string>> labels) {
-    var (@base, kv, ok) = strings_package.Cut(spec, ";");
+    var (@base, kv, ok) = strings.Cut(spec, ";");
     if (!ok) {
         throw panic("no semicolon in key/value spec");
     }
-    (var k, var v, ok) = strings_package.Cut(kv, "=");
+    (var k, var v, ok) = strings.Cut(kv, "=");
     if (!ok) {
         throw panic("missing = in key/value spec");
     }
@@ -2719,7 +2724,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> t) {
                     ref var w = ref heap(new strings.Builder(), out var Ꮡw);
                     goroutineProf.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
                     @string prof = w.String();
-                    if (strings_package.Contains(prof, loopIˢ)) {
+                    if (strings.Contains(prof, loopIˢ)) {
                         cancelʗ2();
                     }
                 }
@@ -2835,7 +2840,7 @@ public static void TestLabelSystemstack(ж<testing.T> t) {
                     break;
                 }}
 
-                if (strings_package.HasPrefix(l.Function.Name, runtimeˢ)) {
+                if (strings.HasPrefix(l.Function.Name, runtimeˢ)) {
                     // There are many places in the runtime
                     // where we can't do a full traceback.
                     // Ideally we'd list them all, but
@@ -2882,9 +2887,9 @@ internal static void labelHog(channel<EmptyStruct> stop, nint gogc) {
     runtime.GC();
 
     for (nint i = 0; ; i++) {
-        var selᴛ12 = stop;
-        switch (trySelect(ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
-        case 0 when selᴛ12.ꟷᐳ(out _): {
+        var stopᴛ1 = stop;
+        switch (trySelect(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
+        case 0 when stopᴛ1.ꟷᐳ(out _): {
             return;
         }
         default: {
@@ -3484,7 +3489,7 @@ internal static partial slice<@string> getProfileStacks(Func<slice<runtime.Block
     }
     slice<@string> stacks = default;
     foreach (var (_, vᴛ1) in range(p)) {
-        var r = vᴛ1;
+        var r = vᴛ1.ΔClone();
 
         ref var stack = ref heap(new strings.Builder(), out var Ꮡstack);
         foreach (var (i, pc) in range(r.StackRecord.Stack())) {
@@ -3662,7 +3667,7 @@ runtime/pprof.inlineA
             t.Run(tc.Name, (ж<testing.T> tΔ1) => {
                 var stacks = getProfileStacks(tcʗ1.Collect, false, false);
                 foreach (var (_, s) in range(stacks)) {
-                    if (strings_package.Contains(s, tcʗ1.SubStack)) {
+                    if (strings.Contains(s, tcʗ1.SubStack)) {
                         return;
                     }
                 }

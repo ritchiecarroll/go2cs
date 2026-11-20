@@ -130,7 +130,7 @@ public static void TestProbablyPrime(ж<testing.T> t) {
         nreps = 1;
     }
     foreach (var (i, s) in range(primes)) {
-        var (p, _) = @new<global::go.math.big_package.ΔInt>().SetString(s, 10);
+        var (p, _) = @new<global::go.math.big_package.Int>().SetString(s, 10);
         if (!p.ProbablyPrime(nreps) || nreps != 1 && !p.ProbablyPrime(1) || !p.ProbablyPrime(0)) {
             t.Errorf("#%d prime found to be non-prime (%s)", i, s);
         }
@@ -140,7 +140,7 @@ public static void TestProbablyPrime(ж<testing.T> t) {
         var s = vᴛ1;
 
         s = strings.Map(cutSpace, s);
-        var (cΔ1, _) = @new<global::go.math.big_package.ΔInt>().SetString(s, 10);
+        var (cΔ1, _) = @new<global::go.math.big_package.Int>().SetString(s, 10);
         if (cΔ1.ProbablyPrime(nreps) || nreps != 1 && cΔ1.ProbablyPrime(1) || cΔ1.ProbablyPrime(0)) {
             t.Errorf("#%d composite found to be prime (%s)", i, s);
         }
@@ -181,7 +181,7 @@ public static void BenchmarkProbablyPrime(ж<testing.B> b) {
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
 
-        var (p, _) = @new<global::go.math.big_package.ΔInt>().SetString("203956878356401977405765866929034577280193993314348263094772646453283062722701277632936616063144088173312372882677123879538709400158306567338328279154499698366071906766440037074217117805690872792848149112022286332144876183376326512083574821647933992961249917319836219304274280243803104015000563790123", 10);
+        var (p, _) = @new<global::go.math.big_package.Int>().SetString("203956878356401977405765866929034577280193993314348263094772646453283062722701277632936616063144088173312372882677123879538709400158306567338328279154499698366071906766440037074217117805690872792848149112022286332144876183376326512083574821647933992961249917319836219304274280243803104015000563790123", 10);
         foreach (var (_, n) in range(slice<nint>([0, 1, 5, 10, 20]))) {
             var pʗ1 = p;
             b.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
@@ -223,7 +223,7 @@ public static void TestMillerRabinPseudoprimes(ж<testing.T> t) {
 
             var stkʗ2 = stk;
         testPseudoprimes(t, probablyPrimeMillerRabinˢ,
-            (global::go.math.big_package.Δnat n) => n.probablyPrimeMillerRabin(stkʗ2, 1, true) && !n.probablyPrimeLucas(stkʗ2),
+            (global::go.math.big_package.nat n) => n.probablyPrimeMillerRabin(stkʗ2, 1, true) && !n.probablyPrimeLucas(stkʗ2),
             // https://oeis.org/A001262
             [2047, 3277, 4033, 4681, 8321, 15841, 29341, 42799, 49141, 52633, 65281, 74665, 80581, 85489, 88357, 90751]);
     }
@@ -244,7 +244,7 @@ public static void TestLucasPseudoprimes(ж<testing.T> t) {
 
             var stkʗ2 = stk;
         testPseudoprimes(t, probablyPrimeLucasˢ,
-            (global::go.math.big_package.Δnat n) => n.probablyPrimeLucas(stkʗ2) && !n.probablyPrimeMillerRabin(stkʗ2, 1, true),
+            (global::go.math.big_package.nat n) => n.probablyPrimeLucas(stkʗ2) && !n.probablyPrimeMillerRabin(stkʗ2, 1, true),
             // https://oeis.org/A217719
             [989, 3239, 5777, 10877, 27971, 29681, 30739, 31631, 39059, 72389, 73919, 75077]);
     }
@@ -252,8 +252,8 @@ public static void TestLucasPseudoprimes(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal static void testPseudoprimes(ж<testing.T> t, @string name, Func<global::go.math.big_package.Δnat, bool> cond, slice<nint> want) {
-    var n = new Δnat(new global::go.math.big_package.Word[]{1}.slice());
+internal static void testPseudoprimes(ж<testing.T> t, @string name, Func<global::go.math.big_package.nat, bool> cond, slice<nint> want) {
+    var n = new nat(new global::go.math.big_package.Word[]{1}.slice());
     for (nint i = 3; i < 100000; i += 2) {
         if (testing.Short()) {
             if (len(want) == 0) {

@@ -12,6 +12,7 @@ using testing = testing_package;
 using time = time_package;
 using go.net;
 using static go.net.http.fcgi_package;
+using static fcgi_internal_test_package;
 
 partial class fcgi_internal_test_package {
 
@@ -75,7 +76,11 @@ internal partial struct nilCloser {
     /*embed*/ public io_package.ReadWriter ReadWriter;
 }
 
+} partial class fcgi_internal_testᴛnilCloser {
+
 internal static error Close(this ref nilCloser c) { return default; }
+
+} partial class fcgi_internal_test_package {
 
 public static void TestStreams(ж<testing.T> t) {
     ref var rec = ref heap(new global::go.net.http.fcgi_package.record(), out var Ꮡrec);
@@ -129,6 +134,8 @@ internal partial struct writeOnlyConn {
     internal slice<byte> buf;
 }
 
+} partial class fcgi_internal_testᴛwriteOnlyConn {
+
 internal static (nint, error) Write(this ref writeOnlyConn c, slice<byte> p) {
     c.buf = appendꓸꓸꓸ(c.buf, p);
     return (len(p), default);
@@ -145,6 +152,8 @@ internal static (nint, error) Read(this ref writeOnlyConn c, slice<byte> p) {
 internal static error Close(this ref writeOnlyConn c) {
     return default;
 }
+
+} partial class fcgi_internal_test_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string wantᶜ => ref wantᶜᵇ;
@@ -237,6 +246,8 @@ internal partial struct nopWriteCloser {
     /*embed*/ public io_package.Reader Reader;
 }
 
+} partial class fcgi_internal_testᴛnopWriteCloser {
+
 internal static (nint, error) Write(this nopWriteCloser _, slice<byte> buf) {
     return (len(buf), default);
 }
@@ -244,6 +255,8 @@ internal static (nint, error) Write(this nopWriteCloser _, slice<byte> buf) {
 internal static error Close(this nopWriteCloser _) {
     return default;
 }
+
+} partial class fcgi_internal_test_package {
 
 // Test that child.serve closes the bodies of aborted requests and closes the
 // bodies of all requests before returning. Causes deadlock if either condition
@@ -259,7 +272,7 @@ public static void TestChildServeCleansUp(ж<testing.T> t) {
         var done = new channel<EmptyStruct>(0);
         var doneʗ1 = done;
         var ttʗ1 = tt;
-        var c = newChild(rc, new fcgi_internal_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var c = newChild(rc, new fcgi_internal_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             // block on reading body of request
             var (_, err) = io.Copy(io.Discard, new fcgi_internal_test_package.io_ReadCloserᴠReader(r.Body));
             if (!AreEqual(err, ttʗ1.err)) {
@@ -279,9 +292,13 @@ internal partial struct rwNopCloser {
     /*embed*/ public io_package.Writer Writer;
 }
 
+} partial class fcgi_internal_testᴛrwNopCloser {
+
 internal static error Close(this rwNopCloser _) {
     return default;
 }
+
+} partial class fcgi_internal_test_package {
 
 // Verifies it doesn't crash. 	Issue 11824.
 public static void TestMalformedParams(ж<testing.T> t) {
@@ -294,7 +311,7 @@ public static void TestMalformedParams(ж<testing.T> t) {
         1, 4, 0, 1, 0, 0, 0, 0
     ]);
     var rw = new rwNopCloser(new fcgi_internal_test_package.bytes_ReaderжReader(bytes.NewReader(input)), io.Discard);
-    var c = newChild(rw, new http.ServeMuxжΔHandler(http.DefaultServeMux));
+    var c = newChild(rw, new http.ServeMuxжHandler(http.DefaultServeMux));
     c.serve();
 }
 
@@ -352,7 +369,7 @@ public static void TestChildServeReadsEnvVars(ж<testing.T> t) {
         var done = new channel<EmptyStruct>(0);
         var doneʗ1 = done;
         var ttʗ1 = tt;
-        var c = newChild(rc, new fcgi_internal_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var c = newChild(rc, new fcgi_internal_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             var env = ProcessEnv(r);
             var (_, ok) = env[ttʗ1.envVar, ꟷ]; if (ok && ttʗ1.expectedFilteredOut) {
                 t.Errorf("Expected environment variable %s to not be set, but set to %s",
@@ -370,6 +387,8 @@ public static void TestChildServeReadsEnvVars(ж<testing.T> t) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gopherˢ => ref gopherˢᵇ;
 private static readonly @string gopherˢᵇ = "gopher"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 
 internal partial struct TestResponseWriterSniffsContentType_type /*dyn*/ {
     internal @string name;
@@ -412,7 +431,7 @@ public static void TestResponseWriterSniffsContentType(ж<testing.T> t) {
             ref var resp = ref heap<ж<global::go.net.http.fcgi_package.response>>(out var Ꮡresp);
             var doneʗ1 = done;
             var ttʗ2 = ttʗ1;
-            var c = newChild(rc, new fcgi_internal_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+            var c = newChild(rc, new fcgi_internal_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
                 io.WriteString(new fcgi_internal_test_package.http_ResponseWriterᴠWriter(w), ttʗ2.body);
                 Ꮡresp.ValueSlot = w._<ж<global::go.net.http.fcgi_package.response>>();
                 close(doneʗ1);
@@ -431,6 +450,8 @@ internal partial struct signalingNopWriteCloser {
     internal channel<bool> closed;
 }
 
+} partial class fcgi_internal_testᴛsignalingNopWriteCloser {
+
 // Go method set entry for the promoted 'ReadCloser.Read()' - provided ONLY by the embedded
 // interface field in *signalingNopWriteCloser's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Read(this signalingNopWriteCloser recvᴛ, slice<byte> p) => recvᴛ.ReadCloser.Read(p);
@@ -443,6 +464,8 @@ internal static error Close(this ref signalingNopWriteCloser rc) {
     close(rc.closed);
     return rc.ReadCloser.Close();
 }
+
+} partial class fcgi_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object fastCGIChildClosedˢ = (@string)"FastCGI child closed connection"u8;
@@ -478,7 +501,7 @@ public static partial void TestSlowRequest(ж<testing.T> t) {
         var handlerDone = new channel<bool>(0);
 
         var handlerDoneʗ1 = handlerDone;
-        var c = newChild(new fcgi_internal_test_package.signalingNopWriteCloserжReadWriteCloser(rc), new fcgi_internal_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var c = newChild(new fcgi_internal_test_package.signalingNopWriteCloserжReadWriteCloser(rc), new fcgi_internal_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.WriteHeader(200);
             close(handlerDoneʗ1);
         })));

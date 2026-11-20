@@ -139,6 +139,30 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </remarks>
     public abstract ref T ValueSlot { get; }
 
+    /// <summary>
+    /// Go's <c>*p</c> read as a VALUE (a copy), panicking on a nil dereference. The converter emits it in place of
+    /// <c>~p</c> for an rvalue dereference whose pointee is a Go struct kept out of inline arrays.
+    /// </summary>
+    /// <remarks>
+    /// On every box but a <see cref="NativeBox{T}"/> this is <c>~p</c>. A native box over such a struct reads its
+    /// bytes at Go's own field offsets into a fresh managed value (B2, 2026-11-15): the struct's arrays are managed
+    /// references in go2cs, so its CLR layout is not its Go layout and the whole-value read through
+    /// <see cref="Value"/> is refused by name. A copy is exact for a read, since nothing can alias it, so the
+    /// decode never has to write back. Writes keep <see cref="Value"/>, and its refusals.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public T GoValue()
+    {
+        if (IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        return ReadGoValue();
+    }
+
+    // The value GoValue returns once the nil check has passed: the slot's, except where the box's storage is not a T
+    // laid out by the CLR (NativeBox).
+    private protected virtual T ReadGoValue() => ValueSlot;
+
     /// <inheritdoc/>
     // The dereference-guard nil question. For every non-standard kind this is exactly the
     // structural mark (their storage resolves without a null check); StandardBox refines it with
@@ -974,8 +998,21 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (IsNilPointer)
             throw RuntimeErrorPanic.NilPointerDereference();
 
+        // reflect's `*p = x` (Value.Elem().Set) for a pointee that owns array storage (an array, a named array, a
+        // value-clone struct) is Go's whole assignment INTO the pointee, so a slice taken from it beforehand sees the new
+        // elements: the in-place copy, written back (IGoValueAssign; DESIGN-array-reassign-in-place.md §8 N2). Any other
+        // pointee is stored as before.
+        if (s_assignsInPlace)
+        {
+            ValueSlot = ((IGoValueAssign<T>)ValueSlot!).AssignedFrom((T)value!);
+            return;
+        }
+
         ValueSlot = (T)value!;
     }
+
+    // Whether WriteBoxSlot stores through IGoValueAssign<T>, decided once per T (a type test, no code built).
+    private static readonly bool s_assignsInPlace = typeof(IGoValueAssign<T>).IsAssignableFrom(typeof(T));
 
     // reflect's element door (GoReflect.ElementAliasBoxOfBox; trim stage 3c-1): at<Telem>'s body for an element type
     // known only at run time. The same view and publish (arrayView), the same bounds panic, and the same ElemRefBox over
@@ -1378,6 +1415,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (value.NamesZeroBase)
             return GoZeroBase.Address;
 
+        // A view with no storage of its own (a field's bytes viewed as an array over a Go value that has no
+        // address) answers the number of the field it views, minted by the field's own conversion. Asked before
+        // the slot is read, which such a box refuses by name.
+        if (value is IPointerNumberForwarder forwarder)
+            return (uintptr)forwarder.ForwardedNumber();
+
         // A pointer to a Go fixed array (`unsafe.Pointer(&arr)`): the native address must reference the
         // array's DATA (element 0), pinned so a syscall can fill it in and the managed reads afterward
         // observe the result — not the transient address of the `array<T>` struct wrapper. Slices keep
@@ -1463,6 +1506,10 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // The zerobase's one address, as in the uintptr operator above.
         if (value.NamesZeroBase)
             return (void*)GoZeroBase.Address;
+
+        // The number of the field a storage-less view views, as in the uintptr operator above.
+        if (value is IPointerNumberForwarder forwarder)
+            return (void*)forwarder.ForwardedNumber();
 
         // A pointer to a Go fixed array resolves to the pinned address of the array data — see the
         // uintptr operator above for the full rationale, including why the address is REGISTERED

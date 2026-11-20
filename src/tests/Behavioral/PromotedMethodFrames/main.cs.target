@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
@@ -38,11 +39,15 @@ internal static partial @string stack() {
     return strings.Join(names, " < ");
 }
 
+} partial class mainᴛinner {
+
 internal static partial @string Val(this inner i) { return caller(1); }
 internal static partial @string Ptr(this ref inner i) { return caller(1); }
 internal static partial @string Self(this inner i) { return caller(0); }
 internal static partial @string ValStack(this inner i) { return stack(); }
 internal static partial @string PtrStack(this ref inner i) { return stack(); }
+
+} partial class main_package {
 
 partial struct mid {
     /*embed*/ internal inner inner;

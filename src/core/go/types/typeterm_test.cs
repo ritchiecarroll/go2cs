@@ -12,21 +12,21 @@ using token = global::go.go.token_package;
 
 partial class types_internal_test_package {
 
-internal static global::go.go.types_package.ΔType myInt;
-internal static void initᴛmyInt() { myInt = func(global::go.go.types_package.ΔType () => {
+internal static global::go.go.types_package.Type myInt;
+internal static void initᴛmyInt() { myInt = func(global::go.go.types_package.Type () => {
     var tname = NewTypeName(nopos, nil, "myInt", default);
-    return new global::go.go.types_package.NamedжΔType(NewNamed(tname, new global::go.go.types_package.BasicжΔType(Typ[Int]), default));
+    return new global::go.go.types_package.NamedжType(NewNamed(tname, new global::go.go.types_package.BasicжType(Typ[Int]), default));
 })(); }
 
-internal static map<@string, ж<global::go.go.types_package.Δterm>> testTerms;
-internal static void initᴛtestTerms() { testTerms = new map<@string, ж<global::go.go.types_package.Δterm>>{
+internal static map<@string, ж<global::go.go.types_package.term>> testTerms;
+internal static void initᴛtestTerms() { testTerms = new map<@string, ж<global::go.go.types_package.term>>{
     ["∅"] = default,
-    ["𝓤"] = Ꮡ(new global::go.go.types_package.Δterm()),
-    ["int"] = Ꮡ(new global::go.go.types_package.Δterm(false, new global::go.go.types_package.BasicжΔType(Typ[Int]))),
-    ["~int"] = Ꮡ(new global::go.go.types_package.Δterm(true, new global::go.go.types_package.BasicжΔType(Typ[Int]))),
-    ["string"] = Ꮡ(new global::go.go.types_package.Δterm(false, new global::go.go.types_package.BasicжΔType(Typ[ΔString]))),
-    ["~string"] = Ꮡ(new global::go.go.types_package.Δterm(true, new global::go.go.types_package.BasicжΔType(Typ[ΔString]))),
-    ["myInt"] = Ꮡ(new global::go.go.types_package.Δterm(false, myInt))
+    ["𝓤"] = Ꮡ(new global::go.go.types_package.term()),
+    ["int"] = Ꮡ(new global::go.go.types_package.term(false, new global::go.go.types_package.BasicжType(Typ[Int]))),
+    ["~int"] = Ꮡ(new global::go.go.types_package.term(true, new global::go.go.types_package.BasicжType(Typ[Int]))),
+    ["string"] = Ꮡ(new global::go.go.types_package.term(false, new global::go.go.types_package.BasicжType(Typ[String]))),
+    ["~string"] = Ꮡ(new global::go.go.types_package.term(true, new global::go.go.types_package.BasicжType(Typ[String]))),
+    ["myInt"] = Ꮡ(new global::go.go.types_package.term(false, myInt))
 }; }
 
 public static void TestTermString(ж<testing.T> t) {
@@ -45,7 +45,7 @@ internal static slice<@string> split(@string s, nint n) {
     return r;
 }
 
-internal static ж<global::go.go.types_package.Δterm> testTerm(@string name) {
+internal static ж<global::go.go.types_package.term> testTerm(@string name) {
     var (r, ok) = testTerms[name, ꟷ];
     if (!ok) {
         throw panic("invalid test argument: " + name);

@@ -7,6 +7,7 @@ using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static reflect_package;
 
 partial class reflect_package {
 
@@ -82,6 +83,8 @@ partial struct abiSeq {
     internal nint iregs, fregs;  // registers used
 }
 
+} partial class reflectᴛabiSeq {
+
 internal static void dump(this ref abiSeq a) {
     foreach (var (i, p) in range(a.steps)) {
         println((@string)"part", i, p.kind, p.offset, p.size, p.stkOff, p.ireg, p.freg);
@@ -119,7 +122,7 @@ internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
 
     // We'll always be adding a new value, so do that first.
     nint pStart = len(a.steps);
-    a.valueStart = builtin.append(a.valueStart, pStart);
+    a.valueStart = append(a.valueStart, pStart);
     if (Ꮡt.Size() == 0) {
         // If the size of the argument type is zero, then
         // in order to degrade gracefully into ABI0, we need
@@ -161,7 +164,7 @@ internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡr
     ref var rcvr = ref Ꮡrcvr.DerefOrNull();
 
     // The receiver is always one word.
-    a.valueStart = builtin.append(a.valueStart, len(a.steps));
+    a.valueStart = append(a.valueStart, len(a.steps));
     bool ok = default;
     bool ptr = default;
     if (!rcvr.IsDirectIface() || rcvr.Pointers()) {
@@ -210,7 +213,7 @@ internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size,
         if ((uint8)(ptrMap & (((uint8)1).Lsh((int64)(i)))) != 0) {
             kind = abiStepPointer;
         }
-        a.steps = builtin.append(a.steps, new abiStep(
+        a.steps = append(a.steps, new abiStep(
             kind: kind,
             offset: offset + (uintptr)i * size,
             size: size,
@@ -235,7 +238,7 @@ internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr siz
         return false;
     }
     for (nint i = 0; i < n; i++) {
-        a.steps = builtin.append(a.steps, new abiStep(
+        a.steps = append(a.steps, new abiStep(
             kind: abiStepFloatReg,
             offset: offset + (uintptr)i * size,
             size: size,
@@ -252,7 +255,7 @@ internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr siz
 // Should not be called directly; use addArg instead.
 internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) {
     a.stackBytes = align(a.stackBytes, alignment);
-    a.steps = builtin.append(a.steps, new abiStep(
+    a.steps = append(a.steps, new abiStep(
         kind: abiStepStack,
         offset: 0, // Only used for whole arguments, so the memory offset is 0.
         size: size,
@@ -260,6 +263,8 @@ internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignm
     ));
     a.stackBytes += size;
 }
+
+} partial class reflect_package {
 
 // abiDesc describes the ABI for a function or method.
 partial struct abiDesc {
@@ -291,6 +296,8 @@ partial struct abiDesc {
     internal abi.IntArgRegBitmap inRegPtrs, outRegPtrs;
 }
 
+} partial class reflectᴛabiDesc {
+
 internal static void dump(this ref abiDesc a) {
     println((@string)"ABI");
     println((@string)"call");
@@ -307,6 +314,8 @@ internal static void dump(this ref abiDesc a) {
     dumpPtrBitMap(a.outRegPtrs);
     println();
 }
+
+} partial class reflect_package {
 
 internal static void dumpPtrBitMap(abi.IntArgRegBitmap bʗp) {
     ref var b = ref heap(bʗp.Clone(), out var Ꮡb);

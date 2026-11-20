@@ -8,9 +8,6 @@ global using static global::go.math.big_package;
 global using static global::go.math.big_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -45,9 +42,6 @@ using static global::go.math.big_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b7820737472696e673b207920737472696e673b207120737472696e673b207220737472696e677d", "quoTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b7820737472696e673b207920737472696e673b2073756d20737472696e673b2070726f6420737472696e677d", "ratBinTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b7831206d6174682f6269672e576f72643b207830206d6174682f6269672e576f72643b2079206d6174682f6269672e576f72643b2071206d6174682f6269672e576f72643b2072206d6174682f6269672e576f72647d", "divWWTestsᴛ1")]
-[assembly: GoTypeAlias("Bits", "ΔBits")]
-[assembly: GoTypeAlias("Int", "ΔInt")]
-[assembly: GoTypeAlias("Rat", "ΔRat")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -64,17 +58,11 @@ using static global::go.math.big_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: GoHoistedLiterals]
-
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(global::go.math.big_package.Float))]
-[assembly: GoFieldAccess(typeof(global::go.math.big_package.ΔInt))]
-[assembly: GoFieldAccess(typeof(global::go.math.big_package.ΔRat))]
+[assembly: GoFieldAccess(typeof(global::go.math.big_package.Int))]
+[assembly: GoFieldAccess(typeof(global::go.math.big_package.Rat))]
 [assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 [assembly: GoFieldAccess(typeof(strconv_package.NumError))]
 
@@ -86,7 +74,7 @@ using static global::go.math.big_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("math/big/alias_test.go", "alias_test.cs", "ABIggu6igoKCpqKCgpTuooKClIKU7oKC7qKCgpTuou6iAAIYAAkCpoCCyICCgsgAAhwACwKmgKaCgsiCgIKCtoKAgoLsgoKAgoKCyICCgraCgIKCyAAKBoIAGyK6ugAEFIKigriCooK4ABBMAAQQAAcckoKktLS0pKbKgoKCgoKmgoKCgoKmgoKCgoI=", "183-185:1;186-188:2;189-191:3;192-194:4;195-197:5;198-202:6;199-201:6.1;203-207:7;204-206:7.1;208-212:8;209-211:8.1;213-217:9;214-216:9.1;218-224:10;220-223:10.1;225-231:11;227-230:11.1;232-236:12;233-235:12.1;237-239:13;240-242:14;243-245:15;246-248:16;249-251:17;252-254:18;255-257:19;258-260:20;261-266:21;262-265:21.1;267-269:22;270-274:23;271-273:23.1;275-277:24;278-282:25;279-281:25.1;283-285:26;286-288:27;289-291:28;293-310:29;313-319:30;321-327:31;329-335:32")]
+[assembly: GoPositionMap("math/big/alias_test.go", "alias_test.cs", "ABMggu6igoKCxqKCgpQACg6igoKUgpQACg6CggAKDqKCgpQACg6iAAoOogAEGAAJAqaAgsiAgoLIAAIcAAsCpoCmgoLIgoCCgraCgIKC7IKCgIKCgsiAgoK2goCCgsgACgaCABsiuroABBSCooK4gqKCuAAQTAAEEAAHHJKCpLS0tKSmyoKCgoKCpoKCgoKCpoKCgoKC", "183-185:1;186-188:2;189-191:3;192-194:4;195-197:5;198-202:6;199-201:6.1;203-207:7;204-206:7.1;208-212:8;209-211:8.1;213-217:9;214-216:9.1;218-224:10;220-223:10.1;225-231:11;227-230:11.1;232-236:12;233-235:12.1;237-239:13;240-242:14;243-245:15;246-248:16;249-251:17;252-254:18;255-257:19;258-260:20;261-266:21;262-265:21.1;267-269:22;270-274:23;271-273:23.1;275-277:24;278-282:25;279-281:25.1;283-285:26;286-288:27;289-291:28;293-310:29;313-319:30;321-327:31;329-335:32")]
 [assembly: GoPositionMap("math/big/example_rat_test.go", "example_rat_test.cs", "AAwoAAgCgoKUpoLKlKyygso=")]
 // </GoSourcePositionMaps>
 
@@ -156,3 +144,18 @@ public static partial class big_test_package
         builtin.initPackage(typeof(global::go.math.big_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(big_test_package.bigInt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class big_testᴛbigInt;
+[GoMethodHost(typeof(big_test_package.notZeroInt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class big_testᴛnotZeroInt;
+[GoMethodHost(typeof(big_test_package.positiveInt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class big_testᴛpositiveInt;
+[GoMethodHost(typeof(big_test_package.prime)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class big_testᴛprime;
+[GoMethodHost(typeof(big_test_package.smallUint)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class big_testᴛsmallUint;
+[GoMethodHost(typeof(big_test_package.zeroOrOne)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class big_testᴛzeroOrOne;
+// </MethodHolders>

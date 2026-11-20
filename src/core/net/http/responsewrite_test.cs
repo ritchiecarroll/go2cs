@@ -28,7 +28,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 0,
                 Request: dummyReq(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: 6
             ),
@@ -42,7 +42,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 0,
                 Request: dummyReq(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: -1
             ),
@@ -55,7 +55,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: dummyReq(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: -1,
                 Close: true
@@ -69,7 +69,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: dummyReq11(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: -1,
                 Close: false
@@ -84,7 +84,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: dummyReq11(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: -1,
                 TransferEncoding: ["chunked"],
@@ -99,7 +99,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: dummyReq11(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: default,
                 ContentLength: 0,
                 Close: false
@@ -113,7 +113,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: dummyReq11(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8))),
                 ContentLength: 0,
                 Close: false
@@ -127,7 +127,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: dummyReq11(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(fooˢ))),
                 ContentLength: 0,
                 Close: false
@@ -141,7 +141,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: dummyReq(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: 6,
                 TransferEncoding: ["chunked"],
@@ -159,7 +159,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: dummyReq(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{
+                Header: new Header(new map<@string, slice<@string>>{
                     ["Foo"] = [" Bar\nBaz "]
                 }),
                 Body: default,
@@ -179,7 +179,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: Ꮡ(new Request(Method: "POST")),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 ContentLength: 0,
                 TransferEncoding: default,
                 Body: default
@@ -195,7 +195,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 1,
                 Request: Ꮡ(new Request(Method: "POST")),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 ContentLength: -1,
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ)))
             ),
@@ -213,7 +213,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 0,
                 Request: dummyReq(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: default
             ),
 
@@ -229,7 +229,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 0,
                 Request: dummyReq(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: default
             ),
 
@@ -245,7 +245,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
                 ProtoMajor: 1,
                 ProtoMinor: 0,
                 Request: dummyReq(getˢ),
-                Header: new ΔHeader(new map<@string, slice<@string>>{}),
+                Header: new Header(new map<@string, slice<@string>>{}),
                 Body: default
             ),
 
@@ -253,7 +253,7 @@ public static void TestResponseWrite(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var i in range(builtin.len(respWriteTests))) {
+    foreach (var i in range(len(respWriteTests))) {
         var tt = Ꮡ(respWriteTests, i);
         ref var braw = ref heap(new strings.Builder(), out var Ꮡbraw);
         var err = tt.ᏑResp.Write(new http_test_package.strings_BuilderжWriter(Ꮡbraw));

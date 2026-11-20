@@ -215,6 +215,41 @@ public sealed class TestExecution
     /// </summary>
     internal long RunningSince => Interlocked.Read(ref m_runningSince);
 
+    // The clock the watchdog reads for this test: its top-level test's, or, under a testing.RunTests list, the
+    // CALLER's. A list's own top-level tests are never watched; the test that called RunTests is.
+    private TestExecution WatchedClock => NestedRoot?.Caller?.WatchedClock ?? m_clockRoot;
+
+    /// <summary>
+    /// The instant the per-test watchdog abandons this test's tree if its clock runs on from now, or null when there
+    /// is no per-test deadline. testing.T.Deadline reports it when it is earlier than the package deadline.
+    /// </summary>
+    /// <remarks>
+    /// The deadline less what the watched clock has charged so far. A clock that pauses later (a parallel test whose
+    /// subtests only queue) or restarts (a test that calls t.Parallel after reading it) moves the abandonment LATER,
+    /// never earlier, so a wait sized from this instant always ends before the watchdog does.
+    /// </remarks>
+    internal DateTime? PerTestDeadlineUtc
+    {
+        get
+        {
+            TimeSpan deadline = m_runner.TestDeadline;
+
+            if (deadline <= TimeSpan.Zero)
+                return null;
+
+            TestExecution clock = WatchedClock;
+            long charged;
+
+            lock (clock.m_clockLock)
+            {
+                long since = Interlocked.Read(ref clock.m_runningSince);
+                charged = since != 0 ? Stopwatch.GetTimestamp() - since : clock.m_chargedTicks;
+            }
+
+            return DateTime.UtcNow + (deadline - Stopwatch.GetElapsedTime(0, charged));
+        }
+    }
+
     /// <summary>
     /// The per-test watchdog's verdict: this test, and every subtest of it still in flight, did not finish
     /// within the deadline. Reports each as <c>fail</c> marked <see cref="TestEvent.Abandoned"/>, a subtest

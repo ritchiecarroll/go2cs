@@ -244,9 +244,8 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
                 }
             }
 
-            var exprᴛ1 = magics;
             switch (ᐧ) {
-            case {} when exprᴛ1 == gccgov1Magic || exprᴛ1 == gccgov2Magic || exprᴛ1 == gccgov3Magic: {
+            case {} when magics == gccgov1Magic || magics == gccgov2Magic || magics == gccgov3Magic: {
                 ref var p = ref heap(new parser(), out var Ꮡp);
                 Ꮡp.init(fpath, reader, imports);
                 pkg = Ꮡp.parsePackage();

@@ -71,7 +71,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     [GoValueClone("items")] internal partial struct boxed<T> {}
-    internal partial struct embeds {}
+    [GoValueClone("grid")] internal partial struct embeds {}
     internal partial struct empty {}
     [GoValueClone("cells")] internal partial struct grid {}
     [GoValueClone("board")] internal partial struct nested {}

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,7 +9,11 @@ partial struct node {
     internal ж<node> next;
 }
 
+} partial class mainᴛnode {
+
 internal static partial void link(this ref node n, ж<node> m) { n.next = m; }
+
+} partial class main_package {
 
 internal static partial array<nint> process(nint n) {
     array<nint> a = new(5);

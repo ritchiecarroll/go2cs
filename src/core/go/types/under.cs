@@ -7,18 +7,19 @@ namespace go.go;
 
 using iter = iter_package;
 using ꓸꓸꓸany = Span<any>;
+using static types_package;
 
 partial class types_package {
 
 // If typ is a type parameter, underIs returns the result of typ.underIs(f).
 // Otherwise, underIs returns the result of f(typ.Underlying()).
-internal static bool underIs(ΔType typ, Func<ΔType, bool> f) {
-    return all(typ, (ΔType _, ΔType u) => f(u));
+internal static bool underIs(Type typ, Func<Type, bool> f) {
+    return all(typ, (Type _, Type u) => f(u));
 }
 
 // all reports whether f(t, u) is true for all (type/underlying type)
 // pairs in the typeset of t. See [typeset] for details of sequence.
-internal static bool all(ΔType t, Func<ΔType, ΔType, bool> f) {
+internal static bool all(Type t, Func<Type, Type, bool> f) {
     var (p, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (p != nil) {
         return p.typeset(f);
     }
@@ -31,8 +32,8 @@ internal static bool all(ΔType t, Func<ΔType, ΔType, bool> f) {
 // In this case, if there are no specific terms, the iterator produces (nil, nil).
 // If t is not a type parameter, the implied type set consists of just t.
 // In any case, typeset is guaranteed to produce at least one set of results.
-internal static iter.Seq2<ΔType, ΔType> typeset(ΔType t) {
-    return (Func<ΔType, ΔType, bool> yield) => {
+internal static iter.Seq2<Type, Type> typeset(Type t) {
+    return (Func<Type, Type, bool> yield) => {
         all(t, yield);
     };
 }
@@ -55,11 +56,15 @@ internal static ж<typeError> typeErrorf(@string format, params ꓸꓸꓸany arg
     return Ꮡ(new typeError(format, args));
 }
 
+} partial class typesᴛtypeError {
+
 // format formats a type error as a string.
 // check may be nil.
 internal static @string format(this ref typeError err, ж<Checker> check) {
     return check.sprintf(err.format_, err.args.ꓸꓸꓸ);
 }
+
+} partial class types_package {
 
 // If t is a type parameter, cond is nil, and t's type set contains no channel types,
 // commonUnder returns the common underlying type of all types in t's type set if
@@ -78,10 +83,10 @@ internal static @string format(this ref typeError err, ж<Checker> check) {
 //
 // If t is not a type parameter, commonUnder behaves as if t was a type parameter
 // with the single type t in its type set.
-internal static (ΔType, ж<typeError>) commonUnder(ΔType t, Func<ΔType, ΔType, ж<typeError>> cond) {
-    ΔType ct = default; // type and respective common underlying type
-    ΔType cu = default;
-    foreach (var (tΔ1, u) in range<ΔType, ΔType>(typeset(t).Invoke)) {
+internal static (Type, ж<typeError>) commonUnder(Type t, Func<Type, Type, ж<typeError>> cond) {
+    Type ct = default; // type and respective common underlying type
+    Type cu = default;
+    foreach (var (tΔ1, u) in range<Type, Type>(typeset(t).Invoke)) {
         if (cond != nil) {
             var err = cond(tΔ1, u); if (err != nil) {
                 return (default, err);

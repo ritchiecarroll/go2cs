@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using collꓸKind = go.RenamedGenericQualified.coll_package.ΔKind;
 // </ImportedTypeAliases>
 
 using go;

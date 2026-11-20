@@ -233,10 +233,10 @@ public static void TestExhaustive(ж<testing.T> t) {
                     qpresʗ2.ᐸꟷ(wantΔ1);
                 }
             });
-            var selᴛ1 = qpres;
+            var qpresᴛ1 = qpres;
             var selᴛ2 = time.After((time.Duration)(5000000000L));
-            switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-            case 0 when selᴛ1.ꟷᐳ(out var gotΔ1): {
+            switch (select(ᐸꟷ(qpresᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+            case 0 when qpresᴛ1.ꟷᐳ(out var gotΔ1): {
                 var (wantΔ2, ok) = gotΔ1._<slice<byte>>(ᐧ); if (ok) {
                     if (((@string)wantΔ2) != Ꮡbuf.Value.String()) {
                         t.Errorf("go decode(%q) = %q; qprint = %q", s, wantΔ2, Ꮡbuf.Value.String());
