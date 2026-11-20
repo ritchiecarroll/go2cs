@@ -122,8 +122,33 @@ keyword, loaded as a startup hook. The rows below are compiles into `main_packag
 
 ## 7. Bisect 2 (runner's launch)
 
-Not run yet. It is for this record, not a gate, and runs after the seat is READY: the window (0, 264], 15 runs per arm,
-verdict by median.
+Run after the seat was READY (2026-11-20, 14:57-15:40Z). It is for this record, not a gate. The window was (0, 264],
+15 runs per arm, verdict by median (< 900 ms GOOD), clean builds.
+
+| idx | commit | median | fast | verdict |
+|---|---|---|---|---|
+| 132 | `0904811dcf` | 1857 | 4/15 | BAD |
+| 66 | `e8888b95d5` | 619 | 15/15 | GOOD |
+| 99 | `31dc1870cb` | 1814 | 6/15 | BAD |
+| 82 | `7fbb8fabfa` | 1808 | 3/15 | BAD |
+| 74 | `0441f175cd` | 1791 | 4/15 | BAD |
+| 70 | `14c62f1096` | 1888 | 2/15 | BAD |
+| 68 | `c13a9cf690` | 1863 | 3/15 | BAD |
+| 67 | `4aebdadc1a` | 619 | 15/15 | GOOD |
+
+- **Last good `4aebdadc1a` (fp67). First bad `c13a9cf690` (fp68): batch 209**, lane R's own item 7.
+  `GoZeroSizeFacts<T>.IsZeroSize` became an inlined pre-gate (GoZeroSize.cs +42), and Window's first arm reads it.
+- **The inline read at the boundary** (runner's launch, 4 runs each):
+  - fp67 refuses Window "too many il bytes" in 4/4 runs, and all 4 are FAST (595-652 ms).
+  - fp68 refuses it in 3/4 runs, which are SLOW (1860-1973). The one run that inlines it is fast (600).
+
+  So before batch 209 the out-of-line Window cost nothing that mattered. From batch 209 on, only the inlined Window is
+  fast, and the bimodal split is whether it inlines. The cut makes it inline every time.
+- **UNROOTED:** why batch 209 makes the out-of-line path slow. Two OSR listings, fp67 and fp68, both happened to be fast
+  runs, and their call lists are identical (953 and 997 lines). A slow fp68 listing is the next read. The fix does not
+  depend on it.
+- **Bisect 1's boundary** (2db66518be, batch 287) is where the MSYS-pipe manifestation moves. It is not this
+  regression.
 
 ## 8. Predictions, scored
 
