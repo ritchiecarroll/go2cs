@@ -34,11 +34,11 @@ namespace go;
 public static partial class GoReflect
 {
     // One per family instantiation: the call and make trampolines, both functions of the type alone.
-    private sealed record VariadicTrampolines(Func<Delegate, object?[], Array, object?> Call, Func<Func<object?[], object?>, Delegate> Make);
+    private sealed record VariadicTrampolines(Func<Delegate, object?[], object?, object?> Call, Func<Func<object?[], object?>, Delegate> Make);
 
     private static readonly ConcurrentDictionary<Type, VariadicTrampolines> s_variadicTrampolines = new();
 
-    private static void registerVariadic(Type familyType, Func<Delegate, object?[], Array, object?> call, Func<Func<object?[], object?>, Delegate> make)
+    private static void registerVariadic(Type familyType, Func<Delegate, object?[], object?, object?> call, Func<Func<object?[], object?>, Delegate> make)
     {
         if (!s_variadicTrampolines.ContainsKey(familyType))
             s_variadicTrampolines.TryAdd(familyType, new VariadicTrampolines(call, make));

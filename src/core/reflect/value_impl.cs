@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 using go;
@@ -2367,17 +2367,10 @@ public static slice<Value> CallSlice(this Value v, slice<Value> @in) {
     // The final argument is checked against the func's own []T parameter — which is exactly what
     // marshalCallArg does, so Go's assignability rule AND its "CallSlice using X as type []T" panic
     // text come for free rather than being restated here.
-    Value tailArg = @in[fixedCount];
-    marshalCallArg(tailArg, ins[^1]);
-    System.Type tailElem = ins[^1].GetGenericArguments()[0];
-    nint tailLen = tailArg.Len();
-    // `Array` alone is reflect.Array (a Kind constant is in scope here), so this one is qualified —
-    // the same collision callVariadic annotates.
-    System.Array tail = System.Array.CreateInstance(tailElem, (int)tailLen);
-    for (nint i = 0; i < tailLen; i++) {
-        tail.SetValue(marshalCallArg(tailArg.Index(i), tailElem), (int)i);
-    }
-    return callResults(GoReflect.InvokeVariadic(del, args, tail), outs);
+    // The marshalled slice itself is the tail: Go's CallSlice hands the callee the caller's slice, so
+    // element writes in the callee are visible through it (golib InvokeVariadicSlice keeps the header).
+    object? tail = marshalCallArg(@in[fixedCount], ins[^1]);
+    return callResults(GoReflect.InvokeVariadicSlice(del, args, tail), outs);
 }
 
 } partial class reflect_package {

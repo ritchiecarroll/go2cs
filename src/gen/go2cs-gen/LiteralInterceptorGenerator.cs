@@ -459,7 +459,7 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
     {
         IArrayTypeSymbol array => array.ElementType.SpecialType == SpecialType.System_Object,
         INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ SpecialType: SpecialType.System_Object }] } named =>
-            named.ConstructedFrom.ToDisplayString() is "System.Span<T>" or "System.ReadOnlySpan<T>",
+            named.ConstructedFrom.ToDisplayString() is "System.Span<T>" or "System.ReadOnlySpan<T>" or "go.variadic<T>",
         _ => false
     };
 
