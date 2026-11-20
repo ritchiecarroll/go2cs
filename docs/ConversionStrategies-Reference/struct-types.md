@@ -955,7 +955,8 @@ Go's, by `TestEachNamedUnnamedStructMoveRecordsItsConversion` in the converter, 
 - an exported package-level declaration that reuses an unexported declaration's lift in one file
   (CS0050/CS0052/CS0053: the reused lift is less accessible than the member that names it).
 
-Since 2026-11-20 a site that needs a public type reuses a registered lift when that lift was
+<!-- one lift per anonymous type across a package's files: recorded declared accessibility, 2026-11-20 -->
+A site that needs a public type reuses a registered lift when that lift was
 declared public, read from the access modifier recorded at its declaration (`liftDeclaredPublic`),
 so an exported function's anonymous result and the exported fields that repeat its type share one
 lift, across the package's files. Guarded by `AnonLiftOnePerType`:
