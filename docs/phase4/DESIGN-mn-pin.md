@@ -360,3 +360,33 @@ taken.
 ### 11.5 Size
 
 The two lines of 11.1 and 11.2 do not move 10.6's 130-180 lines or section 8's 2-3 lane-days.
+
+## 12. As cut: two additions, predictions first (dated block, 2026-11-20)
+
+P3 CLEARED revision 2. COORD's GO for the build adds two items, written here before any code. The owner has since
+moved M:N to .6; nothing in the pin changes for it.
+
+### 12.1 The fifth read that decides a thread
+
+`EnsureCarrier` returns at once while `s_idle > 0`. That read is safe only because a parked pinned carrier counts
+in `s_blocked` and never in `s_idle`: it waits on its private wake, not on `s_work`, so it never takes the idle
+count. **The cut keeps the pinned wait outside the idle count.** M4 gains an assertion: while K goroutines sit
+pinned and parked, `s_idle` never exceeds the shared carriers' count (read under the carriers' lock each tick).
+
+### 12.2 M1b: the Enqueue gate's cost, with a pin alive
+
+M1 cannot see `Enqueue`'s gate (`s_blocked > 0` calls `EnsureCarrier`), because no pin is alive there. M1b: one
+goroutine locked and parked for the whole run, all P busy (P - 1 CPU-bound twins beside the ping-pong pair), and
+the unbuffered ping-pong against the same run with no pinned goroutine.
+
+| # | prediction | stop line |
+|---|---|---|
+| P12 | M1b: ping-pong round trip with the pin alive within 1.05x of the run without it. Most wakes take the run-next slot, which never reaches `Enqueue`; the rest pay one `EnsureCarrier` lock with no idle carrier | over 1.25x: the cure is a lock-free unblocked count that `Enqueue` reads, calling `EnsureCarrier` only below P |
+
+### 12.3 The order of the cut
+
+1. golib: `m_pin`, the private wait, the `Ready` route and the run-next closure, the step-end cases (with the
+   backstop raised while mounted), the builder route for a foreign await under a lock, the retire, room and
+   injection rules, the readings.
+2. GolibTests for M4 and M5, and the invariants of 10.3, each made to fail first.
+3. The arms M0-M7, M1b and M3b on this box, and the record.
