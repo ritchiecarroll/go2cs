@@ -892,7 +892,7 @@ ever changes is to a real reference (hence non-nil), never to a nil where Go
 has storage. Releases whose pack was a `Span<T>` read a spread through golib's `ToSpan` too, and so
 read an empty non-nil slice of a zero-size element type (`[]struct{}`, which spans as `Span<T>.Empty`)
 as nil across a spread; the `variadic<T>` pack carries the slice and has no such residual.
-<!-- src/core/golib/variadicPack.cs:117-118 `pack.IsSpread ? pack.Spread : pack.Elements.slice();` -->
+<!-- src/core/golib/variadicPack.cs:118-119 `pack.IsSpread ? pack.Spread : pack.Elements.slice();` -->
 
 (Guarded by the `SliceNilVsEmpty` behavioral test — every row of the table probed with `s == nil`,
 `len`, and `cap` against `go run`; `resliceTailCapZero` discriminates the operator fix, `nilReslice`

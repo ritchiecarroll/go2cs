@@ -4819,7 +4819,7 @@ and an `sslice<T>` pack is read as the span it already is, so the spread itself 
 appended elements.
 <!-- The overloads: src/core/golib/builtin.cs:552 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)` and :565 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; the ISlice<T> form, :539 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`, remains for other operands. -->
 <!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:31 and src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.cs.target:36 -->
-<!-- .ꓸꓸꓸ: src/core/golib/slice.cs:680#81596c and src/core/golib/variadicPack.cs:98#61d117. -->
+<!-- .ꓸꓸꓸ: src/core/golib/slice.cs:680#81596c and src/core/golib/variadicPack.cs:99#61d117. -->
 
 **Any other use of the pack binds the heap slice.** When the function keeps, returns or captures its
 pack, or grows it with `append` or writes into it with `copy`, the body binds `xsʗp.slice()`. For a

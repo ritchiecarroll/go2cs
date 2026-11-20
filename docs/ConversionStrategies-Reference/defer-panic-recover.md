@@ -410,7 +410,7 @@ and spreading inside the thunk, at every variadic deferred call in the corpus.
 
 An empty variadic call is NOT such a wall: `f()` on `func f(parts ...int)` answers `parts == nil` as `true`, as in
 Go, because the empty pack's `.slice()` copies no elements and keeps Go's nil for a zero-argument call.
-<!-- src/core/golib/variadicPack.cs:117-118#b93221: a literal pack's .slice() is `pack.Elements.slice()`, the Span copy below. -->
+<!-- src/core/golib/variadicPack.cs:118-119#b93221: a literal pack's .slice() is `pack.Elements.slice()`, the Span copy below. -->
 <!-- src/core/golib/slice.cs:2005 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
      empty slice where Go passes nil); golib's Span-to-slice copy has since kept nil-ness,
      slice.cs:1975 `NIL-NESS CROSSES THIS BOUNDARY`. -->
