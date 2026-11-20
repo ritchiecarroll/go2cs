@@ -5,6 +5,9 @@
 > re-sized M:N plan (record 10.4's SHOULD-1, written last per 10.9) on top of the pin design
 > ([DESIGN-mn-pin](DESIGN-mn-pin.md)), N2 ([DESIGN-mn-box-twin](DESIGN-mn-box-twin.md)) and stage (c)
 > ([DATA-mn-stage-c](DATA-mn-stage-c.md)). Amended by dated blocks, never rewritten.
+>
+> **2026-11-20: P3 CLEARED section 7 for build; COORD approved the asks of section 10; section 11 carries the text
+> changes owed before the freeze.** The build waits on the owner's M:N landing shape.
 
 ## 1. What the text must hold
 
@@ -178,3 +181,88 @@ per public member: `twin | forwarder:<reason> | E1 | GUARD`.
    the signature rule.
 4. `async-shaped` keyed on symbols before the freeze.
 5. Section 7's build as item 7a's scope, and section 9's stop lines as written.
+
+## 11. Before the freeze: P3's read and COORD's ruling (dated block, 2026-11-20)
+
+P3 read `e508700c5a` read-only, with P2's wall E at `claude/p2-wall-e-spread-alias` `4c16756345`: CLEAR to build
+section 7. Four changes to the TEXT are owed before it freezes, plus two nits; none changes the build. COORD answered
+section 10: all five asks are yes. The hosts are made `partial`, `async-shaped` is keyed on symbols, and
+E = {E1}. Where this block and sections 3-9 differ, this block holds.
+
+### 11.1 R1 and R6 read one predicate: C# accessibility (amends R1, R6)
+
+R1 said "emitted as a public C# member" and R6 said "unexported", and the two disagree both ways. A linkname-opened
+unexported function is public in C# (`linknameOperations.go`), so R1 froze it while R6 said it never freezes. An
+exported method the converter narrows to `internal` (its receiver type is unexported) fell outside R1 and was not
+"unexported" either.
+
+> **R1 (amended).** The predicate is C# accessibility: the population is every Go declaration whose plain member the
+> conversion emits as `public`, whatever its Go spelling.
+>
+> **R6 (amended).** Members the conversion does NOT emit as public stay analysis-driven: twinned where the park set
+> needs them, never frozen.
+
+### 11.2 R7 names the call helper and the fallback (amends R7)
+
+The hidden twin interface freezes more than its slots. A caller in another assembly binds the static helper
+`Iꞏtwin.Mꞏcall(I recv, …)` (`TwinGenerator.IfaceEmit.cs`), found by name (`TwinGenerator.Iface.cs`).
+
+> **R7 (amended).** Every public interface `I` has its hidden twin interface `Iꞏtwin`, with one slot `Mꞏtwin` per
+> member in the twin set and, beside each slot, the static helper `Mꞏcall(I recv, …)` that callers bind across
+> assemblies. When `recv` implements `Iꞏtwin`, the helper returns its slot's task. Otherwise it calls the plain
+> member and returns a completed task. Under opt-in (11.3) that fallback is the common case: an implementer in an
+> assembly built without twins. Helper and slot freeze together.
+
+### 11.3 The opt-in rule (new section of the text)
+
+R1 is the set GIVEN that an assembly is built with twins. Opt-in needs its own rule. It holds whichever M:N shape
+the owner picks (L-min or L-on).
+
+> **O1. The unit is the assembly.** `GoTwinsFor` selects projects, so an assembly is built with twins or without
+> them.
+>
+> **O2. No partial sets.** An assembly built with twins carries all of R1 in the one shape. The spike's switches
+> that change which twins an opted-in assembly carries (`GoTwinsIface`, `GoTwinsIfaceAll`, `GoTwinsGo`,
+> `GoTwinsRefuse`) do not ship. A build that sets one with twins on is refused by the guard (section 8), naming
+> the property.
+>
+> **O3. Direction.** An assembly that has shipped twins keeps shipping them, and one package identity has one
+> variant (never a with-twins and a without-twins build under the same identity and version). The other direction
+> is safe: a caller bound plain keeps working when its dependency gains twins.
+
+The contract's clock is "the first release that carries twins". Under L-min no stdlib package starts that clock in
+.5, so O3 binds a stdlib package from the first release that builds it with twins.
+
+### 11.4 P8, the invariance arm (new; section 9)
+
+Nothing tested section 2's central claim, that the twin's signature does not move with the lowerings.
+
+| # | prediction | stop line |
+|---|---|---|
+| P8 | rebuild one package twice, (a) with the sstring pilot list emptied, and (b) with one `*T` receiver flipped from `this ref T` to `this ж<T>` by a body edit (an added nil check); the twin members' metadata (names, parameter and result types, attributes) is identical to the unmodified build in both | any difference |
+
+Made to fail first: in a scratch generator build, derive one twin's parameter from the plain lowering instead of
+the canonical one; P8 must then name that member under (b). Then restore the generator, byte-identical.
+
+### 11.5 Nits
+
+- **R5.** The guard checks an author-written twin's signature against the canonical lowering. A hand-written
+  `Printfꞏtwin(@string, params Span<any>)` would otherwise pass as twinned while breaking R2.
+- **The contract sentence**, amended: "a twin member never disappears, and **changes shape only where its plain
+  member does**". Generated lift names are ruled not stable, and a twin whose signature carries one moves with its
+  plain member.
+
+### 11.6 Wall E (P2's spread alias), as P3 read it
+
+R2's `...T` to `slice<T>` holds under wall E. There, `slice<T>.ꓸꓸꓸ` builds a spread pack that carries the
+caller's header, and the plain body's `.slice()` returns that header. So section 4's forwarder is exact: a spread
+call shares storage, and a literal call arrives as the fresh slice the twin's caller built. The variadic interface
+slot holds likewise, and its `ꞏcall` fallback passes `.ꓸꓸꓸ` the same way. Two things to carry:
+
+- Wall E removes the slice-to-pack conversion on purpose (`variadicPack.cs`). A forwarder that passes `args`
+  WITHOUT `.ꓸꓸꓸ` to a `...any` member compiles and passes ONE element, the slice itself. Section 8 gains a
+  GenTests row: a `...any` forwarder and a `...any` `ꞏcall` fallback each deliver every element, made to fail by
+  dropping the `.ꓸꓸꓸ`.
+- Sections 2 and 4 say `params Span<T>`. After wall E the plain lowering is `params variadic<T>`, still ref-like.
+  The generator's variadic test keys on the parameter being `params` with a ref-like type, not on `Span<T>` by
+  name: the same symbols-not-names rule COORD ruled for `async-shaped`.
