@@ -14,14 +14,14 @@ public static @unsafe.Pointer Get(ж<@unsafe.Pointer> src) { return @unsafe.Poin
 
 public static @unsafe.Pointer StoreThroughLocal(@unsafe.Pointer v) {
     ref var l = ref heap<@unsafe.Pointer>(out var Ꮡl);
-    (Ꮡl).Value = v;
+    (Ꮡl).ValueSlot = v;
     return l;
 }
 
 public static @unsafe.Pointer StoreThroughParam(@unsafe.Pointer uʗp, @unsafe.Pointer v) {
     ref var u = ref heap(uʗp, out var Ꮡu);
 
-    (Ꮡu).Value = v;
+    (Ꮡu).ValueSlot = v;
     return u;
 }
 

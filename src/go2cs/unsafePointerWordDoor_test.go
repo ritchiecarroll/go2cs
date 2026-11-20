@@ -181,6 +181,21 @@ func nativeStarredLocal(k uintptr) unsafe.Pointer {
 		}
 	}
 
+	// A STORE through shape (b) writes the local's or parameter's own heap box through its slot, never Value, which would
+	// read the held nil first (COORD ruling on P3's review, 2026-11-20); a load through (b) reads ~Ꮡu, the slot too.
+	if body := bodyOf("managedParamStore"); !strings.Contains(body, "(Ꮡu).ValueSlot = v;") || strings.Contains(body, ".Value =") {
+		t.Errorf("managedParamStore: a store through &param writes through ValueSlot:\n%s", body)
+	}
+
+	if body := bodyOf("managedParamRead"); !strings.Contains(body, "~Ꮡu") {
+		t.Errorf("managedParamRead: a load through &param reads ~Ꮡu:\n%s", body)
+	}
+
+	// Shape (a)'s store keeps its emission: its fresh box is the BOARD's (ff) lost write, not this.
+	if body := bodyOf("managedFuncStore"); !strings.Contains(body, ".Value = v;") {
+		t.Errorf("managedFuncStore: a store through the carrying arm keeps its emission:\n%s", body)
+	}
+
 	for name, door := range map[string]string{
 		"nativeNumberRead":        "LoadWord(",
 		"nativeNumberStore":       "StoreWord(",

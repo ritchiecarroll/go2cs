@@ -189,7 +189,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 						result := v.convExpr(starExpr.X, []ExprContext{lambdaContext})
 
 						if context.inLhsAssign {
-							return fmt.Sprintf("(%s)%s", result, derefAccessor)
+							return fmt.Sprintf("(%s)%s", result, v.unsafePointerShapeBStoreAccessor(starExpr.X, derefAccessor))
 						} else {
 							return fmt.Sprintf("%s%s", PointerDerefOp, result)
 						}

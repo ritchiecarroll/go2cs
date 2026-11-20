@@ -100,6 +100,25 @@ func (v *Visitor) unsafePointerWordOperand(expr ast.Expr) (ast.Expr, bool) {
 // unsafePointerWordSlotIsManaged reports whether a *unsafe.Pointer operand provably names a slot the converter allocated
 // in managed memory: shapes (a) and (b) of the door's header comment.
 func (v *Visitor) unsafePointerWordSlotIsManaged(operand ast.Expr) bool {
+	return v.unsafePointerManagedSlotShape(operand) != 0
+}
+
+// unsafePointerShapeBStoreAccessor answers the accessor of a STORE `*p = v` through shape (b), `&x` of a local or a
+// parameter: `.ValueSlot`, the converter's own convention for writing a held reference (`pp.ValueSlot = Ꮡx`). `.Value`
+// would read the held value first and panic on a nil unsafe.Pointer, where Go stores (COORD ruling on P3's review of
+// seat S-B1, 2026-11-20). Loads through (b) already read the slot (`~Ꮡx`), and shape (a)'s store keeps its emission:
+// its fresh box is the BOARD's (ff) lost write, not this. Every other operand keeps accessor.
+func (v *Visitor) unsafePointerShapeBStoreAccessor(operand ast.Expr, accessor string) string {
+	if isUnsafePointerPointerType(v.info.TypeOf(operand)) && v.unsafePointerManagedSlotShape(operand) == 'b' {
+		return ".ValueSlot"
+	}
+
+	return accessor
+}
+
+// unsafePointerManagedSlotShape answers which provably managed shape a *unsafe.Pointer operand names, 'a' or 'b' of the
+// door's header comment, and 0 for every other operand.
+func (v *Visitor) unsafePointerManagedSlotShape(operand ast.Expr) byte {
 	expr := ast.Unparen(operand)
 	stripped := false
 
@@ -122,7 +141,7 @@ func (v *Visitor) unsafePointerWordSlotIsManaged(operand ast.Expr) bool {
 		// drift: a source it declines is rendered by another route, which is not a fresh box.
 		if _, isWordTarget := unsafePointerTargetLevels(v.info.TypeOf(call)); isWordTarget {
 			if src, _, _ := v.pointerReinterpretManagedSource(call, call.Args[0]); src != nil {
-				return true
+				return 'a'
 			}
 		}
 
@@ -137,18 +156,22 @@ func (v *Visitor) unsafePointerWordSlotIsManaged(operand ast.Expr) bool {
 	unary, isAddr := expr.(*ast.UnaryExpr)
 
 	if stripped || !isAddr || unary.Op != token.AND {
-		return false
+		return 0
 	}
 
 	ident, isIdent := ast.Unparen(unary.X).(*ast.Ident)
 
 	if !isIdent {
-		return false
+		return 0
 	}
 
 	variable, isVar := v.info.ObjectOf(ident).(*types.Var)
 
-	return isVar && !variable.IsField() && variable.Pkg() != nil && variable.Parent() != nil && variable.Parent() != variable.Pkg().Scope()
+	if isVar && !variable.IsField() && variable.Pkg() != nil && variable.Parent() != nil && variable.Parent() != variable.Pkg().Scope() {
+		return 'b'
+	}
+
+	return 0
 }
 
 // unsafePointerIdentityRoundTrip answers x for the conversion `(*unsafe.Pointer)(unsafe.Pointer(x))` where x is itself a
