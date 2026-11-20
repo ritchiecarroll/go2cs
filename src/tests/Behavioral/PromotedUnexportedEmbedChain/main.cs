@@ -66,13 +66,13 @@ internal static void main() {
     fmt.Println("slice:", s[0].Count(), s[1].Count(), s[1].Last());
 
     array<lib.Link> a = new(2, () => new(nil));
-    Ꮡa.at<lib.Link>(0).Add("a0");
-    Ꮡa.at<lib.Link>(0).Add("a0b");
-    fmt.Println("array:", Ꮡa.at<lib.Link>(0).Count(), Ꮡa.at<lib.Link>(0).Last(), Ꮡa.at<lib.Link>(1).Count());
+    a[0].Add("a0");
+    a[0].Add("a0b");
+    fmt.Println("array:", a[0].Count(), a[0].Last(), a[1].Count());
 
     var h = Ꮡ(new holder());
-    h.Ꮡlink.Add("h1");
-    fmt.Println("holder:", h.Ꮡlink.Count(), h.Ꮡlink.Last());
+    h.link.Add("h1");
+    fmt.Println("holder:", h.link.Count(), h.link.Last());
 }
 
 } // end main_package

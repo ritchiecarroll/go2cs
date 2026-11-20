@@ -44,6 +44,7 @@ using static go.main_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(go.go.ppembedlib_package.Link))]
+[assembly: GoFieldAccess(typeof(holder))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAkahIKCgpaCgpaCgoKUgoKWgoKCloKClIKC")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABAg+oSCgoKWgoKWgoKClIKCloKCgpaCgpSCgpaCgoKYgoKCgpSCgoKUgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,6 +70,8 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct holder {}
+    internal partial struct wrap {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -81,3 +84,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.wrap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛwrap;
+// </MethodHolders>

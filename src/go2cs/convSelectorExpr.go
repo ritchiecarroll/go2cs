@@ -2573,6 +2573,18 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							// pp; guarded by PromotedUnexportedEmbedChain). An EXPORTED hop before the
 							// unexported one (`Image{Inline{inner{BaseNode}}}`) has the same answer.
 							if foreignUnexportedHop {
+								// A VALUE base (`v`, `s[0]`, `a[0]`, `h.link`): Go calls a pointer method only on an
+								// ADDRESSABLE value, whose rendering is a C# variable or ref (a local, a slice or array
+								// element, a field), so the method is called on the value itself and binds the outer
+								// type's generated `ref` forwarder, writing in place. The &-machinery's box is not used
+								// for it: for a local nothing else boxes it is a COPY (`Ꮡ(v)`, writes dropped), and for
+								// an array element it names the array's box (`Ꮡa.at<T>(0)`), which a local array the
+								// source never takes the address of does not have (CS0103; PromotedUnexportedEmbedChain's
+								// a[0] arm, run 44748721390). A direct-ж target has no `ref` forwarder and keeps the box.
+								if _, xIsPtr := v.info.TypeOf(selectorExpr.X).Underlying().(*types.Pointer); !xIsPtr && !v.selectorTargetIsDirectBoxMethod(selectorExpr) {
+									return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+								}
+
 								if ofIndex := strings.LastIndex(fieldAddr, ".of("); ofIndex != -1 && strings.HasSuffix(fieldAddr, ")") {
 									box := fieldAddr[:ofIndex]
 
