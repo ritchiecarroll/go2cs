@@ -12657,7 +12657,7 @@ pass and nothing else.
      default. A -stdlib run prints the tags it applies, e.g.
      `Applying build tags: purego,math_big_pure_go (default; pass -tags to override)`
      (../src/go2cs/stdLibConverter.go:56 (`fmt.Println(c.options.buildTagsAnnouncement("purego"))`), the line built at
-     ../src/go2cs/commandLineOptions.go:523 (`return "Applying build tags: " + strings.Join(o.buildTags, ",") + suffix`));
+     ../src/go2cs/commandLineOptions.go:538 (`return "Applying build tags: " + strings.Join(o.buildTags, ",") + suffix`));
      a -recurse run prints its own the same way (../src/go2cs/moduleConverter.go:88
      (`fmt.Println(m.options.buildTagsAnnouncement("module"))`)); -tests shares the stdlib default and prints it only
      with -recurse. -->
