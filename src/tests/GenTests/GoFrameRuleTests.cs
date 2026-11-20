@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace go2cs.Tests;
@@ -383,6 +384,111 @@ public class GoFrameRuleTests
             "the rule must not be configurable: an .editorconfig severity, NoWarn or a pragma could otherwise turn it off");
     }
 
+    [TestMethod]
+    public void RefusesThroughTheAnalyzerACopyThatBindsOnlyWithGeneratedCode()
+    {
+        // `late.Value` stands for a member another generator adds: in the generator's view the call does not bind, so the
+        // `ref ᒐ` is deferred; the analyzer binds it with the late tree and finds keep<GoFrame>, an inferred generic argument.
+        string source = Usings +
+            """
+            public static class pkg
+            {
+                private static void keep<T>(ref T value, int extra) { }
+
+                public static void f()
+                {
+                    GoFrame ᒐ = default;
+                    keep(ref ᒐ, late.Value); // <- GO2CS0016
+                    ᒐ.Run();
+                }
+            }
+            """;
+
+        Result result = RunWith(null, Late, source);
+        AssertRefusedAt(result, "is passed as a generic argument", source, 0);
+        Assert.AreEqual(1, result.Refusals.Length, "reported more than once:\n" + string.Join("\n", result.Refusals));
+    }
+
+    [TestMethod]
+    public void ReportsEachSiteOnce()
+    {
+        // The double-report control: a use the generator refuses, and a use it defers that the analyzer refuses, each
+        // reported exactly once across the generator and the analyzer.
+        string source = Usings +
+            """
+            public static class frames
+            {
+                public static int Ext(this GoFrame frame) => frame.Count;
+
+                public static void keep<T>(ref T value, int extra) { }
+            }
+
+            public static class pkg
+            {
+                public static void f()
+                {
+                    GoFrame ᒐ = default;
+                    _ = ᒐ.Ext();
+                    frames.keep(ref ᒐ, late.Value);
+                    ᒐ.Run();
+                }
+            }
+            """;
+
+        Result result = RunWith(null, Late, source);
+        string[] lines = source.Replace("\r\n", "\n").Split('\n');
+
+        foreach (string site in new[] { "_ = ᒐ.Ext();", "frames.keep(ref ᒐ, late.Value);" })
+        {
+            int line = Array.FindIndex(lines, text => text.Contains(site));
+            int count = result.Refusals.Count(diagnostic => diagnostic.Location.GetLineSpan().Path == FileName(0) &&
+                diagnostic.Location.GetLineSpan().StartLinePosition.Line == line);
+            Assert.AreEqual(1, count, $"`{site}` was reported {count} times:\n" + string.Join("\n", result.Refusals));
+        }
+    }
+
+    [TestMethod]
+    public void ATwinOfADeferringFunctionCompilesAndReportsNothing()
+    {
+        // 9.8's reason for the plain struct: a twin's state machine holds the frame across an await. TwinGenerator writes
+        // the twin, which no generator sees and the analyzer reads only at listed sites, so nothing is reported; the twin
+        // must exist and the whole compilation must EMIT (an async lowering error is reported only while it is built).
+        const string Source =
+            """
+            using System;
+            using static go.builtin;
+
+            namespace go;
+
+            public static partial class frames_package
+            {
+                internal static channel<nint> ch;
+
+                internal static nint park()
+                {
+                    GoFrame ᒐ = default;
+                    try
+                    {
+                        defer(() => { }, ref ᒐ);
+                        return ᐸꟷ(ch);
+                    }
+                    finally { ᒐ.Run(); }
+                }
+            }
+            """;
+
+        Result result = RunWith(new Dictionary<string, string> { ["build_property.GoTwins"] = "true" }, null, Source);
+
+        Assert.IsTrue(result.Output.SyntaxTrees.Any(tree => tree.ToString().Contains("parkꞏtwin")), "no twin was generated for park");
+        Microsoft.CodeAnalysis.Emit.EmitResult emitted = result.Output.Emit(Stream.Null);
+        Diagnostic[] errors = [.. emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)];
+        Assert.AreEqual(0, errors.Length, "the twin does not build:\n" + string.Join("\n", errors));
+        Assert.AreEqual(0, result.Refusals.Length, "a twin's frame was refused:\n" + string.Join("\n", result.Refusals));
+    }
+
+    // Stands for a member another generator adds, which the GoFrame rule's generator does not see.
+    private const string Late = "namespace go { public static class late { public const int Value = 1; } }";
+
     private static void AssertRefused(string fragment, string body)
     {
         string source = Usings + body;
@@ -411,23 +517,37 @@ public class GoFrameRuleTests
 
     private static string FileName(int index) => $"input{index}.cs";
 
-    private sealed record Result(ImmutableArray<Diagnostic> Refusals, ImmutableArray<Diagnostic> CompileErrors);
+    private sealed record Result(ImmutableArray<Diagnostic> Refusals, ImmutableArray<Diagnostic> CompileErrors, Compilation Output);
 
     private static readonly CSharpParseOptions s_parseOptions = new(LanguageVersion.Preview);
 
-    private static Result Run(params string[] sources)
+    private static Result Run(params string[] sources) => RunWith(null, null, sources);
+
+    // Runs every go2cs-gen generator over the sources, then every go2cs-gen analyzer over the result, as a build does. A
+    // `late` source joins the compilation AFTER the generators ran: it stands for another generator's output, which the
+    // GoFrame rule's generator does not see and its analyzer does.
+    private static Result RunWith(Dictionary<string, string>? properties, string? late, params string[] sources)
     {
         CSharpCompilation compilation = CSharpCompilation.Create("frames",
             sources.Select((source, index) => CSharpSyntaxTree.ParseText(source, s_parseOptions, FileName(index))),
             References(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(Generators(), parseOptions: s_parseOptions);
-        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out ImmutableArray<Diagnostic> generatorDiagnostics);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(Generators(), parseOptions: s_parseOptions,
+            optionsProvider: properties is null ? null : new BuildProperties(properties));
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out ImmutableArray<Diagnostic> generatorDiagnostics);
+
+        if (late is not null)
+            output = output.AddSyntaxTrees(CSharpSyntaxTree.ParseText(late, s_parseOptions, "late.cs"));
+
+        ImmutableArray<Diagnostic> analyzerDiagnostics = output.WithAnalyzers(Analyzers()).GetAnalyzerDiagnosticsAsync().GetAwaiter().GetResult();
+        Diagnostic[] crashes = [.. analyzerDiagnostics.Where(diagnostic => diagnostic.Id == "AD0001")];
+        Assert.AreEqual(0, crashes.Length, "an analyzer threw:\n" + string.Join("\n", crashes));
 
         return new Result(
-            [.. generatorDiagnostics.Where(diagnostic => diagnostic.Id == Code)],
-            [.. output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)]);
+            [.. generatorDiagnostics.Concat(analyzerDiagnostics).Where(diagnostic => diagnostic.Id == Code)],
+            [.. output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)],
+            output);
     }
 
     // Every generator go2cs-gen ships, found by its [Generator] attribute.
@@ -441,6 +561,14 @@ public class GoFrameRuleTests
                 _ => throw new InvalidOperationException($"{type} is marked [Generator] and is no generator")
             });
 
+    // Every analyzer go2cs-gen ships, found by its [DiagnosticAnalyzer] attribute.
+    private static ImmutableArray<DiagnosticAnalyzer> Analyzers() =>
+    [
+        .. typeof(LiteralInterceptorGenerator).Assembly.GetTypes()
+            .Where(type => !type.IsAbstract && type.GetCustomAttributes(typeof(DiagnosticAnalyzerAttribute), false).Length > 0)
+            .Select(type => (DiagnosticAnalyzer)Activator.CreateInstance(type)!)
+    ];
+
     private static IEnumerable<MetadataReference> References()
     {
         string trusted = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!;
@@ -448,5 +576,21 @@ public class GoFrameRuleTests
         return trusted.Split(Path.PathSeparator)
             .Select(path => MetadataReference.CreateFromFile(path))
             .Append(MetadataReference.CreateFromFile(typeof(golib::go.GoFrame).Assembly.Location));
+    }
+
+    private sealed class BuildProperties(Dictionary<string, string> properties) : AnalyzerConfigOptionsProvider
+    {
+        private readonly Options m_global = new(properties);
+
+        public override AnalyzerConfigOptions GlobalOptions => m_global;
+
+        public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => m_global;
+
+        public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => m_global;
+
+        private sealed class Options(Dictionary<string, string> values) : AnalyzerConfigOptions
+        {
+            public override bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) => values.TryGetValue(key, out value);
+        }
     }
 }
