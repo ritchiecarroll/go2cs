@@ -60,6 +60,20 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# ---- THE HOST PREFLIGHT ---------------------------------------------------------------------------
+# This script needs PowerShell 7 (pwsh). Under Windows PowerShell 5.1 it passed the project-graph and
+# solution-integrity checks, built the converter, began transpiling, and then THREW: .NET Framework's
+# [System.IO.Path] has no GetRelativePath. The run measured nothing and printed no verdict, and a
+# thrown run read as "CHANGED 0" is route #6 (i9, 2026-11-20, the nuget-precedence seat; COORD ruled the
+# guard 11:36Z). So the host is checked FIRST, before any tool, build or transpile, and the wrong one
+# REFUSES by name with `exit 2`, the same code the tool preflight below uses. It is a refusal, never a
+# skip: nothing about the corpus is read or assumed.
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host (("check-no-regression.ps1 needs PowerShell 7 (pwsh); this is PowerShell {0}. " +
+        "Run it as: pwsh -NoProfile -File check-no-regression.ps1") -f $PSVersionTable.PSVersion) -ForegroundColor Red
+    exit 2
+}
+
 # ---- THE TOOL PREFLIGHT ---------------------------------------------------------------------------
 # ⚠⚠ A FALSE GREEN, MEASURED (LEDGER 2026-09-22 09:46, batch 5): with `git` absent from the session's
 # PATH this script transpiled the whole corpus, then died on `$changed = & git ... status` with "The
