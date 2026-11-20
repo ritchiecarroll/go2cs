@@ -814,8 +814,10 @@ matches native Go's on all 17,422 files of TypeScript's parser test corpus, and 
 TypeScript's 7,404 single-file compiler tests, one at a time, matches native Go's output on every one. Five of its
 language-server packages are still refused (`GO2CS2005`) and skipped, and xxh3 is used through the fork described
 below.
-<!-- PENDING on the publish (COORD 2026-11-19 14:51Z): the link to the typescript-go-cs conversion repository goes
-     here once it is public, after the publish. Until then no visible text says it is public. -->
+The converted compiler is published, with its build and run instructions, in
+[typescript-go-cs](https://github.com/ritchiecarroll/typescript-go-cs).
+<!-- Was PENDING on the publish (COORD 2026-11-19 14:51Z); filled 2026-11-20 once typescript-go-cs was public
+     (main 6ba3f6b7ce). -->
 
 Among the shapes that now convert and run as in Go:
 
@@ -874,10 +876,12 @@ with no package refused, on Windows x64 and on Linux x64. A converted program th
 and reads it back in SQLite's default journal mode and then in WAL mode, and removes it, prints exactly what the
 native Go program prints, on Windows x64 and on Linux x64. On Windows the conversion needs one extra value,
 `-inline-arrays=modernc.org/libc#largeInteger`, without which the first database opened in WAL mode panics
-([Known issues](KnownIssues.md#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger)). These
-shapes now convert and run as in Go:
-<!-- PENDING on the publish (COORD 2026-11-19 14:51Z): the link to the sqlite-cs conversion repository goes here
-     once it is public, after the publish. Until then no visible text says it is public. -->
+([Known issues](KnownIssues.md#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger)). The
+converted C# of both programs, for Windows x64 and Linux x64, is published with the recipe that reproduces it in
+[sqlite-cs](https://github.com/ritchiecarroll/sqlite-cs). These shapes now convert and run as in Go:
+<!-- Was PENDING on the publish (COORD 2026-11-19 14:51Z); filled 2026-11-20 once sqlite-cs carried the converted C#
+     (main 175ef95f31: the 1.26.11.1 release converter, -recurse=nuget, GO2CSPATH empty; both demos byte-identical to
+     native Go on windows/amd64 (i9) and linux/amd64 (P5)). -->
 
 - a C function pointer carried as a `uintptr`: `__ccgo_fp(f)` and a call back through
   `*(*func(…))(unsafe.Pointer(&struct{ uintptr }{x}))`. Each top-level function gets one number, the same at every
