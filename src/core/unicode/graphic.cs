@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using ꓸꓸꓸжRangeTable = Span<ж<unicode_package.RangeTable>>;
+using ꓸꓸꓸжRangeTable = variadic<ж<unicode_package.RangeTable>>;
 
 partial class unicode_package {
 

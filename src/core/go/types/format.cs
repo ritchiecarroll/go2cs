@@ -11,7 +11,7 @@ using token = global::go.go.token_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using types = types_package;
 using static types_package;
 
@@ -21,7 +21,7 @@ partial class types_package {
 internal static readonly object nilˢ = (@string)"<nil>"u8;
 
 internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @string> qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     foreach (var (i, vᴛ1) in range(args)) {
         var arg = vᴛ1;
@@ -121,7 +121,7 @@ internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @strin
 
 // check may be nil.
 internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ж<token.FileSet> fset = default;
@@ -134,7 +134,7 @@ internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, param
 }
 
 internal static void trace(this ж<Checker> Ꮡcheck, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pos1 = check.fset.Position(pos);
@@ -172,7 +172,7 @@ internal static nint ndigits(nint x) {
 
 // dump is only needed for debugging
 internal static void dump(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     fmt.Println(types.sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));

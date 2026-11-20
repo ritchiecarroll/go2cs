@@ -13,7 +13,7 @@ namespace go;
 using abi = @internal.abi_package;
 using @unsafe = unsafe_package;
 using @internal;
-using ꓸꓸꓸuintptr = Span<uintptr>;
+using ꓸꓸꓸuintptr = variadic<uintptr>;
 
 partial class syscall_package {
 

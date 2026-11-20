@@ -6,7 +6,7 @@ namespace go.@internal;
 using fmt = fmt_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
-using ꓸꓸꓸuintptr = Span<uintptr>;
+using ꓸꓸꓸuintptr = variadic<uintptr>;
 
 partial class pkgbits_package {
 

@@ -26,7 +26,7 @@ using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAt
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using log;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static log_package;
 
 partial class log_package {
@@ -339,7 +339,7 @@ public static partial void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗ
 
 // Panic is equivalent to l.Print() followed by a call to panic().
 public static partial void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+    var v = vʗp;
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
     Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
@@ -348,7 +348,7 @@ public static partial void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp)
 
 // Panicf is equivalent to l.Printf() followed by a call to panic().
 public static partial void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+    var v = vʗp;
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
     Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
@@ -357,7 +357,7 @@ public static partial void Panicf(this ж<Logger> Ꮡl, @string format, params �
 
 // Panicln is equivalent to l.Println() followed by a call to panic().
 public static partial void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+    var v = vʗp;
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
     Ꮡl.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
@@ -498,7 +498,7 @@ public static partial void Fatalln(params ꓸꓸꓸany vʗp) {
 
 // Panic is equivalent to [Print] followed by a call to panic().
 public static partial void Panic(params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+    var v = vʗp;
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
     std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
@@ -507,7 +507,7 @@ public static partial void Panic(params ꓸꓸꓸany vʗp) {
 
 // Panicf is equivalent to [Printf] followed by a call to panic().
 public static partial void Panicf(@string format, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+    var v = vʗp;
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
     std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
@@ -516,7 +516,7 @@ public static partial void Panicf(@string format, params ꓸꓸꓸany vʗp) {
 
 // Panicln is equivalent to [Println] followed by a call to panic().
 public static partial void Panicln(params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+    var v = vʗp;
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
     std.output(0, 2, (slice<byte> b) => append(b, s.ꓸꓸꓸ));

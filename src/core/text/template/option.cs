@@ -5,7 +5,7 @@
 namespace go.text;
 
 using strings = strings_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 using static template_package;
 
 partial class template_package {

@@ -18,7 +18,7 @@ using unicode = unicode_package;
 using global::go.go;
 using global::go.go.build;
 using text;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static printer_package;
 
 partial class printer_package {
@@ -92,7 +92,7 @@ partial struct printer {
 } partial class printerᴛprinter {
 
 internal static void internalError(this ref printer p, params ꓸꓸꓸany msgʗp) {
-    var msg = msgʗp.sslice();
+    var msg = msgʗp;
 
     if (debug) {
         fmt.Print(p.pos.String() + ": ");

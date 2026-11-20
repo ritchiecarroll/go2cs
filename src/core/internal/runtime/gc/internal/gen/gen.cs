@@ -15,8 +15,8 @@ using strings = strings_package;
 using container;
 using encoding;
 using hash;
-using ꓸꓸꓸValue = Span<gen_package.Value>;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸValue = variadic<gen_package.Value>;
+using ꓸꓸꓸany = variadic<any>;
 using static gen_package;
 
 partial class gen_package {
@@ -24,7 +24,7 @@ partial class gen_package {
 internal const bool logCompile = true;
 
 internal static void fatalf(@string f, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     throw panic(fmt.Sprintf(f, args.ꓸꓸꓸ));
 }

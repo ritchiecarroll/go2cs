@@ -39,7 +39,8 @@
 //
 // Hand-owned companion: these are `partial` bodies pairing with the bodyless declarations in
 // syscall_darwin.cs and syscall_darwin_amd64.cs, so no converter change and no corpus footprint.
-// syscall_darwin.cs's syscalln and rawsyscalln take `params Span<uintptr>`; the arity reaching golib is
+// syscall_darwin.cs's syscalln and rawsyscalln take `params variadic<uintptr>` (its `ꓸꓸꓸuintptr` alias); calln
+// only reads the pack, so it takes a ReadOnlySpan and a literal pack is not copied; the arity reaching golib is
 // the Go call's, at most nine.
 // Since darwin increment 10 (a) it also carries the two public doors (GoSyscall6X, GoSyscallPtr)
 // through which internal/syscall/unix's linkname pulls of the family reach the rules that have no
@@ -92,15 +93,15 @@ public static partial (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr tr
 }
 
 // The Go 1.26 runtime entries every converted keystone in syscall_darwin.cs calls.
-internal static partial (uintptr r1, uintptr r2, Errno err) syscalln(uintptr fn, params Span<uintptr> argsʗp) {
+internal static partial (uintptr r1, uintptr r2, Errno err) syscalln(uintptr fn, params variadic<uintptr> argsʗp) {
     return calln(fn, argsʗp);
 }
 
-internal static partial (uintptr r1, uintptr r2, Errno err) rawsyscalln(uintptr fn, params Span<uintptr> argsʗp) {
+internal static partial (uintptr r1, uintptr r2, Errno err) rawsyscalln(uintptr fn, params variadic<uintptr> argsʗp) {
     return calln(fn, argsʗp);
 }
 
-private static (uintptr r1, uintptr r2, Errno err) calln(uintptr fn, Span<uintptr> args) {
+private static (uintptr r1, uintptr r2, Errno err) calln(uintptr fn, ReadOnlySpan<uintptr> args) {
     if (args.Length > GoLibcCall.MaxArgs) {
         throw new ArgumentException($"go2cs: syscalln with {args.Length} arguments; the darwin family tops out at {GoLibcCall.MaxArgs}", nameof(args));
     }

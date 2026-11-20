@@ -6,7 +6,7 @@
 namespace go.go;
 
 using iter = iter_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static types_package;
 
 partial class types_package {

@@ -77,7 +77,7 @@ namespace go;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using @unsafe = unsafe_package;
-using ꓸꓸꓸuintptr = Span<uintptr>;
+using ꓸꓸꓸuintptr = go.variadic<uintptr>;
 
 partial class syscall_package {
 

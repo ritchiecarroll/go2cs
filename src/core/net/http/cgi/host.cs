@@ -33,7 +33,7 @@ using go.os;
 using go.path;
 using url = go.net.url_package;
 using vendor.golang.org.x.net.http;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static cgi_package;
 
 partial class cgi_package {
@@ -397,7 +397,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
 }
 
 internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
-    var v = vʗp.sslice();
+    var v = vʗp.slice();
 
     if (h.Logger != nil) {
         h.Logger.Printf(format, v.ꓸꓸꓸ);

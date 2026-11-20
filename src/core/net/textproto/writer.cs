@@ -6,7 +6,7 @@ namespace go.net;
 using bufio = bufio_package;
 using fmt = fmt_package;
 using io = io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static textproto_package;
 
 partial class textproto_package {
@@ -30,7 +30,7 @@ internal static slice<byte> dotcrnl = [(byte)'.', (byte)'\r', (byte)'\n'];
 
 // PrintfLine writes the formatted output followed by \r\n.
 public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     w.closeDot();
     fmt.Fprintf(new bufio_WriterжWriter(w.W), format, args.ꓸꓸꓸ);

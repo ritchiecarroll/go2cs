@@ -12,7 +12,7 @@ using unicode = unicode_package;
 using ast = global::go.go.ast_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static types_package;
 
 partial class types_package {
@@ -266,7 +266,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
     }
 
     void errorf(@string format, params ꓸꓸꓸany argsʗp) {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         if (Ꮡcheck != nil && Ꮡcause != nil) {
             @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
             if (Ꮡcause.Value != ""u8) {

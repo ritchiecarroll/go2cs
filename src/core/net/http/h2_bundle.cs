@@ -62,8 +62,8 @@ using go.sync;
 using vendor.golang.org.x.net;
 using vendor.golang.org.x.net.http;
 using vendor.golang.org.x.net.http2;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸhttp2Setting = Span<http_package.http2Setting>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸhttp2Setting = variadic<http_package.http2Setting>;
 using static http_package;
 
 partial class http_package {
@@ -5095,7 +5095,7 @@ internal static void setConnState(this ref http2serverConn sc, ConnState state) 
 }
 
 internal static void vlogf(this ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     if (http2VerboseLogs) {
         sc.logf(format, args.ꓸꓸꓸ);
@@ -5103,7 +5103,7 @@ internal static void vlogf(this ref http2serverConn sc, @string format, params �
 }
 
 internal static void logf(this ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     var lg = sc.hs.ErrorLog; if (lg != nil) {
         lg.Printf(format, args.ꓸꓸꓸ);
@@ -5157,7 +5157,7 @@ internal static bool http2isClosedConnError(error err) {
 } partial class httpᴛhttp2serverConn {
 
 internal static void condlogf(this ref http2serverConn sc, error err, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     if (err == nil) {
         return;
@@ -12024,13 +12024,13 @@ internal static error http2errRequestHeaderListSize = httpcommon.ErrRequestHeade
 } partial class httpᴛhttp2ClientConn {
 
 internal static void logf(this ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     cc.t.logf(format, args.ꓸꓸꓸ);
 }
 
 internal static void vlogf(this ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     cc.t.vlogf(format, args.ꓸꓸꓸ);
 }
@@ -12038,7 +12038,7 @@ internal static void vlogf(this ref http2ClientConn cc, @string format, params �
 } partial class httpᴛhttp2Transport {
 
 internal static void vlogf(this ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     if (http2VerboseLogs) {
         t.logf(format, args.ꓸꓸꓸ);
@@ -12046,7 +12046,7 @@ internal static void vlogf(this ref http2Transport t, @string format, params ꓸ
 }
 
 internal static void logf(this ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     log.Printf(format, args.ꓸꓸꓸ);
 }

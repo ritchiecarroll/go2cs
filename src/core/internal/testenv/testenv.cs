@@ -32,7 +32,7 @@ using go.os;
 using io = io_package;
 using iter = iter_package;
 using path;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class testenv_package {
 

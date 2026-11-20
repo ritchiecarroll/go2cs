@@ -14,7 +14,7 @@ using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static types_package;
 
 partial class types_package {
@@ -481,7 +481,7 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
     }
 
     void errorf(@string format, params ꓸꓸꓸany argsʗp) {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         if (check != nil && Ꮡcause != nil) {
             @string msg = check.sprintf(format, args.ꓸꓸꓸ);
             if (Ꮡcause.Value != ""u8) {

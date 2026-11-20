@@ -21,7 +21,7 @@ using os = os_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static scanner_package;
 
 partial class scanner_package {
@@ -359,7 +359,7 @@ internal static void error(this ж<Scanner> Ꮡs, @string msg) {
 }
 
 internal static void errorf(this ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     Ꮡs.error(fmt.Sprintf(format, args.ꓸꓸꓸ));
 }

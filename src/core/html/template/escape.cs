@@ -15,7 +15,7 @@ using parse = text.template.parse_package;
 using @internal;
 using text;
 using text.template;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static template_package;
 
 partial class template_package {
@@ -57,7 +57,7 @@ internal static error escapeTemplate(ж<Template> Ꮡtmpl, parse.Node node, @str
 // evalArgs formats the list of arguments into a string. It is equivalent to
 // fmt.Sprint(args...), except that it dereferences all pointers.
 internal static @string evalArgs(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     // Optimization for simple common case of a single string argument.
     if (len(args) == 1) {
@@ -1105,7 +1105,7 @@ public static @string HTMLEscapeString(@string s) {
 // HTMLEscaper returns the escaped HTML equivalent of the textual
 // representation of its arguments.
 public static @string HTMLEscaper(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return template.HTMLEscaper(args.ꓸꓸꓸ);
 }
@@ -1123,7 +1123,7 @@ public static @string JSEscapeString(@string s) {
 // JSEscaper returns the escaped JavaScript equivalent of the textual
 // representation of its arguments.
 public static @string JSEscaper(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return template.JSEscaper(args.ꓸꓸꓸ);
 }
@@ -1131,7 +1131,7 @@ public static @string JSEscaper(params ꓸꓸꓸany argsʗp) {
 // URLQueryEscaper returns the escaped value of the textual representation of
 // its arguments in a form suitable for embedding in a URL query.
 public static @string URLQueryEscaper(params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return template.URLQueryEscaper(args.ꓸꓸꓸ);
 }

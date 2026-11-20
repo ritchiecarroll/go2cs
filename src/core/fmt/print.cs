@@ -13,7 +13,7 @@ using utf8 = unicode.utf8_package;
 using @internal;
 using @unsafe = unsafe_package;
 using unicode;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static fmt_package;
 
 partial class fmt_package {
@@ -268,7 +268,7 @@ public static (nint n, error err) Fprintf(Δio.Writer w, sstring format, params 
 // Printf formats according to a format specifier and writes to standard output.
 // It returns the number of bytes written and any write error encountered.
 public static (nint n, error err) Printf(sstring format, params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     return Fprintf(new os.FileжWriter(os.Stdout), format, a.ꓸꓸꓸ);
 }
@@ -317,7 +317,7 @@ public static (nint n, error err) Fprint(Δio.Writer w, params ꓸꓸꓸany aʗp
 // Spaces are added between operands when neither is a string.
 // It returns the number of bytes written and any write error encountered.
 public static (nint n, error err) Print(params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     return Fprint(new os.FileжWriter(os.Stdout), a.ꓸꓸꓸ);
 }
@@ -370,7 +370,7 @@ public static (nint n, error err) Fprintln(Δio.Writer w, params ꓸꓸꓸany a�
 // Spaces are always added between operands and a newline is appended.
 // It returns the number of bytes written and any write error encountered.
 public static (nint n, error err) Println(params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     return Fprintln(new os.FileжWriter(os.Stdout), a.ꓸꓸꓸ);
 }

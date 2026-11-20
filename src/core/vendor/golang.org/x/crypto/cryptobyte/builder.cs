@@ -5,7 +5,7 @@ namespace go.vendor.golang.org.x.crypto;
 
 using errors = errors_package;
 using fmt = fmt_package;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 using static cryptobyte_package;
 
 partial class cryptobyte_package {

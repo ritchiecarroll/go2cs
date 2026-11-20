@@ -6,7 +6,7 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 using static syscall_package;
 
 partial class syscall_package {

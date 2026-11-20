@@ -93,7 +93,7 @@ using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static flag_package;
 
 partial class flag_package {
@@ -1280,7 +1280,7 @@ public static void Var(Value value, @string name, @string usage) {
 
 // sprintf formats the message, prints it to output, and returns it.
 internal static @string sprintf(this ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     @string msg = fmt.Sprintf(format, a.ꓸꓸꓸ);
     fmt.Fprintln(f.Output(), msg);
@@ -1290,7 +1290,7 @@ internal static @string sprintf(this ref FlagSet f, @string format, params ꓸ�
 // failf prints to standard error a formatted error and usage message and
 // returns the error.
 internal static error failf(this ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
     ref var f = ref Ꮡf.DerefOrNull();
 
     @string msg = f.sprintf(format, a.ꓸꓸꓸ);

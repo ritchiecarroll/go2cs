@@ -6,7 +6,7 @@ namespace go.html;
 using fmt = fmt_package;
 using parse = text.template.parse_package;
 using text.template;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static template_package;
 
 partial class template_package {
@@ -253,7 +253,7 @@ public static @string Error(this ref Error e) {
 // errorf creates an error given a format string f and args.
 // The template Name still needs to be supplied.
 internal static ж<Error> errorf(ErrorCode k, parse.Node node, nint line, @string f, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return Ꮡ(new Error(k, node, "", line, fmt.Sprintf(f, args.ꓸꓸꓸ)));
 }

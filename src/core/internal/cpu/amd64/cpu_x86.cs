@@ -4,7 +4,7 @@
 //go:build 386 || amd64
 namespace go.@internal;
 
-using ꓸꓸꓸuint32 = Span<uint32>;
+using ꓸꓸꓸuint32 = variadic<uint32>;
 
 partial class cpu_package {
 

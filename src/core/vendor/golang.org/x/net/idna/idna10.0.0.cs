@@ -225,7 +225,7 @@ internal static void apply(ж<options> o, slice<Action<ж<options>>> opts) {
 // for lookup and registration purposes respectively, which can be tailored by
 // adding more fine-grained options, where later options override earlier
 // options.
-public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
+public static ж<Profile> New(params variadic<Action<ж<options>>> oʗp) {
     var o = oʗp.slice();
 
     var p = Ꮡ(new Profile());

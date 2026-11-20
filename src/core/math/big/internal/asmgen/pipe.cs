@@ -7,7 +7,7 @@ using fmt = fmt_package;
 using bits = go.math.bits_package;
 using slices = slices_package;
 using go.math;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 using static asmgen_package;
 
 partial class asmgen_package {

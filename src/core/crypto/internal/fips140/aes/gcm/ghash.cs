@@ -25,8 +25,8 @@ partial struct gcmFieldElement {
 // GHASH is exposed to allow crypto/cipher to implement non-AES GCM modes.
 // It is not allowed as a stand-alone operation in FIPS mode because it
 // is not ACVP tested.
-public static slice<byte> GHASH(/*[16]*/ ж<array<byte>> key, params Span<slice<byte>> inputsʗp) {
-    var inputs = inputsʗp.sslice();
+public static slice<byte> GHASH(/*[16]*/ ж<array<byte>> key, params variadic<slice<byte>> inputsʗp) {
+    var inputs = inputsʗp;
 
     fips140.RecordNonApproved();
     ref var @out = ref heap(new array<byte>(16), out var Ꮡout);
@@ -38,7 +38,7 @@ public static slice<byte> GHASH(/*[16]*/ ж<array<byte>> key, params Span<slice<
 // be used on any architecture with hardware support for AES-GCM.
 //
 // Each input is zero-padded to 128-bit before being absorbed.
-internal static void ghash(/*[16]*/ ж<array<byte>> Ꮡout, /*[16]*/ ж<array<byte>> ᏑH, params Span<slice<byte>> inputsʗp) {
+internal static void ghash(/*[16]*/ ж<array<byte>> Ꮡout, /*[16]*/ ж<array<byte>> ᏑH, params variadic<slice<byte>> inputsʗp) {
     var inputs = inputsʗp.sslice();
     ref var @out = ref Ꮡout.DerefOrNull();
     ref var H = ref ᏑH.DerefOrNull();

@@ -9,7 +9,7 @@ using scanner = global::go.go.scanner_package;
 using token = global::go.go.token_package;
 using strconv = strconv_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static ast_package;
 
 partial class ast_package {
@@ -26,7 +26,7 @@ internal static void error(this ref pkgBuilder p, token.Pos pos, @string msg) {
 }
 
 internal static void errorf(this ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     p.error(pos, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }

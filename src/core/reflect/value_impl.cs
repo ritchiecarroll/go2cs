@@ -11,7 +11,7 @@ using strconv = go.strconv_package;
 using @unsafe = go.unsafe_package;
 // value.cs declares this alias file-scoped, so a member MOVED here for hand-owning cannot see it.
 // Spelled identically to the emission so the displaced signature matches the generated one exactly.
-using ꓸꓸꓸValue = System.Span<go.reflect_package.Value>;
+using ꓸꓸꓸValue = go.variadic<go.reflect_package.Value>;
 
 // Hand-finished conversion (the reflection bridge — Phase 4, value side). Go's reflect.Value reads the
 // value through v.ptr as flat memory at computed field/element offsets — reinterpreting an interface's

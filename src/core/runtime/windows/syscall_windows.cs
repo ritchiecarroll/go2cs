@@ -9,7 +9,7 @@ using windows = @internal.runtime.syscall.windows_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime.syscall;
-using ꓸꓸꓸuintptr = Span<uintptr>;
+using ꓸꓸꓸuintptr = variadic<uintptr>;
 using static runtime_package;
 
 partial class runtime_package {

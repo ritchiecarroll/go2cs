@@ -74,7 +74,7 @@ using System;
 // the only declaration of it in the package and must carry it verbatim or the parameter type
 // does not resolve. Measured: 0 occurrences left in mgc.cs after the displacement.
 using @unsafe = unsafe_package;
-using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
+using ꓸꓸꓸunsafeꓸPointer = go.variadic<unsafe_package.Pointer>;
 
 partial class runtime_package {
 

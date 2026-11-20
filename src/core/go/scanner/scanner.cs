@@ -19,7 +19,7 @@ using global::go.go;
 using global::go.go.@internal;
 using global::go.unicode;
 using path;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static scanner_package;
 
 partial class scanner_package {
@@ -189,7 +189,7 @@ internal static void error(this ref Scanner s, nint offs, @string msg) {
 }
 
 internal static void errorf(this ref Scanner s, nint offs, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     s.error(offs, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }

@@ -10,7 +10,7 @@ using tracev2 = @internal.trace.tracev2_package;
 using @internal;
 using @internal.runtime;
 using @internal.trace;
-using ꓸꓸꓸtraceArg = Span<runtime_package.traceArg>;
+using ꓸꓸꓸtraceArg = variadic<runtime_package.traceArg>;
 using static runtime_package;
 
 partial class runtime_package {
@@ -63,7 +63,7 @@ internal static traceEventWriter rawEventWriter(this traceLocker tl) {
 
 // event writes out a trace event.
 internal static void @event(this traceEventWriter e, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     e.tl.writer().@event(ev, args.ꓸꓸꓸ).end();
 }

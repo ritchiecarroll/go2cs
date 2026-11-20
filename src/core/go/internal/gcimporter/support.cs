@@ -10,7 +10,7 @@ using pkgbits = global::go.@internal.pkgbits_package;
 using sync = sync_package;
 using global::go.@internal;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static gcimporter_package;
 
 partial class gcimporter_package {
@@ -22,7 +22,7 @@ internal static void assert(bool b) {
 }
 
 internal static void errorf(@string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     throw panic(fmt.Sprintf(format, args.ꓸꓸꓸ));
 }

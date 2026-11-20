@@ -130,7 +130,7 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
 // it will only process the first paragraph and report the number of bytes
 // consumed from b including this separator. Error may be non-nil if options are
 // given.
-public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) {
+public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params variadic<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     p.p = b;
@@ -143,7 +143,7 @@ public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, 
 // it will only process the first paragraph and report the number of bytes
 // consumed from s including this separator. Error may be non-nil if options are
 // given.
-public static (nint n, error err) SetString(this ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) {
+public static (nint n, error err) SetString(this ref Paragraph p, @string s, params variadic<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     p.p = slice<byte>(s);

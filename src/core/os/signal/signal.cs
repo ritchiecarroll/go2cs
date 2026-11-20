@@ -9,7 +9,7 @@ using slices = slices_package;
 using sync = sync_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using ꓸꓸꓸosꓸSignal = Span<os_package.Signal>;
+using ꓸꓸꓸosꓸSignal = variadic<os_package.Signal>;
 using static signal_package;
 
 partial class signal_package {

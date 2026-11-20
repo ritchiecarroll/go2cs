@@ -16,7 +16,7 @@ using global::go;
 using global::go.go;
 using io = io_package;
 using unicode;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class fuzz_package {
 

@@ -10,7 +10,7 @@ using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using ꓸꓸꓸstatDep = Span<runtime_package.statDep>;
+using ꓸꓸꓸstatDep = variadic<runtime_package.statDep>;
 using static runtime_package;
 
 partial class runtime_package {

@@ -152,7 +152,7 @@ public static bool ContainsFunc<S, E>(S s, Func<E, bool> f)
 // Insert panics if i > len(s).
 // This function is O(len(s) + len(v)).
 // If the result is empty, it has the same nilness as s.
-public static S Insert<S, E>(S s, nint i, params Span<E> vʗp)
+public static S Insert<S, E>(S s, nint i, params variadic<E> vʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     var v = vʗp.slice();
@@ -285,7 +285,7 @@ public static S DeleteFunc<S, E>(S s, Func<E, bool> del)
 // Replace panics if j > len(s) or s[i:j] is not a valid slice of s.
 // When len(v) < (j-i), Replace zeroes the elements between the new length and the original length.
 // If the result is empty, it has the same nilness as s.
-public static S Replace<S, E>(S s, nint i, nint j, params Span<E> vʗp)
+public static S Replace<S, E>(S s, nint i, nint j, params variadic<E> vʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     var v = vʗp.slice();
@@ -517,7 +517,7 @@ public static void Reverse<S, E>(S s)
 
 // Concat returns a new slice concatenating the passed in slices.
 // If the concatenation is empty, the result is nil.
-public static S Concat<S, E>(params Span<S> slicesʗp)
+public static S Concat<S, E>(params variadic<S> slicesʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     var slices = slicesʗp.sslice();

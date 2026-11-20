@@ -11,7 +11,7 @@ using slices = slices_package;
 using strings = strings_package;
 using go.math;
 using io = io_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using asmgen = asmgen_package;
 using static asmgen_package;
 
@@ -71,7 +71,7 @@ private static readonly @string textˢᵇ = "\nTEXT"u8;
 // Panicking is appropriate because there is a bug in the generator,
 // and panicking will show the exact source lines leading to that bug.
 public static void Fatalf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string text = Ꮡa.Ꮡout.String();
@@ -230,7 +230,7 @@ public static void FreeAll(this ref Asm a) {
 
 // Printf emits to the assembly output.
 public static void Printf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string text = fmt.Sprintf(format, args.ꓸꓸꓸ);
@@ -242,14 +242,14 @@ public static void Printf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany
 
 // Comment emits a line comment to the assembly output.
 public static void Comment(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡa.Ꮡout), "\t// %s\n"u8, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
 // EOL appends an end-of-line comment to the previous line.
 public static void EOL(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
     ref var a = ref Ꮡa.DerefOrNull();
 
     var bytes = a.@out.Bytes();
