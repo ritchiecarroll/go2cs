@@ -96,8 +96,32 @@ partial class atomic_package
         if (addr.IsNative)
             return addr.CompareExchangePointerWord(((uintptr)old).Value, ((uintptr)@new).Value);
 
-        return Interlocked.CompareExchange(ref addr.Value, @new, old) == old;
+        // Managed arm: Go compares the POINTERS, and a pointer is its address, so two Pointer objects over one
+        // address are one pointer. Interlocked compares REFERENCES, so this reads the slot, compares addresses, and
+        // exchanges the very reference it read; a store that races in between fails the exchange and the loop reads
+        // again. (It was `CompareExchange(ref slot, new, old) == old`: the exchange compared references and the `==`
+        // compared addresses, so an old naming the stored address through another object reported swapped=true and
+        // swapped nothing.) The structural slot (ValueSlot), as internal/runtime/atomic's casPointerLatched reads it:
+        // a never-stored slot holds null, an ordinary Go nil, which `.Value` would refuse as a nil dereference.
+        ref @unsafe.Pointer slot = ref addr.ValueSlot;
+        uintptr expected = addressOf(old);
+
+        while (true)
+        {
+            @unsafe.Pointer current = Volatile.Read(ref slot);
+
+            if (addressOf(current) != expected)
+                return false;
+
+            if (ReferenceEquals(Interlocked.CompareExchange(ref slot, @new, current), current))
+                return true;
+        }
     }
+
+    // The address an unsafe.Pointer carries, 0 for either nil spelling (a null slot, or the nil-marked Pointer the
+    // converter mints for a nil operand), as internal/runtime/atomic's addressOf answers it.
+    private static uintptr addressOf(@unsafe.Pointer? pointer) =>
+        pointer is null || pointer.IsNull ? default : pointer.Value;
 
     public static partial int32 /*new*/ AddInt32(ж<int32> addr, int32 delta)
     {
