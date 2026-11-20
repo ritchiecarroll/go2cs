@@ -330,8 +330,11 @@
     its suppression files. Set GoAllowBelowBreakFloor=true to build anyway: each error becomes a warning with the same
     code, and the build goes on.
   -->
+  <!-- 1.26.11.2, the .5 release: it moves the floor ONCE for every .5 break together, among them Tour 4's array
+       literals and wall E's go.variadic<T> (COORD 2026-11-20T13:50:29Z). A Go patch hop before .5 ships moves it with
+       the release's version. -->
   <PropertyGroup>
-    <GoBreakFloor>1.26.11.1</GoBreakFloor>
+    <GoBreakFloor>1.26.11.2</GoBreakFloor>
   </PropertyGroup>
 
   <Target Name="GoCheckBreakFloor" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
