@@ -33,10 +33,14 @@ program that writes and reads a database file prints exactly what native Go prin
      package"; "The go.* packages now ship a linux-arm64 build"; "The Go implementation of TypeScript's compiler now
      converts, compiles and type-checks"; "Code that ccgo translated from C converts further" (the file demo, Windows
      x64 and Linux x64). -->
-Changes below break assemblies already compiled against 1.26.10.3, and C# source that reaches a Go method
-through the package class or through `using static` alone, or that writes a name with a `Δ` prefix. They are first
-under *Upgrading from 1.26.10.3*, and a build that would hit one of the binary breaks now stops with an error that
-names the package (`GO2CS3002`).
+> For any code that happened to be compiled against 1.26.10.3 (minimal exposure expected for this at the moment),
+> some of the changes below may break compiled assemblies, e.g., C# source that reaches a Go method through the
+> package class or through `using static` alone, or that writes a name with a `Δ` prefix. They are listed under
+> *Upgrading from 1.26.10.3*, and a build that would hit one of the binary breaks now stops with an error that names
+> the package (`GO2CS3002`).
+<!-- The owner's callout, as the published GitHub Release (nuget-1.26.11.1) carries it, word for word: it replaced the
+     paragraph this entry was released with ("Changes below break assemblies already compiled against 1.26.10.3, ...").
+     First post-.4 docs batch, COORD 2026-11-20 07:19Z. -->
 
 **The standard library is converted from Go 1.26.11, a Go patch release with security fixes.** The converted
 packages that change are `net/http` (its server and transfer code), `net` (its dialer), `crypto/rsa` and the FIPS
@@ -62,7 +66,9 @@ there. Each standard-library package's README now leads its badges with a "conve
   promoted method fails at that call under 1.26.11.1 with `MissingMethodException`. The build refuses the
   combination first: a package built below the new break floor is error `GO2CS3002`, which names the package
   ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.11.1, and move each `nugetgo.*` reference to its
-  1.26.11.1 revision.
+  1.26.11.1 revision. A `nugetgo.*` revision built on 1.26.10.3 left beside go.* 1.26.11.1 fails earlier, at
+  restore, with `NU1107`, before `GO2CS3002` can name it
+  ([Known issues](KnownIssues.md#a-nugetgo-package-built-on-126103-beside-the-go-126111-packages-fails-at-restore)).
   <!-- source: the promoted-forwarder seat (docs/phase4/DESIGN-promoted-forwarder-placement.md; owner ruling
        2026-11-10: "better breaking changes now than before we're deep with users"). The moved members are announced
        to the binary-compatibility guard as generated CP0002 entries
