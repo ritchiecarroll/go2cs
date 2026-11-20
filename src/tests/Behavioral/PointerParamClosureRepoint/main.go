@@ -143,6 +143,39 @@ func sliceAfter(s *[]int) (int, int) {
 	return len(*s), (*s)[0]
 }
 
+// count is nil-tolerant: it compares its receiver to nil before any dereference.
+func (n *node) count() int {
+	if n == nil {
+		return 0
+	}
+	return 1
+}
+
+// tag runs before it dereferences its receiver, so a nil receiver still prints the line.
+func (n *node) tag() int {
+	fmt.Println("tag runs before its deref")
+	return n.val
+}
+
+// nilCount calls a nil-tolerant method on a parameter a deferred literal repoints: 0 for nil, 1.
+func nilCount(n *node) int {
+	defer func() { n = nil }()
+	return n.count()
+}
+
+// nilTag calls a method that dereferences only after a side effect. A nil parameter is legal to
+// hold and to pass, so the method runs, prints, and then faults on its own dereference: the line,
+// then -1 from the recover.
+func nilTag(n *node) (v int) {
+	defer func() {
+		if recover() != nil {
+			v = -1
+		}
+	}()
+	defer func() { n = nil }()
+	return n.tag()
+}
+
 // gotoWalk repoints the parameter in the body through a goto loop (the control): 3.
 func gotoWalk(n *node) int {
 loop:
@@ -171,6 +204,8 @@ func main() {
 	failed := fmt.Errorf("failed")
 	fmt.Println("errAfter:", errAfter(&failed))
 	fmt.Println("sliceAfter:", fmt.Sprint(sliceAfter(&[]int{1, 2, 3})))
+	fmt.Println("nilCount:", nilCount(nil), nilCount(leaf))
+	fmt.Println("nilTag:", nilTag(nil))
 	fmt.Println("gotoWalk:", gotoWalk(root))
 	fmt.Println("root:", root.val, root.kids[0].val, leaf.val)
 }
