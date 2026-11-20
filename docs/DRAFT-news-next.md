@@ -46,7 +46,7 @@
 
 **What changed.**
 
-- **[QUEUED claude/r-shape-witness 5a4655646b]** **A generic under a method-set constraint that is not
+- **[QUEUED claude/r-shape-witness-on-p5 68a7818821]** **A generic under a method-set constraint that is not
   self-referential now converts within its own package.** On every converted platform, a generic function or type
   whose constraint lists methods, and whose signature puts the type parameter where go2cs's constraint proxy cannot
   carry it (a generic named type, or the type parameter in a result, a map, a channel or a pointer), takes a shape
@@ -55,7 +55,10 @@
   as a constraint or type argument from another package, is refused with a new error code that names the site. See
   [Diagnostic codes](DiagnosticCodes.md).
   <!-- R shape-witness stage 1, READY 2026-11-19 11:53Z at 202d0ee3ad (inbox/COORD/20261119T115335Z-R.md), P3's
-       review fixes at 529de5fc92, tip 5a4655646b (20261119T201550Z-R.md, run 8 20261119T224840Z-R.md). Stage 1 is
+       review fixes at 529de5fc92, tip 5a4655646b (20261119T201550Z-R.md, run 8 20261119T224840Z-R.md).
+       2026-11-20: the train ref is claude/r-shape-witness-on-p5 68a7818821, master 2d6cf69fd6 and P5's godebug seat
+       merged in, so it lands after P5 (inbox/COORD/20261120T080944Z-R.md; COORD 08:13Z). If P5 leaves the train, the
+       ref is claude/r-shape-witness at its master merge 21972c9e48. Stage 1 is
        same-package constraints only; %T and stack traces naming a carrier are stage 3. Design:
        docs/phase4/DESIGN-constraint-proxy-nonself.md section 12. Footprint in the standard library: one package, on
        all four targets. -->
