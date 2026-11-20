@@ -997,14 +997,27 @@ const probeCacheEnv = "GO2CS_PROBE_CACHE"
 // probeCacheFlag is -probe-cache, set by main; empty when the flag was not passed.
 var probeCacheFlag string
 
-// probeCacheDir is the GOCACHE every harvest command runs with: -probe-cache, else GO2CS_PROBE_CACHE, else
-// go2cs/probe-cache under the user cache directory (the temporary directory when there is none). The harvest builds
-// the standard library once per target under its own flags (-trimpath, CGO_ENABLED=0, four targets), which no
+// probeCacheDir is the GOCACHE every harvest command runs with (resolveProbeCacheDir). main refuses the run before any
+// conversion when the directory cannot be resolved, so the fallback here is never reached by a run; it names "off",
+// which go refuses outright, rather than an empty GOCACHE, which would mean the user's own cache.
+func probeCacheDir() string {
+	dir, err := resolveProbeCacheDir()
+
+	if err != nil {
+		return "off"
+	}
+
+	return dir
+}
+
+// resolveProbeCacheDir resolves the probe cache: -probe-cache, else GO2CS_PROBE_CACHE, else go2cs/probe-cache under the
+// user cache directory, else a per-user directory under the temporary directory (probeCacheTempFallback). The harvest
+// builds the standard library once per target under its own flags (-trimpath, CGO_ENABLED=0, four targets), which no
 // ordinary build shares, so those entries are kept out of the user's GOCACHE: they cost a cold run about 175 MB and
 // 17 s on a ten-package module and are reused by every later run of any module. Go trims this cache by its own rule
 // (entries unused for five days), and deleting the directory is always safe. Go refuses a relative GOCACHE, so the
 // result is absolute.
-func probeCacheDir() string {
+func resolveProbeCacheDir() (string, error) {
 	dir := probeCacheFlag
 
 	if dir == "" {
@@ -1015,7 +1028,7 @@ func probeCacheDir() string {
 		base, err := os.UserCacheDir()
 
 		if err != nil {
-			base = os.TempDir()
+			return probeCacheTempFallback()
 		}
 
 		dir = filepath.Join(base, "go2cs", "probe-cache")
@@ -1025,5 +1038,45 @@ func probeCacheDir() string {
 		dir = absolute
 	}
 
-	return dir
+	return dir, nil
+}
+
+// probeCacheTempFallback is the probe cache when the user has no cache directory (HOME and XDG_CACHE_HOME unset):
+// go2cs-probe-cache-<uid> under the temporary directory, created 0700. The temporary directory is shared and, on
+// Linux, world-writable, so a fixed name there could be created first by another user and fed to this user's builds
+// as GOCACHE; the directory is used only when it is a real directory (not a link), owned by this user, and closed to
+// group and others. Anything else, and any system with no user id (Windows), is refused, naming -probe-cache.
+func probeCacheTempFallback() (string, error) {
+	uid := os.Getuid()
+
+	if uid < 0 {
+		return "", fmt.Errorf("no user cache directory for the escape probe's build cache; pass -probe-cache <dir> or set %s", probeCacheEnv)
+	}
+
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("go2cs-probe-cache-%d", uid))
+
+	if err := os.Mkdir(dir, 0o700); err != nil && !os.IsExist(err) {
+		return "", fmt.Errorf("cannot create the escape probe's build cache %s: %w; pass -probe-cache <dir> or set %s", dir, err, probeCacheEnv)
+	}
+
+	info, err := os.Lstat(dir)
+
+	if err != nil || !info.IsDir() || info.Mode().Perm()&0o077 != 0 || !probeCacheOwnerIs(info, uid) {
+		return "", fmt.Errorf("refusing %s as the escape probe's build cache: it must be a directory owned by this user with mode 0700; pass -probe-cache <dir> or set %s", dir, probeCacheEnv)
+	}
+
+	return dir, nil
+}
+
+// probeCacheFlagOrExit takes the -probe-cache value and refuses the run, before any conversion, when the probe cache
+// cannot be resolved: a harvest whose go commands fail reports nothing, which would change the emission silently.
+func probeCacheFlagOrExit(value string) string {
+	probeCacheFlag = strings.TrimSpace(value)
+
+	if _, err := resolveProbeCacheDir(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	return probeCacheFlag
 }

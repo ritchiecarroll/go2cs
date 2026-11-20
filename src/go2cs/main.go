@@ -593,7 +593,7 @@ Examples:
 		log.Fatalln(inlineArraysErr)
 	}
 
-	probeCacheFlag = strings.TrimSpace(*probeCacheCmd)
+	probeCacheFlag = probeCacheFlagOrExit(*probeCacheCmd)
 
 	options := Options{
 		warnCodes:           warnCodes,
