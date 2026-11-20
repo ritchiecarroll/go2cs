@@ -669,7 +669,7 @@ public static class TestHost
     {
         string? moduleRoot = Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable);
 
-        if (string.IsNullOrWhiteSpace(moduleRoot) || moduleRoot == PackageAncestry.ModuleRootNone || string.IsNullOrEmpty(modulePath))
+        if (string.IsNullOrWhiteSpace(moduleRoot) || PackageAncestry.IsModuleRootNone(moduleRoot) || string.IsNullOrEmpty(modulePath))
             return;
 
         string mirrorRoot = PackageAncestry.ModuleMirrorRoot(runRoot, modulePath);
@@ -683,8 +683,10 @@ public static class TestHost
     // plain sandbox holds only the package's own files, its fixtures and empty named directories, so a test that reads
     // a package-root data file or a sibling package's content fails here where Go's passes (P5's by-hand sqlite run,
     // 2026-11-20: TestVendorStamp). The pipeline always hands the root over (the converter's testHostModuleEnv); a
-    // by-hand run sets it, or sets it to `none` to run unstaged on purpose, which is said on stderr. A
-    // standard-library host has no module and is unchanged.
+    // by-hand run sets it, or sets it to `none` (any case) to run unstaged on purpose, which is said on stderr; the
+    // pipeline never passes `none`, since that stderr line is part of what the comparison reads. With a root set, a
+    // package outside the module or a root that is not a module refuses as well, naming which (ModuleStagingRefusal).
+    // A standard-library host has no module and is unchanged.
     private static string? ModuleRootForStaging(TestRegistry registry)
     {
         string? moduleRoot = Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable);
@@ -699,13 +701,20 @@ public static class TestHost
                 $"Set it to the module's directory, or to {PackageAncestry.ModuleRootNone} to run without the module, which a test " +
                 "that reads a package-root file or a sibling package's content cannot pass.");
 
-        if (moduleRoot == PackageAncestry.ModuleRootNone)
+        if (PackageAncestry.IsModuleRootNone(moduleRoot))
         {
             Console.Error.WriteLine($"{registry.Package}: module {registry.ModulePath} not staged " +
                 $"({PackageAncestry.ModuleRootEnvironmentVariable}={PackageAncestry.ModuleRootNone}); the tests run without the module tree.");
 
             return null;
         }
+
+        // With a root set, TryStageModule's "nothing to stage" answers are refusals too, naming the precondition.
+        string? refusal = PackageAncestry.ModuleStagingRefusal(moduleRoot, registry.ModulePath, registry.Package,
+            Environment.GetEnvironmentVariable(PackageAncestry.ModuleGoModEnvironmentVariable));
+
+        if (refusal is not null)
+            throw new InvalidOperationException(refusal);
 
         return moduleRoot;
     }

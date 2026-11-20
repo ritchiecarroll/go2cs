@@ -146,9 +146,34 @@ internal static class PackageAncestry
 
     /// <summary>
     /// The <see cref="ModuleRootEnvironmentVariable"/> value that runs a MODULE host without its module copy, on
-    /// purpose. A module host with the variable unset refuses instead (TestHost.ModuleRootForStaging).
+    /// purpose, matched ignoring case (<see cref="IsModuleRootNone"/>). A module host with the variable unset refuses
+    /// instead (TestHost.ModuleRootForStaging). It is for a deliberate by-hand run only: the pipeline never passes it,
+    /// since the host's "not staged" line goes to stderr, which the comparison reads.
     /// </summary>
     public const string ModuleRootNone = "none";
+
+    /// <summary>Whether a module-root value is the <see cref="ModuleRootNone"/> opt-out, in any letter case.</summary>
+    public static bool IsModuleRootNone(string? moduleRoot) =>
+        string.Equals(moduleRoot?.Trim(), ModuleRootNone, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Why a module host with a module root SET cannot stage its module, naming the precondition that failed, or
+    /// null when it can: the package must be a package of the module, and the root must be a module (its own
+    /// go.mod, or the one go reads for a module that ships none). These are <see cref="TryStageModule"/>'s
+    /// "nothing to stage" answers, which for a module host are a sandbox that is silently not the module, so the
+    /// host refuses with this text instead (P3 110324Z, MUST 1.1).
+    /// </summary>
+    public static string? ModuleStagingRefusal(string moduleRoot, string modulePath, string importPath, string? goMod = null)
+    {
+        if (importPath != modulePath && !importPath.StartsWith(modulePath + "/", StringComparison.Ordinal))
+            return $"{importPath} is not a package of module {modulePath}, so the module at {moduleRoot} cannot be staged for it";
+
+        if (!File.Exists(Path.Combine(moduleRoot, "go.mod")) && (string.IsNullOrWhiteSpace(goMod) || !File.Exists(goMod)))
+            return $"{moduleRoot} holds no go.mod and none was handed over ({ModuleGoModEnvironmentVariable}), so it is not a " +
+                $"module go can read; {modulePath} cannot be staged from it";
+
+        return null;
+    }
 
     /// <summary>
     /// The environment variable through which the converter's run hands over the go.mod of a module
