@@ -547,3 +547,48 @@ reading tick (`shared-floor-violations`).
 only the pin, retire and room paths. So this reading most likely carries the cure's own cost, which has read +1.3%
 to +2.7% across sessions (14.1, 14.2), and not anything the floor adds. The one-axis read that would separate them,
 cure+(c) vs the floor fix, was not in the ruled protocol, and it is not run.
+
+### 15.1 Rulings, and P1's attribution reading for the floor fix (dated block, 2026-11-20)
+
+COORD ruled: the floor fix is KEPT whatever P1 reads (a hang fix, red first by name); P3 CLEARED it at `bfe38b8c5e`.
+Section 15's +2.84% got ONE attribution reading, rule fixed first: A/A cure+(c) vs cure+(c) 16 + 16, then cure+(c)
+(`b771dc6152`, golib `24f43ff1`) vs floor (`bfe38b8c5e`, golib `2534897f`) 32 + 32, interleaved.
+
+| sample (unlocked ping-pong) | median (ns) | range |
+|---|---|---|
+| A/A cure+(c) | 1,105.5 | 1,060.8 to 1,273.8 |
+| A/A cure+(c), second copy | 1,091.0 | 1,063.2 to 1,228.8 |
+| cure+(c) | 1,086.6 | 1,058.0 to 1,162.1 |
+| floor | 1,083.7 | 1,048.0 to 1,182.9 |
+
+A/A 1.33%, so the line is 2%. The floor reads -0.27% against cure+(c): **the floor fix is cost-free on the unlocked
+path. The cure's cost reads +1.3% to +2.8% across sessions** (14.1 +2.66%, 14.2 +1.33%, 15 +2.84%, each against the
+pre-cure pin). It is stated here as the cure's cost, beside what the cure buys: P2 2.78 -> 1.77 µs, M3 7-10% faster,
+and run-next-off wakes 3.07 -> 1.89 µs.
+
+### 15.2 P3's SHOULD on the floor fix: pinned carriers blocked without waiting pinned (dated block, 2026-11-20)
+
+P3 (CLEAR on `bfe38b8c5e`, one SHOULD): `SharedUnblocked` subtracted `s_blocked - s_pinnedWaiting` as the shared
+blocked count. But `s_blocked` also counts a PINNED carrier that is blocked without waiting pinned: its goroutine in a
+plain park (`EnterBlocked`), or retaken inside a native call. Locked goroutines in long blocks therefore
+over-provisioned shared carriers. That errs toward threads, never a strand.
+
+**Red first** (MnPinBench mode `pb`; predicted before the run: the old count goes toward P + 2K, and the line
+is P + K + the injection budget = 12 + 24 + 12 = 48). K = 24 goroutines lock, park once (pinned), then sleep 3 s
+through `time.Sleep`'s plain path (its twin is internal, 14), while 5,000 pairs keep work queued for 2 s. Before the
+fix: peak carriers **61** in 3 runs of 3 (764,000 to 867,000 trips/s).
+
+**The fix:** `s_pinnedBlocked` counts the pinned carriers in `s_blocked`, through a per-carrier flag set wherever that
+carrier raises `s_blocked`: `WaitPinned`, `EnterBlocked`, and the monitor's retake. The retake sets the flag BEFORE
+it publishes, so a step that releases the retake at once still lowers what it raised. The flag is read and cleared
+where `s_blocked` falls (`ExitBlocked`, the end of `WaitPinned`, a step's release of its retake). `SharedUnblocked`
+subtracts it in place of `s_pinnedWaiting`.
+
+| reading | result |
+|---|---|
+| `pb`, K = 24, after the fix | peak carriers 37-38 (at most 48), 3 runs of 3; 954,382 to 1,062,990 trips/s; floor violations 0 |
+| scenarios A / B, MnLockPin | green; output = plain; idle-set and floor violations 0 |
+| GolibTests' M:N subset | 85 passed, 1 skipped |
+
+Not exercised: the retake site's pinned counting. No arm here puts a locked goroutine in a bracketed native call. It
+is built, and named as untested.

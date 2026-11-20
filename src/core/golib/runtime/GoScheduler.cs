@@ -223,12 +223,16 @@ public static class GoScheduler
     // DESIGN-mn-pin.md 15 (P3's MUST on the pin build): carriers pinned to a goroutine, running or waiting, kept under
     // s_carriersLock at pin, unpin and retire. A pinned carrier serves one goroutine, so it is never shared capacity.
     private static int s_pinnedCount;
+
+    // DESIGN-mn-pin.md 15.2 (P3's SHOULD on the floor fix): the pinned carriers counted in s_blocked, waiting pinned, in a
+    // plain park (EnterBlocked) or retaken in a native call; raised and lowered with s_blocked through each carrier's flag.
+    private static int s_pinnedBlocked;
     private static long s_sharedFloorViolations;
 
     // The shared carriers that are not blocked: what the idle retire, EnsureCarrier and the injection read (under
-    // s_carriersLock). s_blocked holds the pinned carriers that wait (s_pinnedWaiting) as well as the shared ones.
+    // s_carriersLock). s_blocked holds blocked pinned carriers (s_pinnedBlocked) as well as the shared ones.
     private static int SharedUnblocked() =>
-        s_carriers.Count - s_pinnedCount - (Volatile.Read(ref s_blocked) - Volatile.Read(ref s_pinnedWaiting));
+        s_carriers.Count - s_pinnedCount - (Volatile.Read(ref s_blocked) - Volatile.Read(ref s_pinnedBlocked));
 
     // Keeps at least P shared carriers (under s_carriersLock; AddCarrier takes it again, reentrantly), so Enqueue's
     // assumption that a shared carrier exists always holds.
@@ -504,6 +508,7 @@ public static class GoScheduler
         if (Interlocked.Exchange(ref carrier.Retaken, 0) == 0)
         {
             Interlocked.Increment(ref s_blocked);
+            carrier.BlockCounted();
             ReleaseP();
         }
 
@@ -535,6 +540,7 @@ public static class GoScheduler
         s_p.Wait();
         Interlocked.Decrement(ref s_pWaiters);
         Interlocked.Decrement(ref s_blocked);
+        t_carrier?.UnblockCounted();
 
         if (t_carrier is { } carrier)
         {
@@ -647,6 +653,7 @@ public static class GoScheduler
             if (s_retake && (queued || Volatile.Read(ref s_pWaiters) > 0))
             {
                 int retake = 0;
+                int retakePinned = 0;
 
                 lock (s_carriersLock)
                 {
@@ -657,8 +664,21 @@ public static class GoScheduler
 
                         if (!native)
                             carrier.NativeTicks = 0;
-                        else if (++carrier.NativeTicks >= 2 && Interlocked.CompareExchange(ref carrier.Retaken, 1, 0) == 0)
-                            retake++;
+                        else if (++carrier.NativeTicks >= 2)
+                        {
+                            // DESIGN-mn-pin.md 15.2: the flag is set BEFORE the retake is published, so a step that releases
+                            // the retake at once still lowers the pinned count it raises.
+                            bool pinned = carrier.IsPinned;
+                            carrier.BlockedPinned = pinned;
+
+                            if (Interlocked.CompareExchange(ref carrier.Retaken, 1, 0) == 0)
+                            {
+                                retake++;
+
+                                if (pinned)
+                                    retakePinned++;
+                            }
+                        }
                     }
                 }
 
@@ -666,6 +686,10 @@ public static class GoScheduler
                 {
                     Interlocked.Increment(ref s_retakes);
                     Interlocked.Increment(ref s_blocked);
+
+                    if (i < retakePinned)
+                        Interlocked.Increment(ref s_pinnedBlocked);
+
                     ReleaseP();
                     EnsureCarrier();
                 }
@@ -766,6 +790,28 @@ public static class GoScheduler
         private Goroutine? m_pinned;
 
         internal bool IsPinned => m_pinned is not null;
+
+        // DESIGN-mn-pin.md 15.2: whether this carrier's share of s_blocked is a pinned one. Set where its s_blocked rises (by
+        // the monitor before a retake is published), read and cleared where it falls.
+        internal bool BlockedPinned;
+
+        internal void BlockCounted()
+        {
+            if (IsPinned)
+            {
+                BlockedPinned = true;
+                Interlocked.Increment(ref s_pinnedBlocked);
+            }
+        }
+
+        internal void UnblockCounted()
+        {
+            if (BlockedPinned)
+            {
+                BlockedPinned = false;
+                Interlocked.Decrement(ref s_pinnedBlocked);
+            }
+        }
         private Action? m_pinnedStep;
         private SemaphoreSlim? m_pinWake;
         private bool m_retiring;
@@ -817,6 +863,7 @@ public static class GoScheduler
 
             Interlocked.Increment(ref s_blocked);
             int waiting = Interlocked.Increment(ref s_pinnedWaiting);
+            BlockCounted();
             int peak;
 
             while (waiting > (peak = Volatile.Read(ref s_peakPinnedWaiting)))
@@ -832,6 +879,7 @@ public static class GoScheduler
 
             Interlocked.Decrement(ref s_pinnedWaiting);
             Interlocked.Decrement(ref s_blocked);
+            UnblockCounted();
             Interlocked.Increment(ref s_pinnedWakes);
 
             return new Item(goroutine, Interlocked.Exchange(ref m_pinnedStep, null)!);
@@ -952,7 +1000,10 @@ public static class GoScheduler
 
                     // A step whose P the monitor retook has none to release: it stops counting as blocked.
                     if (Interlocked.Exchange(ref Retaken, 0) == 1)
+                    {
                         Interlocked.Decrement(ref s_blocked);
+                        UnblockCounted();
+                    }
                     else
                         ReleaseP();
                 }

@@ -1,6 +1,7 @@
 namespace go;
 
 using runtime = runtime_package;
+using time = time_package;
 
 // M:N PROTOTYPE, THE PIN'S ARMS (docs/phase4/DESIGN-mn-pin.md 6, 10.5, 11, 12): one mode per process, chosen by
 // MN_BENCH, timed in bench_impl.cs. Results go to standard error as MNBENCH lines; standard output stays empty.
@@ -162,12 +163,49 @@ internal static void woken(channel<long> wakes, bool locked, channel<nint> done)
     done.ᐸꟷ(1);
 }
 
+// DESIGN-mn-pin.md 15.2 (P3's SHOULD on the floor fix): a pinned goroutine in a long plain block. It locks, parks once (so its
+// carrier pins), then sleeps through time.Sleep's plain path, a block the scheduler sees (EnterBlocked) on a pinned carrier.
+internal static void pinnedSleeper(channel<nint> ready, channel<nint> release, nint ms) {
+    runtime.LockOSThread();
+    ready.ᐸꟷ(1);
+    ᐸꟷ(release);
+    time.Sleep(ms * time.Millisecond);
+}
+
 internal static void main() {
     @string mode = benchMode();
     nint k = param("MN_K", 0);
     var done = new channel<nint>(0);
 
-    if (mode == "pp") {
+    if (mode == "pb") {
+        var ready = new channel<nint>(0);
+        var release = new channel<nint>(0);
+        nint pairs = param("MN_PAIRS", 5000);
+
+        for (nint i = 0; i < k; i++) {
+            goǃ(pinnedSleeper, ready, release, param("MN_SLEEP_MS", 3000));
+        }
+
+        for (nint i = 0; i < k; i++) {
+            ᐸꟷ(ready);
+        }
+
+        for (nint i = 0; i < k; i++) {
+            release.ᐸꟷ(1);
+        }
+
+        for (nint i = 0; i < pairs; i++) {
+            goǃ(pair, done);
+        }
+
+        runFor(param("MN_DURATION_MS", 2000));
+
+        for (nint i = 0; i < pairs; i++) {
+            ᐸꟷ(done);
+        }
+
+        reportTrips(param("MN_DURATION_MS", 2000));
+    } else if (mode == "pp") {
         pingpong(param("MN_N", 200000), param("MN_LOCK_A", 0) != 0, param("MN_LOCK_B", 0) != 0);
     } else if (mode == "np") {
         neverPark(param("MN_N", 2000000));
