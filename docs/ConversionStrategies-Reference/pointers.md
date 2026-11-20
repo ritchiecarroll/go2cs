@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:1597-1605 -->
+<!-- source: src/core/unsafe/unsafe.cs:1601-1609 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -1367,9 +1367,10 @@ not implemented.
 docs/phase4/DESIGN-cgo-phase3-marshaling.md, 18.3 to 18.7 (seat S-B1). --> A
 `*unsafe.Pointer` can name a WORD of memory (Go memory reinterpreted from a number, or C memory), and turning a
 word into a CLR `Pointer` object and back cannot happen behind a `ref`: a write through `p.Value` gives the box no
-way to know what to publish. So the doors decide by the box. A box over a CLR `Pointer` slot takes its `.Value`.
-A native box publishes the BaseOf projection, a pinned address or an order token, and keeps the referent in a
-per-slot bag.
+way to know what to publish. So the doors decide by the box. A box over a CLR `Pointer` slot is read and written
+through the slot itself (`ValueSlot`, never `Value`), so a slot that holds nil, Go's nil `unsafe.Pointer`, loads nil
+and takes a store (`tests/Behavioral/UnsafePointerWordNilSlot`). A native box publishes the BaseOf projection, a
+pinned address or an order token, and keeps the referent in a per-slot bag.
 
 ```go
 func load(k unsafe.Pointer) unsafe.Pointer { return *(*unsafe.Pointer)(k) }
@@ -1384,25 +1385,31 @@ return @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(k));
 
 **A provably MANAGED slot keeps its plain emission** (`unsafePointerWordSlotIsManaged`, unsafePointerWordDoor.go).
 That is a slot the converter itself allocated in managed memory, which no native box can be. Over it the doors would
-take their `.Value` arm anyway, so the call buys no behavior and costs the Go-like shape. Exactly two shapes:
+take their managed arm, the slot itself, so the call buys no behavior and costs the Go-like shape. Exactly two shapes:
 
 1. **The reinterpret CARRYING arm** of the section above: `(*unsafe.Pointer)(unsafe.Pointer(p))` of a Go pointer
    `p` whose pointee is not `unsafe.Pointer`, and its deref at more than one level (`**(**unsafe.Pointer)(…)`).
    It is rendered as a fresh `Ꮡ(<rvalue>)` box (`new Pointer(..)`, `OfFunc(f)`, `FromPinnedBox(..)`).
 2. **`&x`**, through the identity round trip `(*unsafe.Pointer)(unsafe.Pointer(&x))`, where `x` is a LOCAL
-   variable or a PARAMETER. Its box is the converter's own `heap(..)`.
+   variable or a PARAMETER. Its box is the converter's own `heap(..)`. Only as the operand itself: under a star
+   (`**&x`, `x` a local `*unsafe.Pointer`) the slot is read OUT of `x`, which may hold a native box. A store through
+   it writes the box through its slot, `(Ꮡx).ValueSlot = v`, as every held reference is stored, and a load reads
+   `~Ꮡx`, the slot too: `.Value` would read the held value first and panic on a nil `unsafe.Pointer`, where Go
+   stores.
 
 The following stay on the doors:
 - a package variable, or a package variable's address;
 - a field or an element;
 - a call result;
-- a `*unsafe.Pointer` variable or parameter;
+- a `*unsafe.Pointer` variable or parameter, and a slot read out of one (`**&x`);
 - every pointer derived from a number.
 
-A mistake in the predicate fails LOUD, never silent. With the native box's unsafe.Pointer exemption gone, a `.Value`
-over a native box is refused by name, so a slot wrongly called managed is a refusal and never a wrong read. Guarded
-both ways by `unsafePointerWordDoor_test.go` (six managed arms unrewritten, five native-reachable arms rewritten, each
-half made red by forcing the predicate). `tests/Behavioral/UnsafePointerWordRead` and
+A mistake in the predicate fails LOUD. With the native box's unsafe.Pointer exemption gone, a `.Value` over a native
+box is refused by name, so a slot wrongly called managed is a refusal and never a wrong read. The one silent case is
+master's, not the predicate's: a STORE through shape 1 writes into the fresh box, which nothing else reads, so the
+write is lost (runtime's `debugcall.cs` and the per-OS `cgocall.cs`, a pointer word stored into a func variable).
+Guarded both ways by `unsafePointerWordDoor_test.go` (six managed arms unrewritten, six native-reachable arms
+rewritten, each half made red by forcing the predicate). `tests/Behavioral/UnsafePointerWordRead` and
 `unsafePointerWordRead_test.go` keep the carrying arm's emission unchanged.
 
 ## A func value carried as a number — one word per static function, through `GoFuncCookie`

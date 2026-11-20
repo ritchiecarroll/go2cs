@@ -2261,3 +2261,26 @@ B-10 door lookups.
 func variable stores into a fresh box, so the write is lost. The sites are `debugcall.cs` (dispatchF) and
 `cgocall.cs` (`cgocallbackg1`'s cb). The narrowing keeps master's form there exactly, and `funcWordOperations` does
 not take the shape.
+
+**Amended 2026-11-20 (later): P3's review of `780e8c97e0`, APPROVE WITH CHANGES, and the changes.**
+- **MUST.** The doors' managed arm read `p.Value`, which throws a nil dereference on a standard box whose held
+  `unsafe.Pointer` is null, Go's nil. Every `*unsafe.Pointer` parameter load and store changed this way, because the
+  alias the door replaced (`DerefOrNull`) read `ValueSlot`.
+  - Red first: `UnsafePointerWordTests.W1W2_AManagedSlotHoldingNilLoadsNilAndTakesAStore`, and the Go scenario as the
+    behavioral project `UnsafePointerWordNilSlot` (exported `Set`/`Get`, whose parameters keep the box; unexported
+    ones ref-lower and never reach the door). Red at `780e8c97e0`: a `PanicException` from `StandardBox.Value` through
+    `LoadWord`, and the program's exit 2 against Go's 0.
+  - Cure: after `RequireSlot`'s structural nil test, both arms take `ValueSlot`. `NativeBox`'s `Value` and `ValueSlot`
+    both go through `ValueAddress`, so W4's floor is unchanged.
+  - A master defect closed on the way: master emitted `pp.Value = v` for `pp := new(unsafe.Pointer); *pp = v`, which
+    throws the same way. The cut emits the store door, now nil-safe.
+- **SHOULD 2.** Shape (a) asks `pointerReinterpretManagedSource` itself, so the predicate cannot drift from the
+  carrying arm.
+- **NIT 3.** Shape (b) applies only when no star was stripped: `**&x` reads the slot out of `x`. The door test's
+  `nativeStarredLocal` arm fires by name with the guard forced off.
+- **NIT 4.** The door's header names the one silent case, master's: a store through shape (a) (the BOARD's (ff) row).
+- **NIT 5.** `FromWord`'s mint row names the third no-referent case: a word of Go memory with no entry.
+- **Found while applying the MUST, ruled by COORD.** Shape (b)'s narrowed STORE kept master's `(Ꮡl).Value = v`, which
+  panics when `l` holds nil, where Go stores. A store through (b) now emits `(Ꮡl).ValueSlot = v`, the converter's own
+  convention for a held reference (`pp.ValueSlot = Ꮡx`). Loads through (b) already read `~Ꮡl`, which is `ValueSlot`.
+  Shape (a)'s store keeps its emission: that is the lost write, not this. Corpus sites: none.
