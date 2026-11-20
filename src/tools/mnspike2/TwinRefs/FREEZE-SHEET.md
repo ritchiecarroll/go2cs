@@ -144,3 +144,67 @@ Settled. COORD accepted A5 with four rulings on this sheet (2026-11-12), and the
   reason. This settles the second OPEN under "Landing requirements". The opt-in proposed here is the build's own:
   the diagnostic has a go2cs-gen code of its own, so `WarningsAsErrors` (or an .editorconfig severity) turns it into
   an error, with no new property to learn. Its code is minted with the fallback's implementation.
+
+## 7b: the rulings folded in, and the sheet read again for L-min (dated block, 2026-11-20)
+
+The owner ruled L-min for .5 (2026-11-20): the frozen surface ships, the scheduler is off by default, and twins are
+opt-in per project. This block applies the four rulings above in code where they were still text, and reads the
+sheet again at branch claude/g-mn-proto-b1 (ccf018ef09 and this change: N2's box twin, N3's func values, the pin
+design). The sections above stand as read on 2026-11-12; where this block and they differ, this block holds.
+
+### The rulings, applied
+
+- **The four awaiter members are explicit.** `OnCompleted` and `UnsafeOnCompleted` on GoTaskAwaiter and
+  GoTaskAwaiter of T are explicit interface implementations now (GoTask.cs, one private `Schedule` each, so neither
+  boxes), as swap B1 ran them. The builder reaches them through its interface constraint, and no caller's IL named
+  them. golib's own definitions, read with `--defs`, now show exactly the sheet's 23 public members on the six types.
+- **The golib/runtime seams and the fallback's severity** need no code here: the seams already ship as a pair, and
+  the fallback diagnostic is minted with the fallback's implementation (unchanged).
+- **The park kit is tier 2 and not frozen** (GoParkSlot, GoParkAwaiter, Goroutine.ParkTwin). One spelling to keep
+  straight: the ruling's "[go-tier2]" means tier 2 and not frozen. The `[go-tier2]` SECTION of PublicSurface.golib.txt
+  lists something else, the tier-2 types in namespace `go`. The park kit lives in go.golib and is tier 2 by its
+  EditorBrowsable mark, so it takes no line there. Recorded so nobody adds one.
+
+### The re-read (predictions written first: the kit's prediction.md)
+
+- 22 builds were attempted, 20 built. MnStormTwin fails as it did at A5: it is the hand-twin program the limits
+  name. MnLaterArg is a Go-only fixture with no project. The 20 are 12 programs: 12 builds with twins, 2 with every
+  interface member hidden-twinned, and 6 plain.
+- Controls: every build's rows add up to its member reference table, and the 6 plain builds name 0 members of the
+  six types and more than 0 other golib members.
+- The six types: the union over the twin builds is the sheet's 21 IL-named rows, exactly. No build names an
+  awaiter's `OnCompleted` or `UnsafeOnCompleted`, and no new member appears. The constructor of GoTask of T is still
+  named by interface twins only.
+- Behaviour: under the scheduler (`GO2CS_MN=1`), each twin build prints exactly its plain build's output. That held
+  for MnAotGeneric (1,490 parks; A5's control read 1,489), MnBoxAlias, MnFuncPair and MnIfaceTwin. MnMixedStorm
+  outran a 120 s limit in both arms and decides nothing. GolibTests' M:N subset (Twin, GoTask, Scheduler, Park, Mn):
+  65 passed, 1 skipped.
+
+### The twin-only surface, frozen by definition
+
+A5 counted 7 twin-only members from what its programs named. A program read shows only the overloads somebody used,
+and the frozen set has to hold every overload a future caller can bind. So the frozen twin-only set is read from
+golib's own public definitions, and the program read confirms it:
+
+| Member | Named by a build here | Under L-min |
+|---|---|---|
+| builtin `RunMainꞏtwin` | yes | frozen |
+| builtin `goǃtwin`, arities 0 to 16 (17 overloads; stage (c)'s arity cure) | arities 0 to 2 here, 0 to 4 at A5 | frozen, as a family |
+| builtin `selectꞏtwin` | yes | frozen |
+| builtin `ᐸꟷꞏtwin`, receive (2 overloads) | 1 | frozen, both |
+| channel of T `ᐸꟷꞏtwin`, send | yes | frozen |
+| GoFuncPair: `Twin`, `Plain`, `Underlying`, its constructor (N3) | the constructor and `Twin` (MnFuncPair) | ASKED: N3 ruled it [go-tier2], but generated twins in a USER assembly bind it, so it is frozen in fact |
+| channel of T `Sendꞏtwin`, `Receiveꞏtwin` (2) | none | tier 2, not frozen: golib's own builtin twins and hand-written twins call them; no generated IL does |
+| Goroutine `StartTwin`, `RunMainTwin` | none | tier 2, not frozen: builtin's twin entry points call them |
+| ж of T `ValueSlot`; builtin `Ꮡ` over a slice or an array; string from System.String | yes | on master already, and in PublicSurface.golib.txt's `[tier1-members]` |
+
+### Owed at landing (item 13): a guard for the frozen tier-2 members
+
+Nothing guards the signatures this sheet freezes. PublicSurfaceTests checks the `[tier1-members]` of the tier-1
+types, and every member above is hidden: the builtin twin entry points are in the `[builtin]` NAME list only, and
+the six task types and GoFuncPair are tier 2. Proposed: a `[mn-frozen]` section in PublicSurface.golib.txt with
+one signature line per frozen member: the 23 of the six types, the twin-only rows marked frozen above, and
+GoFuncPair if ruled so. It is written by the same GO2CS_PUBLIC_SURFACE_MEMBERS path and read red by the line, as
+`[tier1-members]` is. By that file's own header it needs a COORD ruling.
+
+Kit: C:\go2cs\scratch\mn2\proto\b1sheet (builds, reader output, tally, prediction.md; G-LAPTOP).

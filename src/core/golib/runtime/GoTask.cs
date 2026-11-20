@@ -92,11 +92,13 @@ public readonly struct GoTaskAwaiter : ICriticalNotifyCompletion, IGoTaskAwaiter
     /// <summary>Raises what left the awaited twin, if anything did.</summary>
     public void GetResult() => m_core?.ThrowIfFailed();
 
-    /// <inheritdoc/>
-    public void OnCompleted(Action continuation) => UnsafeOnCompleted(continuation);
+    // A5's ruling (FREEZE-SHEET.md, rulings at the freeze): no caller's IL names these two, so they are explicit
+    // implementations and leave the public surface. The builder reaches them through its interface constraint.
+    void INotifyCompletion.OnCompleted(Action continuation) => Schedule(continuation);
 
-    /// <inheritdoc/>
-    public void UnsafeOnCompleted(Action continuation)
+    void ICriticalNotifyCompletion.UnsafeOnCompleted(Action continuation) => Schedule(continuation);
+
+    private void Schedule(Action continuation)
     {
         if (m_core is { Done: false } core)
             core.Await(continuation);
@@ -134,11 +136,13 @@ public readonly struct GoTaskAwaiter<T> : ICriticalNotifyCompletion, IGoTaskAwai
         return core.Result;
     }
 
-    /// <inheritdoc/>
-    public void OnCompleted(Action continuation) => UnsafeOnCompleted(continuation);
+    // A5's ruling (FREEZE-SHEET.md, rulings at the freeze): no caller's IL names these two, so they are explicit
+    // implementations and leave the public surface. The builder reaches them through its interface constraint.
+    void INotifyCompletion.OnCompleted(Action continuation) => Schedule(continuation);
 
-    /// <inheritdoc/>
-    public void UnsafeOnCompleted(Action continuation)
+    void ICriticalNotifyCompletion.UnsafeOnCompleted(Action continuation) => Schedule(continuation);
+
+    private void Schedule(Action continuation)
     {
         if (m_core is { Done: false } core)
             core.Await(continuation);
