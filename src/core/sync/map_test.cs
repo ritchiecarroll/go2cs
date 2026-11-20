@@ -17,6 +17,7 @@ using go.math;
 using go.sync;
 using go.testing;
 using static go.sync_internal_test_package;
+using static sync_test_package;
 
 partial class sync_test_package {
 
@@ -58,6 +59,8 @@ partial struct mapCall {
     internal mapOp op;
     internal any k, v;
 }
+
+} partial class sync_testᴛmapCall {
 
 internal static (any, bool) apply(this mapCall c, mapInterface m) {
     var exprᴛ1 = c.op;
@@ -107,6 +110,8 @@ internal static (any, bool) apply(this mapCall c, mapInterface m) {
     }}
 }
 
+} partial class sync_test_package {
+
 partial struct mapResult {
     internal any value;
     internal bool ok;
@@ -122,7 +127,9 @@ internal static any randValue(ж<rand.Rand> Ꮡr) {
     return (@string)b;
 }
 
-internal static reflectꓸValue Generate(this mapCall _, ж<rand.Rand> r, nint size) {
+} partial class sync_testᴛmapCall {
+
+internal static reflect.Value Generate(this mapCall _, ж<rand.Rand> r, nint size) {
     var c = new mapCall(op: mapOps[rand.Intn(len(mapOps))], k: randValue(r));
     var exprᴛ1 = c.op;
     switch (ᐧ) {
@@ -132,6 +139,8 @@ internal static reflectꓸValue Generate(this mapCall _, ж<rand.Rand> r, nint s
     }}
     return reflect.ValueOf(c);
 }
+
+} partial class sync_test_package {
 
 internal static (slice<mapResult> results, map<any, any> final) applyCalls(mapInterface m, slice<mapCall> calls) {
     slice<mapResult> results = default;
@@ -216,9 +225,9 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> t) {
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
                     for (var i = (int64)0; ; i++) {
-                        var selᴛ5 = doneʗ2;
-                        switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
-                        case 0 when selᴛ5.ꟷᐳ(out _): {
+                        var doneᴛ1 = doneʗ2;
+                        switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+                        case 0 when doneᴛ1.ꟷᐳ(out _): {
                             return;
                         }
                         default: {

@@ -1,12 +1,17 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 internal delegate void handler(@string msg);
 
+} partial class mainᴛhandler {
+
 internal static void invoke(this handler h, @string msg) { h(msg); }
+
+} partial class main_package {
 
 internal static handler wrap(handler h) { return h; }
 

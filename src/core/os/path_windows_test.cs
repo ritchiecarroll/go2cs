@@ -321,7 +321,7 @@ internal static void testLongPathAbs(ж<Δtesting.T> t, @string target) {
     }
     // Test that Walk doesn't fail with long paths.
     // See go.dev/issue/21782.
-    filepath.Walk(target, new Func<@string, fs.FileInfo, error, error>(testWalkFn));
+    filepath.Walk(target, testWalkFn);
     // Test that RemoveAll doesn't hang with long paths.
     // See go.dev/issue/36375.
     {

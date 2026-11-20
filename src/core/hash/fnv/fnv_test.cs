@@ -38,7 +38,7 @@ public static void TestHashInterface(ж<testing.T> t) {
 
         var testʗ1 = test;
         t.Run(test.name, (ж<testing.T> tΔ1) => {
-            testhash.TestHash(tΔ1, new Func<hash.Hash>(testʗ1.fn));
+            testhash.TestHash(tΔ1, testʗ1.fn);
         });
     }
 }

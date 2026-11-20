@@ -590,8 +590,8 @@ public static void TestParseAndCompile(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("%d: compile: %v", i, err);
         }
-        var Δmatch = re.MatchString(s); if (Δmatch != tc.expMatch) {
-            t.Errorf("%d: %q.MatchString(%q)=%t; expected=%t", i, re.OrTypedNil(), s, Δmatch, tc.expMatch);
+        var match = re.MatchString(s); if (match != tc.expMatch) {
+            t.Errorf("%d: %q.MatchString(%q)=%t; expected=%t", i, re.OrTypedNil(), s, match, tc.expMatch);
         }
     }
 }

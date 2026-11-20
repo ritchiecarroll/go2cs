@@ -8,7 +8,7 @@ using static go.@internal.fmtsort_package;
 
 partial class fmtsort_internal_test_package {
 
-public static nint Compare(reflectꓸValue a, reflectꓸValue b) {
+public static nint Compare(reflect.Value a, reflect.Value b) {
     return compare(a, b);
 }
 

@@ -204,7 +204,7 @@ partial class windows_package
     /// Go's signature is preserved exactly, including the <c>ntstatus</c> return. The body is the
     /// generated one with its third argument's memory replaced.
     /// </remarks>
-    public static unsafe error /*ntstatus*/ NtCreateFile(ж<syscallꓸHandle> Ꮡhandle, uint32 access, ж<OBJECT_ATTRIBUTES> Ꮡoa, ж<IO_STATUS_BLOCK> Ꮡiosb, ж<int64> ᏑallocationSize, uint32 attributes, uint32 share, uint32 disposition, uint32 options, uintptr eabuffer, uint32 ealength) {
+    public static unsafe error /*ntstatus*/ NtCreateFile(ж<syscall.Handle> Ꮡhandle, uint32 access, ж<OBJECT_ATTRIBUTES> Ꮡoa, ж<IO_STATUS_BLOCK> Ꮡiosb, ж<int64> ᏑallocationSize, uint32 attributes, uint32 share, uint32 disposition, uint32 options, uintptr eabuffer, uint32 ealength) {
         error ntstatus = default!;
 
         NativeNTUnicodeString name = default;
@@ -237,7 +237,7 @@ partial class windows_package
     /// The twin of <see cref="NtCreateFile"/>, one arity down: same mirror, same contract, same
     /// single-argument delta from the generated body.
     /// </remarks>
-    public static unsafe error /*ntstatus*/ NtOpenFile(ж<syscallꓸHandle> Ꮡhandle, uint32 access, ж<OBJECT_ATTRIBUTES> Ꮡoa, ж<IO_STATUS_BLOCK> Ꮡiosb, uint32 share, uint32 options) {
+    public static unsafe error /*ntstatus*/ NtOpenFile(ж<syscall.Handle> Ꮡhandle, uint32 access, ж<OBJECT_ATTRIBUTES> Ꮡoa, ж<IO_STATUS_BLOCK> Ꮡiosb, uint32 share, uint32 options) {
         error ntstatus = default!;
 
         NativeNTUnicodeString name = default;

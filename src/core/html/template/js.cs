@@ -142,7 +142,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
     ["yield"] = true
 }; }
 
-internal static reflectꓸType jsonMarshalType = reflect.TypeFor<json.Marshaler>();
+internal static reflect.Type jsonMarshalType = reflect.TypeFor<json.Marshaler>();
 
 // indirectToJSONMarshaler returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil) or an implementation of json.Marshal.
@@ -156,7 +156,7 @@ internal static any indirectToJSONMarshaler(any a) {
     }
 
     var v = reflect.ValueOf(a);
-    while (!v.Type().Implements(jsonMarshalType) && v.Kind() == reflect.ΔPointer && !v.IsNil()) {
+    while (!v.Type().Implements(jsonMarshalType) && v.Kind() == reflect.Pointer && !v.IsNil()) {
         v = v.Elem();
     }
     return v.Interface();
@@ -515,9 +515,8 @@ internal static bool isJSType(@string mimeType) {
     (mimeType, _, _) = strings.Cut(mimeType, ";");
     mimeType = strings.ToLower(mimeType);
     mimeType = strings.TrimSpace(mimeType);
-    var exprᴛ1 = mimeType;
     switch (ᐧ) {
-    case {} when exprᴛ1 == ""u8 || exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8: {
+    case {} when mimeType == ""u8 || mimeType == "application/ecmascript"u8 || mimeType == "application/javascript"u8 || mimeType == "application/json"u8 || mimeType == "application/ld+json"u8 || mimeType == "application/x-ecmascript"u8 || mimeType == "application/x-javascript"u8 || mimeType == "module"u8 || mimeType == "text/ecmascript"u8 || mimeType == "text/javascript"u8 || mimeType == "text/javascript1.0"u8 || mimeType == "text/javascript1.1"u8 || mimeType == "text/javascript1.2"u8 || mimeType == "text/javascript1.3"u8 || mimeType == "text/javascript1.4"u8 || mimeType == "text/javascript1.5"u8 || mimeType == "text/jscript"u8 || mimeType == "text/livescript"u8 || mimeType == "text/x-ecmascript"u8 || mimeType == "text/x-javascript"u8: {
         return true;
     }
     default: {

@@ -947,11 +947,20 @@ public class FieldAccessGeneratorTests
     /// extension member whose receiver is a <c>ж&lt;…&gt;</c>, must be on it. C# binds an instance member before an
     /// extension property, so a Go field named like a member the list lacks would silently bind the member.
     /// </summary>
+    /// <remarks>
+    /// One receiver shape cannot collide and is not required: a box CLOSED over golib's <c>array&lt;T&gt;</c>
+    /// (<c>ж&lt;array&lt;T&gt;&gt;</c>, e.g. ArrayExtensions.Assign, Go's <c>*p = b</c> for an unnamed array). A Go field
+    /// or method belongs to a named type, and no named type is emitted as <c>array&lt;T&gt;</c>: a named array is its
+    /// own wrapper struct and an alias of an unnamed array declares no methods, so such an extension is never applicable
+    /// where a Go member binds. go/ast's <c>Assign</c> fields and internal/strconv's <c>(*decimal).Assign</c> compile
+    /// beside it on all four targets (DESIGN-array-reassign-in-place.md §8). The skip is asserted live below.
+    /// </remarks>
     [TestMethod]
     public void TheCollisionListNamesEveryMemberOfTheBox()
     {
         Type box = typeof(golib::go.ж<>);
         HashSet<string> names = [];
+        HashSet<string> closedOverArray = [];
 
         foreach (MemberInfo member in box.GetMembers(BindingFlags.Public | BindingFlags.Instance))
         {
@@ -968,7 +977,12 @@ public class FieldAccessGeneratorTests
                 if (!method.IsDefined(typeof(ExtensionAttribute), false) || method.GetParameters() is not [var receiver, ..])
                     continue;
 
-                if (IsBox(receiver.ParameterType))
+                if (!IsBox(receiver.ParameterType))
+                    continue;
+
+                if (ClosedOverArray(receiver.ParameterType))
+                    closedOverArray.Add(method.Name);
+                else
                     names.Add(method.Name);
             }
         }
@@ -977,6 +991,13 @@ public class FieldAccessGeneratorTests
 
         Assert.AreEqual(0, missing.Length, $"src/go2cs/fieldAccessCollisions.txt lacks: {string.Join(", ", missing)}");
         Assert.IsTrue(names.Contains("Value") && names.Contains("of"), "the guard must see the box's own members");
+        Assert.IsTrue(closedOverArray.Contains("Assign"), "the closed-over-array skip must be live: ArrayExtensions.Assign(this ж<array<T>>, …) is its case");
+
+        // ж<array<T>> (a generic instance whose argument is golib's array<>), the receiver no Go member can share.
+        static bool ClosedOverArray(Type type) =>
+            type.IsGenericType && type.GetGenericTypeDefinition() == typeof(golib::go.ж<>) &&
+            type.GetGenericArguments()[0] is { IsGenericType: true } argument &&
+            argument.GetGenericTypeDefinition() == typeof(golib::go.array<>);
 
         static bool IsBox(Type type)
         {

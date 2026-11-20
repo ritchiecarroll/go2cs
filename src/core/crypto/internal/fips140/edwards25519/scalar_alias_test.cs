@@ -53,14 +53,14 @@ public static void TestScalarAliasing(ж<testing.T> t) {
         }
 
         // Test aliasing the first argument and the receiver.
-        v1 = x.ΔClone();
+        v1.AssignFrom(x);
         {
             var @out = f(Ꮡv1, Ꮡv1, Ꮡy); if (@out != Ꮡv1 || v1 != v || !isReduced(@out.Bytes())) {
                 return false;
             }
         }
         // Test aliasing the second argument and the receiver.
-        v1 = y.ΔClone();
+        v1.AssignFrom(y);
         {
             var @out = f(Ꮡv1, Ꮡx, Ꮡv1); if (@out != Ꮡv1 || v1 != v || !isReduced(@out.Bytes())) {
                 return false;
@@ -75,21 +75,21 @@ public static void TestScalarAliasing(ж<testing.T> t) {
         }
 
         // Test aliasing the first argument and the receiver.
-        v1 = x.ΔClone();
+        v1.AssignFrom(x);
         {
             var @out = f(Ꮡv1, Ꮡv1, Ꮡx); if (@out != Ꮡv1 || v1 != v || !isReduced(@out.Bytes())) {
                 return false;
             }
         }
         // Test aliasing the second argument and the receiver.
-        v1 = x.ΔClone();
+        v1.AssignFrom(x);
         {
             var @out = f(Ꮡv1, Ꮡx, Ꮡv1); if (@out != Ꮡv1 || v1 != v || !isReduced(@out.Bytes())) {
                 return false;
             }
         }
         // Test aliasing both arguments and the receiver.
-        v1 = x.ΔClone();
+        v1.AssignFrom(x);
         {
             var @out = f(Ꮡv1, Ꮡv1, Ꮡv1); if (@out != Ꮡv1 || v1 != v || !isReduced(@out.Bytes())) {
                 return false;
@@ -117,25 +117,25 @@ public static void TestScalarAliasing(ж<testing.T> t) {
         ["Negate"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x) => {
             v = v.ΔClone();
             x = x.ΔClone();
-            return checkAliasingOneArgʗ1(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519_package.Negate)), v, x);
+            return checkAliasingOneArgʗ1(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519ᴛScalar.Negate)), v, x);
         },
         ["Multiply"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
-            return checkAliasingTwoArgsʗ1(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519_package.Multiply)), v, x, y);
+            return checkAliasingTwoArgsʗ1(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519ᴛScalar.Multiply)), v, x, y);
         },
         ["Add"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
-            return checkAliasingTwoArgsʗ2(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519_package.Add)), v, x, y);
+            return checkAliasingTwoArgsʗ2(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519ᴛScalar.Add)), v, x, y);
         },
         ["Subtract"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
-            return checkAliasingTwoArgsʗ3(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519_package.Subtract)), v, x, y);
+            return checkAliasingTwoArgsʗ3(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519ᴛScalar.Subtract)), v, x, y);
         },
         ["MultiplyAdd1"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y, global::go.crypto.@internal.fips140.edwards25519_package.Scalar @fixedʗp) => {
             v = v.ΔClone();

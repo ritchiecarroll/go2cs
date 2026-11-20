@@ -11,6 +11,7 @@ using Δsync = sync_package;
 using syscall = syscall_package;
 using @internal;
 using @internal.syscall;
+using static net_package;
 
 partial class net_package {
 
@@ -58,6 +59,8 @@ internal static void initMPTCPavailable() {
     hasSOLMPTCP = unix.KernelVersionGE(5, 16);
 }
 
+} partial class netᴛsysDialer {
+
 internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     if (supportsMultipathTCP()) {
         var (conn, err) = Ꮡsd.doDialTCPProto(ctx, laddr, raddr, _IPPROTO_MPTCP); if (err == nil) {
@@ -74,6 +77,8 @@ internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context
     return Ꮡsd.dialTCP(ctx, laddr, raddr);
 }
 
+} partial class netᴛsysListener {
+
 internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
     if (supportsMultipathTCP()) {
         var (dial, err) = Ꮡsl.listenTCPProto(ctx, laddr, _IPPROTO_MPTCP); if (err == nil) {
@@ -89,6 +94,8 @@ internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl,
     // retry with "plain" TCP.
     return Ꮡsl.listenTCP(ctx, laddr);
 }
+
+} partial class net_package {
 
 // hasFallenBack reports whether the MPTCP connection has fallen back to "plain"
 // TCP.

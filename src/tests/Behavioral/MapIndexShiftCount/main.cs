@@ -27,7 +27,7 @@ internal static void arm(@string @class, Func<@string> f) {
 
         defer(() => {
             var r = recover(); if (r != nil) {
-                var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
+                var (_, isRuntimeError) = r._<runtime.Error>(ᐧ);
                 fmt.Println(@class + ": panic:", r, isRuntimeError);
             }
         }, ref ᒐ);

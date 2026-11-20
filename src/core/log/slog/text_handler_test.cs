@@ -14,10 +14,11 @@ using testing = testing_package;
 using time = time_package;
 using go.@internal;
 using static go.log.slog_package;
+using static slog_internal_test_package;
 
 partial class slog_internal_test_package {
 
-internal static time.Time testTime = time_package.Date(2000, 1, 2, 3, 4, 5, 0, time_package.ΔUTC);
+internal static time.Time testTime = time.Date(2000, 1, 2, 3, 4, 5, 0, time.UTC);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string quOˢ => ref quOˢᵇ;
@@ -130,12 +131,18 @@ internal partial struct name {
     public @string First, Last;
 }
 
+} partial class slog_internal_testᴛname {
+
 internal static @string String(this name n) { return n.Last + ", "u8 + n.First; }
+
+} partial class slog_internal_test_package {
 
 // for testing TextMarshaler
 internal partial struct text {
     internal @string s;
 }
+
+} partial class slog_internal_testᴛtext {
 
 internal static @string String(this text t) { return t.s; } // should be ignored
 
@@ -150,16 +157,18 @@ internal static (slice<byte>, error) MarshalText(this text t) {
     return (slice<byte>(fmt.Sprintf("text{%q}"u8, t.s)), default);
 }
 
+} partial class slog_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string levelInfoMsgMDur1m0sBˢ => ref levelInfoMsgMDur1m0sBˢᵇ;
 private static readonly @string levelInfoMsgMDur1m0sBˢᵇ = @"level=INFO msg=m dur=1m0s b=true a=1"u8;
 
 public static void TestTextHandlerPreformatted(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    global::go.log.slog_package.ΔHandler h = new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), nil));
-    h = h.WithAttrs(slice<global::go.log.slog_package.Attr>([go.log.slog_package.Duration(durˢ, time_package.ΔMinute), go.log.slog_package.Bool("b", true)]));
+    global::go.log.slog_package.Handler h = new global::go.log.slog_package.TextHandlerжHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), nil));
+    h = h.WithAttrs(slice<global::go.log.slog_package.Attr>([go.log.slog_package.Duration(durˢ, time.Minute), go.log.slog_package.Bool("b", true)]));
     // Also test omitting time.
-    var r = NewRecord(new time_package.Time(), 0, /* 0 Level is INFO */ "m", 0);
+    var r = NewRecord(new time.Time(), 0, /* 0 Level is INFO */ "m", 0);
     r.AddAttrs(Int("a", 1));
     var err = h.Handle(context.Background(), r); if (err != nil) {
         t.Fatal(err);
@@ -173,13 +182,13 @@ public static void TestTextHandlerPreformatted(ж<testing.T> t) {
 
 public static void TestTextHandlerAlloc(ж<testing.T> t) {
     testenv.SkipIfOptimizationOff(new slog_test_package.testing_TжTB(t));
-    ref var r = ref heap<global::go.log.slog_package.Record>(NewRecord(time_package.Now(), LevelInfo, msgˢ, 0), out var Ꮡr);
+    ref var r = ref heap<global::go.log.slog_package.Record>(NewRecord(time.Now(), LevelInfo, msgˢ, 0), out var Ꮡr);
     for (nint i = 0; i < 10; i++) {
         r.AddAttrs(Int("x = y", i));
     }
-    ref var h = ref heap<global::go.log.slog_package.ΔHandler>(out var Ꮡh);
+    ref var h = ref heap<global::go.log.slog_package.Handler>(out var Ꮡh);
 
-    h = new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(io.Discard, nil));
+    h = new global::go.log.slog_package.TextHandlerжHandler(NewTextHandler(io.Discard, nil));
     wantAllocs(t, 0, () => {
         Ꮡh.ValueSlot.Handle(context.Background(), Ꮡr.Value);
     });

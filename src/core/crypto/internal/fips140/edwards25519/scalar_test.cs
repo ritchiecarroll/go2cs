@@ -15,6 +15,7 @@ using go.testing;
 using math;
 using rand = math.rand_package;
 using static go.crypto.@internal.fips140.edwards25519_package;
+using static edwards25519_internal_test_package;
 
 partial class edwards25519_internal_test_package {
 
@@ -35,9 +36,11 @@ internal static void initᴛscOne() { scOne = @new<global::go.crypto.@internal.f
 internal static ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> scMinusOne;
 internal static void initᴛscMinusOne() { scMinusOne = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().Subtract(@new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>(), scOne); }
 
+} partial class edwards25519_internal_testᴛScalar {
+
 // Generate returns a valid (reduced modulo l) Scalar with a distribution
 // weighted towards high, low, and edge values.
-internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips140.edwards25519_package.Scalar _, ж<mathrand.Rand> Ꮡrand, nint size) {
+internal static reflect.Value Generate(this global::go.crypto.@internal.fips140.edwards25519_package.Scalar _, ж<mathrand.Rand> Ꮡrand, nint size) {
     ref var rand = ref Ꮡrand.DerefOrNull();
 
     ref var s = ref heap(new array<byte>(32), out var Ꮡs);
@@ -47,11 +50,11 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
         break;
     }
     case {} when diceRoll is 1: {
-        s = scOneBytes.Clone();
+        s.Assign(scOneBytes);
         break;
     }
     case {} when diceRoll is 2: {
-        s = new array<byte>(scMinusOne.Bytes(), 32);
+        s.Assign(new array<byte>(scMinusOne.Bytes(), 32));
         break;
     }
     case {} when diceRoll is < 5: {
@@ -85,6 +88,8 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
     return reflect.ValueOf(val);
 }
 
+} partial class edwards25519_internal_test_package {
+
 public static void TestScalarGenerate(ж<testing.T> t) {
     var f = (global::go.crypto.@internal.fips140.edwards25519_package.Scalar scʗp) => {
         ref var sc = ref heap(scʗp.ΔClone(), out var Ꮡsc);
@@ -105,7 +110,7 @@ public static partial void TestScalarSetCanonicalBytes(ж<testing.T> t) {
             return false;
         }
         var repr = Ꮡsc.Bytes();
-        return bytes_package.Equal(@in[..], repr) && isReduced(repr);
+        return bytes.Equal(@in[..], repr) && isReduced(repr);
     };
     {
         var err = quick.Check((f1).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
@@ -153,8 +158,8 @@ public static partial void TestScalarSetCanonicalBytes(ж<testing.T> t) {
 }
 
 public static void TestScalarSetUniformBytes(ж<testing.T> t) {
-    var (mod, _) = @new<bigꓸInt>().SetString("27742317777372353535851937790883648493", 10);
-    mod.Add(mod, @new<bigꓸInt>().Lsh(big.NewInt(1), 252));
+    var (mod, _) = @new<big.Int>().SetString("27742317777372353535851937790883648493", 10);
+    mod.Add(mod, @new<big.Int>().Lsh(big.NewInt(1), 252));
     var modʗ1 = mod;
     var f = ([GoArrayDims(64)] array<byte> @in, global::go.crypto.@internal.fips140.edwards25519_package.Scalar scʗp) => {
         @in = @in.Clone();
@@ -207,12 +212,12 @@ public static void TestScalarSetBytesWithClamping(ж<testing.T> t) {
     }
 }
 
-internal static ж<bigꓸInt> bigIntFromLittleEndianBytes(slice<byte> b) {
+internal static ж<big.Int> bigIntFromLittleEndianBytes(slice<byte> b) {
     var bb = new slice<byte>(len(b));
     foreach (var i in range(len(b))) {
         bb[i] = b[len(b) - i - 1];
     }
-    return @new<bigꓸInt>().SetBytes(bb);
+    return @new<big.Int>().SetBytes(bb);
 }
 
 public static void TestScalarMultiplyDistributesOverAdd(ж<testing.T> t) {
@@ -293,16 +298,20 @@ public static void TestScalarNonAdjacentForm(ж<testing.T> t) {
 
 internal partial struct notZeroScalar /*global::go.crypto.@internal.fips140.edwards25519_package.Scalar*/;
 
-internal static reflectꓸValue Generate(this notZeroScalar _, ж<mathrand.Rand> rand, nint size) {
+} partial class edwards25519_internal_testᴛnotZeroScalar {
+
+internal static reflect.Value Generate(this notZeroScalar _, ж<mathrand.Rand> rand, nint size) {
     ref var s = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡs);
     ref var isNonZero = ref heap(new uint64(), out var ᏑisNonZero);
     while (isNonZero == 0) {
-        s = new Scalar().Generate(rand, size).Interface()._<Scalar>();
+        s.AssignFrom(new Scalar().Generate(rand, size).Interface()._<Scalar>());
         var ᴛ3 = s.s.Value;
         fiatScalarNonzero(ref isNonZero, ref ᴛ3);
     }
     return reflect.ValueOf((notZeroScalar)s);
 }
+
+} partial class edwards25519_internal_test_package {
 
 public static void TestScalarEqual(ж<testing.T> t) {
     if (scOne.Equal(scMinusOne) == 1) {

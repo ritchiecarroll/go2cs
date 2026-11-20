@@ -20,6 +20,7 @@ using @internal;
 using fs = go.io.fs_package;
 using go.io;
 using static go.archive.zip_package;
+using static zip_internal_test_package;
 
 partial class zip_internal_test_package {
 
@@ -62,7 +63,7 @@ public static void TestOver65kFiles(ж<testing.T> t) {
 }
 
 public static void TestModTime(ж<testing.T> t) {
-    time.Time testTime = time.Date(2009, time.November, 10, 23, 45, 58, 0, time.ΔUTC);
+    time.Time testTime = time.Date(2009, time.November, 10, 23, 45, 58, 0, time.UTC);
     var fh = @new<global::go.archive.zip_package.FileHeader>();
     fh.SetModTime(testTime);
     var outTime = fh.ModTime();
@@ -193,6 +194,8 @@ internal partial struct rleBuffer {
     internal slice<repeatedByte> buf;
 }
 
+} partial class zip_internal_testᴛrleBuffer {
+
 internal static int64 Size(this ref rleBuffer r) {
     if (len(r.buf) == 0) {
         return 0;
@@ -225,6 +228,8 @@ internal static (nint n, error err) Write(this ref rleBuffer r, slice<byte> p) {
     return (len(p), default);
 }
 
+} partial class zip_internal_test_package {
+
 internal static void memset(slice<byte> a, byte b) {
     if (len(a) == 0) {
         return;
@@ -236,6 +241,8 @@ internal static void memset(slice<byte> a, byte b) {
         copy(a.slice(i), a.slice(0, i));
     }
 }
+
+} partial class zip_internal_testᴛrleBuffer {
 
 internal static (nint n, error err) ReadAt(this ref rleBuffer r, slice<byte> p, int64 off) {
     nint n = default;
@@ -263,6 +270,8 @@ internal static (nint n, error err) ReadAt(this ref rleBuffer r, slice<byte> p, 
     }
     return (n, err);
 }
+
+} partial class zip_internal_test_package {
 
 // Just testing the rleBuffer used in the Zip64 test above. Not used by the zip code.
 public static void TestRLEBuffer(ж<testing.T> t) {
@@ -296,8 +305,12 @@ internal partial struct fakeHash32 {
     /*embed*/ public hash_package.Hash32 Hash32;
 }
 
+} partial class zip_internal_testᴛfakeHash32 {
+
 internal static (nint, error) Write(this fakeHash32 _, slice<byte> p) { return (len(p), default); }
 internal static uint32 Sum32(this fakeHash32 _) { return 0; }
+
+} partial class zip_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object slowTestSkippingˢ = (@string)"slow test; skipping"u8;
@@ -441,9 +454,15 @@ internal partial struct suffixSaver {
     internal int64 size;
 }
 
+} partial class zip_internal_testᴛsuffixSaver {
+
 internal static int64 Size(this ref suffixSaver ss) { return ss.size; }
 
+} partial class zip_internal_test_package {
+
 internal static error errDiscardedBytes = errors.New("ReadAt of discarded bytes");
+
+} partial class zip_internal_testᴛsuffixSaver {
 
 internal static (nint n, error err) ReadAt(this ref suffixSaver ss, slice<byte> p, int64 off) {
     nint n = default;
@@ -496,6 +515,8 @@ internal static (nint n, error err) Write(this ref suffixSaver ss, slice<byte> p
     }
     return (n, err);
 }
+
+} partial class zip_internal_test_package {
 
 // generatesZip64 reports whether f wrote a zip64 file.
 // f is also responsible for closing w.
@@ -915,9 +936,11 @@ public static void TestSuffixSaver(ж<testing.T> t) {
 internal partial struct zeros {
 }
 
+} partial class zip_internal_testᴛzeros {
+
 internal static (nint, error) Read(this zeros _, slice<byte> p) {
     clear(p);
     return (len(p), default);
 }
 
-} // end zip_internal_test_package
+} // end zip_internal_testᴛzeros

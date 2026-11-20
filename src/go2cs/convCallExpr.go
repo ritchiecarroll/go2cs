@@ -66,9 +66,9 @@ func isNarrowIntegerKind(kind types.BasicKind) bool {
 // is the universe *types.Builtin object, anything else is a shadowing declaration and must fall
 // through to the ordinary call path.
 //
-// This is the opposite direction from packageBuiltinShadows, which handles a package method whose
-// name collides with a built-in the call still MEANS (there the call is a real built-in and gets
-// QUALIFIED as `builtin.<name>`); here the call is not a built-in at all.
+// This is the opposite direction from holderDeclares, which handles a method of the current holder
+// whose name collides with a built-in the call still MEANS (there the call is a real built-in and
+// gets QUALIFIED as `builtin.<name>`); here the call is not a built-in at all.
 func (v *Visitor) identIsUniverseBuiltin(ident *ast.Ident) bool {
 	_, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin)
 
@@ -315,8 +315,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// (goImageCopyView.go); marked before the arguments are converted.
 	v.markGoImageCopyArgs(callExpr)
 
-	// A copy into or out of the open view of a named array, `copy((*A)(p)[lo:], src)`, is one of golib's copy
-	// doors (arrayPointerViewDoor.go).
+	// A copy into or out of the open view of an array, `copy((*A)(p)[lo:], src)`, is one of golib's copy doors
+	// (arrayPointerViewDoor.go), unless the slice took the Go-image view just above.
 	if door, ok := v.arrayPointerCopyDoor(callExpr); ok {
 		return door
 	}
@@ -528,6 +528,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// A conversion whose target is an UNNAMED STRUCT type literal, `struct{ Hz int }(v)`: a cast to the
 	// lifted type (namedUnnamedStructConversion.go).
 	if converted, ok := v.structTypeLiteralConversion(callExpr); ok {
+		return converted
+	}
+
+	// A conversion between two struct types of OTHER packages, `lib.Pitch(o)` with o an `other.Pitch`:
+	// a call of the function go2cs-gen writes for the pair (foreignPairStructConversion.go).
+	if converted, ok := v.foreignPairStructConversion(callExpr); ok {
 		return converted
 	}
 
@@ -2203,10 +2209,32 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// (GO2CS2006, sliceWideningWriteRefusals.go), and the trigger here is the one that gate
 			// examines. convertToInterfaceType supplies the adapter reference AND the
 			// GoImplement recording, exactly as at scalar *T→iface call sites.
+			//
+			// Where the callee reaches N outside its []N parameters too, the call renders N as
+			// something else, and the slice must agree with it (sliceWideningRoute; TS readiness
+			// class B, tsc's `GetErrorBaseline[T Diagnostic](…, diagnostics []T,
+			// compareDiagnostics func(a, b T) int, …)`): as the non-self proxy, the elements
+			// project to the proxy (`widen<ж<item>, itemжNamedᴾ>(items, elemᴛ0 => new
+			// itemжNamedᴾ(elemᴛ0))`); as the box, where the clause is elided, the caller's slice
+			// binds as it is and nothing is copied.
 			if paramHasArg && (replacementArgs == nil || len(replacementArgs[i]) == 0) {
 				if tp, ptrElem := v.elementWiseSliceWidening(callExpr, i); tp != nil {
 					elemVar := fmt.Sprintf("elem%s%d", TempVarMarker, i)
-					wrapped := v.convertToInterfaceType(tp.Constraint(), ptrElem, elemVar)
+					var wrapped, target string
+
+					switch v.sliceWideningRoute(callExpr, tp) {
+					case wideningToProxy:
+						funIdent := getCallFunIdent(callExpr.Fun)
+						instance := v.info.Instances[funIdent]
+
+						if proxyName, ok := v.nonSelfConstraintProxyFor(funIdent, v.signatureTypeParams(funIdent), instance.TypeArgs, tp.Index()); ok {
+							target = proxyName
+							wrapped = fmt.Sprintf("new %s(%s)", proxyName, elemVar)
+						}
+					case wideningToConstraint:
+						target = v.getCSharpTypeName(tp.Constraint())
+						wrapped = v.convertToInterfaceType(tp.Constraint(), ptrElem, elemVar)
+					}
 
 					if strings.HasPrefix(wrapped, "new ") {
 						if replacementArgs == nil {
@@ -2214,7 +2242,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 
 						replacementArgs[i] = fmt.Sprintf("widen<%s, %s>(%s, %s => %s)",
-							v.getCSharpTypeName(ptrElem), v.getCSharpTypeName(tp.Constraint()), DynamicCastArgMarker, elemVar, wrapped)
+							v.getCSharpTypeName(ptrElem), target, DynamicCastArgMarker, elemVar, wrapped)
 					}
 				}
 			}
@@ -2755,16 +2783,6 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					lastArg = len(callExpr.Args) - 1
 				}
 
-				if i == 0 && !isEmpty {
-					if cast := v.sameNameMethodCapture(callExpr, paramType); cast != "" {
-						if callExprContext.sameNameCaptureCasts == nil {
-							callExprContext.sameNameCaptureCasts = make(map[int]string)
-						}
-
-						callExprContext.sameNameCaptureCasts[0] = cast
-					}
-				}
-
 				for j := i; j <= lastArg; j++ {
 					if !isEmpty {
 						callExprContext.interfaceTypes[j] = paramType
@@ -3031,7 +3049,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// close(ch) on a NAMED channel type cannot infer `close<T>(in channel<T>)`'s element
 		// from the [GoType("chan T")] wrapper (a user-defined conversion is invisible to
 		// generic inference, CS0411) — name the element type explicitly so the wrapper's
-		// implicit conversion applies at the argument (see namedChanElemTypeArg). A package
+		// implicit conversion applies at the argument (see namedChanElemTypeArg). A holder
 		// that ALSO declares a `close` method shadows the using-static builtin (C# member
 		// lookup stops at the class's own group — net/http's `(*conn).close`), so the same
 		// `builtin.` qualification the general builtin path applies is needed here too.
@@ -3040,7 +3058,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				if typeArgs := v.namedChanElemTypeArg(callExpr.Args[0]); typeArgs != "" {
 					funcName := ident.Name
 
-					if packageBuiltinShadows[ident.Name] {
+					if v.holderDeclares(ident.Name) {
 						funcName = "builtin." + funcName
 					}
 
@@ -3087,7 +3105,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 				funcName := ident.Name
 
-				if packageBuiltinShadows[ident.Name] {
+				if v.holderDeclares(ident.Name) {
 					funcName = "builtin." + funcName
 				}
 
@@ -3478,10 +3496,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// `defer recover()` is never called by a deferred function. Every other recover() is direct and stays as is.
 		if ident.Name == "recover" {
 			if site, ok := packageRecoverForms[callExpr]; ok {
-				// A package that declares its own `recover` method qualifies the built-in (Phase 7a below).
+				// A holder that declares its own `recover` method qualifies the built-in (Phase 7a below).
 				qualifier := ""
 
-				if packageBuiltinShadows[ident.Name] {
+				if v.holderDeclares(ident.Name) {
 					qualifier = "builtin."
 				}
 
@@ -4012,15 +4030,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 	// ---- Phase 7a: built-in name shadowing, and min/max argument typing ----
 
-	// A Go built-in call (`clear(s)`, `len(s)`, …) whose name the package ALSO declares as a method
-	// shadows the using-static `go.builtin.<name>` (C# member lookup binds the package's own
-	// `<name>(this ref T)` extension first → CS1620/CS1503). Qualify it as `builtin.<name>` so it
-	// resolves to the golib built-in regardless of the same-class shadow.
-	if len(packageBuiltinShadows) > 0 {
-		if ident, ok := callExpr.Fun.(*ast.Ident); ok && funcName == ident.Name && packageBuiltinShadows[ident.Name] {
-			if _, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin); isBuiltin {
-				funcName = "builtin." + funcName
-			}
+	// A Go built-in call (`clear(s)`, `len(s)`, …) written inside a method whose holder ALSO declares
+	// a method of that name: the holder's own `<name>(this ref T)` hides the using-static
+	// `go.builtin.<name>` (C# member lookup stops at the class → CS1620/CS1503). Qualify it as
+	// `builtin.<name>` there. Every other class of the package reads the built-in bare: a method is a
+	// member of its receiver type's holder alone (methodHolder.go).
+	if ident, ok := callExpr.Fun.(*ast.Ident); ok && funcName == ident.Name && v.holderDeclares(ident.Name) {
+		if _, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin); isBuiltin {
+			funcName = "builtin." + funcName
 		}
 	}
 
@@ -7973,79 +7990,6 @@ func isEmptyCompositeLit(expr ast.Expr) bool {
 	lit, ok := expr.(*ast.CompositeLit)
 
 	return ok && len(lit.Elts) == 0
-}
-
-// sameNameMethodCapture answers the C# type to cast a call's FIRST argument to, or "", when the call is to a
-// package-level FUNCTION F and the argument's type -- or a named type in F's package whose underlying type is
-// the argument's type -- declares a METHOD also named F in F's package, taking one fewer parameter than the call
-// passes. That method is emitted as the extension `F(this T x, ...)` in F's own package class, an ordinary static
-// member of it, so a bare argument of type T makes the extension the better C# overload (an exact match beats the
-// boxing conversion to F's interface parameter) and the call binds the METHOD where Go binds the function.
-// sort's `func (x StringSlice) Sort() { Sort(x) }` then called itself, overflowing the stack on every .Sort() of
-// IntSlice, Float64Slice and StringSlice (pflag's sortFlags, hence cobra). Casting the argument to the parameter's
-// interface type leaves the extension inapplicable. Only an INTERFACE parameter can be captured: a same-typed
-// parameter would make the function and the extension one C# signature, which the converter already renames.
-func (v *Visitor) sameNameMethodCapture(callExpr *ast.CallExpr, paramType types.Type) string {
-	if len(callExpr.Args) == 0 {
-		return ""
-	}
-
-	var calleeIdent *ast.Ident
-
-	switch fun := ast.Unparen(callExpr.Fun).(type) {
-	case *ast.Ident:
-		calleeIdent = fun
-	case *ast.SelectorExpr:
-		calleeIdent = fun.Sel
-	default:
-		return ""
-	}
-
-	callee, ok := v.info.Uses[calleeIdent].(*types.Func)
-
-	if !ok || callee.Pkg() == nil {
-		return ""
-	}
-
-	if sig, ok := callee.Type().(*types.Signature); !ok || sig.Recv() != nil {
-		return ""
-	}
-
-	argType := v.getType(callExpr.Args[0], false)
-
-	if argType == nil {
-		return ""
-	}
-
-	if ptr, ok := argType.(*types.Pointer); ok {
-		argType = ptr.Elem()
-	}
-
-	scope := callee.Pkg().Scope()
-
-	for _, name := range scope.Names() {
-		typeName, ok := scope.Lookup(name).(*types.TypeName)
-
-		if !ok {
-			continue
-		}
-
-		named, ok := types.Unalias(typeName.Type()).(*types.Named)
-
-		if !ok || !(types.Identical(named, argType) || types.Identical(named.Underlying(), argType)) {
-			continue
-		}
-
-		for i := 0; i < named.NumMethods(); i++ {
-			method := named.Method(i)
-
-			if method.Name() == callee.Name() && method.Type().(*types.Signature).Params().Len()+1 == len(callExpr.Args) {
-				return v.getCSharpTypeName(paramType)
-			}
-		}
-	}
-
-	return ""
 }
 
 // structPointerConversionEmission renders `(*U)(p)` for two struct types identical ignoring tags (convCallExpr's

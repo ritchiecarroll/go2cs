@@ -134,13 +134,13 @@ internal static bool debugPinnerKeepUnpin = false;
 // to other objects, which debuggers can use to simplify the evaluation of
 // expressions involving multiple call injections.
 internal static ж<Pinner> debugPinnerV1() {
-    var Δp = @new<Pinner>();
-    Δp.Pin(@unsafe.Pointer.FromPinnedBox(Δp));
+    var p = @new<Pinner>();
+    p.Pin(@unsafe.Pointer.FromPinnedBox(p));
     if (debugPinnerKeepUnpin) {
         // Make Unpin reachable.
-        Δp.Unpin();
+        p.Unpin();
     }
-    return Δp;
+    return p;
 }
 
 } // end runtime_package

@@ -59,7 +59,7 @@ using static go.log_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("log/log.go", "log.cs", "AEKOAdKCgoKCqOKCgoKipJaAlpSSgoKCgoKCpoIAAhDSgpSCgpSCgoKCgoKClIKCgoKCgoKCgpSmgoKCgoKCppSCgoKUgrikgoKCpgAIDoKUAAIS4oK84oKmuIKUgoKCgoKCgoKmgoKCgpS4goKCgoKmgoKC1oKCAAQQwr7CvsK8spaospaospaosoKGqLKChqiygoaqoqqiqJKClKiyqOKCgtiSqqKqoqiSqJKokq7ivsK+wryylqiylqiylqiygoaosoKGqLKChgACFPKC", "194-196:1;249-253:1;250-252:1.1;259-261:1;267-269:1;275-277:1;282-284:1;290-292:1;298-300:1;307-309:1;316-318:1;325-327:1;400-402:1;408-410:1;416-418:1;423-425:1;431-433:1;439-441:1;448-450:1;457-459:1;466-468:1;480-482:1")]
+[assembly: GoPositionMap("log/log.go", "log.cs", "AESOAdKCgoKCyOKCgoKixJaAlpSSgoKCgoKCpoIAAhDSgpSCgpSCgoKCgoKClIKCgoKCgoKCgpSmgoKCgoKCppSCgoKUgrikgoKCpgAIDoKUAAQS4oK84oKmuIKUgoKCgoKCgoKmgoKCgpS4goKCgoKmgoKC9oKCAAYQwr7CvsK8spaospaospaosoKGqLKChqiygoaqoqqiqJKClKiyqOKCgviSqqKqoqiSqJKokq7ivsK+wryylqiylqiylqiygoaosoKGqLKChgACFPKC", "194-196:1;249-253:1;250-252:1.1;259-261:1;267-269:1;275-277:1;282-284:1;290-292:1;298-300:1;307-309:1;316-318:1;325-327:1;400-402:1;408-410:1;416-418:1;423-425:1;431-433:1;439-441:1;448-450:1;457-459:1;466-468:1;480-482:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -93,3 +93,13 @@ public static partial class log_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(log_package.Logger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class logᴛLogger;
+// </MethodHolders>

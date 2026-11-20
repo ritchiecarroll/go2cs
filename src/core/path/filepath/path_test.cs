@@ -672,7 +672,7 @@ internal static void testWalk(ж<testing.T> t, Func<@string, Func<@string, fs.Di
     var clear = true;
     var markFn = (@string path, fs.DirEntry d, error errΔ1) => mark(d, errΔ1, Ꮡerrors, clear);
     // Expect no errors.
-    var err = walk(tree.name, new Func<@string, fs.DirEntry, error, error>(markFn));
+    var err = walk(tree.name, markFn);
     if (err != nil) {
         t.Fatalf("no error expected, found: %s", err);
     }
@@ -709,7 +709,7 @@ internal static void testWalk(ж<testing.T> t, Func<@string, Func<@string, fs.Di
         // correct double-marking of directory itself
         tree.entries[1].mark -= errVisit;
         tree.entries[3].mark -= errVisit;
-        var errΔ2 = walk(tree.name, new Func<@string, fs.DirEntry, error, error>(markFnʗ1));
+        var errΔ2 = walk(tree.name, markFnʗ1);
         if (errΔ2 != nil) {
             tΔ1.Fatalf("expected no error return from Walk, got %s", errΔ2);
         }
@@ -728,7 +728,7 @@ internal static void testWalk(ж<testing.T> t, Func<@string, Func<@string, fs.Di
         tree.entries[1].mark -= errVisit;
         tree.entries[3].mark -= errVisit;
         clear = false; // error will stop processing
-        errΔ2 = walk(tree.name, new Func<@string, fs.DirEntry, error, error>(markFnʗ1));
+        errΔ2 = walk(tree.name, markFnʗ1);
         if (errΔ2 == nil) {
             tΔ1.Fatalf("expected error return from Walk");
         }
@@ -813,7 +813,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> t) {
     var walkFnʗ1 = walkFn;
     t.Run(walkˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         var walkFnʗ2 = walkFnʗ1;
-        var Walk = (@string root) => filepath.Walk(td, new Func<@string, fs.FileInfo, error, error>(walkFnʗ2));
+        var Walk = (@string root) => filepath.Walk(td, walkFnʗ2);
         checkʗ1(tΔ2, Walk, td);
         checkʗ1(tΔ2, Walk, filepath.Join(td, dirˢ));
     });
@@ -821,7 +821,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> t) {
     var walkDirFnʗ1 = walkDirFn;
     t.Run(walkDirˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         var walkDirFnʗ2 = walkDirFnʗ1;
-        var WalkDir = (@string root) => filepath.WalkDir(td, new Func<@string, fs.DirEntry, error, error>(walkDirFnʗ2));
+        var WalkDir = (@string root) => filepath.WalkDir(td, walkDirFnʗ2);
         checkʗ2(tΔ3, WalkDir, td);
         checkʗ2(tΔ3, WalkDir, filepath.Join(td, dirˢ));
     });
@@ -894,7 +894,7 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> t) {
     var walkFnʗ1 = walkFn;
     t.Run(walkˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         var walkFnʗ2 = walkFnʗ1;
-        var Walk = (@string _) => filepath.Walk(td, new Func<@string, fs.FileInfo, error, error>(walkFnʗ2));
+        var Walk = (@string _) => filepath.Walk(td, walkFnʗ2);
         checkʗ1(tΔ2, Walk, td);
         checkʗ1(tΔ2, Walk, filepath.Join(td, dirˢ));
     });
@@ -902,7 +902,7 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> t) {
     var walkDirFnʗ1 = walkDirFn;
     t.Run(walkDirˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         var walkDirFnʗ2 = walkDirFnʗ1;
-        var WalkDir = (@string _) => filepath.WalkDir(td, new Func<@string, fs.DirEntry, error, error>(walkDirFnʗ2));
+        var WalkDir = (@string _) => filepath.WalkDir(td, walkDirFnʗ2);
         checkʗ2(tΔ3, WalkDir, td);
         checkʗ2(tΔ3, WalkDir, filepath.Join(td, dirˢ));
     });
@@ -1824,13 +1824,12 @@ public static void TestBug3486(ж<testing.T> t) {
             t.Fatal(errΔ1);
         }
 
-        var exprᴛ1 = pth;
         switch (ᐧ) {
-        case {} when exprᴛ1 == utf16: {
+        case {} when pth == utf16: {
             seenUTF16 = true;
             return filepath.SkipDir;
         }
-        case {} when exprᴛ1 == utf8: {
+        case {} when pth == utf8: {
             if (!seenUTF16) {
                 t.Fatal(filepathWalkOutOfOrderˢ);
             }

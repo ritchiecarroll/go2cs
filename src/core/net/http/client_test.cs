@@ -35,6 +35,7 @@ using global::go.sync;
 using static global::go.net.http_internal_test_package;
 using Δhttp = global::go.net.http_package;
 using ꓸꓸꓸany = Span<any>;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -75,7 +76,7 @@ internal static ref readonly @string userAgentˢ => ref userAgentˢᵇ;
 private static readonly @string userAgentˢᵇ = "User-agent:"u8;
 
 internal static void testClient(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(robotsTxtHandler)).ts;
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(robotsTxtHandler)).ts;
 
     var c = ts.Client();
     var (r, err) = c.Get(ts.URL);
@@ -100,7 +101,7 @@ private static readonly @string lastModifiedˢᵇ = "Last-Modified"u8;
 internal static readonly object lastModifiedHeaderNotˢ = (@string)"Last-Modified header not found."u8;
 
 internal static void testClientHead(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(robotsTxtHandler));
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(robotsTxtHandler));
     var (r, err) = cst.c.Head(cst.ts.URL);
     if (err != nil) {
         t.Fatal(err);
@@ -114,6 +115,8 @@ partial struct recordingTransport {
     internal ж<Δhttp.Request> req;
 }
 
+} partial class http_testᴛrecordingTransport {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dummyImplˢ => ref dummyImplˢᵇ;
 private static readonly @string dummyImplˢᵇ = "dummy impl"u8;
@@ -124,6 +127,8 @@ internal static (ж<Δhttp.Response> resp, error err) RoundTrip(this ref recordi
     t.req = Ꮡreq;
     return (default, errors.New(dummyImplˢ));
 }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpDummyFaketldˢ => ref httpDummyFaketldˢᵇ;
@@ -285,7 +290,7 @@ private static readonly @string locationˢᵇ = "Location"u8;
 
 internal static void testClientRedirects(ж<testing.T> t, testMode mode) {
     ref var ts = ref heap<ж<httptest.Server>>(out var Ꮡts);
-    ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (n, _) = strconv.Atoi(r.FormValue("n"));
         // Test Referer header. (7 is arbitrary position to test at)
         if (n == 7) {
@@ -385,7 +390,7 @@ internal static void testClientRedirects(ж<testing.T> t, testMode mode) {
 
     checkErr = errors.New(noRedirectsAllowedˢ);
     (res, err) = c.Get(ts.URL);
-    var (urlError, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok || !AreEqual(urlError.Err, checkErr)) {
+    var (urlError, ok) = err._<ж<url.Error>>(ᐧ); if (!ok || !AreEqual(urlError.Err, checkErr)) {
         t.Errorf("with redirects forbidden, expected a *url.Error with our 'no redirects allowed' error inside; got %#v (%q)", err, err);
     }
     if (res == nil) {
@@ -404,11 +409,11 @@ internal static ref readonly @string redirectedRequestSˢ => ref redirectedReque
 private static readonly @string redirectedRequestSˢᵇ = "redirected request's context never expired after root request canceled"u8;
 
 internal static void testClientRedirectsContext(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         Redirect(w, r, "/", StatusTemporaryRedirect);
     }))).ts;
 
-    var (ctx, cancel) = context_package.WithCancel(context_package.Background());
+    var (ctx, cancel) = context.WithCancel(context.Background());
     var c = ts.Client();
     var cancelʗ1 = cancel;
     c.CheckRedirect = error (ж<Δhttp.Request> reqΔ1, slice<ж<Δhttp.Request>> via) => {
@@ -426,12 +431,12 @@ internal static void testClientRedirectsContext(ж<testing.T> t, testMode mode) 
     };
     var (req, _) = NewRequestWithContext(ctx, getˢ2, ts.URL, default);
     var (_, err) = c.Do(req);
-    var (ue, ok) = err._<ж<urlꓸError>>(ᐧ);
+    var (ue, ok) = err._<ж<url.Error>>(ᐧ);
     if (!ok) {
         t.Fatalf("got error %T; want *url.Error", err);
     }
-    if (!AreEqual(ue.Err, context_package.Canceled)) {
-        t.Errorf("url.Error.Err = %v; want %v", ue.Err, context_package.Canceled);
+    if (!AreEqual(ue.Err, context.Canceled)) {
+        t.Errorf("url.Error.Err = %v; want %v", ue.Err, context.Canceled);
     }
 }
 
@@ -547,7 +552,7 @@ internal partial struct testRedirectsByMethod_log /*dyn*/ {
 internal static void testRedirectsByMethod(ж<testing.T> t, testMode mode, @string method, slice<redirectTest> table, @string want) {
     ref var log = ref heap(new testRedirectsByMethod_log(), out var Ꮡlog);
     ref var ts = ref heap<ж<httptest.Server>>(out var Ꮡts);
-    ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         Ꮡlog.of(testRedirectsByMethod_log.ᏑMutex).Lock();
         var (slurp, _) = io.ReadAll(new http_test_package.io_ReadCloserᴠReader(r.Body));
         fmt.Fprintf(new http_test_package.bytes_BufferжWriter(Ꮡlog.of(testRedirectsByMethod_log.ᏑBuffer)), "%s %s %q"u8, r.Method, r.RequestURI, slurp);
@@ -636,7 +641,7 @@ internal static void testClientRedirectUseResponse(ж<testing.T> t, testMode mod
     try {
         @string body = bodyᶜ;
         ref var ts = ref heap<ж<httptest.Server>>(out var Ꮡts);
-        ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if (strings.Contains(r.URL.Path, otherˢ)) {
                 io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), wrongBodyˢ);
             } else {
@@ -687,7 +692,7 @@ internal static void testClientRedirectNoLocation(ж<testing.T> t, testMode mode
     foreach (var (_, code) in range(slice<nint>([301, 308]))) {
         t.Run(fmt.Sprint(code), (ж<testing.T> tΔ1) => {
             setParallel(tΔ1);
-            var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+            var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
                 w.Header().Set(fooˢ2, barˢ2);
                 w.WriteHeader(code);
             })));
@@ -718,7 +723,7 @@ private static readonly @string fakeURLᶜᵇ = "https://localhost:1234/"u8;
 
 internal static void testClientRedirect308NoGetBody(ж<testing.T> t, testMode mode) {
     @string fakeURL = fakeURLᶜ; // won't be hit
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(locationˢ, fakeURL);
         w.WriteHeader(308);
     }))).ts;
@@ -741,10 +746,10 @@ internal static void testClientRedirect308NoGetBody(ж<testing.T> t, testMode mo
     }
 }
 
-internal static slice<ж<httpꓸCookie>> expectedCookies = [
-    Ꮡ(new httpꓸCookie(Name: "ChocolateChip", Value: "tasty")),
-    Ꮡ(new httpꓸCookie(Name: "First", Value: "Hit")),
-    Ꮡ(new httpꓸCookie(Name: "Second", Value: "Hit"))
+internal static slice<ж<Δhttp.Cookie>> expectedCookies = [
+    Ꮡ(new Δhttp.Cookie(Name: "ChocolateChip", Value: "tasty")),
+    Ꮡ(new Δhttp.Cookie(Name: "First", Value: "Hit")),
+    Ꮡ(new Δhttp.Cookie(Name: "Second", Value: "Hit"))
 ];
 
 internal static Δhttp.HandlerFunc echoCookiesRedirectHandler = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -768,7 +773,7 @@ internal static ref readonly @string cookiesExampleComˢ => ref cookiesExampleCo
 private static readonly @string cookiesExampleComˢᵇ = "cookies.example.com"u8;
 
 internal static void testHostMismatchCookies(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         foreach (var (_, cΔ1) in range(r.Cookies())) {
             cΔ1.Value.Value = setOnServerˢ;
             SetCookie(w, cΔ1);
@@ -781,8 +786,8 @@ internal static void testHostMismatchCookies(ж<testing.T> t, testMode mode) {
 
     var c = ts.Client();
     c.Jar = new http_test_package.TestJarжCookieJar(@new<TestJar>());
-    c.Jar.SetCookies(reqURL, [Ꮡ(new httpꓸCookie(Name: "First", Value: "SetOnClient"))]);
-    c.Jar.SetCookies(ᏑhostURL, [Ꮡ(new httpꓸCookie(Name: "Second", Value: "SetOnClient"))]);
+    c.Jar.SetCookies(reqURL, [Ꮡ(new Δhttp.Cookie(Name: "First", Value: "SetOnClient"))]);
+    c.Jar.SetCookies(ᏑhostURL, [Ꮡ(new Δhttp.Cookie(Name: "Second", Value: "SetOnClient"))]);
 
     var (req, _) = NewRequest(getˢ2, ts.URL, new http_test_package.http_noBodyᴠReader(NoBody));
     req.Host = hostURL.Host;
@@ -792,8 +797,8 @@ internal static void testHostMismatchCookies(ж<testing.T> t, testMode mode) {
     }
     resp.Body.Close();
 
-    matchReturnedCookies(t, [Ꮡ(new httpꓸCookie(Name: "First", Value: "SetOnClient"))], c.Jar.Cookies(reqURL));
-    matchReturnedCookies(t, [Ꮡ(new httpꓸCookie(Name: "Second", Value: "SetOnServer"))], c.Jar.Cookies(ᏑhostURL));
+    matchReturnedCookies(t, [Ꮡ(new Δhttp.Cookie(Name: "First", Value: "SetOnClient"))], c.Jar.Cookies(reqURL));
+    matchReturnedCookies(t, [Ꮡ(new Δhttp.Cookie(Name: "Second", Value: "SetOnServer"))], c.Jar.Cookies(ᏑhostURL));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -808,7 +813,7 @@ public static void TestClientSendsCookieFromJar(ж<testing.T> t) {
         defer(afterTest, new http_test_package.testing_TжTB(t), ref ᒐ);
         var tr = Ꮡ(new recordingTransport());
         var client = Ꮡ(new Client(Transport: new http_test_package.recordingTransportжRoundTripper(tr)));
-        client.Jar = new http_test_package.TestJarжCookieJar(Ꮡ(new TestJar(perURL: new map<@string, slice<ж<httpꓸCookie>>>())));
+        client.Jar = new http_test_package.TestJarжCookieJar(Ꮡ(new TestJar(perURL: new map<@string, slice<ж<Δhttp.Cookie>>>())));
         @string us = httpDummyFaketldˢ;
         var (u, _) = url.Parse(us);
         client.Jar.SetCookies(u, expectedCookies);
@@ -841,10 +846,12 @@ public static void TestClientSendsCookieFromJar(ж<testing.T> t) {
 // scope of all cookies.
 partial struct TestJar {
     internal sync.Mutex m;
-    internal map<@string, slice<ж<httpꓸCookie>>> perURL;
+    internal map<@string, slice<ж<Δhttp.Cookie>>> perURL;
 }
 
-public static void SetCookies(this ж<TestJar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<httpꓸCookie>> cookies) {
+} partial class http_testᴛTestJar {
+
+public static void SetCookies(this ж<TestJar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<Δhttp.Cookie>> cookies) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -854,7 +861,7 @@ public static void SetCookies(this ж<TestJar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<
         j.m.Lock();
         ᒐd1 = true;
         if (j.perURL == nil) {
-            j.perURL = new map<@string, slice<ж<httpꓸCookie>>>();
+            j.perURL = new map<@string, slice<ж<Δhttp.Cookie>>>();
         }
         j.perURL[u.Host] = cookies;
     }
@@ -862,7 +869,7 @@ public static void SetCookies(this ж<TestJar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<
     finally { if (ᒐd1) Ꮡj.DerefOrNull().m.Unlock(); ᒐ.Run(); }
 }
 
-public static slice<ж<httpꓸCookie>> Cookies(this ж<TestJar> Ꮡj, ж<url.URL> Ꮡu) {
+public static slice<ж<Δhttp.Cookie>> Cookies(this ж<TestJar> Ꮡj, ж<url.URL> Ꮡu) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -877,10 +884,12 @@ public static slice<ж<httpꓸCookie>> Cookies(this ж<TestJar> Ꮡj, ж<url.URL
     finally { if (ᒐd1) Ꮡj.DerefOrNull().m.Unlock(); ᒐ.Run(); }
 }
 
+} partial class http_test_package {
+
 public static void TestRedirectCookiesJar(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testRedirectCookiesJar(Δp0, Δp1)); }
 internal static void testRedirectCookiesJar(ж<testing.T> t, testMode mode) {
     ж<httptest.Server> ts = default;
-    ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(echoCookiesRedirectHandler)).ts;
+    ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(echoCookiesRedirectHandler)).ts;
     var c = ts.Client();
     c.Jar = new http_test_package.TestJarжCookieJar(@new<TestJar>());
     var (u, _) = url.Parse(ts.URL);
@@ -893,7 +902,7 @@ internal static void testRedirectCookiesJar(ж<testing.T> t, testMode mode) {
     matchReturnedCookies(t, expectedCookies, resp.Cookies());
 }
 
-internal static void matchReturnedCookies(ж<testing.T> t, slice<ж<httpꓸCookie>> expected, slice<ж<httpꓸCookie>> given) {
+internal static void matchReturnedCookies(ж<testing.T> t, slice<ж<Δhttp.Cookie>> expected, slice<ж<Δhttp.Cookie>> given) {
     if (len(given) != len(expected)) {
         t.Logf("Received cookies: %v", given);
         t.Errorf("Expected %d cookies, got %d", len(expected), len(given));
@@ -931,12 +940,12 @@ Cookies("http://firsthost.fake/nosetcookie")
 """u8.Raw();
 
 internal static void testJarCalls(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         @string pathSuffix = r.RequestURI[1..];
         if (r.RequestURI == "/nosetcookie"u8) {
             return; // don't set cookies for this path
         }
-        SetCookie(w, Ꮡ(new httpꓸCookie(Name: "name"u8 + pathSuffix, Value: "val"u8 + pathSuffix)));
+        SetCookie(w, Ꮡ(new Cookie(Name: "name"u8 + pathSuffix, Value: "val"u8 + pathSuffix)));
         if (r.RequestURI == "/"u8) {
             Redirect(w, r, httpSecondhostFakeˢ, 302);
         }
@@ -968,11 +977,13 @@ partial struct RecordingJar {
     internal bytes.Buffer log;
 }
 
-public static void SetCookies(this ж<RecordingJar> Ꮡj, ж<url.URL> u, slice<ж<httpꓸCookie>> cookies) {
+} partial class http_testᴛRecordingJar {
+
+public static void SetCookies(this ж<RecordingJar> Ꮡj, ж<url.URL> u, slice<ж<Δhttp.Cookie>> cookies) {
     Ꮡj.logf("SetCookie(%q, %v)\n", u.OrTypedNil(), cookies);
 }
 
-public static slice<ж<httpꓸCookie>> Cookies(this ж<RecordingJar> Ꮡj, ж<url.URL> u) {
+public static slice<ж<Δhttp.Cookie>> Cookies(this ж<RecordingJar> Ꮡj, ж<url.URL> u) {
     Ꮡj.logf("Cookies(%q)\n", u.OrTypedNil());
     return default;
 }
@@ -992,11 +1003,13 @@ internal static void logf(this ж<RecordingJar> Ꮡj, @string format, params ꓸ
     finally { if (ᒐd1) Ꮡj.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class http_test_package {
+
 public static void TestStreamingGet(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testStreamingGet(Δp0, Δp1)); }
 internal static void testStreamingGet(ж<testing.T> t, testMode mode) {
     var say = new channel<@string>(0);
     var sayʗ1 = say;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w._<Flusher>().Flush();
         foreach (var str in sayʗ1) {
             w.Write(slice<byte>(str));
@@ -1024,7 +1037,7 @@ internal static void testStreamingGet(ж<testing.T> t, testMode mode) {
             t.Fatalf("Expected %q, got %q", str, got);
         }
     }
-    builtin.close(say);
+    close(say);
     (_, err) = io.ReadFull(res.Body, buf[0..1]);
     if (!AreEqual(err, io.EOF)) {
         t.Fatalf("at end expected EOF, got %v", err);
@@ -1036,13 +1049,15 @@ partial struct writeCountingConn {
     internal ж<nint> count;
 }
 
+} partial class http_testᴛwriteCountingConn {
+
 // Go method set entry for the promoted 'Conn.Close()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
 internal static error Close(this writeCountingConn recvᴛ) => recvᴛ.Conn.Close();
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr LocalAddr(this writeCountingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr(this writeCountingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.Read()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
@@ -1050,7 +1065,7 @@ internal static (nint, error) Read(this writeCountingConn recvᴛ, slice<byte> b
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr RemoteAddr(this writeCountingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr(this writeCountingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
@@ -1069,11 +1084,13 @@ internal static (nint, error) Write(this ref writeCountingConn c, slice<byte> p)
     return c.Conn.Write(p);
 }
 
+} partial class http_test_package {
+
 // TestClientWrites verifies that client requests are buffered and we
 // don't send a TCP packet per line of the http request + body.
 public static void TestClientWrites(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientWrites(Δp0, Δp1), slice<testMode>([http1Mode])); }
 internal static void testClientWrites(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     }))).ts;
 
     ref var writes = ref heap<nint>(0, out var Ꮡwrites);
@@ -1117,7 +1134,7 @@ internal static ref readonly @string tlsHandshakeErrorˢ => ref tlsHandshakeErro
 private static readonly @string tlsHandshakeErrorˢᵇ = "TLS handshake error"u8;
 
 internal static void testClientInsecureTransport(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Write(slice<byte>("Hello"u8));
     })));
     var ts = cst.ts;
@@ -1188,7 +1205,7 @@ private static readonly @string serverNameᶜᵇ = "example.com"u8;
 
 internal static void testClientWithCorrectTLSServerName(ж<testing.T> t, testMode mode) {
     @string serverName = serverNameᶜ;
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         if (r.TLS.ServerName != serverName) {
             t.Errorf("expected client to set ServerName %q, got: %q", serverName, r.TLS.ServerName);
         }
@@ -1209,7 +1226,7 @@ internal static ref readonly @string badserverˢ => ref badserverˢᵇ;
 private static readonly @string badserverˢᵇ = "badserver"u8;
 
 internal static void testClientWithIncorrectTLSServerName(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     })));
     var ts = cst.ts;
     var errLog = @new<strings.Builder>();
@@ -1250,7 +1267,7 @@ internal static ref readonly @string httpsSomeOtherHostTldˢ => ref httpsSomeOth
 private static readonly @string httpsSomeOtherHostTldˢᵇ = "https://some-other-host.tld/"u8;
 
 internal static void testTransportUsesTLSConfigServerName(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Write(slice<byte>("Hello"u8));
     }))).ts;
 
@@ -1277,7 +1294,7 @@ internal static readonly object responseDidnTSetTlsˢ = (@string)"Response didn'
 internal static void testResponseSetsTLSConnectionState(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w.Write(slice<byte>("Hello"u8));
         }))).ts;
 
@@ -1319,7 +1336,7 @@ internal static ref readonly @string httpResponseToHttpsˢ => ref httpResponseTo
 private static readonly @string httpResponseToHttpsˢᵇ = "HTTP response to HTTPS client"u8;
 
 internal static void testHTTPSClientDetectsHTTPServer(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     }))).ts;
     ts.Config.ErrorLog = quietLog;
 
@@ -1337,7 +1354,7 @@ internal partial struct testClientHeadContentLength_tests /*dyn*/ {
 }
 
 internal static void testClientHeadContentLength(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         @string v = r.FormValue("cl"); if (v != ""u8) {
             w.Header().Set(contentLengthˢ, v);
         }
@@ -1379,7 +1396,7 @@ internal static void testEmptyPasswordAuth(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
         @string gopher = gopherˢ;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             @string auth = r.Header.Get(authorizationˢ);
             if (strings.HasPrefix(auth, basicˢ)) {
                 @string encoded = auth[6..];
@@ -1576,7 +1593,7 @@ internal static void testClientTimeout(ж<testing.T> Ꮡt, testMode mode) {
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
     @string nonce = default;     // a unique per-request string
     bool sawSlowNonce = default; // true if the handler saw /slow?nonce=<nonce>
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         _ = r.ParseForm();
         if (r.URL.Path == "/"u8) {
             Redirect(w, r, "/slow?nonce="u8 + r.Form.Get(nonceˢ), StatusFound);
@@ -1649,13 +1666,13 @@ internal static void testClientTimeout(ж<testing.T> Ꮡt, testMode mode) {
         if (err == nil) {
             Ꮡt.Fatal(expectedErrorFromReadAllˢ);
         }
-        (var ne, ok) = err._<netꓸError>(ᐧ);
+        (var ne, ok) = err._<net.Error>(ᐧ);
         if (!ok) {
             Ꮡt.Errorf("error value from ReadAll was %T; expected some net.Error", err);
         } else if (!ne.Timeout()) {
             Ꮡt.Errorf("net.Error.Timeout = false; want true");
         }
-        if (!errors.Is(err, context_package.DeadlineExceeded)) {
+        if (!errors.Is(err, context.DeadlineExceeded)) {
             Ꮡt.Errorf("ReadAll error = %q; expected some context.DeadlineExceeded", err);
         }
         @string got = ne.Error(); if (!strings.Contains(got, clientTimeoutˢ2)) {
@@ -1682,7 +1699,7 @@ internal static void testClientTimeout_Headers(ж<testing.T> t, testMode mode) {
     try {
         var donec = new channel<bool>(1);
         var donecʗ1 = donec;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             ᐸꟷ(donecʗ1);
         })), (optQuietLog).OrTypedNilFunc());
         // Note that we use a channel send here and not a close.
@@ -1703,17 +1720,17 @@ internal static void testClientTimeout_Headers(ж<testing.T> t, testMode mode) {
             res.Body.Close();
             t.Fatal(gotResponseFromGetˢ);
         }
-        var (_, okΔ1) = err._<ж<urlꓸError>>(ᐧ); if (!okΔ1) {
+        var (_, okΔ1) = err._<ж<url.Error>>(ᐧ); if (!okΔ1) {
             t.Fatalf("Got error of type %T; want *url.Error", err);
         }
-        var (ne, ok) = err._<netꓸError>(ᐧ);
+        var (ne, ok) = err._<net.Error>(ᐧ);
         if (!ok) {
             t.Fatalf("Got error of type %T; want some net.Error", err);
         }
         if (!ne.Timeout()) {
             t.Error(netErrorTimeoutFalseWantˢ);
         }
-        if (!errors.Is(err, context_package.DeadlineExceeded)) {
+        if (!errors.Is(err, context.DeadlineExceeded)) {
             t.Errorf("ReadAll error = %q; expected some context.DeadlineExceeded", err);
         }
         @string got = ne.Error(); if (!strings.Contains(got, clientTimeoutExceededˢ)) {
@@ -1734,14 +1751,14 @@ internal static void testClientTimeoutCancel(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var testDone = new channel<EmptyStruct>(0);
-        var (ctx, cancel) = context_package.WithCancel(context_package.Background());
+        var (ctx, cancel) = context.WithCancel(context.Background());
 
         var testDoneʗ1 = testDone;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w._<Flusher>().Flush();
             ᐸꟷ(testDoneʗ1);
         })));
-        defer(ᴛ1 => builtin.close(ᴛ1), testDone, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), testDone, ref ᒐ);
 
         cst.c.Timeout = (time.Duration)(3600000000000L);
         var (req, _) = NewRequest(getˢ2, cst.ts.URL, default);
@@ -1763,7 +1780,7 @@ internal static void testClientTimeoutCancel(ж<testing.T> t, testMode mode) {
 // Issue 49366: if Client.Timeout is set but not hit, no error should be returned.
 public static void TestClientTimeoutDoesNotExpire(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeoutDoesNotExpire(Δp0, Δp1)); }
 internal static void testClientTimeoutDoesNotExpire(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Write(slice<byte>("body"u8));
     })));
 
@@ -1792,7 +1809,7 @@ internal static readonly object serverSawDifferentClientˢ = (@string)"server sa
 internal static void testClientRedirectEatsBody(ж<testing.T> t, testMode mode) {
     var saw = new channel<@string>(2);
     var sawʗ1 = saw;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         sawʗ1.ᐸꟷ(r.RemoteAddr);
         if (r.URL.Path == "/"u8) {
             Redirect(w, r, fooˢ3, StatusFound); // which includes a body
@@ -1810,9 +1827,9 @@ internal static void testClientRedirectEatsBody(ж<testing.T> t, testMode mode) 
     }
 
     @string first = default;
-    var selᴛ4 = saw;
-    switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-    case 0 when selᴛ4.ꟷᐳ(out first): {
+    var sawᴛ1 = saw;
+    switch (trySelect(ᐸꟷ(sawᴛ1, ꓸꓸꓸ))) {
+    case 0 when sawᴛ1.ꟷᐳ(out first): {
         break;
     }
     default: {
@@ -1821,9 +1838,9 @@ internal static void testClientRedirectEatsBody(ж<testing.T> t, testMode mode) 
     }}
 
     @string second = default;
-    var selᴛ5 = saw;
-    switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
-    case 0 when selᴛ5.ꟷᐳ(out second): {
+    var sawᴛ2 = saw;
+    switch (trySelect(ᐸꟷ(sawᴛ2, ꓸꓸꓸ))) {
+    case 0 when sawᴛ2.ꟷᐳ(out second): {
         break;
     }
     default: {
@@ -1839,10 +1856,14 @@ internal static void testClientRedirectEatsBody(ж<testing.T> t, testMode mode) 
 // eofReaderFunc is an io.Reader that runs itself, and then returns io.EOF.
 internal delegate void eofReaderFunc();
 
+} partial class http_testᴛeofReaderFunc {
+
 internal static (nint n, error err) Read(this eofReaderFunc f, slice<byte> p) {
     f();
     return (0, io.EOF);
 }
+
+} partial class http_test_package {
 
 internal partial struct TestReferer_tests /*dyn*/ {
     internal @string lastReq, newReq, explicitRef; // from -> to URLs, explicitly set Referer value
@@ -1896,6 +1917,8 @@ public static void TestReferer(ж<testing.T> t) {
 partial struct issue15577Tripper {
 }
 
+} partial class http_testᴛissue15577Tripper {
+
 internal static (ж<Δhttp.Response>, error) RoundTrip(this issue15577Tripper _Δp0, ж<Δhttp.Request> _Δp1) {
     var resp = Ꮡ(new Response(
         StatusCode: 303,
@@ -1904,6 +1927,8 @@ internal static (ж<Δhttp.Response>, error) RoundTrip(this issue15577Tripper _�
     ));
     return (resp, default);
 }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpDummyTldˢ => ref httpDummyTldˢᵇ;
@@ -1954,8 +1979,8 @@ internal static void testClientCopyHeadersOnRedirect(ж<testing.T> t, testMode m
         @string ua = uaᶜ;
         @string xfoo = xfooᶜ;
         @string ts2URL = default;
-        var ts1 = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-            var want = new httpꓸHeader(new map<@string, slice<@string>>{
+        var ts1 = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+            var want = new Header(new map<@string, slice<@string>>{
                 ["User-Agent"] = [ua],
                 ["X-Foo"] = [xfoo],
                 ["Referer"] = [ts2URL],
@@ -1973,14 +1998,14 @@ internal static void testClientCopyHeadersOnRedirect(ж<testing.T> t, testMode m
             }
         }))).ts;
         var ts1ʗ1 = ts1;
-        var ts2 = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts2 = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             Redirect(w, r, ts1ʗ1.URL, StatusFound);
         }))).ts;
         ts2URL = ts2.URL;
 
         var c = ts1.Client();
         c.CheckRedirect = error (ж<Δhttp.Request> r, slice<ж<Δhttp.Request>> via) => {
-            var want = new httpꓸHeader(new map<@string, slice<@string>>{
+            var want = new Header(new map<@string, slice<@string>>{
                 ["User-Agent"] = [ua],
                 ["X-Foo"] = [xfoo],
                 ["Referer"] = [ts2URL],
@@ -2032,7 +2057,7 @@ internal static void testClientStripHeadersOnRepeatedRedirect(ж<testing.T> t, t
     GoFrame ᒐ = default;
     try {
         @string proto = default;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if (r.Host + r.URL.Path != "a.example.com/"u8) {
                 @string h = r.Header.Get(authorizationˢ); if (h != ""u8) {
                     t.Errorf("on request to %v%v, Authorization=%q, want no header", r.Host, r.URL.Path, h);
@@ -2110,7 +2135,7 @@ private static readonly @string contentLanguageˢᵇ = "Content-Language"u8;
 internal static void testClientStripHeadersOnPostToGetRedirect(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if (r.Method == "POST"u8) {
                 Redirect(w, r, redirectedˢ, StatusFound);
                 return;
@@ -2163,7 +2188,7 @@ internal static void testClientCopyHostOnRedirect(ж<testing.T> t, testMode mode
     GoFrame ᒐ = default;
     try {
         // Virtual hostname: should not receive any request.
-        var @virtual = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var @virtual = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             t.Errorf("Virtual host received request %v", r.URL.OrTypedNil());
             w.WriteHeader(403);
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), shouldNotSeeThisResponseˢ);
@@ -2178,7 +2203,7 @@ internal static void testClientCopyHostOnRedirect(ж<testing.T> t, testMode mode
         @string wantBody = wantBodyᶜ;
         @string tsURL = default;
         @string tsHost = default;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var exprᴛ1 = r.URL.Path;
             switch (ᐧ) {
             case {} when exprᴛ1 == "/"u8: {
@@ -2253,7 +2278,7 @@ private static readonly @string cycleˢᵇ = "Cycle"u8;
 internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        map<@string, slice<@string>> cookieMap(slice<ж<httpꓸCookie>> cs) {
+        map<@string, slice<@string>> cookieMap(slice<ж<Δhttp.Cookie>> cs) {
             var m = new map<@string, slice<@string>>();
             foreach (var (_, cΔ1) in range(cs)) {
                 m[cΔ1.Name] = append(m[cΔ1.Name], (~cΔ1).Value);
@@ -2262,7 +2287,7 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
         }
 
         var cookieMapʗ1 = cookieMap;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             map<@string, slice<@string>> want = default;
             var got = cookieMapʗ1(r.Cookies());
 
@@ -2277,8 +2302,8 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
                     ["Cookie4"] = ["OldValue4"],
                     ["Cycle"] = ["0"]
                 };
-                SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "1", Path: "/")));
-                SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cookie2", Path: "/", MaxAge: -1))); // Delete cookie from Header
+                SetCookie(w, Ꮡ(new Cookie(Name: "Cycle", Value: "1", Path: "/")));
+                SetCookie(w, Ꮡ(new Cookie(Name: "Cookie2", Path: "/", MaxAge: -1))); // Delete cookie from Header
                 Redirect(w, r, "/", StatusFound);
                 break;
             }
@@ -2289,9 +2314,9 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
                     ["Cookie4"] = ["OldValue4"],
                     ["Cycle"] = ["1"]
                 };
-                SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "2", Path: "/")));
-                SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cookie3", Value: "NewValue3", Path: "/"))); // Modify cookie in Header
-                SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cookie4", Value: "NewValue4", Path: "/"))); // Modify cookie in Jar
+                SetCookie(w, Ꮡ(new Cookie(Name: "Cycle", Value: "2", Path: "/")));
+                SetCookie(w, Ꮡ(new Cookie(Name: "Cookie3", Value: "NewValue3", Path: "/"))); // Modify cookie in Header
+                SetCookie(w, Ꮡ(new Cookie(Name: "Cookie4", Value: "NewValue4", Path: "/"))); // Modify cookie in Jar
                 Redirect(w, r, "/", StatusFound);
                 break;
             }
@@ -2302,8 +2327,8 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
                     ["Cookie4"] = ["NewValue4"],
                     ["Cycle"] = ["2"]
                 };
-                SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "3", Path: "/")));
-                SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cookie5", Value: "NewValue5", Path: "/"))); // Insert cookie into Jar
+                SetCookie(w, Ꮡ(new Cookie(Name: "Cycle", Value: "3", Path: "/")));
+                SetCookie(w, Ꮡ(new Cookie(Name: "Cookie5", Value: "NewValue5", Path: "/"))); // Insert cookie into Jar
                 Redirect(w, r, "/", StatusFound);
                 break;
             }
@@ -2334,13 +2359,13 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
 
         var (u, _) = url.Parse(ts.URL);
         var (req, _) = NewRequest(getˢ2, ts.URL, default);
-        req.AddCookie(Ꮡ(new httpꓸCookie(Name: "Cookie1", Value: "OldValue1a")));
-        req.AddCookie(Ꮡ(new httpꓸCookie(Name: "Cookie1", Value: "OldValue1b")));
-        req.AddCookie(Ꮡ(new httpꓸCookie(Name: "Cookie2", Value: "OldValue2")));
-        req.AddCookie(Ꮡ(new httpꓸCookie(Name: "Cookie3", Value: "OldValue3a")));
-        req.AddCookie(Ꮡ(new httpꓸCookie(Name: "Cookie3", Value: "OldValue3b")));
-        jar.SetCookies(u, [Ꮡ(new httpꓸCookie(Name: "Cookie4", Value: "OldValue4", Path: "/"))]);
-        jar.SetCookies(u, [Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "0", Path: "/"))]);
+        req.AddCookie(Ꮡ(new Cookie(Name: "Cookie1", Value: "OldValue1a")));
+        req.AddCookie(Ꮡ(new Cookie(Name: "Cookie1", Value: "OldValue1b")));
+        req.AddCookie(Ꮡ(new Cookie(Name: "Cookie2", Value: "OldValue2")));
+        req.AddCookie(Ꮡ(new Cookie(Name: "Cookie3", Value: "OldValue3a")));
+        req.AddCookie(Ꮡ(new Cookie(Name: "Cookie3", Value: "OldValue3b")));
+        jar.SetCookies(u, [Ꮡ(new Δhttp.Cookie(Name: "Cookie4", Value: "OldValue4", Path: "/"))]);
+        jar.SetCookies(u, [Ꮡ(new Δhttp.Cookie(Name: "Cycle", Value: "0", Path: "/"))]);
         var (res, err) = c.Do(req);
         if (err != nil) {
             t.Fatal(err);
@@ -2462,7 +2487,7 @@ internal static void testClientRedirectTypes(ж<testing.T> t, testMode mode) {
     var handlerc = new channel<Δhttp.HandlerFunc>(1);
 
     var handlercʗ1 = handlerc;
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
         var h = ᐸꟷ(handlercʗ1);
         h(rw, req);
     }))).ts;
@@ -2517,6 +2542,8 @@ partial struct issue18239Body {
     internal error readErr;
 }
 
+} partial class http_testᴛissue18239Body {
+
 internal static (nint, error) Read(this issue18239Body b, slice<byte> _) {
     atomic.AddInt32(b.readCalls, 1);
     return (0, b.readErr);
@@ -2526,6 +2553,8 @@ internal static error Close(this issue18239Body b) {
     atomic.AddInt32(b.closeCalls, 1);
     return default;
 }
+
+} partial class http_test_package {
 
 // Issue 18239: make sure the Transport doesn't retry requests with bodies
 // if Request.GetBody is not defined.
@@ -2537,7 +2566,7 @@ internal static ref readonly @string someBodyReadErrorˢ => ref someBodyReadErro
 private static readonly @string someBodyReadErrorˢᵇ = "some body read error"u8;
 
 internal static void testTransportBodyReadError(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         if (r.URL.Path == "/ping"u8) {
             return;
         }
@@ -2595,7 +2624,7 @@ internal static ref readonly @string helloˢ => ref helloˢᵇ;
 private static readonly @string helloˢᵇ = "hello"u8;
 
 internal static void testRedirectGetBody(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (bΔ1, errΔ1) = io.ReadAll(r.Body);
         if (errΔ1 != nil) {
             t.Error(errΔ1);
@@ -2641,6 +2670,8 @@ partial struct roundTripperGetBody {
     internal ж<testing.T> t;
 }
 
+} partial class http_testᴛroundTripperGetBody {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object missingRequestGetBodyˢ = (@string)"missing Request.GetBody"u8;
 
@@ -2653,15 +2684,25 @@ internal static partial (ж<Δhttp.Response>, error) RoundTrip(this ref roundTri
     return r.Transport.RoundTrip(Ꮡreq);
 }
 
+} partial class http_test_package {
+
 partial struct roundTripperWithoutCloseIdle {
 }
 
+} partial class http_testᴛroundTripperWithoutCloseIdle {
+
 internal static (ж<Δhttp.Response>, error) RoundTrip(this roundTripperWithoutCloseIdle _Δp0, ж<Δhttp.Request> _Δp1) { throw panic("unused"); }
+
+} partial class http_test_package {
 
 internal delegate void roundTripperWithCloseIdle();
 
+} partial class http_testᴛroundTripperWithCloseIdle {
+
 internal static (ж<Δhttp.Response>, error) RoundTrip(this roundTripperWithCloseIdle _Δp0, ж<Δhttp.Request> _Δp1) { throw panic("unused"); }
 internal static partial void CloseIdleConnections(this roundTripperWithCloseIdle f) { f(); }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object notClosedˢ = (@string)"not closed"u8;
@@ -2683,9 +2724,13 @@ public static void TestClientCloseIdleConnections(ж<testing.T> t) {
 
 internal delegate (ж<Δhttp.Response>, error) testRoundTripper(ж<Δhttp.Request> _);
 
+} partial class http_testᴛtestRoundTripper {
+
 internal static partial (ж<Δhttp.Response>, error) RoundTrip(this testRoundTripper t, ж<Δhttp.Request> req) {
     return t(req);
 }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noDeadlineˢ = (@string)"no deadline"u8;
@@ -2703,7 +2748,7 @@ public static void TestClientPropagatesTimeoutToContext(ж<testing.T> t) {
             if (!ok) {
                 t.Error(noDeadlineˢ);
             } else {
-                t.Logf("deadline in %v", deadline.Sub(time.Now()).Round(time.ΔSecond / 10));
+                t.Logf("deadline in %v", deadline.Sub(time.Now()).Round(time.Second / 10));
             }
             return (default, errors.New(notActuallyMakingAˢ));
         }))
@@ -2718,7 +2763,7 @@ public static void TestClientDoCanceledVsTimeout(ж<testing.T> t) { run<TжTBRun
 internal static readonly object unexpectedlyGotANilErrorˢ = (@string)"Unexpectedly got a nil error"u8;
 
 internal static void testClientDoCanceledVsTimeout(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Write(slice<byte>("Hello, World!"u8));
     })));
 
@@ -2732,9 +2777,9 @@ internal static void testClientDoCanceledVsTimeout(ж<testing.T> t, testMode mod
                 context.Context ctx = default;
                 Action cancel = default;
                 if (name == "timeout"u8) {
-                    (ctx, cancel) = context_package.WithTimeout(context_package.Background(), -time.ΔNanosecond);
+                    (ctx, cancel) = context.WithTimeout(context.Background(), -time.Nanosecond);
                 } else {
-                    (ctx, cancel) = context_package.WithCancel(context_package.Background());
+                    (ctx, cancel) = context.WithCancel(context.Background());
                     cancel();
                 }
                 var cancelʗ1 = cancel;
@@ -2746,12 +2791,12 @@ internal static void testClientDoCanceledVsTimeout(ж<testing.T> t, testMode mod
                     tΔ1.Fatal(unexpectedlyGotANilErrorˢ);
                 }
 
-                var ue = err._<ж<urlꓸError>>();
+                var ue = err._<ж<url.Error>>();
 
                 bool wantIsTimeout = default;
-                error wantErr = context_package.Canceled;
+                error wantErr = context.Canceled;
                 if (name == "timeout"u8) {
-                    wantErr = context_package.DeadlineExceeded;
+                    wantErr = context.DeadlineExceeded;
                     wantIsTimeout = true;
                 }
                 {
@@ -2764,7 +2809,7 @@ internal static void testClientDoCanceledVsTimeout(ж<testing.T> t, testMode mod
                         tΔ1.Errorf("url.Error.Err = %v; want %v", g, w);
                     }
                 }
-                var got = errors.Is(err, context_package.DeadlineExceeded); if (got != wantIsTimeout) {
+                var got = errors.Is(err, context.DeadlineExceeded); if (got != wantIsTimeout) {
                     tΔ1.Errorf("errors.Is(err, context.DeadlineExceeded) = %v, want %v", got, wantIsTimeout);
                 }
             }
@@ -2777,6 +2822,8 @@ internal static void testClientDoCanceledVsTimeout(ж<testing.T> t, testMode mod
 partial struct nilBodyRoundTripper {
 }
 
+} partial class http_testᴛnilBodyRoundTripper {
+
 internal static (ж<Δhttp.Response>, error) RoundTrip(this nilBodyRoundTripper _, ж<Δhttp.Request> req) {
     return (Ꮡ(new Response(
         StatusCode: StatusOK,
@@ -2785,6 +2832,8 @@ internal static (ж<Δhttp.Response>, error) RoundTrip(this nilBodyRoundTripper 
         Request: req
     )), default);
 }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpLocalhostAnythingˢ => ref httpLocalhostAnythingˢᵇ;
@@ -2823,7 +2872,7 @@ public static void TestClientPopulatesNilResponseBody(ж<testing.T> t) {
 // Issue 40382: Client calls Close multiple times on Request.Body.
 public static void TestClientCallsCloseOnlyOnce(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientCallsCloseOnlyOnce(Δp0, Δp1)); }
 internal static void testClientCallsCloseOnlyOnce(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.WriteHeader(StatusNoContent);
     })));
 
@@ -2851,6 +2900,8 @@ partial struct issue40382Body {
     internal nint n;
     internal int32 closeCallsAtomic;
 }
+
+} partial class http_testᴛissue40382Body {
 
 internal static (nint, error) Read(this ref issue40382Body b, slice<byte> p) {
     var matchᴛ1 = false;
@@ -2883,6 +2934,8 @@ internal static partial error Close(this ж<issue40382Body> Ꮡb) {
     return default;
 }
 
+} partial class http_test_package {
+
 public static void TestProbeZeroLengthBody(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testProbeZeroLengthBody(Δp0, Δp1)); }
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string contentᶜ => ref contentᶜᵇ;
@@ -2891,8 +2944,8 @@ private static readonly @string contentᶜᵇ = "body"u8;
 internal static partial void testProbeZeroLengthBody(ж<testing.T> t, testMode mode) {
     var reqc = new channel<EmptyStruct>(0);
     var reqcʗ1 = reqc;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-        builtin.close(reqcʗ1);
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        close(reqcʗ1);
         var (_, err) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), r.Body); if (err != nil) {
             t.Errorf("error copying request body: %v", err);
         }
@@ -2920,10 +2973,10 @@ internal static partial void testProbeZeroLengthBody(ж<testing.T> t, testMode m
         finally { ᒐ.Run(); }
     });
 
-    var selᴛ6 = reqc;
+    var reqcᴛ1 = reqc;
     var selᴛ7 = time.After((time.Duration)(60000000000L));
-    switch (select(ᐸꟷ(selᴛ6, ꓸꓸꓸ), ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
-    case 0 when selᴛ6.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(reqcᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
+    case 0 when reqcᴛ1.ꟷᐳ(out _): {
         // Request should be sent after trying to probe the request body for 200ms.
         break;
     }

@@ -141,7 +141,7 @@ with zero bytes allocated, Go's aliasing and equality, the chunk cost, a type wi
 fresh boxes, and a dropped backing being collected.)
 <!-- The table: src/core/golib/ж.ElemRefBox.cs:170 (`internal static ж<T> OfArrayElement(array<T> array, int index)`),
      the chunk: src/core/golib/ж.ElemRefBox.cs:160 (`private const int ElementBoxChunk = 64;`), the first of the
-     three Ꮡ(array<T>, …) overloads: src/core/golib/builtin.cs:2694 (`return ElemRefBox<T>.OfArrayElement(target, index);`).
+     three Ꮡ(array<T>, …) overloads: src/core/golib/builtin.cs:2698 (`return ElemRefBox<T>.OfArrayElement(target, index);`).
      Commits 8a714cf6dd, edb753ebca, 29d469bc11. The slice<T> overloads keep a fresh box per expression. -->
 
 (Guarded by the `SlicePointerIdentity` behavioral output test — self identity, distinctness, re-slice and re-slice-of-re-slice aliasing, the in-capacity `append` result, array-vs-slice-over-that-array, struct elements, a write through an element pointer observed through both views, and `map[*int]` store/overwrite/lookup/miss including a lookup keyed through a *different* window — vs `go run`. Counter-proven: pre-fix **every** identity assertion printed `false`, both map lookups returned empty, and `len(m)` grew from 2 to 3 on the overwrite.)
@@ -290,7 +290,7 @@ A lowered parameter forwarded into another lowered position is `ref p` — it al
 
 **Row 1 — the parameter *is* the alias, and it survives generic instantiation** (`GenericReceiverFieldAddress`; the callee's `ж<T> Ꮡp` box and its `DerefOrNull()` preamble are gone, and the caller's 128-byte-per-evaluation field box becomes free):
 
-<!-- source: src/tests/Behavioral/GenericReceiverFieldAddress/main.cs:11, 14-18 -->
+<!-- source: src/tests/Behavioral/GenericReceiverFieldAddress/main.cs:12, 17-21 -->
 ```csharp
 internal static void setT<T>(ref T p, T val) { p = val; }
 …
@@ -333,7 +333,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
-<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:116-120 -->
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:123-127 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;
@@ -454,7 +454,7 @@ check = func(pc uint32, m []bool) (ok bool) {
 
 The assignment statement's position is that of `check` on its left, which precedes the literal on its right — yet the RHS is evaluated *first*, so the store to `check` unambiguously happens after the literal exists. Scored as read-only-after-capture, the capture would take the snapshot path (`var checkʗ1 = check;` hoisted **above** the assignment) and every recursive call would invoke the still-**null** delegate: a `NullReferenceException` on the first recursion. In regexp's `makeOnePass` that is the entire ambiguity check, so `^.$` — and most of the package — would fail to compile. So the scan also counts a write whose syntactic extent *contains* a referencing literal (`w.pos < lit.pos < w.end`), which routes the capture to shared storage; `check` escapes, so it takes the by-box form and the recursion resolves against the box the assignment fills:
 
-<!-- source: src/core/regexp/onepass.cs:331, 339, 349, 481 -->
+<!-- source: src/core/regexp/onepass.cs:336-486 -->
 ```csharp
 ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
 …
@@ -470,7 +470,7 @@ The same edge covers **mutually** recursive closures (`even`/`odd`, each literal
 ## A nested closure's capture snapshot reads the enclosing closure's snapshot
 When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and captured by NESTED closures, it is not box-ref'd — it is snapshot-copied: the converter declares `var mʗ1 = m;` before the closure and the closure uses `mʗ1`, so the uncapturable `ref`-local `m` is never referenced inside the lambda. The snapshot chain must be threaded through each level. A capture generated for an **inner** closure that lands inside an **outer** closure's body must read the outer closure's snapshot, not the enclosing method's ref-local — the shape testing/fuzz.go's `run` closure has, capturing `fn := reflect.ValueOf(ff)` (a heap-boxed `reflect.Value`) and spawning `go tRunner(t, func(t){ … fn.Call(args) })` from inside itself, where the method-level `fn` is a ref-local uncapturable inside a closure (CS8175). The guard's own shape emits it:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:37-47 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:43-53 -->
 ```csharp
 ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
 var @out = new channel<nint>(1);
@@ -523,7 +523,7 @@ behavioral corpus has 0 besides the new extension. -->
 **A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see [Field address of a collision-renamed heap-boxed local](#field-address-of-a-collision-renamed-heap-boxed-local-uses-the-raw-box-name)). For a type an internal `_test.go` declares, the production `<pkg>_package` class is the wrong qualifier — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites would emit `sql_package.Δtable.Ꮡmu`. The qualifier resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
 
 **Reassigning a captured pointer parameter inside a closure.** The repoint-and-re-alias above (`Ꮡp = …; p = ref Ꮡp.DerefOrNull();`) rebinds a `ref`-local. Inside a CLOSURE that captured the parameter that is illegal: the re-aliased value var is an ENCLOSING `ref`-local, and C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509 `buildChains`'s `considerCandidate` closure does `if sigChecks == nil { sigChecks = new(int) }` on the captured `*int` parameter). The box reassignment `Ꮡp = …` is legal (it writes the captured box field, hoisted to a closure field), so only the ref-local refresh is dropped inside a lambda:
-<!-- source: src/core/crypto/x509/windows/verify.cs:785-788 -->
+<!-- source: src/core/crypto/x509/windows/verify.cs:812-815 -->
 ```csharp
 if (sigChecks == nil) {
     sigChecks = @new<nint>();
@@ -773,7 +773,7 @@ data := make([]byte, unsafe.Sizeof(hdr))
 // …
 f.Type = Type(bo.Uint16(data[unsafe.Offsetof(hdr.Type):]))
 ```
-<!-- source: src/core/debug/elf/file.cs:358, 362 -->
+<!-- source: src/core/debug/elf/file.cs:379-383 -->
 ```csharp
 var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
 …
@@ -844,27 +844,31 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:1359-1368 -->
+<!-- source: src/core/unsafe/unsafe.cs:1365-1373 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
-    // signed form reported a type of 2^63 bytes and up as -1, indistinguishable from
-    // "unknown", and this line then answered with Marshal.SizeOf<T>() -- a DIFFERENT layout
-    // model's number for a type whose Go size was in fact known exactly. The marshalled
-    // fallback now applies only where the Go size genuinely is not derivable.
-    return GoReflect.TryGoSizeOf(typeof(T), GoReflect.ArrayDimsOfValue(x), out nuint size)
+    // signed form reported a type of 2^63 bytes and up as -1, indistinguishable from "unknown".
+    nint[]? dims = GoReflect.ArrayDimsOfValue(x);
+
+    return GoReflect.TryGoSizeOf(typeof(T), dims, out nuint size)
         ? (uintptr)size
-        : (uintptr)Marshal.SizeOf<T>();
+        : throw new PanicException($"runtime error: unsafe.Sizeof: the Go size of {GoReflect.GoTypeName(typeof(T), dims)} cannot be derived (GoReflect.TryGoSizeOf declined it)");
 }
 ```
 
 `typeof(T)` is Go's rule verbatim — `Sizeof` is defined against the operand's **static** type, and the
 converter's inferred type argument is that type. Dims come from the live value because `array<T>`
-carries its Go length in the instance, not the type. `Marshal.SizeOf` stays as the fallback for the
-shapes whose Go size is not derivable (`TryGoSizeOf` answers false: an array whose length nothing can
-reveal, a struct holding such a field), so every operand `Marshal.SizeOf` could measure still resolves. <!-- history: an
-earlier signed GoSizeOf reported "unknown" as -1, which could not be told apart from a type of
-2^63 bytes or more. -->
+carries its Go length in the instance, not the type. A shape whose Go size is not derivable
+(`TryGoSizeOf` answers false: a type past the address space, an array whose length nothing can reveal,
+the depth bound) is **refused by name** rather than answered. No other number is Go's: the CLR's
+marshalled size of `dnsmessage`'s `SVCParam` is 48 where Go says 32, and of a struct holding a
+`[1<<62]int64` field, 16. <!-- history: an earlier signed GoSizeOf reported "unknown" as -1, which could
+not be told apart from a type of 2^63 bytes or more; until 2026-11-16 the false answer fell back
+to Marshal.SizeOf<T>(), and that generic call made ILC compile a struct-marshalling thunk for every T
+reaching this method -- a "will always throw" stub in every Native AOT image for a T holding a slice,
+string or array value field (SVCParam, string, debug/macho.Symbol, debug/pe.COFFSymbol), though every
+corpus T answers through TryGoSizeOf. Guarded by GolibTests UnsafeSizeofRefusalTests. -->
 
 This makes the answer *correct* as well as non-throwing, which matters beyond the three packages:
 `Marshal.SizeOf` reports a **bool** as 4 bytes where Go says 1, so it would measure any struct containing
@@ -873,12 +877,15 @@ golib/GoReflect.TypeLayout.cs had recorded as deferred pending a named consumer.
 by construction: the run-time
 call sites are few against the folded ones. <!-- 7 run-time call sites against 283 folded at landing -->
 
+Guarded by: `UnsafeSizeofRefusalTests` (GolibTests), which refuses a type `TryGoSizeOf` declines by name and
+answers Go's size for the derivable shapes.
+
 ## Converting a Go pointer to `unsafe.Pointer`
 `unsafe.Pointer` is the golib class `unsafe_package.Pointer : StandardBox<uintptr>` (a `ж<uintptr>` heap box over a numeric address). A `uintptr`/`unsafe.Pointer` argument converts through the implicit `uintptr ↔ Pointer` operators, but a **Go pointer** argument (`*T`, emitted as the managed box `ж<T>`) has no such conversion — a plain cast `(@unsafe.Pointer)(ж<T>)` is `CS0030` (when `T` is unrelated to `uintptr`) or a runtime `InvalidCastException` (the base→derived downcast `(@unsafe.Pointer)(ж<uintptr>)` compiles but the object is a plain `ж<uintptr>`, not a `Pointer`). So `unsafe.Pointer(ptr)` for a pointer `ptr` is emitted through the referent-**retaining** mint: <!-- history: since 2026-08-27 (the I5 ruling); before that it was @unsafe.Pointer.FromRef(ref (box).Value), which flattened the pointer to a transient number in a fresh box. -->
 ```go
 func (u *UnsafePointer) Load() unsafe.Pointer { return Loadp(unsafe.Pointer(&u.value)) }
 ```
-<!-- source: src/core/internal/runtime/atomic/types.cs:467-469 -->
+<!-- source: src/core/internal/runtime/atomic/types.cs:505-507 -->
 ```csharp
 public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
     return Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
@@ -1189,7 +1196,7 @@ func readU32(p ptr, o uintptr) uint32 {
 	return *(*uint32)(unsafe.Add(p, o))
 }
 ```
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:19-21 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:20-22 -->
 ```csharp
 internal static uint32 readU32(ptr p, uintptr o) {
     return ~@unsafe.Pointer.To<uint32>(@unsafe.Add(p, o));
@@ -1221,7 +1228,7 @@ func (p *nih) add(bytes uintptr) *nih {
 	return (*nih)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + bytes))
 }
 ```
-<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:16-21 -->
+<!-- source: src/tests/Behavioral/FuncVsMethodOverload/main.cs.target:19-24 -->
 ```csharp
 internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
     if (bytes == 0) {
@@ -1389,7 +1396,7 @@ func callR1(x uintptr, a, b int) int {
 	return (*(*func(int, int) int)(unsafe.Pointer(&struct{ uintptr }{x})))(a, b)
 }
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:18-22 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:19-23 -->
 ```csharp
 internal static uintptr ccgoFP(any fʗp) {
     ref var f = ref heap(fʗp, out var Ꮡf);
@@ -1397,7 +1404,7 @@ internal static uintptr ccgoFP(any fʗp) {
     return (uintptr)GoFuncCookie.Of((Delegate)f);
 }
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:44-46 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:45-47 -->
 ```csharp
 internal static nint callR1(uintptr x, nint a, nint b) {
     return GoFuncCookie.Func<Func<nint, nint, nint>>(x)(a, b);
@@ -1415,7 +1422,7 @@ method table this way: a func stored at a computed address inside a variable of 
 ```go
 	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gwords), 8)) = add
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:98 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:99 -->
 ```csharp
     @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡgwords), 8), (Func<nint, nint, nint>)add);
 ```
@@ -1473,11 +1480,11 @@ which converts to
 ```csharp
 internal static ж<bool> boolFieldAddr(ж<types.Config> conf, @string name) {
     var v = reflect.Indirect(reflect.ValueOf(conf.OrTypedNil()));
-    return (ж<bool>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
+    return @unsafe.Pointer.To<bool>(v.FieldByName(name).Addr().UnsafePointer());
 }
 ```
 
-`ж<T>`'s `explicit operator ж<T>(uintptr)` builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. Without the table below it kills `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site. <!-- with 542 verdicts behind it, when measured -->
+The conversion back, `@unsafe.Pointer.To<T>`, is the number conversion: it and `ж<T>`'s `explicit operator ж<T>(uintptr)` share one body, `ж<T>.FromNumber`. <!-- src/core/unsafe/unsafe.cs:652 `return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);` (To<T>(Pointer? p)); src/core/golib/ж.cs:1136 `return FromNumber(value, carried: null);` (the uintptr operator). The sample spelled the cast (ж<bool>)(uintptr)(…) until the interior-pointer cut (837a413fdc); the .4 -tests regen moved the cited test file to the new spelling. --> That body builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. Without the table below it kills `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site. <!-- with 542 verdicts behind it, when measured -->
 
 The information needed to do better is never actually lost. `reflect.Value.Addr` surfaces the **real aliasing box** — an addressable Value already carries `addrBox`, minted by `GoReflect.FieldAliasBox` — and only the projection to a scalar discards it. So golib's `ManagedPointerTokens` (`golib/ж.PointerTokens.cs`) remembers the association the projection drops: the token that was handed out, and the box it named. `reflectPointerToken` registers on the way out, and the `uintptr → ж<T>` operator consults the table **first**, so a token that came from there recovers its own box and aliases the original storage exactly as Go's pointer would. Everything else keeps the native-address route.
 
@@ -1631,7 +1638,7 @@ change, and the decoder would return 0 for 23. So all three arms route through g
 reinterpret — `reinterpretManagedEmission`, the same emission this file produces for the identical
 conversion in a deref or raw-address context:
 
-<!-- source: src/core/encoding/gob/gobencdec_test.cs:118-121 -->
+<!-- source: src/core/encoding/gob/gobencdec_test.cs:131-134 -->
 ```csharp
 public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
     var (_, err) = fmt.Sscanf((@string)data, "VALUE=%d"u8, Ꮡg.Reinterpret<Gobber, nint>().OrTypedNil());
@@ -1699,10 +1706,9 @@ Nine coupled rules, each first needed by one of those packages:
   `go.math.bits_package.Mul64(a, b)`. When a test-only declaration is specifically responsible, the
   statement also explains the otherwise surprising spelling:
 
-  <!-- source: src/core/hash/maphash/maphash_purego.cs:104-105 -->
+  <!-- source: src/core/hash/maphash/maphash_purego.cs:105 -->
   ```csharp
-  // Fully qualified to avoid alias shadowing by the same-package test declaration "bits".
-  var (hi, lo) = go.math.bits_package.Mul64(a, b);
+  var (hi, lo) = bits.Mul64(a, b);
   ```
 
   This remains a REFERENCE-spelling change only — never a symbol rename, so production names stay
@@ -1846,9 +1852,9 @@ long-standing arms; this is the remaining value-rooted case.) Guarded by
 
 ## Field address of a collision-renamed heap-boxed local uses the raw box name
 A heap box always keeps the RAW Go identifier (`ref var Δslice = ref heap<T>(out var <box>slice)`), so taking the address of a FIELD of a collision-renamed boxed local routes through `boxBaseName` -- the raw-name box, never the Δ-renamed alias (CS0103; reflect `SliceOf`'s `&slice.Type`). This matches the whole-value `&p` form and the renamed receiver/parameter boxes:
-<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:51, 54 -->
+<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:60, 63 -->
 ```csharp
-    ref var Δp = ref heap<box>(new box(n: 0), out var Ꮡp);
+    ref var p = ref heap<box>(new box(n: 0), out var Ꮡp);
 …
     bump(Ꮡp.Ꮡn);
 ```
@@ -2318,7 +2324,7 @@ func (n *AttrNode) Mode(def int) (int, bool) {
 `Mode` is a method of `Node`, callable on a nil `*Node`. It is emitted exactly as it would be under the
 type's own name, with the alias kept in the signature as Go wrote it:
 
-<!-- source: src/tests/Behavioral/AliasReceiverForms/main.cs:21-28 -->
+<!-- source: src/tests/Behavioral/AliasReceiverForms/main.cs:24-31 -->
 ```csharp
 public static (nint, bool) Mode(this ж<AttrNode> Ꮡn, nint def) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -2562,7 +2568,7 @@ buf = (*windows.MountPointReparseBuffer)(unsafe.Pointer(&byteblob[0]))
 buf.SubstituteNameOffset = target.substituteName.offset   // … and three more
 ```
 
-<!-- source: src/core/os/os_windows_test.cs:263-265 -->
+<!-- source: src/core/os/os_windows_test.cs:268-270 -->
 ```csharp
 var byteblob = new slice<byte>(buflen);
 buf = Ꮡ(byteblob, 0).Reinterpret<byte, windows.MountPointReparseBuffer>();
@@ -3302,7 +3308,7 @@ docs/phase4/DESIGN-array-pointer-doors.md section 16. -->
 Guarded by: the behavioral program `ArrayPointerElementDoors` (native pages from `syscall.Mmap`, Go arrays by
 their number and Go values of another type, each form stored through and read back from the memory, against
 Go); `ArrayPointerElementDoorTests` in GolibTests, whose `AnIndexedLoopOverNativeMemoryAllocatesNothing`
-holds the index over C memory at no allocation and whose `TheAddressOfAnElementOfAGoValueKeepsTheValue` holds
+holds the index over C memory at no allocation per access and whose `TheAddressOfAnElementOfAGoValueKeepsTheValue` holds
 the pinned case across a collection; the converter's `TestArrayPointerElementDoorReplacesTheWholeArrayBox`,
 one arm per form and one control per route that keeps its own emission; and repoguard's
 `TestArrayPointerViewDoors`, which refuses a `FromRef` mint at any door.
@@ -3599,7 +3605,7 @@ func decodePort(raw *rawInet4) int {
 	return int(p[0])<<8 + int(p[1])
 }
 ```
-<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:31-40 -->
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:32-41 -->
 ```csharp
 internal static void encodePort(ж<rawInet4> raw, nint port) {
     var p = @unsafe.ArrayPointer<byte>.Of(raw.Ꮡport, 2);
@@ -3628,7 +3634,7 @@ func (sa *sockInet4) sockaddr() {
 	sa.raw.addr = sa.addr
 }
 ```
-<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:160-167 -->
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:163-170 -->
 ```csharp
 internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
@@ -3636,7 +3642,7 @@ internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡsa.Ꮡraw.Ꮡport, 2);
     p.ElementRef(0) = (byte)(sa.port >> 8);
     p.ElementRef(1) = (byte)sa.port;
-    sa.raw.addr = sa.addr.Clone();
+    sa.raw.addr.Assign(sa.addr);
 }
 ```
 
@@ -3781,7 +3787,7 @@ or index whose base is such a dereference now renders the conversion and reads i
 	(*(*frame)(ptr(bp))).Read += 3
 	(*(*frame)(ptr(bp))).bump()
 ```
-<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:21-23 -->
+<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:26-28 -->
 ```csharp
     (@unsafe.Pointer.To<frame>(ptr(bp))).Value.Pgno = 7;
     (@unsafe.Pointer.To<frame>(ptr(bp))).Value.Read += 3;
@@ -3823,7 +3829,7 @@ conversion followed by the field-address accessor, the same form a pointer-retur
 ```csharp
     atomic.StoreInt32(@unsafe.Pointer.To<rec>(gp).Ꮡid, 3);
 ```
-A parenthesized operand keeps its parentheses, `(@unsafe.Pointer.To<rec>(gp)).Ꮡid`; a field of a
+A parenthesized conversion keeps its parentheses, `(@unsafe.Pointer.To<rec>(gp)).Ꮡid`; a field of a
 value field chains the accessor, `@unsafe.Pointer.To<outer>(op).Ꮡin.Ꮡcnt`; and a conversion
 between two named pointer types takes the managed reinterpret, `Ꮡh.Reinterpret<rec2, rec>().Ꮡcnt`.
 
@@ -3841,6 +3847,40 @@ type other than the field's; and by `AddressOfFieldThroughConversionNative`, lin
 the first four over pages the kernel owns and then ccgo's own union spelling over a `uintptr`: a
 member stored, read, compound-assigned and incremented, a pointer-sized member, a second union, the
 address as a number, an atomic operation on it and a kept address.)
+
+## Parentheses around an address-of operand change nothing
+Go's `&(x)` is `&x`, and `&((*T)(p).f)` is `&(*T)(p).f`. The converter removes the parentheses around
+the operand of every `&`, and around each base on the operand's selector and index path, where the file
+is parsed, so the parenthesized operand converts exactly as the plain one does:
+
+<!-- source: src/tests/Behavioral/AddressOfParenthesizedOperand/main.go:46 -->
+```go
+	atomic.StoreInt32(&((*lock)(lp).owner), 21)
+```
+<!-- source: src/tests/Behavioral/AddressOfParenthesizedOperand/main.cs.target:39 -->
+```csharp
+    atomic.StoreInt32(@unsafe.Pointer.To<@lock>(lp).Ꮡowner, 21);
+```
+A parenthesized local is heap-boxed and addressed through its box (`&(n)` is `Ꮡn`), a field of a
+value is `Ꮡpt.ᏑX` for `&((pt).X)`, and an element is `Ꮡarr.at<nint>(2)` for `&((arr)[2])`. Parentheses
+that are part of the expression stay: around a conversion, `&((*T)(p)).f`, and around a dereference,
+`&((*pp).X)`.
+
+**Why.** Every address-of rule matches the operand's shape, and so do the two analyses that read it:
+the one that heap-boxes an address-taken local, and the one that records which types have their
+fields addressed (`GoFieldAccess`). A parenthesized operand matched none of them and fell to
+`Ꮡ(x)`, which boxes a copy, so every write through the address was lost; a type whose only field
+address was parenthesized got no field-access record at all. ccgo spells libc's pthread mutex owner
+and count this way, `atomic.CompareAndSwapInt32(&((*pthreadMutex)(unsafe.Pointer(m)).owner), 0,
+tls.ID)`, nineteen sites on linux, and sqlite's recursive init mutex deadlocked on re-entry.
+Removing the parentheses once, before `go/types` runs, means every rule and both analyses see the
+one form; removing them in the address-of visitor alone would leave both analyses blind.
+In the standard library the only emitted site whose copy was observable is the TXT record read in
+`net`'s windows lookup, whose hand-converted file already spells it as the element's address. <!-- 2026-11-18, batch 312 blocker (COORD), census over go1.26.11 std on four targets and the sqlite-cs closure: std 5 sites on windows/amd64 and 4 on the others, the sqlite closure 19 on linux and 0 on windows and darwin. -->
+(Guarded by the `AddressOfParenthesizedOperand` behavioral output test: a CAS, a store and a kept
+address of a field reached through a conversion, a type whose only field address is parenthesized, a
+field of a value two ways, an element two ways, a local, and a field reached through a pointer; and by
+`TestAddressOfOperandParenthesesAreRemovedAtParse`, which pins the parsed form.)
 
 ## `&*p` is `p`, after Go's nil check
 The address of the variable a pointer indirection denotes is the pointer itself, so `&*p` yields `p`.
@@ -3968,7 +4008,7 @@ alias; the array element type is `ж<CommentGroup>`, so the alias form was CS002
 `CommentMap.addComment` — the sibling `append(list, Ꮡc)` already took the box through the
 call-argument pointer arm). The routing mirrors the struct-field pointer arm: the element index
 is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
-<!-- source: src/core/go/ast/commentmap.cs:30 -->
+<!-- source: src/core/go/ast/commentmap.cs:33 -->
 ```csharp
 list = [c];
 ```
@@ -3989,7 +4029,7 @@ program. Both a pointer RECEIVER and a plain `*T` PARAMETER take the box:
 func (p *pp) free()  { poolPut(p) }   // p is *pp (pointer receiver); poolPut(x any)
 func keep(q *pp)     { poolPut(q) }   // a plain *T parameter, same shape
 ```
-<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:31-38 -->
+<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:34-43 -->
 ```csharp
 internal static void free(this ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -3997,6 +4037,8 @@ internal static void free(this ж<pp> Ꮡp) {
     p.buf = p.buf[..0];
     poolPut(Ꮡp.OrTypedNil());
 }
+
+} partial class main_package {
 
 internal static void keep(ж<pp> q) { poolPut(q.OrTypedNil()); }
 ```

@@ -15,6 +15,7 @@ using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using go.sync;
+using static sync_package;
 
 partial class sync_package {
 
@@ -100,6 +101,8 @@ internal static @unsafe.Pointer poolRaceAddr(any xʗp) {
     var h = (uint32)(((uint64)(uint32)ptr * 0x85ebca6bU) >> 16);
     return @unsafe.Pointer.FromPinnedBox(ᏑpoolRaceHash.at<uint64>((ulong)(h % (uint32)len(poolRaceHash))));
 }
+
+} partial class syncᴛPool {
 
 // Put adds x to the pool.
 public static void Put(this ж<Pool> Ꮡp, any x) {
@@ -264,6 +267,8 @@ internal static (ж<poolLocal>, nint) pinSlow(this ж<Pool> Ꮡp) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class sync_package {
 
 // poolCleanup should be an internal detail,
 // but widely used packages access it using linkname.

@@ -29,7 +29,7 @@ using static go.index.suffixarray_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("index/suffixarray/suffixarray_test.go", "suffixarray_test.cs", "AB42AFWuAbKClIKCgpSCpraigqaCAAgSgoKCgoKUgriUgoKC3KKCpoIACBKCgoKCuJSCgoLuooKCggAHEIKCgoKUuIKmooK4soKUgpSCgoKmqOKCgIKkgoKAgqSCpoKCpoKCgIKkgriCgoCCpIKm1oKygoKCgoKCgriCpqKCgpSipIKCgoKCgpS4goKCgoKClAANDKK4goKUgoKUpgALGIKCgoKClIKCgoKClLiCpqaCgoKClIK4poKCgoKUgs7CgoKUpoKCgoLOwpKCgqaCgoKUgoKClIKCuNiCnNKCgoKCgoKCuIKCgviCgqSCgoLGgoKCgpSUlILGtIKCtqaCgpSUgriCgoKCgpSClIKClIKCgpSSgoKUsoKkgoKCtAAIEIKCgoKUgoKUsoKkgoKCgoKCgoKCgIKkgoCC1g==", "267-269:1;312-314:1;319-327:1;331-339:1;345-358:1;360-392:2;394-406:3;408-420:4;445-450:1;507-516:1;537-539:1;544-579:1;561-577:1.1;566-575:1.1.1;593-614:1", "", "", "", "294:21,295:13,351:21,352:13,502:21,503:13")]
+[assembly: GoPositionMap("index/suffixarray/suffixarray_test.go", "suffixarray_test.cs", "AB82AFWuAbKClIKCgpSCpraigqaCAAgSgoKCgoKUgriUgoKC3KKCpoIACBKCgoKCuJSCgoLuooKCggAJEIKCgoKUuILGooK4soKUgpSCgoKmqOKCgIKkgoKAgqSCpoKCpoKCgIKkgriCgoCCpIKm1oKygoKCgoKCgriCpqKCgpSipIKCgoKCgpS4goKCgoKClAANDKK4goKUgoKUpgALGIKCgoKClIKCgoKClLiCpqaCgoKClIK4poKCgoKUgs7CgoKUpoKCgoLOwpKCgqaCgoKUgoKClIKCuNiCnNKCgoKCgoKCuIKCgviCgpSCgoLGgoKCgpSUlILGtIKCtqaCgpSUgriCgoKCgpSClIKClIKCgpSSgoKUsoKkgoKCtAAIEIKCgoKUgoKUsoKkgoKCgoKCgoKCgIKkgoCC1g==", "267-269:1;312-314:1;319-327:1;331-339:1;345-358:1;360-392:2;394-406:3;408-420:4;445-450:1;507-516:1;537-539:1;544-579:1;561-577:1.1;566-575:1.1.1;593-614:1", "", "", "", "299:21,300:13,356:21,357:13,507:21,508:13")]
 // </GoSourcePositionMaps>
 
 namespace go.index;
@@ -66,3 +66,13 @@ public static partial class suffixarray_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(suffixarray_internal_test_package.index)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class suffixarray_internal_testᴛindex;
+// </MethodHolders>

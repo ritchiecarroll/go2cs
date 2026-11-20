@@ -60,6 +60,7 @@ using utf8 = go.unicode.utf8_package;
 using @unsafe = unsafe_package;
 using go.encoding;
 using go.unicode;
+using static json_package;
 
 partial class json_package {
 
@@ -247,23 +248,31 @@ partial interface Marshaler {
 // An UnsupportedTypeError is returned by [Marshal] when attempting
 // to encode an unsupported value type.
 partial struct UnsupportedTypeError {
-    public reflectꓸType Type;
+    public reflect.Type Type;
 }
+
+} partial class jsonᴛUnsupportedTypeError {
 
 public static @string Error(this ref UnsupportedTypeError e) {
     return "json: unsupported type: "u8 + e.Type.String();
 }
 
+} partial class json_package {
+
 // An UnsupportedValueError is returned by [Marshal] when attempting
 // to encode an unsupported value.
 partial struct UnsupportedValueError {
-    public reflectꓸValue Value;
+    public reflect.Value Value;
     public @string Str;
 }
+
+} partial class jsonᴛUnsupportedValueError {
 
 public static @string Error(this ref UnsupportedValueError e) {
     return "json: unsupported value: "u8 + e.Str;
 }
+
+} partial class json_package {
 
 // Before Go 1.2, an InvalidUTF8Error was returned by [Marshal] when
 // attempting to encode a string value with invalid UTF-8 sequences.
@@ -275,17 +284,23 @@ partial struct InvalidUTF8Error {
     public @string S; // the whole string value that caused the error
 }
 
+} partial class jsonᴛInvalidUTF8Error {
+
 public static @string Error(this ref InvalidUTF8Error e) {
     return "json: invalid UTF-8 in string: "u8 + strconv.Quote(e.S);
 }
 
+} partial class json_package {
+
 // A MarshalerError represents an error from calling a
 // [Marshaler.MarshalJSON] or [encoding.TextMarshaler.MarshalText] method.
 partial struct MarshalerError {
-    public reflectꓸType Type;
+    public reflect.Type Type;
     public error Err;
     internal @string sourceFunc;
 }
+
+} partial class jsonᴛMarshalerError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string marshalJSONˢ => ref marshalJSONˢᵇ;
@@ -301,6 +316,8 @@ public static @string Error(this ref MarshalerError e) {
 
 // Unwrap returns the underlying error.
 public static error Unwrap(this ref MarshalerError e) { return e.Err; }
+
+} partial class json_package {
 
 internal static ref readonly @string hex => ref hexᵇ;
 private static readonly @string hexᵇ = "0123456789abcdef"u8;
@@ -342,6 +359,8 @@ partial struct jsonError {
     /*embed*/ internal error error;
 }
 
+} partial class jsonᴛencodeState {
+
 internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) {
     error err = default;
     GoFrame ᒐ = default;
@@ -369,20 +388,26 @@ internal static void error(this ref encodeState e, error err) {
     throw panic(new jsonError(err));
 }
 
-internal static bool isEmptyValue(reflectꓸValue v) {
+} partial class json_package {
+
+internal static bool isEmptyValue(reflect.Value v) {
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Map || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Map || ᴛ == reflect.Slice || ᴛ == reflect.String: {
         return v.Len() == 0;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔInterface || ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Bool || ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.Interface || ᴛ == reflect.Pointer: {
         return v.IsZero();
     }}
     return false;
 }
 
-internal static void reflectValue(this ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+} partial class jsonᴛencodeState {
+
+internal static void reflectValue(this ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     valueEncoder(v)(Ꮡe, v, opts);
 }
+
+} partial class json_package {
 
 partial struct encOpts {
     // quoted causes primitive fields to be encoded inside JSON strings.
@@ -396,16 +421,16 @@ partial struct encOpts {
 internal static readonly ж<sync.Map> ᏑencoderCache = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map encoderCache => ref ((StaticBox<sync.Map>)ᏑencoderCache).ValueSlot; // map[reflect.Type]encoderFunc
 
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> valueEncoder(reflectꓸValue v) {
+internal static Action<ж<encodeState>, reflect.Value, encOpts> valueEncoder(reflect.Value v) {
     if (!v.IsValid()) {
         return invalidValueEncoder;
     }
     return typeEncoder(v.Type());
 }
 
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> typeEncoder(reflectꓸType t) {
+internal static Action<ж<encodeState>, reflect.Value, encOpts> typeEncoder(reflect.Type t) {
     var (fiΔ1, ok) = ᏑencoderCache.Load(t); if (ok) {
-        return fiΔ1._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
+        return fiΔ1._<Action<ж<encodeState>, reflect.Value, encOpts>>();
     }
 
     // To deal with recursive types, populate the map with an
@@ -414,13 +439,13 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> typeEncoder(re
     //
     // This indirect func is only used for recursive types,
     // and briefly during racing calls to typeEncoder.
-    var indirect = sync.OnceValue(Action<ж<encodeState>, reflectꓸValue, encOpts> () => newTypeEncoder(t, true));
+    var indirect = sync.OnceValue(Action<ж<encodeState>, reflect.Value, encOpts> () => newTypeEncoder(t, true));
     var indirectʗ1 = indirect;
-    var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new Action<ж<encodeState>, reflectꓸValue, encOpts>((ж<encodeState> e, reflectꓸValue v, encOpts opts) => {
+    var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new Action<ж<encodeState>, reflect.Value, encOpts>((ж<encodeState> e, reflect.Value v, encOpts opts) => {
         indirectʗ1()(e, v, opts);
     }));
     if (loaded) {
-        return fi._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
+        return fi._<Action<ж<encodeState>, reflect.Value, encOpts>>();
     }
 
     var f = indirect();
@@ -428,37 +453,37 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> typeEncoder(re
     return f;
 }
 
-internal static reflectꓸType marshalerType = reflect.TypeFor<Marshaler>();
-internal static reflectꓸType textMarshalerType = reflect.TypeFor<encoding.TextMarshaler>();
+internal static reflect.Type marshalerType = reflect.TypeFor<Marshaler>();
+internal static reflect.Type textMarshalerType = reflect.TypeFor<encoding.TextMarshaler>();
 
 // newTypeEncoder constructs an encoderFunc for a type.
 // The returned encoder only checks CanAddr when allowAddr is true.
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder(reflectꓸType t, bool allowAddr) {
+internal static Action<ж<encodeState>, reflect.Value, encOpts> newTypeEncoder(reflect.Type t, bool allowAddr) {
     // If we have a non-pointer value whose type implements
     // Marshaler with a value receiver, then we're better off taking
     // the address of the value - otherwise we end up with an
     // allocation as we cast the value to an interface.
-    if (t.Kind() != reflect.ΔPointer && allowAddr && reflect.PointerTo(t).Implements(marshalerType)) {
-        return newCondAddrEncoder(new Action<ж<encodeState>, reflectꓸValue, encOpts>(addrMarshalerEncoder), newTypeEncoder(t, false));
+    if (t.Kind() != reflect.Pointer && allowAddr && reflect.PointerTo(t).Implements(marshalerType)) {
+        return newCondAddrEncoder(new Action<ж<encodeState>, reflect.Value, encOpts>(addrMarshalerEncoder), newTypeEncoder(t, false));
     }
     if (t.Implements(marshalerType)) {
         return marshalerEncoder;
     }
-    if (t.Kind() != reflect.ΔPointer && allowAddr && reflect.PointerTo(t).Implements(textMarshalerType)) {
-        return newCondAddrEncoder(new Action<ж<encodeState>, reflectꓸValue, encOpts>(addrTextMarshalerEncoder), newTypeEncoder(t, false));
+    if (t.Kind() != reflect.Pointer && allowAddr && reflect.PointerTo(t).Implements(textMarshalerType)) {
+        return newCondAddrEncoder(new Action<ж<encodeState>, reflect.Value, encOpts>(addrTextMarshalerEncoder), newTypeEncoder(t, false));
     }
     if (t.Implements(textMarshalerType)) {
         return textMarshalerEncoder;
     }
 
     switch (t.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return boolEncoder;
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return intEncoder;
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return uintEncoder;
     }
     case var ᴛ when ᴛ == reflect.Float32: {
@@ -467,10 +492,10 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
     case var ᴛ when ᴛ == reflect.Float64: {
         return float64Encoder;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return stringEncoder;
     }
-    case var ᴛ when ᴛ == reflect.ΔInterface: {
+    case var ᴛ when ᴛ == reflect.Interface: {
         return interfaceEncoder;
     }
     case var ᴛ when ᴛ == reflect.Struct: {
@@ -479,13 +504,13 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
     case var ᴛ when ᴛ == reflect.Map: {
         return newMapEncoder(t);
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         return newSliceEncoder(t);
     }
     case var ᴛ when ᴛ == reflect.Array: {
         return newArrayEncoder(t);
     }
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         return newPtrEncoder(t);
     }
     default: {
@@ -493,14 +518,18 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
     }}
 }
 
-internal static void invalidValueEncoder(ж<encodeState> e, reflectꓸValue v, encOpts _) {
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = "null"u8;
+
+internal static void invalidValueEncoder(ж<encodeState> e, reflect.Value v, encOpts _) {
     e.of(encodeState.ᏑBuffer).WriteString(nullˢ);
 }
 
-internal static void marshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+internal static void marshalerEncoder(ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
-    if (v.Kind() == reflect.ΔPointer && v.IsNil()) {
+    if (v.Kind() == reflect.Pointer && v.IsNil()) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
@@ -521,7 +550,7 @@ internal static void marshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, e
     }
 }
 
-internal static void addrMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+internal static void addrMarshalerEncoder(ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     var va = v.Addr();
@@ -542,10 +571,10 @@ internal static void addrMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue 
     }
 }
 
-internal static void textMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+internal static void textMarshalerEncoder(ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
-    if (v.Kind() == reflect.ΔPointer && v.IsNil()) {
+    if (v.Kind() == reflect.Pointer && v.IsNil()) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
@@ -561,7 +590,7 @@ internal static void textMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue 
     Ꮡe.of(encodeState.ᏑBuffer).Write(appendString(Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer(), b, opts.escapeHTML));
 }
 
-internal static void addrTextMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+internal static void addrTextMarshalerEncoder(ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     var va = v.Addr();
@@ -577,7 +606,7 @@ internal static void addrTextMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸVa
     Ꮡe.of(encodeState.ᏑBuffer).Write(appendString(Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer(), b, opts.escapeHTML));
 }
 
-internal static void boolEncoder(ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+internal static void boolEncoder(ж<encodeState> e, reflect.Value v, encOpts opts) {
     var b = e.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendBool(b, v.Bool());
@@ -585,7 +614,7 @@ internal static void boolEncoder(ж<encodeState> e, reflectꓸValue v, encOpts o
     e.of(encodeState.ᏑBuffer).Write(b);
 }
 
-internal static void intEncoder(ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+internal static void intEncoder(ж<encodeState> e, reflect.Value v, encOpts opts) {
     var b = e.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendInt(b, v.Int(), 10);
@@ -593,7 +622,7 @@ internal static void intEncoder(ж<encodeState> e, reflectꓸValue v, encOpts op
     e.of(encodeState.ᏑBuffer).Write(b);
 }
 
-internal static void uintEncoder(ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+internal static void uintEncoder(ж<encodeState> e, reflect.Value v, encOpts opts) {
     var b = e.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendUint(b, v.Uint(), 10);
@@ -603,7 +632,9 @@ internal static void uintEncoder(ж<encodeState> e, reflectꓸValue v, encOpts o
 
 partial struct floatEncoder /*num:nint*/; // number of bits
 
-internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+} partial class jsonᴛfloatEncoder {
+
+internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     var f = v.Float();
@@ -639,10 +670,12 @@ internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflec
     Ꮡe.of(encodeState.ᏑBuffer).Write(b);
 }
 
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> float32Encoder = (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => (((floatEncoder)32)).encode(p1, p2, p3);
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> float64Encoder = (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => (((floatEncoder)64)).encode(p1, p2, p3);
+} partial class json_package {
 
-internal static void stringEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+internal static Action<ж<encodeState>, reflect.Value, encOpts> float32Encoder = (ж<encodeState> p1, reflect.Value p2, encOpts p3) => (((floatEncoder)32)).encode(p1, p2, p3);
+internal static Action<ж<encodeState>, reflect.Value, encOpts> float64Encoder = (ж<encodeState> p1, reflect.Value p2, encOpts p3) => (((floatEncoder)64)).encode(p1, p2, p3);
+
+internal static void stringEncoder(ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (AreEqual(v.Type(), numberType)) {
@@ -731,7 +764,7 @@ internal static bool isValidNumber(@string s) {
     return s == ""u8;
 }
 
-internal static void interfaceEncoder(ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+internal static void interfaceEncoder(ж<encodeState> e, reflect.Value v, encOpts opts) {
     if (v.IsNil()) {
         e.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
@@ -739,7 +772,7 @@ internal static void interfaceEncoder(ж<encodeState> e, reflectꓸValue v, encO
     e.reflectValue(v.Elem(), opts);
 }
 
-internal static void unsupportedTypeEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
+internal static void unsupportedTypeEncoder(ж<encodeState> Ꮡe, reflect.Value v, encOpts _) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.error(new UnsupportedTypeErrorжerror(Ꮡ(new UnsupportedTypeError(v.Type()))));
@@ -755,7 +788,9 @@ partial struct structFields {
     internal map<@string, ж<field>> byFoldedName;
 }
 
-internal static void encode(this structEncoder se, ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+} partial class jsonᴛstructEncoder {
+
+internal static void encode(this structEncoder se, ж<encodeState> e, reflect.Value v, encOpts opts) {
     var next = (byte)'{';
 FieldLoop:
     foreach (var i in range(len(se.fields.list))) {
@@ -764,7 +799,7 @@ FieldLoop:
         // Find the nested struct field by following f.index.
         var fv = v;
         foreach (var (_, iΔ1) in range(f.index)) {
-            if (fv.Kind() == reflect.ΔPointer) {
+            if (fv.Kind() == reflect.Pointer) {
                 if (fv.IsNil()) {
                     goto continue_FieldLoop;
                 }
@@ -795,17 +830,25 @@ break_FieldLoop:;
     }
 }
 
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newStructEncoder(reflectꓸType t) {
+} partial class json_package {
+
+internal static Action<ж<encodeState>, reflect.Value, encOpts> newStructEncoder(reflect.Type t) {
     var se = new structEncoder(fields: cachedTypeFields(t));
     var seʗ1 = se;
-    return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => seʗ1.encode(p1, p2, p3);
+    return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => seʗ1.encode(p1, p2, p3);
 }
 
 partial struct mapEncoder {
-    internal Action<ж<encodeState>, reflectꓸValue, encOpts> elemEnc;
+    internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
 }
 
-internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+} partial class jsonᴛmapEncoder {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = "null"u8;
+
+internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -855,9 +898,11 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
     finally { ᒐ.Run(); }
 }
 
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(reflectꓸType t) {
+} partial class json_package {
+
+internal static Action<ж<encodeState>, reflect.Value, encOpts> newMapEncoder(reflect.Type t) {
     switch (t.Key().Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔString || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.String || ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         break;
     }
     default: {
@@ -868,10 +913,10 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(
     }}
     var me = new mapEncoder(typeEncoder(t.Elem()));
     var meʗ1 = me;
-    return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => meʗ1.encode(p1, p2, p3);
+    return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => meʗ1.encode(p1, p2, p3);
 }
 
-internal static void encodeByteSlice(ж<encodeState> e, reflectꓸValue v, encOpts _) {
+internal static void encodeByteSlice(ж<encodeState> e, reflect.Value v, encOpts _) {
     var bᴷ = new stackAppend<byte>();
 
     if (v.IsNil()) {
@@ -889,7 +934,7 @@ internal static void encodeByteSlice(ж<encodeState> e, reflectꓸValue v, encOp
 
 // sliceEncoder just wraps an arrayEncoder, checking to make sure the value isn't nil.
 partial struct sliceEncoder {
-    internal Action<ж<encodeState>, reflectꓸValue, encOpts> arrayEnc;
+    internal Action<ж<encodeState>, reflect.Value, encOpts> arrayEnc;
 }
 
 internal partial struct encode_ptr /*dyn*/ {
@@ -897,7 +942,13 @@ internal partial struct encode_ptr /*dyn*/ {
     internal nint len;
 }
 
-internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+} partial class jsonᴛsliceEncoder {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = "null"u8;
+
+internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -927,7 +978,9 @@ internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect�
     finally { ᒐ.Run(); }
 }
 
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newSliceEncoder(reflectꓸType t) {
+} partial class json_package {
+
+internal static Action<ж<encodeState>, reflect.Value, encOpts> newSliceEncoder(reflect.Type t) {
     // Byte slices get special treatment; arrays don't.
     if (t.Elem().Kind() == reflect.Uint8) {
         var p = reflect.PointerTo(t.Elem());
@@ -937,14 +990,16 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newSliceEncode
     }
     var enc = new sliceEncoder(newArrayEncoder(t));
     var encʗ1 = enc;
-    return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
+    return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
 partial struct arrayEncoder {
-    internal Action<ж<encodeState>, reflectꓸValue, encOpts> elemEnc;
+    internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
 }
 
-internal static void encode(this arrayEncoder ae, ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+} partial class jsonᴛarrayEncoder {
+
+internal static void encode(this arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) {
     e.of(encodeState.ᏑBuffer).WriteByte((byte)'[');
     nint n = v.Len();
     for (nint i = 0; i < n; i++) {
@@ -956,17 +1011,25 @@ internal static void encode(this arrayEncoder ae, ж<encodeState> e, reflectꓸV
     e.of(encodeState.ᏑBuffer).WriteByte((byte)']');
 }
 
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newArrayEncoder(reflectꓸType t) {
+} partial class json_package {
+
+internal static Action<ж<encodeState>, reflect.Value, encOpts> newArrayEncoder(reflect.Type t) {
     var enc = new arrayEncoder(typeEncoder(t.Elem()));
     var encʗ1 = enc;
-    return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
+    return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
 partial struct ptrEncoder {
-    internal Action<ж<encodeState>, reflectꓸValue, encOpts> elemEnc;
+    internal Action<ж<encodeState>, reflect.Value, encOpts> elemEnc;
 }
 
-internal static void encode(this ptrEncoder pe, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
+} partial class jsonᴛptrEncoder {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = "null"u8;
+
+internal static void encode(this ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -994,17 +1057,21 @@ internal static void encode(this ptrEncoder pe, ж<encodeState> Ꮡe, reflectꓸ
     finally { ᒐ.Run(); }
 }
 
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newPtrEncoder(reflectꓸType t) {
+} partial class json_package {
+
+internal static Action<ж<encodeState>, reflect.Value, encOpts> newPtrEncoder(reflect.Type t) {
     var enc = new ptrEncoder(typeEncoder(t.Elem()));
     var encʗ1 = enc;
-    return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
+    return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
 partial struct condAddrEncoder {
-    internal Action<ж<encodeState>, reflectꓸValue, encOpts> canAddrEnc, elseEnc;
+    internal Action<ж<encodeState>, reflect.Value, encOpts> canAddrEnc, elseEnc;
 }
 
-internal static void encode(this condAddrEncoder ce, ж<encodeState> e, reflectꓸValue v, encOpts opts) {
+} partial class jsonᴛcondAddrEncoder {
+
+internal static void encode(this condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) {
     if (v.CanAddr()) {
         ce.canAddrEnc(e, v, opts);
     } else {
@@ -1012,12 +1079,14 @@ internal static void encode(this condAddrEncoder ce, ж<encodeState> e, reflect�
     }
 }
 
+} partial class json_package {
+
 // newCondAddrEncoder returns an encoder that checks whether its value
 // CanAddr and delegates to canAddrEnc if so, else to elseEnc.
-internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newCondAddrEncoder(Action<ж<encodeState>, reflectꓸValue, encOpts> canAddrEnc, Action<ж<encodeState>, reflectꓸValue, encOpts> elseEnc) {
+internal static Action<ж<encodeState>, reflect.Value, encOpts> newCondAddrEncoder(Action<ж<encodeState>, reflect.Value, encOpts> canAddrEnc, Action<ж<encodeState>, reflect.Value, encOpts> elseEnc) {
     var enc = new condAddrEncoder(canAddrEnc: canAddrEnc, elseEnc: elseEnc);
     var encʗ1 = enc;
-    return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
+    return (ж<encodeState> p1, reflect.Value p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
 internal static bool isValidTag(@string s) {
@@ -1039,9 +1108,9 @@ internal static bool isValidTag(@string s) {
     return true;
 }
 
-internal static reflectꓸType typeByIndex(reflectꓸType t, slice<nint> index) {
+internal static reflect.Type typeByIndex(reflect.Type t, slice<nint> index) {
     foreach (var (_, i) in range(index)) {
-        if (t.Kind() == reflect.ΔPointer) {
+        if (t.Kind() == reflect.Pointer) {
             t = t.Elem();
         }
         t = t.Field(i).Type;
@@ -1050,26 +1119,26 @@ internal static reflectꓸType typeByIndex(reflectꓸType t, slice<nint> index) 
 }
 
 partial struct reflectWithString {
-    internal reflectꓸValue v;
+    internal reflect.Value v;
     internal @string ks;
 }
 
-internal static (@string, error) resolveKeyName(reflectꓸValue k) {
-    if (k.Kind() == reflect.ΔString) {
+internal static (@string, error) resolveKeyName(reflect.Value k) {
+    if (k.Kind() == reflect.String) {
         return (k.String(), default);
     }
     var (tm, ok) = reflect.TypeAssert<encoding.TextMarshaler>(k); if (ok) {
-        if (k.Kind() == reflect.ΔPointer && k.IsNil()) {
+        if (k.Kind() == reflect.Pointer && k.IsNil()) {
             return ("", default);
         }
         var (buf, err) = tm.MarshalText();
         return ((@string)buf, err);
     }
     switch (k.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (strconv.FormatInt(k.Int(), 10), default);
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return (strconv.FormatUint(k.Uint(), 10), default);
     }}
     throw panic("unexpected map key type");
@@ -1167,19 +1236,19 @@ partial struct field {
     internal @string nameEscHTML; // `"` + HTMLEscape(name) + `":`
     internal bool tag;
     internal slice<nint> index;
-    internal reflectꓸType typ;
+    internal reflect.Type typ;
     internal bool omitEmpty;
     internal bool omitZero;
-    internal Func<reflectꓸValue, bool> isZero;
+    internal Func<reflect.Value, bool> isZero;
     internal bool quoted;
-    internal Action<ж<encodeState>, reflectꓸValue, encOpts> encoder;
+    internal Action<ж<encodeState>, reflect.Value, encOpts> encoder;
 }
 
 public partial interface isZeroer {
     bool IsZero();
 }
 
-internal static reflectꓸType isZeroerType = reflect.TypeFor<isZeroer>();
+internal static reflect.Type isZeroerType = reflect.TypeFor<isZeroer>();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string jsonˢ => ref jsonˢᵇ;
@@ -1191,17 +1260,17 @@ private static readonly @string omitemptyˢᵇ = "omitempty"u8;
 internal static ref readonly @string omitzeroˢ => ref omitzeroˢᵇ;
 private static readonly @string omitzeroˢᵇ = "omitzero"u8;
 
-internal static structFields typeFields(reflectꓸType t) {
+internal static structFields typeFields(reflect.Type t) {
     // Anonymous fields to explore at the current level and the next.
     var current = slice<field>([]);
     var next = slice<field>([new(typ: t)]);
 
     // Count of queued names for current level and the next.
-    map<reflectꓸType, nint> count = default;
-    map<reflectꓸType, nint> nextCount = default;
+    map<reflect.Type, nint> count = default;
+    map<reflect.Type, nint> nextCount = default;
 
     // Types already visited at an earlier level.
-    var visited = new map<reflectꓸType, bool>{};
+    var visited = new map<reflect.Type, bool>{};
 
     // Fields found.
     slice<field> fields = default;
@@ -1211,7 +1280,7 @@ internal static structFields typeFields(reflectꓸType t) {
 
     while (len(next) > 0) {
         (current, next) = (next, current[..0]);
-        (count, nextCount) = (nextCount, new map<reflectꓸType, nint>{});
+        (count, nextCount) = (nextCount, new map<reflect.Type, nint>{});
 
         foreach (var (_, f) in range(current)) {
             if (visited[f.typ]) {
@@ -1224,7 +1293,7 @@ internal static structFields typeFields(reflectꓸType t) {
                 var sf = f.typ.Field(i);
                 if (sf.Anonymous) {
                     var tΔ1 = sf.Type;
-                    if (tΔ1.Kind() == reflect.ΔPointer) {
+                    if (tΔ1.Kind() == reflect.Pointer) {
                         tΔ1 = tΔ1.Elem();
                     }
                     if (!sf.IsExported() && tΔ1.Kind() != reflect.Struct) {
@@ -1250,7 +1319,7 @@ internal static structFields typeFields(reflectꓸType t) {
                 index[len(f.index)] = i;
 
                 var ft = sf.Type;
-                if (ft.Name() == ""u8 && ft.Kind() == reflect.ΔPointer) {
+                if (ft.Name() == ""u8 && ft.Kind() == reflect.Pointer) {
                     // Follow pointer.
                     ft = ft.Elem();
                 }
@@ -1259,7 +1328,7 @@ internal static structFields typeFields(reflectꓸType t) {
                 var quoted = false;
                 if (opts.Contains(stringˢ)) {
                     switch (ft.Kind()) {
-                    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔString: {
+                    case var ᴛ when ᴛ == reflect.Bool || ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.String: {
                         quoted = true;
                         break;
                     }}
@@ -1291,27 +1360,27 @@ internal static structFields typeFields(reflectꓸType t) {
                         var tΔ2 = sf.Type;
                         // Provide a function that uses a type's IsZero method.
                         switch (ᐧ) {
-                        case {} when tΔ2.Kind() == reflect.ΔInterface && tΔ2.Implements(isZeroerType): {
-                            field.isZero = (reflectꓸValue v) => {
+                        case {} when tΔ2.Kind() == reflect.Interface && tΔ2.Implements(isZeroerType): {
+                            field.isZero = (reflect.Value v) => {
                                 // Avoid panics calling IsZero on a nil interface or
                                 // non-nil interface with nil pointer.
-                                return v.IsNil() || (v.Elem().Kind() == reflect.ΔPointer && v.Elem().IsNil()) || v.Interface()._<isZeroer>().IsZero();
+                                return v.IsNil() || (v.Elem().Kind() == reflect.Pointer && v.Elem().IsNil()) || v.Interface()._<isZeroer>().IsZero();
                             };
                             break;
                         }
-                        case {} when tΔ2.Kind() == reflect.ΔPointer && tΔ2.Implements(isZeroerType): {
-                            field.isZero = (reflectꓸValue v) => {
+                        case {} when tΔ2.Kind() == reflect.Pointer && tΔ2.Implements(isZeroerType): {
+                            field.isZero = (reflect.Value v) => {
                                 // Avoid panics calling IsZero on nil pointer.
                                 return v.IsNil() || v.Interface()._<isZeroer>().IsZero();
                             };
                             break;
                         }
                         case {} when tΔ2.Implements(isZeroerType): {
-                            field.isZero = (reflectꓸValue v) => v.Interface()._<isZeroer>().IsZero();
+                            field.isZero = (reflect.Value v) => v.Interface()._<isZeroer>().IsZero();
                             break;
                         }
                         case {} when reflect.PointerTo(tΔ2).Implements(isZeroerType): {
-                            field.isZero = (reflectꓸValue v) => {
+                            field.isZero = (reflect.Value v) => {
                                 if (!v.CanAddr()) {
                                     // Temporarily box v so we can take the address.
                                     var v2 = reflect.New(v.Type()).Elem();
@@ -1434,7 +1503,7 @@ internal static readonly ж<sync.Map> ᏑfieldCache = new StaticBox<sync.Map>(de
 internal static ref sync.Map fieldCache => ref ((StaticBox<sync.Map>)ᏑfieldCache).ValueSlot; // map[reflect.Type]structFields
 
 // cachedTypeFields is like typeFields but uses a cache to avoid repeated work.
-internal static structFields cachedTypeFields(reflectꓸType t) {
+internal static structFields cachedTypeFields(reflect.Type t) {
     var (fΔ1, ok) = ᏑfieldCache.Load(t); if (ok) {
         return fΔ1._<structFields>();
     }

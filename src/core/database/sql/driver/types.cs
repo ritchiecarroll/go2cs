@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using strconv = strconv_package;
 using time = time_package;
+using static driver_package;
 
 partial class driver_package {
 
@@ -63,6 +64,8 @@ public partial struct boolType {
 
 internal static ValueConverter _ᴛ3ʗ = new boolType();
 
+} partial class driverᴛboolType {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string boolˢ => ref boolˢᵇ;
 private static readonly @string boolˢᵇ = "Bool"u8;
@@ -91,14 +94,14 @@ public static (Value, error) ConvertValue(this boolType _, any src) {
 
     var sv = reflect.ValueOf(src);
     switch (sv.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         var iv = sv.Int();
         if (iv == 1 || iv == 0) {
             return (iv == 1, default);
         }
         return (default, fmt.Errorf("sql/driver: couldn't convert %d into type bool"u8, iv));
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
         var uv = sv.Uint();
         if (uv == 1 || uv == 0) {
             return (uv == 1, default);
@@ -108,6 +111,8 @@ public static (Value, error) ConvertValue(this boolType _, any src) {
 
     return (default, fmt.Errorf("sql/driver: couldn't convert %v (%T) into type bool"u8, src, src));
 }
+
+} partial class driver_package {
 
 // Int32 is a [ValueConverter] that converts input values to int64,
 // respecting the limits of an int32 value.
@@ -119,24 +124,26 @@ public partial struct int32Type {
 
 internal static ValueConverter _ᴛ4ʗ = new int32Type();
 
+} partial class driverᴛint32Type {
+
 public static (Value, error) ConvertValue(this int32Type _, any v) {
     var rv = reflect.ValueOf(v);
     switch (rv.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         var i64 = rv.Int();
         if (i64 > (2147483648L) - 1 || i64 < -(2147483648L)) {
             return (default, fmt.Errorf("sql/driver: value %d overflows int32"u8, v));
         }
         return (i64, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
         var u64 = rv.Uint();
         if (u64 > (uint64)((2147483648L) - 1)) {
             return (default, fmt.Errorf("sql/driver: value %d overflows int32"u8, v));
         }
         return ((int64)u64, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         var (i, err) = strconv.Atoi(rv.String());
         if (err != nil) {
             return (default, fmt.Errorf("sql/driver: value %q can't be converted to int32"u8, v));
@@ -146,15 +153,19 @@ public static (Value, error) ConvertValue(this int32Type _, any v) {
     return (default, fmt.Errorf("sql/driver: unsupported value %v (type %T) converting to int32"u8, v, v));
 }
 
+} partial class driver_package {
+
 // String is a [ValueConverter] that converts its input to a string.
 // If the value is already a string or []byte, it's unchanged.
 // If the value is of another type, conversion to string is done
 // with fmt.Sprintf("%v", v).
-public static readonly ж<stringType> ᏑΔString = new StaticBox<stringType>(default(stringType));
-public static ref stringType ΔString => ref ((StaticBox<stringType>)ᏑΔString).ValueSlot;
+public static readonly ж<stringType> ᏑString = new StaticBox<stringType>(default(stringType));
+public static ref stringType String => ref ((StaticBox<stringType>)ᏑString).ValueSlot;
 
 public partial struct stringType {
 }
+
+} partial class driverᴛstringType {
 
 public static (Value, error) ConvertValue(this stringType _, any v) {
     switch (v.type()) {
@@ -165,11 +176,15 @@ public static (Value, error) ConvertValue(this stringType _, any v) {
     return (fmt.Sprintf("%v"u8, v), default);
 }
 
+} partial class driver_package {
+
 // Null is a type that implements [ValueConverter] by allowing nil
 // values but otherwise delegating to another [ValueConverter].
 partial struct Null {
     public ValueConverter Converter;
 }
+
+} partial class driverᴛNull {
 
 public static (Value, error) ConvertValue(this Null n, any v) {
     if (v == nil) {
@@ -178,11 +193,15 @@ public static (Value, error) ConvertValue(this Null n, any v) {
     return n.Converter.ConvertValue(v);
 }
 
+} partial class driver_package {
+
 // NotNull is a type that implements [ValueConverter] by disallowing nil
 // values but otherwise delegating to another [ValueConverter].
 partial struct NotNull {
     public ValueConverter Converter;
 }
+
+} partial class driverᴛNotNull {
 
 public static (Value, error) ConvertValue(this NotNull n, any v) {
     if (v == nil) {
@@ -190,6 +209,8 @@ public static (Value, error) ConvertValue(this NotNull n, any v) {
     }
     return n.Converter.ConvertValue(v);
 }
+
+} partial class driver_package {
 
 // IsValue reports whether v is a valid [Value] parameter type.
 public static bool IsValue(any v) {
@@ -239,7 +260,7 @@ public partial struct defaultConverter {
 
 internal static ValueConverter _ᴛ5ʗ = new defaultConverter();
 
-internal static reflectꓸType valuerReflectType = reflect.TypeFor<Valuer>();
+internal static reflect.Type valuerReflectType = reflect.TypeFor<Valuer>();
 
 // callValuerValue returns vr.Value(), with one exception:
 // If vr.Value is an auto-generated method on a pointer type and the
@@ -253,11 +274,13 @@ internal static reflectꓸType valuerReflectType = reflect.TypeFor<Valuer>();
 //
 // This function is mirrored in the database/sql package.
 internal static (Value v, error err) callValuerValue(Valuer vr) {
-    var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.ΔPointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
+    var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.Pointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
         return (default, default);
     }
     return vr.Value();
 }
+
+} partial class driverᴛdefaultConverter {
 
 public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     if (IsValue(v)) {
@@ -282,7 +305,7 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
 
     var rv = reflect.ValueOf(v);
     switch (rv.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         // indirect pointers
         if (rv.IsNil()) {
             return (default, default);
@@ -291,10 +314,10 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (rv.Int(), default);
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32: {
         return ((int64)rv.Uint(), default);
     }
     case var ᴛ when ᴛ == reflect.Uint64: {
@@ -307,21 +330,23 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
         return (rv.Float(), default);
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return (rv.Bool(), default);
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
-        reflectꓸKind ek = rv.Type().Elem().Kind();
+    case var ᴛ when ᴛ == reflect.Slice: {
+        reflect.Kind ek = rv.Type().Elem().Kind();
         if (ek == reflect.Uint8) {
             return (rv.Bytes(), default);
         }
         return (default, fmt.Errorf("unsupported type %T, a slice of %s"u8, v, ek));
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return (rv.String(), default);
     }}
     return (default, fmt.Errorf("unsupported type %T, a %s"u8, v, rv.Kind()));
 }
+
+} partial class driver_package {
 
 partial interface decimalDecompose {
     // Decompose returns the internal decimal state into parts.

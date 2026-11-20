@@ -32,7 +32,7 @@ public static void TestIntGobEncoding(ж<testing.T> t) {
         foreach (var (_, sign) in range(slice<@string>(["", "+", "-"]))) {
             @string x = sign + test;
             medium.Reset(); // empty buffer for each test case (in case of failures)
-            ref var tx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtx);
+            ref var tx = ref heap(new global::go.math.big_package.Int(), out var Ꮡtx);
             Ꮡtx.SetString(x, 10);
             {
                 var err = enc.Encode(Ꮡtx); if (err != nil) {
@@ -40,7 +40,7 @@ public static void TestIntGobEncoding(ж<testing.T> t) {
                     continue;
                 }
             }
-            ref var rx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡrx);
+            ref var rx = ref heap(new global::go.math.big_package.Int(), out var Ꮡrx);
             {
                 var err = dec.Decode(Ꮡrx); if (err != nil) {
                     t.Errorf("decoding of %s failed: %s", Ꮡtx, err);
@@ -61,14 +61,14 @@ public static void TestGobEncodingNilIntInSlice(ж<testing.T> t) {
     var enc = gob.NewEncoder(new big_test_package.bytes_BufferжWriter(buf));
     var dec = gob.NewDecoder(new big_test_package.bytes_BufferжReader(buf));
 
-    ref var @in = ref heap<slice<ж<global::go.math.big_package.ΔInt>>>(out var Ꮡin);
+    ref var @in = ref heap<slice<ж<global::go.math.big_package.Int>>>(out var Ꮡin);
 
-    @in = new slice<ж<global::go.math.big_package.ΔInt>>(1);
+    @in = new slice<ж<global::go.math.big_package.Int>>(1);
     var err = enc.Encode(Ꮡin);
     if (err != nil) {
         t.Errorf("gob encode failed: %q", err);
     }
-    ref var @out = ref heap<slice<ж<global::go.math.big_package.ΔInt>>>(out var Ꮡout);
+    ref var @out = ref heap<slice<ж<global::go.math.big_package.Int>>>(out var Ꮡout);
     err = dec.Decode(Ꮡout);
     if (err != nil) {
         t.Fatalf("gob decode failed: %q", err);
@@ -76,7 +76,7 @@ public static void TestGobEncodingNilIntInSlice(ж<testing.T> t) {
     if (len(@out) != 1) {
         t.Fatalf("wrong len; want 1 got %d", len(@out));
     }
-    ref var zero = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡzero);
+    ref var zero = ref heap(new global::go.math.big_package.Int(), out var Ꮡzero);
     if (@out[0].Cmp(Ꮡzero) != 0) {
         t.Fatalf("transmission of (*Int)(nil) failed: got %s want 0", @out);
     }
@@ -86,14 +86,14 @@ public static void TestIntJSONEncoding(ж<testing.T> t) {
     foreach (var (_, test) in range(encodingTests)) {
         foreach (var (_, sign) in range(slice<@string>(["", "+", "-"]))) {
             @string x = sign + test;
-            ref var tx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtx);
+            ref var tx = ref heap(new global::go.math.big_package.Int(), out var Ꮡtx);
             Ꮡtx.SetString(x, 10);
             var (b, err) = json.Marshal(Ꮡtx);
             if (err != nil) {
                 t.Errorf("marshaling of %s failed: %s", Ꮡtx, err);
                 continue;
             }
-            ref var rx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡrx);
+            ref var rx = ref heap(new global::go.math.big_package.Int(), out var Ꮡrx);
             var errΔ1 = json.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
                 t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
                 continue;
@@ -110,7 +110,7 @@ internal static ref readonly @string nullˢ => ref nullˢᵇ;
 private static readonly @string nullˢᵇ = "null"u8;
 
 public static void TestIntJSONEncodingNil(ж<testing.T> t) {
-    ж<global::go.math.big_package.ΔInt> x = default;
+    ж<global::go.math.big_package.Int> x = default;
     var (b, err) = x.MarshalJSON();
     if (err != nil) {
         t.Fatalf("marshaling of nil failed: %s", err);
@@ -126,14 +126,14 @@ public static void TestIntXMLEncoding(ж<testing.T> t) {
     foreach (var (_, test) in range(encodingTests)) {
         foreach (var (_, sign) in range(slice<@string>(["", "+", "-"]))) {
             @string x = sign + test;
-            ref var tx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtx);
+            ref var tx = ref heap(new global::go.math.big_package.Int(), out var Ꮡtx);
             Ꮡtx.SetString(x, 0);
             var (b, err) = xml.Marshal(Ꮡtx);
             if (err != nil) {
                 t.Errorf("marshaling of %s failed: %s", Ꮡtx, err);
                 continue;
             }
-            ref var rx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡrx);
+            ref var rx = ref heap(new global::go.math.big_package.Int(), out var Ꮡrx);
             var errΔ1 = xml.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
                 t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
                 continue;
@@ -149,7 +149,7 @@ public static void TestIntAppendText(ж<testing.T> t) {
     foreach (var (_, test) in range(encodingTests)) {
         foreach (var (_, sign) in range(slice<@string>(["", "+", "-"]))) {
             @string x = sign + test;
-            ref var tx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡtx);
+            ref var tx = ref heap(new global::go.math.big_package.Int(), out var Ꮡtx);
             Ꮡtx.SetString(x, 10);
             var buf = new slice<byte>(4, 32);
             var (b, err) = Ꮡtx.AppendText(buf);
@@ -157,7 +157,7 @@ public static void TestIntAppendText(ж<testing.T> t) {
                 t.Errorf("marshaling of %s failed: %s", Ꮡtx, err);
                 continue;
             }
-            ref var rx = ref heap(new global::go.math.big_package.ΔInt(), out var Ꮡrx);
+            ref var rx = ref heap(new global::go.math.big_package.Int(), out var Ꮡrx);
             var errΔ1 = Ꮡrx.UnmarshalText(b[4..]); if (errΔ1 != nil) {
                 t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
                 continue;
@@ -170,7 +170,7 @@ public static void TestIntAppendText(ж<testing.T> t) {
 }
 
 public static void TestIntAppendTextNil(ж<testing.T> t) {
-    ж<global::go.math.big_package.ΔInt> x = default;
+    ж<global::go.math.big_package.Int> x = default;
     var buf = new slice<byte>(4, 16);
     var (data, _) = x.AppendText(buf);
     if (((sstring)(data[4..])) != "<nil>"u8) {

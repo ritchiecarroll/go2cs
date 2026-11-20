@@ -8,7 +8,6 @@ global using static global::go.math.bits_package;
 global using static global::go.math.bits_internal_test_package;
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;

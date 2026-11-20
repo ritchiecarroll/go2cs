@@ -19,6 +19,7 @@ using time = time_package;
 using go.database.sql;
 using static go.database.sql_package;
 using ꓸꓸꓸany = Span<any>;
+using static sql_internal_test_package;
 
 partial class sql_internal_test_package {
 
@@ -61,6 +62,8 @@ internal partial struct fakeConnector {
     internal bool closed;
 }
 
+} partial class sql_internal_testᴛfakeConnector {
+
 internal static (driver.Conn, error) Connect(this ref fakeConnector c, context.Context _) {
     var (conn, err) = fdriver.Open(c.name);
     conn._<ж<fakeConn>>().waiter = c.waiter;
@@ -83,20 +86,26 @@ internal static error Close(this ref fakeConnector c) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct fakeDriverCtx {
     /*embed*/ internal fakeDriver fakeDriver;
 }
 
 internal static driver.DriverContext _ᴛ1ʗ = new sql_internal_test_package.fakeDriverCtxжDriverContext(Ꮡ(new fakeDriverCtx()));
 
+} partial class sql_internal_testᴛfakeDriverCtx {
+
 internal static (driver.Connector, error) OpenConnector(this ref fakeDriverCtx cc, @string name) {
     return (new sql_internal_test_package.fakeConnectorжConnector(Ꮡ(new fakeConnector(name: name))), default);
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct fakeDB {
     internal @string name;
     internal sync.Mutex mu;
-    internal map<@string, ж<Δtable>> tables;
+    internal map<@string, ж<table>> tables;
     internal bool badConn;
     internal bool allowAny;
 }
@@ -106,6 +115,8 @@ internal partial struct fakeError {
     public error Wrapped;
 }
 
+} partial class sql_internal_testᴛfakeError {
+
 internal static @string Error(this fakeError err) {
     return err.Message;
 }
@@ -114,16 +125,22 @@ internal static error Unwrap(this fakeError err) {
     return err.Wrapped;
 }
 
-internal partial struct Δtable {
+} partial class sql_internal_test_package {
+
+internal partial struct table {
     internal sync.Mutex mu;
     internal slice<@string> colname;
     internal slice<@string> coltype;
     internal slice<ж<row>> rows;
 }
 
-internal static nint columnIndex(this ref Δtable t, @string name) {
+} partial class sql_internal_testᴛtable {
+
+internal static nint columnIndex(this ref table t, @string name) {
     return slices.Index(t.colname, name);
 }
+
+} partial class sql_internal_test_package {
 
 internal partial struct row {
     internal slice<any> cols; // must be same size as its table colname + coltype
@@ -157,6 +174,8 @@ internal partial struct fakeConn {
     internal Action<context.Context> waiter;
 }
 
+} partial class sql_internal_testᴛfakeConn {
+
 internal static void touchMem(this ref fakeConn c) {
     c.line++;
 }
@@ -169,6 +188,8 @@ internal static void incrStat(this ж<fakeConn> Ꮡc, ж<nint> Ꮡv) {
     v++;
     c.mu.Unlock();
 }
+
+} partial class sql_internal_test_package {
 
 internal partial struct fakeTx {
     internal ж<fakeConn> c;
@@ -243,6 +264,8 @@ internal static void setHookOpenErr(Func<error> fn) {
     finally { ᒐ.Run(); }
 }
 
+} partial class sql_internal_testᴛfakeDriver {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fakedbNoDatabaseNameˢ => ref fakedbNoDatabaseNameˢᵇ;
 private static readonly @string fakedbNoDatabaseNameˢᵇ = "fakedb: no database name"u8;
@@ -311,6 +334,8 @@ internal static ж<fakeDB> getDB(this ж<fakeDriver> Ꮡd, @string name) {
     finally { if (ᒐd1) Ꮡd.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class sql_internal_testᴛfakeDB {
+
 internal static void wipe(this ж<fakeDB> Ꮡdb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -334,7 +359,7 @@ internal static error createTable(this ж<fakeDB> Ꮡdb, @string name, slice<@st
         db.mu.Lock();
         ᒐd1 = true;
         if (db.tables == nil) {
-            db.tables = new map<@string, ж<Δtable>>();
+            db.tables = new map<@string, ж<table>>();
         }
         var (_, exist) = db.tables[name, ꟷ]; if (exist) {
             return fmt.Errorf("fakedb: table %q already exists"u8, name);
@@ -343,7 +368,7 @@ internal static error createTable(this ж<fakeDB> Ꮡdb, @string name, slice<@st
             return fmt.Errorf("fakedb: create table of %q len(names) != len(types): %d vs %d"u8,
                 name, len(columnNames), len(columnTypes));
         }
-        db.tables[name] = Ꮡ(new Δtable(colname: columnNames, coltype: columnTypes));
+        db.tables[name] = Ꮡ(new table(colname: columnNames, coltype: columnTypes));
         return default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -351,15 +376,15 @@ internal static error createTable(this ж<fakeDB> Ꮡdb, @string name, slice<@st
 }
 
 // must be called with db.mu lock held
-internal static (ж<Δtable>, bool) table(this ref fakeDB db, @string Δtable) {
+internal static (ж<table>, bool) table(this ref fakeDB db, @string table) {
     if (db.tables == nil) {
         return (default, false);
     }
-    var (t, ok) = db.tables[Δtable, ꟷ];
+    var (t, ok) = db.tables[table, ꟷ];
     return (t, ok);
 }
 
-internal static (@string typ, bool ok) columnType(this ж<fakeDB> Ꮡdb, @string Δtable, @string column) {
+internal static (@string typ, bool ok) columnType(this ж<fakeDB> Ꮡdb, @string table, @string column) {
     @string typ = default;
     bool ok = default;
     GoFrame ᒐ = default;
@@ -368,7 +393,7 @@ internal static (@string typ, bool ok) columnType(this ж<fakeDB> Ꮡdb, @string
 
         db.mu.Lock();
         defer(Ꮡdb.Ꮡmu.Unlock, ref ᒐ);
-        (var t, ok) = db.table(Δtable);
+        (var t, ok) = db.table(table);
         if (!ok) {
             goto ᒐdone;
         }
@@ -381,6 +406,8 @@ internal static (@string typ, bool ok) columnType(this ж<fakeDB> Ꮡdb, @string
     finally { ᒐ.Run(); }
     ᒐdone: return (typ, ok);
 }
+
+} partial class sql_internal_testᴛfakeConn {
 
 internal static bool isBad(this ref fakeConn c) {
     if (c.stickyBad) {
@@ -430,6 +457,8 @@ internal static (driver.Tx, error) Begin(this ж<fakeConn> Ꮡc) {
     return (new sql_internal_test_package.fakeTxжTx(c.currTx), default);
 }
 
+} partial class sql_internal_test_package {
+
 partial struct hookPostCloseConnᴛ1 /*dyn*/ {
     /*embed*/ public sync_package.Mutex Mutex;
     internal Action<ж<fakeConn>, error> fn;
@@ -456,6 +485,8 @@ internal static void setStrictFakeConnClose(ж<testing.T> t) {
     testStrictClose = t;
 }
 
+} partial class sql_internal_testᴛfakeConn {
+
 internal static error ResetSession(this ref fakeConn c, context.Context ctx) {
     c.dirtySession = false;
     c.currTx = default;
@@ -465,7 +496,11 @@ internal static error ResetSession(this ref fakeConn c, context.Context ctx) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal static driver.Validator _ᴛ2ʗ = new sql_internal_test_package.fakeConnжValidator(((ж<fakeConn>)nil));
+
+} partial class sql_internal_testᴛfakeConn {
 
 internal static bool IsValid(this ref fakeConn c) {
     return !c.isBad();
@@ -521,6 +556,8 @@ internal static error /*err*/ Close(this ж<fakeConn> Ꮡc) {
     ᒐdone: return err;
 }
 
+} partial class sql_internal_test_package {
+
 internal static error checkSubsetTypes(bool allowAny, slice<driver.NamedValue> args) {
     foreach (var (_, arg) in range(args)) {
         switch (arg.Value.type()) {
@@ -542,6 +579,8 @@ internal static error checkSubsetTypes(bool allowAny, slice<driver.NamedValue> a
     }
     return default;
 }
+
+} partial class sql_internal_testᴛfakeConn {
 
 internal static (driver.Result, error) Exec(this ref fakeConn c, @string query, slice<driverꓸValue> args) {
     // Ensure that ExecContext is called if available.
@@ -577,11 +616,15 @@ internal static (driver.Rows, error) QueryContext(this ref fakeConn c, context.C
     return (default, driver.ErrSkip);
 }
 
+} partial class sql_internal_test_package {
+
 internal static error errf(@string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return errors.New("fakedb: "u8 + fmt.Sprintf(msg, args.ꓸꓸꓸ));
 }
+
+} partial class sql_internal_testᴛfakeConn {
 
 // parts are table|selectCol1,selectCol2|whereCol=?,whereCol2=?
 // (note that where columns must always contain ? marks,
@@ -672,17 +715,16 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
         if (!strings.HasPrefix(value, "?")) {
             any subsetVal = default;
             // Convert to driver subset type
-            var exprᴛ1 = ctype;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "string"u8: {
+            case {} when ctype == "string"u8: {
                 subsetVal = slice<byte>(value);
                 break;
             }
-            case {} when exprᴛ1 == "blob"u8: {
+            case {} when ctype == "blob"u8: {
                 subsetVal = slice<byte>(value);
                 break;
             }
-            case {} when exprᴛ1 == "int32"u8: {
+            case {} when ctype == "int32"u8: {
                 var (i, err) = strconv.Atoi(value);
                 if (err != nil) {
                     stmt.Close();
@@ -691,7 +733,7 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
                 subsetVal = (int64)i; // int64 is a subset type, but not int32
                 break;
             }
-            case {} when exprᴛ1 == "table"u8: { // For testing cursor reads.
+            case {} when ctype == "table"u8: { // For testing cursor reads.
                 c.skipDirtySession = true;
                 var vparts = strings.Split(value, "!");
 
@@ -721,9 +763,13 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
     return (Ꮡstmt, default);
 }
 
+} partial class sql_internal_test_package {
+
 // hook to simulate broken connections
 internal static readonly ж<Func<bool>> ᏑhookPrepareBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookPrepareBadConn => ref ((StaticBox<Func<bool>>)ᏑhookPrepareBadConn).ValueSlot;
+
+} partial class sql_internal_testᴛfakeConn {
 
 internal static (driver.Stmt, error) Prepare(this ref fakeConn c, @string query) {
     throw panic("use PrepareContext");
@@ -801,25 +847,24 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
 
         Ꮡc.incrStat(Ꮡc.ᏑstmtsMade);
         error err = default;
-        var exprᴛ2 = cmd;
         switch (ᐧ) {
-        case {} when exprᴛ2 == "WIPE"u8: {
+        case {} when cmd == "WIPE"u8: {
             // Nothing
             break;
         }
-        case {} when exprᴛ2 == "SELECT"u8: {
+        case {} when cmd == "SELECT"u8: {
             (stmt, err) = c.prepareSelect(stmt, parts);
             break;
         }
-        case {} when exprᴛ2 == "CREATE"u8: {
+        case {} when cmd == "CREATE"u8: {
             (stmt, err) = c.prepareCreate(stmt, parts);
             break;
         }
-        case {} when exprᴛ2 == "INSERT"u8: {
+        case {} when cmd == "INSERT"u8: {
             (stmt, err) = Ꮡc.prepareInsert(ctx, stmt, parts);
             break;
         }
-        case {} when exprᴛ2 == "NOSERT"u8: {
+        case {} when cmd == "NOSERT"u8: {
             // Do all the prep-work like for an INSERT but don't actually insert the row.
             // Used for some of the concurrent tests.
             (stmt, err) = Ꮡc.prepareInsert(ctx, stmt, parts);
@@ -839,6 +884,8 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
     }
     return (new sql_internal_test_package.fakeStmtжStmt(firstStmt), default);
 }
+
+} partial class sql_internal_testᴛfakeStmt {
 
 internal static driver.ValueConverter ColumnConverter(this ref fakeStmt s, nint idx) {
     if (s.panic == "ColumnConverter"u8) {
@@ -871,17 +918,25 @@ internal static error Close(this ref fakeStmt s) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 internal static error errClosed = errors.New("fakedb: statement has been closed");
 
 // hook to simulate broken connections
 internal static readonly ж<Func<bool>> ᏑhookExecBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookExecBadConn => ref ((StaticBox<Func<bool>>)ᏑhookExecBadConn).ValueSlot;
 
+} partial class sql_internal_testᴛfakeStmt {
+
 internal static (driver.Result, error) Exec(this ref fakeStmt s, slice<driverꓸValue> args) {
     throw panic("Using ExecContext");
 }
 
+} partial class sql_internal_test_package {
+
 internal static error errFakeConnSessionDirty = errors.New("fakedb: session is dirty");
+
+} partial class sql_internal_testᴛfakeStmt {
 
 internal static (driver.Result, error) ExecContext(this ж<fakeStmt> Ꮡs, context.Context ctx, slice<driver.NamedValue> args) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -943,6 +998,8 @@ internal static (driver.Result, error) ExecContext(this ж<fakeStmt> Ꮡs, conte
     return (default, fmt.Errorf("fakedb: unimplemented statement Exec command type of %q"u8, s.cmd));
 }
 
+} partial class sql_internal_test_package {
+
 internal static driverꓸValue valueFromPlaceholderName(slice<driver.NamedValue> args, @string name) {
     foreach (var i in range(len(args))) {
         if (args[i].Name == name) {
@@ -951,6 +1008,8 @@ internal static driverꓸValue valueFromPlaceholderName(slice<driver.NamedValue>
     }
     return default;
 }
+
+} partial class sql_internal_testᴛfakeStmt {
 
 // When doInsert is true, add the row to the table.
 // When doInsert is false do prep-work and error checking, but don't
@@ -1007,15 +1066,19 @@ internal static (driver.Result, error) execInsert(this ж<fakeStmt> Ꮡs, slice<
         if (doInsert) {
             t.rows = append(t.rows, Ꮡ(new row(cols: cols)));
         }
-        return (((driverꓸRowsAffected)1), default);
+        return (((driver.RowsAffected)1), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
+} partial class sql_internal_test_package {
+
 // hook to simulate broken connections
 internal static readonly ж<Func<bool>> ᏑhookQueryBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookQueryBadConn => ref ((StaticBox<Func<bool>>)ᏑhookQueryBadConn).ValueSlot;
+
+} partial class sql_internal_testᴛfakeStmt {
 
 internal static (driver.Rows, error) Query(this ref fakeStmt s, slice<driverꓸValue> args) {
     throw panic("Use QueryContext");
@@ -1189,9 +1252,13 @@ internal static nint NumInput(this ref fakeStmt s) {
     return s.placeholders;
 }
 
+} partial class sql_internal_test_package {
+
 // hook to simulate broken connections
 internal static readonly ж<Func<bool>> ᏑhookCommitBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookCommitBadConn => ref ((StaticBox<Func<bool>>)ᏑhookCommitBadConn).ValueSlot;
+
+} partial class sql_internal_testᴛfakeTx {
 
 internal static error Commit(this ref fakeTx tx) {
     tx.c.currTx = default;
@@ -1202,9 +1269,13 @@ internal static error Commit(this ref fakeTx tx) {
     return default;
 }
 
+} partial class sql_internal_test_package {
+
 // hook to simulate broken connections
 internal static readonly ж<Func<bool>> ᏑhookRollbackBadConn = new StaticBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookRollbackBadConn => ref ((StaticBox<Func<bool>>)ᏑhookRollbackBadConn).ValueSlot;
+
+} partial class sql_internal_testᴛfakeTx {
 
 internal static error Rollback(this ref fakeTx tx) {
     tx.c.currTx = default;
@@ -1214,6 +1285,8 @@ internal static error Rollback(this ref fakeTx tx) {
     tx.c.touchMem();
     return default;
 }
+
+} partial class sql_internal_test_package {
 
 internal partial struct rowsCursor {
     internal ж<fakeDB> db;
@@ -1238,6 +1311,8 @@ internal partial struct rowsCursor {
     // closeErr is returned when rowsCursor.Close
     internal error closeErr;
 }
+
+} partial class sql_internal_testᴛrowsCursor {
 
 internal static void touchMem(this ref rowsCursor rc) {
     rc.parentMem.touchMem();
@@ -1265,11 +1340,15 @@ internal static slice<@string> Columns(this ref rowsCursor rc) {
     return rc.cols[rc.posSet];
 }
 
-internal static reflectꓸType ColumnTypeScanType(this ref rowsCursor rc, nint index) {
+internal static reflect.Type ColumnTypeScanType(this ref rowsCursor rc, nint index) {
     return colTypeToReflectType(rc.colType[rc.posSet][index]);
 }
 
+} partial class sql_internal_test_package {
+
 internal static Func<slice<driverꓸValue>, error> rowsCursorNextHook;
+
+} partial class sql_internal_testᴛrowsCursor {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fakedbCursorIsClosedˢ => ref fakedbCursorIsClosedˢᵇ;
@@ -1328,6 +1407,8 @@ internal static error NextResultSet(this ref rowsCursor rc) {
     return io.EOF; // Per interface spec.
 }
 
+} partial class sql_internal_test_package {
+
 // fakeDriverString is like driver.String, but indirects pointers like
 // DefaultValueConverter.
 //
@@ -1336,6 +1417,8 @@ internal static error NextResultSet(this ref rowsCursor rc) {
 // our TestPointerParamsAndScans.
 internal partial struct fakeDriverString {
 }
+
+} partial class sql_internal_testᴛfakeDriverString {
 
 internal static (driverꓸValue, error) ConvertValue(this fakeDriverString _, any v) {
     switch (v.type()) {
@@ -1353,108 +1436,112 @@ internal static (driverꓸValue, error) ConvertValue(this fakeDriverString _, an
     return (fmt.Sprintf("%v"u8, v), default);
 }
 
+} partial class sql_internal_test_package {
+
 internal partial struct anyTypeConverter {
 }
+
+} partial class sql_internal_testᴛanyTypeConverter {
 
 internal static (driverꓸValue, error) ConvertValue(this anyTypeConverter _, any v) {
     return (v, default);
 }
 
+} partial class sql_internal_test_package {
+
 internal static driver.ValueConverter converterForType(@string typ) {
-    var exprᴛ1 = typ;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "bool"u8: {
+    case {} when typ == "bool"u8: {
         return driver.Bool;
     }
-    case {} when exprᴛ1 == "nullbool"u8: {
+    case {} when typ == "nullbool"u8: {
         return new driver.Null(Converter: driver.Bool);
     }
-    case {} when exprᴛ1 == "byte"u8 || exprᴛ1 == "int16"u8: {
+    case {} when typ == "byte"u8 || typ == "int16"u8: {
         return new driver.NotNull(Converter: driver.DefaultParameterConverter);
     }
-    case {} when exprᴛ1 == "int32"u8: {
+    case {} when typ == "int32"u8: {
         return driver.Int32;
     }
-    case {} when exprᴛ1 == "nullbyte"u8 || exprᴛ1 == "nullint32"u8 || exprᴛ1 == "nullint16"u8: {
+    case {} when typ == "nullbyte"u8 || typ == "nullint32"u8 || typ == "nullint16"u8: {
         return new driver.Null(Converter: driver.DefaultParameterConverter);
     }
-    case {} when exprᴛ1 == "string"u8: {
+    case {} when typ == "string"u8: {
         return new driver.NotNull(Converter: new fakeDriverString());
     }
-    case {} when exprᴛ1 == "nullstring"u8: {
+    case {} when typ == "nullstring"u8: {
         return new driver.Null(Converter: new fakeDriverString());
     }
-    case {} when exprᴛ1 == "int64"u8: {
+    case {} when typ == "int64"u8: {
         // TODO(coopernurse): add type-specific converter
         return new driver.NotNull(Converter: driver.DefaultParameterConverter);
     }
-    case {} when exprᴛ1 == "nullint64"u8: {
+    case {} when typ == "nullint64"u8: {
         // TODO(coopernurse): add type-specific converter
         return new driver.Null(Converter: driver.DefaultParameterConverter);
     }
-    case {} when exprᴛ1 == "float64"u8: {
+    case {} when typ == "float64"u8: {
         // TODO(coopernurse): add type-specific converter
         return new driver.NotNull(Converter: driver.DefaultParameterConverter);
     }
-    case {} when exprᴛ1 == "nullfloat64"u8: {
+    case {} when typ == "nullfloat64"u8: {
         // TODO(coopernurse): add type-specific converter
         return new driver.Null(Converter: driver.DefaultParameterConverter);
     }
-    case {} when exprᴛ1 == "datetime"u8: {
+    case {} when typ == "datetime"u8: {
         return new driver.NotNull(Converter: driver.DefaultParameterConverter);
     }
-    case {} when exprᴛ1 == "nulldatetime"u8: {
+    case {} when typ == "nulldatetime"u8: {
         return new driver.Null(Converter: driver.DefaultParameterConverter);
     }
-    case {} when exprᴛ1 == "any"u8: {
+    case {} when typ == "any"u8: {
         return new anyTypeConverter();
     }}
     throw panic("invalid fakedb column type of " + typ);
 }
 
-internal static reflectꓸType colTypeToReflectType(@string typ) {
-    var exprᴛ1 = typ;
+internal static reflect.Type colTypeToReflectType(@string typ) {
     switch (ᐧ) {
-    case {} when exprᴛ1 == "bool"u8: {
+    case {} when typ == "bool"u8: {
         return reflect.TypeFor<bool>();
     }
-    case {} when exprᴛ1 == "nullbool"u8: {
+    case {} when typ == "nullbool"u8: {
         return reflect.TypeFor<global::go.database.sql_package.NullBool>();
     }
-    case {} when exprᴛ1 == "int16"u8: {
+    case {} when typ == "int16"u8: {
         return reflect.TypeFor<int16>();
     }
-    case {} when exprᴛ1 == "nullint16"u8: {
+    case {} when typ == "nullint16"u8: {
         return reflect.TypeFor<global::go.database.sql_package.NullInt16>();
     }
-    case {} when exprᴛ1 == "int32"u8: {
+    case {} when typ == "int32"u8: {
         return reflect.TypeFor<int32>();
     }
-    case {} when exprᴛ1 == "nullint32"u8: {
+    case {} when typ == "nullint32"u8: {
         return reflect.TypeFor<global::go.database.sql_package.NullInt32>();
     }
-    case {} when exprᴛ1 == "string"u8: {
+    case {} when typ == "string"u8: {
         return reflect.TypeFor<@string>();
     }
-    case {} when exprᴛ1 == "nullstring"u8: {
+    case {} when typ == "nullstring"u8: {
         return reflect.TypeFor<global::go.database.sql_package.NullString>();
     }
-    case {} when exprᴛ1 == "int64"u8: {
+    case {} when typ == "int64"u8: {
         return reflect.TypeFor<int64>();
     }
-    case {} when exprᴛ1 == "nullint64"u8: {
+    case {} when typ == "nullint64"u8: {
         return reflect.TypeFor<global::go.database.sql_package.NullInt64>();
     }
-    case {} when exprᴛ1 == "float64"u8: {
+    case {} when typ == "float64"u8: {
         return reflect.TypeFor<float64>();
     }
-    case {} when exprᴛ1 == "nullfloat64"u8: {
+    case {} when typ == "nullfloat64"u8: {
         return reflect.TypeFor<global::go.database.sql_package.NullFloat64>();
     }
-    case {} when exprᴛ1 == "datetime"u8: {
+    case {} when typ == "datetime"u8: {
         return reflect.TypeFor<time.Time>();
     }
-    case {} when exprᴛ1 == "any"u8: {
+    case {} when typ == "any"u8: {
         return reflect.TypeFor<any>();
     }}
     throw panic("invalid fakedb column type of " + typ);

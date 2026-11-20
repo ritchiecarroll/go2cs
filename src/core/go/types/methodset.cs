@@ -8,6 +8,7 @@ using fmt = fmt_package;
 using sort = sort_package;
 using strings = strings_package;
 using io = io_package;
+using static types_package;
 
 partial class types_package {
 
@@ -17,6 +18,8 @@ partial class types_package {
 partial struct MethodSet {
     internal slice<ж<Selection>> list;
 }
+
+} partial class typesᴛMethodSet {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string methodSetˢ => ref methodSetˢᵇ;
@@ -65,6 +68,8 @@ public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> pkg, @st
     return default;
 }
 
+} partial class types_package {
+
 // Shared empty method set.
 internal static readonly ж<MethodSet> ᏑemptyMethodSet = new StaticBox<MethodSet>(default(MethodSet));
 internal static ref MethodSet emptyMethodSet => ref ((StaticBox<MethodSet>)ᏑemptyMethodSet).ValueSlot;
@@ -76,7 +81,7 @@ internal static ref MethodSet emptyMethodSet => ref ((StaticBox<MethodSet>)Ꮡem
 
 // NewMethodSet returns the method set for the given type T.
 // It always returns a non-nil method set, even if it is empty.
-public static ж<MethodSet> NewMethodSet(ΔType T) {
+public static ж<MethodSet> NewMethodSet(Type T) {
     // WARNING: The code in this function is extremely subtle - do not modify casually!
     //          This function and lookupFieldOrMethod should be kept in sync.
 
@@ -88,7 +93,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     // it must not be a pointer or interface type and it must be declared
     // in the same package as the method.").
     {
-        var t = asNamed(T); if (t != nil && isPointer(new NamedжΔType(t))) {
+        var t = asNamed(T); if (t != nil && isPointer(new NamedжType(t))) {
             return ᏑemptyMethodSet;
         }
     }
@@ -224,6 +229,8 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
 // same unique id, or a field with that id appeared.
 partial struct methodSet /*map[@string, ж<Selection>]*/; // a nil entry indicates a name collision
 
+} partial class typesᴛmethodSet {
+
 // Add adds all functions in list to the method set s.
 // If multiples is set, every function in list appears multiple times
 // and is treated as a collision.
@@ -259,4 +266,4 @@ internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> in
     return s;
 }
 
-} // end types_package
+} // end typesᴛmethodSet

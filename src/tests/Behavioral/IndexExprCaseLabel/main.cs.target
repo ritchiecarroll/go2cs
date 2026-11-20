@@ -9,12 +9,11 @@ internal static array<@string> words = new @string[]{"alpha", "beta", "gamma"}.a
 internal static UntypedInt one => 1;
 
 internal static @string classify(@string s) {
-    var exprᴛ1 = s;
     switch (ᐧ) {
-    case {} when exprᴛ1 == words[0] || exprᴛ1 == words[2]: {
+    case {} when s == words[0] || s == words[2]: {
         return "ends";
     }
-    case {} when exprᴛ1 == words[one]: {
+    case {} when s == words[one]: {
         return "middle";
     }
     default: {

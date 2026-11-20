@@ -11,6 +11,8 @@ using syscall = syscall_package;
 using @internal;
 using @internal.syscall;
 using fs = go.io.fs_package;
+using os = os_package;
+using static os_package;
 
 partial class os_package {
 
@@ -19,8 +21,8 @@ partial class os_package {
 // the process to exit). On Windows, sending os.Interrupt to a process with
 // os.Process.Signal is not implemented; it will return an error instead of
 // sending a signal.
-public static ΔSignal Interrupt = new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)syscall.SIGINT));
-public static ΔSignal ΔKill = new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)syscall.SIGKILL));
+public static Signal Interrupt = new syscall_SignalᴠSignal(((syscall.Signal)syscall.SIGINT));
+public static Signal Kill = new syscall_SignalᴠSignal(((syscall.Signal)syscall.SIGKILL));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chdirˢ => ref chdirˢᵇ;
@@ -79,8 +81,10 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
     return (newHandleProcess(pid, h), default);
 }
 
+} partial class osᴛProcess {
+
 internal static error kill(this ж<Process> Ꮡp) {
-    return Ꮡp.Signal(ΔKill);
+    return Ꮡp.Signal(os.Kill);
 }
 
 internal static error withHandle(this ж<Process> Ꮡp, Action<uintptr> f) {
@@ -109,12 +113,16 @@ internal static error withHandle(this ж<Process> Ꮡp, Action<uintptr> f) {
     finally { if (ᒐd1) Ꮡp.DerefOrNull().handleTransientRelease(); ᒐ.Run(); }
 }
 
+} partial class os_package {
+
 // ProcessState stores information about a process, as reported by Wait.
 partial struct ProcessState {
     internal nint pid;                  // The process's id.
     internal syscall.WaitStatus status; // System-dependent status info.
     internal ж<syscall.Rusage> rusage;
 }
+
+} partial class osᴛProcessState {
 
 // Pid returns the process id of the exited process.
 public static nint Pid(this ref ProcessState p) {
@@ -194,4 +202,4 @@ public static nint ExitCode(this ж<ProcessState> Ꮡp) {
     return p.status.ExitStatus();
 }
 
-} // end os_package
+} // end osᴛProcessState

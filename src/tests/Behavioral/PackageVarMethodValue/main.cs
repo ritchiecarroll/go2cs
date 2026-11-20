@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct T {
     internal nint n;
 }
+
+} partial class mainᴛT {
 
 internal static void inc(this ref T p) { p.n++; }
 
@@ -16,6 +19,8 @@ internal static nint add(this ref T p, nint d) {
 }
 
 internal static nint peek(this T t) { return t.n; }
+
+} partial class main_package {
 
 partial struct H {
     internal T t;
@@ -34,7 +39,11 @@ partial struct Tab {
     internal array<nint> vals = new(8);
 }
 
+} partial class mainᴛTab {
+
 internal static void inc(this ref Tab p) { p.n++; }
+
+} partial class main_package {
 
 internal static T mk() { return new T(n: 10); }
 

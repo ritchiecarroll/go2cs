@@ -69,7 +69,7 @@ func TestValueDecodeEmissionReadsAKeptOutStructAsAValue(t *testing.T) {
 	for name, site := range map[string]*regexp.Regexp{
 		"the seed":               regexp.MustCompile(`TBF_ctx state = \(.*Reinterpret<.*\)\.GoValue\(\)`),
 		"a pointer stored first": regexp.MustCompile(`return \(r\)\.GoValue\(\)`),
-		"an assignment target":   regexp.MustCompile(`r\.Value = state`),
+		"an assignment target":   regexp.MustCompile(`r\.Value\.AssignFrom\(state\)`),
 		"a field selection":      regexp.MustCompile(`return .*\.Fs\.FP\[0\]`),
 		"a constant operand":     regexp.MustCompile(`unsafe\.Sizeof\(\*r\)`),
 		"a pointer parameter":    regexp.MustCompile(`TBF_ctx param\(ref TBF_ctx p\)`),

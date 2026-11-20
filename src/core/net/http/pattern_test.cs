@@ -7,10 +7,13 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using static global::go.net.http_package;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string pathˢ => ref pathˢᵇ;
+private static readonly @string pathˢᵇ = "path"u8;
 internal static ref readonly @string somethingˢ => ref somethingˢᵇ;
 private static readonly @string somethingˢᵇ = "something"u8;
 internal static ref readonly @string litˢ => ref litˢᵇ;
@@ -49,7 +52,7 @@ public static void TestParsePattern(ж<testing.T> t) {
             new pattern(segments: slice<global::go.net.http_package.segment>([lit("a"), multi(""u8)]))
         ),
         new("/path/to/something", new pattern(segments: slice<global::go.net.http_package.segment>([
-            lit(pathˢ2), lit("to"), lit(somethingˢ)
+            lit(pathˢ), lit("to"), lit(somethingˢ)
         ])
         )),
         new(
@@ -176,11 +179,15 @@ public static void TestParsePatternError(ж<testing.T> t) {
     }
 }
 
+} partial class http_internal_testᴛpattern {
+
 internal static bool equal(this ref global::go.net.http_package.pattern p1, ж<global::go.net.http_package.pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     return p1.method == p2.method && p1.host == p2.host && slices.Equal<slice<global::go.net.http_package.segment>, global::go.net.http_package.segment>(p1.segments, p2.segments);
 }
+
+} partial class http_internal_test_package {
 
 internal static ж<global::go.net.http_package.pattern> mustParsePattern(testing.TB tb, @string s) {
     tb.Helper();
@@ -431,6 +438,8 @@ public static void TestConflictsWith(ж<testing.T> t) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string aYZˢ => ref aYZˢᵇ;
 private static readonly @string aYZˢᵇ = "/a/{y}/{z...}"u8;
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 internal static ref readonly @string matchesTheSameRequestsAsˢ => ref matchesTheSameRequestsAsˢᵇ;
 private static readonly @string matchesTheSameRequestsAsˢᵇ = "matches the same requests as"u8;
 

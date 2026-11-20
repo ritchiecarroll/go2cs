@@ -25,7 +25,7 @@ public static void TestLookPathNotFound(ж<testing.T> t) {
         if (path != ""u8) {
             t.Fatalf("LookPath path == %q when err != nil", path);
         }
-        var (perr, ok) = err._<ж<global::go.os.exec_package.ΔError>>(ᐧ);
+        var (perr, ok) = err._<ж<global::go.os.exec_package.Error>>(ᐧ);
         if (!ok) {
             t.Fatal(lookPathErrorIsNotAnExecˢ);
         }

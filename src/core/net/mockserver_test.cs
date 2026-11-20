@@ -20,6 +20,7 @@ using exec = go.os.exec_package;
 using go.os;
 using path;
 using static go.net_package;
+using static net_internal_test_package;
 
 partial class net_internal_test_package {
 
@@ -76,9 +77,8 @@ internal static global::go.net_package.Listener newLocalListener(testing.TB t, @
         return ln;
     }
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8: {
+    case {} when network == "tcp"u8: {
         if (supportsIPv4()) {
             return listen(tcp4ˢ, "127.0.0.1:0");
         }
@@ -87,19 +87,19 @@ internal static global::go.net_package.Listener newLocalListener(testing.TB t, @
         }
         break;
     }
-    case {} when exprᴛ1 == "tcp4"u8: {
+    case {} when network == "tcp4"u8: {
         if (supportsIPv4()) {
             return listen(tcp4ˢ, "127.0.0.1:0");
         }
         break;
     }
-    case {} when exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp6"u8: {
         if (supportsIPv6()) {
             return listen(tcp6ˢ, "[::1]:0");
         }
         break;
     }
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8: {
+    case {} when network == "unix"u8 || network == "unixpacket"u8: {
         return listen(network, testUnixAddr(t));
     }}
 
@@ -155,10 +155,12 @@ internal partial struct localServer {
     internal slice<global::go.net_package.Conn> cl; // accepted connection list
 }
 
+} partial class net_internal_testᴛlocalServer {
+
 internal static partial error buildup(this ж<localServer> Ꮡls, Action<ж<localServer>, global::go.net_package.Listener> handler) {
     goǃ(() => {
         handler(Ꮡls, Ꮡls.Value.Listener);
-        builtin.close(Ꮡls.Value.done);
+        close(Ꮡls.Value.done);
     });
     return default;
 }
@@ -182,9 +184,8 @@ internal static error teardown(this ж<localServer> Ꮡls) {
             }
             ᐸꟷ(ls.done);
             ls.Listener = default;
-            var exprᴛ1 = network;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8: {
+            case {} when network == "unix"u8 || network == "unixpacket"u8: {
                 Δos.Remove(address);
                 break;
             }}
@@ -194,6 +195,8 @@ internal static error teardown(this ж<localServer> Ꮡls) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡls.Ꮡlnmu.Unlock(); ᒐ.Run(); }
 }
+
+} partial class net_internal_test_package {
 
 internal static partial ж<localServer> newLocalServer(testing.TB t, @string network) {
     t.Helper();
@@ -207,9 +210,13 @@ internal partial struct streamListener {
     internal channel<bool> done; // signal that indicates server stopped
 }
 
+} partial class net_internal_testᴛstreamListener {
+
 internal static ж<localServer> newLocalServer(this ref streamListener sl) {
     return Ꮡ(new localServer(Listener: sl.Listener, done: new channel<bool>(0)));
 }
+
+} partial class net_internal_test_package {
 
 internal partial struct dualStackServer {
     internal Δsync.RWMutex lnmu;
@@ -219,13 +226,15 @@ internal partial struct dualStackServer {
     internal slice<global::go.net_package.Conn> cs; // established connections at the passive open side
 }
 
+} partial class net_internal_testᴛdualStackServer {
+
 internal static partial error buildup(this ж<dualStackServer> Ꮡdss, Action<ж<dualStackServer>, global::go.net_package.Listener> handler) {
     ref var dss = ref Ꮡdss.DerefOrNull();
 
     foreach (var i in range(len(dss.lns))) {
         goǃ((nint iΔ1) => {
             handler(Ꮡdss, Ꮡdss.Value.lns[iΔ1].Listener);
-            builtin.close(Ꮡdss.Value.lns[iΔ1].done);
+            close(Ꮡdss.Value.lns[iΔ1].done);
         }, i);
     }
     return default;
@@ -267,6 +276,8 @@ internal static error teardown(this ж<dualStackServer> Ꮡdss) {
     return default;
 }
 
+} partial class net_internal_test_package {
+
 internal static (ж<dualStackServer>, error) newDualStackServer() {
     var (lns, err) = newDualStackListener();
     if (err != nil) {
@@ -288,12 +299,14 @@ internal static (ж<dualStackServer>, error) newDualStackServer() {
     )), default);
 }
 
+} partial class net_internal_testᴛlocalServer {
+
 internal static void transponder(this ж<localServer> Ꮡls, global::go.net_package.Listener ln, channel/*<-*/<error> ch) {
     GoFrame ᒐ = default;
     try {
         ref var ls = ref Ꮡls.DerefOrNull();
 
-        defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
 
         switch (ln.type()) {
         case ж<global::go.net_package.TCPListener> lnΔ1: {
@@ -344,10 +357,12 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
     finally { ᒐ.Run(); }
 }
 
+} partial class net_internal_test_package {
+
 internal static void transceiver(global::go.net_package.Conn c, slice<byte> wb, channel/*<-*/<error> ch) {
     GoFrame ᒐ = default;
     try {
-        defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
 
         c.SetDeadline(time.Now().Add(someTimeout));
         c.SetReadDeadline(time.Now().Add(someTimeout));
@@ -417,9 +432,8 @@ internal static global::go.net_package.PacketConn newLocalPacketListener(testing
     }
 
     t.Helper();
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8: {
+    case {} when network == "udp"u8: {
         if (supportsIPv4()) {
             return listenPacket(udp4ˢ, "127.0.0.1:0");
         }
@@ -428,19 +442,19 @@ internal static global::go.net_package.PacketConn newLocalPacketListener(testing
         }
         break;
     }
-    case {} when exprᴛ1 == "udp4"u8: {
+    case {} when network == "udp4"u8: {
         if (supportsIPv4()) {
             return listenPacket(udp4ˢ, "127.0.0.1:0");
         }
         break;
     }
-    case {} when exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp6"u8: {
         if (supportsIPv6()) {
             return listenPacket(udp6ˢ, "[::1]:0");
         }
         break;
     }
-    case {} when exprᴛ1 == "unixgram"u8: {
+    case {} when network == "unixgram"u8: {
         return listenPacket(network, testUnixAddr(t));
     }}
 
@@ -490,10 +504,12 @@ internal partial struct localPacketServer {
     internal channel<bool> done; // signal that indicates server stopped
 }
 
+} partial class net_internal_testᴛlocalPacketServer {
+
 internal static partial error buildup(this ж<localPacketServer> Ꮡls, Action<ж<localPacketServer>, global::go.net_package.PacketConn> handler) {
     goǃ(() => {
         handler(Ꮡls, Ꮡls.Value.PacketConn);
-        builtin.close(Ꮡls.Value.done);
+        close(Ꮡls.Value.done);
     });
     return default;
 }
@@ -508,9 +524,8 @@ internal static error teardown(this ж<localPacketServer> Ꮡls) {
         ls.PacketConn.Close();
         ᐸꟷ(ls.done);
         ls.PacketConn = default;
-        var exprᴛ1 = network;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "unixgram"u8: {
+        case {} when network == "unixgram"u8: {
             Δos.Remove(address);
             break;
         }}
@@ -518,6 +533,8 @@ internal static error teardown(this ж<localPacketServer> Ꮡls) {
     Ꮡls.Ꮡpcmu.Unlock();
     return default;
 }
+
+} partial class net_internal_test_package {
 
 internal static partial ж<localPacketServer> newLocalPacketServer(testing.TB t, @string network) {
     t.Helper();
@@ -529,14 +546,18 @@ internal partial struct packetListener {
     /*embed*/ public global::go.net_package.PacketConn PacketConn;
 }
 
+} partial class net_internal_testᴛpacketListener {
+
 internal static ж<localPacketServer> newLocalServer(this ref packetListener pl) {
     return Ꮡ(new localPacketServer(PacketConn: pl.PacketConn, done: new channel<bool>(0)));
 }
 
+} partial class net_internal_test_package {
+
 internal static void packetTransponder(global::go.net_package.PacketConn c, channel/*<-*/<error> ch) {
     GoFrame ᒐ = default;
     try {
-        defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
 
         c.SetDeadline(time.Now().Add(someTimeout));
         c.SetReadDeadline(time.Now().Add(someTimeout));
@@ -556,12 +577,12 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
             switch (ᐧ) {
             case {} when exprᴛ1 == "udp"u8: {
                 var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, (@string)(b.slice(0, n)));
-                (peer, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
+                (peer, err) = (new global::go.net_package.UDPAddrжAddr(ᴛ1), ᴛ2);
                 break;
             }
             case {} when exprᴛ1 == "unixgram"u8: {
                 var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, (@string)(b.slice(0, n)));
-                (peer, err) = (new global::go.net_package.UnixAddrжΔAddr(ᴛ1), ᴛ2);
+                (peer, err) = (new global::go.net_package.UnixAddrжAddr(ᴛ1), ᴛ2);
                 break;
             }}
             if (err != nil) {
@@ -581,10 +602,10 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
     finally { ᒐ.Run(); }
 }
 
-internal static void packetTransceiver(global::go.net_package.PacketConn c, slice<byte> wb, global::go.net_package.ΔAddr dst, channel/*<-*/<error> ch) {
+internal static void packetTransceiver(global::go.net_package.PacketConn c, slice<byte> wb, global::go.net_package.Addr dst, channel/*<-*/<error> ch) {
     GoFrame ᒐ = default;
     try {
-        defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
 
         c.SetDeadline(time.Now().Add(someTimeout));
         c.SetReadDeadline(time.Now().Add(someTimeout));
@@ -760,14 +781,13 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
         Func<slice<byte>, (nint, error)> fn = default;
         {
             @string op = Δos.Getenv("GO_NET_TEST_TRANSFER_OP");
-            var exprᴛ1 = op;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "r"u8: {
+            case {} when op == "r"u8: {
                 var connʗ1 = conn;
                                 fn = connʗ1.Read;
                 break;
             }
-            case {} when exprᴛ1 == "w"u8: {
+            case {} when op == "w"u8: {
                 var connʗ2 = conn;
                 defer(() => connʗ2.Close(), ref ᒐ);
 

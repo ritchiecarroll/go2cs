@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using slogꓸHandler = go.log.slog_package.ΔHandler;
-global using slogꓸLevel = go.log.slog_package.ΔLevel;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,7 +36,7 @@ using static go.log.slog.@internal.benchmarks_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<fastTextHandler, go.log.slog_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<fastTextHandler, go.log.slog_package.Handler>(Pointer = true)]
 [assembly: GoImplement<go.log.slog.@internal.buffer_package.Buffer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
@@ -62,7 +58,7 @@ using static go.log.slog.@internal.benchmarks_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "AClSuIKW", "", "", "49=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
-[assembly: GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqYACQTSgqSCgoKUgoKCgoKSgoKCgpSCgtailLS0tLS0tLSClMTWyKKmgqaCAA8ggqaUooKCpoKmguyClIKmgg==", "50-56:1")]
+[assembly: GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB48gsYACQTSgqSCgoKUgoKCgoKSgoKCgpSCgtailLS0tLS0tLSClMTWyKKmgqaCABEggsaUooKCpoKmggAKDIKUgqaC", "50-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;
@@ -100,3 +96,15 @@ public static partial class benchmarks_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(benchmarks_package.asyncHandler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class benchmarksᴛasyncHandler;
+[GoMethodHost(typeof(benchmarks_package.disabledHandler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class benchmarksᴛdisabledHandler;
+[GoMethodHost(typeof(benchmarks_package.fastTextHandler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class benchmarksᴛfastTextHandler;
+// </MethodHolders>

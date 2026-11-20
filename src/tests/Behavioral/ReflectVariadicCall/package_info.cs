@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAwkooKClKiigoKUqKKoooKCpsyigoKUqKKCgoKmAAYSooKClKaigoKUgoKClKakgpaClpaClqaWloKapIKCgpSUtLSCgpSmgoKUgoKCpoKCmICSgLaygoKmgg==", "132-141:1;142-142:2;143-149:3;167-167:4;168-168:5;172-176:1", "", "117=ValueOf/2/4/1,ValueOf/3/4/1,ValueOf/4/4/1;159=Type/1/4/1,IsVariadic/1/1/1,Type/2/4/1,NumIn/1/2/1,Type/3/4/1,Type/4/4/1,NumIn/2/2/1,In/1/1/1", "", "178:21,179:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA0kooKClKiigoKUqKKoooKCpsyigoKUqKKCgoKmAAgSooKClMaigoKUgoKClKakgpaClpaClqaWloKapIKCgpSUtLSCgpSmgoKUgoKCpoKCmICSgLaygoKmgg==", "132-141:1;142-142:2;143-149:3;167-167:4;168-168:5;172-176:1", "", "122=ValueOf/2/4/1,ValueOf/3/4/1,ValueOf/4/4/1;164=Type/1/4/1,IsVariadic/1/1/1,Type/2/4/1,NumIn/1/2/1,Type/3/4/1,Type/4/4/1,NumIn/2/2/1,In/1/1/1", "", "183:21,184:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -82,3 +81,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounter;
+// </MethodHolders>

@@ -18,6 +18,7 @@ using slices = slices_package;
 using sync = sync_package;
 using @internal;
 using go.math;
+using static big_package;
 
 partial class big_package {
 
@@ -32,18 +33,20 @@ partial class big_package {
 // During arithmetic operations, denormalized values may occur but are
 // always normalized before returning the final result. The normalized
 // representation of 0 is the empty or nil slice (length = 0).
-partial struct Δnat /*[]Word*/;
+partial struct nat /*[]Word*/;
 
-internal static Δnat natOne = new Δnat(new Word[]{1}.slice());
-internal static Δnat natTwo = new Δnat(new Word[]{2}.slice());
-internal static Δnat natFive = new Δnat(new Word[]{5}.slice());
-internal static Δnat natTen = new Δnat(new Word[]{10}.slice());
+internal static nat natOne = new nat(new Word[]{1}.slice());
+internal static nat natTwo = new nat(new Word[]{2}.slice());
+internal static nat natFive = new nat(new Word[]{5}.slice());
+internal static nat natTen = new nat(new Word[]{10}.slice());
 
-internal static @string String(this Δnat z) {
+} partial class bigᴛnat {
+
+internal static @string String(this nat z) {
     return "0x"u8 + ((sstring)z.itoa(false, 16));
 }
 
-internal static Δnat norm(this Δnat z) {
+internal static nat norm(this nat z) {
     nint i = len(z);
     while (i > 0 && z[i - 1] == 0) {
         i--;
@@ -51,21 +54,21 @@ internal static Δnat norm(this Δnat z) {
     return z.slice(0, i);
 }
 
-internal static Δnat make(this Δnat z, nint n) {
+internal static nat make(this nat z, nint n) {
     if (n <= cap(z)) {
         return z.slice(0, n); // reuse z
     }
     if (n == 1) {
         // Most nats start small and stay that way; don't over-allocate.
-        return new Δnat(1);
+        return new nat(1);
     }
     // Choosing a good value for e has significant performance impact
     // because it increases the chance that a value can be reused.
     const nint e = 4; // extra capacity
-    return new Δnat(n, n + e);
+    return new nat(n, n + e);
 }
 
-internal static Δnat setWord(this Δnat z, Word x) {
+internal static nat setWord(this nat z, Word x) {
     if (x == 0) {
         return z[..0];
     }
@@ -74,7 +77,7 @@ internal static Δnat setWord(this Δnat z, Word x) {
     return z;
 }
 
-internal static Δnat setUint64(this Δnat z, uint64 x) {
+internal static nat setUint64(this nat z, uint64 x) {
     // single-word value
     Word w = (Word)(nuint)x; if ((uint64)w == x) {
         return z.setWord(w);
@@ -86,13 +89,13 @@ internal static Δnat setUint64(this Δnat z, uint64 x) {
     return z;
 }
 
-internal static Δnat set(this Δnat z, Δnat x) {
+internal static nat set(this nat z, nat x) {
     z = z.make(len(x));
     copy(z, x);
     return z;
 }
 
-internal static Δnat add(this Δnat z, Δnat x, Δnat y) {
+internal static nat add(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
 
@@ -120,7 +123,7 @@ internal static Δnat add(this Δnat z, Δnat x, Δnat y) {
     return z.norm();
 }
 
-internal static Δnat sub(this Δnat z, Δnat x, Δnat y) {
+internal static nat sub(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
 
@@ -151,7 +154,7 @@ internal static Δnat sub(this Δnat z, Δnat x, Δnat y) {
     return z.norm();
 }
 
-internal static nint /*r*/ cmp(this Δnat x, Δnat y) {
+internal static nint /*r*/ cmp(this nat x, nat y) {
     nint r = default;
 
     nint m = len(x);
@@ -195,7 +198,7 @@ internal static nint /*r*/ cmp(this Δnat x, Δnat y) {
 // In the terminology of that paper, this is an "Almost Montgomery Multiplication":
 // x and y are required to satisfy 0 <= z < 2**(n*_W) and then the result
 // z is guaranteed to satisfy 0 <= z < 2**(n*_W), but it may not be < m.
-internal static Δnat montgomery(this Δnat z, Δnat x, Δnat y, Δnat m, Word k, nint n) {
+internal static nat montgomery(this nat z, nat x, nat y, nat m, Word k, nint n) {
     // This code assumes x, y, m are all the same length, n.
     // (required by addMulVVW and the for loop).
     // It also assumes that x, y are already reduced mod m,
@@ -228,20 +231,22 @@ internal static Δnat montgomery(this Δnat z, Δnat x, Δnat y, Δnat m, Word k
     return z.slice(0, n);
 }
 
+} partial class big_package {
+
 // alias reports whether x and y share the same base array.
 //
 // Note: alias assumes that the capacity of underlying arrays
 // is never changed for nat values; i.e. that there are
 // no 3-operand slice expressions in this code (or worse,
 // reflect-based operations to the same effect).
-internal static bool alias(Δnat x, Δnat y) {
+internal static bool alias(nat x, nat y) {
     return cap(x) > 0 && cap(y) > 0 && Ꮡelem<Word>(x.slice(0, cap(x)), cap(x) - 1) == Ꮡelem<Word>(y.slice(0, cap(y)), cap(y) - 1);
 }
 
 // addTo implements z += x; z must be long enough.
 // (we don't use nat.add because we need z to stay the same
 // slice, and we don't need to normalize z after each addition)
-internal static void addTo(Δnat z, Δnat x) {
+internal static void addTo(nat z, nat x) {
     nint n = len(x); if (n > 0) {
         Word c = addVV(z.slice(0, n), z.slice(0, n), x.slice(0, n)); if (c != 0) {
             if (n < len(z)) {
@@ -251,10 +256,12 @@ internal static void addTo(Δnat z, Δnat x) {
     }
 }
 
+} partial class bigᴛnat {
+
 // mulRange computes the product of all the unsigned integers in the
 // range [a, b] inclusively. If a > b (empty range), the result is 1.
 // The caller may pass stk == nil to request that mulRange obtain and release one itself.
-internal static Δnat mulRange(this Δnat z, ж<stack> Ꮡstk, uint64 a, uint64 b) {
+internal static nat mulRange(this nat z, ж<stack> Ꮡstk, uint64 a, uint64 b) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -271,7 +278,7 @@ internal static Δnat mulRange(this Δnat z, ж<stack> Ꮡstk, uint64 a, uint64 
             return z.setUint64(a);
         }
         case {} when a + 1 == b: {
-            return z.mul(Ꮡstk, ((Δnat)default).setUint64(a), ((Δnat)default).setUint64(b));
+            return z.mul(Ꮡstk, ((nat)default).setUint64(a), ((nat)default).setUint64(b));
         }}
 
         if (Ꮡstk == nil) {
@@ -280,11 +287,13 @@ internal static Δnat mulRange(this Δnat z, ж<stack> Ꮡstk, uint64 a, uint64 
         }
 
         var m = a + (b - a) / 2; // avoid overflow
-        return z.mul(Ꮡstk, ((Δnat)default).mulRange(Ꮡstk, a, m), ((Δnat)default).mulRange(Ꮡstk, m + 1, b));
+        return z.mul(Ꮡstk, ((nat)default).mulRange(Ꮡstk, a, m), ((nat)default).mulRange(Ꮡstk, m + 1, b));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class big_package {
 
 // A stack provides temporary storage for complex calculations
 // such as multiplication and division.
@@ -311,6 +320,8 @@ internal static ж<stack> getStack() {
     }
     return s;
 }
+
+} partial class bigᴛstack {
 
 // free returns the stack for use by another calculation.
 internal static void free(this ж<stack> Ꮡs) {
@@ -339,7 +350,7 @@ internal static void restore(this ref stack s, nint n) {
 }
 
 // nat returns a nat of n words, allocated on the stack.
-internal static Δnat nat(this ref stack s, nint n) {
+internal static nat nat(this ref stack s, nint n) {
     nint nr = (n + 3) & ~(nint)3; // round up to multiple of 4
     nint off = len(s.w);
     s.w = slices.Grow<slice<Word>, Word>(s.w, nr);
@@ -351,9 +362,11 @@ internal static Δnat nat(this ref stack s, nint n) {
     return x;
 }
 
+} partial class bigᴛnat {
+
 // bitLen returns the length of x in bits.
 // Unlike most methods, it works even if x is not normalized.
-internal static nint bitLen(this Δnat x) {
+internal static nint bitLen(this nat x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -375,7 +388,7 @@ internal static nint bitLen(this Δnat x) {
 
 // trailingZeroBits returns the number of consecutive least significant zero
 // bits of x.
-internal static nuint trailingZeroBits(this Δnat x) {
+internal static nuint trailingZeroBits(this nat x) {
     if (len(x) == 0) {
         return 0;
     }
@@ -388,7 +401,7 @@ internal static nuint trailingZeroBits(this Δnat x) {
 }
 
 // isPow2 returns i, true when x == 2**i and 0, false otherwise.
-internal static (nuint, bool) isPow2(this Δnat x) {
+internal static (nuint, bool) isPow2(this nat x) {
     nuint i = default;
     while (x[i] == 0) {
         i++;
@@ -399,12 +412,16 @@ internal static (nuint, bool) isPow2(this Δnat x) {
     return (0, false);
 }
 
-internal static bool same(Δnat x, Δnat y) {
+} partial class big_package {
+
+internal static bool same(nat x, nat y) {
     return len(x) == len(y) && len(x) > 0 && Ꮡelem<Word>(x, 0) == Ꮡelem<Word>(y, 0);
 }
 
+} partial class bigᴛnat {
+
 // z = x << s
-internal static Δnat lsh(this Δnat z, Δnat x, nuint s) {
+internal static nat lsh(this nat z, nat x, nuint s) {
     if (s == 0) {
         if (same(z, x)) {
             return z;
@@ -434,7 +451,7 @@ internal static Δnat lsh(this Δnat z, Δnat x, nuint s) {
 }
 
 // z = x >> s
-internal static Δnat rsh(this Δnat z, Δnat x, nuint s) {
+internal static nat rsh(this nat z, nat x, nuint s) {
     if (s == 0) {
         if (same(z, x)) {
             return z;
@@ -461,7 +478,7 @@ internal static Δnat rsh(this Δnat z, Δnat x, nuint s) {
     return z.norm();
 }
 
-internal static Δnat setBit(this Δnat z, Δnat x, nuint i, nuint b) {
+internal static nat setBit(this nat z, nat x, nuint i, nuint b) {
     nint j = (nint)(i / (nuint)_W);
     Word m = ((Word)1) << (int)(i % (nuint)_W);
     nint n = len(x);
@@ -492,7 +509,7 @@ internal static Δnat setBit(this Δnat z, Δnat x, nuint i, nuint b) {
 }
 
 // bit returns the value of the i'th bit, with lsb == bit 0.
-internal static nuint bit(this Δnat x, nuint i) {
+internal static nuint bit(this nat x, nuint i) {
     nuint j = i / (nuint)_W;
     if (j >= (nuint)len(x)) {
         return 0;
@@ -503,7 +520,7 @@ internal static nuint bit(this Δnat x, nuint i) {
 
 // sticky returns 1 if there's a 1 bit within the
 // i least significant bits, otherwise it returns 0.
-internal static nuint sticky(this Δnat x, nuint i) {
+internal static nuint sticky(this nat x, nuint i) {
     nuint j = i / (nuint)_W;
     if (j >= (nuint)len(x)) {
         if (len(x) == 0) {
@@ -523,7 +540,7 @@ internal static nuint sticky(this Δnat x, nuint i) {
     return 0;
 }
 
-internal static Δnat and(this Δnat z, Δnat x, Δnat y) {
+internal static nat and(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     if (m > n) {
@@ -540,7 +557,7 @@ internal static Δnat and(this Δnat z, Δnat x, Δnat y) {
 }
 
 // trunc returns z = x mod 2ⁿ.
-internal static Δnat trunc(this Δnat z, Δnat x, nuint n) {
+internal static nat trunc(this nat z, nat x, nuint n) {
     nuint w = (n + (nuint)_W - 1) / (nuint)_W;
     if ((nuint)len(x) < w) {
         return z.set(x);
@@ -553,7 +570,7 @@ internal static Δnat trunc(this Δnat z, Δnat x, nuint n) {
     return z.norm();
 }
 
-internal static Δnat andNot(this Δnat z, Δnat x, Δnat y) {
+internal static nat andNot(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     if (n > m) {
@@ -570,7 +587,7 @@ internal static Δnat andNot(this Δnat z, Δnat x, Δnat y) {
     return z.norm();
 }
 
-internal static Δnat or(this Δnat z, Δnat x, Δnat y) {
+internal static nat or(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     var s = x;
@@ -589,7 +606,7 @@ internal static Δnat or(this Δnat z, Δnat x, Δnat y) {
     return z.norm();
 }
 
-internal static Δnat xor(this Δnat z, Δnat x, Δnat y) {
+internal static nat xor(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     var s = x;
@@ -610,7 +627,7 @@ internal static Δnat xor(this Δnat z, Δnat x, Δnat y) {
 
 // random creates a random integer in [0..limit), using the space in z if
 // possible. n is the bit length of limit.
-internal static Δnat random(this Δnat z, ж<rand.Rand> Ꮡrand, Δnat limit, nint n) {
+internal static nat random(this nat z, ж<rand.Rand> Ꮡrand, nat limit, nint n) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     if (alias(z, limit)) {
@@ -654,7 +671,7 @@ internal static Δnat random(this Δnat z, ж<rand.Rand> Ꮡrand, Δnat limit, n
 // If m != 0 (i.e., len(m) != 0), expNN sets z to x**y mod m;
 // otherwise it sets z to x**y. The result is the value of z.
 // The caller may pass stk == nil to request that expNN obtain and release one itself.
-internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δnat m, bool slow) {
+internal static nat expNN(this nat z, ж<stack> Ꮡstk, nat x, nat y, nat m, bool slow) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -726,7 +743,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
         Word v = y[len(y) - 1]; // v > 0 because y is normalized and y > 0
         nuint shift = nlz(v) + 1;
         v <<= shift;
-        Δnat q = default;
+        nat q = default;
 
         UntypedInt mask = /* 1 << (_W - 1) */ 9223372036854775808;
 
@@ -737,8 +754,8 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
         nint w = (nint)_W - (nint)shift;
         // zz and r are used to avoid allocating in mul and div as
         // otherwise the arguments would alias.
-        Δnat zz = default;
-        Δnat r = default;
+        nat zz = default;
+        nat r = default;
         for (nint j = 0; j < w; j++) {
             zz = zz.sqr(Ꮡstk, z);
             (zz, z) = (z, zz);
@@ -791,11 +808,11 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
 // For more details, see Ç. K. Koç, “Montgomery Reduction with Even Modulus”,
 // IEE Proceedings: Computers and Digital Techniques, 141(5) 314-316, September 1994.
 // http://www.people.vcu.edu/~jwang3/CMSC691/j34monex.pdf
-internal static Δnat expNNMontgomeryEven(this Δnat z, ж<stack> stk, Δnat x, Δnat y, Δnat m) {
+internal static nat expNNMontgomeryEven(this nat z, ж<stack> stk, nat x, nat y, nat m) {
     // Split m = m₁ × m₂ where m₁ = 2ⁿ
     nuint n = m.trailingZeroBits();
-    var m1 = ((Δnat)default).lsh(natOne, n);
-    var m2 = ((Δnat)default).rsh(m, n);
+    var m1 = ((nat)default).lsh(natOne, n);
+    var m2 = ((nat)default).rsh(m, n);
 
     // We want z = x**y mod m.
     // z₁ = x**y mod m1 = (x**y mod m) mod m1 = z mod m1
@@ -803,8 +820,8 @@ internal static Δnat expNNMontgomeryEven(this Δnat z, ж<stack> stk, Δnat x, 
     // (We are using the math/big convention for names here,
     // where the computation is z = x**y mod m, so its parts are z1 and z2.
     // The paper is computing x = a**e mod n; it refers to these as x2 and z1.)
-    var z1 = ((Δnat)default).expNN(stk, x, y, m1, false);
-    var z2 = ((Δnat)default).expNN(stk, x, y, m2, false);
+    var z1 = ((nat)default).expNN(stk, x, y, m1, false);
+    var z2 = ((nat)default).expNN(stk, x, y, m2, false);
 
     // Reconstruct z from z₁, z₂ using CRT, using algorithm from paper,
     // which uses only a single modInverse (and an easy one at that).
@@ -822,7 +839,7 @@ internal static Δnat expNNMontgomeryEven(this Δnat z, ж<stack> stk, Δnat x, 
     z1 = z1.subMod2N(z1, z2, n);
 
     // Reuse z2 for p = (z₁ - z₂) [in z1] * m2⁻¹ (mod m₁ [= 2ⁿ]).
-    var m2inv = ((Δnat)default).modInverse(m2, m1);
+    var m2inv = ((nat)default).modInverse(m2, m1);
     z2 = z2.mul(stk, z1, m2inv);
     z2 = z2.trunc(z2, n);
 
@@ -834,7 +851,7 @@ internal static Δnat expNNMontgomeryEven(this Δnat z, ж<stack> stk, Δnat x, 
 
 // expNNWindowed calculates x**y mod m using a fixed, 4-bit window,
 // where m = 2**logM.
-internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, nuint logM) {
+internal static nat expNNWindowed(this nat z, ж<stack> Ꮡstk, nat x, nat y, nuint logM) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -859,14 +876,14 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
 
         UntypedInt n = 4;
         // powers[i] contains x^i.
-        ref var powers = ref heap(new array<Δnat>(16), out var Ꮡpowers);
+        ref var powers = ref heap(new array<nat>(16), out var Ꮡpowers);
         foreach (var iΔ1 in range(len(powers))) {
             powers[iΔ1] = stk.nat(w);
         }
         powers[0] = powers[0].set(natOne);
         powers[1] = powers[1].trunc(x, logM);
         for (nint iΔ2 = 2; iΔ2 < (nint)(1 << (int)(n)); iΔ2 += 2) {
-            var (p2, p, p1) = (Ꮡpowers.at<Δnat>(iΔ2 / 2), Ꮡpowers.at<Δnat>(iΔ2), Ꮡpowers.at<Δnat>(iΔ2 + 1));
+            var (p2, p, p1) = (Ꮡpowers.at<nat>(iΔ2 / 2), Ꮡpowers.at<nat>(iΔ2), Ꮡpowers.at<nat>(iΔ2 + 1));
             p.ValueSlot = p.sqr(Ꮡstk, p2.ValueSlot);
             p.ValueSlot = p.trunc(p.ValueSlot, logM);
             p1.ValueSlot = p1.mul(Ꮡstk, p.ValueSlot, x);
@@ -934,17 +951,17 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
 
 // expNNMontgomery calculates x**y mod m using a fixed, 4-bit window.
 // Uses Montgomery representation.
-internal static Δnat expNNMontgomery(this Δnat z, ж<stack> stk, Δnat x, Δnat y, Δnat m) {
+internal static nat expNNMontgomery(this nat z, ж<stack> stk, nat x, nat y, nat m) {
     nint numWords = len(m);
 
     // We want the lengths of x and m to be equal.
     // It is OK if x >= m as long as len(x) == len(m).
     if (len(x) > numWords) {
-        (_, x) = ((Δnat)default).div(stk, default, x, m);
+        (_, x) = ((nat)default).div(stk, default, x, m);
         // Note: now len(x) <= numWords, not guaranteed ==.
     }
     if (len(x) < numWords) {
-        var rr = new Δnat(numWords);
+        var rr = new nat(numWords);
         copy(rr, x);
         x = rr;
     }
@@ -961,21 +978,21 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> stk, Δnat x, Δna
     k0 = ((Word)0 - k0);
 
     // RR = 2**(2*_W*len(m)) mod m
-    var RR = ((Δnat)default).setWord(1);
-    var zz = ((Δnat)default).lsh(RR, (nuint)(2 * numWords * (nint)_W));
-    (_, RR) = ((Δnat)default).div(stk, RR, zz, m);
+    var RR = ((nat)default).setWord(1);
+    var zz = ((nat)default).lsh(RR, (nuint)(2 * numWords * (nint)_W));
+    (_, RR) = ((nat)default).div(stk, RR, zz, m);
     if (len(RR) < numWords) {
         zz = zz.make(numWords);
         copy(zz, RR);
         RR = zz;
     }
     // one = 1, with equal length to that of m
-    var one = new Δnat(numWords);
+    var one = new nat(numWords);
     one[0] = 1;
 
     UntypedInt n = 4;
     // powers[i] contains x^i
-    array<Δnat> powers = new(16); /* (1 << (int)(n)) */
+    array<nat> powers = new(16); /* (1 << (int)(n)) */
     powers[0] = powers[0].montgomery(one, RR, m, k0, numWords);
     powers[1] = powers[1].montgomery(x, RR, m, k0, numWords);
     for (nint i = 2; i < (nint)(1 << (int)(n)); i++) {
@@ -1018,7 +1035,7 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> stk, Δnat x, Δna
         // The div is not expected to be reached.
         zz = zz.sub(zz, m);
         if (zz.cmp(m) >= 0) {
-            (_, zz) = ((Δnat)default).div(stk, default, zz, m);
+            (_, zz) = ((nat)default).div(stk, default, zz, m);
         }
     }
 
@@ -1029,7 +1046,7 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> stk, Δnat x, Δna
 // The value of z is encoded in the slice buf[i:]. If the value of z
 // cannot be represented in buf, bytes panics. The number i of unused
 // bytes at the beginning of buf is returned as result.
-internal static nint /*i*/ bytes(this Δnat z, slice<byte> buf) {
+internal static nint /*i*/ bytes(this nat z, slice<byte> buf) {
     nint i = default;
 
     // This function is used in cryptographic operations. It must not leak
@@ -1060,6 +1077,8 @@ internal static nint /*i*/ bytes(this Δnat z, slice<byte> buf) {
     return i;
 }
 
+} partial class big_package {
+
 // bigEndianWord returns the contents of buf interpreted as a big-endian encoded Word value.
 internal static Word bigEndianWord(slice<byte> buf) {
     if (_W == 64) {
@@ -1068,9 +1087,11 @@ internal static Word bigEndianWord(slice<byte> buf) {
     return (Word)(nuint)byteorder.BEUint32(buf);
 }
 
+} partial class bigᴛnat {
+
 // setBytes interprets buf as the bytes of a big-endian unsigned
 // integer, sets z to that value, and returns z.
-internal static Δnat setBytes(this Δnat z, slice<byte> buf) {
+internal static nat setBytes(this nat z, slice<byte> buf) {
     z = z.make((len(buf) + (nint)_S - 1) / (nint)_S);
 
     nint i = len(buf);
@@ -1092,7 +1113,7 @@ internal static Δnat setBytes(this Δnat z, slice<byte> buf) {
 
 // sqrt sets z = ⌊√x⌋
 // The caller may pass stk == nil to request that sqrt obtain and release one itself.
-internal static Δnat sqrt(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
+internal static nat sqrt(this nat z, ж<stack> Ꮡstk, nat x) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -1114,8 +1135,8 @@ internal static Δnat sqrt(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
         // https://members.loria.fr/PZimmermann/mca/pub226.html
         // If x is one less than a perfect square, the sequence oscillates between the correct z and z+1;
         // otherwise it converges to the correct z and stays there.
-        Δnat z1 = default;
-        Δnat z2 = default;
+        nat z1 = default;
+        nat z2 = default;
         z1 = z;
         z1 = z1.setUint64(1);
         z1 = z1.lsh(z1, (nuint)(x.bitLen() + 1) / 2); // must be ≥ √x
@@ -1139,13 +1160,13 @@ internal static Δnat sqrt(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
 }
 
 // subMod2N returns z = (x - y) mod 2ⁿ.
-internal static Δnat subMod2N(this Δnat z, Δnat x, Δnat y, nuint n) {
+internal static nat subMod2N(this nat z, nat x, nat y, nuint n) {
     if ((nuint)x.bitLen() > n) {
         if (alias(z, x)) {
             // ok to overwrite x in place
             x = x.trunc(x, n);
         } else {
-            x = ((Δnat)default).trunc(x, n);
+            x = ((nat)default).trunc(x, n);
         }
     }
     if ((nuint)y.bitLen() > n) {
@@ -1153,7 +1174,7 @@ internal static Δnat subMod2N(this Δnat z, Δnat x, Δnat y, nuint n) {
             // ok to overwrite y in place
             y = y.trunc(y, n);
         } else {
-            y = ((Δnat)default).trunc(y, n);
+            y = ((nat)default).trunc(y, n);
         }
     }
     if (x.cmp(y) >= 0) {
@@ -1171,4 +1192,4 @@ internal static Δnat subMod2N(this Δnat z, Δnat x, Δnat y, nuint n) {
     return z.add(z, natOne);
 }
 
-} // end big_package
+} // end bigᴛnat

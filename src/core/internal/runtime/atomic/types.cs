@@ -4,7 +4,11 @@
 namespace go.@internal.runtime;
 
 using @unsafe = unsafe_package;
-using System.Runtime.InteropServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using atomic = atomic_package;
+using static atomic_package;
 
 partial class atomic_package {
 
@@ -15,6 +19,8 @@ partial class atomic_package {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal int32 value;
 }
+
+} partial class atomicᴛInt32 {
 
 // Load accesses and returns the value atomically.
 //
@@ -58,6 +64,8 @@ public static int32 Add(this ж<Int32> Ꮡi, int32 delta) {
     return Xaddint32(Ꮡi.Ꮡvalue, delta);
 }
 
+} partial class atomic_package {
+
 // Int64 is an atomically accessed int64 value.
 //
 // 8-byte aligned on all platforms, unlike a regular int64.
@@ -68,6 +76,8 @@ public static int32 Add(this ж<Int32> Ꮡi, int32 delta) {
     [FieldOffset(0)] internal readonly align64 _;
     [FieldOffset(0)] internal int64 value;
 }
+
+} partial class atomicᴛInt64 {
 
 // Load accesses and returns the value atomically.
 //
@@ -111,6 +121,8 @@ public static int64 Add(this ж<Int64> Ꮡi, int64 delta) {
     return Xaddint64(Ꮡi.Ꮡvalue, delta);
 }
 
+} partial class atomic_package {
+
 // Uint8 is an atomically accessed uint8 value.
 //
 // A Uint8 must not be copied.
@@ -118,6 +130,8 @@ public static int64 Add(this ж<Int64> Ꮡi, int64 delta) {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal uint8 value;
 }
+
+} partial class atomicᴛUint8 {
 
 // Load accesses and returns the value atomically.
 //
@@ -155,6 +169,8 @@ public static void Or(this ж<Uint8> Ꮡu, uint8 value) {
     Or8(Ꮡu.Ꮡvalue, value);
 }
 
+} partial class atomic_package {
+
 // Bool is an atomically accessed bool value.
 //
 // A Bool must not be copied.
@@ -162,6 +178,8 @@ partial struct Bool {
     // Inherits noCopy from Uint8.
     internal Uint8 u;
 }
+
+} partial class atomicᴛBool {
 
 // Load accesses and returns the value atomically.
 //
@@ -181,6 +199,8 @@ public static void Store(this ж<Bool> Ꮡb, bool value) {
     Ꮡb.Ꮡu.Store(s);
 }
 
+} partial class atomic_package {
+
 // Uint32 is an atomically accessed uint32 value.
 //
 // A Uint32 must not be copied.
@@ -189,11 +209,13 @@ public static void Store(this ж<Bool> Ꮡb, bool value) {
     [FieldOffset(0)] internal uint32 value;
 }
 
+} partial class atomicᴛUint32 {
+
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
 public static uint32 Load(this ж<Uint32> Ꮡu) {
-    return Load(Ꮡu.Ꮡvalue);
+    return atomic.Load(Ꮡu.Ꮡvalue);
 }
 
 // LoadAcquire is a partially unsynchronized version
@@ -213,7 +235,7 @@ public static uint32 LoadAcquire(this ж<Uint32> Ꮡu) {
 //
 //go:nosplit
 public static void Store(this ж<Uint32> Ꮡu, uint32 value) {
-    Store(Ꮡu.Ꮡvalue, value);
+    atomic.Store(Ꮡu.Ꮡvalue, value);
 }
 
 // StoreRelease is a partially unsynchronized version
@@ -268,7 +290,7 @@ public static uint32 Swap(this ж<Uint32> Ꮡu, uint32 value) {
 //
 //go:nosplit
 public static void And(this ж<Uint32> Ꮡu, uint32 value) {
-    And(Ꮡu.Ꮡvalue, value);
+    atomic.And(Ꮡu.Ꮡvalue, value);
 }
 
 // Or takes value and performs a bit-wise
@@ -279,7 +301,7 @@ public static void And(this ж<Uint32> Ꮡu, uint32 value) {
 //
 //go:nosplit
 public static void Or(this ж<Uint32> Ꮡu, uint32 value) {
-    Or(Ꮡu.Ꮡvalue, value);
+    atomic.Or(Ꮡu.Ꮡvalue, value);
 }
 
 // Add adds delta to u atomically, returning
@@ -293,6 +315,8 @@ public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) {
     return Xadd(Ꮡu.Ꮡvalue, delta);
 }
 
+} partial class atomic_package {
+
 // Uint64 is an atomically accessed uint64 value.
 //
 // 8-byte aligned on all platforms, unlike a regular uint64.
@@ -303,6 +327,8 @@ public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) {
     [FieldOffset(0)] internal readonly align64 _;
     [FieldOffset(0)] internal uint64 value;
 }
+
+} partial class atomicᴛUint64 {
 
 // Load accesses and returns the value atomically.
 //
@@ -346,6 +372,8 @@ public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) {
     return Xadd64(Ꮡu.Ꮡvalue, delta);
 }
 
+} partial class atomic_package {
+
 // Uintptr is an atomically accessed uintptr value.
 //
 // A Uintptr must not be copied.
@@ -353,6 +381,8 @@ public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal uintptr value;
 }
+
+} partial class atomicᴛUintptr {
 
 // Load accesses and returns the value atomically.
 //
@@ -422,6 +452,8 @@ public static uintptr Add(this ж<Uintptr> Ꮡu, uintptr delta) {
     return Xadduintptr(Ꮡu.Ꮡvalue, delta);
 }
 
+} partial class atomic_package {
+
 // Float64 is an atomically accessed float64 value.
 //
 // 8-byte aligned on all platforms, unlike a regular float64.
@@ -431,6 +463,8 @@ partial struct Float64 {
     // Inherits noCopy and align64 from Uint64.
     internal Uint64 u;
 }
+
+} partial class atomicᴛFloat64 {
 
 // Load accesses and returns the value atomically.
 //
@@ -447,6 +481,8 @@ public static void Store(this ж<Float64> Ꮡf, float64 value) {
     Ꮡf.Ꮡu.Store(bitcast<float64, uint64>(value));
 }
 
+} partial class atomic_package {
+
 // UnsafePointer is an atomically accessed unsafe.Pointer value.
 //
 // Note that because of the atomicity guarantees, stores to values
@@ -460,6 +496,8 @@ partial struct UnsafePointer {
     internal noCopy noCopy;
     internal @unsafe.Pointer value;
 }
+
+} partial class atomicᴛUnsafePointer {
 
 // Load accesses and returns the value atomically.
 //
@@ -486,10 +524,14 @@ public static void Store(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
     storePointer(Ꮡu.Ꮡvalue, value);
 }
 
+} partial class atomic_package {
+
 // provided by runtime
 //
 //go:linkname storePointer
 internal static partial void storePointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer @new);
+
+} partial class atomicᴛUnsafePointer {
 
 // CompareAndSwapNoWB atomically (with respect to other methods)
 // compares u's value with old, and if they're equal,
@@ -514,12 +556,16 @@ public static bool CompareAndSwap(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer o
     return casPointer(Ꮡu.Ꮡvalue, old, @new);
 }
 
+} partial class atomic_package {
+
 internal static partial bool casPointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer old, @unsafe.Pointer @new);
 
 // Pointer is an atomic pointer of type *T.
 partial struct Pointer<T> {
     internal UnsafePointer u;
 }
+
+} partial class atomicᴛPointer {
 
 // Load accesses and returns the value atomically.
 //
@@ -572,6 +618,8 @@ public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> 
     return Ꮡp.Ꮡu.CompareAndSwap(@unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
 
+} partial class atomic_package {
+
 // noCopy may be embedded into structs which must not be copied
 // after the first use.
 //
@@ -580,9 +628,13 @@ public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> 
 partial struct noCopy {
 }
 
+} partial class atomicᴛnoCopy {
+
 // Lock is a no-op used by -copylocks checker from `go vet`.
 internal static void Lock(this ref noCopy _) { }
 internal static void Unlock(this ref noCopy _) { }
+
+} partial class atomic_package {
 
 // align64 may be added to structs that must be 64-bit aligned.
 // This struct is recognized by a special case in the compiler

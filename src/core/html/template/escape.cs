@@ -16,6 +16,7 @@ using @internal;
 using text;
 using text.template;
 using ꓸꓸꓸany = Span<any>;
+using static template_package;
 
 partial class template_package {
 
@@ -30,9 +31,9 @@ internal static error escapeTemplate(ж<Template> Ꮡtmpl, parse.Node node, @str
     var (c, _) = tmpl.esc.escapeTree(new context(), node, name, 0);
     error err = default;
     if (c.err != nil) {
-        (err, c.err.Name) = (new ΔErrorжerror(c.err), name);
+        (err, c.err.Name) = (new Errorжerror(c.err), name);
     } else if (c.state != stateText) {
-        err = new ΔErrorжerror(Ꮡ(new ΔError(ErrEndContext, default, name, 0, fmt.Sprintf("ends in a non-text context: %v"u8, c))));
+        err = new Errorжerror(Ꮡ(new Error(ErrEndContext, default, name, 0, fmt.Sprintf("ends in a non-text context: %v"u8, c))));
     }
     if (err != nil) {
         // Prevent execution of unsafe templates.
@@ -71,7 +72,7 @@ internal static @string evalArgs(params ꓸꓸꓸany argsʗp) {
 }
 
 // funcMap maps command names to functions that render their inputs safe.
-[GoLazy] partial class lazyᴛfuncMap { internal static template.FuncMap funcMap = new text.template_package.FuncMap(new map<@string, any>{
+[GoLazy] partial class lazyᴛfuncMap { internal static template.FuncMap funcMap = new template.FuncMap(new map<@string, any>{
     ["_html_template_attrescaper"] = ((Funcꓸꓸꓸ<any, @string>)(attrEscaper)),
     ["_html_template_commentescaper"] = ((Funcꓸꓸꓸ<any, @string>)(commentEscaper)),
     ["_html_template_cssescaper"] = ((Funcꓸꓸꓸ<any, @string>)(cssEscaper)),
@@ -143,6 +144,8 @@ internal static escaper makeEscaper(ж<nameSpace> n) {
 internal static ref readonly @string filterFailsafe => ref filterFailsafeᵇ;
 private static readonly @string filterFailsafeᵇ = "ZgotmplZ"u8;
 
+} partial class templateᴛescaper {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
 private static readonly @string rangeˢᵇ = "range"u8;
@@ -189,9 +192,13 @@ internal static context escape(this ref escaper e, context c, parse.Node n) {
     throw panic("escaping " + n.String() + " is unimplemented");
 }
 
+} partial class template_package {
+
 internal static ж<godebug.Setting> debugAllowActionJSTmpl = godebug.New("jstmpllitinterp");
 
 internal static ж<godebug.Setting> htmlmetacontenturlescape = godebug.New("htmlmetacontenturlescape");
+
+} partial class templateᴛescaper {
 
 // escapeAction escapes an action template node.
 internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) {
@@ -345,6 +352,8 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
     e.editActionNode(Ꮡn, s);
     return c;
 }
+
+} partial class template_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string evalArgsˢ => ref evalArgsˢᵇ;
@@ -592,6 +601,8 @@ internal static context join(context a, context b, parse.Node node, @string node
     );
 }
 
+} partial class templateᴛescaper {
+
 // escapeBranch escapes a branch template node: "if", "range" and "with".
 internal static context escapeBranch(this ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -634,6 +645,12 @@ internal static context escapeBranch(this ref escaper e, context c, ж<parse.Bra
     return join(c0, c1, new parse.BranchNodeжNode(Ꮡn), nodeName);
 }
 
+} partial class template_package {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
+private static readonly @string rangeˢᵇ = "range"u8;
+
 internal static context joinRange(context c0, ref rangeContext rc) {
     // Merge contexts at break and continue statements into overall body context.
     // In theory we could treat breaks differently from continues, but for now it is
@@ -656,6 +673,8 @@ internal static context joinRange(context c0, ref rangeContext rc) {
     }
     return c0;
 }
+
+} partial class templateᴛescaper {
 
 // escapeList escapes a list template node.
 internal static context escapeList(this ref escaper e, context c, ж<parse.ListNode> Ꮡn) {
@@ -804,6 +823,8 @@ internal static (context, bool) escapeTemplateBody(this ref escaper e, context c
     return e.escapeListConditionally(c, t.Tree.Root, filter);
 }
 
+} partial class template_package {
+
 // delimEnds maps each delim to a string of characters that terminate it.
 internal static array<@string> delimEnds = new golib.SparseArray<@string>{
     [delimDoubleQuote] = @"""",
@@ -837,6 +858,8 @@ internal static slice<byte> escapeSpecialScriptTags(slice<byte> s) {
 }
 
 internal static slice<byte> doctypeBytes = slice<byte>("<!DOCTYPE"u8);
+
+} partial class templateᴛescaper {
 
 // escapeText escapes a text template node.
 internal static context escapeText(this ref escaper e, context c, ж<parse.TextNode> Ꮡn) {
@@ -922,6 +945,8 @@ internal static context escapeText(this ref escaper e, context c, ж<parse.TextN
     return c;
 }
 
+} partial class template_package {
+
 // contextAfterText starts in context c, consumes some tokens from the front of
 // s, then returns the context after those tokens and the unprocessed suffix.
 internal static (context, nint) contextAfterText(context c, slice<byte> s) {
@@ -984,6 +1009,8 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
     // except the state and element.
     return (new context(state: stateTag, element: element), i);
 }
+
+} partial class templateᴛescaper {
 
 // editActionNode records a change to an action pipeline for later commit.
 internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) {
@@ -1060,17 +1087,19 @@ internal static ж<Template> arbitraryTemplate(this ref escaper e) {
     throw panic("no templates in name space");
 }
 
+} partial class template_package {
+
 // Forwarding functions so that clients need only import this package
 // to reach the general escaping functions of text/template.
 
 // HTMLEscape writes to w the escaped HTML equivalent of the plain text data b.
 public static void HTMLEscape(io.Writer w, slice<byte> b) {
-    text.template_package.HTMLEscape(w, b);
+    template.HTMLEscape(w, b);
 }
 
 // HTMLEscapeString returns the escaped HTML equivalent of the plain text data s.
 public static @string HTMLEscapeString(@string s) {
-    return text.template_package.HTMLEscapeString(s);
+    return template.HTMLEscapeString(s);
 }
 
 // HTMLEscaper returns the escaped HTML equivalent of the textual
@@ -1078,17 +1107,17 @@ public static @string HTMLEscapeString(@string s) {
 public static @string HTMLEscaper(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    return text.template_package.HTMLEscaper(args.ꓸꓸꓸ);
+    return template.HTMLEscaper(args.ꓸꓸꓸ);
 }
 
 // JSEscape writes to w the escaped JavaScript equivalent of the plain text data b.
 public static void JSEscape(io.Writer w, slice<byte> b) {
-    text.template_package.JSEscape(w, b);
+    template.JSEscape(w, b);
 }
 
 // JSEscapeString returns the escaped JavaScript equivalent of the plain text data s.
 public static @string JSEscapeString(@string s) {
-    return text.template_package.JSEscapeString(s);
+    return template.JSEscapeString(s);
 }
 
 // JSEscaper returns the escaped JavaScript equivalent of the textual
@@ -1096,7 +1125,7 @@ public static @string JSEscapeString(@string s) {
 public static @string JSEscaper(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    return text.template_package.JSEscaper(args.ꓸꓸꓸ);
+    return template.JSEscaper(args.ꓸꓸꓸ);
 }
 
 // URLQueryEscaper returns the escaped value of the textual representation of
@@ -1104,7 +1133,7 @@ public static @string JSEscaper(params ꓸꓸꓸany argsʗp) {
 public static @string URLQueryEscaper(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    return text.template_package.URLQueryEscaper(args.ꓸꓸꓸ);
+    return template.URLQueryEscaper(args.ꓸꓸꓸ);
 }
 
 } // end template_package

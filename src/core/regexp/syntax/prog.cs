@@ -9,6 +9,7 @@ using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using ꓸꓸꓸstring = Span<@string>;
+using static syntax_package;
 
 partial class syntax_package {
 
@@ -51,12 +52,16 @@ internal static slice<@string> instOpNames = [
     "InstRuneAnyNotNL"
 ];
 
+} partial class syntaxᴛInstOp {
+
 public static @string String(this InstOp i) {
     if ((nuint)i >= (nuint)len(instOpNames)) {
         return ""u8;
     }
     return instOpNames[i];
 }
+
+} partial class syntax_package {
 
 // An EmptyOp specifies a kind or mixture of zero-width assertions.
 partial struct EmptyOp /*num:uint8*/;
@@ -126,6 +131,8 @@ partial struct Inst {
     public slice<rune> Rune;
 }
 
+} partial class syntaxᴛProg {
+
 public static @string String(this ж<Prog> Ꮡp) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     dumpProg(Ꮡb, Ꮡp);
@@ -141,6 +148,8 @@ internal static ж<Inst> skipNop(this ref Prog p, uint32 pc) {
     return i;
 }
 
+} partial class syntaxᴛInst {
+
 // op returns i.Op but merges all the Rune special cases into InstRune
 internal static InstOp op(this ref Inst i) {
     var op = i.Op;
@@ -151,6 +160,8 @@ internal static InstOp op(this ref Inst i) {
     }}
     return op;
 }
+
+} partial class syntaxᴛProg {
 
 // Prefix returns a literal string that all matches for the
 // regexp must start with. Complete is true if the prefix
@@ -204,7 +215,11 @@ break_Loop:;
     return flag;
 }
 
+} partial class syntax_package {
+
 internal static UntypedInt noMatch => -1;
+
+} partial class syntaxᴛInst {
 
 // MatchRune reports whether the instruction matches (and consumes) r.
 // It should only be called when i.Op == [InstRune].
@@ -307,6 +322,8 @@ public static @string String(this ж<Inst> Ꮡi) {
     dumpInst(Ꮡb, ref (Ꮡi).DerefOrNull());
     return b.String();
 }
+
+} partial class syntax_package {
 
 internal static void bw(ж<strings.Builder> b, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();

@@ -56,12 +56,12 @@ using static global::go.sort_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sort/example_keys_test.go", "example_keys_test.cs", "ABk2krgACBSSqJKokqYADBCkhoaGuoKUgpSClII=", "66-68:1;69-71:2;72-74:3;75-77:4")]
-[assembly: GoPositionMap("sort/example_multi_test.go", "example_multi_test.cs", "ABo4soKqwsySqJIAAhLihJKCgqa23KYAEh7EhoaGgriCpoKUgpSClII=", "95-97:1;98-100:2;101-103:3;104-106:4")]
-[assembly: GoPositionMap("sort/example_wrapper_test.go", "example_wrapper_test.cs", "AA0cAAgSgvz81IIACBKCgpSCggASJoKC")]
+[assembly: GoPositionMap("sort/example_keys_test.go", "example_keys_test.cs", "ABw2krgADBSSqJKoksYADBCkhoaGuoKUgpSClII=", "66-68:1;69-71:2;72-74:3;75-77:4")]
+[assembly: GoPositionMap("sort/example_multi_test.go", "example_multi_test.cs", "AB04soLKwuySqJIAAhLihJKCgqa23MYAEh7EhoaGgriCpoKUgpSClII=", "95-97:1;98-100:2;101-103:3;104-106:4")]
+[assembly: GoPositionMap("sort/example_wrapper_test.go", "example_wrapper_test.cs", "ABAcAAwSggALDAALDPSCAAgSgoKUgoIAEiaCgg==")]
 [assembly: GoPositionMap("sort/search_test.go", "search_test.cs", "ABAegrr0ABg8goKCggALCoKCgoKmppQAKmCykqiCggAFEKKClKaCgoKmgpKCgICSgpSCpoLMguQACBqCgoLKgoKCgoKC5oKClIKUgoK4ooK+soKSgoLe2oKSgpSUlJSCgpSClII=", "16-18:1;123-132:1;124-126:1.1;154-154:1;227-227:1;246-249:1", "", "30=f/1/12/13,f/2/12/14,f/3/12/15,f/4/12/16,f/5/12/17,f/6/12/18,f/7/12/19,f/8/12/20,f/9/12/21,f/10/12/22,f/11/12/23,f/12/12/24;187=SearchInts/1/1/5,SearchFloat64s/1/1/6,SearchStrings/1/1/7,Search/1/3/8,Search/2/3/9,Search/3/3/10")]
-[assembly: GoPositionMap("sort/sort_slices_benchmark_test.go", "sort_slices_benchmark_test.cs", "ABIosoKCgpSmgoKClKaCgoKUgsqigoKCgriigoKCgriigoKCgriigoKCgryigoKCgoKCgpSUpqKCgoKCuKKCgoKCuKKClIK4ooKUggAMGoKClIKCgoKUpoKCgoKmgpSCgsqigoKCgriigoKCgoI=", "167-167:1;186-186:1")]
-[assembly: GoPositionMap("sort/sort_test.go", "sort_test.cs", "ABYogoKUgoKCgoKCuIKCgoKCgrqSgpSCpoK4goKCgoKCuIKCgoKCuIKCgoKCuIKCgoKCuIKClpKCuIKCgpSCgpSClIKCuIKCgoKCgoKCgpSCypSCgpSCgoKmgoKCgoK4goKCgoIACBKClIKClJSCgrjGgoK4uIK0pKKCgoKUlIKCgoK4ooKCgpSUgoKCkriigoKClJSCgoKCuKKCgoKClIKCuKKCgoKClIKCuKKCgoKClIKCuKKCgoKClIKCuKKCgoKUgoKCgoK4ooKCgpSCgoKCkriigoKCgpSCgriigoKCgpSCkriigoKCgpSCggAaPoKCgpSCgpSCpoKCgpSmgoKClIKCkoKCgoKCgoKUtLS0tIKClILagoKUgsaCxoKUgsaClILGgri0gsiCggALGIIABxCCpoKmggAOHpSCgpSUgpSCpoK4goKCpqaCpoKCgoKUpoKCgoKUgoLKgoKCggAJEoCCgpaSgrqSkoKCgoKUgpSUpoKSgpSmgpSClIKCgpSCuIKCgpSCuIKUgoKClIK4xIKCgpSClILcgpSC+MLkooKUgoKCgoKCgoKClJSCgoKCgpSCAAkMgoKCgoI=", "53-53:1;97-99:1;100-100:2;194-198:1;236-236:1;334-334:1;360-360:1;523-523:1;527-527:1;531-531:1", "", "205=NewPCG/1/1/1,New/1/1/1", "", "199:21,200:13")]
+[assembly: GoPositionMap("sort/sort_slices_benchmark_test.go", "sort_slices_benchmark_test.cs", "ABMosoKCgpSmgoKClKaCgoKUgsqigoKCgriigoKCgriigoKCgriigoKCgryigoKCgoKCgpSUpqKCgoKCuKKCgoKCuKKClIK4ooKUggAOGoKCtIKCgoKUpoKCgoKmgpSCgsqigoKCgriigoKCgoI=", "167-167:1;186-186:1")]
+[assembly: GoPositionMap("sort/sort_test.go", "sort_test.cs", "ABcogoKUgoKCgoKCuIKCgoKCgrqSgpSCpoK4goKCgoKCuIKCgoKCuIKCgoKCuIKCgoKCuIKClpKCuIKCgpSCgpSClIKCuIKCgoKCgoKCgpSCypSCgpSCgoKmgoKCgoK4goKCgoIAChKClIKClJSCgtjGgoK4uIK0pKKCgoKUlIKCgoK4ooKCgpSUgoKCkriigoKClJSCgoKCuKKCgoKClIKCuKKCgoKClIKCuKKCgoKClIKCuKKCgoKClIKCuKKCgoKUgoKCgoK4ooKCgpSCgoKCkriigoKCgpSCgriigoKCgpSCkriigoKCgpSCggAcPoKCgpSCgpSCxoKCgpSmgoKClIKCkoKCgoKCgoKUtLS0tIKClILagoKUgsaCxoKUgsaClILGgri0gsiCggALGIIABxCCpoKmggAQHpSCgpSUgpSCpoK4goKCpqaCxoKCgoKUpoKCgoKUgoLKgoKCggALEoCCgpaSgrqSkoKCgoKUgpSUxoKSgpSmgpSClIKCgpSCuIKCgpSCuIKUgoKClIK4xIKCgpSClILcgpSC+MLkooKUgoKCgoKCgoKClJSCgoKCgpSCAAkMgoKCgoI=", "53-53:1;97-99:1;100-100:2;194-198:1;236-236:1;334-334:1;360-360:1;523-523:1;527-527:1;531-531:1", "", "210=NewPCG/1/1/1,New/1/1/1", "", "204:21,205:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -126,3 +126,24 @@ public static partial class sort_test_package
         builtin.initPackage(typeof(global::go.sort_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sort_test_package.By)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛBy;
+[GoMethodHost(typeof(sort_test_package.ByName)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛByName;
+[GoMethodHost(typeof(sort_test_package.ByWeight)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛByWeight;
+[GoMethodHost(typeof(sort_test_package.Grams)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛGrams;
+[GoMethodHost(typeof(sort_test_package.Organs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛOrgans;
+[GoMethodHost(typeof(sort_test_package.adversaryTestingData)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛadversaryTestingData;
+[GoMethodHost(typeof(sort_test_package.intPairs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛintPairs;
+[GoMethodHost(typeof(sort_test_package.multiSorter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛmultiSorter;
+[GoMethodHost(typeof(sort_test_package.myStructs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛmyStructs;
+[GoMethodHost(typeof(sort_test_package.nonDeterministicTestingData)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛnonDeterministicTestingData;
+[GoMethodHost(typeof(sort_test_package.planetSorter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛplanetSorter;
+[GoMethodHost(typeof(sort_test_package.testingData)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sort_testᴛtestingData;
+// </MethodHolders>

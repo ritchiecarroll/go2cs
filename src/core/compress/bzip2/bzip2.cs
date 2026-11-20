@@ -6,6 +6,7 @@
 namespace go.compress;
 
 using io = io_package;
+using static bzip2_package;
 
 partial class bzip2_package {
 
@@ -18,9 +19,13 @@ partial class bzip2_package {
 // syntactically invalid.
 partial struct StructuralError /*@string*/;
 
+} partial class bzip2ᴛStructuralError {
+
 public static @string Error(this StructuralError s) {
     return "bzip2 data invalid: "u8 + ((@string)s);
 }
+
+} partial class bzip2_package {
 
 // A reader decompresses bzip2 compressed data.
 partial struct reader {
@@ -53,6 +58,8 @@ public static io.Reader NewReader(io.Reader r) {
 internal static UntypedInt bzip2FileMagic => 0x425a; // "BZ"
 internal static UntypedInt bzip2BlockMagic => 0x314159265359;
 internal static UntypedInt bzip2FinalMagic => 0x177245385090;
+
+} partial class bzip2ᴛreader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badMagicValueˢ => ref badMagicValueˢᵇ;
@@ -500,6 +507,8 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
 
     return default;
 }
+
+} partial class bzip2_package {
 
 // inverseBWT implements the inverse Burrows-Wheeler transform as described in
 // http://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-124.pdf, section 4.2.

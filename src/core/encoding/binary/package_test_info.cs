@@ -8,8 +8,6 @@ global using static global::go.encoding.binary_package;
 global using static global::go.encoding.binary_internal_test_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;

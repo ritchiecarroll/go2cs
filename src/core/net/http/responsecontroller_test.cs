@@ -16,6 +16,7 @@ using global::go.net;
 using net = net_package;
 using static global::go.net.http_internal_test_package;
 using Δhttp = global::go.net.http_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -29,7 +30,7 @@ internal static void testResponseControllerFlush(ж<testing.T> t, testMode mode)
     try {
         var continuec = new channel<EmptyStruct>(0);
         var continuecʗ1 = continuec;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var ctl = NewResponseController(w);
             w.Write(slice<byte>("one"u8));
             var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
@@ -49,7 +50,7 @@ internal static void testResponseControllerFlush(ж<testing.T> t, testMode mode)
 
         var buf = new slice<byte>(16);
         (var n, err) = res.Body.Read(buf);
-        builtin.close(continuec);
+        close(continuec);
         if (err != nil || ((sstring)(buf.slice(0, n))) != "one"u8) {
             t.Fatalf("Body.Read = %q, %v, want %q, nil", (@string)(buf.slice(0, n)), err, oneˢ);
         }
@@ -75,7 +76,7 @@ private static readonly @string valueᶜᵇ = "set"u8;
 internal static void testResponseControllerHijack(ж<testing.T> t, testMode mode) {
     @string header = headerᶜ;
     @string value = valueᶜ;
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var ctl = NewResponseController(w);
         var (c, _, errΔ1) = ctl.Hijack();
         if (mode == http2Mode) {
@@ -107,7 +108,7 @@ public static void TestResponseControllerSetPastWriteDeadline(ж<testing.T> t) {
 internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var ctl = NewResponseController(w);
             w.Write(slice<byte>("one"u8));
             var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
@@ -159,7 +160,7 @@ internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> 
         var startwritec = new channel<EmptyStruct>(0);
         var errcʗ1 = errc;
         var startwritecʗ1 = startwritec;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var ctl = NewResponseController(w);
             w.WriteHeader(200);
             var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
@@ -174,7 +175,7 @@ internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> 
         })));
 
         var (res, err) = cst.c.Get(cst.ts.URL);
-        builtin.close(startwritec);
+        close(startwritec);
         if (err != nil) {
             t.Fatalf("unexpected connection error: %v", err);
         }
@@ -207,10 +208,10 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
         var donec = new channel<EmptyStruct>(0);
         var donecʗ1 = donec;
         var readcʗ1 = readc;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             GoFrame ᒐ = default;
             try {
-                defer(ᴛ1 => builtin.close(ᴛ1), donecʗ1, ref ᒐ);
+                defer(ᴛ1 => close(ᴛ1), donecʗ1, ref ᒐ);
                 var ctl = NewResponseController(w);
                 var b = new slice<byte>(3);
                 var (n, errΔ1) = io.ReadFull(r.Body, b);
@@ -227,7 +228,7 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 if (errΔ1 == nil || ((sstring)b) != ""u8) {
                     t.Errorf("after setting read deadline: Read = %q, nil, want error", (@string)b);
                 }
-                builtin.close(readcʗ1);
+                close(readcʗ1);
                 // Connection errors are sticky, so resetting the deadline does not permit
                 // making more progress. We might want to change this in the future, but verify
                 // the current behavior for now.
@@ -257,16 +258,16 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 var pwʗ2 = pwʗ1;
                 defer(() => pwʗ2.Close(), ref ᒐ);
                 pwʗ1.Write(slice<byte>("one"u8));
-                var selᴛ32 = readcʗ2;
-                var selᴛ33 = donecʗ2;
-                switch (select(ᐸꟷ(selᴛ32, ꓸꓸꓸ), ᐸꟷ(selᴛ33, ꓸꓸꓸ))) {
-                case 0 when selᴛ32.ꟷᐳ(out _): {
+                var readcᴛ1 = readcʗ2;
+                var donecᴛ1 = donecʗ2;
+                switch (select(ᐸꟷ(readcᴛ1, ꓸꓸꓸ), ᐸꟷ(donecᴛ1, ꓸꓸꓸ))) {
+                case 0 when readcᴛ1.ꟷᐳ(out _): {
                     break;
                 }
-                case 1 when selᴛ33.ꟷᐳ(out _): {
-                    var selᴛ34 = readcʗ2;
-                    switch (trySelect(ᐸꟷ(selᴛ34, ꓸꓸꓸ))) {
-                    case 0 when selᴛ34.ꟷᐳ(out _): {
+                case 1 when donecᴛ1.ꟷᐳ(out _): {
+                    var readcᴛ2 = readcʗ2;
+                    switch (trySelect(ᐸꟷ(readcᴛ2, ꓸꓸꓸ))) {
+                    case 0 when readcᴛ2.ꟷᐳ(out _): {
                         break;
                     }
                     default: {
@@ -304,7 +305,7 @@ internal static void testResponseControllerSetFutureReadDeadline(ж<testing.T> t
     GoFrame ᒐ = default;
     try {
         @string respBody = responseBodyˢ;
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
             var ctl = NewResponseController(w);
             var errΔ1 = ctl.SetReadDeadline(time.Now().Add(1 * time.Millisecond)); if (errΔ1 != nil) {
                 t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ1);
@@ -336,15 +337,19 @@ partial struct wrapWriter {
     /*embed*/ public global::go.net.http_package.ResponseWriter ResponseWriter;
 }
 
+} partial class http_testᴛwrapWriter {
+
 internal static Δhttp.ResponseWriter Unwrap(this wrapWriter w) {
     return w.ResponseWriter;
 }
+
+} partial class http_test_package {
 
 public static void TestWrappedResponseController(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testWrappedResponseController(Δp0, Δp1)); }
 internal static void testWrappedResponseController(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w = new wrapWriter(w);
             var ctl = NewResponseController(w);
             var errΔ1 = ctl.Flush(); if (errΔ1 != nil) {
@@ -375,7 +380,7 @@ public static void TestResponseControllerEnableFullDuplex(ж<testing.T> t) {
 internal static void testResponseControllerEnableFullDuplex(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
             var ctl = NewResponseController(w);
             var errΔ1 = ctl.EnableFullDuplex(); if (errΔ1 != nil) {
                 // TODO: Drop test for HTTP/2 when x/net is updated to support
@@ -424,7 +429,7 @@ internal static void testResponseControllerEnableFullDuplex(ж<testing.T> t, tes
 }
 
 public static void TestIssue58237(ж<testing.T> t) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), http2Mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), http2Mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
         var ctl = NewResponseController(w);
         var errΔ1 = ctl.SetReadDeadline(time.Now().Add(1 * time.Millisecond)); if (errΔ1 != nil) {
             t.Errorf("ctl.SetReadDeadline() = %v, want nil", errΔ1);

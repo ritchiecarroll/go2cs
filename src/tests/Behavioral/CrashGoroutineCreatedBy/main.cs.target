@@ -25,7 +25,7 @@ internal static void main() {
 
 internal static partial void child() {
     goǃ(worker);
-    time.Sleep(time.ΔMinute);
+    time.Sleep(time.Minute);
 }
 
 internal static void worker() {

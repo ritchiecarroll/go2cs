@@ -26,7 +26,7 @@ public static void Example() {
     // KDF, and AES-256-GCM as the AEAD to encrypt a single message from a
     // sender to a recipient using the one-shot API.
 
-    var (kem, kdf, Δaead) = (MLKEM768X25519(), HKDFSHA256(), AES256GCM());
+    var (kem, kdf, aead) = (MLKEM768X25519(), HKDFSHA256(), AES256GCM());
 
     // Recipient side
     global::go.crypto.hpke_package.PrivateKey recipientPrivateKey = default;
@@ -49,7 +49,7 @@ public static void Example() {
         }
 
         var message = slice<byte>("|-()-|"u8);
-        (var ct, err) = Seal(publicKey, kdf, Δaead, slice<byte>("example"u8), message);
+        (var ct, err) = Seal(publicKey, kdf, aead, slice<byte>("example"u8), message);
         if (err != nil) {
             throw panic(err);
         }
@@ -59,7 +59,7 @@ public static void Example() {
 
     // Recipient side
     {
-        var (plaintext, err) = Open(recipientPrivateKey, kdf, Δaead, slice<byte>("example"u8), ciphertext);
+        var (plaintext, err) = Open(recipientPrivateKey, kdf, aead, slice<byte>("example"u8), ciphertext);
         if (err != nil) {
             throw panic(err);
         }
@@ -95,7 +95,7 @@ internal static ref readonly @string recipientOpenCiphertextˢ => ref recipientO
 private static readonly @string recipientOpenCiphertextˢᵇ = "Recipient.Open ciphertext"u8;
 
 public static void TestRoundTrip(ж<testing.T> t) {
-    var kems = slice<global::go.crypto.hpke_package.ΔKEM>([DHKEM(ecdh.P256()), DHKEM(ecdh.P384()), DHKEM(ecdh.P521()), DHKEM(ecdh.X25519()), MLKEM768(), MLKEM1024(), MLKEM768P256(), MLKEM1024P384(), MLKEM768X25519()
+    var kems = slice<global::go.crypto.hpke_package.KEM>([DHKEM(ecdh.P256()), DHKEM(ecdh.P384()), DHKEM(ecdh.P521()), DHKEM(ecdh.X25519()), MLKEM768(), MLKEM1024(), MLKEM768P256(), MLKEM1024P384(), MLKEM768X25519()
     ]);
     var kdfs = slice<global::go.crypto.hpke_package.KDF>([HKDFSHA256(), HKDFSHA384(), HKDFSHA512(), SHAKE128(), SHAKE256()
     ]);
@@ -143,13 +143,13 @@ public static void TestRoundTrip(ж<testing.T> t) {
                 var kkʗ1 = kk;
                 var pkʗ1 = pk;
                 tΔ1.Run(fmt.Sprintf("KDF_%04x"u8, kdf.ID()), (ж<testing.T> tΔ2) => {
-                    foreach (var (_, Δaead) in range(aeadsʗ2)) {
-                        var aeadʗ1 = Δaead;
+                    foreach (var (_, aead) in range(aeadsʗ2)) {
+                        var aeadʗ1 = aead;
                         var kʗ2 = kʗ1;
                         var kdfʗ2 = kdfʗ1;
                         var kkʗ2 = kkʗ1;
                         var pkʗ2 = pkʗ1;
-                        tΔ2.Run(fmt.Sprintf("AEAD_%04x"u8, Δaead.ID()), (ж<testing.T> tΔ3) => {
+                        tΔ2.Run(fmt.Sprintf("AEAD_%04x"u8, aead.ID()), (ж<testing.T> tΔ3) => {
                             var (c, errΔ2) = Seal(pkʗ2, kdfʗ2, aeadʗ1, slice<byte>("info"u8), slice<byte>("plaintext"u8));
                             if (errΔ2 != nil) {
                                 tΔ3.Fatal(errΔ2);
@@ -373,12 +373,12 @@ internal static void testVectors(ж<testing.T> t, @string name) {
                 tΔ1.Errorf("unexpected KDF ID: got %04x, want %04x", kdf.ID(), vectorʗ1.KDF);
             }
 
-            (var Δaead, errΔ2) = NewAEAD(vectorʗ1.AEAD);
+            (var aead, errΔ2) = NewAEAD(vectorʗ1.AEAD);
             if (errΔ2 != nil) {
                 tΔ1.Fatal(errΔ2);
             }
-            if (Δaead.ID() != vectorʗ1.AEAD) {
-                tΔ1.Errorf("unexpected AEAD ID: got %04x, want %04x", Δaead.ID(), vectorʗ1.AEAD);
+            if (aead.ID() != vectorʗ1.AEAD) {
+                tΔ1.Errorf("unexpected AEAD ID: got %04x, want %04x", aead.ID(), vectorʗ1.AEAD);
             }
 
             (var kem, errΔ2) = NewKEM(vectorʗ1.KEM);
@@ -405,7 +405,7 @@ internal static void testVectors(ж<testing.T> t, @string name) {
             setupDerandomizedEncap(tΔ1, ikmE, kemSender);
 
             var info = mustDecodeHex(tΔ1, vectorʗ1.Info);
-            (var encap, var sender, errΔ2) = NewSender(kemSender, kdf, Δaead, info);
+            (var encap, var sender, errΔ2) = NewSender(kemSender, kdf, aead, info);
             if (errΔ2 != nil) {
                 tΔ1.Fatal(errΔ2);
             }
@@ -470,12 +470,12 @@ internal static void testVectors(ж<testing.T> t, @string name) {
                 tΔ1.Errorf("unexpected KEM sender bytes from seed: got %x, want %x", derivRecipient.PublicKey().Bytes(), pubKeyBytes);
             }
 
-            (var recipient, errΔ2) = NewRecipient(encap, kemRecipient, kdf, Δaead, info);
+            (var recipient, errΔ2) = NewRecipient(encap, kemRecipient, kdf, aead, info);
             if (errΔ2 != nil) {
                 tΔ1.Fatal(errΔ2);
             }
 
-            if (!AreEqual(Δaead, ExportOnly()) && len(vectorʗ1.AccEncryptions) != 0) {
+            if (!AreEqual(aead, ExportOnly()) && len(vectorʗ1.AccEncryptions) != 0) {
                 var (source, sink) = (sha3.NewSHAKE128(), sha3.NewSHAKE128());
                 foreach (var _ᴛ1 in range(1000)) {
                     var (aad, plaintext) = (drawRandomInput(tΔ1, new hpke_internal_test_package.sha3_SHAKEжReader(source)), drawRandomInput(tΔ1, new hpke_internal_test_package.sha3_SHAKEжReader(source)));
@@ -498,7 +498,7 @@ internal static void testVectors(ж<testing.T> t, @string name) {
                 if (!bytes.Equal(encryptions, expectedEncryptions)) {
                     tΔ1.Errorf("unexpected accumulated encryptions, got: %x, want %x", encryptions, expectedEncryptions);
                 }
-            } else if (!AreEqual(Δaead, ExportOnly())) {
+            } else if (!AreEqual(aead, ExportOnly())) {
                 foreach (var (_, enc) in range(vectorʗ1.Encryptions)) {
                     var aad = mustDecodeHex(tΔ1, enc.Aad);
                     var plaintext = mustDecodeHex(tΔ1, enc.Pt);
@@ -596,7 +596,7 @@ internal static slice<byte> drawRandomInput(ж<testing.T> t, io.Reader r) {
     return b;
 }
 
-internal static void setupDerandomizedEncap(ж<testing.T> t, slice<byte> randBytes, global::go.crypto.hpke_package.ΔPublicKey pk) {
+internal static void setupDerandomizedEncap(ж<testing.T> t, slice<byte> randBytes, global::go.crypto.hpke_package.PublicKey pk) {
     t.Cleanup(() => {
         testingOnlyGenerateKey = default;
         testingOnlyEncapsulate = default;

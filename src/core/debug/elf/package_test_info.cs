@@ -13,8 +13,6 @@ using go;
 using static global::go.debug.elf_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Data", "ΔData")]
-[assembly: GoTypeAlias("Section", "ΔSection")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -38,7 +36,7 @@ using static global::go.debug.elf_internal_test_package;
 [assembly: GoFieldAccess(typeof(fileTest))]
 [assembly: GoFieldAccess(typeof(global::go.debug.elf_package.File))]
 [assembly: GoFieldAccess(typeof(global::go.debug.elf_package.Prog))]
-[assembly: GoFieldAccess(typeof(global::go.debug.elf_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(global::go.debug.elf_package.Section))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -49,7 +47,7 @@ using static global::go.debug.elf_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("debug/elf/elf_test.go", "elf_test.cs", "ABAiABs4goKCgg==")]
-[assembly: GoPositionMap("debug/elf/file_test.go", "file_test.cs", "ACdIAM4DnAeigpSCgoKCgqaUgoKUkoKClIKClIKCpoKClIKCpoKCgpSCgoKUgoKClIKUgoKClIKmgpSC2KjCgoKUkoKClIKCABAcAMwDmgeCspKCgoKUgoKUgoKCgpSCgoKmgoKClIKUgoKUggAKDqaCgpSCgpSCgoKCgpSClJSCAAkIpoKClIIADyCCgpSCuKKCgpSAgqSClIKCgpS0tKSCgpSCuIKClIKClIKCgpSmgriUpKSCgoKClIKCgqaCgoKUgsqCuIKChJSCAA4OooKCgpSkgpSCgqaCgoKCtKgAN2iUgpQAChamuIKCuIKClIKCuIKCgoKCgoKUgoKUgoK4lAAHEAAHEAAHEIIABxCmAAkU7gAKFgAJFAAHEAAIEpSCgpSkAAgSgqaCgqYACBKCtKSCiIKC+KKCgoKUpIKCpoK0AAoEhJKCgpSUgoKmgoKUgoKUgpSCgpSClIKCpoKCgvjCgoKClJKCgoKClILG5MKCgoKUkoKCgoKUgsY=", "1067-1105:1", "", "", "524:25,597:21,1328:21,1563:21,1621:21,1703:21,1734:21")]
+[assembly: GoPositionMap("debug/elf/file_test.go", "file_test.cs", "ACdIAM4DnAeigpSCgoKCgqaUgoKUkoKClIKClIKCpoKClIKCpoKCgpSCgoKUgoKClIKUgoKClIKmgpSC2KjCgoKUkoKClIKCABAcAMwDmgeCspKCgoKUgoKUgoKCgpSCgoKmgoKClIKUgoKUggAKDqaCgpSCgpSCgoKCgpSClJSCAAkIpoKClIIADyCCgpSCuKKCgpSAgqSClIKCgpS0tKSCgpSCuIKClIKClIKCgpSmgriUpKSCgoKClIKCgqaCgoKUgsqCuIKChJSCABAOooKCgpSkgpSCgqaCgoKCtKgAN2iUgpQAChamuIKCuIKClIKCuIKCgoKCgoKUgoKUgoK4lAAHEAAHEAAHEIIABxCmAAkU7gAKFgAJFAAHEAAIEpSCgpSkAAgSgqaCgqYACBKCtKSCiIKC+KKCgoKUpIKCpoK0AAoEhJKCgpSUgoKmgoKUgoKUgpSCgpSClIKCpoKCgvjCgoKClJKCgoKClILG5MKCgoKUkoKCgoKUgsY=", "1067-1105:1", "", "", "524:25,597:21,1330:21,1565:21,1623:21,1705:21,1736:21")]
 [assembly: GoPositionMap("debug/elf/symbols_test.go", "symbols_test.cs", "AA0ekqKCgoKCgqaUgoKUkoKCgoKClIKmgpSClILakoKUgswApwfUDg==", "16-55:1", "", "", "34:25")]
 // </GoSourcePositionMaps>
 

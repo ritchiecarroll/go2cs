@@ -12,6 +12,7 @@ using time = time_package;
 using global::go.net;
 using io = io_package;
 using static global::go.net.http_package;
+using static http_internal_test_package;
 
 partial class http_internal_test_package {
 
@@ -55,10 +56,10 @@ public static void TestServerTLSHandshakeTimeout(ж<testing.T> t) {
         new(
             s: Ꮡ(new Server(
                 ReadTimeout: (time.Duration)(5000000000L),
-                ReadHeaderTimeout: 2 * time.ΔSecond,
+                ReadHeaderTimeout: 2 * time.Second,
                 WriteTimeout: (time.Duration)(4000000000L)
             )),
-            want: 2 * time.ΔSecond
+            want: 2 * time.Second
         )
     ]);
     foreach (var (i, tt) in range(tests)) {
@@ -69,11 +70,15 @@ public static void TestServerTLSHandshakeTimeout(ж<testing.T> t) {
     }
 }
 
-internal partial struct Δhandler {
+internal partial struct handler {
     internal nint i;
 }
 
-internal static void ServeHTTP(this Δhandler _Δp0, global::go.net.http_package.ResponseWriter _Δp1, ж<global::go.net.http_package.Request> _Δp2) { }
+} partial class http_internal_testᴛhandler {
+
+internal static void ServeHTTP(this handler _Δp0, global::go.net.http_package.ResponseWriter _Δp1, ж<global::go.net.http_package.Request> _Δp2) { }
+
+} partial class http_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exampleComˢ => ref exampleComˢᵇ;
@@ -81,7 +86,7 @@ private static readonly @string exampleComˢᵇ = "example.com"u8;
 
 internal partial struct TestFindHandler_type /*dyn*/ {
     internal @string pat;
-    internal global::go.net.http_package.ΔHandler h;
+    internal global::go.net.http_package.Handler h;
 }
 
 internal partial struct TestFindHandler_typeᴛ1 /*dyn*/ {
@@ -93,11 +98,11 @@ internal partial struct TestFindHandler_typeᴛ1 /*dyn*/ {
 public static void TestFindHandler(ж<testing.T> t) {
     var mux = NewServeMux();
     foreach (var (_, ph) in range(slice<TestFindHandler_type>([
-        new("/", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(1)))),
-        new("/foo/", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(2)))),
-        new("/foo", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(3)))),
-        new("/bar/", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(4)))),
-        new("//foo", new http_internal_test_package.ΔhandlerжΔHandler(Ꮡ(new Δhandler(5))))
+        new("/", new http_internal_test_package.handlerжHandler(Ꮡ(new handler(1)))),
+        new("/foo/", new http_internal_test_package.handlerжHandler(Ꮡ(new handler(2)))),
+        new("/foo", new http_internal_test_package.handlerжHandler(Ꮡ(new handler(3)))),
+        new("/bar/", new http_internal_test_package.handlerжHandler(Ꮡ(new handler(4)))),
+        new("//foo", new http_internal_test_package.handlerжHandler(Ꮡ(new handler(5))))
     ]))) {
         mux.Handle(ph.pat, ph.h);
     }
@@ -151,21 +156,21 @@ internal static readonly object gotNilErrorˢ = (@string)"got nil error"u8;
 
 internal partial struct TestRegisterErr_type /*dyn*/ {
     internal @string pattern;
-    internal global::go.net.http_package.ΔHandler handler;
+    internal global::go.net.http_package.Handler handler;
     internal @string wantRegexp;
 }
 
 public static void TestRegisterErr(ж<testing.T> t) {
     var mux = NewServeMux();
-    var h = Ꮡ(new Δhandler());
-    mux.Handle("/a", new http_internal_test_package.ΔhandlerжΔHandler(h));
+    var h = Ꮡ(new handler());
+    mux.Handle("/a", new http_internal_test_package.handlerжHandler(h));
 
     foreach (var (_, vᴛ1) in range(slice<TestRegisterErr_type>([
-        new("", new http_internal_test_package.ΔhandlerжΔHandler(h), "invalid pattern"),
+        new("", new http_internal_test_package.handlerжHandler(h), "invalid pattern"),
         new("/", default, "nil handler"),
-        new("/", new http_test_package.http_HandlerFuncᴠΔHandler(default(global::go.net.http_package.HandlerFunc)!), "nil handler"),
-        new("/{x", new http_internal_test_package.ΔhandlerжΔHandler(h), @"parsing ""/\{x"": at offset 1: bad wildcard segment"),
-        new("/a", new http_internal_test_package.ΔhandlerжΔHandler(h), @"conflicts with pattern.* \(registered at .*/server_test.go:\d+")
+        new("/", new http_test_package.http_HandlerFuncᴠHandler(default(global::go.net.http_package.HandlerFunc)!), "nil handler"),
+        new("/{x", new http_internal_test_package.handlerжHandler(h), @"parsing ""/\{x"": at offset 1: bad wildcard segment"),
+        new("/a", new http_internal_test_package.handlerжHandler(h), @"conflicts with pattern.* \(registered at .*/server_test.go:\d+")
     ]))) {
         ref var test = ref heap(new TestRegisterErr_type(), out var Ꮡtest);
         test = vᴛ1;
@@ -381,7 +386,7 @@ public static void BenchmarkServerMatch(ж<testing.B> Ꮡb) {
         "/products/", "/products/3/image.jpg"]);
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
-        var (r, err) = NewRequest(getˢ, "http://example.com/" + paths[i % builtin.len(paths)], default);
+        var (r, err) = NewRequest(getˢ, "http://example.com/" + paths[i % len(paths)], default);
         if (err != nil) {
             Ꮡb.Fatal(err);
         }

@@ -1,0 +1,5 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells	absent
+DW-7R	internal/trace	osx-x64	187	186	1	1	0	validated	no	187	0	187/0	no	44468879667	877	read	-
+DW-7R	internal/trace	osx-arm64	187	187	0	0	0	validated	no	187	0	187/0	no	44468879667	687	read	-
+DW-7R	net/http	osx-x64	1538	1538	0	0	0	validated	yes	1538	0	1538/0	no	44468879667	530	read	-
+DW-7R	net/http	osx-arm64	1538	1538	0	0	0	validated	yes	1538	0	1538/0	no	44468879667	424	read	-

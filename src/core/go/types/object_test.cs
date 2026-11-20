@@ -45,19 +45,19 @@ public static void TestIsAlias(ж<testing.T> t) {
     // various other types
     var pkg = NewPackage("p", "p");
     var t1 = NewTypeName(nopos, pkg, "t1", default);
-    var n1 = NewNamed(t1, new types.StructжΔType(@new<types.Struct>()), default);
+    var n1 = NewNamed(t1, new types.StructжType(@new<types.Struct>()), default);
     var t5 = NewTypeName(nopos, pkg, "t5", default);
     NewTypeParam(t5, default);
     foreach (var (_, test) in range(slice<TestIsAlias_type>([
         new(NewTypeName(nopos, nil, "t0", default), false), // no type yet
         new(NewTypeName(nopos, pkg, "t0", default), false), // no type yet
         new(t1, false), // type name refers to named type and vice versa
-        new(NewTypeName(nopos, nil, "t2", new types.InterfaceжΔType(NewInterfaceType(default, default))), true), // type name refers to unnamed type
-        new(NewTypeName(nopos, pkg, "t3", new types.NamedжΔType(n1)), true),                                     // type name refers to named type with different type name
-        new(NewTypeName(nopos, nil, "t4", new types.BasicжΔType(Typ[Int32])), true),                             // type name refers to basic type with different name
-        new(NewTypeName(nopos, nil, int32ˢ, new types.BasicжΔType(Typ[Int32])), false),                          // type name refers to basic type with same name
-        new(NewTypeName(nopos, pkg, int32ˢ, new types.BasicжΔType(Typ[Int32])), true),                           // type name is declared in user-defined package (outside Universe)
-        new(NewTypeName(nopos, nil, runeˢ, new types.BasicжΔType(Typ[Rune])), true),                             // type name refers to basic type rune which is an alias already
+        new(NewTypeName(nopos, nil, "t2", new types.InterfaceжType(NewInterfaceType(default, default))), true), // type name refers to unnamed type
+        new(NewTypeName(nopos, pkg, "t3", new types.NamedжType(n1)), true),                                     // type name refers to named type with different type name
+        new(NewTypeName(nopos, nil, "t4", new types.BasicжType(Typ[Int32])), true),                             // type name refers to basic type with different name
+        new(NewTypeName(nopos, nil, int32ˢ, new types.BasicжType(Typ[Int32])), false),                          // type name refers to basic type with same name
+        new(NewTypeName(nopos, pkg, int32ˢ, new types.BasicжType(Typ[Int32])), true),                           // type name is declared in user-defined package (outside Universe)
+        new(NewTypeName(nopos, nil, runeˢ, new types.BasicжType(Typ[Rune])), true),                             // type name refers to basic type rune which is an alias already
         new(t5, false) // type name refers to type parameter and vice versa
     ]))) {
         check(test.name, test.alias);

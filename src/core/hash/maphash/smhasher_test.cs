@@ -17,6 +17,7 @@ using @internal;
 using @internal.runtime;
 using go.math;
 using static go.hash.maphash_package;
+using static maphash_internal_test_package;
 
 partial class maphash_internal_test_package {
 
@@ -25,7 +26,7 @@ partial class maphash_internal_test_package {
 // This code is a port of some of the Smhasher tests to Go.
 // Note: due to the long running time of these tests, they are
 // currently disabled in -race mode.
-internal static global::go.hash.maphash_package.ΔSeed fixedSeed = MakeSeed();
+internal static global::go.hash.maphash_package.Seed fixedSeed = MakeSeed();
 
 // Sanity checks.
 // hash should not depend on values outside key.
@@ -80,6 +81,9 @@ internal partial struct hashSet {
 internal static ж<hashSet> newHashSet() {
     return Ꮡ(new hashSet(list: new slice<uint64>(0, 1024)));
 }
+
+} partial class maphash_internal_testᴛhashSet {
+
 internal static void add(this ref hashSet s, uint64 h) {
     s.list = append(s.list, h);
 }
@@ -89,7 +93,7 @@ internal static void addS(this ref hashSet s, @string x) {
 internal static void addB(this ref hashSet s, slice<byte> x) {
     s.add(bytesHash(x));
 }
-internal static void addS_seed(this ref hashSet s, @string x, global::go.hash.maphash_package.ΔSeed seed) {
+internal static void addS_seed(this ref hashSet s, @string x, global::go.hash.maphash_package.Seed seed) {
     global::go.hash.maphash_package.Hash h = new();
     h.SetSeed(seed);
     h.WriteString(x);
@@ -118,6 +122,8 @@ internal static void check(this ref hashSet s, ж<testing.T> t) {
     // Reset for reuse
     s.list = s.list[..0];
 }
+
+} partial class maphash_internal_test_package {
 
 // a string plus adding zeros must make distinct hashes
 public static void TestSmhasherAppendedZeros(ж<testing.T> t) {
@@ -343,6 +349,8 @@ internal partial struct bytesKey {
     internal slice<byte> b;
 }
 
+} partial class maphash_internal_testᴛbytesKey {
+
 internal static void clear(this ref bytesKey k) {
     builtin.clear(k.b);
 }
@@ -361,6 +369,8 @@ internal static uint64 hash(this ref bytesKey k) {
 internal static @string name(this ref bytesKey k) {
     return fmt.Sprintf("bytes%d"u8, len(k.b));
 }
+
+} partial class maphash_internal_test_package {
 
 // Flipping a single bit of a key should flip each output bit with 50% probability.
 public static void TestSmhasherAvalanche(ж<testing.T> t) {
@@ -527,8 +537,8 @@ public static void TestSmhasherSeed(ж<testing.T> t) {
     const nint N = 100000;
     @string s = helloˢ;
     for (nint i = 0; i < N; i++) {
-        h.addS_seed(s, new ΔSeed(s: (uint64)(i + 1)));
-        h.addS_seed(s, new ΔSeed(s: ((uint64)(i + 1) << 32))); // make sure high bits are used
+        h.addS_seed(s, new Seed(s: (uint64)(i + 1)));
+        h.addS_seed(s, new Seed(s: ((uint64)(i + 1) << 32))); // make sure high bits are used
     }
     h.check(t);
 }

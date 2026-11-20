@@ -10,6 +10,7 @@ using fmt = fmt_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
+using static types_package;
 
 partial class types_package {
 
@@ -43,27 +44,29 @@ partial struct Context {
     internal sync.Mutex mu;
     internal map<@string, slice<ctxtEntry>> typeMap; // type hash -> instances entries
     internal nint nextID;                            // next unique ID
-    internal map<ΔType, nint> originIDs;             // origin type -> unique ID
+    internal map<Type, nint> originIDs;              // origin type -> unique ID
 }
 
 partial struct ctxtEntry {
-    internal ΔType orig;
-    internal slice<ΔType> targs;
-    internal ΔType instance; // = orig[targs]
+    internal Type orig;
+    internal slice<Type> targs;
+    internal Type instance; // = orig[targs]
 }
 
 // NewContext creates a new Context.
 public static ж<Context> NewContext() {
     return Ꮡ(new Context(
         typeMap: new map<@string, slice<ctxtEntry>>(),
-        originIDs: new map<ΔType, nint>()
+        originIDs: new map<Type, nint>()
     ));
 }
+
+} partial class typesᴛContext {
 
 // instanceHash returns a string representation of typ instantiated with targs.
 // The hash should be a perfect hash, though out of caution the type checker
 // does not assume this. The result is guaranteed to not contain blanks.
-internal static @string instanceHash(this ж<Context> Ꮡctxt, ΔType orig, slice<ΔType> targs) {
+internal static @string instanceHash(this ж<Context> Ꮡctxt, Type orig, slice<Type> targs) {
     assert(Ꮡctxt != nil);
     assert(orig != nil);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -85,7 +88,7 @@ internal static @string instanceHash(this ж<Context> Ꮡctxt, ΔType orig, slic
 
 // lookup returns an existing instantiation of orig with targs, if it exists.
 // Otherwise, it returns nil.
-internal static ΔType lookup(this ж<Context> Ꮡctxt, @string h, ΔType orig, slice<ΔType> targs) {
+internal static Type lookup(this ж<Context> Ꮡctxt, @string h, Type orig, slice<Type> targs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -114,7 +117,7 @@ internal static ΔType lookup(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
 // If an identical type is found with the type hash h, the previously seen
 // type is returned. Otherwise, inst is returned, and recorded in the Context
 // for the hash h.
-internal static ΔType update(this ж<Context> Ꮡctxt, @string h, ΔType orig, slice<ΔType> targs, ΔType inst) {
+internal static Type update(this ж<Context> Ꮡctxt, @string h, Type orig, slice<Type> targs, Type inst) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -148,7 +151,7 @@ internal static ΔType update(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
 }
 
 // getID returns a unique ID for the type t.
-internal static nint getID(this ж<Context> Ꮡctxt, ΔType t) {
+internal static nint getID(this ж<Context> Ꮡctxt, Type t) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -168,4 +171,4 @@ internal static nint getID(this ж<Context> Ꮡctxt, ΔType t) {
     finally { if (ᒐd1) Ꮡctxt.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-} // end types_package
+} // end typesᴛContext

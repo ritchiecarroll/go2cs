@@ -27,7 +27,6 @@ using static go.crypto.@internal.fips140.bigmod_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Nat", "ΔNat")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -51,7 +50,7 @@ using static go.crypto.@internal.fips140.bigmod_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Modulus))]
-[assembly: GoFieldAccess(typeof(ΔNat))]
+[assembly: GoFieldAccess(typeof(Nat))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,7 +60,7 @@ using static go.crypto.@internal.fips140.bigmod_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/bigmod/nat.go", "nat.cs", "ACFGzICYtIKCABIssoKosoKUgoKCgpSCgoKosoKCpoKCAAIQ8oKClKjWgoKUlKjCgoKssq7igoKigoKCgpSUgqYABhIACQKCgpSClAAGEAAIAoKCyoKUgqqigpSmgpKCgoKUgoKUgpSs0oKCAAIQAAgEgoKUgoKUrMSClIKClKzEgpSCpoKClAACEgAIAoKCqJKClKiSgoKCgoKUgpQAAhAACASCgpSCgrgAAhAACQSCgpSCgpQAAhAACQSCgpSClAACEAAJBIKClIKUAAIQAAgEgpSClIKCpoKCgqaCgriu1IKUgoKmrLKmgoKUABIqsoKCgriUggAKFriCgpSCyoKCgoK4rgAKDoKClAACENKCrsKCgoKClOaCgoKUgoKClKiSqJKotoKCAAIQAAgCpoKCggAIEoKCgoKCgoKCypQAAhQACwLcpoKClIKCpoKClKzSrNIAAhwADQKCpoIAAhIACQKUgoKCrLKCpgACEgAIAoKCAAIUAAsGrviCggACFAALAoKCgpSmgoKUnMKCABImgsrcggALGIL+goKCgoKCgoKUgraCgoKCgoKCgpSCtoKCgoKCgoKClIK2AAIQ8oKCgqaCgoKClAACEgAKAqaCpoKClKaCgpSmgrjKgoKClKSCgoKUpIKCgpQAAxgACwKCAAcQ3IKCpoKCgoKCpoKCgqaCgriCuAACEgAIAoLKgoKCgoKmAAIWAAoCgoKUgpSuwoKClAAIEAAiMoKUgqaCgpSCgoKCggAOHqaCgoKClIKCyoK4goKCgpSCpoKCgpSCuILMkoKUgoKClAAEFNKCpoKClA==", "", "", "1089=NewNat/1/15/2,NewNat/2/15/2,NewNat/3/15/2,NewNat/4/15/2,NewNat/5/15/2,NewNat/6/15/3,NewNat/7/15/3,NewNat/8/15/3,NewNat/9/15/3,NewNat/10/15/3,NewNat/11/15/4,NewNat/12/15/4,NewNat/13/15/4,NewNat/14/15/4,NewNat/15/15/4")]
+[assembly: GoPositionMap("crypto/internal/fips140/bigmod/nat.go", "nat.cs", "ACJGzICYtIKCABIssoLIsoKUgoKCgpSCgoKosoKCpoKCAAIQ8oKClKjWgoKUlKjCgoKssq7igoKigoKCgpSUgqYABhIACQKCgpSClAAGEAAIAoKCyoKUgsqigpTGgpKCgoKUgoKUgpSs0oKCAAIQAAgEgoKUgoKUrMSClIKClKzEgpSCpoKClAACEgAIAoKCqJKClKiSgoKCgoKUgpQAAhAACASCgpSCgrgAAhAACQSCgpSCgpQAAhAACQSCgpSClAACEAAJBIKClIKUAAIQAAgEgpSClIKCpoKCgqaCgriu1IKUgoKmzLKmgoKUABIqsoKCgriUggAKFriCgpSCyoKCgoK4rgAKDoKClAACENKCrsKCgoKClOaCgoKUgoKClMiSqJKotoKCAAQQAAgCpoKCggAIEoKCgoKCgoKCypQAAhQACwLcpoKClIKCpoKClKzSrNIAAhwADQKCpoIAAhIACQKUgoKCrLKCpgACEgAIAoKCAAIUAAsGrviCggACFAALAoKCgpSmgoKUnMKCABImgsrcggALGIL+goKCgoKCgoKUgraCgoKCgoKCgpSCtoKCgoKCgoKClIK2AAQQ8oKCgqaCgoKClAAEEgAKAqaCpoKClKaCgpSmgrjKgoKClKSCgoKUpIKCgpQAAxgACwKCAAcQ3IKCpoKCgoKCpoKCgqaCgriCuAACEgAIAoLKgoKCgoKmAAIWAAoCgoKUgpSuwoKClAAKEAAiMoKUgqaCgpSCgoKCggAOHqaCgoKClIKCyoK4goKCgpSCpoKCgpSCuILMkoKUgoKClAAGFNKCpoKClA==", "", "", "1106=NewNat/1/15/2,NewNat/2/15/2,NewNat/3/15/2,NewNat/4/15/2,NewNat/5/15/2,NewNat/6/15/3,NewNat/7/15/3,NewNat/8/15/3,NewNat/9/15/3,NewNat/10/15/3,NewNat/11/15/4,NewNat/12/15/4,NewNat/13/15/4,NewNat/14/15/4,NewNat/15/15/4")]
 [assembly: GoPositionMap("crypto/internal/fips140/bigmod/nat_noasm.go", "nat_noasm.cs", "AAoWgqaCpoI=")]
 // </GoSourcePositionMaps>
 
@@ -78,8 +77,8 @@ public static partial class bigmod_package
 
     // <TypeAccessibility>
     public partial struct Modulus {}
+    public partial struct Nat {}
     public partial struct choice {}
-    public partial struct ΔNat {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -94,3 +93,14 @@ public static partial class bigmod_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(bigmod_package.Modulus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bigmodᴛModulus;
+[GoMethodHost(typeof(bigmod_package.Nat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bigmodᴛNat;
+// </MethodHolders>

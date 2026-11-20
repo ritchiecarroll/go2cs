@@ -10,6 +10,7 @@ using Δsyscall = syscall_package;
 using time = time_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using go;
+using static poll_package;
 
 partial class poll_package {
 
@@ -34,6 +35,8 @@ partial struct pollDesc {
 
 internal static readonly ж<sync.Once> ᏑserverInit = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once serverInit => ref ((StaticBox<sync.Once>)ᏑserverInit).ValueSlot;
+
+} partial class pollᴛpollDesc {
 
 internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
@@ -110,6 +113,8 @@ internal static bool pollable(this ref pollDesc pd) {
     return pd.runtimeCtx != 0;
 }
 
+} partial class poll_package {
+
 // Error values returned by runtime_pollReset and runtime_pollWait.
 // These must match the values in runtime/netpoll.go.
 internal static UntypedInt pollNoError => 0;
@@ -135,6 +140,8 @@ internal static error convertErr(nint res, bool isFile) {
     throw panic("unreachable");
 }
 
+} partial class pollᴛFD {
+
 // SetDeadline sets the read and write deadlines associated with fd.
 public static error SetDeadline(this ж<FD> Ꮡfd, time.Time t) {
     return setDeadlineImpl(Ꮡfd, t, (rune)'r' + (rune)'w');
@@ -149,6 +156,8 @@ public static error SetReadDeadline(this ж<FD> Ꮡfd, time.Time t) {
 public static error SetWriteDeadline(this ж<FD> Ꮡfd, time.Time t) {
     return setDeadlineImpl(Ꮡfd, t, 'w');
 }
+
+} partial class poll_package {
 
 internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
     GoFrame ᒐ = default;

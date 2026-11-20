@@ -47,18 +47,18 @@ public static partial void TestChan(ж<testing.T> t) {
                     t.Fatalf("chan[%d]: receive from empty chan", chanCap);
                 }
                 // Ensure that non-blocking receive does not block.
-                var selᴛ1 = c;
-                switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-                case 0 when selᴛ1.ꟷᐳ(out _): {
+                var cᴛ1 = c;
+                switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+                case 0 when cᴛ1.ꟷᐳ(out _): {
                     t.Fatalf("chan[%d]: receive from empty chan", chanCap);
                     break;
                 }
                 default: {
                     break;
                 }}
-                var selᴛ2 = c;
-                switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-                case 0 when selᴛ2.ꟷᐳ(out _, out _): {
+                var cᴛ2 = c;
+                switch (trySelect(ᐸꟷ(cᴛ2, ꓸꓸꓸ))) {
+                case 0 when cᴛ2.ꟷᐳ(out _, out _): {
                     t.Fatalf("chan[%d]: receive from empty chan", chanCap);
                     break;
                 }
@@ -86,8 +86,8 @@ public static partial void TestChan(ж<testing.T> t) {
                     t.Fatalf("chan[%d]: send to full chan", chanCap);
                 }
                 // Ensure that non-blocking send does not block.
-                var selᴛ3 = c.ᐸꟷ(0, ꓸꓸꓸ);
-                switch (trySelect(selᴛ3)) {
+                var cᴛ3 = c.ᐸꟷ(0, ꓸꓸꓸ);
+                switch (trySelect(cᴛ3)) {
                 case 0: {
                     t.Fatalf("chan[%d]: send to full chan", chanCap);
                     break;
@@ -247,9 +247,9 @@ public static partial void TestNonblockRecvRace(ж<testing.T> t) {
         c.ᐸꟷ(1);
         var cʗ1 = c;
         goǃ(() => {
-            var selᴛ4 = cʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-            case 0 when selᴛ4.ꟷᐳ(out _): {
+            var cᴛ1 = cʗ1;
+            switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+            case 0 when cᴛ1.ꟷᐳ(out _): {
                 break;
             }
             default: {
@@ -296,13 +296,13 @@ public static partial void TestNonblockSelectRace(ж<testing.T> t) {
         var c2ʗ1 = c2;
         var doneʗ1 = done;
         goǃ(() => {
-            var selᴛ5 = c1ʗ1;
-            var selᴛ6 = c2ʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-            case 0 when selᴛ5.ꟷᐳ(out _): {
+            var c1ᴛ1 = c1ʗ1;
+            var c2ᴛ1 = c2ʗ1;
+            switch (trySelect(ᐸꟷ(c1ᴛ1, ꓸꓸꓸ), ᐸꟷ(c2ᴛ1, ꓸꓸꓸ))) {
+            case 0 when c1ᴛ1.ꟷᐳ(out _): {
                 break;
             }
-            case 1 when selᴛ6.ꟷᐳ(out _): {
+            case 1 when c2ᴛ1.ꟷᐳ(out _): {
                 break;
             }
             default: {
@@ -312,9 +312,9 @@ public static partial void TestNonblockSelectRace(ж<testing.T> t) {
             doneʗ1.ᐸꟷ(true);
         });
         c2.ᐸꟷ(1);
-        var selᴛ7 = c1;
-        switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
-        case 0 when selᴛ7.ꟷᐳ(out _): {
+        var c1ᴛ2 = c1;
+        switch (trySelect(ᐸꟷ(c1ᴛ2, ꓸꓸꓸ))) {
+        case 0 when c1ᴛ2.ꟷᐳ(out _): {
             break;
         }
         default: {
@@ -341,13 +341,13 @@ public static partial void TestNonblockSelectRace2(ж<testing.T> t) {
         var c2ʗ1 = c2;
         var doneʗ1 = done;
         goǃ(() => {
-            var selᴛ8 = c1ʗ1;
-            var selᴛ9 = c2ʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ8, ꓸꓸꓸ), ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
-            case 0 when selᴛ8.ꟷᐳ(out _): {
+            var c1ᴛ1 = c1ʗ1;
+            var c2ᴛ1 = c2ʗ1;
+            switch (trySelect(ᐸꟷ(c1ᴛ1, ꓸꓸꓸ), ᐸꟷ(c2ᴛ1, ꓸꓸꓸ))) {
+            case 0 when c1ᴛ1.ꟷᐳ(out _): {
                 break;
             }
-            case 1 when selᴛ9.ꟷᐳ(out _): {
+            case 1 when c2ᴛ1.ꟷᐳ(out _): {
                 break;
             }
             default: {
@@ -357,9 +357,9 @@ public static partial void TestNonblockSelectRace2(ж<testing.T> t) {
             doneʗ1.ᐸꟷ(true);
         });
         close(c2);
-        var selᴛ10 = c1;
-        switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
-        case 0 when selᴛ10.ꟷᐳ(out _): {
+        var c1ᴛ2 = c1;
+        switch (trySelect(ᐸꟷ(c1ᴛ2, ꓸꓸꓸ))) {
+        case 0 when c1ᴛ2.ꟷᐳ(out _): {
             break;
         }
         default: {
@@ -390,13 +390,13 @@ public static partial void TestSelfSelect(ж<testing.T> t) {
                         defer(Ꮡwg.Done, ref ᒐ);
                         for (nint i = 0; i < 1000; i++) {
                             if (p == 0 || i % 2 == 0) {
-                                var selᴛ11 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
-                                var selᴛ12 = cʗ1;
-                                switch (select(selᴛ11, ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
+                                var cᴛ1 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
+                                var cᴛ2 = cʗ1;
+                                switch (select(cᴛ1, ᐸꟷ(cᴛ2, ꓸꓸꓸ))) {
                                 case 0: {
                                     break;
                                 }
-                                case 1 when selᴛ12.ꟷᐳ(out var v): {
+                                case 1 when cᴛ2.ꟷᐳ(out var v): {
                                     if (chanCap == 0 && v == p) {
                                         t.Errorf("self receive");
                                         return;
@@ -404,10 +404,10 @@ public static partial void TestSelfSelect(ж<testing.T> t) {
                                     break;
                                 }}
                             } else {
-                                var selᴛ13 = cʗ1;
-                                var selᴛ14 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
-                                switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), selᴛ14)) {
-                                case 0 when selᴛ13.ꟷᐳ(out var v): {
+                                var cᴛ3 = cʗ1;
+                                var cᴛ4 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
+                                switch (select(ᐸꟷ(cᴛ3, ꓸꓸꓸ), cᴛ4)) {
+                                case 0 when cᴛ3.ꟷᐳ(out var v): {
                                     if (chanCap == 0 && v == p) {
                                         t.Errorf("self receive");
                                         return;
@@ -586,30 +586,30 @@ public static partial void TestSelectFairness(ж<testing.T> t) {
             defer(Ꮡwg.Done, ref ᒐ);
             for (;;) {
                 byte b = default;
-                var selᴛ23 = c3ʗ1;
-                var selᴛ24 = c4ʗ1;
-                var selᴛ25 = c1ʗ1;
-                var selᴛ26 = c2ʗ1;
-                switch (select(ᐸꟷ(selᴛ23, ꓸꓸꓸ), ᐸꟷ(selᴛ24, ꓸꓸꓸ), ᐸꟷ(selᴛ25, ꓸꓸꓸ), ᐸꟷ(selᴛ26, ꓸꓸꓸ))) {
-                case 0 when selᴛ23.ꟷᐳ(out b): {
+                var c3ᴛ1 = c3ʗ1;
+                var c4ᴛ1 = c4ʗ1;
+                var c1ᴛ1 = c1ʗ1;
+                var c2ᴛ1 = c2ʗ1;
+                switch (select(ᐸꟷ(c3ᴛ1, ꓸꓸꓸ), ᐸꟷ(c4ᴛ1, ꓸꓸꓸ), ᐸꟷ(c1ᴛ1, ꓸꓸꓸ), ᐸꟷ(c2ᴛ1, ꓸꓸꓸ))) {
+                case 0 when c3ᴛ1.ꟷᐳ(out b): {
                     break;
                 }
-                case 1 when selᴛ24.ꟷᐳ(out b): {
+                case 1 when c4ᴛ1.ꟷᐳ(out b): {
                     break;
                 }
-                case 2 when selᴛ25.ꟷᐳ(out b): {
+                case 2 when c1ᴛ1.ꟷᐳ(out b): {
                     break;
                 }
-                case 3 when selᴛ26.ꟷᐳ(out b): {
+                case 3 when c2ᴛ1.ꟷᐳ(out b): {
                     break;
                 }}
-                var selᴛ27 = outʗ1.ᐸꟷ(b, ꓸꓸꓸ);
-                var selᴛ28 = doneʗ1;
-                switch (select(selᴛ27, ᐸꟷ(selᴛ28, ꓸꓸꓸ))) {
+                var outᴛ1 = outʗ1.ᐸꟷ(b, ꓸꓸꓸ);
+                var doneᴛ1 = doneʗ1;
+                switch (select(outᴛ1, ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
                 case 0: {
                     break;
                 }
-                case 1 when selᴛ28.ꟷᐳ(out _): {
+                case 1 when doneᴛ1.ꟷᐳ(out _): {
                     return;
                 }}
             }
@@ -657,17 +657,17 @@ public static void TestChanSendInterface(ж<testing.T> t) {
     var m = Ꮡ(new TestChanSendInterface_mt());
     var c = new channel<any>(1);
     c.ᐸꟷ(m.OrTypedNil());
-    var selᴛ29 = c.ᐸꟷ(m.OrTypedNil(), ꓸꓸꓸ);
-    switch (trySelect(selᴛ29)) {
+    var cᴛ1 = c.ᐸꟷ(m.OrTypedNil(), ꓸꓸꓸ);
+    switch (trySelect(cᴛ1)) {
     case 0: {
         break;
     }
     default: {
         break;
     }}
-    var selᴛ30 = c.ᐸꟷ(m.OrTypedNil(), ꓸꓸꓸ);
-    var selᴛ31 = c.ᐸꟷ(Ꮡ(new TestChanSendInterface_mt()), ꓸꓸꓸ);
-    switch (trySelect(selᴛ30, selᴛ31)) {
+    var cᴛ2 = c.ᐸꟷ(m.OrTypedNil(), ꓸꓸꓸ);
+    var cᴛ3 = c.ᐸꟷ(Ꮡ(new TestChanSendInterface_mt()), ꓸꓸꓸ);
+    switch (trySelect(cᴛ2, cᴛ3)) {
     case 0: {
         break;
     }
@@ -696,9 +696,9 @@ public static partial void TestPseudoRandomSend(ж<testing.T> t) {
             Ꮡm.Unlock();
         });
         for (nint i = 0; i < n; i++) {
-            var selᴛ32 = c.ᐸꟷ(1, ꓸꓸꓸ);
-            var selᴛ33 = c.ᐸꟷ(0, ꓸꓸꓸ);
-            switch (select(selᴛ32, selᴛ33)) {
+            var cᴛ1 = c.ᐸꟷ(1, ꓸꓸꓸ);
+            var cᴛ2 = c.ᐸꟷ(0, ꓸꓸꓸ);
+            switch (select(cᴛ1, cᴛ2)) {
             case 0: {
                 break;
             }
@@ -887,17 +887,17 @@ public static partial void TestSelectDuplicateChannel(ж<testing.T> t) {
     var dʗ1 = d;
     var eʗ1 = e;
     goǃ(() => {
-        var selᴛ34 = cʗ1;
-        var selᴛ35 = cʗ1;
-        var selᴛ36 = dʗ1;
-        switch (select(ᐸꟷ(selᴛ34, ꓸꓸꓸ), ᐸꟷ(selᴛ35, ꓸꓸꓸ), ᐸꟷ(selᴛ36, ꓸꓸꓸ))) {
-        case 0 when selᴛ34.ꟷᐳ(out _): {
+        var cᴛ1 = cʗ1;
+        var cᴛ2 = cʗ1;
+        var dᴛ1 = dʗ1;
+        switch (select(ᐸꟷ(cᴛ1, ꓸꓸꓸ), ᐸꟷ(cᴛ2, ꓸꓸꓸ), ᐸꟷ(dᴛ1, ꓸꓸꓸ))) {
+        case 0 when cᴛ1.ꟷᐳ(out _): {
             break;
         }
-        case 1 when selᴛ35.ꟷᐳ(out _): {
+        case 1 when cᴛ2.ꟷᐳ(out _): {
             break;
         }
-        case 2 when selᴛ36.ꟷᐳ(out _): {
+        case 2 when dᴛ1.ꟷᐳ(out _): {
             break;
         }}
         eʗ1.ᐸꟷ(9);
@@ -950,21 +950,21 @@ public static partial void TestSelectStackAdjust(ж<testing.T> t) {
         }
 
         // Receive from d. cx won't be affected.
-        var selᴛ37 = cʗ1;
-        var selᴛ38 = c2;
-        var selᴛ39 = dʗ1;
-        var selᴛ40 = d2;
-        switch (select(ᐸꟷ(selᴛ37, ꓸꓸꓸ), ᐸꟷ(selᴛ38, ꓸꓸꓸ), ᐸꟷ(selᴛ39, ꓸꓸꓸ), ᐸꟷ(selᴛ40, ꓸꓸꓸ))) {
-        case 0 when selᴛ37.ꟷᐳ(out cx): {
+        var cᴛ1 = cʗ1;
+        var c2ᴛ1 = c2;
+        var dᴛ1 = dʗ1;
+        var d2ᴛ1 = d2;
+        switch (select(ᐸꟷ(cᴛ1, ꓸꓸꓸ), ᐸꟷ(c2ᴛ1, ꓸꓸꓸ), ᐸꟷ(dᴛ1, ꓸꓸꓸ), ᐸꟷ(d2ᴛ1, ꓸꓸꓸ))) {
+        case 0 when cᴛ1.ꟷᐳ(out cx): {
             break;
         }
-        case 1 when selᴛ38.ꟷᐳ(out _): {
+        case 1 when c2ᴛ1.ꟷᐳ(out _): {
             break;
         }
-        case 2 when selᴛ39.ꟷᐳ(out _): {
+        case 2 when dᴛ1.ꟷᐳ(out _): {
             break;
         }
-        case 3 when selᴛ40.ꟷᐳ(out _): {
+        case 3 when d2ᴛ1.ꟷᐳ(out _): {
             break;
         }}
 
@@ -1066,9 +1066,9 @@ public static void BenchmarkChanNonblocking(ж<testing.B> b) {
     var mycʗ1 = myc;
     b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            var selᴛ41 = mycʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ41, ꓸꓸꓸ))) {
-            case 0 when selᴛ41.ꟷᐳ(out _): {
+            var mycᴛ1 = mycʗ1;
+            switch (trySelect(ᐸꟷ(mycᴛ1, ꓸꓸꓸ))) {
+            case 0 when mycᴛ1.ꟷᐳ(out _): {
                 break;
             }
             default: {
@@ -1084,14 +1084,14 @@ public static void BenchmarkSelectUncontended(ж<testing.B> b) {
         var myc2 = new channel<nint>(1);
         myc1.ᐸꟷ(0);
         while (pb.Next()) {
-            var selᴛ42 = myc1;
-            var selᴛ43 = myc2;
-            switch (select(ᐸꟷ(selᴛ42, ꓸꓸꓸ), ᐸꟷ(selᴛ43, ꓸꓸꓸ))) {
-            case 0 when selᴛ42.ꟷᐳ(out _): {
+            var myc1ᴛ1 = myc1;
+            var myc2ᴛ1 = myc2;
+            switch (select(ᐸꟷ(myc1ᴛ1, ꓸꓸꓸ), ᐸꟷ(myc2ᴛ1, ꓸꓸꓸ))) {
+            case 0 when myc1ᴛ1.ꟷᐳ(out _): {
                 myc2.ᐸꟷ(0);
                 break;
             }
-            case 1 when selᴛ43.ꟷᐳ(out _): {
+            case 1 when myc2ᴛ1.ꟷᐳ(out _): {
                 myc1.ᐸꟷ(0);
                 break;
             }}
@@ -1115,11 +1115,11 @@ public static void BenchmarkSelectSyncContended(ж<testing.B> b) {
         var myc3ʗ2 = myc3ʗ1;
         goǃ(() => {
             for (;;) {
-                var selᴛ44 = myc1ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
-                var selᴛ45 = myc2ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
-                var selᴛ46 = myc3ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
-                var selᴛ47 = doneʗ2;
-                switch (select(selᴛ44, selᴛ45, selᴛ46, ᐸꟷ(selᴛ47, ꓸꓸꓸ))) {
+                var myc1ᴛ1 = myc1ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
+                var myc2ᴛ1 = myc2ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
+                var myc3ᴛ1 = myc3ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
+                var doneᴛ1 = doneʗ2;
+                switch (select(myc1ᴛ1, myc2ᴛ1, myc3ᴛ1, ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
                 case 0: {
                     break;
                 }
@@ -1129,23 +1129,23 @@ public static void BenchmarkSelectSyncContended(ж<testing.B> b) {
                 case 2: {
                     break;
                 }
-                case 3 when selᴛ47.ꟷᐳ(out _): {
+                case 3 when doneᴛ1.ꟷᐳ(out _): {
                     return;
                 }}
             }
         });
         while (pb.Next()) {
-            var selᴛ48 = myc1ʗ1;
-            var selᴛ49 = myc2ʗ1;
-            var selᴛ50 = myc3ʗ1;
-            switch (select(ᐸꟷ(selᴛ48, ꓸꓸꓸ), ᐸꟷ(selᴛ49, ꓸꓸꓸ), ᐸꟷ(selᴛ50, ꓸꓸꓸ))) {
-            case 0 when selᴛ48.ꟷᐳ(out _): {
+            var myc1ᴛ2 = myc1ʗ1;
+            var myc2ᴛ2 = myc2ʗ1;
+            var myc3ᴛ2 = myc3ʗ1;
+            switch (select(ᐸꟷ(myc1ᴛ2, ꓸꓸꓸ), ᐸꟷ(myc2ᴛ2, ꓸꓸꓸ), ᐸꟷ(myc3ᴛ2, ꓸꓸꓸ))) {
+            case 0 when myc1ᴛ2.ꟷᐳ(out _): {
                 break;
             }
-            case 1 when selᴛ49.ꟷᐳ(out _): {
+            case 1 when myc2ᴛ2.ꟷᐳ(out _): {
                 break;
             }
-            case 2 when selᴛ50.ꟷᐳ(out _): {
+            case 2 when myc3ᴛ2.ꟷᐳ(out _): {
                 break;
             }}
         }
@@ -1162,14 +1162,14 @@ public static void BenchmarkSelectAsyncContended(ж<testing.B> b) {
     b.RunParallel((ж<testing.PB> pb) => {
         myc1ʗ1.ᐸꟷ(0);
         while (pb.Next()) {
-            var selᴛ51 = myc1ʗ1;
-            var selᴛ52 = myc2ʗ1;
-            switch (select(ᐸꟷ(selᴛ51, ꓸꓸꓸ), ᐸꟷ(selᴛ52, ꓸꓸꓸ))) {
-            case 0 when selᴛ51.ꟷᐳ(out _): {
+            var myc1ᴛ1 = myc1ʗ1;
+            var myc2ᴛ1 = myc2ʗ1;
+            switch (select(ᐸꟷ(myc1ᴛ1, ꓸꓸꓸ), ᐸꟷ(myc2ᴛ1, ꓸꓸꓸ))) {
+            case 0 when myc1ᴛ1.ꟷᐳ(out _): {
                 myc2ʗ1.ᐸꟷ(0);
                 break;
             }
-            case 1 when selᴛ52.ꟷᐳ(out _): {
+            case 1 when myc2ᴛ1.ꟷᐳ(out _): {
                 myc1ʗ1.ᐸꟷ(0);
                 break;
             }}
@@ -1188,32 +1188,32 @@ public static void BenchmarkSelectNonblock(ж<testing.B> b) {
     var myc4ʗ1 = myc4;
     b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            var selᴛ53 = myc1ʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ53, ꓸꓸꓸ))) {
-            case 0 when selᴛ53.ꟷᐳ(out _): {
+            var myc1ᴛ1 = myc1ʗ1;
+            switch (trySelect(ᐸꟷ(myc1ᴛ1, ꓸꓸꓸ))) {
+            case 0 when myc1ᴛ1.ꟷᐳ(out _): {
                 break;
             }
             default: {
                 break;
             }}
-            var selᴛ54 = myc2ʗ1.ᐸꟷ(0, ꓸꓸꓸ);
-            switch (trySelect(selᴛ54)) {
+            var myc2ᴛ1 = myc2ʗ1.ᐸꟷ(0, ꓸꓸꓸ);
+            switch (trySelect(myc2ᴛ1)) {
             case 0: {
                 break;
             }
             default: {
                 break;
             }}
-            var selᴛ55 = myc3ʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ55, ꓸꓸꓸ))) {
-            case 0 when selᴛ55.ꟷᐳ(out _): {
+            var myc3ᴛ1 = myc3ʗ1;
+            switch (trySelect(ᐸꟷ(myc3ᴛ1, ꓸꓸꓸ))) {
+            case 0 when myc3ᴛ1.ꟷᐳ(out _): {
                 break;
             }
             default: {
                 break;
             }}
-            var selᴛ56 = myc4ʗ1.ᐸꟷ(0, ꓸꓸꓸ);
-            switch (trySelect(selᴛ56)) {
+            var myc4ᴛ1 = myc4ʗ1.ᐸꟷ(0, ꓸꓸꓸ);
+            switch (trySelect(myc4ᴛ1)) {
             case 0: {
                 break;
             }
@@ -1391,7 +1391,7 @@ public static partial void BenchmarkSelectProdCons(ж<testing.B> Ꮡb) {
             // Producer: sends to myc.
             nint foo = 0;
             // Intended to not fire during benchmarking.
-            var mytimer = time.After(time.ΔHour);
+            var mytimer = time.After(time.Hour);
             while (atomic.AddInt32(ᏑN, -1) >= 0) {
                 for (nint g = 0; g < CallsPerSched; g++) {
                     // Model some local work.
@@ -1399,17 +1399,17 @@ public static partial void BenchmarkSelectProdCons(ж<testing.B> Ꮡb) {
                         foo *= 2;
                         foo /= 2;
                     }
-                    var selᴛ57 = mycʗ1.ᐸꟷ(1, ꓸꓸꓸ);
-                    var selᴛ58 = mytimer;
-                    var selᴛ59 = mycloseʗ1;
-                    switch (select(selᴛ57, ᐸꟷ(selᴛ58, ꓸꓸꓸ), ᐸꟷ(selᴛ59, ꓸꓸꓸ))) {
+                    var mycᴛ1 = mycʗ1.ᐸꟷ(1, ꓸꓸꓸ);
+                    var mytimerᴛ1 = mytimer;
+                    var mycloseᴛ1 = mycloseʗ1;
+                    switch (select(mycᴛ1, ᐸꟷ(mytimerᴛ1, ꓸꓸꓸ), ᐸꟷ(mycloseᴛ1, ꓸꓸꓸ))) {
                     case 0: {
                         break;
                     }
-                    case 1 when selᴛ58.ꟷᐳ(out _): {
+                    case 1 when mytimerᴛ1.ꟷᐳ(out _): {
                         break;
                     }
-                    case 2 when selᴛ59.ꟷᐳ(out _): {
+                    case 2 when mycloseᴛ1.ꟷᐳ(out _): {
                         break;
                     }}
                 }
@@ -1424,23 +1424,23 @@ public static partial void BenchmarkSelectProdCons(ж<testing.B> Ꮡb) {
             // Consumer: receives from myc.
             nint foo = 0;
             // Intended to not fire during benchmarking.
-            var mytimer = time.After(time.ΔHour);
+            var mytimer = time.After(time.Hour);
 loop:
             for (;;) {
-                var selᴛ60 = mycʗ2;
-                var selᴛ61 = mytimer;
-                var selᴛ62 = mycloseʗ2;
-                switch (select(ᐸꟷ(selᴛ60, ꓸꓸꓸ), ᐸꟷ(selᴛ61, ꓸꓸꓸ), ᐸꟷ(selᴛ62, ꓸꓸꓸ))) {
-                case 0 when selᴛ60.ꟷᐳ(out var v): {
+                var mycᴛ2 = mycʗ2;
+                var mytimerᴛ2 = mytimer;
+                var mycloseᴛ2 = mycloseʗ2;
+                switch (select(ᐸꟷ(mycᴛ2, ꓸꓸꓸ), ᐸꟷ(mytimerᴛ2, ꓸꓸꓸ), ᐸꟷ(mycloseᴛ2, ꓸꓸꓸ))) {
+                case 0 when mycᴛ2.ꟷᐳ(out var v): {
                     if (v == 0) {
                         goto break_loop;
                     }
                     break;
                 }
-                case 1 when selᴛ61.ꟷᐳ(out _): {
+                case 1 when mytimerᴛ2.ꟷᐳ(out _): {
                     break;
                 }
-                case 2 when selᴛ62.ꟷᐳ(out _): {
+                case 2 when mycloseᴛ2.ꟷᐳ(out _): {
                     break;
                 }}
                 // Model some local work.
@@ -1515,13 +1515,13 @@ public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
         var dʗ1 = d;
         goǃ(() => {
             for (nint i = 0; i < Ꮡb.Value.N; i++) {
-                var selᴛ63 = cʗ1;
-                var selᴛ64 = dʗ1;
-                switch (select(ᐸꟷ(selᴛ63, ꓸꓸꓸ), ᐸꟷ(selᴛ64, ꓸꓸꓸ))) {
-                case 0 when selᴛ63.ꟷᐳ(out _): {
+                var cᴛ1 = cʗ1;
+                var dᴛ1 = dʗ1;
+                switch (select(ᐸꟷ(cᴛ1, ꓸꓸꓸ), ᐸꟷ(dᴛ1, ꓸꓸꓸ))) {
+                case 0 when cᴛ1.ꟷᐳ(out _): {
                     break;
                 }
-                case 1 when selᴛ64.ꟷᐳ(out _): {
+                case 1 when dᴛ1.ꟷᐳ(out _): {
                     break;
                 }}
             }
@@ -1545,9 +1545,9 @@ public static void BenchmarkChanClosed(ж<testing.B> b) {
     var cʗ1 = c;
     b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            var selᴛ65 = cʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ65, ꓸꓸꓸ))) {
-            case 0 when selᴛ65.ꟷᐳ(out _): {
+            var cᴛ1 = cʗ1;
+            switch (trySelect(ᐸꟷ(cᴛ1, ꓸꓸꓸ))) {
+            case 0 when cᴛ1.ꟷᐳ(out _): {
                 break;
             }
             default: {

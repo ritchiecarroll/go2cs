@@ -267,7 +267,7 @@ public static void TestFunctionAlignmentTraceback(ж<testing.T> t) {
     // on amd64 for simplicity. If this function has no filler, then we may
     // get a false negative, but will never get a false positive.
     if (Δruntime.GOARCH == "amd64"u8) {
-        var code = ~(ж<uint8>)(uintptr)((@unsafe.Pointer)pc);
+        var code = ~@unsafe.Pointer.To<uint8>((@unsafe.Pointer)pc);
         if (code != 0xcc) { // INT $3
             t.Errorf("PC %v code got %#x want 0xcc", pc, code);
         }

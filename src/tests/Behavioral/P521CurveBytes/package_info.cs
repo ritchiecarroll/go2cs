@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 // </ImportedTypeAliases>
 
 using go;

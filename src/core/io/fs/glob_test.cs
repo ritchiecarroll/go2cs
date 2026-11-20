@@ -10,6 +10,7 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using fs = go.io.fs_package;
+using static fs_test_package;
 
 partial class fs_test_package {
 
@@ -71,7 +72,11 @@ partial struct globOnly {
     /*embed*/ public go.io.fs_package.GlobFS GlobFS;
 }
 
+} partial class fs_testᴛglobOnly {
+
 internal static (fs.File, error) Open(this globOnly _, @string name) { return (default, ErrNotExist); }
+
+} partial class fs_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string txtˢ => ref txtˢᵇ;

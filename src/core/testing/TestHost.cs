@@ -71,7 +71,7 @@ public static class TestHost
 
     /// <summary>
     /// Gets the UTC instant at which the package deadline (-timeout) expires, or null when no
-    /// deadline is in effect. This is what testing.T.Deadline() reports, so it is measured from the
+    /// deadline is in effect. testing.T.Deadline() reports it unless the per-test deadline is earlier, so it is measured from the
     /// same moment the host starts counting against options.Timeout — not from process start.
     /// </summary>
     public static DateTime? PackageDeadlineUtc { get; private set; }

@@ -10,6 +10,7 @@
 namespace go;
 
 using @unsafe = unsafe_package;
+using static time_package;
 
 partial class time_package {
 
@@ -53,6 +54,8 @@ public static ж<Ticker> NewTicker(Duration d) {
     return t;
 }
 
+} partial class timeᴛTicker {
+
 // Stop turns off a ticker. After Stop, no more ticks will be sent.
 // Stop does not close the channel, to prevent a concurrent goroutine
 // reading from the channel from seeing an erroneous "tick".
@@ -82,6 +85,8 @@ public static void Reset(this ж<Ticker> Ꮡt, Duration d) {
     }
     resetTimer(Ꮡt.Reinterpret<Ticker, Timer>(), when(d), (int64)d);
 }
+
+} partial class time_package {
 
 // Tick is a convenience wrapper for [NewTicker] providing access to the ticking
 // channel only. Unlike NewTicker, Tick will return nil if d <= 0.

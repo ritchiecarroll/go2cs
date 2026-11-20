@@ -13,14 +13,19 @@ using testing = testing_package;
 using go.crypto;
 using go.crypto.@internal;
 using io = io_package;
+using static cipher_test_package;
 
 partial class cipher_test_package {
 
 partial struct noopBlock /*num:nint*/;
 
+} partial class cipher_testᴛnoopBlock {
+
 internal static nint BlockSize(this noopBlock b) { return (nint)b; }
 internal static void Encrypt(this noopBlock _, slice<byte> dst, slice<byte> src) { copy(dst, src); }
 internal static void Decrypt(this noopBlock _, slice<byte> dst, slice<byte> src) { throw panic("unreachable"); }
+
+} partial class cipher_test_package {
 
 internal static void inc(slice<byte> b) {
     for (nint i = len(b) - 1; i >= 0; i++) {

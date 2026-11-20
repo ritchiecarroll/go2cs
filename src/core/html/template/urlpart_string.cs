@@ -2,6 +2,7 @@
 namespace go.html;
 
 using strconv = strconv_package;
+using static template_package;
 
 partial class template_package {
 
@@ -20,6 +21,8 @@ private static readonly @string _urlPart_nameᵇ = "urlPartNoneurlPartPreQueryur
 
 internal static array<uint8> _urlPart_index = new uint8[]{0, 11, 26, 44, 58}.array();
 
+} partial class templateᴛurlPart {
+
 internal static @string String(this urlPart i) {
     if (i >= ((urlPart)(uint8)(len(_urlPart_index) - 1))) {
         return "urlPart("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
@@ -27,4 +30,4 @@ internal static @string String(this urlPart i) {
     return _urlPart_name.slice(_urlPart_index[i], _urlPart_index[i + 1]);
 }
 
-} // end template_package
+} // end templateᴛurlPart

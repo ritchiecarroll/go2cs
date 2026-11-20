@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct nat /*[]uint64*/;
 partial struct fermat /*nat*/;
 
 partial struct limbs /*fermat*/;
+
+} partial class mainᴛnat {
 
 internal static uint64 /*s*/ sum(this nat z) {
     uint64 s = default;
@@ -19,12 +22,16 @@ internal static uint64 /*s*/ sum(this nat z) {
     return s;
 }
 
+} partial class mainᴛfermat {
+
 internal static fermat norm(this fermat z) {
     foreach (var i in range(len(z))) {
         z[i] %= 10;
     }
     return z;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var nilFᴷ = new stackAppend<uint64>();

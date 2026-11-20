@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸName = go.@internal.abi_package.ΔName;
 using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
@@ -31,9 +29,7 @@ using static go.@internal.reflectlite_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6220626f6f6c3b207820616e797d", "dummyᴛ1")]
-[assembly: GoTypeAlias("Kind", "go.@internal.abi_package.ΔKind")]
-[assembly: GoTypeAlias("String", "const:ΔString")]
-[assembly: GoTypeAlias("Type", "ΔType")]
+[assembly: GoTypeAlias("Kind", "go.@internal.abi_package.Kind")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -43,11 +39,11 @@ using static go.@internal.reflectlite_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<rtype, ΔType>]
+[assembly: GoImplement<rtype, go.@internal.reflectlite_package.Type>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "uint8")]
+[assembly: GoImplicitConv<flag, abi.Kind>(Inverted = false, ValueType = "uint8")]
 // </ImplicitConversions>
 
 // This package's string literals are hoisted to `static readonly` fields (the standard
@@ -59,8 +55,8 @@ using static go.@internal.reflectlite_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(go.@internal.abi_package.EmptyInterface))]
-[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔFuncType))]
-[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔStructType))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.FuncType))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.StructType))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -70,8 +66,8 @@ using static go.@internal.reflectlite_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIgBrAKCpoKmgqaC6qKCgoKCggAICoKClIKmgoKUgoIACAaCgpSCgoKClKaCggACGgALDuSCpoKmggAEFpSCgoKUpoKCgpQABByCgpSCgoKClLSklKaCpoKCgpTOgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClAACFPKqogAEGoKClIKCpoIABL4BAAkEgsqCuKaygqaCpgAE2AHSgpQ=")]
-[assembly: GoPositionMap("internal/reflectlite/value.go", "value.cs", "AEykAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACQq4goKmgpS4lIKClJS4AAYU8qaayrKC")]
+[assembly: GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIsBrAKCpoKmgqaC6qKCgoKCggAICoKClIKmgoKUgoIACgaCgpSCgoKClKaCggACGgALDgAIBIKmgqaCAAQWlIKCgpSmgoKClAAEHIKClIKCgoKUtKSUxoKmgoKClO6CgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUAAQU8qqiAAYagoKUgoKmggAGvgEACQSCyoK4prKCpoKmAATYAdKClA==")]
+[assembly: GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE+kAYKmgoKUxtyqooKUgpTIkoKClJSCpoKCgoKU2MbsggAONIKClAAIIKKClIK+soKmgpSCAAUS0gAMvAHSqqLMxgAGMpKClAAELJKCgqYABBQACxwACQq4goKmgpS4lIKClJS4AAgU8qaayrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -88,9 +84,9 @@ public static partial class reflectlite_package
     // <TypeAccessibility>
     internal partial struct dummyᴛ1 {}
     internal partial struct flag {}
+    internal partial struct name {}
     internal partial struct rtype {}
-    internal partial struct Δname {}
-    public partial interface ΔType {}
+    public partial interface Type {}
     public partial struct Value {}
     public partial struct ValueError {}
     // </TypeAccessibility>
@@ -106,3 +102,17 @@ public static partial class reflectlite_package
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(reflectlite_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛValue;
+[GoMethodHost(typeof(reflectlite_package.ValueError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛValueError;
+[GoMethodHost(typeof(reflectlite_package.flag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛflag;
+[GoMethodHost(typeof(reflectlite_package.name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛname;
+[GoMethodHost(typeof(reflectlite_package.rtype)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectliteᴛrtype;
+// </MethodHolders>

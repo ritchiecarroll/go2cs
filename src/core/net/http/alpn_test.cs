@@ -19,6 +19,7 @@ using global::go.net.http;
 using net = net_package;
 using static global::go.net.http_internal_test_package;
 using Δhttp = global::go.net.http_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -36,7 +37,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> t) {
     try {
         setParallel(t);
         defer(afterTest, new http_test_package.testing_TжTB(t), ref ᒐ);
-        var ts = httptest.NewUnstartedServer(new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = httptest.NewUnstartedServer(new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "path=%s,proto="u8, r.URL.Path);
             if (r.TLS != nil) {
                 w.Write(slice<byte>(r.TLS.NegotiatedProtocol));
@@ -51,7 +52,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> t) {
         ts.TLS = Ꮡ(new tls.Config(
             NextProtos: ["unhandled-proto", "tls-0.9"]
         ));
-        ts.Config.TLSNextProto = new map<@string, Action<ж<Δhttp.Server>, ж<tls.Conn>, httpꓸHandler>>{
+        ts.Config.TLSNextProto = new map<@string, Action<ж<Δhttp.Server>, ж<tls.Conn>, Δhttp.Handler>>{
             ["tls-0.9"] = handleTLSProtocol09
         };
         ts.StartTLS();
@@ -134,7 +135,7 @@ private static readonly @string http09ˢᵇ = "HTTP/0.9"u8;
 
 // handleTLSProtocol09 implements the HTTP/0.9 protocol over TLS, for the
 // TestNextProtoUpgrade test.
-internal static void handleTLSProtocol09(ж<Δhttp.Server> srv, ж<tls.Conn> conn, httpꓸHandler h) {
+internal static void handleTLSProtocol09(ж<Δhttp.Server> srv, ж<tls.Conn> conn, Δhttp.Handler h) {
     var br = bufio.NewReader(new http_test_package.tls_ConnжReader(conn));
     var (line, err) = br.ReadString((byte)'\n');
     if (err != nil) {
@@ -149,18 +150,20 @@ internal static void handleTLSProtocol09(ж<Δhttp.Server> srv, ж<tls.Conn> con
     req.Proto = http09ˢ;
     req.ProtoMajor = 0;
     req.ProtoMinor = 9;
-    var rw = Ꮡ(new http09Writer(new http_test_package.tls_ConnжWriter(conn), new httpꓸHeader(0)));
+    var rw = Ꮡ(new http09Writer(new http_test_package.tls_ConnжWriter(conn), new Δhttp.Header(0)));
     h.ServeHTTP(new http_test_package.http09WriterжResponseWriter(rw), req);
 }
 
 partial struct http09Writer {
     /*embed*/ public io_package.Writer Writer;
-    internal httpꓸHeader h;
+    internal Δhttp.Header h;
 }
 
-internal static httpꓸHeader Header(this http09Writer w) { return w.h; }
+} partial class http_testᴛhttp09Writer {
+
+internal static Δhttp.Header Header(this http09Writer w) { return w.h; }
 internal static void WriteHeader(this http09Writer w, nint _) { }
 
 // no headers
 
-} // end http_test_package
+} // end http_testᴛhttp09Writer

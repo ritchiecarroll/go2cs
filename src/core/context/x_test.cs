@@ -18,6 +18,7 @@ using context = context_package;
 using math;
 using static go.context_internal_test_package;
 using ꓸꓸꓸany = Span<any>;
+using static context_test_package;
 
 partial class context_test_package {
 
@@ -255,7 +256,7 @@ public static void TestTimeout(ж<testing.T> t) {
 }
 
 public static void TestCanceledTimeout(ж<testing.T> t) {
-    var (c, _) = WithTimeout(Background(), time.ΔSecond);
+    var (c, _) = WithTimeout(Background(), time.Second);
     var o = new otherContext(c);
     (c, var cancel) = WithTimeout(o, veryLongDuration);
     cancel(); // Should propagate synchronously.
@@ -276,7 +277,11 @@ public static void TestCanceledTimeout(ж<testing.T> t) {
 partial struct key1 /*num:nint*/;
 partial struct key2 /*num:nint*/;
 
+} partial class context_testᴛkey2 {
+
 internal static @string String(this key2 k) { return fmt.Sprintf("%[1]T(%[1]d)"u8, k); }
+
+} partial class context_test_package {
 
 internal static key1 k1 = ((key1)1);
 internal static key2 k2 = ((key2)1); // same int as k1, different type
@@ -412,7 +417,7 @@ public static void TestAllocs(ж<testing.T> t) {
         new(
             desc: "WithTimeout(bg, 1*time.Nanosecond)",
             f: () => {
-                var (c, _) = WithTimeout(bgʗ2, 1 * time.ΔNanosecond);
+                var (c, _) = WithTimeout(bgʗ2, 1 * time.Nanosecond);
                 ᐸꟷ(c.Done());
             },
             limit: 12D,
@@ -495,12 +500,12 @@ public static partial void TestSimultaneousCancels(ж<testing.T> t) {
         // Wait on all the contexts in a random order.
         foreach (var (ctx, _) in m) {
             var selᴛ16 = ctx.Done();
-            var selᴛ17 = stuck;
-            switch (select(ᐸꟷ(selᴛ16, ꓸꓸꓸ), ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
+            var stuckᴛ1 = stuck;
+            switch (select(ᐸꟷ(selᴛ16, ꓸꓸꓸ), ᐸꟷ(stuckᴛ1, ꓸꓸꓸ))) {
             case 0 when selᴛ16.ꟷᐳ(out _): {
                 break;
             }
-            case 1 when selᴛ17.ꟷᐳ(out _): {
+            case 1 when stuckᴛ1.ꟷᐳ(out _): {
                 var buf = new slice<byte>((10 << 10));
                 nint n = Δruntime.Stack(buf, true);
                 t.Fatalf("timed out after %v waiting for <-ctx.Done(); stacks:\n%s", d, buf.slice(0, n));
@@ -514,13 +519,13 @@ public static partial void TestSimultaneousCancels(ж<testing.T> t) {
             Ꮡwg.Wait();
             close(doneʗ1);
         });
-        var selᴛ18 = done;
-        var selᴛ19 = stuck;
-        switch (select(ᐸꟷ(selᴛ18, ꓸꓸꓸ), ᐸꟷ(selᴛ19, ꓸꓸꓸ))) {
-        case 0 when selᴛ18.ꟷᐳ(out _): {
+        var doneᴛ1 = done;
+        var stuckᴛ2 = stuck;
+        switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(stuckᴛ2, ꓸꓸꓸ))) {
+        case 0 when doneᴛ1.ꟷᐳ(out _): {
             break;
         }
-        case 1 when selᴛ19.ꟷᐳ(out _): {
+        case 1 when stuckᴛ2.ꟷᐳ(out _): {
             var buf = new slice<byte>((10 << 10));
             nint n = Δruntime.Stack(buf, true);
             t.Fatalf("timed out after %v waiting for cancel functions; stacks:\n%s", d, buf.slice(0, n));
@@ -1184,6 +1189,8 @@ partial struct customDoneContext {
     internal channel<EmptyStruct> donec;
 }
 
+} partial class context_testᴛcustomDoneContext {
+
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *customDoneContext's method set; see the pointer-only satisfaction record.
 internal static (time.Time, bool) Deadline(this customDoneContext recvᴛ) => recvᴛ.Context.Deadline();
@@ -1199,6 +1206,8 @@ internal static any Value(this customDoneContext recvᴛ, any key) => recvᴛ.Co
 internal static /*<-*/channel<EmptyStruct> Done(this ref customDoneContext c) {
     return c.donec.AsRecvOnly();
 }
+
+} partial class context_test_package {
 
 public static void TestCustomContextPropagation(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -1240,6 +1249,8 @@ partial struct customCauseContext {
     internal error err;
     internal Action cancelChild;
 }
+
+} partial class context_testᴛcustomCauseContext {
 
 internal static (time.Time deadline, bool ok) Deadline(this ref customCauseContext ccc) {
     time.Time deadline = default;
@@ -1297,6 +1308,8 @@ internal static void cancel(this ж<customCauseContext> Ꮡccc) {
 internal static void setCancelChild(this ref customCauseContext ccc, Action cancelChild) {
     ccc.cancelChild = cancelChild;
 }
+
+} partial class context_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testCustomContextCauseˢ => ref testCustomContextCauseˢᵇ;
@@ -1412,10 +1425,10 @@ public static void TestAfterFuncCalledAfterCancel(ж<testing.T> t) {
     var stop = AfterFunc(ctx, () => {
         close(donecʗ1);
     });
-    var selᴛ27 = donec;
+    var donecᴛ1 = donec;
     var selᴛ28 = time.After(shortDuration);
-    switch (select(ᐸꟷ(selᴛ27, ꓸꓸꓸ), ᐸꟷ(selᴛ28, ꓸꓸꓸ))) {
-    case 0 when selᴛ27.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(donecᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ28, ꓸꓸꓸ))) {
+    case 0 when donecᴛ1.ꟷᐳ(out _): {
         t.Fatalf("AfterFunc called before context is done");
         break;
     }
@@ -1423,10 +1436,10 @@ public static void TestAfterFuncCalledAfterCancel(ж<testing.T> t) {
         break;
     }}
     cancel();
-    var selᴛ29 = donec;
+    var donecᴛ2 = donec;
     var selᴛ30 = time.After(veryLongDuration);
-    switch (select(ᐸꟷ(selᴛ29, ꓸꓸꓸ), ᐸꟷ(selᴛ30, ꓸꓸꓸ))) {
-    case 0 when selᴛ29.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(donecᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ30, ꓸꓸꓸ))) {
+    case 0 when donecᴛ2.ꟷᐳ(out _): {
         break;
     }
     case 1 when selᴛ30.ꟷᐳ(out _): {
@@ -1449,10 +1462,10 @@ public static void TestAfterFuncCalledAfterTimeout(ж<testing.T> t) {
         AfterFunc(ctx, () => {
             close(donecʗ1);
         });
-        var selᴛ31 = donec;
+        var donecᴛ1 = donec;
         var selᴛ32 = time.After(veryLongDuration);
-        switch (select(ᐸꟷ(selᴛ31, ꓸꓸꓸ), ᐸꟷ(selᴛ32, ꓸꓸꓸ))) {
-        case 0 when selᴛ31.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(donecᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ32, ꓸꓸꓸ))) {
+        case 0 when donecᴛ1.ꟷᐳ(out _): {
             break;
         }
         case 1 when selᴛ32.ꟷᐳ(out _): {
@@ -1472,10 +1485,10 @@ public static void TestAfterFuncCalledImmediately(ж<testing.T> t) {
     AfterFunc(ctx, () => {
         close(donecʗ1);
     });
-    var selᴛ33 = donec;
+    var donecᴛ1 = donec;
     var selᴛ34 = time.After(veryLongDuration);
-    switch (select(ᐸꟷ(selᴛ33, ꓸꓸꓸ), ᐸꟷ(selᴛ34, ꓸꓸꓸ))) {
-    case 0 when selᴛ33.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(donecᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ34, ꓸꓸꓸ))) {
+    case 0 when donecᴛ1.ꟷᐳ(out _): {
         break;
     }
     case 1 when selᴛ34.ꟷᐳ(out _): {
@@ -1495,10 +1508,10 @@ public static void TestAfterFuncNotCalledAfterStop(ж<testing.T> t) {
         t.Fatalf("stop() = false, want true");
     }
     cancel();
-    var selᴛ35 = donec;
+    var donecᴛ1 = donec;
     var selᴛ36 = time.After(shortDuration);
-    switch (select(ᐸꟷ(selᴛ35, ꓸꓸꓸ), ᐸꟷ(selᴛ36, ꓸꓸꓸ))) {
-    case 0 when selᴛ35.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(donecᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ36, ꓸꓸꓸ))) {
+    case 0 when donecᴛ1.ꟷᐳ(out _): {
         t.Fatalf("AfterFunc called for already-canceled context");
         break;
     }
@@ -1525,10 +1538,10 @@ public static void TestAfterFuncCalledAsynchronously(ж<testing.T> t) {
         defer(() => stopʗ1(), ref ᒐ);
         cancel();
         // After cancel returns, read from donec and unblock the AfterFunc.
-        var selᴛ37 = donec;
+        var donecᴛ1 = donec;
         var selᴛ38 = time.After(veryLongDuration);
-        switch (select(ᐸꟷ(selᴛ37, ꓸꓸꓸ), ᐸꟷ(selᴛ38, ꓸꓸꓸ))) {
-        case 0 when selᴛ37.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(donecᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ38, ꓸꓸꓸ))) {
+        case 0 when donecᴛ1.ꟷᐳ(out _): {
             break;
         }
         case 1 when selᴛ38.ꟷᐳ(out _): {
@@ -1571,6 +1584,8 @@ internal static (context.Context, Action) newCustomContext(context.Context paren
     });
 }
 
+} partial class context_testᴛcustomContext {
+
 internal static (time.Time, bool) Deadline(this ref customContext c) {
     return c.parent.Deadline();
 }
@@ -1594,6 +1609,8 @@ internal static any Value(this ref customContext c, any key) {
     return c.parent.Value(key);
 }
 
+} partial class context_test_package {
+
 // Issue #75533.
 public static partial void TestContextErrDoneRace(ж<testing.T> t) {
     // 4 iterations reliably reproduced #75533.
@@ -1607,9 +1624,9 @@ public static partial void TestContextErrDoneRace(ж<testing.T> t) {
                 Δruntime.Gosched(); // need to explicitly yield
             }
         }
-        var selᴛ40 = donec;
-        switch (trySelect(ᐸꟷ(selᴛ40, ꓸꓸꓸ))) {
-        case 0 when selᴛ40.ꟷᐳ(out _): {
+        var donecᴛ1 = donec;
+        switch (trySelect(ᐸꟷ(donecᴛ1, ꓸꓸꓸ))) {
+        case 0 when donecᴛ1.ꟷᐳ(out _): {
             break;
         }
         default: {

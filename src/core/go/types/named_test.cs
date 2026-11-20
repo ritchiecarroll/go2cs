@@ -10,7 +10,6 @@ using static global::go.go.types_package;
 using global::go.go;
 using static global::go.go.types_internal_test_package;
 using types = global::go.go.types_package;
-using ꓸꓸꓸtypesꓸType = Span<typesꓸType>;
 
 partial class types_test_package {
 
@@ -48,17 +47,17 @@ type Inst = G[int]
 
 internal partial struct BenchmarkNamed_tests /*dyn*/ {
     internal @string name;
-    internal typesꓸType typ;
+    internal types.Type typ;
 }
 
 public static void BenchmarkNamed(ж<testing.B> b) {
     @string src = srcᶜ33;
     var pkg = mustTypecheck(src, nil, nil);
 
-    typesꓸType T = pkg.Scope().Lookup("T").Type();
-    typesꓸType G = pkg.Scope().Lookup("G").Type();
-    typesꓸType SrcInst = pkg.Scope().Lookup(instˢ).Type();
-    typesꓸType UserInst = mustInstantiate(new types_test_package.testing_BжTB(b), G, new types.BasicжΔType(Typ[Int]));
+    types.Type T = pkg.Scope().Lookup("T").Type();
+    types.Type G = pkg.Scope().Lookup("G").Type();
+    types.Type SrcInst = pkg.Scope().Lookup(instˢ).Type();
+    types.Type UserInst = mustInstantiate(new types_test_package.testing_BжTB(b), G, new types.BasicжType(Typ[Int]));
 
     var tests = slice<BenchmarkNamed_tests>([
         new("nongeneric", T),
@@ -104,7 +103,7 @@ public static void BenchmarkNamed(ж<testing.B> b) {
     });
 }
 
-internal static typesꓸType mustInstantiate(testing.TB tb, typesꓸType orig, params ꓸꓸꓸtypesꓸType targsʗp) {
+internal static types.Type mustInstantiate(testing.TB tb, types.Type orig, params Span<types.Type> targsʗp) {
     var targs = targsʗp.slice();
 
     var (inst, err) = Instantiate(nil, orig, targs, true);
@@ -152,7 +151,7 @@ public static void TestFiniteTypeExpansion(ж<testing.T> t) {
     var Inst = Unalias(pkg.Scope().Lookup(instˢ).Type())._<ж<types.Pointer>>().Elem()._<ж<types.Named>>();
     var Node = firstFieldType(Inst);
     var Tree = firstFieldType(Node);
-    if (!Identical(new types.NamedжΔType(Inst), new types.NamedжΔType(Tree))) {
+    if (!Identical(new types.NamedжType(Inst), new types.NamedжType(Tree))) {
         t.Fatalf("Not a cycle: got %v, want %v", Tree.OrTypedNil(), Inst.OrTypedNil());
     }
     if (Inst != Tree) {

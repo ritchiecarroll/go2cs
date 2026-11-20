@@ -9,6 +9,7 @@ using netip = net.netip_package;
 using syscall = syscall_package;
 using @internal;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -23,6 +24,8 @@ partial struct UDPAddr {
     public nint Port;
     public @string Zone; // IPv6 scoped addressing zone
 }
+
+} partial class netᴛUDPAddr {
 
 // AddrPort returns the [UDPAddr] a as a [netip.AddrPort].
 //
@@ -40,8 +43,16 @@ public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) {
     return netip.AddrPortFrom(na, (uint16)a.Port);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string udpˢ => ref udpˢᵇ;
+private static readonly @string udpˢᵇ = "udp"u8;
+
 // Network returns the address's network name, "udp".
 public static @string Network(this ref UDPAddr a) { return udpˢ; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 public static @string String(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -65,12 +76,14 @@ internal static bool isWildcard(this ж<UDPAddr> Ꮡa) {
     return a.IP.IsUnspecified();
 }
 
-internal static ΔAddr opAddr(this ж<UDPAddr> Ꮡa) {
+internal static Addr opAddr(this ж<UDPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
-    return new UDPAddrжΔAddr(Ꮡa);
+    return new UDPAddrжAddr(Ꮡa);
 }
+
+} partial class net_package {
 
 // ResolveUDPAddr returns an address of UDP end point.
 //
@@ -88,12 +101,11 @@ internal static ΔAddr opAddr(this ж<UDPAddr> Ꮡa) {
 // See func [Dial] for a description of the network and address
 // parameters.
 public static (ж<UDPAddr>, error) ResolveUDPAddr(@string network, @string address) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         break;
     }
-    case {} when exprᴛ1 == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
+    case {} when network == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
         network = udpˢ;
         break;
     }
@@ -123,13 +135,23 @@ partial struct addrPortUDPAddr {
     /*embed*/ public net.netip_package.AddrPort AddrPort;
 }
 
+} partial class netᴛaddrPortUDPAddr {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string udpˢ => ref udpˢᵇ;
+private static readonly @string udpˢᵇ = "udp"u8;
+
 internal static @string Network(this addrPortUDPAddr _) { return udpˢ; }
+
+} partial class net_package {
 
 // UDPConn is the implementation of the [Conn] and [PacketConn] interfaces
 // for UDP network connections.
 partial struct UDPConn {
     /*embed*/ internal conn conn;
 }
+
+} partial class netᴛUDPConn {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
@@ -167,13 +189,13 @@ internal static (nint, ж<UDPAddr>, error) readFromUDP(this ж<UDPConn> Ꮡc, sl
 }
 
 // ReadFrom implements the [PacketConn] ReadFrom method.
-public static (nint, ΔAddr, error) ReadFrom(this ж<UDPConn> Ꮡc, slice<byte> b) {
+public static (nint, Addr, error) ReadFrom(this ж<UDPConn> Ꮡc, slice<byte> b) {
     var (n, addr, err) = Ꮡc.readFromUDP(b, Ꮡ(new UDPAddr()));
     if (addr == nil) {
         // Return Addr(nil), not Addr(*UDPConn(nil)).
         return (n, default, err);
     }
-    return (n, new UDPAddrжΔAddr(addr), err);
+    return (n, new UDPAddrжAddr(addr), err);
 }
 
 // ReadFromUDPAddrPort acts like ReadFrom but returns a [netip.AddrPort].
@@ -267,7 +289,7 @@ public static (nint, error) WriteToUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte
 }
 
 // WriteTo implements the [PacketConn] WriteTo method.
-public static (nint, error) WriteTo(this ж<UDPConn> Ꮡc, slice<byte> b, ΔAddr addr) {
+public static (nint, error) WriteTo(this ж<UDPConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -325,6 +347,8 @@ public static (nint n, nint oobn, error err) WriteMsgUDPAddrPort(this ж<UDPConn
     return (n, oobn, err);
 }
 
+} partial class net_package {
+
 internal static ж<UDPConn> newUDPConn(ж<netFD> fd) { return Ꮡ(new UDPConn(new conn(fd))); }
 
 // DialUDP acts like [Dial] for UDP networks.
@@ -341,9 +365,8 @@ public static (ж<UDPConn>, error) DialUDP(@string network, ж<UDPAddr> laddr, �
 internal static (ж<UDPConn>, error) dialUDP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
     ref var dialer = ref Ꮡdialer.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         break;
     }
     default: {
@@ -375,9 +398,8 @@ internal static (ж<UDPConn>, error) dialUDP(context.Context ctx, ж<Dialer> Ꮡ
 public static (ж<UDPConn>, error) ListenUDP(@string network, ж<UDPAddr> Ꮡladdr) {
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         break;
     }
     default: {
@@ -417,9 +439,8 @@ public static (ж<UDPConn>, error) ListenUDP(@string network, ж<UDPAddr> Ꮡlad
 public static (ж<UDPConn>, error) ListenMulticastUDP(@string network, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) {
     ref var gaddr = ref Ꮡgaddr.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+    case {} when network == "udp"u8 || network == "udp4"u8 || network == "udp6"u8: {
         break;
     }
     default: {

@@ -19,6 +19,7 @@ using static go.html.template_package;
 using text;
 using ꓸꓸꓸnint = Span<nint>;
 using ꓸꓸꓸstring = Span<@string>;
+using static template_internal_test_package;
 
 partial class template_internal_test_package {
 
@@ -95,9 +96,13 @@ public partial struct T {
 
 public partial struct S /*[]@string*/;
 
+} partial class template_internal_testᴛS {
+
 public static @string Method0(this S _) {
     return "M0";
 }
+
+} partial class template_internal_test_package {
 
 public partial struct U {
     public @string V;
@@ -106,6 +111,8 @@ public partial struct U {
 public partial struct V {
     internal nint j;
 }
+
+} partial class template_internal_testᴛV {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilVˢ => ref nilVˢᵇ;
@@ -120,9 +127,13 @@ public static @string String(this ж<V> Ꮡv) {
     return fmt.Sprintf("<%d>"u8, v.j);
 }
 
+} partial class template_internal_test_package {
+
 public partial struct W {
     internal nint k;
 }
+
+} partial class template_internal_testᴛW {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilWˢ => ref nilWˢᵇ;
@@ -136,6 +147,8 @@ public static @string Error(this ж<W> Ꮡw) {
     }
     return fmt.Sprintf("[%d]"u8, w.k);
 }
+
+} partial class template_internal_test_package {
 
 internal static readonly ж<I> ᏑsiVal = new StaticBox<I>(((I)new S(new @string[]{"a", "b"}.slice())));
 internal static ref I siVal => ref ((StaticBox<I>)ᏑsiVal).ValueSlot;
@@ -231,6 +244,8 @@ internal static ж<slice<nint>> newIntSlice(params ꓸꓸꓸnint nʗp) {
     return p;
 }
 
+} partial class template_internal_testᴛT {
+
 // Simple methods with and without arguments.
 public static @string Method0(this ref T t) {
     return "M0";
@@ -250,7 +265,7 @@ public static @string Method3(this ref T t, any v) {
 
 public static ж<T> Copy(this ref T t) {
     var n = @new<T>();
-    n.Value = t.ΔClone();
+    n.Value.AssignFrom(t);
     return n;
 }
 
@@ -262,7 +277,11 @@ public static slice<nint> MAdd(this ref T t, nint a, slice<nint> b) {
     return v;
 }
 
+} partial class template_internal_test_package {
+
 internal static error myError = errors.New("my error");
+
+} partial class template_internal_testᴛT {
 
 // MyError returns a value and an error according to its argument.
 public static (bool, error) MyError(this ref T t, bool error) {
@@ -277,6 +296,8 @@ public static ж<U> GetU(this ref T t) {
     return t.U;
 }
 
+} partial class template_internal_testᴛU {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string trueˢ => ref trueˢᵇ;
 private static readonly @string trueˢᵇ = "true"u8;
@@ -287,6 +308,8 @@ public static @string TrueFalse(this ref U u, bool b) {
     }
     return ""u8;
 }
+
+} partial class template_internal_test_package {
 
 internal static @string typeOf(any arg) {
     return fmt.Sprintf("%T"u8, arg);
@@ -1468,9 +1491,13 @@ internal static error alwaysError = errors.New(alwaysErrorText);
 
 public partial struct ErrorWriter /*num:nint*/;
 
+} partial class template_internal_testᴛErrorWriter {
+
 public static (nint, error) Write(this ErrorWriter e, slice<byte> p) {
     return (0, alwaysError);
 }
+
+} partial class template_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorGotNoneˢ = (@string)"expected error; got none"u8;
@@ -1501,7 +1528,7 @@ public static void TestExecuteGivesExecError(ж<testing.T> t) {
     if (err == nil) {
         t.Fatal(expectedErrorGotNoneˢ);
     }
-    var (eerr, ok) = err._<text.template_package.ExecError>(ᐧ);
+    var (eerr, ok) = err._<template.ExecError>(ᐧ);
     if (!ok) {
         t.Fatalf("did not expect ExecError %s", eerr);
     }
@@ -2042,6 +2069,12 @@ internal partial struct recursiveInvoker {
     internal ж<global::go.html.template_package.Template> tmpl;
 }
 
+} partial class template_internal_testᴛrecursiveInvoker {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string subroutineˢ => ref subroutineˢᵇ;
+private static readonly @string subroutineˢᵇ = "subroutine"u8;
+
 internal static (@string, error) Recur(this ref recursiveInvoker r) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     var err = r.tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default); if (err != nil) {
@@ -2049,6 +2082,8 @@ internal static (@string, error) Recur(this ref recursiveInvoker r) {
     }
     return (sb.String(), default);
 }
+
+} partial class template_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string recurˢ2 => ref recurˢ2ᵇ;

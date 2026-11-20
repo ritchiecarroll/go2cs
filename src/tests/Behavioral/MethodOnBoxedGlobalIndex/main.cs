@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -10,6 +11,8 @@ partial struct buf {
 
 internal static partial void add(ref nint p, nint d) { p += d; }
 
+} partial class mainᴛbuf {
+
 internal static void bump(this ж<buf> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -17,6 +20,8 @@ internal static void bump(this ж<buf> Ꮡb) {
 }
 
 internal static nint get(this ref buf b) { return b.n; }
+
+} partial class main_package {
 
 partial struct tracer {
     internal slice<buf> tabs;

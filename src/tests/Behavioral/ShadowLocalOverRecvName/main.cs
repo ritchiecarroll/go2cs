@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -21,14 +22,20 @@ partial struct Tag {
     internal @string tag;
 }
 
+} partial class mainᴛTag {
+
 public static @string Name(this Tag g) {
     return g.tag;
 }
+
+} partial class main_package {
 
 partial struct Box {
     /*embed*/ public HasName HasName;
     internal nint id;
 }
+
+} partial class mainᴛThing {
 
 internal static nint n(this ref Thing t) {
     return t.val;
@@ -81,6 +88,8 @@ public static nint SliceShadowIndex(this ref Thing t) {
     }
 }
 
+} partial class mainᴛBox {
+
 public static @string IfaceShadowEmbed(this ref Box b, ж<Box> other) {
     @string name = b.HasName.Name();
     {
@@ -89,6 +98,8 @@ public static @string IfaceShadowEmbed(this ref Box b, ж<Box> other) {
     }
     return name;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var recv = Ꮡ(new Thing(val: 5, inner: new Inner(n: 3)));

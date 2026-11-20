@@ -5,6 +5,7 @@ namespace go.@internal.syscall;
 
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
+using static windows_package;
 
 partial class windows_package {
 
@@ -58,12 +59,16 @@ partial struct SymbolicLinkReparseBuffer {
     public array<uint16> PathBuffer = new(1);
 }
 
+} partial class windowsᴛSymbolicLinkReparseBuffer {
+
 // Path returns path stored in rb.
 public static @string Path(this ref SymbolicLinkReparseBuffer rb) {
     var n1 = (uint16)(rb.SubstituteNameOffset / 2);
     var n2 = (uint16)((uint16)(rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2);
     return syscall.UTF16ToString(array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2));
 }
+
+} partial class windows_package {
 
 partial struct MountPointReparseBuffer {
     // The integer that contains the offset, in bytes,
@@ -82,6 +87,8 @@ partial struct MountPointReparseBuffer {
     public array<uint16> PathBuffer = new(1);
 }
 
+} partial class windowsᴛMountPointReparseBuffer {
+
 // Path returns path stored in rb.
 public static @string Path(this ref MountPointReparseBuffer rb) {
     var n1 = (uint16)(rb.SubstituteNameOffset / 2);
@@ -89,4 +96,4 @@ public static @string Path(this ref MountPointReparseBuffer rb) {
     return syscall.UTF16ToString(array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2));
 }
 
-} // end windows_package
+} // end windowsᴛMountPointReparseBuffer

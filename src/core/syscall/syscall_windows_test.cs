@@ -95,7 +95,7 @@ public static void TestWin32finddata(ж<testing.T> t) {
     ref var x = ref heap<TestWin32finddata_X>(new TestWin32finddata_X(got: want), out var Ꮡx);
 
     var (pathp, _) = syscall.UTF16PtrFromString(path);
-    (var h, err) = syscall.FindFirstFile(pathp, Ꮡ((x.fd)));
+    (var h, err) = syscall.FindFirstFile(pathp, Ꮡx.Ꮡfd);
     if (err != nil) {
         t.Fatalf("FindFirstFile failed: %v", err);
     }

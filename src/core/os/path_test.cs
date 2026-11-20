@@ -30,8 +30,8 @@ public static void TestMkdirAll(ж<Δtesting.T> t) {
     testMaybeRooted(t, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
         GoFrame ᒐ = default;
         try {
-            Func<@string, fs.FileMode, error> mkdirAll = MkdirAll;
-            Func<@string, (ж<Δos.File>, error)> create = Create;
+            var mkdirAll = MkdirAll;
+            var create = Create;
             if (r != nil) {
                 mkdirAll = (@string p1, fs.FileMode p2) => r.MkdirAll(p1, p2);
                 create = (@string p1) => r.Create(p1);

@@ -7,7 +7,7 @@ namespace go;
 partial class regexp_internal_test_package {
     static regexp_internal_test_package() {
         initᴛrun();
-        initᴛΔmatch();
+        initᴛmatch();
         initᴛnotab();
     }
 } // end regexp_internal_test_package

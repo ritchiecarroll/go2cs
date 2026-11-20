@@ -7,7 +7,6 @@
 global using static global::go.testing.quick_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -36,7 +35,7 @@ using static global::go.testing.quick_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/quick/quick_test.go", "quick_test.cs", "AA0aoMigpLiUuJS4lLiUuJS4lLiUuJS4lLiUuJSigpSCypS4lLjuuJS4lLiUuJS4lLiUuJSCggBdCIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIACBKCptSCpoKCgoKUgqaCgpSCpqKClIKmgoKUggANDKIAABamgoIAChCCgvyyjoKCuIKSgoKUgpSUgoKC", "228-228:1;245-245:2;245-245:3;253-253:4;253-253:5;275-275:1;280-280:1;290-290:1;302-304:1;313-321:1")]
+[assembly: GoPositionMap("testing/quick/quick_test.go", "quick_test.cs", "AA4aoMigpLiUuJS4lLiUuJS4lLiUuJS4lLiUuJSigpSCypS4lLjuuJS4lLiUuJS4lLiUuJSCggBdCIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAChKCxtSCpoKCgoKUgqaCgpSCpqKClIKmgoKUggANDKIAABamgoIAChCCgvyyjoKCuIKSgoKUgpSUgoKC", "228-228:1;245-245:2;245-245:3;253-253:4;253-253:5;275-275:1;280-280:1;290-290:1;302-304:1;313-321:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;
@@ -74,3 +73,13 @@ public static partial class quick_internal_test_package
         builtin.initPackage(typeof(global::go.testing.quick_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(quick_internal_test_package.myStruct)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quick_internal_testᴛmyStruct;
+// </MethodHolders>

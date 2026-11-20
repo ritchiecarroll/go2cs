@@ -20,6 +20,7 @@ using encoding;
 using go.@internal;
 using go.@internal.coverage;
 using go.hash;
+using static encodemeta_package;
 
 partial class encodemeta_package {
 
@@ -64,6 +65,8 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
 partial struct funcDesc {
     internal slice<byte> encoded;
 }
+
+} partial class encodemetaᴛCoverageMetaDataBuilder {
 
 // AddFunc registers a new function with the meta data builder.
 public static nuint AddFunc(this ref CoverageMetaDataBuilder b, coverage.FuncDesc f) {
@@ -194,6 +197,8 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
     }
     return (digest.Clone(), default);
 }
+
+} partial class encodemeta_package {
 
 // HashFuncDesc computes an md5 sum of a coverage.FuncDesc and returns
 // a digest for it.

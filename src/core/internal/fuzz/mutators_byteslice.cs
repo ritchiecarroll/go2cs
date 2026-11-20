@@ -29,7 +29,7 @@ internal static slice<byte> byteSliceInsertRandomBytes(ж<mutator> Ꮡm, slice<b
 
     nint pos = m.rand(len(b) + 1);
     nint n = m.chooseLen(1024);
-    if (len(b) + n >= builtin.cap(b)) {
+    if (len(b) + n >= cap(b)) {
         return default;
     }
     b = b.slice(0, len(b) + n);
@@ -57,7 +57,7 @@ internal static slice<byte> byteSliceDuplicateBytes(ж<mutator> Ꮡm, slice<byte
     // Use the end of the slice as scratch space to avoid doing an
     // allocation. If the slice is too small abort and try something
     // else.
-    if (len(b) + (n * 2) >= builtin.cap(b)) {
+    if (len(b) + (n * 2) >= cap(b)) {
         return default;
     }
     nint end = len(b);
@@ -262,7 +262,7 @@ internal static slice<byte> byteSliceInsertConstantBytes(ж<mutator> Ꮡm, slice
     // entries in the corpus and then picks uniformly from
     // that range).
     nint n = m.chooseLen(4096);
-    if (len(b) + n >= builtin.cap(b)) {
+    if (len(b) + n >= cap(b)) {
         return default;
     }
     b = b.slice(0, len(b) + n);
@@ -340,7 +340,7 @@ internal static slice<byte> byteSliceSwapBytes(ж<mutator> Ꮡm, slice<byte> b) 
     // Use the end of the slice as scratch space to avoid doing an
     // allocation. If the slice is too small abort and try something
     // else.
-    if (len(b) + n >= builtin.cap(b)) {
+    if (len(b) + n >= cap(b)) {
         return default;
     }
     nint end = len(b);

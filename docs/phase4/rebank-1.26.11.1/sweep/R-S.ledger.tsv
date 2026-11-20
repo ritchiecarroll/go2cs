@@ -1,0 +1,4 @@
+280a01952ccdfdad347cf1befb5d6b1af8eb6db5
+# 1.26.11.1 FINAL RE-BANK at 280a01952c, the crypto/tls windows full-count read on R-LAPTOP (COORD FLEET 2026-11-19 03:07Z). go1.26.11 windows/amd64, GOTOOLCHAIN=local, CGO_ENABLED=0; 16 logical cores; run-validated-sweep.ps1 -Filter crypto/tls; solo
+utc	row	rc	word	count	wall_s	real_drift	oracle_rerun	disk_gb	drift_files
+2026-11-19T03:41:47Z	crypto/tls	0	PASS	4920	1439	0	no	120	docs/validation/current/crypto.tls.md (the sweep's page rewrite; restored, not banked)

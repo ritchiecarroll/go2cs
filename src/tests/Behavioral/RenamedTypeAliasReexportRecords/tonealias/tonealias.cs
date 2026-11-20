@@ -1,5 +1,5 @@
-global using Tone = go.RenamedTypeAliasReexportRecords.tone_package.ΔTone;
-global using Pitch = go.RenamedTypeAliasReexportRecords.tone_package.ΔPitch;
+global using Tone = go.RenamedTypeAliasReexportRecords.tone_package.Tone;
+global using Pitch = go.RenamedTypeAliasReexportRecords.tone_package.Pitch;
 
 namespace go.RenamedTypeAliasReexportRecords;
 

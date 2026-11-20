@@ -14,15 +14,6 @@ using go;
 using static global::go.@internal.abi_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("ArrayType", "ΔArrayType")]
-[assembly: GoTypeAlias("ChanDir", "ΔChanDir")]
-[assembly: GoTypeAlias("FuncType", "ΔFuncType")]
-[assembly: GoTypeAlias("InterfaceType", "ΔInterfaceType")]
-[assembly: GoTypeAlias("Kind", "ΔKind")]
-[assembly: GoTypeAlias("MapType", "ΔMapType")]
-[assembly: GoTypeAlias("Name", "ΔName")]
-[assembly: GoTypeAlias("String", "const:ΔString")]
-[assembly: GoTypeAlias("StructType", "ΔStructType")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

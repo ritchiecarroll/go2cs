@@ -141,7 +141,7 @@ internal static class GoArrayElement<T>
 [Serializable]
 [System.Diagnostics.DebuggerDisplay("len = {Length}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(array<>.DebugView))]
-public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped, IGoEquatable
+public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped, IGoEquatable, IGoValueAssign<array<T>>
 {
     // The debugger's view (DebuggerTypeProxy): the array's elements. Built only when a debugger expands one.
     internal sealed class DebugView(array<T> value)
@@ -224,7 +224,10 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     {
         checkArrayConversionLength(source.Length, length);
 
+        // Go's `[N]T(s)` copies the elements: one that owns array storage is copied on its own, so the array and the
+        // slice share no inner array.
         m_array = AllocationCounter.CopyOf<T>(source.ToSpan()[..(int)length]);
+        GoElementCopy.CloneElements<T>(m_array);
         m_length = (int)length;
     }
 
@@ -509,6 +512,29 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     private static readonly bool s_elementNeedsDeepCopy =
         (typeof(IArray).IsAssignableFrom(typeof(T)) && !typeof(ISlice).IsAssignableFrom(typeof(T))) ||
         typeof(IGoValueClone).IsAssignableFrom(typeof(T));
+
+    // Whether ArrayExtensions.Assign walks the elements, assigning each one in place through IGoValueAssign<T> (a nested
+    // array, a named array, a value-clone struct), decided once per T. Such an element owns a backing of its own, which a
+    // span copy would REPLACE with the source's: an element pointer taken beforehand (`p := &a[1]`) would keep the old
+    // inner backing. An element without it copies by value (a span copy), or, if it needs a deep copy that it cannot
+    // take in place, keeps Clone's deep copy.
+    private static readonly bool s_elementAssignsInPlace = typeof(IGoValueAssign<T>).IsAssignableFrom(typeof(T));
+
+    internal static bool ElementNeedsDeepCopy => s_elementNeedsDeepCopy;
+
+    internal static bool ElementAssignsInPlace => s_elementAssignsInPlace;
+
+    // The window's start inside m_array, for Assign's overlap test (two windows over ONE backing, P5's C4).
+    internal int WindowLow => m_low;
+
+    // IGoValueAssign: `var d = this; d.Assign(source); return d;`. The copy shares this array's backing, so the elements
+    // land there; a null-backed copy takes the clone, which the caller's write-back installs.
+    array<T> IGoValueAssign<array<T>>.AssignedFrom(in array<T> source)
+    {
+        array<T> target = this;
+        target.Assign(source);
+        return target;
+    }
 
     public array<T> Clone()
     {
@@ -1111,6 +1137,97 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
 [EditorBrowsable(EditorBrowsableState.Never)] public static class ArrayExtensions
 {
+    // Go's `a = b` on an EXISTING array location (a variable, a field, an element, *p) copies b's elements INTO a's own
+    // storage, so a slice, an element pointer, a pin or a number taken from a beforehand still names a afterwards
+    // (docs/phase4/DESIGN-array-reassign-in-place.md). The converter emits `a.Assign(b)` there, where it emitted the
+    // swap `a = b.Clone()`, which left everything taken from a on the old backing. A declaration, an argument, a
+    // return, a map value and a send keep the clone: each is new storage in Go too.
+    //
+    // `ref this`, so the location is evaluated once, and so a destination with no backing can take the value instead:
+    // default(array<T>), a struct whose field initializers never ran, has none, and nothing can alias storage that does
+    // not exist.
+    //
+    // The lengths are equal by Go's type rules, but not always here (P5's C1): a null-backed source reads length 0, and
+    // AliasPointer clamps a window to the storage that exists. So the copy is min(len(dest), len(source)) elements, and
+    // the rest of the destination is CLEARED, since Go's source is zeros there; a destination shorter than its source
+    // copies its own length. A host ArgumentException out of Span.CopyTo is never reachable.
+    public static void Assign<T>(ref this array<T> dest, in array<T> source)
+    {
+        if (dest.m_array is null)
+        {
+            dest = source.Clone();
+            return;
+        }
+
+        Span<T> target = dest.ToSpan();
+        ReadOnlySpan<T> from = source.ToSpan();
+
+        if (from.Length > target.Length)
+            from = from[..target.Length];
+
+        if (global::go.array<T>.ElementAssignsInPlace)
+        {
+            assignElements(dest, source, target, from);
+            return;
+        }
+
+        if (global::go.array<T>.ElementNeedsDeepCopy)
+        {
+            // A deep element that cannot take an in-place copy keeps Clone's deep copy (today's behavior for it).
+            source.Clone().ToSpan()[..from.Length].CopyTo(target);
+        }
+        else
+        {
+            // Span.CopyTo is a memmove: a self-assignment, or a source window that overlaps the destination's, copies as
+            // Go's value copy does (the right side read whole first). It allocates nothing, as Go's assignment does not.
+            from.CopyTo(target);
+        }
+
+        if (from.Length < target.Length)
+            target[from.Length..].Clear();
+    }
+
+    // The per-element walk (P5's C3, C4): each element is assigned in place through IGoValueAssign<T>, so an inner backing
+    // stays where it is, and the returned value is written back, which carries what a boxed copy does not share (a
+    // backing installed where there was none, a struct's by-value fields). One box per element; no delegate built by
+    // reflection (the Native AOT note above ж<T>'s s_publishArrayBacking). Two windows over ONE backing at different
+    // offsets (`*p = *q` with p := (*[2][2]int)(s[1:]), q := (*[2][2]int)(s)) overlap: when the destination starts above
+    // the source the walk runs from the top down, so no element is read after it was overwritten. The rest of a longer
+    // destination is assigned from the zero value, in place, never dropped.
+    private static void assignElements<T>(in array<T> dest, in array<T> source, Span<T> target, ReadOnlySpan<T> from)
+    {
+        bool topDown = ReferenceEquals(dest.m_array, source.m_array) && dest.WindowLow > source.WindowLow;
+
+        if (topDown)
+        {
+            for (int i = from.Length - 1; i >= 0; i--)
+                target[i] = ((IGoValueAssign<T>)target[i]!).AssignedFrom(from[i]);
+        }
+        else
+        {
+            for (int i = 0; i < from.Length; i++)
+                target[i] = ((IGoValueAssign<T>)target[i]!).AssignedFrom(from[i]);
+        }
+
+        for (int i = from.Length; i < target.Length; i++)
+            target[i] = ((IGoValueAssign<T>)target[i]!).AssignedFrom(default!);
+    }
+
+    // Go's `*p = source` through a pointer to an array (P5's C6). On a box over managed storage it is
+    // `p.Value.Assign(source)`. A box over NATIVE memory (libc's heap, a syscall buffer) has no array<T> to hand out by ref
+    // (NativeArrayBox.Value throws by design), so it stores N elements to the address through its element door, the loop
+    // reflect's store already runs. The converter emits `p.Assign(R)` for `*p = R` when p points to an unnamed array.
+    public static void Assign<T>(this ж<array<T>> p, in array<T> source)
+    {
+        if (p is INativeArrayStore<T> native)
+        {
+            native.StoreElements(source);
+            return;
+        }
+
+        p.Value.Assign(source);
+    }
+
     // array initializer from C# array
     public static array<T> array<T>(this T[] array)
     {

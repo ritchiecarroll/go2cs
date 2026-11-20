@@ -190,7 +190,7 @@ internal static void dumpTo(ж<bytes.Buffer> @out, nint indent, any x) {
         dumpTo(@out, indent + 1, xΔ1.Text);
         break;
     }
-    case slice<global::go.go.doc.comment_package.ΔText> xΔ1: {
+    case slice<global::go.go.doc.comment_package.Text> xΔ1: {
         foreach (var (_, t) in range(xΔ1)) {
             dumpNL(@out, indent);
             dumpTo(@out, indent, t);

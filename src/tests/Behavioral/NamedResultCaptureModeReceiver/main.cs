@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct Int128 {
     public int64 Lo, Hi;
 }
+
+} partial class mainᴛInt128 {
 
 public static (Int128 r, error err) SetBig(this ж<Int128> Ꮡx, int64 v) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -18,6 +21,8 @@ public static (Int128 r, error err) SetBig(this ж<Int128> Ꮡx, int64 v) {
     (x.Lo, x.Hi) = (v, v >> 63);
     return (x, default);
 }
+
+} partial class main_package {
 
 internal static Int128 /*r*/ fromInt(int64 v) {
     ref var r = ref heap(new Int128(), out var Ꮡr);
@@ -40,6 +45,8 @@ partial struct Tally {
     internal @string log;
 }
 
+} partial class mainᴛTally {
+
 public static void Add(this ж<Tally> Ꮡt, nint n) {
     GoFrame ᒐ = default;
     try {
@@ -53,6 +60,8 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 partial struct Holder {
     internal @string name;
@@ -73,6 +82,8 @@ internal static (Tally t, Holder h) tally(nint n) {
 
 partial struct Stack /*[]nint*/;
 
+} partial class mainᴛStack {
+
 internal static void push(this ж<Stack> Ꮡs, nint v) {
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -82,6 +93,8 @@ internal static void push(this ж<Stack> Ꮡs, nint v) {
     }
     s = append(s, v);
 }
+
+} partial class main_package {
 
 internal static Stack /*s*/ build(nint n) {
     ref var s = ref heap<Stack>(out var Ꮡs);
