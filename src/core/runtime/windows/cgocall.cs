@@ -479,7 +479,7 @@ internal static void cgocallbackg1(@unsafe.Pointer fn, @unsafe.Pointer frame, ui
         // will unpack the argument frame and call the Go function.
         ref var cb = ref heap<Action<@unsafe.Pointer>>(out var Ꮡcb);
         ref var cbFV = ref heap<funcval>(new funcval((uintptr)fn), out var ᏑcbFV);
-        (Ꮡ(@unsafe.Pointer.OfFunc(cb))).Value = noescape(@unsafe.Pointer.FromPinnedBox(ᏑcbFV));
+        @unsafe.Pointer.StoreWord(Ꮡ(@unsafe.Pointer.OfFunc(cb)), noescape(@unsafe.Pointer.FromPinnedBox(ᏑcbFV)));
         cb(frame);
 
         if (raceenabled) {
@@ -636,7 +636,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer p, bool indir, 
     }
     case var ᴛ when ᴛ == abi.Func: {
         if (indir) {
-            p = ~@unsafe.Pointer.To<@unsafe.Pointer>(p);
+            p = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(p));
         }
         if (!cgoIsGoPointer(p)) {
             return;
@@ -655,7 +655,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer p, bool indir, 
         if (inheap((uintptr)it)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
-        p = ~@unsafe.Pointer.To<@unsafe.Pointer>(add(p, goarch.PtrSize));
+        p = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(add(p, goarch.PtrSize)));
         if (!cgoIsGoPointer(p)) {
             return;
         }
@@ -713,7 +713,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer p, bool indir, 
     }
     case var ᴛ when ᴛ == abi.Pointer || ᴛ == abi.UnsafePointer: {
         if (indir) {
-            p = ~@unsafe.Pointer.To<@unsafe.Pointer>(p);
+            p = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(p));
             if (p == nil) {
                 return;
             }
@@ -751,7 +751,7 @@ internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointe
             (tp, addr) = tp.next(@base + span.elemsize); if (addr == 0) {
                 break;
             }
-            @unsafe.Pointer pp = ~@unsafe.Pointer.To<@unsafe.Pointer>((@unsafe.Pointer)addr);
+            @unsafe.Pointer pp = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>((@unsafe.Pointer)addr));
             if (cgoIsGoPointer(pp) && !isPinned(pp)) {
                 throw panic(cgoFormatErr(msg, abi.Pointer));
             }

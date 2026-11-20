@@ -3616,8 +3616,8 @@ top:
         ᏑgcCleanups.wake();
     }
 
-    if (cgo_yield.Value != nil) {
-        asmcgocall(cgo_yield.Value, nil);
+    if (@unsafe.Pointer.LoadWord(cgo_yield) != nil) {
+        asmcgocall(@unsafe.Pointer.LoadWord(cgo_yield), nil);
     }
 
     // local runq
@@ -6311,8 +6311,8 @@ internal static void sysmon() {
         now = nanotime();
 
         // trigger libc interceptors if needed
-        if (cgo_yield.Value != nil) {
-            asmcgocall(cgo_yield.Value, nil);
+        if (@unsafe.Pointer.LoadWord(cgo_yield) != nil) {
+            asmcgocall(@unsafe.Pointer.LoadWord(cgo_yield), nil);
         }
         // poll network if not polled for more than 10ms
         var lastpoll = Ꮡsched.of(schedt.Ꮡlastpoll).Load();
