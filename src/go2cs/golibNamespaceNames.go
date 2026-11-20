@@ -151,6 +151,7 @@ var golibNamespaceTypes = nameSet(
 	"UntypedComplex",
 	"UntypedFloat",
 	"UntypedInt",
+	"VariadicExtensions",
 	"builtin",
 	"channel",
 	"complex64",
@@ -289,6 +290,7 @@ var golibGenericNamespaceTypes = nameSet(
 	"slice",
 	"sslice",
 	"stackAppend",
+	"variadic",
 	"ж",
 )
 

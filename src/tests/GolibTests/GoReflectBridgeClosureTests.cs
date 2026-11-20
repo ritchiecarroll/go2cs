@@ -85,27 +85,27 @@ public class GoReflectBridgeClosureTests
         // rely on. A declared `func(string, ...int)` used as a method group in an `any` position
         // instead acquires C#'s NATURAL delegate type, whose name carries no marker at all — so the
         // name test called it non-variadic and In(1) handed back a raw Span<int>, which rendered as
-        // `func(string, Span\`1)`. A Span<T> parameter cannot arise any other way in converted code.
-        Assert.IsTrue(GoReflect.TryFuncShape(typeof(SpanTail), out Type[]? ins, out Type[]? outs, out bool isVariadic));
+        // `func(string, Span\`1)`. A variadic<T> parameter cannot arise any other way in converted code.
+        Assert.IsTrue(GoReflect.TryFuncShape(typeof(VariadicTail), out Type[]? ins, out Type[]? outs, out bool isVariadic));
         Assert.IsTrue(isVariadic);
         Assert.AreEqual(typeof(slice<nint>), ins![1]);
         Assert.AreEqual(0, outs!.Length);
-        Assert.AreEqual("func(string, ...int)", GoReflect.GoTypeName(typeof(SpanTail)));
+        Assert.AreEqual("func(string, ...int)", GoReflect.GoTypeName(typeof(VariadicTail)));
 
-        // The non-variadic control: no Span tail, no variadic claim.
+        // The non-variadic control: no variadic<T> tail, no variadic claim.
         Assert.IsTrue(GoReflect.TryFuncShape(typeof(Action<@string, nint>), out _, out _, out bool plain));
         Assert.IsFalse(plain);
     }
 
-    private delegate void SpanTail(@string s, params Span<nint> rest);
+    private delegate void VariadicTail(@string s, params variadic<nint> rest);
 
-    // ---- InvokeVariadic: the typed dispatch a `params Span<T>` tail forces ------------------------
+    // ---- InvokeVariadic: the typed dispatch a `params variadic<T>` tail forces --------------------
     //
     // These live here rather than in the behavioral tier for the reason this file's header states:
     // the shapes are ones only golib can construct. A Go program reaches Value.Call through the
     // reflect package and observes only the RESULT; what is asserted below is that the dispatch
     // reaches the callee at all for each of the two delegate identities a converted variadic takes,
-    // and that the tail arrives as a real Span over the array handed in — neither of which a printed
+    // and that the tail arrives as a pack over the array handed in — neither of which a printed
     // value can distinguish from an accidental pass.
 
     [TestMethod]
@@ -136,38 +136,38 @@ public class GoReflectBridgeClosureTests
         // used as a method group there, gets a compiler-synthesized delegate type instead of the
         // family one — the same shape difference TryFuncShape had to stop reading off the type NAME.
         // A family cast would throw InvalidCastException on it; the rebind is what makes it callable.
-        SpanTail record = (s, rest) =>
+        VariadicTail record = (s, rest) =>
         {
-            s_spanTailLog = s;
+            s_variadicTailLog = s;
 
             foreach (nint value in rest)
-                s_spanTailLog += (@string)("," + value);
+                s_variadicTailLog += (@string)("," + value);
         };
 
         Assert.AreNotEqual(typeof(Actionꓸꓸꓸ<@string, nint>), record.GetType());
         Assert.IsNull(GoReflect.InvokeVariadic(record, [(@string)"n"], new nint[] { 7, 8 }));
-        Assert.AreEqual((@string)"n,7,8", s_spanTailLog);
+        Assert.AreEqual((@string)"n,7,8", s_variadicTailLog);
     }
 
-    private static @string s_spanTailLog;
+    private static @string s_variadicTailLog;
 
     [TestMethod]
     public void AnExpressionCompiledVariadicDelegateRebindsToo()
     {
         // The third identity, and the one that has no Go source at all: a delegate the BRIDGE built.
         // Value.Method binds a receiver by compiling an expression lambda, so a variadic method value
-        // arrives here as a compiled `Func<Span<T>, R>` whose Method is NOT a runtime MethodInfo —
+        // arrives here as a compiled `Func<variadic<T>, R>` whose Method is NOT a runtime MethodInfo —
         // Delegate.CreateDelegate refuses to re-bind that method at all. Retargeting through Invoke
         // is what makes the rebind total; binding target-and-method would throw here.
-        ParameterExpression args = Expression.Parameter(typeof(Span<nint>), "args");
-        Delegate compiled = Expression.Lambda<Func<Span<nint>, nint>>(
-            Expression.Convert(Expression.Property(args, nameof(Span<nint>.Length)), typeof(nint)), args).Compile();
+        ParameterExpression args = Expression.Parameter(typeof(variadic<nint>), "args");
+        Delegate compiled = Expression.Lambda<Func<variadic<nint>, nint>>(
+            Expression.Convert(Expression.Property(args, nameof(variadic<nint>.Length)), typeof(nint)), args).Compile();
 
         Assert.IsFalse(compiled.Method is { } m && m.GetType().Name.Contains("Runtime"));
         Assert.AreEqual((nint)3, (nint)GoReflect.InvokeVariadic(compiled, [], new nint[] { 4, 5, 6 })!);
     }
 
-    private delegate @string SByteTail(sbyte head, params Span<ushort> rest);
+    private delegate @string SByteTail(sbyte head, params variadic<ushort> rest);
 
     [TestMethod]
     public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()
@@ -248,7 +248,7 @@ public class GoReflectBridgeClosureTests
     [TestMethod]
     public void AVariadicTailAliasesTheArrayItWasHandedRatherThanACopy()
     {
-        // The tail is a Span OVER the array, so the callee sees the caller's storage. Asserting it
+        // The tail is a pack OVER the array, so the callee sees the caller's storage. Asserting it
         // through a write is the only way to tell that apart from a defensive copy, and a copy is
         // exactly what any object?[]-based invoke path would have been forced into.
         Actionꓸꓸꓸ<nint> bump = args =>
@@ -356,7 +356,7 @@ public class GoReflectBridgeClosureTests
 
     private static nint s_arityLog;
 
-    private delegate void NineFixed(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, params Span<nint> rest);
+    private delegate void NineFixed(nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i, params variadic<nint> rest);
 
     [TestMethod]
     public void ANonVariadicDelegateIsRefusedByName()
@@ -366,7 +366,7 @@ public class GoReflectBridgeClosureTests
         NotImplementedException ex = Assert.ThrowsException<NotImplementedException>(
             () => GoReflect.InvokeVariadic(new Action<nint>(_ => { }), [(nint)1], Array.Empty<nint>()));
 
-        StringAssert.Contains(ex.Message, "no Span<T> tail");
+        StringAssert.Contains(ex.Message, "no variadic<T> tail");
     }
 
     // ---- Value.Bytes / SetBytes ALIAS, they never copy -------------------------------------------

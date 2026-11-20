@@ -73,7 +73,7 @@ public static class vshell_package
         VariadicMethods = ["Log"], VariadicDelegates = [typeof(Actionꓸꓸꓸ<object>)])]
     public interface ILog
     {
-        void Log(params Span<object> args);
+        void Log(params variadic<object> args);
 
         nint Count();
     }
@@ -85,7 +85,7 @@ public static class vshell_package
 
         public ΔLog(T value) { }
 
-        public void Log(params Span<object> args) { }
+        public void Log(params variadic<object> args) { }
 
         public nint Count() => 0;
     }
@@ -106,7 +106,7 @@ public static class vshell_package
 
         object? IInterfaceAdapter.Value => m_target;
 
-        public void Log(params Span<object> args) => ((Actionꓸꓸꓸ<object>)m_variadic![0]!)(args);
+        public void Log(params variadic<object> args) => ((Actionꓸꓸꓸ<object>)m_variadic![0]!)(args);
 
         public nint Count() => (nint)m_binding.Invoke(1, m_target)!;
     }
@@ -125,7 +125,7 @@ public static class vshell_package
 
     private static void Record(string text) => s_calls.Add(text);
 
-    private static string Text(Span<object> args)
+    private static string Text(ReadOnlySpan<object> args)
     {
         List<string> parts = [];
 
@@ -156,7 +156,7 @@ public static class vshell_package
         }
     }
 
-    public static void Log(this Rec r, params Span<object> args) => Record($"Rec.Log {r.n} {Text(args)}");
+    public static void Log(this Rec r, params variadic<object> args) => Record($"Rec.Log {r.n} {Text(args)}");
 
     public static nint Count(this Rec r) => r.n;
 
@@ -175,7 +175,7 @@ public static class vshell_package
         }
     }
 
-    public static void Log(this RecP r, params Span<object> args) => Record($"RecP.Log {r.n} {Text(args)}");
+    public static void Log(this RecP r, params variadic<object> args) => Record($"RecP.Log {r.n} {Text(args)}");
 
     public static nint Count(this RecP r) => r.n;
 
@@ -185,9 +185,9 @@ public static class vshell_package
         public nint n;
     }
 
-    [GoRecv] public static void Log(this ref Hand h, params Span<object> args) => Record($"Hand.Log {h.n} {Text(args)}");
+    [GoRecv] public static void Log(this ref Hand h, params variadic<object> args) => Record($"Hand.Log {h.n} {Text(args)}");
 
-    public static void Log(this ж<Hand> h, params Span<object> args) => Log(ref h.Value, args);
+    public static void Log(this ж<Hand> h, params variadic<object> args) => Log(ref h.Value, args);
 
     [GoRecv] public static nint Count(this ref Hand h) => h.n;
 
@@ -198,9 +198,9 @@ public static class vshell_package
         public nint n;
     }
 
-    [GoRecv] public static void Log(this ref HandV h, params Span<object> args) => Record($"HandV.Log {h.n}");
+    [GoRecv] public static void Log(this ref HandV h, params variadic<object> args) => Record($"HandV.Log {h.n}");
 
-    public static void Log(this ж<HandV> h, params Span<object> args) => Log(ref h.Value, args);
+    public static void Log(this ж<HandV> h, params variadic<object> args) => Log(ref h.Value, args);
 
     [GoRecv] public static nint Count(this ref HandV h) => h.n;
 
@@ -215,7 +215,7 @@ public static class vshell_package
             bound && method == "Log" ? new Action<object[]>(_ => { }) : null;
     }
 
-    public static void Log(this Skewed s, params Span<object> args) { }
+    public static void Log(this Skewed s, params variadic<object> args) { }
 
     public static nint Count(this Skewed s) => s.n;
 }

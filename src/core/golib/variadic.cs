@@ -13,7 +13,7 @@ namespace go;
 
 // A Go VARIADIC function type used as a value — a parameter, struct field, variable or methodless
 // named type such as `func(format string, args ...any)` — lowers to one of these delegates. The
-// trailing `params Span<T>` carries the variadic tail, so calls through the value pass loose
+// trailing `params variadic<T>` carries the variadic tail, so calls through the value pass loose
 // arguments (or spread a slice via its `ꓸꓸꓸ` property) exactly as Go callers do, and both the
 // named-function convention (`params ꓸꓸꓸT argsʗp`) and variadic function literals convert to
 // these natively — the parameter types match by identity. Fixed-parameter prefixes up to eight

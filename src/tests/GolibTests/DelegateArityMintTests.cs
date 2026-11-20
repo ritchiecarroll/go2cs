@@ -12,7 +12,7 @@ public class DelegateArityMintTests
     // TryFuncShape's exact inverse. Composing means NAMING a declared delegate family, and every
     // family is finite — System.Func/Action stop at 16 parameters, golib's ladder (funcArity.cs)
     // continues them to 24, the variadic families (variadic.cs) carry 8 fixed parameters ahead of
-    // the `params Span<T>` tail — while Go's own limit is 128 and its reflect suite drives a
+    // the `params variadic<T>` tail — while Go's own limit is 128 and its reflect suite drives a
     // 51-parameter FuncOf (all_test.go, issue #54669). Past every ceiling the type is MINTED with
     // Reflection.Emit (GoDelegateSynthesis).
     //
@@ -209,7 +209,7 @@ public class DelegateArityMintTests
     public void AVariadicTwentyIsMintedAndKeepsItsTailASlice()
     {
         // The variadic tail past the variadic families' 8 fixed parameters. The tail goes IN as
-        // Go's `[]T`, becomes the `Span<T>` the read side tests for, and comes back as `[]T` — the
+        // Go's `[]T`, becomes the `variadic<T>` the read side tests for, and comes back as `[]T` — the
         // one convention MakeGoFuncType owns and the mint carries untouched.
         Type[] ins = [.. parameterTypes(19), typeof(slice<@string>)];
 
@@ -217,8 +217,8 @@ public class DelegateArityMintTests
 
         assertMinted(delegateType, "a variadic 20");
 
-        Assert.AreSame(typeof(Span<@string>), delegateType.GetMethod("Invoke")!.GetParameters()[19].ParameterType,
-            "the minted Invoke must carry the tail as Span<T> — a slice<T> there would read back non-variadic");
+        Assert.AreSame(typeof(variadic<@string>), delegateType.GetMethod("Invoke")!.GetParameters()[19].ParameterType,
+            "the minted Invoke must carry the tail as variadic<T> — a slice<T> there would read back non-variadic");
     }
 
     [TestMethod]

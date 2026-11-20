@@ -30,7 +30,7 @@ namespace go;
 // No conversion from slice<T> to variadic<T> exists on purpose: Go's `f(x)` with `x []any` passes ONE
 // element, and C# picks a params method's NORMAL form whenever its argument converts to the parameter
 // type. Without the conversion only `x.ꓸꓸꓸ` spreads, as only `x...` does in Go.
-[CollectionBuilder(typeof(variadic), nameof(variadic.Create))]
+[CollectionBuilder(typeof(golib.VariadicBuilder), nameof(golib.VariadicBuilder.Create))]
 public readonly ref struct variadic<T>
 {
     // The pack's elements. For a spread: the caller's window (writes reach the caller, as in Go). For a
@@ -62,10 +62,10 @@ public readonly ref struct variadic<T>
     }
 
     /// <summary>True when this pack is a spread <c>f(s...)</c> and so IS the caller's slice.</summary>
-    public bool IsSpread => m_isSpread;
+    [EditorBrowsable(EditorBrowsableState.Never)] public bool IsSpread => m_isSpread;
 
     /// <summary>The caller's slice of a spread pack; the nil slice for a literal pack.</summary>
-    public slice<T> Spread => m_spread;
+    [EditorBrowsable(EditorBrowsableState.Never)] public slice<T> Spread => m_spread;
 
     /// <summary>The pack's element count.</summary>
     public int Length => m_elements.Length;
@@ -83,7 +83,7 @@ public readonly ref struct variadic<T>
     /// before anything may write it: the Span conversion copies it, the heap prologue copies it, and the
     /// converter never emits an element write through its stack view.
     /// </summary>
-    public bool IsCompilerStorage => m_isCompilerStorage;
+    [EditorBrowsable(EditorBrowsableState.Never)] public bool IsCompilerStorage => m_isCompilerStorage;
 
     /// <summary>An element by reference. A write through it is legal only when <see cref="IsCompilerStorage"/> is false.</summary>
     public ref T this[int index] => ref m_elements[index];
@@ -95,7 +95,7 @@ public readonly ref struct variadic<T>
 
     // Spread operator: a forwarded pack (`var xs = xsʗp;` then `g(xs.ꓸꓸꓸ)`) hands on itself, so a spread
     // caller's slice reaches the next callee whole, as Go's `g(xs...)` passes the same slice.
-    public variadic<T> ꓸꓸꓸ => this;
+    [EditorBrowsable(EditorBrowsableState.Never)] public variadic<T> ꓸꓸꓸ => this;
 
     // Hand-written callees that still take `params Span<T>` (hand-owned files) keep Go's copy-free reading
     // of a spread but not its header; that is their documented, listed gap. A literal pack is copied here,
@@ -108,16 +108,6 @@ public readonly ref struct variadic<T>
     // A span-shaped spread source (a stack view's `v.ꓸꓸꓸ`, an array's) packs as LITERAL elements over
     // that same storage: the callee reads and writes it in place, and a heap prologue copies it as before.
     public static implicit operator variadic<T>(Span<T> elements) => new(elements);
-}
-
-/// <summary>The collection builder of <see cref="variadic{T}"/>: a literal argument list.</summary>
-[EditorBrowsable(EditorBrowsableState.Never)] public static class variadic
-{
-    // The compiler hands the arguments as a read-only span over storage of its choosing: a stack buffer, or
-    // read-only static data for an all-constant primitive list. The pack views it without copying and is
-    // marked as compiler storage, so nothing writes it (see variadic<T>.IsCompilerStorage).
-    public static variadic<T> Create<T>(ReadOnlySpan<T> items) =>
-        new(MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(items), items.Length), compilerStorage: true);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)] public static class VariadicExtensions
