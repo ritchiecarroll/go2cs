@@ -128,6 +128,9 @@ public static class GoScheduler
     private static readonly bool s_injectWaiters = Environment.GetEnvironmentVariable("GO2CS_MN_INJECT_WAITERS") != "0";
     private static readonly bool s_retireRaw = Environment.GetEnvironmentVariable("GO2CS_MN_RETIRE_RAW") == "1";
     private static readonly bool s_roomRaw = Environment.GetEnvironmentVariable("GO2CS_MN_ROOM_RAW") == "1";
+
+    // DESIGN-mn-pin.md 15.3 (arms only): GO2CS_MN_RETAKE_UNPINNED=1 counts a retake as shared, as before 15.2.
+    private static readonly bool s_retakeUnpinned = Environment.GetEnvironmentVariable("GO2CS_MN_RETAKE_UNPINNED") == "1";
     private static long s_retakes;
     private static int s_pWaiters;
 
@@ -180,6 +183,12 @@ public static class GoScheduler
         {
             if (s_carriers.Count - s_pinnedCount < s_procs)
                 Interlocked.Increment(ref s_sharedFloorViolations);
+
+            // 15.3 (P3's NIT): the pinned-blocked count stays within 0 and the pinned count, a standing reading.
+            int pinnedBlocked = Volatile.Read(ref s_pinnedBlocked);
+
+            if (pinnedBlocked < 0 || pinnedBlocked > s_pinnedCount)
+                Interlocked.Increment(ref s_pinnedBlockedViolations);
         }
     }
 
@@ -228,6 +237,7 @@ public static class GoScheduler
     // plain park (EnterBlocked) or retaken in a native call; raised and lowered with s_blocked through each carrier's flag.
     private static int s_pinnedBlocked;
     private static long s_sharedFloorViolations;
+    private static long s_pinnedBlockedViolations;
 
     // The shared carriers that are not blocked: what the idle retire, EnsureCarrier and the injection read (under
     // s_carriersLock). s_blocked holds blocked pinned carriers (s_pinnedBlocked) as well as the shared ones.
@@ -444,7 +454,7 @@ public static class GoScheduler
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
                $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
                $" pin-retired={Interlocked.Read(ref s_pinRetired)} peak-pinned-waiting={Volatile.Read(ref s_peakPinnedWaiting)}" +
-               $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)} idle-handoffs={Interlocked.Read(ref s_idleHandoffs)} idle-set-violations={Interlocked.Read(ref s_idleSetViolations)} shared-floor-violations={Interlocked.Read(ref s_sharedFloorViolations)}" +
+               $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)} idle-handoffs={Interlocked.Read(ref s_idleHandoffs)} idle-set-violations={Interlocked.Read(ref s_idleSetViolations)} shared-floor-violations={Interlocked.Read(ref s_sharedFloorViolations)} pinned-blocked-violations={Interlocked.Read(ref s_pinnedBlockedViolations)}" +
                $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading();
     }
 
@@ -668,7 +678,7 @@ public static class GoScheduler
                         {
                             // DESIGN-mn-pin.md 15.2: the flag is set BEFORE the retake is published, so a step that releases
                             // the retake at once still lowers the pinned count it raises.
-                            bool pinned = carrier.IsPinned;
+                            bool pinned = carrier.IsPinned && !s_retakeUnpinned;
                             carrier.BlockedPinned = pinned;
 
                             if (Interlocked.CompareExchange(ref carrier.Retaken, 1, 0) == 0)

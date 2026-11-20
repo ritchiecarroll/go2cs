@@ -107,3 +107,19 @@ internal static void reportScheduler() {
 }
 
 } // end main_package
+
+partial class main_package {
+
+// DESIGN-mn-pin.md 15.3: a native call through golib's seam, as a converted funnel brackets one; the sleep stands in
+// for the call itself.
+internal static void nativeSleep(nint ms) {
+    GoNativeCall.Enter();
+
+    try {
+        Thread.Sleep((int)ms);
+    } finally {
+        GoNativeCall.Exit();
+    }
+}
+
+} // end main_package (native)

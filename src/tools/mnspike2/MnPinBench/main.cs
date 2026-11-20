@@ -172,18 +172,31 @@ internal static void pinnedSleeper(channel<nint> ready, channel<nint> release, n
     time.Sleep(ms * time.Millisecond);
 }
 
+// DESIGN-mn-pin.md 15.3: a pinned goroutine in a long BRACKETED native call (golib's seam, GoNativeCall). The bracket keeps
+// the P, so with work queued the monitor retakes it: the retake site's pinned count.
+internal static void pinnedNative(channel<nint> ready, channel<nint> release, nint ms) {
+    runtime.LockOSThread();
+    ready.ᐸꟷ(1);
+    ᐸꟷ(release);
+    nativeSleep(ms);
+}
+
 internal static void main() {
     @string mode = benchMode();
     nint k = param("MN_K", 0);
     var done = new channel<nint>(0);
 
-    if (mode == "pb") {
+    if (mode == "pb" || mode == "pn") {
         var ready = new channel<nint>(0);
         var release = new channel<nint>(0);
         nint pairs = param("MN_PAIRS", 5000);
 
         for (nint i = 0; i < k; i++) {
-            goǃ(pinnedSleeper, ready, release, param("MN_SLEEP_MS", 3000));
+            if (mode == "pb") {
+                goǃ(pinnedSleeper, ready, release, param("MN_SLEEP_MS", 3000));
+            } else {
+                goǃ(pinnedNative, ready, release, param("MN_SLEEP_MS", 3000));
+            }
         }
 
         for (nint i = 0; i < k; i++) {

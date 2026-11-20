@@ -592,3 +592,28 @@ subtracts it in place of `s_pinnedWaiting`.
 
 Not exercised: the retake site's pinned counting. No arm here puts a locked goroutine in a bracketed native call. It
 is built, and named as untested.
+
+### 15.3 The retake site, exercised; P3's standing reading (dated block, 2026-11-20)
+
+COORD asked for an arm on the one rise of `s_pinnedBlocked` not on the carrier's own thread: the monitor's retake.
+P3 CLEARED `fa0de464e2` with a NIT: a standing reading `0 <= s_pinnedBlocked <= s_pinnedCount`.
+
+**The arm (MnPinBench mode `pn`):** K = 24 goroutines lock, park once (pinned), then make a BRACKETED native call
+through golib's own seam (`GoNativeCall.Enter`, a sleep standing in for the call, `GoNativeCall.Exit`), beside 5,000
+pairs. `Enter` keeps the P, so with work queued the monitor retakes each pinned step: 24 retakes in every run. The red
+is an arm-only switch, `GO2CS_MN_RETAKE_UNPINNED=1`, that counts the retake as shared, as before 15.2. Prediction
+before the run: the red heads to P + 2K; the line is P + K + the budget = 48.
+
+| run (3 each) | peak carriers | trips/s | violations (floor / pinned-blocked) |
+|---|---|---|---|
+| red: retake counted as shared | 61, 62, 61 | 804,004 to 930,724 | 0 / 0 |
+| fixed | 40, 40, 38 | 989,974 to 1,047,424 | 0 / 0 |
+
+**The standing reading, made to fail:** with the retake release's `UnblockCounted` removed (a leak), a run whose
+native calls end inside it (1 s calls, 2 s run, 24 pins retired) reads `pinned-blocked-violations=5`. The same run
+on the correct code reads 0. Restored byte-identical. A first try with 3 s calls read 0 even with the leak: the pins
+outlived the program, so the leak never exceeded the pinned count. That was the arm's shape, not the reading's.
+
+**Not made red by measurement:** the ordering hazard the flag-before-publish rule prevents (a step releasing the
+retake between the monitor's CAS and its flag write). Its window is nanoseconds against seconds-long native calls,
+so no run reaches it. The standing reading is the guard that would catch the drift it causes.
