@@ -561,6 +561,38 @@ path, and the alias control for two named arrays of one shape), `NamedArrayViewF
      showing an address in the storage it viewed; every carrier arm stays green; restored, sha256 equal.
      golib against master c2919b8b16 at 3410407821: 3 files, 69 lines added, 1 removed. -->
 
+#### Amendment 2026-11-20 (P5) — door C's window beside arm 5: the refusal stands for every caller that does not pass N
+
+Arm 5 refuses an `array<E>` pointee over a number no Go value owns because `array<E>` carries no length, so no window
+can be built (1.1). `DESIGN-array-pointer-doors.md` section 20 takes door C's unnamed form: the converter passes N for
+a kept `(*[N]E)(p)`, and `ж<T>.FromNumber` gains an overload that takes the length and an opener. Its place in the arm
+order, and what it leaves of this document's floor:
+
+1. **After arm 3, before arm 5.** The door branch sits where arm 5 stood, after the same-type alias (1), the zero base,
+   the order token (2a, through the interior-alias step), the reinterpret, and token arithmetic (3). Moving it ahead of
+   arm 3 turned token arithmetic from a refusal into a window; that variant was run and two arms went red (20.3).
+2. **It opens only with an opener, a non-zero number, and no token.** A tagged number names no user memory, and an
+   order token is not an address; both answer what they answer without the door.
+3. **Arm 5 is unchanged.** Every caller that passes no opener (the two-argument form, which forwards with none; reflect;
+   hand-written files; a module converted before the door) still reaches the refusal with its text. An element that
+   holds a reference gets no opener, so it reaches the refusal too.
+4. **Arm 2b, the pinned real address of another pointee**, which fell through to a `NativeBox<array<E>>` reading element
+   bytes as an array header, opens the same N-element window over that value's bytes, anchored on the box, but only
+   when the box holds all N elements' bytes still. Otherwise, and without the door, it falls through as before.
+5. **An address derived from a Go value that the registry does not know** reaches arm 5 as before. The door opens a
+   window there only when the value holds its storage still and the window lies inside it (the view doors' V2 rule);
+   otherwise arm 5 refuses it by name. A window over storage the collector may move would read and write wherever the
+   value used to be (`DESIGN-array-pointer-doors.md` 20.3).
+
+The window is `NativeArrayBox<E>`, the backing this document designed (3.1): its `Value` refuses by name, so no
+`array<E>` is ever made from bytes, and its elements are read and written in place through `ElementRef`, bounded by N.
+
+<!-- P5, 2026-11-20. Branch claude/p5-door-c-unnamed at f609052c37 (the door), b6b0816469 (the census), f075e0e3e9 (the
+     regen), 12347fb964 (the V2 rule in the opener). The door condition in ж.cs: arrayOpener is not null, value != 0, not aliasesAnOrderToken, and not
+     ManagedPointerTokens.NamesNoUserMemory. Controls on KeptArrayDoorTests: either guard removed alone, 9 of 9; both
+     removed, the order-token arm red; door ahead of arm 3 with the guards removed, the token-arithmetic and order-token
+     arms red; restored sha-identical. -->
+
 ---
 
 ## 5. Rejected alternatives, on the record
