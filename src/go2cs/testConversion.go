@@ -10763,7 +10763,10 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	// manifest by the wrong platform without any message saying so.
 	// A third-party module row's manifest may live in the committed -module-disclosures tree instead of
 	// the output directory (moduleDisclosureRoot.go); the output directory's own manifest still wins.
-	manifestDir, manifestNote := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, inputPath)
+	manifestDir, manifestNote, manifestErr := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, options.testModuleVersion, inputPath)
+	if manifestErr != nil {
+		return manifestErr
+	}
 	if manifestNote != "" {
 		fmt.Println(manifestNote)
 	}

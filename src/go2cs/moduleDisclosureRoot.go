@@ -38,7 +38,17 @@ import (
 // root is the -module-disclosures tree ("" when the flag is absent); modulePath and moduleDir are the
 // main module's import path and directory ("" for the standard library); pkgDir is the package's
 // source directory.
-func resolveDisclosureManifestDir(outputPath, root, modulePath, moduleDir, pkgDir string) (string, string) {
+func resolveDisclosureManifestDir(outputPath, root, modulePath, moduleDir, claimedVersion, pkgDir string) (string, string, error) {
+	dir, note := resolveDisclosureManifestDirStub(outputPath, root, modulePath, moduleDir, pkgDir)
+	return dir, note, nil
+}
+
+// moduleDisclosurePreflight: RED-COMMIT STUB, refuses nothing yet.
+func moduleDisclosurePreflight(root, moduleDir, claimedVersion string) error {
+	return nil
+}
+
+func resolveDisclosureManifestDirStub(outputPath, root, modulePath, moduleDir, pkgDir string) (string, string) {
 	if root == "" || modulePath == "" || fileExists(filepath.Join(outputPath, testDisclosureFileName)) {
 		return outputPath, ""
 	}

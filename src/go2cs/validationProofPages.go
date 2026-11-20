@@ -1168,7 +1168,7 @@ func thirdPartyDisclosureURL(outputPath string, manifest testManifest, options O
 
 	rel := strings.TrimPrefix(strings.TrimPrefix(manifest.PackageImportPath, manifest.ModulePath), "/")
 	pkgDir := filepath.Join(options.mainModuleDir, filepath.FromSlash(rel))
-	manifestDir, _ := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, pkgDir)
+	manifestDir, _, _ := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, options.testModuleVersion, pkgDir)
 
 	if filepath.Clean(manifestDir) == filepath.Clean(outputPath) {
 		return ""

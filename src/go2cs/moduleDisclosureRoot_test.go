@@ -66,7 +66,7 @@ func TestModuleDisclosureRootApplied(t *testing.T) {
 	want := filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp")
 	writeModuleRootManifest(t, want, "TestDiff/Comparer/MapKeyPointer")
 
-	dir, note := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, pkgDir)
+	dir, note, _ := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, "", pkgDir)
 
 	if dir != want {
 		t.Fatalf("the module root's manifest for the resolved version must be the one read; got dir %q, want %q (note %q)", dir, want, note)
@@ -87,7 +87,7 @@ func TestModuleDisclosureRootWrongVersionRefused(t *testing.T) {
 	moduleDir, pkgDir, outputDir, root := moduleRootFixture(t)
 	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.6.0", "cmp"), "TestDiff/Comparer/MapKeyPointer")
 
-	dir, note := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, pkgDir)
+	dir, note, _ := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, "", pkgDir)
 
 	if dir != outputDir {
 		t.Fatalf("a manifest for another version must NOT be applied; got dir %q", dir)
@@ -104,7 +104,7 @@ func TestModuleDisclosureRootOutputDirWins(t *testing.T) {
 	writeModuleRootManifest(t, outputDir, "TestFromOutputDir")
 	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp"), "TestFromRoot")
 
-	dir, note := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, pkgDir)
+	dir, note, _ := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, "", pkgDir)
 
 	if dir != outputDir || note != "" {
 		t.Fatalf("a manifest in the output directory must win, silently; got dir %q, note %q", dir, note)
@@ -122,7 +122,7 @@ func TestModuleDisclosureRootOrphanReported(t *testing.T) {
 	moduleDir, pkgDir, outputDir, root := moduleRootFixture(t)
 	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp"), "TestDiff/Comparer/MapKeyPointer")
 
-	dir, _ := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, pkgDir)
+	dir, _, _ := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, "", pkgDir)
 	disclosures, _, _, err := loadTestDisclosures(dir, "linux")
 	if err != nil {
 		t.Fatal(err)
@@ -138,21 +138,97 @@ func TestModuleDisclosureRootOrphanReported(t *testing.T) {
 	}
 }
 
-// Arm 5: a main module that is not in a module cache (a plain checkout) has no resolved version: the root
-// is not consulted, and the line says so.
+// Arm 5: a main module that is not in a module cache (a plain checkout or a copy) has no resolved version, and
+// -module-disclosures was given: the run REFUSES, naming both remedies, rather than printing a note and applying
+// nothing (P5's sqlite run, 2026-11-20: the note let a host-fatal disclosure go unapplied and the host aborted).
 func TestModuleDisclosureRootNoResolvedVersion(t *testing.T) {
 	_, _, outputDir, root := moduleRootFixture(t)
 	checkout := filepath.Join(t.TempDir(), "go-cmp")
 	pkgDir := filepath.Join(checkout, "cmp")
 	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp"), "TestDiff/Comparer/MapKeyPointer")
 
-	dir, note := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, checkout, pkgDir)
+	dir, _, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, checkout, "", pkgDir)
 
 	if dir != outputDir {
 		t.Fatalf("with no resolved version the root must not be consulted; got dir %q", dir)
 	}
-	if !strings.Contains(note, "no resolved version") || !strings.Contains(note, "not consulted") {
-		t.Fatalf("the line must say the module has no resolved version and the root was not consulted; got %q", note)
+	if err == nil || !strings.Contains(err.Error(), "-module-version") || !strings.Contains(err.Error(), "module-cache") {
+		t.Fatalf("a disclosure root that cannot be applied must be refused, naming -module-version and the module-cache "+
+			"directory as the two remedies; got %v", err)
+	}
+}
+
+// Arm 6: a COPY of the module (the scout and sqlite recipe) with its version named by -module-version: the root is
+// consulted for that version, exactly as for a module-cache directory.
+func TestModuleDisclosureRootCopyWithNamedVersionApplies(t *testing.T) {
+	_, _, outputDir, root := moduleRootFixture(t)
+	checkout := filepath.Join(t.TempDir(), "go-cmp")
+	pkgDir := filepath.Join(checkout, "cmp")
+	want := filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp")
+	writeModuleRootManifest(t, want, "TestDiff/Comparer/MapKeyPointer")
+
+	dir, note, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, checkout, "v0.7.0", pkgDir)
+
+	if err != nil || dir != want || !strings.Contains(note, filepath.Join(want, testDisclosureFileName)) {
+		t.Fatalf("a copy named v0.7.0 must apply the v0.7.0 manifest; got dir %q, note %q, err %v", dir, note, err)
+	}
+}
+
+// Arm 7: a module-cache directory names its own version; a different -module-version is a contradiction and is
+// refused, naming both. The same version is accepted (the control).
+func TestModuleDisclosureRootNamedVersionMustMatchTheCache(t *testing.T) {
+	moduleDir, pkgDir, outputDir, root := moduleRootFixture(t)
+	want := filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp")
+	writeModuleRootManifest(t, want, "TestDiff/Comparer/MapKeyPointer")
+
+	if _, _, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, "v0.6.0", pkgDir); err == nil ||
+		!strings.Contains(err.Error(), "v0.6.0") || !strings.Contains(err.Error(), "v0.7.0") {
+		t.Fatalf("-module-version v0.6.0 on a v0.7.0 module-cache directory must be refused naming both; got %v", err)
+	}
+
+	if dir, _, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, "v0.7.0", pkgDir); err != nil || dir != want {
+		t.Fatalf("the matching version must apply; got dir %q, err %v", dir, err)
+	}
+}
+
+// Arm 8: -module-version must be a semantic version.
+func TestModuleDisclosureRootNamedVersionMustBeValid(t *testing.T) {
+	_, _, outputDir, root := moduleRootFixture(t)
+	checkout := filepath.Join(t.TempDir(), "go-cmp")
+
+	if _, _, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, checkout, "0.7.0", filepath.Join(checkout, "cmp")); err == nil ||
+		!strings.Contains(err.Error(), "0.7.0") {
+		t.Fatalf("-module-version 0.7.0 (no leading v) is not a module version and must be refused; got %v", err)
+	}
+}
+
+// Arm 9: the PREFLIGHT runs before any conversion, from the module's go.mod, so a run that cannot apply its
+// disclosure root fails in seconds rather than after an hour of conversion.
+func TestModuleDisclosurePreflight(t *testing.T) {
+	moduleDir, _, _, root := moduleRootFixture(t)
+	checkout := filepath.Join(t.TempDir(), "go-cmp")
+
+	for _, dir := range []string{moduleDir, checkout} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module "+moduleRootTestModule+"\n\ngo 1.21\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := moduleDisclosurePreflight(root, checkout, ""); err == nil || !strings.Contains(err.Error(), "-module-version") {
+		t.Fatalf("a copy with no named version must be refused before conversion; got %v", err)
+	}
+
+	for _, arm := range []struct{ root, dir, version string }{
+		{root, checkout, "v0.7.0"},
+		{root, moduleDir, ""},
+		{"", checkout, ""},
+	} {
+		if err := moduleDisclosurePreflight(arm.root, arm.dir, arm.version); err != nil {
+			t.Errorf("preflight(root %q, dir %q, version %q) must pass; got %v", arm.root, arm.dir, arm.version, err)
+		}
 	}
 }
 
@@ -165,10 +241,10 @@ func TestModuleDisclosureRootInertForStdAndWithoutFlag(t *testing.T) {
 	// manifest: only the flag's own guard keeps this arm inert.
 	t.Chdir(root)
 
-	if dir, note := resolveDisclosureManifestDir(outputDir, "", moduleRootTestModule, moduleDir, pkgDir); dir != outputDir || note != "" {
+	if dir, note, _ := resolveDisclosureManifestDir(outputDir, "", moduleRootTestModule, moduleDir, "", pkgDir); dir != outputDir || note != "" {
 		t.Fatalf("without the flag nothing changes; got %q, %q", dir, note)
 	}
-	if dir, note := resolveDisclosureManifestDir(outputDir, root, "", moduleDir, pkgDir); dir != outputDir || note != "" {
+	if dir, note, _ := resolveDisclosureManifestDir(outputDir, root, "", moduleDir, "", pkgDir); dir != outputDir || note != "" {
 		t.Fatalf("a standard-library package never consults the root; got %q, %q", dir, note)
 	}
 }
