@@ -72,9 +72,10 @@ public readonly ref struct variadic<T>
 
     /// <summary>
     /// The pack's elements as a span. A write through it is legal only when <see cref="IsCompilerStorage"/> is
-    /// false: a literal pack's elements are the compiler's storage.
+    /// false: a literal pack's elements are the compiler's storage. Hidden: golib's own plumbing reads it, and a
+    /// C# caller reaches a span through the implicit conversion, which copies compiler storage.
     /// </summary>
-    public Span<T> Elements => m_elements;
+    [EditorBrowsable(EditorBrowsableState.Never)] public Span<T> Elements => m_elements;
 
     /// <summary>
     /// True for a LITERAL pack built by the compiler (the collection builder): its elements are storage the

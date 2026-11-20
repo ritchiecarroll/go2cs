@@ -1170,7 +1170,8 @@ go.variadic<T> :: method static System.ReadOnlySpan<T> op_Implicit(go.variadic<T
 go.variadic<T> :: method static System.Span<T> op_Implicit(go.variadic<T>)
 go.variadic<T> :: method static go.variadic<T> op_Implicit(System.Span<T>)
 go.variadic<T> :: property System.Int32 Length { get; }
-go.variadic<T> :: property System.Span<T> Elements { get; }
+# 2026-11-20, COORD review (inbox/P2/20261120T145250Z-COORD.md item 4): Elements is hidden; tier 1 reaches a span by
+# the copying implicit conversion.
 go.variadic<T> :: property T& Item[System.Int32] { get; }
 go.variadic<T> :: property T& Item[System.IntPtr] { get; }
 go.ж<T> :: method System.Boolean CompareExchangePointerWord(System.UIntPtr, System.UIntPtr)
