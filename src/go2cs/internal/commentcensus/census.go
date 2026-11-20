@@ -921,7 +921,9 @@ func goAnchorIdents(ids []string) map[string]bool {
 	return m
 }
 
-var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!?;)$`)
+// A variadic pack's prelude is a view (`.sslice()`), the heap slice (`var xs = xsʗp.slice();`) or, for a pack
+// only forwarded, the pack itself (`var xs = xsʗp;`, wall E): all three are the converter's prelude.
+var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= [\pL\pN_@]+ʗp(\.slice\(\))?;|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!?;)$`)
 
 var csDeclRe = regexp.MustCompile(`^(\[[^\]]*\]\s*)*(public|internal|private|protected|partial|static|readonly|unsafe|const|ref|file|new)\b`)
 

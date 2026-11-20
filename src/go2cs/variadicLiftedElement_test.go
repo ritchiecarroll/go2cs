@@ -147,7 +147,7 @@ func TestVariadicAliasOfALiftedElementIsPackageQualified(t *testing.T) {
 		}
 
 		for _, line := range lines {
-			if !strings.Contains(line, "= Span<main_package.") {
+			if !strings.Contains(line, "= variadic<main_package.") {
 				t.Errorf("%s: a variadic alias referent is not qualified with the package class: %s", file, line)
 			}
 		}
