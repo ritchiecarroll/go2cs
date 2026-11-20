@@ -41,7 +41,9 @@ public sealed class GoFrameRuleAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        // A converted file keeps its Go file's name and leading comments, so it can be one Roslyn classes as generated code;
+        // the action reads only the listed spans, so reading such files costs nothing elsewhere.
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
 
         context.RegisterCompilationStartAction(start =>
@@ -60,7 +62,7 @@ public sealed class GoFrameRuleAnalyzer : DiagnosticAnalyzer
             {
                 SyntaxTree tree = analysis.SemanticModel.SyntaxTree;
 
-                if (!deferred.TryGetValue(tree.FilePath, out List<TextSpan>? spans))
+                if (!deferred.TryGetValue(GoFrameRuleGenerator.DeferredKey(tree.FilePath), out List<TextSpan>? spans))
                     return;
 
                 SyntaxNode root = tree.GetRoot(analysis.CancellationToken);
@@ -82,7 +84,7 @@ public sealed class GoFrameRuleAnalyzer : DiagnosticAnalyzer
         });
     }
 
-    // The generator's lists, keyed by the source file each use is in.
+    // The generator's lists, keyed by the source file each use is in (GoFrameRuleGenerator.DeferredKey; never a path).
     private static Dictionary<string, List<TextSpan>> ReadDeferred(Compilation compilation, System.Threading.CancellationToken cancellationToken)
     {
         Dictionary<string, List<TextSpan>> deferred = new(StringComparer.Ordinal);

@@ -68,8 +68,23 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
     /// <summary>The hint-name prefix of the comment-only files that list the uses the generator could not bind.</summary>
     public const string DeferredHintPrefix = "GoFrameRule.Deferred.";
 
-    // The prefix of each listed use in such a file: `// GO2CS0016-deferred <start> <length> <path>`.
+    // The prefix of each listed use in such a file: `// GO2CS0016-deferred <start> <length> <key>`.
     internal const string DeferredLinePrefix = "// GO2CS0016-deferred ";
+
+    /// <summary>
+    /// A source file's key in the deferred lists and their hint names: its file name's letters and digits and an FNV-1a
+    /// hash of its full path. The path itself is never written: with EmitCompilerGeneratedFiles the lists land on disk.
+    /// </summary>
+    internal static string DeferredKey(string filePath)
+    {
+        uint hash = 2166136261;
+
+        foreach (char c in filePath)
+            hash = (hash ^ c) * 16777619;
+
+        string name = new([.. System.IO.Path.GetFileNameWithoutExtension(filePath).Where(char.IsLetterOrDigit)]);
+        return name + "." + hash.ToString("x8", CultureInfo.InvariantCulture);
+    }
 
     /// <summary>The tracking name of the semantic transform.</summary>
     public const string TransformStepName = "GoFrameRuleTransform";
@@ -154,7 +169,9 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
         if (model.GetOperation(identifier, cancellationToken) is not { Parent: { } parent } operation)
             return Bound.Unknown;
 
-        for (IOperation? ancestor = parent; ancestor is not null; ancestor = ancestor.Parent)
+        // A use binds or not by the operations up to its own lambda or local function: an invalid call ABOVE that body
+        // (a lambda passed to a call that names a generated member) says nothing of how the body's own statements bind.
+        for (IOperation? ancestor = parent; ancestor is not null and not IAnonymousFunctionOperation and not ILocalFunctionOperation; ancestor = ancestor.Parent)
         {
             if (ancestor is IInvalidOperation)
                 return Bound.Unknown;
@@ -162,14 +179,29 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
 
         bool IsFrame(ITypeSymbol? type) => SymbolEqualityComparer.Default.Equals(type, frame);
 
+        // A method's own type arguments, and those of every type it is a member of (`RefAction<GoFrame>.Invoke`).
+        bool InfersFrame(IMethodSymbol method)
+        {
+            if (method.TypeArguments.Any(IsFrame))
+                return true;
+
+            for (INamedTypeSymbol? type = method.ContainingType; type is not null; type = type.ContainingType)
+            {
+                if (type.TypeArguments.Any(IsFrame))
+                    return true;
+            }
+
+            return false;
+        }
+
         return new Bound(true, parent switch
         {
             IInvocationOperation invocation when invocation.Instance == operation => null,
             IPropertyReferenceOperation property when property.Instance == operation => null,
             IFieldReferenceOperation field when field.Instance == operation => null,
             INameOfOperation => null,
-            IArgumentOperation { Parent: IInvocationOperation invocation } when invocation.TargetMethod.TypeArguments.Any(IsFrame) => "is passed as a generic argument",
-            IArgumentOperation { Parent: IObjectCreationOperation { Type: INamedTypeSymbol created } } when created.TypeArguments.Any(IsFrame) => "is passed as a generic argument",
+            IArgumentOperation { Parent: IInvocationOperation invocation } when InfersFrame(invocation.TargetMethod) => "is passed as a generic argument",
+            IArgumentOperation { Parent: IObjectCreationOperation { Constructor: { } constructor } } when InfersFrame(constructor) => "is passed as a generic argument",
             IArgumentOperation argument when argument.Parameter?.RefKind == RefKind.Ref => null,
             IArgumentOperation => "is passed by value",
             ISimpleAssignmentOperation assignment when assignment.Target == operation => "is assigned",
@@ -423,11 +455,6 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
             if (symbol is null || !IsFrame(type))
                 return;
 
-            // `ref GoFrame alias = ref ᒐ;` is refused at the ref local's declaration.
-            if (identifier.Parent is RefExpressionSyntax)
-                return;
-
-            bool allowed = IsAllowedPosition(identifier);
             bool inNameOf = identifier.Parent is ArgumentSyntax argument && IsNameOfArgument(argument);
 
             if (!inNameOf && !SymbolEqualityComparer.Default.Equals(model.GetEnclosingSymbol(identifier.SpanStart, cancellationToken), symbol.ContainingSymbol))
@@ -435,6 +462,12 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
                 Report(identifier, Describe(symbol.Name, "is captured by a lambda or local function"));
                 return;
             }
+
+            // `ref GoFrame alias = ref ᒐ;` is refused at the ref local's declaration.
+            if (identifier.Parent is RefExpressionSyntax)
+                return;
+
+            bool allowed = IsAllowedPosition(identifier);
 
             Bound bound = Classify(model, identifier, frame, cancellationToken);
 
@@ -464,20 +497,8 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
 
         public string FilePath { get; } = filePath;
 
-        // One file per source file: its name and a stable hash of its full path, so two files of one name stay apart.
-        public string DeferredHintName
-        {
-            get
-            {
-                uint hash = 2166136261;
-
-                foreach (char c in FilePath)
-                    hash = (hash ^ c) * 16777619;
-
-                string name = new([.. System.IO.Path.GetFileNameWithoutExtension(FilePath).Where(char.IsLetterOrDigit)]);
-                return DeferredHintPrefix + name + "." + hash.ToString("x8", CultureInfo.InvariantCulture) + ".g.cs";
-            }
-        }
+        // One file per source file, named by its key (DeferredKey), so two files of one name stay apart.
+        public string DeferredHintName => DeferredHintPrefix + DeferredKey(FilePath) + ".g.cs";
 
         // Comments only: the file adds no type and no member, and only GoFrameRuleAnalyzer reads it.
         public string DeferredSource()
@@ -489,7 +510,7 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
 
             foreach (TextSpan span in Deferred)
                 source.Append(DeferredLinePrefix).Append(span.Start.ToString(CultureInfo.InvariantCulture)).Append(' ')
-                    .Append(span.Length.ToString(CultureInfo.InvariantCulture)).Append(' ').Append(FilePath).Append("\r\n");
+                    .Append(span.Length.ToString(CultureInfo.InvariantCulture)).Append(' ').Append(DeferredKey(FilePath)).Append("\r\n");
 
             return source.ToString();
         }
