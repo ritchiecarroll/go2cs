@@ -150,13 +150,41 @@ public abstract partial class ж<T>
     /// </summary>
     private ж<TElem> viewOf<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
+        string? where = ViewCensus.Enabled ? censusWhere() : null;
+
         if (m_isNull || FieldViewCache.Disabled)
+        {
+            censusSlow(where, found: false);
             return new FieldRefBox<TElem>(this, fieldRefFunc);
+        }
 
         if (tryFindView(fieldRefFunc, out ж<TElem>? found))
+        {
+            censusSlow(where, found: true);
             return found;
+        }
 
+        censusSlow(where, found: false);
         return publishView(fieldRefFunc, new FieldRefBox<TElem>(this, fieldRefFunc));
+    }
+
+    // The view-cache miss census (ViewCensus.cs, a scratch instrument): where this box's list lives, read BEFORE the
+    // lookup, whose viewsHead() creates the weak-table entry it is asked about.
+    private string censusWhere()
+    {
+        if (m_isNull || FieldViewCache.Disabled)
+            return ViewCensus.WhereUncached;
+
+        if (this is SlottedStandardBox<T> || this is FieldRefBox<T> || !Unsafe.IsNullRef(ref ElementViews))
+            return ViewCensus.WhereSlot;
+
+        return s_views.TryGetValue(this, out _) ? ViewCensus.WhereWeakLive : ViewCensus.WhereWeakNew;
+    }
+
+    private void censusSlow(string? where, bool found)
+    {
+        if (where is not null)
+            ViewCensus.Slow(GetType(), where, found);
     }
 
     /// <summary>
@@ -206,12 +234,21 @@ public abstract partial class ж<T>
     [MethodImpl(MethodImplOptions.NoInlining)]
     private ж<TElem> viewOfSlow<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
+        string? where = ViewCensus.Enabled ? censusWhere() : null;
+
         if (m_isNull || FieldViewCache.Disabled)
+        {
+            censusSlow(where, found: false);
             return new FieldRefBox<TElem>(this, FieldRefWrappers<TElem>.For(fieldRefFunc), fieldRefFunc);
+        }
 
         if (tryFindView(fieldRefFunc, out ж<TElem>? found))
+        {
+            censusSlow(where, found: true);
             return found;
+        }
 
+        censusSlow(where, found: false);
         return publishView(fieldRefFunc, new FieldRefBox<TElem>(this, FieldRefWrappers<TElem>.For(fieldRefFunc), fieldRefFunc));
     }
 

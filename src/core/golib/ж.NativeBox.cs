@@ -67,6 +67,10 @@ namespace go;
         // never received it — and the pin, when there is one, is charged by whoever constructed
         // it. Leaf-ctor counting per the B1 split — same charge as before it.
         AllocationCounter.Count();
+
+        // The view-cache miss census (ViewCensus.cs, a scratch instrument): every mint, by T and address.
+        if (ViewCensus.Enabled)
+            ViewCensus.Mint(typeof(T), nativeAddress);
     }
 
     /// <summary>

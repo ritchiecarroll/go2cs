@@ -253,7 +253,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     public ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
         // the cached view: one FieldRefBox per (box, accessor) for the box's life (ж.Views.cs)
-        return nativeFieldView(viewOf(fieldRefFunc));
+        return censusNativeField(nativeFieldView(viewOf(fieldRefFunc)));
     }
 
     /// <summary>
@@ -263,7 +263,18 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </summary>
     public ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
-        return nativeFieldView(viewOf(fieldRefFunc));
+        return censusNativeField(nativeFieldView(viewOf(fieldRefFunc)));
+    }
+
+    // The view-cache miss census (ViewCensus.cs, a scratch instrument): an of() answered by a native box at the
+    // field's Go offset (nativeFieldView's replacement, minted on every call), counted by this root's kind.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ж<TElem> censusNativeField<TElem>(ж<TElem> answer)
+    {
+        if (ViewCensus.Enabled && answer is not FieldRefBox<TElem> && answer.NativeAddress != 0)
+            ViewCensus.NativeField(GetType());
+
+        return answer;
     }
 
     // A field of a struct in NATIVE memory (Go's `&p.f` with p a native pointer) is a native box at the field's GO
