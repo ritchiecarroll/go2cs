@@ -188,6 +188,7 @@
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="kwlib/extension/go.kwlib.extension.csproj" />
+    <ProjectReference Include="kwlib/extension/sub/go.kwlib.extension.sub.csproj" />
     <ProjectReference Include="kwlib/file/go.kwlib.file.csproj" />
     <ProjectReference Include="kwlib/required/go.kwlib.required.csproj" />
     <ProjectReference Include="kwlib/scoped/go.kwlib.scoped.csproj" />

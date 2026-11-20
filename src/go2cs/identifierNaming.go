@@ -87,8 +87,8 @@ var keywords = hashset.NewHashSet([]string{
 //   - safe (PREVIEW only, unsafe evolution -- not LangVersion 15): a member modifier. Included
 //     pre-emptively, as ruled; the corpus declares no such type, so it costs nothing today.
 //
-// RESIDUAL, not covered: a Go PACKAGE so named used as a qualifier at member start (`closed.T f;`) --
-// no std or behavioral package is. And as with emitterSpelledTypeNames, a type declared only in a
+// An import alias and a package qualifier so named take '@' for all four ON PURPOSE (getSanitizedImport, convIdent):
+// `extension` is CS9306, closed/union/safe break at member start. As with emitterSpelledTypeNames, a type declared only in a
 // `_test.go` file renames the test side's uses of a same-named production field (the B2 coherence class);
 // the corpus declares none. C# 15's `with(` collection-element rule is position-scoped, not a rename: since
 // parity seat #30 a slice literal is a collection expression (`slice<nint>([…])`), and an element beginning

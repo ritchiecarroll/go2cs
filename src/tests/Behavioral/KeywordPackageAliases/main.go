@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"go/kwlib/extension"
+	"go/kwlib/extension/sub"
 	"go/kwlib/file"
 	"go/kwlib/required"
 	"go/kwlib/scoped"
@@ -21,6 +22,7 @@ func main() {
 	var s scoped.Kind = 4
 	fmt.Println(e.Double(), f.Double(), r.Double(), s.Double())
 	fmt.Println(extension.Scaled(5), local())
+	fmt.Println(sub.Name())
 }
 
 // local names a variable like the imported package. C# accepts that name bare everywhere but at a type or alias name,

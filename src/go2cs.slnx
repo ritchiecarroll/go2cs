@@ -757,6 +757,7 @@
     <Project Path="tests/Behavioral/KeywordNamedTypes/KeywordNamedTypes.csproj" />
     <Project Path="tests/Behavioral/KeywordPackageAliases/KeywordPackageAliases.csproj" />
     <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/extension/go.kwlib.extension.csproj" />
+    <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/extension/sub/go.kwlib.extension.sub.csproj" />
     <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/file/go.kwlib.file.csproj" />
     <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/required/go.kwlib.required.csproj" />
     <Project Path="tests/Behavioral/KeywordPackageAliases/kwlib/scoped/go.kwlib.scoped.csproj" />
