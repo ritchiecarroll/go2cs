@@ -84,7 +84,7 @@ internal static (slice<unit>, error) parseUnitsᴍ(ж<Data> Ꮡd) {
 
     // Count units.
     nint nunit = 0;
-    var b = makeBuf(Ꮡd, new unknownFormat(), infoˢ, 0, d.info);
+    var b = makeBuf(Ꮡd, new unknownFormat(), infoˢᴍData, 0, d.info);
     while (len(b.data) > 0) {
         var (lenΔ1, _) = b.unitLength();
         if (lenΔ1 != ((Offset)(uint32)lenΔ1)) {
@@ -101,7 +101,7 @@ internal static (slice<unit>, error) parseUnitsᴍ(ж<Data> Ꮡd) {
     }
 
     // Again, this time writing them down.
-    b = makeBuf(Ꮡd, new unknownFormat(), infoˢ, 0, d.info);
+    b = makeBuf(Ꮡd, new unknownFormat(), infoˢᴍData, 0, d.info);
     var units = new slice<unit>(nunit, () => new(nil));
     foreach (var i in range(len(units))) {
         var u = Ꮡ(units, i);
@@ -189,7 +189,7 @@ internal static error collectDwarf5BaseOffsetsᴍ(ж<Data> Ꮡd, ж<unit> Ꮡu) 
     if (u.unit5 == nil) {
         throw panic("expected unit5 to be set up already");
     }
-    ref var b = ref heap<buf>(makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), infoˢ, u.off, u.data), out var Ꮡb);
+    ref var b = ref heap<buf>(makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), infoˢᴍData, u.off, u.data), out var Ꮡb);
     var cu = Ꮡb.entry(nil, Ꮡu);
     if (cu == nil) {
         // Unknown abbreviation table entry or some other fatal

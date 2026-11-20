@@ -253,7 +253,7 @@ internal static void matchingMethodsᴍ(ж<routingNode> Ꮡroot, @string host, @
         Ꮡroot.findChild(host).matchingMethodsPath(path, methodSet);
     }
     root.emptyChild.matchingMethodsPath(path, methodSet);
-    if (methodSet[getˢ]) {
+    if (methodSet[getˢᴍroutingNode]) {
         methodSet[headˢᴍroutingNode] = true;
     }
 }

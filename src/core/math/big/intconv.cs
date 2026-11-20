@@ -105,7 +105,7 @@ internal static void Formatᴍ(ж<Int> Ꮡx, fmt.State s, rune ch) {
     }}
 
     if (Ꮡx == nil) {
-        fmt.Fprint(new fmt_StateᴠWriter(s), nilˢ);
+        fmt.Fprint(new fmt_StateᴠWriter(s), nilˢᴍInt);
         return;
     }
 

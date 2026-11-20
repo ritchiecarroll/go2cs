@@ -3125,7 +3125,7 @@ internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
             if (p.tok == token.ARROW) {
                 // SendStmt
                 if (len(lhs) > 1) {
-                    Ꮡp.errorExpected(lhs[0].Pos(), expressionˢ2);
+                    Ꮡp.errorExpected(lhs[0].Pos(), expressionˢ2ᴍparser);
                     // continue with first expression
                 }
                 ref var arrow = ref heap<token.Pos>(p.pos, out var Ꮡarrow);
@@ -3148,7 +3148,7 @@ internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
                 } else {
                     // lhs must be single receive operation
                     if (len(lhs) > 1) {
-                        Ꮡp.errorExpected(lhs[0].Pos(), expressionˢ2);
+                        Ꮡp.errorExpected(lhs[0].Pos(), expressionˢ2ᴍparser);
                         // continue with first expression
                     }
                     comm = new ast.ExprStmtжStmt(Ꮡ(new ast.ExprStmt(X: lhs[0])));

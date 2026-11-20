@@ -1066,7 +1066,7 @@ internal static error sendSessionTicketᴍ(ж<Conn> Ꮡc, bool earlyData, slice<
     }
     // ticket_nonce, which must be unique per connection, is always left at
     // zero because we only ever send one ticket per connection.
-    var psk = tls13.ExpandLabel<hash.Hash>(() => suite.hash.New(), c.resumptionSecret, resumptionˢ,
+    var psk = tls13.ExpandLabel<hash.Hash>(() => suite.hash.New(), c.resumptionSecret, resumptionˢᴍConn,
         default, suite.hash.Size());
 
     var m = @new<newSessionTicketMsgTLS13>();

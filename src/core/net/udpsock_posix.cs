@@ -265,7 +265,7 @@ internal static (ж<UDPConn>, error) dialUDPᴍ(ж<sysDialer> Ꮡsd, context.Con
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sd.network, new UDPAddrжsockaddr(laddr), new UDPAddrжsockaddr(raddr), syscall.SOCK_DGRAM, 0, dialˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sd.network, new UDPAddrжsockaddr(laddr), new UDPAddrжsockaddr(raddr), syscall.SOCK_DGRAM, 0, dialˢᴍsysDialer, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
@@ -281,7 +281,7 @@ internal static (ж<UDPConn>, error) listenUDPᴍ(ж<sysListener> Ꮡsl, context
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(laddr), default, syscall.SOCK_DGRAM, 0, listenˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(laddr), default, syscall.SOCK_DGRAM, 0, listenˢᴍsysListener, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
@@ -296,7 +296,7 @@ internal static (ж<UDPConn>, error) listenMulticastUDPᴍ(ж<sysListener> Ꮡsl
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn cΔ1) => Ꮡsl.Value.ListenConfig.Control(network, address, cΔ1);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(Ꮡgaddr), default, syscall.SOCK_DGRAM, 0, listenˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(Ꮡgaddr), default, syscall.SOCK_DGRAM, 0, listenˢᴍsysListener, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }

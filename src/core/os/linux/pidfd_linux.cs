@@ -105,7 +105,7 @@ internal static (ж<ProcessState>, error) pidfdWaitᴍ(ж<Process> Ꮡp) {
             // Process already completed Wait, or was not found by
             // pidfdFind. Return ECHILD for consistency with what the wait
             // syscall would return.
-            return (default, NewSyscallError(waitˢ, syscall.ECHILD));
+            return (default, NewSyscallError(waitˢᴍProcess, syscall.ECHILD));
         }
         case var ᴛ when ᴛ == statusReleased: {
             return (default, syscall.EINVAL);

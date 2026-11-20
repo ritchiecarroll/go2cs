@@ -739,8 +739,8 @@ internal static error /*err*/ writeᴍ(ж<Request> Ꮡr, io.Writer w, bool using
         // Use the defaultUserAgent unless the Header contains one, which
         // may be blank to not send the header.
         @string userAgent = defaultUserAgent;
-        if (r.Header.has(userAgentˢ)) {
-            userAgent = r.Header.Get(userAgentˢ);
+        if (r.Header.has(userAgentˢᴍRequest)) {
+            userAgent = r.Header.Get(userAgentˢᴍRequest);
         }
         if (userAgent != ""u8) {
             userAgent = headerNewlineToSpace.Replace(userAgent);
@@ -750,7 +750,7 @@ internal static error /*err*/ writeᴍ(ж<Request> Ꮡr, io.Writer w, bool using
                 goto ᒐdone;
             }
             if (trace != nil && trace.WroteHeaderField != nil) {
-                trace.WroteHeaderField(userAgentˢ, [userAgent]);
+                trace.WroteHeaderField(userAgentˢᴍRequest, [userAgent]);
             }
         }
 
@@ -1120,7 +1120,7 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
 // password. For instance, when used with OAuth2, both arguments must
 // be URL encoded first with [url.QueryEscape].
 internal static void SetBasicAuthᴍ(ref Request r, @string username, @string password) {
-    r.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
+    r.Header.Set(authorizationˢᴍRequest, "Basic "u8 + basicAuth(username, password));
 }
 
 } partial class http_package {
@@ -1729,7 +1729,7 @@ private static readonly @string xIdempotencyKeyˢᵇᴍRequest = "X-Idempotency-
 
 internal static bool isReplayableᴍ(ref Request r) {
     if (r.Body == nil || AreEqual(r.Body, NoBody) || r.GetBody != nil) {
-        var exprᴛ1 = valueOrDefault(r.Method, getˢ);
+        var exprᴛ1 = valueOrDefault(r.Method, getˢᴍRequest);
         switch (ᐧ) {
         case {} when exprᴛ1 == "GET"u8 || exprᴛ1 == "HEAD"u8 || exprᴛ1 == "OPTIONS"u8 || exprᴛ1 == "TRACE"u8: {
             return true;
@@ -1786,7 +1786,7 @@ private static readonly @string websocketˢᵇᴍRequest = "websocket"u8;
 // requiresHTTP1 reports whether this request requires being sent on
 // an HTTP/1 connection.
 internal static bool requiresHTTP1ᴍ(ref Request r) {
-    return hasToken(r.Header.Get(connectionˢ), upgradeˢᴍRequest) && ascii.EqualFold(r.Header.Get(upgradeˢ2ᴍRequest), websocketˢᴍRequest);
+    return hasToken(r.Header.Get(connectionˢᴍRequest), upgradeˢᴍRequest) && ascii.EqualFold(r.Header.Get(upgradeˢ2ᴍRequest), websocketˢᴍRequest);
 }
 
 }

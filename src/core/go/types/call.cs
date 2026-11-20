@@ -581,10 +581,10 @@ internal static ж<Signature> /*rsig*/ argumentsᴍ(ж<Checker> Ꮡcheck, ж<ast
     // check argument count
     if (nargs != npars) {
         positioner at = new ast_CallExprжpositioner(Ꮡcall);
-        @string qualifier = notEnoughˢ;
+        @string qualifier = notEnoughˢᴍChecker;
         if (nargs > npars) {
             at = new ast_Exprᴠpositioner(args[npars].expr); // report at first extra argument
-            qualifier = tooManyˢ;
+            qualifier = tooManyˢᴍChecker;
         } else {
             at = ((atPos)call.Rparen); // report at closing )
         }

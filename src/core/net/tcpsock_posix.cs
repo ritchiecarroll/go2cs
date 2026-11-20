@@ -108,7 +108,7 @@ internal static (ж<TCPConn>, error) doDialTCPProtoᴍ(ж<sysDialer> Ꮡsd, cont
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢᴍsysDialer, ctrlCtxFn);
 
     // TCP has a rarely used mechanism called a 'simultaneous connection' in
     // which Dial("tcp", addr1, addr2) run on the machine at addr1 can
@@ -138,7 +138,7 @@ internal static (ж<TCPConn>, error) doDialTCPProtoᴍ(ж<sysDialer> Ꮡsd, cont
         if (err == nil) {
             fd.Close();
         }
-        (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
+        (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢᴍsysDialer, ctrlCtxFn);
     }
 
     if (err != nil) {
@@ -222,7 +222,7 @@ internal static (ж<TCPListener>, error) listenTCPProtoᴍ(ж<sysListener> Ꮡsl
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new TCPAddrжsockaddr(laddr), default, syscall.SOCK_STREAM, proto, listenˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sl.network, new TCPAddrжsockaddr(laddr), default, syscall.SOCK_STREAM, proto, listenˢᴍsysListener, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }

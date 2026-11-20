@@ -177,7 +177,7 @@ internal static void funcTypeᴍ(ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<
         ref var recvPar = ref ᏑrecvPar.DerefOrNull();
         ref var ftyp = ref Ꮡftyp.DerefOrNull();
 
-        check.openScope(new ast.FuncTypeжNode(Ꮡftyp), functionˢ);
+        check.openScope(new ast.FuncTypeжNode(Ꮡftyp), functionˢᴍChecker);
         check.scope.isFunc = true;
         check.recordScope(new ast.FuncTypeжNode(Ꮡftyp), check.scope);
         sig.scope = check.scope;
@@ -203,7 +203,7 @@ internal static void funcTypeᴍ(ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<
             // (A separate check is needed when type-checking interface method signatures because
             // they don't have a receiver specification.)
             if (ᏑrecvPar != nil) {
-                Ꮡcheck.error(new ast_FieldListжpositioner(ftyp.TypeParams), InvalidMethodTypeParams, methodsCannotHaveTypeˢ);
+                Ꮡcheck.error(new ast_FieldListжpositioner(ftyp.TypeParams), InvalidMethodTypeParams, methodsCannotHaveTypeˢᴍChecker);
             }
             Ꮡcheck.collectTypeParams(Ꮡsig.Ꮡtparams, ftyp.TypeParams);
         }

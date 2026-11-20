@@ -7828,11 +7828,11 @@ internal static void writeHeaderᴍ(ref http2responseWriterState rws, nint code)
         // Per RFC 8297 we must not clear the current header map
         var h = rws.handlerHeader;
 
-        var (_, cl) = h[contentLengthˢ, ꟷ];
+        var (_, cl) = h[contentLengthˢᴍhttp2responseWriterState, ꟷ];
         var (_, te) = h[transferEncodingˢᴍhttp2responseWriterState, ꟷ];
         if (cl || te) {
             h = h.Clone();
-            h.Del(contentLengthˢ);
+            h.Del(contentLengthˢᴍhttp2responseWriterState);
             h.Del(transferEncodingˢᴍhttp2responseWriterState);
         }
 

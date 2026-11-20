@@ -465,7 +465,7 @@ internal static error quicSetReadSecretᴍ(ж<Conn> Ꮡc, QUICEncryptionLevel le
     // TODO(roland): we should merge this check with the similar one in setReadTrafficSecret.
     if (c.hand.Len() != 0) {
         Ꮡc.sendAlert(alertUnexpectedMessage);
-        return errors.New(tlsHandshakeBufferNotˢ);
+        return errors.New(tlsHandshakeBufferNotˢᴍConn);
     }
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICSetReadSecret,

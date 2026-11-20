@@ -723,7 +723,7 @@ internal static (ж<Package>, error) Importᴍ(ж<Context> Ꮡctxt, @string path
         // Exclude results where the import path would include /testdata/.
         bool inTestdata(@string sub) => strings.Contains(sub, testdataˢᴍContext) || strings.HasSuffix(sub, testdataˢ2ᴍContext) || strings.HasPrefix(sub, testdataˢ3ᴍContext) || sub == "testdata"u8;
         if (ctxt.GOROOT != ""u8) {
-            @string root = ctxt.joinPath(ctxt.GOROOT, srcˢ);
+            @string root = ctxt.joinPath(ctxt.GOROOT, srcˢᴍContext);
             var (sub, ok) = ctxt.hasSubdir(root, p.Dir); if (ok && !inTestdata(sub)) {
                 p.Goroot = true;
                 p.ImportPath = sub;
@@ -734,19 +734,19 @@ internal static (ж<Package>, error) Importᴍ(ж<Context> Ꮡctxt, @string path
         }
         var all = ctxt.gopath();
         foreach (var (i, root) in range(all)) {
-            @string rootsrc = ctxt.joinPath(root, srcˢ);
+            @string rootsrc = ctxt.joinPath(root, srcˢᴍContext);
             var (sub, ok) = ctxt.hasSubdir(rootsrc, p.Dir); if (ok && !inTestdata(sub)) {
                 // We found a potential import path for dir,
                 // but check that using it wouldn't find something
                 // else first.
                 if (ctxt.GOROOT != ""u8 && ctxt.Compiler != "gccgo"u8) {
-                    @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢ, sub); if (ctxt.isDir(dir)) {
+                    @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢᴍContext, sub); if (ctxt.isDir(dir)) {
                         p.ConflictDir = dir;
                         goto Found;
                     }
                 }
                 foreach (var (_, earlyRoot) in range(all.slice(0, i))) {
-                    @string dir = ctxt.joinPath(earlyRoot, srcˢ, sub); if (ctxt.isDir(dir)) {
+                    @string dir = ctxt.joinPath(earlyRoot, srcˢᴍContext, sub); if (ctxt.isDir(dir)) {
                         p.ConflictDir = dir;
                         goto Found;
                     }
@@ -830,7 +830,7 @@ internal static (ж<Package>, error) Importᴍ(ж<Context> Ꮡctxt, @string path
                 (_, gorootFirst) = ctxt.hasSubdir(ctxt.GOROOT, srcDir);
             }
             if (gorootFirst) {
-                @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢ, path);
+                @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢᴍContext, path);
                 if (ctxt.Compiler != "gccgo"u8) {
                     var isDir = ctxt.isDir(dir);
                     binaryOnly = !isDir && (ImportMode)(mode & AllowBinary) != 0 && pkga != ""u8 && ctxt.isFile(ctxt.joinPath(ctxt.GOROOT, pkga));
@@ -847,14 +847,14 @@ internal static (ж<Package>, error) Importᴍ(ж<Context> Ꮡctxt, @string path
                 // TODO(bcmills): Setting p.Dir here is misleading, because gccgo
                 // doesn't actually load its standard-library packages from this
                 // directory. See if we can leave it unset.
-                p.Dir = ctxt.joinPath(ctxt.GOROOT, srcˢ, path);
+                p.Dir = ctxt.joinPath(ctxt.GOROOT, srcˢᴍContext, path);
                 p.Goroot = true;
                 p.Root = ctxt.GOROOT;
                 goto Found;
             }
         }
         foreach (var (_, root) in range(gopath)) {
-            @string dir = ctxt.joinPath(root, srcˢ, path);
+            @string dir = ctxt.joinPath(root, srcˢᴍContext, path);
             var isDir = ctxt.isDir(dir);
             binaryOnly = !isDir && (ImportMode)(mode & AllowBinary) != 0 && pkga != ""u8 && ctxt.isFile(ctxt.joinPath(root, pkga));
             if (isDir || binaryOnly) {
@@ -869,7 +869,7 @@ internal static (ж<Package>, error) Importᴍ(ж<Context> Ꮡctxt, @string path
         // That way, the user can still get useful results from 'go list' for
         // standard-vendored paths passed on the command line.
         if (ctxt.GOROOT != ""u8 && tried.goroot == ""u8) {
-            @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢ, path);
+            @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢᴍContext, path);
             if (ctxt.Compiler != "gccgo"u8) {
                 var isDir = ctxt.isDir(dir);
                 binaryOnly = !isDir && (ImportMode)(mode & AllowBinary) != 0 && pkga != ""u8 && ctxt.isFile(ctxt.joinPath(ctxt.GOROOT, pkga));
@@ -908,7 +908,7 @@ internal static (ж<Package>, error) Importᴍ(ж<Context> Ꮡctxt, @string path
 
 Found:
     if (p.Root != ""u8) {
-        p.SrcRoot = ctxt.joinPath(p.Root, srcˢ);
+        p.SrcRoot = ctxt.joinPath(p.Root, srcˢᴍContext);
         p.PkgRoot = ctxt.joinPath(p.Root, pkgˢᴍContext);
         p.BinDir = ctxt.joinPath(p.Root, binˢᴍContext);
         if (pkga != ""u8) {
@@ -1320,13 +1320,13 @@ internal static error importGoᴍ(ref Context ctxt, ж<Package> Ꮡp, @string pa
         // If the source directory is in GOROOT, then the in-process code works fine
         // and we should keep using it. Moreover, the 'go list' approach below doesn't
         // take standard-library vendoring into account and will fail.
-        var (_, ok) = ctxt.hasSubdir(filepath.Join(ctxt.GOROOT, srcˢ), absSrcDir); if (ok) {
+        var (_, ok) = ctxt.hasSubdir(filepath.Join(ctxt.GOROOT, srcˢᴍContext), absSrcDir); if (ok) {
             return errNoModules;
         }
     }
 
     // For efficiency, if path is a standard library package, let the usual lookup code handle it.
-    @string dirΔ1 = ctxt.joinPath(ctxt.GOROOT, srcˢ, path); if (ctxt.isDir(dirΔ1)) {
+    @string dirΔ1 = ctxt.joinPath(ctxt.GOROOT, srcˢᴍContext, path); if (ctxt.isDir(dirΔ1)) {
         return errNoModules;
     }
 
@@ -1367,7 +1367,7 @@ internal static error importGoᴍ(ref Context ctxt, ж<Package> Ꮡp, @string pa
         }
     }
 
-    @string goCmd = filepath.Join(ctxt.GOROOT, binˢ, "go");
+    @string goCmd = filepath.Join(ctxt.GOROOT, binˢᴍContext, "go");
     var cmd = exec.Command(goCmd, listˢᴍContext, "-e", "-compiler=" + ctxt.Compiler, "-tags=" + strings.Join(ctxt.BuildTags, ","), "-installsuffix=" + ctxt.InstallSuffix, fDirImportPathRootGorootˢᴍContext, "--", path);
 
     if (ctxt.Dir != ""u8) {
@@ -1644,7 +1644,7 @@ internal static (ж<fileInfo>, error) matchFileᴍ(ж<Context> Ꮡctxt, @string 
 
     if (strings.HasSuffix(name, ".go")) {
         err = readGoInfo(f, ref (info).DerefOrNull());
-        if (strings.HasSuffix(name, testGoˢ)) {
+        if (strings.HasSuffix(name, testGoˢᴍContext)) {
             ᏑbinaryOnly = default; binaryOnly = ref ᏑbinaryOnly.DerefOrNull(); // ignore //go:binary-only-package comments in _test.go files
         }
     } else {

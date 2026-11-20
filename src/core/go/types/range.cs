@@ -165,7 +165,7 @@ internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<as
                     y.mode = value;
                     y.expr = lhsΔ1; // we don't have a better rhs expression to use here
                     y.typ = typ;
-                    Ꮡcheck.initVar(obj, Ꮡy, assignmentˢ); // error is on variable, use "assignment" not "range clause"
+                    Ꮡcheck.initVar(obj, Ꮡy, assignmentˢᴍChecker); // error is on variable, use "assignment" not "range clause"
                 }
                 assert(obj.typ != nil);
             }
@@ -208,7 +208,7 @@ internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<as
                     y.mode = value;
                     y.expr = lhsΔ2; // we don't have a better rhs expression to use here
                     y.typ = typ;
-                    Ꮡcheck.assignVar(lhsΔ2, default, Ꮡy, assignmentˢ); // error is on variable, use "assignment" not "range clause"
+                    Ꮡcheck.assignVar(lhsΔ2, default, Ꮡy, assignmentˢᴍChecker); // error is on variable, use "assignment" not "range clause"
                 }
             }
         } else if (rangeOverInt) {

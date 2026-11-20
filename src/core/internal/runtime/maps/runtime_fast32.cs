@@ -187,7 +187,7 @@ internal static @unsafe.Pointer putSlotSmallFast32ᴍ(ref Map m, ж<abi.MapType>
     // more efficient than matchEmpty.
     match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
-        fatal(smallMapWithNoEmptySlotˢ);
+        fatal(smallMapWithNoEmptySlotˢᴍMap);
     }
 
     var i = match.first();

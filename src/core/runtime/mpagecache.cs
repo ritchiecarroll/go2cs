@@ -139,7 +139,7 @@ internal static pageCache allocToCacheᴍ(ref pageAlloc p) {
         chunk = p.chunkOf(ci);
         var (j, _) = chunk.of(pallocData.ᏑpallocBits).find(1, chunkPageIndex(p.searchAddr.addr()));
         if (j == ~(nuint)0) {
-            @throw(badSummaryDataˢ);
+            @throw(badSummaryDataˢᴍpageAlloc);
         }
         c = new pageCache(
             @base: chunkBase(ci) + alignDown((uintptr)j, 64) * (uintptr)pageSize,

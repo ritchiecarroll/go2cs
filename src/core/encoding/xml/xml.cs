@@ -1062,7 +1062,7 @@ internal static (byte b, bool ok) mustgetcᴍ(ref Decoder d) {
 
     (b, ok) = d.getc(); if (!ok) {
         if (AreEqual(d.err, io.EOF)) {
-            d.err = d.syntaxError(unexpectedEofˢ);
+            d.err = d.syntaxError(unexpectedEofˢᴍDecoder);
         }
     }
     return (b, ok);

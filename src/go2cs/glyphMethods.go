@@ -573,12 +573,15 @@ func containsWord(words []string, word string) bool {
 	return false
 }
 
-// The hoisted members a holder block declares (a hoisted string literal `invalidˢ` and its backing `invalidˢᵇ`, a hoisted
-// constant, a static backing field, a twin's value delegate) were members of the HOLDER, so the package class may
-// declare the same name for its own use (CS0102 once the block reopens the package class). Each such name declared in a
-// former holder block is renamed, with its uses inside that block, by the holder's name: `invalidˢ` becomes
-// `invalidˢᴍReader`. Nothing outside the block can name a holder's private hoist.
-var glyphHoistDeclaration = regexp.MustCompile(`^(?:private|internal|public) static [^(=]*?([\p{L}_][\p{L}\p{N}_]*)\s*(?:=>|=|;)`)
+// The hoisted members of a holder (a hoisted string literal `invalidˢ` and its backing `invalidˢᵇ`, a hoisted constant
+// `maskᶜ`, a static backing field `xᵇ`) are PRIVATE members of that holder, and a holder spans every file that declares a
+// method of its type. So once a holder's blocks reopen the package class, the package class may already declare the
+// same name (CS0102), and the holder's blocks in other files use the name too. Every hoist-shaped identifier inside a
+// former holder block, declared there or used there, is renamed by the holder's name (`invalidˢ` becomes
+// `invalidˢᴍCounterMode`), identically in every file. Private, so nothing outside the holder's blocks can name one; a
+// qualified name (after a `.`) is another class's and is left alone. A twin's value delegate (ᶠ) can be public and is
+// not renamed.
+var glyphHoistToken = regexp.MustCompile(`(^|[^\p{L}\p{N}_.])([\p{L}_][\p{L}\p{N}_]*[ˢᶜᵇ][\p{L}\p{N}_]*)`)
 
 func glyphRenameHolderHoists(lines []string, packageClass string, switches map[int]string) {
 	stem := strings.TrimSuffix(packageClass, PackageSuffix)
@@ -590,24 +593,13 @@ func glyphRenameHolderHoists(lines []string, packageClass string, switches map[i
 		}
 
 		tag := GlyphMethodSuffix + strings.TrimPrefix(strings.TrimPrefix(holder, stem), TempVarMarker)
-		names := map[string]bool{}
 
 		for i := start; i < end; i++ {
-			if match := glyphHoistDeclaration.FindStringSubmatch(lines[i]); match != nil && strings.ContainsAny(match[1], "ˢᵇᶜᶠ") {
-				names[match[1]] = true
+			if !strings.ContainsAny(lines[i], "ˢᶜᵇ") {
+				continue
 			}
-		}
 
-		for name := range names {
-			pattern := regexp.MustCompile(`(^|[^\p{L}\p{N}_])` + regexp.QuoteMeta(name) + `($|[^\p{L}\p{N}_])`)
-
-			for i := start; i < end; i++ {
-				if strings.Contains(lines[i], name) {
-					// Twice, for adjacent occurrences sharing one separator.
-					lines[i] = pattern.ReplaceAllString(lines[i], "${1}"+name+tag+"${2}")
-					lines[i] = pattern.ReplaceAllString(lines[i], "${1}"+name+tag+"${2}")
-				}
-			}
+			lines[i] = glyphRenameHoistTokens(lines[i], tag)
 		}
 	}
 
@@ -629,4 +621,39 @@ func glyphRenameHolderHoists(lines []string, packageClass string, switches map[i
 	}
 
 	flush(len(lines))
+}
+
+// glyphRenameHoistTokens appends tag to every unqualified hoist-shaped identifier in line, outside string literals.
+func glyphRenameHoistTokens(line string, tag string) string {
+	var out strings.Builder
+	inString := false
+	segmentStart := 0
+
+	emit := func(segment string) {
+		out.WriteString(glyphHoistToken.ReplaceAllString(segment, "${1}${2}"+tag))
+	}
+
+	for i := 0; i < len(line); i++ {
+		if line[i] != '"' || (i > 0 && line[i-1] == '\\') {
+			continue
+		}
+
+		if inString {
+			out.WriteString(line[segmentStart : i+1])
+		} else {
+			emit(line[segmentStart:i])
+			out.WriteByte('"')
+		}
+
+		inString = !inString
+		segmentStart = i + 1
+	}
+
+	if inString {
+		out.WriteString(line[segmentStart:])
+	} else {
+		emit(line[segmentStart:])
+	}
+
+	return out.String()
 }

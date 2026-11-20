@@ -2258,7 +2258,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
 
         if (isClientConn && (unencryptedHTTP2 || (pconn.tlsState != nil && pconn.tlsState.NegotiatedProtocol == "h2"u8))) {
             var (altProto, _) = Ꮡt.ᏑaltProto.Load()._<map<@string, RoundTripper>>(ᐧ);
-            var (h2, ok) = altProto[httpsˢ]._<newClientConner>(ᐧ);
+            var (h2, ok) = altProto[httpsˢᴍTransport]._<newClientConner>(ᐧ);
             if (!ok) {
                 (pconn, err) = (default, errors.New(httpHttp2ImplementationˢᴍTransport)); goto ᒐdone;
             }
@@ -3365,7 +3365,7 @@ internal static (ж<Response> resp, error err) roundTripᴍ(ж<persistConn> Ꮡp
             // auto-decoding a portion of a gzipped document will just fail
             // anyway. See https://golang.org/issue/8923
             requestedGzip = true;
-            req.extraHeaders().Set(acceptEncodingˢᴍpersistConn, gzipˢ);
+            req.extraHeaders().Set(acceptEncodingˢᴍpersistConn, gzipˢᴍpersistConn);
         }
 
         channel<EmptyStruct> continueCh = default;

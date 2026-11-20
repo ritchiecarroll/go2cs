@@ -444,7 +444,7 @@ partial interface typeReader {
 internal static (Type, error) Typeᴍ(ж<Data> Ꮡd, Offset off) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    return Ꮡd.readType(infoˢ, new ReaderжtypeReader(Ꮡd.Reader()), off, d.typeCache, nil);
+    return Ꮡd.readType(infoˢᴍData, new ReaderжtypeReader(Ꮡd.Reader()), off, d.typeCache, nil);
 }
 
 } partial class dwarf_package {

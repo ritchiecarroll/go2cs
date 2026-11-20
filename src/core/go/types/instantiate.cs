@@ -205,11 +205,11 @@ internal static bool validateTArgLenᴍ(ж<Checker> Ꮡcheck, token.Pos pos, @st
     @string qual = default;
     switch (ᐧ) {
     case {} when got < want: {
-        qual = notEnoughˢ;
+        qual = notEnoughˢᴍChecker;
         break;
     }
     case {} when got > want: {
-        qual = tooManyˢ;
+        qual = tooManyˢᴍChecker;
         break;
     }
     default: {

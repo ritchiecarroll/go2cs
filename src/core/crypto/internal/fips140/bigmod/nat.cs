@@ -259,7 +259,7 @@ internal static error setBytesᴍ(ref Nat x, slice<byte> b) {
         i--;
     }
     if (i > 0) {
-        return errors.New(inputOverflowsTheModulusˢ2);
+        return errors.New(inputOverflowsTheModulusˢ2ᴍNat);
     }
     return default;
 }

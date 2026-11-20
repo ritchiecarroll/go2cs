@@ -391,7 +391,7 @@ internal static Type /*T*/ typInternalᴍ(ж<Checker> Ꮡcheck, ast.Expr e0, ж<
         }
         case ж<ast.Ellipsis> e: {
             // dots are handled explicitly where they are valid
-            Ꮡcheck.error(new ast_Ellipsisжpositioner(e), InvalidSyntaxTree, invalidUseOfˢ);
+            Ꮡcheck.error(new ast_Ellipsisжpositioner(e), InvalidSyntaxTree, invalidUseOfˢᴍChecker);
             break;
         }
         case ж<ast.StructType> e: {

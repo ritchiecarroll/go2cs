@@ -1204,7 +1204,7 @@ internal static void skipInlineBodyᴍ(ж<parser> Ꮡp) {
         while (got < want) {
             var r = p.scanner.Next();
             if (r == scanner.EOF) {
-                p.error(unexpectedEofˢ);
+                p.error(unexpectedEofˢᴍparser);
             }
             got += utf8.RuneLen(r);
         }
@@ -1253,7 +1253,7 @@ internal static void parseTypesᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
         while (sb.Len() < total) {
             var r = p.scanner.Next();
             if (r == scanner.EOF) {
-                p.error(unexpectedEofˢ);
+                p.error(unexpectedEofˢᴍparser);
             }
             Ꮡsb.WriteRune(r);
         }
@@ -1287,7 +1287,7 @@ internal static void parseSavedTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, n
 
         p.scanner = @new<scanner.Scanner>();
         Ꮡp.initScanner(p.scanner.Filename, new strings_ReaderжReader(strings.NewReader(p.typeData[i])));
-        p.expectKeyword(typeˢ);
+        p.expectKeyword(typeˢᴍparser);
         nint id = p.parseInt();
         if (id != i) {
             p.errorf("type ID mismatch: got %d, want %d", id, i);

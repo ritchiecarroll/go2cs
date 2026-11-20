@@ -235,7 +235,7 @@ internal static bool isRequestExemptᴍ(ж<CrossOriginProtection> Ꮡc, ж<Reque
 
         Ꮡc.ᏑtrustedMu.RLock();
         ᒐd1 = true;
-        @string origin = req.Header.Get(originˢ);
+        @string origin = req.Header.Get(originˢᴍCrossOriginProtection);
         // The request matches a trusted origin.
         return origin != ""u8 && c.trusted[origin];
     }

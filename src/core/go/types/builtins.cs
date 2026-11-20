@@ -110,9 +110,9 @@ internal static bool /*_*/ Δbuiltinᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
         {
             @string msg = ""u8;
             if (nargs < bin.nargs) {
-                msg = notEnoughˢ;
+                msg = notEnoughˢᴍChecker;
             } else if (!bin.variadic && nargs > bin.nargs) {
-                msg = tooManyˢ;
+                msg = tooManyˢᴍChecker;
             }
             if (msg != ""u8) {
                 Ꮡcheck.errorf(argErrPos(Ꮡcall), WrongArgCount, invalidOp + "%s arguments for %v (expected %d, found %d)", msg, Ꮡcall.OrTypedNil(), bin.nargs, nargs);

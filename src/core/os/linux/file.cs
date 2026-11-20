@@ -256,7 +256,7 @@ internal static (nint n, error err) Writeᴍ(ж<File> Ꮡf, slice<byte> b) {
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
+    var errΔ1 = Ꮡf.checkValid(writeˢᴍFile); if (errΔ1 != nil) {
         return (0, errΔ1);
     }
     (n, var e) = Ꮡf.write(b);
@@ -270,7 +270,7 @@ internal static (nint n, error err) Writeᴍ(ж<File> Ꮡf, slice<byte> b) {
     epipecheck(ref (Ꮡf).DerefOrNull(), e);
 
     if (e != nil) {
-        err = f.wrapErr(writeˢ, e);
+        err = f.wrapErr(writeˢᴍFile, e);
     }
 
     return (n, err);
@@ -292,7 +292,7 @@ internal static (nint n, error err) WriteAtᴍ(ж<File> Ꮡf, slice<byte> b, int
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
+    var errΔ1 = Ꮡf.checkValid(writeˢᴍFile); if (errΔ1 != nil) {
         return (0, errΔ1);
     }
     if (f.appendMode) {
@@ -300,13 +300,13 @@ internal static (nint n, error err) WriteAtᴍ(ж<File> Ꮡf, slice<byte> b, int
     }
 
     if (off < 0) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat", Path: f.name, Err: errors.New(negativeOffsetˢ)))));
+        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat", Path: f.name, Err: errors.New(negativeOffsetˢᴍFile)))));
     }
 
     while (len(b) > 0) {
         var (m, e) = Ꮡf.pwrite(b, off);
         if (e != nil) {
-            err = f.wrapErr(writeˢ, e);
+            err = f.wrapErr(writeˢᴍFile, e);
             break;
         }
         n += m;
@@ -321,12 +321,12 @@ internal static (int64 n, error err) WriteToᴍ(ж<File> Ꮡf, Δio.Writer w) {
     int64 n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
+    var errΔ1 = Ꮡf.checkValid(readˢᴍFile); if (errΔ1 != nil) {
         return (0, errΔ1);
     }
     (n, var handled, var e) = Ꮡf.writeTo(w);
     if (handled) {
-        return (n, f.wrapErr(readˢ, e));
+        return (n, f.wrapErr(readˢᴍFile, e));
     }
     return genericWriteTo(Ꮡf, w); // without wrapping
 }

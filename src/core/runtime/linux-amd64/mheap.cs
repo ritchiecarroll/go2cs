@@ -1587,7 +1587,7 @@ internal static (uintptr, bool) growᴍ(ж<mheap> Ꮡh, uintptr npage) {
                 // Transition this space from Reserved to Prepared and mark it
                 // as released since we'll be able to start using it after updating
                 // the page allocator and releasing the lock at any time.
-                sysMap((@unsafe.Pointer)h.curArena.@base, size, ᏑgcController.ᏑheapReleased, heapˢ);
+                sysMap((@unsafe.Pointer)h.curArena.@base, size, ᏑgcController.ᏑheapReleased, heapˢᴍmheap);
                 // Update stats.
                 var statsΔ1 = Ꮡmemstats.ᏑheapStats.acquire();
                 atomic.Xaddint64(statsΔ1.Ꮡreleased, (int64)size);
@@ -1628,7 +1628,7 @@ internal static (uintptr, bool) growᴍ(ж<mheap> Ꮡh, uintptr npage) {
     // The allocation is always aligned to the heap arena
     // size which is always > physPageSize, so its safe to
     // just add directly to heapReleased.
-    sysMap((@unsafe.Pointer)v, nBase - v, ᏑgcController.ᏑheapReleased, heapˢ);
+    sysMap((@unsafe.Pointer)v, nBase - v, ᏑgcController.ᏑheapReleased, heapˢᴍmheap);
 
     // The memory just allocated counts as both released
     // and idle, even though it's not yet backed by spans.

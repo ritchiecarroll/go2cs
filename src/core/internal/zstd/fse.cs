@@ -386,7 +386,7 @@ internal static error makeMatchBaselineFSEᴍ(ref Reader r, nint off, slice<fseE
             be.basebits = 0;
         } else {
             if (e.sym > 52) {
-                return r.makeError(off, fseBaselineSymbolˢ);
+                return r.makeError(off, fseBaselineSymbolˢᴍReader);
             }
             var idx = (uint8)(e.sym - (uint8)matchLengthOffset);
             var basebits = matchLengthBase[idx];

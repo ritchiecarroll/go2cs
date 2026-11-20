@@ -663,7 +663,7 @@ internal static void stmtᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s)
             if (x.mode == invalid) {
                 return;
             }
-            Ꮡcheck.assignVar(sΔ1.X, default, Ꮡx, assignmentˢ);
+            Ꮡcheck.assignVar(sΔ1.X, default, Ꮡx, assignmentˢᴍChecker);
             break;
         }
         case ж<ast.AssignStmt> sΔ1: {
@@ -697,7 +697,7 @@ internal static void stmtᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s)
                 if (x.mode == invalid) {
                     return;
                 }
-                Ꮡcheck.assignVar(sΔ1.Lhs[0], default, Ꮡx, assignmentˢ);
+                Ꮡcheck.assignVar(sΔ1.Lhs[0], default, Ꮡx, assignmentˢᴍChecker);
                 break;
             }}
             break;
