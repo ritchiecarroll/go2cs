@@ -216,6 +216,7 @@ func newFileEntry(file *ast.File, filePath string, manualConversion bool) FileEn
 		identEscapesHeap: map[types.Object]bool{},
 		sstringEligible:  map[types.Object]bool{},
 		ssliceEligible:   map[types.Object]bool{},
+		packForwardOnly:  map[types.Object]bool{},
 		sstringConvExprs: map[*ast.CallExpr]bool{},
 		manualConversion: manualConversion,
 	}
@@ -259,6 +260,7 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		identEscapesHeap:          fileEntry.identEscapesHeap,
 		sstringEligible:           fileEntry.sstringEligible,
 		ssliceEligible:            fileEntry.ssliceEligible,
+		packForwardOnly:           fileEntry.packForwardOnly,
 		sstringConvExprs:          fileEntry.sstringConvExprs,
 	}
 }

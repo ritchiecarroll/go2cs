@@ -22,6 +22,11 @@ import (
 // only reads it within the frame -- including the two uses §A adds, copy SOURCE and PASS-THROUGH.
 //
 // RED at fa18863b94 on the four "admitted (§A)" cases: the predicate did not know them.
+//
+// Wall E narrows two of them. A forward to a NON-builtin callee hands Go's pack header on, so the callee may
+// keep it and write it: it is admitted only as the pack's sole use outside any loop, and then binds the pack
+// itself (packForwardOnly). And an element WRITE refuses the view for an element type C# may place in
+// read-only static data (a primitive or a type parameter), since an all-constant argument list is built there.
 func TestVariadicPackViewAdmitsOnlyNonRetainingUses(t *testing.T) {
 	const source = `package pack
 
@@ -47,7 +52,16 @@ func ranged(xs ...int) (t int) {
 func forwarded(xs ...int)             { sink(xs...) }
 func appendedFrom(d []int, xs ...int) []int { return append(d, xs...) }
 func copySource(d []int, xs ...int) int     { return copy(d, xs) }
+func appendedFromRead(d []int, xs ...int) int { d = append(d, xs...); return xs[0] + len(d) }
+func writtenString(xs ...string)      { xs[0] = "a" }
+
+// refused (wall E)
 func forwardedTwice(xs ...int)        { sink(xs...); sink(1, 2) ; sink(xs...) }
+func forwardedThenRead(xs ...int) int { sink(xs...); return xs[0] }
+func forwardedInLoop(xs ...int)       { for i := 0; i < 2; i++ { sink(xs...) } }
+func writtenPrimitive(xs ...int)      { xs[0] = 1 }
+func incremented(xs ...int)           { xs[0]++ }
+func writtenTypeParam[T any](xs ...T) { var z T; xs[0] = z }
 
 // refused
 func appendedInto(xs ...int) []int   { return append(xs, 1) }
@@ -91,12 +105,14 @@ func addressTaken(xs ...int) *int    { return &xs[0] }
 		identEscapesHeap: map[types.Object]bool{},
 		sstringEligible:  map[types.Object]bool{},
 		ssliceEligible:   map[types.Object]bool{},
+		packForwardOnly:  map[types.Object]bool{},
 		sstringConvExprs: map[*ast.CallExpr]bool{},
 	}}
 
 	performEscapeAnalysis(files, fset, pkg, info)
 
 	eligible := map[string]bool{}
+	var forwardOnly []string
 
 	for _, decl := range file.Decls {
 		funcDecl, ok := decl.(*ast.FuncDecl)
@@ -112,12 +128,22 @@ func addressTaken(xs ...int) *int    { return &xs[0] }
 		}
 
 		eligible[funcDecl.Name.Name] = files[0].ssliceEligible[info.Defs[last.Names[0]]]
+
+		if files[0].packForwardOnly[info.Defs[last.Names[0]]] {
+			forwardOnly = append(forwardOnly, funcDecl.Name.Name)
+		}
+	}
+
+	if len(forwardOnly) != 1 || forwardOnly[0] != "forwarded" {
+		t.Errorf("forward-only packs = %v, want [forwarded]", forwardOnly)
 	}
 
 	want := map[string]bool{
 		"sink":    true,
 		"lenOnly": true, "indexed": true, "ranged": true,
-		"forwarded": true, "appendedFrom": true, "copySource": true, "forwardedTwice": true,
+		"forwarded": true, "appendedFrom": true, "copySource": true, "appendedFromRead": true, "writtenString": true,
+		"forwardedTwice": false, "forwardedThenRead": false, "forwardedInLoop": false,
+		"writtenPrimitive": false, "incremented": false, "writtenTypeParam": false,
 		"appendedInto": false, "copyDestination": false, "deferredForward": false, "goForward": false,
 		"captured": false, "returned": false, "stored": false, "assignedGlobal": false,
 		"passedAsSlice": false, "resliced": false, "addressTaken": false,
