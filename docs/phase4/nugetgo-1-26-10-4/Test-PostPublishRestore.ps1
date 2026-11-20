@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Post-publish smoke for the nugetgo wave on go.* 1.26.10.4: a consumer restore AND build of every package the
+    Post-publish smoke for the nugetgo wave on go.* 1.26.11.1: a consumer restore AND build of every package the
     four PIN sheets publish, from nuget.org, next to go.fmt at the release, plus the break-floor control. One
     command, run after S4's last push:
 
@@ -26,12 +26,14 @@
     finding.
 
     The floor control (the last row, '<kit>-floor') is the build's red arm. It takes the -FloorControl kit's PREVIOUS
-    revision (the sheet's Rev less one; uuid 1.6.0.3 for this wave), built on the previous release (the release less
-    one in its last part; go.* 1.26.10.3), and references it beside go.fmt at the release. It PASSES only when all of
+    revision (the sheet's Rev less one; uuid rev 3 for this wave), built on an earlier release, and references it
+    beside go.fmt at the release. The release it was built on is read from that revision's own restored nuspec, the
+    lower bound of its go.lib range (go.* 1.26.10.3 for this wave), never derived from the release: a hop that moves
+    the minor version (1.26.10.3 to 1.26.11.1) has no "release less one". It PASSES only when all of
     these hold, so a floor that stopped refusing turns the smoke red:
       [restore] exits 0 (the floor is not a restore check);
       [build]   fails, with exactly one distinct per-package `error GO2CS3002` line, and that line names the package,
-                its version and the previous release; and the consumer's assembly is not written;
+                its version and the release its nuspec names; and the consumer's assembly is not written;
       [opt-out] the same build with -p:GoAllowBelowBreakFloor=true exits 0, with `warning GO2CS3002` naming it.
 
     Exit code = the number of rows that did not pass, the control's included.
@@ -109,15 +111,14 @@ foreach ($o in $Version) {
 foreach ($n in $Only) { if (-not $kits.Contains($n)) { throw "-Only names '$n', which no sheet carries" } }
 $run = @($kits.Values | Where-Object { $Only.Count -eq 0 -or $Only -contains $_.Name })
 
-# The floor control: the kit's previous revision, built on the previous release (the release less one in its last part).
+# The floor control: the kit's previous revision. The release it was built on (BuiltOn) is read from its restored
+# nuspec once its consumer has restored (Get-BuiltOnRelease), never derived from $Release.
 $control = $null
 if (-not $NoFloorControl) {
     if (-not $kits.Contains($FloorControl)) { throw "-FloorControl names '$FloorControl', which no sheet carries" }
     $c = $kits[$FloorControl]
     if ($c.Rev -lt 1) { throw "-FloorControl $FloorControl is at its first revision ($($c.Version)): it has no previous revision" }
-    $parts = $Release.Split('.')
-    $parts[-1] = [string]([int]$parts[-1] - 1)
-    $control = [ordered]@{ Name = "$($c.Name)-floor"; Id = $c.Id; Sheet = $c.Sheet; BuiltOn = $parts -join '.'
+    $control = [ordered]@{ Name = "$($c.Name)-floor"; Id = $c.Id; Sheet = $c.Sheet; BuiltOn = ''
                            Version = if ($c.Rev -gt 1) { "$($c.Base).$($c.Rev - 1)" } else { $c.Base } }
 }
 
@@ -214,6 +215,20 @@ function Invoke-ConsumerBuild([string]$dir, [string]$label, [string[]]$extra = @
                        FirstError = if ($first) { $first -replace '^.*?: error ', '' -replace '\s*\[[^\]]*\]\s*$', '' } else { '' } }
 }
 
+# The release a restored package was built on: the inclusive lower bound of its nuspec's go.lib range ('[a, b)', '[a]'
+# or a bare 'a'), read from the consumer's private packages folder. '' when the nuspec, the dependency or an inclusive
+# bound is missing, which the caller reports as a failure rather than guessing.
+function Get-BuiltOnRelease($k, [string]$dir) {
+    $nuspec = Join-Path $dir "packages/$($k.Id.ToLowerInvariant())/$($k.Version.ToLowerInvariant())/$($k.Id.ToLowerInvariant()).nuspec"
+    if (-not (Test-Path -LiteralPath $nuspec)) { return '' }
+    $xml = [xml](Get-Content -Raw -LiteralPath $nuspec)
+    $ranges = @($xml.SelectNodes("//*[local-name()='dependency']") | Where-Object { $_.GetAttribute('id') -eq 'go.lib' } | ForEach-Object { $_.GetAttribute('version') })
+    $lows = @($ranges | ForEach-Object {
+        if ($_ -match '^\s*\[\s*([0-9][0-9A-Za-z.\-]*)\s*(,|\])') { $Matches[1] } elseif ($_ -match '^\s*([0-9][0-9A-Za-z.\-]*)\s*$') { $Matches[1] } } | Sort-Object -Unique)
+    if ($lows.Count -ne 1) { return '' }
+    return $lows[0]
+}
+
 # The floor control's two builds of its restored consumer, judged: [build] refused with exactly one per-package
 # GO2CS3002 naming the package, its version and the release it was built on, and no assembly written; [opt-out]
 # built, with that diagnostic as a warning.
@@ -263,14 +278,18 @@ foreach ($k in $run) {
 
 if ($control) {
     $k = $control
-    $row = [ordered]@{ Kit = $k.Name; Sheet = $k.Sheet; Package = $k.Id; Version = "$($k.Version) (go.* $($k.BuiltOn))"; Verdict = ''; Detail = '' }
+    $row = [ordered]@{ Kit = $k.Name; Sheet = $k.Sheet; Package = $k.Id; Version = "$($k.Version) (go.* unread)"; Verdict = ''; Detail = '' }
     $listed = @()
     if ($isNugetOrg) { try { $listed = @((Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/$($k.Id.ToLowerInvariant())/index.json").versions) } catch { $listed = @() } }
     if ($isNugetOrg -and $listed -notcontains $k.Version) {
         $row.Verdict = 'NOT-PUBLISHED'; $row.Detail = "nuget.org does not list $($k.Version), the control's revision"
     } else {
         $r = Invoke-ConsumerRestore $k $CoReference -Lenient
-        $j = if ($r.Ok) { Test-FloorControl $k $r.Dir } else { [pscustomobject]@{ Ok = $false; Parts = @() } }
+        if ($r.Ok) { $k.BuiltOn = Get-BuiltOnRelease $k $r.Dir }
+        $row.Version = "$($k.Version) (go.* $(if ($k.BuiltOn) { $k.BuiltOn } else { 'unread' }))"
+        $j = if ($r.Ok -and $k.BuiltOn) { Test-FloorControl $k $r.Dir }
+             elseif ($r.Ok) { [pscustomobject]@{ Ok = $false; Parts = @("[built on] its nuspec names no single inclusive go.lib lower bound") } }
+             else { [pscustomobject]@{ Ok = $false; Parts = @() } }
         $ok = $r.Ok -and $j.Ok
         $parts = @("[restore] $($r.Detail)") + $j.Parts
         $row.Verdict = if ($ok) { 'PASS' } else { 'FAIL' }

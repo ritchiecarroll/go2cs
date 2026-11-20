@@ -1,6 +1,6 @@
-# PIN session S3: sign and push timefmt-go, built on go.* 1.26.10.4 (runbook section 4)
+# PIN session S3: sign and push timefmt-go, built on go.* 1.26.11.1 (runbook section 4)
 
-> **TEMPLATE (C2, 2026-11-10), for the nugetgo wave against go.* 1.26.10.4 (`docs/PLAN-nugetgo-wave-1-26-10-4.md`).** It is not pasted as
+> **TEMPLATE (C2, 2026-11-10), for the nugetgo wave against go.* 1.26.11.1 (`docs/PLAN-nugetgo-wave-1-26-10-4.md`).** It is not pasted as
 > it stands. On release day C2 fills its placeholders, all in block 1: `<<SIGNER_SHA>>`, the full SHA of the master
 > commit whose `src/sign-nupkgs.ps1` signs and whose `src/_nugetpush.ps1` pushes; and each kit's full commit on its
 > `claude/c2-nugetgo-1261004-<name>` ref, the one COORD ruled green: timefmt `<<KIT_SHA_TIMEFMT>>`. C2 then re-runs
@@ -84,7 +84,7 @@ This block uses only Windows PowerShell 5.1 syntax, so it runs (and refuses) in 
     $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
     if ((dotnet --version) -notlike '10.*') { throw 'dotnet is not .NET 10: check DOTNET_ROOT' }
 
-    $Release = '1.26.10.4'
+    $Release = '1.26.11.1'
     $Signer  = '<<SIGNER_SHA>>'
     if ($Signer -like '*<<*' -or $Signer -notmatch '^[0-9a-f]{40}$') { throw 'this sheet is the TEMPLATE: the signer SHA is not filled in. Ask COORD for the filled copy.' }
     $Org     = 'https://api.nuget.org/v3/index.json'
@@ -146,8 +146,8 @@ license file resolve at it; and VALIDATION.md is byte for byte the one the kit c
 
 ## Block 3: the gates, then ONE signing process, then verify
 
-For each kit: its release candidate matches its SHA256SUMS line; its nuspec references go.* at `[1.26.10.4, ...)`;
-its version is the table's; its README names release 1.26.10.4 in its release line; and a package that requires
+For each kit: its release candidate matches its SHA256SUMS line; its nuspec references go.* at `[1.26.11.1, ...)`;
+its version is the table's; its README names release 1.26.11.1 in its release line; and a package that requires
 another kit names that kit's version. All are then copied into one folder, and the signer runs once without
 `-Apply` (the certificate check) and once with it: ONE process, so ONE PIN prompt. Each signed package is then
 verified against the fingerprint.
@@ -265,9 +265,9 @@ Checks the flat container and the registration for every package once a minute, 
 
 ## Block 6: deprecate timefmt-go 0.1.8, built on go.* 1.26.10.3
 
-**Why.** go.* 1.26.10.4 changes members that compiled code binds, and go.lib's break floor (`GoBreakFloor`) is
-1.26.10.4. Every revision of this package built on an earlier go.* 1.26.10 release has a go.* range that admits
-1.26.10.4, so NuGet restores it beside go.* 1.26.10.4 without an error, and the build then stops with `GO2CS3002`,
+**Why.** go.* 1.26.11.1 changes members that compiled code binds, and go.lib's break floor (`GoBreakFloor`) is
+1.26.11.1. Every revision of this package built on an earlier go.* 1.26.10 release has a go.* range that admits
+1.26.11.1, so NuGet restores it beside go.* 1.26.11.1 without an error, and the build then stops with `GO2CS3002`,
 naming the package and the release it was built on (`GoCheckBreakFloor` runs before `CoreCompile`). A restore prints
 no deprecation line (measured, `docs/phase4/RECORD-nuget-sibling-pins.md` section 5); `dotnet list package
 --deprecated`, an IDE's package manager and the package page show one. A deprecation unlists and deletes nothing,
@@ -298,7 +298,7 @@ paste.
         "  tick:      $($old -join ' and ')   (these versions only)"
         '  reason:    Other'
         "  alternate: $($k.Id), version $($k.PV)"
-        "  message:   Built against an earlier go.* 1.26.10 release. go.* 1.26.10.4 refuses it at build time with GO2CS3002: its break floor is 1.26.10.4. Use $($k.PV), built against go.* 1.26.10.4."
+        "  message:   Built against an earlier go.* 1.26.10 release. go.* 1.26.11.1 refuses it at build time with GO2CS3002: its break floor is 1.26.11.1. Use $($k.PV), built against go.* 1.26.11.1."
     }
 }
 ```
