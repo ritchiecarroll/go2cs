@@ -49,9 +49,11 @@ public class ModuleStagingRefusalTests
         TestHost.PublishEnvironmentVariable(SandboxMarker, m_priorMarker);
     }
 
-    private static TestRegistry Registry(string? modulePath)
+    private static TestRegistry Registry(string? modulePath) => Registry(modulePath ?? "guard/modstagingrefusal", modulePath);
+
+    private static TestRegistry Registry(string package, string? modulePath)
     {
-        TestRegistry registry = new(modulePath ?? "guard/modstagingrefusal", [], modulePath: modulePath);
+        TestRegistry registry = new(package, [], modulePath: modulePath);
         registry.Add("TestProbe", _ => s_probeRan = true, "keys_test.go", 1);
         return registry;
     }
@@ -150,5 +152,68 @@ public class ModuleStagingRefusalTests
             Discard(runRoot);
             Discard(module);
         }
+    }
+
+    // P3 110324Z, MUST 1.1 (COORD 110437Z): with the module root SET, TryStageModule's remaining "nothing to stage"
+    // answers are refusals in a module host too, each naming the precondition that failed.
+
+    // A package that is not under the module path the registry names: nothing of that module can be staged for it.
+    [TestMethod]
+    public void AModuleHostWhosePackageIsNotInItsModuleRefuses()
+    {
+        string module = NewDirectory("module");
+
+        try
+        {
+            File.WriteAllText(Path.Combine(module, "go.mod"), $"module {ModulePath}\n\ngo 1.23\n");
+            Environment.SetEnvironmentVariable(ModuleRootVariable, module);
+
+            int exit = RunCapturingStderr(Registry("other.test/pkg", ModulePath), out string stderr);
+
+            Assert.AreEqual(2, exit, $"a package outside its module ran (exit {exit}); stderr: {stderr}");
+            Assert.IsFalse(s_probeRan, "the probe test ran in a sandbox that is not the module");
+            StringAssert.Contains(stderr, "other.test/pkg");
+            StringAssert.Contains(stderr, "not a package of module");
+        }
+        finally
+        {
+            Discard(module);
+        }
+    }
+
+    // A root with no go.mod, and none handed over (GO2CS_MODULE_GOMOD): it is not a module go can read.
+    [TestMethod]
+    public void AModuleHostWhoseRootHasNoGoModRefuses()
+    {
+        string module = NewDirectory("nogomod");
+
+        try
+        {
+            File.WriteAllText(Path.Combine(module, "keys.go"), "package keys\n");
+            Environment.SetEnvironmentVariable(ModuleRootVariable, module);
+
+            int exit = RunCapturingStderr(Registry(ModulePath), out string stderr);
+
+            Assert.AreEqual(2, exit, $"a module root with no go.mod ran (exit {exit}); stderr: {stderr}");
+            Assert.IsFalse(s_probeRan, "the probe test ran in a sandbox that is not the module");
+            StringAssert.Contains(stderr, "go.mod");
+        }
+        finally
+        {
+            Discard(module);
+        }
+    }
+
+    // 'none' is matched ignoring case, so NONE is the opt-out, not a path that silently fails to stage.
+    [TestMethod]
+    public void TheNoneOptOutIsMatchedIgnoringCase()
+    {
+        Environment.SetEnvironmentVariable(ModuleRootVariable, "NONE");
+
+        int exit = RunCapturingStderr(Registry(ModulePath), out string stderr);
+
+        Assert.AreEqual(0, exit, $"GO2CS_MODULE_ROOT=NONE must run; stderr: {stderr}");
+        Assert.IsTrue(s_probeRan, "the probe test did not run");
+        StringAssert.Contains(stderr, "not staged");
     }
 }
