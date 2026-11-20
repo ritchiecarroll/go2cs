@@ -1,0 +1,13 @@
+tag=native-101-r1 rc=0 wall_ms=5423 cpu_ms=9500 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=3209.4 bind_ms=1544.2 check_ms=575.3 work_ms=5362.7
+tag=conv-101-r1 rc=0 wall_ms=82674 cpu_ms=196078 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=48796.2 bind_ms=21247.9 check_ms=10298.8 work_ms=80540.9
+tag=native-rep-r1 rc=0 wall_ms=4977 cpu_ms=8672 stdout_sha16=4B68CD7545797475 inputs=101 repeat=00603 TOTAL parse_ms=3160.5 bind_ms=1560.8 check_ms=158.7 work_ms=4919.9
+tag=conv-rep-r1 rc=0 wall_ms=70973 cpu_ms=165984 stdout_sha16=4B68CD7545797475 inputs=101 repeat=00603 TOTAL parse_ms=46269.8 bind_ms=20650.4 check_ms=1893.2 work_ms=69008.8
+tag=native-101-r2 rc=0 wall_ms=5378 cpu_ms=8516 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=3215.3 bind_ms=1516.4 check_ms=553.6 work_ms=5319.6
+tag=conv-101-r2 rc=0 wall_ms=80323 cpu_ms=193578 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=48023.6 bind_ms=20411.5 check_ms=9665.6 work_ms=78297.1
+tag=native-rep-r2 rc=0 wall_ms=5037 cpu_ms=9219 stdout_sha16=4B68CD7545797475 inputs=101 repeat=00603 TOTAL parse_ms=3156.1 bind_ms=1505.9 check_ms=143.1 work_ms=4838.5
+tag=conv-rep-r2 rc=0 wall_ms=72594 cpu_ms=172141 stdout_sha16=4B68CD7545797475 inputs=101 repeat=00603 TOTAL parse_ms=47903.7 bind_ms=20648.0 check_ms=1841.0 work_ms=70589.6
+tag=native-101-r3 rc=0 wall_ms=5350 cpu_ms=9875 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=3193.8 bind_ms=1503.5 check_ms=560.6 work_ms=5295.4
+tag=conv-101-r3 rc=0 wall_ms=81480 cpu_ms=191891 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=47983.0 bind_ms=20795.1 check_ms=10535.6 work_ms=79500.7
+tag=native-rep-r3 rc=0 wall_ms=5026 cpu_ms=8922 stdout_sha16=4B68CD7545797475 inputs=101 repeat=00603 TOTAL parse_ms=3248.5 bind_ms=1535.1 check_ms=161.6 work_ms=4970.3
+tag=conv-rep-r3 rc=0 wall_ms=73955 cpu_ms=170391 stdout_sha16=4B68CD7545797475 inputs=101 repeat=00603 TOTAL parse_ms=48940.1 bind_ms=20990.8 check_ms=1844.4 work_ms=71983.2
+PHASE-DONE

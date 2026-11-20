@@ -98,3 +98,49 @@ That is -2.7% on the median wall, with the ranges overlapping (base 82.7-87.8, a
 200 / 192 / 193 s to 178 / 181 / 183 s, about -7%. P3's prediction of a 5-12% wall fall MISSED as worded; by P3's own
 falsifier the change sits inside the base's spread. The box was faster than in round 1's control (base median then
 99.4 s), so compare only within this pair.
+
+## Item 0, option (c): phase timers, native and converted (2026-11-21), plus P3's arm 3
+
+**The demos.** These are phase-timed copies, labelled in their own headers and NOT the published demo (`item0/source/`, each
+with its diff). Each adds only an explicit `p.BindSourceFiles()` before the diagnostics (they would trigger it lazily; it
+skips bound files) and per-file wall timers on STDERR. Stdout stays byte-identical: `3EB1134A0D5BFF02` on both sides for
+the 101 inputs, `4B68CD7545797475` on both for the repeat arm.
+- Phases: parse = config parse + NewProgram + syntactic diagnostics; bind = BindSourceFiles; check = global + semantic
+  diagnostics. checkdemo has no emit phase, so emit is not measured.
+- Native: TypeScript `ba29a562` tsc (sparse), the demo copied into `tsc/cmd/checkdemo`, go1.26.11, private GOCACHE and
+  GOMODCACHE, GOWORK=off, GOFLAGS/GOGC/GOMAXPROCS unset.
+- Converted: typescript-go-cs 6ba3f6b with the copy, the published go.* 1.26.11.1, server GC as published.
+- The runner launch throughout; 3 rounds of 4 arms, alternating (`item0/phase-battery.txt`).
+- **Native does not bind in parallel here.** checkdemo passes `SingleThreaded: TSTrue` on both sides, and
+  `BindSourceFiles` and file processing then use a single-threaded work group. Go's GC still runs on other cores
+  (GOMAXPROCS unset).
+
+**Phase totals, median of 3** (ms; converted/native):
+
+| arm | parse | bind | check | work |
+|---|---|---|---|---|
+| 101 inputs once | 3,209 / 48,024 = **15.0x** | 1,516 / 20,795 = **13.7x** | 561 / 10,299 = **18.4x** | 5,320 / 79,501 = 14.9x |
+| input 00603 x 101 | 3,160 / 47,904 = 15.2x | 1,535 / 20,650 = 13.5x | 159 / 1,844 = 11.6x | 4,920 / 70,590 = 14.3x |
+
+**Per file, warm-up against steady state** (`item0/per-file-ratios.txt`):
+- The first 10 files: parse 13.8-16.9x, bind 13.7-14.7x, and check **37-63x**. The checker's code is still being
+  JIT-compiled: about 74-79 ms per file in check, against about 10 ms later.
+- The last 50 files: parse **10.4-11.2x**, bind **11.5-11.9x**, check **4.7-6.1x** (101 inputs); 3.6-6.2x (repeat arm).
+- So the aggregate check ratio is mostly warm-up in a run of about 80 s.
+
+**P3's predictions for arm 3, scored as worded:**
+- "bind and parse 10x+": MET (aggregate 13.5-15.2x; steady 10.4-13.6x).
+- "check alone under 3x": MISSED (steady 3.6-6.2x; aggregate 11.6-18.4x).
+- The falsifier "check alone at 8x or more" FIRES on the aggregate (18.4x and 11.6x) and does NOT fire at steady state
+  (3.6-6.2x).
+
+**COORD's clue (conformance 1.41x against checkdemo about 15x): which axis.** R's reading of this data, not a measurement
+of the conformance runner:
+- **Per-case program size** explains the most. In checkdemo every input builds a fresh 83-file program (82 bundled lib
+  files), and parse + bind of those files is 86% of the converted work, at 11-12x even when warm. If the conformance
+  runner shares parsed lib files across cases (to be verified on the runner), its per-case work is mostly check, which is
+  about 5x here when warm.
+- **Warm-up**, in a short process: the first files' check runs at 37-63x; a long runner amortizes it.
+- **GC mode** cannot be the 10x: server against workstation is 99.4 against 158.6 s (1.6x, round 1, cut 8).
+- **Parallelism** is not the axis inside checkdemo (single-threaded on both sides). Its effect on the runner is P5's arm 2.
+- **OS** is not measured here; it is P5's arm 1 (linux).

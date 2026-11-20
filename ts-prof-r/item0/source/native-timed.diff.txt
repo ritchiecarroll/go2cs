@@ -1,0 +1,35 @@
+4,7c4,8
+< // For each .ts file named on the command line it builds a one-file program in memory (the file as /main.ts, a
+< // tsconfig with "strict": true, the bundled lib files), type-checks it single-threaded, and prints every config,
+< // global, syntactic and semantic diagnostic with its message chain, so the native and the converted run can be
+< // byte-compared.
+---
+> // R'S PHASE-TIMED COPY (item 0, option c; 2026-11-20). NOT the published demo. The published main.go is typescript-go-cs
+> // 6ba3f6b go/cmd/checkdemo/main.go; this copy adds only (1) an explicit p.BindSourceFiles() before the diagnostics, which
+> // they would otherwise trigger lazily (it skips files already bound), and (2) per-phase wall timers written to STDERR,
+> // so stdout stays byte-identical to the published demo. Phases: parse = config parse + NewProgram + syntactic
+> // diagnostics; bind = BindSourceFiles; check = global + semantic diagnostics.
+16a18
+> 	"time"
+47a50,52
+> 	var parseT, bindT, checkT time.Duration
+> 	start := time.Now()
+> 	fmt.Fprintf(os.Stderr, "PHASE-TIMED COPY (R item 0): per file: name parse_ms bind_ms check_ms\n")
+54a60
+> 		t0 := time.Now()
+62a69,71
+> 		t1 := time.Now()
+> 		p.BindSourceFiles()
+> 		t2 := time.Now()
+64a74
+> 		t3 := time.Now()
+65a76,79
+> 		parseT += t1.Sub(t0)
+> 		bindT += t2.Sub(t1)
+> 		checkT += t3.Sub(t2)
+> 		fmt.Fprintf(os.Stderr, "%s %.3f %.3f %.3f\n", name[strings.LastIndexAny(name, `/\`)+1:], ms(t1.Sub(t0)), ms(t2.Sub(t1)), ms(t3.Sub(t2)))
+66a81
+> 	fmt.Fprintf(os.Stderr, "TOTAL parse_ms=%.1f bind_ms=%.1f check_ms=%.1f work_ms=%.1f\n", ms(parseT), ms(bindT), ms(checkT), ms(time.Since(start)))
+67a83,84
+> 
+> func ms(d time.Duration) float64 { return float64(d.Nanoseconds()) / 1e6 }

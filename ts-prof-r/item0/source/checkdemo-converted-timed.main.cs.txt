@@ -1,0 +1,84 @@
+namespace go;
+
+using context = context_package;
+using fmt = fmt_package;
+using os = os_package;
+using strings = strings_package;
+using ast = github.com.microsoft.TypeScript.tsc.@internal.ast_package;
+using bundled = github.com.microsoft.TypeScript.tsc.@internal.bundled_package;
+using compiler = github.com.microsoft.TypeScript.tsc.@internal.compiler_package;
+using core = github.com.microsoft.TypeScript.tsc.@internal.core_package;
+using tsoptions = github.com.microsoft.TypeScript.tsc.@internal.tsoptions_package;
+using vfstest = github.com.microsoft.TypeScript.tsc.@internal.vfs.vfstest_package;
+using collections = github.com.microsoft.TypeScript.tsc.@internal.collections_package;
+using contentmapper = github.com.microsoft.TypeScript.tsc.@internal.contentmapper_package;
+using diagnostics = github.com.microsoft.TypeScript.tsc.@internal.diagnostics_package;
+using github.com.microsoft.TypeScript.tsc.@internal;
+using github.com.microsoft.TypeScript.tsc.@internal.vfs;
+using time = time_package;
+using vfs = github.com.microsoft.TypeScript.tsc.@internal.vfs_package;
+
+partial class main_package {
+
+internal static readonly @string tsconfig = @"{ ""compilerOptions"": { ""strict"": true }, ""files"": [""main.ts""] }"u8;
+
+internal static void report(@string kind, slice<ж<ast.Diagnostic>> diags) {
+    foreach (var (_, d) in range(diags)) {
+        @string @file = "";
+        if (d.File() != nil) {
+            @file = d.File().FileName();
+        }
+        fmt.Printf("%s TS%d %s [%d,+%d] %s\n"u8, kind, d.Code(), @file, d.Pos(), d.Len(), d.String());
+        ref var chain = ref heap<Action<slice<ж<ast.Diagnostic>>, nint>>(out var Ꮡchain);
+        chain = (slice<ж<ast.Diagnostic>> ds, nint depth) => {
+            foreach (var (_, c) in range(ds)) {
+                fmt.Printf("%s  TS%d %s\n"u8, strings.Repeat("  ", depth), c.Code(), c.String());
+                Ꮡchain.ValueSlot(c.MessageChain(), depth + 1);
+            }
+        };
+        chain(d.MessageChain(), 1);
+    }
+}
+
+// R'S PHASE-TIMED COPY (item 0, option c; 2026-11-20). NOT the published demo (typescript-go-cs 6ba3f6b). It adds only an
+// explicit p.BindSourceFiles() before the diagnostics (they would trigger it lazily; it skips bound files) and per-phase
+// wall timers written to STDERR, so stdout stays byte-identical. Phases as in the native copy: parse = config parse +
+// NewProgram + syntactic diagnostics; bind = BindSourceFiles; check = global + semantic diagnostics.
+internal static void main() {
+    var ctx = context.Background();
+    var swTotal = global::System.Diagnostics.Stopwatch.StartNew();
+    double parseMs = 0, bindMs = 0, checkMs = 0;
+    string phaseHeader = "PHASE-TIMED COPY (R item 0): per file: name parse_ms bind_ms check_ms";
+    global::System.Console.Error.WriteLine(phaseHeader);
+    foreach (var (_, name) in range(os.Args[1..])) {
+        var (text, err) = os.ReadFile(name);
+        if (err != nil) {
+            fmt.Println("read error:", err);
+            os.Exit(1);
+        }
+        fmt.Printf("file %s (%d bytes)\n"u8, name.slice(strings.LastIndexAny(name, @"/\") + 1), len(text));
+        long ts0 = global::System.Diagnostics.Stopwatch.GetTimestamp();
+        var fs = bundled.WrapFS(vfstest.FromMap(new map<@string, @string>{["/main.ts"] = ((@string)text), ["/tsconfig.json"] = tsconfig}, true));
+        var host = compiler.NewCompilerHost("/", fs, bundled.LibPath(), default, default, default);
+        var (parsed, errs) = tsoptions.GetParsedCommandLineOfConfigFile("/tsconfig.json", Ꮡ(new core.CompilerOptions()), nil, new compiler_CompilerHostᴠParseConfigHost(host), default);
+        report("config", errs);
+        var p = compiler.NewProgram(new compiler.ProgramOptions(Config: parsed, Host: host, SingleThreaded: core.TSTrue));
+        report("options", p.GetConfigFileParsingDiagnostics());
+        var @file = p.GetSourceFile("/main.ts");
+        report("syntax", p.GetSyntacticDiagnostics(ctx, @file));
+        long ts1 = global::System.Diagnostics.Stopwatch.GetTimestamp();
+        p.BindSourceFiles();
+        long ts2 = global::System.Diagnostics.Stopwatch.GetTimestamp();
+        report("global", p.GetGlobalDiagnostics(ctx));
+        report("semantic", p.GetSemanticDiagnostics(ctx, @file));
+        long ts3 = global::System.Diagnostics.Stopwatch.GetTimestamp();
+        fmt.Printf("files %d\n"u8, len(p.GetSourceFiles()));
+        double f = 1000.0 / global::System.Diagnostics.Stopwatch.Frequency;
+        parseMs += (ts1 - ts0) * f; bindMs += (ts2 - ts1) * f; checkMs += (ts3 - ts2) * f;
+        string shortName = ((string)name).Substring(((string)name).LastIndexOfAny(new[] { '/', '\\' }) + 1);
+        global::System.Console.Error.WriteLine($"{shortName} {(ts1 - ts0) * f:F3} {(ts2 - ts1) * f:F3} {(ts3 - ts2) * f:F3}");
+    }
+    global::System.Console.Error.WriteLine($"TOTAL parse_ms={parseMs:F1} bind_ms={bindMs:F1} check_ms={checkMs:F1} work_ms={swTotal.Elapsed.TotalMilliseconds:F1}");
+}
+
+} // end main_package
