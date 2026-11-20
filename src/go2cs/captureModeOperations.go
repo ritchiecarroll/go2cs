@@ -758,13 +758,28 @@ func bodyReassignsReceiver(body *ast.BlockStmt, recvName string, recv *types.Var
 	found := false
 
 	ast.Inspect(body, func(node ast.Node) bool {
-		assignStmt, ok := node.(*ast.AssignStmt)
+		var targets []ast.Expr
 
-		if !ok || assignStmt.Tok == token.DEFINE {
+		// A range ASSIGNMENT repoints its key or value variable just as `s = …` does
+		// (`for _, s = range list`), and needs the same box.
+		switch stmt := node.(type) {
+		case *ast.AssignStmt:
+			if stmt.Tok == token.DEFINE {
+				return true
+			}
+
+			targets = stmt.Lhs
+		case *ast.RangeStmt:
+			if stmt.Tok != token.ASSIGN {
+				return true
+			}
+
+			targets = []ast.Expr{stmt.Key, stmt.Value}
+		default:
 			return true
 		}
 
-		for _, lhs := range assignStmt.Lhs {
+		for _, lhs := range targets {
 			ident, ok := lhs.(*ast.Ident)
 
 			if !ok || ident.Name != recvName {
