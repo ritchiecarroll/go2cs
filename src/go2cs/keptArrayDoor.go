@@ -109,6 +109,12 @@ func (v *Visitor) keptArrayDoorLength(callExpr *ast.CallExpr, arg ast.Expr) (int
 // reads through ElementRef. ElementRef answers `f.Value[i]` for every box that is not native, so the form is right
 // whatever the door answered at run time. A local that is re-pointed, whose address is taken, or that is bound any
 // other way keeps `f.Value[i]`, which a native box refuses by name.
+//
+// The answer depends on emission order. keptArrayDoorConversions is filled when keptArrayDoorEmission renders the
+// binding, and the answer is cached per local on first ask, so it is right only while a local's binding is always
+// rendered before any use of that local is. Go's scoping gives that for `f := ...` and `var f = ...` in one function
+// body. A pass that rendered a use first (a hoist, or a lookahead that indexes before the declaration is emitted)
+// would cache false and keep `f.Value[i]`, which a native window refuses by name at run time.
 func (v *Visitor) isKeptArrayDoorLocal(x ast.Expr) bool {
 	ident, ok := ast.Unparen(x).(*ast.Ident)
 

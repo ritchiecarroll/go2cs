@@ -2311,6 +2311,14 @@ know, a `FromRef` number that escaped its statement through a variable: the prov
 is refused as before, an index is bounded by N, and the number 0 is nil. Lifetime is Go's: C memory freed under a live
 window is a use after free on both sides.
 
+One bound moves from loud to silent with it. The held-storage test runs once, at the conversion, so a window kept past a
+whole assignment to its value still addresses the value's old elements: with `var a [8]uint64`,
+`f := (*[16]uint32)(unsafe.Pointer(&a)); a = b; f[0] = 1` writes into the elements `a` had before the assignment
+(`a = b` is emitted `a = b.Clone()`, the case `ж.cs` names where the pin is checked), and the write is lost without a
+panic. The base was wrong there too, since To's box read the element bytes as an array header, so this is no
+regression; it is the window's limit, read from the code and not measured. A conversion taken after the assignment
+answers the new elements.
+
 ### 20.3 Red first, and the readings
 
 GolibTests `KeptArrayDoorTests`, 11 arms: the C-memory tuple store (refused through `To`, written in place through the

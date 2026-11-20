@@ -320,4 +320,26 @@ public class KeptArrayDoorTests
         Assert.AreEqual(viaTo, viaDoor, "a window past the end of the value is no window");
         GC.KeepAlive(Ꮡpair);
     }
+
+    /// <summary>
+    /// The bound on arm 2b: a resolved Go box opens a window only over the bytes it holds still. Eight uint32 fit the
+    /// four-ulong value exactly; nine do not, and the conversion answers To's own box rather than a window whose last
+    /// element would lie past the pinned array.
+    /// </summary>
+    [TestMethod]
+    public void AWindowLargerThanThePinnedValueIsNoWindow()
+    {
+        array<ulong> buffer = new(4);
+        ж<array<ulong>> pinned = new StandardBox<array<ulong>>(buffer);
+        uintptr address = (uintptr)pinned;
+
+        Assert.IsInstanceOfType(@unsafe.Pointer.ToArray<uint>((@unsafe.Pointer)address, 8), typeof(NativeArrayBox<uint>), "eight elements fit the value");
+
+        ж<array<uint>> viaTo = @unsafe.Pointer.To<array<uint>>((@unsafe.Pointer)address);
+        ж<array<uint>> viaDoor = @unsafe.Pointer.ToArray<uint>((@unsafe.Pointer)address, 9);
+
+        Assert.AreEqual(viaTo.GetType(), viaDoor.GetType(), "the same box kind as To");
+        Assert.IsNotInstanceOfType(viaDoor, typeof(NativeArrayBox<uint>), "no window past the pinned value");
+        GC.KeepAlive(pinned);
+    }
 }
