@@ -57,14 +57,14 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     // Look at instruction to see if it is a divide.
     // Not necessary in Snow Leopard (si_code will be != 0).
     if (GOOS == "darwin"u8 && sig == _SIGFPE && gp.sigcode0 == 0) {
-        var pcΔ1 = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)gp.sigpc);
+        var pcΔ1 = @unsafe.Pointer.ToArray<byte>((@unsafe.Pointer)gp.sigpc, 4);
         nint i = 0;
-        if ((byte)(pcΔ1.Value[i] & 0xF0) == 0x40) { // 64-bit REX prefix
+        if ((byte)(pcΔ1.ElementRef(i) & 0xF0) == 0x40) { // 64-bit REX prefix
             i++;
-        } else if (pcΔ1.Value[i] == 0x66) { // 16-bit instruction prefix
+        } else if (pcΔ1.ElementRef(i) == 0x66) { // 16-bit instruction prefix
             i++;
         }
-        if (pcΔ1.Value[i] == 0xF6 || pcΔ1.Value[i] == 0xF7) {
+        if (pcΔ1.ElementRef(i) == 0xF6 || pcΔ1.ElementRef(i) == 0xF7) {
             gp.sigcode0 = _FPE_INTDIV;
         }
     }

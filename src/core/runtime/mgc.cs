@@ -740,7 +740,7 @@ internal static void gcStart(gcTrigger trigger) {
             }
             // Initialize ptrBuf if necessary.
             if (goexperiment.GreenTeaGC && (~p).gcw.ptrBuf == nil) {
-                p.Value.gcw.ptrBuf = @unsafe.Pointer.To<array<uintptr>>(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
+                p.Value.gcw.ptrBuf = @unsafe.Pointer.ToArray<uintptr>(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys), 1024);
             }
         }
 
