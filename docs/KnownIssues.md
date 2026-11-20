@@ -558,13 +558,17 @@ A publish that is not a single file never makes a composite image, so it is not 
      -recurse=module (11 packages): first run 33.0 s and 227 MB of cache, second run 7.3 s and no growth; the
      standard-library closure under the probe's flags is about 60 MB per target. A -recurse conversion of a 97-package
      module filled about 12 GB. Ruled by COORD 2026-11-20 09:41Z (board hh): a dedicated persistent cache, separate
-     from GOCACHE. -->
+     from GOCACHE.
+     Measured the same day on one very large package of another module: its probe entries took about 2,273 MB
+     (about 200 MB of compiled object per target). Plain-statement ask from COORD 10:19Z. -->
 For each package it converts, go2cs runs `go build` (and `go test -c` for test files) with `-gcflags=-m` for four
 targets, so it emits the same escape decisions Go makes. Those builds go into their own cache, not your `GOCACHE`:
 `go2cs/probe-cache` under the user cache directory, or the directory named by `-probe-cache` or `GO2CS_PROBE_CACHE`.
 The first conversion builds the standard library there for each target, about 60 MB each, and later conversions of
-any module reuse it. Each converted package adds its own entries, which grow with the package's size: a large module
-can add several gigabytes.
+any module reuse it. Each converted package adds its own entries, which grow with the size of its compiled code: about 5 MB
+for a goldmark package, and about 2.3 GB for one very large package. The separate cache moves this cost out of
+your `GOCACHE`; it does not make it smaller. The first conversion of a large module needs that much free disk
+once (a 97-package module needed about 12 GB), and later conversions reuse it.
 
 Go removes entries unused for five days. To reclaim the space at once, delete the directory; the next conversion
 rebuilds what it needs:
