@@ -4,6 +4,9 @@
      precedent (docs/DRAFT-news-1-26-10-3.md, then docs/DRAFT-news-1-26-10-4.md, which moved into docs/NEWS.md at the
      1.26.11.1 release, 0da8ce11c4). Nothing here is published. The release this draft is for is the next one after
      1.26.11.1 (the .5 work); its version number and date are set at release.
+     The two new diagnostic codes (the shape witness's and the deferred-marker refusal's) are not spelled here: the
+     registry guard (repoguard TestGo2csDiagnosticCodeRegistry) refuses a code on a user page before the code is
+     registered, so each is named at release, read from docs/DiagnosticCodes.md once its seat has landed.
      How to prune: every bullet opens with a status mark. LANDED <sha> is on master; QUEUED <branch> <tip> is a seat
      waiting for a batch, read from that seat's own READY post. At release, drop every bullet still QUEUED, remove the
      marks, and merge what is left into the entry's prose (GoCorpusMigration.md, the release ritual, item 1). The seats
@@ -49,7 +52,7 @@
   carry it (a generic named type, or the type parameter in a result, a map, a channel or a pointer), takes a shape
   witness: the type parameter stays the Go type, and its method calls go through a witness type that
   `package_info.cs` declares. Before, go2cs refused these with `GO2CS2005`. A site the witness cannot place yet, such
-  as a constraint or type argument from another package, is refused with the new code `GO2CS2013`. See
+  as a constraint or type argument from another package, is refused with a new error code that names the site. See
   [Diagnostic codes](DiagnosticCodes.md).
   <!-- R shape-witness stage 1, READY 2026-11-19 11:53Z at 202d0ee3ad (inbox/COORD/20261119T115335Z-R.md), P3's
        review fixes at 529de5fc92, tip 5a4655646b (20261119T201550Z-R.md, run 8 20261119T224840Z-R.md). Stage 1 is
@@ -111,12 +114,12 @@
        recorded and not emulated: the update tick runs while the program is idle, where Go parks it. -->
 - **[QUEUED claude/p5-dot5-godebug-adapter cbc0aa3cc8]** **The converter stops where it would have left a marker in
   its output.** Some names are known only after a package's records are final, so the converter writes a marker and
-  rewrites it afterwards. When that pass cannot finish a file, go2cs now stops with the new error `GO2CS2014` that
+  rewrites it afterwards. When that pass cannot finish a file, go2cs now stops with a new error code that
   names the file, where it warned and left a marker that does not compile. A package written entirely by hand now
   has the markers in its review copies (`.cs.auto`) rewritten too. This applies on every converted platform. See
   [Diagnostic codes](DiagnosticCodes.md).
   <!-- P5 godebug adapter seat, READY 2026-11-19 12:37Z at 95d7d7b04f (inbox/COORD/20261119T123751Z-P5.md),
-       renumbered GO2CS2013 -> GO2CS2014 at cbc0aa3cc8 (20261119T185441Z-P5.md). The one corpus file it moves:
+       renumbered at cbc0aa3cc8 (20261119T185441Z-P5.md). The one corpus file it moves:
        internal/godebug/godebug.cs.auto, the same line on all four targets. -->
 - **[QUEUED claude/i9-lever-e 43982146a0]** **A Native AOT build of converted code is smaller.** golib's pointer
   boxes keep their per-type tables in one shared holder, where each instantiation had its own. A Native AOT publish
