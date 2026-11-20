@@ -38,6 +38,18 @@ public class StrMarkTests
 
             [System.AttributeUsage(System.AttributeTargets.Assembly)]
             public sealed class GoHandOwnedPackageAttribute : System.Attribute { }
+
+            // golib's variadic pack, the converter's rendering of a Go `...T` tail.
+            [System.Runtime.CompilerServices.CollectionBuilder(typeof(VariadicBuilder), "Create")]
+            public readonly ref struct variadic<T>
+            {
+                public System.Span<T>.Enumerator GetEnumerator() => default;
+            }
+
+            public static class VariadicBuilder
+            {
+                public static variadic<T> Create<T>(System.ReadOnlySpan<T> items) => default;
+            }
         }
 
         namespace other
@@ -68,6 +80,10 @@ public class StrMarkTests
                 public static nint Plain(@string s) => 2;
 
                 public static nint Other(global::other.sstring s) => 3;
+
+                public static @string Sprintf(sstring format, params variadic<object> a) => default;
+
+                public static @string Sprintln(sstring prefix, params System.Span<object> a) => default;
             }
         }
         """;
@@ -135,6 +151,22 @@ public class StrMarkTests
 
         Assert.AreEqual(0, ForwardersFor(sources, "Plain").Length);
         Assert.AreEqual(0, ForwardersFor(sources, "Other").Length, "a type named sstring that is not golib's view selects nothing");
+    }
+
+    // The canonical value delegate of a variadic twin is golib's Funcꓸꓸꓸ family, its tail's ELEMENT the last type
+    // argument but one: fmt.Sprintfᶠ's public field type. With the tail a go.variadic<T> the template once missed it
+    // and fell through to System.Func<..., go.variadic<object>, ...>, which compiles but changes the field's type
+    // (2ee6ee8175; P3 145156Z NIT 5). A hand-written params Span<T> tail takes the family too.
+    [TestMethod]
+    public void AVariadicTwinsValueDelegateIsTheVariadicFamily()
+    {
+        Dictionary<string, string> sources = Run();
+        string sprintf = string.Join("\n", ForwardersFor(sources, "Sprintf"));
+        string sprintln = string.Join("\n", ForwardersFor(sources, "Sprintln"));
+
+        StringAssert.Contains(sprintf, "global::go.Funcꓸꓸꓸ<global::go.@string, object, global::go.@string> Sprintfᶠ");
+        StringAssert.Contains(sprintln, "global::go.Funcꓸꓸꓸ<global::go.@string, object, global::go.@string> Sprintlnᶠ");
+        Assert.IsFalse(sprintf.Contains("System.Func<"), "the variadic<T> tail must not fall through to System.Func");
     }
 
     [TestMethod]

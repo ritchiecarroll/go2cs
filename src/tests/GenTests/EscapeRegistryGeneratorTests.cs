@@ -134,18 +134,18 @@ public class EscapeRegistryGeneratorTests
             {
                 partial struct Holder { internal Funcꓸꓸꓸ<bool, byte, nint> f; }
 
-                internal static @string join(@string sep, params Span<@string> parts) => sep;
+                internal static @string join(@string sep, params variadic<@string> parts) => sep;
 
                 internal static void Use()
                 {
                     object declared = join;
-                    any literal = (nint n, params Span<nint> xs) => n + xs.Length;
+                    any literal = (nint n, params variadic<nint> xs) => n + xs.Length;
                     object viaField = default(Holder);
                     object viaPointer = default(ж<Actionꓸꓸꓸ<int, uint>>);
-                    Actionꓸꓸꓸ<short> local = static (params Span<short> xs) => { };
+                    Actionꓸꓸꓸ<short> local = static (params variadic<short> xs) => { };
                     _ = local;
                     object plain = (Func<nint, nint>)(x => x);
-                    var held = (byte b, params Span<byte> bs) => b;
+                    var held = (byte b, params variadic<byte> bs) => b;
                     object carried = held.OrTypedNilFunc();
                     object nested = default(Func<Funcꓸꓸꓸ<sbyte, sbyte, sbyte>, (Actionꓸꓸꓸ<long, ulong>, slice<short>)>);
                 }
