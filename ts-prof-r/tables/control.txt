@@ -1,0 +1,9 @@
+tag=srv-wall1 rc=0 wall_ms=93798 cpu_ms=208984 stdout_sha16=3EB1134A0D5BFF02 lines=405 env= trace=False
+tag=wks-wall1 rc=0 wall_ms=150957 cpu_ms=193656 stdout_sha16=3EB1134A0D5BFF02 lines=405 env=DOTNET_gcServer=0 trace=False
+tag=srv-wall2 rc=0 wall_ms=99372 cpu_ms=219781 stdout_sha16=3EB1134A0D5BFF02 lines=405 env= trace=False
+tag=wks-wall2 rc=0 wall_ms=158693 cpu_ms=204266 stdout_sha16=3EB1134A0D5BFF02 lines=405 env=DOTNET_gcServer=0 trace=False
+tag=srv-wall3 rc=0 wall_ms=103686 cpu_ms=232828 stdout_sha16=3EB1134A0D5BFF02 lines=405 env= trace=False
+tag=wks-wall3 rc=0 wall_ms=158566 cpu_ms=208016 stdout_sha16=3EB1134A0D5BFF02 lines=405 env=DOTNET_gcServer=0 trace=False
+tag=srv-gc rc=0 wall_ms=105759 cpu_ms=231922 stdout_sha16=3EB1134A0D5BFF02 lines=405 env= trace=True
+tag=wks-gc rc=0 wall_ms=157456 cpu_ms=204828 stdout_sha16=3EB1134A0D5BFF02 lines=405 env=DOTNET_gcServer=0 trace=True
+CONTROL-DONE

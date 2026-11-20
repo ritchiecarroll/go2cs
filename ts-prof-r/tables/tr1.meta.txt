@@ -1,0 +1,1 @@
+tag=tr1 rc=0 wall_ms=100904 cpu_ms=220531 stdout_sha16=3EB1134A0D5BFF02 lines=405 env= trace=True

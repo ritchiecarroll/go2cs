@@ -14,7 +14,7 @@ Scratch, not for master. These are raw tables for P3. R has not analysed them.
 - **Launch:** the runner's way, a .NET `Process` with stdout redirected to a pipe the parent drains (`ts-profile.ps1`).
   Never an MSYS pipe (BOARD mm).
 - **Box:** R-LAPTOP, Windows 11 x64, .NET SDK 10.0.400, runtime 10.0.11 (G's versions). Untraced wall about 94-113 s here
-  (see `control.log`).
+  (see `control.txt`).
 
 ## The profiler and the trims
 
@@ -53,7 +53,7 @@ Scratch, not for master. These are raw tables for P3. R has not analysed them.
    peak 3,854 MB. The two peaks disagree by more than tracing load explains: read peak heap as unreliable from this
    instrument.
 7. **CPU exclusive top 40** and **inclusive top 40, GOLIB frames only:** both files.
-8. **Workstation control** (`control.log`, 3 untraced runs each, alternating):
+8. **Workstation control** (`control.txt`, 3 untraced runs each, alternating):
    - server: median 99.4 s (93.8 / 99.4 / 103.7);
    - workstation concurrent: median 158.6 s (151.0 / 158.7 / 158.6);
    - gc-collect traces: server pause 12.8%, gen 18/11/10; workstation pause 36.4%, gen 41/**1,929**/97.
