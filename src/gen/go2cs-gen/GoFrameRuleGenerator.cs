@@ -90,7 +90,7 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
                 productionContext.ReportDiagnostic(record.ToDiagnostic());
 
             if (output.Deferred.Length > 0)
-                productionContext.AddSource(output.DeferredHintName, output.DeferredSource());
+                productionContext.AddGeneratedSource(output.DeferredHintName, output.DeferredSource());
         });
     }
 
