@@ -1,0 +1,51 @@
+namespace go.go;
+
+using static anonifaceembed_package;
+
+partial class anonifaceembed_package {
+
+partial interface Option {
+    nint Apply();
+}
+
+partial interface Other {
+    @string Name();
+}
+
+partial struct both {
+    internal nint n;
+}
+
+} partial class anonifaceembedᴛboth {
+
+internal static nint Apply(this ref both b) { return b.n; }
+internal static @string Name(this ref both b) { return "both"; }
+internal static nint Extra(this ref both b) { return b.n * 10; }
+
+} partial class anonifaceembed_package {
+
+public partial interface With_R0 /*dyn*/ :
+    Option,
+    Other
+{
+}
+
+public static With_R0 With(nint n) {
+    return new bothжWith_R0(Ꮡ(new both(n)));
+}
+
+public partial interface WithMixed_R0 /*dyn*/ :
+    Option
+{
+    nint Extra();
+}
+
+public static WithMixed_R0 WithMixed(nint n) {
+    return new bothжWithMixed_R0(Ꮡ(new both(n)));
+}
+
+public static @string Take(With_R0 v) {
+    return v.Name();
+}
+
+} // end anonifaceembed_package

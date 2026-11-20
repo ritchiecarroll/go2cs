@@ -278,8 +278,10 @@ func lookupProductionDynamicTypeName(signature string) string {
 // K() string })` from another package found no lift of its own and emitted the raw Go text
 // (catalogue C1, EXPERIMENT-ts-readiness-2026-11-07.md).
 func (v *Visitor) importedDynamicInterfaceName(iface *types.Interface) string {
+	// An interface made only of embedded interfaces names no package of its own (goldmark's html.WithWriter
+	// returns `interface{ renderer.Option; Option }`), so the imports' published lifts are searched instead.
 	if iface.NumExplicitMethods() == 0 {
-		return ""
+		return v.importedInterfaceLift(iface)
 	}
 
 	pkg := iface.ExplicitMethod(0).Pkg()
@@ -312,14 +314,55 @@ func (v *Visitor) importedDynamicInterfaceName(iface *types.Interface) string {
 // `type LC_ID = TLC_ID` ahead of `type TLC_ID = struct{...}` in one file, the struct libc's tagLC_ID -- deferred to
 // a marker the post-barrier pass could not resolve, since a reused lift is another package's and never enters
 // this package's registry: raw Go text (sqlite-cs W2). "" when t is not such a struct.
+//
+// An anonymous INTERFACE another package lifted takes that lift the same way (importedInterfaceLift): a value
+// whose static type is one -- the result of goldmark's html.WithWriter, `interface{ renderer.Option; Option }`,
+// passed on as a renderer.Option -- named its type through the marker, which only this package's registry
+// answers, and the run refused the raw Go text (board ii).
 func (v *Visitor) forwardImportedStructLift(t types.Type) string {
-	st, ok := t.(*types.Struct)
+	switch typ := t.(type) {
+	case *types.Struct:
+		return v.importedStructLift(typ)
+	case *types.Interface:
+		return v.importedInterfaceLift(typ)
+	}
 
-	if !ok {
+	return ""
+}
+
+// importedInterfaceLift returns the qualified C# name of the public lift that a package this one imports
+// directly published for an anonymous interface with iface's signature, or "". When two imports publish one,
+// the lexically smallest import path wins, as for importedStructLift; an interface with an explicit method has
+// a declaring package, and importedDynamicInterfaceName asks that package first.
+func (v *Visitor) importedInterfaceLift(iface *types.Interface) string {
+	if iface == nil || iface.Empty() || v.pkg == nil {
 		return ""
 	}
 
-	return v.importedStructLift(st)
+	imports := slices.Clone(v.pkg.Imports())
+	slices.SortFunc(imports, func(a, b *types.Package) int { return strings.Compare(a.Path(), b.Path()) })
+	signature := iface.String()
+
+	for _, pkg := range imports {
+		meta, ok := importPackageDirs[pkg.Path()]
+
+		if !ok {
+			continue
+		}
+
+		key := filepath.Clean(meta.Dir)
+
+		packageLock.Lock()
+		name := importedDynamicTypeNames[key][signature]
+		public := name != "" && importedPublicLiftNames[key][name]
+		packageLock.Unlock()
+
+		if public {
+			return convertToCSTypeName(getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name)
+		}
+	}
+
+	return ""
 }
 
 // importedStructLift returns the qualified C# name of an anonymous struct that a package this one

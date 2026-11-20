@@ -70,6 +70,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
+    public void CheckAnonIfaceEmbedCrossPackage() => CheckTarget("AnonIfaceEmbedCrossPackage");
+
+    [TestMethod]
     public void CheckAnonIfaceMethodSetWidening() => CheckTarget("AnonIfaceMethodSetWidening");
 
     [TestMethod]

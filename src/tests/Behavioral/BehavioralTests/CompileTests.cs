@@ -67,6 +67,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
+    public void CheckAnonIfaceEmbedCrossPackage() => CheckTarget("AnonIfaceEmbedCrossPackage");
+
+    [TestMethod]
     public void CheckAnonIfaceMethodSetWidening() => CheckTarget("AnonIfaceMethodSetWidening");
 
     [TestMethod]
