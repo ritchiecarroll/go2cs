@@ -13,6 +13,7 @@
 package main
 
 import (
+	"encoding/json"
 	"slices"
 	"strings"
 	"testing"
@@ -139,5 +140,47 @@ func TestOracleTestArgsDropMathBigPureGoExceptOnMathBig(t *testing.T) {
 		if strings.Join(options.buildTags, ",") != strings.Join(resolved, ",") {
 			t.Fatalf("oracleTestArgs mutated the caller's build tags: %v", options.buildTags)
 		}
+	}
+}
+
+// TestOracleBuildTagsAreRecordedAndAnUnknownPathIsNamed: the comparison record says what the oracle ran with
+// whenever that differs from the conversion (oracleBuildTags in the record's environment), and a run that cannot
+// name its package keeps the tag with a note rather than silently.
+func TestOracleBuildTagsAreRecordedAndAnUnknownPathIsNamed(t *testing.T) {
+	resolved := resolveBuildTags(false, true, true, true, false, nil)
+	options := Options{buildTags: resolved}
+
+	if got := oracleBuildTagsRecord(options, "example.test/bigpull"); slices.Contains(got, mathBigPureGoTag) || len(got) != len(resolved)-1 {
+		t.Fatalf("a row other than math/big records the oracle's tags without %s: got %v from %v", mathBigPureGoTag, got, resolved)
+	}
+
+	for _, same := range []string{"math/big", "math/big_test", ""} {
+		if got := oracleBuildTagsRecord(options, same); got != nil {
+			t.Errorf("package %q: the oracle runs the conversion's own tags, so the record must omit them; got %v", same, got)
+		}
+	}
+
+	if got := oracleBuildTagsRecord(Options{buildTags: []string{"purego"}}, "crypto/rsa"); got != nil {
+		t.Errorf("without %s the oracle's tags are the conversion's; got %v", mathBigPureGoTag, got)
+	}
+
+	if _, note := oracleBuildTags(options, ""); !strings.Contains(note, "unknown") {
+		t.Errorf("an unknown package path must say why the tag is kept; note %q", note)
+	}
+
+	for _, known := range []string{"math/big", "math/big_test", "crypto/rsa"} {
+		if _, note := oracleBuildTags(options, known); note != "" {
+			t.Errorf("package %q is known; no note expected, got %q", known, note)
+		}
+	}
+
+	// The record field's JSON name, as a reader of a banked row finds it.
+	data, err := json.Marshal(testEnvironmentRecord{OracleBuildTags: []string{"purego"}})
+	if err != nil || !strings.Contains(string(data), `"oracleBuildTags":["purego"]`) {
+		t.Fatalf("record JSON %s (%v) does not carry oracleBuildTags", data, err)
+	}
+
+	if data, _ := json.Marshal(testEnvironmentRecord{}); strings.Contains(string(data), "oracleBuildTags") {
+		t.Fatalf("an unmoved oracle must not add the key: %s", data)
 	}
 }

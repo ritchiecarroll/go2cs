@@ -7924,6 +7924,11 @@ type testEnvironmentRecord struct {
 	// OracleGOARCH is the GOARCH the oracle `go test` child ran at, recorded only when -test-oracle-goarch moved it off
 	// the target's (oracleOptions). Omitted otherwise, so every record whose oracle ran at the target is unchanged.
 	OracleGOARCH string `json:"oracleGoarch,omitempty"`
+
+	// OracleBuildTags is the oracle `go test` child's build tags, recorded only when they differ from the
+	// conversion's (oracleBuildTagsRecord): every row but math/big's own drops math_big_pure_go, so Go ran
+	// math/big's assembly where the conversion runs its pure-Go arithmetic. Omitted otherwise.
+	OracleBuildTags []string `json:"oracleBuildTags,omitempty"`
 }
 
 // oracleOptions is the options the ORACLE child runs under: the conversion's own, with the target's GOARCH replaced
@@ -10742,18 +10747,48 @@ const mathBigPureGoTag = "math_big_pure_go"
 // LINK under `go test`: "invalid reference to math/big.subVV". Its row compares nothing.
 //
 // math/big's own row keeps the tag on both sides: there it changes the test set
-// (arith_amd64_test.go is `//go:build !math_big_pure_go`). An unknown package path keeps it too, so a
-// caller that does not say which package it tests gets exactly the conversion's tags.
+// (arith_amd64_test.go is `//go:build !math_big_pure_go`). The external test variant's path
+// (`math/big_test`) is the same row. An UNKNOWN package path keeps the tag too, because nothing says the
+// row is not math/big's, and oracleBuildTags returns a note saying so, which the compare prints: that
+// row, if it reaches bigfft, fails to link again, and the note is how a reader finds out why.
 func oracleBuildFlags(options Options, packagePath string) []string {
-	if packagePath == "" || packagePath == "math/big" || !slices.Contains(options.buildTags, mathBigPureGoTag) {
-		return options.loaderBuildFlags()
-	}
-
-	options.buildTags = slices.DeleteFunc(slices.Clone(options.buildTags), func(tag string) bool {
-		return tag == mathBigPureGoTag
-	})
+	options.buildTags, _ = oracleBuildTags(options, packagePath)
 
 	return options.loaderBuildFlags()
+}
+
+// oracleBuildTags is the oracle's tag list for the package at packagePath (see oracleBuildFlags), and a
+// note when the path is unknown and the tag is kept for that reason alone. The caller's slice is never
+// modified.
+func oracleBuildTags(options Options, packagePath string) ([]string, string) {
+	if !slices.Contains(options.buildTags, mathBigPureGoTag) {
+		return options.buildTags, ""
+	}
+
+	switch strings.TrimSuffix(packagePath, "_test") {
+	case "":
+		return options.buildTags, "oracle: the package under test is unknown (its test manifest has no packageImportPath), " +
+			"so the oracle keeps " + mathBigPureGoTag + "; a package that pulls math/big by linkname will not link"
+	case "math/big":
+		return options.buildTags, ""
+	}
+
+	return slices.DeleteFunc(slices.Clone(options.buildTags), func(tag string) bool {
+		return tag == mathBigPureGoTag
+	}), ""
+}
+
+// oracleBuildTagsRecord is the comparison record's oracleBuildTags: the oracle's tags when they differ
+// from the conversion's, nil otherwise, so a record whose oracle ran with the conversion's own tags is
+// unchanged (the same rule as oracleGoarch).
+func oracleBuildTagsRecord(options Options, packagePath string) []string {
+	tags, _ := oracleBuildTags(options, packagePath)
+
+	if slices.Equal(tags, options.buildTags) {
+		return nil
+	}
+
+	return tags
 }
 
 // oracleBuildFailure names why the Go side of a comparison did not BUILD: the first line the build
@@ -10824,6 +10859,10 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 	// host-fatal names (testTargetArch.go).
 	archExcluded := targetArchExcludedTests(inputPath, options)
 	hostFatalSkip := withdrawnSkipExpression(disclosures, targetArchExcludedNames(archExcluded))
+
+	if _, note := oracleBuildTags(options, packagePath); note != "" {
+		fmt.Fprintln(os.Stderr, "WARNING: "+note)
+	}
 
 	goArgs := oracleTestArgs(options, packagePath, hostFatalSkip)
 	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, oracleOptions(options), "go", goArgs...)
@@ -10910,6 +10949,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath 
 	environment := testEnvironmentFromOptions(options)
 	environment.OracleGoVersion = oracleVersion
 	environment.Terminal = terminal
+	environment.OracleBuildTags = oracleBuildTagsRecord(options, packagePath)
 	result := testComparison{
 		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},

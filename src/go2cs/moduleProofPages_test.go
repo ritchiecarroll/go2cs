@@ -222,6 +222,18 @@ func TestModuleProofPagesStateTheirBuildTags(t *testing.T) {
 		t.Errorf("MODULE.md must say the pages' build tags differ rather than name one set:\n%s", module)
 	}
 
+	// Go's side dropped math_big_pure_go (oracleBuildFlags): the page must not claim Go ran with it.
+	oracleTags := oracleBuildTagsRecord(Options{buildTags: moduleTags}, "example.com/mod/sub")
+	page := renderValidationProofPage(proofPageProvenance{importPath: "example.com/mod/sub", goVersion: "1.24.13", platform: "windows/amd64",
+		buildTags: moduleTags, convertedPath: "src/example.com/mod/sub"},
+		testComparison{Package: "example.com/mod/sub", Status: "validated", Matched: true, Go: map[string]string{"TestA": "pass"},
+			CSharp: map[string]string{"TestA": "pass"}, Environment: testEnvironmentRecord{OracleBuildTags: oracleTags}},
+		nil, nil)
+	want := "Both sides were built with `-tags " + strings.Join(oracleTags, ",") + "`; the conversion also takes `" + mathBigPureGoTag + "`"
+	if !strings.Contains(page, want) {
+		t.Errorf("a page whose oracle dropped %s must say so (%s):\n%s", mathBigPureGoTag, want, page)
+	}
+
 	stdlib := renderValidationProofPage(proofPageProvenance{importPath: "sort", goVersion: "1.24.13", platform: "windows/amd64", buildTags: moduleTags},
 		testComparison{Package: "sort", Status: "validated", Matched: true, Go: map[string]string{"TestA": "pass"}, CSharp: map[string]string{"TestA": "pass"}},
 		nil, nil)
