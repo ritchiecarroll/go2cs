@@ -124,6 +124,7 @@ func TestOracleTestArgsDropMathBigPureGoExceptOnMathBig(t *testing.T) {
 
 		for _, arm := range []struct{ packagePath, want string }{
 			{"math/big", loader},
+			{"math/big_test", loader},
 			{"", loader},
 			{"crypto/rsa", dropped},
 			{"example.test/bigpull", dropped},
