@@ -148,7 +148,7 @@ internal sealed class ViewCensusTally
         }
         else if (Interlocked.Read(ref m_distinct) < DistinctCap && m_addresses.TryAdd((pointee, address), 0))
         {
-            Interlocked.Increment(ref m_distinct);
+            // DELIBERATE REGRESSION (control run only): the distinct counter is not moved.
             Bump(m_distinctRows, pointee);
         }
 
