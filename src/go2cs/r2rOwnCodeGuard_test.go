@@ -161,6 +161,9 @@ func TestCrossgenPackDecisionIsMajorAware(t *testing.T) {
 		{"another patch", "[10.0.14, 10.0.14]", "10.0.15", "10.0.15", "v10.0", false},
 		{"same-major SDK whose framework pack is not its bundled one", "[10.0.14, 10.0.14]", "10.0.14", "10.0.15", "v10.0", false},
 		{"the SDK's own major instead of the framework's", "[11.0.0, 11.0.0]", "11.0.0", "11.0.0", "v10.0", false},
+		{"empty bundled version", "[10.0.15, 10.0.15]", "10.0.15", "", "v10.0", false},
+		{"empty framework pack version", "[]", "", "10.0.15", "v10.0", false},
+		{"empty framework pack and framework version", "[]", "", "10.0.15", "", false},
 	}
 
 	for _, c := range cases {
@@ -527,6 +530,16 @@ func assertTargetFrameworkCrossgenPack(t *testing.T, dotnet, app, rid string) {
 // "" when the pack is the framework's, pinned exactly, and the bundled one whenever the SDK's major is the framework's.
 func crossgenPackProblem(resolved, known, bundled, frameworkVersion string) string {
 	major := func(version string) string { return strings.SplitN(strings.TrimPrefix(version, "v"), ".", 2)[0] }
+
+	// An empty input is a broken read, never an agreement: with bundled empty the same-major clause below switches
+	// itself off, and with known and frameworkVersion both empty every clause agrees with an empty range.
+	for _, input := range []struct{ name, value string }{
+		{"the framework's pack version", known}, {"the SDK's bundled version", bundled}, {"the target framework version", frameworkVersion},
+	} {
+		if strings.TrimSpace(input.value) == "" {
+			return fmt.Sprintf("resolved %s, but %s read empty", resolved, input.name)
+		}
+	}
 
 	// A bare version is a NuGet MINIMUM, not a pin, so the brackets are part of "pinned exactly".
 	if !strings.HasPrefix(resolved, "[") || !strings.HasSuffix(resolved, "]") {
