@@ -104,6 +104,7 @@ internal static void doner(ж<sync_package.WaitGroup> Ꮡwg, channel<nint> req, 
 
 // locked runs one shape, locked to its thread for the whole run, and checks its thread after every park.
 internal static void locked(nint shape, nint rounds, channel<nint> done) {
+    armStart(shape);
     var req = new channel<nint>(0);
     var resp = new channel<nint>(0);
     var never = new channel<nint>(0);
@@ -169,11 +170,13 @@ internal static void locked(nint shape, nint rounds, channel<nint> done) {
 
     unlockMe(shape);
     req.ᐸꟷ(-1);
+    armDone(shape);
     done.ᐸꟷ(shape);
 }
 
 // nest: locked twice and unlocked once still pins; unlocked to zero it is released.
 internal static void nest(nint rounds, channel<nint> done) {
+    armStart(shapeNest);
     var req = new channel<nint>(0);
     var resp = new channel<nint>(0);
 
@@ -194,11 +197,13 @@ internal static void nest(nint rounds, channel<nint> done) {
     }
 
     req.ᐸꟷ(-1);
+    armDone(shapeNest);
     done.ᐸꟷ(shapeNest);
 }
 
 // exitLocked ends while locked: its thread must end with it.
 internal static void exitLocked(channel<nint> done) {
+    armStart(shapeExit);
     var req = new channel<nint>(0);
     var resp = new channel<nint>(0);
 
@@ -211,11 +216,13 @@ internal static void exitLocked(channel<nint> done) {
 
     noteExitThread();
     req.ᐸꟷ(-1);
+    armDone(shapeExit);
     done.ᐸꟷ(shapeExit);
 }
 
 // unpin: pinned, then unlocked, then a park whose wake comes before the park commits (10.3's deterministic form).
 internal static void unpin(nint rounds, channel<nint> done) {
+    armStart(shapeUnpin);
     var req = new channel<nint>(0);
     var resp = new channel<nint>(0);
 
@@ -235,6 +242,7 @@ internal static void unpin(nint rounds, channel<nint> done) {
     }
 
     req.ᐸꟷ(-1);
+    armDone(shapeUnpin);
     done.ᐸꟷ(shapeUnpin);
 }
 

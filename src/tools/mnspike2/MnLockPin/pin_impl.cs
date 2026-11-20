@@ -60,6 +60,45 @@ internal static void checkForeign() {
         Interlocked.Increment(ref s_foreign);
 }
 
+// The per-arm watchdog: an arm that has not finished by its deadline is named and the program exits 3, so a hang reds
+// by NAME (a hang that names nothing is a weak red, and it is the shape a future regression would take). The watchdog
+// is a plain thread, outside the scheduler it watches.
+private static readonly long[] s_armStart = new long[s_shapeNames.Length];
+private static readonly int[] s_armDone = new int[s_shapeNames.Length];
+private static int s_watching;
+
+private static readonly long s_deadlineTicks =
+    (long.TryParse(Environment.GetEnvironmentVariable("MN_PIN_ARM_DEADLINE_MS"), out long ms) && ms > 0 ? ms : 20000) *
+    (System.Diagnostics.Stopwatch.Frequency / 1000);
+
+internal static void armStart(nint shape) {
+    Volatile.Write(ref s_armStart[shape], System.Diagnostics.Stopwatch.GetTimestamp());
+
+    if (Interlocked.Exchange(ref s_watching, 1) == 0)
+        new Thread(Watch) { IsBackground = true, Name = "mnpin-watchdog" }.Start();
+}
+
+internal static void armDone(nint shape) => Volatile.Write(ref s_armDone[shape], 1);
+
+private static void Watch() {
+    while (true) {
+        Thread.Sleep(250);
+        long now = System.Diagnostics.Stopwatch.GetTimestamp();
+
+        for (int i = 0; i < s_shapeNames.Length; i++) {
+            long start = Volatile.Read(ref s_armStart[i]);
+
+            if (start != 0 && Volatile.Read(ref s_armDone[i]) == 0 && now - start > s_deadlineTicks) {
+                string line = $"MNPIN-WATCHDOG arm={s_shapeNames[i]} did not finish within {s_deadlineTicks / (System.Diagnostics.Stopwatch.Frequency / 1000)} ms";
+                Console.Out.WriteLine(line);
+                Console.Error.WriteLine(line);
+                Console.Out.Flush();
+                Environment.Exit(3);
+            }
+        }
+    }
+}
+
 // The foreign check's positive control: a thread registered as pinned must count. Run once before any goroutine
 // starts, and taken back, so it leaves the count at zero.
 internal static void controlForeign() {
