@@ -48,4 +48,20 @@ public static @string Take(With_R0 v) {
     return v.Name();
 }
 
+partial struct runner {
+    internal nint n;
+}
+
+} partial class anonifaceembedᴛrunner {
+
+internal static nint run(this runner r) { return r.n; }
+
+} partial class anonifaceembed_package {
+
+public partial interface Runner_R0 /*dyn*/ {
+    nint run();
+}
+
+public static Runner_R0 Runner(nint n) { return new runner(n); }
+
 } // end anonifaceembed_package

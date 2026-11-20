@@ -22,6 +22,16 @@ internal static nint useOption(lib.Option o) { return o.Apply(); }
 
 internal static @string useOther(lib.Other o) { return o.Name(); }
 
+partial struct local {
+    internal nint n;
+}
+
+} partial class mainᴛlocal {
+
+internal static nint run(this local l) { return l.n + 1; }
+
+} partial class main_package {
+
 internal static void main() {
     fmt.Println(useOption(lib.With(3)));
     fmt.Println(useOther(lib.With(3)));
@@ -33,6 +43,23 @@ internal static void main() {
     var w = lib.With(7);
     lib.Option o = w;
     fmt.Println(o.Apply(), w.Name());
+
+    fmt.Println(useRun(new local(8)));
+    runs rr = new useRun_rᴠruns(mkRun(9));
+    fmt.Println(rr.run());
+    _ = lib.Runner(9);
 }
+
+internal partial interface useRun_r /*dyn*/ {
+    nint run();
+}
+
+internal static nint useRun(useRun_r r) { return r.run(); }
+
+partial interface runs {
+    nint run();
+}
+
+internal static useRun_r mkRun(nint n) { return new local(n); }
 
 } // end main_package

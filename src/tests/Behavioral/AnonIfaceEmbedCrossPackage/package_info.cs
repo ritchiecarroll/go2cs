@@ -27,6 +27,7 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b72756e282920696e747d", "useRun_r")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -36,7 +37,9 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<local, useRun_r>]
 [assembly: GoImplement<mine, go.go.anonifaceembed_package.With_R0>]
+[assembly: GoImplement<useRun_r, runs>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -50,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA8cgrSUlIKCgoKCgpSCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA8cgrSU/LSCgoKCgoKUgoKUgoKC6N4=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -66,6 +69,9 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface runs {}
+    internal partial interface useRun_r {}
+    internal partial struct local {}
     internal partial struct mine {}
     // </TypeAccessibility>
 
@@ -87,5 +93,6 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
+[GoMethodHost(typeof(main_package.local)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛlocal;
 [GoMethodHost(typeof(main_package.mine)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmine;
 // </MethodHolders>

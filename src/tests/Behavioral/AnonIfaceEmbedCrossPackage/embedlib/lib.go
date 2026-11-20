@@ -38,3 +38,11 @@ func Take(v interface {
 }) string {
 	return v.Name()
 }
+
+type runner struct{ n int }
+
+func (r runner) run() int { return r.n }
+
+// Runner returns an interface whose only method is unexported. An importer can spell its own interface the same way,
+// with its own run, which is a different Go type: the importer must not take this lift for it.
+func Runner(n int) interface{ run() int } { return runner{n} }

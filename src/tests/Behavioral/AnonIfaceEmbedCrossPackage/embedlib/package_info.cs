@@ -29,6 +29,7 @@ using static go.go.anonifaceembed_package;
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657b4578747261282920696e743b20676f2f616e6f6e6966616365656d6265642e4f7074696f6e7d", "WithMixed_R0")]
 [assembly: GoDynamicTypeLift("696e746572666163657b676f2f616e6f6e6966616365656d6265642e4f7074696f6e3b20676f2f616e6f6e6966616365656d6265642e4f746865727d", "With_R0")]
+[assembly: GoDynamicTypeLift("696e746572666163657b72756e282920696e747d", "Runner_R0")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -40,6 +41,7 @@ using static go.go.anonifaceembed_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<both, WithMixed_R0>(Pointer = true)]
 [assembly: GoImplement<both, With_R0>(Pointer = true)]
+[assembly: GoImplement<runner, Runner_R0>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -53,7 +55,7 @@ using static go.go.anonifaceembed_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "ABQcgoIACQaIAAgIiKiI")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "ABQcgoIACQaIAAgIiKiIAAgK+A==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -69,8 +71,10 @@ public static partial class anonifaceembed_package
 
     // <TypeAccessibility>
     internal partial struct both {}
+    internal partial struct runner {}
     public partial interface Option {}
     public partial interface Other {}
+    public partial interface Runner_R0 {}
     public partial interface WithMixed_R0 {}
     public partial interface With_R0 {}
     // </TypeAccessibility>
@@ -93,4 +97,5 @@ public static partial class anonifaceembed_package
 
 // <MethodHolders>
 [GoMethodHost(typeof(anonifaceembed_package.both)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class anonifaceembedᴛboth;
+[GoMethodHost(typeof(anonifaceembed_package.runner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class anonifaceembedᴛrunner;
 // </MethodHolders>

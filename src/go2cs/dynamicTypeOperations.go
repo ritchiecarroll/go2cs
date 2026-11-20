@@ -334,8 +334,14 @@ func (v *Visitor) forwardImportedStructLift(t types.Type) string {
 // directly published for an anonymous interface with iface's signature, or "". When two imports publish one,
 // the lexically smallest import path wins, as for importedStructLift; an interface with an explicit method has
 // a declaring package, and importedDynamicInterfaceName asks that package first.
+//
+// The signature is the match key, so the lookup is made only where the signature identifies the type: go/types
+// prints an unexported method and a type parameter by bare name, so `interface{ run() }` in this package and the
+// same spelling in an import are two Go types with one signature (as are two generic functions' `interface{ M() T }`).
+// Such an interface is never matched here and keeps its own package's lift. With exported method names and
+// path-qualified named types, equal signatures are identical interfaces.
 func (v *Visitor) importedInterfaceLift(iface *types.Interface) string {
-	if iface == nil || iface.Empty() || v.pkg == nil {
+	if iface == nil || iface.Empty() || v.pkg == nil || !interfaceSignatureIdentifiesIt(iface) {
 		return ""
 	}
 
@@ -901,4 +907,21 @@ func resolvedDynamicTypeText(text string) (result string, unresolved []string) {
 	resolved.WriteString(text)
 
 	return resolved.String(), unresolved
+}
+
+// interfaceSignatureIdentifiesIt reports whether iface's printed signature names one Go type wherever it is read:
+// a method set (no type terms) whose every method, embedded ones included, is exported and whose signature mentions
+// no type parameter anywhere (mentionsTypeParam; typeContainsTypeParams does not look inside a signature).
+func interfaceSignatureIdentifiesIt(iface *types.Interface) bool {
+	if !iface.IsMethodSet() {
+		return false
+	}
+
+	for i := range iface.NumMethods() {
+		if method := iface.Method(i); !method.Exported() || mentionsTypeParam(method.Type(), map[types.Type]bool{}) {
+			return false
+		}
+	}
+
+	return true
 }
