@@ -511,7 +511,9 @@ func ssliceStackHasLoop(stack []ast.Node) bool {
 // compiler chose: for an all-constant primitive list it is the module's read-only data (a write is an
 // access violation), and nothing in the language keeps it from reusing storage for other constant
 // lists either. The heap prologue copies a literal pack (and shares a spread's slice), so a pack its
-// callee writes always takes it.
+// callee writes always takes it. A write to a FIELD of an element (`xs[i].f = v`) is not one of these and
+// keeps the view: a struct element is never a constant, so its storage is per call, and a spread's is the
+// caller's, as in Go.
 func ssliceElementIsWritten(index *ast.IndexExpr, stack []ast.Node) bool {
 	var target ast.Expr = index
 	k := len(stack) - 1

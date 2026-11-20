@@ -71,8 +71,8 @@ public readonly ref struct variadic<T>
     public int Length => m_elements.Length;
 
     /// <summary>
-    /// The pack's elements as a span. The elements of a literal pack are the compiler's storage (see
-    /// <see cref="IsCompilerStorage"/>) and are never written through this span.
+    /// The pack's elements as a span. A write through it is legal only when <see cref="IsCompilerStorage"/> is
+    /// false: a literal pack's elements are the compiler's storage.
     /// </summary>
     public Span<T> Elements => m_elements;
 
@@ -85,8 +85,10 @@ public readonly ref struct variadic<T>
     /// </summary>
     public bool IsCompilerStorage => m_isCompilerStorage;
 
+    /// <summary>An element by reference. A write through it is legal only when <see cref="IsCompilerStorage"/> is false.</summary>
     public ref T this[int index] => ref m_elements[index];
 
+    /// <summary>An element by reference. A write through it is legal only when <see cref="IsCompilerStorage"/> is false.</summary>
     public ref T this[nint index] => ref m_elements[checked((int)index)];
 
     public Span<T>.Enumerator GetEnumerator() => m_elements.GetEnumerator();
