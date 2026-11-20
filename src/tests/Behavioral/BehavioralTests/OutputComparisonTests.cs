@@ -1202,6 +1202,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
 
     [TestMethod]
+    public void CheckKeywordPackageAliases() => CheckTarget("KeywordPackageAliases");
+
+    [TestMethod]
     public void CheckKeywordTrueFalseIdent() => CheckTarget("KeywordTrueFalseIdent");
 
     [TestMethod]

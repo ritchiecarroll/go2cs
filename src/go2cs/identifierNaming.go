@@ -59,12 +59,12 @@ var keywords = hashset.NewHashSet([]string{
 	// text/template/parse), so the raw `bool true` is a C# syntax error (CS1001/CS1003). Escape.
 	"true", "false",
 
-	// `required` and `scoped` are C# 11 contextual keywords banned as TYPE names: a type
-	// declared `partial struct required` is CS9029 and `partial struct scoped` is CS9062
-	// ("Types and aliases cannot be named '...'"). Like `file`, the '@' escape is valid in
-	// every position, so they are escaped like full keywords. (`record` and `partial` type
-	// names compile clean on C# 13/net9 and need no escape; `nint`/`nuint` need a RENAME,
-	// not an escape — see the reserved set below. All verified empirically.)
+	// `required` and `scoped` are C# 11 contextual keywords banned as TYPE and ALIAS names (CS9029, CS9062: "Types
+	// and aliases cannot be named '...'"). Like `file`, the '@' escape is valid in every position, so they are escaped
+	// like full keywords. `extension` (C# 14, CS9306) is banned at the same two positions but is NOT here: escaped
+	// everywhere it put '@' on std locals that never change meaning, so it sits in csReservedTypeNames below, which
+	// Δ-renames a declared type and '@'-escapes an import alias, and a local stays bare. (`record`/`partial` names only
+	// warn; `nint`/`nuint` need a RENAME, see `reserved`. csBannedTypeAndAliasNames_test.go holds every case.)
 	"required", "scoped",
 
 	// The remaining C# keywords overlap with Go keywords (true keywords in Go too), so they
@@ -93,7 +93,7 @@ var keywords = hashset.NewHashSet([]string{
 // the corpus declares none. C# 15's `with(` collection-element rule is position-scoped, not a rename: since
 // parity seat #30 a slice literal is a collection expression (`slice<nint>([…])`), and an element beginning
 // with a call to a Go `with` is written `@with(…)` (escapeCollectionWithElement); every other use stays bare.
-var csReservedTypeNames = hashset.NewHashSet([]string{"closed", "union", "safe"})
+var csReservedTypeNames = hashset.NewHashSet([]string{"closed", "union", "safe", "extension"})
 
 // collectCSReservedTypeNameDecls records every name in file that a C# 15 reserved TYPE-position keyword
 // (csReservedTypeNames) would break: a type declaration at any level, an alias, and a type parameter of a
@@ -232,7 +232,7 @@ func getSanitizedImport(identifier string) string {
 
 	identifier = replaceInvalidIdentifierChars(identifier)
 
-	if keywords.Contains(identifier) {
+	if keywords.Contains(identifier) || csReservedTypeNames.Contains(identifier) { // an alias so named is banned too
 		return "@" + identifier
 	}
 
