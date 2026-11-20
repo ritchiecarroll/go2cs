@@ -87,6 +87,25 @@ public class ZeroBaseIdentityTests
             "and so do slices of two different zero-size types");
     }
 
+    // Generic `==` over a pointer type argument (slices.Contains, a comparable type parameter) is AreEqual<T>. It took
+    // the interface-value path, whose type match reads the box CLASS, so an element box and a heap box naming the
+    // zerobase were unequal there while equal under ж's `==`. Go has one `==`.
+    [TestMethod]
+    public void GenericEqualityAgreesWithPointerEqualityAcrossBoxKinds()
+    {
+        slice<Void> s = new(10);
+        ж<Void> element = Ꮡ(s, 5), heap = Zero<Void>();
+
+        Assert.IsTrue(element == heap, "&s[5] == new(struct{})");
+        Assert.IsTrue(AreEqual(element, heap), "and through generic ==");
+        Assert.IsTrue(AreEqual(heap, element), "in either order");
+
+        ж<nint> one = Ꮡ((nint)1), other = Ꮡ((nint)1);
+
+        Assert.IsTrue(AreEqual(one, one), "a pointer equals itself through generic ==");
+        Assert.IsFalse(AreEqual(one, other), "two allocations stay two pointers through generic ==");
+    }
+
     [TestMethod]
     public void MadeZeroLengthSlicesShareTheZeroBase()
     {

@@ -4221,6 +4221,14 @@ public static partial class builtin
 
             if (leftNil || rightNil)
                 return leftNil && rightNil;
+
+            // Two non-nil pointers: the pointer type's own identity rule answers, the one its `==` uses -- ж<T>'s
+            // per-kind Equals, or a named pointer's Equals over its box. The object overload below answered the same
+            // for a same-kind pair after six adapter probes, two GetType calls and a dictionary read, about 90 ns a
+            // compare on the hit path of slices.Contains over []*T (TypeScript's AppendIfUnique). It also matched
+            // the two operands by box CLASS, so two kinds naming one address (a native element box and a NativeBox,
+            // or two zerobase pointers) were unequal through generic == while equal through ж's ==; Go has one ==.
+            return EqualityComparer<T>.Default.Equals(left!, right!);
         }
 
         return default(T) is null ?
