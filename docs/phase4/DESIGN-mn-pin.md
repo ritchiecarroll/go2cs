@@ -488,3 +488,29 @@ pinned carrier never enters the set (12.1); a reading tick checks it (`idle-set-
   128 steps, so it would have to cost about 4 µs each time, which is implausible. (c) Code shape: `Ready` gained a
   branch with a lock-taking call on every wake path, which can change the JIT's inlining of `Ready` and its callers.
   20-30 ns a wake would explain +2.7%. That is the first candidate to test if a test is ruled.
+
+### 14.2 Arm (c), one axis, outcome pre-ruled (dated block, 2026-11-20)
+
+COORD's arm: the locked waker's hand-off moves out of `Ready` into a `[NoInlining]` static cold helper (`HandToIdle`),
+and nothing else changes. The ruling, fixed before the run: if cure+(c) is within 2% of base, keep cure+(c) and P1 is
+MET; otherwise keep the cure with its cost stated.
+
+**The JIT check, posted before the run** (`DOTNET_JitDisasm`, Tier-1 `Ready`): pre-cure 274 bytes with `Enqueue`
+inlined; cure 499 bytes, with `Enqueue` and `ClaimIdle` called out of line and two thread-static reads; cure+(c) 374
+bytes, `Enqueue` inlined again and one `HandToIdle` call. `Commit` calls `Ready` in all three.
+
+| sample (unlocked ping-pong, interleaved) | median (ns) | range |
+|---|---|---|
+| A/A base | 1,066.2 | 1,042.7 to 1,112.4 |
+| A/A base, second copy | 1,060.3 | 1,034.5 to 1,119.8 |
+| cure | 1,083.0 | 1,053.5 to 1,195.7 |
+| cure+(c), paired with the cure | 1,084.2 | 1,050.5 to 1,156.4 |
+| base | 1,066.6 | 1,044.1 to 1,125.1 |
+| cure+(c), paired with base | 1,080.8 | 1,054.0 to 1,190.5 |
+
+- A/A delta 0.56%, so the line is 2%. Base vs cure+(c): **+1.33%, inside: P1 MET; cure+(c) is KEPT**, as pre-ruled.
+- Stated plainly: cure vs cure+(c) reads +0.1%, so the arm did NOT move the number. P1 passed this time because the
+  cure's own cost read smaller in this session (+1.3% to 1.5%) than in 14.1's (+2.66%). That 14.1 reading stays
+  visible as MISSED.
+- P3's note, recorded as the named candidate for item 11 (park step thin), not tested here: the cost may sit in
+  `Enqueue`'s `ClaimIdle` lock.

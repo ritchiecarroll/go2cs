@@ -336,19 +336,28 @@ public static class GoScheduler
 
         // THE CURE (DESIGN-mn-pin.md 14): a waker locked to its carrier hands the goroutine it readies straight to an idle
         // carrier (the one that ran it last, when idle), through that carrier's run-next slot and its own wake: no queue.
-        if (t_carrier is { Mounted: { LockedToThread: true } } && ClaimIdle(goroutine.m_lastCarrier as Carrier) is { } target)
-        {
-            goroutine.m_readyStep = step;
-
-            if (Interlocked.Exchange(ref target.Next, goroutine) is { } stale)
-                Enqueue(stale, stale.TakeReadyStep());
-
-            Interlocked.Increment(ref s_idleHandoffs);
-            target.m_idleWake.Release();
+        if (t_carrier is { Mounted: { LockedToThread: true } } && HandToIdle(goroutine, step))
             return;
-        }
 
         Enqueue(goroutine, step);
+    }
+
+    // DESIGN-mn-pin.md 14.2 (COORD's arm (c)): the locked waker's hand-off, kept out of Ready's hot path as a cold static
+    // helper, so the lock-taking call cannot change how Ready is compiled for the unlocked path.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static bool HandToIdle(Goroutine goroutine, Action step)
+    {
+        if (ClaimIdle(goroutine.m_lastCarrier as Carrier) is not { } target)
+            return false;
+
+        goroutine.m_readyStep = step;
+
+        if (Interlocked.Exchange(ref target.Next, goroutine) is { } stale)
+            Enqueue(stale, stale.TakeReadyStep());
+
+        Interlocked.Increment(ref s_idleHandoffs);
+        target.m_idleWake.Release();
+        return true;
     }
 
     private static void Enqueue(Goroutine goroutine, Action step)
