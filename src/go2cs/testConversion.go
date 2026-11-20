@@ -8749,6 +8749,11 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 	return violations, unchecked
 }
 
+// hostFatalMintViolationsFor: RED-COMMIT STUB, the std rule for every row.
+func hostFatalMintViolationsFor(outputPath, inputPath string, disclosures map[string]testDisclosure, options Options) ([]string, []string) {
+	return hostFatalMintViolations(outputPath, disclosures)
+}
+
 // hostFatalNames lists the excluded tests for the DISCLOSED column, sorted. They appear in
 // neither side's results by construction, so without this the counts would silently shrink --
 // which is the hidden-test outcome the ruling forbids.
@@ -10771,7 +10776,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		fmt.Println(manifestNote)
 	}
 	disclosures, outOfScopeDisclosures, disclosureNotes, disclosureErr := loadTestDisclosures(manifestDir, goosOfTarget(options.targetPlatform))
-	mintViolations, mintUnchecked := hostFatalMintViolations(outputPath, disclosures)
+	mintViolations, mintUnchecked := hostFatalMintViolationsFor(outputPath, inputPath, disclosures, options)
 	if len(mintViolations) > 0 {
 		// Refused BEFORE either child runs, so a bad entry cannot quietly withdraw a row that some
 		// platform passes. Fatal rather than a warning: the whole point of the class is that it
