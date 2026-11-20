@@ -1557,14 +1557,14 @@ public static partial class GoReflect
         // converted variadic func value takes: a declared `func(string, ...int)` used as a method
         // group in an `any` position acquires C#'s NATURAL delegate type instead, whose name carries
         // no family marker at all — so the name test reported it non-variadic and `In(1)` handed back
-        // a raw `Span<int>`, which then rendered as `func(string, Span\`1)`. A `Span<T>` parameter
+        // a raw `Span<int>`, which then rendered as `func(string, Span\`1)`. A `variadic<T>` parameter
         // cannot arise any other way in converted code (Go has no such type and the converter emits
         // one only for a variadic tail), so the shape test subsumes the name test rather than
         // widening it.
-        // The converter's tail is `variadic<T>` (golib variadicPack.cs); a hand-written `params variadic<T>`
-        // tail reads as variadic too, so a hand-owned func value keeps reporting Go's own shape.
+        // The converter's tail is `variadic<T>` (golib variadicPack.cs), the one tail the invoke and make
+        // paths can carry; a hand-written `params Span<T>` reads as an ordinary trailing parameter.
         bool spanTail = ins.Length > 0 && ins[^1] is { IsGenericType: true } tail &&
-                        (tail.GetGenericTypeDefinition() == typeof(variadic<>) || tail.GetGenericTypeDefinition() == typeof(Span<>));
+                        tail.GetGenericTypeDefinition() == typeof(variadic<>);
 
         string name = delegateType.Name;
         isVariadic = spanTail ||
@@ -1915,6 +1915,8 @@ public static partial class GoReflect
     private static variadic<TArg> variadicTail<TArg>(object? t) => t switch
     {
         slice<TArg> spread => new variadic<TArg>(spread),
+        // A named slice type (`type S []T`) is assignable to the tail's []T: its window, shared.
+        ISlice<TArg> named => new variadic<TArg>(new slice<TArg>(named)),
         TArg[] fresh => new variadic<TArg>(new slice<TArg>(fresh)),
         null => new variadic<TArg>(default(slice<TArg>)),
         _ => throw new ArgumentException($"variadic tail '{t.GetType().Name}' is neither a slice nor an array of '{typeof(TArg).Name}'", nameof(t))

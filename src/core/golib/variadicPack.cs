@@ -34,8 +34,7 @@ namespace go;
 public readonly ref struct variadic<T>
 {
     // The pack's elements. For a spread: the caller's window (writes reach the caller, as in Go). For a
-    // literal pack: the compiler's storage, which for an all-constant pack of a primitive type is the
-    // module's READ-ONLY static data (see IsReadOnlyLiteral).
+    // literal pack: the compiler's storage, whose kind is the compiler's choice (see IsCompilerStorage).
     private readonly Span<T> m_elements;
 
     // The caller's slice, when this pack is a spread; default otherwise.
@@ -43,17 +42,22 @@ public readonly ref struct variadic<T>
 
     private readonly bool m_isSpread;
 
+    // True when the elements are the storage the compiler built for a literal argument list.
+    private readonly bool m_isCompilerStorage;
+
     internal variadic(slice<T> spread)
     {
         m_spread = spread;
         m_isSpread = true;
+        m_isCompilerStorage = false;
         m_elements = spread.ToSpan();
     }
 
-    internal variadic(Span<T> elements)
+    internal variadic(Span<T> elements, bool compilerStorage = false)
     {
         m_elements = elements;
         m_isSpread = false;
+        m_isCompilerStorage = compilerStorage;
         m_spread = default;
     }
 
@@ -67,18 +71,19 @@ public readonly ref struct variadic<T>
     public int Length => m_elements.Length;
 
     /// <summary>
-    /// The pack's elements as a span. A literal pack of a primitive element type built from constants lives in
-    /// read-only static data, so it must never be written through this span; see <see cref="IsReadOnlyLiteral"/>.
+    /// The pack's elements as a span. The elements of a literal pack are the compiler's storage (see
+    /// <see cref="IsCompilerStorage"/>) and are never written through this span.
     /// </summary>
     public Span<T> Elements => m_elements;
 
     /// <summary>
-    /// True for a LITERAL pack whose storage may be the module's read-only static data: C# places an
-    /// all-constant collection of a primitive (or enum) element type there when it builds the span a
-    /// [CollectionBuilder] receives. Such a pack is copied before anything may write it; the converter
-    /// never emits a write through the stack view of a primitive pack.
+    /// True for a LITERAL pack built by the compiler (the collection builder): its elements are storage the
+    /// compiler chose for the argument list, which for an all-constant primitive list is the module's
+    /// read-only static data, and which nothing obliges it to keep private to one call. Such a pack is copied
+    /// before anything may write it: the Span conversion copies it, the heap prologue copies it, and the
+    /// converter never emits an element write through its stack view.
     /// </summary>
-    public bool IsReadOnlyLiteral => !m_isSpread && PrimitiveElement<T>.Value;
+    public bool IsCompilerStorage => m_isCompilerStorage;
 
     public ref T this[int index] => ref m_elements[index];
 
@@ -90,32 +95,27 @@ public readonly ref struct variadic<T>
     // caller's slice reaches the next callee whole, as Go's `g(xs...)` passes the same slice.
     public variadic<T> ꓸꓸꓸ => this;
 
-    // Hand-written callees that still take `params Span<T>` (golib builtins, hand-owned files) keep Go's
-    // copy-free reading of a pack but not its spread aliasing; that is their documented, listed gap. A
-    // read-only literal is copied here so such a callee can never write static data.
+    // Hand-written callees that still take `params Span<T>` (hand-owned files) keep Go's copy-free reading
+    // of a spread but not its header; that is their documented, listed gap. A literal pack is copied here,
+    // so such a callee can never write the compiler's storage.
     public static implicit operator Span<T>(variadic<T> pack) =>
-        pack.IsReadOnlyLiteral && pack.m_elements.Length > 0 ? AllocationCounter.CopyOf<T>(pack.m_elements) : pack.m_elements;
+        pack.m_isCompilerStorage && pack.m_elements.Length > 0 ? AllocationCounter.CopyOf<T>(pack.m_elements) : pack.m_elements;
 
     public static implicit operator ReadOnlySpan<T>(variadic<T> pack) => pack.m_elements;
 
     // A span-shaped spread source (a stack view's `v.ꓸꓸꓸ`, an array's) packs as LITERAL elements over
     // that same storage: the callee reads and writes it in place, and a heap prologue copies it as before.
     public static implicit operator variadic<T>(Span<T> elements) => new(elements);
-
-    private static class PrimitiveElement<TElem>
-    {
-        public static readonly bool Value = typeof(TElem).IsPrimitive || typeof(TElem).IsEnum;
-    }
 }
 
 /// <summary>The collection builder of <see cref="variadic{T}"/>: a literal argument list.</summary>
 [EditorBrowsable(EditorBrowsableState.Never)] public static class variadic
 {
-    // The compiler hands the arguments as a read-only span over its own storage: a stack buffer, or
-    // read-only static data for an all-constant primitive list. The pack views it without copying; the
-    // read-only case is guarded where a write could happen (see variadic<T>.IsReadOnlyLiteral).
+    // The compiler hands the arguments as a read-only span over storage of its choosing: a stack buffer, or
+    // read-only static data for an all-constant primitive list. The pack views it without copying and is
+    // marked as compiler storage, so nothing writes it (see variadic<T>.IsCompilerStorage).
     public static variadic<T> Create<T>(ReadOnlySpan<T> items) =>
-        new(MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(items), items.Length));
+        new(MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(items), items.Length), compilerStorage: true);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)] public static class VariadicExtensions

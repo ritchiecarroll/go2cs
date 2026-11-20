@@ -67,6 +67,11 @@ internal interface ISliceBacking
 
 [EditorBrowsable(EditorBrowsableState.Never)] public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
 {
+    // The slice's spread as a variadic pack carrying the slice (Go's f(s...) hands f the slice itself). It hides
+    // IArray<T>'s Span spread, so a spread reached through a constraint (`func F[S ~[]E, E any](s S) { g(s...) }`)
+    // carries the header too.
+    new variadic<T> ꓸꓸꓸ { get; }
+
     ISlice<T> Append(params T[] elems);
 
     ISlice<T> this[Range range] { get; }
