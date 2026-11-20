@@ -4,8 +4,23 @@ using fmt = fmt_package;
 using lib = global::go.go.ppembedlib_package;
 using global::go.go;
 using ppembedlib = global::go.go.ppembedlib_package;
+using static main_package;
 
 partial class main_package {
+
+partial struct wrap {
+    /*embed*/ public global::go.go.ppembedlib_package.Link Link;
+}
+
+} partial class mainᴛwrap {
+
+internal static void add(this ref wrap w, @string s) { w.Link.baseLink.BaseInline.BaseNode.Add(s); }
+
+} partial class main_package {
+
+partial struct holder {
+    internal lib.Link link;
+}
 
 internal static void main() {
     var l = lib.NewLink("dest");
@@ -38,6 +53,26 @@ internal static void main() {
     var t = Ꮡ(new lib.Tag());
     t.Bump();
     fmt.Println("tag:", t.Bump());
+
+    var w = Ꮡ(new wrap());
+    w.add("w1");
+    w.add("w2");
+    fmt.Println("wrap:", w.Count(), w.Last());
+
+    var s = new slice<lib.Link>(2, () => new(nil));
+    s[0].Add("s0");
+    s[1].Add("s1");
+    s[1].Add("s1b");
+    fmt.Println("slice:", s[0].Count(), s[1].Count(), s[1].Last());
+
+    array<lib.Link> a = new(2, () => new(nil));
+    Ꮡa.at<lib.Link>(0).Add("a0");
+    Ꮡa.at<lib.Link>(0).Add("a0b");
+    fmt.Println("array:", Ꮡa.at<lib.Link>(0).Count(), Ꮡa.at<lib.Link>(0).Last(), Ꮡa.at<lib.Link>(1).Count());
+
+    var h = Ꮡ(new holder());
+    h.Ꮡlink.Add("h1");
+    fmt.Println("holder:", h.Ꮡlink.Count(), h.Ꮡlink.Last());
 }
 
 } // end main_package

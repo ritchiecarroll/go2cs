@@ -28,6 +28,15 @@ import (
 //	deep    two or more hops: was the `.of(…)` descent through the unexported accessor, now `x.M(…)`
 //	single  one hop with a non-pointer x: the route already called on the box, and now calls on the value itself
 //	        when that box was a copy (`Ꮡ(x)`); a census cannot see the copy, so these are candidates
+//	ptrtail the FIRST hop is a POINTER embed and a later value hop is a foreign unexported embed: the route's
+//	        pointer-then-value arm spells each tail hop as `.of(<Owner>.<accessor>)` through the internal accessor
+//	        (P3 132359Z, SHOULD 2). Counted only; board pp does not change that arm
+//
+// Positive controls, with the counts a change to the predicate is checked against:
+//   - GO2CS_PP_CENSUS_DIR = src/tests/Behavioral/PromotedUnexportedEmbedChain: 35 deep, 0 single, 0 ptrtail
+//     (the fixture's calls through Link, Image, Emph and wrap; Para and Tag are not counted);
+//   - a module whose type embeds *Outer, Outer embedding a foreign unexported struct holding the method: 1 ptrtail
+//     per call (C1's scratch control, 2026-11-20).
 //
 // Each site prints as "<goos>\t<kind>\t<package>\t<file:line>\t<receiver type>.<method>".
 func TestPromotedUnexportedEmbedCensus(t *testing.T) {
@@ -119,10 +128,10 @@ func promotedUnexportedEmbedSite(pkg *packages.Package, selector *ast.SelectorEx
 		return "", ""
 	}
 
-	foreignUnexported := false
+	foreignUnexported, foreignUnexportedInTail, firstHopPtr := false, false, false
 	hops := 0
 
-	for _, idx := range sel.Index()[:len(sel.Index())-1] {
+	for i, idx := range sel.Index()[:len(sel.Index())-1] {
 		if structType == nil {
 			return "", ""
 		}
@@ -132,23 +141,42 @@ func promotedUnexportedEmbedSite(pkg *packages.Package, selector *ast.SelectorEx
 			return "", ""
 		}
 
-		if _, isPtr := hop.Type().Underlying().(*types.Pointer); isPtr {
-			return "", ""
+		hopType := hop.Type()
+
+		if ptr, isPtr := hopType.Underlying().(*types.Pointer); isPtr {
+			// Only the FIRST hop may be a pointer (the ptrtail kind); a pointer further down is no shape here.
+			if i > 0 {
+				return "", ""
+			}
+
+			firstHopPtr, hopType = true, ptr.Elem()
 		}
 
 		if !hop.Exported() && hop.Pkg() != nil && hop.Pkg() != pkg.Types {
 			foreignUnexported = true
+
+			if i > 0 {
+				foreignUnexportedInTail = true
+			}
 		}
 
 		hops++
-		structType, _ = hop.Type().Underlying().(*types.Struct)
+		structType, _ = hopType.Underlying().(*types.Struct)
+	}
+
+	what := types.TypeString(recvType, types.RelativeTo(pkg.Types)) + "." + sel.Obj().Name()
+
+	if firstHopPtr {
+		if foreignUnexportedInTail && hops >= 2 {
+			return "ptrtail", what
+		}
+
+		return "", ""
 	}
 
 	if !foreignUnexported {
 		return "", ""
 	}
-
-	what := types.TypeString(recvType, types.RelativeTo(pkg.Types)) + "." + sel.Obj().Name()
 
 	if hops >= 2 {
 		return "deep", what
