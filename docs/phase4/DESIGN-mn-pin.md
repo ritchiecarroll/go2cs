@@ -463,3 +463,28 @@ pinned carrier never enters the set (12.1); a reading tick checks it (`idle-set-
 | 11.1 shape guard | as the fixed arm | peak carriers 33-34, 11 wakes, p50 1.02 s, p99 3.01 s |
 | fifth read (12.1) | 0 | idle-set violations 0 in every run |
 | MnLockPin | green 3/3 | green 3/3, output = plain, about 70,000 direct hand-offs per run |
+
+### 14.1 Addendum: P2' re-scored, and the P1 guard re-run under a rule fixed first (dated block, 2026-11-20)
+
+- **P2', corrected:** 1,767.5 ns is 1.89x the thread path, above the predicted 1.6-1.8 µs band and inside the 2x stop
+  line: **MISSED HIGH on the prediction, MET on the line.** The cure is kept (COORD).
+- **P1 guard, COORD's named re-run.** The rule was fixed before the run: an A/A pair (base vs base, interleaved,
+  16 + 16), then base vs cure (interleaved, 32 + 32); MET if the cure's median is within max(2%, the A/A delta) of
+  base. "Base" is the pre-cure pin build (golib `13ba6de5`); the cure is golib `b111c061`. Unlocked ping-pong, one
+  process per run.
+
+| sample | median (ns) | range |
+|---|---|---|
+| A/A base | 1,062.7 | 1,047.9 to 1,115.3 |
+| A/A base, second copy | 1,058.0 | 1,037.8 to 1,114.8 |
+| base | 1,063.7 | 1,033.2 to 1,127.4 |
+| cure | 1,092.0 | 1,066.2 to 1,313.1 |
+
+  The A/A delta is 0.44%, so the line is 2%. The cure reads **+2.66%: P1 MISSED** under the rule. The earlier readings
+  stay beside it: 8 + 8 read +4.0% and 16 + 16 read +1.6%.
+- **Candidates, not tested (no tuning without a ruling):** (a) COORD's: the idle carriers take a lock per 100 ms
+  idle cycle (about 110 lock operations a second at P = 12, small against a million round trips a second). (b) The
+  Enqueue fall-back after the run-next chain cap (128) now takes the idle-set lock. It is reached at most once per
+  128 steps, so it would have to cost about 4 µs each time, which is implausible. (c) Code shape: `Ready` gained a
+  branch with a lock-taking call on every wake path, which can change the JIT's inlining of `Ready` and its callers.
+  20-30 ns a wake would explain +2.7%. That is the first candidate to test if a test is ruled.
