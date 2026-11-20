@@ -2000,6 +2000,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
 
     [TestMethod]
+    public void CheckPointerParamClosureRepoint() => CheckTarget("PointerParamClosureRepoint");
+
+    [TestMethod]
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]

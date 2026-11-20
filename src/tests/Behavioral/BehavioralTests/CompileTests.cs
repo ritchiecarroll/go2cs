@@ -2047,6 +2047,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
 
     [TestMethod]
+    public void CheckPointerParamClosureRepoint() => CheckTarget("PointerParamClosureRepoint");
+
+    [TestMethod]
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]
