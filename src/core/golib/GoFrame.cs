@@ -44,14 +44,14 @@ namespace go;
 /// a delegate cannot capture. None of that is needed: <c>try</c>/<c>catch</c>/<c>finally</c> are
 /// STATEMENTS, and <c>recover()</c> reads a static thread-local slot rather than a handle on the
 /// frame — so a deferred closure never needs to reach the frame, and only the defer LIST is
-/// genuinely per-call. A <c>ref struct</c> can hold it: it lives in the caller's own stack frame,
-/// the JIT can enregister the slots, and it allocates nothing.
+/// genuinely per-call. A plain struct holds it in the caller's own stack frame and allocates nothing. It is
+/// not a <c>ref struct</c>, so an M:N twin can hold it across an await; go2cs-gen's GO2CS0016 refuses every copy.
 /// </para>
 /// <para>
 /// Design: <c>docs/Phase4/DESIGN-closure-emission.md</c> §4.
 /// </para>
 /// </remarks>
-[EditorBrowsable(EditorBrowsableState.Never)] public partial struct GoFrame // M:N SPIKE: not a ref struct, so a twin's frame can live across an await
+[EditorBrowsable(EditorBrowsableState.Never)] public partial struct GoFrame // not a ref struct; GO2CS0016 (GoFrameRuleGenerator) refuses a copy, a store or a capture
 {
     // Inline slots for the common defer arities; m_overflow is the correctness tail past them.
     // FOUR comes from a census of the Go standard library, not from a guess: of its 1,454 deferring

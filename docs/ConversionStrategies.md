@@ -8154,7 +8154,7 @@ internal static void main() {
 Each part has one job:
 
 - `GoFrame ᒐ = default;` declares this call's list of deferred calls. golib's
-  [`GoFrame`](../src/core/golib/GoFrame.cs) is a small `ref struct` that lives on the stack. The glyph
+  [`GoFrame`](../src/core/golib/GoFrame.cs) is a small struct that lives on the stack (GO2CS0016 refuses a copy). The glyph
   `ᒐ` marks this frame and every name that belongs to it, such as `ᒐex`, `ᒐp` and the label `ᒐdone`
   ([Reading Converted Code](#reading-converted-code-names-and-glyphs)).
 - `defer(…, ref ᒐ)` adds one call to that list. `ᒐ` is passed by `ref`, so the call lands in this

@@ -213,5 +213,18 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    // GO2CS0016, GoFrameRuleGenerator (M:N item 8; DATA-mn-spike-2.md 9.8 and 10.6): GoFrame is a plain struct, so the
+    // compiler no longer refuses a frame that escapes, and a copied frame runs its deferred calls twice or loses them.
+    // Reported from a SOURCE GENERATOR, so it runs where analyzers are switched off, and NotConfigurable, so no severity
+    // setting, NoWarn or pragma turns it off.
+    public static readonly DiagnosticDescriptor GoFrameEscapes = new(
+        id: "GO2CS0016",
+        title: "A GoFrame is copied, stored or captured",
+        messageFormat: "{0}: a GoFrame may only be a local initialised to default, a ref parameter or ref argument, or the receiver of its own members, since a copy runs the frame's deferred calls twice or loses them",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        customTags: WellKnownDiagnosticTags.NotConfigurable);
 #pragma warning restore RS2008
 }

@@ -139,7 +139,7 @@ warns, in every build, on each refusal a conversion downgraded with `-warn` (`GO
 | `uint8`/`rune`/`complex128`/… | aliases (`byte`/`int32`/`Complex`) via global usings |
 | `uintptr` | the `uintptr` struct — `uintptr.cs` |
 | panic / runtime error | `PanicException` / `RuntimeErrorPanic` |
-| per-call `defer` list | `GoFrame` (`ref struct`, LIFO drain) — `GoFrame.cs` |
+| per-call `defer` list | `GoFrame` (struct, never copied: GO2CS0016; LIFO drain) — `GoFrame.cs` |
 
 See [`ConversionStrategies.md`](ConversionStrategies.md) for a high-level, example-driven tour of the
 per-construct mapping, and [`ConversionStrategies-Reference/`](ConversionStrategies-Reference/README.md) for the
