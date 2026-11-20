@@ -153,10 +153,10 @@ internal static void SetDenyHandlerᴍ(ж<CrossOriginProtection> Ꮡc, Handler h
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string secFetchSiteˢ => ref secFetchSiteˢᵇ;
-private static readonly @string secFetchSiteˢᵇ = "Sec-Fetch-Site"u8;
-internal static ref readonly @string originˢ => ref originˢᵇ;
-private static readonly @string originˢᵇ = "Origin"u8;
+internal static ref readonly @string secFetchSiteˢᴍCrossOriginProtection => ref secFetchSiteˢᵇᴍCrossOriginProtection;
+private static readonly @string secFetchSiteˢᵇᴍCrossOriginProtection = "Sec-Fetch-Site"u8;
+internal static ref readonly @string originˢᴍCrossOriginProtection => ref originˢᵇᴍCrossOriginProtection;
+private static readonly @string originˢᵇᴍCrossOriginProtection = "Origin"u8;
 
 // Check applies cross-origin checks to a request.
 // It returns an error if the request should be rejected.
@@ -170,7 +170,7 @@ internal static error Checkᴍ(ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡre
         return default;
     }}
 
-    var exprᴛ2 = req.Header.Get(secFetchSiteˢ);
+    var exprᴛ2 = req.Header.Get(secFetchSiteˢᴍCrossOriginProtection);
     switch (ᐧ) {
     case {} when exprᴛ2 == ""u8: {
         // No Sec-Fetch-Site header is present.
@@ -187,7 +187,7 @@ internal static error Checkᴍ(ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡre
         return errCrossOriginRequest;
     }}
 
-    @string origin = req.Header.Get(originˢ);
+    @string origin = req.Header.Get(originˢᴍCrossOriginProtection);
     if (origin == ""u8) {
         // Neither Sec-Fetch-Site nor Origin headers are present.
         // Either the request is same-origin or not a browser request.

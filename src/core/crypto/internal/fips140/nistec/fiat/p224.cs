@@ -78,8 +78,8 @@ internal static slice<byte> bytesᴍ(ж<P224Element> Ꮡe, /*[28]*/ ж<array<byt
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidP224Elementˢ => ref invalidP224Elementˢᵇ;
-private static readonly @string invalidP224Elementˢᵇ = "invalid P224Element encoding"u8;
+private static ref readonly @string invalidP224ElementˢᴍP224Element => ref invalidP224ElementˢᵇᴍP224Element;
+private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid P224Element encoding"u8;
 
 // SetBytes sets e = v, where v is a big-endian 28-byte encoding, and returns e.
 // If v is not 28 bytes or it encodes a value higher than 2^224 - 2^96 + 1,
@@ -88,7 +88,7 @@ internal static (ж<P224Element>, error) SetBytesᴍ(ж<P224Element> Ꮡe, slice
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p224ElementLen) {
-        return (default, errors.New(invalidP224Elementˢ));
+        return (default, errors.New(invalidP224ElementˢᴍP224Element));
     }
 
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
@@ -96,7 +96,7 @@ internal static (ж<P224Element>, error) SetBytesᴍ(ж<P224Element> Ꮡe, slice
     slice<byte> minusOneEncoding = @new<P224Element>().Sub(
         @new<P224Element>(), @new<P224Element>().One()).Bytes();
     if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
-        return (default, errors.New(invalidP224Elementˢ));
+        return (default, errors.New(invalidP224ElementˢᴍP224Element));
     }
 
     ref var @in = ref heap(new array<byte>(28), out var Ꮡin);

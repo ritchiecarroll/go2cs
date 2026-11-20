@@ -18,11 +18,11 @@ partial struct rawConn {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syscallConnControlˢ => ref syscallConnControlˢᵇ;
-private static readonly @string syscallConnControlˢᵇ = "SyscallConn.Control"u8;
+internal static ref readonly @string syscallConnControlˢᴍrawConn => ref syscallConnControlˢᵇᴍrawConn;
+private static readonly @string syscallConnControlˢᵇᴍrawConn = "SyscallConn.Control"u8;
 
 internal static error Controlᴍ(ref rawConn c, Action<uintptr> f) {
-    var errΔ1 = c.@file.checkValid(syscallConnControlˢ); if (errΔ1 != nil) {
+    var errΔ1 = c.@file.checkValid(syscallConnControlˢᴍrawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawControl(f);
@@ -31,11 +31,11 @@ internal static error Controlᴍ(ref rawConn c, Action<uintptr> f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syscallConnReadˢ => ref syscallConnReadˢᵇ;
-private static readonly @string syscallConnReadˢᵇ = "SyscallConn.Read"u8;
+internal static ref readonly @string syscallConnReadˢᴍrawConn => ref syscallConnReadˢᵇᴍrawConn;
+private static readonly @string syscallConnReadˢᵇᴍrawConn = "SyscallConn.Read"u8;
 
 internal static error Readᴍ(ref rawConn c, Func<uintptr, bool> f) {
-    var errΔ1 = c.@file.checkValid(syscallConnReadˢ); if (errΔ1 != nil) {
+    var errΔ1 = c.@file.checkValid(syscallConnReadˢᴍrawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawRead(f);
@@ -44,11 +44,11 @@ internal static error Readᴍ(ref rawConn c, Func<uintptr, bool> f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syscallConnWriteˢ => ref syscallConnWriteˢᵇ;
-private static readonly @string syscallConnWriteˢᵇ = "SyscallConn.Write"u8;
+internal static ref readonly @string syscallConnWriteˢᴍrawConn => ref syscallConnWriteˢᵇᴍrawConn;
+private static readonly @string syscallConnWriteˢᵇᴍrawConn = "SyscallConn.Write"u8;
 
 internal static error Writeᴍ(ref rawConn c, Func<uintptr, bool> f) {
-    var errΔ1 = c.@file.checkValid(syscallConnWriteˢ); if (errΔ1 != nil) {
+    var errΔ1 = c.@file.checkValid(syscallConnWriteˢᴍrawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawWrite(f);

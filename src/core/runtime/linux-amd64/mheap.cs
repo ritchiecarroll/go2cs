@@ -988,8 +988,8 @@ internal static ж<mspan> allocᴍ(ж<mheap> Ꮡh, uintptr npages, spanClass spa
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string manualSpanAllocationˢ => ref manualSpanAllocationˢᵇ;
-private static readonly @string manualSpanAllocationˢᵇ = "manual span allocation called with non-manually-managed type"u8;
+internal static ref readonly @string manualSpanAllocationˢᴍmheap => ref manualSpanAllocationˢᵇᴍmheap;
+private static readonly @string manualSpanAllocationˢᵇᴍmheap = "manual span allocation called with non-manually-managed type"u8;
 
 // allocManual allocates a manually-managed span of npage pages.
 // allocManual returns nil if allocation fails.
@@ -1010,7 +1010,7 @@ private static readonly @string manualSpanAllocationˢᵇ = "manual span allocat
 //go:systemstack
 internal static ж<mspan> allocManualᴍ(ж<mheap> Ꮡh, uintptr npages, spanAllocType typ) {
     if (!typ.manual()) {
-        @throw(manualSpanAllocationˢ);
+        @throw(manualSpanAllocationˢᴍmheap);
     }
     return Ꮡh.allocSpan(npages, typ, 0);
 }
@@ -1032,8 +1032,8 @@ internal static void setSpansᴍ(ref mheap h, uintptr @base, uintptr npage, ж<m
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string potentiallyOverlappingInˢ => ref potentiallyOverlappingInˢᵇ;
-private static readonly @string potentiallyOverlappingInˢᵇ = "potentially overlapping in-use allocations detected"u8;
+internal static ref readonly @string potentiallyOverlappingInˢᴍmheap => ref potentiallyOverlappingInˢᵇᴍmheap;
+private static readonly @string potentiallyOverlappingInˢᵇᴍmheap = "potentially overlapping in-use allocations detected"u8;
 
 // allocNeedsZero checks if the region of address space [base, base+npage*pageSize),
 // assumed to be allocated, needs to be zeroed, updating heap arena metadata for
@@ -1088,7 +1088,7 @@ internal static bool /*needZero*/ allocNeedsZeroᴍ(ref mheap h, uintptr @base, 
                 // The zeroedBase moved into the space we were trying to
                 // claim. That's very bad, and indicates someone allocated
                 // the same region we did.
-                @throw(potentiallyOverlappingInˢ);
+                @throw(potentiallyOverlappingInˢᴍmheap);
             }
         }
 
@@ -1187,8 +1187,8 @@ internal static void freeMSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string grewHeapButNoAdequateˢ => ref grewHeapButNoAdequateˢᵇ;
-private static readonly @string grewHeapButNoAdequateˢᵇ = "grew heap, but no adequate free space found"u8;
+internal static ref readonly @string grewHeapButNoAdequateˢᴍmheap => ref grewHeapButNoAdequateˢᵇᴍmheap;
+private static readonly @string grewHeapButNoAdequateˢᵇᴍmheap = "grew heap, but no adequate free space found"u8;
 
 // allocSpan allocates an mspan which owns npages worth of memory.
 //
@@ -1273,7 +1273,7 @@ internal static ж<mspan> /*s*/ allocSpanᴍ(ж<mheap> Ꮡh, uintptr npages, spa
             }
             (@base, _) = h.pages.find(npages + extraPages);
             if (@base == 0) {
-                @throw(grewHeapButNoAdequateˢ);
+                @throw(grewHeapButNoAdequateˢᴍmheap);
             }
         }
         @base = alignUp(@base, physPageSize);
@@ -1292,7 +1292,7 @@ internal static ж<mspan> /*s*/ allocSpanᴍ(ж<mheap> Ꮡh, uintptr npages, spa
             }
             (@base, scav) = h.pages.alloc(npages);
             if (@base == 0) {
-                @throw(grewHeapButNoAdequateˢ);
+                @throw(grewHeapButNoAdequateˢᴍmheap);
             }
         }
     }
@@ -1727,14 +1727,14 @@ internal static void freeManualᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mheapFreeSpanLockedˢ => ref mheapFreeSpanLockedˢᵇ;
-private static readonly @string mheapFreeSpanLockedˢᵇ = "mheap.freeSpanLocked - invalid stack free"u8;
-internal static ref readonly @string mheapFreeSpanLockedˢ2 => ref mheapFreeSpanLockedˢ2ᵇ;
-private static readonly @string mheapFreeSpanLockedˢ2ᵇ = "mheap.freeSpanLocked - invalid free of user arena chunk"u8;
-internal static ref readonly @string mheapFreeSpanLockedˢ3 => ref mheapFreeSpanLockedˢ3ᵇ;
-private static readonly @string mheapFreeSpanLockedˢ3ᵇ = "mheap.freeSpanLocked - invalid free"u8;
-internal static ref readonly @string mheapFreeSpanLockedˢ4 => ref mheapFreeSpanLockedˢ4ᵇ;
-private static readonly @string mheapFreeSpanLockedˢ4ᵇ = "mheap.freeSpanLocked - invalid span state"u8;
+internal static ref readonly @string mheapFreeSpanLockedˢᴍmheap => ref mheapFreeSpanLockedˢᵇᴍmheap;
+private static readonly @string mheapFreeSpanLockedˢᵇᴍmheap = "mheap.freeSpanLocked - invalid stack free"u8;
+internal static ref readonly @string mheapFreeSpanLockedˢ2ᴍmheap => ref mheapFreeSpanLockedˢ2ᵇᴍmheap;
+private static readonly @string mheapFreeSpanLockedˢ2ᵇᴍmheap = "mheap.freeSpanLocked - invalid free of user arena chunk"u8;
+internal static ref readonly @string mheapFreeSpanLockedˢ3ᴍmheap => ref mheapFreeSpanLockedˢ3ᵇᴍmheap;
+private static readonly @string mheapFreeSpanLockedˢ3ᵇᴍmheap = "mheap.freeSpanLocked - invalid free"u8;
+internal static ref readonly @string mheapFreeSpanLockedˢ4ᴍmheap => ref mheapFreeSpanLockedˢ4ᵇᴍmheap;
+private static readonly @string mheapFreeSpanLockedˢ4ᵇᴍmheap = "mheap.freeSpanLocked - invalid span state"u8;
 
 internal static void freeSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
     ref var h = ref Ꮡh.DerefOrNull();
@@ -1745,17 +1745,17 @@ internal static void freeSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAlloc
     switch (Ꮡs.Ꮡstate.get()) {
     case var ᴛ when ᴛ == mSpanManual: {
         if (s.allocCount != 0) {
-            @throw(mheapFreeSpanLockedˢ);
+            @throw(mheapFreeSpanLockedˢᴍmheap);
         }
         break;
     }
     case var ᴛ when ᴛ == mSpanInUse: {
         if (s.isUserArenaChunk) {
-            @throw(mheapFreeSpanLockedˢ2);
+            @throw(mheapFreeSpanLockedˢ2ᴍmheap);
         }
         if (s.allocCount != 0 || s.sweepgen != h.sweepgen) {
             print((@string)"mheap.freeSpanLocked - span ", Ꮡs.OrTypedNil(), (@string)" ptr ", (hex)(uint64)s.@base(), (@string)" allocCount ", s.allocCount, (@string)" sweepgen ", s.sweepgen, (@string)"/", h.sweepgen, (@string)"\n");
-            @throw(mheapFreeSpanLockedˢ3);
+            @throw(mheapFreeSpanLockedˢ3ᴍmheap);
         }
         Ꮡh.ᏑpagesInUse.Add(((uintptr)0 - s.npages));
 
@@ -1770,7 +1770,7 @@ internal static void freeSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAlloc
         break;
     }
     default: {
-        @throw(mheapFreeSpanLockedˢ4);
+        @throw(mheapFreeSpanLockedˢ4ᴍmheap);
         break;
     }}
 
@@ -1891,8 +1891,8 @@ internal static void initᴍ(ref mSpanList list) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mSpanListRemoveˢ => ref mSpanListRemoveˢᵇ;
-private static readonly @string mSpanListRemoveˢᵇ = "mSpanList.remove"u8;
+internal static ref readonly @string mSpanListRemoveˢᴍmSpanList => ref mSpanListRemoveˢᵇᴍmSpanList;
+private static readonly @string mSpanListRemoveˢᵇᴍmSpanList = "mSpanList.remove"u8;
 
 internal static void removeᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
@@ -1901,7 +1901,7 @@ internal static void removeᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     if (span.list != Ꮡlist) {
         print((@string)"runtime: failed mSpanList.remove span.npages=", span.npages,
             (@string)" span=", Ꮡspan.OrTypedNil(), (@string)" prev=", span.prev.OrTypedNil(), (@string)" span.list=", span.list.OrTypedNil(), (@string)" list=", Ꮡlist.OrTypedNil(), (@string)"\n");
-        @throw(mSpanListRemoveˢ);
+        @throw(mSpanListRemoveˢᴍmSpanList);
     }
     if (list.first == Ꮡspan) {
         list.first = span.next;
@@ -1923,8 +1923,8 @@ internal static bool isEmptyᴍ(ref mSpanList list) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mSpanListInsertˢ => ref mSpanListInsertˢᵇ;
-private static readonly @string mSpanListInsertˢᵇ = "mSpanList.insert"u8;
+internal static ref readonly @string mSpanListInsertˢᴍmSpanList => ref mSpanListInsertˢᵇᴍmSpanList;
+private static readonly @string mSpanListInsertˢᵇᴍmSpanList = "mSpanList.insert"u8;
 
 internal static void insertᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
@@ -1932,7 +1932,7 @@ internal static void insertᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
 
     if (span.next != nil || span.prev != nil || span.list != nil) {
         println((@string)"runtime: failed mSpanList.insert", Ꮡspan.OrTypedNil(), span.next.OrTypedNil(), span.prev.OrTypedNil(), span.list.OrTypedNil());
-        @throw(mSpanListInsertˢ);
+        @throw(mSpanListInsertˢᴍmSpanList);
     }
     span.next = list.first;
     if (list.first != nil) {
@@ -1948,8 +1948,8 @@ internal static void insertᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mSpanListInsertBackˢ => ref mSpanListInsertBackˢᵇ;
-private static readonly @string mSpanListInsertBackˢᵇ = "mSpanList.insertBack"u8;
+internal static ref readonly @string mSpanListInsertBackˢᴍmSpanList => ref mSpanListInsertBackˢᵇᴍmSpanList;
+private static readonly @string mSpanListInsertBackˢᵇᴍmSpanList = "mSpanList.insertBack"u8;
 
 internal static void insertBackᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
@@ -1957,7 +1957,7 @@ internal static void insertBackᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
 
     if (span.next != nil || span.prev != nil || span.list != nil) {
         println((@string)"runtime: failed mSpanList.insertBack", Ꮡspan.OrTypedNil(), span.next.OrTypedNil(), span.prev.OrTypedNil(), span.list.OrTypedNil());
-        @throw(mSpanListInsertBackˢ);
+        @throw(mSpanListInsertBackˢᴍmSpanList);
     }
     span.prev = list.last;
     if (list.last != nil) {

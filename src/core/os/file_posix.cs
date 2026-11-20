@@ -108,18 +108,18 @@ internal static error chmod(@string name, FileMode mode) {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chmodˢ => ref chmodˢᵇ;
-private static readonly @string chmodˢᵇ = "chmod"u8;
+internal static ref readonly @string chmodˢᴍFile => ref chmodˢᵇᴍFile;
+private static readonly @string chmodˢᵇᴍFile = "chmod"u8;
 
 // See docs in file.go:(*File).Chmod.
 internal static error chmodᴍ(ж<File> Ꮡf, FileMode mode) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var err = Ꮡf.checkValid(chmodˢ); if (err != nil) {
+    var err = Ꮡf.checkValid(chmodˢᴍFile); if (err != nil) {
         return err;
     }
     var e = Ꮡf.of(File.Ꮡpfd).Fchmod(syscallMode(mode)); if (e != nil) {
-        return f.wrapErr(chmodˢ, e);
+        return f.wrapErr(chmodˢᴍFile, e);
     }
     return default;
 }
@@ -158,8 +158,8 @@ public static error Lchown(@string name, nint uid, nint gid) {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chownˢ => ref chownˢᵇ;
-private static readonly @string chownˢᵇ = "chown"u8;
+internal static ref readonly @string chownˢᴍFile => ref chownˢᵇᴍFile;
+private static readonly @string chownˢᵇᴍFile = "chown"u8;
 
 // Chown changes the numeric uid and gid of the named file.
 // If there is an error, it will be of type [*PathError].
@@ -169,18 +169,18 @@ private static readonly @string chownˢᵇ = "chown"u8;
 internal static error Chownᴍ(ж<File> Ꮡf, nint uid, nint gid) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var err = Ꮡf.checkValid(chownˢ); if (err != nil) {
+    var err = Ꮡf.checkValid(chownˢᴍFile); if (err != nil) {
         return err;
     }
     var e = Ꮡf.of(File.Ꮡpfd).Fchown(uid, gid); if (e != nil) {
-        return f.wrapErr(chownˢ, e);
+        return f.wrapErr(chownˢᴍFile, e);
     }
     return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string truncateˢ => ref truncateˢᵇ;
-private static readonly @string truncateˢᵇ = "truncate"u8;
+internal static ref readonly @string truncateˢᴍFile => ref truncateˢᵇᴍFile;
+private static readonly @string truncateˢᵇᴍFile = "truncate"u8;
 
 // Truncate changes the size of the file.
 // It does not change the I/O offset.
@@ -188,18 +188,18 @@ private static readonly @string truncateˢᵇ = "truncate"u8;
 internal static error Truncateᴍ(ж<File> Ꮡf, int64 size) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var err = Ꮡf.checkValid(truncateˢ); if (err != nil) {
+    var err = Ꮡf.checkValid(truncateˢᴍFile); if (err != nil) {
         return err;
     }
     var e = Ꮡf.of(File.Ꮡpfd).Ftruncate(size); if (e != nil) {
-        return f.wrapErr(truncateˢ, e);
+        return f.wrapErr(truncateˢᴍFile, e);
     }
     return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syncˢ => ref syncˢᵇ;
-private static readonly @string syncˢᵇ = "sync"u8;
+internal static ref readonly @string syncˢᴍFile => ref syncˢᵇᴍFile;
+private static readonly @string syncˢᵇᴍFile = "sync"u8;
 
 // Sync commits the current contents of the file to stable storage.
 // Typically, this means flushing the file system's in-memory copy
@@ -207,11 +207,11 @@ private static readonly @string syncˢᵇ = "sync"u8;
 internal static error Syncᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var err = Ꮡf.checkValid(syncˢ); if (err != nil) {
+    var err = Ꮡf.checkValid(syncˢᴍFile); if (err != nil) {
         return err;
     }
     var e = Ꮡf.of(File.Ꮡpfd).Fsync(); if (e != nil) {
-        return f.wrapErr(syncˢ, e);
+        return f.wrapErr(syncˢᴍFile, e);
     }
     return default;
 }
@@ -250,8 +250,8 @@ internal static array<syscall.Timespec> chtimesUtimes(time.Time atime, time.Time
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chdirˢ => ref chdirˢᵇ;
-private static readonly @string chdirˢᵇ = "chdir"u8;
+internal static ref readonly @string chdirˢᴍFile => ref chdirˢᵇᴍFile;
+private static readonly @string chdirˢᵇᴍFile = "chdir"u8;
 
 // Chdir changes the current working directory to the file,
 // which must be a directory.
@@ -260,12 +260,12 @@ internal static error Chdirᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var err = Ꮡf.checkValid(chdirˢ); if (err != nil) {
+        var err = Ꮡf.checkValid(chdirˢᴍFile); if (err != nil) {
             return err;
         }
     }
     var e = Ꮡf.of(File.Ꮡpfd).Fchdir(); if (e != nil) {
-        return f.wrapErr(chdirˢ, e);
+        return f.wrapErr(chdirˢᴍFile, e);
     }
     var log = testlog.Logger(); if (log != nil) {
         var (wd, err) = Getwd();
@@ -277,36 +277,36 @@ internal static error Chdirᴍ(ж<File> Ꮡf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string setDeadlineˢ => ref setDeadlineˢᵇ;
-private static readonly @string setDeadlineˢᵇ = "SetDeadline"u8;
+internal static ref readonly @string setDeadlineˢᴍFile => ref setDeadlineˢᵇᴍFile;
+private static readonly @string setDeadlineˢᵇᴍFile = "SetDeadline"u8;
 
 // setDeadline sets the read and write deadline.
 internal static error setDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
-    var err = Ꮡf.checkValid(setDeadlineˢ); if (err != nil) {
+    var err = Ꮡf.checkValid(setDeadlineˢᴍFile); if (err != nil) {
         return err;
     }
     return Ꮡf.of(File.Ꮡpfd).SetDeadline(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string setReadDeadlineˢ => ref setReadDeadlineˢᵇ;
-private static readonly @string setReadDeadlineˢᵇ = "SetReadDeadline"u8;
+internal static ref readonly @string setReadDeadlineˢᴍFile => ref setReadDeadlineˢᵇᴍFile;
+private static readonly @string setReadDeadlineˢᵇᴍFile = "SetReadDeadline"u8;
 
 // setReadDeadline sets the read deadline.
 internal static error setReadDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
-    var err = Ꮡf.checkValid(setReadDeadlineˢ); if (err != nil) {
+    var err = Ꮡf.checkValid(setReadDeadlineˢᴍFile); if (err != nil) {
         return err;
     }
     return Ꮡf.of(File.Ꮡpfd).SetReadDeadline(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string setWriteDeadlineˢ => ref setWriteDeadlineˢᵇ;
-private static readonly @string setWriteDeadlineˢᵇ = "SetWriteDeadline"u8;
+internal static ref readonly @string setWriteDeadlineˢᴍFile => ref setWriteDeadlineˢᵇᴍFile;
+private static readonly @string setWriteDeadlineˢᵇᴍFile = "SetWriteDeadline"u8;
 
 // setWriteDeadline sets the write deadline.
 internal static error setWriteDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
-    var err = Ꮡf.checkValid(setWriteDeadlineˢ); if (err != nil) {
+    var err = Ꮡf.checkValid(setWriteDeadlineˢᴍFile); if (err != nil) {
         return err;
     }
     return Ꮡf.of(File.Ꮡpfd).SetWriteDeadline(t);

@@ -84,8 +84,8 @@ internal static void resetᴍ(ref clientResponse r) {
 } partial class jsonrpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unspecifiedErrorˢ => ref unspecifiedErrorˢᵇ;
-private static readonly @string unspecifiedErrorˢᵇ = "unspecified error"u8;
+internal static ref readonly @string unspecifiedErrorˢᴍclientCodec => ref unspecifiedErrorˢᵇᴍclientCodec;
+private static readonly @string unspecifiedErrorˢᵇᴍclientCodec = "unspecified error"u8;
 
 internal static error ReadResponseHeaderᴍ(ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -109,7 +109,7 @@ internal static error ReadResponseHeaderᴍ(ж<clientCodec> Ꮡc, ж<rpc.Respons
             return fmt.Errorf("invalid error %v"u8, c.resp.Error);
         }
         if (x == ""u8) {
-            x = unspecifiedErrorˢ;
+            x = unspecifiedErrorˢᴍclientCodec;
         }
         r.Error = x;
     }

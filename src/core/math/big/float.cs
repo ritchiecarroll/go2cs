@@ -388,10 +388,10 @@ internal static void validateᴍ(ж<Float> Ꮡx) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nonzeroFiniteNumberWithˢ => ref nonzeroFiniteNumberWithˢᵇ;
-private static readonly @string nonzeroFiniteNumberWithˢᵇ = "nonzero finite number with empty mantissa"u8;
-internal static ref readonly @string zeroPrecisionFiniteˢ => ref zeroPrecisionFiniteˢᵇ;
-private static readonly @string zeroPrecisionFiniteˢᵇ = "zero precision finite number"u8;
+internal static ref readonly @string nonzeroFiniteNumberWithˢᴍFloat => ref nonzeroFiniteNumberWithˢᵇᴍFloat;
+private static readonly @string nonzeroFiniteNumberWithˢᵇᴍFloat = "nonzero finite number with empty mantissa"u8;
+internal static ref readonly @string zeroPrecisionFiniteˢᴍFloat => ref zeroPrecisionFiniteˢᵇᴍFloat;
+private static readonly @string zeroPrecisionFiniteˢᵇᴍFloat = "zero precision finite number"u8;
 
 internal static @string validate0ᴍ(ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -401,14 +401,14 @@ internal static @string validate0ᴍ(ж<Float> Ꮡx) {
     }
     nint m = len(x.mant);
     if (m == 0) {
-        return nonzeroFiniteNumberWithˢ;
+        return nonzeroFiniteNumberWithˢᴍFloat;
     }
     UntypedInt msb = /* 1 << (_W - 1) */ 9223372036854775808;
     if ((Word)(x.mant[m - 1] & (nuint)msb) == 0) {
         return fmt.Sprintf("msb not set in last word %#x of %s"u8, x.mant[m - 1], Ꮡx.Text((byte)'p', 0));
     }
     if (x.prec == 0) {
-        return zeroPrecisionFiniteˢ;
+        return zeroPrecisionFiniteˢᴍFloat;
     }
     return ""u8;
 }

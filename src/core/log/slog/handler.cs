@@ -639,8 +639,8 @@ internal static void appendStringᴍ(ref handleState s, @string str) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍhandleState => ref nilˢᵇᴍhandleState;
+private static readonly @string nilˢᵇᴍhandleState = "<nil>"u8;
 
 internal static void appendValueᴍ(ж<handleState> Ꮡs, Value v) {
     GoFrame ᒐ = default;
@@ -656,7 +656,7 @@ internal static void appendValueᴍ(ж<handleState> Ꮡs, Value v) {
                 //
                 // Adapted from the code in fmt/print.go.
                 ref var vΔ1 = ref heap<reflect.Value>(reflect.ValueOf(vʗ1.any), out var ᏑvΔ1); if (vΔ1.Kind() == reflect.Pointer && vΔ1.IsNil()) {
-                    Ꮡs.Value.appendString(nilˢ);
+                    Ꮡs.Value.appendString(nilˢᴍhandleState);
                     return;
                 }
 

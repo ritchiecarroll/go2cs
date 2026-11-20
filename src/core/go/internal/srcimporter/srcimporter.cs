@@ -232,16 +232,16 @@ internal static partial (slice<ж<ast.File>>, error) parseFilesᴍ(ж<Importer> 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string srcimporterˢ => ref srcimporterˢᵇ;
-private static readonly @string srcimporterˢᵇ = "srcimporter"u8;
-internal static ref readonly @string binˢ => ref binˢᵇ;
-private static readonly @string binˢᵇ = "bin"u8;
-internal static ref readonly @string cgoCppflagsˢ => ref cgoCppflagsˢᵇ;
-private static readonly @string cgoCppflagsˢᵇ = "CGO_CPPFLAGS"u8;
-internal static ref readonly @string cgoCflagsˢ => ref cgoCflagsˢᵇ;
-private static readonly @string cgoCflagsˢᵇ = "CGO_CFLAGS"u8;
-internal static ref readonly @string cgoGotypesGoˢ => ref cgoGotypesGoˢᵇ;
-private static readonly @string cgoGotypesGoˢᵇ = "_cgo_gotypes.go"u8;
+internal static ref readonly @string srcimporterˢᴍImporter => ref srcimporterˢᵇᴍImporter;
+private static readonly @string srcimporterˢᵇᴍImporter = "srcimporter"u8;
+internal static ref readonly @string binˢᴍImporter => ref binˢᵇᴍImporter;
+private static readonly @string binˢᵇᴍImporter = "bin"u8;
+internal static ref readonly @string cgoCppflagsˢᴍImporter => ref cgoCppflagsˢᵇᴍImporter;
+private static readonly @string cgoCppflagsˢᵇᴍImporter = "CGO_CPPFLAGS"u8;
+internal static ref readonly @string cgoCflagsˢᴍImporter => ref cgoCflagsˢᵇᴍImporter;
+private static readonly @string cgoCflagsˢᵇᴍImporter = "CGO_CFLAGS"u8;
+internal static ref readonly @string cgoGotypesGoˢᴍImporter => ref cgoGotypesGoˢᵇᴍImporter;
+private static readonly @string cgoGotypesGoˢᵇᴍImporter = "_cgo_gotypes.go"u8;
 
 internal static (ж<ast.File>, error) cgoᴍ(ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) {
     GoFrame ᒐ = default;
@@ -250,7 +250,7 @@ internal static (ж<ast.File>, error) cgoᴍ(ж<Importer> Ꮡp, ж<build.Package
         ref var bp = ref Ꮡbp.DerefOrNull();
         var argsᴷ = new stackAppend<@string>();
 
-        var (tmpdir, err) = os.MkdirTemp(""u8, srcimporterˢ);
+        var (tmpdir, err) = os.MkdirTemp(""u8, srcimporterˢᴍImporter);
         if (err != nil) {
             return (default, err);
         }
@@ -258,7 +258,7 @@ internal static (ж<ast.File>, error) cgoᴍ(ж<Importer> Ꮡp, ж<build.Package
 
         @string goCmd = "go";
         if (p.ctxt.GOROOT != ""u8) {
-            goCmd = filepath.Join(p.ctxt.GOROOT, binˢ, "go");
+            goCmd = filepath.Join(p.ctxt.GOROOT, binˢᴍImporter, "go");
         }
         var args = slice<@string>([goCmd, "tool", "cgo", "-objdir", tmpdir]);
         if (bp.Goroot) {
@@ -274,7 +274,7 @@ internal static (ж<ast.File>, error) cgoᴍ(ж<Importer> Ꮡp, ж<build.Package
             }}
         }
         args = append(args, (@string)"--");
-        args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCppflagsˢ)));
+        args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCppflagsˢᴍImporter)));
         args = appendꓸꓸꓸ(args, bp.CgoCPPFLAGS);
         if (len(bp.CgoPkgConfig) > 0) {
             var cmdΔ1 = exec.Command("pkg-config"u8, appendꓸꓸꓸ(slice<@string>(["--cflags"]), bp.CgoPkgConfig).ꓸꓸꓸ);
@@ -285,7 +285,7 @@ internal static (ж<ast.File>, error) cgoᴍ(ж<Importer> Ꮡp, ж<build.Package
             args = appendꓸꓸꓸ(args, strings.Fields((@string)@out));
         }
         args = append(args, (@string)"-I", tmpdir);
-        args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCflagsˢ)));
+        args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCflagsˢᴍImporter)));
         args = appendꓸꓸꓸ(args, bp.CgoCFLAGS);
         args = appendꓸꓸꓸ(args, bp.CgoFiles);
 
@@ -295,7 +295,7 @@ internal static (ж<ast.File>, error) cgoᴍ(ж<Importer> Ꮡp, ж<build.Package
             return (default, fmt.Errorf("go tool cgo: %w"u8, errΔ2));
         }
 
-        return parser.ParseFile(p.fset, filepath.Join(tmpdir, cgoGotypesGoˢ), default, parser.SkipObjectResolution);
+        return parser.ParseFile(p.fset, filepath.Join(tmpdir, cgoGotypesGoˢᴍImporter), default, parser.SkipObjectResolution);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }

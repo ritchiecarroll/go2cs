@@ -84,7 +84,7 @@ partial struct debugHTTP {
 } partial class rpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object rpcErrorExecutingˢ = (@string)"rpc: error executing template:"u8;
+internal static readonly object rpcErrorExecutingˢᴍdebugHTTP = (@string)"rpc: error executing template:"u8;
 
 // Runs at /debug/rpc
 internal static void ServeHTTPᴍ(debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> req) {
@@ -103,7 +103,7 @@ internal static void ServeHTTPᴍ(debugHTTP server, Δhttp.ResponseWriter w, ж<
     slices.SortFunc(services, (debugService a, debugService b) => strings.Compare(a.Name, b.Name));
     var err = debug.Execute(new http_ResponseWriterᴠWriter(w), services);
     if (err != nil) {
-        fmt.Fprintln(new http_ResponseWriterᴠWriter(w), rpcErrorExecutingˢ, err.Error());
+        fmt.Fprintln(new http_ResponseWriterᴠWriter(w), rpcErrorExecutingˢᴍdebugHTTP, err.Error());
     }
 }
 

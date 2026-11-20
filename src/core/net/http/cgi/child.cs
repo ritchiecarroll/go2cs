@@ -240,8 +240,8 @@ internal static void WriteHeaderᴍ(ref response r, nint code) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢ2 => ref contentTypeˢ2ᵇ;
-private static readonly @string contentTypeˢ2ᵇ = "Content-Type"u8;
+internal static ref readonly @string contentTypeˢ2ᴍresponse => ref contentTypeˢ2ᵇᴍresponse;
+private static readonly @string contentTypeˢ2ᵇᴍresponse = "Content-Type"u8;
 
 // writeCGIHeader finalizes the header sent to the client and writes it to the output.
 // p is not written by writeHeader, but is the first chunk of the body
@@ -253,8 +253,8 @@ internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
     }
     r.wroteCGIHeader = true;
     fmt.Fprintf(new bufio_WriterжWriter(r.bufw), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
-    var (_, hasType) = r.header[contentTypeˢ2, ꟷ]; if (!hasType) {
-        r.header.Set(contentTypeˢ2, http.DetectContentType(p));
+    var (_, hasType) = r.header[contentTypeˢ2ᴍresponse, ꟷ]; if (!hasType) {
+        r.header.Set(contentTypeˢ2ᴍresponse, http.DetectContentType(p));
     }
     r.header.Write(new bufio_WriterжWriter(r.bufw));
     r.bufw.WriteString("\r\n");

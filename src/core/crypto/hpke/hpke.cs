@@ -185,8 +185,8 @@ public static (ж<Recipient>, error) NewRecipient(slice<byte> enc, PrivateKey k,
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exportOnlyInstantiationˢ => ref exportOnlyInstantiationˢᵇ;
-private static readonly @string exportOnlyInstantiationˢᵇ = "export-only instantiation"u8;
+internal static ref readonly @string exportOnlyInstantiationˢᴍSender => ref exportOnlyInstantiationˢᵇᴍSender;
+private static readonly @string exportOnlyInstantiationˢᵇᴍSender = "export-only instantiation"u8;
 
 // Seal encrypts the provided plaintext, optionally binding to the additional
 // public data aad.
@@ -195,7 +195,7 @@ private static readonly @string exportOnlyInstantiationˢᵇ = "export-only inst
 // must be called in the same order as Seal.
 internal static (slice<byte>, error) Sealᴍ(ref Sender s, slice<byte> aad, slice<byte> plaintext) {
     if (s.aead == nil) {
-        return (default, errors.New(exportOnlyInstantiationˢ));
+        return (default, errors.New(exportOnlyInstantiationˢᴍSender));
     }
     var ciphertext = s.aead.Seal(default, s.nextNonce(), plaintext, aad);
     s.seqNum++;
@@ -222,14 +222,14 @@ public static (slice<byte>, error) Seal(PublicKey pk, KDF kdf, AEAD aead, slice<
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidLengthˢ => ref invalidLengthˢᵇ;
-private static readonly @string invalidLengthˢᵇ = "invalid length"u8;
+internal static ref readonly @string invalidLengthˢᴍSender => ref invalidLengthˢᵇᴍSender;
+private static readonly @string invalidLengthˢᵇᴍSender = "invalid length"u8;
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
 internal static (slice<byte>, error) Exportᴍ(ref Sender s, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
-        return (default, errors.New(invalidLengthˢ));
+        return (default, errors.New(invalidLengthˢᴍSender));
     }
     return s.export(exporterContext, (uint16)length);
 }
@@ -237,8 +237,8 @@ internal static (slice<byte>, error) Exportᴍ(ref Sender s, @string exporterCon
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exportOnlyInstantiationˢ => ref exportOnlyInstantiationˢᵇ;
-private static readonly @string exportOnlyInstantiationˢᵇ = "export-only instantiation"u8;
+internal static ref readonly @string exportOnlyInstantiationˢᴍRecipient => ref exportOnlyInstantiationˢᵇᴍRecipient;
+private static readonly @string exportOnlyInstantiationˢᵇᴍRecipient = "export-only instantiation"u8;
 
 // Open decrypts the provided ciphertext, optionally binding to the additional
 // public data aad, or returns an error if decryption fails.
@@ -247,7 +247,7 @@ private static readonly @string exportOnlyInstantiationˢᵇ = "export-only inst
 // in the same order as Seal on the sending side.
 internal static (slice<byte>, error) Openᴍ(ref Recipient r, slice<byte> aad, slice<byte> ciphertext) {
     if (r.aead == nil) {
-        return (default, errors.New(exportOnlyInstantiationˢ));
+        return (default, errors.New(exportOnlyInstantiationˢᴍRecipient));
     }
     var (plaintext, err) = r.aead.Open(default, r.nextNonce(), ciphertext, aad);
     if (err != nil) {
@@ -283,14 +283,14 @@ public static (slice<byte>, error) Open(PrivateKey k, KDF kdf, AEAD aead, slice<
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidLengthˢ => ref invalidLengthˢᵇ;
-private static readonly @string invalidLengthˢᵇ = "invalid length"u8;
+internal static ref readonly @string invalidLengthˢᴍRecipient => ref invalidLengthˢᵇᴍRecipient;
+private static readonly @string invalidLengthˢᵇᴍRecipient = "invalid length"u8;
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
 internal static (slice<byte>, error) Exportᴍ(ref Recipient r, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
-        return (default, errors.New(invalidLengthˢ));
+        return (default, errors.New(invalidLengthˢᴍRecipient));
     }
     return r.export(exporterContext, (uint16)length);
 }

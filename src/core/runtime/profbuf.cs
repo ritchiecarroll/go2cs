@@ -324,14 +324,14 @@ internal static bool canWriteTwoRecordsᴍ(ж<profBuf> Ꮡb, nint nstk1, nint ns
 // go2cs generated this placeholder — func write is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeProfBufAlreadyˢ => ref runtimeProfBufAlreadyˢᵇ;
-private static readonly @string runtimeProfBufAlreadyˢᵇ = "runtime: profBuf already closed"u8;
+internal static ref readonly @string runtimeProfBufAlreadyˢᴍprofBuf => ref runtimeProfBufAlreadyˢᵇᴍprofBuf;
+private static readonly @string runtimeProfBufAlreadyˢᵇᴍprofBuf = "runtime: profBuf already closed"u8;
 
 // close signals that there will be no more writes on the buffer.
 // Once all the data has been read from the buffer, reads will return eof=true.
 internal static void closeᴍ(ж<profBuf> Ꮡb) {
     if (Ꮡb.Ꮡeof.Load() > 0) {
-        @throw(runtimeProfBufAlreadyˢ);
+        @throw(runtimeProfBufAlreadyˢᴍprofBuf);
     }
     Ꮡb.Ꮡeof.Store(1);
     Ꮡb.wakeupExtra();
@@ -372,10 +372,10 @@ internal static array<@unsafe.Pointer> overflowTag = new(1); // always nil
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeMalformedProfBufˢ => ref runtimeMalformedProfBufˢᵇ;
-private static readonly @string runtimeMalformedProfBufˢᵇ = "runtime: malformed profBuf buffer - tag and data out of sync"u8;
-internal static ref readonly @string runtimeMalformedProfBufˢ2 => ref runtimeMalformedProfBufˢ2ᵇ;
-private static readonly @string runtimeMalformedProfBufˢ2ᵇ = "runtime: malformed profBuf buffer - invalid size"u8;
+internal static ref readonly @string runtimeMalformedProfBufˢᴍprofBuf => ref runtimeMalformedProfBufˢᵇᴍprofBuf;
+private static readonly @string runtimeMalformedProfBufˢᵇᴍprofBuf = "runtime: malformed profBuf buffer - tag and data out of sync"u8;
+internal static ref readonly @string runtimeMalformedProfBufˢ2ᴍprofBuf => ref runtimeMalformedProfBufˢ2ᵇᴍprofBuf;
+private static readonly @string runtimeMalformedProfBufˢ2ᵇᴍprofBuf = "runtime: malformed profBuf buffer - invalid size"u8;
 
 internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) readᴍ(ж<profBuf> Ꮡb, profBufReadMode mode) {
     slice<uint64> data = default;
@@ -471,7 +471,7 @@ Read:
 
     nint ntag = countSub(bw.tagCount(), br.tagCount());
     if (ntag == 0) {
-        @throw(runtimeMalformedProfBufˢ);
+        @throw(runtimeMalformedProfBufˢᴍprofBuf);
     }
     tags = b.tags.slice((nint)(br.tagCount() % (uint32)len(b.tags)));
     if (len(tags) > ntag) {
@@ -486,7 +486,7 @@ Read:
     nint ti = 0;
     while (di < len(data) && data[di] != 0 && ti < len(tags)) {
         if ((uintptr)di + (uintptr)data[di] > (uintptr)len(data)) {
-            @throw(runtimeMalformedProfBufˢ2);
+            @throw(runtimeMalformedProfBufˢ2ᴍprofBuf);
         }
         di += (nint)data[di];
         ti++;

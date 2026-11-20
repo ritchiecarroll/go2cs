@@ -536,8 +536,8 @@ internal static error Flushᴍ(ж<Writer> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string flushˢ => ref flushˢᵇ;
-private static readonly @string flushˢᵇ = "Flush"u8;
+private static ref readonly @string flushˢᴍWriter => ref flushˢᵇᴍWriter;
+private static readonly @string flushˢᵇᴍWriter = "Flush"u8;
 
 // flush is the internal version of Flush, with a named return value which we
 // don't want to expose.
@@ -548,7 +548,7 @@ internal static error /*err*/ flushᴍ(ж<Writer> Ꮡb) {
         ref var b = ref Ꮡb.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(Ꮡb.handlePanic, Ꮡerr, flushˢ, ref ᒐ, recovers: true);
+        defer(Ꮡb.handlePanic, Ꮡerr, flushˢᴍWriter, ref ᒐ, recovers: true);
         b.flushNoDefers();
         err = default;
     }
@@ -582,8 +582,8 @@ internal static slice<byte> hbar = slice<byte>("---\n"u8);
 } partial class tabwriter_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string writeˢ => ref writeˢᵇ;
-private static readonly @string writeˢᵇ = "Write"u8;
+private static ref readonly @string writeˢᴍWriter => ref writeˢᵇᴍWriter;
+private static readonly @string writeˢᵇᴍWriter = "Write"u8;
 
 // Write writes buf to the writer b.
 // The only errors returned are ones encountered
@@ -596,7 +596,7 @@ internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡb, slice<byte> buf) {
         ref var b = ref Ꮡb.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(Ꮡb.handlePanic, Ꮡerr, writeˢ, ref ᒐ, recovers: true);
+        defer(Ꮡb.handlePanic, Ꮡerr, writeˢᴍWriter, ref ᒐ, recovers: true);
 
         // split text into cells
         n = 0;

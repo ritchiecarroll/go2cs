@@ -125,17 +125,17 @@ internal static void padStringᴍ(ref fmt f, sstring s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string trueˢ => ref trueˢᵇ;
-private static readonly @string trueˢᵇ = "true"u8;
-internal static ref readonly @string falseˢ => ref falseˢᵇ;
-private static readonly @string falseˢᵇ = "false"u8;
+internal static ref readonly @string trueˢᴍfmt => ref trueˢᵇᴍfmt;
+private static readonly @string trueˢᵇᴍfmt = "true"u8;
+internal static ref readonly @string falseˢᴍfmt => ref falseˢᵇᴍfmt;
+private static readonly @string falseˢᵇᴍfmt = "false"u8;
 
 // fmtBoolean formats a boolean.
 internal static void fmtBooleanᴍ(ref fmt f, bool v) {
     if (v) {
-        f.padString(trueˢ);
+        f.padString(trueˢᴍfmt);
     } else {
-        f.padString(falseˢ);
+        f.padString(falseˢᴍfmt);
     }
 }
 

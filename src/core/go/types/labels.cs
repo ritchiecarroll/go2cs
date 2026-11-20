@@ -16,19 +16,19 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string labelˢ => ref labelˢᵇ;
-private static readonly @string labelˢᵇ = "label"u8;
-internal static ref readonly @string gotoSJumpsIntoBlockˢ => ref gotoSJumpsIntoBlockˢᵇ;
-private static readonly @string gotoSJumpsIntoBlockˢᵇ = "goto %s jumps into block"u8;
-internal static ref readonly @string labelSNotDeclaredˢ => ref labelSNotDeclaredˢᵇ;
-private static readonly @string labelSNotDeclaredˢᵇ = "label %s not declared"u8;
+internal static ref readonly @string labelˢᴍChecker => ref labelˢᵇᴍChecker;
+private static readonly @string labelˢᵇᴍChecker = "label"u8;
+internal static ref readonly @string gotoSJumpsIntoBlockˢᴍChecker => ref gotoSJumpsIntoBlockˢᵇᴍChecker;
+private static readonly @string gotoSJumpsIntoBlockˢᵇᴍChecker = "goto %s jumps into block"u8;
+internal static ref readonly @string labelSNotDeclaredˢᴍChecker => ref labelSNotDeclaredˢᵇᴍChecker;
+private static readonly @string labelSNotDeclaredˢᵇᴍChecker = "label %s not declared"u8;
 
 // labels checks correct label use in body.
 internal static void labelsᴍ(ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody) {
     ref var body = ref Ꮡbody.DerefOrNull();
 
     // set of all labels in this body
-    var all = NewScope(nil, body.Pos(), body.End(), labelˢ);
+    var all = NewScope(nil, body.Pos(), body.End(), labelˢᴍChecker);
 
     var fwdJumps = Ꮡcheck.blockBranches(all, nil, nil, body.List);
 
@@ -41,11 +41,11 @@ internal static void labelsᴍ(ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody) 
         errors.Code code = default;
         @string name = jmp.Label.Name;
         var alt = all.Lookup(name); if (alt != nil) {
-            msg = gotoSJumpsIntoBlockˢ;
+            msg = gotoSJumpsIntoBlockˢᴍChecker;
             code = JumpIntoBlock;
             alt._<ж<Label>>().used = true; // avoid another error
         } else {
-            msg = labelSNotDeclaredˢ;
+            msg = labelSNotDeclaredˢᴍChecker;
             code = UndeclaredLabel;
         }
         Ꮡcheck.errorf(new ast_Identжpositioner(jmp.Label), code, msg, name);

@@ -298,8 +298,8 @@ internal static error EmitPercentᴍ(ref Formatter fm, io.Writer w, slice<@strin
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object totalˢ = (@string)"total"u8;
-private static readonly object statementsˢ = (@string)"(statements)"u8;
+private static readonly object totalˢᴍFormatter = (@string)"total"u8;
+private static readonly object statementsˢᴍFormatter = (@string)"(statements)"u8;
 
 // EmitFuncs writes out a function-level summary to the writer 'w'. A
 // note on handling function literals: although we collect coverage
@@ -402,7 +402,7 @@ internal static error EmitFuncsᴍ(ж<Formatter> Ꮡfm, io.Writer w) {
         }
         {
             var (_, err) = fmt.Fprintf(new tabwriter_WriterжWriter(tabber), "%s\t%s\t%.1f%%\n"u8,
-                totalˢ, statementsˢ, perc(covStmts, allStmts)); if (err != nil) {
+                totalˢᴍFormatter, statementsˢᴍFormatter, perc(covStmts, allStmts)); if (err != nil) {
                 return err;
             }
         }

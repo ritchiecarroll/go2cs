@@ -141,10 +141,10 @@ partial struct timeoutError {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsDialWithDialerTimedˢ => ref tlsDialWithDialerTimedˢᵇ;
-private static readonly @string tlsDialWithDialerTimedˢᵇ = "tls: DialWithDialer timed out"u8;
+internal static ref readonly @string tlsDialWithDialerTimedˢᴍtimeoutError => ref tlsDialWithDialerTimedˢᵇᴍtimeoutError;
+private static readonly @string tlsDialWithDialerTimedˢᵇᴍtimeoutError = "tls: DialWithDialer timed out"u8;
 
-internal static @string Errorᴍ(timeoutError _) { return tlsDialWithDialerTimedˢ; }
+internal static @string Errorᴍ(timeoutError _) { return tlsDialWithDialerTimedˢᴍtimeoutError; }
 internal static bool Timeoutᴍ(timeoutError _) { return true; }
 internal static bool Temporaryᴍ(timeoutError _) { return true; }
 

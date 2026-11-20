@@ -156,10 +156,10 @@ partial struct VoidType {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string voidˢ => ref voidˢᵇ;
-private static readonly @string voidˢᵇ = "void"u8;
+internal static ref readonly @string voidˢᴍVoidType => ref voidˢᵇᴍVoidType;
+private static readonly @string voidˢᵇᴍVoidType = "void"u8;
 
-internal static @string Stringᴍ(ref VoidType t) { return voidˢ; }
+internal static @string Stringᴍ(ref VoidType t) { return voidˢᴍVoidType; }
 
 } partial class dwarf_package {
 
@@ -332,11 +332,11 @@ partial struct EnumValue {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string enumˢ => ref enumˢᵇ;
-private static readonly @string enumˢᵇ = "enum"u8;
+internal static ref readonly @string enumˢᴍEnumType => ref enumˢᵇᴍEnumType;
+private static readonly @string enumˢᵇᴍEnumType = "enum"u8;
 
 internal static @string Stringᴍ(ref EnumType t) {
-    @string s = enumˢ;
+    @string s = enumˢᴍEnumType;
     if (t.EnumName != ""u8) {
         s += " "u8 + t.EnumName;
     }
@@ -363,11 +363,11 @@ partial struct FuncType {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string funcˢ => ref funcˢᵇ;
-private static readonly @string funcˢᵇ = "func("u8;
+internal static ref readonly @string funcˢᴍFuncType => ref funcˢᵇᴍFuncType;
+private static readonly @string funcˢᵇᴍFuncType = "func("u8;
 
 internal static @string Stringᴍ(ref FuncType t) {
-    @string s = funcˢ;
+    @string s = funcˢᴍFuncType;
     foreach (var (i, tΔ1) in range(t.ParamType)) {
         if (i > 0) {
             s += ", "u8;
@@ -486,24 +486,24 @@ internal partial interface readType_type /*dyn*/ {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string complexFloatˢ => ref complexFloatˢᵇ;
-private static readonly @string complexFloatˢᵇ = "complex float"u8;
-internal static ref readonly @string complexDoubleˢ => ref complexDoubleˢᵇ;
-private static readonly @string complexDoubleˢᵇ = "complex double"u8;
-internal static ref readonly @string classˢ => ref classˢᵇ;
-private static readonly @string classˢᵇ = "class"u8;
-internal static ref readonly @string structˢ => ref structˢᵇ;
-private static readonly @string structˢᵇ = "struct"u8;
-internal static ref readonly @string unionˢ => ref unionˢᵇ;
-private static readonly @string unionˢᵇ = "union"u8;
-internal static ref readonly @string locationˢ => ref locationˢᵇ;
-private static readonly @string locationˢᵇ = "location"u8;
-internal static ref readonly @string constˢ => ref constˢᵇ;
-private static readonly @string constˢᵇ = "const"u8;
-internal static ref readonly @string restrictˢ => ref restrictˢᵇ;
-private static readonly @string restrictˢᵇ = "restrict"u8;
-internal static ref readonly @string volatileˢ => ref volatileˢᵇ;
-private static readonly @string volatileˢᵇ = "volatile"u8;
+internal static ref readonly @string complexFloatˢᴍData => ref complexFloatˢᵇᴍData;
+private static readonly @string complexFloatˢᵇᴍData = "complex float"u8;
+internal static ref readonly @string complexDoubleˢᴍData => ref complexDoubleˢᵇᴍData;
+private static readonly @string complexDoubleˢᵇᴍData = "complex double"u8;
+internal static ref readonly @string classˢᴍData => ref classˢᵇᴍData;
+private static readonly @string classˢᵇᴍData = "class"u8;
+internal static ref readonly @string structˢᴍData => ref structˢᵇᴍData;
+private static readonly @string structˢᵇᴍData = "struct"u8;
+internal static ref readonly @string unionˢᴍData => ref unionˢᵇᴍData;
+private static readonly @string unionˢᵇᴍData = "union"u8;
+internal static ref readonly @string locationˢᴍData => ref locationˢᵇᴍData;
+private static readonly @string locationˢᵇᴍData = "location"u8;
+internal static ref readonly @string constˢᴍData => ref constˢᵇᴍData;
+private static readonly @string constˢᵇᴍData = "const"u8;
+internal static ref readonly @string restrictˢᴍData => ref restrictˢᵇᴍData;
+private static readonly @string restrictˢᵇᴍData = "restrict"u8;
+internal static ref readonly @string volatileˢᴍData => ref volatileˢᵇᴍData;
+private static readonly @string volatileˢᵇᴍData = "volatile"u8;
 
 // readType reads a type from r at off of name. It adds types to the
 // type cache, appends new typedef types to typedefs, and computes the
@@ -712,11 +712,11 @@ internal static (Type, error) readTypeᴍ(ж<Data> Ꮡd, @string name, typeReade
                     var (byteSize, _) = e.Val(AttrByteSize)._<int64>(ᐧ);
                     switch (byteSize) {
                     case 8: {
-                        nameΔ2 = complexFloatˢ;
+                        nameΔ2 = complexFloatˢᴍData;
                         break;
                     }
                     case 16: {
-                        nameΔ2 = complexDoubleˢ;
+                        nameΔ2 = complexDoubleˢᴍData;
                         break;
                     }}
                 }
@@ -777,15 +777,15 @@ internal static (Type, error) readTypeᴍ(ж<Data> Ꮡd, @string name, typeReade
             typeCache[off] = new StructTypeжType(t);
             switch (e.Tag) {
             case var ᴛ2 when ᴛ2 == TagClassType: {
-                t.Kind = classˢ;
+                t.Kind = classˢᴍData;
                 break;
             }
             case var ᴛ2 when ᴛ2 == TagStructType: {
-                t.Kind = structˢ;
+                t.Kind = structˢᴍData;
                 break;
             }
             case var ᴛ2 when ᴛ2 == TagUnionType: {
-                t.Kind = unionˢ;
+                t.Kind = unionˢᴍData;
                 break;
             }}
             (t.StructName, _) = e.Val(AttrName)._<@string>(ᐧ);
@@ -806,7 +806,7 @@ internal static (Type, error) readTypeᴍ(ж<Data> Ꮡd, @string name, typeReade
                 case slice<byte> loc: {
                     // TODO: Should have original compilation
                     // unit here, not unknownFormat.
-                    var b = makeBuf(Ꮡd, new unknownFormat(), locationˢ, 0, loc);
+                    var b = makeBuf(Ꮡd, new unknownFormat(), locationˢᴍData, 0, loc);
                     if (b.uint8() != opPlusUconst) {
                         err = new DecodeError(name, kid.Offset, "unexpected opcode");
                         goto Error;
@@ -866,15 +866,15 @@ internal static (Type, error) readTypeᴍ(ж<Data> Ꮡd, @string name, typeReade
             }
             switch (e.Tag) {
             case var ᴛ2 when ᴛ2 == TagConstType: {
-                t.Qual = constˢ;
+                t.Qual = constˢᴍData;
                 break;
             }
             case var ᴛ2 when ᴛ2 == TagRestrictType: {
-                t.Qual = restrictˢ;
+                t.Qual = restrictˢᴍData;
                 break;
             }
             case var ᴛ2 when ᴛ2 == TagVolatileType: {
-                t.Qual = volatileˢ;
+                t.Qual = volatileˢᴍData;
                 break;
             }}
             break;

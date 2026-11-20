@@ -381,10 +381,10 @@ partial struct printer {
 } partial class xml_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xmlˢ => ref xmlˢᵇ;
-private static readonly @string xmlˢᵇ = "xml"u8;
-internal static ref readonly @string xmlnsˢ => ref xmlnsˢᵇ;
-private static readonly @string xmlnsˢᵇ = @"xmlns:"u8;
+internal static ref readonly @string xmlˢᴍprinter => ref xmlˢᵇᴍprinter;
+private static readonly @string xmlˢᵇᴍprinter = "xml"u8;
+internal static ref readonly @string xmlnsˢᴍprinter => ref xmlnsˢᵇᴍprinter;
+private static readonly @string xmlnsˢᵇᴍprinter = @"xmlns:"u8;
 
 // createAttrPrefix finds the name space prefix attribute to use for the given name space,
 // defining a new prefix if necessary. It returns the prefix.
@@ -422,7 +422,7 @@ internal static @string createAttrPrefixᴍ(ж<printer> Ꮡp, @string url) {
     // case should be matched, so:
     //    (('X'|'x') ('M'|'m') ('L'|'l'))
     // See Section 2.3 of https://www.w3.org/TR/REC-xml/
-    if (len(prefix) >= 3 && strings.EqualFold(prefix[..3], xmlˢ)) {
+    if (len(prefix) >= 3 && strings.EqualFold(prefix[..3], xmlˢᴍprinter)) {
         prefix = "_"u8 + prefix;
     }
     if (p.attrNS[prefix] != "") {
@@ -438,7 +438,7 @@ internal static @string createAttrPrefixᴍ(ж<printer> Ꮡp, @string url) {
     p.attrPrefix[url] = prefix;
     p.attrNS[prefix] = url;
 
-    p.WriteString(xmlnsˢ);
+    p.WriteString(xmlnsˢᴍprinter);
     p.WriteString(prefix);
     p.WriteString(@"=""");
     EscapeText(new printerжWriter(Ꮡp), slice<byte>(url));
@@ -798,8 +798,8 @@ internal static error marshalTextInterfaceᴍ(ж<printer> Ꮡp, encoding.TextMar
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xmlnsˢ2 => ref xmlnsˢ2ᵇ;
-private static readonly @string xmlnsˢ2ᵇ = @" xmlns="""u8;
+internal static ref readonly @string xmlnsˢ2ᴍprinter => ref xmlnsˢ2ᵇᴍprinter;
+private static readonly @string xmlnsˢ2ᵇᴍprinter = @" xmlns="""u8;
 
 // writeStart writes the given start element.
 internal static error writeStartᴍ(ж<printer> Ꮡp, ж<StartElement> Ꮡstart) {
@@ -818,7 +818,7 @@ internal static error writeStartᴍ(ж<printer> Ꮡp, ж<StartElement> Ꮡstart)
     p.WriteString(start.Name.Local);
 
     if (start.Name.Space != ""u8) {
-        p.WriteString(xmlnsˢ2);
+        p.WriteString(xmlnsˢ2ᴍprinter);
         p.EscapeString(start.Name.Space);
         p.WriteByte((byte)'"');
     }
@@ -1132,15 +1132,15 @@ internal static error marshalStructᴍ(ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string useOfClosedEncoderˢ => ref useOfClosedEncoderˢᵇ;
-private static readonly @string useOfClosedEncoderˢᵇ = "use of closed Encoder"u8;
+internal static ref readonly @string useOfClosedEncoderˢᴍprinter => ref useOfClosedEncoderˢᵇᴍprinter;
+private static readonly @string useOfClosedEncoderˢᵇᴍprinter = "use of closed Encoder"u8;
 
 // Write implements io.Writer
 internal static (nint n, error err) Writeᴍ(ref printer p, slice<byte> b) {
     nint n = default;
 
     if (p.closed && p.err == nil) {
-        p.err = errors.New(useOfClosedEncoderˢ);
+        p.err = errors.New(useOfClosedEncoderˢᴍprinter);
     }
     if (p.err == nil) {
         (n, p.err) = p.w.Write(b);
@@ -1153,7 +1153,7 @@ internal static (nint n, error err) WriteStringᴍ(ref printer p, @string s) {
     nint n = default;
 
     if (p.closed && p.err == nil) {
-        p.err = errors.New(useOfClosedEncoderˢ);
+        p.err = errors.New(useOfClosedEncoderˢᴍprinter);
     }
     if (p.err == nil) {
         (n, p.err) = p.w.WriteString(s);
@@ -1164,7 +1164,7 @@ internal static (nint n, error err) WriteStringᴍ(ref printer p, @string s) {
 // WriteByte implements io.ByteWriter
 internal static error WriteByteᴍ(ref printer p, byte c) {
     if (p.closed && p.err == nil) {
-        p.err = errors.New(useOfClosedEncoderˢ);
+        p.err = errors.New(useOfClosedEncoderˢᴍprinter);
     }
     if (p.err == nil) {
         p.err = p.w.WriteByte(c);

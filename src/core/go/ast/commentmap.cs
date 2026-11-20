@@ -328,7 +328,7 @@ break_loop:;
 } partial class ast_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object commentMapˢ = (@string)"CommentMap {"u8;
+internal static readonly object commentMapˢᴍCommentMap = (@string)"CommentMap {"u8;
 
 internal static @string Stringᴍ(CommentMap cmap) {
     var nodesᴷ = new stackAppend<Node>();
@@ -347,7 +347,7 @@ internal static @string Stringᴍ(CommentMap cmap) {
     });
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), commentMapˢ);
+    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), commentMapˢᴍCommentMap);
     foreach (var (_, node) in range(nodes)) {
         var comment = cmap[node];
         // print name of identifiers; print node type for other nodes

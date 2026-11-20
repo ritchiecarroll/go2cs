@@ -128,9 +128,9 @@ public static ж<Server> NewUnstartedServer(http.Handler handler) {
 } partial class httptest_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exampleCom80ˢ => ref exampleCom80ˢᵇ;
-private static readonly @string exampleCom80ˢᵇ = ".example.com:80"u8;
-internal static readonly object httptestServingOnˢ = (@string)"httptest: serving on"u8;
+internal static ref readonly @string exampleCom80ˢᴍServer => ref exampleCom80ˢᵇᴍServer;
+private static readonly @string exampleCom80ˢᵇᴍServer = ".example.com:80"u8;
+internal static readonly object httptestServingOnˢᴍServer = (@string)"httptest: serving on"u8;
 
 // Start starts a server from NewUnstartedServer.
 internal static void Startᴍ(ж<Server> Ꮡs) {
@@ -151,7 +151,7 @@ internal static void Startᴍ(ж<Server> Ꮡs) {
             if (trʗ1.Dial != nil) {
                 return trʗ1.Dial(network, addr);
             }
-            if (addr == "example.com:80"u8 || strings.HasSuffix(addr, exampleCom80ˢ)) {
+            if (addr == "example.com:80"u8 || strings.HasSuffix(addr, exampleCom80ˢᴍServer)) {
                 addr = Ꮡs.Value.Listener.Addr().String();
             }
             return Ꮡdialer.DialContext(ctx, network, addr);
@@ -162,14 +162,14 @@ internal static void Startᴍ(ж<Server> Ꮡs) {
     Ꮡs.wrap();
     Ꮡs.goServe();
     if (serveFlag != ""u8) {
-        fmt.Fprintln(new os.FileжWriter(os.Stderr), httptestServingOnˢ, s.URL);
+        fmt.Fprintln(new os.FileжWriter(os.Stderr), httptestServingOnˢᴍServer, s.URL);
         select();
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exampleCom443ˢ => ref exampleCom443ˢᵇ;
-private static readonly @string exampleCom443ˢᵇ = ".example.com:443"u8;
+internal static ref readonly @string exampleCom443ˢᴍServer => ref exampleCom443ˢᵇᴍServer;
+private static readonly @string exampleCom443ˢᵇᴍServer = ".example.com:443"u8;
 
 // StartTLS starts TLS on a server from NewUnstartedServer.
 internal static void StartTLSᴍ(ж<Server> Ꮡs) {
@@ -220,7 +220,7 @@ internal static void StartTLSᴍ(ж<Server> Ꮡs) {
         if (trʗ1.Dial != nil) {
             return trʗ1.Dial(network, addr);
         }
-        if (addr == "example.com:443"u8 || strings.HasSuffix(addr, exampleCom443ˢ)) {
+        if (addr == "example.com:443"u8 || strings.HasSuffix(addr, exampleCom443ˢᴍServer)) {
             addr = Ꮡs.Value.Listener.Addr().String();
         }
         return Ꮡdialer.DialContext(ctx, network, addr);
@@ -313,8 +313,8 @@ internal static void Closeᴍ(ж<Server> Ꮡs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httptestServerBlockedInˢ => ref httptestServerBlockedInˢᵇ;
-private static readonly @string httptestServerBlockedInˢᵇ = "httptest.Server blocked in Close after 5 seconds, waiting for connections:\n"u8;
+internal static ref readonly @string httptestServerBlockedInˢᴍServer => ref httptestServerBlockedInˢᵇᴍServer;
+private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptest.Server blocked in Close after 5 seconds, waiting for connections:\n"u8;
 
 internal static void logCloseHangDebugInfoᴍ(ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
@@ -325,7 +325,7 @@ internal static void logCloseHangDebugInfoᴍ(ж<Server> Ꮡs) {
         s.mu.Lock();
         ᒐd1 = true;
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-        Ꮡbuf.WriteString(httptestServerBlockedInˢ);
+        Ꮡbuf.WriteString(httptestServerBlockedInˢᴍServer);
         foreach (var (c, st) in s.conns) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "  %T %p %v in state %v\n"u8, c, c, c.RemoteAddr(), st);
         }

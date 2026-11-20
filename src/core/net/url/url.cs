@@ -973,8 +973,8 @@ internal static @string Stringᴍ(ref URL u) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xxxxxˢ => ref xxxxxˢᵇ;
-private static readonly @string xxxxxˢᵇ = "xxxxx"u8;
+internal static ref readonly @string xxxxxˢᴍURL => ref xxxxxˢᵇᴍURL;
+private static readonly @string xxxxxˢᵇᴍURL = "xxxxx"u8;
 
 // Redacted is like [URL.String] but replaces any password with "xxxxx".
 // Only the password in u.User is redacted.
@@ -987,7 +987,7 @@ internal static @string Redactedᴍ(ж<URL> Ꮡu) {
 
     var ru = u;
     var (_, has) = ru.User.Password(); if (has) {
-        ru.User = UserPassword(ru.User.Username(), xxxxxˢ);
+        ru.User = UserPassword(ru.User.Username(), xxxxxˢᴍURL);
     }
     return ru.String();
 }

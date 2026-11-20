@@ -365,8 +365,8 @@ Found:
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string semaRootRotateLeftˢ => ref semaRootRotateLeftˢᵇ;
-private static readonly @string semaRootRotateLeftˢᵇ = "semaRoot rotateLeft"u8;
+internal static ref readonly @string semaRootRotateLeftˢᴍsemaRoot => ref semaRootRotateLeftˢᵇᴍsemaRoot;
+private static readonly @string semaRootRotateLeftˢᵇᴍsemaRoot = "semaRoot rotateLeft"u8;
 
 // rotateLeft rotates the tree rooted at node x.
 // turning (x a (y b c)) into (y (x a b) c).
@@ -392,15 +392,15 @@ internal static void rotateLeftᴍ(ref semaRoot root, ж<sudog> Ꮡx) {
         p.Value.prev = y;
     } else {
         if ((~p).next != Ꮡx) {
-            @throw(semaRootRotateLeftˢ);
+            @throw(semaRootRotateLeftˢᴍsemaRoot);
         }
         p.Value.next = y;
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string semaRootRotateRightˢ => ref semaRootRotateRightˢᵇ;
-private static readonly @string semaRootRotateRightˢᵇ = "semaRoot rotateRight"u8;
+internal static ref readonly @string semaRootRotateRightˢᴍsemaRoot => ref semaRootRotateRightˢᵇᴍsemaRoot;
+private static readonly @string semaRootRotateRightˢᵇᴍsemaRoot = "semaRoot rotateRight"u8;
 
 // rotateRight rotates the tree rooted at node y.
 // turning (y (x a b) c) into (x a (y b c)).
@@ -426,7 +426,7 @@ internal static void rotateRightᴍ(ref semaRoot root, ж<sudog> Ꮡy) {
         p.Value.prev = x;
     } else {
         if ((~p).next != Ꮡy) {
-            @throw(semaRootRotateRightˢ);
+            @throw(semaRootRotateRightˢᴍsemaRoot);
         }
         p.Value.next = x;
     }

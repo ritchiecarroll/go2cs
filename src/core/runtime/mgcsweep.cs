@@ -162,21 +162,21 @@ internal static sweepLocker beginᴍ(ж<activeSweep> Ꮡa) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sweeperLeftOutstandingˢ => ref sweeperLeftOutstandingˢᵇ;
-private static readonly @string sweeperLeftOutstandingˢᵇ = "sweeper left outstanding across sweep generations"u8;
-internal static ref readonly @string mismatchedBeginEndOfˢ => ref mismatchedBeginEndOfˢᵇ;
-private static readonly @string mismatchedBeginEndOfˢᵇ = "mismatched begin/end of activeSweep"u8;
+internal static ref readonly @string sweeperLeftOutstandingˢᴍactiveSweep => ref sweeperLeftOutstandingˢᵇᴍactiveSweep;
+private static readonly @string sweeperLeftOutstandingˢᵇᴍactiveSweep = "sweeper left outstanding across sweep generations"u8;
+internal static ref readonly @string mismatchedBeginEndOfˢᴍactiveSweep => ref mismatchedBeginEndOfˢᵇᴍactiveSweep;
+private static readonly @string mismatchedBeginEndOfˢᵇᴍactiveSweep = "mismatched begin/end of activeSweep"u8;
 
 // end deregisters a sweeper. Must be called once for each time
 // begin is called if the sweepLocker is valid.
 internal static void endᴍ(ж<activeSweep> Ꮡa, sweepLocker sl) {
     if (sl.sweepGen != mheap_.sweepgen) {
-        @throw(sweeperLeftOutstandingˢ);
+        @throw(sweeperLeftOutstandingˢᴍactiveSweep);
     }
     for (;;) {
         var state = Ꮡa.Ꮡstate.Load();
         if ((state & ~(uint32)sweepDrainedMask) - 1 >= sweepDrainedMask) {
-            @throw(mismatchedBeginEndOfˢ);
+            @throw(mismatchedBeginEndOfˢᴍactiveSweep);
         }
         if (Ꮡa.Ꮡstate.CompareAndSwap(state, state - 1)) {
             if (state - 1 != sweepDrainedMask) {
@@ -356,14 +356,14 @@ partial struct sweepLocked {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string useOfInvalidSweepLockerˢ => ref useOfInvalidSweepLockerˢᵇ;
-private static readonly @string useOfInvalidSweepLockerˢᵇ = "use of invalid sweepLocker"u8;
+internal static ref readonly @string useOfInvalidSweepLockerˢᴍsweepLocker => ref useOfInvalidSweepLockerˢᵇᴍsweepLocker;
+private static readonly @string useOfInvalidSweepLockerˢᵇᴍsweepLocker = "use of invalid sweepLocker"u8;
 
 // tryAcquire attempts to acquire sweep ownership of span s. If it
 // successfully acquires ownership, it blocks sweep completion.
 internal static (sweepLocked, bool) tryAcquireᴍ(ref sweepLocker l, ж<mspan> s) {
     if (!l.valid) {
-        @throw(useOfInvalidSweepLockerˢ);
+        @throw(useOfInvalidSweepLockerˢᴍsweepLocker);
     }
     // Check before attempting to CAS.
     if (atomic.Load(s.Ꮡsweepgen) != l.sweepGen - 2) {
@@ -490,8 +490,8 @@ internal static bool isSweepDone() {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mspanEnsureSweptMIsNotˢ => ref mspanEnsureSweptMIsNotˢᵇ;
-private static readonly @string mspanEnsureSweptMIsNotˢᵇ = "mspan.ensureSwept: m is not locked"u8;
+internal static ref readonly @string mspanEnsureSweptMIsNotˢᴍmspan => ref mspanEnsureSweptMIsNotˢᵇᴍmspan;
+private static readonly @string mspanEnsureSweptMIsNotˢᵇᴍmspan = "mspan.ensureSwept: m is not locked"u8;
 
 // Returns only when span s has been swept.
 //
@@ -502,7 +502,7 @@ internal static void ensureSweptᴍ(ж<mspan> Ꮡs) {
     // (if GC is triggered on another goroutine).
     var gp = getg();
     if ((~(~gp).m).locks == 0 && (~(~gp).m).mallocing == 0 && gp != (~(~gp).m).g0) {
-        @throw(mspanEnsureSweptMIsNotˢ);
+        @throw(mspanEnsureSweptMIsNotˢᴍmspan);
     }
 
     // If this operation fails, then that means that there are
@@ -534,20 +534,20 @@ internal static void ensureSweptᴍ(ж<mspan> Ꮡs) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mspanSweepMIsNotLockedˢ => ref mspanSweepMIsNotLockedˢᵇ;
-private static readonly @string mspanSweepMIsNotLockedˢᵇ = "mspan.sweep: m is not locked"u8;
-internal static ref readonly @string mspanSweepBadSpanStateˢ => ref mspanSweepBadSpanStateˢᵇ;
-private static readonly @string mspanSweepBadSpanStateˢᵇ = "mspan.sweep: bad span state"u8;
-internal static ref readonly @string sweepIncreasedAllocationˢ => ref sweepIncreasedAllocationˢᵇ;
-private static readonly @string sweepIncreasedAllocationˢᵇ = "sweep increased allocation count"u8;
-internal static ref readonly @string mspanSweepBadSpanStateˢ2 => ref mspanSweepBadSpanStateˢ2ᵇ;
-private static readonly @string mspanSweepBadSpanStateˢ2ᵇ = "mspan.sweep: bad span state after sweep"u8;
-internal static ref readonly @string sweptCachedSpanˢ => ref sweptCachedSpanˢᵇ;
-private static readonly @string sweptCachedSpanˢᵇ = "swept cached span"u8;
-internal static ref readonly @string sweepTriedToPreserveAˢ => ref sweepTriedToPreserveAˢᵇ;
-private static readonly @string sweepTriedToPreserveAˢᵇ = "sweep: tried to preserve a user arena span"u8;
-internal static ref readonly @string userArenaSpanIsOnTheˢ => ref userArenaSpanIsOnTheˢᵇ;
-private static readonly @string userArenaSpanIsOnTheˢᵇ = "user arena span is on the wrong list"u8;
+internal static ref readonly @string mspanSweepMIsNotLockedˢᴍsweepLocked => ref mspanSweepMIsNotLockedˢᵇᴍsweepLocked;
+private static readonly @string mspanSweepMIsNotLockedˢᵇᴍsweepLocked = "mspan.sweep: m is not locked"u8;
+internal static ref readonly @string mspanSweepBadSpanStateˢᴍsweepLocked => ref mspanSweepBadSpanStateˢᵇᴍsweepLocked;
+private static readonly @string mspanSweepBadSpanStateˢᵇᴍsweepLocked = "mspan.sweep: bad span state"u8;
+internal static ref readonly @string sweepIncreasedAllocationˢᴍsweepLocked => ref sweepIncreasedAllocationˢᵇᴍsweepLocked;
+private static readonly @string sweepIncreasedAllocationˢᵇᴍsweepLocked = "sweep increased allocation count"u8;
+internal static ref readonly @string mspanSweepBadSpanStateˢ2ᴍsweepLocked => ref mspanSweepBadSpanStateˢ2ᵇᴍsweepLocked;
+private static readonly @string mspanSweepBadSpanStateˢ2ᵇᴍsweepLocked = "mspan.sweep: bad span state after sweep"u8;
+internal static ref readonly @string sweptCachedSpanˢᴍsweepLocked => ref sweptCachedSpanˢᵇᴍsweepLocked;
+private static readonly @string sweptCachedSpanˢᵇᴍsweepLocked = "swept cached span"u8;
+internal static ref readonly @string sweepTriedToPreserveAˢᴍsweepLocked => ref sweepTriedToPreserveAˢᵇᴍsweepLocked;
+private static readonly @string sweepTriedToPreserveAˢᵇᴍsweepLocked = "sweep: tried to preserve a user arena span"u8;
+internal static ref readonly @string userArenaSpanIsOnTheˢᴍsweepLocked => ref userArenaSpanIsOnTheˢᵇᴍsweepLocked;
+private static readonly @string userArenaSpanIsOnTheˢᵇᴍsweepLocked = "user arena span is on the wrong list"u8;
 
 // sweep frees or collects finalizers for blocks not marked in the mark phase.
 // It clears the mark bits in preparation for the next GC round.
@@ -559,7 +559,7 @@ internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
     // GC must not start while we are in the middle of this function.
     var gp = getg();
     if ((~(~gp).m).locks == 0 && (~(~gp).m).mallocing == 0 && gp != (~(~gp).m).g0) {
-        @throw(mspanSweepMIsNotLockedˢ);
+        @throw(mspanSweepMIsNotLockedˢᴍsweepLocked);
     }
 
     var s = sl.mspan;
@@ -573,7 +573,7 @@ internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
     {
         var state = s.Ꮡstate.get(); if (state != mSpanInUse || s.sweepgen != sweepgen - 1) {
             print((@string)"mspan.sweep: state=", state, (@string)" sweepgen=", s.sweepgen, (@string)" mheap.sweepgen=", sweepgen, (@string)"\n");
-            @throw(mspanSweepBadSpanStateˢ);
+            @throw(mspanSweepBadSpanStateˢᴍsweepLocked);
         }
     }
 
@@ -736,7 +736,7 @@ internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
         // The zombie check above should have caught this in
         // more detail.
         print((@string)"runtime: nelems=", s.nelems, (@string)" nalloc=", nalloc, (@string)" previous allocCount=", s.allocCount, (@string)" nfreed=", nfreed, (@string)"\n");
-        @throw(sweepIncreasedAllocationˢ);
+        @throw(sweepIncreasedAllocationˢᴍsweepLocked);
     }
 
     s.allocCount = nalloc;
@@ -764,11 +764,11 @@ internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
     {
         var state = s.Ꮡstate.get(); if (state != mSpanInUse || s.sweepgen != sweepgen - 1) {
             print((@string)"mspan.sweep: state=", state, (@string)" sweepgen=", s.sweepgen, (@string)" mheap.sweepgen=", sweepgen, (@string)"\n");
-            @throw(mspanSweepBadSpanStateˢ2);
+            @throw(mspanSweepBadSpanStateˢ2ᴍsweepLocked);
         }
     }
     if (s.sweepgen == sweepgen + 1 || s.sweepgen == sweepgen + 3) {
-        @throw(sweptCachedSpanˢ);
+        @throw(sweptCachedSpanˢᴍsweepLocked);
     }
 
     // We need to set s.sweepgen = h.sweepgen only when all blocks are swept,
@@ -787,7 +787,7 @@ internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
         if (preserve) {
             // This is a case that should never be handled by a sweeper that
             // preserves the span for reuse.
-            @throw(sweepTriedToPreserveAˢ);
+            @throw(sweepTriedToPreserveAˢᴍsweepLocked);
         }
         if (nalloc > 0) {
             // There still exist pointers into the span or the span hasn't been
@@ -809,7 +809,7 @@ internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
             // It's the arena code's responsibility to get the chunk on the quarantine
             // list by the time all references to the chunk are gone.
             if (sʗ1.list != Ꮡmheap_.ᏑuserArena.of(mheap_userArena.ᏑquarantineList)) {
-                @throw(userArenaSpanIsOnTheˢ);
+                @throw(userArenaSpanIsOnTheˢᴍsweepLocked);
             }
             @lock(Ꮡmheap_.Ꮡlock);
             Ꮡmheap_.ᏑuserArena.of(mheap_userArena.ᏑquarantineList).remove(sʗ1);
@@ -902,8 +902,8 @@ internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string foundPointerToFreeObjectˢ => ref foundPointerToFreeObjectˢᵇ;
-private static readonly @string foundPointerToFreeObjectˢᵇ = "found pointer to free object"u8;
+internal static ref readonly @string foundPointerToFreeObjectˢᴍmspan => ref foundPointerToFreeObjectˢᵇᴍmspan;
+private static readonly @string foundPointerToFreeObjectˢᵇᴍmspan = "found pointer to free object"u8;
 
 // reportZombies reports any marked but free objects in s and throws.
 //
@@ -955,7 +955,7 @@ internal static void reportZombiesᴍ(ж<mspan> Ꮡs) {
         mbits.advance();
         abits.advance();
     }
-    @throw(foundPointerToFreeObjectˢ);
+    @throw(foundPointerToFreeObjectˢᴍmspan);
 }
 
 } partial class runtime_package {

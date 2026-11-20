@@ -277,8 +277,8 @@ internal static void syntaxErrorᴍ(ref rulesParser p, @string msg) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badListSyntaxˢ => ref badListSyntaxˢᵇ;
-private static readonly @string badListSyntaxˢᵇ = "bad list syntax"u8;
+internal static ref readonly @string badListSyntaxˢᴍrulesParser => ref badListSyntaxˢᵇᴍrulesParser;
+private static readonly @string badListSyntaxˢᵇᴍrulesParser = "bad list syntax"u8;
 
 // nextList parses and returns a comma-separated list of names.
 internal static (slice<@string> list, @string token) nextListᴍ(ref rulesParser p) {
@@ -294,7 +294,7 @@ internal static (slice<@string> list, @string token) nextListᴍ(ref rulesParser
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (tok == ","u8 || tok == "<"u8 || tok == "!<"u8 || tok == ";"u8)) { matchᴛ1 = true;
-            p.syntaxError(badListSyntaxˢ);
+            p.syntaxError(badListSyntaxˢᴍrulesParser);
         }
         list = append(list, tok);
 
@@ -306,8 +306,8 @@ internal static (slice<@string> list, @string token) nextListᴍ(ref rulesParser
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedTokenˢ => ref unexpectedTokenˢᵇ;
-private static readonly @string unexpectedTokenˢᵇ = "unexpected token !"u8;
+internal static ref readonly @string unexpectedTokenˢᴍrulesParser => ref unexpectedTokenˢᵇᴍrulesParser;
+private static readonly @string unexpectedTokenˢᵇᴍrulesParser = "unexpected token !"u8;
 
 // nextToken returns the next token in the deps rules,
 // one of ";" "," "<" "!<" or a name.
@@ -325,7 +325,7 @@ internal static @string nextTokenᴍ(ref rulesParser p) {
         }
         if (exprᴛ1 is (byte)'!') { matchᴛ1 = true;
             if (len(p.text) < 2 || p.text[1] != '<') {
-                p.syntaxError(unexpectedTokenˢ);
+                p.syntaxError(unexpectedTokenˢᴍrulesParser);
             }
             p.text = p.text[2..];
             return "!<";

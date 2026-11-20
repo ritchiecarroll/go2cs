@@ -97,8 +97,8 @@ internal static @string ctrlNetworkᴍ(ref netFD fd) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bindˢ => ref bindˢᵇ;
-private static readonly @string bindˢᵇ = "bind"u8;
+internal static ref readonly @string bindˢᴍnetFD => ref bindˢᵇᴍnetFD;
+private static readonly @string bindˢᵇᴍnetFD = "bind"u8;
 
 internal static error dialᴍ(ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, sockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
@@ -124,7 +124,7 @@ internal static error dialᴍ(ж<netFD> Ꮡfd, context.Context ctx, sockaddr lad
             return err;
         } else if (lsa != nil) {
             err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-                return os.NewSyscallError(bindˢ, err);
+                return os.NewSyscallError(bindˢᴍnetFD, err);
             }
         }
     }
@@ -163,8 +163,8 @@ internal static error dialᴍ(ж<netFD> Ꮡfd, context.Context ctx, sockaddr lad
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢ => ref listenˢᵇ;
-private static readonly @string listenˢᵇ = "listen"u8;
+internal static ref readonly @string listenˢᴍnetFD => ref listenˢᵇᴍnetFD;
+private static readonly @string listenˢᵇᴍnetFD = "listen"u8;
 
 internal static error listenStreamᴍ(ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, nint backlog, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
@@ -186,10 +186,10 @@ internal static error listenStreamᴍ(ж<netFD> Ꮡfd, context.Context ctx, sock
     }
 
     err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-        return os.NewSyscallError(bindˢ, err);
+        return os.NewSyscallError(bindˢᴍnetFD, err);
     }
     err = listenFunc(fd.pfd.Sysfd, backlog); if (err != nil) {
-        return os.NewSyscallError(listenˢ, err);
+        return os.NewSyscallError(listenˢᴍnetFD, err);
     }
     err = Ꮡfd.init(); if (err != nil) {
         return err;
@@ -242,7 +242,7 @@ internal static error listenDatagramᴍ(ж<netFD> Ꮡfd, context.Context ctx, so
         }
     }
     err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-        return os.NewSyscallError(bindˢ, err);
+        return os.NewSyscallError(bindˢᴍnetFD, err);
     }
     err = Ꮡfd.init(); if (err != nil) {
         return err;

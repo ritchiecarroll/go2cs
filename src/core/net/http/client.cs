@@ -514,8 +514,8 @@ public static (ж<Response> resp, error err) Get(@string url) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string getˢ => ref getˢᵇ;
-private static readonly @string getˢᵇ = "GET"u8;
+internal static ref readonly @string getˢᴍClient => ref getˢᵇᴍClient;
+private static readonly @string getˢᵇᴍClient = "GET"u8;
 
 // Get issues a GET to the specified URL. If the response is one of the
 // following redirect codes, Get follows the redirect after calling the
@@ -543,7 +543,7 @@ private static readonly @string getˢᵇ = "GET"u8;
 internal static (ж<Response> resp, error err) Getᴍ(ж<Client> Ꮡc, @string url) {
     error err = default;
 
-    (var req, err) = NewRequest(getˢ, url, default);
+    (var req, err) = NewRequest(getˢᴍClient, url, default);
     if (err != nil) {
         return (default, err);
     }
@@ -684,12 +684,12 @@ internal static Action<ж<Response>, error> testHookClientDoResult;
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpNilRequestUrlˢ => ref httpNilRequestUrlˢᵇ;
-private static readonly @string httpNilRequestUrlˢᵇ = "http: nil Request.URL"u8;
-internal static ref readonly @string locationˢ => ref locationˢᵇ;
-private static readonly @string locationˢᵇ = "Location"u8;
-internal static ref readonly @string refererˢ => ref refererˢᵇ;
-private static readonly @string refererˢᵇ = "Referer"u8;
+internal static ref readonly @string httpNilRequestUrlˢᴍClient => ref httpNilRequestUrlˢᵇᴍClient;
+private static readonly @string httpNilRequestUrlˢᵇᴍClient = "http: nil Request.URL"u8;
+internal static ref readonly @string locationˢᴍClient => ref locationˢᵇᴍClient;
+private static readonly @string locationˢᵇᴍClient = "Location"u8;
+internal static ref readonly @string refererˢᴍClient => ref refererˢᵇᴍClient;
+private static readonly @string refererˢᵇᴍClient = "Referer"u8;
 
 internal static (ж<Response> retres, error reterr) @doᴍ(ж<Client> Ꮡc, ж<Request> Ꮡreq) {
     ж<Response> retres = default;
@@ -708,7 +708,7 @@ internal static (ж<Response> retres, error reterr) @doᴍ(ж<Client> Ꮡc, ж<R
             req.closeBody();
             (retres, reterr) = (default, new url.Errorжerror(Ꮡ(new url.Error(
                 Op: urlErrorOp(req.Method),
-                Err: errors.New(httpNilRequestUrlˢ)
+                Err: errors.New(httpNilRequestUrlˢᴍClient)
             )))); goto ᒐdone;
         }
         _ = c; // panic early if c is nil; see go.dev/issue/53521
@@ -744,7 +744,7 @@ internal static (ж<Response> retres, error reterr) @doᴍ(ж<Client> Ꮡc, ж<R
             // For all but the first request, create the next
             // request hop and replace req.
             if (len(reqs) > 0) {
-                @string loc = resp.Header.Get(locationˢ);
+                @string loc = resp.Header.Get(locationˢᴍClient);
                 if (loc == ""u8) {
                     // While most 3xx responses include a Location, it is not
                     // required and 3xx responses without a Location have been
@@ -797,8 +797,8 @@ internal static (ж<Response> retres, error reterr) @doᴍ(ж<Client> Ꮡc, ж<R
                 copyHeaders(Ꮡreq, stripSensitiveHeaders, !includeBody);
                 // Add the Referer header from the most recent
                 // request URL to the new one, if it's not https->http:
-                @string @ref = refererForURL(reqs[len(reqs) - 1].URL, ref (req.URL).DerefOrNull(), req.Header.Get(refererˢ)); if (@ref != ""u8) {
-                    req.Header.Set(refererˢ, @ref);
+                @string @ref = refererForURL(reqs[len(reqs) - 1].URL, ref (req.URL).DerefOrNull(), req.Header.Get(refererˢᴍClient)); if (@ref != ""u8) {
+                    req.Header.Set(refererˢᴍClient, @ref);
                 }
                 errΔ1 = c.checkRedirect(Ꮡreq, reqs);
 
@@ -864,8 +864,8 @@ internal static (ж<Response> retres, error reterr) @doᴍ(ж<Client> Ꮡc, ж<R
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cookieˢ => ref cookieˢᵇ;
-private static readonly @string cookieˢᵇ = "Cookie"u8;
+internal static ref readonly @string cookieˢᴍClient => ref cookieˢᵇᴍClient;
+private static readonly @string cookieˢᵇᴍClient = "Cookie"u8;
 
 // makeHeadersCopier makes a function that copies headers from the
 // initial Request, ireq. For every redirect, this function must be called
@@ -878,7 +878,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopierᴍ(ж<Client> 
     // We use a closured callback to keep a reference to these original headers.
     Header ireqhdr = cloneOrMakeHeader(ireq.Header);
     map<@string, slice<ж<Cookie>>> icookies = default;
-    if (c.Jar != nil && ireq.Header.Get(cookieˢ) != ""u8) {
+    if (c.Jar != nil && ireq.Header.Get(cookieˢᴍClient) != ""u8) {
         icookies = new map<@string, slice<ж<Cookie>>>();
         foreach (var (_, cΔ1) in range(ireq.Cookies())) {
             icookies[cΔ1.Name] = append(icookies[cΔ1.Name], cΔ1);
@@ -910,7 +910,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopierᴍ(ж<Client> 
                 }
             }
             if (changed) {
-                ireqhdrʗ1.Del(cookieˢ);
+                ireqhdrʗ1.Del(cookieˢᴍClient);
                 slice<@string> ss = default;
                 foreach (var (_, cs) in icookiesʗ1) {
                     foreach (var (_, cΔ3) in range(cs)) {
@@ -918,7 +918,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopierᴍ(ж<Client> 
                     }
                 }
                 slices.Sort<slice<@string>, @string>(ss); // Ensure deterministic headers
-                ireqhdrʗ1.Set(cookieˢ, strings.Join(ss, "; "));
+                ireqhdrʗ1.Set(cookieˢᴍClient, strings.Join(ss, "; "));
             }
         }
 
@@ -983,10 +983,10 @@ public static (ж<Response> resp, error err) Post(@string url, @string contentTy
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string postˢ => ref postˢᵇ;
-private static readonly @string postˢᵇ = "POST"u8;
-internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
-private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
+internal static ref readonly @string postˢᴍClient => ref postˢᵇᴍClient;
+private static readonly @string postˢᵇᴍClient = "POST"u8;
+internal static ref readonly @string contentTypeˢᴍClient => ref contentTypeˢᵇᴍClient;
+private static readonly @string contentTypeˢᵇᴍClient = "Content-Type"u8;
 
 // Post issues a POST to the specified URL.
 //
@@ -1005,11 +1005,11 @@ private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 internal static (ж<Response> resp, error err) Postᴍ(ж<Client> Ꮡc, @string url, @string contentType, io.Reader body) {
     error err = default;
 
-    (var req, err) = NewRequest(postˢ, url, body);
+    (var req, err) = NewRequest(postˢᴍClient, url, body);
     if (err != nil) {
         return (default, err);
     }
-    req.Header.Set(contentTypeˢ, contentType);
+    req.Header.Set(contentTypeˢᴍClient, contentType);
     return Ꮡc.Do(req);
 }
 
@@ -1038,8 +1038,8 @@ public static (ж<Response> resp, error err) PostForm(@string urlΔ1, url.Values
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string applicationXWwwFormˢ => ref applicationXWwwFormˢᵇ;
-private static readonly @string applicationXWwwFormˢᵇ = "application/x-www-form-urlencoded"u8;
+internal static ref readonly @string applicationXWwwFormˢᴍClient => ref applicationXWwwFormˢᵇᴍClient;
+private static readonly @string applicationXWwwFormˢᵇᴍClient = "application/x-www-form-urlencoded"u8;
 
 // PostForm issues a POST to the specified URL,
 // with data's keys and values URL-encoded as the request body.
@@ -1056,7 +1056,7 @@ private static readonly @string applicationXWwwFormˢᵇ = "application/x-www-fo
 // To make a request with a specified context.Context, use [NewRequestWithContext]
 // and Client.Do.
 internal static (ж<Response> resp, error err) PostFormᴍ(ж<Client> Ꮡc, @string urlΔ1, url.Values data) {
-    return Ꮡc.Post(urlΔ1, applicationXWwwFormˢ, new strings_ReaderжReader(strings.NewReader(data.Encode())));
+    return Ꮡc.Post(urlΔ1, applicationXWwwFormˢᴍClient, new strings_ReaderжReader(strings.NewReader(data.Encode())));
 }
 
 } partial class http_package {
@@ -1082,8 +1082,8 @@ public static (ж<Response> resp, error err) Head(@string url) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string headˢ => ref headˢᵇ;
-private static readonly @string headˢᵇ = "HEAD"u8;
+internal static ref readonly @string headˢᴍClient => ref headˢᵇᴍClient;
+private static readonly @string headˢᵇᴍClient = "HEAD"u8;
 
 // Head issues a HEAD to the specified URL. If the response is one of the
 // following redirect codes, Head follows the redirect after calling the
@@ -1100,7 +1100,7 @@ private static readonly @string headˢᵇ = "HEAD"u8;
 internal static (ж<Response> resp, error err) Headᴍ(ж<Client> Ꮡc, @string url) {
     error err = default;
 
-    (var req, err) = NewRequest(headˢ, url, default);
+    (var req, err) = NewRequest(headˢᴍClient, url, default);
     if (err != nil) {
         return (default, err);
     }

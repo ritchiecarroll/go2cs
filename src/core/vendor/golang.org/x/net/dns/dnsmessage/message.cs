@@ -2673,12 +2673,12 @@ internal static (slice<byte>, error) packᴍ(ref TXTResource r, slice<byte> msg,
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string dnsmessageTXTResourceTxtˢ => ref dnsmessageTXTResourceTxtˢᵇ;
-private static readonly @string dnsmessageTXTResourceTxtˢᵇ = "dnsmessage.TXTResource{TXT: []string{"u8;
+private static ref readonly @string dnsmessageTXTResourceTxtˢᴍTXTResource => ref dnsmessageTXTResourceTxtˢᵇᴍTXTResource;
+private static readonly @string dnsmessageTXTResourceTxtˢᵇᴍTXTResource = "dnsmessage.TXTResource{TXT: []string{"u8;
 
 // GoString implements fmt.GoStringer.GoString.
 internal static @string GoStringᴍ(ref TXTResource r) {
-    @string s = dnsmessageTXTResourceTxtˢ;
+    @string s = dnsmessageTXTResourceTxtˢᴍTXTResource;
     if (len(r.TXT) == 0) {
         return s + "}}"u8;
     }
@@ -2866,12 +2866,12 @@ internal static (slice<byte>, error) packᴍ(ref OPTResource r, slice<byte> msg,
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string dnsmessageOPTResourceˢ => ref dnsmessageOPTResourceˢᵇ;
-private static readonly @string dnsmessageOPTResourceˢᵇ = "dnsmessage.OPTResource{Options: []dnsmessage.Option{"u8;
+private static ref readonly @string dnsmessageOPTResourceˢᴍOPTResource => ref dnsmessageOPTResourceˢᵇᴍOPTResource;
+private static readonly @string dnsmessageOPTResourceˢᵇᴍOPTResource = "dnsmessage.OPTResource{Options: []dnsmessage.Option{"u8;
 
 // GoString implements fmt.GoStringer.GoString.
 internal static @string GoStringᴍ(ref OPTResource r) {
-    @string s = dnsmessageOPTResourceˢ;
+    @string s = dnsmessageOPTResourceˢᴍOPTResource;
     if (len(r.Options) == 0) {
         return s + "}}"u8;
     }

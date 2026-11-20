@@ -34,8 +34,8 @@ partial struct GccgoInstallation {
 } partial class gccgoimporter_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string targetˢ => ref targetˢᵇ;
-private static readonly @string targetˢᵇ = "Target: "u8;
+internal static ref readonly @string targetˢᴍGccgoInstallation => ref targetˢᵇᴍGccgoInstallation;
+private static readonly @string targetˢᵇᴍGccgoInstallation = "Target: "u8;
 
 // Ask the driver at the given path for information for this GccgoInstallation.
 // The given arguments are passed directly to the call of the driver.
@@ -59,7 +59,7 @@ internal static error /*err*/ InitFromDriverᴍ(ref GccgoInstallation inst, @str
     while (scanner.Scan()) {
         @string line = scanner.Text();
         switch (ᐧ) {
-        case {} when strings.HasPrefix(line, targetˢ): {
+        case {} when strings.HasPrefix(line, targetˢᴍGccgoInstallation): {
             inst.TargetTriple = line[8..];
             break;
         }

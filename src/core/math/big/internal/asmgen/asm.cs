@@ -64,8 +64,8 @@ internal static @string asmHeader = """
 } partial class asmgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string textˢ => ref textˢᵇ;
-private static readonly @string textˢᵇ = "\nTEXT"u8;
+internal static ref readonly @string textˢᴍAsm => ref textˢᵇᴍAsm;
+private static readonly @string textˢᵇᴍAsm = "\nTEXT"u8;
 
 // Fatalf reports a fatal error by panicking.
 // Panicking is appropriate because there is a bug in the generator,
@@ -75,7 +75,7 @@ internal static void Fatalfᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string text = Ꮡa.Ꮡout.String();
-    nint i = strings.LastIndex(text, textˢ);
+    nint i = strings.LastIndex(text, textˢᴍAsm);
     text = text.slice(i + 1);
     throw panic("[" + a.Arch.Name + "] asmgen internal error: " + fmt.Sprintf(format, args.ꓸꓸꓸ) + "\n" + text);
 }
@@ -487,20 +487,20 @@ internal static void SLTUᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string addSSˢ => ref addSSˢᵇ;
-private static readonly @string addSSˢᵇ = "ADD %s, %s"u8;
-internal static ref readonly @string addSSSˢ => ref addSSSˢᵇ;
-private static readonly @string addSSSˢᵇ = "ADD %s, %s, %s"u8;
-internal static ref readonly @string adc0SSˢ => ref adc0SSˢᵇ;
-private static readonly @string adc0SSˢᵇ = "ADC $0, %s, %s"u8;
-internal static ref readonly @string adcSSSCrSˢ => ref adcSSSCrSˢᵇ;
-private static readonly @string adcSSSCrSˢᵇ = "ADC %s, %s, %s (cr=%s)"u8;
-internal static ref readonly @string addsSSSCrSˢ => ref addsSSSCrSˢᵇ;
-private static readonly @string addsSSSCrSˢᵇ = "ADDS %s, %s, %s (cr=%s)"u8;
-internal static ref readonly @string adcs0SSCrSˢ => ref adcs0SSCrSˢᵇ;
-private static readonly @string adcs0SSCrSˢᵇ = "ADCS $0, %s, %s (cr=%s)"u8;
-internal static ref readonly @string adcsSSSCrSˢ => ref adcsSSSCrSˢᵇ;
-private static readonly @string adcsSSSCrSˢᵇ = "ADCS %s, %s, %s (cr=%s)"u8;
+internal static ref readonly @string addSSˢᴍAsm => ref addSSˢᵇᴍAsm;
+private static readonly @string addSSˢᵇᴍAsm = "ADD %s, %s"u8;
+internal static ref readonly @string addSSSˢᴍAsm => ref addSSSˢᵇᴍAsm;
+private static readonly @string addSSSˢᵇᴍAsm = "ADD %s, %s, %s"u8;
+internal static ref readonly @string adc0SSˢᴍAsm => ref adc0SSˢᵇᴍAsm;
+private static readonly @string adc0SSˢᵇᴍAsm = "ADC $0, %s, %s"u8;
+internal static ref readonly @string adcSSSCrSˢᴍAsm => ref adcSSSCrSˢᵇᴍAsm;
+private static readonly @string adcSSSCrSˢᵇᴍAsm = "ADC %s, %s, %s (cr=%s)"u8;
+internal static ref readonly @string addsSSSCrSˢᴍAsm => ref addsSSSCrSˢᵇᴍAsm;
+private static readonly @string addsSSSCrSˢᵇᴍAsm = "ADDS %s, %s, %s (cr=%s)"u8;
+internal static ref readonly @string adcs0SSCrSˢᴍAsm => ref adcs0SSCrSˢᵇᴍAsm;
+private static readonly @string adcs0SSCrSˢᵇᴍAsm = "ADCS $0, %s, %s (cr=%s)"u8;
+internal static ref readonly @string adcsSSSCrSˢᴍAsm => ref adcsSSSCrSˢᵇᴍAsm;
+private static readonly @string adcsSSSCrSˢᵇᴍAsm = "ADCS %s, %s, %s (cr=%s)"u8;
 
 // Add emits dst = src1+src2, with the specified carry behavior.
 internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
@@ -538,9 +538,9 @@ internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
             Ꮡa.Printf("\t%s (%s)(%s), %s\n", a.Arch.lea, src1, src2, dst);
         }
         if (src2 == dst) {
-            Ꮡa.EOL(addSSˢ, src1, dst);
+            Ꮡa.EOL(addSSˢᴍAsm, src1, dst);
         } else {
-            Ꮡa.EOL(addSSSˢ, src1, src2, dst);
+            Ꮡa.EOL(addSSSˢᴍAsm, src1, src2, dst);
         }
         break;
     }
@@ -576,11 +576,11 @@ internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
             if (a.IsZero(src1)) {
                 // Only here to use the carry.
                 Ꮡa.Add(cr, src2, dst, KeepCarry);
-                Ꮡa.EOL(adc0SSˢ, src2, dst);
+                Ꮡa.EOL(adc0SSˢᴍAsm, src2, dst);
                 break;
             }
             Ꮡa.Add(src1, src2, dst, KeepCarry);
-            Ꮡa.EOL(adcSSSCrSˢ, src1, src2, dst, cr);
+            Ꮡa.EOL(adcSSSCrSˢᴍAsm, src1, src2, dst, cr);
             Ꮡa.Add(cr, dst, dst, KeepCarry);
             Ꮡa.EOL("...");
             break;
@@ -605,13 +605,13 @@ internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
                 // src1 == src2 == dst.
                 // Overflows if and only if the high bit is set, so copy high bit to carry.
                 Ꮡa.Rsh(a.Imm(a.Arch.WordBits - 1), src1, cr);
-                Ꮡa.EOL(addsSSSCrSˢ, src1, src2, dst, cr);
+                Ꮡa.EOL(addsSSSCrSˢᴍAsm, src1, src2, dst, cr);
                 Ꮡa.Add(src1, src2, dst, KeepCarry);
                 Ꮡa.EOL("...");
                 return;
             }}
             Ꮡa.Add(src1, src2, dst, KeepCarry);
-            Ꮡa.EOL(addsSSSCrSˢ, src1, src2, dst, cr);
+            Ꮡa.EOL(addsSSSCrSˢᴍAsm, src1, src2, dst, cr);
             Ꮡa.SLTU(old, dst, cr); // dst < old (one of the src) implies carry
             Ꮡa.EOL("...");
             break;
@@ -621,7 +621,7 @@ internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
                 // Only here to use and then set the carry.
                 // Easy since carry is not aliased to dst.
                 Ꮡa.Add(cr, src2, dst, KeepCarry);
-                Ꮡa.EOL(adcs0SSCrSˢ, src2, dst, cr);
+                Ꮡa.EOL(adcs0SSCrSˢᴍAsm, src2, dst, cr);
                 Ꮡa.SLTU(cr, dst, cr); // dst < cr implies carry
                 Ꮡa.EOL("...");
                 break;
@@ -641,14 +641,14 @@ internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
             }}
             if (old.Valid()) {
                 Ꮡa.Add(src1, src2, dst, KeepCarry);
-                Ꮡa.EOL(adcsSSSCrSˢ, src1, src2, dst, cr);
+                Ꮡa.EOL(adcsSSSCrSˢᴍAsm, src1, src2, dst, cr);
                 Ꮡa.SLTU(old, dst, tmp); // // dst < old (one of the src) implies carry
                 Ꮡa.EOL("...");
             } else {
                 // src1 == src2 == dst, like above. Sign bit is carry bit,
                 // but we copy it into tmp, not cr.
                 Ꮡa.Rsh(a.Imm(a.Arch.WordBits - 1), src1, tmp);
-                Ꮡa.EOL(adcsSSSCrSˢ, src1, src2, dst, cr);
+                Ꮡa.EOL(adcsSSSCrSˢᴍAsm, src1, src2, dst, cr);
                 Ꮡa.Add(src1, src2, dst, KeepCarry);
                 Ꮡa.EOL("...");
             }
@@ -667,16 +667,16 @@ internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sbc0SSˢ => ref sbc0SSˢᵇ;
-private static readonly @string sbc0SSˢᵇ = "SBC $0, %s, %s"u8;
-internal static ref readonly @string sbcSSSˢ => ref sbcSSSˢᵇ;
-private static readonly @string sbcSSSˢᵇ = "SBC %s, %s, %s"u8;
-internal static ref readonly @string subsSSSˢ => ref subsSSSˢᵇ;
-private static readonly @string subsSSSˢᵇ = "SUBS %s, %s, %s"u8;
-internal static ref readonly @string sbcs0SSˢ => ref sbcs0SSˢᵇ;
-private static readonly @string sbcs0SSˢᵇ = "SBCS $0, %s, %s"u8;
-internal static ref readonly @string sbcsSSSˢ => ref sbcsSSSˢᵇ;
-private static readonly @string sbcsSSSˢᵇ = "SBCS %s, %s, %s"u8;
+internal static ref readonly @string sbc0SSˢᴍAsm => ref sbc0SSˢᵇᴍAsm;
+private static readonly @string sbc0SSˢᵇᴍAsm = "SBC $0, %s, %s"u8;
+internal static ref readonly @string sbcSSSˢᴍAsm => ref sbcSSSˢᵇᴍAsm;
+private static readonly @string sbcSSSˢᵇᴍAsm = "SBC %s, %s, %s"u8;
+internal static ref readonly @string subsSSSˢᴍAsm => ref subsSSSˢᵇᴍAsm;
+private static readonly @string subsSSSˢᵇᴍAsm = "SUBS %s, %s, %s"u8;
+internal static ref readonly @string sbcs0SSˢᴍAsm => ref sbcs0SSˢᵇᴍAsm;
+private static readonly @string sbcs0SSˢᵇᴍAsm = "SBCS $0, %s, %s"u8;
+internal static ref readonly @string sbcsSSSˢᴍAsm => ref sbcsSSSˢᵇᴍAsm;
+private static readonly @string sbcsSSSˢᵇᴍAsm = "SBCS %s, %s, %s"u8;
 
 // Sub emits dst = src2-src1, with the specified carry behavior.
 internal static void Subᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
@@ -747,11 +747,11 @@ internal static void Subᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
             if (a.IsZero(src1)) {
                 // Only here to use the carry.
                 Ꮡa.Sub(cr, src2, dst, KeepCarry);
-                Ꮡa.EOL(sbc0SSˢ, src2, dst);
+                Ꮡa.EOL(sbc0SSˢᴍAsm, src2, dst);
                 break;
             }
             Ꮡa.Sub(src1, src2, dst, KeepCarry);
-            Ꮡa.EOL(sbcSSSˢ, src1, src2, dst);
+            Ꮡa.EOL(sbcSSSˢᴍAsm, src1, src2, dst);
             Ꮡa.Sub(cr, dst, dst, KeepCarry);
             Ꮡa.EOL("...");
             break;
@@ -764,7 +764,7 @@ internal static void Subᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
             }
             // Compute the new carry first, in case dst is src1 or src2.
             Ꮡa.SLTU(src1, src2, cr);
-            Ꮡa.EOL(subsSSSˢ, src1, src2, dst);
+            Ꮡa.EOL(subsSSSˢᴍAsm, src1, src2, dst);
             Ꮡa.Sub(src1, src2, dst, KeepCarry);
             Ꮡa.EOL("...");
             break;
@@ -780,7 +780,7 @@ internal static void Subᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
                     // But we want to use the carry, so we can't compute it before
                     // the SUB either. Compute into a temporary and MOV.
                     Ꮡa.SLTU(cr, src2, tmp);
-                    Ꮡa.EOL(sbcs0SSˢ, src2, dst);
+                    Ꮡa.EOL(sbcs0SSˢᴍAsm, src2, dst);
                     Ꮡa.Sub(cr, src2, dst, KeepCarry);
                     Ꮡa.EOL("...");
                     Ꮡa.Mov(tmp, cr);
@@ -795,7 +795,7 @@ internal static void Subᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
             // computing carry bits for both, and add'ing them together.
             // Doing src2 - cr first frees up cr to store the carry from the sub of src1.
             Ꮡa.SLTU(cr, src2, tmp);
-            Ꮡa.EOL(sbcsSSSˢ, src1, src2, dst);
+            Ꮡa.EOL(sbcsSSSˢᴍAsm, src1, src2, dst);
             Ꮡa.Sub(cr, src2, dst, KeepCarry);
             Ꮡa.EOL("...");
             Ꮡa.SLTU(src1, dst, cr);
@@ -811,8 +811,8 @@ internal static void Subᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry car
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string clearCarryˢ => ref clearCarryˢᵇ;
-private static readonly @string clearCarryˢᵇ = "clear carry"u8;
+internal static ref readonly @string clearCarryˢᴍAsm => ref clearCarryˢᵇᴍAsm;
+private static readonly @string clearCarryˢᵇᴍAsm = "clear carry"u8;
 
 // ClearCarry clears the carry flag.
 // The ‘which’ parameter must be AddCarry or SubCarry to specify how the flag will be used.
@@ -834,12 +834,12 @@ internal static void ClearCarryᴍ(ж<Asm> Ꮡa, Carry which) {
         Ꮡa.Sub(a.Imm(0), dst, dst, (Carry)(SetCarry | (Carry)(which & asmgen.AltCarry)));
         break;
     }}
-    Ꮡa.EOL(clearCarryˢ);
+    Ꮡa.EOL(clearCarryˢᴍAsm);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string saveCarryˢ => ref saveCarryˢᵇ;
-private static readonly @string saveCarryˢᵇ = "save carry"u8;
+internal static ref readonly @string saveCarryˢᴍAsm => ref saveCarryˢᵇᴍAsm;
+private static readonly @string saveCarryˢᵇᴍAsm = "save carry"u8;
 
 // SaveCarry saves the carry flag into dst.
 // The meaning of the bits in dst is architecture-dependent.
@@ -858,12 +858,12 @@ internal static void SaveCarryᴍ(ж<Asm> Ꮡa, Reg dst) {
     } else {
         Ꮡa.Sub(dst, dst, dst, (Carry)(UseCarry | SmashCarry));
     }
-    Ꮡa.EOL(saveCarryˢ);
+    Ꮡa.EOL(saveCarryˢᴍAsm);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string restoreCarryˢ => ref restoreCarryˢᵇ;
-private static readonly @string restoreCarryˢᵇ = "restore carry"u8;
+internal static ref readonly @string restoreCarryˢᴍAsm => ref restoreCarryˢᵇᴍAsm;
+private static readonly @string restoreCarryˢᵇᴍAsm = "restore carry"u8;
 
 // RestoreCarry restores the carry flag from src.
 // src is left in an undefined state.
@@ -884,14 +884,14 @@ internal static void RestoreCarryᴍ(ж<Asm> Ꮡa, Reg src) {
         // (This may seem too clever, but on GOARCH=arm we have no other good options.)
         Ꮡa.Sub(src, cmp.Or(a.ZR(), new Reg("SP")), src, SetCarry);
     }
-    Ꮡa.EOL(restoreCarryˢ);
+    Ꮡa.EOL(restoreCarryˢᴍAsm);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string convertAddCarryˢ => ref convertAddCarryˢᵇ;
-private static readonly @string convertAddCarryˢᵇ = "convert add carry"u8;
-internal static ref readonly @string convertSubCarryˢ => ref convertSubCarryˢᵇ;
-private static readonly @string convertSubCarryˢᵇ = "convert sub carry"u8;
+internal static ref readonly @string convertAddCarryˢᴍAsm => ref convertAddCarryˢᵇᴍAsm;
+private static readonly @string convertAddCarryˢᵇᴍAsm = "convert add carry"u8;
+internal static ref readonly @string convertSubCarryˢᴍAsm => ref convertSubCarryˢᵇᴍAsm;
+private static readonly @string convertSubCarryˢᵇᴍAsm = "convert sub carry"u8;
 
 // ConvertCarry converts the carry flag in dst from the internal format to a 0 or 1.
 // The carry flag is left in an undefined state.
@@ -908,19 +908,19 @@ internal static void ConvertCarryᴍ(ж<Asm> Ꮡa, Carry which, Reg dst) {
         } else {
             Ꮡa.Add(a.Imm(1), dst, dst, SmashCarry);
         }
-        Ꮡa.EOL(convertAddCarryˢ);
+        Ꮡa.EOL(convertAddCarryˢᴍAsm);
         break;
     }
     case var ᴛ when ᴛ == SubCarry: {
         Ꮡa.Neg(dst, dst);
-        Ꮡa.EOL(convertSubCarryˢ);
+        Ꮡa.EOL(convertSubCarryˢᴍAsm);
         break;
     }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string saveConvertAddCarryˢ => ref saveConvertAddCarryˢᵇ;
-private static readonly @string saveConvertAddCarryˢᵇ = "save & convert add carry"u8;
+internal static ref readonly @string saveConvertAddCarryˢᴍAsm => ref saveConvertAddCarryˢᵇᴍAsm;
+private static readonly @string saveConvertAddCarryˢᵇᴍAsm = "save & convert add carry"u8;
 
 // SaveConvertCarry saves and converts the carry flag into dst: 0 unset, 1 set.
 // The carry flag is left in an undefined state.
@@ -935,7 +935,7 @@ internal static void SaveConvertCarryᴍ(ж<Asm> Ꮡa, Carry which, Reg dst) {
     case var ᴛ when ᴛ == AddCarry: {
         if ((a.Arch.adc != ""u8 || a.Arch.adcs != ""u8) && a.ZR().Valid()) {
             Ꮡa.Add(a.ZR(), a.ZR(), dst, (Carry)(UseCarry | SmashCarry));
-            Ꮡa.EOL(saveConvertAddCarryˢ);
+            Ꮡa.EOL(saveConvertAddCarryˢᴍAsm);
             return;
         }
         break;

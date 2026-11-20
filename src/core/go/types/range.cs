@@ -19,12 +19,12 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
-private static readonly @string rangeˢᵇ = "range"u8;
-internal static ref readonly @string rangeClauseˢ => ref rangeClauseˢᵇ;
-private static readonly @string rangeClauseˢᵇ = "range clause"u8;
-internal static ref readonly @string noNewVariablesOnLeftSideˢ => ref noNewVariablesOnLeftSideˢᵇ;
-private static readonly @string noNewVariablesOnLeftSideˢᵇ = "no new variables on left side of :="u8;
+internal static ref readonly @string rangeˢᴍChecker => ref rangeˢᵇᴍChecker;
+private static readonly @string rangeˢᵇᴍChecker = "range"u8;
+internal static ref readonly @string rangeClauseˢᴍChecker => ref rangeClauseˢᵇᴍChecker;
+private static readonly @string rangeClauseˢᵇᴍChecker = "range clause"u8;
+internal static ref readonly @string noNewVariablesOnLeftSideˢᴍChecker => ref noNewVariablesOnLeftSideˢᵇᴍChecker;
+private static readonly @string noNewVariablesOnLeftSideˢᵇᴍChecker = "no new variables on left side of :="u8;
 
 // rangeStmt type-checks a range statement of form
 //
@@ -111,7 +111,7 @@ internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<as
 
         // Open the for-statement block scope now, after the range clause.
         // Iteration variables declared with := need to go in this scope (was go.dev/issue/51437).
-        check.openScope(new ast.RangeStmtжNode(ᏑrangeStmt), rangeˢ);
+        check.openScope(new ast.RangeStmtжNode(ᏑrangeStmt), rangeˢᴍChecker);
         ᒐd1 = true;
 
         // check assignment to/declaration of iteration variables
@@ -159,7 +159,7 @@ internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<as
 
                 if (rangeOverInt) {
                     assert(i == 0); // at most one iteration variable (rhs[1] == nil or Typ[Invalid] for rangeOverInt)
-                    Ꮡcheck.initVar(obj, Ꮡx, rangeClauseˢ);
+                    Ꮡcheck.initVar(obj, Ꮡx, rangeClauseˢᴍChecker);
                 } else {
                     ref var y = ref heap(new operand(), out var Ꮡy);
                     y.mode = value;
@@ -178,7 +178,7 @@ internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<as
                     Ꮡcheck.declare(check.scope, nil, /* recordDef already called */ new VarжObject(obj), scopePos);
                 }
             } else {
-                Ꮡcheck.error(noNewVarPos, NoNewVar, noNewVariablesOnLeftSideˢ);
+                Ꮡcheck.error(noNewVarPos, NoNewVar, noNewVariablesOnLeftSideˢᴍChecker);
             }
         } else if (sKey != nil) {
             /* lhs[0] != nil */
@@ -196,7 +196,7 @@ internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<as
 
                 if (rangeOverInt) {
                     assert(i == 0); // at most one iteration variable (rhs[1] == nil or Typ[Invalid] for rangeOverInt)
-                    Ꮡcheck.assignVar(lhsΔ2, default, Ꮡx, rangeClauseˢ);
+                    Ꮡcheck.assignVar(lhsΔ2, default, Ꮡx, rangeClauseˢᴍChecker);
                     // If the assignment succeeded, if x was untyped before, it now
                     // has a type inferred via the assignment. It must be an integer.
                     // (go.dev/issues/67027)
@@ -218,7 +218,7 @@ internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<as
             // We do this by checking the assignment _ = x. This ensures
             // that an untyped x can be converted to a value of its default
             // type (rune or int).
-            Ꮡcheck.assignment(Ꮡx, default, rangeClauseˢ);
+            Ꮡcheck.assignment(Ꮡx, default, rangeClauseˢᴍChecker);
         }
 
         Ꮡcheck.stmt(inner, new ast.BlockStmtжStmt(rangeStmt.Body));

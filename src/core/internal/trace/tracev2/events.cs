@@ -513,32 +513,32 @@ public static GoStatus GoWaiting => 4;
 } partial class tracev2_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string runnableˢ => ref runnableˢᵇ;
-private static readonly @string runnableˢᵇ = "Runnable"u8;
-private static ref readonly @string runningˢ => ref runningˢᵇ;
-private static readonly @string runningˢᵇ = "Running"u8;
-private static ref readonly @string syscallˢ => ref syscallˢᵇ;
-private static readonly @string syscallˢᵇ = "Syscall"u8;
-private static ref readonly @string waitingˢ => ref waitingˢᵇ;
-private static readonly @string waitingˢᵇ = "Waiting"u8;
-private static ref readonly @string badˢ => ref badˢᵇ;
-private static readonly @string badˢᵇ = "Bad"u8;
+private static ref readonly @string runnableˢᴍGoStatus => ref runnableˢᵇᴍGoStatus;
+private static readonly @string runnableˢᵇᴍGoStatus = "Runnable"u8;
+private static ref readonly @string runningˢᴍGoStatus => ref runningˢᵇᴍGoStatus;
+private static readonly @string runningˢᵇᴍGoStatus = "Running"u8;
+private static ref readonly @string syscallˢᴍGoStatus => ref syscallˢᵇᴍGoStatus;
+private static readonly @string syscallˢᵇᴍGoStatus = "Syscall"u8;
+private static ref readonly @string waitingˢᴍGoStatus => ref waitingˢᵇᴍGoStatus;
+private static readonly @string waitingˢᵇᴍGoStatus = "Waiting"u8;
+private static ref readonly @string badˢᴍGoStatus => ref badˢᵇᴍGoStatus;
+private static readonly @string badˢᵇᴍGoStatus = "Bad"u8;
 
 internal static @string Stringᴍ(GoStatus s) {
     switch (s) {
     case var ᴛ when ᴛ == GoRunnable: {
-        return runnableˢ;
+        return runnableˢᴍGoStatus;
     }
     case var ᴛ when ᴛ == GoRunning: {
-        return runningˢ;
+        return runningˢᴍGoStatus;
     }
     case var ᴛ when ᴛ == GoSyscall: {
-        return syscallˢ;
+        return syscallˢᴍGoStatus;
     }
     case var ᴛ when ᴛ == GoWaiting: {
-        return waitingˢ;
+        return waitingˢᴍGoStatus;
     }}
-    return badˢ;
+    return badˢᴍGoStatus;
 }
 
 } partial class tracev2_package {
@@ -567,27 +567,27 @@ public static ProcStatus ProcSyscallAbandoned => 4;
 } partial class tracev2_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string runningˢ => ref runningˢᵇ;
-private static readonly @string runningˢᵇ = "Running"u8;
-private static ref readonly @string idleˢ => ref idleˢᵇ;
-private static readonly @string idleˢᵇ = "Idle"u8;
-private static ref readonly @string syscallˢ => ref syscallˢᵇ;
-private static readonly @string syscallˢᵇ = "Syscall"u8;
-private static ref readonly @string badˢ => ref badˢᵇ;
-private static readonly @string badˢᵇ = "Bad"u8;
+private static ref readonly @string runningˢᴍProcStatus => ref runningˢᵇᴍProcStatus;
+private static readonly @string runningˢᵇᴍProcStatus = "Running"u8;
+private static ref readonly @string idleˢᴍProcStatus => ref idleˢᵇᴍProcStatus;
+private static readonly @string idleˢᵇᴍProcStatus = "Idle"u8;
+private static ref readonly @string syscallˢᴍProcStatus => ref syscallˢᵇᴍProcStatus;
+private static readonly @string syscallˢᵇᴍProcStatus = "Syscall"u8;
+private static ref readonly @string badˢᴍProcStatus => ref badˢᵇᴍProcStatus;
+private static readonly @string badˢᵇᴍProcStatus = "Bad"u8;
 
 internal static @string Stringᴍ(ProcStatus s) {
     switch (s) {
     case var ᴛ when ᴛ == ProcRunning: {
-        return runningˢ;
+        return runningˢᴍProcStatus;
     }
     case var ᴛ when ᴛ == ProcIdle: {
-        return idleˢ;
+        return idleˢᴍProcStatus;
     }
     case var ᴛ when ᴛ == ProcSyscall: {
-        return syscallˢ;
+        return syscallˢᴍProcStatus;
     }}
-    return badˢ;
+    return badˢᴍProcStatus;
 }
 
 } partial class tracev2_package {

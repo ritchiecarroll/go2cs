@@ -239,7 +239,7 @@ internal static void determineMatchingIsolatesᴍ(ref paragraph p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object assertIEndˢ = (@string)"assert (i <= end)"u8;
+private static readonly object assertIEndˢᴍparagraph = (@string)"assert (i <= end)"u8;
 
 // determineParagraphEmbeddingLevel reports the resolved paragraph direction of
 // the substring limited by the given range [start, end).
@@ -257,7 +257,7 @@ internal static level determineParagraphEmbeddingLevelᴍ(ref paragraph p, nint 
         } else if (t.@in(FSI, LRI, RLI)) {
             i = p.matchingPDI[i]; // skip over to the matching PDI
             if (i > end) {
-                log.Panic(assertIEndˢ);
+                log.Panic(assertIEndˢᴍparagraph);
             }
         }
     }

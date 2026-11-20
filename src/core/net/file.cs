@@ -13,12 +13,12 @@ partial struct fileAddr /*@string*/;
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fileNetˢ => ref fileNetˢᵇ;
-private static readonly @string fileNetˢᵇ = "file+net"u8;
+internal static ref readonly @string fileNetˢᴍfileAddr => ref fileNetˢᵇᴍfileAddr;
+private static readonly @string fileNetˢᵇᴍfileAddr = "file+net"u8;
 
 // BUG(mikio): On JS, the FileConn, FileListener and
 // FilePacketConn functions are not implemented.
-internal static @string Networkᴍ(fileAddr _) { return fileNetˢ; }
+internal static @string Networkᴍ(fileAddr _) { return fileNetˢᴍfileAddr; }
 internal static @string Stringᴍ(fileAddr f) { return (@string)f; }
 
 } partial class net_package {

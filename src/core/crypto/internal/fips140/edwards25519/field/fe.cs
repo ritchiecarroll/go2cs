@@ -220,8 +220,8 @@ internal static ж<Element> Setᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string edwards25519InvalidFieldˢ => ref edwards25519InvalidFieldˢᵇ;
-private static readonly @string edwards25519InvalidFieldˢᵇ = "edwards25519: invalid field element input size"u8;
+internal static ref readonly @string edwards25519InvalidFieldˢᴍElement => ref edwards25519InvalidFieldˢᵇᴍElement;
+private static readonly @string edwards25519InvalidFieldˢᵇᴍElement = "edwards25519: invalid field element input size"u8;
 
 // SetBytes sets v to x, where x is a 32-byte little-endian encoding. If x is
 // not of the right length, SetBytes returns nil and an error, and the
@@ -235,7 +235,7 @@ internal static (ж<Element>, error) SetBytesᴍ(ж<Element> Ꮡv, slice<byte> x
     ref var v = ref Ꮡv.DerefOrNull();
 
     if (len(x) != 32) {
-        return (default, errors.New(edwards25519InvalidFieldˢ));
+        return (default, errors.New(edwards25519InvalidFieldˢᴍElement));
     }
 
     // Bits 0:51 (bytes 0:8, bits 0:64, shift 0, mask 51).

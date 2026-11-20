@@ -31,8 +31,8 @@ partial struct CPU {
 } partial class cgroup_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string impossibleCgroupVersionˢ => ref impossibleCgroupVersionˢᵇ;
-private static readonly @string impossibleCgroupVersionˢᵇ = "impossible cgroup version"u8;
+internal static ref readonly @string impossibleCgroupVersionˢᴍCPU => ref impossibleCgroupVersionˢᵇᴍCPU;
+private static readonly @string impossibleCgroupVersionˢᵇᴍCPU = "impossible cgroup version"u8;
 
 internal static void Closeᴍ(CPU c) {
     switch (c.version) {
@@ -46,7 +46,7 @@ internal static void Closeᴍ(CPU c) {
         break;
     }
     default: {
-        @throw(impossibleCgroupVersionˢ);
+        @throw(impossibleCgroupVersionˢᴍCPU);
         break;
     }}
 }

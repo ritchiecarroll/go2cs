@@ -229,10 +229,10 @@ partial struct GCMWithXORCounterNonce {
 } partial class gcm_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoCipherIncorrectˢ => ref cryptoCipherIncorrectˢᵇ;
-private static readonly @string cryptoCipherIncorrectˢᵇ = "crypto/cipher: incorrect nonce length given to SetNoncePrefixAndMask"u8;
-private static ref readonly @string cryptoCipherˢ => ref cryptoCipherˢᵇ;
-private static readonly @string cryptoCipherˢᵇ = "crypto/cipher: SetNoncePrefixAndMask called twice or after first Seal"u8;
+private static ref readonly @string cryptoCipherIncorrectˢᴍGCMWithXORCounterNonce => ref cryptoCipherIncorrectˢᵇᴍGCMWithXORCounterNonce;
+private static readonly @string cryptoCipherIncorrectˢᵇᴍGCMWithXORCounterNonce = "crypto/cipher: incorrect nonce length given to SetNoncePrefixAndMask"u8;
+private static ref readonly @string cryptoCipherˢᴍGCMWithXORCounterNonce => ref cryptoCipherˢᵇᴍGCMWithXORCounterNonce;
+private static readonly @string cryptoCipherˢᵇᴍGCMWithXORCounterNonce = "crypto/cipher: SetNoncePrefixAndMask called twice or after first Seal"u8;
 
 // SetNoncePrefixAndMask sets the fixed prefix and XOR mask for the nonces used
 // in Seal. It must be called before the first call to Seal.
@@ -245,10 +245,10 @@ private static readonly @string cryptoCipherˢᵇ = "crypto/cipher: SetNoncePref
 // increasing.
 internal static error SetNoncePrefixAndMaskᴍ(ref GCMWithXORCounterNonce g, slice<byte> nonce) {
     if (len(nonce) != gcmStandardNonceSize) {
-        return errors.New(cryptoCipherIncorrectˢ);
+        return errors.New(cryptoCipherIncorrectˢᴍGCMWithXORCounterNonce);
     }
     if (g.ready) {
-        return errors.New(cryptoCipherˢ);
+        return errors.New(cryptoCipherˢᴍGCMWithXORCounterNonce);
     }
     g.prefix = byteorder.BEUint32(nonce[..4]);
     g.mask = byteorder.BEUint64(nonce[4..]);

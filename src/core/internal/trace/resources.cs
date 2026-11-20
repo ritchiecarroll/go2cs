@@ -54,20 +54,20 @@ internal static bool Executingᴍ(GoState s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string undeterminedˢ => ref undeterminedˢᵇ;
-private static readonly @string undeterminedˢᵇ = "Undetermined"u8;
-internal static ref readonly @string notExistˢ => ref notExistˢᵇ;
-private static readonly @string notExistˢᵇ = "NotExist"u8;
-internal static ref readonly @string runnableˢ => ref runnableˢᵇ;
-private static readonly @string runnableˢᵇ = "Runnable"u8;
-internal static ref readonly @string runningˢ => ref runningˢᵇ;
-private static readonly @string runningˢᵇ = "Running"u8;
-internal static ref readonly @string waitingˢ => ref waitingˢᵇ;
-private static readonly @string waitingˢᵇ = "Waiting"u8;
-internal static ref readonly @string syscallˢ => ref syscallˢᵇ;
-private static readonly @string syscallˢᵇ = "Syscall"u8;
-internal static ref readonly @string badˢ => ref badˢᵇ;
-private static readonly @string badˢᵇ = "Bad"u8;
+internal static ref readonly @string undeterminedˢᴍGoState => ref undeterminedˢᵇᴍGoState;
+private static readonly @string undeterminedˢᵇᴍGoState = "Undetermined"u8;
+internal static ref readonly @string notExistˢᴍGoState => ref notExistˢᵇᴍGoState;
+private static readonly @string notExistˢᵇᴍGoState = "NotExist"u8;
+internal static ref readonly @string runnableˢᴍGoState => ref runnableˢᵇᴍGoState;
+private static readonly @string runnableˢᵇᴍGoState = "Runnable"u8;
+internal static ref readonly @string runningˢᴍGoState => ref runningˢᵇᴍGoState;
+private static readonly @string runningˢᵇᴍGoState = "Running"u8;
+internal static ref readonly @string waitingˢᴍGoState => ref waitingˢᵇᴍGoState;
+private static readonly @string waitingˢᵇᴍGoState = "Waiting"u8;
+internal static ref readonly @string syscallˢᴍGoState => ref syscallˢᵇᴍGoState;
+private static readonly @string syscallˢᵇᴍGoState = "Syscall"u8;
+internal static ref readonly @string badˢᴍGoState => ref badˢᵇᴍGoState;
+private static readonly @string badˢᵇᴍGoState = "Bad"u8;
 
 // String returns a human-readable representation of a GoState.
 //
@@ -75,24 +75,24 @@ private static readonly @string badˢᵇ = "Bad"u8;
 internal static @string Stringᴍ(GoState s) {
     switch (s) {
     case var ᴛ when ᴛ == GoUndetermined: {
-        return undeterminedˢ;
+        return undeterminedˢᴍGoState;
     }
     case var ᴛ when ᴛ == GoNotExist: {
-        return notExistˢ;
+        return notExistˢᴍGoState;
     }
     case var ᴛ when ᴛ == GoRunnable: {
-        return runnableˢ;
+        return runnableˢᴍGoState;
     }
     case var ᴛ when ᴛ == GoRunning: {
-        return runningˢ;
+        return runningˢᴍGoState;
     }
     case var ᴛ when ᴛ == GoWaiting: {
-        return waitingˢ;
+        return waitingˢᴍGoState;
     }
     case var ᴛ when ᴛ == GoSyscall: {
-        return syscallˢ;
+        return syscallˢᴍGoState;
     }}
-    return badˢ;
+    return badˢᴍGoState;
 }
 
 } partial class trace_package {
@@ -117,16 +117,16 @@ internal static bool Executingᴍ(ProcState s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string undeterminedˢ => ref undeterminedˢᵇ;
-private static readonly @string undeterminedˢᵇ = "Undetermined"u8;
-internal static ref readonly @string notExistˢ => ref notExistˢᵇ;
-private static readonly @string notExistˢᵇ = "NotExist"u8;
-internal static ref readonly @string runningˢ => ref runningˢᵇ;
-private static readonly @string runningˢᵇ = "Running"u8;
-internal static ref readonly @string idleˢ => ref idleˢᵇ;
-private static readonly @string idleˢᵇ = "Idle"u8;
-internal static ref readonly @string badˢ => ref badˢᵇ;
-private static readonly @string badˢᵇ = "Bad"u8;
+internal static ref readonly @string undeterminedˢᴍProcState => ref undeterminedˢᵇᴍProcState;
+private static readonly @string undeterminedˢᵇᴍProcState = "Undetermined"u8;
+internal static ref readonly @string notExistˢᴍProcState => ref notExistˢᵇᴍProcState;
+private static readonly @string notExistˢᵇᴍProcState = "NotExist"u8;
+internal static ref readonly @string runningˢᴍProcState => ref runningˢᵇᴍProcState;
+private static readonly @string runningˢᵇᴍProcState = "Running"u8;
+internal static ref readonly @string idleˢᴍProcState => ref idleˢᵇᴍProcState;
+private static readonly @string idleˢᵇᴍProcState = "Idle"u8;
+internal static ref readonly @string badˢᴍProcState => ref badˢᵇᴍProcState;
+private static readonly @string badˢᵇᴍProcState = "Bad"u8;
 
 // String returns a human-readable representation of a ProcState.
 //
@@ -134,18 +134,18 @@ private static readonly @string badˢᵇ = "Bad"u8;
 internal static @string Stringᴍ(ProcState s) {
     switch (s) {
     case var ᴛ when ᴛ == ProcUndetermined: {
-        return undeterminedˢ;
+        return undeterminedˢᴍProcState;
     }
     case var ᴛ when ᴛ == ProcNotExist: {
-        return notExistˢ;
+        return notExistˢᴍProcState;
     }
     case var ᴛ when ᴛ == ProcRunning: {
-        return runningˢ;
+        return runningˢᴍProcState;
     }
     case var ᴛ when ᴛ == ProcIdle: {
-        return idleˢ;
+        return idleˢᴍProcState;
     }}
-    return badˢ;
+    return badˢᴍProcState;
 }
 
 } partial class trace_package {
@@ -164,16 +164,16 @@ public static ResourceKind ResourceThread => 3;          // Thread.
 } partial class trace_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noneˢ => ref noneˢᵇ;
-private static readonly @string noneˢᵇ = "None"u8;
-internal static ref readonly @string goroutineˢ => ref goroutineˢᵇ;
-private static readonly @string goroutineˢᵇ = "Goroutine"u8;
-internal static ref readonly @string procˢ => ref procˢᵇ;
-private static readonly @string procˢᵇ = "Proc"u8;
-internal static ref readonly @string threadˢ => ref threadˢᵇ;
-private static readonly @string threadˢᵇ = "Thread"u8;
-internal static ref readonly @string badˢ => ref badˢᵇ;
-private static readonly @string badˢᵇ = "Bad"u8;
+internal static ref readonly @string noneˢᴍResourceKind => ref noneˢᵇᴍResourceKind;
+private static readonly @string noneˢᵇᴍResourceKind = "None"u8;
+internal static ref readonly @string goroutineˢᴍResourceKind => ref goroutineˢᵇᴍResourceKind;
+private static readonly @string goroutineˢᵇᴍResourceKind = "Goroutine"u8;
+internal static ref readonly @string procˢᴍResourceKind => ref procˢᵇᴍResourceKind;
+private static readonly @string procˢᵇᴍResourceKind = "Proc"u8;
+internal static ref readonly @string threadˢᴍResourceKind => ref threadˢᵇᴍResourceKind;
+private static readonly @string threadˢᵇᴍResourceKind = "Thread"u8;
+internal static ref readonly @string badˢᴍResourceKind => ref badˢᵇᴍResourceKind;
+private static readonly @string badˢᵇᴍResourceKind = "Bad"u8;
 
 // String returns a human-readable representation of a ResourceKind.
 //
@@ -181,18 +181,18 @@ private static readonly @string badˢᵇ = "Bad"u8;
 internal static @string Stringᴍ(ResourceKind r) {
     switch (r) {
     case var ᴛ when ᴛ == ResourceNone: {
-        return noneˢ;
+        return noneˢᴍResourceKind;
     }
     case var ᴛ when ᴛ == ResourceGoroutine: {
-        return goroutineˢ;
+        return goroutineˢᴍResourceKind;
     }
     case var ᴛ when ᴛ == ResourceProc: {
-        return procˢ;
+        return procˢᴍResourceKind;
     }
     case var ᴛ when ᴛ == ResourceThread: {
-        return threadˢ;
+        return threadˢᴍResourceKind;
     }}
-    return badˢ;
+    return badˢᴍResourceKind;
 }
 
 } partial class trace_package {

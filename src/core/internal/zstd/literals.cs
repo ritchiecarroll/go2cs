@@ -33,12 +33,12 @@ internal static (nint, slice<byte>, error) readLiteralsᴍ(ж<Reader> Ꮡr, bloc
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string literalSizeTooLargeˢ => ref literalSizeTooLargeˢᵇ;
-private static readonly @string literalSizeTooLargeˢᵇ = "literal size too large"u8;
-internal static ref readonly @string rawLiteralSizeTooLargeˢ => ref rawLiteralSizeTooLargeˢᵇ;
-private static readonly @string rawLiteralSizeTooLargeˢᵇ = "raw literal size too large"u8;
-internal static ref readonly @string rleLiteralMissingˢ => ref rleLiteralMissingˢᵇ;
-private static readonly @string rleLiteralMissingˢᵇ = "RLE literal missing"u8;
+internal static ref readonly @string literalSizeTooLargeˢᴍReader => ref literalSizeTooLargeˢᵇᴍReader;
+private static readonly @string literalSizeTooLargeˢᵇᴍReader = "literal size too large"u8;
+internal static ref readonly @string rawLiteralSizeTooLargeˢᴍReader => ref rawLiteralSizeTooLargeˢᵇᴍReader;
+private static readonly @string rawLiteralSizeTooLargeˢᵇᴍReader = "raw literal size too large"u8;
+internal static ref readonly @string rleLiteralMissingˢᴍReader => ref rleLiteralMissingˢᵇᴍReader;
+private static readonly @string rleLiteralMissingˢᵇᴍReader = "RLE literal missing"u8;
 
 // readRawRLELiterals reads and decompresses a Raw_Literals_Block or
 // a RLE_Literals_Block. RFC 3.1.1.3.1.1.
@@ -74,20 +74,20 @@ internal static (nint, slice<byte>, error) readRawRLELiteralsᴍ(ref Reader r, b
     // The maximum size of one decompressed block is 128K,
     // so we can't have more literals than that.
     if (regeneratedSize > 128 << 10) {
-        return (0, default, r.makeError(off, literalSizeTooLargeˢ));
+        return (0, default, r.makeError(off, literalSizeTooLargeˢᴍReader));
     }
 
     if (raw) {
         // RFC 3.1.1.3.1.2.
         if (off + regeneratedSize > len(data)) {
-            return (0, default, r.makeError(off, rawLiteralSizeTooLargeˢ));
+            return (0, default, r.makeError(off, rawLiteralSizeTooLargeˢᴍReader));
         }
         outbuf = appendꓸꓸꓸ(outbuf, data.slice(off, off + regeneratedSize));
         off += regeneratedSize;
     } else {
         // RFC 3.1.1.3.1.3.
         if (off >= len(data)) {
-            return (0, default, r.makeError(off, rleLiteralMissingˢ));
+            return (0, default, r.makeError(off, rleLiteralMissingˢᴍReader));
         }
         var rle = data[off];
         off++;
@@ -101,10 +101,10 @@ internal static (nint, slice<byte>, error) readRawRLELiteralsᴍ(ref Reader r, b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string huffmanTableTooBigˢ => ref huffmanTableTooBigˢᵇ;
-private static readonly @string huffmanTableTooBigˢᵇ = "Huffman table too big"u8;
-internal static ref readonly @string missingLiteralsHuffmanˢ => ref missingLiteralsHuffmanˢᵇ;
-private static readonly @string missingLiteralsHuffmanˢᵇ = "missing literals Huffman tree"u8;
+internal static ref readonly @string huffmanTableTooBigˢᴍReader => ref huffmanTableTooBigˢᵇᴍReader;
+private static readonly @string huffmanTableTooBigˢᵇᴍReader = "Huffman table too big"u8;
+internal static ref readonly @string missingLiteralsHuffmanˢᴍReader => ref missingLiteralsHuffmanˢᵇᴍReader;
+private static readonly @string missingLiteralsHuffmanˢᵇᴍReader = "missing literals Huffman tree"u8;
 
 // readHuffLiterals reads and decompresses a Compressed_Literals_Block or
 // a Treeless_Literals_Block. RFC 3.1.1.3.1.4.
@@ -154,7 +154,7 @@ internal static (nint, slice<byte>, error) readHuffLiteralsᴍ(ж<Reader> Ꮡr, 
     // The maximum size of one decompressed block is 128K,
     // so we can't have more literals than that.
     if (regeneratedSize > 128 << 10) {
-        return (0, default, r.makeError(off, literalSizeTooLargeˢ));
+        return (0, default, r.makeError(off, literalSizeTooLargeˢᴍReader));
     }
 
     nint roff = off + compressedSize;
@@ -178,7 +178,7 @@ internal static (nint, slice<byte>, error) readHuffLiteralsᴍ(ж<Reader> Ꮡr, 
         r.huffmanTableBits = huffmanTableBits;
 
         if (totalStreamsSize < hoff - off) {
-            return (0, default, r.makeError(off, huffmanTableTooBigˢ));
+            return (0, default, r.makeError(off, huffmanTableTooBigˢᴍReader));
         }
         totalStreamsSize -= hoff - off;
         off = hoff;
@@ -186,7 +186,7 @@ internal static (nint, slice<byte>, error) readHuffLiteralsᴍ(ж<Reader> Ꮡr, 
         // Treeless_Literals_Block
         // Reuse previous Huffman tree.
         if (r.huffmanTableBits == 0) {
-            return (0, default, r.makeError(off, missingLiteralsHuffmanˢ));
+            return (0, default, r.makeError(off, missingLiteralsHuffmanˢᴍReader));
         }
     }
 
@@ -208,8 +208,8 @@ internal static (nint, slice<byte>, error) readHuffLiteralsᴍ(ж<Reader> Ꮡr, 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string literalsHuffmanStreamOutˢ => ref literalsHuffmanStreamOutˢᵇ;
-private static readonly @string literalsHuffmanStreamOutˢᵇ = "literals Huffman stream out of bits"u8;
+internal static ref readonly @string literalsHuffmanStreamOutˢᴍReader => ref literalsHuffmanStreamOutˢᵇᴍReader;
+private static readonly @string literalsHuffmanStreamOutˢᵇᴍReader = "literals Huffman stream out of bits"u8;
 
 // readLiteralsOneStream reads a single stream of compressed literals.
 internal static (slice<byte>, error) readLiteralsOneStreamᴍ(ж<Reader> Ꮡr, block data, nint off, nint compressedSize, nint regeneratedSize, slice<byte> outbuf) {
@@ -229,7 +229,7 @@ internal static (slice<byte>, error) readLiteralsOneStreamᴍ(ж<Reader> Ꮡr, b
 
     for (nint i = 0; i < regeneratedSize; i++) {
         if (!rbr.fetch((uint8)huffBits)) {
-            return (default, rbr.makeError(literalsHuffmanStreamOutˢ));
+            return (default, rbr.makeError(literalsHuffmanStreamOutˢᴍReader));
         }
 
         uint16 t = default;
@@ -244,10 +244,10 @@ internal static (slice<byte>, error) readLiteralsOneStreamᴍ(ж<Reader> Ꮡr, b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string totalStreamsSizeTooSmallˢ => ref totalStreamsSizeTooSmallˢᵇ;
-private static readonly @string totalStreamsSizeTooSmallˢᵇ = "total streams size too small for jump table"u8;
-internal static ref readonly @string regeneratedSizeTooSmallˢ => ref regeneratedSizeTooSmallˢᵇ;
-private static readonly @string regeneratedSizeTooSmallˢᵇ = "regenerated size too small to decode streams"u8;
+internal static ref readonly @string totalStreamsSizeTooSmallˢᴍReader => ref totalStreamsSizeTooSmallˢᵇᴍReader;
+private static readonly @string totalStreamsSizeTooSmallˢᵇᴍReader = "total streams size too small for jump table"u8;
+internal static ref readonly @string regeneratedSizeTooSmallˢᴍReader => ref regeneratedSizeTooSmallˢᵇᴍReader;
+private static readonly @string regeneratedSizeTooSmallˢᵇᴍReader = "regenerated size too small to decode streams"u8;
 
 // readLiteralsFourStreams reads four interleaved streams of
 // compressed literals.
@@ -260,7 +260,7 @@ internal static (slice<byte>, error) readLiteralsFourStreamsᴍ(ж<Reader> Ꮡr,
         return (default, r.makeEOFError(off));
     }
     if (totalStreamsSize < 6) {
-        return (default, r.makeError(off, totalStreamsSizeTooSmallˢ));
+        return (default, r.makeError(off, totalStreamsSizeTooSmallˢᴍReader));
     }
     // RFC 3.1.1.3.1.6.
     // "The decompressed size of each stream is equal to (Regenerated_Size+3)/4,
@@ -268,7 +268,7 @@ internal static (slice<byte>, error) readLiteralsFourStreamsᴍ(ж<Reader> Ꮡr,
     // to reach a total decompressed size as specified in Regenerated_Size."
     nint regeneratedStreamSize = (regeneratedSize + 3) / 4;
     if (regeneratedSize < regeneratedStreamSize * 3) {
-        return (default, r.makeError(off, regeneratedSizeTooSmallˢ));
+        return (default, r.makeError(off, regeneratedSizeTooSmallˢᴍReader));
     }
 
     var streamSize1 = binary.LittleEndian.Uint16(data.slice(off));
@@ -341,7 +341,7 @@ internal static (slice<byte>, error) readLiteralsFourStreamsᴍ(ж<Reader> Ꮡr,
         var huffTableʗ1 = huffTable;
         (uint16, error) fetchHuff(ж<reverseBitReader> rbr) {
             if (!rbr.fetch((uint8)huffBits)) {
-                return (0, rbr.makeError(literalsHuffmanStreamOutˢ));
+                return (0, rbr.makeError(literalsHuffmanStreamOutˢᴍReader));
             }
             var idx = (rbr.bits.Rsh((uint64)(rbr.cnt - huffBits))) & huffMask;
             return (huffTableʗ1[idx], default);

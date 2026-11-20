@@ -229,8 +229,8 @@ partial struct UncommonType {
 } partial class abi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tMcount0ˢ => ref tMcount0ˢᵇ;
-private static readonly @string tMcount0ˢᵇ = "t.mcount > 0"u8;
+internal static ref readonly @string tMcount0ˢᴍUncommonType => ref tMcount0ˢᵇᴍUncommonType;
+private static readonly @string tMcount0ˢᵇᴍUncommonType = "t.mcount > 0"u8;
 
 internal static unsafe slice<Method> Methodsᴍ(ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -238,12 +238,12 @@ internal static unsafe slice<Method> Methodsᴍ(ж<UncommonType> Ꮡt) {
     if (t.Mcount == 0) {
         return default;
     }
-    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tMcount0ˢ)), (int)(t.Mcount)));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tMcount0ˢᴍUncommonType)), (int)(t.Mcount)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tXcount0ˢ => ref tXcount0ˢᵇ;
-private static readonly @string tXcount0ˢᵇ = "t.xcount > 0"u8;
+internal static ref readonly @string tXcount0ˢᴍUncommonType => ref tXcount0ˢᵇᴍUncommonType;
+private static readonly @string tXcount0ˢᵇᴍUncommonType = "t.xcount > 0"u8;
 
 internal static unsafe slice<Method> ExportedMethodsᴍ(ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -251,7 +251,7 @@ internal static unsafe slice<Method> ExportedMethodsᴍ(ж<UncommonType> Ꮡt) {
     if (t.Xcount == 0) {
         return default;
     }
-    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tXcount0ˢ)), (int)(t.Xcount)));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tXcount0ˢᴍUncommonType)), (int)(t.Xcount)));
 }
 
 } partial class abi_package {
@@ -565,13 +565,13 @@ internal static ж<byte> DataCheckedᴍ(Name n, nint off, @string whySafe) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string theRuntimeDoesnTNeedToˢ => ref theRuntimeDoesnTNeedToˢᵇ;
-private static readonly @string theRuntimeDoesnTNeedToˢᵇ = "the runtime doesn't need to give you a reason"u8;
+internal static ref readonly @string theRuntimeDoesnTNeedToˢᴍName => ref theRuntimeDoesnTNeedToˢᵇᴍName;
+private static readonly @string theRuntimeDoesnTNeedToˢᵇᴍName = "the runtime doesn't need to give you a reason"u8;
 
 // Data does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe because the runtime made the call (other packages use DataChecked)
 internal static ж<byte> Dataᴍ(Name n, nint off) {
-    return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢ));
+    return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢᴍName));
 }
 
 // IsExported returns "is n exported?"
@@ -590,15 +590,15 @@ internal static bool IsEmbeddedᴍ(Name n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readVarintˢ => ref readVarintˢᵇ;
-private static readonly @string readVarintˢᵇ = "read varint"u8;
+internal static ref readonly @string readVarintˢᴍName => ref readVarintˢᵇᴍName;
+private static readonly @string readVarintˢᵇᴍName = "read varint"u8;
 
 // ReadVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
 internal static (nint, nint) ReadVarintᴍ(Name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
-        var x = n.DataChecked(off + i, readVarintˢ).Value;
+        var x = n.DataChecked(off + i, readVarintˢᴍName).Value;
         v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
@@ -635,8 +635,8 @@ internal static nint writeVarint(slice<byte> buf, nint n) {
 } partial class abi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nonEmptyStringˢ => ref nonEmptyStringˢᵇ;
-private static readonly @string nonEmptyStringˢᵇ = "non-empty string"u8;
+internal static ref readonly @string nonEmptyStringˢᴍName => ref nonEmptyStringˢᵇᴍName;
+private static readonly @string nonEmptyStringˢᵇᴍName = "non-empty string"u8;
 
 // Name returns the name of n, or empty if it does not actually have a name.
 internal static @string Nameᴍ(Name n) {
@@ -644,7 +644,7 @@ internal static @string Nameᴍ(Name n) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
-    return @unsafe.String(n.DataChecked(1 + i, nonEmptyStringˢ), l);
+    return @unsafe.String(n.DataChecked(1 + i, nonEmptyStringˢᴍName), l);
 }
 
 // Tag returns the tag string for n, or empty if there is none.
@@ -654,7 +654,7 @@ internal static @string Tagᴍ(Name n) {
     }
     var (i, l) = n.ReadVarint(1);
     var (i2, l2) = n.ReadVarint(1 + i + l);
-    return @unsafe.String(n.DataChecked(1 + i + l + i2, nonEmptyStringˢ), l2);
+    return @unsafe.String(n.DataChecked(1 + i + l + i2, nonEmptyStringˢᴍName), l2);
 }
 
 } partial class abi_package {

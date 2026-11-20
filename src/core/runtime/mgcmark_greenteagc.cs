@@ -115,8 +115,8 @@ internal static spanScanOwnership orᴍ(ж<spanScanOwnership> Ꮡo, spanScanOwne
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeSpanInlineMarkˢ => ref runtimeSpanInlineMarkˢᵇ;
-private static readonly @string runtimeSpanInlineMarkˢᵇ = "runtime: span inline mark bits nil?"u8;
+internal static ref readonly @string runtimeSpanInlineMarkˢᴍspanInlineMarkBits => ref runtimeSpanInlineMarkˢᵇᴍspanInlineMarkBits;
+private static readonly @string runtimeSpanInlineMarkˢᵇᴍspanInlineMarkBits = "runtime: span inline mark bits nil?"u8;
 
 internal static void initᴍ(ж<spanInlineMarkBits> Ꮡimb, spanClass @class, bool needzero) {
     ref var imb = ref Ꮡimb.DerefOrNull();
@@ -139,7 +139,7 @@ internal static void initᴍ(ж<spanInlineMarkBits> Ꮡimb, spanClass @class, bo
         // would insert circa 2025, which is a memory read instruction.
         //
         // See go.dev/issue/74375 for details.
-        @throw(runtimeSpanInlineMarkˢ);
+        @throw(runtimeSpanInlineMarkˢᴍspanInlineMarkBits);
     }
     if (needzero) {
         // Use memclrNoHeapPointers to avoid having the compiler make a worse
@@ -198,28 +198,28 @@ internal static ж<spanInlineMarkBits> spanInlineMarkBitsFromBase(uintptr @base)
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string expectedSpanWithInlineˢ => ref expectedSpanWithInlineˢᵇ;
-private static readonly @string expectedSpanWithInlineˢᵇ = "expected span with inline mark bits"u8;
+internal static ref readonly @string expectedSpanWithInlineˢᴍmspan => ref expectedSpanWithInlineˢᵇᴍmspan;
+private static readonly @string expectedSpanWithInlineˢᵇᴍmspan = "expected span with inline mark bits"u8;
 
 // initInlineMarkBits initializes the inlineMarkBits stored at the end of the span.
 internal static void initInlineMarkBitsᴍ(ref mspan s) {
     if (doubleCheckGreenTea && !gcUsesSpanInlineMarkBits(s.elemsize)) {
-        @throw(expectedSpanWithInlineˢ);
+        @throw(expectedSpanWithInlineˢᴍmspan);
     }
     // Zeroing is only necessary if this span wasn't just freshly allocated from the OS.
     s.inlineMarkBits().init(s.spanclass, s.needzero != 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string marksDonTMatchScansForˢ => ref marksDonTMatchScansForˢᵇ;
-private static readonly @string marksDonTMatchScansForˢᵇ = "marks don't match scans for span with pointer"u8;
+internal static ref readonly @string marksDonTMatchScansForˢᴍmspan => ref marksDonTMatchScansForˢᵇᴍmspan;
+private static readonly @string marksDonTMatchScansForˢᵇᴍmspan = "marks don't match scans for span with pointer"u8;
 
 // moveInlineMarks merges the span's inline mark bits into dst and clears them.
 //
 // gcUsesSpanInlineMarkBits(s.elemsize) must be true.
 internal static void moveInlineMarksᴍ(ref mspan s, ж<gcBits> dst) {
     if (doubleCheckGreenTea && !gcUsesSpanInlineMarkBits(s.elemsize)) {
-        @throw(expectedSpanWithInlineˢ);
+        @throw(expectedSpanWithInlineˢᴍmspan);
     }
     var bytes = divRoundUp((uintptr)s.nelems, 8);
     var imb = s.inlineMarkBits();
@@ -232,7 +232,7 @@ internal static void moveInlineMarksᴍ(ref mspan s, ж<gcBits> dst) {
         (dst.bytep(i).Reinterpret<uint8, uintptr>()).Value |= bswapIfBigEndian(marks);
     }
     if (doubleCheckGreenTea && !s.spanclass.noscan() && imb.marks != imb.scans) {
-        @throw(marksDonTMatchScansForˢ);
+        @throw(marksDonTMatchScansForˢᴍmspan);
     }
 
     // Reset the inline mark bits.
@@ -244,7 +244,7 @@ internal static void moveInlineMarksᴍ(ref mspan s, ж<gcBits> dst) {
 // gcUsesSpanInlineMarkBits(s.elemsize) must be true.
 internal static ж<spanInlineMarkBits> inlineMarkBitsᴍ(ref mspan s) {
     if (doubleCheckGreenTea && !gcUsesSpanInlineMarkBits(s.elemsize)) {
-        @throw(expectedSpanWithInlineˢ);
+        @throw(expectedSpanWithInlineˢᴍmspan);
     }
     return spanInlineMarkBitsFromBase(s.@base());
 }
@@ -413,8 +413,8 @@ internal static bool /*ok*/ putFastᴍ(ref spanQueue q, objptr s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string failedPutFastAfterDrainˢ => ref failedPutFastAfterDrainˢᵇ;
-private static readonly @string failedPutFastAfterDrainˢᵇ = "failed putFast after drain"u8;
+internal static ref readonly @string failedPutFastAfterDrainˢᴍspanQueue => ref failedPutFastAfterDrainˢᵇᴍspanQueue;
+private static readonly @string failedPutFastAfterDrainˢᵇᴍspanQueue = "failed putFast after drain"u8;
 
 // put puts s onto the queue.
 //
@@ -461,7 +461,7 @@ internal static bool putᴍ(ж<spanQueue> Ꮡq, objptr s) {
     // We're out of space. Drain out our local spans.
     Ꮡq.drain((uint32)len(q.ring) / 2);
     if (!q.putFast(s)) {
-        @throw(failedPutFastAfterDrainˢ);
+        @throw(failedPutFastAfterDrainˢᴍspanQueue);
     }
     return true;
 }
@@ -506,8 +506,8 @@ internal static bool chainEmptyᴍ(ж<spanQueue> Ꮡq) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string failedToPutSpanOnNewlyˢ => ref failedToPutSpanOnNewlyˢᵇ;
-private static readonly @string failedToPutSpanOnNewlyˢᵇ = "failed to put span on newly-allocated spanSPMC"u8;
+internal static ref readonly @string failedToPutSpanOnNewlyˢᴍspanQueue => ref failedToPutSpanOnNewlyˢᵇᴍspanQueue;
+private static readonly @string failedToPutSpanOnNewlyˢᵇᴍspanQueue = "failed to put span on newly-allocated spanSPMC"u8;
 
 // drain publishes n spans from the local queue to the spmc chain.
 internal static void drainᴍ(ж<spanQueue> Ꮡq, uint32 n) {
@@ -554,15 +554,15 @@ internal static void drainᴍ(ж<spanQueue> Ꮡq, uint32 n) {
     }
     var newHead = newSpanSPMC(newCap);
     if (!q.tryDrain(newHead, n)) {
-        @throw(failedToPutSpanOnNewlyˢ);
+        @throw(failedToPutSpanOnNewlyˢᴍspanQueue);
     }
     q.chain.head.Ꮡprev.StoreNoWB(@unsafe.Pointer.FromPinnedBox(newHead));
     q.chain.head = newHead;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string attemptToDrainTooManyˢ => ref attemptToDrainTooManyˢᵇ;
-private static readonly @string attemptToDrainTooManyˢᵇ = "attempt to drain too many elements"u8;
+internal static ref readonly @string attemptToDrainTooManyˢᴍspanQueue => ref attemptToDrainTooManyˢᵇᴍspanQueue;
+private static readonly @string attemptToDrainTooManyˢᵇᴍspanQueue = "attempt to drain too many elements"u8;
 
 // tryDrain attempts to drain n spans from q's local queue to the chain.
 //
@@ -571,7 +571,7 @@ internal static bool tryDrainᴍ(ref spanQueue q, ж<spanSPMC> Ꮡr, uint32 n) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (q.head + n > q.tail) {
-        @throw(attemptToDrainTooManyˢ);
+        @throw(attemptToDrainTooManyˢᴍspanQueue);
     }
     var h = Ꮡr.Ꮡhead.Load(); // synchronize with consumers
     var t = Ꮡr.Ꮡtail.Load();
@@ -639,8 +639,8 @@ internal static objptr stealᴍ(ref spanQueue q, ж<spanQueue> q2) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stealWithLocalWorkˢ => ref stealWithLocalWorkˢᵇ;
-private static readonly @string stealWithLocalWorkˢᵇ = "steal with local work available"u8;
+internal static ref readonly @string stealWithLocalWorkˢᴍspanQueue => ref stealWithLocalWorkˢᵇᴍspanQueue;
+private static readonly @string stealWithLocalWorkˢᵇᴍspanQueue = "steal with local work available"u8;
 
 // refill takes some spans from r and puts them into q's local queue.
 //
@@ -652,7 +652,7 @@ internal static objptr refillᴍ(ref spanQueue q, ж<spanSPMC> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (q.tail - q.head != 0) {
-        @throw(stealWithLocalWorkˢ);
+        @throw(stealWithLocalWorkˢᴍspanQueue);
     }
 
     // Steal some spans.
@@ -686,10 +686,10 @@ internal static objptr refillᴍ(ref spanQueue q, ж<spanSPMC> Ꮡr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string spanQueueDestroyDuringˢ => ref spanQueueDestroyDuringˢᵇ;
-private static readonly @string spanQueueDestroyDuringˢᵇ = "spanQueue.destroy during the mark phase"u8;
-internal static ref readonly @string spanQueueDestroyOnNonˢ => ref spanQueueDestroyOnNonˢᵇ;
-private static readonly @string spanQueueDestroyOnNonˢᵇ = "spanQueue.destroy on non-empty queue"u8;
+internal static ref readonly @string spanQueueDestroyDuringˢᴍspanQueue => ref spanQueueDestroyDuringˢᵇᴍspanQueue;
+private static readonly @string spanQueueDestroyDuringˢᵇᴍspanQueue = "spanQueue.destroy during the mark phase"u8;
+internal static ref readonly @string spanQueueDestroyOnNonˢᴍspanQueue => ref spanQueueDestroyOnNonˢᵇᴍspanQueue;
+private static readonly @string spanQueueDestroyOnNonˢᵇᴍspanQueue = "spanQueue.destroy on non-empty queue"u8;
 
 // destroy frees all chains in an empty spanQueue.
 //
@@ -702,10 +702,10 @@ internal static void destroyᴍ(ж<spanQueue> Ꮡq) {
 
     assertWorldStopped();
     if (gcphase != _GCoff) {
-        @throw(spanQueueDestroyDuringˢ);
+        @throw(spanQueueDestroyDuringˢᴍspanQueue);
     }
     if (!Ꮡq.empty()) {
-        @throw(spanQueueDestroyOnNonˢ);
+        @throw(spanQueueDestroyOnNonˢᴍspanQueue);
     }
 
     @lock(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlock));

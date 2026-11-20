@@ -121,12 +121,12 @@ internal static void SetHintᴍ(ref Pipe p, @string name, Hint hint) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runLoopBackwardUsingˢ => ref runLoopBackwardUsingˢᵇ;
-private static readonly @string runLoopBackwardUsingˢᵇ = "run loop backward, using counter as positive index"u8;
-internal static ref readonly @string useCounterAsNegativeˢ => ref useCounterAsNegativeˢᵇ;
-private static readonly @string useCounterAsNegativeˢᵇ = "use counter as negative index"u8;
-internal static ref readonly @string runLoopBackwardˢ => ref runLoopBackwardˢᵇ;
-private static readonly @string runLoopBackwardˢᵇ = "run loop backward"u8;
+internal static ref readonly @string runLoopBackwardUsingˢᴍPipe => ref runLoopBackwardUsingˢᵇᴍPipe;
+private static readonly @string runLoopBackwardUsingˢᵇᴍPipe = "run loop backward, using counter as positive index"u8;
+internal static ref readonly @string useCounterAsNegativeˢᴍPipe => ref useCounterAsNegativeˢᵇᴍPipe;
+private static readonly @string useCounterAsNegativeˢᵇᴍPipe = "use counter as negative index"u8;
+internal static ref readonly @string runLoopBackwardˢᴍPipe => ref runLoopBackwardˢᵇᴍPipe;
+private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward"u8;
 
 // LoadPtrs loads the slice pointer arguments into registers,
 // assuming that the slice length n has already been loaded
@@ -158,7 +158,7 @@ internal static void LoadPtrsᴍ(ref Pipe p, Reg n) {
         // is AX, we will access the slice with pointer BX using (BX)(AX*WordBytes).
         // The loop is moving backward through the slice, but the counter
         // is also moving backward, so not much to do.
-        a.Comment(runLoopBackwardUsingˢ);
+        a.Comment(runLoopBackwardUsingˢᴍPipe);
         p.indexCounter = +1;
         p.index = n;
         break;
@@ -171,7 +171,7 @@ internal static void LoadPtrsᴍ(ref Pipe p, Reg n) {
         // to each of the pointers.
         // See comment below about the garbage collector (non-)implications
         // of pointing beyond the slice bounds.
-        a.Comment(useCounterAsNegativeˢ);
+        a.Comment(useCounterAsNegativeˢᴍPipe);
         p.indexCounter = -1;
         p.index = n;
         foreach (var (_, ptr) in range(p.inPtr)) {
@@ -197,7 +197,7 @@ internal static void LoadPtrsᴍ(ref Pipe p, Reg n) {
         // (The same thing happens by the end of forward loops,
         // but it's less important since once the pointers go off the slice
         // in a forward loop, the loop is over and the slice won't be accessed anymore.)
-        a.Comment(runLoopBackwardˢ);
+        a.Comment(runLoopBackwardˢᴍPipe);
         foreach (var (_, ptr) in range(p.inPtr)) {
             a.AddWords(n, ptr, ptr);
         }
@@ -422,8 +422,8 @@ internal static void Startᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string computeUnrolledLoopˢ => ref computeUnrolledLoopˢᵇ;
-private static readonly @string computeUnrolledLoopˢᵇ = "compute unrolled loop lengths"u8;
+internal static ref readonly @string computeUnrolledLoopˢᴍPipe => ref computeUnrolledLoopˢᵇᴍPipe;
+private static readonly @string computeUnrolledLoopˢᵇᴍPipe = "compute unrolled loop lengths"u8;
 
 // Restart prepares to loop over an additional n columns,
 // beyond a previous loop run by p.Start/p.Loop.
@@ -444,7 +444,7 @@ internal static void Restartᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factors�
     // We compute them all ahead of time in case the computation would smash
     // a carry flag that the loop bodies need preserved.
     if (len(factors) > 1) {
-        a.Comment(computeUnrolledLoopˢ);
+        a.Comment(computeUnrolledLoopˢᴍPipe);
     }
     switch (ᐧ) {
     default: {
@@ -552,10 +552,10 @@ internal static void AtUnrollEndᴍ(ref Pipe p, Action end) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unrollDXˢ => ref unrollDXˢᵇ;
-private static readonly @string unrollDXˢᵇ = "unroll %dX"u8;
-internal static ref readonly @string unrollDXInBatchesOfDˢ => ref unrollDXInBatchesOfDˢᵇ;
-private static readonly @string unrollDXInBatchesOfDˢᵇ = "unroll %dX in batches of %d"u8;
+internal static ref readonly @string unrollDXˢᴍPipe => ref unrollDXˢᵇᴍPipe;
+private static readonly @string unrollDXˢᵇᴍPipe = "unroll %dX"u8;
+internal static ref readonly @string unrollDXInBatchesOfDˢᴍPipe => ref unrollDXInBatchesOfDˢᵇᴍPipe;
+private static readonly @string unrollDXInBatchesOfDˢᵇᴍPipe = "unroll %dX in batches of %d"u8;
 
 // unroll emits a single unrolled loop for the given factor, iterating n times.
 internal static void unrollᴍ(ref Pipe p, Reg n, nint factor, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
@@ -573,9 +573,9 @@ internal static void unrollᴍ(ref Pipe p, Reg n, nint factor, Action<slice<slic
 
     // Unrolled loop body.
     if (factor < p.maxColumns) {
-        a.Comment(unrollDXˢ, factor);
+        a.Comment(unrollDXˢᴍPipe, factor);
     } else {
-        a.Comment(unrollDXInBatchesOfDˢ, factor, p.maxColumns);
+        a.Comment(unrollDXInBatchesOfDˢᴍPipe, factor, p.maxColumns);
     }
     if (p.unrollStart != nil) {
         p.unrollStart();

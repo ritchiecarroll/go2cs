@@ -93,15 +93,15 @@ internal static void initᴍ(ж<parser> Ꮡp, ж<token.File> Ꮡfile, slice<byte
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string dotsᶜ => ref dotsᶜᵇ;
-private static readonly @string dotsᶜᵇ = ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . "u8;
+internal static ref readonly @string dotsᶜᴍparser => ref dotsᶜᵇᴍparser;
+private static readonly @string dotsᶜᵇᴍparser = ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . "u8;
 
 // ----------------------------------------------------------------------------
 // Parsing support
 internal static void printTraceᴍ(ref parser p, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
 
-    @string dots = dotsᶜ;
+    @string dots = dotsᶜᴍparser;
     const nint n = /* len(dots) */ 64;
     var pos = p.@file.Position(p.pos);
     fmt.Printf("%5d:%3d: "u8, pos.Line, pos.Column);
@@ -160,8 +160,8 @@ internal static void decNestLev(ref parser p) {
 } partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string goBuildˢ => ref goBuildˢᵇ;
-private static readonly @string goBuildˢᵇ = "//go:build"u8;
+internal static ref readonly @string goBuildˢᴍparser => ref goBuildˢᵇᴍparser;
+private static readonly @string goBuildˢᵇᴍparser = "//go:build"u8;
 
 // Advance to the next token.
 internal static void next0ᴍ(ж<parser> Ꮡp) {
@@ -191,7 +191,7 @@ internal static void next0ᴍ(ж<parser> Ꮡp) {
     for (;;) {
         (p.pos, p.tok, p.lit) = p.scanner.Scan();
         if (p.tok == token.COMMENT) {
-            if (p.top && strings.HasPrefix(p.lit, goBuildˢ)) {
+            if (p.top && strings.HasPrefix(p.lit, goBuildˢᴍparser)) {
                 var (x, err) = constraint.Parse(p.lit); if (err == nil) {
                     p.goVersion = constraint.GoVersion(x);
                 }
@@ -455,8 +455,8 @@ internal static ж<ast.CommentGroup> /*comment*/ expectSemiᴍ(ж<parser> Ꮡp) 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingˢ => ref missingˢᵇ;
-private static readonly @string missingˢᵇ = "missing ','"u8;
+internal static ref readonly @string missingˢᴍparser => ref missingˢᵇᴍparser;
+private static readonly @string missingˢᵇᴍparser = "missing ','"u8;
 
 internal static bool atCommaᴍ(ж<parser> Ꮡp, @string context, token.Token follow) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -465,7 +465,7 @@ internal static bool atCommaᴍ(ж<parser> Ꮡp, @string context, token.Token fo
         return true;
     }
     if (p.tok != follow) {
-        @string msg = missingˢ;
+        @string msg = missingˢᴍparser;
         if (p.tok == token.SEMICOLON && p.lit == "\n"u8) {
             msg += " before newline"u8;
         }
@@ -571,8 +571,8 @@ internal static ж<ast.Ident> parseIdentᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string identListˢ => ref identListˢᵇ;
-private static readonly @string identListˢᵇ = "IdentList"u8;
+internal static ref readonly @string identListˢᴍparser => ref identListˢᵇᴍparser;
+private static readonly @string identListˢᵇᴍparser = "IdentList"u8;
 
 internal static slice<ж<ast.Ident>> /*list*/ parseIdentListᴍ(ж<parser> Ꮡp) {
     slice<ж<ast.Ident>> list = default;
@@ -581,7 +581,7 @@ internal static slice<ж<ast.Ident>> /*list*/ parseIdentListᴍ(ж<parser> Ꮡp)
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, identListˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, identListˢᴍparser), ref ᒐ);
         }
 
         list = append(list, Ꮡp.parseIdent());
@@ -596,8 +596,8 @@ internal static slice<ж<ast.Ident>> /*list*/ parseIdentListᴍ(ж<parser> Ꮡp)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string expressionListˢ => ref expressionListˢᵇ;
-private static readonly @string expressionListˢᵇ = "ExpressionList"u8;
+internal static ref readonly @string expressionListˢᴍparser => ref expressionListˢᵇᴍparser;
+private static readonly @string expressionListˢᵇᴍparser = "ExpressionList"u8;
 
 // ----------------------------------------------------------------------------
 // Common productions
@@ -610,7 +610,7 @@ internal static slice<ast.Expr> /*list*/ parseExprListᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, expressionListˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, expressionListˢᴍparser), ref ᒐ);
         }
 
         list = append(list, Ꮡp.parseExpr());
@@ -635,10 +635,10 @@ internal static slice<ast.Expr> parseListᴍ(ж<parser> Ꮡp, bool inRhs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeˢ => ref typeˢᵇ;
-private static readonly @string typeˢᵇ = "Type"u8;
-internal static ref readonly @string typeˢ2 => ref typeˢ2ᵇ;
-private static readonly @string typeˢ2ᵇ = "type"u8;
+internal static ref readonly @string typeˢᴍparser => ref typeˢᵇᴍparser;
+private static readonly @string typeˢᵇᴍparser = "Type"u8;
+internal static ref readonly @string typeˢ2ᴍparser => ref typeˢ2ᵇᴍparser;
+private static readonly @string typeˢ2ᵇᴍparser = "type"u8;
 
 // ----------------------------------------------------------------------------
 // Types
@@ -648,14 +648,14 @@ internal static ast.Expr parseTypeᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, typeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, typeˢᴍparser), ref ᒐ);
         }
 
         var typ = Ꮡp.tryIdentOrType();
 
         if (typ == nil) {
             ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
-            Ꮡp.errorExpected(pos, typeˢ2);
+            Ꮡp.errorExpected(pos, typeˢ2ᴍparser);
             Ꮡp.advance(exprEnd);
             return new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: pos, To: p.pos)));
         }
@@ -667,8 +667,8 @@ internal static ast.Expr parseTypeᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string qualifiedIdentˢ => ref qualifiedIdentˢᵇ;
-private static readonly @string qualifiedIdentˢᵇ = "QualifiedIdent"u8;
+internal static ref readonly @string qualifiedIdentˢᴍparser => ref qualifiedIdentˢᵇᴍparser;
+private static readonly @string qualifiedIdentˢᵇᴍparser = "QualifiedIdent"u8;
 
 internal static ast.Expr parseQualifiedIdentᴍ(ж<parser> Ꮡp, ж<ast.Ident> ident) {
     GoFrame ᒐ = default;
@@ -676,7 +676,7 @@ internal static ast.Expr parseQualifiedIdentᴍ(ж<parser> Ꮡp, ж<ast.Ident> i
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, qualifiedIdentˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, qualifiedIdentˢᴍparser), ref ᒐ);
         }
 
         var typ = Ꮡp.parseTypeName(ident);
@@ -691,8 +691,8 @@ internal static ast.Expr parseQualifiedIdentᴍ(ж<parser> Ꮡp, ж<ast.Ident> i
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeNameˢ => ref typeNameˢᵇ;
-private static readonly @string typeNameˢᵇ = "TypeName"u8;
+internal static ref readonly @string typeNameˢᴍparser => ref typeNameˢᵇᴍparser;
+private static readonly @string typeNameˢᵇᴍparser = "TypeName"u8;
 
 // If the result is an identifier, it is not resolved.
 internal static ast.Expr parseTypeNameᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡident) {
@@ -702,7 +702,7 @@ internal static ast.Expr parseTypeNameᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡiden
         ref var ident = ref Ꮡident.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, typeNameˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, typeNameˢᴍparser), ref ᒐ);
         }
 
         if (Ꮡident == nil) {
@@ -723,10 +723,10 @@ internal static ast.Expr parseTypeNameᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡiden
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string arrayTypeˢ => ref arrayTypeˢᵇ;
-private static readonly @string arrayTypeˢᵇ = "ArrayType"u8;
-internal static ref readonly @string unexpectedCommaExpectingˢ => ref unexpectedCommaExpectingˢᵇ;
-private static readonly @string unexpectedCommaExpectingˢᵇ = "unexpected comma; expecting ]"u8;
+internal static ref readonly @string arrayTypeˢᴍparser => ref arrayTypeˢᵇᴍparser;
+private static readonly @string arrayTypeˢᵇᴍparser = "ArrayType"u8;
+internal static ref readonly @string unexpectedCommaExpectingˢᴍparser => ref unexpectedCommaExpectingˢᵇᴍparser;
+private static readonly @string unexpectedCommaExpectingˢᵇᴍparser = "unexpected comma; expecting ]"u8;
 
 // "[" has already been consumed, and lbrack is its position.
 // If len != nil it is the already consumed array length.
@@ -736,7 +736,7 @@ internal static ж<ast.ArrayType> parseArrayTypeᴍ(ж<parser> Ꮡp, token.Pos l
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, arrayTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, arrayTypeˢᴍparser), ref ᒐ);
         }
 
         if (len == nil) {
@@ -754,7 +754,7 @@ internal static ж<ast.ArrayType> parseArrayTypeᴍ(ж<parser> Ꮡp, token.Pos l
             // Trailing commas are accepted in type parameter
             // lists but not in array type declarations.
             // Accept for better error handling but complain.
-            Ꮡp.error(p.pos, unexpectedCommaExpectingˢ);
+            Ꮡp.error(p.pos, unexpectedCommaExpectingˢᴍparser);
             Ꮡp.next();
         }
         Ꮡp.expect(token.RBRACK);
@@ -766,8 +766,8 @@ internal static ж<ast.ArrayType> parseArrayTypeᴍ(ж<parser> Ꮡp, token.Pos l
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string arrayFieldOrTypeInstanceˢ => ref arrayFieldOrTypeInstanceˢᵇ;
-private static readonly @string arrayFieldOrTypeInstanceˢᵇ = "ArrayFieldOrTypeInstance"u8;
+internal static ref readonly @string arrayFieldOrTypeInstanceˢᴍparser => ref arrayFieldOrTypeInstanceˢᵇᴍparser;
+private static readonly @string arrayFieldOrTypeInstanceˢᵇᴍparser = "ArrayFieldOrTypeInstance"u8;
 
 internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstanceᴍ(ж<parser> Ꮡp, ж<ast.Ident> x) {
     GoFrame ᒐ = default;
@@ -775,7 +775,7 @@ internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstanceᴍ(ж<pa
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, arrayFieldOrTypeInstanceˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, arrayFieldOrTypeInstanceˢᴍparser), ref ᒐ);
         }
 
         ref var lbrack = ref heap<token.Pos>(Ꮡp.expect(token.LBRACK), out var Ꮡlbrack);
@@ -810,7 +810,7 @@ internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstanceᴍ(ж<pa
                 // x [P]E
                 if (trailingComma.IsValid()) {
                     // Trailing commas are invalid in array type fields.
-                    Ꮡp.error(trailingComma, unexpectedCommaExpectingˢ);
+                    Ꮡp.error(trailingComma, unexpectedCommaExpectingˢᴍparser);
                 }
                 return (x, new ast.ArrayTypeжExpr(Ꮡ(new ast.ArrayType(Lbrack: lbrack, Len: args[0], Elt: elt))));
             }
@@ -824,12 +824,12 @@ internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstanceᴍ(ж<pa
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fieldDeclˢ => ref fieldDeclˢᵇ;
-private static readonly @string fieldDeclˢᵇ = "FieldDecl"u8;
-internal static ref readonly @string cannotParenthesizeˢ => ref cannotParenthesizeˢᵇ;
-private static readonly @string cannotParenthesizeˢᵇ = "cannot parenthesize embedded type"u8;
-internal static ref readonly @string fieldNameOrEmbeddedTypeˢ => ref fieldNameOrEmbeddedTypeˢᵇ;
-private static readonly @string fieldNameOrEmbeddedTypeˢᵇ = "field name or embedded type"u8;
+internal static ref readonly @string fieldDeclˢᴍparser => ref fieldDeclˢᵇᴍparser;
+private static readonly @string fieldDeclˢᵇᴍparser = "FieldDecl"u8;
+internal static ref readonly @string cannotParenthesizeˢᴍparser => ref cannotParenthesizeˢᵇᴍparser;
+private static readonly @string cannotParenthesizeˢᵇᴍparser = "cannot parenthesize embedded type"u8;
+internal static ref readonly @string fieldNameOrEmbeddedTypeˢᴍparser => ref fieldNameOrEmbeddedTypeˢᵇᴍparser;
+private static readonly @string fieldNameOrEmbeddedTypeˢᵇᴍparser = "field name or embedded type"u8;
 
 internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -837,7 +837,7 @@ internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, fieldDeclˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, fieldDeclˢᴍparser), ref ᒐ);
         }
 
         var doc = p.leadComment;
@@ -879,7 +879,7 @@ internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
             Ꮡp.next();
             if (p.tok == token.LPAREN) {
                 // *(T)
-                Ꮡp.error(p.pos, cannotParenthesizeˢ);
+                Ꮡp.error(p.pos, cannotParenthesizeˢᴍparser);
                 Ꮡp.next();
                 typ = Ꮡp.parseQualifiedIdent(nil);
                 // expect closing ')' but no need to complain if missing
@@ -894,7 +894,7 @@ internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
             break;
         }
         case var ᴛ when ᴛ == token.LPAREN: {
-            Ꮡp.error(p.pos, cannotParenthesizeˢ);
+            Ꮡp.error(p.pos, cannotParenthesizeˢᴍparser);
             Ꮡp.next();
             if (p.tok == token.MUL) {
                 // (*T)
@@ -913,7 +913,7 @@ internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
         }
         default: {
             ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
-            Ꮡp.errorExpected(pos, fieldNameOrEmbeddedTypeˢ);
+            Ꮡp.errorExpected(pos, fieldNameOrEmbeddedTypeˢᴍparser);
             Ꮡp.advance(exprEnd);
             typ = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: pos, To: p.pos)));
             break;
@@ -935,8 +935,8 @@ internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string structTypeˢ => ref structTypeˢᵇ;
-private static readonly @string structTypeˢᵇ = "StructType"u8;
+internal static ref readonly @string structTypeˢᴍparser => ref structTypeˢᵇᴍparser;
+private static readonly @string structTypeˢᵇᴍparser = "StructType"u8;
 
 internal static ж<ast.StructType> parseStructTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -944,7 +944,7 @@ internal static ж<ast.StructType> parseStructTypeᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, structTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, structTypeˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.STRUCT), out var Ꮡpos);
@@ -972,8 +972,8 @@ internal static ж<ast.StructType> parseStructTypeᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pointerTypeˢ => ref pointerTypeˢᵇ;
-private static readonly @string pointerTypeˢᵇ = "PointerType"u8;
+internal static ref readonly @string pointerTypeˢᴍparser => ref pointerTypeˢᵇᴍparser;
+private static readonly @string pointerTypeˢᵇᴍparser = "PointerType"u8;
 
 internal static ж<ast.StarExpr> parsePointerTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -981,7 +981,7 @@ internal static ж<ast.StarExpr> parsePointerTypeᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, pointerTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, pointerTypeˢᴍparser), ref ᒐ);
         }
 
         ref var star = ref heap<token.Pos>(Ꮡp.expect(token.MUL), out var Ꮡstar);
@@ -994,8 +994,8 @@ internal static ж<ast.StarExpr> parsePointerTypeᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dotsTypeˢ => ref dotsTypeˢᵇ;
-private static readonly @string dotsTypeˢᵇ = "DotsType"u8;
+internal static ref readonly @string dotsTypeˢᴍparser => ref dotsTypeˢᵇᴍparser;
+private static readonly @string dotsTypeˢᵇᴍparser = "DotsType"u8;
 
 internal static ж<ast.Ellipsis> parseDotsTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1003,7 +1003,7 @@ internal static ж<ast.Ellipsis> parseDotsTypeᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, dotsTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, dotsTypeˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.ELLIPSIS), out var Ꮡpos);
@@ -1025,8 +1025,8 @@ partial struct field {
 } partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string paramDeclˢ => ref paramDeclˢᵇ;
-private static readonly @string paramDeclˢᵇ = "ParamDecl"u8;
+internal static ref readonly @string paramDeclˢᴍparser => ref paramDeclˢᵇᴍparser;
+private static readonly @string paramDeclˢᵇᴍparser = "ParamDecl"u8;
 
 internal static field /*f*/ parseParamDeclᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡname, bool typeSetsOK) {
     field f = default;
@@ -1038,7 +1038,7 @@ internal static field /*f*/ parseParamDeclᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡ
         // TODO(rFindley) refactor to be more similar to paramDeclOrNil in the syntax
         // package
         if (p.trace) {
-            defer(un, trace(Ꮡp, paramDeclˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, paramDeclˢᴍparser), ref ᒐ);
         }
 
         token.Token ptok = p.tok;
@@ -1128,26 +1128,26 @@ internal static field /*f*/ parseParamDeclᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡ
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string parameterListˢ => ref parameterListˢᵇ;
-private static readonly @string parameterListˢᵇ = "ParameterList"u8;
-internal static ref readonly @string parameterListˢ2 => ref parameterListˢ2ᵇ;
-private static readonly @string parameterListˢ2ᵇ = "parameter list"u8;
-internal static ref readonly @string missingTypeConstraintˢ => ref missingTypeConstraintˢᵇ;
-private static readonly @string missingTypeConstraintˢᵇ = "missing type constraint"u8;
-internal static ref readonly @string missingTypeParameterNameˢ => ref missingTypeParameterNameˢᵇ;
-private static readonly @string missingTypeParameterNameˢᵇ = "missing type parameter name"u8;
-internal static ref readonly @string missingParameterTypeˢ => ref missingParameterTypeˢᵇ;
-private static readonly @string missingParameterTypeˢᵇ = "missing parameter type"u8;
-internal static ref readonly @string missingParameterNameˢ => ref missingParameterNameˢᵇ;
-private static readonly @string missingParameterNameˢᵇ = "missing parameter name"u8;
-internal static ref readonly @string canOnlyUseWithFinalˢ => ref canOnlyUseWithFinalˢᵇ;
-private static readonly @string canOnlyUseWithFinalˢᵇ = "can only use ... with final parameter"u8;
-internal static ref readonly @string invalidUseOfˢ => ref invalidUseOfˢᵇ;
-private static readonly @string invalidUseOfˢᵇ = "invalid use of ..."u8;
-internal static ref readonly @string nilTypeInUnnamedˢ => ref nilTypeInUnnamedˢᵇ;
-private static readonly @string nilTypeInUnnamedˢᵇ = "nil type in unnamed parameter list"u8;
-internal static ref readonly @string nilTypeInNamedParameterˢ => ref nilTypeInNamedParameterˢᵇ;
-private static readonly @string nilTypeInNamedParameterˢᵇ = "nil type in named parameter list"u8;
+internal static ref readonly @string parameterListˢᴍparser => ref parameterListˢᵇᴍparser;
+private static readonly @string parameterListˢᵇᴍparser = "ParameterList"u8;
+internal static ref readonly @string parameterListˢ2ᴍparser => ref parameterListˢ2ᵇᴍparser;
+private static readonly @string parameterListˢ2ᵇᴍparser = "parameter list"u8;
+internal static ref readonly @string missingTypeConstraintˢᴍparser => ref missingTypeConstraintˢᵇᴍparser;
+private static readonly @string missingTypeConstraintˢᵇᴍparser = "missing type constraint"u8;
+internal static ref readonly @string missingTypeParameterNameˢᴍparser => ref missingTypeParameterNameˢᵇᴍparser;
+private static readonly @string missingTypeParameterNameˢᵇᴍparser = "missing type parameter name"u8;
+internal static ref readonly @string missingParameterTypeˢᴍparser => ref missingParameterTypeˢᵇᴍparser;
+private static readonly @string missingParameterTypeˢᵇᴍparser = "missing parameter type"u8;
+internal static ref readonly @string missingParameterNameˢᴍparser => ref missingParameterNameˢᵇᴍparser;
+private static readonly @string missingParameterNameˢᵇᴍparser = "missing parameter name"u8;
+internal static ref readonly @string canOnlyUseWithFinalˢᴍparser => ref canOnlyUseWithFinalˢᵇᴍparser;
+private static readonly @string canOnlyUseWithFinalˢᵇᴍparser = "can only use ... with final parameter"u8;
+internal static ref readonly @string invalidUseOfˢᴍparser => ref invalidUseOfˢᵇᴍparser;
+private static readonly @string invalidUseOfˢᵇᴍparser = "invalid use of ..."u8;
+internal static ref readonly @string nilTypeInUnnamedˢᴍparser => ref nilTypeInUnnamedˢᵇᴍparser;
+private static readonly @string nilTypeInUnnamedˢᵇᴍparser = "nil type in unnamed parameter list"u8;
+internal static ref readonly @string nilTypeInNamedParameterˢᴍparser => ref nilTypeInNamedParameterˢᵇᴍparser;
+private static readonly @string nilTypeInNamedParameterˢᵇᴍparser = "nil type in named parameter list"u8;
 
 internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡname0, ast.Expr typ0, token.Token closing, bool dddok) {
     slice<ж<ast.Field>> @params = default;
@@ -1158,7 +1158,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser>
         var listᴷ = new stackAppend<field>();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, parameterListˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, parameterListˢᴍparser), ref ᒐ);
         }
 
         // Type parameters are the only parameter list closed by ']'.
@@ -1202,7 +1202,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser>
                     typed++;
                 }
             }
-            if (!Ꮡp.atComma(parameterListˢ2, closing)) {
+            if (!Ꮡp.atComma(parameterListˢ2ᴍparser, closing)) {
                 break;
             }
             Ꮡp.next();
@@ -1230,10 +1230,10 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser>
                 if (named == typed) {
                     /* same as typed == 0 */
                     errPos = p.pos; // position error at closing ]
-                    msg = missingTypeConstraintˢ;
+                    msg = missingTypeConstraintˢᴍparser;
                 } else {
                     errPos = pos0; // position at opening [ or first name
-                    msg = missingTypeParameterNameˢ;
+                    msg = missingTypeParameterNameˢᴍparser;
                     if (len(list) == 1) {
                         msg += " or invalid array length"u8;
                     }
@@ -1272,19 +1272,19 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser>
                 if (named == typed) {
                     errPos = p.pos; // position error at closing token ) or ]
                     if (tparams) {
-                        msg = missingTypeConstraintˢ;
+                        msg = missingTypeConstraintˢᴍparser;
                     } else {
-                        msg = missingParameterTypeˢ;
+                        msg = missingParameterTypeˢᴍparser;
                     }
                 } else {
                     if (tparams) {
-                        msg = missingTypeParameterNameˢ;
+                        msg = missingTypeParameterNameˢᴍparser;
                         // go.dev/issue/60812
                         if (len(list) == 1) {
                             msg += " or invalid array length"u8;
                         }
                     } else {
-                        msg = missingParameterNameˢ;
+                        msg = missingParameterNameˢᴍparser;
                     }
                 }
                 Ꮡp.error(errPos, msg);
@@ -1299,9 +1299,9 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser>
                 if (first) {
                     first = false;
                     if (dddok) {
-                        Ꮡp.error(t.ΔEllipsis, canOnlyUseWithFinalˢ);
+                        Ꮡp.error(t.ΔEllipsis, canOnlyUseWithFinalˢᴍparser);
                     } else {
-                        Ꮡp.error(t.ΔEllipsis, invalidUseOfˢ);
+                        Ꮡp.error(t.ΔEllipsis, invalidUseOfˢᴍparser);
                     }
                 }
                 // use T instead of invalid ...T
@@ -1316,7 +1316,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser>
         if (named == 0) {
             // parameter list consists of types only
             foreach (var (_, par) in range(list)) {
-                assert(par.typ != nil, nilTypeInUnnamedˢ);
+                assert(par.typ != nil, nilTypeInUnnamedˢᴍparser);
                 @params = append(@params, Ꮡ(new ast.Field(Type: par.typ)));
             }
             goto ᒐdone;
@@ -1327,7 +1327,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser>
         ref var names = ref heap<slice<ж<ast.Ident>>>(out var Ꮡnames);
         ref var typ = ref heap<ast.Expr>(out var Ꮡtyp);
         void addParams() {
-            assert(Ꮡtyp.ValueSlot != nil, nilTypeInNamedParameterˢ);
+            assert(Ꮡtyp.ValueSlot != nil, nilTypeInNamedParameterˢᴍparser);
             var field = Ꮡ(new ast.Field(Names: Ꮡnames.ValueSlot, Type: Ꮡtyp.ValueSlot));
             @params = append(@params, field);
             Ꮡnames.ValueSlot = default;
@@ -1351,10 +1351,10 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser>
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeParametersˢ => ref typeParametersˢᵇ;
-private static readonly @string typeParametersˢᵇ = "TypeParameters"u8;
-internal static ref readonly @string emptyTypeParameterListˢ => ref emptyTypeParameterListˢᵇ;
-private static readonly @string emptyTypeParameterListˢᵇ = "empty type parameter list"u8;
+internal static ref readonly @string typeParametersˢᴍparser => ref typeParametersˢᵇᴍparser;
+private static readonly @string typeParametersˢᵇᴍparser = "TypeParameters"u8;
+internal static ref readonly @string emptyTypeParameterListˢᴍparser => ref emptyTypeParameterListˢᵇᴍparser;
+private static readonly @string emptyTypeParameterListˢᵇᴍparser = "empty type parameter list"u8;
 
 internal static ж<ast.FieldList> parseTypeParametersᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1362,7 +1362,7 @@ internal static ж<ast.FieldList> parseTypeParametersᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, typeParametersˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, typeParametersˢᴍparser), ref ᒐ);
         }
 
         ref var lbrack = ref heap<token.Pos>(Ꮡp.expect(token.LBRACK), out var Ꮡlbrack);
@@ -1373,7 +1373,7 @@ internal static ж<ast.FieldList> parseTypeParametersᴍ(ж<parser> Ꮡp) {
         ref var rbrack = ref heap<token.Pos>(Ꮡp.expect(token.RBRACK), out var Ꮡrbrack);
 
         if (len(list) == 0) {
-            Ꮡp.error(rbrack, emptyTypeParameterListˢ);
+            Ꮡp.error(rbrack, emptyTypeParameterListˢᴍparser);
             return default; // avoid follow-on errors
         }
 
@@ -1384,8 +1384,8 @@ internal static ж<ast.FieldList> parseTypeParametersᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string parametersˢ => ref parametersˢᵇ;
-private static readonly @string parametersˢᵇ = "Parameters"u8;
+internal static ref readonly @string parametersˢᴍparser => ref parametersˢᵇᴍparser;
+private static readonly @string parametersˢᵇᴍparser = "Parameters"u8;
 
 internal static ж<ast.FieldList> parseParametersᴍ(ж<parser> Ꮡp, bool result) {
     GoFrame ᒐ = default;
@@ -1393,7 +1393,7 @@ internal static ж<ast.FieldList> parseParametersᴍ(ж<parser> Ꮡp, bool resul
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, parametersˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, parametersˢᴍparser), ref ᒐ);
         }
 
         if (!result || p.tok == token.LPAREN) {
@@ -1419,10 +1419,10 @@ internal static ж<ast.FieldList> parseParametersᴍ(ж<parser> Ꮡp, bool resul
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string funcTypeˢ => ref funcTypeˢᵇ;
-private static readonly @string funcTypeˢᵇ = "FuncType"u8;
-internal static ref readonly @string functionTypeMustHaveNoˢ => ref functionTypeMustHaveNoˢᵇ;
-private static readonly @string functionTypeMustHaveNoˢᵇ = "function type must have no type parameters"u8;
+internal static ref readonly @string funcTypeˢᴍparser => ref funcTypeˢᵇᴍparser;
+private static readonly @string funcTypeˢᵇᴍparser = "FuncType"u8;
+internal static ref readonly @string functionTypeMustHaveNoˢᴍparser => ref functionTypeMustHaveNoˢᵇᴍparser;
+private static readonly @string functionTypeMustHaveNoˢᵇᴍparser = "function type must have no type parameters"u8;
 
 internal static ж<ast.FuncType> parseFuncTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1430,7 +1430,7 @@ internal static ж<ast.FuncType> parseFuncTypeᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, funcTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, funcTypeˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.FUNC), out var Ꮡpos);
@@ -1438,7 +1438,7 @@ internal static ж<ast.FuncType> parseFuncTypeᴍ(ж<parser> Ꮡp) {
         if (p.tok == token.LBRACK) {
             var tparams = Ꮡp.parseTypeParameters();
             if (tparams != nil) {
-                Ꮡp.error(tparams.Opening, functionTypeMustHaveNoˢ);
+                Ꮡp.error(tparams.Opening, functionTypeMustHaveNoˢᴍparser);
             }
         }
         var @params = Ꮡp.parseParameters(false);
@@ -1451,12 +1451,12 @@ internal static ж<ast.FuncType> parseFuncTypeᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string methodSpecˢ => ref methodSpecˢᵇ;
-private static readonly @string methodSpecˢᵇ = "MethodSpec"u8;
-internal static ref readonly @string interfaceMethodMustHaveˢ => ref interfaceMethodMustHaveˢᵇ;
-private static readonly @string interfaceMethodMustHaveˢᵇ = "interface method must have no type parameters"u8;
-internal static ref readonly @string typeArgumentListˢ => ref typeArgumentListˢᵇ;
-private static readonly @string typeArgumentListˢᵇ = "type argument list"u8;
+internal static ref readonly @string methodSpecˢᴍparser => ref methodSpecˢᵇᴍparser;
+private static readonly @string methodSpecˢᵇᴍparser = "MethodSpec"u8;
+internal static ref readonly @string interfaceMethodMustHaveˢᴍparser => ref interfaceMethodMustHaveˢᵇᴍparser;
+private static readonly @string interfaceMethodMustHaveˢᵇᴍparser = "interface method must have no type parameters"u8;
+internal static ref readonly @string typeArgumentListˢᴍparser => ref typeArgumentListˢᵇᴍparser;
+private static readonly @string typeArgumentListˢᵇᴍparser = "type argument list"u8;
 
 internal static ж<ast.Field> parseMethodSpecᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1464,7 +1464,7 @@ internal static ж<ast.Field> parseMethodSpecᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, methodSpecˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, methodSpecˢᴍparser), ref ᒐ);
         }
 
         var doc = p.leadComment;
@@ -1487,7 +1487,7 @@ internal static ж<ast.Field> parseMethodSpecᴍ(ж<parser> Ꮡp) {
                     // better error message and improved error recovery.
                     _ = Ꮡp.parseParameterList(name0, default, token.RBRACK, false);
                     _ = Ꮡp.expect(token.RBRACK);
-                    Ꮡp.error(lbrack, interfaceMethodMustHaveˢ);
+                    Ꮡp.error(lbrack, interfaceMethodMustHaveˢᴍparser);
 
                     // TODO(rfindley) refactor to share code with parseFuncType.
                     var @params = Ꮡp.parseParameters(false);
@@ -1502,19 +1502,19 @@ internal static ж<ast.Field> parseMethodSpecᴍ(ж<parser> Ꮡp) {
                     // embedded instantiated type
                     // TODO(rfindley) should resolve all identifiers in x.
                     var list = slice<ast.Expr>([xΔ2]);
-                    if (Ꮡp.atComma(typeArgumentListˢ, token.RBRACK)) {
+                    if (Ꮡp.atComma(typeArgumentListˢᴍparser, token.RBRACK)) {
                         p.exprLev++;
                         Ꮡp.next();
                         while (p.tok != token.RBRACK && p.tok != token.EOF) {
                             list = append(list, Ꮡp.parseType());
-                            if (!Ꮡp.atComma(typeArgumentListˢ, token.RBRACK)) {
+                            if (!Ꮡp.atComma(typeArgumentListˢᴍparser, token.RBRACK)) {
                                 break;
                             }
                             Ꮡp.next();
                         }
                         p.exprLev--;
                     }
-                    token.Pos rbrack = Ꮡp.expectClosing(token.RBRACK, typeArgumentListˢ);
+                    token.Pos rbrack = Ꮡp.expectClosing(token.RBRACK, typeArgumentListˢᴍparser);
                     typ = packIndexExpr(new ast.IdentжExpr(ident), lbrack, list, rbrack);
                 }
                 break;
@@ -1553,8 +1553,8 @@ internal static ж<ast.Field> parseMethodSpecᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string embeddedElemˢ => ref embeddedElemˢᵇ;
-private static readonly @string embeddedElemˢᵇ = "EmbeddedElem"u8;
+internal static ref readonly @string embeddedElemˢᴍparser => ref embeddedElemˢᵇᴍparser;
+private static readonly @string embeddedElemˢᵇᴍparser = "EmbeddedElem"u8;
 
 internal static ast.Expr embeddedElemᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
@@ -1562,7 +1562,7 @@ internal static ast.Expr embeddedElemᴍ(ж<parser> Ꮡp, ast.Expr x) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, embeddedElemˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, embeddedElemˢᴍparser), ref ᒐ);
         }
         if (x == nil) {
             x = Ꮡp.embeddedTerm();
@@ -1583,10 +1583,10 @@ internal static ast.Expr embeddedElemᴍ(ж<parser> Ꮡp, ast.Expr x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string embeddedTermˢ => ref embeddedTermˢᵇ;
-private static readonly @string embeddedTermˢᵇ = "EmbeddedTerm"u8;
-internal static ref readonly @string termOrTypeˢ => ref termOrTypeˢᵇ;
-private static readonly @string termOrTypeˢᵇ = "~ term or type"u8;
+internal static ref readonly @string embeddedTermˢᴍparser => ref embeddedTermˢᵇᴍparser;
+private static readonly @string embeddedTermˢᵇᴍparser = "EmbeddedTerm"u8;
+internal static ref readonly @string termOrTypeˢᴍparser => ref termOrTypeˢᵇᴍparser;
+private static readonly @string termOrTypeˢᵇᴍparser = "~ term or type"u8;
 
 internal static ast.Expr embeddedTermᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1594,7 +1594,7 @@ internal static ast.Expr embeddedTermᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, embeddedTermˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, embeddedTermˢᴍparser), ref ᒐ);
         }
         if (p.tok == token.TILDE) {
             var tΔ1 = @new<ast.UnaryExpr>();
@@ -1608,7 +1608,7 @@ internal static ast.Expr embeddedTermᴍ(ж<parser> Ꮡp) {
         var t = Ꮡp.tryIdentOrType();
         if (t == nil) {
             ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
-            Ꮡp.errorExpected(pos, termOrTypeˢ);
+            Ꮡp.errorExpected(pos, termOrTypeˢᴍparser);
             Ꮡp.advance(exprEnd);
             return new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: pos, To: p.pos)));
         }
@@ -1620,8 +1620,8 @@ internal static ast.Expr embeddedTermᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string interfaceTypeˢ => ref interfaceTypeˢᵇ;
-private static readonly @string interfaceTypeˢᵇ = "InterfaceType"u8;
+internal static ref readonly @string interfaceTypeˢᴍparser => ref interfaceTypeˢᵇᴍparser;
+private static readonly @string interfaceTypeˢᵇᴍparser = "InterfaceType"u8;
 
 internal static ж<ast.InterfaceType> parseInterfaceTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1629,7 +1629,7 @@ internal static ж<ast.InterfaceType> parseInterfaceTypeᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, interfaceTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, interfaceTypeˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.INTERFACE), out var Ꮡpos);
@@ -1687,8 +1687,8 @@ break_parseElements:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mapTypeˢ => ref mapTypeˢᵇ;
-private static readonly @string mapTypeˢᵇ = "MapType"u8;
+internal static ref readonly @string mapTypeˢᴍparser => ref mapTypeˢᵇᴍparser;
+private static readonly @string mapTypeˢᵇᴍparser = "MapType"u8;
 
 internal static ж<ast.MapType> parseMapTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1696,7 +1696,7 @@ internal static ж<ast.MapType> parseMapTypeᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, mapTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, mapTypeˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.MAP), out var Ꮡpos);
@@ -1712,8 +1712,8 @@ internal static ж<ast.MapType> parseMapTypeᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chanTypeˢ => ref chanTypeˢᵇ;
-private static readonly @string chanTypeˢᵇ = "ChanType"u8;
+internal static ref readonly @string chanTypeˢᴍparser => ref chanTypeˢᵇᴍparser;
+private static readonly @string chanTypeˢᵇᴍparser = "ChanType"u8;
 
 internal static ж<ast.ChanType> parseChanTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1721,7 +1721,7 @@ internal static ж<ast.ChanType> parseChanTypeᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, chanTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, chanTypeˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
@@ -1748,8 +1748,8 @@ internal static ж<ast.ChanType> parseChanTypeᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeInstanceˢ => ref typeInstanceˢᵇ;
-private static readonly @string typeInstanceˢᵇ = "TypeInstance"u8;
+internal static ref readonly @string typeInstanceˢᴍparser => ref typeInstanceˢᵇᴍparser;
+private static readonly @string typeInstanceˢᵇᴍparser = "TypeInstance"u8;
 
 internal static ast.Expr parseTypeInstanceᴍ(ж<parser> Ꮡp, ast.Expr typ) {
     GoFrame ᒐ = default;
@@ -1757,7 +1757,7 @@ internal static ast.Expr parseTypeInstanceᴍ(ж<parser> Ꮡp, ast.Expr typ) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, typeInstanceˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, typeInstanceˢᴍparser), ref ᒐ);
         }
 
         ref var opening = ref heap<token.Pos>(Ꮡp.expect(token.LBRACK), out var Ꮡopening);
@@ -1765,17 +1765,17 @@ internal static ast.Expr parseTypeInstanceᴍ(ж<parser> Ꮡp, ast.Expr typ) {
         slice<ast.Expr> list = default;
         while (p.tok != token.RBRACK && p.tok != token.EOF) {
             list = append(list, Ꮡp.parseType());
-            if (!Ꮡp.atComma(typeArgumentListˢ, token.RBRACK)) {
+            if (!Ꮡp.atComma(typeArgumentListˢᴍparser, token.RBRACK)) {
                 break;
             }
             Ꮡp.next();
         }
         p.exprLev--;
 
-        ref var closing = ref heap<token.Pos>(Ꮡp.expectClosing(token.RBRACK, typeArgumentListˢ), out var Ꮡclosing);
+        ref var closing = ref heap<token.Pos>(Ꮡp.expectClosing(token.RBRACK, typeArgumentListˢᴍparser), out var Ꮡclosing);
 
         if (len(list) == 0) {
-            Ꮡp.errorExpected(closing, typeArgumentListˢ);
+            Ꮡp.errorExpected(closing, typeArgumentListˢᴍparser);
             return new ast.IndexExprжExpr(Ꮡ(new ast.IndexExpr(
                 X: typ,
                 Lbrack: opening,
@@ -1843,8 +1843,8 @@ internal static ast.Expr tryIdentOrTypeᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string statementListˢ => ref statementListˢᵇ;
-private static readonly @string statementListˢᵇ = "StatementList"u8;
+internal static ref readonly @string statementListˢᴍparser => ref statementListˢᵇᴍparser;
+private static readonly @string statementListˢᵇᴍparser = "StatementList"u8;
 
 // ----------------------------------------------------------------------------
 // Blocks
@@ -1855,7 +1855,7 @@ internal static slice<ast.Stmt> /*list*/ parseStmtListᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, statementListˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, statementListˢᴍparser), ref ᒐ);
         }
 
         while (p.tok != token.CASE && p.tok != token.DEFAULT && p.tok != token.RBRACE && p.tok != token.EOF) {
@@ -1868,8 +1868,8 @@ internal static slice<ast.Stmt> /*list*/ parseStmtListᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bodyˢ => ref bodyˢᵇ;
-private static readonly @string bodyˢᵇ = "Body"u8;
+internal static ref readonly @string bodyˢᴍparser => ref bodyˢᵇᴍparser;
+private static readonly @string bodyˢᵇᴍparser = "Body"u8;
 
 internal static ж<ast.BlockStmt> parseBodyᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1877,7 +1877,7 @@ internal static ж<ast.BlockStmt> parseBodyᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, bodyˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, bodyˢᴍparser), ref ᒐ);
         }
 
         ref var lbrace = ref heap<token.Pos>(Ꮡp.expect(token.LBRACE), out var Ꮡlbrace);
@@ -1891,8 +1891,8 @@ internal static ж<ast.BlockStmt> parseBodyᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string blockStmtˢ => ref blockStmtˢᵇ;
-private static readonly @string blockStmtˢᵇ = "BlockStmt"u8;
+internal static ref readonly @string blockStmtˢᴍparser => ref blockStmtˢᵇᴍparser;
+private static readonly @string blockStmtˢᵇᴍparser = "BlockStmt"u8;
 
 internal static ж<ast.BlockStmt> parseBlockStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -1900,7 +1900,7 @@ internal static ж<ast.BlockStmt> parseBlockStmtᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, blockStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, blockStmtˢᴍparser), ref ᒐ);
         }
 
         ref var lbrace = ref heap<token.Pos>(Ꮡp.expect(token.LBRACE), out var Ꮡlbrace);
@@ -1914,8 +1914,8 @@ internal static ж<ast.BlockStmt> parseBlockStmtᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string funcTypeOrLitˢ => ref funcTypeOrLitˢᵇ;
-private static readonly @string funcTypeOrLitˢᵇ = "FuncTypeOrLit"u8;
+internal static ref readonly @string funcTypeOrLitˢᴍparser => ref funcTypeOrLitˢᵇᴍparser;
+private static readonly @string funcTypeOrLitˢᵇᴍparser = "FuncTypeOrLit"u8;
 
 // ----------------------------------------------------------------------------
 // Expressions
@@ -1925,7 +1925,7 @@ internal static ast.Expr parseFuncTypeOrLitᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, funcTypeOrLitˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, funcTypeOrLitˢᴍparser), ref ᒐ);
         }
 
         var typ = Ꮡp.parseFuncType();
@@ -1945,12 +1945,12 @@ internal static ast.Expr parseFuncTypeOrLitᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string operandˢ => ref operandˢᵇ;
-private static readonly @string operandˢᵇ = "Operand"u8;
-internal static ref readonly @string typeCannotBeIdentifierˢ => ref typeCannotBeIdentifierˢᵇ;
-private static readonly @string typeCannotBeIdentifierˢᵇ = "type cannot be identifier"u8;
-internal static ref readonly @string operandˢ2 => ref operandˢ2ᵇ;
-private static readonly @string operandˢ2ᵇ = "operand"u8;
+internal static ref readonly @string operandˢᴍparser => ref operandˢᵇᴍparser;
+private static readonly @string operandˢᵇᴍparser = "Operand"u8;
+internal static ref readonly @string typeCannotBeIdentifierˢᴍparser => ref typeCannotBeIdentifierˢᵇᴍparser;
+private static readonly @string typeCannotBeIdentifierˢᵇᴍparser = "type cannot be identifier"u8;
+internal static ref readonly @string operandˢ2ᴍparser => ref operandˢ2ᵇᴍparser;
+private static readonly @string operandˢ2ᵇᴍparser = "operand"u8;
 
 // parseOperand may return an expression or a raw type (incl. array
 // types of the form [...]T). Callers must verify the result.
@@ -1960,7 +1960,7 @@ internal static ast.Expr parseOperandᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, operandˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, operandˢᴍparser), ref ᒐ);
         }
 
         switch (p.tok) {
@@ -1993,13 +1993,13 @@ internal static ast.Expr parseOperandᴍ(ж<parser> Ꮡp) {
         var typ = Ꮡp.tryIdentOrType(); if (typ != nil) { // do not consume trailing type parameters
             // could be type for composite literal or conversion
             var (_, isIdent) = typ._<ж<ast.Ident>>(ᐧ);
-            assert(!isIdent, typeCannotBeIdentifierˢ);
+            assert(!isIdent, typeCannotBeIdentifierˢᴍparser);
             return typ;
         }
 
         // we have an error
         ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
-        Ꮡp.errorExpected(pos, operandˢ2);
+        Ꮡp.errorExpected(pos, operandˢ2ᴍparser);
         Ꮡp.advance(stmtStart);
         return new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: pos, To: p.pos)));
     }
@@ -2008,8 +2008,8 @@ internal static ast.Expr parseOperandᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string selectorˢ => ref selectorˢᵇ;
-private static readonly @string selectorˢᵇ = "Selector"u8;
+internal static ref readonly @string selectorˢᴍparser => ref selectorˢᵇᴍparser;
+private static readonly @string selectorˢᵇᴍparser = "Selector"u8;
 
 internal static ast.Expr parseSelectorᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
@@ -2017,7 +2017,7 @@ internal static ast.Expr parseSelectorᴍ(ж<parser> Ꮡp, ast.Expr x) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, selectorˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, selectorˢᴍparser), ref ᒐ);
         }
 
         var sel = Ꮡp.parseIdent();
@@ -2029,8 +2029,8 @@ internal static ast.Expr parseSelectorᴍ(ж<parser> Ꮡp, ast.Expr x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeAssertionˢ => ref typeAssertionˢᵇ;
-private static readonly @string typeAssertionˢᵇ = "TypeAssertion"u8;
+internal static ref readonly @string typeAssertionˢᴍparser => ref typeAssertionˢᵇᴍparser;
+private static readonly @string typeAssertionˢᵇᴍparser = "TypeAssertion"u8;
 
 internal static ast.Expr parseTypeAssertionᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
@@ -2038,7 +2038,7 @@ internal static ast.Expr parseTypeAssertionᴍ(ж<parser> Ꮡp, ast.Expr x) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, typeAssertionˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, typeAssertionˢᴍparser), ref ᒐ);
         }
 
         ref var lparen = ref heap<token.Pos>(Ꮡp.expect(token.LPAREN), out var Ꮡlparen);
@@ -2058,10 +2058,10 @@ internal static ast.Expr parseTypeAssertionᴍ(ж<parser> Ꮡp, ast.Expr x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string middleIndexRequiredIn3ˢ => ref middleIndexRequiredIn3ˢᵇ;
-private static readonly @string middleIndexRequiredIn3ˢᵇ = "middle index required in 3-index slice"u8;
-internal static ref readonly @string finalIndexRequiredIn3ˢ => ref finalIndexRequiredIn3ˢᵇ;
-private static readonly @string finalIndexRequiredIn3ˢᵇ = "final index required in 3-index slice"u8;
+internal static ref readonly @string middleIndexRequiredIn3ˢᴍparser => ref middleIndexRequiredIn3ˢᵇᴍparser;
+private static readonly @string middleIndexRequiredIn3ˢᵇᴍparser = "middle index required in 3-index slice"u8;
+internal static ref readonly @string finalIndexRequiredIn3ˢᴍparser => ref finalIndexRequiredIn3ˢᵇᴍparser;
+private static readonly @string finalIndexRequiredIn3ˢᵇᴍparser = "final index required in 3-index slice"u8;
 
 internal static ast.Expr parseIndexOrSliceOrInstanceᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
@@ -2076,7 +2076,7 @@ internal static ast.Expr parseIndexOrSliceOrInstanceᴍ(ж<parser> Ꮡp, ast.Exp
         if (p.tok == token.RBRACK) {
             // empty index, slice or index expressions are not permitted;
             // accept them for parsing tolerance, but complain
-            Ꮡp.errorExpected(p.pos, operandˢ2);
+            Ꮡp.errorExpected(p.pos, operandˢ2ᴍparser);
             ref var rbrackΔ1 = ref heap<token.Pos>(p.pos, out var ᏑrbrackΔ1);
             Ꮡp.next();
             return new ast.IndexExprжExpr(Ꮡ(new ast.IndexExpr(
@@ -2134,11 +2134,11 @@ internal static ast.Expr parseIndexOrSliceOrInstanceᴍ(ж<parser> Ꮡp, ast.Exp
                 // Check presence of middle and final index here rather than during type-checking
                 // to prevent erroneous programs from passing through gofmt (was go.dev/issue/7305).
                 if (index[1] == nil) {
-                    Ꮡp.error(colons[0], middleIndexRequiredIn3ˢ);
+                    Ꮡp.error(colons[0], middleIndexRequiredIn3ˢᴍparser);
                     index[1] = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: colons[0] + 1, To: colons[1])));
                 }
                 if (index[2] == nil) {
-                    Ꮡp.error(colons[1], finalIndexRequiredIn3ˢ);
+                    Ꮡp.error(colons[1], finalIndexRequiredIn3ˢᴍparser);
                     index[2] = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: colons[1] + 1, To: rbrack)));
                 }
             }
@@ -2158,10 +2158,10 @@ internal static ast.Expr parseIndexOrSliceOrInstanceᴍ(ж<parser> Ꮡp, ast.Exp
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string callOrConversionˢ => ref callOrConversionˢᵇ;
-private static readonly @string callOrConversionˢᵇ = "CallOrConversion"u8;
-internal static ref readonly @string argumentListˢ => ref argumentListˢᵇ;
-private static readonly @string argumentListˢᵇ = "argument list"u8;
+internal static ref readonly @string callOrConversionˢᴍparser => ref callOrConversionˢᵇᴍparser;
+private static readonly @string callOrConversionˢᵇᴍparser = "CallOrConversion"u8;
+internal static ref readonly @string argumentListˢᴍparser => ref argumentListˢᵇᴍparser;
+private static readonly @string argumentListˢᵇᴍparser = "argument list"u8;
 
 internal static ж<ast.CallExpr> parseCallOrConversionᴍ(ж<parser> Ꮡp, ast.Expr fun) {
     GoFrame ᒐ = default;
@@ -2169,7 +2169,7 @@ internal static ж<ast.CallExpr> parseCallOrConversionᴍ(ж<parser> Ꮡp, ast.E
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, callOrConversionˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, callOrConversionˢᴍparser), ref ᒐ);
         }
 
         ref var lparen = ref heap<token.Pos>(Ꮡp.expect(token.LPAREN), out var Ꮡlparen);
@@ -2182,13 +2182,13 @@ internal static ж<ast.CallExpr> parseCallOrConversionᴍ(ж<parser> Ꮡp, ast.E
                 ellipsis = p.pos;
                 Ꮡp.next();
             }
-            if (!Ꮡp.atComma(argumentListˢ, token.RPAREN)) {
+            if (!Ꮡp.atComma(argumentListˢᴍparser, token.RPAREN)) {
                 break;
             }
             Ꮡp.next();
         }
         p.exprLev--;
-        ref var rparen = ref heap<token.Pos>(Ꮡp.expectClosing(token.RPAREN, argumentListˢ), out var Ꮡrparen);
+        ref var rparen = ref heap<token.Pos>(Ꮡp.expectClosing(token.RPAREN, argumentListˢᴍparser), out var Ꮡrparen);
 
         return Ꮡ(new ast.CallExpr(Fun: fun, Lparen: lparen, Args: list, Ellipsis: ellipsis, Rparen: rparen));
     }
@@ -2197,8 +2197,8 @@ internal static ж<ast.CallExpr> parseCallOrConversionᴍ(ж<parser> Ꮡp, ast.E
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string elementˢ => ref elementˢᵇ;
-private static readonly @string elementˢᵇ = "Element"u8;
+internal static ref readonly @string elementˢᴍparser => ref elementˢᵇᴍparser;
+private static readonly @string elementˢᵇᴍparser = "Element"u8;
 
 internal static ast.Expr parseValueᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -2206,7 +2206,7 @@ internal static ast.Expr parseValueᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, elementˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, elementˢᴍparser), ref ᒐ);
         }
 
         if (p.tok == token.LBRACE) {
@@ -2227,7 +2227,7 @@ internal static ast.Expr parseElementᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, elementˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, elementˢᴍparser), ref ᒐ);
         }
 
         var x = Ꮡp.parseValue();
@@ -2244,10 +2244,10 @@ internal static ast.Expr parseElementᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string elementListˢ => ref elementListˢᵇ;
-private static readonly @string elementListˢᵇ = "ElementList"u8;
-internal static ref readonly @string compositeLiteralˢ => ref compositeLiteralˢᵇ;
-private static readonly @string compositeLiteralˢᵇ = "composite literal"u8;
+internal static ref readonly @string elementListˢᴍparser => ref elementListˢᵇᴍparser;
+private static readonly @string elementListˢᵇᴍparser = "ElementList"u8;
+internal static ref readonly @string compositeLiteralˢᴍparser => ref compositeLiteralˢᵇᴍparser;
+private static readonly @string compositeLiteralˢᵇᴍparser = "composite literal"u8;
 
 internal static slice<ast.Expr> /*list*/ parseElementListᴍ(ж<parser> Ꮡp) {
     slice<ast.Expr> list = default;
@@ -2256,12 +2256,12 @@ internal static slice<ast.Expr> /*list*/ parseElementListᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, elementListˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, elementListˢᴍparser), ref ᒐ);
         }
 
         while (p.tok != token.RBRACE && p.tok != token.EOF) {
             list = append(list, Ꮡp.parseElement());
-            if (!Ꮡp.atComma(compositeLiteralˢ, token.RBRACE)) {
+            if (!Ꮡp.atComma(compositeLiteralˢᴍparser, token.RBRACE)) {
                 break;
             }
             Ꮡp.next();
@@ -2273,8 +2273,8 @@ internal static slice<ast.Expr> /*list*/ parseElementListᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string literalValueˢ => ref literalValueˢᵇ;
-private static readonly @string literalValueˢᵇ = "LiteralValue"u8;
+internal static ref readonly @string literalValueˢᴍparser => ref literalValueˢᵇᴍparser;
+private static readonly @string literalValueˢᵇᴍparser = "LiteralValue"u8;
 
 internal static ast.Expr parseLiteralValueᴍ(ж<parser> Ꮡp, ast.Expr typ) {
     GoFrame ᒐ = default;
@@ -2284,7 +2284,7 @@ internal static ast.Expr parseLiteralValueᴍ(ж<parser> Ꮡp, ast.Expr typ) {
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, literalValueˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, literalValueˢᴍparser), ref ᒐ);
         }
 
         ref var lbrace = ref heap<token.Pos>(Ꮡp.expect(token.LBRACE), out var Ꮡlbrace);
@@ -2294,7 +2294,7 @@ internal static ast.Expr parseLiteralValueᴍ(ж<parser> Ꮡp, ast.Expr typ) {
             elts = Ꮡp.parseElementList();
         }
         p.exprLev--;
-        ref var rbrace = ref heap<token.Pos>(Ꮡp.expectClosing(token.RBRACE, compositeLiteralˢ), out var Ꮡrbrace);
+        ref var rbrace = ref heap<token.Pos>(Ꮡp.expectClosing(token.RBRACE, compositeLiteralˢᴍparser), out var Ꮡrbrace);
         return new ast.CompositeLitжExpr(Ꮡ(new ast.CompositeLit(Type: typ, Lbrace: lbrace, Elts: elts, Rbrace: rbrace)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
@@ -2302,12 +2302,12 @@ internal static ast.Expr parseLiteralValueᴍ(ж<parser> Ꮡp, ast.Expr typ) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string primaryExprˢ => ref primaryExprˢᵇ;
-private static readonly @string primaryExprˢᵇ = "PrimaryExpr"u8;
-internal static ref readonly @string selectorOrTypeAssertionˢ => ref selectorOrTypeAssertionˢᵇ;
-private static readonly @string selectorOrTypeAssertionˢᵇ = "selector or type assertion"u8;
-internal static ref readonly @string cannotParenthesizeTypeInˢ => ref cannotParenthesizeTypeInˢᵇ;
-private static readonly @string cannotParenthesizeTypeInˢᵇ = "cannot parenthesize type in composite literal"u8;
+internal static ref readonly @string primaryExprˢᴍparser => ref primaryExprˢᵇᴍparser;
+private static readonly @string primaryExprˢᵇᴍparser = "PrimaryExpr"u8;
+internal static ref readonly @string selectorOrTypeAssertionˢᴍparser => ref selectorOrTypeAssertionˢᵇᴍparser;
+private static readonly @string selectorOrTypeAssertionˢᵇᴍparser = "selector or type assertion"u8;
+internal static ref readonly @string cannotParenthesizeTypeInˢᴍparser => ref cannotParenthesizeTypeInˢᵇᴍparser;
+private static readonly @string cannotParenthesizeTypeInˢᵇᴍparser = "cannot parenthesize type in composite literal"u8;
 
 internal static ast.Expr parsePrimaryExprᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
@@ -2315,7 +2315,7 @@ internal static ast.Expr parsePrimaryExprᴍ(ж<parser> Ꮡp, ast.Expr x) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, primaryExprˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, primaryExprˢᴍparser), ref ᒐ);
         }
 
         if (x == nil) {
@@ -2344,7 +2344,7 @@ internal static ast.Expr parsePrimaryExprᴍ(ж<parser> Ꮡp, ast.Expr x) {
                 }
                 default: {
                     ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
-                    Ꮡp.errorExpected(pos, selectorOrTypeAssertionˢ);
+                    Ꮡp.errorExpected(pos, selectorOrTypeAssertionˢᴍparser);
                     // TODO(rFindley) The check for token.RBRACE below is a targeted fix
                     //                to error recovery sufficient to make the x/tools tests to
                     //                pass with the new parsing logic introduced for type
@@ -2400,7 +2400,7 @@ internal static ast.Expr parsePrimaryExprᴍ(ж<parser> Ꮡp, ast.Expr x) {
                     return x;
                 }}
                 if (!AreEqual(t, x)) {
-                    Ꮡp.error(t.Pos(), cannotParenthesizeTypeInˢ);
+                    Ꮡp.error(t.Pos(), cannotParenthesizeTypeInˢᴍparser);
                     // already progressed, no need to advance
                 }
                 x = Ꮡp.parseLiteralValue(x);
@@ -2416,12 +2416,12 @@ internal static ast.Expr parsePrimaryExprᴍ(ж<parser> Ꮡp, ast.Expr x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unaryExprˢ => ref unaryExprˢᵇ;
-private static readonly @string unaryExprˢᵇ = "UnaryExpr"u8;
-internal static ref readonly @string chanˢ => ref chanˢᵇ;
-private static readonly @string chanˢᵇ = "'chan'"u8;
-internal static ref readonly @string channelTypeˢ => ref channelTypeˢᵇ;
-private static readonly @string channelTypeˢᵇ = "channel type"u8;
+internal static ref readonly @string unaryExprˢᴍparser => ref unaryExprˢᵇᴍparser;
+private static readonly @string unaryExprˢᵇᴍparser = "UnaryExpr"u8;
+internal static ref readonly @string chanˢᴍparser => ref chanˢᵇᴍparser;
+private static readonly @string chanˢᵇᴍparser = "'chan'"u8;
+internal static ref readonly @string channelTypeˢᴍparser => ref channelTypeˢᵇᴍparser;
+private static readonly @string channelTypeˢᵇᴍparser = "channel type"u8;
 
 internal static ast.Expr parseUnaryExprᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -2431,7 +2431,7 @@ internal static ast.Expr parseUnaryExprᴍ(ж<parser> Ꮡp) {
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, unaryExprˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, unaryExprˢᴍparser), ref ᒐ);
         }
 
         switch (p.tok) {
@@ -2474,14 +2474,14 @@ internal static ast.Expr parseUnaryExprᴍ(ж<parser> Ꮡp) {
                 while (ok && dir == ast.SEND) {
                     if (typ.Dir == ast.RECV) {
                         // error: (<-type) is (<-(<-chan T))
-                        Ꮡp.errorExpected(typ.Arrow, chanˢ);
+                        Ꮡp.errorExpected(typ.Arrow, chanˢᴍparser);
                     }
                     (arrow, typ.Begin, typ.Arrow) = (typ.Arrow, arrow, arrow);
                     (dir, typ.Dir) = (typ.Dir, ast.RECV);
                     (typ, ok) = (~typ).Value._<ж<ast.ChanType>>(ᐧ);
                 }
                 if (dir == ast.SEND) {
-                    Ꮡp.errorExpected(arrow, channelTypeˢ);
+                    Ꮡp.errorExpected(arrow, channelTypeˢᴍparser);
                 }
 
                 return x;
@@ -2513,8 +2513,8 @@ internal static (token.Token, nint) tokPrecᴍ(ref parser p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string binaryExprˢ => ref binaryExprˢᵇ;
-private static readonly @string binaryExprˢᵇ = "BinaryExpr"u8;
+internal static ref readonly @string binaryExprˢᴍparser => ref binaryExprˢᵇᴍparser;
+private static readonly @string binaryExprˢᵇᴍparser = "BinaryExpr"u8;
 
 // parseBinaryExpr parses a (possibly) binary expression.
 // If x is non-nil, it is used as the left operand.
@@ -2526,7 +2526,7 @@ internal static ast.Expr parseBinaryExprᴍ(ж<parser> Ꮡp, ast.Expr x, nint pr
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, binaryExprˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, binaryExprˢᴍparser), ref ᒐ);
         }
 
         if (x == nil) {
@@ -2556,8 +2556,8 @@ internal static ast.Expr parseBinaryExprᴍ(ж<parser> Ꮡp, ast.Expr x, nint pr
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string expressionˢ => ref expressionˢᵇ;
-private static readonly @string expressionˢᵇ = "Expression"u8;
+internal static ref readonly @string expressionˢᴍparser => ref expressionˢᵇᴍparser;
+private static readonly @string expressionˢᵇᴍparser = "Expression"u8;
 
 // The result may be a type or even a raw type ([...]int).
 internal static ast.Expr parseExprᴍ(ж<parser> Ꮡp) {
@@ -2566,7 +2566,7 @@ internal static ast.Expr parseExprᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, expressionˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, expressionˢᴍparser), ref ᒐ);
         }
 
         return Ꮡp.parseBinaryExpr(default, token.LowestPrec + 1);
@@ -2598,12 +2598,12 @@ internal static UntypedInt rangeOk => 2;
 } partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string simpleStmtˢ => ref simpleStmtˢᵇ;
-private static readonly @string simpleStmtˢᵇ = "SimpleStmt"u8;
-internal static ref readonly @string expressionˢ2 => ref expressionˢ2ᵇ;
-private static readonly @string expressionˢ2ᵇ = "1 expression"u8;
-internal static ref readonly @string illegalLabelDeclarationˢ => ref illegalLabelDeclarationˢᵇ;
-private static readonly @string illegalLabelDeclarationˢᵇ = "illegal label declaration"u8;
+internal static ref readonly @string simpleStmtˢᴍparser => ref simpleStmtˢᵇᴍparser;
+private static readonly @string simpleStmtˢᵇᴍparser = "SimpleStmt"u8;
+internal static ref readonly @string expressionˢ2ᴍparser => ref expressionˢ2ᵇᴍparser;
+private static readonly @string expressionˢ2ᵇᴍparser = "1 expression"u8;
+internal static ref readonly @string illegalLabelDeclarationˢᴍparser => ref illegalLabelDeclarationˢᵇᴍparser;
+private static readonly @string illegalLabelDeclarationˢᵇᴍparser = "illegal label declaration"u8;
 
 // parseSimpleStmt returns true as 2nd result if it parsed the assignment
 // of a range clause (with mode == rangeOk). The returned statement is an
@@ -2615,7 +2615,7 @@ internal static (ast.Stmt, bool) parseSimpleStmtᴍ(ж<parser> Ꮡp, nint mode) 
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, simpleStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, simpleStmtˢᴍparser), ref ᒐ);
         }
 
         var x = Ꮡp.parseList(false);
@@ -2642,7 +2642,7 @@ internal static (ast.Stmt, bool) parseSimpleStmtᴍ(ж<parser> Ꮡp, nint mode) 
         }}
 
         if (len(x) > 1) {
-            Ꮡp.errorExpected(x[0].Pos(), expressionˢ2);
+            Ꮡp.errorExpected(x[0].Pos(), expressionˢ2ᴍparser);
             // continue with first expression
         }
 
@@ -2664,7 +2664,7 @@ internal static (ast.Stmt, bool) parseSimpleStmtᴍ(ж<parser> Ꮡp, nint mode) 
             // reported for the line is the illegal label error instead of the token
             // before the ':' that caused the problem. Thus, use the (latest) colon
             // position for error reporting.
-            Ꮡp.error(colon, illegalLabelDeclarationˢ);
+            Ꮡp.error(colon, illegalLabelDeclarationˢᴍparser);
             return (new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: x[0].Pos(), To: colon + 1))), false);
         }
         case var ᴛ when ᴛ == token.ARROW: {
@@ -2705,8 +2705,8 @@ internal static ж<ast.CallExpr> parseCallExprᴍ(ж<parser> Ꮡp, @string callT
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string goStmtˢ => ref goStmtˢᵇ;
-private static readonly @string goStmtˢᵇ = "GoStmt"u8;
+internal static ref readonly @string goStmtˢᴍparser => ref goStmtˢᵇᴍparser;
+private static readonly @string goStmtˢᵇᴍparser = "GoStmt"u8;
 
 internal static ast.Stmt parseGoStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -2714,7 +2714,7 @@ internal static ast.Stmt parseGoStmtᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, goStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, goStmtˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.GO), out var Ꮡpos);
@@ -2731,10 +2731,10 @@ internal static ast.Stmt parseGoStmtᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string deferStmtˢ => ref deferStmtˢᵇ;
-private static readonly @string deferStmtˢᵇ = "DeferStmt"u8;
-internal static ref readonly @string deferˢ => ref deferˢᵇ;
-private static readonly @string deferˢᵇ = "defer"u8;
+internal static ref readonly @string deferStmtˢᴍparser => ref deferStmtˢᵇᴍparser;
+private static readonly @string deferStmtˢᵇᴍparser = "DeferStmt"u8;
+internal static ref readonly @string deferˢᴍparser => ref deferˢᵇᴍparser;
+private static readonly @string deferˢᵇᴍparser = "defer"u8;
 
 internal static ast.Stmt parseDeferStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -2742,11 +2742,11 @@ internal static ast.Stmt parseDeferStmtᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, deferStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, deferStmtˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.DEFER), out var Ꮡpos);
-        var call = Ꮡp.parseCallExpr(deferˢ);
+        var call = Ꮡp.parseCallExpr(deferˢᴍparser);
         Ꮡp.expectSemi();
         if (call == nil) {
             return new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: pos, To: pos + 5))); // len("defer")
@@ -2759,8 +2759,8 @@ internal static ast.Stmt parseDeferStmtᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string returnStmtˢ => ref returnStmtˢᵇ;
-private static readonly @string returnStmtˢᵇ = "ReturnStmt"u8;
+internal static ref readonly @string returnStmtˢᴍparser => ref returnStmtˢᵇᴍparser;
+private static readonly @string returnStmtˢᵇᴍparser = "ReturnStmt"u8;
 
 internal static ж<ast.ReturnStmt> parseReturnStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -2768,7 +2768,7 @@ internal static ж<ast.ReturnStmt> parseReturnStmtᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, returnStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, returnStmtˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
@@ -2786,8 +2786,8 @@ internal static ж<ast.ReturnStmt> parseReturnStmtᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string branchStmtˢ => ref branchStmtˢᵇ;
-private static readonly @string branchStmtˢᵇ = "BranchStmt"u8;
+internal static ref readonly @string branchStmtˢᴍparser => ref branchStmtˢᵇᴍparser;
+private static readonly @string branchStmtˢᵇᴍparser = "BranchStmt"u8;
 
 internal static ж<ast.BranchStmt> parseBranchStmtᴍ(ж<parser> Ꮡp, token.Token tok) {
     GoFrame ᒐ = default;
@@ -2795,7 +2795,7 @@ internal static ж<ast.BranchStmt> parseBranchStmtᴍ(ж<parser> Ꮡp, token.Tok
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, branchStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, branchStmtˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(tok), out var Ꮡpos);
@@ -2812,10 +2812,10 @@ internal static ж<ast.BranchStmt> parseBranchStmtᴍ(ж<parser> Ꮡp, token.Tok
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string simpleStatementˢ => ref simpleStatementˢᵇ;
-private static readonly @string simpleStatementˢᵇ = "simple statement"u8;
-internal static ref readonly @string assignmentˢ => ref assignmentˢᵇ;
-private static readonly @string assignmentˢᵇ = "assignment"u8;
+internal static ref readonly @string simpleStatementˢᴍparser => ref simpleStatementˢᵇᴍparser;
+private static readonly @string simpleStatementˢᵇᴍparser = "simple statement"u8;
+internal static ref readonly @string assignmentˢᴍparser => ref assignmentˢᵇᴍparser;
+private static readonly @string assignmentˢᵇᴍparser = "assignment"u8;
 
 internal static ast.Expr makeExprᴍ(ж<parser> Ꮡp, ast.Stmt s, @string want) {
     if (s == nil) {
@@ -2824,9 +2824,9 @@ internal static ast.Expr makeExprᴍ(ж<parser> Ꮡp, ast.Stmt s, @string want) 
     var (es, isExpr) = s._<ж<ast.ExprStmt>>(ᐧ); if (isExpr) {
         return es.X;
     }
-    @string found = simpleStatementˢ;
+    @string found = simpleStatementˢᴍparser;
     var (_, isAss) = s._<ж<ast.AssignStmt>>(ᐧ); if (isAss) {
-        found = assignmentˢ;
+        found = assignmentˢᴍparser;
     }
     Ꮡp.error(s.Pos(), fmt.Sprintf("expected %s, found %s (missing parentheses around composite literal?)"u8, want, found));
     return new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: s.Pos(), To: s.End())));
@@ -2842,14 +2842,14 @@ internal partial struct parseIfHeader_semi /*dyn*/ {
 } partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingConditionInIfˢ => ref missingConditionInIfˢᵇ;
-private static readonly @string missingConditionInIfˢᵇ = "missing condition in if statement"u8;
-internal static ref readonly @string varDeclarationNotAllowedˢ => ref varDeclarationNotAllowedˢᵇ;
-private static readonly @string varDeclarationNotAllowedˢᵇ = "var declaration not allowed in if initializer"u8;
-internal static ref readonly @string booleanExpressionˢ => ref booleanExpressionˢᵇ;
-private static readonly @string booleanExpressionˢᵇ = "boolean expression"u8;
-internal static ref readonly @string unexpectedNewlineˢ => ref unexpectedNewlineˢᵇ;
-private static readonly @string unexpectedNewlineˢᵇ = "unexpected newline, expecting { after if clause"u8;
+internal static ref readonly @string missingConditionInIfˢᴍparser => ref missingConditionInIfˢᵇᴍparser;
+private static readonly @string missingConditionInIfˢᵇᴍparser = "missing condition in if statement"u8;
+internal static ref readonly @string varDeclarationNotAllowedˢᴍparser => ref varDeclarationNotAllowedˢᵇᴍparser;
+private static readonly @string varDeclarationNotAllowedˢᵇᴍparser = "var declaration not allowed in if initializer"u8;
+internal static ref readonly @string booleanExpressionˢᴍparser => ref booleanExpressionˢᵇᴍparser;
+private static readonly @string booleanExpressionˢᵇᴍparser = "boolean expression"u8;
+internal static ref readonly @string unexpectedNewlineˢᴍparser => ref unexpectedNewlineˢᵇᴍparser;
+private static readonly @string unexpectedNewlineˢᵇᴍparser = "unexpected newline, expecting { after if clause"u8;
 
 // parseIfHeader is an adjusted version of parser.header
 // in cmd/compile/internal/syntax/parser.go, which has
@@ -2860,7 +2860,7 @@ internal static (ast.Stmt init, ast.Expr cond) parseIfHeaderᴍ(ж<parser> Ꮡp)
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.tok == token.LBRACE) {
-        Ꮡp.error(p.pos, missingConditionInIfˢ);
+        Ꮡp.error(p.pos, missingConditionInIfˢᴍparser);
         cond = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: p.pos, To: p.pos)));
         return (init, cond);
     }
@@ -2873,7 +2873,7 @@ internal static (ast.Stmt init, ast.Expr cond) parseIfHeaderᴍ(ж<parser> Ꮡp)
         // accept potential variable declaration but complain
         if (p.tok == token.VAR) {
             Ꮡp.next();
-            Ꮡp.error(p.pos, varDeclarationNotAllowedˢ);
+            Ꮡp.error(p.pos, varDeclarationNotAllowedˢᴍparser);
         }
         (init, _) = Ꮡp.parseSimpleStmt(basic);
     }
@@ -2897,12 +2897,12 @@ internal static (ast.Stmt init, ast.Expr cond) parseIfHeaderᴍ(ж<parser> Ꮡp)
     }
 
     if (condStmt != nil) {
-        cond = Ꮡp.makeExpr(condStmt, booleanExpressionˢ);
+        cond = Ꮡp.makeExpr(condStmt, booleanExpressionˢᴍparser);
     } else if (semi.pos.IsValid()) {
         if (semi.lit == "\n"u8) {
-            Ꮡp.error(semi.pos, unexpectedNewlineˢ);
+            Ꮡp.error(semi.pos, unexpectedNewlineˢᴍparser);
         } else {
-            Ꮡp.error(semi.pos, missingConditionInIfˢ);
+            Ꮡp.error(semi.pos, missingConditionInIfˢᴍparser);
         }
     }
 
@@ -2916,10 +2916,10 @@ internal static (ast.Stmt init, ast.Expr cond) parseIfHeaderᴍ(ж<parser> Ꮡp)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ifStmtˢ => ref ifStmtˢᵇ;
-private static readonly @string ifStmtˢᵇ = "IfStmt"u8;
-internal static ref readonly @string ifStatementOrBlockˢ => ref ifStatementOrBlockˢᵇ;
-private static readonly @string ifStatementOrBlockˢᵇ = "if statement or block"u8;
+internal static ref readonly @string ifStmtˢᴍparser => ref ifStmtˢᵇᴍparser;
+private static readonly @string ifStmtˢᵇᴍparser = "IfStmt"u8;
+internal static ref readonly @string ifStatementOrBlockˢᴍparser => ref ifStatementOrBlockˢᵇᴍparser;
+private static readonly @string ifStatementOrBlockˢᵇᴍparser = "if statement or block"u8;
 
 internal static ж<ast.IfStmt> parseIfStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -2929,7 +2929,7 @@ internal static ж<ast.IfStmt> parseIfStmtᴍ(ж<parser> Ꮡp) {
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, ifStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, ifStmtˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.IF), out var Ꮡpos);
@@ -2951,7 +2951,7 @@ internal static ж<ast.IfStmt> parseIfStmtᴍ(ж<parser> Ꮡp) {
                 break;
             }
             default: {
-                Ꮡp.errorExpected(p.pos, ifStatementOrBlockˢ);
+                Ꮡp.errorExpected(p.pos, ifStatementOrBlockˢᴍparser);
                 else_ = new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: p.pos, To: p.pos)));
                 break;
             }}
@@ -2966,8 +2966,8 @@ internal static ж<ast.IfStmt> parseIfStmtᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string caseClauseˢ => ref caseClauseˢᵇ;
-private static readonly @string caseClauseˢᵇ = "CaseClause"u8;
+internal static ref readonly @string caseClauseˢᴍparser => ref caseClauseˢᵇᴍparser;
+private static readonly @string caseClauseˢᵇᴍparser = "CaseClause"u8;
 
 internal static ж<ast.CaseClause> parseCaseClauseᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -2975,7 +2975,7 @@ internal static ж<ast.CaseClause> parseCaseClauseᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, caseClauseˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, caseClauseˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
@@ -3006,8 +3006,8 @@ internal static bool isTypeSwitchAssert(ast.Expr x) {
 } partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string expectedFoundˢ => ref expectedFoundˢᵇ;
-private static readonly @string expectedFoundˢᵇ = "expected ':=', found '='"u8;
+internal static ref readonly @string expectedFoundˢᴍparser => ref expectedFoundˢᵇᴍparser;
+private static readonly @string expectedFoundˢᵇᴍparser = "expected ':=', found '='"u8;
 
 internal static bool isTypeSwitchGuardᴍ(ж<parser> Ꮡp, ast.Stmt s) {
     switch (s.type()) {
@@ -3022,7 +3022,7 @@ internal static bool isTypeSwitchGuardᴍ(ж<parser> Ꮡp, ast.Stmt s) {
             var matchᴛ1 = false;
             if (exprᴛ1 == token.ASSIGN) {
                 // permit v = x.(type) but complain
-                Ꮡp.error(t.TokPos, expectedFoundˢ);
+                Ꮡp.error(t.TokPos, expectedFoundˢᴍparser);
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ1 && exprᴛ1 == token.DEFINE) { matchᴛ1 = true;
@@ -3035,10 +3035,10 @@ internal static bool isTypeSwitchGuardᴍ(ж<parser> Ꮡp, ast.Stmt s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string switchStmtˢ => ref switchStmtˢᵇ;
-private static readonly @string switchStmtˢᵇ = "SwitchStmt"u8;
-internal static ref readonly @string switchExpressionˢ => ref switchExpressionˢᵇ;
-private static readonly @string switchExpressionˢᵇ = "switch expression"u8;
+internal static ref readonly @string switchStmtˢᴍparser => ref switchStmtˢᵇᴍparser;
+private static readonly @string switchStmtˢᵇᴍparser = "SwitchStmt"u8;
+internal static ref readonly @string switchExpressionˢᴍparser => ref switchExpressionˢᵇᴍparser;
+private static readonly @string switchExpressionˢᵇᴍparser = "switch expression"u8;
 
 internal static ast.Stmt parseSwitchStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -3046,7 +3046,7 @@ internal static ast.Stmt parseSwitchStmtᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, switchStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, switchStmtˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.SWITCH), out var Ꮡpos);
@@ -3096,17 +3096,17 @@ internal static ast.Stmt parseSwitchStmtᴍ(ж<parser> Ꮡp) {
             return new ast.TypeSwitchStmtжStmt(Ꮡ(new ast.TypeSwitchStmt(Switch: pos, Init: s1, Assign: s2, Body: body)));
         }
 
-        return new ast.SwitchStmtжStmt(Ꮡ(new ast.SwitchStmt(Switch: pos, Init: s1, Tag: Ꮡp.makeExpr(s2, switchExpressionˢ), Body: body)));
+        return new ast.SwitchStmtжStmt(Ꮡ(new ast.SwitchStmt(Switch: pos, Init: s1, Tag: Ꮡp.makeExpr(s2, switchExpressionˢᴍparser), Body: body)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string commClauseˢ => ref commClauseˢᵇ;
-private static readonly @string commClauseˢᵇ = "CommClause"u8;
-internal static ref readonly @string or2Expressionsˢ => ref or2Expressionsˢᵇ;
-private static readonly @string or2Expressionsˢᵇ = "1 or 2 expressions"u8;
+internal static ref readonly @string commClauseˢᴍparser => ref commClauseˢᵇᴍparser;
+private static readonly @string commClauseˢᵇᴍparser = "CommClause"u8;
+internal static ref readonly @string or2Expressionsˢᴍparser => ref or2Expressionsˢᵇᴍparser;
+private static readonly @string or2Expressionsˢᵇᴍparser = "1 or 2 expressions"u8;
 
 internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -3114,7 +3114,7 @@ internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, commClauseˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, commClauseˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
@@ -3137,7 +3137,7 @@ internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
                 ref var tok = ref heap<token.Token>(p.tok, out var Ꮡtok); if (tok == token.ASSIGN || tok == token.DEFINE) {
                     // RecvStmt with assignment
                     if (len(lhs) > 2) {
-                        Ꮡp.errorExpected(lhs[0].Pos(), or2Expressionsˢ);
+                        Ꮡp.errorExpected(lhs[0].Pos(), or2Expressionsˢᴍparser);
                         // continue with first two expressions
                         lhs = lhs[0..2];
                     }
@@ -3168,8 +3168,8 @@ internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string selectStmtˢ => ref selectStmtˢᵇ;
-private static readonly @string selectStmtˢᵇ = "SelectStmt"u8;
+internal static ref readonly @string selectStmtˢᴍparser => ref selectStmtˢᵇᴍparser;
+private static readonly @string selectStmtˢᵇᴍparser = "SelectStmt"u8;
 
 internal static ж<ast.SelectStmt> parseSelectStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -3177,7 +3177,7 @@ internal static ж<ast.SelectStmt> parseSelectStmtᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, selectStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, selectStmtˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.SELECT), out var Ꮡpos);
@@ -3197,12 +3197,12 @@ internal static ж<ast.SelectStmt> parseSelectStmtᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string forStmtˢ => ref forStmtˢᵇ;
-private static readonly @string forStmtˢᵇ = "ForStmt"u8;
-internal static ref readonly @string atMost2Expressionsˢ => ref atMost2Expressionsˢᵇ;
-private static readonly @string atMost2Expressionsˢᵇ = "at most 2 expressions"u8;
-internal static ref readonly @string booleanOrRangeExpressionˢ => ref booleanOrRangeExpressionˢᵇ;
-private static readonly @string booleanOrRangeExpressionˢᵇ = "boolean or range expression"u8;
+internal static ref readonly @string forStmtˢᴍparser => ref forStmtˢᵇᴍparser;
+private static readonly @string forStmtˢᵇᴍparser = "ForStmt"u8;
+internal static ref readonly @string atMost2Expressionsˢᴍparser => ref atMost2Expressionsˢᵇᴍparser;
+private static readonly @string atMost2Expressionsˢᵇᴍparser = "at most 2 expressions"u8;
+internal static ref readonly @string booleanOrRangeExpressionˢᴍparser => ref booleanOrRangeExpressionˢᵇᴍparser;
+private static readonly @string booleanOrRangeExpressionˢᵇᴍparser = "boolean or range expression"u8;
 
 internal static ast.Stmt parseForStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -3210,7 +3210,7 @@ internal static ast.Stmt parseForStmtᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, forStmtˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, forStmtˢᴍparser), ref ᒐ);
         }
 
         ref var pos = ref heap<token.Pos>(Ꮡp.expect(token.FOR), out var Ꮡpos);
@@ -3271,7 +3271,7 @@ internal static ast.Stmt parseForStmtᴍ(ж<parser> Ꮡp) {
                 break;
             }
             default: {
-                Ꮡp.errorExpected(@as.Lhs[len(@as.Lhs) - 1].Pos(), atMost2Expressionsˢ);
+                Ꮡp.errorExpected(@as.Lhs[len(@as.Lhs) - 1].Pos(), atMost2Expressionsˢᴍparser);
                 return new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: pos, To: body.End())));
             }}
             // parseSimpleStmt returned a right-hand side that
@@ -3293,7 +3293,7 @@ internal static ast.Stmt parseForStmtᴍ(ж<parser> Ꮡp) {
         return new ast.ForStmtжStmt(Ꮡ(new ast.ForStmt(
             For: pos,
             Init: s1,
-            Cond: Ꮡp.makeExpr(s2, booleanOrRangeExpressionˢ),
+            Cond: Ꮡp.makeExpr(s2, booleanOrRangeExpressionˢᴍparser),
             Post: s3,
             Body: body
         )));
@@ -3303,10 +3303,10 @@ internal static ast.Stmt parseForStmtᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string statementˢ => ref statementˢᵇ;
-private static readonly @string statementˢᵇ = "Statement"u8;
-internal static ref readonly @string statementˢ2 => ref statementˢ2ᵇ;
-private static readonly @string statementˢ2ᵇ = "statement"u8;
+internal static ref readonly @string statementˢᴍparser => ref statementˢᵇᴍparser;
+private static readonly @string statementˢᵇᴍparser = "Statement"u8;
+internal static ref readonly @string statementˢ2ᴍparser => ref statementˢ2ᵇᴍparser;
+private static readonly @string statementˢ2ᵇᴍparser = "statement"u8;
 
 internal static ast.Stmt /*s*/ parseStmtᴍ(ж<parser> Ꮡp) {
     ast.Stmt s = default;
@@ -3317,7 +3317,7 @@ internal static ast.Stmt /*s*/ parseStmtᴍ(ж<parser> Ꮡp) {
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, statementˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, statementˢᴍparser), ref ᒐ);
         }
 
         switch (p.tok) {
@@ -3391,7 +3391,7 @@ internal static ast.Stmt /*s*/ parseStmtᴍ(ж<parser> Ꮡp) {
         default: {
             // no statement found
             ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
-            Ꮡp.errorExpected(pos, statementˢ2);
+            Ꮡp.errorExpected(pos, statementˢ2ᴍparser);
             Ꮡp.advance(stmtStart);
             s = new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: pos, To: p.pos)));
             break;
@@ -3409,12 +3409,12 @@ internal static ast.Stmt /*s*/ parseStmtᴍ(ж<parser> Ꮡp) {
 } partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string importSpecˢ => ref importSpecˢᵇ;
-private static readonly @string importSpecˢᵇ = "ImportSpec"u8;
-internal static ref readonly @string importPathMustBeAStringˢ => ref importPathMustBeAStringˢᵇ;
-private static readonly @string importPathMustBeAStringˢᵇ = "import path must be a string"u8;
-internal static ref readonly @string missingImportPathˢ => ref missingImportPathˢᵇ;
-private static readonly @string missingImportPathˢᵇ = "missing import path"u8;
+internal static ref readonly @string importSpecˢᴍparser => ref importSpecˢᵇᴍparser;
+private static readonly @string importSpecˢᵇᴍparser = "ImportSpec"u8;
+internal static ref readonly @string importPathMustBeAStringˢᴍparser => ref importPathMustBeAStringˢᵇᴍparser;
+private static readonly @string importPathMustBeAStringˢᵇᴍparser = "import path must be a string"u8;
+internal static ref readonly @string missingImportPathˢᴍparser => ref missingImportPathˢᵇᴍparser;
+private static readonly @string missingImportPathˢᵇᴍparser = "missing import path"u8;
 
 // ----------------------------------------------------------------------------
 // Declarations
@@ -3424,7 +3424,7 @@ internal static ast.Spec parseImportSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, importSpecˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, importSpecˢᴍparser), ref ᒐ);
         }
 
         ж<ast.Ident> ident = default;
@@ -3447,10 +3447,10 @@ internal static ast.Spec parseImportSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup
             end = p.stringEnd;
             Ꮡp.next();
         } else if (p.tok.IsLiteral()) {
-            Ꮡp.error(pos, importPathMustBeAStringˢ);
+            Ꮡp.error(pos, importPathMustBeAStringˢᴍparser);
             Ꮡp.next();
         } else {
-            Ꮡp.error(pos, missingImportPathˢ);
+            Ꮡp.error(pos, missingImportPathˢᴍparser);
             Ꮡp.advance(exprEnd);
         }
         var comment = Ꮡp.expectSemi();
@@ -3524,8 +3524,8 @@ internal static ast.Spec parseValueSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup>
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string parseGenericTypeˢ => ref parseGenericTypeˢᵇ;
-private static readonly @string parseGenericTypeˢᵇ = "parseGenericType"u8;
+internal static ref readonly @string parseGenericTypeˢᴍparser => ref parseGenericTypeˢᵇᴍparser;
+private static readonly @string parseGenericTypeˢᵇᴍparser = "parseGenericType"u8;
 
 internal static void parseGenericTypeᴍ(ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡspec, token.Pos openPos, ж<ast.Ident> name0, ast.Expr typ0) {
     GoFrame ᒐ = default;
@@ -3534,7 +3534,7 @@ internal static void parseGenericTypeᴍ(ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡsp
         ref var spec = ref Ꮡspec.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, parseGenericTypeˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, parseGenericTypeˢᴍparser), ref ᒐ);
         }
 
         var list = Ꮡp.parseParameterList(name0, typ0, token.RBRACK, false);
@@ -3552,8 +3552,8 @@ internal static void parseGenericTypeᴍ(ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡsp
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeSpecˢ => ref typeSpecˢᵇ;
-private static readonly @string typeSpecˢᵇ = "TypeSpec"u8;
+internal static ref readonly @string typeSpecˢᴍparser => ref typeSpecˢᵇᴍparser;
+private static readonly @string typeSpecˢᵇᴍparser = "TypeSpec"u8;
 
 internal static ast.Spec parseTypeSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token _Δp2, nint _Δp3) {
     GoFrame ᒐ = default;
@@ -3561,7 +3561,7 @@ internal static ast.Spec parseTypeSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup> 
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, typeSpecˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, typeSpecˢᴍparser), ref ᒐ);
         }
 
         var name = Ꮡp.parseIdent();
@@ -3773,12 +3773,12 @@ internal static ж<ast.GenDecl> parseGenDeclᴍ(ж<parser> Ꮡp, token.Token key
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string functionDeclˢ => ref functionDeclˢᵇ;
-private static readonly @string functionDeclˢᵇ = "FunctionDecl"u8;
-internal static ref readonly @string methodMustHaveNoTypeˢ => ref methodMustHaveNoTypeˢᵇ;
-private static readonly @string methodMustHaveNoTypeˢᵇ = "method must have no type parameters"u8;
-internal static ref readonly @string unexpectedSemicolonOrˢ => ref unexpectedSemicolonOrˢᵇ;
-private static readonly @string unexpectedSemicolonOrˢᵇ = "unexpected semicolon or newline before {"u8;
+internal static ref readonly @string functionDeclˢᴍparser => ref functionDeclˢᵇᴍparser;
+private static readonly @string functionDeclˢᵇᴍparser = "FunctionDecl"u8;
+internal static ref readonly @string methodMustHaveNoTypeˢᴍparser => ref methodMustHaveNoTypeˢᵇᴍparser;
+private static readonly @string methodMustHaveNoTypeˢᵇᴍparser = "method must have no type parameters"u8;
+internal static ref readonly @string unexpectedSemicolonOrˢᴍparser => ref unexpectedSemicolonOrˢᵇᴍparser;
+private static readonly @string unexpectedSemicolonOrˢᵇᴍparser = "unexpected semicolon or newline before {"u8;
 
 internal static ж<ast.FuncDecl> parseFuncDeclᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
@@ -3786,7 +3786,7 @@ internal static ж<ast.FuncDecl> parseFuncDeclᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, functionDeclˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, functionDeclˢᴍparser), ref ᒐ);
         }
 
         var doc = p.leadComment;
@@ -3805,7 +3805,7 @@ internal static ж<ast.FuncDecl> parseFuncDeclᴍ(ж<parser> Ꮡp) {
             if (recv != nil && tparams != nil) {
                 // Method declarations do not have type parameters. We parse them for a
                 // better error message and improved error recovery.
-                Ꮡp.error(tparams.Opening, methodMustHaveNoTypeˢ);
+                Ꮡp.error(tparams.Opening, methodMustHaveNoTypeˢᴍparser);
                 tparams = default;
             }
         }
@@ -3823,7 +3823,7 @@ internal static ж<ast.FuncDecl> parseFuncDeclᴍ(ж<parser> Ꮡp) {
             Ꮡp.next();
             if (p.tok == token.LBRACE) {
                 // opening { of function declaration on next line
-                Ꮡp.error(p.pos, unexpectedSemicolonOrˢ);
+                Ꮡp.error(p.pos, unexpectedSemicolonOrˢᴍparser);
                 body = Ꮡp.parseBody();
                 Ꮡp.expectSemi();
             }
@@ -3853,10 +3853,10 @@ internal static ж<ast.FuncDecl> parseFuncDeclᴍ(ж<parser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string declarationˢ => ref declarationˢᵇ;
-private static readonly @string declarationˢᵇ = "Declaration"u8;
-internal static ref readonly @string declarationˢ2 => ref declarationˢ2ᵇ;
-private static readonly @string declarationˢ2ᵇ = "declaration"u8;
+internal static ref readonly @string declarationˢᴍparser => ref declarationˢᵇᴍparser;
+private static readonly @string declarationˢᵇᴍparser = "Declaration"u8;
+internal static ref readonly @string declarationˢ2ᴍparser => ref declarationˢ2ᵇᴍparser;
+private static readonly @string declarationˢ2ᵇᴍparser = "declaration"u8;
 
 internal static ast.Decl parseDeclᴍ(ж<parser> Ꮡp, map<token.Token, bool> sync) {
     GoFrame ᒐ = default;
@@ -3864,7 +3864,7 @@ internal static ast.Decl parseDeclᴍ(ж<parser> Ꮡp, map<token.Token, bool> sy
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, declarationˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, declarationˢᴍparser), ref ᒐ);
         }
 
         Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f = default;
@@ -3886,7 +3886,7 @@ internal static ast.Decl parseDeclᴍ(ж<parser> Ꮡp, map<token.Token, bool> sy
         }
         default: {
             ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
-            Ꮡp.errorExpected(pos, declarationˢ2);
+            Ꮡp.errorExpected(pos, declarationˢ2ᴍparser);
             Ꮡp.advance(sync);
             return new ast.BadDeclжDecl(Ꮡ(new ast.BadDecl(From: pos, To: p.pos)));
         }}
@@ -3898,12 +3898,12 @@ internal static ast.Decl parseDeclᴍ(ж<parser> Ꮡp, map<token.Token, bool> sy
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fileˢ => ref fileˢᵇ;
-private static readonly @string fileˢᵇ = "File"u8;
-internal static ref readonly @string invalidPackageNameˢ => ref invalidPackageNameˢᵇ;
-private static readonly @string invalidPackageNameˢᵇ = "invalid package name _"u8;
-internal static ref readonly @string importsMustAppearBeforeˢ => ref importsMustAppearBeforeˢᵇ;
-private static readonly @string importsMustAppearBeforeˢᵇ = "imports must appear before other declarations"u8;
+internal static ref readonly @string fileˢᴍparser => ref fileˢᵇᴍparser;
+private static readonly @string fileˢᵇᴍparser = "File"u8;
+internal static ref readonly @string invalidPackageNameˢᴍparser => ref invalidPackageNameˢᵇᴍparser;
+private static readonly @string invalidPackageNameˢᵇᴍparser = "invalid package name _"u8;
+internal static ref readonly @string importsMustAppearBeforeˢᴍparser => ref importsMustAppearBeforeˢᵇᴍparser;
+private static readonly @string importsMustAppearBeforeˢᵇᴍparser = "imports must appear before other declarations"u8;
 
 // ----------------------------------------------------------------------------
 // Source files
@@ -3913,7 +3913,7 @@ internal static ж<ast.File> parseFileᴍ(ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         if (p.trace) {
-            defer(un, trace(Ꮡp, fileˢ), ref ᒐ);
+            defer(un, trace(Ꮡp, fileˢᴍparser), ref ᒐ);
         }
 
         // Don't bother parsing the rest if we had errors scanning the first token.
@@ -3929,7 +3929,7 @@ internal static ж<ast.File> parseFileᴍ(ж<parser> Ꮡp) {
         // the package name does not appear in any scope.
         var ident = Ꮡp.parseIdent();
         if (ident.Name == "_"u8 && (Mode)(p.mode & DeclarationErrors) != 0) {
-            Ꮡp.error(p.pos, invalidPackageNameˢ);
+            Ꮡp.error(p.pos, invalidPackageNameˢᴍparser);
         }
         Ꮡp.expectSemi();
 
@@ -3952,7 +3952,7 @@ internal static ж<ast.File> parseFileᴍ(ж<parser> Ꮡp) {
                 while (p.tok != token.EOF) {
                     // Continue to accept import declarations for error tolerance, but complain.
                     if (p.tok == token.IMPORT && prev != token.IMPORT) {
-                        Ꮡp.error(p.pos, importsMustAppearBeforeˢ);
+                        Ꮡp.error(p.pos, importsMustAppearBeforeˢᴍparser);
                     }
                     prev = p.tok;
 

@@ -66,8 +66,8 @@ internal static slice<byte> Bytesᴍ(ref Buffer b) { return b.buf.slice(b.off); 
 internal static slice<byte> AvailableBufferᴍ(ref Buffer b) { return b.buf.slice(len(b.buf)); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍBuffer => ref nilˢᵇᴍBuffer;
+private static readonly @string nilˢᵇᴍBuffer = "<nil>"u8;
 
 // String returns the contents of the unread portion of the buffer
 // as a string. If the [Buffer] is a nil pointer, it returns "<nil>".
@@ -78,7 +78,7 @@ internal static @string Stringᴍ(ж<Buffer> Ꮡb) {
 
     if (Ꮡb == nil) {
         // Special case, useful in debugging.
-        return nilˢ;
+        return nilˢᴍBuffer;
     }
     return (@string)(b.buf.slice(b.off));
 }
@@ -434,8 +434,8 @@ internal static (rune r, nint size, error err) ReadRuneᴍ(ref Buffer b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesBufferUnreadRuneˢ => ref bytesBufferUnreadRuneˢᵇ;
-private static readonly @string bytesBufferUnreadRuneˢᵇ = "bytes.Buffer: UnreadRune: previous operation was not a successful ReadRune"u8;
+internal static ref readonly @string bytesBufferUnreadRuneˢᴍBuffer => ref bytesBufferUnreadRuneˢᵇᴍBuffer;
+private static readonly @string bytesBufferUnreadRuneˢᵇᴍBuffer = "bytes.Buffer: UnreadRune: previous operation was not a successful ReadRune"u8;
 
 // UnreadRune unreads the last rune returned by [Buffer.ReadRune].
 // If the most recent read or write operation on the buffer was
@@ -444,7 +444,7 @@ private static readonly @string bytesBufferUnreadRuneˢᵇ = "bytes.Buffer: Unre
 // from any read operation.)
 internal static error UnreadRuneᴍ(ref Buffer b) {
     if (b.lastRead <= opInvalid) {
-        return errors.New(bytesBufferUnreadRuneˢ);
+        return errors.New(bytesBufferUnreadRuneˢᴍBuffer);
     }
     if (b.off >= (nint)b.lastRead) {
         b.off -= (nint)b.lastRead;

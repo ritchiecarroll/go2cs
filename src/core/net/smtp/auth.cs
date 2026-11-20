@@ -62,12 +62,12 @@ internal static bool isLocalhost(@string name) {
 } partial class smtp_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unencryptedConnectionˢ => ref unencryptedConnectionˢᵇ;
-private static readonly @string unencryptedConnectionˢᵇ = "unencrypted connection"u8;
-internal static ref readonly @string wrongHostNameˢ => ref wrongHostNameˢᵇ;
-private static readonly @string wrongHostNameˢᵇ = "wrong host name"u8;
-internal static ref readonly @string plainˢ => ref plainˢᵇ;
-private static readonly @string plainˢᵇ = "PLAIN"u8;
+internal static ref readonly @string unencryptedConnectionˢᴍplainAuth => ref unencryptedConnectionˢᵇᴍplainAuth;
+private static readonly @string unencryptedConnectionˢᵇᴍplainAuth = "unencrypted connection"u8;
+internal static ref readonly @string wrongHostNameˢᴍplainAuth => ref wrongHostNameˢᵇᴍplainAuth;
+private static readonly @string wrongHostNameˢᵇᴍplainAuth = "wrong host name"u8;
+internal static ref readonly @string plainˢᴍplainAuth => ref plainˢᵇᴍplainAuth;
+private static readonly @string plainˢᵇᴍplainAuth = "PLAIN"u8;
 
 internal static (@string, slice<byte>, error) Startᴍ(ref plainAuth a, ж<ServerInfo> Ꮡserver) {
     ref var server = ref Ꮡserver.DerefOrNull();
@@ -78,23 +78,23 @@ internal static (@string, slice<byte>, error) Startᴍ(ref plainAuth a, ж<Serve
     // That might just be the attacker saying
     // "it's ok, you can trust me with your password."
     if (!server.TLS && !isLocalhost(server.Name)) {
-        return ("", default, errors.New(unencryptedConnectionˢ));
+        return ("", default, errors.New(unencryptedConnectionˢᴍplainAuth));
     }
     if (server.Name != a.host) {
-        return ("", default, errors.New(wrongHostNameˢ));
+        return ("", default, errors.New(wrongHostNameˢᴍplainAuth));
     }
     var resp = slice<byte>(a.identity + "\x00" + a.username + "\x00" + a.password);
-    return (plainˢ, resp, default);
+    return (plainˢᴍplainAuth, resp, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedServerˢ => ref unexpectedServerˢᵇ;
-private static readonly @string unexpectedServerˢᵇ = "unexpected server challenge"u8;
+internal static ref readonly @string unexpectedServerˢᴍplainAuth => ref unexpectedServerˢᵇᴍplainAuth;
+private static readonly @string unexpectedServerˢᵇᴍplainAuth = "unexpected server challenge"u8;
 
 internal static (slice<byte>, error) Nextᴍ(ref plainAuth a, slice<byte> fromServer, bool more) {
     if (more) {
         // We've already sent everything.
-        return (default, errors.New(unexpectedServerˢ));
+        return (default, errors.New(unexpectedServerˢᴍplainAuth));
     }
     return (default, default);
 }
@@ -116,11 +116,11 @@ public static Auth CRAMMD5Auth(@string username, @string secret) {
 } partial class smtp_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cramMd5ˢ => ref cramMd5ˢᵇ;
-private static readonly @string cramMd5ˢᵇ = "CRAM-MD5"u8;
+internal static ref readonly @string cramMd5ˢᴍcramMD5Auth => ref cramMd5ˢᵇᴍcramMD5Auth;
+private static readonly @string cramMd5ˢᵇᴍcramMD5Auth = "CRAM-MD5"u8;
 
 internal static (@string, slice<byte>, error) Startᴍ(ref cramMD5Auth a, ж<ServerInfo> server) {
-    return (cramMd5ˢ, default, default);
+    return (cramMd5ˢᴍcramMD5Auth, default, default);
 }
 
 internal static (slice<byte>, error) Nextᴍ(ref cramMD5Auth a, slice<byte> fromServer, bool more) {

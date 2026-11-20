@@ -60,13 +60,13 @@ internal static bool IsPseudoᴍ(HeaderField hf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string sensitiveˢ => ref sensitiveˢᵇ;
-private static readonly @string sensitiveˢᵇ = " (sensitive)"u8;
+private static ref readonly @string sensitiveˢᴍHeaderField => ref sensitiveˢᵇᴍHeaderField;
+private static readonly @string sensitiveˢᵇᴍHeaderField = " (sensitive)"u8;
 
 internal static @string Stringᴍ(HeaderField hf) {
     @string suffix = default;
     if (hf.Sensitive) {
-        suffix = sensitiveˢ;
+        suffix = sensitiveˢᴍHeaderField;
     }
     return fmt.Sprintf("header field %q = %q%s"u8, hf.Name, hf.Value, suffix);
 }
@@ -268,8 +268,8 @@ internal static (slice<HeaderField>, error) DecodeFullᴍ(ж<Decoder> Ꮡd, slic
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string truncatedHeadersˢ => ref truncatedHeadersˢᵇ;
-private static readonly @string truncatedHeadersˢᵇ = "truncated headers"u8;
+private static ref readonly @string truncatedHeadersˢᴍDecoder => ref truncatedHeadersˢᵇᴍDecoder;
+private static readonly @string truncatedHeadersˢᵇᴍDecoder = "truncated headers"u8;
 
 // Close declares that the decoding is complete and resets the Decoder
 // to be reused again for a new header block. If there is any remaining
@@ -277,7 +277,7 @@ private static readonly @string truncatedHeadersˢᵇ = "truncated headers"u8;
 internal static error Closeᴍ(ref Decoder d) {
     if (d.saveBuf.Len() > 0) {
         d.saveBuf.Reset();
-        return new DecodingError(errors.New(truncatedHeadersˢ));
+        return new DecodingError(errors.New(truncatedHeadersˢᴍDecoder));
     }
     d.firstField = true;
     return default;
@@ -347,8 +347,8 @@ internal static bool sensitiveᴍ(indexType v) { return v == indexedNever; }
 } partial class hpack_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidEncodingˢ => ref invalidEncodingˢᵇ;
-private static readonly @string invalidEncodingˢᵇ = "invalid encoding"u8;
+private static ref readonly @string invalidEncodingˢᴍDecoder => ref invalidEncodingˢᵇᴍDecoder;
+private static readonly @string invalidEncodingˢᵇᴍDecoder = "invalid encoding"u8;
 
 // returns errNeedMore if there isn't enough data available.
 // any other error is fatal.
@@ -388,7 +388,7 @@ internal static error parseHeaderFieldReprᴍ(ref Decoder d) {
         return d.parseDynamicTableSizeUpdate();
     }}
 
-    return new DecodingError(errors.New(invalidEncodingˢ));
+    return new DecodingError(errors.New(invalidEncodingˢᴍDecoder));
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
@@ -466,17 +466,17 @@ internal static error callEmitᴍ(ref Decoder d, HeaderField hf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string dynamicTableSizeUpdateˢ => ref dynamicTableSizeUpdateˢᵇ;
-private static readonly @string dynamicTableSizeUpdateˢᵇ = "dynamic table size update MUST occur at the beginning of a header block"u8;
-private static ref readonly @string dynamicTableSizeUpdateˢ2 => ref dynamicTableSizeUpdateˢ2ᵇ;
-private static readonly @string dynamicTableSizeUpdateˢ2ᵇ = "dynamic table size update too large"u8;
+private static ref readonly @string dynamicTableSizeUpdateˢᴍDecoder => ref dynamicTableSizeUpdateˢᵇᴍDecoder;
+private static readonly @string dynamicTableSizeUpdateˢᵇᴍDecoder = "dynamic table size update MUST occur at the beginning of a header block"u8;
+private static ref readonly @string dynamicTableSizeUpdateˢ2ᴍDecoder => ref dynamicTableSizeUpdateˢ2ᵇᴍDecoder;
+private static readonly @string dynamicTableSizeUpdateˢ2ᵇᴍDecoder = "dynamic table size update too large"u8;
 
 // (same invariants and behavior as parseHeaderFieldRepr)
 internal static error parseDynamicTableSizeUpdateᴍ(ref Decoder d) {
     // RFC 7541, sec 4.2: This dynamic table size update MUST occur at the
     // beginning of the first header block following the change to the dynamic table size.
     if (!d.firstField && d.dynTab.size > 0) {
-        return new DecodingError(errors.New(dynamicTableSizeUpdateˢ));
+        return new DecodingError(errors.New(dynamicTableSizeUpdateˢᴍDecoder));
     }
 
     var buf = d.buf;
@@ -485,7 +485,7 @@ internal static error parseDynamicTableSizeUpdateᴍ(ref Decoder d) {
         return err;
     }
     if (size > (uint64)d.dynTab.allowedMaxSize) {
-        return new DecodingError(errors.New(dynamicTableSizeUpdateˢ2));
+        return new DecodingError(errors.New(dynamicTableSizeUpdateˢ2ᴍDecoder));
     }
     d.dynTab.setMaxSize((uint32)size);
     d.buf = buf;

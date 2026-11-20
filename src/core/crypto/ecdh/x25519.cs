@@ -34,20 +34,20 @@ partial struct x25519Curve {
 } partial class ecdh_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string x25519ˢ => ref x25519ˢᵇ;
-private static readonly @string x25519ˢᵇ = "X25519"u8;
+private static ref readonly @string x25519ˢᴍx25519Curve => ref x25519ˢᵇᴍx25519Curve;
+private static readonly @string x25519ˢᵇᴍx25519Curve = "X25519"u8;
 
 internal static @string Stringᴍ(ref x25519Curve c) {
-    return x25519ˢ;
+    return x25519ˢᴍx25519Curve;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoEcdhUseOfX25519Isˢ => ref cryptoEcdhUseOfX25519Isˢᵇ;
-private static readonly @string cryptoEcdhUseOfX25519Isˢᵇ = "crypto/ecdh: use of X25519 is not allowed in FIPS 140-only mode"u8;
+private static ref readonly @string cryptoEcdhUseOfX25519Isˢᴍx25519Curve => ref cryptoEcdhUseOfX25519Isˢᵇᴍx25519Curve;
+private static readonly @string cryptoEcdhUseOfX25519Isˢᵇᴍx25519Curve = "crypto/ecdh: use of X25519 is not allowed in FIPS 140-only mode"u8;
 
 internal static (ж<PrivateKey>, error) GenerateKeyᴍ(ж<x25519Curve> Ꮡc, io.Reader r) {
     if (fips140only.Enforced()) {
-        return (default, errors.New(cryptoEcdhUseOfX25519Isˢ));
+        return (default, errors.New(cryptoEcdhUseOfX25519Isˢᴍx25519Curve));
     }
     r = rand.CustomReader(r);
     var key = new slice<byte>(x25519PrivateKeySize);
@@ -58,15 +58,15 @@ internal static (ж<PrivateKey>, error) GenerateKeyᴍ(ж<x25519Curve> Ꮡc, io.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoEcdhInvalidPrivateˢ2 => ref cryptoEcdhInvalidPrivateˢ2ᵇ;
-private static readonly @string cryptoEcdhInvalidPrivateˢ2ᵇ = "crypto/ecdh: invalid private key size"u8;
+private static ref readonly @string cryptoEcdhInvalidPrivateˢ2ᴍx25519Curve => ref cryptoEcdhInvalidPrivateˢ2ᵇᴍx25519Curve;
+private static readonly @string cryptoEcdhInvalidPrivateˢ2ᵇᴍx25519Curve = "crypto/ecdh: invalid private key size"u8;
 
 internal static (ж<PrivateKey>, error) NewPrivateKeyᴍ(ж<x25519Curve> Ꮡc, slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default, errors.New(cryptoEcdhUseOfX25519Isˢ));
+        return (default, errors.New(cryptoEcdhUseOfX25519Isˢᴍx25519Curve));
     }
     if (len(key) != x25519PrivateKeySize) {
-        return (default, errors.New(cryptoEcdhInvalidPrivateˢ2));
+        return (default, errors.New(cryptoEcdhInvalidPrivateˢ2ᴍx25519Curve));
     }
     var publicKey = new slice<byte>(x25519PublicKeySize);
     var x25519Basepoint = new byte[]{9}.array(32);
@@ -82,15 +82,15 @@ internal static (ж<PrivateKey>, error) NewPrivateKeyᴍ(ж<x25519Curve> Ꮡc, s
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoEcdhInvalidPublicˢ => ref cryptoEcdhInvalidPublicˢᵇ;
-private static readonly @string cryptoEcdhInvalidPublicˢᵇ = "crypto/ecdh: invalid public key"u8;
+private static ref readonly @string cryptoEcdhInvalidPublicˢᴍx25519Curve => ref cryptoEcdhInvalidPublicˢᵇᴍx25519Curve;
+private static readonly @string cryptoEcdhInvalidPublicˢᵇᴍx25519Curve = "crypto/ecdh: invalid public key"u8;
 
 internal static (ж<PublicKey>, error) NewPublicKeyᴍ(ж<x25519Curve> Ꮡc, slice<byte> key) {
     if (fips140only.Enforced()) {
-        return (default, errors.New(cryptoEcdhUseOfX25519Isˢ));
+        return (default, errors.New(cryptoEcdhUseOfX25519Isˢᴍx25519Curve));
     }
     if (len(key) != x25519PublicKeySize) {
-        return (default, errors.New(cryptoEcdhInvalidPublicˢ));
+        return (default, errors.New(cryptoEcdhInvalidPublicˢᴍx25519Curve));
     }
     return (Ꮡ(new PublicKey(
         curve: new x25519CurveжCurve(Ꮡc),
@@ -99,8 +99,8 @@ internal static (ж<PublicKey>, error) NewPublicKeyᴍ(ж<x25519Curve> Ꮡc, sli
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoEcdhBadX25519ˢ => ref cryptoEcdhBadX25519ˢᵇ;
-private static readonly @string cryptoEcdhBadX25519ˢᵇ = "crypto/ecdh: bad X25519 remote ECDH input: low order point"u8;
+private static ref readonly @string cryptoEcdhBadX25519ˢᴍx25519Curve => ref cryptoEcdhBadX25519ˢᵇᴍx25519Curve;
+private static readonly @string cryptoEcdhBadX25519ˢᵇᴍx25519Curve = "crypto/ecdh: bad X25519 remote ECDH input: low order point"u8;
 
 internal static (slice<byte>, error) ecdhᴍ(ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
     ref var local = ref Ꮡlocal.DerefOrNull();
@@ -109,7 +109,7 @@ internal static (slice<byte>, error) ecdhᴍ(ref x25519Curve c, ж<PrivateKey> �
     var @out = new slice<byte>(x25519SharedSecretSize);
     x25519ScalarMult(@out, local.privateKey, remote.publicKey);
     if (isZero(@out)) {
-        return (default, errors.New(cryptoEcdhBadX25519ˢ));
+        return (default, errors.New(cryptoEcdhBadX25519ˢᴍx25519Curve));
     }
     return (@out, default);
 }

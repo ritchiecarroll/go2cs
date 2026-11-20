@@ -152,8 +152,8 @@ public static (ж<Writer>, error) Dial(@string network, @string raddr, Priority 
 } partial class syslog_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string localhostˢ => ref localhostˢᵇ;
-private static readonly @string localhostˢᵇ = "localhost"u8;
+internal static ref readonly @string localhostˢᴍWriter => ref localhostˢᵇᴍWriter;
+private static readonly @string localhostˢᵇᴍWriter = "localhost"u8;
 
 // connect makes a connection to the syslog server.
 // It must be called with w.mu held.
@@ -169,7 +169,7 @@ internal static error /*err*/ connectᴍ(ref Writer w) {
     if (w.network == ""u8) {
         (w.conn, err) = unixSyslog();
         if (w.hostname == ""u8) {
-            w.hostname = localhostˢ;
+            w.hostname = localhostˢᴍWriter;
         }
     } else {
         net.Conn c = default;

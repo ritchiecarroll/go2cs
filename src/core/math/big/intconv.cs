@@ -14,8 +14,8 @@ partial class big_package {
 } partial class big_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍInt => ref nilˢᵇᴍInt;
+private static readonly @string nilˢᵇᴍInt = "<nil>"u8;
 
 // Text returns the string representation of x in the given base.
 // Base must be between 2 and 62, inclusive. The result uses the
@@ -27,7 +27,7 @@ internal static @string Textᴍ(ж<Int> Ꮡx, nint @base) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
-        return nilˢ;
+        return nilˢᴍInt;
     }
     return (@string)x.abs.itoa(x.neg, @base);
 }
@@ -292,8 +292,8 @@ internal static fmt.Scanner _ᴛ5ʗ = new IntжScanner(intOne); // *Int must imp
 } partial class big_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string intScanInvalidVerbˢ => ref intScanInvalidVerbˢᵇ;
-private static readonly @string intScanInvalidVerbˢᵇ = "Int.Scan: invalid verb"u8;
+internal static ref readonly @string intScanInvalidVerbˢᴍInt => ref intScanInvalidVerbˢᵇᴍInt;
+private static readonly @string intScanInvalidVerbˢᵇᴍInt = "Int.Scan: invalid verb"u8;
 
 // Scan is a support routine for [fmt.Scanner]; it sets z to the value of
 // the scanned number. It accepts the formats 'b' (binary), 'o' (octal),
@@ -323,7 +323,7 @@ internal static error Scanᴍ(ж<Int> Ꮡz, fmt.ScanState s, rune ch) {
         break;
     }
     default: {
-        return errors.New(intScanInvalidVerbˢ);
+        return errors.New(intScanInvalidVerbˢᴍInt);
     }}
     var (_, _, err) = Ꮡz.scan(new byteReader(s), @base);
     return err;

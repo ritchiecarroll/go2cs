@@ -479,10 +479,10 @@ partial struct canceledError {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string operationWasCanceledˢ => ref operationWasCanceledˢᵇ;
-private static readonly @string operationWasCanceledˢᵇ = "operation was canceled"u8;
+internal static ref readonly @string operationWasCanceledˢᴍcanceledError => ref operationWasCanceledˢᵇᴍcanceledError;
+private static readonly @string operationWasCanceledˢᵇᴍcanceledError = "operation was canceled"u8;
 
-internal static @string Errorᴍ(canceledError _) { return operationWasCanceledˢ; }
+internal static @string Errorᴍ(canceledError _) { return operationWasCanceledˢᴍcanceledError; }
 
 internal static bool Isᴍ(canceledError _, error err) { return AreEqual(err, context.Canceled); }
 
@@ -534,14 +534,14 @@ partial struct OpError {
 internal static error Unwrapᴍ(ref OpError e) { return e.Err; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍOpError => ref nilˢᵇᴍOpError;
+private static readonly @string nilˢᵇᴍOpError = "<nil>"u8;
 
 internal static @string Errorᴍ(ж<OpError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
-        return nilˢ;
+        return nilˢᴍOpError;
     }
     @string s = e.Op;
     if (e.Net != ""u8) {
@@ -639,14 +639,14 @@ partial struct AddrError {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍAddrError => ref nilˢᵇᴍAddrError;
+private static readonly @string nilˢᵇᴍAddrError = "<nil>"u8;
 
 internal static @string Errorᴍ(ж<AddrError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
-        return nilˢ;
+        return nilˢᴍAddrError;
     }
     @string s = e.Err;
     if (e.Addr != ""u8) {
@@ -699,10 +699,10 @@ partial struct timeoutError {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string iOTimeoutˢ => ref iOTimeoutˢᵇ;
-private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
+internal static ref readonly @string iOTimeoutˢᴍtimeoutError => ref iOTimeoutˢᵇᴍtimeoutError;
+private static readonly @string iOTimeoutˢᵇᴍtimeoutError = "i/o timeout"u8;
 
-internal static @string Errorᴍ(ref timeoutError e) { return iOTimeoutˢ; }
+internal static @string Errorᴍ(ref timeoutError e) { return iOTimeoutˢᴍtimeoutError; }
 internal static bool Timeoutᴍ(ref timeoutError e) { return true; }
 internal static bool Temporaryᴍ(ref timeoutError e) { return true; }
 
@@ -808,14 +808,14 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
 internal static error Unwrapᴍ(ref DNSError e) { return e.UnwrapErr; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍDNSError => ref nilˢᵇᴍDNSError;
+private static readonly @string nilˢᵇᴍDNSError = "<nil>"u8;
 
 internal static @string Errorᴍ(ж<DNSError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
-        return nilˢ;
+        return nilˢᴍDNSError;
     }
     @string s = "lookup "u8 + e.Name;
     if (e.Server != ""u8) {

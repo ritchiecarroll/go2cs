@@ -28,8 +28,8 @@ internal static void directCyclesᴍ(ж<Checker> Ꮡcheck) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string checkDirectCycleForSˢ => ref checkDirectCycleForSˢᵇ;
-private static readonly @string checkDirectCycleForSˢᵇ = "-- check direct cycle for %s"u8;
+internal static ref readonly @string checkDirectCycleForSˢᴍChecker => ref checkDirectCycleForSˢᵇᴍChecker;
+private static readonly @string checkDirectCycleForSˢᵇᴍChecker = "-- check direct cycle for %s"u8;
 
 // directCycle checks if the declaration of the type given by tname contains a direct cycle.
 // A direct cycle exists if the path from tname's declaration's RHS leads from type name to
@@ -57,7 +57,7 @@ internal static void directCycleᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname,
     var pathᴷ = new stackAppend<ж<TypeName>>();
 
     if (debug && check.conf._Trace) {
-        Ꮡcheck.trace(Ꮡtname.of(TypeName.Ꮡobject).Pos(), checkDirectCycleForSˢ, Ꮡtname.OrTypedNil());
+        Ꮡcheck.trace(Ꮡtname.of(TypeName.Ꮡobject).Pos(), checkDirectCycleForSˢᴍChecker, Ꮡtname.OrTypedNil());
     }
 
     slice<ж<TypeName>> path = default;

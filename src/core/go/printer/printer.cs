@@ -652,8 +652,8 @@ internal static void stripCommonPrefix(slice<@string> lines) {
 } partial class printer_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string linePrefixᶜ => ref linePrefixᶜᵇ;
-private static readonly @string linePrefixᶜᵇ = "//line "u8;
+internal static ref readonly @string linePrefixᶜᴍprinter => ref linePrefixᶜᵇᴍprinter;
+private static readonly @string linePrefixᶜᵇᴍprinter = "//line "u8;
 
 internal static void writeCommentᴍ(ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomment) {
     GoFrame ᒐ = default;
@@ -664,7 +664,7 @@ internal static void writeCommentᴍ(ж<printer> Ꮡp, ж<ast.Comment> Ꮡcommen
         @string text = comment.Text;
         var pos = p.posFor(comment.Pos());
 
-        @string linePrefix = linePrefixᶜ;
+        @string linePrefix = linePrefixᶜᴍprinter;
         if (strings.HasPrefix(text, linePrefix) && (!pos.IsValid() || pos.Column == 1)) {
             // Possibly a //-style line directive.
             // Suspend indentation temporarily to keep line directive valid.
@@ -777,7 +777,7 @@ internal static bool containsLinebreakᴍ(ref printer p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object intersperseCommentsˢ = (@string)"intersperseComments called without pending comments"u8;
+internal static readonly object intersperseCommentsˢᴍprinter = (@string)"intersperseComments called without pending comments"u8;
 
 // intersperseComments consumes all comments that appear before the next token
 // tok and prints it together with the buffered whitespace (i.e., the whitespace
@@ -856,12 +856,12 @@ internal static (bool wroteNewline, bool droppedFF) intersperseCommentsᴍ(ж<pr
 
     // no comment was written - we should never reach here since
     // intersperseComments should not be called in that case
-    p.internalError(intersperseCommentsˢ);
+    p.internalError(intersperseCommentsˢᴍprinter);
     return (wroteNewline, droppedFF);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object negativeIndentationˢ = (@string)"negative indentation:"u8;
+internal static readonly object negativeIndentationˢᴍprinter = (@string)"negative indentation:"u8;
 
 // writeWhitespace writes the first n whitespace entries.
 internal static void writeWhitespaceᴍ(ref printer p, nint n) {
@@ -878,7 +878,7 @@ internal static void writeWhitespaceᴍ(ref printer p, nint n) {
         else if (ch == unindent) { matchᴛ1 = true;
             p.indent--;
             if (p.indent < 0) {
-                p.internalError(negativeIndentationˢ, p.indent);
+                p.internalError(negativeIndentationˢᴍprinter, p.indent);
                 p.indent = 0;
             }
         }
@@ -961,7 +961,7 @@ internal static void setPosᴍ(ref printer p, token.Pos pos) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object whitespaceBufferNotEmptyˢ = (@string)"whitespace buffer not empty"u8;
+internal static readonly object whitespaceBufferNotEmptyˢᴍprinter = (@string)"whitespace buffer not empty"u8;
 
 // print prints a list of "items" (roughly corresponding to syntactic
 // tokens, but also including whitespace and formatting information).
@@ -1057,7 +1057,7 @@ internal static void printᴍ(ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
                 // should never happen because it is taken care
                 // of via binary expression formatting)
                 if (len(p.wsbuf) != 0) {
-                    p.internalError(whitespaceBufferNotEmptyˢ);
+                    p.internalError(whitespaceBufferNotEmptyˢᴍprinter);
                 }
                 p.wsbuf = p.wsbuf[0..1];
                 p.wsbuf[0] = (rune)' ';

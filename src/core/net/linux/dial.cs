@@ -542,8 +542,8 @@ internal static (Conn, error) Dialᴍ(ж<Dialer> Ꮡd, @string network, @string 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dialˢ => ref dialˢᵇ;
-private static readonly @string dialˢᵇ = "dial"u8;
+internal static ref readonly @string dialˢᴍDialer => ref dialˢᵇᴍDialer;
+private static readonly @string dialˢᵇᴍDialer = "dial"u8;
 
 // DialContext connects to the address on the named network using
 // the provided context.
@@ -581,7 +581,7 @@ internal static (Conn, error) DialContextᴍ(ж<Dialer> Ꮡd, context.Context ct
             resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(), Ꮡshadow);
         }
 
-        var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, dialˢ, network, address, d.LocalAddr);
+        var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, dialˢᴍDialer, network, address, d.LocalAddr);
         if (err != nil) {
             return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial", Net: network, Source: default, Addr: default, Err: err))));
         }
@@ -1052,8 +1052,8 @@ internal static void SetMultipathTCPᴍ(ref ListenConfig lc, bool use) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢ => ref listenˢᵇ;
-private static readonly @string listenˢᵇ = "listen"u8;
+internal static ref readonly @string listenˢᴍListenConfig => ref listenˢᵇᴍListenConfig;
+private static readonly @string listenˢᵇᴍListenConfig = "listen"u8;
 
 // Listen announces on the local network address.
 //
@@ -1063,7 +1063,7 @@ private static readonly @string listenˢᵇ = "listen"u8;
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned Listener.
 internal static (Listener, error) Listenᴍ(ref ListenConfig lc, context.Context ctx, @string network, @string address) {
-    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default);
+    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢᴍListenConfig, network, address, default);
     if (err != nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen", Net: network, Source: default, Addr: default, Err: err))));
     }
@@ -1108,7 +1108,7 @@ internal static (Listener, error) Listenᴍ(ref ListenConfig lc, context.Context
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned PacketConn.
 internal static (PacketConn, error) ListenPacketᴍ(ref ListenConfig lc, context.Context ctx, @string network, @string address) {
-    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default);
+    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢᴍListenConfig, network, address, default);
     if (err != nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen", Net: network, Source: default, Addr: default, Err: err))));
     }

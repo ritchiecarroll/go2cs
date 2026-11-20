@@ -105,8 +105,8 @@ internal static void endᴍ(dloggerFake l) { }
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string recordTooLargeˢ => ref recordTooLargeˢᵇ;
-private static readonly @string recordTooLargeˢᵇ = "record too large"u8;
+internal static ref readonly @string recordTooLargeˢᴍdloggerImpl => ref recordTooLargeˢᵇᴍdloggerImpl;
+private static readonly @string recordTooLargeˢᵇᴍdloggerImpl = "record too large"u8;
 
 //go:nosplit
 internal static void endᴍ(ж<dloggerImpl> Ꮡl) {
@@ -115,7 +115,7 @@ internal static void endᴍ(ж<dloggerImpl> Ꮡl) {
     // Fill in framing header.
     var size = l.w.write - l.w.r.end;
     if (!l.w.writeFrameAt(l.w.r.end, size)) {
-        @throw(recordTooLargeˢ);
+        @throw(recordTooLargeˢᴍdloggerImpl);
     }
 
     // Commit the record.
@@ -330,8 +330,8 @@ internal static dloggerFake pᴍ(dloggerFake l, any x) { return l; }
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string notAPointerTypeˢ => ref notAPointerTypeˢᵇ;
-private static readonly @string notAPointerTypeˢᵇ = "not a pointer type"u8;
+internal static ref readonly @string notAPointerTypeˢᴍdloggerImpl => ref notAPointerTypeˢᵇᴍdloggerImpl;
+private static readonly @string notAPointerTypeˢᵇᴍdloggerImpl = "not a pointer type"u8;
 
 //go:nosplit
 internal static ж<dloggerImpl> pᴍ(ж<dloggerImpl> Ꮡl, any xʗp) {
@@ -349,7 +349,7 @@ internal static ж<dloggerImpl> pᴍ(ж<dloggerImpl> Ꮡl, any xʗp) {
             break;
         }
         default: {
-            @throw(notAPointerTypeˢ);
+            @throw(notAPointerTypeˢᴍdloggerImpl);
             break;
         }}
     }
@@ -478,8 +478,8 @@ internal static UntypedInt debugLogSyncSize => /* debugLogHeaderSize + 2*8 */ 18
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string recordWrappedAroundˢ => ref recordWrappedAroundˢᵇ;
-private static readonly @string recordWrappedAroundˢᵇ = "record wrapped around"u8;
+internal static ref readonly @string recordWrappedAroundˢᴍdebugLogWriter => ref recordWrappedAroundˢᵇᴍdebugLogWriter;
+private static readonly @string recordWrappedAroundˢᵇᴍdebugLogWriter = "record wrapped around"u8;
 
 //go:nosplit
 internal static void ensureᴍ(ref debugLogWriter l, uint64 n) {
@@ -492,7 +492,7 @@ internal static void ensureᴍ(ref debugLogWriter l, uint64 n) {
             // eat the whole buffer at this point, but we
             // have to communicate that to the reader
             // somehow.
-            @throw(recordWrappedAroundˢ);
+            @throw(recordWrappedAroundˢᴍdebugLogWriter);
         }
     }
 }

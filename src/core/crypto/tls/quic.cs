@@ -24,28 +24,28 @@ public static QUICEncryptionLevel QUICEncryptionLevelApplication => 3;
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string initialˢ => ref initialˢᵇ;
-private static readonly @string initialˢᵇ = "Initial"u8;
-internal static ref readonly @string earlyˢ => ref earlyˢᵇ;
-private static readonly @string earlyˢᵇ = "Early"u8;
-internal static ref readonly @string handshakeˢ => ref handshakeˢᵇ;
-private static readonly @string handshakeˢᵇ = "Handshake"u8;
-internal static ref readonly @string applicationˢ => ref applicationˢᵇ;
-private static readonly @string applicationˢᵇ = "Application"u8;
+internal static ref readonly @string initialˢᴍQUICEncryptionLevel => ref initialˢᵇᴍQUICEncryptionLevel;
+private static readonly @string initialˢᵇᴍQUICEncryptionLevel = "Initial"u8;
+internal static ref readonly @string earlyˢᴍQUICEncryptionLevel => ref earlyˢᵇᴍQUICEncryptionLevel;
+private static readonly @string earlyˢᵇᴍQUICEncryptionLevel = "Early"u8;
+internal static ref readonly @string handshakeˢᴍQUICEncryptionLevel => ref handshakeˢᵇᴍQUICEncryptionLevel;
+private static readonly @string handshakeˢᵇᴍQUICEncryptionLevel = "Handshake"u8;
+internal static ref readonly @string applicationˢᴍQUICEncryptionLevel => ref applicationˢᵇᴍQUICEncryptionLevel;
+private static readonly @string applicationˢᵇᴍQUICEncryptionLevel = "Application"u8;
 
 internal static @string Stringᴍ(QUICEncryptionLevel l) {
     switch (l) {
     case var ᴛ when ᴛ == QUICEncryptionLevelInitial: {
-        return initialˢ;
+        return initialˢᴍQUICEncryptionLevel;
     }
     case var ᴛ when ᴛ == QUICEncryptionLevelEarly: {
-        return earlyˢ;
+        return earlyˢᴍQUICEncryptionLevel;
     }
     case var ᴛ when ᴛ == QUICEncryptionLevelHandshake: {
-        return handshakeˢ;
+        return handshakeˢᴍQUICEncryptionLevel;
     }
     case var ᴛ when ᴛ == QUICEncryptionLevelApplication: {
-        return applicationˢ;
+        return applicationˢᴍQUICEncryptionLevel;
     }
     default: {
         return fmt.Sprintf("QUICEncryptionLevel(%v)"u8, (nint)l);
@@ -218,10 +218,10 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ref QUICConfig config
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsStartCalledMoreThanˢ => ref tlsStartCalledMoreThanˢᵇ;
-private static readonly @string tlsStartCalledMoreThanˢᵇ = "tls: Start called more than once"u8;
-internal static ref readonly @string tlsConfigMinVersionMustˢ => ref tlsConfigMinVersionMustˢᵇ;
-private static readonly @string tlsConfigMinVersionMustˢᵇ = "tls: Config MinVersion must be at least TLS 1.3"u8;
+internal static ref readonly @string tlsStartCalledMoreThanˢᴍQUICConn => ref tlsStartCalledMoreThanˢᵇᴍQUICConn;
+private static readonly @string tlsStartCalledMoreThanˢᵇᴍQUICConn = "tls: Start called more than once"u8;
+internal static ref readonly @string tlsConfigMinVersionMustˢᴍQUICConn => ref tlsConfigMinVersionMustˢᵇᴍQUICConn;
+private static readonly @string tlsConfigMinVersionMustˢᵇᴍQUICConn = "tls: Config MinVersion must be at least TLS 1.3"u8;
 
 // Start starts the client or server handshake protocol.
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
@@ -231,11 +231,11 @@ internal static partial error Startᴍ(ж<QUICConn> Ꮡq, context.Context ctx) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     if (q.conn.quic.started) {
-        return quicError(errors.New(tlsStartCalledMoreThanˢ));
+        return quicError(errors.New(tlsStartCalledMoreThanˢᴍQUICConn));
     }
     q.conn.quic.started = true;
     if (q.conn.config.MinVersion < VersionTLS13) {
-        return quicError(errors.New(tlsConfigMinVersionMustˢ));
+        return quicError(errors.New(tlsConfigMinVersionMustˢᴍQUICConn));
     }
     goǃ((ᴛ0, ᴛ1) => ᴛ0.HandshakeContext(ᴛ1), Ꮡq.Value.conn, ctx);
     var (_, ok) = ᐸꟷ(q.conn.quic.blockedc, ꟷ); if (!ok) {
@@ -292,8 +292,8 @@ internal static error Closeᴍ(ref QUICConn q) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsHandshakeDataReceivedˢ => ref tlsHandshakeDataReceivedˢᵇ;
-private static readonly @string tlsHandshakeDataReceivedˢᵇ = "tls: handshake data received at wrong level"u8;
+internal static ref readonly @string tlsHandshakeDataReceivedˢᴍQUICConn => ref tlsHandshakeDataReceivedˢᵇᴍQUICConn;
+private static readonly @string tlsHandshakeDataReceivedˢᵇᴍQUICConn = "tls: handshake data received at wrong level"u8;
 
 // HandleData handles handshake bytes received from the peer.
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
@@ -304,7 +304,7 @@ internal static error HandleDataᴍ(ж<QUICConn> Ꮡq, QUICEncryptionLevel level
 
         var c = q.conn;
         if (c.@in.level != level) {
-            return quicError(c.Ꮡin.setErrorLocked(errors.New(tlsHandshakeDataReceivedˢ)));
+            return quicError(c.Ꮡin.setErrorLocked(errors.New(tlsHandshakeDataReceivedˢᴍQUICConn)));
         }
         c.quic.readbuf = data;
         ᐸꟷ(c.quic.signalc);
@@ -353,12 +353,12 @@ partial struct QUICSessionTicketOptions {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsSendSessionTicketˢ => ref tlsSendSessionTicketˢᵇ;
-private static readonly @string tlsSendSessionTicketˢᵇ = "tls: SendSessionTicket called before handshake completed"u8;
-internal static ref readonly @string tlsSendSessionTicketˢ2 => ref tlsSendSessionTicketˢ2ᵇ;
-private static readonly @string tlsSendSessionTicketˢ2ᵇ = "tls: SendSessionTicket called on the client"u8;
-internal static ref readonly @string tlsSendSessionTicketˢ3 => ref tlsSendSessionTicketˢ3ᵇ;
-private static readonly @string tlsSendSessionTicketˢ3ᵇ = "tls: SendSessionTicket called multiple times"u8;
+internal static ref readonly @string tlsSendSessionTicketˢᴍQUICConn => ref tlsSendSessionTicketˢᵇᴍQUICConn;
+private static readonly @string tlsSendSessionTicketˢᵇᴍQUICConn = "tls: SendSessionTicket called before handshake completed"u8;
+internal static ref readonly @string tlsSendSessionTicketˢ2ᴍQUICConn => ref tlsSendSessionTicketˢ2ᵇᴍQUICConn;
+private static readonly @string tlsSendSessionTicketˢ2ᵇᴍQUICConn = "tls: SendSessionTicket called on the client"u8;
+internal static ref readonly @string tlsSendSessionTicketˢ3ᴍQUICConn => ref tlsSendSessionTicketˢ3ᵇᴍQUICConn;
+private static readonly @string tlsSendSessionTicketˢ3ᵇᴍQUICConn = "tls: SendSessionTicket called multiple times"u8;
 
 // SendSessionTicket sends a session ticket to the client.
 // It produces connection events, which may be read with [QUICConn.NextEvent].
@@ -369,21 +369,21 @@ internal static error SendSessionTicketᴍ(ref QUICConn q, QUICSessionTicketOpti
         return default;
     }
     if (!c.ᏑisHandshakeComplete.Load()) {
-        return quicError(errors.New(tlsSendSessionTicketˢ));
+        return quicError(errors.New(tlsSendSessionTicketˢᴍQUICConn));
     }
     if (c.isClient) {
-        return quicError(errors.New(tlsSendSessionTicketˢ2));
+        return quicError(errors.New(tlsSendSessionTicketˢ2ᴍQUICConn));
     }
     if (q.sessionTicketSent) {
-        return quicError(errors.New(tlsSendSessionTicketˢ3));
+        return quicError(errors.New(tlsSendSessionTicketˢ3ᴍQUICConn));
     }
     q.sessionTicketSent = true;
     return quicError(c.sendSessionTicket(opts.EarlyData, opts.Extra));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsStoreSessionTicketˢ => ref tlsStoreSessionTicketˢᵇ;
-private static readonly @string tlsStoreSessionTicketˢᵇ = "tls: StoreSessionTicket called on the server"u8;
+internal static ref readonly @string tlsStoreSessionTicketˢᴍQUICConn => ref tlsStoreSessionTicketˢᵇᴍQUICConn;
+private static readonly @string tlsStoreSessionTicketˢᵇᴍQUICConn = "tls: StoreSessionTicket called on the server"u8;
 
 // StoreSession stores a session previously received in a QUICStoreSession event
 // in the ClientSessionCache.
@@ -392,7 +392,7 @@ private static readonly @string tlsStoreSessionTicketˢᵇ = "tls: StoreSessionT
 internal static error StoreSessionᴍ(ref QUICConn q, ж<SessionState> session) {
     var c = q.conn;
     if (!c.isClient) {
-        return quicError(errors.New(tlsStoreSessionTicketˢ));
+        return quicError(errors.New(tlsStoreSessionTicketˢᴍQUICConn));
     }
     @string cacheKey = c.clientSessionCacheKey();
     if (cacheKey == ""u8) {

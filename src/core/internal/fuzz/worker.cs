@@ -688,8 +688,8 @@ partial struct workerServer {
 } partial class fuzz_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noArgumentsProvidedForˢ => ref noArgumentsProvidedForˢᵇ;
-private static readonly @string noArgumentsProvidedForˢᵇ = "no arguments provided for any call"u8;
+internal static ref readonly @string noArgumentsProvidedForˢᴍworkerServer => ref noArgumentsProvidedForˢᵇᴍworkerServer;
+private static readonly @string noArgumentsProvidedForˢᵇᴍworkerServer = "no arguments provided for any call"u8;
 
 // serve reads serialized RPC messages on fuzzIn. When serve receives a message,
 // it calls the corresponding method, then sends the serialized result back
@@ -733,7 +733,7 @@ internal static error serveᴍ(ж<workerServer> Ꮡws, context.Context ctx) {
             break;
         }
         default: {
-            return errors.New(noArgumentsProvidedForˢ);
+            return errors.New(noArgumentsProvidedForˢᴍworkerServer);
         }}
 
         {
@@ -760,8 +760,8 @@ internal static UntypedInt chainedMutations => 5;
 } partial class fuzz_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fuzzFunctionFailedWithNoˢ => ref fuzzFunctionFailedWithNoˢᵇ;
-private static readonly @string fuzzFunctionFailedWithNoˢᵇ = "fuzz function failed with no input"u8;
+internal static ref readonly @string fuzzFunctionFailedWithNoˢᴍworkerServer => ref fuzzFunctionFailedWithNoˢᵇᴍworkerServer;
+private static readonly @string fuzzFunctionFailedWithNoˢᵇᴍworkerServer = "fuzz function failed with no input"u8;
 
 // fuzz runs the test function on random variations of the input value in shared
 // memory for a limited duration or number of iterations.
@@ -832,7 +832,7 @@ internal static fuzzResponse /*resp*/ fuzzᴍ(ж<workerServer> Ꮡws, context.Co
             if (errΔ1 != nil) {
                 errMsg = errΔ1.Error();
                 if (errMsg == ""u8) {
-                    errMsg = fuzzFunctionFailedWithNoˢ;
+                    errMsg = fuzzFunctionFailedWithNoˢᴍworkerServer;
                 }
                 return (dur, default, errMsg);
             }
@@ -1240,8 +1240,8 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string workerServerFuzzModifiedˢ => ref workerServerFuzzModifiedˢᵇ;
-private static readonly @string workerServerFuzzModifiedˢᵇ = "workerServer.fuzz modified input"u8;
+internal static ref readonly @string workerServerFuzzModifiedˢᴍworkerClient => ref workerServerFuzzModifiedˢᵇᴍworkerClient;
+private static readonly @string workerServerFuzzModifiedˢᵇᴍworkerClient = "workerServer.fuzz modified input"u8;
 
 // fuzz tells the worker to call the fuzz method. See workerServer.fuzz.
 internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, error err) fuzzᴍ(ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, fuzzArgs argsʗp) {
@@ -1287,7 +1287,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
         resp.Count = mem.header().count;
 
         if (!bytes.Equal(inp, mem.valueRef())) {
-            (entryOut, resp, isInternalError, err) = (new CorpusEntry(), new fuzzResponse(), true, errors.New(workerServerFuzzModifiedˢ)); goto ᒐdone;
+            (entryOut, resp, isInternalError, err) = (new CorpusEntry(), new fuzzResponse(), true, errors.New(workerServerFuzzModifiedˢᴍworkerClient)); goto ᒐdone;
         }
         var needEntryOut = callErr != nil || resp.Err != ""u8 || (!args.Warmup && resp.CoverageData != nil);
         if (needEntryOut) {

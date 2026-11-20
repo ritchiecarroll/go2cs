@@ -47,12 +47,12 @@ partial struct echConfigErr {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsMalformedECHConfigˢ => ref tlsMalformedECHConfigˢᵇ;
-private static readonly @string tlsMalformedECHConfigˢᵇ = "tls: malformed ECHConfig"u8;
+internal static ref readonly @string tlsMalformedECHConfigˢᴍechConfigErr => ref tlsMalformedECHConfigˢᵇᴍechConfigErr;
+private static readonly @string tlsMalformedECHConfigˢᵇᴍechConfigErr = "tls: malformed ECHConfig"u8;
 
 internal static @string Errorᴍ(ref echConfigErr e) {
     if (e.field == ""u8) {
-        return tlsMalformedECHConfigˢ;
+        return tlsMalformedECHConfigˢᴍechConfigErr;
     }
     return fmt.Sprintf("tls: malformed ECHConfig, invalid %s field"u8, e.field);
 }
@@ -548,11 +548,11 @@ partial struct ECHRejectionError {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsServerRejectedEchˢ => ref tlsServerRejectedEchˢᵇ;
-private static readonly @string tlsServerRejectedEchˢᵇ = "tls: server rejected ECH"u8;
+internal static ref readonly @string tlsServerRejectedEchˢᴍECHRejectionError => ref tlsServerRejectedEchˢᵇᴍECHRejectionError;
+private static readonly @string tlsServerRejectedEchˢᵇᴍECHRejectionError = "tls: server rejected ECH"u8;
 
 internal static @string Errorᴍ(ref ECHRejectionError e) {
-    return tlsServerRejectedEchˢ;
+    return tlsServerRejectedEchˢᴍECHRejectionError;
 }
 
 } partial class tls_package {

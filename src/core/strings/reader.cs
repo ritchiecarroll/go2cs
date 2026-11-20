@@ -53,8 +53,8 @@ internal static (nint n, error err) Readᴍ(ref Reader r, slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringsReaderReadAtˢ => ref stringsReaderReadAtˢᵇ;
-private static readonly @string stringsReaderReadAtˢᵇ = "strings.Reader.ReadAt: negative offset"u8;
+internal static ref readonly @string stringsReaderReadAtˢᴍReader => ref stringsReaderReadAtˢᵇᴍReader;
+private static readonly @string stringsReaderReadAtˢᵇᴍReader = "strings.Reader.ReadAt: negative offset"u8;
 
 // ReadAt implements the [io.ReaderAt] interface.
 internal static (nint n, error err) ReadAtᴍ(ref Reader r, slice<byte> b, int64 off) {
@@ -63,7 +63,7 @@ internal static (nint n, error err) ReadAtᴍ(ref Reader r, slice<byte> b, int64
 
     // cannot modify state - see io.ReaderAt
     if (off < 0) {
-        return (0, errors.New(stringsReaderReadAtˢ));
+        return (0, errors.New(stringsReaderReadAtˢᴍReader));
     }
     if (off >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -87,13 +87,13 @@ internal static (byte, error) ReadByteᴍ(ref Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringsReaderUnreadByteˢ => ref stringsReaderUnreadByteˢᵇ;
-private static readonly @string stringsReaderUnreadByteˢᵇ = "strings.Reader.UnreadByte: at beginning of string"u8;
+internal static ref readonly @string stringsReaderUnreadByteˢᴍReader => ref stringsReaderUnreadByteˢᵇᴍReader;
+private static readonly @string stringsReaderUnreadByteˢᵇᴍReader = "strings.Reader.UnreadByte: at beginning of string"u8;
 
 // UnreadByte implements the [io.ByteScanner] interface.
 internal static error UnreadByteᴍ(ref Reader r) {
     if (r.i <= 0) {
-        return errors.New(stringsReaderUnreadByteˢ);
+        return errors.New(stringsReaderUnreadByteˢᴍReader);
     }
     r.prevRune = -1;
     r.i--;
@@ -117,18 +117,18 @@ internal static (rune ch, nint size, error err) ReadRuneᴍ(ref Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringsReaderUnreadRuneˢ => ref stringsReaderUnreadRuneˢᵇ;
-private static readonly @string stringsReaderUnreadRuneˢᵇ = "strings.Reader.UnreadRune: at beginning of string"u8;
-internal static ref readonly @string stringsReaderUnreadRuneˢ2 => ref stringsReaderUnreadRuneˢ2ᵇ;
-private static readonly @string stringsReaderUnreadRuneˢ2ᵇ = "strings.Reader.UnreadRune: previous operation was not ReadRune"u8;
+internal static ref readonly @string stringsReaderUnreadRuneˢᴍReader => ref stringsReaderUnreadRuneˢᵇᴍReader;
+private static readonly @string stringsReaderUnreadRuneˢᵇᴍReader = "strings.Reader.UnreadRune: at beginning of string"u8;
+internal static ref readonly @string stringsReaderUnreadRuneˢ2ᴍReader => ref stringsReaderUnreadRuneˢ2ᵇᴍReader;
+private static readonly @string stringsReaderUnreadRuneˢ2ᵇᴍReader = "strings.Reader.UnreadRune: previous operation was not ReadRune"u8;
 
 // UnreadRune implements the [io.RuneScanner] interface.
 internal static error UnreadRuneᴍ(ref Reader r) {
     if (r.i <= 0) {
-        return errors.New(stringsReaderUnreadRuneˢ);
+        return errors.New(stringsReaderUnreadRuneˢᴍReader);
     }
     if (r.prevRune < 0) {
-        return errors.New(stringsReaderUnreadRuneˢ2);
+        return errors.New(stringsReaderUnreadRuneˢ2ᴍReader);
     }
     r.i = (int64)r.prevRune;
     r.prevRune = -1;
@@ -136,10 +136,10 @@ internal static error UnreadRuneᴍ(ref Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringsReaderSeekInvalidˢ => ref stringsReaderSeekInvalidˢᵇ;
-private static readonly @string stringsReaderSeekInvalidˢᵇ = "strings.Reader.Seek: invalid whence"u8;
-internal static ref readonly @string stringsReaderSeekˢ => ref stringsReaderSeekˢᵇ;
-private static readonly @string stringsReaderSeekˢᵇ = "strings.Reader.Seek: negative position"u8;
+internal static ref readonly @string stringsReaderSeekInvalidˢᴍReader => ref stringsReaderSeekInvalidˢᵇᴍReader;
+private static readonly @string stringsReaderSeekInvalidˢᵇᴍReader = "strings.Reader.Seek: invalid whence"u8;
+internal static ref readonly @string stringsReaderSeekˢᴍReader => ref stringsReaderSeekˢᵇᴍReader;
+private static readonly @string stringsReaderSeekˢᵇᴍReader = "strings.Reader.Seek: negative position"u8;
 
 // Seek implements the [io.Seeker] interface.
 internal static (int64, error) Seekᴍ(ref Reader r, int64 offset, nint whence) {
@@ -159,10 +159,10 @@ internal static (int64, error) Seekᴍ(ref Reader r, int64 offset, nint whence) 
         break;
     }
     default: {
-        return (0, errors.New(stringsReaderSeekInvalidˢ));
+        return (0, errors.New(stringsReaderSeekInvalidˢᴍReader));
     }}
     if (abs < 0) {
-        return (0, errors.New(stringsReaderSeekˢ));
+        return (0, errors.New(stringsReaderSeekˢᴍReader));
     }
     r.i = abs;
     return (abs, default);

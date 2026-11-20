@@ -1079,11 +1079,11 @@ internal static error Closeᴍ(ref openDir d) { return default; }
 internal static (fs.FileInfo, error) Statᴍ(ref openDir d) { return d.e.stat(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
-private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
+internal static ref readonly @string isADirectoryˢᴍopenDir => ref isADirectoryˢᵇᴍopenDir;
+private static readonly @string isADirectoryˢᵇᴍopenDir = "is a directory"u8;
 
 internal static (nint, error) Readᴍ(ref openDir d, slice<byte> _) {
-    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.e.name, Err: errors.New(isADirectoryˢ)))));
+    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.e.name, Err: errors.New(isADirectoryˢᴍopenDir)))));
 }
 
 internal static (slice<fs.DirEntry>, error) ReadDirᴍ(ref openDir d, nint count) {

@@ -820,8 +820,8 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElemᴍ(ref Ite
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string concurrentMapIterationˢ => ref concurrentMapIterationˢᵇ;
-private static readonly @string concurrentMapIterationˢᵇ = "concurrent map iteration and map write"u8;
+internal static ref readonly @string concurrentMapIterationˢᴍIter => ref concurrentMapIterationˢᵇᴍIter;
+private static readonly @string concurrentMapIterationˢᵇᴍIter = "concurrent map iteration and map write"u8;
 
 // Next proceeds to the next element in iteration, which can be accessed via
 // the Key and Elem methods.
@@ -839,7 +839,7 @@ internal static void Nextᴍ(ref Iter it) {
     }
 
     if (it.m.writing != 0) {
-        fatal(concurrentMapIterationˢ);
+        fatal(concurrentMapIterationˢᴍIter);
         return;
     }
 

@@ -568,8 +568,8 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeTextOffsetOutOfˢ => ref runtimeTextOffsetOutOfˢᵇ;
-private static readonly @string runtimeTextOffsetOutOfˢᵇ = "runtime: text offset out of range"u8;
+internal static ref readonly @string runtimeTextOffsetOutOfˢᴍmoduledata => ref runtimeTextOffsetOutOfˢᵇᴍmoduledata;
+private static readonly @string runtimeTextOffsetOutOfˢᵇᴍmoduledata = "runtime: text offset out of range"u8;
 
 // textAddr returns md.text + off, with special handling for multiple text sections.
 // off is a (virtual) offset computed at internal linking time,
@@ -602,7 +602,7 @@ internal static uintptr textAddrᴍ(ref moduledata md, uint32 off32) {
         }
         if (res > md.etext && GOARCH != "wasm"u8) { // on wasm, functions do not live in the same address space as the linear memory
             println((@string)"runtime: textAddr", (hex)(uint64)res, (@string)"out of range", (hex)(uint64)md.text, (@string)"-", (hex)(uint64)md.etext);
-            @throw(runtimeTextOffsetOutOfˢ);
+            @throw(runtimeTextOffsetOutOfˢᴍmoduledata);
         }
     }
     if (GOARCH == "wasm"u8) {
@@ -614,8 +614,8 @@ internal static uintptr textAddrᴍ(ref moduledata md, uint32 off32) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedMultipleTextˢ => ref unexpectedMultipleTextˢᵇ;
-private static readonly @string unexpectedMultipleTextˢᵇ = "unexpected multiple text sections on Wasm"u8;
+internal static ref readonly @string unexpectedMultipleTextˢᴍmoduledata => ref unexpectedMultipleTextˢᵇᴍmoduledata;
+private static readonly @string unexpectedMultipleTextˢᵇᴍmoduledata = "unexpected multiple text sections on Wasm"u8;
 
 // textOff is the opposite of textAddr. It converts a PC to a (virtual) offset
 // to md.text, and returns if the PC is in any Go text section.
@@ -633,7 +633,7 @@ internal static (uint32, bool) textOffᴍ(ref moduledata md, uintptr pc) {
     var res = (uint32)off;
     if (len(md.textsectmap) > 1) {
         if (GOARCH == "wasm"u8) {
-            fatal(unexpectedMultipleTextˢ);
+            fatal(unexpectedMultipleTextˢᴍmoduledata);
         }
         foreach (var (i, sect) in range(md.textsectmap)) {
             if (sect.baseaddr > pc) {

@@ -84,8 +84,8 @@ internal static (nint n, error err) Readᴍ(ж<ChaCha8> Ꮡc, slice<byte> p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidChaCha8ReadBufferˢ => ref invalidChaCha8ReadBufferˢᵇ;
-private static readonly @string invalidChaCha8ReadBufferˢᵇ = "invalid ChaCha8 Read buffer encoding"u8;
+internal static ref readonly @string invalidChaCha8ReadBufferˢᴍChaCha8 => ref invalidChaCha8ReadBufferˢᵇᴍChaCha8;
+private static readonly @string invalidChaCha8ReadBufferˢᵇᴍChaCha8 = "invalid ChaCha8 Read buffer encoding"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 internal static error UnmarshalBinaryᴍ(ж<ChaCha8> Ꮡc, slice<byte> data) {
@@ -96,7 +96,7 @@ internal static error UnmarshalBinaryᴍ(ж<ChaCha8> Ꮡc, slice<byte> data) {
         slice<byte> buf = default;
         (buf, data, ok) = readUint8LengthPrefixed(data);
         if (!ok) {
-            return errors.New(invalidChaCha8ReadBufferˢ);
+            return errors.New(invalidChaCha8ReadBufferˢᴍChaCha8);
         }
         c.readLen = copy(c.readBuf.slice(len(c.readBuf) - len(buf)), buf);
     }

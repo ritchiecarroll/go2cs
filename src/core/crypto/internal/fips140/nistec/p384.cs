@@ -58,10 +58,10 @@ internal static ж<P384Point> Setᴍ(ж<P384Point> Ꮡp, ж<P384Point> Ꮡq) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidP384Compressedˢ => ref invalidP384Compressedˢᵇ;
-private static readonly @string invalidP384Compressedˢᵇ = "invalid P384 compressed point encoding"u8;
-internal static ref readonly @string invalidP384PointEncodingˢ => ref invalidP384PointEncodingˢᵇ;
-private static readonly @string invalidP384PointEncodingˢᵇ = "invalid P384 point encoding"u8;
+internal static ref readonly @string invalidP384CompressedˢᴍP384Point => ref invalidP384CompressedˢᵇᴍP384Point;
+private static readonly @string invalidP384CompressedˢᵇᴍP384Point = "invalid P384 compressed point encoding"u8;
+internal static ref readonly @string invalidP384PointEncodingˢᴍP384Point => ref invalidP384PointEncodingˢᵇᴍP384Point;
+private static readonly @string invalidP384PointEncodingˢᵇᴍP384Point = "invalid P384 point encoding"u8;
 
 // SetBytes sets p to the compressed, uncompressed, or infinity value encoded in
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
@@ -103,7 +103,7 @@ internal static (ж<P384Point>, error) SetBytesᴍ(ж<P384Point> Ꮡp, slice<byt
         // y² = x³ - 3x + b
         var y = p384Polynomial(@new<fiat.P384Element>(), x);
         if (!p384Sqrt(y, y)) {
-            return (default, errors.New(invalidP384Compressedˢ));
+            return (default, errors.New(invalidP384CompressedˢᴍP384Point));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -119,7 +119,7 @@ internal static (ж<P384Point>, error) SetBytesᴍ(ж<P384Point> Ꮡp, slice<byt
         return (Ꮡp, default);
     }
     default: {
-        return (default, errors.New(invalidP384PointEncodingˢ));
+        return (default, errors.New(invalidP384PointEncodingˢᴍP384Point));
     }}
 }
 
@@ -201,14 +201,14 @@ internal static (slice<byte>, error) BytesXᴍ(ref P384Point p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string p384PointIsThePointAtˢ => ref p384PointIsThePointAtˢᵇ;
-private static readonly @string p384PointIsThePointAtˢᵇ = "P384 point is the point at infinity"u8;
+internal static ref readonly @string p384PointIsThePointAtˢᴍP384Point => ref p384PointIsThePointAtˢᵇᴍP384Point;
+private static readonly @string p384PointIsThePointAtˢᵇᴍP384Point = "P384 point is the point at infinity"u8;
 
 internal static (slice<byte>, error) bytesXᴍ(ref P384Point p, /*[48]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
-        return (default, errors.New(p384PointIsThePointAtˢ));
+        return (default, errors.New(p384PointIsThePointAtˢᴍP384Point));
     }
 
     var zinv = @new<fiat.P384Element>().Invert(p.z);
@@ -465,8 +465,8 @@ internal static ж<array<p384Table>> generatorTableᴍ(ref P384Point p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢ => ref invalidScalarLengthˢᵇ;
-private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarLengthˢᴍP384Point => ref invalidScalarLengthˢᵇᴍP384Point;
+private static readonly @string invalidScalarLengthˢᵇᴍP384Point = "invalid scalar length"u8;
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
@@ -474,7 +474,7 @@ internal static (ж<P384Point>, error) ScalarBaseMultᴍ(ж<P384Point> Ꮡp, sli
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p384ElementLength) {
-        return (default, errors.New(invalidScalarLengthˢ));
+        return (default, errors.New(invalidScalarLengthˢᴍP384Point));
     }
     var tables = p.generatorTable();
 

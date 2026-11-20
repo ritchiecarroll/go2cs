@@ -178,10 +178,10 @@ partial struct deadlineExceededError {
 } partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contextDeadlineExceededˢ => ref contextDeadlineExceededˢᵇ;
-private static readonly @string contextDeadlineExceededˢᵇ = "context deadline exceeded"u8;
+internal static ref readonly @string contextDeadlineExceededˢᴍdeadlineExceededError => ref contextDeadlineExceededˢᵇᴍdeadlineExceededError;
+private static readonly @string contextDeadlineExceededˢᵇᴍdeadlineExceededError = "context deadline exceeded"u8;
 
-internal static @string Errorᴍ(deadlineExceededError _) { return contextDeadlineExceededˢ; }
+internal static @string Errorᴍ(deadlineExceededError _) { return contextDeadlineExceededˢᴍdeadlineExceededError; }
 internal static bool Timeoutᴍ(deadlineExceededError _) { return true; }
 internal static bool Temporaryᴍ(deadlineExceededError _) { return true; }
 
@@ -222,11 +222,11 @@ partial struct backgroundCtx {
 } partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contextBackgroundˢ => ref contextBackgroundˢᵇ;
-private static readonly @string contextBackgroundˢᵇ = "context.Background"u8;
+internal static ref readonly @string contextBackgroundˢᴍbackgroundCtx => ref contextBackgroundˢᵇᴍbackgroundCtx;
+private static readonly @string contextBackgroundˢᵇᴍbackgroundCtx = "context.Background"u8;
 
 internal static @string Stringᴍ(backgroundCtx _) {
-    return contextBackgroundˢ;
+    return contextBackgroundˢᴍbackgroundCtx;
 }
 
 } partial class context_package {
@@ -238,11 +238,11 @@ partial struct todoCtx {
 } partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contextTodoˢ => ref contextTodoˢᵇ;
-private static readonly @string contextTodoˢᵇ = "context.TODO"u8;
+internal static ref readonly @string contextTodoˢᴍtodoCtx => ref contextTodoˢᵇᴍtodoCtx;
+private static readonly @string contextTodoˢᵇᴍtodoCtx = "context.TODO"u8;
 
 internal static @string Stringᴍ(todoCtx _) {
-    return contextTodoˢ;
+    return contextTodoˢᴍtodoCtx;
 }
 
 } partial class context_package {

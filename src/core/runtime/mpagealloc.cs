@@ -309,8 +309,8 @@ partial struct pageAlloc {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rootLevelMaxPagesDoesnTˢ => ref rootLevelMaxPagesDoesnTˢᵇ;
-private static readonly @string rootLevelMaxPagesDoesnTˢᵇ = "root level max pages doesn't fit in summary"u8;
+internal static ref readonly @string rootLevelMaxPagesDoesnTˢᴍpageAlloc => ref rootLevelMaxPagesDoesnTˢᵇᴍpageAlloc;
+private static readonly @string rootLevelMaxPagesDoesnTˢᵇᴍpageAlloc = "root level max pages doesn't fit in summary"u8;
 
 internal static void initᴍ(ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -323,7 +323,7 @@ internal static void initᴍ(ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysM
         // is a big problem. Throw.
         print((@string)"runtime: root level max pages = ", ((nint)1).Lsh(levelLogPages[0]), (@string)"\n");
         print((@string)"runtime: summary max pages = ", (nint)(maxPackedValue), (@string)"\n");
-        @throw(rootLevelMaxPagesDoesnTˢ);
+        @throw(rootLevelMaxPagesDoesnTˢᴍpageAlloc);
     }
     p.sysStat = ᏑsysStat;
 
@@ -365,8 +365,8 @@ internal static ж<pallocData> chunkOfᴍ(ref pageAlloc p, chunkIdx ci) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pageAllocOutOfMemoryˢ => ref pageAllocOutOfMemoryˢᵇ;
-private static readonly @string pageAllocOutOfMemoryˢᵇ = "pageAlloc: out of memory"u8;
+internal static ref readonly @string pageAllocOutOfMemoryˢᴍpageAlloc => ref pageAllocOutOfMemoryˢᵇᴍpageAlloc;
+private static readonly @string pageAllocOutOfMemoryˢᵇᴍpageAlloc = "pageAlloc: out of memory"u8;
 
 // grow sets up the metadata for the address range [base, base+size).
 // It may allocate metadata, in which case *p.sysStat will be updated.
@@ -424,7 +424,7 @@ internal static void growᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) {
             uintptr l2Size = /* unsafe.Sizeof(*p.chunks[0]) */ 1048576;
             @unsafe.Pointer r = sysAlloc(l2Size, p.sysStat, vmaNamePageAllocIndex);
             if (r == nil) {
-                @throw(pageAllocOutOfMemoryˢ);
+                @throw(pageAllocOutOfMemoryˢᴍpageAlloc);
             }
             if (!p.test) {
                 // Make the chunk mapping eligible or ineligible
@@ -661,10 +661,10 @@ internal partial struct find_firstFree /*dyn*/ {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangePartiallyOverlapsˢ => ref rangePartiallyOverlapsˢᵇ;
-private static readonly @string rangePartiallyOverlapsˢᵇ = "range partially overlaps"u8;
-internal static ref readonly @string badSummaryDataˢ => ref badSummaryDataˢᵇ;
-private static readonly @string badSummaryDataˢᵇ = "bad summary data"u8;
+internal static ref readonly @string rangePartiallyOverlapsˢᴍpageAlloc => ref rangePartiallyOverlapsˢᵇᴍpageAlloc;
+private static readonly @string rangePartiallyOverlapsˢᵇᴍpageAlloc = "range partially overlaps"u8;
+internal static ref readonly @string badSummaryDataˢᴍpageAlloc => ref badSummaryDataˢᵇᴍpageAlloc;
+private static readonly @string badSummaryDataˢᵇᴍpageAlloc = "bad summary data"u8;
 
 // find searches for the first (address-ordered) contiguous free region of
 // npages in size and returns a base address for that region.
@@ -750,7 +750,7 @@ internal static (uintptr, offAddr) findᴍ(ref pageAlloc p, uintptr npages) {
             // so throw.
             print((@string)"runtime: addr = ", (hex)(uint64)addrΔ1.addr(), (@string)", size = ", size, (@string)"\n");
             print((@string)"runtime: base = ", (hex)(uint64)ᏑfirstFree.Value.@base.addr(), (@string)", bound = ", (hex)(uint64)ᏑfirstFree.Value.bound.addr(), (@string)"\n");
-            @throw(rangePartiallyOverlapsˢ);
+            @throw(rangePartiallyOverlapsˢᴍpageAlloc);
         }
     }
 
@@ -863,7 +863,7 @@ nextLevel:
             var sum = entries[jΔ2];
             print((@string)"runtime: summary[", l, (@string)"][", i + jΔ2, (@string)"] = (", sum.start(), (@string)", ", sum.max(), (@string)", ", sum.end(), (@string)")\n");
         }
-        @throw(badSummaryDataˢ);
+        @throw(badSummaryDataˢᴍpageAlloc);
 continue_nextLevel:;
     }
 break_nextLevel:;
@@ -883,7 +883,7 @@ break_nextLevel:;
         var sum = p.summary[len(p.summary) - 1][i];
         print((@string)"runtime: summary[", (nint)(len(p.summary) - 1), (@string)"][", i, (@string)"] = (", sum.start(), (@string)", ", sum.max(), (@string)", ", sum.end(), (@string)")\n");
         print((@string)"runtime: npages = ", npages, (@string)"\n");
-        @throw(badSummaryDataˢ);
+        @throw(badSummaryDataˢᴍpageAlloc);
     }
 
     // Compute the address at which the free space starts.
@@ -931,7 +931,7 @@ internal static (uintptr addr, uintptr scav) allocᴍ(ref pageAlloc p, uintptr n
             if (j == ~(nuint)0) {
                 print((@string)"runtime: max = ", max, (@string)", npages = ", npages, (@string)"\n");
                 print((@string)"runtime: searchIdx = ", chunkPageIndex(p.searchAddr.addr()), (@string)", p.searchAddr = ", (hex)(uint64)p.searchAddr.addr(), (@string)"\n");
-                @throw(badSummaryDataˢ);
+                @throw(badSummaryDataˢᴍpageAlloc);
             }
             addr = chunkBase(i) + (uintptr)j * (uintptr)pageSize;
             searchAddr = new offAddr(chunkBase(i) + (uintptr)searchIdx * (uintptr)pageSize);

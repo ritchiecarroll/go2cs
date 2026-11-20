@@ -93,13 +93,13 @@ internal static void Resetᴍ(ref Writer z, io.Writer w) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gzipWriteExtraDataIsTooˢ => ref gzipWriteExtraDataIsTooˢᵇ;
-private static readonly @string gzipWriteExtraDataIsTooˢᵇ = "gzip.Write: Extra data is too large"u8;
+internal static ref readonly @string gzipWriteExtraDataIsTooˢᴍWriter => ref gzipWriteExtraDataIsTooˢᵇᴍWriter;
+private static readonly @string gzipWriteExtraDataIsTooˢᵇᴍWriter = "gzip.Write: Extra data is too large"u8;
 
 // writeBytes writes a length-prefixed byte slice to z.w.
 internal static error writeBytesᴍ(ref Writer z, slice<byte> b) {
     if (len(b) > 0xffff) {
-        return errors.New(gzipWriteExtraDataIsTooˢ);
+        return errors.New(gzipWriteExtraDataIsTooˢᴍWriter);
     }
     le.PutUint16(z.buf[..2], (uint16)len(b));
     var (_, err) = z.w.Write(z.buf[..2]);
@@ -111,8 +111,8 @@ internal static error writeBytesᴍ(ref Writer z, slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gzipWriteNonLatin1Headerˢ => ref gzipWriteNonLatin1Headerˢᵇ;
-private static readonly @string gzipWriteNonLatin1Headerˢᵇ = "gzip.Write: non-Latin-1 header string"u8;
+internal static ref readonly @string gzipWriteNonLatin1HeaderˢᴍWriter => ref gzipWriteNonLatin1HeaderˢᵇᴍWriter;
+private static readonly @string gzipWriteNonLatin1HeaderˢᵇᴍWriter = "gzip.Write: non-Latin-1 header string"u8;
 
 // writeString writes a UTF-8 string s in GZIP's format to z.w.
 // GZIP (RFC 1952) specifies that strings are NUL-terminated ISO 8859-1 (Latin-1).
@@ -123,7 +123,7 @@ internal static error /*err*/ writeStringᴍ(ref Writer z, @string s) {
     var needconv = false;
     foreach (var (_, v) in s) {
         if (v == 0 || v > 0xff) {
-            return errors.New(gzipWriteNonLatin1Headerˢ);
+            return errors.New(gzipWriteNonLatin1HeaderˢᴍWriter);
         }
         if (v > 0x7f) {
             needconv = true;

@@ -148,8 +148,8 @@ internal static ж<Location> fixedZone(@string name, nint offset) {
 } partial class time_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string utcˢ => ref utcˢᵇ;
-private static readonly @string utcˢᵇ = "UTC"u8;
+internal static ref readonly @string utcˢᴍLocation => ref utcˢᵇᴍLocation;
+private static readonly @string utcˢᵇᴍLocation = "UTC"u8;
 
 // lookup returns information about the time zone in use at an
 // instant in time expressed as seconds since January 1, 1970 00:00:00 UTC.
@@ -169,7 +169,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
 
     if (len(l.zone) == 0) {
-        name = utcˢ;
+        name = utcˢᴍLocation;
         offset = 0;
         start = alpha;
         end = omega;

@@ -95,12 +95,12 @@ internal static uint16 IDᴍ(ref aead a) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidKeySizeˢ => ref invalidKeySizeˢᵇ;
-private static readonly @string invalidKeySizeˢᵇ = "invalid key size"u8;
+internal static ref readonly @string invalidKeySizeˢᴍaead => ref invalidKeySizeˢᵇᴍaead;
+private static readonly @string invalidKeySizeˢᵇᴍaead = "invalid key size"u8;
 
 internal static (cipher.AEAD, error) aeadᴍ(ref aead a, slice<byte> key) {
     if (len(key) != a.nK) {
-        return (default, errors.New(invalidKeySizeˢ));
+        return (default, errors.New(invalidKeySizeˢᴍaead));
     }
     return a.@new(key);
 }

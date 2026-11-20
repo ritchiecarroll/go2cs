@@ -402,17 +402,17 @@ internal static (slice<byte>, error) MarshalBinaryᴍ(ref sum128a s) {
 } partial class fnv_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashFnvInvalidHashStateˢ => ref hashFnvInvalidHashStateˢᵇ;
-private static readonly @string hashFnvInvalidHashStateˢᵇ = "hash/fnv: invalid hash state identifier"u8;
-internal static ref readonly @string hashFnvInvalidHashStateˢ2 => ref hashFnvInvalidHashStateˢ2ᵇ;
-private static readonly @string hashFnvInvalidHashStateˢ2ᵇ = "hash/fnv: invalid hash state size"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢᴍsum32 => ref hashFnvInvalidHashStateˢᵇᴍsum32;
+private static readonly @string hashFnvInvalidHashStateˢᵇᴍsum32 = "hash/fnv: invalid hash state identifier"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢ2ᴍsum32 => ref hashFnvInvalidHashStateˢ2ᵇᴍsum32;
+private static readonly @string hashFnvInvalidHashStateˢ2ᵇᴍsum32 = "hash/fnv: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref sum32 s, slice<byte> b) {
     if (len(b) < len(magic32) || ((sstring)(b[..(int)(len(magic32))])) != magic32) {
-        return errors.New(hashFnvInvalidHashStateˢ);
+        return errors.New(hashFnvInvalidHashStateˢᴍsum32);
     }
     if (len(b) != marshaledSize32) {
-        return errors.New(hashFnvInvalidHashStateˢ2);
+        return errors.New(hashFnvInvalidHashStateˢ2ᴍsum32);
     }
     s = (sum32)byteorder.BEUint32(b[4..]);
     return default;
@@ -421,17 +421,17 @@ internal static error UnmarshalBinaryᴍ(ref sum32 s, slice<byte> b) {
 } partial class fnv_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashFnvInvalidHashStateˢ => ref hashFnvInvalidHashStateˢᵇ;
-private static readonly @string hashFnvInvalidHashStateˢᵇ = "hash/fnv: invalid hash state identifier"u8;
-internal static ref readonly @string hashFnvInvalidHashStateˢ2 => ref hashFnvInvalidHashStateˢ2ᵇ;
-private static readonly @string hashFnvInvalidHashStateˢ2ᵇ = "hash/fnv: invalid hash state size"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢᴍsum32a => ref hashFnvInvalidHashStateˢᵇᴍsum32a;
+private static readonly @string hashFnvInvalidHashStateˢᵇᴍsum32a = "hash/fnv: invalid hash state identifier"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢ2ᴍsum32a => ref hashFnvInvalidHashStateˢ2ᵇᴍsum32a;
+private static readonly @string hashFnvInvalidHashStateˢ2ᵇᴍsum32a = "hash/fnv: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref sum32a s, slice<byte> b) {
     if (len(b) < len(magic32a) || ((sstring)(b[..(int)(len(magic32a))])) != magic32a) {
-        return errors.New(hashFnvInvalidHashStateˢ);
+        return errors.New(hashFnvInvalidHashStateˢᴍsum32a);
     }
     if (len(b) != marshaledSize32) {
-        return errors.New(hashFnvInvalidHashStateˢ2);
+        return errors.New(hashFnvInvalidHashStateˢ2ᴍsum32a);
     }
     s = (sum32a)byteorder.BEUint32(b[4..]);
     return default;
@@ -440,17 +440,17 @@ internal static error UnmarshalBinaryᴍ(ref sum32a s, slice<byte> b) {
 } partial class fnv_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashFnvInvalidHashStateˢ => ref hashFnvInvalidHashStateˢᵇ;
-private static readonly @string hashFnvInvalidHashStateˢᵇ = "hash/fnv: invalid hash state identifier"u8;
-internal static ref readonly @string hashFnvInvalidHashStateˢ2 => ref hashFnvInvalidHashStateˢ2ᵇ;
-private static readonly @string hashFnvInvalidHashStateˢ2ᵇ = "hash/fnv: invalid hash state size"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢᴍsum64 => ref hashFnvInvalidHashStateˢᵇᴍsum64;
+private static readonly @string hashFnvInvalidHashStateˢᵇᴍsum64 = "hash/fnv: invalid hash state identifier"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢ2ᴍsum64 => ref hashFnvInvalidHashStateˢ2ᵇᴍsum64;
+private static readonly @string hashFnvInvalidHashStateˢ2ᵇᴍsum64 = "hash/fnv: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref sum64 s, slice<byte> b) {
     if (len(b) < len(magic64) || ((sstring)(b[..(int)(len(magic64))])) != magic64) {
-        return errors.New(hashFnvInvalidHashStateˢ);
+        return errors.New(hashFnvInvalidHashStateˢᴍsum64);
     }
     if (len(b) != marshaledSize64) {
-        return errors.New(hashFnvInvalidHashStateˢ2);
+        return errors.New(hashFnvInvalidHashStateˢ2ᴍsum64);
     }
     s = (sum64)byteorder.BEUint64(b[4..]);
     return default;
@@ -459,17 +459,17 @@ internal static error UnmarshalBinaryᴍ(ref sum64 s, slice<byte> b) {
 } partial class fnv_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashFnvInvalidHashStateˢ => ref hashFnvInvalidHashStateˢᵇ;
-private static readonly @string hashFnvInvalidHashStateˢᵇ = "hash/fnv: invalid hash state identifier"u8;
-internal static ref readonly @string hashFnvInvalidHashStateˢ2 => ref hashFnvInvalidHashStateˢ2ᵇ;
-private static readonly @string hashFnvInvalidHashStateˢ2ᵇ = "hash/fnv: invalid hash state size"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢᴍsum64a => ref hashFnvInvalidHashStateˢᵇᴍsum64a;
+private static readonly @string hashFnvInvalidHashStateˢᵇᴍsum64a = "hash/fnv: invalid hash state identifier"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢ2ᴍsum64a => ref hashFnvInvalidHashStateˢ2ᵇᴍsum64a;
+private static readonly @string hashFnvInvalidHashStateˢ2ᵇᴍsum64a = "hash/fnv: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref sum64a s, slice<byte> b) {
     if (len(b) < len(magic64a) || ((sstring)(b[..(int)(len(magic64a))])) != magic64a) {
-        return errors.New(hashFnvInvalidHashStateˢ);
+        return errors.New(hashFnvInvalidHashStateˢᴍsum64a);
     }
     if (len(b) != marshaledSize64) {
-        return errors.New(hashFnvInvalidHashStateˢ2);
+        return errors.New(hashFnvInvalidHashStateˢ2ᴍsum64a);
     }
     s = (sum64a)byteorder.BEUint64(b[4..]);
     return default;
@@ -478,17 +478,17 @@ internal static error UnmarshalBinaryᴍ(ref sum64a s, slice<byte> b) {
 } partial class fnv_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashFnvInvalidHashStateˢ => ref hashFnvInvalidHashStateˢᵇ;
-private static readonly @string hashFnvInvalidHashStateˢᵇ = "hash/fnv: invalid hash state identifier"u8;
-internal static ref readonly @string hashFnvInvalidHashStateˢ2 => ref hashFnvInvalidHashStateˢ2ᵇ;
-private static readonly @string hashFnvInvalidHashStateˢ2ᵇ = "hash/fnv: invalid hash state size"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢᴍsum128 => ref hashFnvInvalidHashStateˢᵇᴍsum128;
+private static readonly @string hashFnvInvalidHashStateˢᵇᴍsum128 = "hash/fnv: invalid hash state identifier"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢ2ᴍsum128 => ref hashFnvInvalidHashStateˢ2ᵇᴍsum128;
+private static readonly @string hashFnvInvalidHashStateˢ2ᵇᴍsum128 = "hash/fnv: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref sum128 s, slice<byte> b) {
     if (len(b) < len(magic128) || ((sstring)(b[..(int)(len(magic128))])) != magic128) {
-        return errors.New(hashFnvInvalidHashStateˢ);
+        return errors.New(hashFnvInvalidHashStateˢᴍsum128);
     }
     if (len(b) != marshaledSize128) {
-        return errors.New(hashFnvInvalidHashStateˢ2);
+        return errors.New(hashFnvInvalidHashStateˢ2ᴍsum128);
     }
     s.Value[0] = byteorder.BEUint64(b[4..]);
     s.Value[1] = byteorder.BEUint64(b[12..]);
@@ -498,17 +498,17 @@ internal static error UnmarshalBinaryᴍ(ref sum128 s, slice<byte> b) {
 } partial class fnv_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashFnvInvalidHashStateˢ => ref hashFnvInvalidHashStateˢᵇ;
-private static readonly @string hashFnvInvalidHashStateˢᵇ = "hash/fnv: invalid hash state identifier"u8;
-internal static ref readonly @string hashFnvInvalidHashStateˢ2 => ref hashFnvInvalidHashStateˢ2ᵇ;
-private static readonly @string hashFnvInvalidHashStateˢ2ᵇ = "hash/fnv: invalid hash state size"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢᴍsum128a => ref hashFnvInvalidHashStateˢᵇᴍsum128a;
+private static readonly @string hashFnvInvalidHashStateˢᵇᴍsum128a = "hash/fnv: invalid hash state identifier"u8;
+internal static ref readonly @string hashFnvInvalidHashStateˢ2ᴍsum128a => ref hashFnvInvalidHashStateˢ2ᵇᴍsum128a;
+private static readonly @string hashFnvInvalidHashStateˢ2ᵇᴍsum128a = "hash/fnv: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref sum128a s, slice<byte> b) {
     if (len(b) < len(magic128a) || ((sstring)(b[..(int)(len(magic128a))])) != magic128a) {
-        return errors.New(hashFnvInvalidHashStateˢ);
+        return errors.New(hashFnvInvalidHashStateˢᴍsum128a);
     }
     if (len(b) != marshaledSize128) {
-        return errors.New(hashFnvInvalidHashStateˢ2);
+        return errors.New(hashFnvInvalidHashStateˢ2ᴍsum128a);
     }
     s.Value[0] = byteorder.BEUint64(b[4..]);
     s.Value[1] = byteorder.BEUint64(b[12..]);

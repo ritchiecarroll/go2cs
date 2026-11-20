@@ -389,8 +389,8 @@ internal static ж<godebug.Setting> http2client = godebug.New("http2client");
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpsˢ => ref httpsˢᵇ;
-private static readonly @string httpsˢᵇ = "https"u8;
+internal static ref readonly @string httpsˢᴍTransport => ref httpsˢᵇᴍTransport;
+private static readonly @string httpsˢᵇᴍTransport = "https"u8;
 
 // onceSetNextProtoDefaults initializes TLSNextProto.
 // It must be called via t.nextProtoOnce.Do.
@@ -409,7 +409,7 @@ internal static void onceSetNextProtoDefaultsᴍ(ж<Transport> Ꮡt) {
     // altproto map) so we can call CloseIdleConnections on it if
     // requested. (Issue 22891)
     var (altProto, _) = Ꮡt.ᏑaltProto.Load()._<map<@string, RoundTripper>>(ᐧ);
-    var rv = reflect.ValueOf(altProto[httpsˢ]); if (rv.IsValid() && rv.Type().Kind() == reflect.Struct && rv.Type().NumField() == 1) {
+    var rv = reflect.ValueOf(altProto[httpsˢᴍTransport]); if (rv.IsValid() && rv.Type().Kind() == reflect.Struct && rv.Type().NumField() == 1) {
         var v = rv.Field(0); if (v.CanInterface()) {
             var (h2i, ok) = v.Interface()._<h2Transport>(ᐧ); if (ok) {
                 t.h2transport = h2i;
@@ -607,14 +607,14 @@ internal static @string validateHeaders(Header hdrs) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpNilRequestUrlˢ => ref httpNilRequestUrlˢᵇ;
-private static readonly @string httpNilRequestUrlˢᵇ = "http: nil Request.URL"u8;
-internal static ref readonly @string httpNilRequestHeaderˢ => ref httpNilRequestHeaderˢᵇ;
-private static readonly @string httpNilRequestHeaderˢᵇ = "http: nil Request.Header"u8;
-internal static ref readonly @string unsupportedProtocolˢ => ref unsupportedProtocolˢᵇ;
-private static readonly @string unsupportedProtocolˢᵇ = "unsupported protocol scheme"u8;
-internal static ref readonly @string httpNoHostInRequestUrlˢ => ref httpNoHostInRequestUrlˢᵇ;
-private static readonly @string httpNoHostInRequestUrlˢᵇ = "http: no Host in request URL"u8;
+internal static ref readonly @string httpNilRequestUrlˢᴍTransport => ref httpNilRequestUrlˢᵇᴍTransport;
+private static readonly @string httpNilRequestUrlˢᵇᴍTransport = "http: nil Request.URL"u8;
+internal static ref readonly @string httpNilRequestHeaderˢᴍTransport => ref httpNilRequestHeaderˢᵇᴍTransport;
+private static readonly @string httpNilRequestHeaderˢᵇᴍTransport = "http: nil Request.Header"u8;
+internal static ref readonly @string unsupportedProtocolˢᴍTransport => ref unsupportedProtocolˢᵇᴍTransport;
+private static readonly @string unsupportedProtocolˢᵇᴍTransport = "unsupported protocol scheme"u8;
+internal static ref readonly @string httpNoHostInRequestUrlˢᴍTransport => ref httpNoHostInRequestUrlˢᵇᴍTransport;
+private static readonly @string httpNoHostInRequestUrlˢᵇᴍTransport = "http: no Host in request URL"u8;
 
 // roundTrip implements a RoundTripper over HTTP.
 internal static partial (ж<Response>, error err) roundTripᴍ(ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
@@ -631,11 +631,11 @@ internal static partial (ж<Response>, error err) roundTripᴍ(ж<Transport> Ꮡ
 
         if (req.URL == nil) {
             req.closeBody();
-            (_ᴛ1, err) = (default, errors.New(httpNilRequestUrlˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(httpNilRequestUrlˢᴍTransport)); goto ᒐdone;
         }
         if (req.Header == nil) {
             req.closeBody();
-            (_ᴛ1, err) = (default, errors.New(httpNilRequestHeaderˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(httpNilRequestHeaderˢᴍTransport)); goto ᒐdone;
         }
         @string scheme = req.URL.Scheme;
         var isHTTP = scheme == "http"u8 || scheme == "https"u8;
@@ -668,7 +668,7 @@ internal static partial (ж<Response>, error err) roundTripᴍ(ж<Transport> Ꮡ
         }
         if (!isHTTP) {
             req.closeBody();
-            (_ᴛ1, err) = (default, badStringError(unsupportedProtocolˢ, scheme)); goto ᒐdone;
+            (_ᴛ1, err) = (default, badStringError(unsupportedProtocolˢᴍTransport, scheme)); goto ᒐdone;
         }
         if (req.Method != ""u8 && !validMethod(req.Method)) {
             req.closeBody();
@@ -676,7 +676,7 @@ internal static partial (ж<Response>, error err) roundTripᴍ(ж<Transport> Ꮡ
         }
         if (req.URL.Host == ""u8) {
             req.closeBody();
-            (_ᴛ1, err) = (default, errors.New(httpNoHostInRequestUrlˢ)); goto ᒐdone;
+            (_ᴛ1, err) = (default, errors.New(httpNoHostInRequestUrlˢᴍTransport)); goto ᒐdone;
         }
 
         // Transport request context.
@@ -1452,23 +1452,23 @@ internal static ref net.Dialer zeroDialer => ref ((StaticBox<net.Dialer>)Ꮡzero
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string netHttpTransportˢ => ref netHttpTransportˢᵇ;
-private static readonly @string netHttpTransportˢᵇ = "net/http: Transport.DialContext hook returned (nil, nil)"u8;
-internal static ref readonly @string netHttpTransportDialHookˢ => ref netHttpTransportDialHookˢᵇ;
-private static readonly @string netHttpTransportDialHookˢᵇ = "net/http: Transport.Dial hook returned (nil, nil)"u8;
+internal static ref readonly @string netHttpTransportˢᴍTransport => ref netHttpTransportˢᵇᴍTransport;
+private static readonly @string netHttpTransportˢᵇᴍTransport = "net/http: Transport.DialContext hook returned (nil, nil)"u8;
+internal static ref readonly @string netHttpTransportDialHookˢᴍTransport => ref netHttpTransportDialHookˢᵇᴍTransport;
+private static readonly @string netHttpTransportDialHookˢᵇᴍTransport = "net/http: Transport.Dial hook returned (nil, nil)"u8;
 
 internal static (net.Conn, error) dialᴍ(ref Transport t, context.Context ctx, @string network, @string addr) {
     if (t.DialContext != nil) {
         var (c, err) = t.DialContext(ctx, network, addr);
         if (c == nil && err == nil) {
-            err = errors.New(netHttpTransportˢ);
+            err = errors.New(netHttpTransportˢᴍTransport);
         }
         return (c, err);
     }
     if (t.Dial != nil) {
         var (c, err) = t.Dial(network, addr);
         if (c == nil && err == nil) {
-            err = errors.New(netHttpTransportDialHookˢ);
+            err = errors.New(netHttpTransportDialHookˢᴍTransport);
         }
         return (c, err);
     }
@@ -1689,8 +1689,8 @@ internal static void allᴍ(ref wantConnQueue q, Action<ж<wantConn>> f) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string netHttpTransportDialTLSˢ => ref netHttpTransportDialTLSˢᵇ;
-private static readonly @string netHttpTransportDialTLSˢᵇ = "net/http: Transport.DialTLS or DialTLSContext returned (nil, nil)"u8;
+internal static ref readonly @string netHttpTransportDialTLSˢᴍTransport => ref netHttpTransportDialTLSˢᵇᴍTransport;
+private static readonly @string netHttpTransportDialTLSˢᵇᴍTransport = "net/http: Transport.DialTLS or DialTLSContext returned (nil, nil)"u8;
 
 internal static (net.Conn conn, error err) customDialTLSᴍ(ref Transport t, context.Context ctx, @string network, @string addr) {
     net.Conn conn = default;
@@ -1702,7 +1702,7 @@ internal static (net.Conn conn, error err) customDialTLSᴍ(ref Transport t, con
         (conn, err) = t.DialTLS(network, addr);
     }
     if (conn == nil && err == nil) {
-        err = errors.New(netHttpTransportDialTLSˢ);
+        err = errors.New(netHttpTransportDialTLSˢᴍTransport);
     }
     return (conn, err);
 }
@@ -2029,16 +2029,16 @@ internal static Func<context.Context, time.Duration, (context.Context, Action)> 
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
-private static readonly @string tcpˢᵇ = "tcp"u8;
-internal static ref readonly @string proxyAuthorizationˢ => ref proxyAuthorizationˢᵇ;
-private static readonly @string proxyAuthorizationˢᵇ = "Proxy-Authorization"u8;
-internal static ref readonly @string unknownStatusCodeˢ => ref unknownStatusCodeˢᵇ;
-private static readonly @string unknownStatusCodeˢᵇ = "unknown status code"u8;
-internal static ref readonly @string httpHttp2Implementationˢ => ref httpHttp2Implementationˢᵇ;
-private static readonly @string httpHttp2Implementationˢᵇ = "http: HTTP/2 implementation does not support NewClientConn (update golang.org/x/net?)"u8;
-internal static ref readonly @string httpTransportDoesNotˢ => ref httpTransportDoesNotˢᵇ;
-private static readonly @string httpTransportDoesNotˢᵇ = "http: Transport does not support unencrypted HTTP/2"u8;
+internal static ref readonly @string tcpˢᴍTransport => ref tcpˢᵇᴍTransport;
+private static readonly @string tcpˢᵇᴍTransport = "tcp"u8;
+internal static ref readonly @string proxyAuthorizationˢᴍTransport => ref proxyAuthorizationˢᵇᴍTransport;
+private static readonly @string proxyAuthorizationˢᵇᴍTransport = "Proxy-Authorization"u8;
+internal static ref readonly @string unknownStatusCodeˢᴍTransport => ref unknownStatusCodeˢᵇᴍTransport;
+private static readonly @string unknownStatusCodeˢᵇᴍTransport = "unknown status code"u8;
+internal static ref readonly @string httpHttp2ImplementationˢᴍTransport => ref httpHttp2ImplementationˢᵇᴍTransport;
+private static readonly @string httpHttp2ImplementationˢᵇᴍTransport = "http: HTTP/2 implementation does not support NewClientConn (update golang.org/x/net?)"u8;
+internal static ref readonly @string httpTransportDoesNotˢᴍTransport => ref httpTransportDoesNotˢᵇᴍTransport;
+private static readonly @string httpTransportDoesNotˢᵇᴍTransport = "http: Transport does not support unencrypted HTTP/2"u8;
 
 internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transport> Ꮡt, context.Context ctx, connectMethod cm, bool isClientConn, Action internalStateHook) {
     ж<persistConn> pconn = default;
@@ -2068,7 +2068,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
         }
         if (cm.scheme() == "https"u8 && t.hasCustomTLSDialer()) {
             error errΔ2 = default;
-            (pconn.conn, errΔ2) = t.customDialTLS(ctx, tcpˢ, cm.addr());
+            (pconn.conn, errΔ2) = t.customDialTLS(ctx, tcpˢᴍTransport, cm.addr());
             if (errΔ2 != nil) {
                 (pconn, err) = (default, wrapErr(errΔ2)); goto ᒐdone;
             }
@@ -2096,7 +2096,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
                 }
             }
         } else {
-            var (conn, errΔ4) = t.dial(ctx, tcpˢ, cm.addr());
+            var (conn, errΔ4) = t.dial(ctx, tcpˢᴍTransport, cm.addr());
             if (errΔ4 != nil) {
                 (pconn, err) = (default, wrapErr(errΔ4)); goto ᒐdone;
             }
@@ -2120,7 +2120,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
         }
         case {} when cm.proxyURL.Scheme == "socks5"u8 || cm.proxyURL.Scheme == "socks5h"u8: {
             var conn = pconn.conn;
-            var d = socksNewDialer(tcpˢ, conn.RemoteAddr().String());
+            var d = socksNewDialer(tcpˢᴍTransport, conn.RemoteAddr().String());
             {
                 var u = cm.proxyURL.User; if (u != nil) {
                     var auth = Ꮡ(new socksUsernamePassword(
@@ -2135,7 +2135,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
                                         d.Authenticate = (context.Context p1, io.ReadWriter p2, socksAuthMethod p3) => authʗ1.Authenticate(p1, p2, p3);
                 }
             }
-            var (_, errΔ8) = d.DialWithConn(ctx, conn, tcpˢ, cm.targetAddr); if (errΔ8 != nil) {
+            var (_, errΔ8) = d.DialWithConn(ctx, conn, tcpˢᴍTransport, cm.targetAddr); if (errΔ8 != nil) {
                 conn.Close();
                 (pconn, err) = (default, errΔ8); goto ᒐdone;
             }
@@ -2146,7 +2146,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
             {
                 @string pa = cm.proxyAuth(); if (pa != ""u8) {
                     pconn.mutateHeaderFunc = (Header h) => {
-                        h.Set(proxyAuthorizationˢ, pa);
+                        h.Set(proxyAuthorizationˢᴍTransport, pa);
                     };
                 }
             }
@@ -2171,7 +2171,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
             {
                 @string pa = cm.proxyAuth(); if (pa != ""u8) {
                     hdr = hdr.Clone();
-                    hdr.Set(proxyAuthorizationˢ, pa);
+                    hdr.Set(proxyAuthorizationˢᴍTransport, pa);
                 }
             }
             var connectReq = Ꮡ(new Request(
@@ -2240,7 +2240,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
                 var (_, text, ok) = strings.Cut(resp.Status, " ");
                 conn.Close();
                 if (!ok) {
-                    (pconn, err) = (default, errors.New(unknownStatusCodeˢ)); goto ᒐdone;
+                    (pconn, err) = (default, errors.New(unknownStatusCodeˢᴍTransport)); goto ᒐdone;
                 }
                 (pconn, err) = (default, errors.New(text)); goto ᒐdone;
             }
@@ -2260,7 +2260,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
             var (altProto, _) = Ꮡt.ᏑaltProto.Load()._<map<@string, RoundTripper>>(ᐧ);
             var (h2, ok) = altProto[httpsˢ]._<newClientConner>(ᐧ);
             if (!ok) {
-                (pconn, err) = (default, errors.New(httpHttp2Implementationˢ)); goto ᒐdone;
+                (pconn, err) = (default, errors.New(httpHttp2ImplementationˢᴍTransport)); goto ᒐdone;
             }
             var (alt, errΔ12) = h2.NewClientConn(pconn.conn, internalStateHook);
             if (errΔ12 != nil) {
@@ -2273,7 +2273,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transp
         if (unencryptedHTTP2) {
             var (next, ok) = t.TLSNextProto[nextProtoUnencryptedHTTP2, ꟷ];
             if (!ok) {
-                (pconn, err) = (default, errors.New(httpTransportDoesNotˢ)); goto ᒐdone;
+                (pconn, err) = (default, errors.New(httpTransportDoesNotˢᴍTransport)); goto ᒐdone;
             }
             var alt = next(cm.targetAddr, unencryptedTLSConn(pconn.conn));
             var (e, okΔ1) = alt._<erringRoundTripper>(ᐧ); if (okΔ1) {
@@ -2654,12 +2654,12 @@ internal static error errCallerOwnsConn = errors.New("read loop ending; caller o
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentEncodingˢ => ref contentEncodingˢᵇ;
-private static readonly @string contentEncodingˢᵇ = "Content-Encoding"u8;
-internal static ref readonly @string gzipˢ => ref gzipˢᵇ;
-private static readonly @string gzipˢᵇ = "gzip"u8;
-internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
-private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
+internal static ref readonly @string contentEncodingˢᴍpersistConn => ref contentEncodingˢᵇᴍpersistConn;
+private static readonly @string contentEncodingˢᵇᴍpersistConn = "Content-Encoding"u8;
+internal static ref readonly @string gzipˢᴍpersistConn => ref gzipˢᵇᴍpersistConn;
+private static readonly @string gzipˢᵇᴍpersistConn = "gzip"u8;
+internal static ref readonly @string contentLengthˢᴍpersistConn => ref contentLengthˢᵇᴍpersistConn;
+private static readonly @string contentLengthˢᵇᴍpersistConn = "Content-Length"u8;
 
 internal static void readLoopᴍ(ж<persistConn> Ꮡpc) {
     GoFrame ᒐ = default;
@@ -2821,10 +2821,10 @@ internal static void readLoopᴍ(ж<persistConn> Ꮡpc) {
             ));
 
             resp.Body = new bodyEOFSignalжReadCloser(body);
-            if (rc.addedGzip && ascii.EqualFold(resp.Header.Get(contentEncodingˢ), gzipˢ)) {
+            if (rc.addedGzip && ascii.EqualFold(resp.Header.Get(contentEncodingˢᴍpersistConn), gzipˢᴍpersistConn)) {
                 resp.Body = new gzipReaderжReadCloser(Ꮡ(new gzipReader(body: body)));
-                resp.Header.Del(contentEncodingˢ);
-                resp.Header.Del(contentLengthˢ);
+                resp.Header.Del(contentEncodingˢᴍpersistConn);
+                resp.Header.Del(contentLengthˢᴍpersistConn);
                 resp.ContentLength = -1;
                 resp.Uncompressed = true;
             }
@@ -3307,14 +3307,14 @@ internal static error waitForAvailabilityᴍ(ref persistConn pc, context.Context
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string acceptEncodingˢ => ref acceptEncodingˢᵇ;
-private static readonly @string acceptEncodingˢᵇ = "Accept-Encoding"u8;
-internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
-private static readonly @string rangeˢᵇ = "Range"u8;
-internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
-private static readonly @string connectionˢᵇ = "Connection"u8;
-internal static ref readonly @string closeˢ => ref closeˢᵇ;
-private static readonly @string closeˢᵇ = "close"u8;
+internal static ref readonly @string acceptEncodingˢᴍpersistConn => ref acceptEncodingˢᵇᴍpersistConn;
+private static readonly @string acceptEncodingˢᵇᴍpersistConn = "Accept-Encoding"u8;
+internal static ref readonly @string rangeˢᴍpersistConn => ref rangeˢᵇᴍpersistConn;
+private static readonly @string rangeˢᵇᴍpersistConn = "Range"u8;
+internal static ref readonly @string connectionˢᴍpersistConn => ref connectionˢᵇᴍpersistConn;
+private static readonly @string connectionˢᵇᴍpersistConn = "Connection"u8;
+internal static ref readonly @string closeˢᴍpersistConn => ref closeˢᵇᴍpersistConn;
+private static readonly @string closeˢᵇᴍpersistConn = "close"u8;
 
 internal static (ж<Response> resp, error err) roundTripᴍ(ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq) {
     ж<Response> resp = default;
@@ -3351,7 +3351,7 @@ internal static (ж<Response> resp, error err) roundTripᴍ(ж<persistConn> Ꮡp
         // uncompress the gzip stream if we were the layer that
         // requested it.
         var requestedGzip = false;
-        if (!pc.t.DisableCompression && req.Header.Get(acceptEncodingˢ) == ""u8 && req.Header.Get(rangeˢ) == ""u8 && req.Method != "HEAD"u8) {
+        if (!pc.t.DisableCompression && req.Header.Get(acceptEncodingˢᴍpersistConn) == ""u8 && req.Header.Get(rangeˢᴍpersistConn) == ""u8 && req.Method != "HEAD"u8) {
             // Request gzip only, not deflate. Deflate is ambiguous and
             // not as universally supported anyway.
             // See: https://zlib.net/zlib_faq.html#faq39
@@ -3365,7 +3365,7 @@ internal static (ж<Response> resp, error err) roundTripᴍ(ж<persistConn> Ꮡp
             // auto-decoding a portion of a gzipped document will just fail
             // anyway. See https://golang.org/issue/8923
             requestedGzip = true;
-            req.extraHeaders().Set(acceptEncodingˢ, gzipˢ);
+            req.extraHeaders().Set(acceptEncodingˢᴍpersistConn, gzipˢ);
         }
 
         channel<EmptyStruct> continueCh = default;
@@ -3374,7 +3374,7 @@ internal static (ж<Response> resp, error err) roundTripᴍ(ж<persistConn> Ꮡp
         }
 
         if (pc.t.DisableKeepAlives && !req.wantsClose() && !isProtocolSwitchHeader(req.Header)) {
-            req.extraHeaders().Set(connectionˢ, closeˢ);
+            req.extraHeaders().Set(connectionˢᴍpersistConn, closeˢᴍpersistConn);
         }
 
         var gone = new channel<EmptyStruct>(0);
@@ -3840,10 +3840,10 @@ partial struct tlsHandshakeTimeoutError {
 internal static bool Timeoutᴍ(tlsHandshakeTimeoutError _) { return true; }
 internal static bool Temporaryᴍ(tlsHandshakeTimeoutError _) { return true; }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string netHttpTlsHandshakeˢ => ref netHttpTlsHandshakeˢᵇ;
-private static readonly @string netHttpTlsHandshakeˢᵇ = "net/http: TLS handshake timeout"u8;
+internal static ref readonly @string netHttpTlsHandshakeˢᴍtlsHandshakeTimeoutError => ref netHttpTlsHandshakeˢᵇᴍtlsHandshakeTimeoutError;
+private static readonly @string netHttpTlsHandshakeˢᵇᴍtlsHandshakeTimeoutError = "net/http: TLS handshake timeout"u8;
 
-internal static @string Errorᴍ(tlsHandshakeTimeoutError _) { return netHttpTlsHandshakeˢ; }
+internal static @string Errorᴍ(tlsHandshakeTimeoutError _) { return netHttpTlsHandshakeˢᴍtlsHandshakeTimeoutError; }
 
 } partial class http_package {
 

@@ -80,8 +80,8 @@ internal static ж<spanSet> fullSweptᴍ(ref mcentral c, uint32 sweepgen) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string spanHasNoFreeObjectsˢ => ref spanHasNoFreeObjectsˢᵇ;
-private static readonly @string spanHasNoFreeObjectsˢᵇ = "span has no free objects"u8;
+internal static ref readonly @string spanHasNoFreeObjectsˢᴍmcentral => ref spanHasNoFreeObjectsˢᵇᴍmcentral;
+private static readonly @string spanHasNoFreeObjectsˢᵇᴍmcentral = "span has no free objects"u8;
 
 // Allocate a span to use in an mcache.
 internal static ж<mspan> cacheSpanᴍ(ref mcentral c) {
@@ -189,7 +189,7 @@ havespan:
     }
     nint n = (nint)s.nelems - (nint)s.allocCount;
     if (n == 0 || s.freeindex == s.nelems || s.allocCount == s.nelems) {
-        @throw(spanHasNoFreeObjectsˢ);
+        @throw(spanHasNoFreeObjectsˢᴍmcentral);
     }
     var freeByteBase = (uint16)(s.freeindex & ~(64 - 1));
     var whichByte = (uint16)(freeByteBase / 8);
@@ -204,8 +204,8 @@ havespan:
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string uncachingSpanButSˢ => ref uncachingSpanButSˢᵇ;
-private static readonly @string uncachingSpanButSˢᵇ = "uncaching span but s.allocCount == 0"u8;
+internal static ref readonly @string uncachingSpanButSˢᴍmcentral => ref uncachingSpanButSˢᵇᴍmcentral;
+private static readonly @string uncachingSpanButSˢᵇᴍmcentral = "uncaching span but s.allocCount == 0"u8;
 
 // Return span from an mcache.
 //
@@ -215,7 +215,7 @@ internal static void uncacheSpanᴍ(ref mcentral c, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.allocCount == 0) {
-        @throw(uncachingSpanButSˢ);
+        @throw(uncachingSpanButSˢᴍmcentral);
     }
 
     var sg = mheap_.sweepgen;

@@ -35,12 +35,12 @@ internal static slice<byte> HTMLᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
 } partial class comment_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string preˢ => ref preˢᵇ;
-private static readonly @string preˢᵇ = "<pre>"u8;
-internal static ref readonly @string preˢ2 => ref preˢ2ᵇ;
-private static readonly @string preˢ2ᵇ = "</pre>\n"u8;
-internal static ref readonly @string valueˢ => ref valueˢᵇ;
-private static readonly @string valueˢᵇ = @" value="""u8;
+internal static ref readonly @string preˢᴍhtmlPrinter => ref preˢᵇᴍhtmlPrinter;
+private static readonly @string preˢᵇᴍhtmlPrinter = "<pre>"u8;
+internal static ref readonly @string preˢ2ᴍhtmlPrinter => ref preˢ2ᵇᴍhtmlPrinter;
+private static readonly @string preˢ2ᵇᴍhtmlPrinter = "</pre>\n"u8;
+internal static ref readonly @string valueˢᴍhtmlPrinter => ref valueˢᵇᴍhtmlPrinter;
+private static readonly @string valueˢᵇᴍhtmlPrinter = @" value="""u8;
 
 // block prints the block x to out.
 internal static void blockᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
@@ -77,9 +77,9 @@ internal static void blockᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block 
         break;
     }
     case ж<Code> xΔ1: {
-        @out.WriteString(preˢ);
+        @out.WriteString(preˢᴍhtmlPrinter);
         p.escape(Ꮡout, xΔ1.Text);
-        @out.WriteString(preˢ2);
+        @out.WriteString(preˢ2ᴍhtmlPrinter);
         break;
     }
     case ж<List> xΔ1: {
@@ -94,7 +94,7 @@ internal static void blockᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block 
             @out.WriteString("<li");
             @string n = item.Number; if (n != ""u8) {
                 if (n != next) {
-                    @out.WriteString(valueˢ);
+                    @out.WriteString(valueˢᴍhtmlPrinter);
                     @out.WriteString(n);
                     @out.WriteString(@"""");
                     next = n;
@@ -133,8 +133,8 @@ internal static @string inc(@string s) {
 } partial class comment_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string aHrefˢ => ref aHrefˢᵇ;
-private static readonly @string aHrefˢᵇ = @"<a href="""u8;
+internal static ref readonly @string aHrefˢᴍhtmlPrinter => ref aHrefˢᵇᴍhtmlPrinter;
+private static readonly @string aHrefˢᵇᴍhtmlPrinter = @"<a href="""u8;
 
 // text prints the text sequence x to out.
 internal static void textᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
@@ -153,7 +153,7 @@ internal static void textᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<T
             break;
         }
         case ж<Link> tΔ1: {
-            @out.WriteString(aHrefˢ);
+            @out.WriteString(aHrefˢᴍhtmlPrinter);
             p.escape(Ꮡout, tΔ1.URL);
             @out.WriteString(@""">");
             p.text(Ꮡout, tΔ1.Text);
@@ -163,7 +163,7 @@ internal static void textᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<T
         case ж<DocLink> tΔ1: {
             @string url = p.docLinkURL(tΔ1);
             if (url != ""u8) {
-                @out.WriteString(aHrefˢ);
+                @out.WriteString(aHrefˢᴍhtmlPrinter);
                 p.escape(Ꮡout, url);
                 @out.WriteString(@""">");
             }
@@ -177,12 +177,12 @@ internal static void textᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<T
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ampˢ => ref ampˢᵇ;
-private static readonly @string ampˢᵇ = "&amp;"u8;
-internal static ref readonly @string quotˢ => ref quotˢᵇ;
-private static readonly @string quotˢᵇ = "&quot;"u8;
-internal static ref readonly @string aposˢ => ref aposˢᵇ;
-private static readonly @string aposˢᵇ = "&apos;"u8;
+internal static ref readonly @string ampˢᴍhtmlPrinter => ref ampˢᵇᴍhtmlPrinter;
+private static readonly @string ampˢᵇᴍhtmlPrinter = "&amp;"u8;
+internal static ref readonly @string quotˢᴍhtmlPrinter => ref quotˢᵇᴍhtmlPrinter;
+private static readonly @string quotˢᵇᴍhtmlPrinter = "&quot;"u8;
+internal static ref readonly @string aposˢᴍhtmlPrinter => ref aposˢᵇᴍhtmlPrinter;
+private static readonly @string aposˢᵇᴍhtmlPrinter = "&apos;"u8;
 
 // escape prints s to out as plain text,
 // escaping < & " ' and > to avoid being misinterpreted
@@ -201,19 +201,19 @@ internal static void escapeᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @stri
         }
         case (byte)'&': {
             @out.WriteString(s.slice(start, i));
-            @out.WriteString(ampˢ);
+            @out.WriteString(ampˢᴍhtmlPrinter);
             start = i + 1;
             break;
         }
         case (byte)'"': {
             @out.WriteString(s.slice(start, i));
-            @out.WriteString(quotˢ);
+            @out.WriteString(quotˢᴍhtmlPrinter);
             start = i + 1;
             break;
         }
         case (byte)'\'': {
             @out.WriteString(s.slice(start, i));
-            @out.WriteString(aposˢ);
+            @out.WriteString(aposˢᴍhtmlPrinter);
             start = i + 1;
             break;
         }

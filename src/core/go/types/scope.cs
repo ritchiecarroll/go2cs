@@ -154,8 +154,8 @@ internal static void insertᴍ(ref Scope s, @string name, Object obj) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string indᶜ => ref indᶜᵇ;
-private static readonly @string indᶜᵇ = ".  "u8;
+internal static ref readonly @string indᶜᴍScope => ref indᶜᵇᴍScope;
+private static readonly @string indᶜᵇᴍScope = ".  "u8;
 
 // WriteTo writes a string representation of the scope to w,
 // with the scope elements sorted by name.
@@ -165,7 +165,7 @@ private static readonly @string indᶜᵇ = ".  "u8;
 internal static void WriteToᴍ(ж<Scope> Ꮡs, io.Writer w, nint n, bool recurse) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    @string ind = indᶜ;
+    @string ind = indᶜᴍScope;
     @string indn = strings.Repeat(ind, n);
 
     fmt.Fprintf(w, "%s%s scope %p {\n"u8, indn, s.comment, Ꮡs.OrTypedNil());

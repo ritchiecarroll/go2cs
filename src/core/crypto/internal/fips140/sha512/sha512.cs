@@ -187,14 +187,14 @@ internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoSha512InvalidHashˢ => ref cryptoSha512InvalidHashˢᵇ;
-private static readonly @string cryptoSha512InvalidHashˢᵇ = "crypto/sha512: invalid hash state identifier"u8;
-private static ref readonly @string cryptoSha512InvalidHashˢ2 => ref cryptoSha512InvalidHashˢ2ᵇ;
-private static readonly @string cryptoSha512InvalidHashˢ2ᵇ = "crypto/sha512: invalid hash state size"u8;
+private static ref readonly @string cryptoSha512InvalidHashˢᴍDigest => ref cryptoSha512InvalidHashˢᵇᴍDigest;
+private static readonly @string cryptoSha512InvalidHashˢᵇᴍDigest = "crypto/sha512: invalid hash state identifier"u8;
+private static ref readonly @string cryptoSha512InvalidHashˢ2ᴍDigest => ref cryptoSha512InvalidHashˢ2ᵇᴍDigest;
+private static readonly @string cryptoSha512InvalidHashˢ2ᵇᴍDigest = "crypto/sha512: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
     if (len(b) < len(magic512)) {
-        return errors.New(cryptoSha512InvalidHashˢ);
+        return errors.New(cryptoSha512InvalidHashˢᴍDigest);
     }
     switch (ᐧ) {
     case {} when d.size == size384 && ((sstring)(b[..(int)(len(magic384))])) == magic384: {
@@ -210,10 +210,10 @@ internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
         break;
     }
     default: {
-        return errors.New(cryptoSha512InvalidHashˢ);
+        return errors.New(cryptoSha512InvalidHashˢᴍDigest);
     }}
     if (len(b) != marshaledSize) {
-        return errors.New(cryptoSha512InvalidHashˢ2);
+        return errors.New(cryptoSha512InvalidHashˢ2ᴍDigest);
     }
     b = b[(int)(len(magic512))..];
     (b, d.h[0]) = consumeUint64(b);

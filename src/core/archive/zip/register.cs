@@ -47,8 +47,8 @@ partial struct pooledFlateWriter {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string writeAfterCloseˢ => ref writeAfterCloseˢᵇ;
-private static readonly @string writeAfterCloseˢᵇ = "Write after Close"u8;
+internal static ref readonly @string writeAfterCloseˢᴍpooledFlateWriter => ref writeAfterCloseˢᵇᴍpooledFlateWriter;
+private static readonly @string writeAfterCloseˢᵇᴍpooledFlateWriter = "Write after Close"u8;
 
 internal static (nint n, error err) Writeᴍ(ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
     nint n = default;
@@ -60,7 +60,7 @@ internal static (nint n, error err) Writeᴍ(ж<pooledFlateWriter> Ꮡw, slice<b
         w.mu.Lock();
         defer(Ꮡw.Ꮡmu.Unlock, ref ᒐ);
         if (w.fw == nil) {
-            (n, err) = (0, errors.New(writeAfterCloseˢ)); goto ᒐdone;
+            (n, err) = (0, errors.New(writeAfterCloseˢᴍpooledFlateWriter)); goto ᒐdone;
         }
         (n, err) = w.fw.Write(p);
     }
@@ -112,8 +112,8 @@ partial struct pooledFlateReader {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readAfterCloseˢ => ref readAfterCloseˢᵇ;
-private static readonly @string readAfterCloseˢᵇ = "Read after Close"u8;
+internal static ref readonly @string readAfterCloseˢᴍpooledFlateReader => ref readAfterCloseˢᵇᴍpooledFlateReader;
+private static readonly @string readAfterCloseˢᵇᴍpooledFlateReader = "Read after Close"u8;
 
 internal static (nint n, error err) Readᴍ(ж<pooledFlateReader> Ꮡr, slice<byte> p) {
     nint n = default;
@@ -125,7 +125,7 @@ internal static (nint n, error err) Readᴍ(ж<pooledFlateReader> Ꮡr, slice<by
         r.mu.Lock();
         defer(Ꮡr.Ꮡmu.Unlock, ref ᒐ);
         if (r.fr == nil) {
-            (n, err) = (0, errors.New(readAfterCloseˢ)); goto ᒐdone;
+            (n, err) = (0, errors.New(readAfterCloseˢᴍpooledFlateReader)); goto ᒐdone;
         }
         (n, err) = r.fr.Read(p);
     }

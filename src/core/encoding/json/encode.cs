@@ -303,13 +303,13 @@ partial struct MarshalerError {
 } partial class json_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string marshalJSONˢ => ref marshalJSONˢᵇ;
-private static readonly @string marshalJSONˢᵇ = "MarshalJSON"u8;
+internal static ref readonly @string marshalJSONˢᴍMarshalerError => ref marshalJSONˢᵇᴍMarshalerError;
+private static readonly @string marshalJSONˢᵇᴍMarshalerError = "MarshalJSON"u8;
 
 internal static @string Errorᴍ(ref MarshalerError e) {
     @string srcFunc = e.sourceFunc;
     if (srcFunc == ""u8) {
-        srcFunc = marshalJSONˢ;
+        srcFunc = marshalJSONˢᴍMarshalerError;
     }
     return "json: error calling "u8 + srcFunc + " for type "u8 + e.Type.String() + ": "u8 + e.Err.Error();
 }
@@ -845,8 +845,8 @@ partial struct mapEncoder {
 } partial class json_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nullˢ => ref nullˢᵇ;
-private static readonly @string nullˢᵇ = "null"u8;
+internal static ref readonly @string nullˢᴍmapEncoder => ref nullˢᵇᴍmapEncoder;
+private static readonly @string nullˢᵇᴍmapEncoder = "null"u8;
 
 internal static void encodeᴍ(mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
@@ -854,7 +854,7 @@ internal static void encodeᴍ(mapEncoder me, ж<encodeState> Ꮡe, reflect.Valu
         ref var e = ref Ꮡe.DerefOrNull();
 
         if (v.IsNil()) {
-            Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
+            Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢᴍmapEncoder);
             return;
         }
         {
@@ -945,8 +945,8 @@ internal partial struct encode_ptr /*dyn*/ {
 } partial class json_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nullˢ => ref nullˢᵇ;
-private static readonly @string nullˢᵇ = "null"u8;
+internal static ref readonly @string nullˢᴍsliceEncoder => ref nullˢᵇᴍsliceEncoder;
+private static readonly @string nullˢᵇᴍsliceEncoder = "null"u8;
 
 internal static void encodeᴍ(sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
@@ -954,7 +954,7 @@ internal static void encodeᴍ(sliceEncoder se, ж<encodeState> Ꮡe, reflect.Va
         ref var e = ref Ꮡe.DerefOrNull();
 
         if (v.IsNil()) {
-            Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
+            Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢᴍsliceEncoder);
             return;
         }
         {
@@ -1026,8 +1026,8 @@ partial struct ptrEncoder {
 } partial class json_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nullˢ => ref nullˢᵇ;
-private static readonly @string nullˢᵇ = "null"u8;
+internal static ref readonly @string nullˢᴍptrEncoder => ref nullˢᵇᴍptrEncoder;
+private static readonly @string nullˢᵇᴍptrEncoder = "null"u8;
 
 internal static void encodeᴍ(ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
@@ -1035,7 +1035,7 @@ internal static void encodeᴍ(ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Valu
         ref var e = ref Ꮡe.DerefOrNull();
 
         if (v.IsNil()) {
-            Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
+            Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢᴍptrEncoder);
             return;
         }
         {

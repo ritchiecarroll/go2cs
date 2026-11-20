@@ -83,8 +83,8 @@ internal static (uintptr, error) pidfdFind(nint pid) {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string waitidˢ => ref waitidˢᵇ;
-private static readonly @string waitidˢᵇ = "waitid"u8;
+internal static ref readonly @string waitidˢᴍProcess => ref waitidˢᵇᴍProcess;
+private static readonly @string waitidˢᵇᴍProcess = "waitid"u8;
 
 // pidfdWait waits for the process to complete,
 // and updates the process status to done.
@@ -116,7 +116,7 @@ internal static (ж<ProcessState>, error) pidfdWaitᴍ(ж<Process> Ꮡp) {
         ref var rusage = ref heap(new syscall.Rusage(), out var Ꮡrusage);
         var err = ignoringEINTR(() => unix.Waitid(unix.P_PIDFD, (nint)handle, Ꮡinfo, syscall.WEXITED, Ꮡrusage));
         if (err != nil) {
-            return (default, NewSyscallError(waitidˢ, err));
+            return (default, NewSyscallError(waitidˢᴍProcess, err));
         }
 
         // Update the Process status to statusDone.

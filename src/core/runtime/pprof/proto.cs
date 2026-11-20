@@ -345,14 +345,14 @@ internal static error addCPUDataᴍ(ref profileBuilder b, slice<uint64> data, sl
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string samplesˢ => ref samplesˢᵇ;
-private static readonly @string samplesˢᵇ = "samples"u8;
-internal static ref readonly @string countˢ => ref countˢᵇ;
-private static readonly @string countˢᵇ = "count"u8;
-internal static ref readonly @string cpuˢ => ref cpuˢᵇ;
-private static readonly @string cpuˢᵇ = "cpu"u8;
-internal static ref readonly @string nanosecondsˢ => ref nanosecondsˢᵇ;
-private static readonly @string nanosecondsˢᵇ = "nanoseconds"u8;
+internal static ref readonly @string samplesˢᴍprofileBuilder => ref samplesˢᵇᴍprofileBuilder;
+private static readonly @string samplesˢᵇᴍprofileBuilder = "samples"u8;
+internal static ref readonly @string countˢᴍprofileBuilder => ref countˢᵇᴍprofileBuilder;
+private static readonly @string countˢᵇᴍprofileBuilder = "count"u8;
+internal static ref readonly @string cpuˢᴍprofileBuilder => ref cpuˢᵇᴍprofileBuilder;
+private static readonly @string cpuˢᵇᴍprofileBuilder = "cpu"u8;
+internal static ref readonly @string nanosecondsˢᴍprofileBuilder => ref nanosecondsˢᵇᴍprofileBuilder;
+private static readonly @string nanosecondsˢᵇᴍprofileBuilder = "nanoseconds"u8;
 
 // build completes and returns the constructed profile.
 internal static error buildᴍ(ж<profileBuilder> Ꮡb) {
@@ -362,10 +362,10 @@ internal static error buildᴍ(ж<profileBuilder> Ꮡb) {
 
     b.pb.int64Opt(tagProfile_TimeNanos, b.start.UnixNano());
     if (b.havePeriod) { // must be CPU profile
-        b.pbValueType(tagProfile_SampleType, samplesˢ, countˢ);
-        b.pbValueType(tagProfile_SampleType, cpuˢ, nanosecondsˢ);
+        b.pbValueType(tagProfile_SampleType, samplesˢᴍprofileBuilder, countˢᴍprofileBuilder);
+        b.pbValueType(tagProfile_SampleType, cpuˢᴍprofileBuilder, nanosecondsˢᴍprofileBuilder);
         b.pb.int64Opt(tagProfile_DurationNanos, b.end.Sub(b.start).Nanoseconds());
-        b.pbValueType(tagProfile_PeriodType, cpuˢ, nanosecondsˢ);
+        b.pbValueType(tagProfile_PeriodType, cpuˢᴍprofileBuilder, nanosecondsˢᴍprofileBuilder);
         b.pb.int64Opt(tagProfile_Period, b.period);
     }
 

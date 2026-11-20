@@ -78,8 +78,8 @@ internal static slice<byte> bytesᴍ(ж<P384Element> Ꮡe, /*[48]*/ ж<array<byt
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidP384Elementˢ => ref invalidP384Elementˢᵇ;
-private static readonly @string invalidP384Elementˢᵇ = "invalid P384Element encoding"u8;
+private static ref readonly @string invalidP384ElementˢᴍP384Element => ref invalidP384ElementˢᵇᴍP384Element;
+private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid P384Element encoding"u8;
 
 // SetBytes sets e = v, where v is a big-endian 48-byte encoding, and returns e.
 // If v is not 48 bytes or it encodes a value higher than 2^384 - 2^128 - 2^96 + 2^32 - 1,
@@ -88,7 +88,7 @@ internal static (ж<P384Element>, error) SetBytesᴍ(ж<P384Element> Ꮡe, slice
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p384ElementLen) {
-        return (default, errors.New(invalidP384Elementˢ));
+        return (default, errors.New(invalidP384ElementˢᴍP384Element));
     }
 
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
@@ -96,7 +96,7 @@ internal static (ж<P384Element>, error) SetBytesᴍ(ж<P384Element> Ꮡe, slice
     slice<byte> minusOneEncoding = @new<P384Element>().Sub(
         @new<P384Element>(), @new<P384Element>().One()).Bytes();
     if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
-        return (default, errors.New(invalidP384Elementˢ));
+        return (default, errors.New(invalidP384ElementˢᴍP384Element));
     }
 
     ref var @in = ref heap(new array<byte>(48), out var Ꮡin);

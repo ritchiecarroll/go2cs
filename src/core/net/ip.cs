@@ -297,8 +297,8 @@ internal static IP Maskᴍ(IP ip, IPMask mask) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍIP => ref nilˢᵇᴍIP;
+private static readonly @string nilˢᵇᴍIP = "<nil>"u8;
 
 // String returns the string form of the IP address ip.
 // It returns one of 4 forms:
@@ -308,7 +308,7 @@ private static readonly @string nilˢᵇ = "<nil>"u8;
 //   - the hexadecimal form of ip, without punctuation, if no other cases apply
 internal static @string Stringᴍ(IP ip) {
     if (len(ip) == 0) {
-        return nilˢ;
+        return nilˢᴍIP;
     }
 
     if (len(ip) != IPv4len && len(ip) != IPv6len) {
@@ -476,13 +476,13 @@ internal static (nint ones, nint bits) Sizeᴍ(IPMask m) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍIPMask => ref nilˢᵇᴍIPMask;
+private static readonly @string nilˢᵇᴍIPMask = "<nil>"u8;
 
 // String returns the hexadecimal form of m, with no punctuation.
 internal static @string Stringᴍ(IPMask m) {
     if (len(m) == 0) {
-        return nilˢ;
+        return nilˢᴍIPMask;
     }
     return hexString(m);
 }
@@ -540,15 +540,15 @@ internal static bool Containsᴍ(ж<IPNet> Ꮡn, IP ip) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ipNetˢ => ref ipNetˢᵇ;
-private static readonly @string ipNetˢᵇ = "ip+net"u8;
+internal static ref readonly @string ipNetˢᴍIPNet => ref ipNetˢᵇᴍIPNet;
+private static readonly @string ipNetˢᵇᴍIPNet = "ip+net"u8;
 
 // Network returns the address's network name, "ip+net".
-internal static @string Networkᴍ(ref IPNet n) { return ipNetˢ; }
+internal static @string Networkᴍ(ref IPNet n) { return ipNetˢᴍIPNet; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍIPNet => ref nilˢᵇᴍIPNet;
+private static readonly @string nilˢᵇᴍIPNet = "<nil>"u8;
 
 // String returns the CIDR notation of n like "192.0.2.0/24"
 // or "2001:db8::/48" as defined in RFC 4632 and RFC 4291.
@@ -558,11 +558,11 @@ private static readonly @string nilˢᵇ = "<nil>"u8;
 // punctuation like "198.51.100.0/c000ff00".
 internal static @string Stringᴍ(ж<IPNet> Ꮡn) {
     if (Ꮡn == nil) {
-        return nilˢ;
+        return nilˢᴍIPNet;
     }
     var (nn, m) = networkNumberAndMask(ref (Ꮡn).DerefOrNull());
     if (nn == nil || m == nil) {
-        return nilˢ;
+        return nilˢᴍIPNet;
     }
     nint l = simpleMaskLength(m);
     if (l == -1) {

@@ -426,8 +426,8 @@ internal static ж<_type> typeOffᴍ(rtype t, typeOff off) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeTextOffsetBaseˢ => ref runtimeTextOffsetBaseˢᵇ;
-private static readonly @string runtimeTextOffsetBaseˢᵇ = "runtime: text offset base pointer out of range"u8;
+internal static ref readonly @string runtimeTextOffsetBaseˢᴍrtype => ref runtimeTextOffsetBaseˢᵇᴍrtype;
+private static readonly @string runtimeTextOffsetBaseˢᵇᴍrtype = "runtime: text offset base pointer out of range"u8;
 
 internal static @unsafe.Pointer textOffᴍ(rtype t, textOff off) {
     if (off == -1) {
@@ -452,7 +452,7 @@ internal static @unsafe.Pointer textOffᴍ(rtype t, textOff off) {
             for (var next = Ꮡfirstmoduledata; next != nil; next = next.next) {
                 println((@string)"\ttypes", (hex)(uint64)next.types, (@string)"etypes", (hex)(uint64)next.etypes);
             }
-            @throw(runtimeTextOffsetBaseˢ);
+            @throw(runtimeTextOffsetBaseˢᴍrtype);
         }
         return resΔ1;
     }

@@ -21,8 +21,8 @@ partial class tls_package {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string trafficUpdˢ => ref trafficUpdˢᵇ;
-private static readonly @string trafficUpdˢᵇ = "traffic upd"u8;
+internal static ref readonly @string trafficUpdˢᴍcipherSuiteTLS13 => ref trafficUpdˢᵇᴍcipherSuiteTLS13;
+private static readonly @string trafficUpdˢᵇᴍcipherSuiteTLS13 = "traffic upd"u8;
 
 // This file contains the functions necessary to compute the TLS 1.3 key
 // schedule. See RFC 8446, Section 7.
@@ -33,12 +33,12 @@ internal static slice<byte> nextTrafficSecretᴍ(ж<cipherSuiteTLS13> Ꮡc, slic
     ref var c = ref Ꮡc.DerefOrNull();
 
     var recvʗ1 = c.hash;
-    return tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), trafficSecret, trafficUpdˢ, default, c.hash.Size());
+    return tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), trafficSecret, trafficUpdˢᴍcipherSuiteTLS13, default, c.hash.Size());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string keyˢ => ref keyˢᵇ;
-private static readonly @string keyˢᵇ = "key"u8;
+internal static ref readonly @string keyˢᴍcipherSuiteTLS13 => ref keyˢᵇᴍcipherSuiteTLS13;
+private static readonly @string keyˢᵇᴍcipherSuiteTLS13 = "key"u8;
 
 // trafficKey generates traffic keys according to RFC 8446, Section 7.3.
 internal static (slice<byte> key, slice<byte> iv) trafficKeyᴍ(ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) {
@@ -47,15 +47,15 @@ internal static (slice<byte> key, slice<byte> iv) trafficKeyᴍ(ж<cipherSuiteTL
     ref var c = ref Ꮡc.DerefOrNull();
 
     var recvʗ1 = c.hash;
-    key = tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), trafficSecret, keyˢ, default, c.keyLen);
+    key = tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), trafficSecret, keyˢᴍcipherSuiteTLS13, default, c.keyLen);
     var recvʗ2 = c.hash;
     iv = tls13.ExpandLabel<hash.Hash>(() => recvʗ2.New(), trafficSecret, "iv", default, aeadNonceLength);
     return (key, iv);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string finishedˢ => ref finishedˢᵇ;
-private static readonly @string finishedˢᵇ = "finished"u8;
+internal static ref readonly @string finishedˢᴍcipherSuiteTLS13 => ref finishedˢᵇᴍcipherSuiteTLS13;
+private static readonly @string finishedˢᵇᴍcipherSuiteTLS13 = "finished"u8;
 
 // finishedHash generates the Finished verify_data or PskBinderEntry according
 // to RFC 8446, Section 4.4.4. See sections 4.4 and 4.2.11.2 for the baseKey
@@ -64,7 +64,7 @@ internal static slice<byte> finishedHashᴍ(ж<cipherSuiteTLS13> Ꮡc, slice<byt
     ref var c = ref Ꮡc.DerefOrNull();
 
     var recvʗ1 = c.hash;
-    var finishedKey = tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), baseKey, finishedˢ, default, c.hash.Size());
+    var finishedKey = tls13.ExpandLabel<hash.Hash>(() => recvʗ1.New(), baseKey, finishedˢᴍcipherSuiteTLS13, default, c.hash.Size());
     var recvʗ2 = c.hash;
     var verifyData = hmac.New(() => recvʗ2.New(), finishedKey);
     verifyData.Write(transcript.Sum(default));
@@ -249,14 +249,14 @@ internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keySharesᴍ(�
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInvalidClientKeyShareˢ2 => ref tlsInvalidClientKeyShareˢ2ᵇ;
-private static readonly @string tlsInvalidClientKeyShareˢ2ᵇ = "tls: invalid client key share length for hybrid key exchange"u8;
+internal static ref readonly @string tlsInvalidClientKeyShareˢ2ᴍhybridKeyExchange => ref tlsInvalidClientKeyShareˢ2ᵇᴍhybridKeyExchange;
+private static readonly @string tlsInvalidClientKeyShareˢ2ᵇᴍhybridKeyExchange = "tls: invalid client key share length for hybrid key exchange"u8;
 
 internal static (slice<byte>, keyShare, error) serverSharedSecretᴍ(ж<hybridKeyExchange> Ꮡke, io.Reader rand, slice<byte> clientKeyShare) {
     ref var ke = ref Ꮡke.DerefOrNull();
 
     if (len(clientKeyShare) != ke.ecdhElementSize + ke.mlkemPublicKeySize) {
-        return (default, new keyShare(), errors.New(tlsInvalidClientKeyShareˢ2));
+        return (default, new keyShare(), errors.New(tlsInvalidClientKeyShareˢ2ᴍhybridKeyExchange));
     }
     slice<byte> ecdhShareData = default;
     slice<byte> mlkemShareData = default;
@@ -295,15 +295,15 @@ internal static (slice<byte>, keyShare, error) serverSharedSecretᴍ(ж<hybridKe
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInvalidServerKeyShareˢ2 => ref tlsInvalidServerKeyShareˢ2ᵇ;
-private static readonly @string tlsInvalidServerKeyShareˢ2ᵇ = "tls: invalid server key share length for hybrid key exchange"u8;
+internal static ref readonly @string tlsInvalidServerKeyShareˢ2ᴍhybridKeyExchange => ref tlsInvalidServerKeyShareˢ2ᵇᴍhybridKeyExchange;
+private static readonly @string tlsInvalidServerKeyShareˢ2ᵇᴍhybridKeyExchange = "tls: invalid server key share length for hybrid key exchange"u8;
 
 internal static (slice<byte>, error) clientSharedSecretᴍ(ж<hybridKeyExchange> Ꮡke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) {
     ref var ke = ref Ꮡke.DerefOrNull();
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     if (len(serverKeyShare) != ke.ecdhElementSize + ke.mlkemCiphertextSize) {
-        return (default, errors.New(tlsInvalidServerKeyShareˢ2));
+        return (default, errors.New(tlsInvalidServerKeyShareˢ2ᴍhybridKeyExchange));
     }
     slice<byte> ecdhShareData = default;
     slice<byte> mlkemShareData = default;

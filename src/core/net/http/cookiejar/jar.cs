@@ -460,12 +460,12 @@ internal static @string defaultPath(@string path) {
 } partial class cookiejar_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sameSiteˢ => ref sameSiteˢᵇ;
-private static readonly @string sameSiteˢᵇ = "SameSite"u8;
-internal static ref readonly @string sameSiteStrictˢ => ref sameSiteStrictˢᵇ;
-private static readonly @string sameSiteStrictˢᵇ = "SameSite=Strict"u8;
-internal static ref readonly @string sameSiteLaxˢ => ref sameSiteLaxˢᵇ;
-private static readonly @string sameSiteLaxˢᵇ = "SameSite=Lax"u8;
+internal static ref readonly @string sameSiteˢᴍJar => ref sameSiteˢᵇᴍJar;
+private static readonly @string sameSiteˢᵇᴍJar = "SameSite"u8;
+internal static ref readonly @string sameSiteStrictˢᴍJar => ref sameSiteStrictˢᵇᴍJar;
+private static readonly @string sameSiteStrictˢᵇᴍJar = "SameSite=Strict"u8;
+internal static ref readonly @string sameSiteLaxˢᴍJar => ref sameSiteLaxˢᵇᴍJar;
+private static readonly @string sameSiteLaxˢᵇᴍJar = "SameSite=Lax"u8;
 
 // newEntry creates an entry from an http.Cookie c. now is the current time and
 // is compared to c.Expires to determine deletion of c. defPath and host are the
@@ -520,15 +520,15 @@ internal static (entry e, bool remove, error err) newEntryᴍ(ref Jar j, ж<http
 
     switch (c.SameSite) {
     case var ᴛ when ᴛ == http.SameSiteDefaultMode: {
-        e.SameSite = sameSiteˢ;
+        e.SameSite = sameSiteˢᴍJar;
         break;
     }
     case var ᴛ when ᴛ == http.SameSiteStrictMode: {
-        e.SameSite = sameSiteStrictˢ;
+        e.SameSite = sameSiteStrictˢᴍJar;
         break;
     }
     case var ᴛ when ᴛ == http.SameSiteLaxMode: {
-        e.SameSite = sameSiteLaxˢ;
+        e.SameSite = sameSiteLaxˢᴍJar;
         break;
     }}
 

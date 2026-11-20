@@ -44,20 +44,20 @@ internal static slice<tracev2.EventSpec> Specsᴍ(Version v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidTraceVersionˢ => ref invalidTraceVersionˢᵇ;
-private static readonly @string invalidTraceVersionˢᵇ = "<invalid trace version>"u8;
-private static ref readonly @string v1TraceEventTypeˢ => ref v1TraceEventTypeˢᵇ;
-private static readonly @string v1TraceEventTypeˢᵇ = "<v1 trace event type>"u8;
+private static ref readonly @string invalidTraceVersionˢᴍVersion => ref invalidTraceVersionˢᵇᴍVersion;
+private static readonly @string invalidTraceVersionˢᵇᴍVersion = "<invalid trace version>"u8;
+private static ref readonly @string v1TraceEventTypeˢᴍVersion => ref v1TraceEventTypeˢᵇᴍVersion;
+private static readonly @string v1TraceEventTypeˢᵇᴍVersion = "<v1 trace event type>"u8;
 
 // EventName returns a string name of a wire format event
 // for a particular trace version.
 internal static @string EventNameᴍ(Version v, tracev2.EventType typ) {
     if (!v.Valid()) {
-        return invalidTraceVersionˢ;
+        return invalidTraceVersionˢᴍVersion;
     }
     var s = v.Specs();
     if (len(s) == 0) {
-        return v1TraceEventTypeˢ;
+        return v1TraceEventTypeˢᴍVersion;
     }
     if ((nint)typ < len(s) && s[typ].Name != ""u8) {
         return s[typ].Name;

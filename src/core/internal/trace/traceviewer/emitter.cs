@@ -671,22 +671,22 @@ internal static void OptionalEventᴍ(ref Emitter e, ж<format.Event> ev) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string statsˢ => ref statsˢᵇ;
-private static readonly @string statsˢᵇ = "STATS"u8;
-private static ref readonly @string tasksˢ => ref tasksˢᵇ;
-private static readonly @string tasksˢᵇ = "TASKS"u8;
-private static ref readonly @string networkˢ => ref networkˢᵇ;
-private static readonly @string networkˢᵇ = "Network"u8;
-private static ref readonly @string timersˢ => ref timersˢᵇ;
-private static readonly @string timersˢᵇ = "Timers"u8;
-private static ref readonly @string syscallsˢ => ref syscallsˢᵇ;
-private static readonly @string syscallsˢᵇ = "Syscalls"u8;
+private static ref readonly @string statsˢᴍEmitter => ref statsˢᵇᴍEmitter;
+private static readonly @string statsˢᵇᴍEmitter = "STATS"u8;
+private static ref readonly @string tasksˢᴍEmitter => ref tasksˢᵇᴍEmitter;
+private static readonly @string tasksˢᵇᴍEmitter = "TASKS"u8;
+private static ref readonly @string networkˢᴍEmitter => ref networkˢᵇᴍEmitter;
+private static readonly @string networkˢᵇᴍEmitter = "Network"u8;
+private static ref readonly @string timersˢᴍEmitter => ref timersˢᵇᴍEmitter;
+private static readonly @string timersˢᵇᴍEmitter = "Timers"u8;
+private static ref readonly @string syscallsˢᴍEmitter => ref syscallsˢᵇᴍEmitter;
+private static readonly @string syscallsˢᵇᴍEmitter = "Syscalls"u8;
 
 internal static void Flushᴍ(ref Emitter e) {
-    e.processMeta(format.StatsSection, statsˢ, 0);
+    e.processMeta(format.StatsSection, statsˢᴍEmitter, 0);
 
     if (len(e.tasks) != 0) {
-        e.processMeta(format.TasksSection, tasksˢ, 1);
+        e.processMeta(format.TasksSection, tasksˢᴍEmitter, 1);
     }
     foreach (var (id, task) in e.tasks) {
         e.threadMeta(format.TasksSection, id, task.name, task.sortIndex);
@@ -695,9 +695,9 @@ internal static void Flushᴍ(ref Emitter e) {
     e.processMeta(format.ProcsSection, e.resourceType, 2);
 
     e.threadMeta(format.ProcsSection, GCP, "GC", -6);
-    e.threadMeta(format.ProcsSection, NetpollP, networkˢ, -5);
-    e.threadMeta(format.ProcsSection, TimerP, timersˢ, -4);
-    e.threadMeta(format.ProcsSection, SyscallP, syscallsˢ, -3);
+    e.threadMeta(format.ProcsSection, NetpollP, networkˢᴍEmitter, -5);
+    e.threadMeta(format.ProcsSection, TimerP, timersˢᴍEmitter, -4);
+    e.threadMeta(format.ProcsSection, SyscallP, syscallsˢᴍEmitter, -3);
 
     foreach (var (id, name) in e.resources) {
         nint priority = (nint)id;

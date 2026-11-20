@@ -523,11 +523,11 @@ partial struct nobitsSectionReader {
 } partial class xcoff_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedReadFromˢ => ref unexpectedReadFromˢᵇ;
-private static readonly @string unexpectedReadFromˢᵇ = "unexpected read from section with uninitialized data"u8;
+internal static ref readonly @string unexpectedReadFromˢᴍnobitsSectionReader => ref unexpectedReadFromˢᵇᴍnobitsSectionReader;
+private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = "unexpected read from section with uninitialized data"u8;
 
 internal static (nint n, error err) ReadAtᴍ(ref nobitsSectionReader _, slice<byte> p, int64 off) {
-    return (0, errors.New(unexpectedReadFromˢ));
+    return (0, errors.New(unexpectedReadFromˢᴍnobitsSectionReader));
 }
 
 } partial class xcoff_package {

@@ -1311,8 +1311,8 @@ internal static void usageᴍ(ж<FlagSet> Ꮡf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string trueˢ => ref trueˢᵇ;
-private static readonly @string trueˢᵇ = "true"u8;
+internal static ref readonly @string trueˢᴍFlagSet => ref trueˢᵇᴍFlagSet;
+private static readonly @string trueˢᵇᴍFlagSet = "true"u8;
 
 // parseOne parses one flag. It reports whether a flag was seen.
 internal static (bool, error) parseOneᴍ(ж<FlagSet> Ꮡf) {
@@ -1366,7 +1366,7 @@ internal static (bool, error) parseOneᴍ(ж<FlagSet> Ꮡf) {
                 return (false, Ꮡf.failf("invalid boolean value %q for -%s: %v", value, name, err));
             }
         } else {
-            var err = fv.Set(trueˢ); if (err != nil) {
+            var err = fv.Set(trueˢᴍFlagSet); if (err != nil) {
                 return (false, Ꮡf.failf("invalid boolean flag %s: %v", name, err));
             }
         }

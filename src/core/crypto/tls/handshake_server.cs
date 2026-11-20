@@ -176,8 +176,8 @@ internal static error handshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsEncryptedClientHelloˢ => ref tlsEncryptedClientHelloˢᵇ;
-private static readonly @string tlsEncryptedClientHelloˢᵇ = "tls: Encrypted Client Hello cannot be used pre-TLS 1.3"u8;
+internal static ref readonly @string tlsEncryptedClientHelloˢᴍConn => ref tlsEncryptedClientHelloˢᵇᴍConn;
+private static readonly @string tlsEncryptedClientHelloˢᵇᴍConn = "tls: Encrypted Client Hello cannot be used pre-TLS 1.3"u8;
 
 // readClientHello reads a ClientHello message and selects the protocol version.
 internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHelloᴍ(ж<Conn> Ꮡc, context.Context ctx) {
@@ -256,7 +256,7 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHell
     // but it didn't, and this matches the boringssl behavior.
     if (c.vers != VersionTLS13 && (ech != nil && !ech.inner)) {
         Ꮡc.sendAlert(alertIllegalParameter);
-        return (default, default, errors.New(tlsEncryptedClientHelloˢ));
+        return (default, default, errors.New(tlsEncryptedClientHelloˢᴍConn));
     }
 
     if (c.config.MinVersion == 0 && c.vers < VersionTLS12) {
@@ -270,10 +270,10 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHell
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsClientDoesNotSupportˢ => ref tlsClientDoesNotSupportˢᵇ;
-private static readonly @string tlsClientDoesNotSupportˢᵇ = "tls: client does not support uncompressed connections"u8;
-internal static ref readonly @string tlsInitialHandshakeHadˢ => ref tlsInitialHandshakeHadˢᵇ;
-private static readonly @string tlsInitialHandshakeHadˢᵇ = "tls: initial handshake had non-empty renegotiation extension"u8;
+internal static ref readonly @string tlsClientDoesNotSupportˢᴍserverHandshakeState => ref tlsClientDoesNotSupportˢᵇᴍserverHandshakeState;
+private static readonly @string tlsClientDoesNotSupportˢᵇᴍserverHandshakeState = "tls: client does not support uncompressed connections"u8;
+internal static ref readonly @string tlsInitialHandshakeHadˢᴍserverHandshakeState => ref tlsInitialHandshakeHadˢᵇᴍserverHandshakeState;
+private static readonly @string tlsInitialHandshakeHadˢᵇᴍserverHandshakeState = "tls: initial handshake had non-empty renegotiation extension"u8;
 
 internal static error processClientHelloᴍ(ref serverHandshakeState hs) {
     var c = hs.c;
@@ -292,7 +292,7 @@ internal static error processClientHelloᴍ(ref serverHandshakeState hs) {
 
     if (!foundCompression) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsClientDoesNotSupportˢ);
+        return errors.New(tlsClientDoesNotSupportˢᴍserverHandshakeState);
     }
 
     hs.hello.random = new slice<byte>(32);
@@ -315,7 +315,7 @@ internal static error processClientHelloᴍ(ref serverHandshakeState hs) {
 
     if (len(hs.clientHello.secureRenegotiation) != 0) {
         c.sendAlert(alertHandshakeFailure);
-        return errors.New(tlsInitialHandshakeHadˢ);
+        return errors.New(tlsInitialHandshakeHadˢᴍserverHandshakeState);
     }
 
     hs.hello.extendedMasterSecret = hs.clientHello.extendedMasterSecret;
@@ -473,8 +473,8 @@ internal static (bool, error) supportsECDHE(ж<Config> c, uint16 version, slice<
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsClientUsingˢ => ref tlsClientUsingˢᵇ;
-private static readonly @string tlsClientUsingˢᵇ = "tls: client using inappropriate protocol fallback"u8;
+internal static ref readonly @string tlsClientUsingˢᴍserverHandshakeState => ref tlsClientUsingˢᵇᴍserverHandshakeState;
+private static readonly @string tlsClientUsingˢᵇᴍserverHandshakeState = "tls: client using inappropriate protocol fallback"u8;
 
 internal static error pickCipherSuiteᴍ(ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
@@ -505,7 +505,7 @@ internal static error pickCipherSuiteᴍ(ж<serverHandshakeState> Ꮡhs) {
             // The client is doing a fallback connection. See RFC 7507.
             if (hs.clientHello.vers < c.config.maxSupportedVersion(roleServer)) {
                 c.sendAlert(alertInappropriateFallback);
-                return errors.New(tlsClientUsingˢ);
+                return errors.New(tlsClientUsingˢᴍserverHandshakeState);
             }
             break;
         }
@@ -538,8 +538,8 @@ internal static bool cipherSuiteOkᴍ(ref serverHandshakeState hs, ж<cipherSuit
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsSessionSupportedˢ => ref tlsSessionSupportedˢᵇ;
-private static readonly @string tlsSessionSupportedˢᵇ = "tls: session supported extended_master_secret but client does not"u8;
+internal static ref readonly @string tlsSessionSupportedˢᴍserverHandshakeState => ref tlsSessionSupportedˢᵇᴍserverHandshakeState;
+private static readonly @string tlsSessionSupportedˢᵇᴍserverHandshakeState = "tls: session supported extended_master_secret but client does not"u8;
 
 // checkForResumption reports whether we should perform resumption on this connection.
 internal static error checkForResumptionᴍ(ж<serverHandshakeState> Ꮡhs) {
@@ -632,7 +632,7 @@ internal static error checkForResumptionᴍ(ж<serverHandshakeState> Ꮡhs) {
     if (sessionState.extMasterSecret && !hs.clientHello.extendedMasterSecret) {
         // Aborting is somewhat harsh, but it's a MUST and it would indicate a
         // weird downgrade in client capabilities.
-        return errors.New(tlsSessionSupportedˢ);
+        return errors.New(tlsSessionSupportedˢᴍserverHandshakeState);
     }
     if (!sessionState.extMasterSecret && fips140tls.Required()) {
         if (fips140ems.Value() != "0"u8) {
@@ -694,12 +694,12 @@ internal static error doResumeHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsFips1403RequiresTheˢ => ref tlsFips1403RequiresTheˢᵇ;
-private static readonly @string tlsFips1403RequiresTheˢᵇ = "tls: FIPS 140-3 requires the use of Extended Master Secret"u8;
-internal static ref readonly @string tlsClientCertificateUsedˢ => ref tlsClientCertificateUsedˢᵇ;
-private static readonly @string tlsClientCertificateUsedˢᵇ = "tls: client certificate used with invalid signature algorithm"u8;
-internal static ref readonly @string tlsInternalErrorDidNotˢ => ref tlsInternalErrorDidNotˢᵇ;
-private static readonly @string tlsInternalErrorDidNotˢᵇ = "tls: internal error: did not keep handshake transcript for TLS 1.2"u8;
+internal static ref readonly @string tlsFips1403RequiresTheˢᴍserverHandshakeState => ref tlsFips1403RequiresTheˢᵇᴍserverHandshakeState;
+private static readonly @string tlsFips1403RequiresTheˢᵇᴍserverHandshakeState = "tls: FIPS 140-3 requires the use of Extended Master Secret"u8;
+internal static ref readonly @string tlsClientCertificateUsedˢᴍserverHandshakeState => ref tlsClientCertificateUsedˢᵇᴍserverHandshakeState;
+private static readonly @string tlsClientCertificateUsedˢᵇᴍserverHandshakeState = "tls: client certificate used with invalid signature algorithm"u8;
+internal static ref readonly @string tlsInternalErrorDidNotˢᴍserverHandshakeState => ref tlsInternalErrorDidNotˢᵇᴍserverHandshakeState;
+private static readonly @string tlsInternalErrorDidNotˢᵇᴍserverHandshakeState = "tls: internal error: did not keep handshake transcript for TLS 1.2"u8;
 
 internal static error doFullHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
@@ -852,7 +852,7 @@ internal static error doFullHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
         if (fips140tls.Required()) {
             if (fips140ems.Value() != "0"u8) {
                 c.sendAlert(alertHandshakeFailure);
-                return errors.New(tlsFips1403RequiresTheˢ);
+                return errors.New(tlsFips1403RequiresTheˢᴍserverHandshakeState);
             }
             fips140ems.IncNonDefault();
         }
@@ -889,7 +889,7 @@ internal static error doFullHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
         if (c.vers >= VersionTLS12) {
             if (!isSupportedSignatureAlgorithm(certVerify.signatureAlgorithm, certReq.supportedSignatureAlgorithms)) {
                 c.sendAlert(alertIllegalParameter);
-                return errors.New(tlsClientCertificateUsedˢ);
+                return errors.New(tlsClientCertificateUsedˢᴍserverHandshakeState);
             }
             (sigType, sigHash, err) = typeAndHashFromSignatureScheme(certVerify.signatureAlgorithm);
             if (err != nil) {
@@ -901,7 +901,7 @@ internal static error doFullHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
             }
             if (hs.finishedHash.buffer == nil) {
                 c.sendAlert(alertInternalError);
-                return errors.New(tlsInternalErrorDidNotˢ);
+                return errors.New(tlsInternalErrorDidNotˢᴍserverHandshakeState);
             }
             var errΔ12 = verifyHandshakeSignature(sigType, pub, sigHash, hs.finishedHash.buffer, certVerify.signature); if (errΔ12 != nil) {
                 c.sendAlert(alertDecryptError);
@@ -959,8 +959,8 @@ internal static error establishKeysᴍ(ref serverHandshakeState hs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsClientSFinishedˢ => ref tlsClientSFinishedˢᵇ;
-private static readonly @string tlsClientSFinishedˢᵇ = "tls: client's Finished message is incorrect"u8;
+internal static ref readonly @string tlsClientSFinishedˢᴍserverHandshakeState => ref tlsClientSFinishedˢᵇᴍserverHandshakeState;
+private static readonly @string tlsClientSFinishedˢᵇᴍserverHandshakeState = "tls: client's Finished message is incorrect"u8;
 
 internal static error readFinishedᴍ(ж<serverHandshakeState> Ꮡhs, slice<byte> @out) {
     ref var hs = ref Ꮡhs.DerefOrNull();
@@ -987,7 +987,7 @@ internal static error readFinishedᴍ(ж<serverHandshakeState> Ꮡhs, slice<byte
     var verify = hs.finishedHash.clientSum(hs.masterSecret);
     if (len(verify) != len(clientFinished.verifyData) || subtle.ConstantTimeCompare(verify, clientFinished.verifyData) != 1) {
         c.sendAlert(alertHandshakeFailure);
-        return errors.New(tlsClientSFinishedˢ);
+        return errors.New(tlsClientSFinishedˢᴍserverHandshakeState);
     }
 
     var errΔ2 = transcriptMsg(new finishedMsgжhandshakeMessage(clientFinished), new finishedHashжtranscriptHash(Ꮡhs.ᏑfinishedHash)); if (errΔ2 != nil) {
@@ -1068,8 +1068,8 @@ internal static error sendFinishedᴍ(ж<serverHandshakeState> Ꮡhs, slice<byte
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsClientDidnTProvideAˢ => ref tlsClientDidnTProvideAˢᵇ;
-private static readonly @string tlsClientDidnTProvideAˢᵇ = "tls: client didn't provide a certificate"u8;
+internal static ref readonly @string tlsClientDidnTProvideAˢᴍConn => ref tlsClientDidnTProvideAˢᵇᴍConn;
+private static readonly @string tlsClientDidnTProvideAˢᵇᴍConn = "tls: client didn't provide a certificate"u8;
 
 // processCertsFromClient takes a chain of client certificates either from a
 // certificateMsg message or a certificateMsgTLS13 message and verifies them.
@@ -1099,7 +1099,7 @@ internal static error processCertsFromClientᴍ(ж<Conn> Ꮡc, Certificate certi
         } else {
             Ꮡc.sendAlert(alertHandshakeFailure);
         }
-        return errors.New(tlsClientDidnTProvideAˢ);
+        return errors.New(tlsClientDidnTProvideAˢᴍConn);
     }
 
     if (c.config.ClientAuth >= VerifyClientCertIfGiven && len(certs) > 0) {

@@ -196,8 +196,8 @@ internal static nint Pendingᴍ(ж<ServerConn> Ꮡsc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string persistServerPipeCountˢ => ref persistServerPipeCountˢᵇ;
-private static readonly @string persistServerPipeCountˢᵇ = "persist server pipe count"u8;
+internal static ref readonly @string persistServerPipeCountˢᴍServerConn => ref persistServerPipeCountˢᵇᴍServerConn;
+private static readonly @string persistServerPipeCountˢᵇᴍServerConn = "persist server pipe count"u8;
 
 // Write writes resp in response to req. To close the connection gracefully, set the
 // Response.Close field to true. Write should be considered operational until
@@ -234,7 +234,7 @@ internal static error Writeᴍ(ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<ht
         var c = sc.c;
         if (sc.nread <= sc.nwritten) {
             defer(Ꮡsc.Ꮡmu.Unlock, ref ᒐ);
-            return errors.New(persistServerPipeCountˢ);
+            return errors.New(persistServerPipeCountˢᴍServerConn);
         }
         if (resp.Close) {
             // After signaling a keep-alive close, any pipelined unread

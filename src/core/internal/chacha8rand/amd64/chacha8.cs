@@ -160,11 +160,11 @@ partial struct errUnmarshalChaCha8 {
 } partial class chacha8rand_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidChaCha8Encodingˢ => ref invalidChaCha8Encodingˢᵇ;
-private static readonly @string invalidChaCha8Encodingˢᵇ = "invalid ChaCha8 encoding"u8;
+internal static ref readonly @string invalidChaCha8EncodingˢᴍerrUnmarshalChaCha8 => ref invalidChaCha8EncodingˢᵇᴍerrUnmarshalChaCha8;
+private static readonly @string invalidChaCha8EncodingˢᵇᴍerrUnmarshalChaCha8 = "invalid ChaCha8 encoding"u8;
 
 internal static @string Errorᴍ(ref errUnmarshalChaCha8 _) {
-    return invalidChaCha8Encodingˢ;
+    return invalidChaCha8EncodingˢᴍerrUnmarshalChaCha8;
 }
 
 } partial class chacha8rand_package {

@@ -46,14 +46,14 @@ partial struct clientHandshakeStateTLS13 {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsServerSelectedTls13Inˢ => ref tlsServerSelectedTls13Inˢᵇ;
-private static readonly @string tlsServerSelectedTls13Inˢᵇ = "tls: server selected TLS 1.3 in a renegotiation"u8;
-internal static ref readonly @string echAcceptConfirmationˢ => ref echAcceptConfirmationˢᵇ;
-private static readonly @string echAcceptConfirmationˢᵇ = "ech accept confirmation"u8;
-internal static ref readonly @string tlsUnexpectedEncryptedˢ => ref tlsUnexpectedEncryptedˢᵇ;
-private static readonly @string tlsUnexpectedEncryptedˢᵇ = "tls: unexpected encrypted client hello extension in server hello despite ECH being accepted"u8;
-internal static ref readonly @string tlsUnexpectedServerNameˢ => ref tlsUnexpectedServerNameˢᵇ;
-private static readonly @string tlsUnexpectedServerNameˢᵇ = "tls: unexpected server_name extension in server hello"u8;
+internal static ref readonly @string tlsServerSelectedTls13InˢᴍclientHandshakeStateTLS13 => ref tlsServerSelectedTls13InˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSelectedTls13InˢᵇᴍclientHandshakeStateTLS13 = "tls: server selected TLS 1.3 in a renegotiation"u8;
+internal static ref readonly @string echAcceptConfirmationˢᴍclientHandshakeStateTLS13 => ref echAcceptConfirmationˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string echAcceptConfirmationˢᵇᴍclientHandshakeStateTLS13 = "ech accept confirmation"u8;
+internal static ref readonly @string tlsUnexpectedEncryptedˢᴍclientHandshakeStateTLS13 => ref tlsUnexpectedEncryptedˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsUnexpectedEncryptedˢᵇᴍclientHandshakeStateTLS13 = "tls: unexpected encrypted client hello extension in server hello despite ECH being accepted"u8;
+internal static ref readonly @string tlsUnexpectedServerNameˢᴍclientHandshakeStateTLS13 => ref tlsUnexpectedServerNameˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsUnexpectedServerNameˢᵇᴍclientHandshakeStateTLS13 = "tls: unexpected server_name extension in server hello"u8;
 
 // handshake requires hs.c, hs.hello, hs.serverHello, hs.keyShareKeys, and,
 // optionally, hs.session, hs.earlySecret and hs.binderKey to be set.
@@ -66,7 +66,7 @@ internal static error handshakeᴍ(ж<clientHandshakeStateTLS13> Ꮡhs) {
     // sections 4.1.2 and 4.1.3.
     if (c.handshakes > 0) {
         c.sendAlert(alertProtocolVersion);
-        return errors.New(tlsServerSelectedTls13Inˢ);
+        return errors.New(tlsServerSelectedTls13InˢᴍclientHandshakeStateTLS13);
     }
 
     // Consistency check on the presence of a keyShare and its parameters.
@@ -120,7 +120,7 @@ internal static error handshakeᴍ(ж<clientHandshakeStateTLS13> Ꮡhs) {
             c.sendAlert(alertInternalError);
             return err;
         }
-        var acceptConfirmation = tls13.ExpandLabel(h, prk, echAcceptConfirmationˢ, confTranscript.Sum(default), 8);
+        var acceptConfirmation = tls13.ExpandLabel(h, prk, echAcceptConfirmationˢᴍclientHandshakeStateTLS13, confTranscript.Sum(default), 8);
         if (subtle.ConstantTimeCompare(acceptConfirmation, hs.serverHello.random.slice(len(hs.serverHello.random) - 8)) == 1) {
             hs.hello = hs.echContext.innerHello;
             c.serverName = c.config.ServerName;
@@ -129,12 +129,12 @@ internal static error handshakeᴍ(ж<clientHandshakeStateTLS13> Ꮡhs) {
 
             if (hs.serverHello.encryptedClientHello != nil) {
                 c.sendAlert(alertUnsupportedExtension);
-                return errors.New(tlsUnexpectedEncryptedˢ);
+                return errors.New(tlsUnexpectedEncryptedˢᴍclientHandshakeStateTLS13);
             }
 
             if (hs.hello.serverName == ""u8 && hs.serverHello.serverNameAck) {
                 c.sendAlert(alertUnsupportedExtension);
-                return errors.New(tlsUnexpectedServerNameˢ);
+                return errors.New(tlsUnexpectedServerNameˢᴍclientHandshakeStateTLS13);
             }
         } else {
             hs.echContext.echRejected = true;
@@ -205,22 +205,22 @@ internal static error handshakeᴍ(ж<clientHandshakeStateTLS13> Ꮡhs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsServerSelectedTls13ˢ => ref tlsServerSelectedTls13ˢᵇ;
-private static readonly @string tlsServerSelectedTls13ˢᵇ = "tls: server selected TLS 1.3 using the legacy version field"u8;
-internal static ref readonly @string tlsServerSelectedAnˢ => ref tlsServerSelectedAnˢᵇ;
-private static readonly @string tlsServerSelectedAnˢᵇ = "tls: server selected an invalid version after a HelloRetryRequest"u8;
-internal static ref readonly @string tlsServerSentAnIncorrectˢ => ref tlsServerSentAnIncorrectˢᵇ;
-private static readonly @string tlsServerSentAnIncorrectˢᵇ = "tls: server sent an incorrect legacy version"u8;
-internal static ref readonly @string tlsServerSentAˢ => ref tlsServerSentAˢᵇ;
-private static readonly @string tlsServerSentAˢᵇ = "tls: server sent a ServerHello extension forbidden in TLS 1.3"u8;
-internal static ref readonly @string tlsServerDidNotEchoTheˢ => ref tlsServerDidNotEchoTheˢᵇ;
-private static readonly @string tlsServerDidNotEchoTheˢᵇ = "tls: server did not echo the legacy session ID"u8;
-internal static ref readonly @string tlsServerSentNonZeroˢ => ref tlsServerSentNonZeroˢᵇ;
-private static readonly @string tlsServerSentNonZeroˢᵇ = "tls: server sent non-zero legacy TLS compression method"u8;
-internal static ref readonly @string tlsServerChangedCipherˢ => ref tlsServerChangedCipherˢᵇ;
-private static readonly @string tlsServerChangedCipherˢᵇ = "tls: server changed cipher suite after a HelloRetryRequest"u8;
-internal static ref readonly @string tlsServerChoseAnˢ => ref tlsServerChoseAnˢᵇ;
-private static readonly @string tlsServerChoseAnˢᵇ = "tls: server chose an unconfigured cipher suite"u8;
+internal static ref readonly @string tlsServerSelectedTls13ˢᴍclientHandshakeStateTLS13 => ref tlsServerSelectedTls13ˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSelectedTls13ˢᵇᴍclientHandshakeStateTLS13 = "tls: server selected TLS 1.3 using the legacy version field"u8;
+internal static ref readonly @string tlsServerSelectedAnˢᴍclientHandshakeStateTLS13 => ref tlsServerSelectedAnˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSelectedAnˢᵇᴍclientHandshakeStateTLS13 = "tls: server selected an invalid version after a HelloRetryRequest"u8;
+internal static ref readonly @string tlsServerSentAnIncorrectˢᴍclientHandshakeStateTLS13 => ref tlsServerSentAnIncorrectˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentAnIncorrectˢᵇᴍclientHandshakeStateTLS13 = "tls: server sent an incorrect legacy version"u8;
+internal static ref readonly @string tlsServerSentAˢᴍclientHandshakeStateTLS13 => ref tlsServerSentAˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentAˢᵇᴍclientHandshakeStateTLS13 = "tls: server sent a ServerHello extension forbidden in TLS 1.3"u8;
+internal static ref readonly @string tlsServerDidNotEchoTheˢᴍclientHandshakeStateTLS13 => ref tlsServerDidNotEchoTheˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerDidNotEchoTheˢᵇᴍclientHandshakeStateTLS13 = "tls: server did not echo the legacy session ID"u8;
+internal static ref readonly @string tlsServerSentNonZeroˢᴍclientHandshakeStateTLS13 => ref tlsServerSentNonZeroˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentNonZeroˢᵇᴍclientHandshakeStateTLS13 = "tls: server sent non-zero legacy TLS compression method"u8;
+internal static ref readonly @string tlsServerChangedCipherˢᴍclientHandshakeStateTLS13 => ref tlsServerChangedCipherˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerChangedCipherˢᵇᴍclientHandshakeStateTLS13 = "tls: server changed cipher suite after a HelloRetryRequest"u8;
+internal static ref readonly @string tlsServerChoseAnˢᴍclientHandshakeStateTLS13 => ref tlsServerChoseAnˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerChoseAnˢᵇᴍclientHandshakeStateTLS13 = "tls: server chose an unconfigured cipher suite"u8;
 
 // checkServerHelloOrHRR does validity checks that apply to both ServerHello and
 // HelloRetryRequest messages. It sets hs.suite.
@@ -229,42 +229,42 @@ internal static error checkServerHelloOrHRRᴍ(ref clientHandshakeStateTLS13 hs)
 
     if (hs.serverHello.supportedVersion == 0) {
         c.sendAlert(alertMissingExtension);
-        return errors.New(tlsServerSelectedTls13ˢ);
+        return errors.New(tlsServerSelectedTls13ˢᴍclientHandshakeStateTLS13);
     }
 
     if (hs.serverHello.supportedVersion != VersionTLS13) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerSelectedAnˢ);
+        return errors.New(tlsServerSelectedAnˢᴍclientHandshakeStateTLS13);
     }
 
     if (hs.serverHello.vers != VersionTLS12) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerSentAnIncorrectˢ);
+        return errors.New(tlsServerSentAnIncorrectˢᴍclientHandshakeStateTLS13);
     }
 
     if (hs.serverHello.ocspStapling || hs.serverHello.ticketSupported || hs.serverHello.extendedMasterSecret || hs.serverHello.secureRenegotiationSupported || len(hs.serverHello.secureRenegotiation) != 0 || len(hs.serverHello.alpnProtocol) != 0 || len(hs.serverHello.scts) != 0) {
         c.sendAlert(alertUnsupportedExtension);
-        return errors.New(tlsServerSentAˢ);
+        return errors.New(tlsServerSentAˢᴍclientHandshakeStateTLS13);
     }
 
     if (!bytes.Equal(hs.hello.sessionId, hs.serverHello.sessionId)) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerDidNotEchoTheˢ);
+        return errors.New(tlsServerDidNotEchoTheˢᴍclientHandshakeStateTLS13);
     }
 
     if (hs.serverHello.compressionMethod != compressionNone) {
         c.sendAlert(alertDecodeError);
-        return errors.New(tlsServerSentNonZeroˢ);
+        return errors.New(tlsServerSentNonZeroˢᴍclientHandshakeStateTLS13);
     }
 
     var selectedSuite = mutualCipherSuiteTLS13(hs.hello.cipherSuites, hs.serverHello.cipherSuite);
     if (hs.suite != nil && selectedSuite != hs.suite) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerChangedCipherˢ);
+        return errors.New(tlsServerChangedCipherˢᴍclientHandshakeStateTLS13);
     }
     if (selectedSuite == nil) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerChoseAnˢ);
+        return errors.New(tlsServerChoseAnˢᴍclientHandshakeStateTLS13);
     }
     hs.suite = selectedSuite;
     c.cipherSuite = hs.suite.id;
@@ -287,22 +287,22 @@ internal static error sendDummyChangeCipherSpecᴍ(ref clientHandshakeStateTLS13
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsMalformedEncryptedˢ => ref tlsMalformedEncryptedˢᵇ;
-private static readonly @string tlsMalformedEncryptedˢᵇ = "tls: malformed encrypted client hello extension"u8;
-internal static ref readonly @string hrrEchAcceptConfirmationˢ => ref hrrEchAcceptConfirmationˢᵇ;
-private static readonly @string hrrEchAcceptConfirmationˢᵇ = "hrr ech accept confirmation"u8;
-internal static ref readonly @string tlsUnexpectedEncryptedˢ2 => ref tlsUnexpectedEncryptedˢ2ᵇ;
-private static readonly @string tlsUnexpectedEncryptedˢ2ᵇ = "tls: unexpected encrypted client hello extension in serverHello"u8;
-internal static ref readonly @string tlsServerSentAnˢ => ref tlsServerSentAnˢᵇ;
-private static readonly @string tlsServerSentAnˢᵇ = "tls: server sent an unnecessary HelloRetryRequest message"u8;
-internal static ref readonly @string tlsReceivedMalformedKeyˢ => ref tlsReceivedMalformedKeyˢᵇ;
-private static readonly @string tlsReceivedMalformedKeyˢᵇ = "tls: received malformed key_share extension"u8;
-internal static ref readonly @string tlsServerSelectedˢ3 => ref tlsServerSelectedˢ3ᵇ;
-private static readonly @string tlsServerSelectedˢ3ᵇ = "tls: server selected unsupported group"u8;
-internal static ref readonly @string tlsServerSentAnˢ2 => ref tlsServerSentAnˢ2ᵇ;
-private static readonly @string tlsServerSentAnˢ2ᵇ = "tls: server sent an unnecessary HelloRetryRequest key_share"u8;
-internal static ref readonly @string tlsCurvePreferencesˢ => ref tlsCurvePreferencesˢᵇ;
-private static readonly @string tlsCurvePreferencesˢᵇ = "tls: CurvePreferences includes unsupported curve"u8;
+internal static ref readonly @string tlsMalformedEncryptedˢᴍclientHandshakeStateTLS13 => ref tlsMalformedEncryptedˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsMalformedEncryptedˢᵇᴍclientHandshakeStateTLS13 = "tls: malformed encrypted client hello extension"u8;
+internal static ref readonly @string hrrEchAcceptConfirmationˢᴍclientHandshakeStateTLS13 => ref hrrEchAcceptConfirmationˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string hrrEchAcceptConfirmationˢᵇᴍclientHandshakeStateTLS13 = "hrr ech accept confirmation"u8;
+internal static ref readonly @string tlsUnexpectedEncryptedˢ2ᴍclientHandshakeStateTLS13 => ref tlsUnexpectedEncryptedˢ2ᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsUnexpectedEncryptedˢ2ᵇᴍclientHandshakeStateTLS13 = "tls: unexpected encrypted client hello extension in serverHello"u8;
+internal static ref readonly @string tlsServerSentAnˢᴍclientHandshakeStateTLS13 => ref tlsServerSentAnˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentAnˢᵇᴍclientHandshakeStateTLS13 = "tls: server sent an unnecessary HelloRetryRequest message"u8;
+internal static ref readonly @string tlsReceivedMalformedKeyˢᴍclientHandshakeStateTLS13 => ref tlsReceivedMalformedKeyˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsReceivedMalformedKeyˢᵇᴍclientHandshakeStateTLS13 = "tls: received malformed key_share extension"u8;
+internal static ref readonly @string tlsServerSelectedˢ3ᴍclientHandshakeStateTLS13 => ref tlsServerSelectedˢ3ᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSelectedˢ3ᵇᴍclientHandshakeStateTLS13 = "tls: server selected unsupported group"u8;
+internal static ref readonly @string tlsServerSentAnˢ2ᴍclientHandshakeStateTLS13 => ref tlsServerSentAnˢ2ᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentAnˢ2ᵇᴍclientHandshakeStateTLS13 = "tls: server sent an unnecessary HelloRetryRequest key_share"u8;
+internal static ref readonly @string tlsCurvePreferencesˢᴍclientHandshakeStateTLS13 => ref tlsCurvePreferencesˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsCurvePreferencesˢᵇᴍclientHandshakeStateTLS13 = "tls: CurvePreferences includes unsupported curve"u8;
 
 // processHelloRetryRequest handles the HRR in hs.serverHello, modifies and
 // resends hs.hello, and reads the new ServerHello into hs.serverHello.
@@ -331,7 +331,7 @@ internal static error processHelloRetryRequestᴍ(ref clientHandshakeStateTLS13 
         if (hs.serverHello.encryptedClientHello != nil) {
             if (len(hs.serverHello.encryptedClientHello) != 8) {
                 hs.c.sendAlert(alertDecodeError);
-                return errors.New(tlsMalformedEncryptedˢ);
+                return errors.New(tlsMalformedEncryptedˢᴍclientHandshakeStateTLS13);
             }
 
             var confTranscript = cloneHash(hs.echContext.innerTranscript, hs.suite.hash);
@@ -346,7 +346,7 @@ internal static error processHelloRetryRequestᴍ(ref clientHandshakeStateTLS13 
                 c.sendAlert(alertInternalError);
                 return errΔ2;
             }
-            var acceptConfirmation = tls13.ExpandLabel(h, prk, hrrEchAcceptConfirmationˢ, confTranscript.Sum(default), 8);
+            var acceptConfirmation = tls13.ExpandLabel(h, prk, hrrEchAcceptConfirmationˢᴍclientHandshakeStateTLS13, confTranscript.Sum(default), 8);
             if (subtle.ConstantTimeCompare(acceptConfirmation, hs.serverHello.encryptedClientHello) == 1) {
                 hello = hs.echContext.innerHello;
                 c.serverName = c.config.ServerName;
@@ -361,7 +361,7 @@ internal static error processHelloRetryRequestᴍ(ref clientHandshakeStateTLS13 
     } else if (hs.serverHello.encryptedClientHello != nil) {
         // Unsolicited ECH extension should be rejected
         c.sendAlert(alertUnsupportedExtension);
-        return errors.New(tlsUnexpectedEncryptedˢ2);
+        return errors.New(tlsUnexpectedEncryptedˢ2ᴍclientHandshakeStateTLS13);
     }
 
     // The only HelloRetryRequest extensions we support are key_share and
@@ -369,7 +369,7 @@ internal static error processHelloRetryRequestᴍ(ref clientHandshakeStateTLS13 
     // in any change in the ClientHello.
     if (hs.serverHello.selectedGroup == 0 && hs.serverHello.cookie == nil) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerSentAnˢ);
+        return errors.New(tlsServerSentAnˢᴍclientHandshakeStateTLS13);
     }
 
     if (hs.serverHello.cookie != nil) {
@@ -378,7 +378,7 @@ internal static error processHelloRetryRequestᴍ(ref clientHandshakeStateTLS13 
 
     if (hs.serverHello.serverShare.group != 0) {
         c.sendAlert(alertDecodeError);
-        return errors.New(tlsReceivedMalformedKeyˢ);
+        return errors.New(tlsReceivedMalformedKeyˢᴍclientHandshakeStateTLS13);
     }
 
     // If the server sent a key_share extension selecting a group, ensure it's
@@ -388,16 +388,16 @@ internal static error processHelloRetryRequestᴍ(ref clientHandshakeStateTLS13 
         var curveID = hs.serverHello.selectedGroup; if (curveID != 0) {
             if (!slices.Contains(hello.supportedCurves, curveID)) {
                 c.sendAlert(alertIllegalParameter);
-                return errors.New(tlsServerSelectedˢ3);
+                return errors.New(tlsServerSelectedˢ3ᴍclientHandshakeStateTLS13);
             }
             if (slices.ContainsFunc(hs.hello.keyShares, (keyShare ks) => ks.group == curveID)) {
                 c.sendAlert(alertIllegalParameter);
-                return errors.New(tlsServerSentAnˢ2);
+                return errors.New(tlsServerSentAnˢ2ᴍclientHandshakeStateTLS13);
             }
             var (ke, errΔ4) = keyExchangeForCurveID(curveID);
             if (errΔ4 != nil) {
                 c.sendAlert(alertInternalError);
-                return errors.New(tlsCurvePreferencesˢ);
+                return errors.New(tlsCurvePreferencesˢᴍclientHandshakeStateTLS13);
             }
             (hs.keyShareKeys, hello.keyShares, errΔ4) = ke.keyShares(c.config.rand());
             if (errΔ4 != nil) {
@@ -487,18 +487,18 @@ internal static error processHelloRetryRequestᴍ(ref clientHandshakeStateTLS13 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsServerSentTwoˢ => ref tlsServerSentTwoˢᵇ;
-private static readonly @string tlsServerSentTwoˢᵇ = "tls: server sent two HelloRetryRequest messages"u8;
-internal static ref readonly @string tlsServerSentACookieInAˢ => ref tlsServerSentACookieInAˢᵇ;
-private static readonly @string tlsServerSentACookieInAˢᵇ = "tls: server sent a cookie in a normal ServerHello"u8;
-internal static ref readonly @string tlsMalformedKeyShareˢ => ref tlsMalformedKeyShareˢᵇ;
-private static readonly @string tlsMalformedKeyShareˢᵇ = "tls: malformed key_share extension"u8;
-internal static ref readonly @string tlsServerDidNotSendAKeyˢ => ref tlsServerDidNotSendAKeyˢᵇ;
-private static readonly @string tlsServerDidNotSendAKeyˢᵇ = "tls: server did not send a key share"u8;
-internal static ref readonly @string tlsServerSelectedAnˢ2 => ref tlsServerSelectedAnˢ2ᵇ;
-private static readonly @string tlsServerSelectedAnˢ2ᵇ = "tls: server selected an invalid PSK"u8;
-internal static ref readonly @string tlsServerSelectedAnˢ3 => ref tlsServerSelectedAnˢ3ᵇ;
-private static readonly @string tlsServerSelectedAnˢ3ᵇ = "tls: server selected an invalid PSK and cipher suite pair"u8;
+internal static ref readonly @string tlsServerSentTwoˢᴍclientHandshakeStateTLS13 => ref tlsServerSentTwoˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentTwoˢᵇᴍclientHandshakeStateTLS13 = "tls: server sent two HelloRetryRequest messages"u8;
+internal static ref readonly @string tlsServerSentACookieInAˢᴍclientHandshakeStateTLS13 => ref tlsServerSentACookieInAˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentACookieInAˢᵇᴍclientHandshakeStateTLS13 = "tls: server sent a cookie in a normal ServerHello"u8;
+internal static ref readonly @string tlsMalformedKeyShareˢᴍclientHandshakeStateTLS13 => ref tlsMalformedKeyShareˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsMalformedKeyShareˢᵇᴍclientHandshakeStateTLS13 = "tls: malformed key_share extension"u8;
+internal static ref readonly @string tlsServerDidNotSendAKeyˢᴍclientHandshakeStateTLS13 => ref tlsServerDidNotSendAKeyˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerDidNotSendAKeyˢᵇᴍclientHandshakeStateTLS13 = "tls: server did not send a key share"u8;
+internal static ref readonly @string tlsServerSelectedAnˢ2ᴍclientHandshakeStateTLS13 => ref tlsServerSelectedAnˢ2ᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSelectedAnˢ2ᵇᴍclientHandshakeStateTLS13 = "tls: server selected an invalid PSK"u8;
+internal static ref readonly @string tlsServerSelectedAnˢ3ᴍclientHandshakeStateTLS13 => ref tlsServerSelectedAnˢ3ᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSelectedAnˢ3ᵇᴍclientHandshakeStateTLS13 = "tls: server selected an invalid PSK and cipher suite pair"u8;
 
 internal static error processServerHelloᴍ(ж<clientHandshakeStateTLS13> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
@@ -507,26 +507,26 @@ internal static error processServerHelloᴍ(ж<clientHandshakeStateTLS13> Ꮡhs)
 
     if (bytes.Equal(hs.serverHello.random, helloRetryRequestRandom)) {
         c.sendAlert(alertUnexpectedMessage);
-        return errors.New(tlsServerSentTwoˢ);
+        return errors.New(tlsServerSentTwoˢᴍclientHandshakeStateTLS13);
     }
 
     if (len(hs.serverHello.cookie) != 0) {
         c.sendAlert(alertUnsupportedExtension);
-        return errors.New(tlsServerSentACookieInAˢ);
+        return errors.New(tlsServerSentACookieInAˢᴍclientHandshakeStateTLS13);
     }
 
     if (hs.serverHello.selectedGroup != 0) {
         c.sendAlert(alertDecodeError);
-        return errors.New(tlsMalformedKeyShareˢ);
+        return errors.New(tlsMalformedKeyShareˢᴍclientHandshakeStateTLS13);
     }
 
     if (hs.serverHello.serverShare.group == 0) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerDidNotSendAKeyˢ);
+        return errors.New(tlsServerDidNotSendAKeyˢᴍclientHandshakeStateTLS13);
     }
     if (!slices.ContainsFunc(hs.hello.keyShares, (keyShare ks) => ks.group == Ꮡhs.Value.serverHello.serverShare.group)) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerSelectedˢ3);
+        return errors.New(tlsServerSelectedˢ3ᴍclientHandshakeStateTLS13);
     }
 
     if (!hs.serverHello.selectedIdentityPresent) {
@@ -535,7 +535,7 @@ internal static error processServerHelloᴍ(ж<clientHandshakeStateTLS13> Ꮡhs)
 
     if ((nint)hs.serverHello.selectedIdentity >= len(hs.hello.pskIdentities)) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerSelectedAnˢ2);
+        return errors.New(tlsServerSelectedAnˢ2ᴍclientHandshakeStateTLS13);
     }
 
     if (len(hs.hello.pskIdentities) != 1 || hs.session == nil) {
@@ -547,7 +547,7 @@ internal static error processServerHelloᴍ(ж<clientHandshakeStateTLS13> Ꮡhs)
     }
     if (pskSuite.hash != hs.suite.hash) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsServerSelectedAnˢ3);
+        return errors.New(tlsServerSelectedAnˢ3ᴍclientHandshakeStateTLS13);
     }
 
     hs.usingPSK = true;
@@ -560,8 +560,8 @@ internal static error processServerHelloᴍ(ж<clientHandshakeStateTLS13> Ꮡhs)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInvalidServerKeyShareˢ => ref tlsInvalidServerKeyShareˢᵇ;
-private static readonly @string tlsInvalidServerKeyShareˢᵇ = "tls: invalid server key share"u8;
+internal static ref readonly @string tlsInvalidServerKeyShareˢᴍclientHandshakeStateTLS13 => ref tlsInvalidServerKeyShareˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsInvalidServerKeyShareˢᵇᴍclientHandshakeStateTLS13 = "tls: invalid server key share"u8;
 
 internal static error establishHandshakeKeysᴍ(ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
@@ -574,7 +574,7 @@ internal static error establishHandshakeKeysᴍ(ref clientHandshakeStateTLS13 hs
     (var sharedKey, err) = ke.clientSharedSecret(hs.keyShareKeys, hs.serverHello.serverShare.data);
     if (err != nil) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsInvalidServerKeyShareˢ);
+        return errors.New(tlsInvalidServerKeyShareˢᴍclientHandshakeStateTLS13);
     }
     c.curveID = hs.serverHello.serverShare.group;
 
@@ -617,18 +617,18 @@ internal static error establishHandshakeKeysᴍ(ref clientHandshakeStateTLS13 hs
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsServerDidNotSendAQuicˢ => ref tlsServerDidNotSendAQuicˢᵇ;
-private static readonly @string tlsServerDidNotSendAQuicˢᵇ = "tls: server did not send a quic_transport_parameters extension"u8;
-internal static ref readonly @string tlsServerSentAnˢ3 => ref tlsServerSentAnˢ3ᵇ;
-private static readonly @string tlsServerSentAnˢ3ᵇ = "tls: server sent an unexpected quic_transport_parameters extension"u8;
-internal static ref readonly @string tlsServerSentAnˢ4 => ref tlsServerSentAnˢ4ᵇ;
-private static readonly @string tlsServerSentAnˢ4ᵇ = "tls: server sent an unexpected early_data extension"u8;
-internal static ref readonly @string tlsServerAccepted0Rttˢ => ref tlsServerAccepted0Rttˢᵇ;
-private static readonly @string tlsServerAccepted0Rttˢᵇ = "tls: server accepted 0-RTT with the wrong cipher suite"u8;
-internal static ref readonly @string tlsServerAccepted0Rttˢ2 => ref tlsServerAccepted0Rttˢ2ᵇ;
-private static readonly @string tlsServerAccepted0Rttˢ2ᵇ = "tls: server accepted 0-RTT with the wrong ALPN"u8;
-internal static ref readonly @string tlsServerSentEncryptedˢ => ref tlsServerSentEncryptedˢᵇ;
-private static readonly @string tlsServerSentEncryptedˢᵇ = "tls: server sent encrypted client hello retry configs after accepting encrypted client hello"u8;
+internal static ref readonly @string tlsServerDidNotSendAQuicˢᴍclientHandshakeStateTLS13 => ref tlsServerDidNotSendAQuicˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerDidNotSendAQuicˢᵇᴍclientHandshakeStateTLS13 = "tls: server did not send a quic_transport_parameters extension"u8;
+internal static ref readonly @string tlsServerSentAnˢ3ᴍclientHandshakeStateTLS13 => ref tlsServerSentAnˢ3ᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentAnˢ3ᵇᴍclientHandshakeStateTLS13 = "tls: server sent an unexpected quic_transport_parameters extension"u8;
+internal static ref readonly @string tlsServerSentAnˢ4ᴍclientHandshakeStateTLS13 => ref tlsServerSentAnˢ4ᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentAnˢ4ᵇᴍclientHandshakeStateTLS13 = "tls: server sent an unexpected early_data extension"u8;
+internal static ref readonly @string tlsServerAccepted0RttˢᴍclientHandshakeStateTLS13 => ref tlsServerAccepted0RttˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerAccepted0RttˢᵇᴍclientHandshakeStateTLS13 = "tls: server accepted 0-RTT with the wrong cipher suite"u8;
+internal static ref readonly @string tlsServerAccepted0Rttˢ2ᴍclientHandshakeStateTLS13 => ref tlsServerAccepted0Rttˢ2ᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerAccepted0Rttˢ2ᵇᴍclientHandshakeStateTLS13 = "tls: server accepted 0-RTT with the wrong ALPN"u8;
+internal static ref readonly @string tlsServerSentEncryptedˢᴍclientHandshakeStateTLS13 => ref tlsServerSentEncryptedˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsServerSentEncryptedˢᵇᴍclientHandshakeStateTLS13 = "tls: server sent encrypted client hello retry configs after accepting encrypted client hello"u8;
 
 internal static error readServerParametersᴍ(ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
@@ -658,19 +658,19 @@ internal static error readServerParametersᴍ(ref clientHandshakeStateTLS13 hs) 
         if (encryptedExtensions.quicTransportParameters == nil) {
             // RFC 9001 Section 8.2.
             c.sendAlert(alertMissingExtension);
-            return errors.New(tlsServerDidNotSendAQuicˢ);
+            return errors.New(tlsServerDidNotSendAQuicˢᴍclientHandshakeStateTLS13);
         }
         c.quicSetTransportParameters(encryptedExtensions.quicTransportParameters);
     } else {
         if (encryptedExtensions.quicTransportParameters != nil) {
             c.sendAlert(alertUnsupportedExtension);
-            return errors.New(tlsServerSentAnˢ3);
+            return errors.New(tlsServerSentAnˢ3ᴍclientHandshakeStateTLS13);
         }
     }
 
     if (!hs.hello.earlyData && encryptedExtensions.earlyData) {
         c.sendAlert(alertUnsupportedExtension);
-        return errors.New(tlsServerSentAnˢ4);
+        return errors.New(tlsServerSentAnˢ4ᴍclientHandshakeStateTLS13);
     }
     if (hs.hello.earlyData && !encryptedExtensions.earlyData) {
         c.quicRejectedEarlyData();
@@ -678,11 +678,11 @@ internal static error readServerParametersᴍ(ref clientHandshakeStateTLS13 hs) 
     if (encryptedExtensions.earlyData) {
         if (hs.session.cipherSuite != c.cipherSuite) {
             c.sendAlert(alertHandshakeFailure);
-            return errors.New(tlsServerAccepted0Rttˢ);
+            return errors.New(tlsServerAccepted0RttˢᴍclientHandshakeStateTLS13);
         }
         if (hs.session.alpnProtocol != c.clientProtocol) {
             c.sendAlert(alertHandshakeFailure);
-            return errors.New(tlsServerAccepted0Rttˢ2);
+            return errors.New(tlsServerAccepted0Rttˢ2ᴍclientHandshakeStateTLS13);
         }
     }
     if (hs.echContext != nil) {
@@ -690,7 +690,7 @@ internal static error readServerParametersᴍ(ref clientHandshakeStateTLS13 hs) 
             hs.echContext.retryConfigs = encryptedExtensions.echRetryConfigs;
         } else if (encryptedExtensions.echRetryConfigs != nil) {
             c.sendAlert(alertUnsupportedExtension);
-            return errors.New(tlsServerSentEncryptedˢ);
+            return errors.New(tlsServerSentEncryptedˢᴍclientHandshakeStateTLS13);
         }
     }
 
@@ -698,10 +698,10 @@ internal static error readServerParametersᴍ(ref clientHandshakeStateTLS13 hs) 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsReceivedEmptyˢ => ref tlsReceivedEmptyˢᵇ;
-private static readonly @string tlsReceivedEmptyˢᵇ = "tls: received empty certificates message"u8;
-internal static ref readonly @string tlsCertificateUsedWithˢ => ref tlsCertificateUsedWithˢᵇ;
-private static readonly @string tlsCertificateUsedWithˢᵇ = "tls: certificate used with invalid signature algorithm"u8;
+internal static ref readonly @string tlsReceivedEmptyˢᴍclientHandshakeStateTLS13 => ref tlsReceivedEmptyˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsReceivedEmptyˢᵇᴍclientHandshakeStateTLS13 = "tls: received empty certificates message"u8;
+internal static ref readonly @string tlsCertificateUsedWithˢᴍclientHandshakeStateTLS13 => ref tlsCertificateUsedWithˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsCertificateUsedWithˢᵇᴍclientHandshakeStateTLS13 = "tls: certificate used with invalid signature algorithm"u8;
 
 internal static error readServerCertificateᴍ(ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
@@ -743,7 +743,7 @@ internal static error readServerCertificateᴍ(ref clientHandshakeStateTLS13 hs)
     }
     if (len(certMsg.certificate.ΔCertificate) == 0) {
         c.sendAlert(alertDecodeError);
-        return errors.New(tlsReceivedEmptyˢ);
+        return errors.New(tlsReceivedEmptyˢᴍclientHandshakeStateTLS13);
     }
 
     c.scts = certMsg.certificate.SignedCertificateTimestamps;
@@ -772,7 +772,7 @@ internal static error readServerCertificateᴍ(ref clientHandshakeStateTLS13 hs)
     // include PKCS#1 v1.5 and SHA-1 if the ClientHello also supported TLS 1.2.
     if (!isSupportedSignatureAlgorithm(certVerify.signatureAlgorithm, supportedSignatureAlgorithms(c.vers)) || !isSupportedSignatureAlgorithm(certVerify.signatureAlgorithm, signatureSchemesForPublicKey(c.vers, c.peerCertificates[0].PublicKey))) {
         c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsCertificateUsedWithˢ);
+        return errors.New(tlsCertificateUsedWithˢᴍclientHandshakeStateTLS13);
     }
     (var sigType, var sigHash, err) = typeAndHashFromSignatureScheme(certVerify.signatureAlgorithm);
     if (err != nil) {
@@ -797,8 +797,8 @@ internal static error readServerCertificateᴍ(ref clientHandshakeStateTLS13 hs)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInvalidServerFinishedˢ => ref tlsInvalidServerFinishedˢᵇ;
-private static readonly @string tlsInvalidServerFinishedˢᵇ = "tls: invalid server finished hash"u8;
+internal static ref readonly @string tlsInvalidServerFinishedˢᴍclientHandshakeStateTLS13 => ref tlsInvalidServerFinishedˢᵇᴍclientHandshakeStateTLS13;
+private static readonly @string tlsInvalidServerFinishedˢᵇᴍclientHandshakeStateTLS13 = "tls: invalid server finished hash"u8;
 
 internal static error readServerFinishedᴍ(ref clientHandshakeStateTLS13 hs) {
     var c = hs.c;
@@ -820,7 +820,7 @@ internal static error readServerFinishedᴍ(ref clientHandshakeStateTLS13 hs) {
     var expectedMAC = hs.suite.finishedHash(c.@in.trafficSecret, hs.transcript);
     if (!hmac.Equal(expectedMAC, finished.verifyData)) {
         c.sendAlert(alertDecryptError);
-        return errors.New(tlsInvalidServerFinishedˢ);
+        return errors.New(tlsInvalidServerFinishedˢᴍclientHandshakeStateTLS13);
     }
 
     var errΔ1 = transcriptMsg(new finishedMsgжhandshakeMessage(finished), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ1 != nil) {
@@ -953,16 +953,16 @@ internal static error sendClientFinishedᴍ(ref clientHandshakeStateTLS13 hs) {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsReceivedNewSessionˢ => ref tlsReceivedNewSessionˢᵇ;
-private static readonly @string tlsReceivedNewSessionˢᵇ = "tls: received new session ticket from a client"u8;
-internal static ref readonly @string tlsReceivedASessionˢ => ref tlsReceivedASessionˢᵇ;
-private static readonly @string tlsReceivedASessionˢᵇ = "tls: received a session ticket with invalid lifetime"u8;
-internal static ref readonly @string tlsReceivedASessionˢ2 => ref tlsReceivedASessionˢ2ᵇ;
-private static readonly @string tlsReceivedASessionˢ2ᵇ = "tls: received a session ticket with empty opaque ticket label"u8;
-internal static ref readonly @string tlsInvalidEarlyDataForˢ => ref tlsInvalidEarlyDataForˢᵇ;
-private static readonly @string tlsInvalidEarlyDataForˢᵇ = "tls: invalid early data for QUIC connection"u8;
-internal static ref readonly @string resumptionˢ => ref resumptionˢᵇ;
-private static readonly @string resumptionˢᵇ = "resumption"u8;
+internal static ref readonly @string tlsReceivedNewSessionˢᴍConn => ref tlsReceivedNewSessionˢᵇᴍConn;
+private static readonly @string tlsReceivedNewSessionˢᵇᴍConn = "tls: received new session ticket from a client"u8;
+internal static ref readonly @string tlsReceivedASessionˢᴍConn => ref tlsReceivedASessionˢᵇᴍConn;
+private static readonly @string tlsReceivedASessionˢᵇᴍConn = "tls: received a session ticket with invalid lifetime"u8;
+internal static ref readonly @string tlsReceivedASessionˢ2ᴍConn => ref tlsReceivedASessionˢ2ᵇᴍConn;
+private static readonly @string tlsReceivedASessionˢ2ᵇᴍConn = "tls: received a session ticket with empty opaque ticket label"u8;
+internal static ref readonly @string tlsInvalidEarlyDataForˢᴍConn => ref tlsInvalidEarlyDataForˢᵇᴍConn;
+private static readonly @string tlsInvalidEarlyDataForˢᵇᴍConn = "tls: invalid early data for QUIC connection"u8;
+internal static ref readonly @string resumptionˢᴍConn => ref resumptionˢᵇᴍConn;
+private static readonly @string resumptionˢᵇᴍConn = "resumption"u8;
 
 internal static error handleNewSessionTicketᴍ(ж<Conn> Ꮡc, ж<newSessionTicketMsgTLS13> Ꮡmsg) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -970,7 +970,7 @@ internal static error handleNewSessionTicketᴍ(ж<Conn> Ꮡc, ж<newSessionTick
 
     if (!c.isClient) {
         Ꮡc.sendAlert(alertUnexpectedMessage);
-        return errors.New(tlsReceivedNewSessionˢ);
+        return errors.New(tlsReceivedNewSessionˢᴍConn);
     }
 
     if (c.config.SessionTicketsDisabled || c.config.ClientSessionCache == nil) {
@@ -984,18 +984,18 @@ internal static error handleNewSessionTicketᴍ(ж<Conn> Ꮡc, ж<newSessionTick
     var lifetime = ((time.Duration)(int64)msg.lifetime) * time.Second;
     if (lifetime > maxSessionTicketLifetime) {
         Ꮡc.sendAlert(alertIllegalParameter);
-        return errors.New(tlsReceivedASessionˢ);
+        return errors.New(tlsReceivedASessionˢᴍConn);
     }
 
     if (len(msg.label) == 0) {
         Ꮡc.sendAlert(alertDecodeError);
-        return errors.New(tlsReceivedASessionˢ2);
+        return errors.New(tlsReceivedASessionˢ2ᴍConn);
     }
 
     // RFC 9001, Section 4.6.1
     if (c.quic != nil && msg.maxEarlyData != 0 && msg.maxEarlyData != 0xffffffffU) {
         Ꮡc.sendAlert(alertIllegalParameter);
-        return errors.New(tlsInvalidEarlyDataForˢ);
+        return errors.New(tlsInvalidEarlyDataForˢᴍConn);
     }
 
     var cipherSuite = cipherSuiteTLS13ByID(c.cipherSuite);
@@ -1003,7 +1003,7 @@ internal static error handleNewSessionTicketᴍ(ж<Conn> Ꮡc, ж<newSessionTick
         return Ꮡc.sendAlert(alertInternalError);
     }
 
-    var psk = tls13.ExpandLabel<hash.Hash>(() => cipherSuite.hash.New(), c.resumptionSecret, resumptionˢ,
+    var psk = tls13.ExpandLabel<hash.Hash>(() => cipherSuite.hash.New(), c.resumptionSecret, resumptionˢᴍConn,
         msg.nonce, cipherSuite.hash.Size());
 
     var session = c.sessionState();

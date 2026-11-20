@@ -178,8 +178,8 @@ public static (Trace, error) Parse(io.Reader r, version.Version vers) {
 } partial class tracev1_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noEvFrequencyEventˢ => ref noEvFrequencyEventˢᵇ;
-private static readonly @string noEvFrequencyEventˢᵇ = "no EvFrequency event"u8;
+internal static ref readonly @string noEvFrequencyEventˢᴍparser => ref noEvFrequencyEventˢᵇᴍparser;
+private static readonly @string noEvFrequencyEventˢᵇᴍparser = "no EvFrequency event"u8;
 
 // parse parses, post-processes and verifies the trace.
 internal static (Trace, error) parseᴍ(ж<parser> Ꮡp) {
@@ -224,7 +224,7 @@ internal static (Trace, error) parseᴍ(ж<parser> Ꮡp) {
         }
 
         if (p.ticksPerSec == 0) {
-            return (new Trace(), errors.New(noEvFrequencyEventˢ));
+            return (new Trace(), errors.New(noEvFrequencyEventˢᴍparser));
         }
 
         if (events.Len() > 0) {
@@ -671,10 +671,10 @@ internal static (slice<byte>, error) readFullᴍ(ref parser p, nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringHasInvalidId0ˢ => ref stringHasInvalidId0ˢᵇ;
-private static readonly @string stringHasInvalidId0ˢᵇ = "string has invalid id 0"u8;
-internal static ref readonly @string stringHasInvalidLength0ˢ => ref stringHasInvalidLength0ˢᵇ;
-private static readonly @string stringHasInvalidLength0ˢᵇ = "string has invalid length 0"u8;
+internal static ref readonly @string stringHasInvalidId0ˢᴍparser => ref stringHasInvalidId0ˢᵇᴍparser;
+private static readonly @string stringHasInvalidId0ˢᵇᴍparser = "string has invalid id 0"u8;
+internal static ref readonly @string stringHasInvalidLength0ˢᴍparser => ref stringHasInvalidLength0ˢᵇᴍparser;
+private static readonly @string stringHasInvalidLength0ˢᵇᴍparser = "string has invalid length 0"u8;
 
 // readRawEvent reads a raw event into ev. The slices in ev are only valid until
 // the next call to readRawEvent, even when storing to a different location.
@@ -730,7 +730,7 @@ internal static error readRawEventᴍ(ref parser p, nuint flags, ж<rawEvent> �
                 return err;
             }
             if (id == 0) {
-                return errors.New(stringHasInvalidId0ˢ);
+                return errors.New(stringHasInvalidId0ˢᴍparser);
             }
             if (p.strings[id] != "") {
                 return fmt.Errorf("string has duplicate id %d"u8, id);
@@ -741,7 +741,7 @@ internal static error readRawEventᴍ(ref parser p, nuint flags, ж<rawEvent> �
                 return err;
             }
             if (ln == 0) {
-                return errors.New(stringHasInvalidLength0ˢ);
+                return errors.New(stringHasInvalidLength0ˢᴍparser);
             }
             if (ln > 1000000) {
                 return fmt.Errorf("string has too large length %d"u8, ln);

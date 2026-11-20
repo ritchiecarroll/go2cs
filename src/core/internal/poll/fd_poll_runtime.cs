@@ -83,12 +83,12 @@ internal static error prepareWriteᴍ(ref pollDesc pd, bool isFile) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string waitingForUnsupportedˢ => ref waitingForUnsupportedˢᵇ;
-private static readonly @string waitingForUnsupportedˢᵇ = "waiting for unsupported file type"u8;
+internal static ref readonly @string waitingForUnsupportedˢᴍpollDesc => ref waitingForUnsupportedˢᵇᴍpollDesc;
+private static readonly @string waitingForUnsupportedˢᵇᴍpollDesc = "waiting for unsupported file type"u8;
 
 internal static error waitᴍ(ref pollDesc pd, nint mode, bool isFile) {
     if (pd.runtimeCtx == 0) {
-        return errors.New(waitingForUnsupportedˢ);
+        return errors.New(waitingForUnsupportedˢᴍpollDesc);
     }
     nint res = runtime_pollWait(pd.runtimeCtx, mode);
     return convertErr(res, isFile);

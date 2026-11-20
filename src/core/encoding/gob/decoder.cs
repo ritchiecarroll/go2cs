@@ -61,8 +61,8 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 } partial class gob_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gobDuplicateTypeReceivedˢ => ref gobDuplicateTypeReceivedˢᵇ;
-private static readonly @string gobDuplicateTypeReceivedˢᵇ = "gob: duplicate type received"u8;
+internal static ref readonly @string gobDuplicateTypeReceivedˢᴍDecoder => ref gobDuplicateTypeReceivedˢᵇᴍDecoder;
+private static readonly @string gobDuplicateTypeReceivedˢᵇᴍDecoder = "gob: duplicate type received"u8;
 
 // recvType loads the definition of a type.
 internal static void recvTypeᴍ(ж<Decoder> Ꮡdec, typeId id) {
@@ -70,7 +70,7 @@ internal static void recvTypeᴍ(ж<Decoder> Ꮡdec, typeId id) {
 
     // Have we already seen this type? That's an error
     if (id < firstUserId || dec.wireType[id] != nil) {
-        dec.err = errors.New(gobDuplicateTypeReceivedˢ);
+        dec.err = errors.New(gobDuplicateTypeReceivedˢᴍDecoder);
         return;
     }
 
@@ -156,8 +156,8 @@ internal static uint64 nextUintᴍ(ж<Decoder> Ꮡdec) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string extraDataInBufferˢ => ref extraDataInBufferˢᵇ;
-private static readonly @string extraDataInBufferˢᵇ = "extra data in buffer"u8;
+internal static ref readonly @string extraDataInBufferˢᴍDecoder => ref extraDataInBufferˢᵇᴍDecoder;
+private static readonly @string extraDataInBufferˢᵇᴍDecoder = "extra data in buffer"u8;
 
 // decodeTypeSequence parses:
 // TypeSequence
@@ -202,7 +202,7 @@ internal static typeId decodeTypeSequenceᴍ(ж<Decoder> Ꮡdec, bool isInterfac
         // will be absorbed by recvMessage.)
         if (dec.buf.Len() > 0) {
             if (!isInterface) {
-                dec.err = errors.New(extraDataInBufferˢ);
+                dec.err = errors.New(extraDataInBufferˢᴍDecoder);
                 break;
             }
             Ꮡdec.nextUint();
@@ -213,8 +213,8 @@ internal static typeId decodeTypeSequenceᴍ(ж<Decoder> Ꮡdec, bool isInterfac
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gobAttemptToDecodeIntoAˢ => ref gobAttemptToDecodeIntoAˢᵇ;
-private static readonly @string gobAttemptToDecodeIntoAˢᵇ = "gob: attempt to decode into a non-pointer"u8;
+internal static ref readonly @string gobAttemptToDecodeIntoAˢᴍDecoder => ref gobAttemptToDecodeIntoAˢᵇᴍDecoder;
+private static readonly @string gobAttemptToDecodeIntoAˢᵇᴍDecoder = "gob: attempt to decode into a non-pointer"u8;
 
 // Decode reads the next value from the input stream and stores
 // it in the data represented by the empty interface value.
@@ -233,15 +233,15 @@ internal static error Decodeᴍ(ж<Decoder> Ꮡdec, any e) {
     // If e represents a value as opposed to a pointer, the answer won't
     // get back to the caller. Make sure it's a pointer.
     if (value.Kind() != reflect.Pointer) {
-        dec.err = errors.New(gobAttemptToDecodeIntoAˢ);
+        dec.err = errors.New(gobAttemptToDecodeIntoAˢᴍDecoder);
         return dec.err;
     }
     return Ꮡdec.DecodeValue(value);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gobDecodeValueOfˢ => ref gobDecodeValueOfˢᵇ;
-private static readonly @string gobDecodeValueOfˢᵇ = "gob: DecodeValue of unassignable value"u8;
+internal static ref readonly @string gobDecodeValueOfˢᴍDecoder => ref gobDecodeValueOfˢᵇᴍDecoder;
+private static readonly @string gobDecodeValueOfˢᵇᴍDecoder = "gob: DecodeValue of unassignable value"u8;
 
 // DecodeValue reads the next value from the input stream.
 // If v is the zero reflect.Value (v.Kind() == Invalid), DecodeValue discards the value.
@@ -259,7 +259,7 @@ internal static error DecodeValueᴍ(ж<Decoder> Ꮡdec, reflect.Value v) {
             if (v.Kind() == reflect.Pointer && !v.IsNil()) {
                 // That's okay, we'll store through the pointer.
             } else if (!v.CanSet()) {
-                return errors.New(gobDecodeValueOfˢ);
+                return errors.New(gobDecodeValueOfˢᴍDecoder);
             }
         }
         // Make sure we're single-threaded through here.

@@ -546,11 +546,11 @@ internal static NodeType Typeᴍ(ref NilNode n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "nil"u8;
+internal static ref readonly @string nilˢᴍNilNode => ref nilˢᵇᴍNilNode;
+private static readonly @string nilˢᵇᴍNilNode = "nil"u8;
 
 internal static @string Stringᴍ(ref NilNode n) {
-    return nilˢ;
+    return nilˢᴍNilNode;
 }
 
 internal static void writeToᴍ(ref NilNode n, ж<strings.Builder> sb) {
@@ -686,16 +686,16 @@ internal static ж<BoolNode> newBoolᴍ(ж<Tree> Ꮡt, Pos pos, bool @true) {
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string trueˢ => ref trueˢᵇ;
-private static readonly @string trueˢᵇ = "true"u8;
-internal static ref readonly @string falseˢ => ref falseˢᵇ;
-private static readonly @string falseˢᵇ = "false"u8;
+internal static ref readonly @string trueˢᴍBoolNode => ref trueˢᵇᴍBoolNode;
+private static readonly @string trueˢᵇᴍBoolNode = "true"u8;
+internal static ref readonly @string falseˢᴍBoolNode => ref falseˢᵇᴍBoolNode;
+private static readonly @string falseˢᵇᴍBoolNode = "false"u8;
 
 internal static @string Stringᴍ(ref BoolNode b) {
     if (b.True) {
-        return trueˢ;
+        return trueˢᴍBoolNode;
     }
-    return falseˢ;
+    return falseˢᴍBoolNode;
 }
 
 internal static void writeToᴍ(ref BoolNode b, ж<strings.Builder> sb) {
@@ -733,8 +733,8 @@ partial struct NumberNode {
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string eEpPˢ => ref eEpPˢᵇ;
-private static readonly @string eEpPˢᵇ = ".eEpP"u8;
+internal static ref readonly @string eEpPˢᴍTree => ref eEpPˢᵇᴍTree;
+private static readonly @string eEpPˢᵇᴍTree = ".eEpP"u8;
 
 internal static (ж<NumberNode>, error) newNumberᴍ(ж<Tree> Ꮡt, Pos pos, @string text, itemType typ) {
     var n = Ꮡ(new NumberNode(tr: Ꮡt, NodeType: NodeNumber, Pos: pos, Text: text));
@@ -801,7 +801,7 @@ internal static (ж<NumberNode>, error) newNumberᴍ(ж<Tree> Ꮡt, Pos pos, @st
         if (errΔ6 == nil) {
             // If we parsed it as a float but it looks like an integer,
             // it's a huge number too large to fit in an int. Reject it.
-            if (!strings.ContainsAny(text, eEpPˢ)) {
+            if (!strings.ContainsAny(text, eEpPˢᴍTree)) {
                 return (default, fmt.Errorf("integer overflow: %q"u8, text));
             }
             n.IsFloat = true;
@@ -914,11 +914,11 @@ internal static ж<endNode> newEndᴍ(ж<Tree> Ꮡt, Pos pos) {
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string endˢ => ref endˢᵇ;
-private static readonly @string endˢᵇ = "{{end}}"u8;
+internal static ref readonly @string endˢᴍendNode => ref endˢᵇᴍendNode;
+private static readonly @string endˢᵇᴍendNode = "{{end}}"u8;
 
 internal static @string Stringᴍ(ref endNode e) {
-    return endˢ;
+    return endˢᴍendNode;
 }
 
 internal static void writeToᴍ(ref endNode e, ж<strings.Builder> sb) {
@@ -956,11 +956,11 @@ internal static NodeType Typeᴍ(ref elseNode e) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string elseˢ => ref elseˢᵇ;
-private static readonly @string elseˢᵇ = "{{else}}"u8;
+internal static ref readonly @string elseˢᴍelseNode => ref elseˢᵇᴍelseNode;
+private static readonly @string elseˢᵇᴍelseNode = "{{else}}"u8;
 
 internal static @string Stringᴍ(ref elseNode e) {
-    return elseˢ;
+    return elseˢᴍelseNode;
 }
 
 internal static void writeToᴍ(ref elseNode e, ж<strings.Builder> sb) {
@@ -997,14 +997,14 @@ internal static @string Stringᴍ(ref BranchNode b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
-private static readonly @string rangeˢᵇ = "range"u8;
-internal static ref readonly @string withˢ => ref withˢᵇ;
-private static readonly @string withˢᵇ = "with"u8;
-internal static ref readonly @string elseˢ => ref elseˢᵇ;
-private static readonly @string elseˢᵇ = "{{else}}"u8;
-internal static ref readonly @string endˢ => ref endˢᵇ;
-private static readonly @string endˢᵇ = "{{end}}"u8;
+internal static ref readonly @string rangeˢᴍBranchNode => ref rangeˢᵇᴍBranchNode;
+private static readonly @string rangeˢᵇᴍBranchNode = "range"u8;
+internal static ref readonly @string withˢᴍBranchNode => ref withˢᵇᴍBranchNode;
+private static readonly @string withˢᵇᴍBranchNode = "with"u8;
+internal static ref readonly @string elseˢᴍBranchNode => ref elseˢᵇᴍBranchNode;
+private static readonly @string elseˢᵇᴍBranchNode = "{{else}}"u8;
+internal static ref readonly @string endˢᴍBranchNode => ref endˢᵇᴍBranchNode;
+private static readonly @string endˢᵇᴍBranchNode = "{{end}}"u8;
 
 internal static void writeToᴍ(ref BranchNode b, ж<strings.Builder> sb) {
     @string name = ""u8;
@@ -1014,11 +1014,11 @@ internal static void writeToᴍ(ref BranchNode b, ж<strings.Builder> sb) {
         break;
     }
     case var ᴛ when ᴛ == NodeRange: {
-        name = rangeˢ;
+        name = rangeˢᴍBranchNode;
         break;
     }
     case var ᴛ when ᴛ == NodeWith: {
-        name = withˢ;
+        name = withˢᴍBranchNode;
         break;
     }
     default: {
@@ -1032,10 +1032,10 @@ internal static void writeToᴍ(ref BranchNode b, ж<strings.Builder> sb) {
     sb.WriteString("}}");
     b.List.writeTo(sb);
     if (b.ElseList != nil) {
-        sb.WriteString(elseˢ);
+        sb.WriteString(elseˢᴍBranchNode);
         b.ElseList.writeTo(sb);
     }
-    sb.WriteString(endˢ);
+    sb.WriteString(endˢᴍBranchNode);
 }
 
 internal static ж<Tree> treeᴍ(ref BranchNode b) {
@@ -1098,12 +1098,12 @@ internal static ж<BreakNode> newBreakᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
 
 internal static Node Copyᴍ(ref BreakNode b) { return new BreakNodeжNode(b.tr.newBreak(b.Pos, b.Line)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string breakˢ => ref breakˢᵇ;
-private static readonly @string breakˢᵇ = "{{break}}"u8;
+internal static ref readonly @string breakˢᴍBreakNode => ref breakˢᵇᴍBreakNode;
+private static readonly @string breakˢᵇᴍBreakNode = "{{break}}"u8;
 
-internal static @string Stringᴍ(ref BreakNode b) { return breakˢ; }
+internal static @string Stringᴍ(ref BreakNode b) { return breakˢᴍBreakNode; }
 internal static ж<Tree> treeᴍ(ref BreakNode b) { return b.tr; }
-internal static void writeToᴍ(ref BreakNode b, ж<strings.Builder> sb) { sb.WriteString(breakˢ); }
+internal static void writeToᴍ(ref BreakNode b, ж<strings.Builder> sb) { sb.WriteString(breakˢᴍBreakNode); }
 
 } partial class parse_package {
 
@@ -1125,12 +1125,12 @@ internal static ж<ContinueNode> newContinueᴍ(ж<Tree> Ꮡt, Pos pos, nint lin
 
 internal static Node Copyᴍ(ref ContinueNode c) { return new ContinueNodeжNode(c.tr.newContinue(c.Pos, c.Line)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string continueˢ => ref continueˢᵇ;
-private static readonly @string continueˢᵇ = "{{continue}}"u8;
+internal static ref readonly @string continueˢᴍContinueNode => ref continueˢᵇᴍContinueNode;
+private static readonly @string continueˢᵇᴍContinueNode = "{{continue}}"u8;
 
-internal static @string Stringᴍ(ref ContinueNode c) { return continueˢ; }
+internal static @string Stringᴍ(ref ContinueNode c) { return continueˢᴍContinueNode; }
 internal static ж<Tree> treeᴍ(ref ContinueNode c) { return c.tr; }
-internal static void writeToᴍ(ref ContinueNode c, ж<strings.Builder> sb) { sb.WriteString(continueˢ); }
+internal static void writeToᴍ(ref ContinueNode c, ж<strings.Builder> sb) { sb.WriteString(continueˢᴍContinueNode); }
 
 } partial class parse_package {
 
@@ -1197,11 +1197,11 @@ internal static @string Stringᴍ(ref TemplateNode t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string templateˢ => ref templateˢᵇ;
-private static readonly @string templateˢᵇ = "{{template "u8;
+internal static ref readonly @string templateˢᴍTemplateNode => ref templateˢᵇᴍTemplateNode;
+private static readonly @string templateˢᵇᴍTemplateNode = "{{template "u8;
 
 internal static void writeToᴍ(ref TemplateNode t, ж<strings.Builder> sb) {
-    sb.WriteString(templateˢ);
+    sb.WriteString(templateˢᴍTemplateNode);
     sb.WriteString(strconv.Quote(t.Name));
     if (t.Pipe != nil) {
         sb.WriteByte((byte)' ');

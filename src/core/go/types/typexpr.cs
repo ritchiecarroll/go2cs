@@ -20,10 +20,10 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotUseAsValueOrTypeˢ => ref cannotUseAsValueOrTypeˢᵇ;
-private static readonly @string cannotUseAsValueOrTypeˢᵇ = "cannot use _ as value or type"u8;
-internal static ref readonly @string cannotUseIotaOutsideˢ => ref cannotUseIotaOutsideˢᵇ;
-private static readonly @string cannotUseIotaOutsideˢᵇ = "cannot use iota outside constant declaration"u8;
+internal static ref readonly @string cannotUseAsValueOrTypeˢᴍChecker => ref cannotUseAsValueOrTypeˢᵇᴍChecker;
+private static readonly @string cannotUseAsValueOrTypeˢᵇᴍChecker = "cannot use _ as value or type"u8;
+internal static ref readonly @string cannotUseIotaOutsideˢᴍChecker => ref cannotUseIotaOutsideˢᵇᴍChecker;
+private static readonly @string cannotUseIotaOutsideˢᵇᴍChecker = "cannot use iota outside constant declaration"u8;
 
 // ident type-checks identifier e and initializes x with the value or type of e.
 // If an error occurred, x.mode is set to invalid.
@@ -40,7 +40,7 @@ internal static void identᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Ide
     switch (obj) {
     case var ᴛ when AreEqual(ᴛ, default): {
         if (e.Name == "_"u8) {
-            Ꮡcheck.error(new ast_Identжpositioner(Ꮡe), InvalidBlank, cannotUseAsValueOrTypeˢ);
+            Ꮡcheck.error(new ast_Identжpositioner(Ꮡe), InvalidBlank, cannotUseAsValueOrTypeˢᴍChecker);
         } else if (isValidName(e.Name)) {
             Ꮡcheck.errorf(new ast_Identжpositioner(Ꮡe), UndeclaredName, "undefined: %s", e.Name);
         }
@@ -115,7 +115,7 @@ internal static void identᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Ide
         }
         if (AreEqual(objΔ1, universeIota)) {
             if (check.iota == nil) {
-                Ꮡcheck.error(new ast_Identжpositioner(Ꮡe), InvalidIota, cannotUseIotaOutsideˢ);
+                Ꮡcheck.error(new ast_Identжpositioner(Ꮡe), InvalidIota, cannotUseIotaOutsideˢᴍChecker);
                 return;
             }
             x.val = check.iota;
@@ -269,14 +269,14 @@ internal static @string goTypeName(Type typ) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeSˢ => ref typeSˢᵇ;
-private static readonly @string typeSˢᵇ = "-- type %s"u8;
-internal static ref readonly @string sUnderSSˢ => ref sUnderSSˢᵇ;
-private static readonly @string sUnderSSˢᵇ = "=> %s (under = %s) // %s"u8;
-internal static ref readonly @string invalidUseOfArrayOutsideˢ => ref invalidUseOfArrayOutsideˢᵇ;
-private static readonly @string invalidUseOfArrayOutsideˢᵇ = "invalid use of [...] array (outside a composite literal)"u8;
-internal static ref readonly @string missingComparableˢ => ref missingComparableˢᵇ;
-private static readonly @string missingComparableˢᵇ = " (missing comparable constraint)"u8;
+internal static ref readonly @string typeSˢᴍChecker => ref typeSˢᵇᴍChecker;
+private static readonly @string typeSˢᵇᴍChecker = "-- type %s"u8;
+internal static ref readonly @string sUnderSSˢᴍChecker => ref sUnderSSˢᵇᴍChecker;
+private static readonly @string sUnderSSˢᵇᴍChecker = "=> %s (under = %s) // %s"u8;
+internal static ref readonly @string invalidUseOfArrayOutsideˢᴍChecker => ref invalidUseOfArrayOutsideˢᵇᴍChecker;
+private static readonly @string invalidUseOfArrayOutsideˢᵇᴍChecker = "invalid use of [...] array (outside a composite literal)"u8;
+internal static ref readonly @string missingComparableˢᴍChecker => ref missingComparableˢᵇᴍChecker;
+private static readonly @string missingComparableˢᵇᴍChecker = " (missing comparable constraint)"u8;
 
 // typInternal drives type checking of types.
 // Must only be called by declaredType or genericType.
@@ -287,7 +287,7 @@ internal static Type /*T*/ typInternalᴍ(ж<Checker> Ꮡcheck, ast.Expr e0, ж<
         ref var check = ref Ꮡcheck.DerefOrNull();
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(e0.Pos(), typeSˢ, e0);
+            Ꮡcheck.trace(e0.Pos(), typeSˢᴍChecker, e0);
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
@@ -300,7 +300,7 @@ internal static Type /*T*/ typInternalᴍ(ж<Checker> Ꮡcheck, ast.Expr e0, ж<
                 if (AreEqual(T, under)) {
                     Ꮡcheck.trace(e0.Pos(), "=> %s // %s", T, goTypeName(T));
                 } else {
-                    Ꮡcheck.trace(e0.Pos(), sUnderSSˢ, T, under, goTypeName(T));
+                    Ꮡcheck.trace(e0.Pos(), sUnderSSˢᴍChecker, T, under, goTypeName(T));
                 }
             }, ref ᒐ);
         }
@@ -377,7 +377,7 @@ internal static Type /*T*/ typInternalᴍ(ж<Checker> Ꮡcheck, ast.Expr e0, ж<
             // Provide a more specific error when encountering a [...] array
             // rather than leaving it to the handling of the ... expression.
             var (_, ok) = e.Len._<ж<ast.Ellipsis>>(ᐧ); if (ok) {
-                Ꮡcheck.error(new ast_Exprᴠpositioner(e.Len), BadDotDotDotSyntax, invalidUseOfArrayOutsideˢ);
+                Ꮡcheck.error(new ast_Exprᴠpositioner(e.Len), BadDotDotDotSyntax, invalidUseOfArrayOutsideˢᴍChecker);
                 typΔ2.len = -1;
             } else {
                 typΔ2.len = Ꮡcheck.arrayLength(e.Len);
@@ -438,7 +438,7 @@ internal static Type /*T*/ typInternalᴍ(ж<Checker> Ꮡcheck, ast.Expr e0, ж<
                 if (!Comparable(typʗ1.key)) {
                     @string why = default;
                     if (isTypeParam(typʗ1.key)) {
-                        why = missingComparableˢ;
+                        why = missingComparableˢᴍChecker;
                     }
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(e.Key), IncomparableMapKey, "invalid map key type %s%s", typʗ1.key, why);
                 }
@@ -497,8 +497,8 @@ internal partial interface instantiatedType_type /*dyn*/ {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string instantiatingTypeSWithSˢ => ref instantiatingTypeSWithSˢᵇ;
-private static readonly @string instantiatingTypeSWithSˢᵇ = "-- instantiating type %s with %s"u8;
+internal static ref readonly @string instantiatingTypeSWithSˢᴍChecker => ref instantiatingTypeSWithSˢᵇᴍChecker;
+private static readonly @string instantiatingTypeSWithSˢᵇᴍChecker = "-- instantiating type %s with %s"u8;
 
 internal static Type /*res*/ instantiatedTypeᴍ(ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡix) {
     Type res = default;
@@ -508,7 +508,7 @@ internal static Type /*res*/ instantiatedTypeᴍ(ж<Checker> Ꮡcheck, ж<indexe
         ref var ix = ref Ꮡix.DerefOrNull();
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(ix.Pos(), instantiatingTypeSWithSˢ, ix.x, ix.indices);
+            Ꮡcheck.trace(ix.Pos(), instantiatingTypeSWithSˢᴍChecker, ix.x, ix.indices);
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
@@ -581,10 +581,10 @@ internal static Type /*res*/ instantiatedTypeᴍ(ж<Checker> Ꮡcheck, ж<indexe
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidArrayLengthSˢ => ref invalidArrayLengthSˢᵇ;
-private static readonly @string invalidArrayLengthSˢᵇ = "invalid array length %s"u8;
-internal static ref readonly @string arrayLengthSMustBeˢ => ref arrayLengthSMustBeˢᵇ;
-private static readonly @string arrayLengthSMustBeˢᵇ = "array length %s must be integer"u8;
+internal static ref readonly @string invalidArrayLengthSˢᴍChecker => ref invalidArrayLengthSˢᵇᴍChecker;
+private static readonly @string invalidArrayLengthSˢᵇᴍChecker = "invalid array length %s"u8;
+internal static ref readonly @string arrayLengthSMustBeˢᴍChecker => ref arrayLengthSMustBeˢᵇᴍChecker;
+private static readonly @string arrayLengthSMustBeˢᵇᴍChecker = "array length %s must be integer"u8;
 
 // arrayLength type-checks the array length expression e
 // and returns the constant length >= 0, or a value < 0
@@ -627,9 +627,9 @@ internal static int64 arrayLengthᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
 
     @string msg = default;
     if (isInteger(x.typ)) {
-        msg = invalidArrayLengthSˢ;
+        msg = invalidArrayLengthSˢᴍChecker;
     } else {
-        msg = arrayLengthSMustBeˢ;
+        msg = arrayLengthSMustBeˢᴍChecker;
     }
     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidArrayLen, msg, Ꮡx);
     return -1;

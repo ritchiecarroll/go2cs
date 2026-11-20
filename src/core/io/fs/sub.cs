@@ -89,11 +89,11 @@ internal static error fixErrᴍ(ref subFS f, error err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string openˢ => ref openˢᵇ;
-private static readonly @string openˢᵇ = "open"u8;
+private static ref readonly @string openˢᴍsubFS => ref openˢᵇᴍsubFS;
+private static readonly @string openˢᵇᴍsubFS = "open"u8;
 
 internal static (File, error) Openᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(openˢ, name);
+    var (full, err) = f.fullName(openˢᴍsubFS, name);
     if (err != nil) {
         return (default, err);
     }
@@ -102,11 +102,11 @@ internal static (File, error) Openᴍ(ref subFS f, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string readˢ => ref readˢᵇ;
-private static readonly @string readˢᵇ = "read"u8;
+private static ref readonly @string readˢᴍsubFS => ref readˢᵇᴍsubFS;
+private static readonly @string readˢᵇᴍsubFS = "read"u8;
 
 internal static (slice<DirEntry>, error) ReadDirᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(readˢ, name);
+    var (full, err) = f.fullName(readˢᴍsubFS, name);
     if (err != nil) {
         return (default, err);
     }
@@ -115,7 +115,7 @@ internal static (slice<DirEntry>, error) ReadDirᴍ(ref subFS f, @string name) {
 }
 
 internal static (slice<byte>, error) ReadFileᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(readˢ, name);
+    var (full, err) = f.fullName(readˢᴍsubFS, name);
     if (err != nil) {
         return (default, err);
     }
@@ -124,11 +124,11 @@ internal static (slice<byte>, error) ReadFileᴍ(ref subFS f, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string readlinkˢ => ref readlinkˢᵇ;
-private static readonly @string readlinkˢᵇ = "readlink"u8;
+private static ref readonly @string readlinkˢᴍsubFS => ref readlinkˢᵇᴍsubFS;
+private static readonly @string readlinkˢᵇᴍsubFS = "readlink"u8;
 
 internal static (@string, error) ReadLinkᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(readlinkˢ, name);
+    var (full, err) = f.fullName(readlinkˢᴍsubFS, name);
     if (err != nil) {
         return ("", err);
     }
@@ -140,11 +140,11 @@ internal static (@string, error) ReadLinkᴍ(ref subFS f, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string lstatˢ => ref lstatˢᵇ;
-private static readonly @string lstatˢᵇ = "lstat"u8;
+private static ref readonly @string lstatˢᴍsubFS => ref lstatˢᵇᴍsubFS;
+private static readonly @string lstatˢᵇᴍsubFS = "lstat"u8;
 
 internal static (FileInfo, error) Lstatᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(lstatˢ, name);
+    var (full, err) = f.fullName(lstatˢᴍsubFS, name);
     if (err != nil) {
         return (default, err);
     }
@@ -177,8 +177,8 @@ internal static (slice<@string>, error) Globᴍ(ref subFS f, @string pattern) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string subˢ => ref subˢᵇ;
-private static readonly @string subˢᵇ = "sub"u8;
+private static ref readonly @string subˢᴍsubFS => ref subˢᵇᴍsubFS;
+private static readonly @string subˢᵇᴍsubFS = "sub"u8;
 
 internal static (FS, error) Subᴍ(ж<subFS> Ꮡf, @string dir) {
     ref var f = ref Ꮡf.DerefOrNull();
@@ -187,7 +187,7 @@ internal static (FS, error) Subᴍ(ж<subFS> Ꮡf, @string dir) {
         return (new subFSжFS(Ꮡf), default);
     }
     ref var full = ref heap<@string>(out var Ꮡfull);
-    (full, var err) = f.fullName(subˢ, dir);
+    (full, var err) = f.fullName(subˢᴍsubFS, dir);
     if (err != nil) {
         return (default, err);
     }

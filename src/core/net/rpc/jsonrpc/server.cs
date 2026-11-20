@@ -114,8 +114,8 @@ internal static ref json.RawMessage @null => ref ((StaticBox<json.RawMessage>)�
 } partial class jsonrpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidSequenceNumberInˢ => ref invalidSequenceNumberInˢᵇ;
-private static readonly @string invalidSequenceNumberInˢᵇ = "invalid sequence number in response"u8;
+internal static ref readonly @string invalidSequenceNumberInˢᴍserverCodec => ref invalidSequenceNumberInˢᵇᴍserverCodec;
+private static readonly @string invalidSequenceNumberInˢᵇᴍserverCodec = "invalid sequence number in response"u8;
 
 internal static error WriteResponseᴍ(ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -125,7 +125,7 @@ internal static error WriteResponseᴍ(ж<serverCodec> Ꮡc, ж<rpc.Response> �
     var (b, ok) = c.pending[r.Seq, ꟷ];
     if (!ok) {
         c.mutex.Unlock();
-        return errors.New(invalidSequenceNumberInˢ);
+        return errors.New(invalidSequenceNumberInˢᴍserverCodec);
     }
     delete(c.pending, r.Seq);
     c.mutex.Unlock();

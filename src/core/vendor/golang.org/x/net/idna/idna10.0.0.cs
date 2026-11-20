@@ -254,19 +254,19 @@ internal static (@string, error) ToUnicodeᴍ(ref Profile p, @string s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string transitionalˢ => ref transitionalˢᵇ;
-private static readonly @string transitionalˢᵇ = "Transitional"u8;
-private static ref readonly @string nonTransitionalˢ => ref nonTransitionalˢᵇ;
-private static readonly @string nonTransitionalˢᵇ = "NonTransitional"u8;
+private static ref readonly @string transitionalˢᴍProfile => ref transitionalˢᵇᴍProfile;
+private static readonly @string transitionalˢᵇᴍProfile = "Transitional"u8;
+private static ref readonly @string nonTransitionalˢᴍProfile => ref nonTransitionalˢᵇᴍProfile;
+private static readonly @string nonTransitionalˢᵇᴍProfile = "NonTransitional"u8;
 
 // String reports a string with a description of the profile for debugging
 // purposes. The string format may change with different versions.
 internal static @string Stringᴍ(ref Profile p) {
     @string s = ""u8;
     if (p.transitional) {
-        s = transitionalˢ;
+        s = transitionalˢᴍProfile;
     } else {
-        s = nonTransitionalˢ;
+        s = nonTransitionalˢᴍProfile;
     }
     if (p.useSTD3Rules) {
         s += ":UseSTD3Rules"u8;

@@ -54,8 +54,8 @@ partial struct mlink {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeFixallocSizeTooˢ => ref runtimeFixallocSizeTooˢᵇ;
-private static readonly @string runtimeFixallocSizeTooˢᵇ = "runtime: fixalloc size too large"u8;
+internal static ref readonly @string runtimeFixallocSizeTooˢᴍfixalloc => ref runtimeFixallocSizeTooˢᵇᴍfixalloc;
+private static readonly @string runtimeFixallocSizeTooˢᵇᴍfixalloc = "runtime: fixalloc size too large"u8;
 
 // Initialize f to allocate objects of the given size,
 // using the allocator to obtain chunks of memory.
@@ -63,7 +63,7 @@ internal static void initᴍ(ref fixalloc f, uintptr size, Action<@unsafe.Pointe
     ref var stat = ref Ꮡstat.DerefOrNull();
 
     if (size > _FixAllocChunk) {
-        @throw(runtimeFixallocSizeTooˢ);
+        @throw(runtimeFixallocSizeTooˢᴍfixalloc);
     }
     size = max(size, /* unsafe.Sizeof(mlink{}) */ (uintptr)8);
 
@@ -80,13 +80,13 @@ internal static void initᴍ(ref fixalloc f, uintptr size, Action<@unsafe.Pointe
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeInternalErrorˢ => ref runtimeInternalErrorˢᵇ;
-private static readonly @string runtimeInternalErrorˢᵇ = "runtime: internal error"u8;
+internal static ref readonly @string runtimeInternalErrorˢᴍfixalloc => ref runtimeInternalErrorˢᵇᴍfixalloc;
+private static readonly @string runtimeInternalErrorˢᵇᴍfixalloc = "runtime: internal error"u8;
 
 internal static @unsafe.Pointer allocᴍ(ref fixalloc f) {
     if (f.size == 0) {
         print((@string)"runtime: use of FixAlloc_Alloc before FixAlloc_Init\n");
-        @throw(runtimeInternalErrorˢ);
+        @throw(runtimeInternalErrorˢᴍfixalloc);
     }
 
     if (f.list != nil) {

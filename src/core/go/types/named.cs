@@ -781,10 +781,10 @@ internal static ж<Context> contextᴍ(ref Checker check) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string namedExpandRHSSˢ => ref namedExpandRHSSˢᵇ;
-private static readonly @string namedExpandRHSSˢᵇ = "-- Named.expandRHS %s"u8;
-internal static ref readonly @string sRhsSˢ => ref sRhsSˢᵇ;
-private static readonly @string sRhsSˢᵇ = "=> %s (rhs = %s)"u8;
+internal static ref readonly @string namedExpandRHSSˢᴍNamed => ref namedExpandRHSSˢᵇᴍNamed;
+private static readonly @string namedExpandRHSSˢᵇᴍNamed = "-- Named.expandRHS %s"u8;
+internal static ref readonly @string sRhsSˢᴍNamed => ref sRhsSˢᵇᴍNamed;
+private static readonly @string sRhsSˢᵇᴍNamed = "=> %s (rhs = %s)"u8;
 
 // expandRHS crafts a synthetic RHS for an instantiated type using the RHS of
 // its origin type (which must be a generic type).
@@ -825,12 +825,12 @@ internal static Type /*rhs*/ expandRHSᴍ(ж<Named> Ꮡn) {
 
         var check = n.check;
         if (check != nil && check.conf._Trace) {
-            check.trace(n.obj.pos, namedExpandRHSSˢ, Ꮡn.OrTypedNil());
+            check.trace(n.obj.pos, namedExpandRHSSˢᴍNamed, Ꮡn.OrTypedNil());
             check.indent++;
             var checkʗ1 = check;
             defer(() => {
                 checkʗ1.indent--;
-                checkʗ1.trace(Ꮡn.Value.obj.pos, sRhsSˢ, Ꮡn.OrTypedNil(), rhs);
+                checkʗ1.trace(Ꮡn.Value.obj.pos, sRhsSˢᴍNamed, Ꮡn.OrTypedNil(), rhs);
             }, ref ᒐ);
         }
 

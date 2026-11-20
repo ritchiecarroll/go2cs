@@ -127,8 +127,8 @@ internal static void writeChunkᴍ(ref encoder e, slice<byte> b, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ihdrˢ => ref ihdrˢᵇ;
-private static readonly @string ihdrˢᵇ = "IHDR"u8;
+internal static ref readonly @string ihdrˢᴍencoder => ref ihdrˢᵇᴍencoder;
+private static readonly @string ihdrˢᵇᴍencoder = "IHDR"u8;
 
 internal static void writeIHDRᴍ(ref encoder e) {
     var b = e.m.Bounds();
@@ -189,14 +189,14 @@ internal static void writeIHDRᴍ(ref encoder e) {
     e.tmp[10] = 0; // default compression method
     e.tmp[11] = 0; // default filter method
     e.tmp[12] = 0; // non-interlaced
-    e.writeChunk(e.tmp[..13], ihdrˢ);
+    e.writeChunk(e.tmp[..13], ihdrˢᴍencoder);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string plteˢ => ref plteˢᵇ;
-private static readonly @string plteˢᵇ = "PLTE"u8;
-internal static ref readonly @string tRNSˢ => ref tRNSˢᵇ;
-private static readonly @string tRNSˢᵇ = "tRNS"u8;
+internal static ref readonly @string plteˢᴍencoder => ref plteˢᵇᴍencoder;
+private static readonly @string plteˢᵇᴍencoder = "PLTE"u8;
+internal static ref readonly @string tRNSˢᴍencoder => ref tRNSˢᵇᴍencoder;
+private static readonly @string tRNSˢᵇᴍencoder = "tRNS"u8;
 
 internal static void writePLTEAndTRNSᴍ(ref encoder e, color.Palette p) {
     if (len(p) < 1 || len(p) > 256) {
@@ -214,15 +214,15 @@ internal static void writePLTEAndTRNSᴍ(ref encoder e, color.Palette p) {
         }
         e.tmp[3 * 256 + i] = c1.A;
     }
-    e.writeChunk(e.tmp.slice(0, 3 * len(p)), plteˢ);
+    e.writeChunk(e.tmp.slice(0, 3 * len(p)), plteˢᴍencoder);
     if (last != -1) {
-        e.writeChunk(e.tmp.slice(3 * 256, 3 * 256 + 1 + last), tRNSˢ);
+        e.writeChunk(e.tmp.slice(3 * 256, 3 * 256 + 1 + last), tRNSˢᴍencoder);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string idatˢ => ref idatˢᵇ;
-private static readonly @string idatˢᵇ = "IDAT"u8;
+internal static ref readonly @string idatˢᴍencoder => ref idatˢᵇᴍencoder;
+private static readonly @string idatˢᵇᴍencoder = "IDAT"u8;
 
 // An encoder is an io.Writer that satisfies writes by writing PNG IDAT chunks,
 // including an 8-byte header and 4-byte CRC checksum per Write call. Such calls
@@ -231,7 +231,7 @@ private static readonly @string idatˢᵇ = "IDAT"u8;
 // This method should only be called from writeIDATs (via writeImage).
 // No other code should treat an encoder as an io.Writer.
 internal static (nint, error) Writeᴍ(ref encoder e, slice<byte> b) {
-    e.writeChunk(b, idatˢ);
+    e.writeChunk(b, idatˢᴍencoder);
     if (e.err != nil) {
         return (0, e.err);
     }
@@ -669,10 +669,10 @@ internal static nint levelToZlib(CompressionLevel l) {
 } partial class png_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string iendˢ => ref iendˢᵇ;
-private static readonly @string iendˢᵇ = "IEND"u8;
+internal static ref readonly @string iendˢᴍencoder => ref iendˢᵇᴍencoder;
+private static readonly @string iendˢᵇᴍencoder = "IEND"u8;
 
-internal static void writeIENDᴍ(ref encoder e) { e.writeChunk(default, iendˢ); }
+internal static void writeIENDᴍ(ref encoder e) { e.writeChunk(default, iendˢᴍencoder); }
 
 } partial class png_package {
 

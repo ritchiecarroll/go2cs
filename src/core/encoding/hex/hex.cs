@@ -264,15 +264,15 @@ internal static byte toChar(byte b) {
 } partial class hex_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string encodingHexDumperClosedˢ => ref encodingHexDumperClosedˢᵇ;
-private static readonly @string encodingHexDumperClosedˢᵇ = "encoding/hex: dumper closed"u8;
+internal static ref readonly @string encodingHexDumperClosedˢᴍdumper => ref encodingHexDumperClosedˢᵇᴍdumper;
+private static readonly @string encodingHexDumperClosedˢᵇᴍdumper = "encoding/hex: dumper closed"u8;
 
 internal static (nint n, error err) Writeᴍ(ref dumper h, slice<byte> data) {
     nint n = default;
     error err = default;
 
     if (h.closed) {
-        return (0, errors.New(encodingHexDumperClosedˢ));
+        return (0, errors.New(encodingHexDumperClosedˢᴍdumper));
     }
 
     // Output lines look like:

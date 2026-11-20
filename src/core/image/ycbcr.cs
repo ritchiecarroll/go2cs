@@ -22,38 +22,38 @@ public static YCbCrSubsampleRatio YCbCrSubsampleRatio410 => 5;
 } partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string yCbCrSubsampleRatio444ˢ => ref yCbCrSubsampleRatio444ˢᵇ;
-private static readonly @string yCbCrSubsampleRatio444ˢᵇ = "YCbCrSubsampleRatio444"u8;
-internal static ref readonly @string yCbCrSubsampleRatio422ˢ => ref yCbCrSubsampleRatio422ˢᵇ;
-private static readonly @string yCbCrSubsampleRatio422ˢᵇ = "YCbCrSubsampleRatio422"u8;
-internal static ref readonly @string yCbCrSubsampleRatio420ˢ => ref yCbCrSubsampleRatio420ˢᵇ;
-private static readonly @string yCbCrSubsampleRatio420ˢᵇ = "YCbCrSubsampleRatio420"u8;
-internal static ref readonly @string yCbCrSubsampleRatio440ˢ => ref yCbCrSubsampleRatio440ˢᵇ;
-private static readonly @string yCbCrSubsampleRatio440ˢᵇ = "YCbCrSubsampleRatio440"u8;
-internal static ref readonly @string yCbCrSubsampleRatio411ˢ => ref yCbCrSubsampleRatio411ˢᵇ;
-private static readonly @string yCbCrSubsampleRatio411ˢᵇ = "YCbCrSubsampleRatio411"u8;
-internal static ref readonly @string yCbCrSubsampleRatio410ˢ => ref yCbCrSubsampleRatio410ˢᵇ;
-private static readonly @string yCbCrSubsampleRatio410ˢᵇ = "YCbCrSubsampleRatio410"u8;
+internal static ref readonly @string yCbCrSubsampleRatio444ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio444ˢᵇᴍYCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio444ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio444"u8;
+internal static ref readonly @string yCbCrSubsampleRatio422ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio422ˢᵇᴍYCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio422ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio422"u8;
+internal static ref readonly @string yCbCrSubsampleRatio420ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio420ˢᵇᴍYCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio420ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio420"u8;
+internal static ref readonly @string yCbCrSubsampleRatio440ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio440ˢᵇᴍYCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio440ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio440"u8;
+internal static ref readonly @string yCbCrSubsampleRatio411ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio411ˢᵇᴍYCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio411ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio411"u8;
+internal static ref readonly @string yCbCrSubsampleRatio410ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio410ˢᵇᴍYCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio410ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio410"u8;
 
 internal static @string Stringᴍ(YCbCrSubsampleRatio s) {
     switch (s) {
     case var ᴛ when ᴛ == YCbCrSubsampleRatio444: {
-        return yCbCrSubsampleRatio444ˢ;
+        return yCbCrSubsampleRatio444ˢᴍYCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio422: {
-        return yCbCrSubsampleRatio422ˢ;
+        return yCbCrSubsampleRatio422ˢᴍYCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio420: {
-        return yCbCrSubsampleRatio420ˢ;
+        return yCbCrSubsampleRatio420ˢᴍYCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio440: {
-        return yCbCrSubsampleRatio440ˢ;
+        return yCbCrSubsampleRatio440ˢᴍYCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio411: {
-        return yCbCrSubsampleRatio411ˢ;
+        return yCbCrSubsampleRatio411ˢᴍYCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio410: {
-        return yCbCrSubsampleRatio410ˢ;
+        return yCbCrSubsampleRatio410ˢᴍYCbCrSubsampleRatio;
     }}
     return "YCbCrSubsampleRatioUnknown";
 }

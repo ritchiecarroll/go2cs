@@ -672,12 +672,12 @@ internal partial struct Start_goroutineStatus /*dyn*/ {
 } partial class exec_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string execAlreadyStartedˢ => ref execAlreadyStartedˢᵇ;
-private static readonly @string execAlreadyStartedˢᵇ = "exec: already started"u8;
-internal static ref readonly @string execNoCommandˢ => ref execNoCommandˢᵇ;
-private static readonly @string execNoCommandˢᵇ = "exec: no command"u8;
-internal static ref readonly @string execCommandWithANonNilˢ => ref execCommandWithANonNilˢᵇ;
-private static readonly @string execCommandWithANonNilˢᵇ = "exec: command with a non-nil Cancel was not created with CommandContext"u8;
+internal static ref readonly @string execAlreadyStartedˢᴍCmd => ref execAlreadyStartedˢᵇᴍCmd;
+private static readonly @string execAlreadyStartedˢᵇᴍCmd = "exec: already started"u8;
+internal static ref readonly @string execNoCommandˢᴍCmd => ref execNoCommandˢᵇᴍCmd;
+private static readonly @string execNoCommandˢᵇᴍCmd = "exec: no command"u8;
+internal static ref readonly @string execCommandWithANonNilˢᴍCmd => ref execCommandWithANonNilˢᵇᴍCmd;
+private static readonly @string execCommandWithANonNilˢᵇᴍCmd = "exec: command with a non-nil Cancel was not created with CommandContext"u8;
 
 // Start starts the specified command but does not wait for it to complete.
 //
@@ -694,7 +694,7 @@ internal static partial error Startᴍ(ж<Cmd> Ꮡc) {
         // call to Start succeeded, we don't want to spuriously close its pipes.
         // It is an error to call Start twice even if the first call did not create a process.
         if (atomic.SwapInt32(Ꮡc.ᏑstartCalled, 1) != 0) {
-            return errors.New(execAlreadyStartedˢ);
+            return errors.New(execAlreadyStartedˢᴍCmd);
         }
 
         var started = false;
@@ -710,7 +710,7 @@ internal static partial error Startᴍ(ж<Cmd> Ꮡc) {
         }, ref ᒐ);
 
         if (c.Path == ""u8 && c.Err == nil && c.lookPathErr == nil) {
-            c.Err = errors.New(execNoCommandˢ);
+            c.Err = errors.New(execNoCommandˢᴍCmd);
         }
         if (c.Err != nil || c.lookPathErr != nil) {
             if (c.lookPathErr != nil) {
@@ -748,7 +748,7 @@ internal static partial error Startᴍ(ж<Cmd> Ꮡc) {
             }
         }
         if (c.Cancel != nil && c.ctx == nil) {
-            return errors.New(execCommandWithANonNilˢ);
+            return errors.New(execCommandWithANonNilˢᴍCmd);
         }
         if (c.ctx != nil) {
             var selᴛ1 = c.ctx.Done();
@@ -974,10 +974,10 @@ internal static @string Errorᴍ(ref ExitError e) {
 } partial class exec_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string execNotStartedˢ => ref execNotStartedˢᵇ;
-private static readonly @string execNotStartedˢᵇ = "exec: not started"u8;
-internal static ref readonly @string execWaitWasAlreadyCalledˢ => ref execWaitWasAlreadyCalledˢᵇ;
-private static readonly @string execWaitWasAlreadyCalledˢᵇ = "exec: Wait was already called"u8;
+internal static ref readonly @string execNotStartedˢᴍCmd => ref execNotStartedˢᵇᴍCmd;
+private static readonly @string execNotStartedˢᵇᴍCmd = "exec: not started"u8;
+internal static ref readonly @string execWaitWasAlreadyCalledˢᴍCmd => ref execWaitWasAlreadyCalledˢᵇᴍCmd;
+private static readonly @string execWaitWasAlreadyCalledˢᵇᴍCmd = "exec: Wait was already called"u8;
 
 // Wait waits for the command to exit and waits for any copying to
 // stdin or copying from stdout or stderr to complete.
@@ -1000,10 +1000,10 @@ internal static error Waitᴍ(ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Process == nil) {
-        return errors.New(execNotStartedˢ);
+        return errors.New(execNotStartedˢᴍCmd);
     }
     if (c.ProcessState != nil) {
-        return errors.New(execWaitWasAlreadyCalledˢ);
+        return errors.New(execWaitWasAlreadyCalledˢᴍCmd);
     }
 
     var (state, err) = c.Process.Wait();
@@ -1100,8 +1100,8 @@ internal static error awaitGoroutinesᴍ(ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer) 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string execStdoutAlreadySetˢ => ref execStdoutAlreadySetˢᵇ;
-private static readonly @string execStdoutAlreadySetˢᵇ = "exec: Stdout already set"u8;
+internal static ref readonly @string execStdoutAlreadySetˢᴍCmd => ref execStdoutAlreadySetˢᵇᴍCmd;
+private static readonly @string execStdoutAlreadySetˢᵇᴍCmd = "exec: Stdout already set"u8;
 
 // Output runs the command and returns its standard output.
 // Any returned error will usually be of type [*ExitError].
@@ -1112,7 +1112,7 @@ internal static (slice<byte>, error) Outputᴍ(ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Stdout != nil) {
-        return (default, errors.New(execStdoutAlreadySetˢ));
+        return (default, errors.New(execStdoutAlreadySetˢᴍCmd));
     }
     ref var stdout = ref heap(new bytes.Buffer(), out var Ꮡstdout);
     c.Stdout = new bytes_BufferжWriter(Ꮡstdout);
@@ -1132,8 +1132,8 @@ internal static (slice<byte>, error) Outputᴍ(ж<Cmd> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string execStderrAlreadySetˢ => ref execStderrAlreadySetˢᵇ;
-private static readonly @string execStderrAlreadySetˢᵇ = "exec: Stderr already set"u8;
+internal static ref readonly @string execStderrAlreadySetˢᴍCmd => ref execStderrAlreadySetˢᵇᴍCmd;
+private static readonly @string execStderrAlreadySetˢᵇᴍCmd = "exec: Stderr already set"u8;
 
 // CombinedOutput runs the command and returns its combined standard
 // output and standard error.
@@ -1141,10 +1141,10 @@ internal static (slice<byte>, error) CombinedOutputᴍ(ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Stdout != nil) {
-        return (default, errors.New(execStdoutAlreadySetˢ));
+        return (default, errors.New(execStdoutAlreadySetˢᴍCmd));
     }
     if (c.Stderr != nil) {
-        return (default, errors.New(execStderrAlreadySetˢ));
+        return (default, errors.New(execStderrAlreadySetˢᴍCmd));
     }
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     c.Stdout = new bytes_BufferжWriter(Ꮡb);
@@ -1154,10 +1154,10 @@ internal static (slice<byte>, error) CombinedOutputᴍ(ж<Cmd> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string execStdinAlreadySetˢ => ref execStdinAlreadySetˢᵇ;
-private static readonly @string execStdinAlreadySetˢᵇ = "exec: Stdin already set"u8;
-internal static ref readonly @string execStdinPipeAfterˢ => ref execStdinPipeAfterˢᵇ;
-private static readonly @string execStdinPipeAfterˢᵇ = "exec: StdinPipe after process started"u8;
+internal static ref readonly @string execStdinAlreadySetˢᴍCmd => ref execStdinAlreadySetˢᵇᴍCmd;
+private static readonly @string execStdinAlreadySetˢᵇᴍCmd = "exec: Stdin already set"u8;
+internal static ref readonly @string execStdinPipeAfterˢᴍCmd => ref execStdinPipeAfterˢᵇᴍCmd;
+private static readonly @string execStdinPipeAfterˢᵇᴍCmd = "exec: StdinPipe after process started"u8;
 
 // StdinPipe returns a pipe that will be connected to the command's
 // standard input when the command starts.
@@ -1167,10 +1167,10 @@ private static readonly @string execStdinPipeAfterˢᵇ = "exec: StdinPipe after
 // is closed, the caller must close the pipe.
 internal static (io.WriteCloser, error) StdinPipeᴍ(ref Cmd c) {
     if (c.Stdin != nil) {
-        return (default, errors.New(execStdinAlreadySetˢ));
+        return (default, errors.New(execStdinAlreadySetˢᴍCmd));
     }
     if (c.Process != nil) {
-        return (default, errors.New(execStdinPipeAfterˢ));
+        return (default, errors.New(execStdinPipeAfterˢᴍCmd));
     }
     var (pr, pw, err) = os.Pipe();
     if (err != nil) {
@@ -1183,8 +1183,8 @@ internal static (io.WriteCloser, error) StdinPipeᴍ(ref Cmd c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string execStdoutPipeAfterˢ => ref execStdoutPipeAfterˢᵇ;
-private static readonly @string execStdoutPipeAfterˢᵇ = "exec: StdoutPipe after process started"u8;
+internal static ref readonly @string execStdoutPipeAfterˢᴍCmd => ref execStdoutPipeAfterˢᵇᴍCmd;
+private static readonly @string execStdoutPipeAfterˢᵇᴍCmd = "exec: StdoutPipe after process started"u8;
 
 // StdoutPipe returns a pipe that will be connected to the command's
 // standard output when the command starts.
@@ -1196,10 +1196,10 @@ private static readonly @string execStdoutPipeAfterˢᵇ = "exec: StdoutPipe aft
 // See the example for idiomatic usage.
 internal static (io.ReadCloser, error) StdoutPipeᴍ(ref Cmd c) {
     if (c.Stdout != nil) {
-        return (default, errors.New(execStdoutAlreadySetˢ));
+        return (default, errors.New(execStdoutAlreadySetˢᴍCmd));
     }
     if (c.Process != nil) {
-        return (default, errors.New(execStdoutPipeAfterˢ));
+        return (default, errors.New(execStdoutPipeAfterˢᴍCmd));
     }
     var (pr, pw, err) = os.Pipe();
     if (err != nil) {
@@ -1212,8 +1212,8 @@ internal static (io.ReadCloser, error) StdoutPipeᴍ(ref Cmd c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string execStderrPipeAfterˢ => ref execStderrPipeAfterˢᵇ;
-private static readonly @string execStderrPipeAfterˢᵇ = "exec: StderrPipe after process started"u8;
+internal static ref readonly @string execStderrPipeAfterˢᴍCmd => ref execStderrPipeAfterˢᵇᴍCmd;
+private static readonly @string execStderrPipeAfterˢᵇᴍCmd = "exec: StderrPipe after process started"u8;
 
 // StderrPipe returns a pipe that will be connected to the command's
 // standard error when the command starts.
@@ -1225,10 +1225,10 @@ private static readonly @string execStderrPipeAfterˢᵇ = "exec: StderrPipe aft
 // See the StdoutPipe example for idiomatic usage.
 internal static (io.ReadCloser, error) StderrPipeᴍ(ref Cmd c) {
     if (c.Stderr != nil) {
-        return (default, errors.New(execStderrAlreadySetˢ));
+        return (default, errors.New(execStderrAlreadySetˢᴍCmd));
     }
     if (c.Process != nil) {
-        return (default, errors.New(execStderrPipeAfterˢ));
+        return (default, errors.New(execStderrPipeAfterˢᴍCmd));
     }
     var (pr, pw, err) = os.Pipe();
     if (err != nil) {
@@ -1300,10 +1300,10 @@ internal static slice<byte> /*pRemain*/ fillᴍ(ref prefixSuffixSaver w, ж<slic
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string omittingˢ => ref omittingˢᵇ;
-private static readonly @string omittingˢᵇ = "\n... omitting "u8;
-internal static ref readonly @string bytesˢ => ref bytesˢᵇ;
-private static readonly @string bytesˢᵇ = " bytes ...\n"u8;
+internal static ref readonly @string omittingˢᴍprefixSuffixSaver => ref omittingˢᵇᴍprefixSuffixSaver;
+private static readonly @string omittingˢᵇᴍprefixSuffixSaver = "\n... omitting "u8;
+internal static ref readonly @string bytesˢᴍprefixSuffixSaver => ref bytesˢᵇᴍprefixSuffixSaver;
+private static readonly @string bytesˢᵇᴍprefixSuffixSaver = " bytes ...\n"u8;
 
 internal static slice<byte> Bytesᴍ(ref prefixSuffixSaver w) {
     if (w.suffix == nil) {
@@ -1315,9 +1315,9 @@ internal static slice<byte> Bytesᴍ(ref prefixSuffixSaver w) {
     bytes.Buffer buf = default;
     buf.Grow(len(w.prefix) + len(w.suffix) + 50);
     buf.Write(w.prefix);
-    buf.WriteString(omittingˢ);
+    buf.WriteString(omittingˢᴍprefixSuffixSaver);
     buf.WriteString(strconv.FormatInt(w.skipped, 10));
-    buf.WriteString(bytesˢ);
+    buf.WriteString(bytesˢᴍprefixSuffixSaver);
     buf.Write(w.suffix.slice(w.suffixOff));
     buf.Write(w.suffix.slice(0, w.suffixOff));
     return buf.Bytes();

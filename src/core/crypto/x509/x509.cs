@@ -934,11 +934,11 @@ partial struct ConstraintViolationError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509InvalidSignatureˢ => ref x509InvalidSignatureˢᵇ;
-private static readonly @string x509InvalidSignatureˢᵇ = "x509: invalid signature: parent certificate cannot sign this kind of certificate"u8;
+internal static ref readonly @string x509InvalidSignatureˢᴍConstraintViolationError => ref x509InvalidSignatureˢᵇᴍConstraintViolationError;
+private static readonly @string x509InvalidSignatureˢᵇᴍConstraintViolationError = "x509: invalid signature: parent certificate cannot sign this kind of certificate"u8;
 
 internal static @string Errorᴍ(ConstraintViolationError _) {
-    return x509InvalidSignatureˢ;
+    return x509InvalidSignatureˢᴍConstraintViolationError;
 }
 
 } partial class x509_package {
@@ -1114,11 +1114,11 @@ partial struct UnhandledCriticalExtension {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509UnhandledCriticalˢ => ref x509UnhandledCriticalˢᵇ;
-private static readonly @string x509UnhandledCriticalˢᵇ = "x509: unhandled critical extension"u8;
+internal static ref readonly @string x509UnhandledCriticalˢᴍUnhandledCriticalExtension => ref x509UnhandledCriticalˢᵇᴍUnhandledCriticalExtension;
+private static readonly @string x509UnhandledCriticalˢᵇᴍUnhandledCriticalExtension = "x509: unhandled critical extension"u8;
 
 internal static @string Errorᴍ(UnhandledCriticalExtension h) {
-    return x509UnhandledCriticalˢ;
+    return x509UnhandledCriticalˢᴍUnhandledCriticalExtension;
 }
 
 } partial class x509_package {
@@ -1968,8 +1968,8 @@ public static (ж<pkix.CertificateList>, error) ParseDERCRL(slice<byte> derBytes
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificatePrivateˢ => ref x509CertificatePrivateˢᵇ;
-private static readonly @string x509CertificatePrivateˢᵇ = "x509: certificate private key does not implement crypto.Signer"u8;
+internal static ref readonly @string x509CertificatePrivateˢᴍCertificate => ref x509CertificatePrivateˢᵇᴍCertificate;
+private static readonly @string x509CertificatePrivateˢᵇᴍCertificate = "x509: certificate private key does not implement crypto.Signer"u8;
 
 // CreateCRL returns a DER encoded CRL, signed by this Certificate, that
 // contains the given list of revoked certificates.
@@ -1981,7 +1981,7 @@ internal static (slice<byte> crlBytes, error err) CreateCRLᴍ(ref Certificate c
 
     var (key, ok) = priv._<crypto.Signer>(ᐧ);
     if (!ok) {
-        return (default, errors.New(x509CertificatePrivateˢ));
+        return (default, errors.New(x509CertificatePrivateˢᴍCertificate));
     }
 
     (var signatureAlgorithm, var algorithmIdentifier, err) = signingParamsForKey(key, 0);

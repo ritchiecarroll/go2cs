@@ -96,8 +96,8 @@ partial interface genericClientConn :
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpNewClientConnˢ => ref httpNewClientConnˢᵇ;
-private static readonly @string httpNewClientConnˢᵇ = "http: NewClientConn returned something that is not a ClientConn"u8;
+internal static ref readonly @string httpNewClientConnˢᴍTransport => ref httpNewClientConnˢᵇᴍTransport;
+private static readonly @string httpNewClientConnˢᵇᴍTransport = "http: NewClientConn returned something that is not a ClientConn"u8;
 
 // NewClientConn creates a new client connection to the given address.
 //
@@ -200,7 +200,7 @@ internal static (ж<ClientConn>, error) NewClientConnᴍ(ж<Transport> Ꮡt, con
             // (probably x/net/http2) or the bundled copy in h2_bundle.go.
             var (gc, ok) = pconn.alt._<genericClientConn>(ᐧ);
             if (!ok) {
-                return (default, errors.New(httpNewClientConnˢ));
+                return (default, errors.New(httpNewClientConnˢᴍTransport));
             }
             cc.cc = gc;
             cc.lastAvailable = gc.Available();
@@ -474,11 +474,11 @@ internal static partial (ж<Response>, error) RoundTripᴍ(http1ClientConn cc, �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string clientConnClosedˢ => ref clientConnClosedˢᵇ;
-private static readonly @string clientConnClosedˢᵇ = "ClientConn closed"u8;
+internal static ref readonly @string clientConnClosedˢᴍhttp1ClientConn => ref clientConnClosedˢᵇᴍhttp1ClientConn;
+private static readonly @string clientConnClosedˢᵇᴍhttp1ClientConn = "ClientConn closed"u8;
 
 internal static error Closeᴍ(http1ClientConn cc) {
-    cc.pconn.close(errors.New(clientConnClosedˢ));
+    cc.pconn.close(errors.New(clientConnClosedˢᴍhttp1ClientConn));
     return default;
 }
 
@@ -524,8 +524,8 @@ internal static nint InFlightᴍ(http1ClientConn cc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectionIsUnavailableˢ => ref connectionIsUnavailableˢᵇ;
-private static readonly @string connectionIsUnavailableˢᵇ = "connection is unavailable"u8;
+internal static ref readonly @string connectionIsUnavailableˢᴍhttp1ClientConn => ref connectionIsUnavailableˢᵇᴍhttp1ClientConn;
+private static readonly @string connectionIsUnavailableˢᵇᴍhttp1ClientConn = "connection is unavailable"u8;
 
 internal static error Reserveᴍ(http1ClientConn cc) {
     GoFrame ᒐ = default;
@@ -542,7 +542,7 @@ internal static error Reserveᴍ(http1ClientConn cc) {
             break;
         }
         default: {
-            return errors.New(connectionIsUnavailableˢ);
+            return errors.New(connectionIsUnavailableˢᴍhttp1ClientConn);
         }}
         cc.pconn.reserved = true;
         return default;

@@ -176,12 +176,12 @@ internal static error readStringTableᴍ(ref CounterDataReader cdr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string argcˢ => ref argcˢᵇ;
-private static readonly @string argcˢᵇ = "argc"u8;
-private static ref readonly @string goosˢ => ref goosˢᵇ;
-private static readonly @string goosˢᵇ = "GOOS"u8;
-private static ref readonly @string goarchˢ => ref goarchˢᵇ;
-private static readonly @string goarchˢᵇ = "GOARCH"u8;
+private static ref readonly @string argcˢᴍCounterDataReader => ref argcˢᵇᴍCounterDataReader;
+private static readonly @string argcˢᵇᴍCounterDataReader = "argc"u8;
+private static ref readonly @string goosˢᴍCounterDataReader => ref goosˢᵇᴍCounterDataReader;
+private static readonly @string goosˢᵇᴍCounterDataReader = "GOOS"u8;
+private static ref readonly @string goarchˢᴍCounterDataReader => ref goarchˢᵇᴍCounterDataReader;
+private static readonly @string goarchˢᵇᴍCounterDataReader = "GOARCH"u8;
 
 internal static error readArgsᴍ(ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
@@ -219,7 +219,7 @@ internal static error readArgsᴍ(ж<CounterDataReader> Ꮡcdr) {
         }
         cdr.args[k] = v;
     }
-    if (cdr.args[argcˢ, ꟷ] is (var argcs, true)) {
+    if (cdr.args[argcˢᴍCounterDataReader, ꟷ] is (var argcs, true)) {
         var (argc, errΔ1) = strconv.Atoi(argcs);
         if (errΔ1 != nil) {
             return fmt.Errorf("malformed argc in counter data file args section"u8);
@@ -230,10 +230,10 @@ internal static error readArgsᴍ(ж<CounterDataReader> Ꮡcdr) {
             cdr.osargs = append(cdr.osargs, arg);
         }
     }
-    if (cdr.args[goosˢ, ꟷ] is (var goos, true)) {
+    if (cdr.args[goosˢᴍCounterDataReader, ꟷ] is (var goos, true)) {
         cdr.goos = goos;
     }
-    if (cdr.args[goarchˢ, ꟷ] is (var goarch, true)) {
+    if (cdr.args[goarchˢᴍCounterDataReader, ꟷ] is (var goarch, true)) {
         cdr.goarch = goarch;
     }
     return default;

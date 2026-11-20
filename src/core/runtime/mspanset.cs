@@ -246,12 +246,12 @@ break_claimLoop:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string attemptToClearNonEmptyˢ => ref attemptToClearNonEmptyˢᵇ;
-private static readonly @string attemptToClearNonEmptyˢᵇ = "attempt to clear non-empty span set"u8;
-internal static ref readonly @string spanSetBlockWithUnpoppedˢ => ref spanSetBlockWithUnpoppedˢᵇ;
-private static readonly @string spanSetBlockWithUnpoppedˢᵇ = "span set block with unpopped elements found in reset"u8;
-internal static ref readonly @string fullyEmptyUnfreedSpanSetˢ => ref fullyEmptyUnfreedSpanSetˢᵇ;
-private static readonly @string fullyEmptyUnfreedSpanSetˢᵇ = "fully empty unfreed span set block found in reset"u8;
+internal static ref readonly @string attemptToClearNonEmptyˢᴍspanSet => ref attemptToClearNonEmptyˢᵇᴍspanSet;
+private static readonly @string attemptToClearNonEmptyˢᵇᴍspanSet = "attempt to clear non-empty span set"u8;
+internal static ref readonly @string spanSetBlockWithUnpoppedˢᴍspanSet => ref spanSetBlockWithUnpoppedˢᵇᴍspanSet;
+private static readonly @string spanSetBlockWithUnpoppedˢᵇᴍspanSet = "span set block with unpopped elements found in reset"u8;
+internal static ref readonly @string fullyEmptyUnfreedSpanSetˢᴍspanSet => ref fullyEmptyUnfreedSpanSetˢᵇᴍspanSet;
+private static readonly @string fullyEmptyUnfreedSpanSetˢᵇᴍspanSet = "fully empty unfreed span set block found in reset"u8;
 
 // reset resets a spanSet which is empty. It will also clean up
 // any left over blocks.
@@ -264,7 +264,7 @@ internal static void resetᴍ(ж<spanSet> Ꮡb) {
     var (head, tail) = Ꮡb.Ꮡindex.load().split();
     if (head < tail) {
         print((@string)"head = ", head, (@string)", tail = ", tail, (@string)"\n");
-        @throw(attemptToClearNonEmptyˢ);
+        @throw(attemptToClearNonEmptyˢᴍspanSet);
     }
     var top = head / (uint32)spanSetBlockEntries;
     if ((uintptr)top < Ꮡb.ᏑspineLen.Load()) {
@@ -281,13 +281,13 @@ internal static void resetᴍ(ж<spanSet> Ꮡb) {
                 // popped should never be zero because that means we have
                 // pushed at least one value but not yet popped if this
                 // block pointer is not nil.
-                @throw(spanSetBlockWithUnpoppedˢ);
+                @throw(spanSetBlockWithUnpoppedˢᴍspanSet);
             }
             if (block.of(spanSetBlock.Ꮡpopped).Load() == spanSetBlockEntries) {
                 // popped should also never be equal to spanSetBlockEntries
                 // because the last popper should have made the block pointer
                 // in this slot nil.
-                @throw(fullyEmptyUnfreedSpanSetˢ);
+                @throw(fullyEmptyUnfreedSpanSetˢᴍspanSet);
             }
 
             // Clear the pointer to the block.
@@ -427,8 +427,8 @@ internal static headTailIndex decHeadᴍ(ж<atomicHeadTailIndex> Ꮡh) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string headTailIndexOverflowˢ => ref headTailIndexOverflowˢᵇ;
-private static readonly @string headTailIndexOverflowˢᵇ = "headTailIndex overflow"u8;
+internal static ref readonly @string headTailIndexOverflowˢᴍatomicHeadTailIndex => ref headTailIndexOverflowˢᵇᴍatomicHeadTailIndex;
+private static readonly @string headTailIndexOverflowˢᵇᴍatomicHeadTailIndex = "headTailIndex overflow"u8;
 
 // incTail atomically increments the tail of a headTailIndex.
 internal static headTailIndex incTailᴍ(ж<atomicHeadTailIndex> Ꮡh) {
@@ -436,7 +436,7 @@ internal static headTailIndex incTailᴍ(ж<atomicHeadTailIndex> Ꮡh) {
     // Check for overflow.
     if (ht.tail() == 0) {
         print((@string)"runtime: head = ", ht.head(), (@string)", tail = ", ht.tail(), (@string)"\n");
-        @throw(headTailIndexOverflowˢ);
+        @throw(headTailIndexOverflowˢᴍatomicHeadTailIndex);
     }
     return ht;
 }

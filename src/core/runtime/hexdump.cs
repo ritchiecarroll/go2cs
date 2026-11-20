@@ -86,10 +86,10 @@ internal static void closeᴍ(ref hexdumper h) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidAddrBytesˢ => ref invalidAddrBytesˢᵇ;
-private static readonly @string invalidAddrBytesˢᵇ = "invalid addrBytes"u8;
-internal static ref readonly @string invalidWordBytesˢ => ref invalidWordBytesˢᵇ;
-private static readonly @string invalidWordBytesˢᵇ = "invalid wordBytes"u8;
+internal static ref readonly @string invalidAddrBytesˢᴍhexdumper => ref invalidAddrBytesˢᵇᴍhexdumper;
+private static readonly @string invalidAddrBytesˢᵇᴍhexdumper = "invalid addrBytes"u8;
+internal static ref readonly @string invalidWordBytesˢᴍhexdumper => ref invalidWordBytesˢᵇᴍhexdumper;
+private static readonly @string invalidWordBytesˢᵇᴍhexdumper = "invalid wordBytes"u8;
 
 internal static void initᴍ(ref hexdumper h) {
     const nint bytesPerLine = /* len(h.dataBuf) */ 16;
@@ -97,7 +97,7 @@ internal static void initᴍ(ref hexdumper h) {
     if (h.addrBytes == 0) {
         h.addrBytes = goarch.PtrSize;
     } else if (h.addrBytes < 0 || h.addrBytes > goarch.PtrSize) {
-        @throw(invalidAddrBytesˢ);
+        @throw(invalidAddrBytesˢᴍhexdumper);
     }
 
     if (h.wordBytes == 0) {
@@ -105,7 +105,7 @@ internal static void initᴍ(ref hexdumper h) {
     }
     nint wb = (nint)h.wordBytes;
     if (wb < 0 || wb >= bytesPerLine || (wb & (wb - 1)) != 0) {
-        @throw(invalidWordBytesˢ);
+        @throw(invalidWordBytesˢᴍhexdumper);
     }
 
     // Construct position mapping.
@@ -135,23 +135,23 @@ internal static void initᴍ(ref hexdumper h) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string addrSepᶜ => ref addrSepᶜᵇ;
-private static readonly @string addrSepᶜᵇ = ": "u8;
+internal static ref readonly @string addrSepᶜᴍhexdumper => ref addrSepᶜᵇᴍhexdumper;
+private static readonly @string addrSepᶜᵇᴍhexdumper = ": "u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string asciiSepᶜ => ref asciiSepᶜᵇ;
-private static readonly @string asciiSepᶜᵇ = "  "u8;
+internal static ref readonly @string asciiSepᶜᴍhexdumper => ref asciiSepᶜᵇᴍhexdumper;
+private static readonly @string asciiSepᶜᵇᴍhexdumper = "  "u8;
 
 internal static void flushLineᴍ(ref hexdumper h, slice<byte> data) {
     const nint bytesPerLine = /* len(h.dataBuf) */ 16;
 
     UntypedInt maxAddrChars = /* 2 * goarch.PtrSize */ 16;
-    @string addrSep = addrSepᶜ;
+    @string addrSep = addrSepᶜᴍhexdumper;
     nint dataStart = (nint)((uint8)(2 * h.addrBytes)) + len(addrSep);
     // dataChars uses the same formula to toPos above. We calculate it with the
     // "last field", then add the size of the last field.
     const nint dataChars = /* (bytesPerLine-1)*2 + (bytesPerLine-1)/4 + (bytesPerLine-1)/8 + 2 */ 36;
-    @string asciiSep = asciiSepᶜ;
+    @string asciiSep = asciiSepᶜᴍhexdumper;
     nint asciiStart = dataStart + dataChars + len(asciiSep);
     const nint asciiChars = /* bytesPerLine */ 16;
     nint nlPos = asciiStart + asciiChars;
@@ -226,13 +226,13 @@ internal static void flushLineᴍ(ref hexdumper h, slice<byte> data) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string digᶜ => ref digᶜᵇ;
-private static readonly @string digᶜᵇ = "0123456789abcdef"u8;
+internal static ref readonly @string digᶜᴍhexdumper => ref digᶜᵇᴍhexdumper;
+private static readonly @string digᶜᵇᴍhexdumper = "0123456789abcdef"u8;
 
 // fmtHex formats v in base 16 into buf. It fills all of buf. If buf is too
 // small to represent v, it the output will start with '*'.
 internal static void fmtHexᴍ(ref hexdumper h, slice<byte> buf, uint64 v) {
-    @string dig = digᶜ;
+    @string dig = digᶜᴍhexdumper;
     nint i = len(buf) - 1;
     for (; i >= 0; i--) {
         buf[i] = dig[v % 16];

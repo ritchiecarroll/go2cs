@@ -161,49 +161,49 @@ public static IsolationLevel LevelLinearizable => 7;
 } partial class sql_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string defaultˢ => ref defaultˢᵇ;
-private static readonly @string defaultˢᵇ = "Default"u8;
-internal static ref readonly @string readUncommittedˢ => ref readUncommittedˢᵇ;
-private static readonly @string readUncommittedˢᵇ = "Read Uncommitted"u8;
-internal static ref readonly @string readCommittedˢ => ref readCommittedˢᵇ;
-private static readonly @string readCommittedˢᵇ = "Read Committed"u8;
-internal static ref readonly @string writeCommittedˢ => ref writeCommittedˢᵇ;
-private static readonly @string writeCommittedˢᵇ = "Write Committed"u8;
-internal static ref readonly @string repeatableReadˢ => ref repeatableReadˢᵇ;
-private static readonly @string repeatableReadˢᵇ = "Repeatable Read"u8;
-internal static ref readonly @string snapshotˢ => ref snapshotˢᵇ;
-private static readonly @string snapshotˢᵇ = "Snapshot"u8;
-internal static ref readonly @string serializableˢ => ref serializableˢᵇ;
-private static readonly @string serializableˢᵇ = "Serializable"u8;
-internal static ref readonly @string linearizableˢ => ref linearizableˢᵇ;
-private static readonly @string linearizableˢᵇ = "Linearizable"u8;
+internal static ref readonly @string defaultˢᴍIsolationLevel => ref defaultˢᵇᴍIsolationLevel;
+private static readonly @string defaultˢᵇᴍIsolationLevel = "Default"u8;
+internal static ref readonly @string readUncommittedˢᴍIsolationLevel => ref readUncommittedˢᵇᴍIsolationLevel;
+private static readonly @string readUncommittedˢᵇᴍIsolationLevel = "Read Uncommitted"u8;
+internal static ref readonly @string readCommittedˢᴍIsolationLevel => ref readCommittedˢᵇᴍIsolationLevel;
+private static readonly @string readCommittedˢᵇᴍIsolationLevel = "Read Committed"u8;
+internal static ref readonly @string writeCommittedˢᴍIsolationLevel => ref writeCommittedˢᵇᴍIsolationLevel;
+private static readonly @string writeCommittedˢᵇᴍIsolationLevel = "Write Committed"u8;
+internal static ref readonly @string repeatableReadˢᴍIsolationLevel => ref repeatableReadˢᵇᴍIsolationLevel;
+private static readonly @string repeatableReadˢᵇᴍIsolationLevel = "Repeatable Read"u8;
+internal static ref readonly @string snapshotˢᴍIsolationLevel => ref snapshotˢᵇᴍIsolationLevel;
+private static readonly @string snapshotˢᵇᴍIsolationLevel = "Snapshot"u8;
+internal static ref readonly @string serializableˢᴍIsolationLevel => ref serializableˢᵇᴍIsolationLevel;
+private static readonly @string serializableˢᵇᴍIsolationLevel = "Serializable"u8;
+internal static ref readonly @string linearizableˢᴍIsolationLevel => ref linearizableˢᵇᴍIsolationLevel;
+private static readonly @string linearizableˢᵇᴍIsolationLevel = "Linearizable"u8;
 
 // String returns the name of the transaction isolation level.
 internal static @string Stringᴍ(IsolationLevel i) {
     switch (i) {
     case var ᴛ when ᴛ == LevelDefault: {
-        return defaultˢ;
+        return defaultˢᴍIsolationLevel;
     }
     case var ᴛ when ᴛ == LevelReadUncommitted: {
-        return readUncommittedˢ;
+        return readUncommittedˢᴍIsolationLevel;
     }
     case var ᴛ when ᴛ == LevelReadCommitted: {
-        return readCommittedˢ;
+        return readCommittedˢᴍIsolationLevel;
     }
     case var ᴛ when ᴛ == LevelWriteCommitted: {
-        return writeCommittedˢ;
+        return writeCommittedˢᴍIsolationLevel;
     }
     case var ᴛ when ᴛ == LevelRepeatableRead: {
-        return repeatableReadˢ;
+        return repeatableReadˢᴍIsolationLevel;
     }
     case var ᴛ when ᴛ == LevelSnapshot: {
-        return snapshotˢ;
+        return snapshotˢᴍIsolationLevel;
     }
     case var ᴛ when ᴛ == LevelSerializable: {
-        return serializableˢ;
+        return serializableˢᴍIsolationLevel;
     }
     case var ᴛ when ᴛ == LevelLinearizable: {
-        return linearizableˢ;
+        return linearizableˢᴍIsolationLevel;
     }
     default: {
         return "IsolationLevel("u8 + strconv.Itoa((nint)i) + ")"u8;
@@ -770,8 +770,8 @@ internal static (ж<driverStmt>, error) prepareLockedᴍ(ж<driverConn> Ꮡdc, c
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlDuplicateDriverConnˢ => ref sqlDuplicateDriverConnˢᵇ;
-private static readonly @string sqlDuplicateDriverConnˢᵇ = "sql: duplicate driverConn close"u8;
+internal static ref readonly @string sqlDuplicateDriverConnˢᴍdriverConn => ref sqlDuplicateDriverConnˢᵇᴍdriverConn;
+private static readonly @string sqlDuplicateDriverConnˢᵇᴍdriverConn = "sql: duplicate driverConn close"u8;
 
 // the dc.db's Mutex is held.
 internal static Func<error> closeDBLockedᴍ(ж<driverConn> Ꮡdc) {
@@ -783,7 +783,7 @@ internal static Func<error> closeDBLockedᴍ(ж<driverConn> Ꮡdc) {
         Ꮡdc.of(driverConn.ᏑMutex).Lock();
         ᒐd1 = true;
         if (dc.closed) {
-            return () => errors.New(sqlDuplicateDriverConnˢ);
+            return () => errors.New(sqlDuplicateDriverConnˢᴍdriverConn);
         }
         dc.closed = true;
         return dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), Ꮡdc.OrTypedNil());
@@ -798,7 +798,7 @@ internal static error Closeᴍ(ж<driverConn> Ꮡdc) {
     Ꮡdc.of(driverConn.ᏑMutex).Lock();
     if (dc.closed) {
         Ꮡdc.of(driverConn.ᏑMutex).Unlock();
-        return errors.New(sqlDuplicateDriverConnˢ);
+        return errors.New(sqlDuplicateDriverConnˢᴍdriverConn);
     }
     dc.closed = true;
     Ꮡdc.of(driverConn.ᏑMutex).Unlock(); // not defer; removeDep finalClose calls may need to lock
@@ -2820,8 +2820,8 @@ internal static (ж<Stmt>, error) Prepareᴍ(ж<Tx> Ꮡtx, @string query) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlTxStmtStatementFromˢ => ref sqlTxStmtStatementFromˢᵇ;
-private static readonly @string sqlTxStmtStatementFromˢᵇ = "sql: Tx.Stmt: statement from different database used"u8;
+internal static ref readonly @string sqlTxStmtStatementFromˢᴍTx => ref sqlTxStmtStatementFromˢᵇᴍTx;
+private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt: statement from different database used"u8;
 
 // StmtContext returns a transaction-specific prepared statement from
 // an existing statement.
@@ -2854,7 +2854,7 @@ internal static ж<Stmt> StmtContextᴍ(ж<Tx> Ꮡtx, context.Context ctx, ж<St
         defer(releaseʗ1, (error)(default), ref ᒐ);
 
         if (tx.db != stmt.db) {
-            return Ꮡ(new Stmt(stickyErr: errors.New(sqlTxStmtStatementFromˢ)));
+            return Ꮡ(new Stmt(stickyErr: errors.New(sqlTxStmtStatementFromˢᴍTx)));
         }
         ref var si = ref heap<driver.Stmt>(out var Ꮡsi);
         ж<Stmt> parentStmt = default;
@@ -3183,8 +3183,8 @@ internal static void removeClosedStmtLockedᴍ(ref Stmt s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlStatementIsClosedˢ => ref sqlStatementIsClosedˢᵇ;
-private static readonly @string sqlStatementIsClosedˢᵇ = "sql: statement is closed"u8;
+internal static ref readonly @string sqlStatementIsClosedˢᴍStmt => ref sqlStatementIsClosedˢᵇᴍStmt;
+private static readonly @string sqlStatementIsClosedˢᵇᴍStmt = "sql: statement is closed"u8;
 
 // connStmt returns a free driver connection on which to execute the
 // statement, a function to call to release the connection, and a
@@ -3202,7 +3202,7 @@ internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds
     s.mu.Lock();
     if (s.closed) {
         s.mu.Unlock();
-        err = errors.New(sqlStatementIsClosedˢ);
+        err = errors.New(sqlStatementIsClosedˢᴍStmt);
         return (dc, releaseConn, ds, err);
     }
 
@@ -3993,8 +3993,8 @@ internal static error Scanᴍ(ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlScanCalledWithoutˢ => ref sqlScanCalledWithoutˢᵇ;
-private static readonly @string sqlScanCalledWithoutˢᵇ = "sql: Scan called without calling Next"u8;
+internal static ref readonly @string sqlScanCalledWithoutˢᴍRows => ref sqlScanCalledWithoutˢᵇᴍRows;
+private static readonly @string sqlScanCalledWithoutˢᵇᴍRows = "sql: Scan called without calling Next"u8;
 
 internal static error scanLockedᴍ(ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗp) {
     var dest = destʗp.sslice();
@@ -4008,7 +4008,7 @@ internal static error scanLockedᴍ(ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗp)
     }
 
     if (rs.lastcols == nil) {
-        return errors.New(sqlScanCalledWithoutˢ);
+        return errors.New(sqlScanCalledWithoutˢᴍRows);
     }
     if (len(dest) != len(rs.lastcols)) {
         return fmt.Errorf("sql: expected %d destination arguments in Scan, not %d"u8, len(rs.lastcols), len(dest));
@@ -4117,8 +4117,8 @@ partial struct Row {
 } partial class sql_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlRawBytesIsnTAllowedOnˢ => ref sqlRawBytesIsnTAllowedOnˢᵇ;
-private static readonly @string sqlRawBytesIsnTAllowedOnˢᵇ = "sql: RawBytes isn't allowed on Row.Scan"u8;
+internal static ref readonly @string sqlRawBytesIsnTAllowedOnˢᴍRow => ref sqlRawBytesIsnTAllowedOnˢᵇᴍRow;
+private static readonly @string sqlRawBytesIsnTAllowedOnˢᵇᴍRow = "sql: RawBytes isn't allowed on Row.Scan"u8;
 
 // Scan copies the columns from the matched row into the values
 // pointed at by dest. See the documentation on [Rows.Scan] for details.
@@ -4150,7 +4150,7 @@ internal static error Scanᴍ(ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
         // don't care.
         defer(ᴛ0 => ᴛ0.Close(), Ꮡr.Value.rows, ref ᒐ);
         if (scanArgsContainRawBytes(dest)) {
-            return errors.New(sqlRawBytesIsnTAllowedOnˢ);
+            return errors.New(sqlRawBytesIsnTAllowedOnˢᴍRow);
         }
 
         if (!r.rows.Next()) {

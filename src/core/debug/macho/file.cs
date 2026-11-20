@@ -658,20 +658,20 @@ internal static ж<Section> Sectionᴍ(ref File f, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string debugˢ => ref debugˢᵇ;
-private static readonly @string debugˢᵇ = "__debug_"u8;
-internal static ref readonly @string zdebugˢ => ref zdebugˢᵇ;
-private static readonly @string zdebugˢᵇ = "__zdebug_"u8;
-internal static ref readonly @string abbrevˢ => ref abbrevˢᵇ;
-private static readonly @string abbrevˢᵇ = "abbrev"u8;
-internal static ref readonly @string infoˢ => ref infoˢᵇ;
-private static readonly @string infoˢᵇ = "info"u8;
-internal static ref readonly @string lineˢ => ref lineˢᵇ;
-private static readonly @string lineˢᵇ = "line"u8;
-internal static ref readonly @string rangesˢ => ref rangesˢᵇ;
-private static readonly @string rangesˢᵇ = "ranges"u8;
-internal static ref readonly @string strˢ => ref strˢᵇ;
-private static readonly @string strˢᵇ = "str"u8;
+internal static ref readonly @string debugˢᴍFile => ref debugˢᵇᴍFile;
+private static readonly @string debugˢᵇᴍFile = "__debug_"u8;
+internal static ref readonly @string zdebugˢᴍFile => ref zdebugˢᵇᴍFile;
+private static readonly @string zdebugˢᵇᴍFile = "__zdebug_"u8;
+internal static ref readonly @string abbrevˢᴍFile => ref abbrevˢᵇᴍFile;
+private static readonly @string abbrevˢᵇᴍFile = "abbrev"u8;
+internal static ref readonly @string infoˢᴍFile => ref infoˢᵇᴍFile;
+private static readonly @string infoˢᵇᴍFile = "info"u8;
+internal static ref readonly @string lineˢᴍFile => ref lineˢᵇᴍFile;
+private static readonly @string lineˢᵇᴍFile = "line"u8;
+internal static ref readonly @string rangesˢᴍFile => ref rangesˢᵇᴍFile;
+private static readonly @string rangesˢᵇᴍFile = "ranges"u8;
+internal static ref readonly @string strˢᴍFile => ref strˢᵇᴍFile;
+private static readonly @string strˢᵇᴍFile = "str"u8;
 
 // DWARF returns the DWARF debug information for the Mach-O file.
 internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
@@ -679,11 +679,11 @@ internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
         @string sectname = s.Name;
         nint pfx = default;
         switch (ᐧ) {
-        case {} when strings.HasPrefix(sectname, debugˢ): {
+        case {} when strings.HasPrefix(sectname, debugˢᴍFile): {
             pfx = 8;
             break;
         }
-        case {} when strings.HasPrefix(sectname, zdebugˢ): {
+        case {} when strings.HasPrefix(sectname, zdebugˢᴍFile): {
             pfx = 9;
             break;
         }
@@ -751,7 +751,7 @@ internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
         dat[suffix] = b;
     }
 
-    var (d, err) = dwarf.New(dat[abbrevˢ], default, default, dat[infoˢ], dat[lineˢ], default, dat[rangesˢ], dat[strˢ]);
+    var (d, err) = dwarf.New(dat[abbrevˢᴍFile], default, default, dat[infoˢᴍFile], dat[lineˢᴍFile], default, dat[rangesˢᴍFile], dat[strˢᴍFile]);
     if (err != nil) {
         return (default, err);
     }

@@ -22,17 +22,17 @@ partial struct MethodSet {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string methodSetˢ => ref methodSetˢᵇ;
-private static readonly @string methodSetˢᵇ = "MethodSet {}"u8;
-internal static readonly object methodSetˢ2 = (@string)"MethodSet {"u8;
+internal static ref readonly @string methodSetˢᴍMethodSet => ref methodSetˢᵇᴍMethodSet;
+private static readonly @string methodSetˢᵇᴍMethodSet = "MethodSet {}"u8;
+internal static readonly object methodSetˢ2ᴍMethodSet = (@string)"MethodSet {"u8;
 
 internal static @string Stringᴍ(ref MethodSet s) {
     if (s.Len() == 0) {
-        return methodSetˢ;
+        return methodSetˢᴍMethodSet;
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), methodSetˢ2);
+    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), methodSetˢ2ᴍMethodSet);
     foreach (var (_, f) in range(s.list)) {
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%s\n"u8, f.OrTypedNil());
     }

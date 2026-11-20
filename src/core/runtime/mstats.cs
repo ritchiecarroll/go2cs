@@ -602,8 +602,8 @@ internal static uint64 loadᴍ(ж<sysMemStat> Ꮡs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sysMemStatOverflowˢ => ref sysMemStatOverflowˢᵇ;
-private static readonly @string sysMemStatOverflowˢᵇ = "sysMemStat overflow"u8;
+internal static ref readonly @string sysMemStatOverflowˢᴍsysMemStat => ref sysMemStatOverflowˢᵇᴍsysMemStat;
+private static readonly @string sysMemStatOverflowˢᵇᴍsysMemStat = "sysMemStat overflow"u8;
 
 // add atomically adds the sysMemStat by n.
 //
@@ -614,7 +614,7 @@ internal static void addᴍ(ж<sysMemStat> Ꮡs, int64 n) {
     var val = atomic.Xadd64(Ꮡs.Reinterpret<sysMemStat, uint64>(), n);
     if ((n > 0 && (int64)val < n) || (n < 0 && (int64)val + n < n)) {
         print((@string)"runtime: val=", val, (@string)" n=", n, (@string)"\n");
-        @throw(sysMemStatOverflowˢ);
+        @throw(sysMemStatOverflowˢᴍsysMemStat);
     }
 }
 
@@ -718,8 +718,8 @@ partial struct consistentHeapStats {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badSequenceNumberˢ => ref badSequenceNumberˢᵇ;
-private static readonly @string badSequenceNumberˢᵇ = "bad sequence number"u8;
+internal static ref readonly @string badSequenceNumberˢᴍconsistentHeapStats => ref badSequenceNumberˢᵇᴍconsistentHeapStats;
+private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "bad sequence number"u8;
 
 // acquire returns a heapStatsDelta to be updated. In effect,
 // it acquires the shard for writing. release must be called
@@ -746,7 +746,7 @@ internal static ж<heapStatsDelta> acquireᴍ(ж<consistentHeapStats> Ꮡm) {
         if (seq % 2 == 0) {
             // Should have been incremented to odd.
             print((@string)"runtime: seq=", seq, (@string)"\n");
-            @throw(badSequenceNumberˢ);
+            @throw(badSequenceNumberˢᴍconsistentHeapStats);
         }
     } else {
         @lock(Ꮡm.ᏑnoPLock);
@@ -777,7 +777,7 @@ internal static void releaseᴍ(ж<consistentHeapStats> Ꮡm) {
         if (seq % 2 != 0) {
             // Should have been incremented to even.
             print((@string)"runtime: seq=", seq, (@string)"\n");
-            @throw(badSequenceNumberˢ);
+            @throw(badSequenceNumberˢᴍconsistentHeapStats);
         }
     } else {
         unlock(Ꮡm.ᏑnoPLock);

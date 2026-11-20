@@ -88,11 +88,11 @@ internal static bool oneStageᴍ(ref hkdfKDF kdf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hpkeInternalErrorˢ => ref hpkeInternalErrorˢᵇ;
-private static readonly @string hpkeInternalErrorˢᵇ = "hpke: internal error: labeledDerive called on two-stage KDF"u8;
+internal static ref readonly @string hpkeInternalErrorˢᴍhkdfKDF => ref hpkeInternalErrorˢᵇᴍhkdfKDF;
+private static readonly @string hpkeInternalErrorˢᵇᴍhkdfKDF = "hpke: internal error: labeledDerive called on two-stage KDF"u8;
 
 internal static (slice<byte>, error) labeledDeriveᴍ(ref hkdfKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
-    return (default, errors.New(hpkeInternalErrorˢ));
+    return (default, errors.New(hpkeInternalErrorˢᴍhkdfKDF));
 }
 
 internal static (slice<byte>, error) labeledExtractᴍ(ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) {
@@ -164,19 +164,19 @@ internal static (slice<byte>, error) labeledDeriveᴍ(ref shakeKDF kdf, slice<by
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hpkeInternalErrorˢ2 => ref hpkeInternalErrorˢ2ᵇ;
-private static readonly @string hpkeInternalErrorˢ2ᵇ = "hpke: internal error: labeledExtract called on one-stage KDF"u8;
+internal static ref readonly @string hpkeInternalErrorˢ2ᴍshakeKDF => ref hpkeInternalErrorˢ2ᵇᴍshakeKDF;
+private static readonly @string hpkeInternalErrorˢ2ᵇᴍshakeKDF = "hpke: internal error: labeledExtract called on one-stage KDF"u8;
 
 internal static (slice<byte>, error) labeledExtractᴍ(ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4) {
-    return (default, errors.New(hpkeInternalErrorˢ2));
+    return (default, errors.New(hpkeInternalErrorˢ2ᴍshakeKDF));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hpkeInternalErrorˢ3 => ref hpkeInternalErrorˢ3ᵇ;
-private static readonly @string hpkeInternalErrorˢ3ᵇ = "hpke: internal error: labeledExpand called on one-stage KDF"u8;
+internal static ref readonly @string hpkeInternalErrorˢ3ᴍshakeKDF => ref hpkeInternalErrorˢ3ᵇᴍshakeKDF;
+private static readonly @string hpkeInternalErrorˢ3ᵇᴍshakeKDF = "hpke: internal error: labeledExpand called on one-stage KDF"u8;
 
 internal static (slice<byte>, error) labeledExpandᴍ(ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
-    return (default, errors.New(hpkeInternalErrorˢ3));
+    return (default, errors.New(hpkeInternalErrorˢ3ᴍshakeKDF));
 }
 
 }

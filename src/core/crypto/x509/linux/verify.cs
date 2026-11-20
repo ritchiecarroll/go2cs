@@ -78,25 +78,25 @@ partial struct CertificateInvalidError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificateIsNotˢ => ref x509CertificateIsNotˢᵇ;
-private static readonly @string x509CertificateIsNotˢᵇ = "x509: certificate is not authorized to sign other certificates"u8;
-internal static ref readonly @string x509TooManyIntermediatesˢ => ref x509TooManyIntermediatesˢᵇ;
-private static readonly @string x509TooManyIntermediatesˢᵇ = "x509: too many intermediates for path length constraint"u8;
-internal static ref readonly @string x509CertificateSpecifiesˢ => ref x509CertificateSpecifiesˢᵇ;
-private static readonly @string x509CertificateSpecifiesˢᵇ = "x509: certificate specifies an incompatible key usage"u8;
-internal static ref readonly @string x509IssuerNameDoesNotˢ => ref x509IssuerNameDoesNotˢᵇ;
-private static readonly @string x509IssuerNameDoesNotˢᵇ = "x509: issuer name does not match subject from issuing certificate"u8;
-internal static ref readonly @string x509IssuerHasNameˢ => ref x509IssuerHasNameˢᵇ;
-private static readonly @string x509IssuerHasNameˢᵇ = "x509: issuer has name constraints but leaf doesn't have a SAN extension"u8;
-internal static ref readonly @string x509NoValidChainsBuiltˢ => ref x509NoValidChainsBuiltˢᵇ;
-private static readonly @string x509NoValidChainsBuiltˢᵇ = "x509: no valid chains built"u8;
-internal static ref readonly @string x509UnknownErrorˢ => ref x509UnknownErrorˢᵇ;
-private static readonly @string x509UnknownErrorˢᵇ = "x509: unknown error"u8;
+internal static ref readonly @string x509CertificateIsNotˢᴍCertificateInvalidError => ref x509CertificateIsNotˢᵇᴍCertificateInvalidError;
+private static readonly @string x509CertificateIsNotˢᵇᴍCertificateInvalidError = "x509: certificate is not authorized to sign other certificates"u8;
+internal static ref readonly @string x509TooManyIntermediatesˢᴍCertificateInvalidError => ref x509TooManyIntermediatesˢᵇᴍCertificateInvalidError;
+private static readonly @string x509TooManyIntermediatesˢᵇᴍCertificateInvalidError = "x509: too many intermediates for path length constraint"u8;
+internal static ref readonly @string x509CertificateSpecifiesˢᴍCertificateInvalidError => ref x509CertificateSpecifiesˢᵇᴍCertificateInvalidError;
+private static readonly @string x509CertificateSpecifiesˢᵇᴍCertificateInvalidError = "x509: certificate specifies an incompatible key usage"u8;
+internal static ref readonly @string x509IssuerNameDoesNotˢᴍCertificateInvalidError => ref x509IssuerNameDoesNotˢᵇᴍCertificateInvalidError;
+private static readonly @string x509IssuerNameDoesNotˢᵇᴍCertificateInvalidError = "x509: issuer name does not match subject from issuing certificate"u8;
+internal static ref readonly @string x509IssuerHasNameˢᴍCertificateInvalidError => ref x509IssuerHasNameˢᵇᴍCertificateInvalidError;
+private static readonly @string x509IssuerHasNameˢᵇᴍCertificateInvalidError = "x509: issuer has name constraints but leaf doesn't have a SAN extension"u8;
+internal static ref readonly @string x509NoValidChainsBuiltˢᴍCertificateInvalidError => ref x509NoValidChainsBuiltˢᵇᴍCertificateInvalidError;
+private static readonly @string x509NoValidChainsBuiltˢᵇᴍCertificateInvalidError = "x509: no valid chains built"u8;
+internal static ref readonly @string x509UnknownErrorˢᴍCertificateInvalidError => ref x509UnknownErrorˢᵇᴍCertificateInvalidError;
+private static readonly @string x509UnknownErrorˢᵇᴍCertificateInvalidError = "x509: unknown error"u8;
 
 internal static @string Errorᴍ(CertificateInvalidError e) {
     switch (e.Reason) {
     case var ᴛ when ᴛ == NotAuthorizedToSign: {
-        return x509CertificateIsNotˢ;
+        return x509CertificateIsNotˢᴍCertificateInvalidError;
     }
     case var ᴛ when ᴛ == Expired: {
         return "x509: certificate has expired or is not yet valid: "u8 + e.Detail;
@@ -108,28 +108,28 @@ internal static @string Errorᴍ(CertificateInvalidError e) {
         return "x509: a root or intermediate certificate is not authorized for an extended key usage: "u8 + e.Detail;
     }
     case var ᴛ when ᴛ == TooManyIntermediates: {
-        return x509TooManyIntermediatesˢ;
+        return x509TooManyIntermediatesˢᴍCertificateInvalidError;
     }
     case var ᴛ when ᴛ == IncompatibleUsage: {
-        return x509CertificateSpecifiesˢ;
+        return x509CertificateSpecifiesˢᴍCertificateInvalidError;
     }
     case var ᴛ when ᴛ == NameMismatch: {
-        return x509IssuerNameDoesNotˢ;
+        return x509IssuerNameDoesNotˢᴍCertificateInvalidError;
     }
     case var ᴛ when ᴛ == NameConstraintsWithoutSANs: {
-        return x509IssuerHasNameˢ;
+        return x509IssuerHasNameˢᴍCertificateInvalidError;
     }
     case var ᴛ when ᴛ == UnconstrainedName: {
         return "x509: issuer has name constraints but leaf contains unknown or unconstrained name: "u8 + e.Detail;
     }
     case var ᴛ when ᴛ == NoValidChains: {
-        @string s = x509NoValidChainsBuiltˢ;
+        @string s = x509NoValidChainsBuiltˢᴍCertificateInvalidError;
         if (e.Detail != ""u8) {
             s = fmt.Sprintf("%s: %s"u8, s, e.Detail);
         }
         return s;
     }}
-    return x509UnknownErrorˢ;
+    return x509UnknownErrorˢᴍCertificateInvalidError;
 }
 
 } partial class x509_package {
@@ -144,15 +144,15 @@ partial struct HostnameError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificateReliesOnˢ => ref x509CertificateReliesOnˢᵇ;
-private static readonly @string x509CertificateReliesOnˢᵇ = "x509: certificate relies on legacy Common Name field, use SANs instead"u8;
+internal static ref readonly @string x509CertificateReliesOnˢᴍHostnameError => ref x509CertificateReliesOnˢᵇᴍHostnameError;
+private static readonly @string x509CertificateReliesOnˢᵇᴍHostnameError = "x509: certificate relies on legacy Common Name field, use SANs instead"u8;
 
 internal static @string Errorᴍ(HostnameError h) {
     var c = h.Certificate;
     nint maxNamesIncluded = 100;
 
     if (!c.hasSANExtension() && matchHostnames(c.Subject.CommonName, splitHostname(h.Host))) {
-        return x509CertificateReliesOnˢ;
+        return x509CertificateReliesOnˢᴍHostnameError;
     }
 
     ref var valid = ref heap(new strings.Builder(), out var Ꮡvalid);
@@ -199,11 +199,11 @@ partial struct UnknownAuthorityError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificateSignedByˢ => ref x509CertificateSignedByˢᵇ;
-private static readonly @string x509CertificateSignedByˢᵇ = "x509: certificate signed by unknown authority"u8;
+internal static ref readonly @string x509CertificateSignedByˢᴍUnknownAuthorityError => ref x509CertificateSignedByˢᵇᴍUnknownAuthorityError;
+private static readonly @string x509CertificateSignedByˢᵇᴍUnknownAuthorityError = "x509: certificate signed by unknown authority"u8;
 
 internal static @string Errorᴍ(UnknownAuthorityError e) {
-    @string s = x509CertificateSignedByˢ;
+    @string s = x509CertificateSignedByˢᴍUnknownAuthorityError;
     if (e.hintErr != nil) {
         @string certName = e.hintCert.Subject.CommonName;
         if (len(certName) == 0) {
@@ -228,11 +228,11 @@ partial struct SystemRootsError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509FailedToLoadSystemˢ => ref x509FailedToLoadSystemˢᵇ;
-private static readonly @string x509FailedToLoadSystemˢᵇ = "x509: failed to load system roots and no roots provided"u8;
+internal static ref readonly @string x509FailedToLoadSystemˢᴍSystemRootsError => ref x509FailedToLoadSystemˢᵇᴍSystemRootsError;
+private static readonly @string x509FailedToLoadSystemˢᵇᴍSystemRootsError = "x509: failed to load system roots and no roots provided"u8;
 
 internal static @string Errorᴍ(SystemRootsError se) {
-    @string msg = x509FailedToLoadSystemˢ;
+    @string msg = x509FailedToLoadSystemˢᴍSystemRootsError;
     if (se.Err != nil) {
         return msg + "; "u8 + se.Err.Error();
     }
@@ -487,8 +487,8 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509InternalErrorEmptyˢ => ref x509InternalErrorEmptyˢᵇ;
-private static readonly @string x509InternalErrorEmptyˢᵇ = "x509: internal error: empty chain when appending CA cert"u8;
+internal static ref readonly @string x509InternalErrorEmptyˢᴍCertificate => ref x509InternalErrorEmptyˢᵇᴍCertificate;
+private static readonly @string x509InternalErrorEmptyˢᵇᴍCertificate = "x509: internal error: empty chain when appending CA cert"u8;
 
 // isValid performs validity checks on c given that it is a candidate to append
 // to the chain in currentChain.
@@ -527,7 +527,7 @@ internal static error isValidᴍ(ж<Certificate> Ꮡc, nint certType, slice<ж<C
 
     if (certType == intermediateCertificate || certType == rootCertificate) {
         if (len(currentChain) == 0) {
-            return errors.New(x509InternalErrorEmptyˢ);
+            return errors.New(x509InternalErrorEmptyˢᴍCertificate);
         }
     }
 

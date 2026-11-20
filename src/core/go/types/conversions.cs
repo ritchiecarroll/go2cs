@@ -141,10 +141,10 @@ internal static void conversionᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type 
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string conversionOfSliceToArrayˢ => ref conversionOfSliceToArrayˢᵇ;
-private static readonly @string conversionOfSliceToArrayˢᵇ = "conversion of slice to array requires go1.20 or later"u8;
-internal static ref readonly @string conversionOfSliceToArrayˢ2 => ref conversionOfSliceToArrayˢ2ᵇ;
-private static readonly @string conversionOfSliceToArrayˢ2ᵇ = "conversion of slice to array pointer requires go1.17 or later"u8;
+internal static ref readonly @string conversionOfSliceToArrayˢᴍoperand => ref conversionOfSliceToArrayˢᵇᴍoperand;
+private static readonly @string conversionOfSliceToArrayˢᵇᴍoperand = "conversion of slice to array requires go1.20 or later"u8;
+internal static ref readonly @string conversionOfSliceToArrayˢ2ᴍoperand => ref conversionOfSliceToArrayˢ2ᵇᴍoperand;
+private static readonly @string conversionOfSliceToArrayˢ2ᵇᴍoperand = "conversion of slice to array pointer requires go1.17 or later"u8;
 
 // TODO(gri) convertibleTo checks if T(x) is valid. It assumes that the type
 // of x is fully known, but that's not the case for say string(1<<s + 1.0):
@@ -237,7 +237,7 @@ internal static bool convertibleToᴍ(ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Ty
                 // check != nil
                 if (Ꮡcause != nil) {
                     // TODO(gri) consider restructuring versionErrorf so we can use it here and below
-                    cause = conversionOfSliceToArrayˢ;
+                    cause = conversionOfSliceToArrayˢᴍoperand;
                 }
                 return false;
             }
@@ -251,7 +251,7 @@ internal static bool convertibleToᴍ(ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Ty
                     }
                     // check != nil
                     if (Ꮡcause != nil) {
-                        cause = conversionOfSliceToArrayˢ2;
+                        cause = conversionOfSliceToArrayˢ2ᴍoperand;
                     }
                     return false;
                 }

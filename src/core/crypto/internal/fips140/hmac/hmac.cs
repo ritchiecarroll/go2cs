@@ -146,11 +146,11 @@ partial struct errCloneUnsupported {
 } partial class hmac_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoHmacHashDoesNotˢ => ref cryptoHmacHashDoesNotˢᵇ;
-private static readonly @string cryptoHmacHashDoesNotˢᵇ = "crypto/hmac: hash does not support hash.Cloner"u8;
+private static ref readonly @string cryptoHmacHashDoesNotˢᴍerrCloneUnsupported => ref cryptoHmacHashDoesNotˢᵇᴍerrCloneUnsupported;
+private static readonly @string cryptoHmacHashDoesNotˢᵇᴍerrCloneUnsupported = "crypto/hmac: hash does not support hash.Cloner"u8;
 
 internal static @string Errorᴍ(errCloneUnsupported e) {
-    return cryptoHmacHashDoesNotˢ;
+    return cryptoHmacHashDoesNotˢᴍerrCloneUnsupported;
 }
 
 internal static error Unwrapᴍ(errCloneUnsupported e) {

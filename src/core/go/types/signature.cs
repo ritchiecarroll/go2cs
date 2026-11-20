@@ -161,8 +161,8 @@ internal static @string Stringᴍ(ж<Signature> Ꮡs) { return TypeString(new Si
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string methodHasMultipleˢ => ref methodHasMultipleˢᵇ;
-private static readonly @string methodHasMultipleˢᵇ = "method has multiple receivers"u8;
+internal static ref readonly @string methodHasMultipleˢᴍChecker => ref methodHasMultipleˢᵇᴍChecker;
+private static readonly @string methodHasMultipleˢᵇᴍChecker = "method has multiple receivers"u8;
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -189,7 +189,7 @@ internal static void funcTypeᴍ(ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<
         if (ᏑrecvPar != nil && ᏑrecvPar.NumFields() > 0) {
             // We have at least one receiver; make sure we don't have more than one.
             nint n = len(recvPar.List); if (n > 1) {
-                Ꮡcheck.error(new ast_Fieldжpositioner(recvPar.List[n - 1]), InvalidRecv, methodHasMultipleˢ);
+                Ꮡcheck.error(new ast_Fieldжpositioner(recvPar.List[n - 1]), InvalidRecv, methodHasMultipleˢᴍChecker);
                 // continue with first one
             }
             // all type parameters' scopes start after the method name
@@ -231,8 +231,8 @@ internal static void funcTypeᴍ(ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeParameterˢ => ref typeParameterˢᵇ;
-private static readonly @string typeParameterˢᵇ = "type parameter"u8;
+internal static ref readonly @string typeParameterˢᴍChecker => ref typeParameterˢᵇᴍChecker;
+private static readonly @string typeParameterˢᵇᴍChecker = "type parameter"u8;
 
 // collectRecv extracts the method receiver and its type parameters (if any) from rparam.
 // It declares the type parameters (but not the receiver) in the current scope, and
@@ -338,7 +338,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecvᴍ(ж<Checker> Ꮡcheck
                     recvTPar.bound = Ꮡcheck.subst(recvTPar.obj.pos, baseTPar.bound, smap, nil, check.context());
                 }
             } else {
-                @string got = measure(len(recvTParams), typeParameterˢ);
+                @string got = measure(len(recvTParams), typeParameterˢᴍChecker);
                 Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), BadRecv, "receiver declares %s, but receiver base type declares %d", got, len(baseTParams));
             }
 
@@ -365,7 +365,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecvᴍ(ж<Checker> Ꮡcheck
     ж<ast.Ident> rname = default;
     nint n = len(rparam.Names); if (n >= 1) {
         if (n > 1) {
-            Ꮡcheck.error(new ast_Identжpositioner(rparam.Names[n - 1]), InvalidRecv, methodHasMultipleˢ);
+            Ꮡcheck.error(new ast_Identжpositioner(rparam.Names[n - 1]), InvalidRecv, methodHasMultipleˢᴍChecker);
         }
         rname = rparam.Names[0];
     }
@@ -447,10 +447,10 @@ internal static void recordParenthesizedRecvTypesᴍ(ref Checker check, ast.Expr
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string anonymousParameterˢ => ref anonymousParameterˢᵇ;
-private static readonly @string anonymousParameterˢᵇ = "anonymous parameter"u8;
-internal static ref readonly @string listContainsBothNamedAndˢ => ref listContainsBothNamedAndˢᵇ;
-private static readonly @string listContainsBothNamedAndˢᵇ = "list contains both named and anonymous parameters"u8;
+internal static ref readonly @string anonymousParameterˢᴍChecker => ref anonymousParameterˢᵇᴍChecker;
+private static readonly @string anonymousParameterˢᵇᴍChecker = "anonymous parameter"u8;
+internal static ref readonly @string listContainsBothNamedAndˢᴍChecker => ref listContainsBothNamedAndˢᵇᴍChecker;
+private static readonly @string listContainsBothNamedAndˢᵇᴍChecker = "list contains both named and anonymous parameters"u8;
 
 // collectParams collects (but does not declare) all parameter/result
 // variables of list and returns the list of names and corresponding
@@ -487,7 +487,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
             // named parameter
             foreach (var (_, name) in range(field.Names)) {
                 if (name.Name == ""u8) {
-                    Ꮡcheck.error(new ast_Identжpositioner(name), InvalidSyntaxTree, anonymousParameterˢ);
+                    Ꮡcheck.error(new ast_Identжpositioner(name), InvalidSyntaxTree, anonymousParameterˢᴍChecker);
                     // ok to continue
                 }
                 var par = newVar(kind, name.Pos(), check.pkg, name.Name, typ);
@@ -507,7 +507,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
     }
 
     if (named && anonymous) {
-        Ꮡcheck.error(new ast_FieldListжpositioner(Ꮡlist), InvalidSyntaxTree, listContainsBothNamedAndˢ);
+        Ꮡcheck.error(new ast_FieldListжpositioner(Ꮡlist), InvalidSyntaxTree, listContainsBothNamedAndˢᴍChecker);
         // ok to continue
     }
 
@@ -535,10 +535,10 @@ internal static void declareParamsᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.Ident>>
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unsafePointerˢ => ref unsafePointerˢᵇ;
-private static readonly @string unsafePointerˢᵇ = "unsafe.Pointer"u8;
-internal static ref readonly @string pointerOrInterfaceTypeˢ => ref pointerOrInterfaceTypeˢᵇ;
-private static readonly @string pointerOrInterfaceTypeˢᵇ = "pointer or interface type"u8;
+internal static ref readonly @string unsafePointerˢᴍChecker => ref unsafePointerˢᵇᴍChecker;
+private static readonly @string unsafePointerˢᵇᴍChecker = "unsafe.Pointer"u8;
+internal static ref readonly @string pointerOrInterfaceTypeˢᴍChecker => ref pointerOrInterfaceTypeˢᵇᴍChecker;
+private static readonly @string pointerOrInterfaceTypeˢᵇᴍChecker = "pointer or interface type"u8;
 
 // validRecv verifies that the receiver satisfies its respective spec requirements
 // and reports an error otherwise.
@@ -567,14 +567,14 @@ internal static void validRecvᴍ(ж<Checker> Ꮡcheck, positioner pos, ж<Var> 
         case ж<Basic> u: {
             // unsafe.Pointer is treated like a regular pointer
             if (u.kind == UnsafePointer) {
-                cause = unsafePointerˢ;
+                cause = unsafePointerˢᴍChecker;
             }
             break;
         }
         case ж<Pointer> _:
         case ж<Interface> _: {
             var u = switchᴛ12;
-            cause = pointerOrInterfaceTypeˢ;
+            cause = pointerOrInterfaceTypeˢᴍChecker;
             break;
         }
         case ж<TypeParam> u: {

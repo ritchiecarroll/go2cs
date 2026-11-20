@@ -321,8 +321,8 @@ internal static (fs.File, error) Openᴍ(FS f, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string notADirectoryˢ => ref notADirectoryˢᵇ;
-private static readonly @string notADirectoryˢᵇ = "not a directory"u8;
+private static ref readonly @string notADirectoryˢᴍFS => ref notADirectoryˢᵇᴍFS;
+private static readonly @string notADirectoryˢᵇᴍFS = "not a directory"u8;
 
 // ReadDir reads and returns the entire named directory.
 internal static (slice<fs.DirEntry>, error) ReadDirᴍ(FS f, @string name) {
@@ -332,7 +332,7 @@ internal static (slice<fs.DirEntry>, error) ReadDirᴍ(FS f, @string name) {
     }
     var (dir, ok) = @file._<ж<openDir>>(ᐧ);
     if (!ok) {
-        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: name, Err: errors.New(notADirectoryˢ)))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: name, Err: errors.New(notADirectoryˢᴍFS)))));
     }
     var list = new slice<fs.DirEntry>(len(dir.files));
     foreach (var i in range(len(list))) {
@@ -342,8 +342,8 @@ internal static (slice<fs.DirEntry>, error) ReadDirᴍ(FS f, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
-private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
+private static ref readonly @string isADirectoryˢᴍFS => ref isADirectoryˢᵇᴍFS;
+private static readonly @string isADirectoryˢᵇᴍFS = "is a directory"u8;
 
 // ReadFile reads and returns the content of the named file.
 internal static (slice<byte>, error) ReadFileᴍ(FS f, @string name) {
@@ -353,7 +353,7 @@ internal static (slice<byte>, error) ReadFileᴍ(FS f, @string name) {
     }
     var (ofile, ok) = @file._<ж<openFile>>(ᐧ);
     if (!ok) {
-        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: name, Err: errors.New(isADirectoryˢ)))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: name, Err: errors.New(isADirectoryˢᴍFS)))));
     }
     return (slice<byte>(ofile.f.data), default);
 }
@@ -433,11 +433,11 @@ internal static error Closeᴍ(ref openDir d) { return default; }
 internal static (fs.FileInfo, error) Statᴍ(ref openDir d) { return (new fileжFileInfo(d.f), default); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
-private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
+private static ref readonly @string isADirectoryˢᴍopenDir => ref isADirectoryˢᵇᴍopenDir;
+private static readonly @string isADirectoryˢᵇᴍopenDir = "is a directory"u8;
 
 internal static (nint, error) Readᴍ(ref openDir d, slice<byte> _) {
-    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.f.name, Err: errors.New(isADirectoryˢ)))));
+    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.f.name, Err: errors.New(isADirectoryˢᴍopenDir)))));
 }
 
 internal static (slice<fs.DirEntry>, error) ReadDirᴍ(ref openDir d, nint count) {

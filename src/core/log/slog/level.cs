@@ -49,14 +49,14 @@ public static Level LevelError => 8;
 } partial class slog_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string debugˢ => ref debugˢᵇ;
-private static readonly @string debugˢᵇ = "DEBUG"u8;
-internal static ref readonly @string infoˢ => ref infoˢᵇ;
-private static readonly @string infoˢᵇ = "INFO"u8;
-internal static ref readonly @string warnˢ => ref warnˢᵇ;
-private static readonly @string warnˢᵇ = "WARN"u8;
-internal static ref readonly @string errorˢ => ref errorˢᵇ;
-private static readonly @string errorˢᵇ = "ERROR"u8;
+internal static ref readonly @string debugˢᴍLevel => ref debugˢᵇᴍLevel;
+private static readonly @string debugˢᵇᴍLevel = "DEBUG"u8;
+internal static ref readonly @string infoˢᴍLevel => ref infoˢᵇᴍLevel;
+private static readonly @string infoˢᵇᴍLevel = "INFO"u8;
+internal static ref readonly @string warnˢᴍLevel => ref warnˢᵇᴍLevel;
+private static readonly @string warnˢᵇᴍLevel = "WARN"u8;
+internal static ref readonly @string errorˢᴍLevel => ref errorˢᵇᴍLevel;
+private static readonly @string errorˢᵇᴍLevel = "ERROR"u8;
 
 // String returns a name for the level.
 // If the level has a name, then that name
@@ -81,16 +81,16 @@ internal static @string Stringᴍ(Level l) {
 
     switch (ᐧ) {
     case {} when l < LevelInfo: {
-        return str(debugˢ, l - LevelDebug);
+        return str(debugˢᴍLevel, l - LevelDebug);
     }
     case {} when l < LevelWarn: {
-        return str(infoˢ, l - LevelInfo);
+        return str(infoˢᴍLevel, l - LevelInfo);
     }
     case {} when l < LevelError: {
-        return str(warnˢ, l - LevelWarn);
+        return str(warnˢᴍLevel, l - LevelWarn);
     }
     default: {
-        return str(errorˢ, l - LevelError);
+        return str(errorˢᴍLevel, l - LevelError);
     }}
 }
 
@@ -138,8 +138,8 @@ internal static error UnmarshalTextᴍ(ж<Level> Ꮡl, slice<byte> data) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownNameˢ => ref unknownNameˢᵇ;
-private static readonly @string unknownNameˢᵇ = "unknown name"u8;
+internal static ref readonly @string unknownNameˢᴍLevel => ref unknownNameˢᵇᴍLevel;
+private static readonly @string unknownNameˢᵇᴍLevel = "unknown name"u8;
 
 internal static error /*err*/ parseᴍ(ж<Level> Ꮡl, @string s) {
     error err = default;
@@ -181,7 +181,7 @@ internal static error /*err*/ parseᴍ(ж<Level> Ꮡl, @string s) {
             break;
         }
         default: {
-            err = errors.New(unknownNameˢ); goto ᒐdone;
+            err = errors.New(unknownNameˢᴍLevel); goto ᒐdone;
         }}
         l += ((Level)offset);
         err = default;

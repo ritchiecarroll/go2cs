@@ -24,13 +24,13 @@ partial struct item {
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string eofˢ => ref eofˢᵇ;
-private static readonly @string eofˢᵇ = "EOF"u8;
+internal static ref readonly @string eofˢᴍitem => ref eofˢᵇᴍitem;
+private static readonly @string eofˢᵇᴍitem = "EOF"u8;
 
 internal static @string Stringᴍ(item i) {
     switch (ᐧ) {
     case {} when i.typ == itemEOF: {
-        return eofˢ;
+        return eofˢᴍitem;
     }
     case {} when i.typ == itemError: {
         return i.val;

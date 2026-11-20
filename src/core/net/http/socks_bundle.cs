@@ -24,16 +24,16 @@ internal static time.Time socksaLongTimeAgo = time.Unix(1, 0);
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tooManyAuthenticationˢ => ref tooManyAuthenticationˢᵇ;
-private static readonly @string tooManyAuthenticationˢᵇ = "too many authentication methods"u8;
-internal static ref readonly @string noAcceptableˢ => ref noAcceptableˢᵇ;
-private static readonly @string noAcceptableˢᵇ = "no acceptable authentication methods"u8;
-internal static ref readonly @string unknownAddressTypeˢ => ref unknownAddressTypeˢᵇ;
-private static readonly @string unknownAddressTypeˢᵇ = "unknown address type"u8;
-internal static ref readonly @string fqdnTooLongˢ => ref fqdnTooLongˢᵇ;
-private static readonly @string fqdnTooLongˢᵇ = "FQDN too long"u8;
-internal static ref readonly @string nonZeroReservedFieldˢ => ref nonZeroReservedFieldˢᵇ;
-private static readonly @string nonZeroReservedFieldˢᵇ = "non-zero reserved field"u8;
+internal static ref readonly @string tooManyAuthenticationˢᴍsocksDialer => ref tooManyAuthenticationˢᵇᴍsocksDialer;
+private static readonly @string tooManyAuthenticationˢᵇᴍsocksDialer = "too many authentication methods"u8;
+internal static ref readonly @string noAcceptableˢᴍsocksDialer => ref noAcceptableˢᵇᴍsocksDialer;
+private static readonly @string noAcceptableˢᵇᴍsocksDialer = "no acceptable authentication methods"u8;
+internal static ref readonly @string unknownAddressTypeˢᴍsocksDialer => ref unknownAddressTypeˢᵇᴍsocksDialer;
+private static readonly @string unknownAddressTypeˢᵇᴍsocksDialer = "unknown address type"u8;
+internal static ref readonly @string fqdnTooLongˢᴍsocksDialer => ref fqdnTooLongˢᵇᴍsocksDialer;
+private static readonly @string fqdnTooLongˢᵇᴍsocksDialer = "FQDN too long"u8;
+internal static ref readonly @string nonZeroReservedFieldˢᴍsocksDialer => ref nonZeroReservedFieldˢᵇᴍsocksDialer;
+private static readonly @string nonZeroReservedFieldˢᵇᴍsocksDialer = "non-zero reserved field"u8;
 
 internal static partial (net.Addr, error ctxErr) connectᴍ(ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string address) {
     net.Addr _ᴛ1 = default;
@@ -88,7 +88,7 @@ internal static partial (net.Addr, error ctxErr) connectᴍ(ж<socksDialer> Ꮡd
         } else {
             var ams = d.AuthMethods;
             if (len(ams) > 255) {
-                (_ᴛ1, ctxErr) = (default, errors.New(tooManyAuthenticationˢ)); goto ᒐdone;
+                (_ᴛ1, ctxErr) = (default, errors.New(tooManyAuthenticationˢᴍsocksDialer)); goto ᒐdone;
             }
             b = append(b, (byte)len(ams));
             foreach (var (_, amΔ1) in range(ams)) {
@@ -107,7 +107,7 @@ internal static partial (net.Addr, error ctxErr) connectᴍ(ж<socksDialer> Ꮡd
         }
         socksAuthMethod am = (socksAuthMethod)(nint)b[1];
         if (am == socksAuthMethodNoAcceptableMethods) {
-            (_ᴛ1, ctxErr) = (default, errors.New(noAcceptableˢ)); goto ᒐdone;
+            (_ᴛ1, ctxErr) = (default, errors.New(noAcceptableˢᴍsocksDialer)); goto ᒐdone;
         }
         if (d.Authenticate != nil) {
             ctxErr = d.Authenticate(ctx, new net_ConnᴠReadWriter(c), am); if (ctxErr != nil) {
@@ -125,11 +125,11 @@ internal static partial (net.Addr, error ctxErr) connectᴍ(ж<socksDialer> Ꮡd
                 b = append(b, (byte)(socksAddrTypeIPv6));
                 b = appendꓸꓸꓸ(b, ip6);
             } else {
-                (_ᴛ1, ctxErr) = (default, errors.New(unknownAddressTypeˢ)); goto ᒐdone;
+                (_ᴛ1, ctxErr) = (default, errors.New(unknownAddressTypeˢᴍsocksDialer)); goto ᒐdone;
             }
         } else {
             if (len(host) > 255) {
-                (_ᴛ1, ctxErr) = (default, errors.New(fqdnTooLongˢ)); goto ᒐdone;
+                (_ᴛ1, ctxErr) = (default, errors.New(fqdnTooLongˢᴍsocksDialer)); goto ᒐdone;
             }
             b = append(b, (byte)(socksAddrTypeFQDN));
             b = append(b, (byte)len(host));
@@ -150,7 +150,7 @@ internal static partial (net.Addr, error ctxErr) connectᴍ(ж<socksDialer> Ꮡd
             (_ᴛ1, ctxErr) = (default, errors.New("unknown error "u8 + cmdErr.String())); goto ᒐdone;
         }
         if (b[2] != 0) {
-            (_ᴛ1, ctxErr) = (default, errors.New(nonZeroReservedFieldˢ)); goto ᒐdone;
+            (_ᴛ1, ctxErr) = (default, errors.New(nonZeroReservedFieldˢᴍsocksDialer)); goto ᒐdone;
         }
         nint l = 2;
         ref var a = ref heap(new socksAddr(), out var Ꮡa);
@@ -219,18 +219,18 @@ partial struct socksCommand /*num:nint*/;
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string socksConnectˢ => ref socksConnectˢᵇ;
-private static readonly @string socksConnectˢᵇ = "socks connect"u8;
-internal static ref readonly @string socksBindˢ => ref socksBindˢᵇ;
-private static readonly @string socksBindˢᵇ = "socks bind"u8;
+internal static ref readonly @string socksConnectˢᴍsocksCommand => ref socksConnectˢᵇᴍsocksCommand;
+private static readonly @string socksConnectˢᵇᴍsocksCommand = "socks connect"u8;
+internal static ref readonly @string socksBindˢᴍsocksCommand => ref socksBindˢᵇᴍsocksCommand;
+private static readonly @string socksBindˢᵇᴍsocksCommand = "socks bind"u8;
 
 internal static @string Stringᴍ(socksCommand cmd) {
     switch (cmd) {
     case var ᴛ when ᴛ == socksCmdConnect: {
-        return socksConnectˢ;
+        return socksConnectˢᴍsocksCommand;
     }
     case var ᴛ when ᴛ == sockscmdBind: {
-        return socksBindˢ;
+        return socksBindˢᴍsocksCommand;
     }
     default: {
         return "socks "u8 + strconv.Itoa((nint)cmd);
@@ -248,53 +248,53 @@ partial struct socksReply /*num:nint*/;
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string succeededˢ => ref succeededˢᵇ;
-private static readonly @string succeededˢᵇ = "succeeded"u8;
-internal static ref readonly @string generalSocksServerˢ => ref generalSocksServerˢᵇ;
-private static readonly @string generalSocksServerˢᵇ = "general SOCKS server failure"u8;
-internal static ref readonly @string connectionNotAllowedByˢ => ref connectionNotAllowedByˢᵇ;
-private static readonly @string connectionNotAllowedByˢᵇ = "connection not allowed by ruleset"u8;
-internal static ref readonly @string networkUnreachableˢ => ref networkUnreachableˢᵇ;
-private static readonly @string networkUnreachableˢᵇ = "network unreachable"u8;
-internal static ref readonly @string hostUnreachableˢ => ref hostUnreachableˢᵇ;
-private static readonly @string hostUnreachableˢᵇ = "host unreachable"u8;
-internal static ref readonly @string connectionRefusedˢ => ref connectionRefusedˢᵇ;
-private static readonly @string connectionRefusedˢᵇ = "connection refused"u8;
-internal static ref readonly @string ttlExpiredˢ => ref ttlExpiredˢᵇ;
-private static readonly @string ttlExpiredˢᵇ = "TTL expired"u8;
-internal static ref readonly @string commandNotSupportedˢ => ref commandNotSupportedˢᵇ;
-private static readonly @string commandNotSupportedˢᵇ = "command not supported"u8;
-internal static ref readonly @string addressTypeNotSupportedˢ => ref addressTypeNotSupportedˢᵇ;
-private static readonly @string addressTypeNotSupportedˢᵇ = "address type not supported"u8;
+internal static ref readonly @string succeededˢᴍsocksReply => ref succeededˢᵇᴍsocksReply;
+private static readonly @string succeededˢᵇᴍsocksReply = "succeeded"u8;
+internal static ref readonly @string generalSocksServerˢᴍsocksReply => ref generalSocksServerˢᵇᴍsocksReply;
+private static readonly @string generalSocksServerˢᵇᴍsocksReply = "general SOCKS server failure"u8;
+internal static ref readonly @string connectionNotAllowedByˢᴍsocksReply => ref connectionNotAllowedByˢᵇᴍsocksReply;
+private static readonly @string connectionNotAllowedByˢᵇᴍsocksReply = "connection not allowed by ruleset"u8;
+internal static ref readonly @string networkUnreachableˢᴍsocksReply => ref networkUnreachableˢᵇᴍsocksReply;
+private static readonly @string networkUnreachableˢᵇᴍsocksReply = "network unreachable"u8;
+internal static ref readonly @string hostUnreachableˢᴍsocksReply => ref hostUnreachableˢᵇᴍsocksReply;
+private static readonly @string hostUnreachableˢᵇᴍsocksReply = "host unreachable"u8;
+internal static ref readonly @string connectionRefusedˢᴍsocksReply => ref connectionRefusedˢᵇᴍsocksReply;
+private static readonly @string connectionRefusedˢᵇᴍsocksReply = "connection refused"u8;
+internal static ref readonly @string ttlExpiredˢᴍsocksReply => ref ttlExpiredˢᵇᴍsocksReply;
+private static readonly @string ttlExpiredˢᵇᴍsocksReply = "TTL expired"u8;
+internal static ref readonly @string commandNotSupportedˢᴍsocksReply => ref commandNotSupportedˢᵇᴍsocksReply;
+private static readonly @string commandNotSupportedˢᵇᴍsocksReply = "command not supported"u8;
+internal static ref readonly @string addressTypeNotSupportedˢᴍsocksReply => ref addressTypeNotSupportedˢᵇᴍsocksReply;
+private static readonly @string addressTypeNotSupportedˢᵇᴍsocksReply = "address type not supported"u8;
 
 internal static @string Stringᴍ(socksReply code) {
     switch (code) {
     case var ᴛ when ᴛ == socksStatusSucceeded: {
-        return succeededˢ;
+        return succeededˢᴍsocksReply;
     }
     case var ᴛ when ᴛ == (socksReply)(0x01): {
-        return generalSocksServerˢ;
+        return generalSocksServerˢᴍsocksReply;
     }
     case var ᴛ when ᴛ == (socksReply)(0x02): {
-        return connectionNotAllowedByˢ;
+        return connectionNotAllowedByˢᴍsocksReply;
     }
     case var ᴛ when ᴛ == (socksReply)(0x03): {
-        return networkUnreachableˢ;
+        return networkUnreachableˢᴍsocksReply;
     }
     case var ᴛ when ᴛ == (socksReply)(0x04): {
-        return hostUnreachableˢ;
+        return hostUnreachableˢᴍsocksReply;
     }
     case var ᴛ when ᴛ == (socksReply)(0x05): {
-        return connectionRefusedˢ;
+        return connectionRefusedˢᴍsocksReply;
     }
     case var ᴛ when ᴛ == (socksReply)(0x06): {
-        return ttlExpiredˢ;
+        return ttlExpiredˢᴍsocksReply;
     }
     case var ᴛ when ᴛ == (socksReply)(0x07): {
-        return commandNotSupportedˢ;
+        return commandNotSupportedˢᴍsocksReply;
     }
     case var ᴛ when ᴛ == (socksReply)(0x08): {
-        return addressTypeNotSupportedˢ;
+        return addressTypeNotSupportedˢᴍsocksReply;
     }
     default: {
         return "unknown code: "u8 + strconv.Itoa((nint)code);
@@ -330,20 +330,20 @@ partial struct socksAddr {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string socksˢ => ref socksˢᵇ;
-private static readonly @string socksˢᵇ = "socks"u8;
+internal static ref readonly @string socksˢᴍsocksAddr => ref socksˢᵇᴍsocksAddr;
+private static readonly @string socksˢᵇᴍsocksAddr = "socks"u8;
 
-internal static @string Networkᴍ(ref socksAddr a) { return socksˢ; }
+internal static @string Networkᴍ(ref socksAddr a) { return socksˢᴍsocksAddr; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍsocksAddr => ref nilˢᵇᴍsocksAddr;
+private static readonly @string nilˢᵇᴍsocksAddr = "<nil>"u8;
 
 internal static @string Stringᴍ(ж<socksAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return nilˢ;
+        return nilˢᴍsocksAddr;
     }
     @string port = strconv.Itoa(a.Port);
     if (a.IP == nil) {
@@ -396,8 +396,8 @@ partial struct socksDialer {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilContextˢ => ref nilContextˢᵇ;
-private static readonly @string nilContextˢᵇ = "nil context"u8;
+internal static ref readonly @string nilContextˢᴍsocksDialer => ref nilContextˢᵇᴍsocksDialer;
+private static readonly @string nilContextˢᵇᴍsocksDialer = "nil context"u8;
 
 // DialContext connects to the provided address on the provided
 // network.
@@ -418,7 +418,7 @@ internal static (net.Conn, error) DialContextᴍ(ж<socksDialer> Ꮡd, context.C
     }
     if (ctx == nil) {
         var (proxy, dst, _) = d.pathAddrs(address);
-        return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errors.New(nilContextˢ)))));
+        return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errors.New(nilContextˢᴍsocksDialer)))));
     }
     error err = default;
     net.Conn c = default;
@@ -456,7 +456,7 @@ internal static (net.Addr, error) DialWithConnᴍ(ж<socksDialer> Ꮡd, context.
     }
     if (ctx == nil) {
         var (proxy, dst, _) = d.pathAddrs(address);
-        return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errors.New(nilContextˢ)))));
+        return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errors.New(nilContextˢᴍsocksDialer)))));
     }
     var (a, err) = Ꮡd.connect(ctx, c, address);
     if (err != nil) {
@@ -498,10 +498,10 @@ internal static (net.Conn, error) Dialᴍ(ж<socksDialer> Ꮡd, @string network,
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string networkNotImplementedˢ => ref networkNotImplementedˢᵇ;
-private static readonly @string networkNotImplementedˢᵇ = "network not implemented"u8;
-internal static ref readonly @string commandNotImplementedˢ => ref commandNotImplementedˢᵇ;
-private static readonly @string commandNotImplementedˢᵇ = "command not implemented"u8;
+internal static ref readonly @string networkNotImplementedˢᴍsocksDialer => ref networkNotImplementedˢᵇᴍsocksDialer;
+private static readonly @string networkNotImplementedˢᵇᴍsocksDialer = "network not implemented"u8;
+internal static ref readonly @string commandNotImplementedˢᴍsocksDialer => ref commandNotImplementedˢᵇᴍsocksDialer;
+private static readonly @string commandNotImplementedˢᵇᴍsocksDialer = "command not implemented"u8;
 
 internal static error validateTargetᴍ(ref socksDialer d, @string network, @string address) {
     switch (ᐧ) {
@@ -509,14 +509,14 @@ internal static error validateTargetᴍ(ref socksDialer d, @string network, @str
         break;
     }
     default: {
-        return errors.New(networkNotImplementedˢ);
+        return errors.New(networkNotImplementedˢᴍsocksDialer);
     }}
     switch (d.cmd) {
     case var ᴛ when ᴛ == socksCmdConnect || ᴛ == sockscmdBind: {
         break;
     }
     default: {
-        return errors.New(commandNotImplementedˢ);
+        return errors.New(commandNotImplementedˢᴍsocksDialer);
     }}
     return default;
 }
@@ -567,12 +567,12 @@ partial struct socksUsernamePassword {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidUsernamePasswordˢ => ref invalidUsernamePasswordˢᵇ;
-private static readonly @string invalidUsernamePasswordˢᵇ = "invalid username/password"u8;
-internal static ref readonly @string invalidUsernamePasswordˢ2 => ref invalidUsernamePasswordˢ2ᵇ;
-private static readonly @string invalidUsernamePasswordˢ2ᵇ = "invalid username/password version"u8;
-internal static ref readonly @string usernamePasswordˢ => ref usernamePasswordˢᵇ;
-private static readonly @string usernamePasswordˢᵇ = "username/password authentication failed"u8;
+internal static ref readonly @string invalidUsernamePasswordˢᴍsocksUsernamePassword => ref invalidUsernamePasswordˢᵇᴍsocksUsernamePassword;
+private static readonly @string invalidUsernamePasswordˢᵇᴍsocksUsernamePassword = "invalid username/password"u8;
+internal static ref readonly @string invalidUsernamePasswordˢ2ᴍsocksUsernamePassword => ref invalidUsernamePasswordˢ2ᵇᴍsocksUsernamePassword;
+private static readonly @string invalidUsernamePasswordˢ2ᵇᴍsocksUsernamePassword = "invalid username/password version"u8;
+internal static ref readonly @string usernamePasswordˢᴍsocksUsernamePassword => ref usernamePasswordˢᵇᴍsocksUsernamePassword;
+private static readonly @string usernamePasswordˢᵇᴍsocksUsernamePassword = "username/password authentication failed"u8;
 
 // Authenticate authenticates a pair of username and password with the
 // proxy server.
@@ -583,7 +583,7 @@ internal static error Authenticateᴍ(ref socksUsernamePassword up, context.Cont
     }
     case var ᴛ when ᴛ == socksAuthMethodUsernamePassword: {
         if (len(up.Username) == 0 || len(up.Username) > 255 || len(up.Password) > 255) {
-            return errors.New(invalidUsernamePasswordˢ);
+            return errors.New(invalidUsernamePasswordˢᴍsocksUsernamePassword);
         }
         var b = slice<byte>([socksauthUsernamePasswordVersion]);
         b = append(b, (byte)len(up.Username));
@@ -603,10 +603,10 @@ internal static error Authenticateᴍ(ref socksUsernamePassword up, context.Cont
             }
         }
         if (b[0] != socksauthUsernamePasswordVersion) {
-            return errors.New(invalidUsernamePasswordˢ2);
+            return errors.New(invalidUsernamePasswordˢ2ᴍsocksUsernamePassword);
         }
         if (b[1] != socksauthStatusSucceeded) {
-            return errors.New(usernamePasswordˢ);
+            return errors.New(usernamePasswordˢᴍsocksUsernamePassword);
         }
         return default;
     }}

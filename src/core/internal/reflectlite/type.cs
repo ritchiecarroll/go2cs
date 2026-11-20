@@ -154,15 +154,15 @@ internal static bool embeddedᴍ(name n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readVarintˢ => ref readVarintˢᵇ;
-private static readonly @string readVarintˢᵇ = "read varint"u8;
+internal static ref readonly @string readVarintˢᴍname => ref readVarintˢᵇᴍname;
+private static readonly @string readVarintˢᵇᴍname = "read varint"u8;
 
 // readVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
 internal static (nint, nint) readVarintᴍ(name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
-        var x = n.data(off + i, readVarintˢ).Value;
+        var x = n.data(off + i, readVarintˢᴍname).Value;
         v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
@@ -171,15 +171,15 @@ internal static (nint, nint) readVarintᴍ(name n, nint off) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nonEmptyStringˢ => ref nonEmptyStringˢᵇ;
-private static readonly @string nonEmptyStringˢᵇ = "non-empty string"u8;
+internal static ref readonly @string nonEmptyStringˢᴍname => ref nonEmptyStringˢᵇᴍname;
+private static readonly @string nonEmptyStringˢᵇᴍname = "non-empty string"u8;
 
 internal static @string nameᴍ(name n) {
     if (n.bytes == nil) {
         return ""u8;
     }
     var (i, l) = n.readVarint(1);
-    return @unsafe.String(n.data(1 + i, nonEmptyStringˢ), l);
+    return @unsafe.String(n.data(1 + i, nonEmptyStringˢᴍname), l);
 }
 
 internal static @string tagᴍ(name n) {
@@ -188,7 +188,7 @@ internal static @string tagᴍ(name n) {
     }
     var (i, l) = n.readVarint(1);
     var (i2, l2) = n.readVarint(1 + i + l);
-    return @unsafe.String(n.data(1 + i + l + i2, nonEmptyStringˢ), l2);
+    return @unsafe.String(n.data(1 + i + l + i2, nonEmptyStringˢᴍname), l2);
 }
 
 } partial class reflectlite_package {

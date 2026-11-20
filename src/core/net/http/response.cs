@@ -130,15 +130,15 @@ public static error ErrNoLocation = errors.New("http: no Location header in resp
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string locationˢ => ref locationˢᵇ;
-private static readonly @string locationˢᵇ = "Location"u8;
+internal static ref readonly @string locationˢᴍResponse => ref locationˢᵇᴍResponse;
+private static readonly @string locationˢᵇᴍResponse = "Location"u8;
 
 // Location returns the URL of the response's "Location" header,
 // if present. Relative redirects are resolved relative to
 // [Response.Request]. [ErrNoLocation] is returned if no
 // Location header is present.
 internal static (ж<url.URL>, error) Locationᴍ(ref Response r) {
-    @string lv = r.Header.Get(locationˢ);
+    @string lv = r.Header.Get(locationˢᴍResponse);
     if (lv == ""u8) {
         return (default, ErrNoLocation);
     }
@@ -254,8 +254,8 @@ internal partial struct Write_r1 /*dyn*/ {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentLength0ˢ => ref contentLength0ˢᵇ;
-private static readonly @string contentLength0ˢᵇ = "Content-Length: 0\r\n"u8;
+internal static ref readonly @string contentLength0ˢᴍResponse => ref contentLength0ˢᵇᴍResponse;
+private static readonly @string contentLength0ˢᵇᴍResponse = "Content-Length: 0\r\n"u8;
 
 // Write writes r to w in the HTTP/1.x server response format,
 // including the status line, headers, body, and optional trailer.
@@ -341,7 +341,7 @@ internal static error Writeᴍ(ref Response r, io.Writer w) {
     // POST/PUT requests, even if zero length. See Issue 8180.
     var contentLengthAlreadySent = tw.shouldSendContentLength();
     if (r1.ContentLength == 0 && !chunked(r1.TransferEncoding) && !contentLengthAlreadySent && bodyAllowedForStatus(r.StatusCode)) {
-        var (_, errΔ3) = io.WriteString(w, contentLength0ˢ); if (errΔ3 != nil) {
+        var (_, errΔ3) = io.WriteString(w, contentLength0ˢᴍResponse); if (errΔ3 != nil) {
             return errΔ3;
         }
     }

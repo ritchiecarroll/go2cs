@@ -144,8 +144,8 @@ internal static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFuncᴍ(ref Config 
 } partial class httpproxy_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string refusingToUseHttpProxyˢ => ref refusingToUseHttpProxyˢᵇ;
-private static readonly @string refusingToUseHttpProxyˢᵇ = "refusing to use HTTP_PROXY value in CGI environment; see golang.org/s/cgihttpproxy"u8;
+private static ref readonly @string refusingToUseHttpProxyˢᴍconfig => ref refusingToUseHttpProxyˢᵇᴍconfig;
+private static readonly @string refusingToUseHttpProxyˢᵇᴍconfig = "refusing to use HTTP_PROXY value in CGI environment; see golang.org/s/cgihttpproxy"u8;
 
 internal static (ж<url.URL>, error) proxyForURLᴍ(ref config cfg, ж<url.URL> ᏑreqURL) {
     ref var reqURL = ref ᏑreqURL.DerefOrNull();
@@ -156,7 +156,7 @@ internal static (ж<url.URL>, error) proxyForURLᴍ(ref config cfg, ж<url.URL> 
     } else if (reqURL.Scheme == "http"u8) {
         proxy = cfg.httpProxy;
         if (proxy != nil && cfg.CGI) {
-            return (default, errors.New(refusingToUseHttpProxyˢ));
+            return (default, errors.New(refusingToUseHttpProxyˢᴍconfig));
         }
     }
     if (proxy == nil) {

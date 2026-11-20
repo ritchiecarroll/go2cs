@@ -193,8 +193,8 @@ partial struct htmlSig /*[]byte*/;
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string textHtmlCharsetUtf8ˢ => ref textHtmlCharsetUtf8ˢᵇ;
-private static readonly @string textHtmlCharsetUtf8ˢᵇ = "text/html; charset=utf-8"u8;
+internal static ref readonly @string textHtmlCharsetUtf8ˢᴍhtmlSig => ref textHtmlCharsetUtf8ˢᵇᴍhtmlSig;
+private static readonly @string textHtmlCharsetUtf8ˢᵇᴍhtmlSig = "text/html; charset=utf-8"u8;
 
 internal static @string matchᴍ(htmlSig h, slice<byte> data, nint firstNonWS) {
     data = data.slice(firstNonWS);
@@ -214,7 +214,7 @@ internal static @string matchᴍ(htmlSig h, slice<byte> data, nint firstNonWS) {
     if (!isTT(data[len(h)])) {
         return ""u8;
     }
-    return textHtmlCharsetUtf8ˢ;
+    return textHtmlCharsetUtf8ˢᴍhtmlSig;
 }
 
 } partial class http_package {
@@ -228,8 +228,8 @@ partial struct mp4Sig {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string videoMp4ˢ => ref videoMp4ˢᵇ;
-private static readonly @string videoMp4ˢᵇ = "video/mp4"u8;
+internal static ref readonly @string videoMp4ˢᴍmp4Sig => ref videoMp4ˢᵇᴍmp4Sig;
+private static readonly @string videoMp4ˢᵇᴍmp4Sig = "video/mp4"u8;
 
 internal static @string matchᴍ(mp4Sig _, slice<byte> data, nint firstNonWS) {
     // https://mimesniff.spec.whatwg.org/#signature-for-mp4
@@ -250,7 +250,7 @@ internal static @string matchᴍ(mp4Sig _, slice<byte> data, nint firstNonWS) {
             continue;
         }
         if (bytes.Equal(data.slice(st, st + 3), mp4)) {
-            return videoMp4ˢ;
+            return videoMp4ˢᴍmp4Sig;
         }
     }
     return ""u8;
@@ -264,8 +264,8 @@ partial struct textSig {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string textPlainCharsetUtf8ˢ => ref textPlainCharsetUtf8ˢᵇ;
-private static readonly @string textPlainCharsetUtf8ˢᵇ = "text/plain; charset=utf-8"u8;
+internal static ref readonly @string textPlainCharsetUtf8ˢᴍtextSig => ref textPlainCharsetUtf8ˢᵇᴍtextSig;
+private static readonly @string textPlainCharsetUtf8ˢᵇᴍtextSig = "text/plain; charset=utf-8"u8;
 
 internal static @string matchᴍ(textSig _, slice<byte> data, nint firstNonWS) {
     // c.f. section 5, step 4.
@@ -275,7 +275,7 @@ internal static @string matchᴍ(textSig _, slice<byte> data, nint firstNonWS) {
             return ""u8;
         }}
     }
-    return textPlainCharsetUtf8ˢ;
+    return textPlainCharsetUtf8ˢᴍtextSig;
 }
 
 }

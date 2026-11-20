@@ -223,8 +223,8 @@ internal static item expectOneOfᴍ(ref Tree t, itemType expected1, itemType exp
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string actionˢ => ref actionˢᵇ;
-private static readonly @string actionˢᵇ = " action"u8;
+internal static ref readonly @string actionˢᴍTree => ref actionˢᵇᴍTree;
+private static readonly @string actionˢᵇᴍTree = " action"u8;
 
 // unexpected complains about the token and terminates processing.
 internal static void unexpectedᴍ(ref Tree t, item token, @string context) {
@@ -232,7 +232,7 @@ internal static void unexpectedᴍ(ref Tree t, item token, @string context) {
         @string extra = ""u8;
         if (t.actionLine != 0 && t.actionLine != token.line) {
             extra = fmt.Sprintf(" in action started at %s:%d"u8, t.ParseName, t.actionLine);
-            if (strings.HasSuffix(token.val, actionˢ)) {
+            if (strings.HasSuffix(token.val, actionˢᴍTree)) {
                 extra = extra[(int)(len(" in action"))..]; // avoid "action in action"
             }
         }
@@ -265,10 +265,10 @@ internal static void recoverᴍ(ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string breakˢ2 => ref breakˢ2ᵇ;
-private static readonly @string breakˢ2ᵇ = "break"u8;
-internal static ref readonly @string continueˢ2 => ref continueˢ2ᵇ;
-private static readonly @string continueˢ2ᵇ = "continue"u8;
+internal static ref readonly @string breakˢ2ᴍTree => ref breakˢ2ᵇᴍTree;
+private static readonly @string breakˢ2ᵇᴍTree = "break"u8;
+internal static ref readonly @string continueˢ2ᴍTree => ref continueˢ2ᵇᴍTree;
+private static readonly @string continueˢ2ᵇᴍTree = "continue"u8;
 
 // startParse initializes the parser, using the lexer.
 internal static void startParseᴍ(ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
@@ -282,8 +282,8 @@ internal static void startParseᴍ(ref Tree t, slice<map<@string, any>> funcs, �
     t.stackDepth = 0;
     lex.options = new lexOptions(
         emitComment: (Mode)(t.Mode & ParseComments) != 0,
-        breakOK: !t.hasFunction(breakˢ2),
-        continueOK: !t.hasFunction(continueˢ2)
+        breakOK: !t.hasFunction(breakˢ2ᴍTree),
+        continueOK: !t.hasFunction(continueˢ2ᴍTree)
     );
 }
 
@@ -385,8 +385,8 @@ public static bool IsEmptyTree(Node n) {
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string definitionˢ => ref definitionˢᵇ;
-private static readonly @string definitionˢᵇ = "definition"u8;
+internal static ref readonly @string definitionˢᴍTree => ref definitionˢᵇᴍTree;
+private static readonly @string definitionˢᵇᴍTree = "definition"u8;
 
 // parse is the top-level parser for a template, essentially the same
 // as itemList except it also parses {{define}} actions.
@@ -399,7 +399,7 @@ internal static void parseᴍ(ж<Tree> Ꮡt) {
         if (t.peek().typ == itemLeftDelim) {
             var delim = t.next();
             if (t.nextNonSpace().typ == itemDefine) {
-                var newT = New(definitionˢ); // name will be updated once we know it.
+                var newT = New(definitionˢᴍTree); // name will be updated once we know it.
                 newT.text = t.text;
                 newT.Mode = t.Mode;
                 newT.ParseName = t.ParseName;
@@ -423,8 +423,8 @@ internal static void parseᴍ(ж<Tree> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string contextᶜ => ref contextᶜᵇ;
-private static readonly @string contextᶜᵇ = "define clause"u8;
+internal static ref readonly @string contextᶜᴍTree => ref contextᶜᵇᴍTree;
+private static readonly @string contextᶜᵇᴍTree = "define clause"u8;
 
 // parseDefinition parses a {{define}} ...  {{end}} template definition and
 // installs the definition in t.treeSet. The "define" keyword has already
@@ -432,7 +432,7 @@ private static readonly @string contextᶜᵇ = "define clause"u8;
 internal static void parseDefinitionᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string context = contextᶜ;
+    @string context = contextᶜᴍTree;
     var name = t.expectOneOf(itemString, itemRawString, context);
     error err = default;
     (t.Name, err) = strconv.Unquote(name.val);
@@ -473,8 +473,8 @@ internal static (ж<ListNode> list, Node next) itemListᴍ(ж<Tree> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inputˢ => ref inputˢᵇ;
-private static readonly @string inputˢᵇ = "input"u8;
+internal static ref readonly @string inputˢᴍTree => ref inputˢᵇᴍTree;
+private static readonly @string inputˢᵇᴍTree = "input"u8;
 
 // textOrAction:
 //
@@ -500,7 +500,7 @@ internal static Node textOrActionᴍ(ж<Tree> Ꮡt) {
                 return new CommentNodeжNode(Ꮡt.newComment(token.pos, token.val));
             }
             default: {
-                t.unexpected(token, inputˢ);
+                t.unexpected(token, inputˢᴍTree);
                 break;
             }}
         }
@@ -515,8 +515,8 @@ internal static void clearActionLineᴍ(ref Tree t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string commandˢ => ref commandˢᵇ;
-private static readonly @string commandˢᵇ = "command"u8;
+internal static ref readonly @string commandˢᴍTree => ref commandˢᵇᴍTree;
+private static readonly @string commandˢᵇᴍTree = "command"u8;
 
 // Action:
 //
@@ -560,12 +560,12 @@ internal static Node /*n*/ actionᴍ(ж<Tree> Ꮡt) {
     t.backup();
     var token = t.peek();
     // Do not pop variables; they persist until "end".
-    return new ActionNodeжNode(Ꮡt.newAction(token.pos, token.line, Ꮡt.pipeline(commandˢ, itemRightDelim)));
+    return new ActionNodeжNode(Ꮡt.newAction(token.pos, token.line, Ꮡt.pipeline(commandˢᴍTree, itemRightDelim)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string breakˢ => ref breakˢᵇ;
-private static readonly @string breakˢᵇ = "{{break}}"u8;
+internal static ref readonly @string breakˢᴍTree => ref breakˢᵇᴍTree;
+private static readonly @string breakˢᵇᴍTree = "{{break}}"u8;
 
 // Break:
 //
@@ -576,7 +576,7 @@ internal static Node breakControlᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
-        t.unexpected(token, breakˢ);
+        t.unexpected(token, breakˢᴍTree);
     }
     if (t.rangeDepth == 0) {
         t.errorf("{{break}} outside {{range}}");
@@ -585,8 +585,8 @@ internal static Node breakControlᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string continueˢ => ref continueˢᵇ;
-private static readonly @string continueˢᵇ = "{{continue}}"u8;
+internal static ref readonly @string continueˢᴍTree => ref continueˢᵇᴍTree;
+private static readonly @string continueˢᵇᴍTree = "{{continue}}"u8;
 
 // Continue:
 //
@@ -597,7 +597,7 @@ internal static Node continueControlᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
-        t.unexpected(token, continueˢ);
+        t.unexpected(token, continueˢᴍTree);
     }
     if (t.rangeDepth == 0) {
         t.errorf("{{continue}} outside {{range}}");
@@ -768,8 +768,8 @@ internal static Node ifControlᴍ(ж<Tree> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
-private static readonly @string rangeˢᵇ = "range"u8;
+internal static ref readonly @string rangeˢᴍTree => ref rangeˢᵇᴍTree;
+private static readonly @string rangeˢᵇᴍTree = "range"u8;
 
 // Range:
 //
@@ -778,14 +778,14 @@ private static readonly @string rangeˢᵇ = "range"u8;
 //
 // Range keyword is past.
 internal static Node rangeControlᴍ(ж<Tree> Ꮡt) {
-    var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ);
+    var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢᴍTree);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
     return new RangeNodeжNode(r);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string withˢ => ref withˢᵇ;
-private static readonly @string withˢᵇ = "with"u8;
+internal static ref readonly @string withˢᴍTree => ref withˢᵇᴍTree;
+private static readonly @string withˢᵇᴍTree = "with"u8;
 
 // With:
 //
@@ -794,13 +794,13 @@ private static readonly @string withˢᵇ = "with"u8;
 //
 // If keyword is past.
 internal static Node withControlᴍ(ж<Tree> Ꮡt) {
-    var (ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15) = Ꮡt.parseControl(withˢ);
+    var (ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15) = Ꮡt.parseControl(withˢᴍTree);
     return new WithNodeжNode(Ꮡt.newWith(ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string endˢ2 => ref endˢ2ᵇ;
-private static readonly @string endˢ2ᵇ = "end"u8;
+internal static ref readonly @string endˢ2ᴍTree => ref endˢ2ᵇᴍTree;
+private static readonly @string endˢ2ᵇᴍTree = "end"u8;
 
 // End:
 //
@@ -810,12 +810,12 @@ private static readonly @string endˢ2ᵇ = "end"u8;
 internal static Node endControlᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    return new endNodeжNode(Ꮡt.newEnd(t.expect(itemRightDelim, endˢ2).pos));
+    return new endNodeжNode(Ꮡt.newEnd(t.expect(itemRightDelim, endˢ2ᴍTree).pos));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string elseˢ2 => ref elseˢ2ᵇ;
-private static readonly @string elseˢ2ᵇ = "else"u8;
+internal static ref readonly @string elseˢ2ᴍTree => ref elseˢ2ᵇᴍTree;
+private static readonly @string elseˢ2ᵇᴍTree = "else"u8;
 
 // Else:
 //
@@ -832,13 +832,13 @@ internal static Node elseControlᴍ(ж<Tree> Ꮡt) {
     if (peek.typ == itemIf || peek.typ == itemWith) {
         return new elseNodeжNode(Ꮡt.newElse(peek.pos, peek.line));
     }
-    var token = t.expect(itemRightDelim, elseˢ2);
+    var token = t.expect(itemRightDelim, elseˢ2ᴍTree);
     return new elseNodeжNode(Ꮡt.newElse(token.pos, token.line));
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string contextᶜ1 => ref contextᶜ1ᵇ;
-private static readonly @string contextᶜ1ᵇ = "block clause"u8;
+internal static ref readonly @string contextᶜ1ᴍTree => ref contextᶜ1ᵇᴍTree;
+private static readonly @string contextᶜ1ᵇᴍTree = "block clause"u8;
 
 // Block:
 //
@@ -850,7 +850,7 @@ private static readonly @string contextᶜ1ᵇ = "block clause"u8;
 internal static Node blockControlᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string context = contextᶜ1;
+    @string context = contextᶜ1ᴍTree;
 
     var token = t.nextNonSpace();
     @string name = t.parseTemplateName(token, context);
@@ -873,8 +873,8 @@ internal static Node blockControlᴍ(ж<Tree> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string contextᶜ2 => ref contextᶜ2ᵇ;
-private static readonly @string contextᶜ2ᵇ = "template clause"u8;
+internal static ref readonly @string contextᶜ2ᴍTree => ref contextᶜ2ᵇᴍTree;
+private static readonly @string contextᶜ2ᵇᴍTree = "template clause"u8;
 
 // Template:
 //
@@ -885,7 +885,7 @@ private static readonly @string contextᶜ2ᵇ = "template clause"u8;
 internal static Node templateControlᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string context = contextᶜ2;
+    @string context = contextᶜ2ᴍTree;
     var token = t.nextNonSpace();
     @string name = t.parseTemplateName(token, context);
     ж<PipeNode> pipe = default;
@@ -917,8 +917,8 @@ internal static @string /*name*/ parseTemplateNameᴍ(ref Tree t, item token, @s
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string operandˢ => ref operandˢᵇ;
-private static readonly @string operandˢᵇ = "operand"u8;
+internal static ref readonly @string operandˢᴍTree => ref operandˢᵇᴍTree;
+private static readonly @string operandˢᵇᴍTree = "operand"u8;
 
 // command:
 //
@@ -951,7 +951,7 @@ internal static ж<CommandNode> commandᴍ(ж<Tree> Ꮡt) {
             break;
         }
         default: {
-            t.unexpected(token, operandˢ);
+            t.unexpected(token, operandˢᴍTree);
             break;
         }}
         break;
@@ -1008,8 +1008,8 @@ internal static Node operandᴍ(ж<Tree> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string parenthesizedPipelineˢ => ref parenthesizedPipelineˢᵇ;
-private static readonly @string parenthesizedPipelineˢᵇ = "parenthesized pipeline"u8;
+internal static ref readonly @string parenthesizedPipelineˢᴍTree => ref parenthesizedPipelineˢᵇᴍTree;
+private static readonly @string parenthesizedPipelineˢᵇᴍTree = "parenthesized pipeline"u8;
 
 // term:
 //
@@ -1067,7 +1067,7 @@ internal static Node termᴍ(ж<Tree> Ꮡt) {
                 defer(() => {
                     Ꮡt.Value.stackDepth--;
                 }, ref ᒐ);
-                return new PipeNodeжNode(Ꮡt.pipeline(parenthesizedPipelineˢ, itemRightParen));
+                return new PipeNodeжNode(Ꮡt.pipeline(parenthesizedPipelineˢᴍTree, itemRightParen));
             }
             case var ᴛ when ᴛ == itemString || ᴛ == itemRawString: {
                 var (s, err) = strconv.Unquote(token.val);

@@ -292,28 +292,28 @@ public static void SetCookie(ResponseWriter w, ж<Cookie> cookie) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pathˢ => ref pathˢᵇ;
-private static readonly @string pathˢᵇ = "; Path="u8;
-internal static ref readonly @string domainˢ => ref domainˢᵇ;
-private static readonly @string domainˢᵇ = "; Domain="u8;
-internal static ref readonly @string expiresˢ => ref expiresˢᵇ;
-private static readonly @string expiresˢᵇ = "; Expires="u8;
-internal static ref readonly @string maxAgeˢ => ref maxAgeˢᵇ;
-private static readonly @string maxAgeˢᵇ = "; Max-Age="u8;
-internal static ref readonly @string maxAge0ˢ => ref maxAge0ˢᵇ;
-private static readonly @string maxAge0ˢᵇ = "; Max-Age=0"u8;
-internal static ref readonly @string httpOnlyˢ => ref httpOnlyˢᵇ;
-private static readonly @string httpOnlyˢᵇ = "; HttpOnly"u8;
-internal static ref readonly @string secureˢ => ref secureˢᵇ;
-private static readonly @string secureˢᵇ = "; Secure"u8;
-internal static ref readonly @string sameSiteNoneˢ => ref sameSiteNoneˢᵇ;
-private static readonly @string sameSiteNoneˢᵇ = "; SameSite=None"u8;
-internal static ref readonly @string sameSiteLaxˢ => ref sameSiteLaxˢᵇ;
-private static readonly @string sameSiteLaxˢᵇ = "; SameSite=Lax"u8;
-internal static ref readonly @string sameSiteStrictˢ => ref sameSiteStrictˢᵇ;
-private static readonly @string sameSiteStrictˢᵇ = "; SameSite=Strict"u8;
-internal static ref readonly @string partitionedˢ => ref partitionedˢᵇ;
-private static readonly @string partitionedˢᵇ = "; Partitioned"u8;
+internal static ref readonly @string pathˢᴍCookie => ref pathˢᵇᴍCookie;
+private static readonly @string pathˢᵇᴍCookie = "; Path="u8;
+internal static ref readonly @string domainˢᴍCookie => ref domainˢᵇᴍCookie;
+private static readonly @string domainˢᵇᴍCookie = "; Domain="u8;
+internal static ref readonly @string expiresˢᴍCookie => ref expiresˢᵇᴍCookie;
+private static readonly @string expiresˢᵇᴍCookie = "; Expires="u8;
+internal static ref readonly @string maxAgeˢᴍCookie => ref maxAgeˢᵇᴍCookie;
+private static readonly @string maxAgeˢᵇᴍCookie = "; Max-Age="u8;
+internal static ref readonly @string maxAge0ˢᴍCookie => ref maxAge0ˢᵇᴍCookie;
+private static readonly @string maxAge0ˢᵇᴍCookie = "; Max-Age=0"u8;
+internal static ref readonly @string httpOnlyˢᴍCookie => ref httpOnlyˢᵇᴍCookie;
+private static readonly @string httpOnlyˢᵇᴍCookie = "; HttpOnly"u8;
+internal static ref readonly @string secureˢᴍCookie => ref secureˢᵇᴍCookie;
+private static readonly @string secureˢᵇᴍCookie = "; Secure"u8;
+internal static ref readonly @string sameSiteNoneˢᴍCookie => ref sameSiteNoneˢᵇᴍCookie;
+private static readonly @string sameSiteNoneˢᵇᴍCookie = "; SameSite=None"u8;
+internal static ref readonly @string sameSiteLaxˢᴍCookie => ref sameSiteLaxˢᵇᴍCookie;
+private static readonly @string sameSiteLaxˢᵇᴍCookie = "; SameSite=Lax"u8;
+internal static ref readonly @string sameSiteStrictˢᴍCookie => ref sameSiteStrictˢᵇᴍCookie;
+private static readonly @string sameSiteStrictˢᵇᴍCookie = "; SameSite=Strict"u8;
+internal static ref readonly @string partitionedˢᴍCookie => ref partitionedˢᵇᴍCookie;
+private static readonly @string partitionedˢᵇᴍCookie = "; Partitioned"u8;
 
 // String returns the serialization of the cookie for use in a [Cookie]
 // header (if only Name and Value are set) or a Set-Cookie response
@@ -335,7 +335,7 @@ internal static @string Stringᴍ(ж<Cookie> Ꮡc) {
     Ꮡb.WriteString(sanitizeCookieValue(c.Value, c.Quoted));
 
     if (len(c.Path) > 0) {
-        Ꮡb.WriteString(pathˢ);
+        Ꮡb.WriteString(pathˢᴍCookie);
         Ꮡb.WriteString(sanitizeCookiePath(c.Path));
     }
     if (len(c.Domain) > 0) {
@@ -348,7 +348,7 @@ internal static @string Stringᴍ(ж<Cookie> Ꮡc) {
             if (d[0] == '.') {
                 d = d[1..];
             }
-            Ꮡb.WriteString(domainˢ);
+            Ꮡb.WriteString(domainˢᴍCookie);
             Ꮡb.WriteString(d);
         } else {
             log.Printf("net/http: invalid Cookie.Domain %q; dropping domain attribute", c.Domain);
@@ -356,20 +356,20 @@ internal static @string Stringᴍ(ж<Cookie> Ꮡc) {
     }
     array<byte> buf = new(29); /* len(TimeFormat) */
     if (validCookieExpires(c.Expires)) {
-        Ꮡb.WriteString(expiresˢ);
+        Ꮡb.WriteString(expiresˢᴍCookie);
         Ꮡb.Write(c.Expires.UTC().AppendFormat(buf[..0], TimeFormat));
     }
     if (c.MaxAge > 0) {
-        Ꮡb.WriteString(maxAgeˢ);
+        Ꮡb.WriteString(maxAgeˢᴍCookie);
         Ꮡb.Write(strconv.AppendInt(buf[..0], (int64)c.MaxAge, 10));
     } else if (c.MaxAge < 0) {
-        Ꮡb.WriteString(maxAge0ˢ);
+        Ꮡb.WriteString(maxAge0ˢᴍCookie);
     }
     if (c.HttpOnly) {
-        Ꮡb.WriteString(httpOnlyˢ);
+        Ꮡb.WriteString(httpOnlyˢᴍCookie);
     }
     if (c.Secure) {
-        Ꮡb.WriteString(secureˢ);
+        Ꮡb.WriteString(secureˢᴍCookie);
     }
     switch (c.SameSite) {
     case var ᴛ when ᴛ == SameSiteDefaultMode: {
@@ -377,47 +377,47 @@ internal static @string Stringᴍ(ж<Cookie> Ꮡc) {
         break;
     }
     case var ᴛ when ᴛ == SameSiteNoneMode: {
-        Ꮡb.WriteString(sameSiteNoneˢ);
+        Ꮡb.WriteString(sameSiteNoneˢᴍCookie);
         break;
     }
     case var ᴛ when ᴛ == SameSiteLaxMode: {
-        Ꮡb.WriteString(sameSiteLaxˢ);
+        Ꮡb.WriteString(sameSiteLaxˢᴍCookie);
         break;
     }
     case var ᴛ when ᴛ == SameSiteStrictMode: {
-        Ꮡb.WriteString(sameSiteStrictˢ);
+        Ꮡb.WriteString(sameSiteStrictˢᴍCookie);
         break;
     }}
     if (c.Partitioned) {
-        Ꮡb.WriteString(partitionedˢ);
+        Ꮡb.WriteString(partitionedˢᴍCookie);
     }
     return b.String();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpNilCookieˢ => ref httpNilCookieˢᵇ;
-private static readonly @string httpNilCookieˢᵇ = "http: nil Cookie"u8;
-internal static ref readonly @string httpInvalidCookieNameˢ => ref httpInvalidCookieNameˢᵇ;
-private static readonly @string httpInvalidCookieNameˢᵇ = "http: invalid Cookie.Name"u8;
-internal static ref readonly @string httpInvalidCookieExpiresˢ => ref httpInvalidCookieExpiresˢᵇ;
-private static readonly @string httpInvalidCookieExpiresˢᵇ = "http: invalid Cookie.Expires"u8;
-internal static ref readonly @string httpInvalidCookieDomainˢ => ref httpInvalidCookieDomainˢᵇ;
-private static readonly @string httpInvalidCookieDomainˢᵇ = "http: invalid Cookie.Domain"u8;
-internal static ref readonly @string httpPartitionedCookiesˢ => ref httpPartitionedCookiesˢᵇ;
-private static readonly @string httpPartitionedCookiesˢᵇ = "http: partitioned cookies must be set with Secure"u8;
+internal static ref readonly @string httpNilCookieˢᴍCookie => ref httpNilCookieˢᵇᴍCookie;
+private static readonly @string httpNilCookieˢᵇᴍCookie = "http: nil Cookie"u8;
+internal static ref readonly @string httpInvalidCookieNameˢᴍCookie => ref httpInvalidCookieNameˢᵇᴍCookie;
+private static readonly @string httpInvalidCookieNameˢᵇᴍCookie = "http: invalid Cookie.Name"u8;
+internal static ref readonly @string httpInvalidCookieExpiresˢᴍCookie => ref httpInvalidCookieExpiresˢᵇᴍCookie;
+private static readonly @string httpInvalidCookieExpiresˢᵇᴍCookie = "http: invalid Cookie.Expires"u8;
+internal static ref readonly @string httpInvalidCookieDomainˢᴍCookie => ref httpInvalidCookieDomainˢᵇᴍCookie;
+private static readonly @string httpInvalidCookieDomainˢᵇᴍCookie = "http: invalid Cookie.Domain"u8;
+internal static ref readonly @string httpPartitionedCookiesˢᴍCookie => ref httpPartitionedCookiesˢᵇᴍCookie;
+private static readonly @string httpPartitionedCookiesˢᵇᴍCookie = "http: partitioned cookies must be set with Secure"u8;
 
 // Valid reports whether the cookie is valid.
 internal static error Validᴍ(ж<Cookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
-        return errors.New(httpNilCookieˢ);
+        return errors.New(httpNilCookieˢᴍCookie);
     }
     if (!isToken(c.Name)) {
-        return errors.New(httpInvalidCookieNameˢ);
+        return errors.New(httpInvalidCookieNameˢᴍCookie);
     }
     if (!c.Expires.IsZero() && !validCookieExpires(c.Expires)) {
-        return errors.New(httpInvalidCookieExpiresˢ);
+        return errors.New(httpInvalidCookieExpiresˢᴍCookie);
     }
     for (nint i = 0; i < len(c.Value); i++) {
         if (!validCookieValueByte(c.Value[i])) {
@@ -433,12 +433,12 @@ internal static error Validᴍ(ж<Cookie> Ꮡc) {
     }
     if (len(c.Domain) > 0) {
         if (!validCookieDomain(c.Domain)) {
-            return errors.New(httpInvalidCookieDomainˢ);
+            return errors.New(httpInvalidCookieDomainˢᴍCookie);
         }
     }
     if (c.Partitioned) {
         if (!c.Secure) {
-            return errors.New(httpPartitionedCookiesˢ);
+            return errors.New(httpPartitionedCookiesˢᴍCookie);
         }
     }
     return default;

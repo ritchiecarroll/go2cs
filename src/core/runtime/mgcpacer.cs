@@ -730,8 +730,8 @@ internal static void enlistWorkerᴍ(ж<gcControllerState> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gcControllerStateˢ => ref gcControllerStateˢᵇ;
-private static readonly @string gcControllerStateˢᵇ = "gcControllerState.findRunnable: blackening not enabled"u8;
+internal static ref readonly @string gcControllerStateˢᴍgcControllerState => ref gcControllerStateˢᵇᴍgcControllerState;
+private static readonly @string gcControllerStateˢᵇᴍgcControllerState = "gcControllerState.findRunnable: blackening not enabled"u8;
 
 // assignWaitingGCWorker assigns a background mark worker to pp if one should
 // be run.
@@ -750,7 +750,7 @@ internal static (bool, int64) assignWaitingGCWorkerᴍ(ж<gcControllerState> Ꮡ
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     if (gcBlackenEnabled == 0) {
-        @throw(gcControllerStateˢ);
+        @throw(gcControllerStateˢᴍgcControllerState);
     }
 
     if (now == 0) {
@@ -924,8 +924,8 @@ internal static void resetLiveᴍ(ж<gcControllerState> Ꮡc, uint64 bytesMarked
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string markWorkerStopUnknownˢ => ref markWorkerStopUnknownˢᵇ;
-private static readonly @string markWorkerStopUnknownˢᵇ = "markWorkerStop: unknown mark worker mode"u8;
+internal static ref readonly @string markWorkerStopUnknownˢᴍgcControllerState => ref markWorkerStopUnknownˢᵇᴍgcControllerState;
+private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState = "markWorkerStop: unknown mark worker mode"u8;
 
 // markWorkerStop must be called whenever a mark worker stops executing.
 //
@@ -950,7 +950,7 @@ internal static void markWorkerStopᴍ(ж<gcControllerState> Ꮡc, gcMarkWorkerM
         break;
     }
     default: {
-        @throw(markWorkerStopUnknownˢ);
+        @throw(markWorkerStopUnknownˢᴍgcControllerState);
         break;
     }}
 }
@@ -1197,8 +1197,8 @@ internal static UntypedInt maxTriggerRatioNum => 61; // ~0.95
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string producedATriggerGreaterˢ => ref producedATriggerGreaterˢᵇ;
-private static readonly @string producedATriggerGreaterˢᵇ = "produced a trigger greater than the heap goal"u8;
+internal static ref readonly @string producedATriggerGreaterˢᴍgcControllerState => ref producedATriggerGreaterˢᵇᴍgcControllerState;
+private static readonly @string producedATriggerGreaterˢᵇᴍgcControllerState = "produced a trigger greater than the heap goal"u8;
 
 // trigger returns the current point at which a GC should trigger along with
 // the heap goal.
@@ -1273,7 +1273,7 @@ internal static (uint64, uint64) triggerᴍ(ж<gcControllerState> Ꮡc) {
     if (trigger > goal) {
         print((@string)"trigger=", trigger, (@string)" heapGoal=", goal, (@string)"\n");
         print((@string)"minTrigger=", minTrigger, (@string)" maxTrigger=", maxTrigger, (@string)"\n");
-        @throw(producedATriggerGreaterˢ);
+        @throw(producedATriggerGreaterˢᴍgcControllerState);
     }
     return (trigger, goal);
 }
@@ -1477,8 +1477,8 @@ internal static int64 readGOMEMLIMIT() {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string negativeIdleMarkWorkersˢ => ref negativeIdleMarkWorkersˢᵇ;
-private static readonly @string negativeIdleMarkWorkersˢᵇ = "negative idle mark workers"u8;
+internal static ref readonly @string negativeIdleMarkWorkersˢᴍgcControllerState => ref negativeIdleMarkWorkersˢᵇᴍgcControllerState;
+private static readonly @string negativeIdleMarkWorkersˢᵇᴍgcControllerState = "negative idle mark workers"u8;
 
 // addIdleMarkWorker attempts to add a new idle mark worker.
 //
@@ -1501,7 +1501,7 @@ internal static bool addIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
         }
         if (n < 0) {
             print((@string)"n=", n, (@string)" max=", max, (@string)"\n");
-            @throw(negativeIdleMarkWorkersˢ);
+            @throw(negativeIdleMarkWorkersˢᴍgcControllerState);
         }
         var @new = (uint64)(uint32)(n + 1) | ((uint64)max << 32);
         if (Ꮡc.ᏑidleMarkWorkers.CompareAndSwap(old, @new)) {
@@ -1531,7 +1531,7 @@ internal static void removeIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
         var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
         if (n - 1 < 0) {
             print((@string)"n=", n, (@string)" max=", max, (@string)"\n");
-            @throw(negativeIdleMarkWorkersˢ);
+            @throw(negativeIdleMarkWorkersˢᴍgcControllerState);
         }
         var @new = (uint64)(uint32)(n - 1) | ((uint64)max << 32);
         if (Ꮡc.ᏑidleMarkWorkers.CompareAndSwap(old, @new)) {
@@ -1551,7 +1551,7 @@ internal static void setMaxIdleMarkWorkersᴍ(ж<gcControllerState> Ꮡc, int32 
         var n = (int32)(old & (uint64)(~(uint32)0));
         if (n < 0) {
             print((@string)"n=", n, (@string)" max=", max, (@string)"\n");
-            @throw(negativeIdleMarkWorkersˢ);
+            @throw(negativeIdleMarkWorkersˢᴍgcControllerState);
         }
         var @new = (uint64)(uint32)n | ((uint64)max << 32);
         if (Ꮡc.ᏑidleMarkWorkers.CompareAndSwap(old, @new)) {

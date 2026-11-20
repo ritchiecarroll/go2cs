@@ -460,8 +460,8 @@ internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref
 } partial class mlkem_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mlkemInvalidCiphertextˢ => ref mlkemInvalidCiphertextˢᵇ;
-private static readonly @string mlkemInvalidCiphertextˢᵇ = "mlkem: invalid ciphertext length"u8;
+internal static ref readonly @string mlkemInvalidCiphertextˢᴍDecapsulationKey1024 => ref mlkemInvalidCiphertextˢᵇᴍDecapsulationKey1024;
+private static readonly @string mlkemInvalidCiphertextˢᵇᴍDecapsulationKey1024 = "mlkem: invalid ciphertext length"u8;
 
 // Decapsulate generates a shared key from a ciphertext and a decapsulation key.
 // If the ciphertext is not valid, Decapsulate returns an error.
@@ -470,7 +470,7 @@ private static readonly @string mlkemInvalidCiphertextˢᵇ = "mlkem: invalid ci
 internal static (slice<byte> sharedKey, error err) Decapsulateᴍ(ж<DecapsulationKey1024> Ꮡdk, slice<byte> ciphertext) {
     fipsSelfTest();
     if (len(ciphertext) != CiphertextSize1024) {
-        return (default, errors.New(mlkemInvalidCiphertextˢ));
+        return (default, errors.New(mlkemInvalidCiphertextˢᴍDecapsulationKey1024));
     }
     var c = Ꮡ(array<byte>.Alias(ciphertext, 1568));
     // Note that the hash check (step 3 of the decapsulation input check from

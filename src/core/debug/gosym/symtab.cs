@@ -56,10 +56,10 @@ internal static @string nameWithoutInstᴍ(ref Sym s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeˢ => ref typeˢᵇ;
-private static readonly @string typeˢᵇ = "type:"u8;
-internal static ref readonly @string typeˢ2 => ref typeˢ2ᵇ;
-private static readonly @string typeˢ2ᵇ = "type."u8;
+internal static ref readonly @string typeˢᴍSym => ref typeˢᵇᴍSym;
+private static readonly @string typeˢᵇᴍSym = "type:"u8;
+internal static ref readonly @string typeˢ2ᴍSym => ref typeˢ2ᵇᴍSym;
+private static readonly @string typeˢ2ᵇᴍSym = "type."u8;
 
 // PackageName returns the package part of the symbol name,
 // or the empty string if there is none.
@@ -70,12 +70,12 @@ internal static @string PackageNameᴍ(ref Sym s) {
     // they do not belong to any package.
     //
     // See cmd/compile/internal/base/link.go:ReservedImports variable.
-    if (s.goVersion >= ver120 && (strings.HasPrefix(name, "go:") || strings.HasPrefix(name, typeˢ))) {
+    if (s.goVersion >= ver120 && (strings.HasPrefix(name, "go:") || strings.HasPrefix(name, typeˢᴍSym))) {
         return ""u8;
     }
 
     // For go1.18 and below, the prefix are "type." and "go." instead.
-    if (s.goVersion <= ver118 && (strings.HasPrefix(name, "go.") || strings.HasPrefix(name, typeˢ2))) {
+    if (s.goVersion <= ver118 && (strings.HasPrefix(name, "go.") || strings.HasPrefix(name, typeˢ2ᴍSym))) {
         return ""u8;
     }
 
@@ -705,8 +705,8 @@ internal partial struct lineFromAline_stackEnt /*dyn*/ {
 } partial class gosym_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string malformedSymbolTableˢ => ref malformedSymbolTableˢᵇ;
-private static readonly @string malformedSymbolTableˢᵇ = "<malformed symbol table>"u8;
+internal static ref readonly @string malformedSymbolTableˢᴍObj => ref malformedSymbolTableˢᵇᴍObj;
+private static readonly @string malformedSymbolTableˢᵇᴍObj = "<malformed symbol table>"u8;
 
 /*
  * Object files
@@ -737,7 +737,7 @@ pathloop:
         case {} when s.Name == ""u8: {
             // Pop
             if (tos == noPath) {
-                return (malformedSymbolTableˢ, 0);
+                return (malformedSymbolTableˢᴍObj, 0);
             }
             tos.prev.offset += val - tos.start;
             tos = tos.prev;

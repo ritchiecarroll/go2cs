@@ -67,10 +67,10 @@ internal static ValueConverter _ᴛ3ʗ = new boolType();
 } partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string boolˢ => ref boolˢᵇ;
-private static readonly @string boolˢᵇ = "Bool"u8;
+internal static ref readonly @string boolˢᴍboolType => ref boolˢᵇᴍboolType;
+private static readonly @string boolˢᵇᴍboolType = "Bool"u8;
 
-internal static @string Stringᴍ(boolType _) { return boolˢ; }
+internal static @string Stringᴍ(boolType _) { return boolˢᴍboolType; }
 
 internal static (Value, error) ConvertValueᴍ(boolType _, any src) {
     switch (src.type()) {

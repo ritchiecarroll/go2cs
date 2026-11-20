@@ -14,8 +14,8 @@ partial class os_package {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string statˢ => ref statˢᵇ;
-private static readonly @string statˢᵇ = "stat"u8;
+internal static ref readonly @string statˢᴍFile => ref statˢᵇᴍFile;
+private static readonly @string statˢᵇᴍFile = "stat"u8;
 
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
@@ -28,7 +28,7 @@ internal static (FileInfo, error) Statᴍ(ж<File> Ꮡf) {
     ref var fs = ref heap(new fileStat(), out var Ꮡfs);
     var err = Ꮡf.of(File.Ꮡpfd).Fstat(Ꮡfs.Ꮡsys);
     if (err != nil) {
-        return (default, f.wrapErr(statˢ, err));
+        return (default, f.wrapErr(statˢᴍFile, err));
     }
     fillFileStatFromSys(Ꮡfs, f.name);
     return (new fileStatжFileInfo(Ꮡfs), default);

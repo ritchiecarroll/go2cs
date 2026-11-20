@@ -410,12 +410,12 @@ internal static bool ProtoAtLeastᴍ(ref Request r, nint major, nint minor) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string userAgentˢ => ref userAgentˢᵇ;
-private static readonly @string userAgentˢᵇ = "User-Agent"u8;
+internal static ref readonly @string userAgentˢᴍRequest => ref userAgentˢᵇᴍRequest;
+private static readonly @string userAgentˢᵇᴍRequest = "User-Agent"u8;
 
 // UserAgent returns the client's User-Agent, if sent in the request.
 internal static @string UserAgentᴍ(ref Request r) {
-    return r.Header.Get(userAgentˢ);
+    return r.Header.Get(userAgentˢᴍRequest);
 }
 
 // Cookies parses and returns the HTTP cookies sent with the request.
@@ -454,8 +454,8 @@ internal static (ж<Cookie>, error) Cookieᴍ(ref Request r, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cookieˢ => ref cookieˢᵇ;
-private static readonly @string cookieˢᵇ = "Cookie"u8;
+internal static ref readonly @string cookieˢᴍRequest => ref cookieˢᵇᴍRequest;
+private static readonly @string cookieˢᵇᴍRequest = "Cookie"u8;
 
 // AddCookie adds a cookie to the request. Per RFC 6265 section 5.4,
 // AddCookie does not attach more than one [Cookie] header field. That
@@ -467,16 +467,16 @@ internal static void AddCookieᴍ(ref Request r, ж<Cookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     @string s = fmt.Sprintf("%s=%s"u8, sanitizeCookieName(c.Name), sanitizeCookieValue(c.Value, c.Quoted));
-    @string cΔ1 = r.Header.Get(cookieˢ); if (cΔ1 != ""u8) {
-        r.Header.Set(cookieˢ, cΔ1 + "; "u8 + s);
+    @string cΔ1 = r.Header.Get(cookieˢᴍRequest); if (cΔ1 != ""u8) {
+        r.Header.Set(cookieˢᴍRequest, cΔ1 + "; "u8 + s);
     } else {
-        r.Header.Set(cookieˢ, s);
+        r.Header.Set(cookieˢᴍRequest, s);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string refererˢ => ref refererˢᵇ;
-private static readonly @string refererˢᵇ = "Referer"u8;
+internal static ref readonly @string refererˢᴍRequest => ref refererˢᵇᴍRequest;
+private static readonly @string refererˢᵇᴍRequest = "Referer"u8;
 
 // Referer returns the referring URL, if sent in the request.
 //
@@ -487,7 +487,7 @@ private static readonly @string refererˢᵇ = "Referer"u8;
 // alternate (correct English) spelling req.Referrer() but cannot
 // diagnose programs that use Header["Referrer"].
 internal static @string Refererᴍ(ref Request r) {
-    return r.Header.Get(refererˢ);
+    return r.Header.Get(refererˢᴍRequest);
 }
 
 } partial class http_package {
@@ -503,10 +503,10 @@ internal static ж<multipart.Form> multipartByReader = Ꮡ(new multipart.Form(
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpMultipartReaderˢ => ref httpMultipartReaderˢᵇ;
-private static readonly @string httpMultipartReaderˢᵇ = "http: MultipartReader called twice"u8;
-internal static ref readonly @string httpMultipartHandledByˢ => ref httpMultipartHandledByˢᵇ;
-private static readonly @string httpMultipartHandledByˢᵇ = "http: multipart handled by ParseMultipartForm"u8;
+internal static ref readonly @string httpMultipartReaderˢᴍRequest => ref httpMultipartReaderˢᵇᴍRequest;
+private static readonly @string httpMultipartReaderˢᵇᴍRequest = "http: MultipartReader called twice"u8;
+internal static ref readonly @string httpMultipartHandledByˢᴍRequest => ref httpMultipartHandledByˢᵇᴍRequest;
+private static readonly @string httpMultipartHandledByˢᵇᴍRequest = "http: multipart handled by ParseMultipartForm"u8;
 
 // MultipartReader returns a MIME multipart reader if this is a
 // multipart/form-data or a multipart/mixed POST request, else returns nil and an error.
@@ -514,36 +514,36 @@ private static readonly @string httpMultipartHandledByˢᵇ = "http: multipart h
 // process the request body as a stream.
 internal static (ж<multipart.Reader>, error) MultipartReaderᴍ(ref Request r) {
     if (r.MultipartForm == multipartByReader) {
-        return (default, errors.New(httpMultipartReaderˢ));
+        return (default, errors.New(httpMultipartReaderˢᴍRequest));
     }
     if (r.MultipartForm != nil) {
-        return (default, errors.New(httpMultipartHandledByˢ));
+        return (default, errors.New(httpMultipartHandledByˢᴍRequest));
     }
     r.MultipartForm = multipartByReader;
     return r.multipartReader(true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
-private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
-internal static ref readonly @string missingFormBodyˢ => ref missingFormBodyˢᵇ;
-private static readonly @string missingFormBodyˢᵇ = "missing form body"u8;
-internal static ref readonly @string boundaryˢ => ref boundaryˢᵇ;
-private static readonly @string boundaryˢᵇ = "boundary"u8;
+internal static ref readonly @string contentTypeˢᴍRequest => ref contentTypeˢᵇᴍRequest;
+private static readonly @string contentTypeˢᵇᴍRequest = "Content-Type"u8;
+internal static ref readonly @string missingFormBodyˢᴍRequest => ref missingFormBodyˢᵇᴍRequest;
+private static readonly @string missingFormBodyˢᵇᴍRequest = "missing form body"u8;
+internal static ref readonly @string boundaryˢᴍRequest => ref boundaryˢᵇᴍRequest;
+private static readonly @string boundaryˢᵇᴍRequest = "boundary"u8;
 
 internal static (ж<multipart.Reader>, error) multipartReaderᴍ(ref Request r, bool allowMixed) {
-    @string v = r.Header.Get(contentTypeˢ);
+    @string v = r.Header.Get(contentTypeˢᴍRequest);
     if (v == ""u8) {
         return (default, new ProtocolErrorжerror(ErrNotMultipart));
     }
     if (r.Body == nil) {
-        return (default, errors.New(missingFormBodyˢ));
+        return (default, errors.New(missingFormBodyˢᴍRequest));
     }
     var (d, @params, err) = mime.ParseMediaType(v);
     if (err != nil || !(d == "multipart/form-data"u8 || allowMixed && d == "multipart/mixed"u8)) {
         return (default, new ProtocolErrorжerror(ErrNotMultipart));
     }
-    var (boundary, ok) = @params[boundaryˢ, ꟷ];
+    var (boundary, ok) = @params[boundaryˢᴍRequest, ꟷ];
     if (!ok) {
         return (default, new ProtocolErrorжerror(ErrMissingBoundary));
     }
@@ -612,14 +612,14 @@ internal static error errMissingHost = errors.New("http: Request.Write on Reques
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpInvalidHostHeaderˢ => ref httpInvalidHostHeaderˢᵇ;
-private static readonly @string httpInvalidHostHeaderˢᵇ = "http: invalid Host header"u8;
-internal static ref readonly @string netHttpCanTWriteControlˢ => ref netHttpCanTWriteControlˢᵇ;
-private static readonly @string netHttpCanTWriteControlˢᵇ = "net/http: can't write control character in Request.URL"u8;
-internal static ref readonly @string getˢ => ref getˢᵇ;
-private static readonly @string getˢᵇ = "GET"u8;
-internal static ref readonly @string hostˢ => ref hostˢᵇ;
-private static readonly @string hostˢᵇ = "Host"u8;
+internal static ref readonly @string httpInvalidHostHeaderˢᴍRequest => ref httpInvalidHostHeaderˢᵇᴍRequest;
+private static readonly @string httpInvalidHostHeaderˢᵇᴍRequest = "http: invalid Host header"u8;
+internal static ref readonly @string netHttpCanTWriteControlˢᴍRequest => ref netHttpCanTWriteControlˢᵇᴍRequest;
+private static readonly @string netHttpCanTWriteControlˢᵇᴍRequest = "net/http: can't write control character in Request.URL"u8;
+internal static ref readonly @string getˢᴍRequest => ref getˢᵇᴍRequest;
+private static readonly @string getˢᵇᴍRequest = "GET"u8;
+internal static ref readonly @string hostˢᴍRequest => ref hostˢᵇᴍRequest;
+private static readonly @string hostˢᵇᴍRequest = "Host"u8;
 
 // extraHeaders may be nil
 // waitForContinue may be nil
@@ -686,7 +686,7 @@ internal static error /*err*/ writeᴍ(ж<Request> Ꮡr, io.Writer w, bool using
             if (!usingProxy) {
                 host = ""u8;
             } else {
-                err = errors.New(httpInvalidHostHeaderˢ); goto ᒐdone;
+                err = errors.New(httpInvalidHostHeaderˢᴍRequest); goto ᒐdone;
             }
         }
 
@@ -706,7 +706,7 @@ internal static error /*err*/ writeᴍ(ж<Request> Ꮡr, io.Writer w, bool using
             }
         }
         if (stringContainsCTLByte(ruri)) {
-            err = errors.New(netHttpCanTWriteControlˢ); goto ᒐdone;
+            err = errors.New(netHttpCanTWriteControlˢᴍRequest); goto ᒐdone;
         }
         // TODO: validate r.Method too? At least it's less likely to
         // come from an attacker (more likely to be a constant in
@@ -722,7 +722,7 @@ internal static error /*err*/ writeᴍ(ж<Request> Ꮡr, io.Writer w, bool using
             w = new bufio_WriterжWriter(bw);
         }
 
-        (_, err) = fmt.Fprintf(w, "%s %s HTTP/1.1\r\n"u8, valueOrDefault(r.Method, getˢ), ruri);
+        (_, err) = fmt.Fprintf(w, "%s %s HTTP/1.1\r\n"u8, valueOrDefault(r.Method, getˢᴍRequest), ruri);
         if (err != nil) {
             goto ᒐdone;
         }
@@ -733,7 +733,7 @@ internal static error /*err*/ writeᴍ(ж<Request> Ꮡr, io.Writer w, bool using
             goto ᒐdone;
         }
         if (trace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(hostˢ, [host]);
+            trace.WroteHeaderField(hostˢᴍRequest, [host]);
         }
 
         // Use the defaultUserAgent unless the Header contains one, which
@@ -1052,14 +1052,14 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string authorizationˢ => ref authorizationˢᵇ;
-private static readonly @string authorizationˢᵇ = "Authorization"u8;
+internal static ref readonly @string authorizationˢᴍRequest => ref authorizationˢᵇᴍRequest;
+private static readonly @string authorizationˢᵇᴍRequest = "Authorization"u8;
 
 // BasicAuth returns the username and password provided in the request's
 // Authorization header, if the request uses HTTP Basic Authentication.
 // See RFC 2617, Section 2.
 internal static (@string username, @string password, bool ok) BasicAuthᴍ(ref Request r) {
-    @string auth = r.Header.Get(authorizationˢ);
+    @string auth = r.Header.Get(authorizationˢᴍRequest);
     if (auth == ""u8) {
         return ("", "", false);
     }
@@ -1327,12 +1327,12 @@ partial struct MaxBytesError {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpRequestBodyTooLargeˢ => ref httpRequestBodyTooLargeˢᵇ;
-private static readonly @string httpRequestBodyTooLargeˢᵇ = "http: request body too large"u8;
+internal static ref readonly @string httpRequestBodyTooLargeˢᴍMaxBytesError => ref httpRequestBodyTooLargeˢᵇᴍMaxBytesError;
+private static readonly @string httpRequestBodyTooLargeˢᵇᴍMaxBytesError = "http: request body too large"u8;
 
 internal static @string Errorᴍ(ref MaxBytesError e) {
     // Due to Hyrum's law, this text cannot be changed.
-    return httpRequestBodyTooLargeˢ;
+    return httpRequestBodyTooLargeˢᴍMaxBytesError;
 }
 
 } partial class http_package {
@@ -1522,8 +1522,8 @@ internal static error ParseFormᴍ(ж<Request> Ꮡr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpMultipartHandledByˢ2 => ref httpMultipartHandledByˢ2ᵇ;
-private static readonly @string httpMultipartHandledByˢ2ᵇ = "http: multipart handled by MultipartReader"u8;
+internal static ref readonly @string httpMultipartHandledByˢ2ᴍRequest => ref httpMultipartHandledByˢ2ᵇᴍRequest;
+private static readonly @string httpMultipartHandledByˢ2ᵇᴍRequest = "http: multipart handled by MultipartReader"u8;
 
 // ParseMultipartForm parses a request body as multipart/form-data.
 // The whole request body is parsed and up to a total of maxMemory bytes of
@@ -1537,7 +1537,7 @@ internal static error ParseMultipartFormᴍ(ж<Request> Ꮡr, int64 maxMemory) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.MultipartForm == multipartByReader) {
-        return errors.New(httpMultipartHandledByˢ2);
+        return errors.New(httpMultipartHandledByˢ2ᴍRequest);
     }
     error parseFormErr = default;
     if (r.Form == nil) {
@@ -1619,7 +1619,7 @@ internal static (multipart.File, ж<multipart.FileHeader>, error) FormFileᴍ(ж
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.MultipartForm == multipartByReader) {
-        return (default, default, errors.New(httpMultipartHandledByˢ2));
+        return (default, default, errors.New(httpMultipartHandledByˢ2ᴍRequest));
     }
     if (r.MultipartForm == nil) {
         var err = Ꮡr.ParseMultipartForm(defaultMaxMemory);
@@ -1681,37 +1681,37 @@ internal static nint patIndexᴍ(ref Request r, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string expectˢ2 => ref expectˢ2ᵇ;
-private static readonly @string expectˢ2ᵇ = "Expect"u8;
-internal static ref readonly @string continueˢ => ref continueˢᵇ;
-private static readonly @string continueˢᵇ = "100-continue"u8;
+internal static ref readonly @string expectˢ2ᴍRequest => ref expectˢ2ᵇᴍRequest;
+private static readonly @string expectˢ2ᵇᴍRequest = "Expect"u8;
+internal static ref readonly @string continueˢᴍRequest => ref continueˢᵇᴍRequest;
+private static readonly @string continueˢᵇᴍRequest = "100-continue"u8;
 
 internal static bool expectsContinueᴍ(ref Request r) {
-    return hasToken(r.Header.get(expectˢ2), continueˢ);
+    return hasToken(r.Header.get(expectˢ2ᴍRequest), continueˢᴍRequest);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
-private static readonly @string connectionˢᵇ = "Connection"u8;
-internal static ref readonly @string keepAliveˢ => ref keepAliveˢᵇ;
-private static readonly @string keepAliveˢᵇ = "keep-alive"u8;
+internal static ref readonly @string connectionˢᴍRequest => ref connectionˢᵇᴍRequest;
+private static readonly @string connectionˢᵇᴍRequest = "Connection"u8;
+internal static ref readonly @string keepAliveˢᴍRequest => ref keepAliveˢᵇᴍRequest;
+private static readonly @string keepAliveˢᵇᴍRequest = "keep-alive"u8;
 
 internal static bool wantsHttp10KeepAliveᴍ(ref Request r) {
     if (r.ProtoMajor != 1 || r.ProtoMinor != 0) {
         return false;
     }
-    return hasToken(r.Header.get(connectionˢ), keepAliveˢ);
+    return hasToken(r.Header.get(connectionˢᴍRequest), keepAliveˢᴍRequest);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string closeˢ => ref closeˢᵇ;
-private static readonly @string closeˢᵇ = "close"u8;
+internal static ref readonly @string closeˢᴍRequest => ref closeˢᵇᴍRequest;
+private static readonly @string closeˢᵇᴍRequest = "close"u8;
 
 internal static bool wantsCloseᴍ(ref Request r) {
     if (r.Close) {
         return true;
     }
-    return hasToken(r.Header.get(connectionˢ), closeˢ);
+    return hasToken(r.Header.get(connectionˢᴍRequest), closeˢᴍRequest);
 }
 
 internal static error closeBodyᴍ(ref Request r) {
@@ -1722,10 +1722,10 @@ internal static error closeBodyᴍ(ref Request r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string idempotencyKeyˢ => ref idempotencyKeyˢᵇ;
-private static readonly @string idempotencyKeyˢᵇ = "Idempotency-Key"u8;
-internal static ref readonly @string xIdempotencyKeyˢ => ref xIdempotencyKeyˢᵇ;
-private static readonly @string xIdempotencyKeyˢᵇ = "X-Idempotency-Key"u8;
+internal static ref readonly @string idempotencyKeyˢᴍRequest => ref idempotencyKeyˢᵇᴍRequest;
+private static readonly @string idempotencyKeyˢᵇᴍRequest = "Idempotency-Key"u8;
+internal static ref readonly @string xIdempotencyKeyˢᴍRequest => ref xIdempotencyKeyˢᵇᴍRequest;
+private static readonly @string xIdempotencyKeyˢᵇᴍRequest = "X-Idempotency-Key"u8;
 
 internal static bool isReplayableᴍ(ref Request r) {
     if (r.Body == nil || AreEqual(r.Body, NoBody) || r.GetBody != nil) {
@@ -1737,7 +1737,7 @@ internal static bool isReplayableᴍ(ref Request r) {
         // The Idempotency-Key, while non-standard, is widely used to
         // mean a POST or other request is idempotent. See
         // https://golang.org/issue/19943#issuecomment-421092421
-        if (r.Header.has(idempotencyKeyˢ) || r.Header.has(xIdempotencyKeyˢ)) {
+        if (r.Header.has(idempotencyKeyˢᴍRequest) || r.Header.has(xIdempotencyKeyˢᴍRequest)) {
             return true;
         }
     }
@@ -1776,17 +1776,17 @@ internal static bool requestMethodUsuallyLacksBody(@string method) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string upgradeˢ => ref upgradeˢᵇ;
-private static readonly @string upgradeˢᵇ = "upgrade"u8;
-internal static ref readonly @string upgradeˢ2 => ref upgradeˢ2ᵇ;
-private static readonly @string upgradeˢ2ᵇ = "Upgrade"u8;
-internal static ref readonly @string websocketˢ => ref websocketˢᵇ;
-private static readonly @string websocketˢᵇ = "websocket"u8;
+internal static ref readonly @string upgradeˢᴍRequest => ref upgradeˢᵇᴍRequest;
+private static readonly @string upgradeˢᵇᴍRequest = "upgrade"u8;
+internal static ref readonly @string upgradeˢ2ᴍRequest => ref upgradeˢ2ᵇᴍRequest;
+private static readonly @string upgradeˢ2ᵇᴍRequest = "Upgrade"u8;
+internal static ref readonly @string websocketˢᴍRequest => ref websocketˢᵇᴍRequest;
+private static readonly @string websocketˢᵇᴍRequest = "websocket"u8;
 
 // requiresHTTP1 reports whether this request requires being sent on
 // an HTTP/1 connection.
 internal static bool requiresHTTP1ᴍ(ref Request r) {
-    return hasToken(r.Header.Get(connectionˢ), upgradeˢ) && ascii.EqualFold(r.Header.Get(upgradeˢ2), websocketˢ);
+    return hasToken(r.Header.Get(connectionˢ), upgradeˢᴍRequest) && ascii.EqualFold(r.Header.Get(upgradeˢ2ᴍRequest), websocketˢᴍRequest);
 }
 
 }

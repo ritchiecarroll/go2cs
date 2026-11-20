@@ -164,22 +164,22 @@ internal static lockRank lockRankLeafRank => 1000;
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownˢ2 => ref unknownˢ2ᵇ;
-private static readonly @string unknownˢ2ᵇ = "UNKNOWN"u8;
-internal static ref readonly @string leafˢ => ref leafˢᵇ;
-private static readonly @string leafˢᵇ = "LEAF"u8;
-internal static ref readonly @string badRankˢ => ref badRankˢᵇ;
-private static readonly @string badRankˢᵇ = "BAD RANK"u8;
+internal static ref readonly @string unknownˢ2ᴍlockRank => ref unknownˢ2ᵇᴍlockRank;
+private static readonly @string unknownˢ2ᵇᴍlockRank = "UNKNOWN"u8;
+internal static ref readonly @string leafˢᴍlockRank => ref leafˢᵇᴍlockRank;
+private static readonly @string leafˢᵇᴍlockRank = "LEAF"u8;
+internal static ref readonly @string badRankˢᴍlockRank => ref badRankˢᵇᴍlockRank;
+private static readonly @string badRankˢᵇᴍlockRank = "BAD RANK"u8;
 
 internal static @string Stringᴍ(lockRank rank) {
     if (rank == 0) {
-        return unknownˢ2;
+        return unknownˢ2ᴍlockRank;
     }
     if (rank == lockRankLeafRank) {
-        return leafˢ;
+        return leafˢᴍlockRank;
     }
     if (rank < 0 || (nint)rank >= len(lockNames)) {
-        return badRankˢ;
+        return badRankˢᴍlockRank;
     }
     return lockNames[rank];
 }

@@ -198,16 +198,16 @@ internal static void writeᴍ(ref Func fn, io.Writer w) {
 } partial class gen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string initialˢ => ref initialˢᵇ;
-private static readonly @string initialˢᵇ = "initial"u8;
-private static ref readonly @string postCseˢ => ref postCseˢᵇ;
-private static readonly @string postCseˢᵇ = "post cse"u8;
-private static ref readonly @string postDeadcodeˢ => ref postDeadcodeˢᵇ;
-private static readonly @string postDeadcodeˢᵇ = "post deadcode"u8;
-private static ref readonly @string postAddLoadsˢ => ref postAddLoadsˢᵇ;
-private static readonly @string postAddLoadsˢᵇ = "post addLoads"u8;
-private static ref readonly @string postScheduleˢ => ref postScheduleˢᵇ;
-private static readonly @string postScheduleˢᵇ = "post schedule"u8;
+private static ref readonly @string initialˢᴍFile => ref initialˢᵇᴍFile;
+private static readonly @string initialˢᵇᴍFile = "initial"u8;
+private static ref readonly @string postCseˢᴍFile => ref postCseˢᵇᴍFile;
+private static readonly @string postCseˢᵇᴍFile = "post cse"u8;
+private static ref readonly @string postDeadcodeˢᴍFile => ref postDeadcodeˢᵇᴍFile;
+private static readonly @string postDeadcodeˢᵇᴍFile = "post deadcode"u8;
+private static ref readonly @string postAddLoadsˢᴍFile => ref postAddLoadsˢᵇᴍFile;
+private static readonly @string postAddLoadsˢᵇᴍFile = "post addLoads"u8;
+private static ref readonly @string postScheduleˢᴍFile => ref postScheduleˢᵇᴍFile;
+private static readonly @string postScheduleˢᵇᴍFile = "post schedule"u8;
 
 internal static void Compileᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
@@ -234,25 +234,25 @@ internal static void Compileᴍ(ж<File> Ꮡf) {
     }
 
     foreach (var (_, fn) in range(f.funcs)) {
-        trace(fn, initialˢ);
+        trace(fn, initialˢᴍFile);
 
         for (;;) {
             if (fn.cse()) {
-                trace(fn, postCseˢ);
+                trace(fn, postCseˢᴍFile);
                 continue;
             }
             if (fn.deadcode()) {
-                trace(fn, postDeadcodeˢ);
+                trace(fn, postDeadcodeˢᴍFile);
                 continue;
             }
             break;
         }
         fn.addLoads();
-        trace(fn, postAddLoadsˢ);
+        trace(fn, postAddLoadsˢᴍFile);
 
         // Assigning locations requires ops to be in dependency order.
         fn.schedule();
-        trace(fn, postScheduleˢ);
+        trace(fn, postScheduleˢᴍFile);
 
         var locs = fn.assignLocs();
 
@@ -481,10 +481,10 @@ internal static any Popᴍ(ref opHeap h) {
 } partial class gen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object scheduleDidnTScheduleAllˢ = (@string)"schedule didn't schedule all ops"u8;
-private static readonly object beforeˢ = (@string)"before:"u8;
-private static readonly object afterˢ = (@string)"after:"u8;
-private static readonly object badScheduleˢ = (@string)"bad schedule"u8;
+private static readonly object scheduleDidnTScheduleAllˢᴍFunc = (@string)"schedule didn't schedule all ops"u8;
+private static readonly object beforeˢᴍFunc = (@string)"before:"u8;
+private static readonly object afterˢᴍFunc = (@string)"after:"u8;
+private static readonly object badScheduleˢᴍFunc = (@string)"bad schedule"u8;
 
 // schedule ensures fn's ops are in dependency order.
 internal static void scheduleᴍ(ref Func fn) {
@@ -525,21 +525,21 @@ internal static void scheduleᴍ(ref Func fn) {
         }
     }
     if (len(newOps) != len(fn.ops)) {
-        log.Print(scheduleDidnTScheduleAllˢ);
-        log.Print(beforeˢ);
+        log.Print(scheduleDidnTScheduleAllˢᴍFunc);
+        log.Print(beforeˢᴍFunc);
         fn.write(new os.FileжWriter(os.Stderr));
         fn.ops = newOps;
-        log.Print(afterˢ);
+        log.Print(afterˢᴍFunc);
         fn.write(new os.FileжWriter(os.Stderr));
-        log.Fatal(badScheduleˢ);
+        log.Fatal(badScheduleˢᴍFunc);
     }
 
     fn.ops = newOps;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string maskˢ => ref maskˢᵇ;
-private static readonly @string maskˢᵇ = ".mask"u8;
+private static ref readonly @string maskˢᴍFunc => ref maskˢᵇᴍFunc;
+private static readonly @string maskˢᵇᴍFunc = ".mask"u8;
 
 internal static void emitᴍ(ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs) {
     ref var f = ref Ꮡf.DerefOrNull();
@@ -575,7 +575,7 @@ internal static void emitᴍ(ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs) 
         @string opName = o.Δop;
         // A ".mask" suffix is used to distinguish AVX-512 ops that use the same
         // mnemonic for regular and masked mode.
-        opName = strings.TrimSuffix(opName, maskˢ);
+        opName = strings.TrimSuffix(opName, maskˢᴍFunc);
 
         fmt.Fprintf(w, "\t%s"u8, opName);
         if (o.Δop == "VGF2P8AFFINEQB"u8) {

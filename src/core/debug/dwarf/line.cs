@@ -122,10 +122,10 @@ partial struct LineFile {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string attrStmtListValueOutOfˢ => ref attrStmtListValueOutOfˢᵇ;
-private static readonly @string attrStmtListValueOutOfˢᵇ = "AttrStmtList value out of range"u8;
-internal static ref readonly @string lineˢ => ref lineˢᵇ;
-private static readonly @string lineˢᵇ = "line"u8;
+internal static ref readonly @string attrStmtListValueOutOfˢᴍData => ref attrStmtListValueOutOfˢᵇᴍData;
+private static readonly @string attrStmtListValueOutOfˢᵇᴍData = "AttrStmtList value out of range"u8;
+internal static ref readonly @string lineˢᴍData => ref lineˢᵇᴍData;
+private static readonly @string lineˢᵇᴍData = "line"u8;
 
 // LineReader returns a new reader for the line table of compilation
 // unit cu, which must be an [Entry] with tag [TagCompileUnit].
@@ -147,7 +147,7 @@ internal static (ж<LineReader>, error) LineReaderᴍ(ж<Data> Ꮡd, ж<Entry> �
         return (default, default);
     }
     if (off < 0 || off > (int64)len(d.line)) {
-        return (default, errors.New(attrStmtListValueOutOfˢ));
+        return (default, errors.New(attrStmtListValueOutOfˢᴍData));
     }
     // AttrCompDir is optional if all file names are absolute. Use
     // the empty string if it's not present.
@@ -155,7 +155,7 @@ internal static (ж<LineReader>, error) LineReaderᴍ(ж<Data> Ꮡd, ж<Entry> �
 
     // Create the LineReader.
     var u = Ꮡ(d.unit, Ꮡd.offsetToUnit(cu.Offset));
-    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, (Offset)(uint32)off, d.line.slice((nint)(off)));
+    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢᴍData, (Offset)(uint32)off, d.line.slice((nint)(off)));
     // The compilation directory is implicitly directories[0].
     ref var r = ref heap<LineReader>(new LineReader(
         buf: buf,
@@ -340,10 +340,10 @@ internal static slice<lnctForm> readLNCTFormatᴍ(ref LineReader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string strˢ => ref strˢᵇ;
-private static readonly @string strˢᵇ = "str"u8;
-internal static ref readonly @string lineStrˢ => ref lineStrˢᵇ;
-private static readonly @string lineStrˢᵇ = "line_str"u8;
+internal static ref readonly @string strˢᴍLineReader => ref strˢᵇᴍLineReader;
+private static readonly @string strˢᵇᴍLineReader = "str"u8;
+internal static ref readonly @string lineStrˢᴍLineReader => ref lineStrˢᵇᴍLineReader;
+private static readonly @string lineStrˢᵇᴍLineReader = "line_str"u8;
 
 // readLNCT reads a sequence of LNCT entries and returns path information.
 internal static (@string path, uint64 mtime, uint64 size, error err) readLNCTᴍ(ref LineReader r, slice<lnctForm> s, bool dwarf64) {
@@ -372,9 +372,9 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCTᴍ
             }
             buf b1 = default;
             if (lf.form == formStrp) {
-                b1 = makeBuf(r.buf.dwarf, r.buf.format, strˢ, 0, r.str);
+                b1 = makeBuf(r.buf.dwarf, r.buf.format, strˢᴍLineReader, 0, r.str);
             } else {
-                b1 = makeBuf(r.buf.dwarf, r.buf.format, lineStrˢ, 0, r.lineStr);
+                b1 = makeBuf(r.buf.dwarf, r.buf.format, lineStrˢᴍLineReader, 0, r.lineStr);
             }
             b1.skip((nint)off);
             str = b1.@string();
@@ -574,8 +574,8 @@ internal static error Nextᴍ(ref LineReader r, ж<LineEntry> entry) {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownAddressSizeˢ => ref unknownAddressSizeˢᵇ;
-private static readonly @string unknownAddressSizeˢᵇ = "unknown address size"u8;
+internal static ref readonly @string unknownAddressSizeˢᴍLineReader => ref unknownAddressSizeˢᵇᴍLineReader;
+private static readonly @string unknownAddressSizeˢᵇᴍLineReader = "unknown address size"u8;
 
 // step processes the next opcode and updates r.state. If the opcode
 // emits a row in the line table, this updates *entry and returns
@@ -627,7 +627,7 @@ internal static bool stepᴍ(ref LineReader r, ж<LineEntry> Ꮡentry) {
                 break;
             }
             default: {
-                r.buf.error(unknownAddressSizeˢ);
+                r.buf.error(unknownAddressSizeˢᴍLineReader);
                 break;
             }}
             break;

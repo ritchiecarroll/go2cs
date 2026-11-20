@@ -133,14 +133,14 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
 } partial class cgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢ2 => ref contentTypeˢ2ᵇ;
-private static readonly @string contentTypeˢ2ᵇ = "Content-Type"u8;
-internal static ref readonly @string pathˢ => ref pathˢᵇ;
-private static readonly @string pathˢᵇ = "PATH"u8;
-internal static ref readonly @string binUsrBinUsrUcbUsrBsdUsrˢ => ref binUsrBinUsrUcbUsrBsdUsrˢᵇ;
-private static readonly @string binUsrBinUsrUcbUsrBsdUsrˢᵇ = "/bin:/usr/bin:/usr/ucb:/usr/bsd:/usr/local/bin"u8;
-internal static ref readonly @string locationˢ => ref locationˢᵇ;
-private static readonly @string locationˢᵇ = "Location"u8;
+internal static ref readonly @string contentTypeˢ2ᴍHandler => ref contentTypeˢ2ᵇᴍHandler;
+private static readonly @string contentTypeˢ2ᵇᴍHandler = "Content-Type"u8;
+internal static ref readonly @string pathˢᴍHandler => ref pathˢᵇᴍHandler;
+private static readonly @string pathˢᵇᴍHandler = "PATH"u8;
+internal static ref readonly @string binUsrBinUsrUcbUsrBsdUsrˢᴍHandler => ref binUsrBinUsrUcbUsrBsdUsrˢᵇᴍHandler;
+private static readonly @string binUsrBinUsrUcbUsrBsdUsrˢᵇᴍHandler = "/bin:/usr/bin:/usr/ucb:/usr/bsd:/usr/local/bin"u8;
+internal static ref readonly @string locationˢᴍHandler => ref locationˢᵇᴍHandler;
+private static readonly @string locationˢᵇᴍHandler = "Location"u8;
 
 internal static void ServeHTTPᴍ(ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
@@ -214,13 +214,13 @@ internal static void ServeHTTPᴍ(ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         if (req.ContentLength > 0) {
             env = append(env, fmt.Sprintf("CONTENT_LENGTH=%d"u8, req.ContentLength));
         }
-        @string ctype = req.Header.Get(contentTypeˢ2); if (ctype != ""u8) {
+        @string ctype = req.Header.Get(contentTypeˢ2ᴍHandler); if (ctype != ""u8) {
             env = append(env, "CONTENT_TYPE="u8 + ctype);
         }
 
-        @string envPath = os.Getenv(pathˢ);
+        @string envPath = os.Getenv(pathˢᴍHandler);
         if (envPath == ""u8) {
-            envPath = binUsrBinUsrUcbUsrBsdUsrˢ;
+            envPath = binUsrBinUsrUcbUsrBsdUsrˢᴍHandler;
         }
         env = append(env, "PATH="u8 + envPath);
 
@@ -349,7 +349,7 @@ internal static void ServeHTTPᴍ(ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             return;
         }
 
-        @string loc = headers.Get(locationˢ); if (loc != ""u8) {
+        @string loc = headers.Get(locationˢᴍHandler); if (loc != ""u8) {
             if (strings.HasPrefix(loc, "/") && h.PathLocationHandler != nil) {
                 h.handleInternalRedirect(rw, Ꮡreq, loc);
                 return;
@@ -359,7 +359,7 @@ internal static void ServeHTTPᴍ(ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             }
         }
 
-        if (statusCode == 0 && headers.Get(contentTypeˢ2) == ""u8) {
+        if (statusCode == 0 && headers.Get(contentTypeˢ2ᴍHandler) == ""u8) {
             rw.WriteHeader(http.StatusInternalServerError);
             h.printf("cgi: missing required Content-Type in headers");
             return;

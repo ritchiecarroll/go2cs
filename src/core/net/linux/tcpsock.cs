@@ -45,21 +45,21 @@ internal static netip.AddrPort AddrPortᴍ(ж<TCPAddr> Ꮡa) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
-private static readonly @string tcpˢᵇ = "tcp"u8;
+internal static ref readonly @string tcpˢᴍTCPAddr => ref tcpˢᵇᴍTCPAddr;
+private static readonly @string tcpˢᵇᴍTCPAddr = "tcp"u8;
 
 // Network returns the address's network name, "tcp".
-internal static @string Networkᴍ(ref TCPAddr a) { return tcpˢ; }
+internal static @string Networkᴍ(ref TCPAddr a) { return tcpˢᴍTCPAddr; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍTCPAddr => ref nilˢᵇᴍTCPAddr;
+private static readonly @string nilˢᵇᴍTCPAddr = "<nil>"u8;
 
 internal static @string Stringᴍ(ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return nilˢ;
+        return nilˢᴍTCPAddr;
     }
     @string ip = ipEmptyString(a.IP);
     if (a.Zone != ""u8) {

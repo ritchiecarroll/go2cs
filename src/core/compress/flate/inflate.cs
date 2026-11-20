@@ -395,8 +395,8 @@ internal static error Closeᴍ(ref decompressor f) {
 } partial class flate_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedLengthCodeˢ => ref unexpectedLengthCodeˢᵇ;
-private static readonly @string unexpectedLengthCodeˢᵇ = "unexpected length code"u8;
+internal static ref readonly @string unexpectedLengthCodeˢᴍdecompressor => ref unexpectedLengthCodeˢᵇᴍdecompressor;
+private static readonly @string unexpectedLengthCodeˢᵇᴍdecompressor = "unexpected length code"u8;
 
 internal static error readHuffmanᴍ(ж<decompressor> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
@@ -459,7 +459,7 @@ internal static error readHuffmanᴍ(ж<decompressor> Ꮡf) {
         nint b = default;
         switch (x) {
         default: {
-            return ((InternalError)(@string)unexpectedLengthCodeˢ);
+            return ((InternalError)(@string)unexpectedLengthCodeˢᴍdecompressor);
         }
         case 16: {
             rep = 3;

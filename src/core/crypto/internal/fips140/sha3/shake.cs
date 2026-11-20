@@ -114,12 +114,12 @@ internal static (slice<byte>, error) AppendBinaryᴍ(ref SHAKE s, slice<byte> b)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string sha3InvalidHashStateˢ => ref sha3InvalidHashStateˢᵇ;
-private static readonly @string sha3InvalidHashStateˢᵇ = "sha3: invalid hash state"u8;
+private static ref readonly @string sha3InvalidHashStateˢᴍSHAKE => ref sha3InvalidHashStateˢᵇᴍSHAKE;
+private static readonly @string sha3InvalidHashStateˢᵇᴍSHAKE = "sha3: invalid hash state"u8;
 
 internal static error UnmarshalBinaryᴍ(ref SHAKE s, slice<byte> b) {
     if (len(b) < marshaledSize) {
-        return errors.New(sha3InvalidHashStateˢ);
+        return errors.New(sha3InvalidHashStateˢᴍSHAKE);
     }
     var err = s.d.UnmarshalBinary(b[..(int)(marshaledSize)]); if (err != nil) {
         return err;

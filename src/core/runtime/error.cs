@@ -47,11 +47,11 @@ partial struct TypeAssertionError {
 internal static void RuntimeErrorᴍ(ref TypeAssertionError _) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
-private static readonly @string interfaceˢᵇ = "interface"u8;
+internal static ref readonly @string interfaceˢᴍTypeAssertionError => ref interfaceˢᵇᴍTypeAssertionError;
+private static readonly @string interfaceˢᵇᴍTypeAssertionError = "interface"u8;
 
 internal static @string Errorᴍ(ref TypeAssertionError e) {
-    @string inter = interfaceˢ;
+    @string inter = interfaceˢᴍTypeAssertionError;
     if (e._interface != nil) {
         inter = toRType(e._interface).@string();
     }

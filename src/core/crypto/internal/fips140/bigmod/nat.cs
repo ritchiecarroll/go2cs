@@ -183,8 +183,8 @@ internal static slice<byte> Bytesᴍ(ref Nat x, ж<Modulus> Ꮡm) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inputOverflowsTheModulusˢ => ref inputOverflowsTheModulusˢᵇ;
-private static readonly @string inputOverflowsTheModulusˢᵇ = "input overflows the modulus"u8;
+internal static ref readonly @string inputOverflowsTheModulusˢᴍNat => ref inputOverflowsTheModulusˢᵇᴍNat;
+private static readonly @string inputOverflowsTheModulusˢᵇᴍNat = "input overflows the modulus"u8;
 
 // SetBytes assigns x = b, where b is a slice of big-endian bytes.
 // SetBytes returns an error if b >= m.
@@ -201,14 +201,14 @@ internal static (ж<Nat>, error) SetBytesᴍ(ж<Nat> Ꮡx, slice<byte> b, ж<Mod
         return (default, err);
     }
     if (x.cmpGeq(m.nat) == yes) {
-        return (default, errors.New(inputOverflowsTheModulusˢ));
+        return (default, errors.New(inputOverflowsTheModulusˢᴍNat));
     }
     return (Ꮡx, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inputOverflowsTheModulusˢ2 => ref inputOverflowsTheModulusˢ2ᵇ;
-private static readonly @string inputOverflowsTheModulusˢ2ᵇ = "input overflows the modulus size"u8;
+internal static ref readonly @string inputOverflowsTheModulusˢ2ᴍNat => ref inputOverflowsTheModulusˢ2ᵇᴍNat;
+private static readonly @string inputOverflowsTheModulusˢ2ᵇᴍNat = "input overflows the modulus size"u8;
 
 // SetOverflowingBytes assigns x = b, where b is a slice of big-endian bytes.
 // SetOverflowingBytes returns an error if b has a longer bit length than m, but
@@ -227,7 +227,7 @@ internal static (ж<Nat>, error) SetOverflowingBytesᴍ(ж<Nat> Ꮡx, slice<byte
     // size of the modulus, so now we only need to check if the most significant
     // limb of x has more bits than the most significant limb of the modulus.
     if (bitLen(x.limbs[len(x.limbs) - 1]) > bitLen(m.nat.limbs[len(m.nat.limbs) - 1])) {
-        return (default, errors.New(inputOverflowsTheModulusˢ2));
+        return (default, errors.New(inputOverflowsTheModulusˢ2ᴍNat));
     }
     Ꮡx.maybeSubtractModulus(no, Ꮡm);
     return (Ꮡx, default);

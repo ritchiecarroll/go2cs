@@ -361,8 +361,8 @@ public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> fset,
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidPackageNameˢ => ref invalidPackageNameˢᵇ;
-private static readonly @string invalidPackageNameˢᵇ = "invalid package name _"u8;
+internal static ref readonly @string invalidPackageNameˢᴍChecker => ref invalidPackageNameˢᵇᴍChecker;
+private static readonly @string invalidPackageNameˢᵇᴍChecker = "invalid package name _"u8;
 
 // initFiles initializes the files-specific portion of checker.
 // The provided files must all belong to the same package.
@@ -401,7 +401,7 @@ internal static void initFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> file
             if (name != "_"u8) {
                 pkg.name = name;
             } else {
-                Ꮡcheck.error(new ast_Identжpositioner(@file.Name), BlankPkgName, invalidPackageNameˢ);
+                Ꮡcheck.error(new ast_Identжpositioner(@file.Name), BlankPkgName, invalidPackageNameˢᴍChecker);
             }
             fallthrough = true;
         }
@@ -491,7 +491,7 @@ partial struct bailout {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object theFollowingPanicˢ = (@string)"The following panic happened checking types near:"u8;
+internal static readonly object theFollowingPanicˢᴍChecker = (@string)"The following panic happened checking types near:"u8;
 
 internal static void handleBailoutᴍ(ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
@@ -518,7 +518,7 @@ internal static void handleBailoutᴍ(ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
                     }
                 }
 
-                fmt.Fprintln(new os.FileжWriter(os.Stderr), theFollowingPanicˢ);
+                fmt.Fprintln(new os.FileжWriter(os.Stderr), theFollowingPanicˢᴍChecker);
                 if (len(check.posStack) <= 10) {
                     doPrint(check.posStack);
                 } else {
@@ -566,26 +566,26 @@ internal static error /*err*/ Filesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>>
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string initFilesˢ => ref initFilesˢᵇ;
-private static readonly @string initFilesˢᵇ = "== initFiles =="u8;
-internal static ref readonly @string collectObjectsˢ => ref collectObjectsˢᵇ;
-private static readonly @string collectObjectsˢᵇ = "== collectObjects =="u8;
-internal static ref readonly @string sortObjectsˢ => ref sortObjectsˢᵇ;
-private static readonly @string sortObjectsˢᵇ = "== sortObjects =="u8;
-internal static ref readonly @string directCyclesˢ => ref directCyclesˢᵇ;
-private static readonly @string directCyclesˢᵇ = "== directCycles =="u8;
-internal static ref readonly @string packageObjectsˢ => ref packageObjectsˢᵇ;
-private static readonly @string packageObjectsˢᵇ = "== packageObjects =="u8;
-internal static ref readonly @string processDelayedˢ => ref processDelayedˢᵇ;
-private static readonly @string processDelayedˢᵇ = "== processDelayed =="u8;
-internal static ref readonly @string cleanupˢ => ref cleanupˢᵇ;
-private static readonly @string cleanupˢᵇ = "== cleanup =="u8;
-internal static ref readonly @string initOrderˢ => ref initOrderˢᵇ;
-private static readonly @string initOrderˢᵇ = "== initOrder =="u8;
-internal static ref readonly @string unusedImportsˢ => ref unusedImportsˢᵇ;
-private static readonly @string unusedImportsˢᵇ = "== unusedImports =="u8;
-internal static ref readonly @string recordUntypedˢ => ref recordUntypedˢᵇ;
-private static readonly @string recordUntypedˢᵇ = "== recordUntyped =="u8;
+internal static ref readonly @string initFilesˢᴍChecker => ref initFilesˢᵇᴍChecker;
+private static readonly @string initFilesˢᵇᴍChecker = "== initFiles =="u8;
+internal static ref readonly @string collectObjectsˢᴍChecker => ref collectObjectsˢᵇᴍChecker;
+private static readonly @string collectObjectsˢᵇᴍChecker = "== collectObjects =="u8;
+internal static ref readonly @string sortObjectsˢᴍChecker => ref sortObjectsˢᵇᴍChecker;
+private static readonly @string sortObjectsˢᵇᴍChecker = "== sortObjects =="u8;
+internal static ref readonly @string directCyclesˢᴍChecker => ref directCyclesˢᵇᴍChecker;
+private static readonly @string directCyclesˢᵇᴍChecker = "== directCycles =="u8;
+internal static ref readonly @string packageObjectsˢᴍChecker => ref packageObjectsˢᵇᴍChecker;
+private static readonly @string packageObjectsˢᵇᴍChecker = "== packageObjects =="u8;
+internal static ref readonly @string processDelayedˢᴍChecker => ref processDelayedˢᵇᴍChecker;
+private static readonly @string processDelayedˢᵇᴍChecker = "== processDelayed =="u8;
+internal static ref readonly @string cleanupˢᴍChecker => ref cleanupˢᵇᴍChecker;
+private static readonly @string cleanupˢᵇᴍChecker = "== cleanup =="u8;
+internal static ref readonly @string initOrderˢᴍChecker => ref initOrderˢᵇᴍChecker;
+private static readonly @string initOrderˢᵇᴍChecker = "== initOrder =="u8;
+internal static ref readonly @string unusedImportsˢᴍChecker => ref unusedImportsˢᵇᴍChecker;
+private static readonly @string unusedImportsˢᵇᴍChecker = "== unusedImports =="u8;
+internal static ref readonly @string recordUntypedˢᴍChecker => ref recordUntypedˢᵇᴍChecker;
+private static readonly @string recordUntypedˢᵇᴍChecker = "== recordUntyped =="u8;
 
 // checkFiles type-checks the specified files. Errors are reported as
 // a side effect, not by returning early, to ensure that well-formed
@@ -617,36 +617,36 @@ internal static void checkFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> fil
             }
         }
 
-        print(initFilesˢ);
+        print(initFilesˢᴍChecker);
         Ꮡcheck.initFiles(files);
 
-        print(collectObjectsˢ);
+        print(collectObjectsˢᴍChecker);
         Ꮡcheck.collectObjects();
 
-        print(sortObjectsˢ);
+        print(sortObjectsˢᴍChecker);
         check.sortObjects();
 
-        print(directCyclesˢ);
+        print(directCyclesˢᴍChecker);
         Ꮡcheck.directCycles();
 
-        print(packageObjectsˢ);
+        print(packageObjectsˢᴍChecker);
         Ꮡcheck.packageObjects();
 
-        print(processDelayedˢ);
+        print(processDelayedˢᴍChecker);
         Ꮡcheck.processDelayed(0); // incl. all functions
 
-        print(cleanupˢ);
+        print(cleanupˢᴍChecker);
         check.cleanup();
 
-        print(initOrderˢ);
+        print(initOrderˢᴍChecker);
         Ꮡcheck.initOrder();
 
         if (!check.conf.DisableUnusedImportCheck) {
-            print(unusedImportsˢ);
+            print(unusedImportsˢᴍChecker);
             Ꮡcheck.unusedImports();
         }
 
-        print(recordUntypedˢ);
+        print(recordUntypedˢᴍChecker);
         Ꮡcheck.recordUntyped();
 
         if (check.firstErr == nil) {
@@ -676,8 +676,8 @@ internal static void checkFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> fil
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string delayedPˢ => ref delayedPˢᵇ;
-private static readonly @string delayedPˢᵇ = "-- delayed %p"u8;
+internal static ref readonly @string delayedPˢᴍChecker => ref delayedPˢᵇᴍChecker;
+private static readonly @string delayedPˢᵇᴍChecker = "-- delayed %p"u8;
 
 // processDelayed processes all delayed actions pushed after top.
 internal static void processDelayedᴍ(ж<Checker> Ꮡcheck, nint top) {
@@ -696,7 +696,7 @@ internal static void processDelayedᴍ(ж<Checker> Ꮡcheck, nint top) {
             if (a.desc != nil) {
                 Ꮡcheck.trace(a.desc.pos.Pos(), "-- "u8 + a.desc.format, a.desc.args.ꓸꓸꓸ);
             } else {
-                Ꮡcheck.trace(nopos, delayedPˢ, (a.f).OrTypedNilFunc());
+                Ꮡcheck.trace(nopos, delayedPˢᴍChecker, (a.f).OrTypedNilFunc());
             }
         }
         check.version = a.version; // reestablish the effective Go version captured earlier

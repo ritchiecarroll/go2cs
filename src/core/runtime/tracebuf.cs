@@ -163,10 +163,10 @@ internal static traceWriter flushᴍ(traceWriter w) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string traceBufferˢ => ref traceBufferˢᵇ;
-private static readonly @string traceBufferˢᵇ = "trace buffer"u8;
-internal static ref readonly @string traceOutOfMemoryˢ => ref traceOutOfMemoryˢᵇ;
-private static readonly @string traceOutOfMemoryˢᵇ = "trace: out of memory"u8;
+internal static ref readonly @string traceBufferˢᴍtraceWriter => ref traceBufferˢᵇᴍtraceWriter;
+private static readonly @string traceBufferˢᵇᴍtraceWriter = "trace buffer"u8;
+internal static ref readonly @string traceOutOfMemoryˢᴍtraceWriter => ref traceOutOfMemoryˢᵇᴍtraceWriter;
+private static readonly @string traceOutOfMemoryˢᵇᴍtraceWriter = "trace: out of memory"u8;
 
 // refill puts w.traceBuf on the queue of full buffers and refresh's w's buffer.
 internal static traceWriter refillᴍ(traceWriter w) {
@@ -181,9 +181,9 @@ internal static traceWriter refillᴍ(traceWriter w) {
             unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         } else {
             unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
-            w.traceBuf = @unsafe.Pointer.To<traceBuf>(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceBufferˢ));
+            w.traceBuf = @unsafe.Pointer.To<traceBuf>(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceBufferˢᴍtraceWriter));
             if (w.traceBuf == nil) {
-                @throw(traceOutOfMemoryˢ);
+                @throw(traceOutOfMemoryˢᴍtraceWriter);
             }
         }
     });
@@ -365,8 +365,8 @@ internal static bool availableᴍ(ref traceBuf buf, nint size) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string vCouldNotFitInˢ => ref vCouldNotFitInˢᵇ;
-private static readonly @string vCouldNotFitInˢᵇ = "v could not fit in traceBytesPerNumber"u8;
+internal static ref readonly @string vCouldNotFitInˢᴍtraceBuf => ref vCouldNotFitInˢᵇᴍtraceBuf;
+private static readonly @string vCouldNotFitInˢᵇᴍtraceBuf = "v could not fit in traceBytesPerNumber"u8;
 
 // varintAt writes varint v at byte position pos in buf. This always
 // consumes traceBytesPerNumber bytes. This is intended for when the caller
@@ -388,7 +388,7 @@ internal static void varintAtᴍ(ref traceBuf buf, nint pos, uint64 v) {
         pos++;
     }
     if (v != 0) {
-        @throw(vCouldNotFitInˢ);
+        @throw(vCouldNotFitInˢᴍtraceBuf);
     }
 }
 

@@ -73,14 +73,14 @@ internal static slice<@string> kindStrings = [
 } partial class slog_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownSlogKindˢ => ref unknownSlogKindˢᵇ;
-private static readonly @string unknownSlogKindˢᵇ = "<unknown slog.Kind>"u8;
+internal static ref readonly @string unknownSlogKindˢᴍKind => ref unknownSlogKindˢᵇᴍKind;
+private static readonly @string unknownSlogKindˢᵇᴍKind = "<unknown slog.Kind>"u8;
 
 internal static @string Stringᴍ(Kind k) {
     if (k >= 0 && (nint)k < len(kindStrings)) {
         return kindStrings[k];
     }
-    return unknownSlogKindˢ;
+    return unknownSlogKindˢᴍKind;
 }
 
 } partial class slog_package {

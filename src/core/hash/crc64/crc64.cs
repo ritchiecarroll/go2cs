@@ -128,22 +128,22 @@ internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashCrc64InvalidHashˢ => ref hashCrc64InvalidHashˢᵇ;
-private static readonly @string hashCrc64InvalidHashˢᵇ = "hash/crc64: invalid hash state identifier"u8;
-internal static ref readonly @string hashCrc64InvalidHashˢ2 => ref hashCrc64InvalidHashˢ2ᵇ;
-private static readonly @string hashCrc64InvalidHashˢ2ᵇ = "hash/crc64: invalid hash state size"u8;
-internal static ref readonly @string hashCrc64TablesDoNotˢ => ref hashCrc64TablesDoNotˢᵇ;
-private static readonly @string hashCrc64TablesDoNotˢᵇ = "hash/crc64: tables do not match"u8;
+internal static ref readonly @string hashCrc64InvalidHashˢᴍdigest => ref hashCrc64InvalidHashˢᵇᴍdigest;
+private static readonly @string hashCrc64InvalidHashˢᵇᴍdigest = "hash/crc64: invalid hash state identifier"u8;
+internal static ref readonly @string hashCrc64InvalidHashˢ2ᴍdigest => ref hashCrc64InvalidHashˢ2ᵇᴍdigest;
+private static readonly @string hashCrc64InvalidHashˢ2ᵇᴍdigest = "hash/crc64: invalid hash state size"u8;
+internal static ref readonly @string hashCrc64TablesDoNotˢᴍdigest => ref hashCrc64TablesDoNotˢᵇᴍdigest;
+private static readonly @string hashCrc64TablesDoNotˢᵇᴍdigest = "hash/crc64: tables do not match"u8;
 
 internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
-        return errors.New(hashCrc64InvalidHashˢ);
+        return errors.New(hashCrc64InvalidHashˢᴍdigest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(hashCrc64InvalidHashˢ2);
+        return errors.New(hashCrc64InvalidHashˢ2ᴍdigest);
     }
     if (tableSum(d.tab) != byteorder.BEUint64(b[4..])) {
-        return errors.New(hashCrc64TablesDoNotˢ);
+        return errors.New(hashCrc64TablesDoNotˢᴍdigest);
     }
     d.crc = byteorder.BEUint64(b[12..]);
     return default;

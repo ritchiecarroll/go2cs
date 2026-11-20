@@ -853,8 +853,8 @@ public static bool IsExported(@string name) { return token.IsExported(name); }
 internal static bool IsExportedᴍ(ref Ident id) { return token.IsExported(id.Name); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍIdent => ref nilˢᵇᴍIdent;
+private static readonly @string nilˢᵇᴍIdent = "<nil>"u8;
 
 internal static @string Stringᴍ(ж<Ident> Ꮡid) {
     ref var id = ref Ꮡid.DerefOrNull();
@@ -862,7 +862,7 @@ internal static @string Stringᴍ(ж<Ident> Ꮡid) {
     if (Ꮡid != nil) {
         return id.Name;
     }
-    return nilˢ;
+    return nilˢᴍIdent;
 }
 
 } partial class ast_package {

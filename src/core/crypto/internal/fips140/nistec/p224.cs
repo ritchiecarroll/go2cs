@@ -58,10 +58,10 @@ internal static ж<P224Point> Setᴍ(ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidP224Compressedˢ => ref invalidP224Compressedˢᵇ;
-private static readonly @string invalidP224Compressedˢᵇ = "invalid P224 compressed point encoding"u8;
-internal static ref readonly @string invalidP224PointEncodingˢ => ref invalidP224PointEncodingˢᵇ;
-private static readonly @string invalidP224PointEncodingˢᵇ = "invalid P224 point encoding"u8;
+internal static ref readonly @string invalidP224CompressedˢᴍP224Point => ref invalidP224CompressedˢᵇᴍP224Point;
+private static readonly @string invalidP224CompressedˢᵇᴍP224Point = "invalid P224 compressed point encoding"u8;
+internal static ref readonly @string invalidP224PointEncodingˢᴍP224Point => ref invalidP224PointEncodingˢᵇᴍP224Point;
+private static readonly @string invalidP224PointEncodingˢᵇᴍP224Point = "invalid P224 point encoding"u8;
 
 // SetBytes sets p to the compressed, uncompressed, or infinity value encoded in
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
@@ -103,7 +103,7 @@ internal static (ж<P224Point>, error) SetBytesᴍ(ж<P224Point> Ꮡp, slice<byt
         // y² = x³ - 3x + b
         var y = p224Polynomial(@new<fiat.P224Element>(), x);
         if (!p224Sqrt(y, y)) {
-            return (default, errors.New(invalidP224Compressedˢ));
+            return (default, errors.New(invalidP224CompressedˢᴍP224Point));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -119,7 +119,7 @@ internal static (ж<P224Point>, error) SetBytesᴍ(ж<P224Point> Ꮡp, slice<byt
         return (Ꮡp, default);
     }
     default: {
-        return (default, errors.New(invalidP224PointEncodingˢ));
+        return (default, errors.New(invalidP224PointEncodingˢᴍP224Point));
     }}
 }
 
@@ -201,14 +201,14 @@ internal static (slice<byte>, error) BytesXᴍ(ref P224Point p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string p224PointIsThePointAtˢ => ref p224PointIsThePointAtˢᵇ;
-private static readonly @string p224PointIsThePointAtˢᵇ = "P224 point is the point at infinity"u8;
+internal static ref readonly @string p224PointIsThePointAtˢᴍP224Point => ref p224PointIsThePointAtˢᵇᴍP224Point;
+private static readonly @string p224PointIsThePointAtˢᵇᴍP224Point = "P224 point is the point at infinity"u8;
 
 internal static (slice<byte>, error) bytesXᴍ(ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
-        return (default, errors.New(p224PointIsThePointAtˢ));
+        return (default, errors.New(p224PointIsThePointAtˢᴍP224Point));
     }
 
     var zinv = @new<fiat.P224Element>().Invert(p.z);
@@ -465,8 +465,8 @@ internal static ж<array<p224Table>> generatorTableᴍ(ref P224Point p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢ => ref invalidScalarLengthˢᵇ;
-private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarLengthˢᴍP224Point => ref invalidScalarLengthˢᵇᴍP224Point;
+private static readonly @string invalidScalarLengthˢᵇᴍP224Point = "invalid scalar length"u8;
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
@@ -474,7 +474,7 @@ internal static (ж<P224Point>, error) ScalarBaseMultᴍ(ж<P224Point> Ꮡp, sli
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p224ElementLength) {
-        return (default, errors.New(invalidScalarLengthˢ));
+        return (default, errors.New(invalidScalarLengthˢᴍP224Point));
     }
     var tables = p.generatorTable();
 

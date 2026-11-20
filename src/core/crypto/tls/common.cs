@@ -1361,16 +1361,16 @@ internal static (ж<Certificate>, error) getCertificateᴍ(ref Config c, ж<Clie
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noMutuallySupportedˢ => ref noMutuallySupportedˢᵇ;
-private static readonly @string noMutuallySupportedˢᵇ = "no mutually supported protocol versions"u8;
-internal static ref readonly @string clientDoesnTSupportEcdheˢ => ref clientDoesnTSupportEcdheˢᵇ;
-private static readonly @string clientDoesnTSupportEcdheˢᵇ = "client doesn't support ECDHE, can only use legacy RSA key exchange"u8;
-internal static ref readonly @string clientDoesnTSupportˢ => ref clientDoesnTSupportˢᵇ;
-private static readonly @string clientDoesnTSupportˢᵇ = "client doesn't support certificate curve"u8;
-internal static ref readonly @string connectionDoesnTSupportˢ => ref connectionDoesnTSupportˢᵇ;
-private static readonly @string connectionDoesnTSupportˢᵇ = "connection doesn't support Ed25519"u8;
-internal static ref readonly @string clientDoesnTSupportAnyˢ => ref clientDoesnTSupportAnyˢᵇ;
-private static readonly @string clientDoesnTSupportAnyˢᵇ = "client doesn't support any cipher suites compatible with the certificate"u8;
+internal static ref readonly @string noMutuallySupportedˢᴍClientHelloInfo => ref noMutuallySupportedˢᵇᴍClientHelloInfo;
+private static readonly @string noMutuallySupportedˢᵇᴍClientHelloInfo = "no mutually supported protocol versions"u8;
+internal static ref readonly @string clientDoesnTSupportEcdheˢᴍClientHelloInfo => ref clientDoesnTSupportEcdheˢᵇᴍClientHelloInfo;
+private static readonly @string clientDoesnTSupportEcdheˢᵇᴍClientHelloInfo = "client doesn't support ECDHE, can only use legacy RSA key exchange"u8;
+internal static ref readonly @string clientDoesnTSupportˢᴍClientHelloInfo => ref clientDoesnTSupportˢᵇᴍClientHelloInfo;
+private static readonly @string clientDoesnTSupportˢᵇᴍClientHelloInfo = "client doesn't support certificate curve"u8;
+internal static ref readonly @string connectionDoesnTSupportˢᴍClientHelloInfo => ref connectionDoesnTSupportˢᵇᴍClientHelloInfo;
+private static readonly @string connectionDoesnTSupportˢᵇᴍClientHelloInfo = "connection doesn't support Ed25519"u8;
+internal static ref readonly @string clientDoesnTSupportAnyˢᴍClientHelloInfo => ref clientDoesnTSupportAnyˢᵇᴍClientHelloInfo;
+private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = "client doesn't support any cipher suites compatible with the certificate"u8;
 
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the client that sent the ClientHello. Otherwise, it returns an error
@@ -1398,7 +1398,7 @@ internal static error SupportsCertificateᴍ(ж<ClientHelloInfo> Ꮡchi, ж<Cert
     }
     var (vers, ok) = config.mutualVersion(roleServer, chi.SupportedVersions);
     if (!ok) {
-        return errors.New(noMutuallySupportedˢ);
+        return errors.New(noMutuallySupportedˢᴍClientHelloInfo);
     }
 
     // If the client specified the name they are trying to connect to, the
@@ -1471,7 +1471,7 @@ internal static error SupportsCertificateᴍ(ж<ClientHelloInfo> Ꮡchi, ж<Cert
         return err;
     }
     if (!ecdheSupported) {
-        return supportsRSAFallback(errors.New(clientDoesnTSupportEcdheˢ));
+        return supportsRSAFallback(errors.New(clientDoesnTSupportEcdheˢᴍClientHelloInfo));
     }
 
     bool ecdsaCipherSuite = default;
@@ -1505,14 +1505,14 @@ internal static error SupportsCertificateᴍ(ж<ClientHelloInfo> Ꮡchi, ж<Cert
                     }
                 }
                 if (!curveOk) {
-                    return errors.New(clientDoesnTSupportˢ);
+                    return errors.New(clientDoesnTSupportˢᴍClientHelloInfo);
                 }
                 ecdsaCipherSuite = true;
                 break;
             }
             case ed25519.PublicKey pub: {
                 if (vers < VersionTLS12 || len(chi.SignatureSchemes) == 0) {
-                    return errors.New(connectionDoesnTSupportˢ);
+                    return errors.New(connectionDoesnTSupportˢᴍClientHelloInfo);
                 }
                 ecdsaCipherSuite = true;
                 break;
@@ -1551,7 +1551,7 @@ internal static error SupportsCertificateᴍ(ж<ClientHelloInfo> Ꮡchi, ж<Cert
         return true;
     });
     if (cipherSuite == nil) {
-        return supportsRSAFallback(errors.New(clientDoesnTSupportAnyˢ));
+        return supportsRSAFallback(errors.New(clientDoesnTSupportAnyˢᴍClientHelloInfo));
     }
 
     return default;
@@ -1560,8 +1560,8 @@ internal static error SupportsCertificateᴍ(ж<ClientHelloInfo> Ꮡchi, ж<Cert
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chainIsNotSignedByAnˢ => ref chainIsNotSignedByAnˢᵇ;
-private static readonly @string chainIsNotSignedByAnˢᵇ = "chain is not signed by an acceptable CA"u8;
+internal static ref readonly @string chainIsNotSignedByAnˢᴍCertificateRequestInfo => ref chainIsNotSignedByAnˢᵇᴍCertificateRequestInfo;
+private static readonly @string chainIsNotSignedByAnˢᵇᴍCertificateRequestInfo = "chain is not signed by an acceptable CA"u8;
 
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the server that sent the CertificateRequest. Otherwise, it returns an error
@@ -1596,7 +1596,7 @@ internal static error SupportsCertificateᴍ(ref CertificateRequestInfo cri, ж<
             }
         }
     }
-    return errors.New(chainIsNotSignedByAnˢ);
+    return errors.New(chainIsNotSignedByAnˢᴍCertificateRequestInfo);
 }
 
 } partial class tls_package {

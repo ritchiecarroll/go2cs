@@ -91,62 +91,62 @@ internal static UntypedInt sLast => 29;
 } partial class trace_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string traceContainsTooManyˢ => ref traceContainsTooManyˢᵇ;
-private static readonly @string traceContainsTooManyˢᵇ = "trace contains too many strings"u8;
-internal static ref readonly @string foreverˢ => ref foreverˢᵇ;
-private static readonly @string foreverˢᵇ = "forever"u8;
-internal static ref readonly @string preemptedˢ => ref preemptedˢᵇ;
-private static readonly @string preemptedˢᵇ = "preempted"u8;
-internal static ref readonly @string runtimeGoschedˢ => ref runtimeGoschedˢᵇ;
-private static readonly @string runtimeGoschedˢᵇ = "runtime.Gosched"u8;
-internal static ref readonly @string sleepˢ => ref sleepˢᵇ;
-private static readonly @string sleepˢᵇ = "sleep"u8;
-internal static ref readonly @string chanSendˢ => ref chanSendˢᵇ;
-private static readonly @string chanSendˢᵇ = "chan send"u8;
-internal static ref readonly @string chanReceiveˢ => ref chanReceiveˢᵇ;
-private static readonly @string chanReceiveˢᵇ = "chan receive"u8;
-internal static ref readonly @string networkˢ => ref networkˢᵇ;
-private static readonly @string networkˢᵇ = "network"u8;
-internal static ref readonly @string syncˢ => ref syncˢᵇ;
-private static readonly @string syncˢᵇ = "sync"u8;
-internal static ref readonly @string syncCondWaitˢ => ref syncCondWaitˢᵇ;
-private static readonly @string syncCondWaitˢᵇ = "sync.(*Cond).Wait"u8;
-internal static ref readonly @string selectˢ => ref selectˢᵇ;
-private static readonly @string selectˢᵇ = "select"u8;
-internal static ref readonly @string gcMarkAssistWaitForWorkˢ => ref gcMarkAssistWaitForWorkˢᵇ;
-private static readonly @string gcMarkAssistWaitForWorkˢᵇ = "GC mark assist wait for work"u8;
-internal static ref readonly @string gcMarkTerminationˢ => ref gcMarkTerminationˢᵇ;
-private static readonly @string gcMarkTerminationˢᵇ = "GC mark termination"u8;
-internal static ref readonly @string gcSweepTerminationˢ => ref gcSweepTerminationˢᵇ;
-private static readonly @string gcSweepTerminationˢᵇ = "GC sweep termination"u8;
-internal static ref readonly @string writeHeapDumpˢ => ref writeHeapDumpˢᵇ;
-private static readonly @string writeHeapDumpˢᵇ = "write heap dump"u8;
-internal static ref readonly @string goroutineProfileˢ => ref goroutineProfileˢᵇ;
-private static readonly @string goroutineProfileˢᵇ = "goroutine profile"u8;
-internal static ref readonly @string goroutineProfileCleanupˢ => ref goroutineProfileCleanupˢᵇ;
-private static readonly @string goroutineProfileCleanupˢᵇ = "goroutine profile cleanup"u8;
-internal static ref readonly @string allGoroutineStackTraceˢ => ref allGoroutineStackTraceˢᵇ;
-private static readonly @string allGoroutineStackTraceˢᵇ = "all goroutine stack trace"u8;
-internal static ref readonly @string readMemStatsˢ => ref readMemStatsˢᵇ;
-private static readonly @string readMemStatsˢᵇ = "read mem stats"u8;
-internal static ref readonly @string allThreadsSyscallˢ => ref allThreadsSyscallˢᵇ;
-private static readonly @string allThreadsSyscallˢᵇ = "AllThreadsSyscall"u8;
-internal static ref readonly @string gomaxprocsˢ => ref gomaxprocsˢᵇ;
-private static readonly @string gomaxprocsˢᵇ = "GOMAXPROCS"u8;
-internal static ref readonly @string startTraceˢ => ref startTraceˢᵇ;
-private static readonly @string startTraceˢᵇ = "start trace"u8;
-internal static ref readonly @string stopTraceˢ => ref stopTraceˢᵇ;
-private static readonly @string stopTraceˢᵇ = "stop trace"u8;
-internal static ref readonly @string countPagesInUseTestˢ => ref countPagesInUseTestˢᵇ;
-private static readonly @string countPagesInUseTestˢᵇ = "CountPagesInUse (test)"u8;
-internal static ref readonly @string readMetricsSlowTestˢ => ref readMetricsSlowTestˢᵇ;
-private static readonly @string readMetricsSlowTestˢᵇ = "ReadMetricsSlow (test)"u8;
-internal static ref readonly @string readMemStatsSlowTestˢ => ref readMemStatsSlowTestˢᵇ;
-private static readonly @string readMemStatsSlowTestˢᵇ = "ReadMemStatsSlow (test)"u8;
-internal static ref readonly @string pageCachePagesLeakedTestˢ => ref pageCachePagesLeakedTestˢᵇ;
-private static readonly @string pageCachePagesLeakedTestˢᵇ = "PageCachePagesLeaked (test)"u8;
-internal static ref readonly @string resetDebugLogTestˢ => ref resetDebugLogTestˢᵇ;
-private static readonly @string resetDebugLogTestˢᵇ = "ResetDebugLog (test)"u8;
+internal static ref readonly @string traceContainsTooManyˢᴍtraceV1Converter => ref traceContainsTooManyˢᵇᴍtraceV1Converter;
+private static readonly @string traceContainsTooManyˢᵇᴍtraceV1Converter = "trace contains too many strings"u8;
+internal static ref readonly @string foreverˢᴍtraceV1Converter => ref foreverˢᵇᴍtraceV1Converter;
+private static readonly @string foreverˢᵇᴍtraceV1Converter = "forever"u8;
+internal static ref readonly @string preemptedˢᴍtraceV1Converter => ref preemptedˢᵇᴍtraceV1Converter;
+private static readonly @string preemptedˢᵇᴍtraceV1Converter = "preempted"u8;
+internal static ref readonly @string runtimeGoschedˢᴍtraceV1Converter => ref runtimeGoschedˢᵇᴍtraceV1Converter;
+private static readonly @string runtimeGoschedˢᵇᴍtraceV1Converter = "runtime.Gosched"u8;
+internal static ref readonly @string sleepˢᴍtraceV1Converter => ref sleepˢᵇᴍtraceV1Converter;
+private static readonly @string sleepˢᵇᴍtraceV1Converter = "sleep"u8;
+internal static ref readonly @string chanSendˢᴍtraceV1Converter => ref chanSendˢᵇᴍtraceV1Converter;
+private static readonly @string chanSendˢᵇᴍtraceV1Converter = "chan send"u8;
+internal static ref readonly @string chanReceiveˢᴍtraceV1Converter => ref chanReceiveˢᵇᴍtraceV1Converter;
+private static readonly @string chanReceiveˢᵇᴍtraceV1Converter = "chan receive"u8;
+internal static ref readonly @string networkˢᴍtraceV1Converter => ref networkˢᵇᴍtraceV1Converter;
+private static readonly @string networkˢᵇᴍtraceV1Converter = "network"u8;
+internal static ref readonly @string syncˢᴍtraceV1Converter => ref syncˢᵇᴍtraceV1Converter;
+private static readonly @string syncˢᵇᴍtraceV1Converter = "sync"u8;
+internal static ref readonly @string syncCondWaitˢᴍtraceV1Converter => ref syncCondWaitˢᵇᴍtraceV1Converter;
+private static readonly @string syncCondWaitˢᵇᴍtraceV1Converter = "sync.(*Cond).Wait"u8;
+internal static ref readonly @string selectˢᴍtraceV1Converter => ref selectˢᵇᴍtraceV1Converter;
+private static readonly @string selectˢᵇᴍtraceV1Converter = "select"u8;
+internal static ref readonly @string gcMarkAssistWaitForWorkˢᴍtraceV1Converter => ref gcMarkAssistWaitForWorkˢᵇᴍtraceV1Converter;
+private static readonly @string gcMarkAssistWaitForWorkˢᵇᴍtraceV1Converter = "GC mark assist wait for work"u8;
+internal static ref readonly @string gcMarkTerminationˢᴍtraceV1Converter => ref gcMarkTerminationˢᵇᴍtraceV1Converter;
+private static readonly @string gcMarkTerminationˢᵇᴍtraceV1Converter = "GC mark termination"u8;
+internal static ref readonly @string gcSweepTerminationˢᴍtraceV1Converter => ref gcSweepTerminationˢᵇᴍtraceV1Converter;
+private static readonly @string gcSweepTerminationˢᵇᴍtraceV1Converter = "GC sweep termination"u8;
+internal static ref readonly @string writeHeapDumpˢᴍtraceV1Converter => ref writeHeapDumpˢᵇᴍtraceV1Converter;
+private static readonly @string writeHeapDumpˢᵇᴍtraceV1Converter = "write heap dump"u8;
+internal static ref readonly @string goroutineProfileˢᴍtraceV1Converter => ref goroutineProfileˢᵇᴍtraceV1Converter;
+private static readonly @string goroutineProfileˢᵇᴍtraceV1Converter = "goroutine profile"u8;
+internal static ref readonly @string goroutineProfileCleanupˢᴍtraceV1Converter => ref goroutineProfileCleanupˢᵇᴍtraceV1Converter;
+private static readonly @string goroutineProfileCleanupˢᵇᴍtraceV1Converter = "goroutine profile cleanup"u8;
+internal static ref readonly @string allGoroutineStackTraceˢᴍtraceV1Converter => ref allGoroutineStackTraceˢᵇᴍtraceV1Converter;
+private static readonly @string allGoroutineStackTraceˢᵇᴍtraceV1Converter = "all goroutine stack trace"u8;
+internal static ref readonly @string readMemStatsˢᴍtraceV1Converter => ref readMemStatsˢᵇᴍtraceV1Converter;
+private static readonly @string readMemStatsˢᵇᴍtraceV1Converter = "read mem stats"u8;
+internal static ref readonly @string allThreadsSyscallˢᴍtraceV1Converter => ref allThreadsSyscallˢᵇᴍtraceV1Converter;
+private static readonly @string allThreadsSyscallˢᵇᴍtraceV1Converter = "AllThreadsSyscall"u8;
+internal static ref readonly @string gomaxprocsˢᴍtraceV1Converter => ref gomaxprocsˢᵇᴍtraceV1Converter;
+private static readonly @string gomaxprocsˢᵇᴍtraceV1Converter = "GOMAXPROCS"u8;
+internal static ref readonly @string startTraceˢᴍtraceV1Converter => ref startTraceˢᵇᴍtraceV1Converter;
+private static readonly @string startTraceˢᵇᴍtraceV1Converter = "start trace"u8;
+internal static ref readonly @string stopTraceˢᴍtraceV1Converter => ref stopTraceˢᵇᴍtraceV1Converter;
+private static readonly @string stopTraceˢᵇᴍtraceV1Converter = "stop trace"u8;
+internal static ref readonly @string countPagesInUseTestˢᴍtraceV1Converter => ref countPagesInUseTestˢᵇᴍtraceV1Converter;
+private static readonly @string countPagesInUseTestˢᵇᴍtraceV1Converter = "CountPagesInUse (test)"u8;
+internal static ref readonly @string readMetricsSlowTestˢᴍtraceV1Converter => ref readMetricsSlowTestˢᵇᴍtraceV1Converter;
+private static readonly @string readMetricsSlowTestˢᵇᴍtraceV1Converter = "ReadMetricsSlow (test)"u8;
+internal static ref readonly @string readMemStatsSlowTestˢᴍtraceV1Converter => ref readMemStatsSlowTestˢᵇᴍtraceV1Converter;
+private static readonly @string readMemStatsSlowTestˢᵇᴍtraceV1Converter = "ReadMemStatsSlow (test)"u8;
+internal static ref readonly @string pageCachePagesLeakedTestˢᴍtraceV1Converter => ref pageCachePagesLeakedTestˢᵇᴍtraceV1Converter;
+private static readonly @string pageCachePagesLeakedTestˢᵇᴍtraceV1Converter = "PageCachePagesLeaked (test)"u8;
+internal static ref readonly @string resetDebugLogTestˢᴍtraceV1Converter => ref resetDebugLogTestˢᵇᴍtraceV1Converter;
+private static readonly @string resetDebugLogTestˢᵇᴍtraceV1Converter = "ResetDebugLog (test)"u8;
 
 internal static error initᴍ(ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     ref var it = ref Ꮡit.DerefOrNull();
@@ -177,7 +177,7 @@ internal static error initᴍ(ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     // Add all strings used for UserLog. In the trace v1 format, these were
     // stored inline and didn't have IDs. We generate IDs for them.
     if (max + (uint64)len(pr.InlineStrings) < max) {
-        return errors.New(traceContainsTooManyˢ);
+        return errors.New(traceContainsTooManyˢᴍtraceV1Converter);
     }
     ref var addErr = ref heap<error>(out var ᏑaddErr);
     var evtʗ1 = evt;
@@ -196,7 +196,7 @@ internal static error initᴍ(ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
 
     // Add strings that the converter emits explicitly.
     if (max + (uint64)sLast < max) {
-        return errors.New(traceContainsTooManyˢ);
+        return errors.New(traceContainsTooManyˢᴍtraceV1Converter);
     }
     it.builtinToStringID = new slice<uint64>(sLast);
     var addʗ1 = add;
@@ -205,35 +205,35 @@ internal static error initᴍ(ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
         Ꮡit.Value.builtinToStringID[c] = nid;
         addʗ1((stringID)nid, s);
     }
-    addBuiltin(sForever, foreverˢ);
-    addBuiltin(sPreempted, preemptedˢ);
-    addBuiltin(sGosched, runtimeGoschedˢ);
-    addBuiltin(sSleep, sleepˢ);
-    addBuiltin(sChanSend, chanSendˢ);
-    addBuiltin(sChanRecv, chanReceiveˢ);
-    addBuiltin(sNetwork, networkˢ);
-    addBuiltin(sSync, syncˢ);
-    addBuiltin(sSyncCond, syncCondWaitˢ);
-    addBuiltin(sSelect, selectˢ);
+    addBuiltin(sForever, foreverˢᴍtraceV1Converter);
+    addBuiltin(sPreempted, preemptedˢᴍtraceV1Converter);
+    addBuiltin(sGosched, runtimeGoschedˢᴍtraceV1Converter);
+    addBuiltin(sSleep, sleepˢᴍtraceV1Converter);
+    addBuiltin(sChanSend, chanSendˢᴍtraceV1Converter);
+    addBuiltin(sChanRecv, chanReceiveˢᴍtraceV1Converter);
+    addBuiltin(sNetwork, networkˢᴍtraceV1Converter);
+    addBuiltin(sSync, syncˢᴍtraceV1Converter);
+    addBuiltin(sSyncCond, syncCondWaitˢᴍtraceV1Converter);
+    addBuiltin(sSelect, selectˢᴍtraceV1Converter);
     addBuiltin(sEmpty, ""u8);
-    addBuiltin(sMarkAssistWait, gcMarkAssistWaitForWorkˢ);
+    addBuiltin(sMarkAssistWait, gcMarkAssistWaitForWorkˢᴍtraceV1Converter);
     addBuiltin(sSTWUnknown, ""u8);
-    addBuiltin(sSTWGCMarkTermination, gcMarkTerminationˢ);
-    addBuiltin(sSTWGCSweepTermination, gcSweepTerminationˢ);
-    addBuiltin(sSTWWriteHeapDump, writeHeapDumpˢ);
-    addBuiltin(sSTWGoroutineProfile, goroutineProfileˢ);
-    addBuiltin(sSTWGoroutineProfileCleanup, goroutineProfileCleanupˢ);
-    addBuiltin(sSTWAllGoroutinesStackTrace, allGoroutineStackTraceˢ);
-    addBuiltin(sSTWReadMemStats, readMemStatsˢ);
-    addBuiltin(sSTWAllThreadsSyscall, allThreadsSyscallˢ);
-    addBuiltin(sSTWGOMAXPROCS, gomaxprocsˢ);
-    addBuiltin(sSTWStartTrace, startTraceˢ);
-    addBuiltin(sSTWStopTrace, stopTraceˢ);
-    addBuiltin(sSTWCountPagesInUse, countPagesInUseTestˢ);
-    addBuiltin(sSTWReadMetricsSlow, readMetricsSlowTestˢ);
-    addBuiltin(sSTWReadMemStatsSlow, readMemStatsSlowTestˢ);
-    addBuiltin(sSTWPageCachePagesLeaked, pageCachePagesLeakedTestˢ);
-    addBuiltin(sSTWResetDebugLog, resetDebugLogTestˢ);
+    addBuiltin(sSTWGCMarkTermination, gcMarkTerminationˢᴍtraceV1Converter);
+    addBuiltin(sSTWGCSweepTermination, gcSweepTerminationˢᴍtraceV1Converter);
+    addBuiltin(sSTWWriteHeapDump, writeHeapDumpˢᴍtraceV1Converter);
+    addBuiltin(sSTWGoroutineProfile, goroutineProfileˢᴍtraceV1Converter);
+    addBuiltin(sSTWGoroutineProfileCleanup, goroutineProfileCleanupˢᴍtraceV1Converter);
+    addBuiltin(sSTWAllGoroutinesStackTrace, allGoroutineStackTraceˢᴍtraceV1Converter);
+    addBuiltin(sSTWReadMemStats, readMemStatsˢᴍtraceV1Converter);
+    addBuiltin(sSTWAllThreadsSyscall, allThreadsSyscallˢᴍtraceV1Converter);
+    addBuiltin(sSTWGOMAXPROCS, gomaxprocsˢᴍtraceV1Converter);
+    addBuiltin(sSTWStartTrace, startTraceˢᴍtraceV1Converter);
+    addBuiltin(sSTWStopTrace, stopTraceˢᴍtraceV1Converter);
+    addBuiltin(sSTWCountPagesInUse, countPagesInUseTestˢᴍtraceV1Converter);
+    addBuiltin(sSTWReadMetricsSlow, readMetricsSlowTestˢᴍtraceV1Converter);
+    addBuiltin(sSTWReadMemStatsSlow, readMemStatsSlowTestˢᴍtraceV1Converter);
+    addBuiltin(sSTWPageCachePagesLeaked, pageCachePagesLeakedTestˢᴍtraceV1Converter);
+    addBuiltin(sSTWResetDebugLog, resetDebugLogTestˢᴍtraceV1Converter);
 
     if (addErr != nil) {
         // This should be impossible but let's be safe.

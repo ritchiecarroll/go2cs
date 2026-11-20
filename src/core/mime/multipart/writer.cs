@@ -43,12 +43,12 @@ internal static @string Boundaryᴍ(ref Writer w) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mimeSetBoundaryCalledˢ => ref mimeSetBoundaryCalledˢᵇ;
-private static readonly @string mimeSetBoundaryCalledˢᵇ = "mime: SetBoundary called after write"u8;
-internal static ref readonly @string mimeInvalidBoundaryˢ => ref mimeInvalidBoundaryˢᵇ;
-private static readonly @string mimeInvalidBoundaryˢᵇ = "mime: invalid boundary length"u8;
-internal static ref readonly @string mimeInvalidBoundaryˢ2 => ref mimeInvalidBoundaryˢ2ᵇ;
-private static readonly @string mimeInvalidBoundaryˢ2ᵇ = "mime: invalid boundary character"u8;
+internal static ref readonly @string mimeSetBoundaryCalledˢᴍWriter => ref mimeSetBoundaryCalledˢᵇᴍWriter;
+private static readonly @string mimeSetBoundaryCalledˢᵇᴍWriter = "mime: SetBoundary called after write"u8;
+internal static ref readonly @string mimeInvalidBoundaryˢᴍWriter => ref mimeInvalidBoundaryˢᵇᴍWriter;
+private static readonly @string mimeInvalidBoundaryˢᵇᴍWriter = "mime: invalid boundary length"u8;
+internal static ref readonly @string mimeInvalidBoundaryˢ2ᴍWriter => ref mimeInvalidBoundaryˢ2ᵇᴍWriter;
+private static readonly @string mimeInvalidBoundaryˢ2ᵇᴍWriter = "mime: invalid boundary character"u8;
 
 // SetBoundary overrides the [Writer]'s default randomly-generated
 // boundary separator with an explicit value.
@@ -58,11 +58,11 @@ private static readonly @string mimeInvalidBoundaryˢ2ᵇ = "mime: invalid bound
 // at most 70 bytes long.
 internal static error SetBoundaryᴍ(ref Writer w, @string boundary) {
     if (w.lastpart != nil) {
-        return errors.New(mimeSetBoundaryCalledˢ);
+        return errors.New(mimeSetBoundaryCalledˢᴍWriter);
     }
     // rfc2046#section-5.1.1
     if (len(boundary) < 1 || len(boundary) > 70) {
-        return errors.New(mimeInvalidBoundaryˢ);
+        return errors.New(mimeInvalidBoundaryˢᴍWriter);
     }
     nint end = len(boundary) - 1;
     foreach (var (i, b) in boundary) {
@@ -80,7 +80,7 @@ internal static error SetBoundaryᴍ(ref Writer w, @string boundary) {
             }
             break;
         }}
-        return errors.New(mimeInvalidBoundaryˢ2);
+        return errors.New(mimeInvalidBoundaryˢ2ᴍWriter);
     }
     w.boundary = boundary;
     return default;
@@ -170,19 +170,19 @@ internal static @string escapeQuotes(@string s) {
 } partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
-private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
-internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
-private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
-internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
-private static readonly @string applicationOctetStreamˢᵇ = "application/octet-stream"u8;
+internal static ref readonly @string contentDispositionˢᴍWriter => ref contentDispositionˢᵇᴍWriter;
+private static readonly @string contentDispositionˢᵇᴍWriter = "Content-Disposition"u8;
+internal static ref readonly @string contentTypeˢᴍWriter => ref contentTypeˢᵇᴍWriter;
+private static readonly @string contentTypeˢᵇᴍWriter = "Content-Type"u8;
+internal static ref readonly @string applicationOctetStreamˢᴍWriter => ref applicationOctetStreamˢᵇᴍWriter;
+private static readonly @string applicationOctetStreamˢᵇᴍWriter = "application/octet-stream"u8;
 
 // CreateFormFile is a convenience wrapper around [Writer.CreatePart]. It creates
 // a new form-data header with the provided field name and file name.
 internal static (io.Writer, error) CreateFormFileᴍ(ж<Writer> Ꮡw, @string fieldname, @string filename) {
     var h = new textproto.MIMEHeader(0);
-    h.Set(contentDispositionˢ, FileContentDisposition(fieldname, filename));
-    h.Set(contentTypeˢ, applicationOctetStreamˢ);
+    h.Set(contentDispositionˢᴍWriter, FileContentDisposition(fieldname, filename));
+    h.Set(contentTypeˢᴍWriter, applicationOctetStreamˢᴍWriter);
     return Ꮡw.CreatePart(h);
 }
 
@@ -190,7 +190,7 @@ internal static (io.Writer, error) CreateFormFileᴍ(ж<Writer> Ꮡw, @string fi
 // given field name.
 internal static (io.Writer, error) CreateFormFieldᴍ(ж<Writer> Ꮡw, @string fieldname) {
     var h = new textproto.MIMEHeader(0);
-    h.Set(contentDispositionˢ,
+    h.Set(contentDispositionˢᴍWriter,
         fmt.Sprintf(@"form-data; name=""%s"""u8, escapeQuotes(fieldname)));
     return Ꮡw.CreatePart(h);
 }
@@ -245,15 +245,15 @@ internal static error closeᴍ(ref part p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string multipartCanTWriteToˢ => ref multipartCanTWriteToˢᵇ;
-private static readonly @string multipartCanTWriteToˢᵇ = "multipart: can't write to finished part"u8;
+internal static ref readonly @string multipartCanTWriteToˢᴍpart => ref multipartCanTWriteToˢᵇᴍpart;
+private static readonly @string multipartCanTWriteToˢᵇᴍpart = "multipart: can't write to finished part"u8;
 
 internal static (nint n, error err) Writeᴍ(ref part p, slice<byte> d) {
     nint n = default;
     error err = default;
 
     if (p.closed) {
-        return (0, errors.New(multipartCanTWriteToˢ));
+        return (0, errors.New(multipartCanTWriteToˢᴍpart));
     }
     (n, err) = p.mw.w.Write(d);
     if (err != nil) {

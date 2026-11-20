@@ -124,18 +124,18 @@ partial struct dhKEM {
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string eaePrkˢ => ref eaePrkˢᵇ;
-private static readonly @string eaePrkˢᵇ = "eae_prk"u8;
-internal static ref readonly @string sharedSecretˢ => ref sharedSecretˢᵇ;
-private static readonly @string sharedSecretˢᵇ = "shared_secret"u8;
+internal static ref readonly @string eaePrkˢᴍdhKEM => ref eaePrkˢᵇᴍdhKEM;
+private static readonly @string eaePrkˢᵇᴍdhKEM = "eae_prk"u8;
+internal static ref readonly @string sharedSecretˢᴍdhKEM => ref sharedSecretˢᵇᴍdhKEM;
+private static readonly @string sharedSecretˢᵇᴍdhKEM = "shared_secret"u8;
 
 internal static (slice<byte>, error) extractAndExpandᴍ(ref dhKEM kem, slice<byte> dhKey, slice<byte> kemContext) {
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (eaePRK, err) = kem.kdf.labeledExtract(suiteID, default, eaePrkˢ, dhKey);
+    var (eaePRK, err) = kem.kdf.labeledExtract(suiteID, default, eaePrkˢᴍdhKEM, dhKey);
     if (err != nil) {
         return (default, err);
     }
-    return kem.kdf.labeledExpand(suiteID, eaePRK, sharedSecretˢ, kemContext, kem.Nsecret);
+    return kem.kdf.labeledExpand(suiteID, eaePRK, sharedSecretˢᴍdhKEM, kemContext, kem.Nsecret);
 }
 
 internal static uint16 IDᴍ(ref dhKEM kem) {
@@ -196,20 +196,20 @@ internal static uint16 IDᴍ(unsupportedCurveKEM _) {
     return 0;
 }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unsupportedCurveˢ => ref unsupportedCurveˢᵇ;
-private static readonly @string unsupportedCurveˢᵇ = "unsupported curve"u8;
+internal static ref readonly @string unsupportedCurveˢᴍunsupportedCurveKEM => ref unsupportedCurveˢᵇᴍunsupportedCurveKEM;
+private static readonly @string unsupportedCurveˢᵇᴍunsupportedCurveKEM = "unsupported curve"u8;
 
 internal static (PrivateKey, error) GenerateKeyᴍ(unsupportedCurveKEM _) {
-    return (default, errors.New(unsupportedCurveˢ));
+    return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
 }
 internal static (PublicKey, error) NewPublicKeyᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default, errors.New(unsupportedCurveˢ));
+    return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
 }
 internal static (PrivateKey, error) NewPrivateKeyᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default, errors.New(unsupportedCurveˢ));
+    return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
 }
 internal static (PrivateKey, error) DeriveKeyPairᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default, errors.New(unsupportedCurveˢ));
+    return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
 }
 internal static nint encSizeᴍ(unsupportedCurveKEM _) {
     return 0;
@@ -357,17 +357,17 @@ internal static (PrivateKey, error) NewPrivateKeyᴍ(ref dhKEM kem, slice<byte> 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dkpPrkˢ => ref dkpPrkˢᵇ;
-private static readonly @string dkpPrkˢᵇ = "dkp_prk"u8;
-internal static ref readonly @string candidateˢ => ref candidateˢᵇ;
-private static readonly @string candidateˢᵇ = "candidate"u8;
+internal static ref readonly @string dkpPrkˢᴍdhKEM => ref dkpPrkˢᵇᴍdhKEM;
+private static readonly @string dkpPrkˢᵇᴍdhKEM = "dkp_prk"u8;
+internal static ref readonly @string candidateˢᴍdhKEM => ref candidateˢᵇᴍdhKEM;
+private static readonly @string candidateˢᵇᴍdhKEM = "candidate"u8;
 
 internal static (PrivateKey, error) DeriveKeyPairᴍ(ж<dhKEM> Ꮡkem, slice<byte> ikm) {
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     // DeriveKeyPair from RFC 9180 Section 7.1.3.
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (prk, err) = kem.kdf.labeledExtract(suiteID, default, dkpPrkˢ, ikm);
+    var (prk, err) = kem.kdf.labeledExtract(suiteID, default, dkpPrkˢᴍdhKEM, ikm);
     if (err != nil) {
         return (default, err);
     }
@@ -380,7 +380,7 @@ internal static (PrivateKey, error) DeriveKeyPairᴍ(ж<dhKEM> Ꮡkem, slice<byt
     }
     uint8 counter = default;
     while (counter < 4) {
-        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢ, [counter], kem.Nsk);
+        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢᴍdhKEM, [counter], kem.Nsk);
         if (errΔ2 != nil) {
             return (default, errΔ2);
         }
@@ -404,8 +404,8 @@ internal static KEM KEMᴍ(ref dhKEMPrivateKey k) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ecdhPrivateKeyDoesNotˢ => ref ecdhPrivateKeyDoesNotˢᵇ;
-private static readonly @string ecdhPrivateKeyDoesNotˢᵇ = "ecdh: private key does not support Bytes"u8;
+internal static ref readonly @string ecdhPrivateKeyDoesNotˢᴍdhKEMPrivateKey => ref ecdhPrivateKeyDoesNotˢᵇᴍdhKEMPrivateKey;
+private static readonly @string ecdhPrivateKeyDoesNotˢᵇᴍdhKEMPrivateKey = "ecdh: private key does not support Bytes"u8;
 
 internal static (slice<byte>, error) Bytesᴍ(ref dhKEMPrivateKey k) {
     // Bizarrely, RFC 9180, Section 7.1.2 says SerializePrivateKey MUST clamp
@@ -419,7 +419,7 @@ internal static (slice<byte>, error) Bytesᴍ(ref dhKEMPrivateKey k) {
     // I'm sure this will not lead to any unexpected behavior or interop issue.
     var (priv, ok) = k.priv._<ж<ecdh.PrivateKey>>(ᐧ);
     if (!ok) {
-        return (default, errors.New(ecdhPrivateKeyDoesNotˢ));
+        return (default, errors.New(ecdhPrivateKeyDoesNotˢᴍdhKEMPrivateKey));
     }
     if (k.kem == dhKEMX25519) {
         var b = priv.Bytes();

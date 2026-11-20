@@ -22,8 +22,8 @@ internal static void validTypeᴍ(ж<Checker> Ꮡcheck, ж<Named> typ) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string validTypeSNestVPathVˢ => ref validTypeSNestVPathVˢᵇ;
-private static readonly @string validTypeSNestVPathVˢᵇ = "validType(%s) nest %v, path %v"u8;
+internal static ref readonly @string validTypeSNestVPathVˢᴍChecker => ref validTypeSNestVPathVˢᵇᴍChecker;
+private static readonly @string validTypeSNestVPathVˢᵇᴍChecker = "validType(%s) nest %v, path %v"u8;
 
 // validType0 checks if the given type is valid. If typ is a type parameter
 // its value is looked up in the type argument list of the instantiated
@@ -50,7 +50,7 @@ internal static bool validType0ᴍ(ж<Checker> Ꮡcheck, token.Pos pos, Type typ
                 pos = t.obj.pos;
             }
             check.indent++;
-            Ꮡcheck.trace(pos, validTypeSNestVPathVˢ, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
+            Ꮡcheck.trace(pos, validTypeSNestVPathVˢᴍChecker, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
             defer(() => {
                 Ꮡcheck.Value.indent--;
             }, ref ᒐ);

@@ -109,8 +109,8 @@ internal static @string sprintfᴍ(ref resolver r, @string format, params ꓸꓸ
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string openingScopeVˢ => ref openingScopeVˢᵇ;
-private static readonly @string openingScopeVˢᵇ = "opening scope @%v"u8;
+internal static ref readonly @string openingScopeVˢᴍresolver => ref openingScopeVˢᵇᴍresolver;
+private static readonly @string openingScopeVˢᵇᴍresolver = "opening scope @%v"u8;
 
 internal static void openScopeᴍ(ref resolver r, token.Pos pos) {
     r.depth++;
@@ -118,19 +118,19 @@ internal static void openScopeᴍ(ref resolver r, token.Pos pos) {
         throw panic(new bailout(pos: pos, msg: "exceeded max scope depth during object resolution"));
     }
     if (debugResolve) {
-        r.trace(openingScopeVˢ, pos);
+        r.trace(openingScopeVˢᴍresolver, pos);
     }
     r.topScope = ast.NewScope(r.topScope);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string closingScopeˢ => ref closingScopeˢᵇ;
-private static readonly @string closingScopeˢᵇ = "closing scope"u8;
+internal static ref readonly @string closingScopeˢᴍresolver => ref closingScopeˢᵇᴍresolver;
+private static readonly @string closingScopeˢᵇᴍresolver = "closing scope"u8;
 
 internal static void closeScopeᴍ(ref resolver r) {
     r.depth--;
     if (debugResolve) {
-        r.trace(closingScopeˢ);
+        r.trace(closingScopeˢᴍresolver);
     }
     r.topScope = r.topScope.Outer;
 }
@@ -156,8 +156,8 @@ internal static void closeLabelScopeᴍ(ref resolver r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string declaringSVˢ => ref declaringSVˢᵇ;
-private static readonly @string declaringSVˢᵇ = "declaring %s@%v"u8;
+internal static ref readonly @string declaringSVˢᴍresolver => ref declaringSVˢᵇᴍresolver;
+private static readonly @string declaringSVˢᵇᴍresolver = "declaring %s@%v"u8;
 
 internal static void declareᴍ(ref resolver r, any decl, any data, ж<ast.Scope> Ꮡscope, ast.ObjKind kind, params ꓸꓸꓸжastꓸIdent identsʗp) {
     var idents = identsʗp.sslice();
@@ -179,7 +179,7 @@ internal static void declareᴍ(ref resolver r, any decl, any data, ж<ast.Scope
         }
         if (ident.Name != "_"u8) {
             if (debugResolve) {
-                r.trace(declaringSVˢ, ident.Name, ident.Pos());
+                r.trace(declaringSVˢᴍresolver, ident.Name, ident.Pos());
             }
             var alt = scope.Insert(obj); if (alt != nil && r.declErr != nil) {
                 @string prevDecl = ""u8;
@@ -193,10 +193,10 @@ internal static void declareᴍ(ref resolver r, any decl, any data, ж<ast.Scope
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string identifierAlreadyˢ => ref identifierAlreadyˢᵇ;
-private static readonly @string identifierAlreadyˢᵇ = "identifier already declared or resolved"u8;
-internal static ref readonly @string noNewVariablesOnLeftSideˢ => ref noNewVariablesOnLeftSideˢᵇ;
-private static readonly @string noNewVariablesOnLeftSideˢᵇ = "no new variables on left side of :="u8;
+internal static ref readonly @string identifierAlreadyˢᴍresolver => ref identifierAlreadyˢᵇᴍresolver;
+private static readonly @string identifierAlreadyˢᵇᴍresolver = "identifier already declared or resolved"u8;
+internal static ref readonly @string noNewVariablesOnLeftSideˢᴍresolver => ref noNewVariablesOnLeftSideˢᵇᴍresolver;
+private static readonly @string noNewVariablesOnLeftSideˢᵇᴍresolver = "no new variables on left side of :="u8;
 
 internal static void shortVarDeclᴍ(ref resolver r, ж<ast.AssignStmt> Ꮡdecl) {
     ref var decl = ref Ꮡdecl.DerefOrNull();
@@ -207,14 +207,14 @@ internal static void shortVarDeclᴍ(ref resolver r, ж<ast.AssignStmt> Ꮡdecl)
     nint n = 0; // number of new variables
     foreach (var (_, x) in range(decl.Lhs)) {
         var (ident, isIdent) = x._<ж<ast.Ident>>(ᐧ); if (isIdent) {
-            assert(ident.Obj == nil, identifierAlreadyˢ);
+            assert(ident.Obj == nil, identifierAlreadyˢᴍresolver);
             var obj = ast.NewObj(ast.Var, ident.Name);
             // remember corresponding assignment for other tools
             obj.Decl = Ꮡdecl.OrTypedNil();
             ident.Obj = obj;
             if (ident.Name != "_"u8) {
                 if (debugResolve) {
-                    r.trace(declaringSVˢ, ident.Name, ident.Pos());
+                    r.trace(declaringSVˢᴍresolver, ident.Name, ident.Pos());
                 }
                 var alt = r.topScope.Insert(obj); if (alt != nil) {
                     ident.Obj = alt; // redeclaration
@@ -225,7 +225,7 @@ internal static void shortVarDeclᴍ(ref resolver r, ж<ast.AssignStmt> Ꮡdecl)
         }
     }
     if (n == 0 && r.declErr != nil) {
-        r.declErr(decl.Lhs[0].Pos(), noNewVariablesOnLeftSideˢ);
+        r.declErr(decl.Lhs[0].Pos(), noNewVariablesOnLeftSideˢᴍresolver);
     }
 }
 
@@ -239,10 +239,10 @@ internal static ж<ast.Object> unresolved = @new<ast.Object>();
 } partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string resolvedVSToVˢ => ref resolvedVSToVˢᵇ;
-private static readonly @string resolvedVSToVˢᵇ = "resolved %v:%s to %v"u8;
-internal static ref readonly @string objWithNoNameˢ => ref objWithNoNameˢᵇ;
-private static readonly @string objWithNoNameˢᵇ = "obj with no name"u8;
+internal static ref readonly @string resolvedVSToVˢᴍresolver => ref resolvedVSToVˢᵇᴍresolver;
+private static readonly @string resolvedVSToVˢᵇᴍresolver = "resolved %v:%s to %v"u8;
+internal static ref readonly @string objWithNoNameˢᴍresolver => ref objWithNoNameˢᵇᴍresolver;
+private static readonly @string objWithNoNameˢᵇᴍresolver = "obj with no name"u8;
 
 // If x is an identifier, resolve attempts to resolve x by looking up
 // the object it denotes. If no object is found and collectUnresolved is
@@ -262,9 +262,9 @@ internal static void resolveᴍ(ref resolver r, ж<ast.Ident> Ꮡident, bool col
     for (var s = r.topScope; s != nil; s = s.Outer) {
         var obj = s.Lookup(ident.Name); if (obj != nil) {
             if (debugResolve) {
-                r.trace(resolvedVSToVˢ, ident.Pos(), ident.Name, obj.OrTypedNil());
+                r.trace(resolvedVSToVˢᴍresolver, ident.Pos(), ident.Name, obj.OrTypedNil());
             }
-            assert(obj.Name != ""u8, objWithNoNameˢ);
+            assert(obj.Name != ""u8, objWithNoNameˢᴍresolver);
             // Identifiers (for receiver type parameters) are written to the scope,
             // but never set as the resolved object. See go.dev/issue/50956.
             var (_, ok) = obj.Decl._<ж<ast.Ident>>(ᐧ); if (!ok) {
@@ -305,8 +305,8 @@ internal static void walkStmtsᴍ(ж<resolver> Ꮡr, slice<ast.Stmt> list) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nodeTVˢ => ref nodeTVˢᵇ;
-private static readonly @string nodeTVˢᵇ = "node %T@%v"u8;
+internal static ref readonly @string nodeTVˢᴍresolver => ref nodeTVˢᵇᴍresolver;
+private static readonly @string nodeTVˢᵇᴍresolver = "node %T@%v"u8;
 
 internal static ast.Visitor Visitᴍ(ж<resolver> Ꮡr, ast.Node node) {
     GoFrame ᒐ = default;
@@ -314,7 +314,7 @@ internal static ast.Visitor Visitᴍ(ж<resolver> Ꮡr, ast.Node node) {
         ref var r = ref Ꮡr.DerefOrNull();
 
         if (debugResolve && node != nil) {
-            r.trace(nodeTVˢ, node, node.Pos());
+            r.trace(nodeTVˢᴍresolver, node, node.Pos());
         }
 
         switch (node.type()) {

@@ -60,12 +60,12 @@ partial struct listNodeManual {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeUninitializedˢ => ref runtimeUninitializedˢᵇ;
-private static readonly @string runtimeUninitializedˢᵇ = "runtime: uninitialized listHead"u8;
+internal static ref readonly @string runtimeUninitializedˢᴍlistHeadManual => ref runtimeUninitializedˢᵇᴍlistHeadManual;
+private static readonly @string runtimeUninitializedˢᵇᴍlistHeadManual = "runtime: uninitialized listHead"u8;
 
 internal static ж<listNodeManual> getNodeᴍ(ref listHeadManual head, @unsafe.Pointer p) {
     if (!head.initialized) {
-        @throw(runtimeUninitializedˢ);
+        @throw(runtimeUninitializedˢᴍlistHeadManual);
     }
 
     if (p == nil) {

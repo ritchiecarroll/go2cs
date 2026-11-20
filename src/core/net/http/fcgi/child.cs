@@ -113,14 +113,14 @@ internal static (nint n, error err) Writeᴍ(ref response r, slice<byte> p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
-private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
-internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
-private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
-internal static ref readonly @string transferEncodingˢ => ref transferEncodingˢᵇ;
-private static readonly @string transferEncodingˢᵇ = "Transfer-Encoding"u8;
-internal static ref readonly @string dateˢ => ref dateˢᵇ;
-private static readonly @string dateˢᵇ = "Date"u8;
+internal static ref readonly @string contentTypeˢᴍresponse => ref contentTypeˢᵇᴍresponse;
+private static readonly @string contentTypeˢᵇᴍresponse = "Content-Type"u8;
+internal static ref readonly @string contentLengthˢᴍresponse => ref contentLengthˢᵇᴍresponse;
+private static readonly @string contentLengthˢᵇᴍresponse = "Content-Length"u8;
+internal static ref readonly @string transferEncodingˢᴍresponse => ref transferEncodingˢᵇᴍresponse;
+private static readonly @string transferEncodingˢᵇᴍresponse = "Transfer-Encoding"u8;
+internal static ref readonly @string dateˢᴍresponse => ref dateˢᵇᴍresponse;
+private static readonly @string dateˢᵇᴍresponse = "Date"u8;
 
 internal static void WriteHeaderᴍ(ref response r, nint code) {
     if (r.wroteHeader) {
@@ -130,12 +130,12 @@ internal static void WriteHeaderᴍ(ref response r, nint code) {
     r.code = code;
     if (code == http.StatusNotModified) {
         // Must not have body.
-        r.header.Del(contentTypeˢ);
-        r.header.Del(contentLengthˢ);
-        r.header.Del(transferEncodingˢ);
+        r.header.Del(contentTypeˢᴍresponse);
+        r.header.Del(contentLengthˢᴍresponse);
+        r.header.Del(transferEncodingˢᴍresponse);
     }
-    if (r.header.Get(dateˢ) == ""u8) {
-        r.header.Set(dateˢ, time.Now().UTC().Format(http.TimeFormat));
+    if (r.header.Get(dateˢᴍresponse) == ""u8) {
+        r.header.Set(dateˢᴍresponse, time.Now().UTC().Format(http.TimeFormat));
     }
 }
 
@@ -149,8 +149,8 @@ internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
     }
     r.wroteCGIHeader = true;
     fmt.Fprintf(new bufWriterжWriter(r.w), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
-    var (_, hasType) = r.header[contentTypeˢ, ꟷ]; if (r.code != http.StatusNotModified && !hasType) {
-        r.header.Set(contentTypeˢ, http.DetectContentType(p));
+    var (_, hasType) = r.header[contentTypeˢᴍresponse, ꟷ]; if (r.code != http.StatusNotModified && !hasType) {
+        r.header.Set(contentTypeˢᴍresponse, http.DetectContentType(p));
     }
     r.header.Write(new bufWriterжWriter(r.w));
     r.w.Value.Writer.Value.WriteString("\r\n");
@@ -229,8 +229,8 @@ public static error ErrConnClosed = errors.New("fcgi: connection to web server c
 } partial class fcgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fcgiReceivedIdThatIsˢ => ref fcgiReceivedIdThatIsˢᵇ;
-private static readonly @string fcgiReceivedIdThatIsˢᵇ = "fcgi: received ID that is already in-flight"u8;
+internal static ref readonly @string fcgiReceivedIdThatIsˢᴍchild => ref fcgiReceivedIdThatIsˢᵇᴍchild;
+private static readonly @string fcgiReceivedIdThatIsˢᵇᴍchild = "fcgi: received ID that is already in-flight"u8;
 
 internal static partial error handleRecordᴍ(ж<child> Ꮡc, ж<record> Ꮡrec) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -247,7 +247,7 @@ internal static partial error handleRecordᴍ(ж<child> Ꮡc, ж<record> Ꮡrec)
         if (req != nil) {
             // The server is trying to begin a request with the same ID
             // as an in-progress request. This is an error.
-            return errors.New(fcgiReceivedIdThatIsˢ);
+            return errors.New(fcgiReceivedIdThatIsˢᴍchild);
         }
 
         beginRequest br = new();

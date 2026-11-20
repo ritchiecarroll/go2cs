@@ -61,8 +61,8 @@ internal static bool containsᴍ(addrRange a, uintptr addr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badPruneˢ => ref badPruneˢᵇ;
-private static readonly @string badPruneˢᵇ = "bad prune"u8;
+internal static ref readonly @string badPruneˢᴍaddrRange => ref badPruneˢᵇᴍaddrRange;
+private static readonly @string badPruneˢᵇᴍaddrRange = "bad prune"u8;
 
 // subtract takes the addrRange toPrune and cuts out any overlap with
 // from, then returns the new range. subtract assumes that a and b
@@ -72,7 +72,7 @@ internal static addrRange subtractᴍ(addrRange a, addrRange b) {
     if (b.@base.lessEqual(a.@base) && a.limit.lessEqual(b.limit)) {
         return new addrRange();
     } else if (a.@base.lessThan(b.@base) && b.limit.lessThan(a.limit)) {
-        @throw(badPruneˢ);
+        @throw(badPruneˢᴍaddrRange);
     } else if (b.limit.lessThan(a.limit) && a.@base.lessThan(b.limit)) {
         a.@base = b.limit;
     } else if (a.@base.lessThan(b.@base) && b.@base.lessThan(a.limit)) {

@@ -158,14 +158,14 @@ internal static error refillᴍ(ж<Reader> Ꮡr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidMagicNumberˢ => ref invalidMagicNumberˢᵇ;
-private static readonly @string invalidMagicNumberˢᵇ = "invalid magic number"u8;
-internal static ref readonly @string reservedBitSetInFrameˢ => ref reservedBitSetInFrameˢᵇ;
-private static readonly @string reservedBitSetInFrameˢᵇ = "reserved bit set in frame header descriptor"u8;
-internal static ref readonly @string windowSizeTooLargeˢ => ref windowSizeTooLargeˢᵇ;
-private static readonly @string windowSizeTooLargeˢᵇ = "windowSize too large"u8;
-internal static ref readonly @string dictionariesAreNotˢ => ref dictionariesAreNotˢᵇ;
-private static readonly @string dictionariesAreNotˢᵇ = "dictionaries are not supported"u8;
+internal static ref readonly @string invalidMagicNumberˢᴍReader => ref invalidMagicNumberˢᵇᴍReader;
+private static readonly @string invalidMagicNumberˢᵇᴍReader = "invalid magic number"u8;
+internal static ref readonly @string reservedBitSetInFrameˢᴍReader => ref reservedBitSetInFrameˢᵇᴍReader;
+private static readonly @string reservedBitSetInFrameˢᵇᴍReader = "reserved bit set in frame header descriptor"u8;
+internal static ref readonly @string windowSizeTooLargeˢᴍReader => ref windowSizeTooLargeˢᵇᴍReader;
+private static readonly @string windowSizeTooLargeˢᵇᴍReader = "windowSize too large"u8;
+internal static ref readonly @string dictionariesAreNotˢᴍReader => ref dictionariesAreNotˢᵇᴍReader;
+private static readonly @string dictionariesAreNotˢᵇᴍReader = "dictionaries are not supported"u8;
 
 // readFrameHeader reads the frame header and prepares to read a block.
 internal static error readFrameHeaderᴍ(ref Reader r) {
@@ -194,7 +194,7 @@ retry:
             goto retry;
         }
 
-        return r.makeError(relativeOffset, invalidMagicNumberˢ);
+        return r.makeError(relativeOffset, invalidMagicNumberˢᴍReader);
     }
 
     relativeOffset += 4;
@@ -222,7 +222,7 @@ retry:
     }
 
     if ((byte)(descriptor & ((byte)(1 << 3))) != 0) {
-        return r.makeError(relativeOffset, reservedBitSetInFrameˢ);
+        return r.makeError(relativeOffset, reservedBitSetInFrameˢᴍReader);
     }
 
     r.hasChecksum = (byte)(descriptor & ((byte)(1 << 2))) != 0;
@@ -261,7 +261,7 @@ retry:
 
         // Default zstd sets limits on the window size.
         if (fuzzing && (windowLog > 31 || windowSize > (uint64)1 << 27)) {
-            return r.makeError(relativeOffset, windowSizeTooLargeˢ);
+            return r.makeError(relativeOffset, windowSizeTooLargeˢᴍReader);
         }
     }
 
@@ -271,7 +271,7 @@ retry:
         // Allow only zero Dictionary ID.
         foreach (var (_, b) in range(dictionaryId)) {
             if (b != 0) {
-                return r.makeError(relativeOffset, dictionariesAreNotˢ);
+                return r.makeError(relativeOffset, dictionariesAreNotˢᴍReader);
             }
         }
     }
@@ -390,14 +390,14 @@ internal static error skipFrameᴍ(ref Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string blockSizeTooLargeˢ => ref blockSizeTooLargeˢᵇ;
-private static readonly @string blockSizeTooLargeˢᵇ = "block size too large"u8;
-internal static ref readonly @string invalidBlockTypeˢ => ref invalidBlockTypeˢᵇ;
-private static readonly @string invalidBlockTypeˢᵇ = "invalid block type"u8;
-internal static ref readonly @string tooManyUncompressedBytesˢ => ref tooManyUncompressedBytesˢᵇ;
-private static readonly @string tooManyUncompressedBytesˢᵇ = "too many uncompressed bytes in frame"u8;
-internal static ref readonly @string notEnoughUncompressedˢ => ref notEnoughUncompressedˢᵇ;
-private static readonly @string notEnoughUncompressedˢᵇ = "not enough uncompressed bytes for frame"u8;
+internal static ref readonly @string blockSizeTooLargeˢᴍReader => ref blockSizeTooLargeˢᵇᴍReader;
+private static readonly @string blockSizeTooLargeˢᵇᴍReader = "block size too large"u8;
+internal static ref readonly @string invalidBlockTypeˢᴍReader => ref invalidBlockTypeˢᵇᴍReader;
+private static readonly @string invalidBlockTypeˢᵇᴍReader = "invalid block type"u8;
+internal static ref readonly @string tooManyUncompressedBytesˢᴍReader => ref tooManyUncompressedBytesˢᵇᴍReader;
+private static readonly @string tooManyUncompressedBytesˢᵇᴍReader = "too many uncompressed bytes in frame"u8;
+internal static ref readonly @string notEnoughUncompressedˢᴍReader => ref notEnoughUncompressedˢᵇᴍReader;
+private static readonly @string notEnoughUncompressedˢᵇᴍReader = "not enough uncompressed bytes for frame"u8;
 
 // readBlock reads the next block from a frame.
 internal static error readBlockᴍ(ж<Reader> Ꮡr) {
@@ -424,7 +424,7 @@ internal static error readBlockᴍ(ж<Reader> Ꮡr) {
     // We don't record the window size for a single segment frame,
     // so just use 128K. RFC 3.1.1.2.3, 3.1.1.2.4.
     if (blockSize > 128 << 10 || (r.window.size > 0 && blockSize > r.window.size)) {
-        return r.makeError(relativeOffset, blockSizeTooLargeˢ);
+        return r.makeError(relativeOffset, blockSizeTooLargeˢᴍReader);
     }
 
     // Handle different block types. RFC 3.1.1.2.2.
@@ -466,12 +466,12 @@ internal static error readBlockᴍ(ж<Reader> Ꮡr) {
         break;
     }
     case 3: {
-        return r.makeError(relativeOffset, invalidBlockTypeˢ);
+        return r.makeError(relativeOffset, invalidBlockTypeˢᴍReader);
     }}
 
     if (!r.frameSizeUnknown) {
         if ((uint64)len(r.buffer) > r.remainingFrameSize) {
-            return r.makeError(relativeOffset, tooManyUncompressedBytesˢ);
+            return r.makeError(relativeOffset, tooManyUncompressedBytesˢᴍReader);
         }
         r.remainingFrameSize -= (uint64)len(r.buffer);
     }
@@ -484,7 +484,7 @@ internal static error readBlockᴍ(ж<Reader> Ꮡr) {
         r.window.save(r.buffer);
     } else {
         if (!r.frameSizeUnknown && r.remainingFrameSize != 0) {
-            return r.makeError(relativeOffset, notEnoughUncompressedˢ);
+            return r.makeError(relativeOffset, notEnoughUncompressedˢᴍReader);
         }
         // Check for checksum at end of frame. RFC 3.1.1.
         if (r.hasChecksum) {

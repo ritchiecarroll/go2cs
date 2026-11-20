@@ -71,14 +71,14 @@ internal static void markCompleteᴍ(ref Struct s) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string embeddedFieldTypeCannotˢ => ref embeddedFieldTypeCannotˢᵇ;
-private static readonly @string embeddedFieldTypeCannotˢᵇ = "embedded field type cannot be unsafe.Pointer"u8;
-internal static ref readonly @string embeddedFieldTypeCannotˢ2 => ref embeddedFieldTypeCannotˢ2ᵇ;
-private static readonly @string embeddedFieldTypeCannotˢ2ᵇ = "embedded field type cannot be a pointer"u8;
-internal static ref readonly @string embeddedFieldTypeCannotˢ3 => ref embeddedFieldTypeCannotˢ3ᵇ;
-private static readonly @string embeddedFieldTypeCannotˢ3ᵇ = "embedded field type cannot be a (pointer to a) type parameter"u8;
-internal static ref readonly @string embeddedFieldTypeCannotˢ4 => ref embeddedFieldTypeCannotˢ4ᵇ;
-private static readonly @string embeddedFieldTypeCannotˢ4ᵇ = "embedded field type cannot be a pointer to an interface"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢᴍChecker => ref embeddedFieldTypeCannotˢᵇᴍChecker;
+private static readonly @string embeddedFieldTypeCannotˢᵇᴍChecker = "embedded field type cannot be unsafe.Pointer"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ2ᴍChecker => ref embeddedFieldTypeCannotˢ2ᵇᴍChecker;
+private static readonly @string embeddedFieldTypeCannotˢ2ᵇᴍChecker = "embedded field type cannot be a pointer"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ3ᴍChecker => ref embeddedFieldTypeCannotˢ3ᵇᴍChecker;
+private static readonly @string embeddedFieldTypeCannotˢ3ᵇᴍChecker = "embedded field type cannot be a (pointer to a) type parameter"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ4ᴍChecker => ref embeddedFieldTypeCannotˢ4ᵇᴍChecker;
+private static readonly @string embeddedFieldTypeCannotˢ4ᵇᴍChecker = "embedded field type cannot be a pointer to an interface"u8;
 
 internal static void structTypeᴍ(ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -175,12 +175,12 @@ internal static void structTypeᴍ(ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<
                     }
                     // unsafe.Pointer is treated like a regular pointer
                     if (u.kind == UnsafePointer) {
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ);
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢᴍChecker);
                     }
                     break;
                 }
                 case ж<Pointer> u: {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ2);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ2ᴍChecker);
                     break;
                 }
                 case ж<Interface> u: {
@@ -188,11 +188,11 @@ internal static void structTypeᴍ(ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<
                         // The error code here is inconsistent with other error codes for
                         // invalid embedding, because this restriction may be relaxed in the
                         // future, and so it did not warrant a new error code.
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), MisplacedTypeParam, embeddedFieldTypeCannotˢ3);
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), MisplacedTypeParam, embeddedFieldTypeCannotˢ3ᴍChecker);
                         break;
                     }
                     if (isPtr) {
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ4);
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ4ᴍChecker);
                     }
                     break;
                 }}

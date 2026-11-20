@@ -412,8 +412,8 @@ internal static (@unsafe.Pointer, bool) Getᴍ(ref Map m, ж<abi.MapType> typ, @
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string concurrentMapReadAndMapˢ => ref concurrentMapReadAndMapˢᵇ;
-private static readonly @string concurrentMapReadAndMapˢᵇ = "concurrent map read and map write"u8;
+internal static ref readonly @string concurrentMapReadAndMapˢᴍMap => ref concurrentMapReadAndMapˢᵇᴍMap;
+private static readonly @string concurrentMapReadAndMapˢᵇᴍMap = "concurrent map read and map write"u8;
 
 internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeyᴍ(ref Map m, ж<abi.MapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
@@ -423,7 +423,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeyᴍ(ref Map m
     }
 
     if (m.writing != 0) {
-        fatal(concurrentMapReadAndMapˢ);
+        fatal(concurrentMapReadAndMapˢᴍMap);
     }
 
     var hash = typ.Hasher(key, m.seed);
@@ -444,7 +444,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKeyᴍ(ref Map m, ж<abi.MapTy
     }
 
     if (m.writing != 0) {
-        fatal(concurrentMapReadAndMapˢ);
+        fatal(concurrentMapReadAndMapˢᴍMap);
     }
 
     var hash = typ.Hasher(key, m.seed);
@@ -499,8 +499,8 @@ internal static void Putᴍ(ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Pointe
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string concurrentMapWritesˢ => ref concurrentMapWritesˢᵇ;
-private static readonly @string concurrentMapWritesˢᵇ = "concurrent map writes"u8;
+internal static ref readonly @string concurrentMapWritesˢᴍMap => ref concurrentMapWritesˢᵇᴍMap;
+private static readonly @string concurrentMapWritesˢᵇᴍMap = "concurrent map writes"u8;
 
 // PutSlot returns a pointer to the element slot where an inserted element
 // should be written.
@@ -511,7 +511,7 @@ internal static @unsafe.Pointer PutSlotᴍ(ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp,
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.writing != 0) {
-        fatal(concurrentMapWritesˢ);
+        fatal(concurrentMapWritesˢᴍMap);
     }
 
     var hash = typ.Hasher(key, m.seed);
@@ -529,7 +529,7 @@ internal static @unsafe.Pointer PutSlotᴍ(ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp,
             @unsafe.Pointer elem = m.putSlotSmall(Ꮡtyp, hash, key);
 
             if (m.writing == 0) {
-                fatal(concurrentMapWritesˢ);
+                fatal(concurrentMapWritesˢᴍMap);
             }
             m.writing ^= (uint8)(1);
 
@@ -551,7 +551,7 @@ internal static @unsafe.Pointer PutSlotᴍ(ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp,
         }
 
         if (m.writing == 0) {
-            fatal(concurrentMapWritesˢ);
+            fatal(concurrentMapWritesˢᴍMap);
         }
         m.writing ^= (uint8)(1);
 
@@ -560,8 +560,8 @@ internal static @unsafe.Pointer PutSlotᴍ(ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp,
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string smallMapWithNoEmptySlotˢ => ref smallMapWithNoEmptySlotˢᵇ;
-private static readonly @string smallMapWithNoEmptySlotˢᵇ = "small map with no empty slot (concurrent map writes?)"u8;
+internal static ref readonly @string smallMapWithNoEmptySlotˢᴍMap => ref smallMapWithNoEmptySlotˢᵇᴍMap;
+private static readonly @string smallMapWithNoEmptySlotˢᵇᴍMap = "small map with no empty slot (concurrent map writes?)"u8;
 
 internal static @unsafe.Pointer putSlotSmallᴍ(ref Map m, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
@@ -600,7 +600,7 @@ internal static @unsafe.Pointer putSlotSmallᴍ(ref Map m, ж<abi.MapType> Ꮡty
     // more efficient than matchEmpty.
     match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
-        fatal(smallMapWithNoEmptySlotˢ);
+        fatal(smallMapWithNoEmptySlotˢᴍMap);
         return default;
     }
 
@@ -690,7 +690,7 @@ internal static void Deleteᴍ(ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Poi
     }
 
     if (m.writing != 0) {
-        fatal(concurrentMapWritesˢ);
+        fatal(concurrentMapWritesˢᴍMap);
     }
 
     var hash = typ.Hasher(key, m.seed);
@@ -716,7 +716,7 @@ internal static void Deleteᴍ(ж<Map> Ꮡm, ж<abi.MapType> Ꮡtyp, @unsafe.Poi
     }
 
     if (m.writing == 0) {
-        fatal(concurrentMapWritesˢ);
+        fatal(concurrentMapWritesˢᴍMap);
     }
     m.writing ^= (uint8)(1);
 }
@@ -779,7 +779,7 @@ internal static void Clearᴍ(ж<Map> Ꮡm, ж<abi.MapType> typ) {
     }
 
     if (m.writing != 0) {
-        fatal(concurrentMapWritesˢ);
+        fatal(concurrentMapWritesˢᴍMap);
     }
     m.writing ^= (uint8)(1); // toggle, see comment on writing
 
@@ -806,7 +806,7 @@ internal static void Clearᴍ(ж<Map> Ꮡm, ж<abi.MapType> typ) {
     m.seed = (uintptr)rand();
 
     if (m.writing == 0) {
-        fatal(concurrentMapWritesˢ);
+        fatal(concurrentMapWritesˢᴍMap);
     }
     m.writing ^= (uint8)(1);
 }
@@ -825,15 +825,15 @@ internal static void clearSmallᴍ(ref Map m, ж<abi.MapType> Ꮡtyp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string concurrentMapCloneAndMapˢ => ref concurrentMapCloneAndMapˢᵇ;
-private static readonly @string concurrentMapCloneAndMapˢᵇ = "concurrent map clone and map write"u8;
+internal static ref readonly @string concurrentMapCloneAndMapˢᴍMap => ref concurrentMapCloneAndMapˢᵇᴍMap;
+private static readonly @string concurrentMapCloneAndMapˢᵇᴍMap = "concurrent map clone and map write"u8;
 
 internal static ж<Map> Cloneᴍ(ж<Map> Ꮡm, ж<abi.MapType> typ) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Note: this should never be called with a nil map.
     if (m.writing != 0) {
-        fatal(concurrentMapCloneAndMapˢ);
+        fatal(concurrentMapCloneAndMapˢᴍMap);
     }
 
     // Shallow copy the Map structure.

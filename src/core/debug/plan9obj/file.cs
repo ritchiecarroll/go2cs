@@ -339,21 +339,21 @@ public static error ErrNoSymbols = errors.New("no symbol section");
 } partial class plan9obj_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string symsˢ => ref symsˢᵇ;
-private static readonly @string symsˢᵇ = "syms"u8;
-internal static ref readonly @string cannotLoadSymbolSectionˢ => ref cannotLoadSymbolSectionˢᵇ;
-private static readonly @string cannotLoadSymbolSectionˢᵇ = "cannot load symbol section"u8;
+internal static ref readonly @string symsˢᴍFile => ref symsˢᵇᴍFile;
+private static readonly @string symsˢᵇᴍFile = "syms"u8;
+internal static ref readonly @string cannotLoadSymbolSectionˢᴍFile => ref cannotLoadSymbolSectionˢᵇᴍFile;
+private static readonly @string cannotLoadSymbolSectionˢᵇᴍFile = "cannot load symbol section"u8;
 
 // Symbols returns the symbol table for f.
 internal static (slice<Sym>, error) Symbolsᴍ(ref File f) {
-    var symtabSection = f.Section(symsˢ);
+    var symtabSection = f.Section(symsˢᴍFile);
     if (symtabSection == nil) {
         return (default, ErrNoSymbols);
     }
 
     var (symtab, err) = symtabSection.Data();
     if (err != nil) {
-        return (default, errors.New(cannotLoadSymbolSectionˢ));
+        return (default, errors.New(cannotLoadSymbolSectionˢᴍFile));
     }
 
     return newTable(symtab, f.PtrSize);

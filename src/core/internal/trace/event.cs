@@ -358,15 +358,15 @@ partial struct ExperimentalEvent {
 } partial class trace_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringˢ => ref stringˢᵇ;
-private static readonly @string stringˢᵇ = "string"u8;
+internal static ref readonly @string stringˢᴍExperimentalEvent => ref stringˢᵇᴍExperimentalEvent;
+private static readonly @string stringˢᵇᴍExperimentalEvent = "string"u8;
 
 // ArgValue returns a typed Value for the i'th argument in the experimental event.
 internal static Value ArgValueᴍ(ExperimentalEvent e, nint i) {
     if (i < 0 || i >= len(e.Args)) {
         throw panic(fmt.Sprintf("experimental event argument index %d out of bounds [0, %d)"u8, i, len(e.Args)));
     }
-    if (strings.HasSuffix(e.Args[i], stringˢ)) {
+    if (strings.HasSuffix(e.Args[i], stringˢᴍExperimentalEvent)) {
         @string s = e.table.Ꮡstrings.mustGet((stringID)e.argValues[i]);
         return StringValue(s);
     }
@@ -1037,12 +1037,12 @@ internal static Stack Stackᴍ(Event e) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string schedGomaxprocsThreadsˢ => ref schedGomaxprocsThreadsˢᵇ;
-private static readonly @string schedGomaxprocsThreadsˢᵇ = "/sched/gomaxprocs:threads"u8;
-internal static ref readonly @string memoryClassesHeapObjectsˢ => ref memoryClassesHeapObjectsˢᵇ;
-private static readonly @string memoryClassesHeapObjectsˢᵇ = "/memory/classes/heap/objects:bytes"u8;
-internal static ref readonly @string gcHeapGoalBytesˢ => ref gcHeapGoalBytesˢᵇ;
-private static readonly @string gcHeapGoalBytesˢᵇ = "/gc/heap/goal:bytes"u8;
+internal static ref readonly @string schedGomaxprocsThreadsˢᴍEvent => ref schedGomaxprocsThreadsˢᵇᴍEvent;
+private static readonly @string schedGomaxprocsThreadsˢᵇᴍEvent = "/sched/gomaxprocs:threads"u8;
+internal static ref readonly @string memoryClassesHeapObjectsˢᴍEvent => ref memoryClassesHeapObjectsˢᵇᴍEvent;
+private static readonly @string memoryClassesHeapObjectsˢᵇᴍEvent = "/memory/classes/heap/objects:bytes"u8;
+internal static ref readonly @string gcHeapGoalBytesˢᴍEvent => ref gcHeapGoalBytesˢᵇᴍEvent;
+private static readonly @string gcHeapGoalBytesˢᵇᴍEvent = "/gc/heap/goal:bytes"u8;
 
 // Metric returns details about a Metric event.
 //
@@ -1056,17 +1056,17 @@ internal static Metric Metricᴍ(Event e) {
     Metric m = default;
     switch (e.@base.typ) {
     case var ᴛ when ᴛ == tracev2.EvProcsChange: {
-        m.Name = schedGomaxprocsThreadsˢ;
+        m.Name = schedGomaxprocsThreadsˢᴍEvent;
         m.Value = Uint64Value(e.@base.args[0]);
         break;
     }
     case var ᴛ when ᴛ == tracev2.EvHeapAlloc: {
-        m.Name = memoryClassesHeapObjectsˢ;
+        m.Name = memoryClassesHeapObjectsˢᴍEvent;
         m.Value = Uint64Value(e.@base.args[0]);
         break;
     }
     case var ᴛ when ᴛ == tracev2.EvHeapGoal: {
-        m.Name = gcHeapGoalBytesˢ;
+        m.Name = gcHeapGoalBytesˢᴍEvent;
         m.Value = Uint64Value(e.@base.args[0]);
         break;
     }
@@ -1096,12 +1096,12 @@ internal static Label Labelᴍ(Event e) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gcConcurrentMarkPhaseˢ => ref gcConcurrentMarkPhaseˢᵇ;
-private static readonly @string gcConcurrentMarkPhaseˢᵇ = "GC concurrent mark phase"u8;
-internal static ref readonly @string gcIncrementalSweepˢ => ref gcIncrementalSweepˢᵇ;
-private static readonly @string gcIncrementalSweepˢᵇ = "GC incremental sweep"u8;
-internal static ref readonly @string gcMarkAssistˢ => ref gcMarkAssistˢᵇ;
-private static readonly @string gcMarkAssistˢᵇ = "GC mark assist"u8;
+internal static ref readonly @string gcConcurrentMarkPhaseˢᴍEvent => ref gcConcurrentMarkPhaseˢᵇᴍEvent;
+private static readonly @string gcConcurrentMarkPhaseˢᵇᴍEvent = "GC concurrent mark phase"u8;
+internal static ref readonly @string gcIncrementalSweepˢᴍEvent => ref gcIncrementalSweepˢᵇᴍEvent;
+private static readonly @string gcIncrementalSweepˢᵇᴍEvent = "GC incremental sweep"u8;
+internal static ref readonly @string gcMarkAssistˢᴍEvent => ref gcMarkAssistˢᵇᴍEvent;
+private static readonly @string gcMarkAssistˢᵇᴍEvent = "GC mark assist"u8;
 
 // Range returns details about an EventRangeBegin, EventRangeActive, or EventRangeEnd event.
 //
@@ -1122,12 +1122,12 @@ internal static Range Rangeᴍ(Event e) {
         break;
     }
     case var ᴛ when ᴛ == tracev2.EvGCBegin || ᴛ == tracev2.EvGCActive || ᴛ == tracev2.EvGCEnd: {
-        r.Name = gcConcurrentMarkPhaseˢ;
+        r.Name = gcConcurrentMarkPhaseˢᴍEvent;
         r.Scope = new ResourceID(Kind: ResourceNone);
         break;
     }
     case var ᴛ when ᴛ == tracev2.EvGCSweepBegin || ᴛ == tracev2.EvGCSweepActive || ᴛ == tracev2.EvGCSweepEnd: {
-        r.Name = gcIncrementalSweepˢ;
+        r.Name = gcIncrementalSweepˢᴍEvent;
         r.Scope = new ResourceID(Kind: ResourceProc);
         if (e.@base.typ == tracev2.EvGCSweepActive) {
             r.Scope.id = (int64)e.@base.args[0];
@@ -1137,7 +1137,7 @@ internal static Range Rangeᴍ(Event e) {
         break;
     }
     case var ᴛ when ᴛ == tracev2.EvGCMarkAssistBegin || ᴛ == tracev2.EvGCMarkAssistActive || ᴛ == tracev2.EvGCMarkAssistEnd: {
-        r.Name = gcMarkAssistˢ;
+        r.Name = gcMarkAssistˢᴍEvent;
         r.Scope = new ResourceID(Kind: ResourceGoroutine);
         if (e.@base.typ == tracev2.EvGCMarkAssistActive) {
             r.Scope.id = (int64)e.@base.args[0];
@@ -1521,8 +1521,8 @@ internal static array<tracev2.ProcStatus> procState2Tracev2ProcStatus = new goli
 } partial class trace_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object transitionStackˢ = (@string)"TransitionStack="u8;
-internal static readonly object stackˢ = (@string)"Stack="u8;
+internal static readonly object transitionStackˢᴍEvent = (@string)"TransitionStack="u8;
+internal static readonly object stackˢᴍEvent = (@string)"Stack="u8;
 
 // String returns the event as a human-readable string.
 //
@@ -1598,7 +1598,7 @@ internal static @string Stringᴍ(Event e) {
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Reason=%q"u8, s.Reason);
         if (s.Stack != NoStack) {
             fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
-            fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), transitionStackˢ);
+            fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), transitionStackˢᴍEvent);
             printStack(new strings_BuilderжWriter(Ꮡsb), "\t", s.Stack.Frames());
         }
         break;
@@ -1628,7 +1628,7 @@ internal static @string Stringᴍ(Event e) {
     }}
     var stk = e.Stack(); if (stk != NoStack) {
         fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
-        fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), stackˢ);
+        fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), stackˢᴍEvent);
         printStack(new strings_BuilderжWriter(Ꮡsb), "\t", stk.Frames());
     }
     return sb.String();

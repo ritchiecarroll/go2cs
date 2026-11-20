@@ -127,8 +127,8 @@ internal static typePointers typePointersOfᴍ(ж<mspan> Ꮡspan, uintptr addr, 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typePointersOfUncheckedˢ => ref typePointersOfUncheckedˢᵇ;
-private static readonly @string typePointersOfUncheckedˢᵇ = "typePointersOfUnchecked consisting of non-base-address for object"u8;
+internal static ref readonly @string typePointersOfUncheckedˢᴍmspan => ref typePointersOfUncheckedˢᵇᴍmspan;
+private static readonly @string typePointersOfUncheckedˢᵇᴍmspan = "typePointersOfUnchecked consisting of non-base-address for object"u8;
 
 // typePointersOfUnchecked is like typePointersOf, but assumes addr is the base
 // of an allocation slot in a span (the start of the object if no header, the
@@ -144,7 +144,7 @@ internal static typePointers typePointersOfUncheckedᴍ(ж<mspan> Ꮡspan, uintp
     const bool doubleCheck = false;
     if (doubleCheck && span.objBase(addr) != addr) {
         print((@string)"runtime: addr=", addr, (@string)" base=", span.objBase(addr), (@string)"\n");
-        @throw(typePointersOfUncheckedˢ);
+        @throw(typePointersOfUncheckedˢᴍmspan);
     }
 
     var spc = span.spanclass;
@@ -176,8 +176,8 @@ internal static typePointers typePointersOfUncheckedᴍ(ж<mspan> Ꮡspan, uintp
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badTypePassedToˢ => ref badTypePassedToˢᵇ;
-private static readonly @string badTypePassedToˢᵇ = "bad type passed to typePointersOfType"u8;
+internal static ref readonly @string badTypePassedToˢᴍmspan => ref badTypePassedToˢᵇᴍmspan;
+private static readonly @string badTypePassedToˢᵇᴍmspan = "bad type passed to typePointersOfType"u8;
 
 // typePointersOfType is like typePointersOf, but assumes addr points to one or more
 // contiguous instances of the provided type. The provided type must not be nil.
@@ -191,7 +191,7 @@ private static readonly @string badTypePassedToˢᵇ = "bad type passed to typeP
 internal static typePointers typePointersOfTypeᴍ(ref mspan span, ж<abi.Type> typ, uintptr addr) {
     const bool doubleCheck = false;
     if (doubleCheck && typ == nil) {
-        @throw(badTypePassedToˢ);
+        @throw(badTypePassedToˢᴍmspan);
     }
     if (span.spanclass.noscan()) {
         return new typePointers();
@@ -545,10 +545,10 @@ internal static void initHeapBitsᴍ(ref mspan s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string heapBitsCalledForNoscanˢ => ref heapBitsCalledForNoscanˢᵇ;
-private static readonly @string heapBitsCalledForNoscanˢᵇ = "heapBits called for noscan"u8;
-internal static ref readonly @string heapBitsCalledForSpanˢ => ref heapBitsCalledForSpanˢᵇ;
-private static readonly @string heapBitsCalledForSpanˢᵇ = "heapBits called for span class that should have a malloc header"u8;
+internal static ref readonly @string heapBitsCalledForNoscanˢᴍmspan => ref heapBitsCalledForNoscanˢᵇᴍmspan;
+private static readonly @string heapBitsCalledForNoscanˢᵇᴍmspan = "heapBits called for noscan"u8;
+internal static ref readonly @string heapBitsCalledForSpanˢᴍmspan => ref heapBitsCalledForSpanˢᵇᴍmspan;
+private static readonly @string heapBitsCalledForSpanˢᵇᴍmspan = "heapBits called for span class that should have a malloc header"u8;
 
 // heapBits returns the heap ptr/scalar bits stored at the end of the span for
 // small object spans and heap arena spans.
@@ -569,10 +569,10 @@ internal static slice<uintptr> heapBitsᴍ(ref mspan span) {
 
     if (doubleCheck && !span.isUserArenaChunk) {
         if (span.spanclass.noscan()) {
-            @throw(heapBitsCalledForNoscanˢ);
+            @throw(heapBitsCalledForNoscanˢᴍmspan);
         }
         if (span.elemsize > gc.MinSizeForMallocHeader) {
-            @throw(heapBitsCalledForSpanˢ);
+            @throw(heapBitsCalledForSpanˢᴍmspan);
         }
     }
     // Find the bitmap at the end of the span.
@@ -652,10 +652,10 @@ internal static uintptr heapBitsSmallForAddrᴍ(ref mspan span, uintptr addr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeMspanˢ => ref runtimeMspanˢᵇ;
-private static readonly @string runtimeMspanˢᵇ = "runtime: (*mspan).writeHeapBitsSmall: dataSize is not a multiple of typ.Size_"u8;
-internal static ref readonly @string badPointerBitsWrittenForˢ => ref badPointerBitsWrittenForˢᵇ;
-private static readonly @string badPointerBitsWrittenForˢᵇ = "bad pointer bits written for small object"u8;
+internal static ref readonly @string runtimeMspanˢᴍmspan => ref runtimeMspanˢᵇᴍmspan;
+private static readonly @string runtimeMspanˢᵇᴍmspan = "runtime: (*mspan).writeHeapBitsSmall: dataSize is not a multiple of typ.Size_"u8;
+internal static ref readonly @string badPointerBitsWrittenForˢᴍmspan => ref badPointerBitsWrittenForˢᵇᴍmspan;
+private static readonly @string badPointerBitsWrittenForˢᵇᴍmspan = "bad pointer bits written for small object"u8;
 
 // writeHeapBitsSmall writes the heap bits for small objects whose ptr/scalar data is
 // stored as a bitmap at the end of the span.
@@ -681,7 +681,7 @@ internal static uintptr /*scanSize*/ writeHeapBitsSmallᴍ(ref mspan span, uintp
         // The alternative is to be defensive and mask out src to the length
         // of dataSize. The purpose is to save on one additional masking operation.
         if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
-            @throw(runtimeMspanˢ);
+            @throw(runtimeMspanˢᴍmspan);
         }
         for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
             src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
@@ -723,7 +723,7 @@ internal static uintptr /*scanSize*/ writeHeapBitsSmallᴍ(ref mspan span, uintp
             print((@string)"runtime: x=", (hex)(uint64)x, (@string)" i=", i, (@string)" j=", j, (@string)" bits=", bits, (@string)"\n");
             print((@string)"runtime: dataSize=", dataSize, (@string)" typ.Size_=", typ.Size_, (@string)" typ.PtrBytes=", typ.PtrBytes, (@string)"\n");
             print((@string)"runtime: src0=", (hex)(uint64)src0, (@string)" src=", (hex)(uint64)src, (@string)" srcRead=", (hex)(uint64)srcRead, (@string)"\n");
-            @throw(badPointerBitsWrittenForˢ);
+            @throw(badPointerBitsWrittenForˢᴍmspan);
         }
     }
     return scanSize;
@@ -1193,8 +1193,8 @@ internal static void refillAllocCacheᴍ(ref mspan s, uint16 whichByte) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sFreeindexSNelemsˢ => ref sFreeindexSNelemsˢᵇ;
-private static readonly @string sFreeindexSNelemsˢᵇ = "s.freeindex > s.nelems"u8;
+internal static ref readonly @string sFreeindexSNelemsˢᴍmspan => ref sFreeindexSNelemsˢᵇᴍmspan;
+private static readonly @string sFreeindexSNelemsˢᵇᴍmspan = "s.freeindex > s.nelems"u8;
 
 // nextFreeIndex returns the index of the next free object in s at
 // or after s.freeindex.
@@ -1207,7 +1207,7 @@ internal static uint16 nextFreeIndexᴍ(ref mspan s) {
         return sfreeindex;
     }
     if (sfreeindex > snelems) {
-        @throw(sFreeindexSNelemsˢ);
+        @throw(sFreeindexSNelemsˢᴍmspan);
     }
 
     var aCache = s.allocCache;
@@ -1289,8 +1289,8 @@ internal static bool isFreeOrNewlyAllocatedᴍ(ref mspan s, uintptr index) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badMagicDivisionˢ => ref badMagicDivisionˢᵇ;
-private static readonly @string badMagicDivisionˢᵇ = "bad magic division"u8;
+internal static ref readonly @string badMagicDivisionˢᴍmspan => ref badMagicDivisionˢᵇᴍmspan;
+private static readonly @string badMagicDivisionˢᵇᴍmspan = "bad magic division"u8;
 
 // divideByElemSize returns n/s.elemsize.
 // n must be within [0, s.npages*_PageSize),
@@ -1308,7 +1308,7 @@ internal static uintptr divideByElemSizeᴍ(ref mspan s, uintptr n) {
 
     if (doubleCheck && q != n / s.elemsize) {
         println(n, (@string)"/", s.elemsize, (@string)"should be", n / s.elemsize, (@string)"but got", q);
-        @throw(badMagicDivisionˢ);
+        @throw(badMagicDivisionˢᴍmspan);
     }
     return q;
 }

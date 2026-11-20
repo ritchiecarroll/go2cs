@@ -182,8 +182,8 @@ internal static nint eofᴍ(ж<scanner> Ꮡs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exceededMaxDepthˢ => ref exceededMaxDepthˢᵇ;
-private static readonly @string exceededMaxDepthˢᵇ = "exceeded max depth"u8;
+internal static ref readonly @string exceededMaxDepthˢᴍscanner => ref exceededMaxDepthˢᵇᴍscanner;
+private static readonly @string exceededMaxDepthˢᵇᴍscanner = "exceeded max depth"u8;
 
 // pushParseState pushes a new parse state newParseState onto the parse stack.
 // an error state is returned if maxNestingDepth was exceeded, otherwise successState is returned.
@@ -192,7 +192,7 @@ internal static nint pushParseStateᴍ(ref scanner s, byte c, nint newParseState
     if (len(s.parseState) <= maxNestingDepth) {
         return successState;
     }
-    return s.error(c, exceededMaxDepthˢ);
+    return s.error(c, exceededMaxDepthˢᴍscanner);
 }
 
 // popParseState pops a parse state (already obtained) off the stack

@@ -119,11 +119,11 @@ partial struct HandshakeSecret {
 } partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string derivedˢ => ref derivedˢᵇ;
-private static readonly @string derivedˢᵇ = "derived"u8;
+private static ref readonly @string derivedˢᴍEarlySecret => ref derivedˢᵇᴍEarlySecret;
+private static readonly @string derivedˢᵇᴍEarlySecret = "derived"u8;
 
 internal static ж<HandshakeSecret> HandshakeSecretᴍ(ref EarlySecret s, slice<byte> sharedSecret) {
-    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default);
+    var derived = deriveSecret(s.hash, s.secret, derivedˢᴍEarlySecret, default);
     return Ꮡ(new HandshakeSecret(
         secret: extract(s.hash, sharedSecret, derived),
         hash: s.hash
@@ -154,11 +154,11 @@ partial struct MasterSecret {
 } partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string derivedˢ => ref derivedˢᵇ;
-private static readonly @string derivedˢᵇ = "derived"u8;
+private static ref readonly @string derivedˢᴍHandshakeSecret => ref derivedˢᵇᴍHandshakeSecret;
+private static readonly @string derivedˢᵇᴍHandshakeSecret = "derived"u8;
 
 internal static ж<MasterSecret> MasterSecretᴍ(ref HandshakeSecret s) {
-    var derived = deriveSecret(s.hash, s.secret, derivedˢ, default);
+    var derived = deriveSecret(s.hash, s.secret, derivedˢᴍHandshakeSecret, default);
     return Ꮡ(new MasterSecret(
         secret: extract(s.hash, default, derived),
         hash: s.hash
@@ -217,14 +217,14 @@ internal static ж<ExporterMasterSecret> EarlyExporterMasterSecretᴍ(ref EarlyS
 } partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string exporterˢ => ref exporterˢᵇ;
-private static readonly @string exporterˢᵇ = "exporter"u8;
+private static ref readonly @string exporterˢᴍExporterMasterSecret => ref exporterˢᵇᴍExporterMasterSecret;
+private static readonly @string exporterˢᵇᴍExporterMasterSecret = "exporter"u8;
 
 internal static slice<byte> Exporterᴍ(ref ExporterMasterSecret s, @string label, slice<byte> context, nint length) {
     var secret = deriveSecret(s.hash, s.secret, label, default);
     var h = s.hash();
     h.Write(context);
-    return ExpandLabel(s.hash, secret, exporterˢ, h.Sum(default), length);
+    return ExpandLabel(s.hash, secret, exporterˢᴍExporterMasterSecret, h.Sum(default), length);
 }
 
 } partial class tls13_package {

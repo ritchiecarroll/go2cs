@@ -64,8 +64,8 @@ partial struct PublicKey {
 } partial class ecdsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ecdsaUnsupportedCurveByˢ => ref ecdsaUnsupportedCurveByˢᵇ;
-private static readonly @string ecdsaUnsupportedCurveByˢᵇ = "ecdsa: unsupported curve by crypto/ecdh"u8;
+internal static ref readonly @string ecdsaUnsupportedCurveByˢᴍPublicKey => ref ecdsaUnsupportedCurveByˢᵇᴍPublicKey;
+private static readonly @string ecdsaUnsupportedCurveByˢᵇᴍPublicKey = "ecdsa: unsupported curve by crypto/ecdh"u8;
 
 // Any methods implemented on PublicKey might need to also be implemented on
 // PrivateKey, as the latter embeds the former and will expose its methods.
@@ -78,7 +78,7 @@ internal static (ж<ecdh.PublicKey>, error) ECDHᴍ(ж<PublicKey> Ꮡpub) {
 
     var c = curveToECDH(pub.Curve);
     if (c == nil) {
-        return (default, errors.New(ecdsaUnsupportedCurveByˢ));
+        return (default, errors.New(ecdsaUnsupportedCurveByˢᴍPublicKey));
     }
     var (k, err) = Ꮡpub.Bytes();
     if (err != nil) {
@@ -162,8 +162,8 @@ internal static (ж<PublicKey>, error) parseUncompressedPublicKey<P>(ж<ecdsa.Cu
 } partial class ecdsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ecdsaCurveNotSupportedByˢ2 => ref ecdsaCurveNotSupportedByˢ2ᵇ;
-private static readonly @string ecdsaCurveNotSupportedByˢ2ᵇ = "ecdsa: curve not supported by PublicKey.Bytes"u8;
+internal static ref readonly @string ecdsaCurveNotSupportedByˢ2ᴍPublicKey => ref ecdsaCurveNotSupportedByˢ2ᵇᴍPublicKey;
+private static readonly @string ecdsaCurveNotSupportedByˢ2ᵇᴍPublicKey = "ecdsa: curve not supported by PublicKey.Bytes"u8;
 
 // Bytes encodes the public key as an uncompressed point according to SEC 1,
 // Version 2.0, Section 2.3.3 (also known as the X9.62 uncompressed format).
@@ -193,7 +193,7 @@ internal static (slice<byte>, error) Bytesᴍ(ж<PublicKey> Ꮡpub) {
         return publicKeyBytes<ecdsa.P521PointжPoint>(ecdsa.P521(), ref (Ꮡpub).DerefOrNull());
     }
     default: {
-        return (default, errors.New(ecdsaCurveNotSupportedByˢ2));
+        return (default, errors.New(ecdsaCurveNotSupportedByˢ2ᴍPublicKey));
     }}
 }
 
@@ -226,8 +226,8 @@ partial struct PrivateKey {
 } partial class ecdsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ecdsaUnsupportedCurveByˢ => ref ecdsaUnsupportedCurveByˢᵇ;
-private static readonly @string ecdsaUnsupportedCurveByˢᵇ = "ecdsa: unsupported curve by crypto/ecdh"u8;
+internal static ref readonly @string ecdsaUnsupportedCurveByˢᴍPrivateKey => ref ecdsaUnsupportedCurveByˢᵇᴍPrivateKey;
+private static readonly @string ecdsaUnsupportedCurveByˢᵇᴍPrivateKey = "ecdsa: unsupported curve by crypto/ecdh"u8;
 
 // ECDH returns k as a [ecdh.PrivateKey]. It returns an error if the key is
 // invalid according to the definition of [ecdh.Curve.NewPrivateKey], or if the
@@ -237,7 +237,7 @@ internal static (ж<ecdh.PrivateKey>, error) ECDHᴍ(ж<PrivateKey> Ꮡpriv) {
 
     var c = curveToECDH(priv.Curve);
     if (c == nil) {
-        return (default, errors.New(ecdsaUnsupportedCurveByˢ));
+        return (default, errors.New(ecdsaUnsupportedCurveByˢᴍPrivateKey));
     }
     var (k, err) = Ꮡpriv.Bytes();
     if (err != nil) {
@@ -347,8 +347,8 @@ internal static (ж<PrivateKey>, error) parseRawPrivateKey<P>(ж<ecdsa.Curve<P>>
 } partial class ecdsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ecdsaCurveNotSupportedByˢ4 => ref ecdsaCurveNotSupportedByˢ4ᵇ;
-private static readonly @string ecdsaCurveNotSupportedByˢ4ᵇ = "ecdsa: curve not supported by PrivateKey.Bytes"u8;
+internal static ref readonly @string ecdsaCurveNotSupportedByˢ4ᴍPrivateKey => ref ecdsaCurveNotSupportedByˢ4ᵇᴍPrivateKey;
+private static readonly @string ecdsaCurveNotSupportedByˢ4ᵇᴍPrivateKey = "ecdsa: curve not supported by PrivateKey.Bytes"u8;
 
 // Bytes encodes the private key as a fixed-length big-endian integer according
 // to SEC 1, Version 2.0, Section 2.3.6 (sometimes referred to as the raw
@@ -379,7 +379,7 @@ internal static (slice<byte>, error) Bytesᴍ(ж<PrivateKey> Ꮡpriv) {
         return privateKeyBytes<ecdsa.P521PointжPoint>(ecdsa.P521(), Ꮡpriv);
     }
     default: {
-        return (default, errors.New(ecdsaCurveNotSupportedByˢ4));
+        return (default, errors.New(ecdsaCurveNotSupportedByˢ4ᴍPrivateKey));
     }}
 }
 

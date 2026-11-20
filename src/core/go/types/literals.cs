@@ -91,8 +91,8 @@ internal static void basicLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string functionLiteralˢ => ref functionLiteralˢᵇ;
-private static readonly @string functionLiteralˢᵇ = "<function literal>"u8;
+internal static ref readonly @string functionLiteralˢᴍChecker => ref functionLiteralˢᵇᴍChecker;
+private static readonly @string functionLiteralˢᵇᴍChecker = "<function literal>"u8;
 
 internal static void funcLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.FuncLit> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -119,7 +119,7 @@ internal static void funcLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.F
                 var iotaʗ1 = iota;
                 var sigʗ1 = sig;
                 check.later(() => {
-                    Ꮡcheck.funcBody(declʗ1, functionLiteralˢ, sigʗ1, Ꮡe.Value.Body, iotaʗ1);
+                    Ꮡcheck.funcBody(declʗ1, functionLiteralˢᴍChecker, sigʗ1, Ꮡe.Value.Body, iotaʗ1);
                 }).describef(new ast_FuncLitжpositioner(Ꮡe), "func literal");
             }
             x.mode = value;
@@ -132,20 +132,20 @@ internal static void funcLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.F
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingTypeInCompositeˢ => ref missingTypeInCompositeˢᵇ;
-private static readonly @string missingTypeInCompositeˢᵇ = "missing type in composite literal"u8;
-internal static ref readonly @string mixtureOfFieldValueAndˢ => ref mixtureOfFieldValueAndˢᵇ;
-private static readonly @string mixtureOfFieldValueAndˢᵇ = "mixture of field:value and value elements in struct literal"u8;
-internal static ref readonly @string structLiteralˢ => ref structLiteralˢᵇ;
-private static readonly @string structLiteralˢᵇ = "struct literal"u8;
-internal static ref readonly @string missingKeyInMapLiteralˢ => ref missingKeyInMapLiteralˢᵇ;
-private static readonly @string missingKeyInMapLiteralˢᵇ = "missing key in map literal"u8;
-internal static ref readonly @string mapLiteralˢ => ref mapLiteralˢᵇ;
-private static readonly @string mapLiteralˢᵇ = "map literal"u8;
-internal static ref readonly @string elementˢ => ref elementˢᵇ;
-private static readonly @string elementˢᵇ = " element"u8;
-internal static ref readonly @string noCommonUnderlyingTypeˢ => ref noCommonUnderlyingTypeˢᵇ;
-private static readonly @string noCommonUnderlyingTypeˢᵇ = " (no common underlying type)"u8;
+internal static ref readonly @string missingTypeInCompositeˢᴍChecker => ref missingTypeInCompositeˢᵇᴍChecker;
+private static readonly @string missingTypeInCompositeˢᵇᴍChecker = "missing type in composite literal"u8;
+internal static ref readonly @string mixtureOfFieldValueAndˢᴍChecker => ref mixtureOfFieldValueAndˢᵇᴍChecker;
+private static readonly @string mixtureOfFieldValueAndˢᵇᴍChecker = "mixture of field:value and value elements in struct literal"u8;
+internal static ref readonly @string structLiteralˢᴍChecker => ref structLiteralˢᵇᴍChecker;
+private static readonly @string structLiteralˢᵇᴍChecker = "struct literal"u8;
+internal static ref readonly @string missingKeyInMapLiteralˢᴍChecker => ref missingKeyInMapLiteralˢᵇᴍChecker;
+private static readonly @string missingKeyInMapLiteralˢᵇᴍChecker = "missing key in map literal"u8;
+internal static ref readonly @string mapLiteralˢᴍChecker => ref mapLiteralˢᵇᴍChecker;
+private static readonly @string mapLiteralˢᵇᴍChecker = "map literal"u8;
+internal static ref readonly @string elementˢᴍChecker => ref elementˢᵇᴍChecker;
+private static readonly @string elementˢᵇᴍChecker = " element"u8;
+internal static ref readonly @string noCommonUnderlyingTypeˢᴍChecker => ref noCommonUnderlyingTypeˢᵇᴍChecker;
+private static readonly @string noCommonUnderlyingTypeˢᵇᴍChecker = " (no common underlying type)"u8;
 
 internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, Type hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -187,7 +187,7 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
     }
     default: {
         // TODO(gri) provide better error messages depending on context
-        Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), UntypedLit, missingTypeInCompositeˢ);
+        Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), UntypedLit, missingTypeInCompositeˢᴍChecker);
         // continue with invalid type so that elements are "used" (go.dev/issue/69092)
         typ = new BasicжType(Typ[Invalid]);
         @base = typ;
@@ -211,7 +211,7 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
                 foreach (var (_, eΔ1) in range(e.Elts)) {
                     var (kv, _) = eΔ1._<ж<ast.KeyValueExpr>>(ᐧ);
                     if (kv == nil) {
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ1), MixedStructLit, mixtureOfFieldValueAndˢ);
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ1), MixedStructLit, mixtureOfFieldValueAndˢᴍChecker);
                         continue;
                     }
                     var (key, _) = kv.Key._<ж<ast.Ident>>(ᐧ);
@@ -235,7 +235,7 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
                     var fld = fields[i];
                     check.recordUse(key, new VarжObject(fld));
                     var etyp = fld.typ;
-                    Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
+                    Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢᴍChecker);
                     // 0 <= i < len(fields)
                     if (visited[i]) {
                         Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), DuplicateLitField, "duplicate field name %s in struct literal", key.Name);
@@ -247,7 +247,7 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
                 // no element must have a key
                 foreach (var (i, eΔ2) in range(e.Elts)) {
                     var (kv, _) = eΔ2._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
-                        Ꮡcheck.error(new ast_KeyValueExprжpositioner(kv), MixedStructLit, mixtureOfFieldValueAndˢ);
+                        Ꮡcheck.error(new ast_KeyValueExprжpositioner(kv), MixedStructLit, mixtureOfFieldValueAndˢᴍChecker);
                         continue;
                     }
                     Ꮡcheck.expr(nil, Ꮡx, eΔ2);
@@ -262,7 +262,7 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
                         continue;
                     }
                     var etyp = fld.typ;
-                    Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
+                    Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢᴍChecker);
                 }
                 if (len(e.Elts) < len(fields)) {
                     Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(Ꮡe), e.Rbrace), InvalidStructLit, "too few values in struct literal of type %s", @base);
@@ -306,11 +306,11 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
             foreach (var (_, eΔ3) in range(e.Elts)) {
                 var (kv, _) = eΔ3._<ж<ast.KeyValueExpr>>(ᐧ);
                 if (kv == nil) {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ3), MissingLitKey, missingKeyInMapLiteralˢ);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ3), MissingLitKey, missingKeyInMapLiteralˢᴍChecker);
                     continue;
                 }
                 Ꮡcheck.exprWithHint(Ꮡx, kv.Key, utyp.key);
-                Ꮡcheck.assignment(Ꮡx, utyp.key, mapLiteralˢ);
+                Ꮡcheck.assignment(Ꮡx, utyp.key, mapLiteralˢᴍChecker);
                 if (x.mode == invalid) {
                     continue;
                 }
@@ -335,7 +335,7 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
                     }
                 }
                 Ꮡcheck.exprWithHint(Ꮡx, (~kv).Value, utyp.elem);
-                Ꮡcheck.assignment(Ꮡx, utyp.elem, mapLiteralˢ);
+                Ꮡcheck.assignment(Ꮡx, utyp.elem, mapLiteralˢᴍChecker);
             }
             break;
         }
@@ -358,11 +358,11 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
             if (isValid(utyp)) {
                 @string qualifier = default;
                 if (isElem) {
-                    qualifier = elementˢ;
+                    qualifier = elementˢᴍChecker;
                 }
                 @string cause = default;
                 if (utyp == nil) {
-                    cause = noCommonUnderlyingTypeˢ;
+                    cause = noCommonUnderlyingTypeˢᴍChecker;
                 }
                 Ꮡcheck.errorf(new ast_CompositeLitжpositioner(Ꮡe), InvalidLit, "invalid composite literal%s type %s%s", qualifier, typ, cause);
                 x.mode = invalid;
@@ -377,8 +377,8 @@ internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string arrayOrSliceLiteralˢ => ref arrayOrSliceLiteralˢᵇ;
-private static readonly @string arrayOrSliceLiteralˢᵇ = "array or slice literal"u8;
+internal static ref readonly @string arrayOrSliceLiteralˢᴍChecker => ref arrayOrSliceLiteralˢᵇᴍChecker;
+private static readonly @string arrayOrSliceLiteralˢᵇᴍChecker = "array or slice literal"u8;
 
 // indexedElts checks the elements (elts) of an array or slice composite literal
 // against the literal's element type (typ), and the element indices against
@@ -423,7 +423,7 @@ internal static int64 indexedEltsᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> elts,
         // check element against composite literal element type
         ref var x = ref heap(new operand(), out var Ꮡx);
         Ꮡcheck.exprWithHint(Ꮡx, eval, typ);
-        Ꮡcheck.assignment(Ꮡx, typ, arrayOrSliceLiteralˢ);
+        Ꮡcheck.assignment(Ꮡx, typ, arrayOrSliceLiteralˢᴍChecker);
     }
     return max;
 }

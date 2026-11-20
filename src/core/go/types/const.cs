@@ -20,8 +20,8 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string constantResultIsNotˢ => ref constantResultIsNotˢᵇ;
-private static readonly @string constantResultIsNotˢᵇ = "constant result is not representable"u8;
+internal static ref readonly @string constantResultIsNotˢᴍChecker => ref constantResultIsNotˢᵇᴍChecker;
+private static readonly @string constantResultIsNotˢᵇᴍChecker = "constant result is not representable"u8;
 
 // overflow checks that the constant x is representable by its type.
 // For untyped constants, it checks that the value doesn't become
@@ -35,7 +35,7 @@ internal static void overflowᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token.P
         // TODO(gri) We should report exactly what went wrong. At the
         //           moment we don't have the (go/constant) API for that.
         //           See also TODO in go/constant/value.go.
-        Ꮡcheck.error((atPos)opPos, InvalidConstVal, constantResultIsNotˢ);
+        Ꮡcheck.error((atPos)opPos, InvalidConstVal, constantResultIsNotˢᴍChecker);
         return;
     }
 
@@ -329,22 +329,22 @@ internal static (constant.Value, errors.Code) representationᴍ(ж<Checker> Ꮡc
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotConvertSToTypeSˢ => ref cannotConvertSToTypeSˢᵇ;
-private static readonly @string cannotConvertSToTypeSˢᵇ = "cannot convert %s to type %s"u8;
-internal static ref readonly @string sTruncatedToSˢ => ref sTruncatedToSˢᵇ;
-private static readonly @string sTruncatedToSˢᵇ = "%s truncated to %s"u8;
-internal static ref readonly @string sOverflowsSˢ => ref sOverflowsSˢᵇ;
-private static readonly @string sOverflowsSˢᵇ = "%s overflows %s"u8;
+internal static ref readonly @string cannotConvertSToTypeSˢᴍChecker => ref cannotConvertSToTypeSˢᵇᴍChecker;
+private static readonly @string cannotConvertSToTypeSˢᵇᴍChecker = "cannot convert %s to type %s"u8;
+internal static ref readonly @string sTruncatedToSˢᴍChecker => ref sTruncatedToSˢᵇᴍChecker;
+private static readonly @string sTruncatedToSˢᵇᴍChecker = "%s truncated to %s"u8;
+internal static ref readonly @string sOverflowsSˢᴍChecker => ref sOverflowsSˢᵇᴍChecker;
+private static readonly @string sOverflowsSˢᵇᴍChecker = "%s overflows %s"u8;
 
 internal static void invalidConversionᴍ(ж<Checker> Ꮡcheck, errors.Code code, ж<operand> x, Type target) {
-    @string msg = cannotConvertSToTypeSˢ;
+    @string msg = cannotConvertSToTypeSˢᴍChecker;
     switch (code) {
     case var ᴛ when ᴛ == TruncatedFloat: {
-        msg = sTruncatedToSˢ;
+        msg = sTruncatedToSˢᴍChecker;
         break;
     }
     case var ᴛ when ᴛ == NumericOverflow: {
-        msg = sOverflowsSˢ;
+        msg = sOverflowsSˢᴍChecker;
         break;
     }}
     Ꮡcheck.errorf(new operandжpositioner(x), code, msg, x.OrTypedNil(), target);

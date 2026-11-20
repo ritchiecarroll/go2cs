@@ -200,8 +200,8 @@ partial struct stackScanState {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string addressNotAStackAddressˢ => ref addressNotAStackAddressˢᵇ;
-private static readonly @string addressNotAStackAddressˢᵇ = "address not a stack address"u8;
+internal static ref readonly @string addressNotAStackAddressˢᴍstackScanState => ref addressNotAStackAddressˢᵇᴍstackScanState;
+private static readonly @string addressNotAStackAddressˢᵇᴍstackScanState = "address not a stack address"u8;
 
 // Add p as a potential pointer to a stack object.
 // p must be a stack address.
@@ -209,7 +209,7 @@ internal static void putPtrᴍ(ж<stackScanState> Ꮡs, uintptr p, bool conserva
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (p < s.stack.lo || p >= s.stack.hi) {
-        @throw(addressNotAStackAddressˢ);
+        @throw(addressNotAStackAddressˢᴍstackScanState);
     }
     var head = Ꮡs.Ꮡbuf;
     if (conservative) {
@@ -277,8 +277,8 @@ internal static (uintptr p, bool conservative) getPtrᴍ(ж<stackScanState> Ꮡs
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string objectsAddedOutOfOrderOrˢ => ref objectsAddedOutOfOrderOrˢᵇ;
-private static readonly @string objectsAddedOutOfOrderOrˢᵇ = "objects added out of order or overlapping"u8;
+internal static ref readonly @string objectsAddedOutOfOrderOrˢᴍstackScanState => ref objectsAddedOutOfOrderOrˢᵇᴍstackScanState;
+private static readonly @string objectsAddedOutOfOrderOrˢᵇᴍstackScanState = "objects added out of order or overlapping"u8;
 
 // addObject adds a stack object at addr of type typ to the set of stack objects.
 internal static void addObjectᴍ(ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) {
@@ -293,7 +293,7 @@ internal static void addObjectᴍ(ref stackScanState s, uintptr addr, ж<stackOb
         s.tail = x;
     }
     if (x.nobj > 0 && (uint32)(addr - s.stack.lo) < x.obj[x.nobj - 1].off + x.obj[x.nobj - 1].size) {
-        @throw(objectsAddedOutOfOrderOrˢ);
+        @throw(objectsAddedOutOfOrderOrˢᴍstackScanState);
     }
     if (x.nobj == len(x.obj)) {
         // full buffer - allocate a new buffer, add to end of linked list

@@ -351,26 +351,26 @@ internal static (slice<byte>, error) decode(byte encoding, @string text) {
 } partial class mime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string utf8ˢ2 => ref utf8ˢ2ᵇ;
-private static readonly @string utf8ˢ2ᵇ = "utf-8"u8;
-internal static ref readonly @string iso88591ˢ => ref iso88591ˢᵇ;
-private static readonly @string iso88591ˢᵇ = "iso-8859-1"u8;
-internal static ref readonly @string usAsciiˢ => ref usAsciiˢᵇ;
-private static readonly @string usAsciiˢᵇ = "us-ascii"u8;
+internal static ref readonly @string utf8ˢ2ᴍWordDecoder => ref utf8ˢ2ᵇᴍWordDecoder;
+private static readonly @string utf8ˢ2ᵇᴍWordDecoder = "utf-8"u8;
+internal static ref readonly @string iso88591ˢᴍWordDecoder => ref iso88591ˢᵇᴍWordDecoder;
+private static readonly @string iso88591ˢᵇᴍWordDecoder = "iso-8859-1"u8;
+internal static ref readonly @string usAsciiˢᴍWordDecoder => ref usAsciiˢᵇᴍWordDecoder;
+private static readonly @string usAsciiˢᵇᴍWordDecoder = "us-ascii"u8;
 
 internal static error convertᴍ(ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) {
     switch (ᐧ) {
-    case {} when strings.EqualFold(utf8ˢ2, charset): {
+    case {} when strings.EqualFold(utf8ˢ2ᴍWordDecoder, charset): {
         buf.Write(content);
         break;
     }
-    case {} when strings.EqualFold(iso88591ˢ, charset): {
+    case {} when strings.EqualFold(iso88591ˢᴍWordDecoder, charset): {
         foreach (var (_, c) in range(content)) {
             buf.WriteRune((rune)c);
         }
         break;
     }
-    case {} when strings.EqualFold(usAsciiˢ, charset): {
+    case {} when strings.EqualFold(usAsciiˢᴍWordDecoder, charset): {
         foreach (var (_, c) in range(content)) {
             if (c >= utf8.RuneSelf) {
                 buf.WriteRune(Δunicode.ReplacementChar);

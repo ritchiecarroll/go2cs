@@ -131,8 +131,8 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string flagsˢ => ref flagsˢᵇ;
-private static readonly @string flagsˢᵇ = "flags"u8;
+private static ref readonly @string flagsˢᴍmmu => ref flagsˢᵇᴍmmu;
+private static readonly @string flagsˢᵇᴍmmu = "flags"u8;
 
 // HandlePlot serves the JSON data for the MMU plot.
 internal static void HandlePlotᴍ(ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
@@ -143,7 +143,7 @@ internal static void HandlePlotᴍ(ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.
     }
 
     slice<float64> quantiles = default;
-    foreach (var flagStr in range<@string>(strings.SplitSeq(r.FormValue(flagsˢ), "|").Invoke)) {
+    foreach (var flagStr in range<@string>(strings.SplitSeq(r.FormValue(flagsˢᴍmmu), "|").Invoke)) {
         if (flagStr == "mut"u8) {
             quantiles = [0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D, /* 1 - .95 */ 0.05D];
             break;
@@ -399,8 +399,8 @@ internal static @string templMMU = """
 } partial class traceviewer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string windowˢ => ref windowˢᵇ;
-private static readonly @string windowˢᵇ = "window"u8;
+private static ref readonly @string windowˢᴍmmu => ref windowˢᵇᴍmmu;
+private static readonly @string windowˢᵇᴍmmu = "window"u8;
 
 // HandleDetails serves details of an MMU graph at a particular window.
 internal static void HandleDetailsᴍ(ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
@@ -412,7 +412,7 @@ internal static void HandleDetailsᴍ(ж<mmu> Ꮡm, http.ResponseWriter w, ж<ht
         return;
     }
 
-    @string windowStr = r.FormValue(windowˢ);
+    @string windowStr = r.FormValue(windowˢᴍmmu);
     (var window, err) = strconv.ParseUint(windowStr, 10, 64);
     if (err != nil) {
         http.Error(w, fmt.Sprintf("failed to parse window parameter %q: %v"u8, windowStr, err), http.StatusBadRequest);

@@ -107,8 +107,8 @@ internal static void rlockᴍ(ж<rwmutex> Ꮡrw) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runlockOfUnlockedRwmutexˢ => ref runlockOfUnlockedRwmutexˢᵇ;
-private static readonly @string runlockOfUnlockedRwmutexˢᵇ = "runlock of unlocked rwmutex"u8;
+internal static ref readonly @string runlockOfUnlockedRwmutexˢᴍrwmutex => ref runlockOfUnlockedRwmutexˢᵇᴍrwmutex;
+private static readonly @string runlockOfUnlockedRwmutexˢᵇᴍrwmutex = "runlock of unlocked rwmutex"u8;
 
 // runlock undoes a single rlock call on rw.
 internal static void runlockᴍ(ж<rwmutex> Ꮡrw) {
@@ -116,7 +116,7 @@ internal static void runlockᴍ(ж<rwmutex> Ꮡrw) {
 
     var r = Ꮡrw.ᏑreaderCount.Add(-1); if (r < 0) {
         if (r + 1 == 0 || r + 1 == (int32)(-rwmutexMaxReaders)) {
-            @throw(runlockOfUnlockedRwmutexˢ);
+            @throw(runlockOfUnlockedRwmutexˢᴍrwmutex);
         }
         // A writer is pending.
         if (Ꮡrw.ᏑreaderWait.Add(-1) == 0) {
@@ -156,8 +156,8 @@ internal static void @lockᴍ(ж<rwmutex> Ꮡrw) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unlockOfUnlockedRwmutexˢ => ref unlockOfUnlockedRwmutexˢᵇ;
-private static readonly @string unlockOfUnlockedRwmutexˢᵇ = "unlock of unlocked rwmutex"u8;
+internal static ref readonly @string unlockOfUnlockedRwmutexˢᴍrwmutex => ref unlockOfUnlockedRwmutexˢᵇᴍrwmutex;
+private static readonly @string unlockOfUnlockedRwmutexˢᵇᴍrwmutex = "unlock of unlocked rwmutex"u8;
 
 // unlock unlocks rw for writing.
 internal static void unlockᴍ(ж<rwmutex> Ꮡrw) {
@@ -166,7 +166,7 @@ internal static void unlockᴍ(ж<rwmutex> Ꮡrw) {
     // Announce to readers that there is no active writer.
     var r = Ꮡrw.ᏑreaderCount.Add(rwmutexMaxReaders);
     if (r >= rwmutexMaxReaders) {
-        @throw(unlockOfUnlockedRwmutexˢ);
+        @throw(unlockOfUnlockedRwmutexˢᴍrwmutex);
     }
     // Unblock blocked readers.
     runtime.@lock(Ꮡrw.ᏑrLock);

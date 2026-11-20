@@ -148,16 +148,16 @@ internal static slice<byte> AppendUint64ᴍ(littleEndian _, slice<byte> b, uint6
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string littleEndianˢ => ref littleEndianˢᵇ;
-private static readonly @string littleEndianˢᵇ = "LittleEndian"u8;
+internal static ref readonly @string littleEndianˢᴍlittleEndian => ref littleEndianˢᵇᴍlittleEndian;
+private static readonly @string littleEndianˢᵇᴍlittleEndian = "LittleEndian"u8;
 
-internal static @string Stringᴍ(littleEndian _) { return littleEndianˢ; }
+internal static @string Stringᴍ(littleEndian _) { return littleEndianˢᴍlittleEndian; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string binaryLittleEndianˢ => ref binaryLittleEndianˢᵇ;
-private static readonly @string binaryLittleEndianˢᵇ = "binary.LittleEndian"u8;
+internal static ref readonly @string binaryLittleEndianˢᴍlittleEndian => ref binaryLittleEndianˢᵇᴍlittleEndian;
+private static readonly @string binaryLittleEndianˢᵇᴍlittleEndian = "binary.LittleEndian"u8;
 
-internal static @string GoStringᴍ(littleEndian _) { return binaryLittleEndianˢ; }
+internal static @string GoStringᴍ(littleEndian _) { return binaryLittleEndianˢᴍlittleEndian; }
 
 } partial class binary_package {
 
@@ -243,30 +243,30 @@ internal static slice<byte> AppendUint64ᴍ(bigEndian _, slice<byte> b, uint64 v
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bigEndianˢ => ref bigEndianˢᵇ;
-private static readonly @string bigEndianˢᵇ = "BigEndian"u8;
+internal static ref readonly @string bigEndianˢᴍbigEndian => ref bigEndianˢᵇᴍbigEndian;
+private static readonly @string bigEndianˢᵇᴍbigEndian = "BigEndian"u8;
 
-internal static @string Stringᴍ(bigEndian _) { return bigEndianˢ; }
+internal static @string Stringᴍ(bigEndian _) { return bigEndianˢᴍbigEndian; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string binaryBigEndianˢ => ref binaryBigEndianˢᵇ;
-private static readonly @string binaryBigEndianˢᵇ = "binary.BigEndian"u8;
+internal static ref readonly @string binaryBigEndianˢᴍbigEndian => ref binaryBigEndianˢᵇᴍbigEndian;
+private static readonly @string binaryBigEndianˢᵇᴍbigEndian = "binary.BigEndian"u8;
 
-internal static @string GoStringᴍ(bigEndian _) { return binaryBigEndianˢ; }
+internal static @string GoStringᴍ(bigEndian _) { return binaryBigEndianˢᴍbigEndian; }
 
 } partial class binary_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nativeEndianˢ => ref nativeEndianˢᵇ;
-private static readonly @string nativeEndianˢᵇ = "NativeEndian"u8;
+internal static ref readonly @string nativeEndianˢᴍnativeEndian => ref nativeEndianˢᵇᴍnativeEndian;
+private static readonly @string nativeEndianˢᵇᴍnativeEndian = "NativeEndian"u8;
 
-internal static @string Stringᴍ(nativeEndian _) { return nativeEndianˢ; }
+internal static @string Stringᴍ(nativeEndian _) { return nativeEndianˢᴍnativeEndian; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string binaryNativeEndianˢ => ref binaryNativeEndianˢᵇ;
-private static readonly @string binaryNativeEndianˢᵇ = "binary.NativeEndian"u8;
+internal static ref readonly @string binaryNativeEndianˢᴍnativeEndian => ref binaryNativeEndianˢᵇᴍnativeEndian;
+private static readonly @string binaryNativeEndianˢᵇᴍnativeEndian = "binary.NativeEndian"u8;
 
-internal static @string GoStringᴍ(nativeEndian _) { return binaryNativeEndianˢ; }
+internal static @string GoStringᴍ(nativeEndian _) { return binaryNativeEndianˢᴍnativeEndian; }
 
 } partial class binary_package {
 

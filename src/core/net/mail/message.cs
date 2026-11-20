@@ -238,12 +238,12 @@ public static error ErrHeaderNotPresent = errors.New("mail: header not in messag
 } partial class mail_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dateˢ => ref dateˢᵇ;
-private static readonly @string dateˢᵇ = "Date"u8;
+internal static ref readonly @string dateˢᴍHeader => ref dateˢᵇᴍHeader;
+private static readonly @string dateˢᵇᴍHeader = "Date"u8;
 
 // Date parses the Date header field.
 internal static (time.Time, error) Dateᴍ(Header h) {
-    @string hdr = h.Get(dateˢ);
+    @string hdr = h.Get(dateˢᴍHeader);
     if (hdr == ""u8) {
         return (new time.Time(), ErrHeaderNotPresent);
     }
@@ -302,8 +302,8 @@ internal static (slice<ж<Address>>, error) ParseListᴍ(ref AddressParser p, @s
 } partial class mail_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string utf8ˢ => ref utf8ˢᵇ;
-private static readonly @string utf8ˢᵇ = "utf-8"u8;
+internal static ref readonly @string utf8ˢᴍAddress => ref utf8ˢᵇᴍAddress;
+private static readonly @string utf8ˢᵇᴍAddress = "utf-8"u8;
 
 // String formats the address as a valid RFC 5322 address.
 // If the address's name contains non-ASCII characters
@@ -366,9 +366,9 @@ internal static @string Stringᴍ(ref Address a) {
     // characters like quotes or parentheses (see RFC 2047 section 5.3).
     // When this is the case encode the name using base64 encoding.
     if (strings.ContainsAny(a.Name, "\"#$%&'(),.:;<>@[]^`{|}~")) {
-        return mime.BEncoding.Encode(utf8ˢ, a.Name) + " "u8 + s;
+        return mime.BEncoding.Encode(utf8ˢᴍAddress, a.Name) + " "u8 + s;
     }
-    return mime.QEncoding.Encode(utf8ˢ, a.Name) + " "u8 + s;
+    return mime.QEncoding.Encode(utf8ˢᴍAddress, a.Name) + " "u8 + s;
 }
 
 } partial class mail_package {
@@ -381,10 +381,10 @@ partial struct addrParser {
 } partial class mail_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mailMisformattedˢ => ref mailMisformattedˢᵇ;
-private static readonly @string mailMisformattedˢᵇ = "mail: misformatted parenthetical comment"u8;
-internal static ref readonly @string mailExpectedCommaˢ => ref mailExpectedCommaˢᵇ;
-private static readonly @string mailExpectedCommaˢᵇ = "mail: expected comma"u8;
+internal static ref readonly @string mailMisformattedˢᴍaddrParser => ref mailMisformattedˢᵇᴍaddrParser;
+private static readonly @string mailMisformattedˢᵇᴍaddrParser = "mail: misformatted parenthetical comment"u8;
+internal static ref readonly @string mailExpectedCommaˢᴍaddrParser => ref mailExpectedCommaˢᵇᴍaddrParser;
+private static readonly @string mailExpectedCommaˢᵇᴍaddrParser = "mail: expected comma"u8;
 
 internal static (slice<ж<Address>>, error) parseAddressListᴍ(ж<addrParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -405,13 +405,13 @@ internal static (slice<ж<Address>>, error) parseAddressListᴍ(ж<addrParser> �
         list = appendꓸꓸꓸ(list, addrs);
 
         if (!p.skipCFWS()) {
-            return (default, errors.New(mailMisformattedˢ));
+            return (default, errors.New(mailMisformattedˢᴍaddrParser));
         }
         if (p.empty()) {
             break;
         }
         if (p.peek() != ',') {
-            return (default, errors.New(mailExpectedCommaˢ));
+            return (default, errors.New(mailExpectedCommaˢᴍaddrParser));
         }
 
         // Skip empty entries for obs-addr-list.
@@ -426,10 +426,10 @@ internal static (slice<ж<Address>>, error) parseAddressListᴍ(ж<addrParser> �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mailEmptyGroupˢ => ref mailEmptyGroupˢᵇ;
-private static readonly @string mailEmptyGroupˢᵇ = "mail: empty group"u8;
-internal static ref readonly @string mailGroupWithMultipleˢ => ref mailGroupWithMultipleˢᵇ;
-private static readonly @string mailGroupWithMultipleˢᵇ = "mail: group with multiple addresses"u8;
+internal static ref readonly @string mailEmptyGroupˢᴍaddrParser => ref mailEmptyGroupˢᵇᴍaddrParser;
+private static readonly @string mailEmptyGroupˢᵇᴍaddrParser = "mail: empty group"u8;
+internal static ref readonly @string mailGroupWithMultipleˢᴍaddrParser => ref mailGroupWithMultipleˢᵇᴍaddrParser;
+private static readonly @string mailGroupWithMultipleˢᵇᴍaddrParser = "mail: group with multiple addresses"u8;
 
 internal static (ж<Address>, error) parseSingleAddressᴍ(ж<addrParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -439,29 +439,29 @@ internal static (ж<Address>, error) parseSingleAddressᴍ(ж<addrParser> Ꮡp) 
         return (default, err);
     }
     if (!p.skipCFWS()) {
-        return (default, errors.New(mailMisformattedˢ));
+        return (default, errors.New(mailMisformattedˢᴍaddrParser));
     }
     if (!p.empty()) {
         return (default, fmt.Errorf("mail: expected single address, got %q"u8, p.s));
     }
     if (builtin.len(addrs) == 0) {
-        return (default, errors.New(mailEmptyGroupˢ));
+        return (default, errors.New(mailEmptyGroupˢᴍaddrParser));
     }
     if (builtin.len(addrs) > 1) {
-        return (default, errors.New(mailGroupWithMultipleˢ));
+        return (default, errors.New(mailGroupWithMultipleˢᴍaddrParser));
     }
     return (addrs[0], default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mailNoAddressˢ => ref mailNoAddressˢᵇ;
-private static readonly @string mailNoAddressˢᵇ = "mail: no address"u8;
-internal static ref readonly @string mailMissingOrAngleAddrˢ => ref mailMissingOrAngleAddrˢᵇ;
-private static readonly @string mailMissingOrAngleAddrˢᵇ = "mail: missing '@' or angle-addr"u8;
-internal static ref readonly @string mailNoAngleAddrˢ => ref mailNoAngleAddrˢᵇ;
-private static readonly @string mailNoAngleAddrˢᵇ = "mail: no angle-addr"u8;
-internal static ref readonly @string mailUnclosedAngleAddrˢ => ref mailUnclosedAngleAddrˢᵇ;
-private static readonly @string mailUnclosedAngleAddrˢᵇ = "mail: unclosed angle-addr"u8;
+internal static ref readonly @string mailNoAddressˢᴍaddrParser => ref mailNoAddressˢᵇᴍaddrParser;
+private static readonly @string mailNoAddressˢᵇᴍaddrParser = "mail: no address"u8;
+internal static ref readonly @string mailMissingOrAngleAddrˢᴍaddrParser => ref mailMissingOrAngleAddrˢᵇᴍaddrParser;
+private static readonly @string mailMissingOrAngleAddrˢᵇᴍaddrParser = "mail: missing '@' or angle-addr"u8;
+internal static ref readonly @string mailNoAngleAddrˢᴍaddrParser => ref mailNoAngleAddrˢᵇᴍaddrParser;
+private static readonly @string mailNoAngleAddrˢᵇᴍaddrParser = "mail: no angle-addr"u8;
+internal static ref readonly @string mailUnclosedAngleAddrˢᴍaddrParser => ref mailUnclosedAngleAddrˢᵇᴍaddrParser;
+private static readonly @string mailUnclosedAngleAddrˢᵇᴍaddrParser = "mail: unclosed angle-addr"u8;
 
 // parseAddress parses a single RFC 5322 address at the start of p.
 internal static (slice<ж<Address>>, error) parseAddressᴍ(ж<addrParser> Ꮡp, bool handleGroup) {
@@ -470,7 +470,7 @@ internal static (slice<ж<Address>>, error) parseAddressᴍ(ж<addrParser> Ꮡp,
     debug.Printf("parseAddress: %q", p.s);
     p.skipSpace();
     if (p.empty()) {
-        return (default, errors.New(mailNoAddressˢ));
+        return (default, errors.New(mailNoAddressˢᴍaddrParser));
     }
 
     // address = mailbox / group
@@ -527,19 +527,19 @@ internal static (slice<ж<Address>>, error) parseAddressᴍ(ж<addrParser> Ꮡp,
         if (atext) {
             // The input is like "foo.bar"; it's possible the input
             // meant to be "foo.bar@domain", or "foo.bar <...>".
-            return (default, errors.New(mailMissingOrAngleAddrˢ));
+            return (default, errors.New(mailMissingOrAngleAddrˢᴍaddrParser));
         }
         // The input is like "Full Name", which couldn't possibly be a
         // valid email address if followed by "@domain"; the input
         // likely meant to be "Full Name <...>".
-        return (default, errors.New(mailNoAngleAddrˢ));
+        return (default, errors.New(mailNoAngleAddrˢᴍaddrParser));
     }
     (spec, err) = Ꮡp.consumeAddrSpec();
     if (err != nil) {
         return (default, err);
     }
     if (!p.consume((byte)'>')) {
-        return (default, errors.New(mailUnclosedAngleAddrˢ));
+        return (default, errors.New(mailUnclosedAngleAddrˢᴍaddrParser));
     }
     debug.Printf("parseAddress: spec=%q", spec);
 
@@ -557,7 +557,7 @@ internal static (slice<ж<Address>>, error) consumeGroupListᴍ(ж<addrParser> �
     p.skipSpace();
     if (p.consume((byte)';')) {
         if (!p.skipCFWS()) {
-            return (default, errors.New(mailMisformattedˢ));
+            return (default, errors.New(mailMisformattedˢᴍaddrParser));
         }
         return (group, default);
     }
@@ -572,30 +572,30 @@ internal static (slice<ж<Address>>, error) consumeGroupListᴍ(ж<addrParser> �
         group = appendꓸꓸꓸ(group, addrs);
 
         if (!p.skipCFWS()) {
-            return (default, errors.New(mailMisformattedˢ));
+            return (default, errors.New(mailMisformattedˢᴍaddrParser));
         }
         if (p.consume((byte)';')) {
             if (!p.skipCFWS()) {
-                return (default, errors.New(mailMisformattedˢ));
+                return (default, errors.New(mailMisformattedˢᴍaddrParser));
             }
             break;
         }
         if (!p.consume((byte)',')) {
-            return (default, errors.New(mailExpectedCommaˢ));
+            return (default, errors.New(mailExpectedCommaˢᴍaddrParser));
         }
     }
     return (group, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mailNoAddrSpecˢ => ref mailNoAddrSpecˢᵇ;
-private static readonly @string mailNoAddrSpecˢᵇ = "mail: no addr-spec"u8;
-internal static ref readonly @string mailEmptyQuotedStringInˢ => ref mailEmptyQuotedStringInˢᵇ;
-private static readonly @string mailEmptyQuotedStringInˢᵇ = "mail: empty quoted string in addr-spec"u8;
-internal static ref readonly @string mailMissingInAddrSpecˢ => ref mailMissingInAddrSpecˢᵇ;
-private static readonly @string mailMissingInAddrSpecˢᵇ = "mail: missing @ in addr-spec"u8;
-internal static ref readonly @string mailNoDomainInAddrSpecˢ => ref mailNoDomainInAddrSpecˢᵇ;
-private static readonly @string mailNoDomainInAddrSpecˢᵇ = "mail: no domain in addr-spec"u8;
+internal static ref readonly @string mailNoAddrSpecˢᴍaddrParser => ref mailNoAddrSpecˢᵇᴍaddrParser;
+private static readonly @string mailNoAddrSpecˢᵇᴍaddrParser = "mail: no addr-spec"u8;
+internal static ref readonly @string mailEmptyQuotedStringInˢᴍaddrParser => ref mailEmptyQuotedStringInˢᵇᴍaddrParser;
+private static readonly @string mailEmptyQuotedStringInˢᵇᴍaddrParser = "mail: empty quoted string in addr-spec"u8;
+internal static ref readonly @string mailMissingInAddrSpecˢᴍaddrParser => ref mailMissingInAddrSpecˢᵇᴍaddrParser;
+private static readonly @string mailMissingInAddrSpecˢᵇᴍaddrParser = "mail: missing @ in addr-spec"u8;
+internal static ref readonly @string mailNoDomainInAddrSpecˢᴍaddrParser => ref mailNoDomainInAddrSpecˢᵇᴍaddrParser;
+private static readonly @string mailNoDomainInAddrSpecˢᵇᴍaddrParser = "mail: no domain in addr-spec"u8;
 
 // consumeAddrSpec parses a single RFC 5322 addr-spec at the start of p.
 internal static (@string spec, error err) consumeAddrSpecᴍ(ж<addrParser> Ꮡp) {
@@ -619,14 +619,14 @@ internal static (@string spec, error err) consumeAddrSpecᴍ(ж<addrParser> Ꮡp
         @string localPart = default;
         p.skipSpace();
         if (p.empty()) {
-            (spec, err) = ("", errors.New(mailNoAddrSpecˢ)); goto ᒐdone;
+            (spec, err) = ("", errors.New(mailNoAddrSpecˢᴍaddrParser)); goto ᒐdone;
         }
         if (p.peek() == '"') {
             // quoted-string
             debug.Printf("consumeAddrSpec: parsing quoted-string");
             (localPart, err) = p.consumeQuotedString();
             if (localPart == ""u8) {
-                err = errors.New(mailEmptyQuotedStringInˢ);
+                err = errors.New(mailEmptyQuotedStringInˢᴍaddrParser);
             }
         } else {
             // dot-atom
@@ -639,14 +639,14 @@ internal static (@string spec, error err) consumeAddrSpecᴍ(ж<addrParser> Ꮡp
         }
 
         if (!p.consume((byte)'@')) {
-            (spec, err) = ("", errors.New(mailMissingInAddrSpecˢ)); goto ᒐdone;
+            (spec, err) = ("", errors.New(mailMissingInAddrSpecˢᴍaddrParser)); goto ᒐdone;
         }
 
         // domain = dot-atom / domain-literal
         @string domain = default;
         p.skipSpace();
         if (p.empty()) {
-            (spec, err) = ("", errors.New(mailNoDomainInAddrSpecˢ)); goto ᒐdone;
+            (spec, err) = ("", errors.New(mailNoDomainInAddrSpecˢᴍaddrParser)); goto ᒐdone;
         }
 
         if (p.peek() == '[') {
@@ -684,7 +684,7 @@ internal static (@string phrase, error err) consumePhraseᴍ(ref addrParser p) {
         // obs-phrase allows CFWS after one word
         if (builtin.len(words) > 0) {
             if (!p.skipCFWS()) {
-                return ("", errors.New(mailMisformattedˢ));
+                return ("", errors.New(mailMisformattedˢᴍaddrParser));
             }
         }
         // word = atom / quoted-string
@@ -742,8 +742,8 @@ internal static (@string phrase, error err) consumePhraseᴍ(ref addrParser p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mailUnclosedQuotedStringˢ => ref mailUnclosedQuotedStringˢᵇ;
-private static readonly @string mailUnclosedQuotedStringˢᵇ = "mail: unclosed quoted-string"u8;
+internal static ref readonly @string mailUnclosedQuotedStringˢᴍaddrParser => ref mailUnclosedQuotedStringˢᵇᴍaddrParser;
+private static readonly @string mailUnclosedQuotedStringˢᵇᴍaddrParser = "mail: unclosed quoted-string"u8;
 
 // consumeQuotedString parses the quoted string at the start of p.
 internal static (@string qs, error err) consumeQuotedStringᴍ(ref addrParser p) {
@@ -761,7 +761,7 @@ Loop:
 
         switch (ᐧ) {
         case {} when size is 0: {
-            return ("", errors.New(mailUnclosedQuotedStringˢ));
+            return ("", errors.New(mailUnclosedQuotedStringˢᴍaddrParser));
         }
         case {} when size == 1 && r == utf8.RuneError: {
             return ("", fmt.Errorf("mail: invalid utf-8 in quoted-string: %q"u8, p.s));
@@ -804,14 +804,14 @@ break_Loop:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mailInvalidStringˢ => ref mailInvalidStringˢᵇ;
-private static readonly @string mailInvalidStringˢᵇ = "mail: invalid string"u8;
-internal static ref readonly @string mailLeadingDotInAtomˢ => ref mailLeadingDotInAtomˢᵇ;
-private static readonly @string mailLeadingDotInAtomˢᵇ = "mail: leading dot in atom"u8;
-internal static ref readonly @string mailDoubleDotInAtomˢ => ref mailDoubleDotInAtomˢᵇ;
-private static readonly @string mailDoubleDotInAtomˢᵇ = "mail: double dot in atom"u8;
-internal static ref readonly @string mailTrailingDotInAtomˢ => ref mailTrailingDotInAtomˢᵇ;
-private static readonly @string mailTrailingDotInAtomˢᵇ = "mail: trailing dot in atom"u8;
+internal static ref readonly @string mailInvalidStringˢᴍaddrParser => ref mailInvalidStringˢᵇᴍaddrParser;
+private static readonly @string mailInvalidStringˢᵇᴍaddrParser = "mail: invalid string"u8;
+internal static ref readonly @string mailLeadingDotInAtomˢᴍaddrParser => ref mailLeadingDotInAtomˢᵇᴍaddrParser;
+private static readonly @string mailLeadingDotInAtomˢᵇᴍaddrParser = "mail: leading dot in atom"u8;
+internal static ref readonly @string mailDoubleDotInAtomˢᴍaddrParser => ref mailDoubleDotInAtomˢᵇᴍaddrParser;
+private static readonly @string mailDoubleDotInAtomˢᵇᴍaddrParser = "mail: double dot in atom"u8;
+internal static ref readonly @string mailTrailingDotInAtomˢᴍaddrParser => ref mailTrailingDotInAtomˢᵇᴍaddrParser;
+private static readonly @string mailTrailingDotInAtomˢᵇᴍaddrParser = "mail: trailing dot in atom"u8;
 
 // consumeAtom parses an RFC 5322 atom at the start of p.
 // If dot is true, consumeAtom parses an RFC 5322 dot-atom instead.
@@ -842,34 +842,34 @@ continue_Loop:;
 break_Loop:;
 
     if (i == 0) {
-        return ("", errors.New(mailInvalidStringˢ));
+        return ("", errors.New(mailInvalidStringˢᴍaddrParser));
     }
     (atom, p.s) = (p.s.slice(0, i), p.s.slice(i));
     if (!permissive) {
         if (strings.HasPrefix(atom, ".")) {
-            return ("", errors.New(mailLeadingDotInAtomˢ));
+            return ("", errors.New(mailLeadingDotInAtomˢᴍaddrParser));
         }
         if (strings.Contains(atom, "..")) {
-            return ("", errors.New(mailDoubleDotInAtomˢ));
+            return ("", errors.New(mailDoubleDotInAtomˢᴍaddrParser));
         }
         if (strings.HasSuffix(atom, ".")) {
-            return ("", errors.New(mailTrailingDotInAtomˢ));
+            return ("", errors.New(mailTrailingDotInAtomˢᴍaddrParser));
         }
     }
     return (atom, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mailMissingInDomainˢ => ref mailMissingInDomainˢᵇ;
-private static readonly @string mailMissingInDomainˢᵇ = @"mail: missing ""["" in domain-literal"u8;
-internal static ref readonly @string mailUnclosedDomainˢ => ref mailUnclosedDomainˢᵇ;
-private static readonly @string mailUnclosedDomainˢᵇ = "mail: unclosed domain-literal"u8;
+internal static ref readonly @string mailMissingInDomainˢᴍaddrParser => ref mailMissingInDomainˢᵇᴍaddrParser;
+private static readonly @string mailMissingInDomainˢᵇᴍaddrParser = @"mail: missing ""["" in domain-literal"u8;
+internal static ref readonly @string mailUnclosedDomainˢᴍaddrParser => ref mailUnclosedDomainˢᵇᴍaddrParser;
+private static readonly @string mailUnclosedDomainˢᵇᴍaddrParser = "mail: unclosed domain-literal"u8;
 
 // consumeDomainLiteral parses an RFC 5322 domain-literal at the start of p.
 internal static (@string, error) consumeDomainLiteralᴍ(ref addrParser p) {
     // Skip the leading [
     if (!p.consume((byte)'[')) {
-        return ("", errors.New(mailMissingInDomainˢ));
+        return ("", errors.New(mailMissingInDomainˢᴍaddrParser));
     }
 
     // Parse the dtext
@@ -877,7 +877,7 @@ internal static (@string, error) consumeDomainLiteralᴍ(ref addrParser p) {
     nint dtextLen = 0;
     for (;;) {
         if (p.empty()) {
-            return ("", errors.New(mailUnclosedDomainˢ));
+            return ("", errors.New(mailUnclosedDomainˢᴍaddrParser));
         }
         if (p.peek() == ']') {
             break;
@@ -898,7 +898,7 @@ internal static (@string, error) consumeDomainLiteralᴍ(ref addrParser p) {
 
     // Skip the trailing ]
     if (!p.consume((byte)']')) {
-        return ("", errors.New(mailUnclosedDomainˢ));
+        return ("", errors.New(mailUnclosedDomainˢᴍaddrParser));
     }
 
     // Check if the domain literal is an IP address
@@ -910,16 +910,16 @@ internal static (@string, error) consumeDomainLiteralᴍ(ref addrParser p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mailCommentDoesNotStartˢ => ref mailCommentDoesNotStartˢᵇ;
-private static readonly @string mailCommentDoesNotStartˢᵇ = "mail: comment does not start with ("u8;
+internal static ref readonly @string mailCommentDoesNotStartˢᴍaddrParser => ref mailCommentDoesNotStartˢᵇᴍaddrParser;
+private static readonly @string mailCommentDoesNotStartˢᵇᴍaddrParser = "mail: comment does not start with ("u8;
 
 internal static (@string, error) consumeDisplayNameCommentᴍ(ref addrParser p) {
     if (!p.consume((byte)'(')) {
-        return ("", errors.New(mailCommentDoesNotStartˢ));
+        return ("", errors.New(mailCommentDoesNotStartˢᴍaddrParser));
     }
     var (comment, ok) = p.consumeComment();
     if (!ok) {
-        return ("", errors.New(mailMisformattedˢ));
+        return ("", errors.New(mailMisformattedˢᴍaddrParser));
     }
 
     // TODO(stapelberg): parse quoted-string within comment

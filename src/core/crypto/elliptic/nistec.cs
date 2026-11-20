@@ -131,10 +131,10 @@ internal static bool IsOnCurveᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int>
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string negativeCoordinateˢ => ref negativeCoordinateˢᵇ;
-private static readonly @string negativeCoordinateˢᵇ = "negative coordinate"u8;
-internal static ref readonly @string overflowingCoordinateˢ => ref overflowingCoordinateˢᵇ;
-private static readonly @string overflowingCoordinateˢᵇ = "overflowing coordinate"u8;
+internal static ref readonly @string negativeCoordinateˢᴍnistCurve => ref negativeCoordinateˢᵇᴍnistCurve;
+private static readonly @string negativeCoordinateˢᵇᴍnistCurve = "negative coordinate"u8;
+internal static ref readonly @string overflowingCoordinateˢᴍnistCurve => ref overflowingCoordinateˢᵇᴍnistCurve;
+private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overflowing coordinate"u8;
 
 internal static (Point p, error err) pointFromAffineᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
     where Point : nistPoint<Point>
@@ -150,10 +150,10 @@ internal static (Point p, error err) pointFromAffineᴍ<Point>(ref nistCurve<Poi
     }
     // Reject values that would not get correctly encoded.
     if (x.Sign() < 0 || y.Sign() < 0) {
-        return (p, errors.New(negativeCoordinateˢ));
+        return (p, errors.New(negativeCoordinateˢᴍnistCurve));
     }
     if (x.BitLen() > curve.@params.BitSize || y.BitLen() > curve.@params.BitSize) {
-        return (p, errors.New(overflowingCoordinateˢ));
+        return (p, errors.New(overflowingCoordinateˢᴍnistCurve));
     }
     // Encode the coordinates and let SetBytes reject invalid points.
     nint byteLen = (curve.@params.BitSize + 7) / 8;

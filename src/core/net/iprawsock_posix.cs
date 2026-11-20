@@ -141,8 +141,8 @@ internal static (nint n, nint oobn, error err) writeMsgᴍ(ref IPConn c, slice<b
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dialˢ => ref dialˢᵇ;
-private static readonly @string dialˢᵇ = "dial"u8;
+internal static ref readonly @string dialˢᴍsysDialer => ref dialˢᵇᴍsysDialer;
+private static readonly @string dialˢᵇᴍsysDialer = "dial"u8;
 
 internal static (ж<IPConn>, error) dialIPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
@@ -162,7 +162,7 @@ internal static (ж<IPConn>, error) dialIPᴍ(ж<sysDialer> Ꮡsd, context.Conte
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string networkΔ1, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(networkΔ1, address, c);
     }
-    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), new IPAddrжsockaddr(raddr), syscall.SOCK_RAW, proto, dialˢ, ctrlCtxFn);
+    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), new IPAddrжsockaddr(raddr), syscall.SOCK_RAW, proto, dialˢᴍsysDialer, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
@@ -172,8 +172,8 @@ internal static (ж<IPConn>, error) dialIPᴍ(ж<sysDialer> Ꮡsd, context.Conte
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢ => ref listenˢᵇ;
-private static readonly @string listenˢᵇ = "listen"u8;
+internal static ref readonly @string listenˢᴍsysListener => ref listenˢᵇᴍsysListener;
+private static readonly @string listenˢᵇᴍsysListener = "listen"u8;
 
 internal static (ж<IPConn>, error) listenIPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
@@ -193,7 +193,7 @@ internal static (ж<IPConn>, error) listenIPᴍ(ж<sysListener> Ꮡsl, context.C
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string networkΔ1, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(networkΔ1, address, c);
     }
-    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), default, syscall.SOCK_RAW, proto, listenˢ, ctrlCtxFn);
+    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), default, syscall.SOCK_RAW, proto, listenˢᴍsysListener, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }

@@ -63,12 +63,12 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string underflowˢ => ref underflowˢᵇ;
-private static readonly @string underflowˢᵇ = "underflow"u8;
+internal static ref readonly @string underflowˢᴍbuf => ref underflowˢᵇᴍbuf;
+private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
 
 internal static uint8 uint8ᴍ(ref buf b) {
     if (len(b.data) < 1) {
-        b.error(underflowˢ);
+        b.error(underflowˢᴍbuf);
         return 0;
     }
     var val = b.data[0];
@@ -79,7 +79,7 @@ internal static uint8 uint8ᴍ(ref buf b) {
 
 internal static slice<byte> bytesᴍ(ref buf b, nint n) {
     if (n < 0 || len(b.data) < n) {
-        b.error(underflowˢ);
+        b.error(underflowˢᴍbuf);
         return default;
     }
     var data = b.data.slice(0, n);
@@ -93,7 +93,7 @@ internal static void skipᴍ(ref buf b, nint n) { b.bytes(n); }
 internal static @string @stringᴍ(ref buf b) {
     nint i = bytes_package.IndexByte(b.data, 0);
     if (i < 0) {
-        b.error(underflowˢ);
+        b.error(underflowˢᴍbuf);
         return ""u8;
     }
 
@@ -175,8 +175,8 @@ internal static int64 @intᴍ(ref buf b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownAddressSizeˢ => ref unknownAddressSizeˢᵇ;
-private static readonly @string unknownAddressSizeˢᵇ = "unknown address size"u8;
+internal static ref readonly @string unknownAddressSizeˢᴍbuf => ref unknownAddressSizeˢᵇᴍbuf;
+private static readonly @string unknownAddressSizeˢᵇᴍbuf = "unknown address size"u8;
 
 // Address-sized uint.
 internal static uint64 addrᴍ(ref buf b) {
@@ -193,13 +193,13 @@ internal static uint64 addrᴍ(ref buf b) {
     case 8: {
         return b.uint64();
     }}
-    b.error(unknownAddressSizeˢ);
+    b.error(unknownAddressSizeˢᴍbuf);
     return 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unitLengthHasReservedˢ => ref unitLengthHasReservedˢᵇ;
-private static readonly @string unitLengthHasReservedˢᵇ = "unit length has reserved value"u8;
+internal static ref readonly @string unitLengthHasReservedˢᴍbuf => ref unitLengthHasReservedˢᵇᴍbuf;
+private static readonly @string unitLengthHasReservedˢᵇᴍbuf = "unit length has reserved value"u8;
 
 internal static (Offset length, bool dwarf64) unitLengthᴍ(ref buf b) {
     Offset length = default;
@@ -210,7 +210,7 @@ internal static (Offset length, bool dwarf64) unitLengthᴍ(ref buf b) {
         dwarf64 = true;
         length = (Offset)(uint32)b.uint64();
     } else if (length >= 0xfffffff0U) {
-        b.error(unitLengthHasReservedˢ);
+        b.error(unitLengthHasReservedˢᴍbuf);
     }
     return (length, dwarf64);
 }

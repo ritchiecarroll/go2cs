@@ -96,13 +96,13 @@ internal static positioner posnᴍ(ref error_ err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noErrorˢ => ref noErrorˢᵇ;
-private static readonly @string noErrorˢᵇ = "no error"u8;
+internal static ref readonly @string noErrorˢᴍerror_ => ref noErrorˢᵇᴍerror_;
+private static readonly @string noErrorˢᵇᴍerror_ = "no error"u8;
 
 // msg returns the formatted error message without the primary error position pos().
 internal static @string msgᴍ(ref error_ err) {
     if (err.empty()) {
-        return noErrorˢ;
+        return noErrorˢᴍerror_;
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -120,12 +120,12 @@ internal static @string msgᴍ(ref error_ err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidOperandˢ => ref invalidOperandˢᵇ;
-private static readonly @string invalidOperandˢᵇ = "invalid operand"u8;
-internal static ref readonly @string invalidTypeˢ => ref invalidTypeˢᵇ;
-private static readonly @string invalidTypeˢᵇ = "invalid type"u8;
-internal static ref readonly @string errorSCodeDˢ => ref errorSCodeDˢᵇ;
-private static readonly @string errorSCodeDˢᵇ = "ERROR: %s (code = %d)"u8;
+internal static ref readonly @string invalidOperandˢᴍerror_ => ref invalidOperandˢᵇᴍerror_;
+private static readonly @string invalidOperandˢᵇᴍerror_ = "invalid operand"u8;
+internal static ref readonly @string invalidTypeˢᴍerror_ => ref invalidTypeˢᵇᴍerror_;
+private static readonly @string invalidTypeˢᵇᴍerror_ = "invalid type"u8;
+internal static ref readonly @string errorSCodeDˢᴍerror_ => ref errorSCodeDˢᵇᴍerror_;
+private static readonly @string errorSCodeDˢᵇᴍerror_ = "ERROR: %s (code = %d)"u8;
 
 // report reports the error err, setting check.firstError if necessary.
 internal static void reportᴍ(ref error_ err) {
@@ -142,13 +142,13 @@ internal static void reportᴍ(ref error_ err) {
     if (check.firstErr != nil) {
         // It is sufficient to look at the first sub-error only.
         @string msg = err.desc[0].msg;
-        if (strings.Index(msg, invalidOperandˢ) > 0 || strings.Index(msg, invalidTypeˢ) > 0) {
+        if (strings.Index(msg, invalidOperandˢᴍerror_) > 0 || strings.Index(msg, invalidTypeˢᴍerror_) > 0) {
             return;
         }
     }
 
     if (check.conf._Trace) {
-        check.trace(err.posn().Pos(), errorSCodeDˢ, err.desc[0].msg, err.code);
+        check.trace(err.posn().Pos(), errorSCodeDˢᴍerror_, err.desc[0].msg, err.code);
     }
 
     // In go/types, if there is a sub-error with a valid position,

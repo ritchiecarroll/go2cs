@@ -131,8 +131,8 @@ internal static (nint, error) Readᴍ(ж<Reader> Ꮡr, slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwInvalidCodeˢ => ref lzwInvalidCodeˢᵇ;
-private static readonly @string lzwInvalidCodeˢᵇ = "lzw: invalid code"u8;
+internal static ref readonly @string lzwInvalidCodeˢᴍReader => ref lzwInvalidCodeˢᵇᴍReader;
+private static readonly @string lzwInvalidCodeˢᵇᴍReader = "lzw: invalid code"u8;
 
 // decode decompresses bytes from r and leaves them in d.toRead.
 // read specifies how to decode bytes into codes.
@@ -207,7 +207,7 @@ loop:
             break;
         }
         default: {
-            r.err = errors.New(lzwInvalidCodeˢ);
+            r.err = errors.New(lzwInvalidCodeˢᴍReader);
             goto break_loop;
             break;
         }}
@@ -285,8 +285,8 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
 } partial class lzw_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwUnknownOrderˢ => ref lzwUnknownOrderˢᵇ;
-private static readonly @string lzwUnknownOrderˢᵇ = "lzw: unknown order"u8;
+internal static ref readonly @string lzwUnknownOrderˢᴍReader => ref lzwUnknownOrderˢᵇᴍReader;
+private static readonly @string lzwUnknownOrderˢᵇᴍReader = "lzw: unknown order"u8;
 
 internal static void initᴍ(ref Reader r, io.Reader src, Order order, nint litWidth) {
     switch (order) {
@@ -299,7 +299,7 @@ internal static void initᴍ(ref Reader r, io.Reader src, Order order, nint litW
         break;
     }
     default: {
-        r.err = errors.New(lzwUnknownOrderˢ);
+        r.err = errors.New(lzwUnknownOrderˢᴍReader);
         return;
     }}
     if (litWidth < 2 || 8 < litWidth) {

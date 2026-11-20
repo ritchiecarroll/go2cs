@@ -160,10 +160,10 @@ internal static ж<field.Element> feOne = @new<field.Element>().One();
 } partial class edwards25519_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string edwards25519InvalidPointˢ => ref edwards25519InvalidPointˢᵇ;
-private static readonly @string edwards25519InvalidPointˢᵇ = "edwards25519: invalid point encoding length"u8;
-internal static ref readonly @string edwards25519InvalidPointˢ2 => ref edwards25519InvalidPointˢ2ᵇ;
-private static readonly @string edwards25519InvalidPointˢ2ᵇ = "edwards25519: invalid point encoding"u8;
+internal static ref readonly @string edwards25519InvalidPointˢᴍPoint => ref edwards25519InvalidPointˢᵇᴍPoint;
+private static readonly @string edwards25519InvalidPointˢᵇᴍPoint = "edwards25519: invalid point encoding length"u8;
+internal static ref readonly @string edwards25519InvalidPointˢ2ᴍPoint => ref edwards25519InvalidPointˢ2ᵇᴍPoint;
+private static readonly @string edwards25519InvalidPointˢ2ᵇᴍPoint = "edwards25519: invalid point encoding"u8;
 
 // SetBytes sets v = x, where x is a 32-byte encoding of v. If x does not
 // represent a valid point on the curve, SetBytes returns nil and an error and
@@ -183,7 +183,7 @@ internal static (ж<Point>, error) SetBytesᴍ(ж<Point> Ꮡv, slice<byte> x) {
 
     var (y, err) = @new<field.Element>().SetBytes(x);
     if (err != nil) {
-        return (default, errors.New(edwards25519InvalidPointˢ));
+        return (default, errors.New(edwards25519InvalidPointˢᴍPoint));
     }
 
     // -x² + y² = 1 + dx²y²
@@ -201,7 +201,7 @@ internal static (ж<Point>, error) SetBytesᴍ(ж<Point> Ꮡv, slice<byte> x) {
     // x = +√(u/v)
     var (xx, wasSquare) = @new<field.Element>().SqrtRatio(u, vv);
     if (wasSquare == 0) {
-        return (default, errors.New(edwards25519InvalidPointˢ2));
+        return (default, errors.New(edwards25519InvalidPointˢ2ᴍPoint));
     }
 
     // Select the negative square root if the sign bit is set.

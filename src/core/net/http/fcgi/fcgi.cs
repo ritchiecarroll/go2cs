@@ -72,12 +72,12 @@ partial struct beginRequest {
 } partial class fcgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fcgiInvalidBeginRequestˢ => ref fcgiInvalidBeginRequestˢᵇ;
-private static readonly @string fcgiInvalidBeginRequestˢᵇ = "fcgi: invalid begin request record"u8;
+internal static ref readonly @string fcgiInvalidBeginRequestˢᴍbeginRequest => ref fcgiInvalidBeginRequestˢᵇᴍbeginRequest;
+private static readonly @string fcgiInvalidBeginRequestˢᵇᴍbeginRequest = "fcgi: invalid begin request record"u8;
 
 internal static error readᴍ(ref beginRequest br, slice<byte> content) {
     if (len(content) != 8) {
-        return errors.New(fcgiInvalidBeginRequestˢ);
+        return errors.New(fcgiInvalidBeginRequestˢᴍbeginRequest);
     }
     br.role = binary.BigEndian.Uint16(content);
     br.flags = content[2];
@@ -148,8 +148,8 @@ partial struct record {
 } partial class fcgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fcgiInvalidHeaderVersionˢ => ref fcgiInvalidHeaderVersionˢᵇ;
-private static readonly @string fcgiInvalidHeaderVersionˢᵇ = "fcgi: invalid header version"u8;
+internal static ref readonly @string fcgiInvalidHeaderVersionˢᴍrecord => ref fcgiInvalidHeaderVersionˢᵇᴍrecord;
+private static readonly @string fcgiInvalidHeaderVersionˢᵇᴍrecord = "fcgi: invalid header version"u8;
 
 internal static error /*err*/ readᴍ(ж<record> Ꮡrec, io.Reader r) {
     error err = default;
@@ -159,7 +159,7 @@ internal static error /*err*/ readᴍ(ж<record> Ꮡrec, io.Reader r) {
         return err;
     }
     if (rec.h.Version != 1) {
-        return errors.New(fcgiInvalidHeaderVersionˢ);
+        return errors.New(fcgiInvalidHeaderVersionˢᴍrecord);
     }
     nint n = (nint)rec.h.ContentLength + (nint)rec.h.PaddingLength;
     (_, err) = io.ReadFull(r, rec.buf.slice(0, n)); if (err != nil) {

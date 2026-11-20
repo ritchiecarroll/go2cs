@@ -149,10 +149,10 @@ internal static Kind Kindᴍ(complexVal _) { return Complex; }
 } partial class constant_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
-private static readonly @string unknownˢᵇ = "unknown"u8;
+internal static ref readonly @string unknownˢᴍunknownVal => ref unknownˢᵇᴍunknownVal;
+private static readonly @string unknownˢᵇᴍunknownVal = "unknown"u8;
 
-internal static @string Stringᴍ(unknownVal _) { return unknownˢ; }
+internal static @string Stringᴍ(unknownVal _) { return unknownˢᴍunknownVal; }
 
 } partial class constant_package {
 

@@ -65,10 +65,10 @@ internal static UntypedInt p256CompressedLength => /* 1 + p256ElementLength */ 3
 } partial class nistec_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidP256Compressedˢ => ref invalidP256Compressedˢᵇ;
-private static readonly @string invalidP256Compressedˢᵇ = "invalid P256 compressed point encoding"u8;
-internal static ref readonly @string invalidP256PointEncodingˢ => ref invalidP256PointEncodingˢᵇ;
-private static readonly @string invalidP256PointEncodingˢᵇ = "invalid P256 point encoding"u8;
+internal static ref readonly @string invalidP256CompressedˢᴍP256Point => ref invalidP256CompressedˢᵇᴍP256Point;
+private static readonly @string invalidP256CompressedˢᵇᴍP256Point = "invalid P256 compressed point encoding"u8;
+internal static ref readonly @string invalidP256PointEncodingˢᴍP256Point => ref invalidP256PointEncodingˢᵇᴍP256Point;
+private static readonly @string invalidP256PointEncodingˢᵇᴍP256Point = "invalid P256 point encoding"u8;
 
 // SetBytes sets p to the compressed, uncompressed, or infinity value encoded in
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
@@ -108,7 +108,7 @@ internal static (ж<P256Point>, error) SetBytesᴍ(ж<P256Point> Ꮡp, slice<byt
         // y² = x³ - 3x + b
         var y = p256Polynomial(@new<fiat.P256Element>(), x);
         if (!p256Sqrt(y, y)) {
-            return (default, errors.New(invalidP256Compressedˢ));
+            return (default, errors.New(invalidP256CompressedˢᴍP256Point));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -124,7 +124,7 @@ internal static (ж<P256Point>, error) SetBytesᴍ(ж<P256Point> Ꮡp, slice<byt
         return (Ꮡp, default);
     }
     default: {
-        return (default, errors.New(invalidP256PointEncodingˢ));
+        return (default, errors.New(invalidP256PointEncodingˢᴍP256Point));
     }}
 }
 
@@ -208,14 +208,14 @@ internal static (slice<byte>, error) BytesXᴍ(ж<P256Point> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string p256PointIsThePointAtˢ => ref p256PointIsThePointAtˢᵇ;
-private static readonly @string p256PointIsThePointAtˢᵇ = "P256 point is the point at infinity"u8;
+internal static ref readonly @string p256PointIsThePointAtˢᴍP256Point => ref p256PointIsThePointAtˢᵇᴍP256Point;
+private static readonly @string p256PointIsThePointAtˢᵇᴍP256Point = "P256 point is the point at infinity"u8;
 
 internal static (slice<byte>, error) bytesXᴍ(ж<P256Point> Ꮡp, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (Ꮡp.Ꮡz.IsZero() == 1) {
-        return (default, errors.New(p256PointIsThePointAtˢ));
+        return (default, errors.New(p256PointIsThePointAtˢᴍP256Point));
     }
 
     var zinv = @new<fiat.P256Element>().Invert(Ꮡp.Ꮡz);
@@ -441,15 +441,15 @@ partial struct p256OrdElement /*[4]uint64*/;
 } partial class nistec_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢ => ref invalidScalarLengthˢᵇ;
-private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarLengthˢᴍp256OrdElement => ref invalidScalarLengthˢᵇᴍp256OrdElement;
+private static readonly @string invalidScalarLengthˢᵇᴍp256OrdElement = "invalid scalar length"u8;
 
 // SetBytes sets s to the big-endian value of x, reducing it as necessary.
 internal static (ж<p256OrdElement>, error) SetBytesᴍ(ж<p256OrdElement> Ꮡs, slice<byte> x) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (len(x) != 32) {
-        return (ж<p256OrdElement>.NilBoxOfDims(4L), errors.New(invalidScalarLengthˢ));
+        return (ж<p256OrdElement>.NilBoxOfDims(4L), errors.New(invalidScalarLengthˢᴍp256OrdElement));
     }
 
     s.Value[0] = byteorder.BEUint64(x[24..]);

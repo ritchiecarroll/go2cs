@@ -85,17 +85,17 @@ internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoMd5InvalidHashˢ => ref cryptoMd5InvalidHashˢᵇ;
-private static readonly @string cryptoMd5InvalidHashˢᵇ = "crypto/md5: invalid hash state identifier"u8;
-internal static ref readonly @string cryptoMd5InvalidHashˢ2 => ref cryptoMd5InvalidHashˢ2ᵇ;
-private static readonly @string cryptoMd5InvalidHashˢ2ᵇ = "crypto/md5: invalid hash state size"u8;
+internal static ref readonly @string cryptoMd5InvalidHashˢᴍdigest => ref cryptoMd5InvalidHashˢᵇᴍdigest;
+private static readonly @string cryptoMd5InvalidHashˢᵇᴍdigest = "crypto/md5: invalid hash state identifier"u8;
+internal static ref readonly @string cryptoMd5InvalidHashˢ2ᴍdigest => ref cryptoMd5InvalidHashˢ2ᵇᴍdigest;
+private static readonly @string cryptoMd5InvalidHashˢ2ᵇᴍdigest = "crypto/md5: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
-        return errors.New(cryptoMd5InvalidHashˢ);
+        return errors.New(cryptoMd5InvalidHashˢᴍdigest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(cryptoMd5InvalidHashˢ2);
+        return errors.New(cryptoMd5InvalidHashˢ2ᴍdigest);
     }
     b = b[(int)(len(magic))..];
     (b, d.s[0]) = consumeUint32(b);
@@ -144,8 +144,8 @@ internal static nint Sizeᴍ(ref digest d) { return md5.Size; }
 internal static nint BlockSizeᴍ(ref digest d) { return md5.BlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoMd5UseOfMd5IsNotˢ => ref cryptoMd5UseOfMd5IsNotˢᵇ;
-private static readonly @string cryptoMd5UseOfMd5IsNotˢᵇ = "crypto/md5: use of MD5 is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoMd5UseOfMd5IsNotˢᴍdigest => ref cryptoMd5UseOfMd5IsNotˢᵇᴍdigest;
+private static readonly @string cryptoMd5UseOfMd5IsNotˢᵇᴍdigest = "crypto/md5: use of MD5 is not allowed in FIPS 140-only mode"u8;
 
 internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default;
@@ -153,7 +153,7 @@ internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
-        return (0, errors.New(cryptoMd5UseOfMd5IsNotˢ));
+        return (0, errors.New(cryptoMd5UseOfMd5IsNotˢᴍdigest));
     }
     // Note that we currently call block or blockGeneric
     // directly (guarded using haveAsm) because this allows

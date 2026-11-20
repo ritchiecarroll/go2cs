@@ -90,17 +90,17 @@ internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoSha256InvalidHashˢ => ref cryptoSha256InvalidHashˢᵇ;
-private static readonly @string cryptoSha256InvalidHashˢᵇ = "crypto/sha256: invalid hash state identifier"u8;
-private static ref readonly @string cryptoSha256InvalidHashˢ2 => ref cryptoSha256InvalidHashˢ2ᵇ;
-private static readonly @string cryptoSha256InvalidHashˢ2ᵇ = "crypto/sha256: invalid hash state size"u8;
+private static ref readonly @string cryptoSha256InvalidHashˢᴍDigest => ref cryptoSha256InvalidHashˢᵇᴍDigest;
+private static readonly @string cryptoSha256InvalidHashˢᵇᴍDigest = "crypto/sha256: invalid hash state identifier"u8;
+private static ref readonly @string cryptoSha256InvalidHashˢ2ᴍDigest => ref cryptoSha256InvalidHashˢ2ᵇᴍDigest;
+private static readonly @string cryptoSha256InvalidHashˢ2ᵇᴍDigest = "crypto/sha256: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
     if (len(b) < len(magic224) || (d.is224 && ((sstring)(b[..(int)(len(magic224))])) != magic224) || (!d.is224 && ((sstring)(b[..(int)(len(magic256))])) != magic256)) {
-        return errors.New(cryptoSha256InvalidHashˢ);
+        return errors.New(cryptoSha256InvalidHashˢᴍDigest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(cryptoSha256InvalidHashˢ2);
+        return errors.New(cryptoSha256InvalidHashˢ2ᴍDigest);
     }
     b = b[(int)(len(magic224))..];
     (b, d.h[0]) = consumeUint32(b);

@@ -351,8 +351,8 @@ internal static void STWDoneᴍ(traceLocker tl) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string doubleTraceGCSweepStartˢ => ref doubleTraceGCSweepStartˢᵇ;
-private static readonly @string doubleTraceGCSweepStartˢᵇ = "double traceGCSweepStart"u8;
+internal static ref readonly @string doubleTraceGCSweepStartˢᴍtraceLocker => ref doubleTraceGCSweepStartˢᵇᴍtraceLocker;
+private static readonly @string doubleTraceGCSweepStartˢᵇᴍtraceLocker = "double traceGCSweepStart"u8;
 
 // GCSweepStart prepares to trace a sweep loop. This does not
 // emit any events until traceGCSweepSpan is called.
@@ -366,7 +366,7 @@ internal static void GCSweepStartᴍ(traceLocker tl) {
     // sweep. If we don't sweep anything, don't emit any events.
     var pp = (~tl.mp).p.ptr();
     if ((~pp).trace.maySweep) {
-        @throw(doubleTraceGCSweepStartˢ);
+        @throw(doubleTraceGCSweepStartˢᴍtraceLocker);
     }
     (pp.Value.trace.maySweep, pp.Value.trace.swept, pp.Value.trace.reclaimed) = (true, 0, 0);
 }
@@ -391,8 +391,8 @@ internal static void GCSweepSpanᴍ(traceLocker tl, uintptr bytesSwept) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingTraceGCSweepStartˢ => ref missingTraceGCSweepStartˢᵇ;
-private static readonly @string missingTraceGCSweepStartˢᵇ = "missing traceGCSweepStart"u8;
+internal static ref readonly @string missingTraceGCSweepStartˢᴍtraceLocker => ref missingTraceGCSweepStartˢᵇᴍtraceLocker;
+private static readonly @string missingTraceGCSweepStartˢᵇᴍtraceLocker = "missing traceGCSweepStart"u8;
 
 // GCSweepDone finishes tracing a sweep loop. If any memory was
 // swept (i.e. traceGCSweepSpan emitted an event) then this will emit
@@ -402,7 +402,7 @@ private static readonly @string missingTraceGCSweepStartˢᵇ = "missing traceGC
 internal static void GCSweepDoneᴍ(traceLocker tl) {
     var pp = (~tl.mp).p.ptr();
     if (!(~pp).trace.maySweep) {
-        @throw(missingTraceGCSweepStartˢ);
+        @throw(missingTraceGCSweepStartˢᴍtraceLocker);
     }
     if ((~pp).trace.inSweep) {
         tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCSweepEnd, (traceArg)(uint64)(~pp).trace.swept, (traceArg)(uint64)(~pp).trace.reclaimed);

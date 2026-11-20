@@ -74,8 +74,8 @@ internal static UntypedInt wbMaxEntriesPerCall => 8;
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badWriteBarrierBufferˢ => ref badWriteBarrierBufferˢᵇ;
-private static readonly @string badWriteBarrierBufferˢᵇ = "bad write barrier buffer bounds"u8;
+internal static ref readonly @string badWriteBarrierBufferˢᴍwbBuf => ref badWriteBarrierBufferˢᵇᴍwbBuf;
+private static readonly @string badWriteBarrierBufferˢᵇᴍwbBuf = "bad write barrier buffer bounds"u8;
 
 // reset empties b by resetting its next and end pointers.
 internal static void resetᴍ(ref wbBuf b) {
@@ -91,7 +91,7 @@ internal static void resetᴍ(ref wbBuf b) {
     }
 
     if ((b.end - b.next) % /* unsafe.Sizeof(b.buf[0]) */ (uintptr)8 != 0) {
-        @throw(badWriteBarrierBufferˢ);
+        @throw(badWriteBarrierBufferˢᴍwbBuf);
     }
 }
 

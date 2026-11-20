@@ -251,14 +251,14 @@ internal static (Event e, error err) ReadEventᴍ(ж<Reader> Ꮡr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string internalErrorˢ4 => ref internalErrorˢ4ᵇ;
-private static readonly @string internalErrorˢ4ᵇ = "internal error: nextGenWithSpill called for Go 1.26+ trace"u8;
+internal static ref readonly @string internalErrorˢ4ᴍReader => ref internalErrorˢ4ᵇᴍReader;
+private static readonly @string internalErrorˢ4ᵇᴍReader = "internal error: nextGenWithSpill called for Go 1.26+ trace"u8;
 
 // nextGenWithSpill reads the generation and calls nextGen while
 // also handling any spilled batches.
 internal static (Event, error) nextGenWithSpillᴍ(ref Reader r) {
     if (r.version >= version.Go126) {
-        return (new Event(), errors.New(internalErrorˢ4));
+        return (new Event(), errors.New(internalErrorˢ4ᴍReader));
     }
     if (r.spillErr != nil) {
         if (r.spillErrSync) {

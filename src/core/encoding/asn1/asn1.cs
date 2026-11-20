@@ -1279,12 +1279,12 @@ partial struct invalidUnmarshalError {
 } partial class asn1_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string asn1UnmarshalRecipientˢ => ref asn1UnmarshalRecipientˢᵇ;
-private static readonly @string asn1UnmarshalRecipientˢᵇ = "asn1: Unmarshal recipient value is nil"u8;
+internal static ref readonly @string asn1UnmarshalRecipientˢᴍinvalidUnmarshalError => ref asn1UnmarshalRecipientˢᵇᴍinvalidUnmarshalError;
+private static readonly @string asn1UnmarshalRecipientˢᵇᴍinvalidUnmarshalError = "asn1: Unmarshal recipient value is nil"u8;
 
 internal static @string Errorᴍ(ref invalidUnmarshalError e) {
     if (e.Type == nil) {
-        return asn1UnmarshalRecipientˢ;
+        return asn1UnmarshalRecipientˢᴍinvalidUnmarshalError;
     }
 
     if (e.Type.Kind() != reflect.Pointer) {

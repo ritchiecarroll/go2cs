@@ -141,10 +141,10 @@ internal static error writeUSTARHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string globalHead00ˢ => ref globalHead00ˢᵇ;
-private static readonly @string globalHead00ˢᵇ = "GlobalHead.0.0"u8;
-internal static ref readonly @string paxHeaders0ˢ => ref paxHeaders0ˢᵇ;
-private static readonly @string paxHeaders0ˢᵇ = "PaxHeaders.0"u8;
+internal static ref readonly @string globalHead00ˢᴍWriter => ref globalHead00ˢᵇᴍWriter;
+private static readonly @string globalHead00ˢᵇᴍWriter = "GlobalHead.0.0"u8;
+internal static ref readonly @string paxHeaders0ˢᴍWriter => ref paxHeaders0ˢᵇᴍWriter;
+private static readonly @string paxHeaders0ˢᵇᴍWriter = "PaxHeaders.0"u8;
 
 internal static error writePAXHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, map<@string, @string> paxHdrs) {
     ref var tw = ref Ꮡtw.DerefOrNull();
@@ -209,12 +209,12 @@ internal static error writePAXHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, map
         if (isGlobal) {
             name = realName;
             if (name == ""u8) {
-                name = globalHead00ˢ;
+                name = globalHead00ˢᴍWriter;
             }
             flag = TypeXGlobalHeader;
         } else {
             var (dir, @file) = path.Split(realName);
-            name = path.Join(dir, paxHeaders0ˢ, @file);
+            name = path.Join(dir, paxHeaders0ˢᴍWriter, @file);
             flag = TypeXHeader;
         }
         @string data = buf.String();
@@ -257,15 +257,15 @@ internal static error writePAXHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, map
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string longNameᶜ => ref longNameᶜᵇ;
-private static readonly @string longNameᶜᵇ = "././@LongLink"u8;
+internal static ref readonly @string longNameᶜᴍWriter => ref longNameᶜᵇᴍWriter;
+private static readonly @string longNameᶜᵇᴍWriter = "././@LongLink"u8;
 
 internal static error writeGNUHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     ref var tw = ref Ꮡtw.DerefOrNull();
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     // Use long-link files if Name or Linkname exceeds the field size.
-    @string longName = longNameᶜ;
+    @string longName = longNameᶜᴍWriter;
     if (len(hdr.Name) > nameSize) {
         @string data = hdr.Name + "\x00"u8;
         var err = Ꮡtw.writeRawFile(longName, data, TypeGNULongName, FormatGNU); if (err != nil) {
@@ -452,8 +452,8 @@ internal static error writeRawHeaderᴍ(ref Writer tw, ж<block> Ꮡblk, int64 s
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tarCannotAddNonRegularˢ => ref tarCannotAddNonRegularˢᵇ;
-private static readonly @string tarCannotAddNonRegularˢᵇ = "tar: cannot add non-regular file"u8;
+internal static ref readonly @string tarCannotAddNonRegularˢᴍWriter => ref tarCannotAddNonRegularˢᵇᴍWriter;
+private static readonly @string tarCannotAddNonRegularˢᵇᴍWriter = "tar: cannot add non-regular file"u8;
 
 // AddFS adds the files from fs.FS to the archive.
 // It walks the directory tree starting at the root of the filesystem
@@ -480,7 +480,7 @@ internal static error AddFSᴍ(ж<Writer> Ꮡtw, fs.FS fsys) {
                     return errΔ1;
                 }
             } else if (!typ.IsRegular() && typ != fs.ModeDir) {
-                return errors.New(tarCannotAddNonRegularˢ);
+                return errors.New(tarCannotAddNonRegularˢᴍWriter);
             }
             (var h, err) = FileInfoHeader(info, linkTarget);
             if (err != nil) {

@@ -104,8 +104,8 @@ partial struct SessionState {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInternalErrorEmptyˢ => ref tlsInternalErrorEmptyˢᵇ;
-private static readonly @string tlsInternalErrorEmptyˢᵇ = "tls: internal error: empty verified chain"u8;
+internal static ref readonly @string tlsInternalErrorEmptyˢᴍSessionState => ref tlsInternalErrorEmptyˢᵇᴍSessionState;
+private static readonly @string tlsInternalErrorEmptyˢᵇᴍSessionState = "tls: internal error: empty verified chain"u8;
 
 // Bytes encodes the session, including any private fields, so that it can be
 // parsed by [ParseSessionState]. The encoding contains secret values critical
@@ -157,7 +157,7 @@ internal static (slice<byte>, error) Bytesᴍ(ж<SessionState> Ꮡs) {
             bΔ4.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
                 // We elide the first certificate because it's always the leaf.
                 if (len(chainʗ1) == 0) {
-                    bΔ5.SetError(errors.New(tlsInternalErrorEmptyˢ));
+                    bΔ5.SetError(errors.New(tlsInternalErrorEmptyˢᴍSessionState));
                     return;
                 }
                 foreach (var (_, cert) in range(chainʗ1[1..])) {
@@ -354,12 +354,12 @@ internal static (slice<byte>, error) EncryptTicketᴍ(ж<Config> Ꮡc, Connectio
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInternalErrorSessionˢ => ref tlsInternalErrorSessionˢᵇ;
-private static readonly @string tlsInternalErrorSessionˢᵇ = "tls: internal error: session ticket keys unavailable"u8;
+internal static ref readonly @string tlsInternalErrorSessionˢᴍConfig => ref tlsInternalErrorSessionˢᵇᴍConfig;
+private static readonly @string tlsInternalErrorSessionˢᵇᴍConfig = "tls: internal error: session ticket keys unavailable"u8;
 
 internal static (slice<byte>, error) encryptTicketᴍ(ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
     if (len(ticketKeys) == 0) {
-        return (default, errors.New(tlsInternalErrorSessionˢ));
+        return (default, errors.New(tlsInternalErrorSessionˢᴍConfig));
     }
 
     var encrypted = new slice<byte>((nint)aes.BlockSize + len(state) + (nint)sha256.Size);

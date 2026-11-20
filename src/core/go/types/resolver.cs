@@ -54,8 +54,8 @@ internal static void addDepᴍ(ref declInfo d, Object obj) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingTypeOrInitExprˢ => ref missingTypeOrInitExprˢᵇ;
-private static readonly @string missingTypeOrInitExprˢᵇ = "missing type or init expr"u8;
+internal static ref readonly @string missingTypeOrInitExprˢᴍChecker => ref missingTypeOrInitExprˢᵇᴍChecker;
+private static readonly @string missingTypeOrInitExprˢᵇᴍChecker = "missing type or init expr"u8;
 
 // arityMatch checks that the lhs and rhs of a const or var decl
 // have the appropriate number of names and init exprs. For const
@@ -77,7 +77,7 @@ internal static void arityMatchᴍ(ж<Checker> Ꮡcheck, ж<ast.ValueSpec> Ꮡs,
     case {} when Ꮡinit == nil && r == 0: {
         // var decl w/o init expr
         if (s.Type == nil) {
-            Ꮡcheck.error(new ast_ValueSpecжpositioner(Ꮡs), code, missingTypeOrInitExprˢ);
+            Ꮡcheck.error(new ast_ValueSpecжpositioner(Ꮡs), code, missingTypeOrInitExprˢᴍChecker);
         }
         break;
     }
@@ -127,10 +127,10 @@ internal static (@string, error) validatedImportPath(@string path) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotDeclareInitMustBeˢ => ref cannotDeclareInitMustBeˢᵇ;
-private static readonly @string cannotDeclareInitMustBeˢᵇ = "cannot declare init - must be func"u8;
-internal static ref readonly @string cannotDeclareMainMustBeˢ => ref cannotDeclareMainMustBeˢᵇ;
-private static readonly @string cannotDeclareMainMustBeˢᵇ = "cannot declare main - must be func"u8;
+internal static ref readonly @string cannotDeclareInitMustBeˢᴍChecker => ref cannotDeclareInitMustBeˢᵇᴍChecker;
+private static readonly @string cannotDeclareInitMustBeˢᵇᴍChecker = "cannot declare init - must be func"u8;
+internal static ref readonly @string cannotDeclareMainMustBeˢᴍChecker => ref cannotDeclareMainMustBeˢᵇᴍChecker;
+private static readonly @string cannotDeclareMainMustBeˢᵇᴍChecker = "cannot declare main - must be func"u8;
 
 // declarePkgObj declares obj in the package scope, records its ident -> obj mapping,
 // and updates check.objMap. The object must not be a function or method.
@@ -143,14 +143,14 @@ internal static void declarePkgObjᴍ(ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡide
     // spec: "A package-scope or file-scope identifier with name init
     // may only be declared to be a function with this (func()) signature."
     if (ident.Name == "init"u8) {
-        Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidInitDecl, cannotDeclareInitMustBeˢ);
+        Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidInitDecl, cannotDeclareInitMustBeˢᴍChecker);
         return;
     }
 
     // spec: "The main package must have package name main and declare
     // a function main that takes no arguments and returns no value."
     if (ident.Name == "main"u8 && check.pkg.name == "main"u8) {
-        Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidMainDecl, cannotDeclareMainMustBeˢ);
+        Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidMainDecl, cannotDeclareMainMustBeˢᴍChecker);
         return;
     }
 
@@ -169,8 +169,8 @@ internal static @string filenameᴍ(ref Checker check, nint fileNo) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotUseFakeImportCAndˢ => ref cannotUseFakeImportCAndˢᵇ;
-private static readonly @string cannotUseFakeImportCAndˢᵇ = "cannot use FakeImportC and go115UsesCgo together"u8;
+internal static ref readonly @string cannotUseFakeImportCAndˢᴍChecker => ref cannotUseFakeImportCAndˢᵇᴍChecker;
+private static readonly @string cannotUseFakeImportCAndˢᵇᴍChecker = "cannot use FakeImportC and go115UsesCgo together"u8;
 
 internal static ж<Package> importPackageᴍ(ж<Checker> Ꮡcheck, positioner at, @string path, @string dir) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -189,7 +189,7 @@ internal static ж<Package> importPackageᴍ(ж<Checker> Ꮡcheck, positioner at
     // no package yet => import it
     if (path == "C"u8 && (check.conf.FakeImportC || check.conf.go115UsesCgo)) {
         if (check.conf.FakeImportC && check.conf.go115UsesCgo) {
-            Ꮡcheck.error(at, BadImportPath, cannotUseFakeImportCAndˢ);
+            Ꮡcheck.error(at, BadImportPath, cannotUseFakeImportCAndˢᴍChecker);
         }
         imp = NewPackage("C", "C");
         imp.fake = true; // package scope is not populated
@@ -266,12 +266,12 @@ internal partial struct collectObjects_methodInfo /*dyn*/ {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotRenameImportCˢ => ref cannotRenameImportCˢᵇ;
-private static readonly @string cannotRenameImportCˢᵇ = @"cannot rename import ""C"""u8;
-internal static ref readonly @string cannotImportPackageAsˢ => ref cannotImportPackageAsˢᵇ;
-private static readonly @string cannotImportPackageAsˢᵇ = "cannot import package as init - init must be a func"u8;
-internal static ref readonly @string methodHasNoReceiverˢ => ref methodHasNoReceiverˢᵇ;
-private static readonly @string methodHasNoReceiverˢᵇ = "method has no receiver"u8;
+internal static ref readonly @string cannotRenameImportCˢᴍChecker => ref cannotRenameImportCˢᵇᴍChecker;
+private static readonly @string cannotRenameImportCˢᵇᴍChecker = @"cannot rename import ""C"""u8;
+internal static ref readonly @string cannotImportPackageAsˢᴍChecker => ref cannotImportPackageAsˢᵇᴍChecker;
+private static readonly @string cannotImportPackageAsˢᵇᴍChecker = "cannot import package as init - init must be a func"u8;
+internal static ref readonly @string methodHasNoReceiverˢᴍChecker => ref methodHasNoReceiverˢᵇᴍChecker;
+private static readonly @string methodHasNoReceiverˢᵇᴍChecker = "method has no receiver"u8;
 
 // collectObjects collects all file and package objects and inserts them
 // into their respective scopes. It also performs imports and associates
@@ -345,13 +345,13 @@ internal static void collectObjectsᴍ(ж<Checker> Ꮡcheck) {
                     name = dΔ1.spec.Name.Name;
                     if (path == "C"u8) {
                         // match 1.17 cmd/compile (not prescribed by spec)
-                        Ꮡcheck.error(new ast_Identжpositioner(dΔ1.spec.Name), ImportCRenamed, cannotRenameImportCˢ);
+                        Ꮡcheck.error(new ast_Identжpositioner(dΔ1.spec.Name), ImportCRenamed, cannotRenameImportCˢᴍChecker);
                         return;
                     }
                 }
 
                 if (name == "init"u8) {
-                    Ꮡcheck.error(new ast_ImportSpecжpositioner(dΔ1.spec), InvalidInitDecl, cannotImportPackageAsˢ);
+                    Ꮡcheck.error(new ast_ImportSpecжpositioner(dΔ1.spec), InvalidInitDecl, cannotImportPackageAsˢᴍChecker);
                     return;
                 }
 
@@ -474,7 +474,7 @@ internal static void collectObjectsᴍ(ж<Checker> Ꮡcheck) {
                 if (dΔ1.decl.Recv.NumFields() == 0) {
                     // regular function
                     if (dΔ1.decl.Recv != nil) {
-                        Ꮡcheck.error(new ast_FieldListжpositioner(dΔ1.decl.Recv), BadRecv, methodHasNoReceiverˢ);
+                        Ꮡcheck.error(new ast_FieldListжpositioner(dΔ1.decl.Recv), BadRecv, methodHasNoReceiverˢᴍChecker);
                         // treat as function
                     }
                     if (name == "init"u8 || (name == "main"u8 && Ꮡcheck.Value.pkg.name == "main"u8)) {
@@ -584,8 +584,8 @@ internal static void sortObjectsᴍ(ref Checker check) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string parameterizedReceiverˢ => ref parameterizedReceiverˢᵇ;
-private static readonly @string parameterizedReceiverˢᵇ = "parameterized receiver contains nil parameters"u8;
+internal static ref readonly @string parameterizedReceiverˢᴍChecker => ref parameterizedReceiverˢᵇᴍChecker;
+private static readonly @string parameterizedReceiverˢᵇᴍChecker = "parameterized receiver contains nil parameters"u8;
 
 // unpackRecv unpacks a receiver type expression and returns its components: ptr indicates
 // whether rtyp is a pointer receiver, base is the receiver base type expression stripped
@@ -628,7 +628,7 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
                     break;
                 }
                 case null: {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(ix.orig), InvalidSyntaxTree, parameterizedReceiverˢ);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(ix.orig), InvalidSyntaxTree, parameterizedReceiverˢᴍChecker);
                     break;
                 }
                 default: {

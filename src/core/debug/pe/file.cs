@@ -188,11 +188,11 @@ partial struct nobitsSectionReader {
 } partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedReadFromˢ => ref unexpectedReadFromˢᵇ;
-private static readonly @string unexpectedReadFromˢᵇ = "unexpected read from section with uninitialized data"u8;
+internal static ref readonly @string unexpectedReadFromˢᴍnobitsSectionReader => ref unexpectedReadFromˢᵇᴍnobitsSectionReader;
+private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = "unexpected read from section with uninitialized data"u8;
 
 internal static (nint n, error err) ReadAtᴍ(ref nobitsSectionReader _, slice<byte> p, int64 off) {
-    return (0, errors.New(unexpectedReadFromˢ));
+    return (0, errors.New(unexpectedReadFromˢᴍnobitsSectionReader));
 }
 
 } partial class pe_package {
@@ -225,28 +225,28 @@ internal static ж<Section> Sectionᴍ(ref File f, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string debugˢ => ref debugˢᵇ;
-private static readonly @string debugˢᵇ = ".debug_"u8;
-internal static ref readonly @string zdebugˢ => ref zdebugˢᵇ;
-private static readonly @string zdebugˢᵇ = ".zdebug_"u8;
-internal static ref readonly @string abbrevˢ => ref abbrevˢᵇ;
-private static readonly @string abbrevˢᵇ = "abbrev"u8;
-internal static ref readonly @string infoˢ => ref infoˢᵇ;
-private static readonly @string infoˢᵇ = "info"u8;
-internal static ref readonly @string lineˢ => ref lineˢᵇ;
-private static readonly @string lineˢᵇ = "line"u8;
-internal static ref readonly @string rangesˢ => ref rangesˢᵇ;
-private static readonly @string rangesˢᵇ = "ranges"u8;
-internal static ref readonly @string strˢ => ref strˢᵇ;
-private static readonly @string strˢᵇ = "str"u8;
+internal static ref readonly @string debugˢᴍFile => ref debugˢᵇᴍFile;
+private static readonly @string debugˢᵇᴍFile = ".debug_"u8;
+internal static ref readonly @string zdebugˢᴍFile => ref zdebugˢᵇᴍFile;
+private static readonly @string zdebugˢᵇᴍFile = ".zdebug_"u8;
+internal static ref readonly @string abbrevˢᴍFile => ref abbrevˢᵇᴍFile;
+private static readonly @string abbrevˢᵇᴍFile = "abbrev"u8;
+internal static ref readonly @string infoˢᴍFile => ref infoˢᵇᴍFile;
+private static readonly @string infoˢᵇᴍFile = "info"u8;
+internal static ref readonly @string lineˢᴍFile => ref lineˢᵇᴍFile;
+private static readonly @string lineˢᵇᴍFile = "line"u8;
+internal static ref readonly @string rangesˢᴍFile => ref rangesˢᵇᴍFile;
+private static readonly @string rangesˢᵇᴍFile = "ranges"u8;
+internal static ref readonly @string strˢᴍFile => ref strˢᵇᴍFile;
+private static readonly @string strˢᵇᴍFile = "str"u8;
 
 internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
     @string dwarfSuffix(ж<Section> s) {
         switch (ᐧ) {
-        case {} when strings.HasPrefix(s.Name, debugˢ): {
+        case {} when strings.HasPrefix(s.Name, debugˢᴍFile): {
             return s.Name[7..];
         }
-        case {} when strings.HasPrefix(s.Name, zdebugˢ): {
+        case {} when strings.HasPrefix(s.Name, zdebugˢᴍFile): {
             return s.Name[8..];
         }
         default: {
@@ -303,7 +303,7 @@ internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
         dat[suffix] = b;
     }
 
-    var (d, err) = dwarf.New(dat[abbrevˢ], default, default, dat[infoˢ], dat[lineˢ], default, dat[rangesˢ], dat[strˢ]);
+    var (d, err) = dwarf.New(dat[abbrevˢᴍFile], default, default, dat[infoˢᴍFile], dat[lineˢᴍFile], default, dat[rangesˢᴍFile], dat[strˢᴍFile]);
     if (err != nil) {
         return (default, err);
     }
@@ -352,14 +352,14 @@ partial struct ImportDirectory {
 } partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string optionalHeaderDataˢ => ref optionalHeaderDataˢᵇ;
-private static readonly @string optionalHeaderDataˢᵇ = "optional header data directory virtual size doesn't fit within data seek"u8;
-internal static ref readonly @string importDirectoryOriginalˢ => ref importDirectoryOriginalˢᵇ;
-private static readonly @string importDirectoryOriginalˢᵇ = "import directory original first thunk doesn't fit within data seek"u8;
-internal static ref readonly @string thunkParsingNeedsAtLeastˢ => ref thunkParsingNeedsAtLeastˢᵇ;
-private static readonly @string thunkParsingNeedsAtLeastˢᵇ = "thunk parsing needs at least 8-bytes"u8;
-internal static ref readonly @string thunkParsingNeedsAtLeastˢ2 => ref thunkParsingNeedsAtLeastˢ2ᵇ;
-private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇ = "thunk parsing needs at least 5-bytes"u8;
+internal static ref readonly @string optionalHeaderDataˢᴍFile => ref optionalHeaderDataˢᵇᴍFile;
+private static readonly @string optionalHeaderDataˢᵇᴍFile = "optional header data directory virtual size doesn't fit within data seek"u8;
+internal static ref readonly @string importDirectoryOriginalˢᴍFile => ref importDirectoryOriginalˢᵇᴍFile;
+private static readonly @string importDirectoryOriginalˢᵇᴍFile = "import directory original first thunk doesn't fit within data seek"u8;
+internal static ref readonly @string thunkParsingNeedsAtLeastˢᴍFile => ref thunkParsingNeedsAtLeastˢᵇᴍFile;
+private static readonly @string thunkParsingNeedsAtLeastˢᵇᴍFile = "thunk parsing needs at least 8-bytes"u8;
+internal static ref readonly @string thunkParsingNeedsAtLeastˢ2ᴍFile => ref thunkParsingNeedsAtLeastˢ2ᵇᴍFile;
+private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇᴍFile = "thunk parsing needs at least 5-bytes"u8;
 
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
@@ -423,7 +423,7 @@ internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
     // seek to the virtual address specified in the import data directory
     var seek = idd.VirtualAddress - ds.VirtualAddress;
     if (seek >= (uint32)len(d)) {
-        return (default, errors.New(optionalHeaderDataˢ));
+        return (default, errors.New(optionalHeaderDataˢᴍFile));
     }
     d = d.slice((nint)(seek));
 
@@ -458,13 +458,13 @@ internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
         // seek to OriginalFirstThunk
         var seekΔ1 = dt.OriginalFirstThunk - ds.VirtualAddress;
         if (seekΔ1 >= (uint32)len(d)) {
-            return (default, errors.New(importDirectoryOriginalˢ));
+            return (default, errors.New(importDirectoryOriginalˢᴍFile));
         }
         d = d.slice((nint)(seekΔ1));
         while (len(d) > 0) {
             if (pe64) { // 64bit
                 if (len(d) < 8) {
-                    return (default, errors.New(thunkParsingNeedsAtLeastˢ));
+                    return (default, errors.New(thunkParsingNeedsAtLeastˢᴍFile));
                 }
                 var va = binary.LittleEndian.Uint64(d[0..8]);
                 d = d[8..];
@@ -479,7 +479,7 @@ internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
                 }
             } else { // 32bit
                 if (len(d) <= 4) {
-                    return (default, errors.New(thunkParsingNeedsAtLeastˢ2));
+                    return (default, errors.New(thunkParsingNeedsAtLeastˢ2ᴍFile));
                 }
                 var va = binary.LittleEndian.Uint32(d[0..4]);
                 d = d[4..];
@@ -519,11 +519,11 @@ partial struct FormatError {
 } partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownErrorˢ => ref unknownErrorˢᵇ;
-private static readonly @string unknownErrorˢᵇ = "unknown error"u8;
+internal static ref readonly @string unknownErrorˢᴍFormatError => ref unknownErrorˢᵇᴍFormatError;
+private static readonly @string unknownErrorˢᵇᴍFormatError = "unknown error"u8;
 
 internal static @string Errorᴍ(ref FormatError e) {
-    return unknownErrorˢ;
+    return unknownErrorˢᴍFormatError;
 }
 
 } partial class pe_package {

@@ -1247,28 +1247,28 @@ internal static gcState gcRunning => 2;
 } partial class trace_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string undeterminedˢ => ref undeterminedˢᵇ;
-private static readonly @string undeterminedˢᵇ = "Undetermined"u8;
-internal static ref readonly @string notRunningˢ => ref notRunningˢᵇ;
-private static readonly @string notRunningˢᵇ = "NotRunning"u8;
-internal static ref readonly @string runningˢ => ref runningˢᵇ;
-private static readonly @string runningˢᵇ = "Running"u8;
-internal static ref readonly @string badˢ => ref badˢᵇ;
-private static readonly @string badˢᵇ = "Bad"u8;
+internal static ref readonly @string undeterminedˢᴍgcState => ref undeterminedˢᵇᴍgcState;
+private static readonly @string undeterminedˢᵇᴍgcState = "Undetermined"u8;
+internal static ref readonly @string notRunningˢᴍgcState => ref notRunningˢᵇᴍgcState;
+private static readonly @string notRunningˢᵇᴍgcState = "NotRunning"u8;
+internal static ref readonly @string runningˢᴍgcState => ref runningˢᵇᴍgcState;
+private static readonly @string runningˢᵇᴍgcState = "Running"u8;
+internal static ref readonly @string badˢᴍgcState => ref badˢᵇᴍgcState;
+private static readonly @string badˢᵇᴍgcState = "Bad"u8;
 
 // String returns a human-readable string for the GC state.
 internal static @string Stringᴍ(gcState s) {
     switch (s) {
     case var ᴛ when ᴛ == gcUndetermined: {
-        return undeterminedˢ;
+        return undeterminedˢᴍgcState;
     }
     case var ᴛ when ᴛ == gcNotRunning: {
-        return notRunningˢ;
+        return notRunningˢᴍgcState;
     }
     case var ᴛ when ᴛ == gcRunning: {
-        return runningˢ;
+        return runningˢᴍgcState;
     }}
-    return badˢ;
+    return badˢᴍgcState;
 }
 
 } partial class trace_package {

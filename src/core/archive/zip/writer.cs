@@ -69,22 +69,22 @@ internal static error Flushᴍ(ref Writer w) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipWriterCommentTooLongˢ => ref zipWriterCommentTooLongˢᵇ;
-private static readonly @string zipWriterCommentTooLongˢᵇ = "zip: Writer.Comment too long"u8;
+internal static ref readonly @string zipWriterCommentTooLongˢᴍWriter => ref zipWriterCommentTooLongˢᵇᴍWriter;
+private static readonly @string zipWriterCommentTooLongˢᵇᴍWriter = "zip: Writer.Comment too long"u8;
 
 // SetComment sets the end-of-central-directory comment field.
 // It can only be called before [Writer.Close].
 internal static error SetCommentᴍ(ref Writer w, @string comment) {
     if (len(comment) > uint16max) {
-        return errors.New(zipWriterCommentTooLongˢ);
+        return errors.New(zipWriterCommentTooLongˢᴍWriter);
     }
     w.comment = comment;
     return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipWriterClosedTwiceˢ => ref zipWriterClosedTwiceˢᵇ;
-private static readonly @string zipWriterClosedTwiceˢᵇ = "zip: writer closed twice"u8;
+internal static ref readonly @string zipWriterClosedTwiceˢᴍWriter => ref zipWriterClosedTwiceˢᵇᴍWriter;
+private static readonly @string zipWriterClosedTwiceˢᵇᴍWriter = "zip: writer closed twice"u8;
 
 // Close finishes writing the zip file by writing the central directory.
 // It does not close the underlying writer.
@@ -96,7 +96,7 @@ internal static error Closeᴍ(ref Writer w) {
         w.last = default;
     }
     if (w.closed) {
-        return errors.New(zipWriterClosedTwiceˢ);
+        return errors.New(zipWriterClosedTwiceˢᴍWriter);
     }
     w.closed = true;
 
@@ -280,8 +280,8 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string archiveZipInvalidˢ => ref archiveZipInvalidˢᵇ;
-private static readonly @string archiveZipInvalidˢᵇ = "archive/zip: invalid duplicate FileHeader"u8;
+internal static ref readonly @string archiveZipInvalidˢᴍWriter => ref archiveZipInvalidˢᵇᴍWriter;
+private static readonly @string archiveZipInvalidˢᵇᴍWriter = "archive/zip: invalid duplicate FileHeader"u8;
 
 // prepare performs the bookkeeping operations required at the start of
 // CreateHeader and CreateRaw.
@@ -293,7 +293,7 @@ internal static error prepareᴍ(ref Writer w, ж<FileHeader> fh) {
     }
     if (len(w.dir) > 0 && w.dir[len(w.dir) - 1].FileHeader == fh) {
         // See https://golang.org/issue/11144 confusion.
-        return errors.New(archiveZipInvalidˢ);
+        return errors.New(archiveZipInvalidˢᴍWriter);
     }
     return default;
 }
@@ -554,8 +554,8 @@ internal static void RegisterCompressorᴍ(ref Writer w, uint16 method, Func<io.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipCannotAddNonRegularˢ => ref zipCannotAddNonRegularˢᵇ;
-private static readonly @string zipCannotAddNonRegularˢᵇ = "zip: cannot add non-regular file"u8;
+internal static ref readonly @string zipCannotAddNonRegularˢᴍWriter => ref zipCannotAddNonRegularˢᵇᴍWriter;
+private static readonly @string zipCannotAddNonRegularˢᵇᴍWriter = "zip: cannot add non-regular file"u8;
 
 // AddFS adds the files from fs.FS to the archive.
 // It walks the directory tree starting at the root of the filesystem
@@ -575,7 +575,7 @@ internal static error AddFSᴍ(ж<Writer> Ꮡw, fs.FS fsys) {
                 return err;
             }
             if (!d.IsDir() && !info.Mode().IsRegular()) {
-                return errors.New(zipCannotAddNonRegularˢ);
+                return errors.New(zipCannotAddNonRegularˢᴍWriter);
             }
             (var h, err) = FileInfoHeader(info);
             if (err != nil) {
@@ -623,14 +623,14 @@ partial struct dirWriter {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipWriteToDirectoryˢ => ref zipWriteToDirectoryˢᵇ;
-private static readonly @string zipWriteToDirectoryˢᵇ = "zip: write to directory"u8;
+internal static ref readonly @string zipWriteToDirectoryˢᴍdirWriter => ref zipWriteToDirectoryˢᵇᴍdirWriter;
+private static readonly @string zipWriteToDirectoryˢᵇᴍdirWriter = "zip: write to directory"u8;
 
 internal static (nint, error) Writeᴍ(dirWriter _, slice<byte> b) {
     if (len(b) == 0) {
         return (0, default);
     }
-    return (0, errors.New(zipWriteToDirectoryˢ));
+    return (0, errors.New(zipWriteToDirectoryˢᴍdirWriter));
 }
 
 } partial class zip_package {
@@ -648,12 +648,12 @@ partial struct fileWriter {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipWriteToClosedFileˢ => ref zipWriteToClosedFileˢᵇ;
-private static readonly @string zipWriteToClosedFileˢᵇ = "zip: write to closed file"u8;
+internal static ref readonly @string zipWriteToClosedFileˢᴍfileWriter => ref zipWriteToClosedFileˢᵇᴍfileWriter;
+private static readonly @string zipWriteToClosedFileˢᵇᴍfileWriter = "zip: write to closed file"u8;
 
 internal static (nint, error) Writeᴍ(ref fileWriter w, slice<byte> p) {
     if (w.closed) {
-        return (0, errors.New(zipWriteToClosedFileˢ));
+        return (0, errors.New(zipWriteToClosedFileˢᴍfileWriter));
     }
     if (w.raw) {
         return w.zipw.Write(p);
@@ -663,12 +663,12 @@ internal static (nint, error) Writeᴍ(ref fileWriter w, slice<byte> p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipFileClosedTwiceˢ => ref zipFileClosedTwiceˢᵇ;
-private static readonly @string zipFileClosedTwiceˢᵇ = "zip: file closed twice"u8;
+internal static ref readonly @string zipFileClosedTwiceˢᴍfileWriter => ref zipFileClosedTwiceˢᵇᴍfileWriter;
+private static readonly @string zipFileClosedTwiceˢᵇᴍfileWriter = "zip: file closed twice"u8;
 
 internal static error closeᴍ(ref fileWriter w) {
     if (w.closed) {
-        return errors.New(zipFileClosedTwiceˢ);
+        return errors.New(zipFileClosedTwiceˢᴍfileWriter);
     }
     w.closed = true;
     if (w.raw) {

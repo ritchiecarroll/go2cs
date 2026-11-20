@@ -185,8 +185,8 @@ internal static (slice<byte>, error) Signᴍ(ж<PrivateKey> Ꮡpriv, io.Reader r
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoRsaInvalidOptionsˢ => ref cryptoRsaInvalidOptionsˢᵇ;
-private static readonly @string cryptoRsaInvalidOptionsˢᵇ = "crypto/rsa: invalid options for Decrypt"u8;
+internal static ref readonly @string cryptoRsaInvalidOptionsˢᴍPrivateKey => ref cryptoRsaInvalidOptionsˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaInvalidOptionsˢᵇᴍPrivateKey = "crypto/rsa: invalid options for Decrypt"u8;
 
 // Decrypt decrypts ciphertext with priv. If opts is nil or of type
 // *[PKCS1v15DecryptOptions] then PKCS #1 v1.5 decryption is performed. Otherwise
@@ -224,7 +224,7 @@ internal static (slice<byte> plaintext, error err) Decryptᴍ(ж<PrivateKey> Ꮡ
     }
     default: {
         var optsΔ1 = opts;
-        return (default, errors.New(cryptoRsaInvalidOptionsˢ));
+        return (default, errors.New(cryptoRsaInvalidOptionsˢᴍPrivateKey));
     }}
 }
 
@@ -256,10 +256,10 @@ partial struct CRTValue {
 } partial class rsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoRsaMissingPrimesˢ => ref cryptoRsaMissingPrimesˢᵇ;
-private static readonly @string cryptoRsaMissingPrimesˢᵇ = "crypto/rsa: missing primes"u8;
-internal static ref readonly @string cryptoRsaPrecomputedˢ => ref cryptoRsaPrecomputedˢᵇ;
-private static readonly @string cryptoRsaPrecomputedˢᵇ = "crypto/rsa: precomputed values are inconsistent with the key"u8;
+internal static ref readonly @string cryptoRsaMissingPrimesˢᴍPrivateKey => ref cryptoRsaMissingPrimesˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaMissingPrimesˢᵇᴍPrivateKey = "crypto/rsa: missing primes"u8;
+internal static ref readonly @string cryptoRsaPrecomputedˢᴍPrivateKey => ref cryptoRsaPrecomputedˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaPrecomputedˢᵇᴍPrivateKey = "crypto/rsa: precomputed values are inconsistent with the key"u8;
 
 // Validate performs basic sanity checks on the key.
 // It returns nil if the key is valid, or else an error describing a problem.
@@ -270,7 +270,7 @@ internal static error Validateᴍ(ref PrivateKey priv) {
     // [crypto/x509.MarshalPKCS1PrivateKey], which unfortunately doesn't return
     // an error, so we need to reject them here.
     if (len(priv.Primes) < 2) {
-        return errors.New(cryptoRsaMissingPrimesˢ);
+        return errors.New(cryptoRsaMissingPrimesˢᴍPrivateKey);
     }
     // If Precomputed.fips is set and consistent, then the key has been
     // validated by [rsa.NewPrivateKey] or [rsa.NewPrivateKeyWithoutCRT].
@@ -278,7 +278,7 @@ internal static error Validateᴍ(ref PrivateKey priv) {
         return default;
     }
     if (priv.Precomputed.fips != nil) {
-        return errors.New(cryptoRsaPrecomputedˢ);
+        return errors.New(cryptoRsaPrecomputedˢᴍPrivateKey);
     }
     var (_, err) = priv.precompute();
     return err;
@@ -616,32 +616,32 @@ internal static void Precomputeᴍ(ref PrivateKey priv) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoRsaMissingPublicˢ => ref cryptoRsaMissingPublicˢᵇ;
-private static readonly @string cryptoRsaMissingPublicˢᵇ = "crypto/rsa: missing public modulus"u8;
-internal static ref readonly @string cryptoRsaMissingPrivateˢ => ref cryptoRsaMissingPrivateˢᵇ;
-private static readonly @string cryptoRsaMissingPrivateˢᵇ = "crypto/rsa: missing private exponent"u8;
-internal static ref readonly @string cryptoRsaPrimePIsNilˢ => ref cryptoRsaPrimePIsNilˢᵇ;
-private static readonly @string cryptoRsaPrimePIsNilˢᵇ = "crypto/rsa: prime P is nil"u8;
-internal static ref readonly @string cryptoRsaPrimeQIsNilˢ => ref cryptoRsaPrimeQIsNilˢᵇ;
-private static readonly @string cryptoRsaPrimeQIsNilˢᵇ = "crypto/rsa: prime Q is nil"u8;
+internal static ref readonly @string cryptoRsaMissingPublicˢᴍPrivateKey => ref cryptoRsaMissingPublicˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaMissingPublicˢᵇᴍPrivateKey = "crypto/rsa: missing public modulus"u8;
+internal static ref readonly @string cryptoRsaMissingPrivateˢᴍPrivateKey => ref cryptoRsaMissingPrivateˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaMissingPrivateˢᵇᴍPrivateKey = "crypto/rsa: missing private exponent"u8;
+internal static ref readonly @string cryptoRsaPrimePIsNilˢᴍPrivateKey => ref cryptoRsaPrimePIsNilˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaPrimePIsNilˢᵇᴍPrivateKey = "crypto/rsa: prime P is nil"u8;
+internal static ref readonly @string cryptoRsaPrimeQIsNilˢᴍPrivateKey => ref cryptoRsaPrimeQIsNilˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaPrimeQIsNilˢᵇᴍPrivateKey = "crypto/rsa: prime Q is nil"u8;
 
 internal static (PrecomputedValues, error) precomputeᴍ(ref PrivateKey priv) {
     PrecomputedValues precomputed = default;
 
     if (priv.N == nil) {
-        return (precomputed, errors.New(cryptoRsaMissingPublicˢ));
+        return (precomputed, errors.New(cryptoRsaMissingPublicˢᴍPrivateKey));
     }
     if (priv.D == nil) {
-        return (precomputed, errors.New(cryptoRsaMissingPrivateˢ));
+        return (precomputed, errors.New(cryptoRsaMissingPrivateˢᴍPrivateKey));
     }
     if (len(priv.Primes) != 2) {
         return priv.precomputeLegacy();
     }
     if (priv.Primes[0] == nil) {
-        return (precomputed, errors.New(cryptoRsaPrimePIsNilˢ));
+        return (precomputed, errors.New(cryptoRsaPrimePIsNilˢᴍPrivateKey));
     }
     if (priv.Primes[1] == nil) {
-        return (precomputed, errors.New(cryptoRsaPrimeQIsNilˢ));
+        return (precomputed, errors.New(cryptoRsaPrimeQIsNilˢᴍPrivateKey));
     }
 
     // If the CRT values are already set, use them.
@@ -674,12 +674,12 @@ internal static (PrecomputedValues, error) precomputeᴍ(ref PrivateKey priv) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoRsaPrimeFactorIsˢ => ref cryptoRsaPrimeFactorIsˢᵇ;
-private static readonly @string cryptoRsaPrimeFactorIsˢᵇ = "crypto/rsa: prime factor is nil"u8;
-internal static ref readonly @string cryptoRsaPrimeFactorIs1ˢ => ref cryptoRsaPrimeFactorIs1ˢᵇ;
-private static readonly @string cryptoRsaPrimeFactorIs1ˢᵇ = "crypto/rsa: prime factor is <= 1"u8;
-internal static ref readonly @string cryptoRsaPrimeFactorsAreˢ => ref cryptoRsaPrimeFactorsAreˢᵇ;
-private static readonly @string cryptoRsaPrimeFactorsAreˢᵇ = "crypto/rsa: prime factors are not relatively prime"u8;
+internal static ref readonly @string cryptoRsaPrimeFactorIsˢᴍPrivateKey => ref cryptoRsaPrimeFactorIsˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaPrimeFactorIsˢᵇᴍPrivateKey = "crypto/rsa: prime factor is nil"u8;
+internal static ref readonly @string cryptoRsaPrimeFactorIs1ˢᴍPrivateKey => ref cryptoRsaPrimeFactorIs1ˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaPrimeFactorIs1ˢᵇᴍPrivateKey = "crypto/rsa: prime factor is <= 1"u8;
+internal static ref readonly @string cryptoRsaPrimeFactorsAreˢᴍPrivateKey => ref cryptoRsaPrimeFactorsAreˢᵇᴍPrivateKey;
+private static readonly @string cryptoRsaPrimeFactorsAreˢᵇᴍPrivateKey = "crypto/rsa: prime factors are not relatively prime"u8;
 
 internal static (PrecomputedValues, error) precomputeLegacyᴍ(ref PrivateKey priv) {
     PrecomputedValues precomputed = default;
@@ -697,10 +697,10 @@ internal static (PrecomputedValues, error) precomputeLegacyᴍ(ref PrivateKey pr
     // Ensure the Mod and ModInverse calls below don't panic.
     foreach (var (_, prime) in range(priv.Primes)) {
         if (prime == nil) {
-            return (precomputed, errors.New(cryptoRsaPrimeFactorIsˢ));
+            return (precomputed, errors.New(cryptoRsaPrimeFactorIsˢᴍPrivateKey));
         }
         if (prime.Cmp(bigOne) <= 0) {
-            return (precomputed, errors.New(cryptoRsaPrimeFactorIs1ˢ));
+            return (precomputed, errors.New(cryptoRsaPrimeFactorIs1ˢᴍPrivateKey));
         }
     }
 
@@ -712,7 +712,7 @@ internal static (PrecomputedValues, error) precomputeLegacyᴍ(ref PrivateKey pr
 
     precomputed.Qinv = @new<big.Int>().ModInverse(priv.Primes[1], priv.Primes[0]);
     if (precomputed.Qinv == nil) {
-        return (precomputed, errors.New(cryptoRsaPrimeFactorsAreˢ));
+        return (precomputed, errors.New(cryptoRsaPrimeFactorsAreˢᴍPrivateKey));
     }
 
     var r = @new<big.Int>().Mul(priv.Primes[0], priv.Primes[1]);
@@ -727,7 +727,7 @@ internal static (PrecomputedValues, error) precomputeLegacyᴍ(ref PrivateKey pr
         values.R = @new<big.Int>().Set(r);
         values.Coeff = @new<big.Int>().ModInverse(r, prime);
         if (values.Coeff == nil) {
-            return (precomputed, errors.New(cryptoRsaPrimeFactorsAreˢ));
+            return (precomputed, errors.New(cryptoRsaPrimeFactorsAreˢᴍPrivateKey));
         }
 
         r.Mul(r, prime);

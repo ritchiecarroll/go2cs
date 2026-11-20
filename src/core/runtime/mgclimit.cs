@@ -89,10 +89,10 @@ internal static bool limitingᴍ(ж<gcCPULimiterState> Ꮡl) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string failedToAcquireLockToˢ => ref failedToAcquireLockToˢᵇ;
-private static readonly @string failedToAcquireLockToˢᵇ = "failed to acquire lock to start a GC transition"u8;
-internal static ref readonly @string transitioningGcToTheSameˢ => ref transitioningGcToTheSameˢᵇ;
-private static readonly @string transitioningGcToTheSameˢᵇ = "transitioning GC to the same state as before?"u8;
+internal static ref readonly @string failedToAcquireLockToˢᴍgcCPULimiterState => ref failedToAcquireLockToˢᵇᴍgcCPULimiterState;
+private static readonly @string failedToAcquireLockToˢᵇᴍgcCPULimiterState = "failed to acquire lock to start a GC transition"u8;
+internal static ref readonly @string transitioningGcToTheSameˢᴍgcCPULimiterState => ref transitioningGcToTheSameˢᵇᴍgcCPULimiterState;
+private static readonly @string transitioningGcToTheSameˢᵇᴍgcCPULimiterState = "transitioning GC to the same state as before?"u8;
 
 // startGCTransition notifies the limiter of a GC transition.
 //
@@ -106,10 +106,10 @@ internal static void startGCTransitionᴍ(ж<gcCPULimiterState> Ꮡl, bool enabl
     if (!Ꮡl.tryLock()) {
         // This must happen during a STW, so we can't fail to acquire the lock.
         // If we did, something went wrong. Throw.
-        @throw(failedToAcquireLockToˢ);
+        @throw(failedToAcquireLockToˢᴍgcCPULimiterState);
     }
     if (l.gcEnabled == enableGC) {
-        @throw(transitioningGcToTheSameˢ);
+        @throw(transitioningGcToTheSameˢᴍgcCPULimiterState);
     }
     // Flush whatever was left between the last update and now.
     Ꮡl.updateLocked(now);
@@ -122,8 +122,8 @@ internal static void startGCTransitionᴍ(ж<gcCPULimiterState> Ꮡl, bool enabl
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string finishGCTransitionCalledˢ => ref finishGCTransitionCalledˢᵇ;
-private static readonly @string finishGCTransitionCalledˢᵇ = "finishGCTransition called without starting one?"u8;
+internal static ref readonly @string finishGCTransitionCalledˢᴍgcCPULimiterState => ref finishGCTransitionCalledˢᵇᴍgcCPULimiterState;
+private static readonly @string finishGCTransitionCalledˢᵇᴍgcCPULimiterState = "finishGCTransition called without starting one?"u8;
 
 // finishGCTransition notifies the limiter that the GC transition is complete
 // and releases ownership of it. It also accumulates STW time in the bucket.
@@ -132,7 +132,7 @@ internal static void finishGCTransitionᴍ(ж<gcCPULimiterState> Ꮡl, int64 now
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!l.transitioning) {
-        @throw(finishGCTransitionCalledˢ);
+        @throw(finishGCTransitionCalledˢᴍgcCPULimiterState);
     }
     // Count the full nprocs set of CPU time because the world is stopped
     // between startGCTransition and finishGCTransition. Even though the GC
@@ -173,8 +173,8 @@ internal static void addIdleTimeᴍ(ж<gcCPULimiterState> Ꮡl, int64 t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string updateDuringTransitionˢ => ref updateDuringTransitionˢᵇ;
-private static readonly @string updateDuringTransitionˢᵇ = "update during transition"u8;
+internal static ref readonly @string updateDuringTransitionˢᴍgcCPULimiterState => ref updateDuringTransitionˢᵇᴍgcCPULimiterState;
+private static readonly @string updateDuringTransitionˢᵇᴍgcCPULimiterState = "update during transition"u8;
 
 // update updates the bucket given runtime-specific information. now is the
 // current monotonic time in nanoseconds.
@@ -190,15 +190,15 @@ internal static void updateᴍ(ж<gcCPULimiterState> Ꮡl, int64 now) {
         return;
     }
     if (l.transitioning) {
-        @throw(updateDuringTransitionˢ);
+        @throw(updateDuringTransitionˢᴍgcCPULimiterState);
     }
     Ꮡl.updateLocked(now);
     Ꮡl.unlock();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidLimiterEventTypeˢ => ref invalidLimiterEventTypeˢᵇ;
-private static readonly @string invalidLimiterEventTypeˢᵇ = "invalid limiter event type found"u8;
+internal static ref readonly @string invalidLimiterEventTypeˢᴍgcCPULimiterState => ref invalidLimiterEventTypeˢᵇᴍgcCPULimiterState;
+private static readonly @string invalidLimiterEventTypeˢᵇᴍgcCPULimiterState = "invalid limiter event type found"u8;
 
 // updateLocked is the implementation of update. l.lock must be held.
 internal static void updateLockedᴍ(ж<gcCPULimiterState> Ꮡl, int64 now) {
@@ -254,7 +254,7 @@ internal static void updateLockedᴍ(ж<gcCPULimiterState> Ꮡl, int64 now) {
                 break;
             }
             default: {
-                @throw(invalidLimiterEventTypeˢ);
+                @throw(invalidLimiterEventTypeˢᴍgcCPULimiterState);
                 break;
             }}
         }
@@ -340,14 +340,14 @@ internal static bool tryLockᴍ(ж<gcCPULimiterState> Ꮡl) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string doubleUnlockˢ => ref doubleUnlockˢᵇ;
-private static readonly @string doubleUnlockˢᵇ = "double unlock"u8;
+internal static ref readonly @string doubleUnlockˢᴍgcCPULimiterState => ref doubleUnlockˢᵇᴍgcCPULimiterState;
+private static readonly @string doubleUnlockˢᵇᴍgcCPULimiterState = "double unlock"u8;
 
 // unlock releases the lock on l. Must be called if tryLock returns true.
 internal static void unlockᴍ(ж<gcCPULimiterState> Ꮡl) {
     var old = Ꮡl.Ꮡlock.Swap(0);
     if (old != 1) {
-        @throw(doubleUnlockˢ);
+        @throw(doubleUnlockˢᴍgcCPULimiterState);
     }
 }
 
@@ -359,8 +359,8 @@ internal static UntypedFloat capacityPerProc => 1e9; // 1 second in nanoseconds
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string failedToAcquireLockToˢ2 => ref failedToAcquireLockToˢ2ᵇ;
-private static readonly @string failedToAcquireLockToˢ2ᵇ = "failed to acquire lock to reset capacity"u8;
+internal static ref readonly @string failedToAcquireLockToˢ2ᴍgcCPULimiterState => ref failedToAcquireLockToˢ2ᵇᴍgcCPULimiterState;
+private static readonly @string failedToAcquireLockToˢ2ᵇᴍgcCPULimiterState = "failed to acquire lock to reset capacity"u8;
 
 // resetCapacity updates the capacity based on GOMAXPROCS. Must not be called
 // while the GC is enabled.
@@ -372,7 +372,7 @@ internal static void resetCapacityᴍ(ж<gcCPULimiterState> Ꮡl, int64 now, int
     if (!Ꮡl.tryLock()) {
         // This must happen during a STW, so we can't fail to acquire the lock.
         // If we did, something went wrong. Throw.
-        @throw(failedToAcquireLockToˢ2);
+        @throw(failedToAcquireLockToˢ2ᴍgcCPULimiterState);
     }
     // Flush the rest of the time for this period.
     Ꮡl.updateLocked(now);
@@ -501,10 +501,10 @@ internal static (limiterEventType typ, int64 duration) consumeᴍ(ж<limiterEven
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string limiterEventStopFoundˢ => ref limiterEventStopFoundˢᵇ;
-private static readonly @string limiterEventStopFoundˢᵇ = "limiterEvent.stop: found wrong event in p's limiter event slot"u8;
-internal static ref readonly @string limiterEventStopInvalidˢ => ref limiterEventStopInvalidˢᵇ;
-private static readonly @string limiterEventStopInvalidˢᵇ = "limiterEvent.stop: invalid limiter event type found"u8;
+internal static ref readonly @string limiterEventStopFoundˢᴍlimiterEvent => ref limiterEventStopFoundˢᵇᴍlimiterEvent;
+private static readonly @string limiterEventStopFoundˢᵇᴍlimiterEvent = "limiterEvent.stop: found wrong event in p's limiter event slot"u8;
+internal static ref readonly @string limiterEventStopInvalidˢᴍlimiterEvent => ref limiterEventStopInvalidˢᵇᴍlimiterEvent;
+private static readonly @string limiterEventStopInvalidˢᵇᴍlimiterEvent = "limiterEvent.stop: invalid limiter event type found"u8;
 
 // stop stops the active limiter event. Throws if the
 //
@@ -515,7 +515,7 @@ internal static void stopᴍ(ж<limiterEvent> Ꮡe, limiterEventType typ, int64 
         stamp = (limiterEventStamp)Ꮡe.Ꮡstamp.Load();
         if (stamp.typ() != typ) {
             print((@string)"runtime: want=", typ, (@string)" got=", stamp.typ(), (@string)"\n");
-            @throw(limiterEventStopFoundˢ);
+            @throw(limiterEventStopFoundˢᴍlimiterEvent);
         }
         if (Ꮡe.Ꮡstamp.CompareAndSwap((uint64)stamp, (uint64)limiterEventStampNone)) {
             break;
@@ -547,7 +547,7 @@ internal static void stopᴍ(ж<limiterEvent> Ꮡe, limiterEventType typ, int64 
         break;
     }
     default: {
-        @throw(limiterEventStopInvalidˢ);
+        @throw(limiterEventStopInvalidˢᴍlimiterEvent);
         break;
     }}
 }

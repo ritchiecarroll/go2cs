@@ -525,11 +525,11 @@ internal static Result _ᴛ1ʗ = ((RowsAffected)0);
 } partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lastInsertIdIsNotˢ => ref lastInsertIdIsNotˢᵇ;
-private static readonly @string lastInsertIdIsNotˢᵇ = "LastInsertId is not supported by this driver"u8;
+internal static ref readonly @string lastInsertIdIsNotˢᴍRowsAffected => ref lastInsertIdIsNotˢᵇᴍRowsAffected;
+private static readonly @string lastInsertIdIsNotˢᵇᴍRowsAffected = "LastInsertId is not supported by this driver"u8;
 
 internal static (int64, error) LastInsertIdᴍ(RowsAffected _) {
-    return (0, errors.New(lastInsertIdIsNotˢ));
+    return (0, errors.New(lastInsertIdIsNotˢᴍRowsAffected));
 }
 
 internal static (int64, error) RowsAffectedᴍ(RowsAffected v) {
@@ -552,19 +552,19 @@ internal static Result _ᴛ2ʗ = new noRows();
 } partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noLastInsertIdAvailableˢ => ref noLastInsertIdAvailableˢᵇ;
-private static readonly @string noLastInsertIdAvailableˢᵇ = "no LastInsertId available after DDL statement"u8;
+internal static ref readonly @string noLastInsertIdAvailableˢᴍnoRows => ref noLastInsertIdAvailableˢᵇᴍnoRows;
+private static readonly @string noLastInsertIdAvailableˢᵇᴍnoRows = "no LastInsertId available after DDL statement"u8;
 
 internal static (int64, error) LastInsertIdᴍ(noRows _) {
-    return (0, errors.New(noLastInsertIdAvailableˢ));
+    return (0, errors.New(noLastInsertIdAvailableˢᴍnoRows));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noRowsAffectedAvailableˢ => ref noRowsAffectedAvailableˢᵇ;
-private static readonly @string noRowsAffectedAvailableˢᵇ = "no RowsAffected available after DDL statement"u8;
+internal static ref readonly @string noRowsAffectedAvailableˢᴍnoRows => ref noRowsAffectedAvailableˢᵇᴍnoRows;
+private static readonly @string noRowsAffectedAvailableˢᵇᴍnoRows = "no RowsAffected available after DDL statement"u8;
 
 internal static (int64, error) RowsAffectedᴍ(noRows _) {
-    return (0, errors.New(noRowsAffectedAvailableˢ));
+    return (0, errors.New(noRowsAffectedAvailableˢᴍnoRows));
 }
 
 }

@@ -97,10 +97,10 @@ internal static void Attrsᴍ(Record r, Func<Attr, bool> f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bugˢ => ref bugˢᵇ;
-private static readonly @string bugˢᵇ = "!BUG"u8;
-internal static ref readonly @string addAttrsUnsafelyCalledOnˢ => ref addAttrsUnsafelyCalledOnˢᵇ;
-private static readonly @string addAttrsUnsafelyCalledOnˢᵇ = "AddAttrs unsafely called on copy of Record made without using Record.Clone"u8;
+internal static ref readonly @string bugˢᴍRecord => ref bugˢᵇᴍRecord;
+private static readonly @string bugˢᵇᴍRecord = "!BUG"u8;
+internal static ref readonly @string addAttrsUnsafelyCalledOnˢᴍRecord => ref addAttrsUnsafelyCalledOnˢᵇᴍRecord;
+private static readonly @string addAttrsUnsafelyCalledOnˢᵇᴍRecord = "AddAttrs unsafely called on copy of Record made without using Record.Clone"u8;
 
 // AddAttrs appends the given Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
@@ -123,7 +123,7 @@ internal static void AddAttrsᴍ(ref Record r, params ꓸꓸꓸAttr attrsʗp) {
         if (!end.isEmpty()) {
             // Don't panic; copy and muddle through.
             r.back = slices.Clip<slice<Attr>, Attr>(r.back);
-            r.back = append(r.back, String(bugˢ, addAttrsUnsafelyCalledOnˢ));
+            r.back = append(r.back, String(bugˢᴍRecord, addAttrsUnsafelyCalledOnˢᴍRecord));
         }
     }
     nint ne = countEmptyGroups(attrs.slice(i));
@@ -214,12 +214,12 @@ partial struct Source {
 } partial class slog_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string functionˢ => ref functionˢᵇ;
-private static readonly @string functionˢᵇ = "function"u8;
-internal static ref readonly @string fileˢ => ref fileˢᵇ;
-private static readonly @string fileˢᵇ = "file"u8;
-internal static ref readonly @string lineˢ => ref lineˢᵇ;
-private static readonly @string lineˢᵇ = "line"u8;
+internal static ref readonly @string functionˢᴍSource => ref functionˢᵇᴍSource;
+private static readonly @string functionˢᵇᴍSource = "function"u8;
+internal static ref readonly @string fileˢᴍSource => ref fileˢᵇᴍSource;
+private static readonly @string fileˢᵇᴍSource = "file"u8;
+internal static ref readonly @string lineˢᴍSource => ref lineˢᵇᴍSource;
+private static readonly @string lineˢᵇᴍSource = "line"u8;
 
 // group returns the non-zero fields of s as a slice of attrs.
 // It is similar to a LogValue method, but we don't want Source
@@ -228,13 +228,13 @@ private static readonly @string lineˢᵇ = "line"u8;
 internal static Value groupᴍ(ref Source s) {
     slice<Attr> @as = default;
     if (s.Function != ""u8) {
-        @as = append(@as, String(functionˢ, s.Function));
+        @as = append(@as, String(functionˢᴍSource, s.Function));
     }
     if (s.File != ""u8) {
-        @as = append(@as, String(fileˢ, s.File));
+        @as = append(@as, String(fileˢᴍSource, s.File));
     }
     if (s.Line != 0) {
-        @as = append(@as, Int(lineˢ, s.Line));
+        @as = append(@as, Int(lineˢᴍSource, s.Line));
     }
     return GroupValue(@as.ꓸꓸꓸ);
 }

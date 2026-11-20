@@ -290,8 +290,8 @@ partial struct sync {
 } partial class testgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string clockSnapshotˢ => ref clockSnapshotˢᵇ;
-private static readonly @string clockSnapshotˢᵇ = "ClockSnapshot"u8;
+private static ref readonly @string clockSnapshotˢᴍGeneration => ref clockSnapshotˢᵇᴍGeneration;
+private static readonly @string clockSnapshotˢᵇᴍGeneration = "ClockSnapshot"u8;
 
 // writeEventsTo emits event batches in the generation to tw.
 internal static void writeEventsToᴍ(ж<Generation> Ꮡg, ж<raw.TextWriter> Ꮡtw) {
@@ -307,7 +307,7 @@ internal static void writeEventsToᴍ(ж<Generation> Ꮡg, ж<raw.TextWriter> �
         bΔ1.RawEvent(tracev2.EvFrequency, default, g.sync.freq);
         var sec = (uint64)g.sync.walltime.Unix();
         var nsec = (uint64)g.sync.walltime.Nanosecond();
-        bΔ1.Event(clockSnapshotˢ, g.sync.mono, sec, nsec);
+        bΔ1.Event(clockSnapshotˢᴍGeneration, g.sync.mono, sec, nsec);
         bΔ1.writeEventsTo(Ꮡtw);
     }
 

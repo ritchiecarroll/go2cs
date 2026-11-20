@@ -46,8 +46,8 @@ internal static uint64 Uint64ᴍ(Value v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string valueBadˢ => ref valueBadˢᵇ;
-private static readonly @string valueBadˢᵇ = "Value{Bad}"u8;
+internal static ref readonly @string valueBadˢᴍValue => ref valueBadˢᵇᴍValue;
+private static readonly @string valueBadˢᵇᴍValue = "Value{Bad}"u8;
 
 // String returns the string value for a ValueString, and otherwise
 // a string representation of the value for other kinds of values.
@@ -59,7 +59,7 @@ internal static @string Stringᴍ(Value v) {
     case var ᴛ when ᴛ == ValueUint64: {
         return fmt.Sprintf("Value{Uint64(%d)}"u8, v.Uint64());
     }}
-    return valueBadˢ;
+    return valueBadˢᴍValue;
 }
 
 } partial class trace_package {

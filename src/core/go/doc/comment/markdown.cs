@@ -44,8 +44,8 @@ internal static slice<byte> Markdownᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
 } partial class comment_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string fourSpaceᶜ => ref fourSpaceᶜᵇ;
-private static readonly @string fourSpaceᶜᵇ = "    "u8;
+internal static ref readonly @string fourSpaceᶜᴍmdPrinter => ref fourSpaceᶜᵇᴍmdPrinter;
+private static readonly @string fourSpaceᶜᵇᴍmdPrinter = "    "u8;
 
 // block prints the block x to out.
 internal static void blockᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
@@ -101,7 +101,7 @@ internal static void blockᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block
                 @out.WriteString("  - "); // SP SP - SP
             }
             foreach (var (iΔ1, blk) in range(item.Content)) {
-                @string fourSpace = fourSpaceᶜ;
+                @string fourSpace = fourSpaceᶜᴍmdPrinter;
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
                 }

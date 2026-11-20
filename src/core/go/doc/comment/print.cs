@@ -125,8 +125,8 @@ internal static @string DefaultURLᴍ(ref DocLink l, @string baseURL) {
 } partial class comment_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hdrˢ => ref hdrˢᵇ;
-private static readonly @string hdrˢᵇ = "hdr-"u8;
+internal static ref readonly @string hdrˢᴍHeading => ref hdrˢᵇᴍHeading;
+private static readonly @string hdrˢᵇᴍHeading = "hdr-"u8;
 
 // DefaultID returns the default anchor ID for the heading h.
 //
@@ -146,7 +146,7 @@ internal static @string DefaultIDᴍ(ref Heading h) {
         return ""u8;
     }
     @out.Reset();
-    Ꮡout.WriteString(hdrˢ);
+    Ꮡout.WriteString(hdrˢᴍHeading);
     foreach (var (_, r) in s) {
         if (r < 0x80 && isIdentASCII((byte)r)) {
             Ꮡout.WriteByte((byte)r);
@@ -219,8 +219,8 @@ internal static bool blankBefore(Block x) {
 } partial class comment_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string fourSpaceᶜ1 => ref fourSpaceᶜ1ᵇ;
-private static readonly @string fourSpaceᶜ1ᵇ = "    "u8;
+internal static ref readonly @string fourSpaceᶜ1ᴍcommentPrinter => ref fourSpaceᶜ1ᵇᴍcommentPrinter;
+private static readonly @string fourSpaceᶜ1ᵇᴍcommentPrinter = "    "u8;
 
 // block prints the block x to out.
 internal static void blockᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
@@ -270,7 +270,7 @@ internal static void blockᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Blo
                 @out.WriteString(". ");
             }
             foreach (var (iΔ1, blk) in range(item.Content)) {
-                @string fourSpace = fourSpaceᶜ1;
+                @string fourSpace = fourSpaceᶜ1ᴍcommentPrinter;
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
                 }

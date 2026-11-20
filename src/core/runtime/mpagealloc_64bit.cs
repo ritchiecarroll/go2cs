@@ -66,10 +66,10 @@ internal static array<nuint> levelBits = new nuint[]{
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pageSummaryˢ => ref pageSummaryˢᵇ;
-private static readonly @string pageSummaryˢᵇ = "page summary"u8;
-internal static ref readonly @string failedToReservePageˢ => ref failedToReservePageˢᵇ;
-private static readonly @string failedToReservePageˢᵇ = "failed to reserve page summary memory"u8;
+internal static ref readonly @string pageSummaryˢᴍpageAlloc => ref pageSummaryˢᵇᴍpageAlloc;
+private static readonly @string pageSummaryˢᵇᴍpageAlloc = "page summary"u8;
+internal static ref readonly @string failedToReservePageˢᴍpageAlloc => ref failedToReservePageˢᵇᴍpageAlloc;
+private static readonly @string failedToReservePageˢᵇᴍpageAlloc = "failed to reserve page summary memory"u8;
 
 // sysInit performs architecture-dependent initialization of fields
 // in pageAlloc. pageAlloc should be uninitialized except for sysStat
@@ -82,9 +82,9 @@ internal static void sysInitᴍ(ref pageAlloc p, bool test) {
 
         // Reserve b bytes of memory anywhere in the address space.
         var b = alignUp((uintptr)entries * pallocSumBytes, physPageSize);
-        @unsafe.Pointer r = sysReserve(nil, b, pageSummaryˢ);
+        @unsafe.Pointer r = sysReserve(nil, b, pageSummaryˢᴍpageAlloc);
         if (r == nil) {
-            @throw(failedToReservePageˢ);
+            @throw(failedToReservePageˢᴍpageAlloc);
         }
 
         // Put this reservation into a slice.
@@ -94,10 +94,10 @@ internal static void sysInitᴍ(ref pageAlloc p, bool test) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sysGrowBoundsNotAlignedˢ => ref sysGrowBoundsNotAlignedˢᵇ;
-private static readonly @string sysGrowBoundsNotAlignedˢᵇ = "sysGrow bounds not aligned to pallocChunkBytes"u8;
-internal static ref readonly @string pageAllocˢ => ref pageAllocˢᵇ;
-private static readonly @string pageAllocˢᵇ = "page alloc"u8;
+internal static ref readonly @string sysGrowBoundsNotAlignedˢᴍpageAlloc => ref sysGrowBoundsNotAlignedˢᵇᴍpageAlloc;
+private static readonly @string sysGrowBoundsNotAlignedˢᵇᴍpageAlloc = "sysGrow bounds not aligned to pallocChunkBytes"u8;
+internal static ref readonly @string pageAllocˢᴍpageAlloc => ref pageAllocˢᵇᴍpageAlloc;
+private static readonly @string pageAllocˢᵇᴍpageAlloc = "page alloc"u8;
 
 // sysGrow performs architecture-dependent operations on heap
 // growth for the page allocator, such as mapping in new memory
@@ -114,7 +114,7 @@ internal static void sysGrowᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr limit
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
         print((@string)"runtime: base = ", (hex)(uint64)@base, (@string)", limit = ", (hex)(uint64)limit, (@string)"\n");
-        @throw(sysGrowBoundsNotAlignedˢ);
+        @throw(sysGrowBoundsNotAlignedˢᴍpageAlloc);
     }
 
     // addrRangeToSummaryRange converts a range of addresses into a range
@@ -192,7 +192,7 @@ internal static void sysGrowᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr limit
         }
 
         // Map and commit need.
-        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), p.sysStat, pageAllocˢ);
+        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), p.sysStat, pageAllocˢᴍpageAlloc);
         sysUsed((@unsafe.Pointer)need.@base.addr(), need.size(), need.size());
         p.summaryMappedReady += need.size();
     }
@@ -201,10 +201,10 @@ internal static void sysGrowᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr limit
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sysGrowBoundsNotAlignedˢ => ref sysGrowBoundsNotAlignedˢᵇ;
-private static readonly @string sysGrowBoundsNotAlignedˢᵇ = "sysGrow bounds not aligned to pallocChunkBytes"u8;
-internal static ref readonly @string scavengeIndexˢ => ref scavengeIndexˢᵇ;
-private static readonly @string scavengeIndexˢᵇ = "scavenge index"u8;
+internal static ref readonly @string sysGrowBoundsNotAlignedˢᴍscavengeIndex => ref sysGrowBoundsNotAlignedˢᵇᴍscavengeIndex;
+private static readonly @string sysGrowBoundsNotAlignedˢᵇᴍscavengeIndex = "sysGrow bounds not aligned to pallocChunkBytes"u8;
+internal static ref readonly @string scavengeIndexˢᴍscavengeIndex => ref scavengeIndexˢᵇᴍscavengeIndex;
+private static readonly @string scavengeIndexˢᵇᴍscavengeIndex = "scavenge index"u8;
 
 // sysGrow increases the index's backing store in response to a heap growth.
 //
@@ -214,7 +214,7 @@ internal static uintptr sysGrowᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintpt
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
         print((@string)"runtime: base = ", (hex)(uint64)@base, (@string)", limit = ", (hex)(uint64)limit, (@string)"\n");
-        @throw(sysGrowBoundsNotAlignedˢ);
+        @throw(sysGrowBoundsNotAlignedˢᴍscavengeIndex);
     }
     var scSize = /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
     // Map and commit the pieces of chunks that we need.
@@ -252,7 +252,7 @@ internal static uintptr sysGrowᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintpt
 
     // If we've got something to map, map it, and update the slice bounds.
     if (need.size() != 0) {
-        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), sysStat, scavengeIndexˢ);
+        sysMap((@unsafe.Pointer)need.@base.addr(), need.size(), sysStat, scavengeIndexˢᴍscavengeIndex);
         sysUsed((@unsafe.Pointer)need.@base.addr(), need.size(), need.size());
         // Update the indices only after the new memory is valid.
         if (haveMax == 0 || needMin < haveMin) {
@@ -271,7 +271,7 @@ internal static uintptr sysGrowᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintpt
 internal static uintptr sysInitᴍ(ref scavengeIndex s, bool test, ж<sysMemStat> sysStat) {
     var n = (uintptr)((uintptr)1 << (int)(heapAddrBits)) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
-    @unsafe.Pointer r = sysReserve(nil, nbytes, scavengeIndexˢ);
+    @unsafe.Pointer r = sysReserve(nil, nbytes, scavengeIndexˢᴍscavengeIndex);
     ref var sl = ref heap<notInHeapSlice>(new notInHeapSlice(@unsafe.Pointer.To<notInHeap>(r), (nint)n, (nint)n), out var Ꮡsl);
     s.chunks = ~Ꮡsl.Reinterpret<notInHeapSlice, slice<atomicScavChunkData>>();
     return 0; // All memory above is mapped Reserved.

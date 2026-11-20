@@ -55,8 +55,8 @@ internal static void recordᴍ(ref Checker check, ж<operand> Ꮡx) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string vSTypeSIsTypedˢ => ref vSTypeSIsTypedˢᵇ;
-private static readonly @string vSTypeSIsTypedˢᵇ = "%v: %s (type %s) is typed"u8;
+internal static ref readonly @string vSTypeSIsTypedˢᴍChecker => ref vSTypeSIsTypedˢᵇᴍChecker;
+private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s) is typed"u8;
 
 internal static void recordUntypedᴍ(ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -67,7 +67,7 @@ internal static void recordUntypedᴍ(ж<Checker> Ꮡcheck) {
 
     foreach (var (x, info) in check.untyped) {
         if (debug && isTyped(new BasicжType(info.typ))) {
-            Ꮡcheck.dump(vSTypeSIsTypedˢ, x.Pos(), x, info.typ.OrTypedNil());
+            Ꮡcheck.dump(vSTypeSIsTypedˢᴍChecker, x.Pos(), x, info.typ.OrTypedNil());
             throw panic("unreachable");
         }
         check.recordTypeAndValue(x, info.mode, new BasicжType(info.typ), info.val);

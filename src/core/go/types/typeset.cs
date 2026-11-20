@@ -66,8 +66,8 @@ internal static (nint, ж<Func>) LookupMethodᴍ(ref _TypeSet s, ж<Package> pkg
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string comparableˢ => ref comparableˢᵇ;
-private static readonly @string comparableˢᵇ = "comparable"u8;
+internal static ref readonly @string comparableˢᴍ_TypeSet => ref comparableˢᵇᴍ_TypeSet;
+private static readonly @string comparableˢᵇᴍ_TypeSet = "comparable"u8;
 
 internal static @string Stringᴍ(ref _TypeSet s) {
     switch (ᐧ) {
@@ -84,7 +84,7 @@ internal static @string Stringᴍ(ref _TypeSet s) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡbuf.WriteByte((byte)'{');
     if (s.comparable) {
-        Ꮡbuf.WriteString(comparableˢ);
+        Ꮡbuf.WriteString(comparableˢᴍ_TypeSet);
         if (hasMethods || hasTerms) {
             Ꮡbuf.WriteString("; ");
         }

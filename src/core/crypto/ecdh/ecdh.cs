@@ -124,8 +124,8 @@ partial struct PrivateKey {
 } partial class ecdh_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoEcdhPrivateKeyAndˢ => ref cryptoEcdhPrivateKeyAndˢᵇ;
-private static readonly @string cryptoEcdhPrivateKeyAndˢᵇ = "crypto/ecdh: private key and public key curves do not match"u8;
+private static ref readonly @string cryptoEcdhPrivateKeyAndˢᴍPrivateKey => ref cryptoEcdhPrivateKeyAndˢᵇᴍPrivateKey;
+private static readonly @string cryptoEcdhPrivateKeyAndˢᵇᴍPrivateKey = "crypto/ecdh: private key and public key curves do not match"u8;
 
 // ECDH performs an ECDH exchange and returns the shared secret. The [PrivateKey]
 // and [PublicKey] must use the same curve.
@@ -143,7 +143,7 @@ internal static (slice<byte>, error) ECDHᴍ(ж<PrivateKey> Ꮡk, ж<PublicKey> 
     ref var remote = ref Ꮡremote.DerefOrNull();
 
     if (!AreEqual(k.curve, remote.curve)) {
-        return (default, errors.New(cryptoEcdhPrivateKeyAndˢ));
+        return (default, errors.New(cryptoEcdhPrivateKeyAndˢᴍPrivateKey));
     }
     return k.curve.ecdh(Ꮡk, Ꮡremote);
 }

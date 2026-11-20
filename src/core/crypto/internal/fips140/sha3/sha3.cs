@@ -226,16 +226,16 @@ internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string sha3InvalidHashStateˢ => ref sha3InvalidHashStateˢᵇ;
-private static readonly @string sha3InvalidHashStateˢᵇ = "sha3: invalid hash state"u8;
-private static ref readonly @string sha3InvalidHashStateˢ2 => ref sha3InvalidHashStateˢ2ᵇ;
-private static readonly @string sha3InvalidHashStateˢ2ᵇ = "sha3: invalid hash state identifier"u8;
-private static ref readonly @string sha3InvalidHashStateˢ3 => ref sha3InvalidHashStateˢ3ᵇ;
-private static readonly @string sha3InvalidHashStateˢ3ᵇ = "sha3: invalid hash state function"u8;
+private static ref readonly @string sha3InvalidHashStateˢᴍDigest => ref sha3InvalidHashStateˢᵇᴍDigest;
+private static readonly @string sha3InvalidHashStateˢᵇᴍDigest = "sha3: invalid hash state"u8;
+private static ref readonly @string sha3InvalidHashStateˢ2ᴍDigest => ref sha3InvalidHashStateˢ2ᵇᴍDigest;
+private static readonly @string sha3InvalidHashStateˢ2ᵇᴍDigest = "sha3: invalid hash state identifier"u8;
+private static ref readonly @string sha3InvalidHashStateˢ3ᴍDigest => ref sha3InvalidHashStateˢ3ᵇᴍDigest;
+private static readonly @string sha3InvalidHashStateˢ3ᵇᴍDigest = "sha3: invalid hash state function"u8;
 
 internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
     if (len(b) != marshaledSize) {
-        return errors.New(sha3InvalidHashStateˢ);
+        return errors.New(sha3InvalidHashStateˢᴍDigest);
     }
 
     @string magic = (@string)(b[..(int)(len(magicSHA3))]);
@@ -254,13 +254,13 @@ internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
         break;
     }
     default: {
-        return errors.New(sha3InvalidHashStateˢ2);
+        return errors.New(sha3InvalidHashStateˢ2ᴍDigest);
     }}
 
     nint rate = (nint)b[0];
     b = b[1..];
     if (rate != d.rate) {
-        return errors.New(sha3InvalidHashStateˢ3);
+        return errors.New(sha3InvalidHashStateˢ3ᴍDigest);
     }
 
     copy(d.a[..], b);
@@ -269,11 +269,11 @@ internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
     nint n = (nint)b[0];
     spongeDirection state = (spongeDirection)(nint)b[1];
     if (n > d.rate) {
-        return errors.New(sha3InvalidHashStateˢ);
+        return errors.New(sha3InvalidHashStateˢᴍDigest);
     }
     d.n = n;
     if (state != spongeAbsorbing && state != spongeSqueezing) {
-        return errors.New(sha3InvalidHashStateˢ);
+        return errors.New(sha3InvalidHashStateˢᴍDigest);
     }
     d.state = state;
 

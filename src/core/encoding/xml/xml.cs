@@ -274,8 +274,8 @@ public static ж<Decoder> NewTokenDecoder(TokenReader t) {
 } partial class xml_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedEofˢ => ref unexpectedEofˢᵇ;
-private static readonly @string unexpectedEofˢᵇ = "unexpected EOF"u8;
+internal static ref readonly @string unexpectedEofˢᴍDecoder => ref unexpectedEofˢᵇᴍDecoder;
+private static readonly @string unexpectedEofˢᵇᴍDecoder = "unexpected EOF"u8;
 
 // Token returns the next XML token in the input stream.
 // At the end of the input stream, Token returns nil, [io.EOF].
@@ -315,7 +315,7 @@ internal static (Token, error) Tokenᴍ(ref Decoder d) {
     } else {
         (t, err) = d.rawToken(); if (t == nil && err != nil) {
             if (AreEqual(err, io.EOF) && d.stk != nil && d.stk.kind != stkEOF) {
-                err = d.syntaxError(unexpectedEofˢ);
+                err = d.syntaxError(unexpectedEofˢᴍDecoder);
             }
             return (default, err);
         }
@@ -611,30 +611,30 @@ internal static (Token, error) RawTokenᴍ(ref Decoder d) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string expectedElementNameAfterˢ => ref expectedElementNameAfterˢᵇ;
-private static readonly @string expectedElementNameAfterˢᵇ = "expected element name after </"u8;
-internal static ref readonly @string expectedTargetNameAfterˢ => ref expectedTargetNameAfterˢᵇ;
-private static readonly @string expectedTargetNameAfterˢᵇ = "expected target name after <?"u8;
-internal static ref readonly @string versionˢ => ref versionˢᵇ;
-private static readonly @string versionˢᵇ = "version"u8;
-internal static ref readonly @string encodingˢ => ref encodingˢᵇ;
-private static readonly @string encodingˢᵇ = "encoding"u8;
-internal static ref readonly @string utf8ˢ => ref utf8ˢᵇ;
-private static readonly @string utf8ˢᵇ = "utf-8"u8;
-internal static ref readonly @string invalidSequenceNotPartOfˢ => ref invalidSequenceNotPartOfˢᵇ;
-private static readonly @string invalidSequenceNotPartOfˢᵇ = "invalid sequence <!- not part of <!--"u8;
-internal static ref readonly @string invalidSequenceNotˢ => ref invalidSequenceNotˢᵇ;
-private static readonly @string invalidSequenceNotˢᵇ = @"invalid sequence ""--"" not allowed in comments"u8;
-internal static ref readonly @string invalidSequenceˢ => ref invalidSequenceˢᵇ;
-private static readonly @string invalidSequenceˢᵇ = "invalid <![ sequence"u8;
-internal static ref readonly @string expectedElementNameAfterˢ2 => ref expectedElementNameAfterˢ2ᵇ;
-private static readonly @string expectedElementNameAfterˢ2ᵇ = "expected element name after <"u8;
-internal static ref readonly @string expectedInElementˢ => ref expectedInElementˢᵇ;
-private static readonly @string expectedInElementˢᵇ = "expected /> in element"u8;
-internal static ref readonly @string expectedAttributeNameInˢ => ref expectedAttributeNameInˢᵇ;
-private static readonly @string expectedAttributeNameInˢᵇ = "expected attribute name in element"u8;
-internal static ref readonly @string attributeNameWithoutInˢ => ref attributeNameWithoutInˢᵇ;
-private static readonly @string attributeNameWithoutInˢᵇ = "attribute name without = in element"u8;
+internal static ref readonly @string expectedElementNameAfterˢᴍDecoder => ref expectedElementNameAfterˢᵇᴍDecoder;
+private static readonly @string expectedElementNameAfterˢᵇᴍDecoder = "expected element name after </"u8;
+internal static ref readonly @string expectedTargetNameAfterˢᴍDecoder => ref expectedTargetNameAfterˢᵇᴍDecoder;
+private static readonly @string expectedTargetNameAfterˢᵇᴍDecoder = "expected target name after <?"u8;
+internal static ref readonly @string versionˢᴍDecoder => ref versionˢᵇᴍDecoder;
+private static readonly @string versionˢᵇᴍDecoder = "version"u8;
+internal static ref readonly @string encodingˢᴍDecoder => ref encodingˢᵇᴍDecoder;
+private static readonly @string encodingˢᵇᴍDecoder = "encoding"u8;
+internal static ref readonly @string utf8ˢᴍDecoder => ref utf8ˢᵇᴍDecoder;
+private static readonly @string utf8ˢᵇᴍDecoder = "utf-8"u8;
+internal static ref readonly @string invalidSequenceNotPartOfˢᴍDecoder => ref invalidSequenceNotPartOfˢᵇᴍDecoder;
+private static readonly @string invalidSequenceNotPartOfˢᵇᴍDecoder = "invalid sequence <!- not part of <!--"u8;
+internal static ref readonly @string invalidSequenceNotˢᴍDecoder => ref invalidSequenceNotˢᵇᴍDecoder;
+private static readonly @string invalidSequenceNotˢᵇᴍDecoder = @"invalid sequence ""--"" not allowed in comments"u8;
+internal static ref readonly @string invalidSequenceˢᴍDecoder => ref invalidSequenceˢᵇᴍDecoder;
+private static readonly @string invalidSequenceˢᵇᴍDecoder = "invalid <![ sequence"u8;
+internal static ref readonly @string expectedElementNameAfterˢ2ᴍDecoder => ref expectedElementNameAfterˢ2ᵇᴍDecoder;
+private static readonly @string expectedElementNameAfterˢ2ᵇᴍDecoder = "expected element name after <"u8;
+internal static ref readonly @string expectedInElementˢᴍDecoder => ref expectedInElementˢᵇᴍDecoder;
+private static readonly @string expectedInElementˢᵇᴍDecoder = "expected /> in element"u8;
+internal static ref readonly @string expectedAttributeNameInˢᴍDecoder => ref expectedAttributeNameInˢᵇᴍDecoder;
+private static readonly @string expectedAttributeNameInˢᵇᴍDecoder = "expected attribute name in element"u8;
+internal static ref readonly @string attributeNameWithoutInˢᴍDecoder => ref attributeNameWithoutInˢᵇᴍDecoder;
+private static readonly @string attributeNameWithoutInˢᵇᴍDecoder = "attribute name without = in element"u8;
 
 internal static (Token, error) rawTokenᴍ(ref Decoder d) {
     if (d.t != nil) {
@@ -675,7 +675,7 @@ internal static (Token, error) rawTokenᴍ(ref Decoder d) {
         Name nameΔ2 = default;
         (nameΔ2, ok) = d.nsname(); if (!ok) {
             if (d.err == nil) {
-                d.err = d.syntaxError(expectedElementNameAfterˢ);
+                d.err = d.syntaxError(expectedElementNameAfterˢᴍDecoder);
             }
             return (default, d.err);
         }
@@ -694,7 +694,7 @@ internal static (Token, error) rawTokenᴍ(ref Decoder d) {
         @string targetΔ1 = default;
         (targetΔ1, ok) = d.name(); if (!ok) {
             if (d.err == nil) {
-                d.err = d.syntaxError(expectedTargetNameAfterˢ);
+                d.err = d.syntaxError(expectedTargetNameAfterˢᴍDecoder);
             }
             return (default, d.err);
         }
@@ -716,13 +716,13 @@ internal static (Token, error) rawTokenᴍ(ref Decoder d) {
 
         if (targetΔ1 == "xml"u8) {
             @string content = (@string)data;
-            @string ver = procInst(versionˢ, content);
+            @string ver = procInst(versionˢᴍDecoder, content);
             if (ver != ""u8 && ver != "1.0"u8) {
                 d.err = fmt.Errorf("xml: unsupported version %q; only version 1.0 is supported"u8, ver);
                 return (default, d.err);
             }
-            @string enc = procInst(encodingˢ, content);
-            if (enc != ""u8 && enc != "utf-8"u8 && enc != "UTF-8"u8 && !strings.EqualFold(enc, utf8ˢ)) {
+            @string enc = procInst(encodingˢᴍDecoder, content);
+            if (enc != ""u8 && enc != "utf-8"u8 && enc != "UTF-8"u8 && !strings.EqualFold(enc, utf8ˢᴍDecoder)) {
                 if (d.CharsetReader == nil) {
                     d.err = fmt.Errorf("xml: encoding %q declared but Decoder.CharsetReader is nil"u8, enc);
                     return (default, d.err);
@@ -752,7 +752,7 @@ internal static (Token, error) rawTokenᴍ(ref Decoder d) {
                 return (default, d.err);
             }
             if (b != '-') {
-                d.err = d.syntaxError(invalidSequenceNotPartOfˢ);
+                d.err = d.syntaxError(invalidSequenceNotPartOfˢᴍDecoder);
                 return (default, d.err);
             }
             // Look for terminator.
@@ -767,7 +767,7 @@ internal static (Token, error) rawTokenᴍ(ref Decoder d) {
                 if (b0 == '-' && b1 == '-') {
                     if (b != '>') {
                         d.err = d.syntaxError(
-                            invalidSequenceNotˢ);
+                            invalidSequenceNotˢᴍDecoder);
                         return (default, d.err);
                     }
                     break;
@@ -785,7 +785,7 @@ internal static (Token, error) rawTokenᴍ(ref Decoder d) {
                     return (default, d.err);
                 }
                 if (b != LiteralByteAt("CDATA["u8, i)) {
-                    d.err = d.syntaxError(invalidSequenceˢ);
+                    d.err = d.syntaxError(invalidSequenceˢᴍDecoder);
                     return (default, d.err);
                 }
             }
@@ -881,7 +881,7 @@ HandleB:
     slice<Attr> attr = default;
     (name, ok) = d.nsname(); if (!ok) {
         if (d.err == nil) {
-            d.err = d.syntaxError(expectedElementNameAfterˢ2);
+            d.err = d.syntaxError(expectedElementNameAfterˢ2ᴍDecoder);
         }
         return (default, d.err);
     }
@@ -898,7 +898,7 @@ HandleB:
                 return (default, d.err);
             }
             if (b != '>') {
-                d.err = d.syntaxError(expectedInElementˢ);
+                d.err = d.syntaxError(expectedInElementˢᴍDecoder);
                 return (default, d.err);
             }
             break;
@@ -911,7 +911,7 @@ HandleB:
         var a = new Attr();
         (a.Name, ok) = d.nsname(); if (!ok) {
             if (d.err == nil) {
-                d.err = d.syntaxError(expectedAttributeNameInˢ);
+                d.err = d.syntaxError(expectedAttributeNameInˢᴍDecoder);
             }
             return (default, d.err);
         }
@@ -921,7 +921,7 @@ HandleB:
         }
         if (b != '=') {
             if (d.Strict) {
-                d.err = d.syntaxError(attributeNameWithoutInˢ);
+                d.err = d.syntaxError(attributeNameWithoutInˢᴍDecoder);
                 return (default, d.err);
             }
             d.ungetc(b);
@@ -944,8 +944,8 @@ HandleB:
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unquotedOrMissingˢ => ref unquotedOrMissingˢᵇ;
-private static readonly @string unquotedOrMissingˢᵇ = "unquoted or missing attribute value in element"u8;
+internal static ref readonly @string unquotedOrMissingˢᴍDecoder => ref unquotedOrMissingˢᵇᴍDecoder;
+private static readonly @string unquotedOrMissingˢᵇᴍDecoder = "unquoted or missing attribute value in element"u8;
 
 internal static slice<byte> attrvalᴍ(ref Decoder d) {
     var (b, ok) = d.mustgetc();
@@ -958,7 +958,7 @@ internal static slice<byte> attrvalᴍ(ref Decoder d) {
     }
     // Handle unquoted attribute values for strict parsers
     if (d.Strict) {
-        d.err = d.syntaxError(unquotedOrMissingˢ);
+        d.err = d.syntaxError(unquotedOrMissingˢᴍDecoder);
         return default;
     }
     // Handle unquoted attribute values for unstrict parsers
@@ -1090,14 +1090,14 @@ internal static map<@string, rune> entity = new map<@string, rune>{
 } partial class xml_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedEofInCdataˢ => ref unexpectedEofInCdataˢᵇ;
-private static readonly @string unexpectedEofInCdataˢᵇ = "unexpected EOF in CDATA section"u8;
-internal static ref readonly @string unescapedNotInCdataˢ => ref unescapedNotInCdataˢᵇ;
-private static readonly @string unescapedNotInCdataˢᵇ = "unescaped ]]> not in CDATA section"u8;
-internal static ref readonly @string unescapedInsideQuotedˢ => ref unescapedInsideQuotedˢᵇ;
-private static readonly @string unescapedInsideQuotedˢᵇ = "unescaped < inside quoted string"u8;
-internal static ref readonly @string invalidUtf8ˢ => ref invalidUtf8ˢᵇ;
-private static readonly @string invalidUtf8ˢᵇ = "invalid UTF-8"u8;
+internal static ref readonly @string unexpectedEofInCdataˢᴍDecoder => ref unexpectedEofInCdataˢᵇᴍDecoder;
+private static readonly @string unexpectedEofInCdataˢᵇᴍDecoder = "unexpected EOF in CDATA section"u8;
+internal static ref readonly @string unescapedNotInCdataˢᴍDecoder => ref unescapedNotInCdataˢᵇᴍDecoder;
+private static readonly @string unescapedNotInCdataˢᵇᴍDecoder = "unescaped ]]> not in CDATA section"u8;
+internal static ref readonly @string unescapedInsideQuotedˢᴍDecoder => ref unescapedInsideQuotedˢᵇᴍDecoder;
+private static readonly @string unescapedInsideQuotedˢᵇᴍDecoder = "unescaped < inside quoted string"u8;
+internal static ref readonly @string invalidUtf8ˢᴍDecoder => ref invalidUtf8ˢᵇᴍDecoder;
+private static readonly @string invalidUtf8ˢᵇᴍDecoder = "invalid UTF-8"u8;
 
 // Read plain text section (XML calls it character data).
 // If quote >= 0, we are in a quoted string and need to find the matching quote.
@@ -1114,7 +1114,7 @@ Input:
         if (!ok) {
             if (cdata) {
                 if (AreEqual(d.err, io.EOF)) {
-                    d.err = d.syntaxError(unexpectedEofInCdataˢ);
+                    d.err = d.syntaxError(unexpectedEofInCdataˢᴍDecoder);
                 }
                 return default;
             }
@@ -1129,14 +1129,14 @@ Input:
                 trunc = 2;
                 goto break_Input;
             }
-            d.err = d.syntaxError(unescapedNotInCdataˢ);
+            d.err = d.syntaxError(unescapedNotInCdataˢᴍDecoder);
             return default;
         }
 
         // Stop reading text if we see a <.
         if (b == '<' && !cdata) {
             if (quote >= 0) {
-                d.err = d.syntaxError(unescapedInsideQuotedˢ);
+                d.err = d.syntaxError(unescapedInsideQuotedˢᴍDecoder);
                 return default;
             }
             d.ungetc((byte)'<');
@@ -1256,7 +1256,7 @@ break_Input:;
     while (len(buf) > 0) {
         var (r, size) = utf8.DecodeRune(buf);
         if (r == utf8.RuneError && size == 1) {
-            d.err = d.syntaxError(invalidUtf8ˢ);
+            d.err = d.syntaxError(invalidUtf8ˢᴍDecoder);
             return default;
         }
         buf = buf.slice(size);

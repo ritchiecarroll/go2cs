@@ -374,8 +374,8 @@ internal static bool isNilᴍ(ref operand x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string needTypeAssertionˢ => ref needTypeAssertionˢᵇ;
-private static readonly @string needTypeAssertionˢᵇ = "need type assertion"u8;
+internal static ref readonly @string needTypeAssertionˢᴍoperand => ref needTypeAssertionˢᵇᴍoperand;
+private static readonly @string needTypeAssertionˢᵇᴍoperand = "need type assertion"u8;
 
 // assignableTo reports whether x is assignable to a variable of type T. If the
 // result is false and a non-nil cause is provided, it may be set to a more
@@ -458,7 +458,7 @@ internal static (bool, errors.Code) assignableToᴍ(ж<operand> Ꮡx, ж<Checker
         if (check.implements(T, V, false, nil)) {
             // T implements V, so give hint about type assertion.
             if (Ꮡcause != nil) {
-                cause = needTypeAssertionˢ;
+                cause = needTypeAssertionˢᴍoperand;
             }
             return (false, IncompatibleAssign);
         }

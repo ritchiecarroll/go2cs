@@ -414,8 +414,8 @@ internal static ж<dnsConfig> getSystemDNSConfig() {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string etcResolvConfˢ => ref etcResolvConfˢᵇ;
-private static readonly @string etcResolvConfˢᵇ = "/etc/resolv.conf"u8;
+internal static ref readonly @string etcResolvConfˢᴍresolverConfig => ref etcResolvConfˢᵇᴍresolverConfig;
+private static readonly @string etcResolvConfˢᵇᴍresolverConfig = "/etc/resolv.conf"u8;
 
 // init initializes conf and is only called via conf.initOnce.
 internal static void initᴍ(ж<resolverConfig> Ꮡconf) {
@@ -423,7 +423,7 @@ internal static void initᴍ(ж<resolverConfig> Ꮡconf) {
 
     // Set dnsConfig and lastChecked so we don't parse
     // resolv.conf twice the first time.
-    Ꮡconf.ᏑdnsConfig.Store(dnsReadConfig(etcResolvConfˢ));
+    Ꮡconf.ᏑdnsConfig.Store(dnsReadConfig(etcResolvConfˢᴍresolverConfig));
     conf.lastChecked = time.Now();
 
     // Prepare ch so that only one update of resolverConfig may
@@ -940,12 +940,12 @@ break_loop:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cnameˢ => ref cnameˢᵇ;
-private static readonly @string cnameˢᵇ = "CNAME"u8;
+internal static ref readonly @string cnameˢᴍResolver => ref cnameˢᵇᴍResolver;
+private static readonly @string cnameˢᵇᴍResolver = "CNAME"u8;
 
 // goLookupCNAME is the native Go (non-cgo) implementation of LookupCNAME.
 internal static (@string, error) goLookupCNAMEᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string host, hostLookupOrder order, ж<dnsConfig> conf) {
-    var (_, cname, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, cnameˢ, host, order, conf);
+    var (_, cname, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, cnameˢᴍResolver, host, order, conf);
     return (cname.String(), err);
 }
 

@@ -231,8 +231,8 @@ internal static void addLengthPrefixedᴍ(ж<Builder> Ꮡb, nint lenLen, bool is
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string pendingAsn1ChildTooLongˢ => ref pendingAsn1ChildTooLongˢᵇ;
-private static readonly @string pendingAsn1ChildTooLongˢᵇ = "pending ASN.1 child too long"u8;
+private static ref readonly @string pendingAsn1ChildTooLongˢᴍBuilder => ref pendingAsn1ChildTooLongˢᵇᴍBuilder;
+private static readonly @string pendingAsn1ChildTooLongˢᵇᴍBuilder = "pending ASN.1 child too long"u8;
 
 internal static void flushChildᴍ(ref Builder b) {
     if (b.child == nil) {
@@ -263,7 +263,7 @@ internal static void flushChildᴍ(ref Builder b) {
         uint8 lenLen = default;
         uint8 lenByte = default;
         if ((int64)length > 0xfffffffeL) {
-            b.err = errors.New(pendingAsn1ChildTooLongˢ);
+            b.err = errors.New(pendingAsn1ChildTooLongˢᴍBuilder);
             return;
         } else if (length > 0xffffff) {
             lenLen = 5;
@@ -314,10 +314,10 @@ internal static void flushChildᴍ(ref Builder b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptobyteLengthOverflowˢ => ref cryptobyteLengthOverflowˢᵇ;
-private static readonly @string cryptobyteLengthOverflowˢᵇ = "cryptobyte: length overflow"u8;
-private static ref readonly @string cryptobyteBuilderIsˢ => ref cryptobyteBuilderIsˢᵇ;
-private static readonly @string cryptobyteBuilderIsˢᵇ = "cryptobyte: Builder is exceeding its fixed-size buffer"u8;
+private static ref readonly @string cryptobyteLengthOverflowˢᴍBuilder => ref cryptobyteLengthOverflowˢᵇᴍBuilder;
+private static readonly @string cryptobyteLengthOverflowˢᵇᴍBuilder = "cryptobyte: length overflow"u8;
+private static ref readonly @string cryptobyteBuilderIsˢᴍBuilder => ref cryptobyteBuilderIsˢᵇᴍBuilder;
+private static readonly @string cryptobyteBuilderIsˢᵇᴍBuilder = "cryptobyte: Builder is exceeding its fixed-size buffer"u8;
 
 internal static void addᴍ(ref Builder b, params ꓸꓸꓸbyte bytesʗp) {
     var bytes = bytesʗp.sslice();
@@ -329,10 +329,10 @@ internal static void addᴍ(ref Builder b, params ꓸꓸꓸbyte bytesʗp) {
         throw panic("cryptobyte: attempted write while child is pending");
     }
     if (len(b.result) + len(bytes) < len(bytes)) {
-        b.err = errors.New(cryptobyteLengthOverflowˢ);
+        b.err = errors.New(cryptobyteLengthOverflowˢᴍBuilder);
     }
     if (b.fixedSize && len(b.result) + len(bytes) > cap(b.result)) {
-        b.err = errors.New(cryptobyteBuilderIsˢ);
+        b.err = errors.New(cryptobyteBuilderIsˢᴍBuilder);
         return;
     }
     b.result = appendꓸꓸꓸ(b.result, bytes);

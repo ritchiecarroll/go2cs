@@ -121,8 +121,8 @@ internal static map<Format, @string> formatNames = new map<Format, @string>{
 } partial class tar_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
-private static readonly @string unknownˢᵇ = "<unknown>"u8;
+internal static ref readonly @string unknownˢᴍFormat => ref unknownˢᵇᴍFormat;
+private static readonly @string unknownˢᵇᴍFormat = "<unknown>"u8;
 
 internal static @string Stringᴍ(Format f) {
     var ssᴷ = new stackAppend<@string>();
@@ -135,7 +135,7 @@ internal static @string Stringᴍ(Format f) {
     }
     switch (len(ss)) {
     case 0: {
-        return unknownˢ;
+        return unknownˢᴍFormat;
     }
     case 1: {
         return ss[0];

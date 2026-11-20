@@ -104,10 +104,10 @@ internal static bool quoteValue(@string value) {
 } partial class debug_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string modˢ => ref modˢᵇ;
-private static readonly @string modˢᵇ = "mod"u8;
-private static ref readonly @string depˢ => ref depˢᵇ;
-private static readonly @string depˢᵇ = "dep"u8;
+private static ref readonly @string modˢᴍBuildInfo => ref modˢᵇᴍBuildInfo;
+private static readonly @string modˢᵇᴍBuildInfo = "mod"u8;
+private static ref readonly @string depˢᴍBuildInfo => ref depˢᵇᴍBuildInfo;
+private static readonly @string depˢᵇᴍBuildInfo = "dep"u8;
 
 // String returns a string representation of a [BuildInfo].
 internal static @string Stringᴍ(ref BuildInfo bi) {
@@ -136,10 +136,10 @@ internal static @string Stringᴍ(ref BuildInfo bi) {
         bufʗ1.WriteByte((byte)'\n');
     };
     if (bi.Main != (new Module())) {
-        formatMod(modˢ, bi.Main);
+        formatMod(modˢᴍBuildInfo, bi.Main);
     }
     foreach (var (_, dep) in range(bi.Deps)) {
-        formatMod(depˢ, dep.Value);
+        formatMod(depˢᴍBuildInfo, dep.Value);
     }
     foreach (var (_, s) in range(bi.Settings)) {
         @string key = s.Key;

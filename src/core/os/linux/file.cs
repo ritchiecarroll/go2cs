@@ -147,8 +147,8 @@ public static ж<File> NewFile(uintptr fd, @string name) {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readˢ => ref readˢᵇ;
-private static readonly @string readˢᵇ = "read"u8;
+internal static ref readonly @string readˢᴍFile => ref readˢᵇᴍFile;
+private static readonly @string readˢᵇᴍFile = "read"u8;
 
 // Read reads up to len(b) bytes from the File and stores them in b.
 // It returns the number of bytes read and any error encountered.
@@ -157,16 +157,16 @@ internal static (nint n, error err) Readᴍ(ж<File> Ꮡf, slice<byte> b) {
     nint n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
+    var errΔ1 = Ꮡf.checkValid(readˢᴍFile); if (errΔ1 != nil) {
         return (0, errΔ1);
     }
     (n, var e) = Ꮡf.read(b);
-    return (n, f.wrapErr(readˢ, e));
+    return (n, f.wrapErr(readˢᴍFile, e));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string negativeOffsetˢ => ref negativeOffsetˢᵇ;
-private static readonly @string negativeOffsetˢᵇ = "negative offset"u8;
+internal static ref readonly @string negativeOffsetˢᴍFile => ref negativeOffsetˢᵇᴍFile;
+private static readonly @string negativeOffsetˢᵇᴍFile = "negative offset"u8;
 
 // ReadAt reads len(b) bytes from the File starting at byte offset off.
 // It returns the number of bytes read and the error, if any.
@@ -177,18 +177,18 @@ internal static (nint n, error err) ReadAtᴍ(ж<File> Ꮡf, slice<byte> b, int6
     error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
+    var errΔ1 = Ꮡf.checkValid(readˢᴍFile); if (errΔ1 != nil) {
         return (0, errΔ1);
     }
 
     if (off < 0) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat", Path: f.name, Err: errors.New(negativeOffsetˢ)))));
+        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat", Path: f.name, Err: errors.New(negativeOffsetˢᴍFile)))));
     }
 
     while (len(b) > 0) {
         var (m, e) = Ꮡf.pread(b, off);
         if (e != nil) {
-            err = f.wrapErr(readˢ, e);
+            err = f.wrapErr(readˢᴍFile, e);
             break;
         }
         n += m;
@@ -199,22 +199,22 @@ internal static (nint n, error err) ReadAtᴍ(ж<File> Ꮡf, slice<byte> b, int6
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string writeˢ => ref writeˢᵇ;
-private static readonly @string writeˢᵇ = "write"u8;
+internal static ref readonly @string writeˢᴍFile => ref writeˢᵇᴍFile;
+private static readonly @string writeˢᵇᴍFile = "write"u8;
 
 // ReadFrom implements io.ReaderFrom.
 internal static (int64 n, error err) ReadFromᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
+    var errΔ1 = Ꮡf.checkValid(writeˢᴍFile); if (errΔ1 != nil) {
         return (0, errΔ1);
     }
     (n, var handled, var e) = Ꮡf.readFrom(r);
     if (!handled) {
         return genericReadFrom(Ꮡf, r); // without wrapping
     }
-    return (n, f.wrapErr(writeˢ, e));
+    return (n, f.wrapErr(writeˢᴍFile, e));
 }
 
 } partial class os_package {
@@ -363,8 +363,8 @@ internal static (int64, error) genericWriteTo(ж<File> f, Δio.Writer w) {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string seekˢ => ref seekˢᵇ;
-private static readonly @string seekˢᵇ = "seek"u8;
+internal static ref readonly @string seekˢᴍFile => ref seekˢᵇᴍFile;
+private static readonly @string seekˢᵇᴍFile = "seek"u8;
 
 // Seek sets the offset for the next Read or Write on file to offset, interpreted
 // according to whence: 0 means relative to the origin of the file, 1 means
@@ -374,7 +374,7 @@ private static readonly @string seekˢᵇ = "seek"u8;
 internal static (int64 ret, error err) Seekᴍ(ж<File> Ꮡf, int64 offset, nint whence) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    var errΔ1 = Ꮡf.checkValid(seekˢ); if (errΔ1 != nil) {
+    var errΔ1 = Ꮡf.checkValid(seekˢᴍFile); if (errΔ1 != nil) {
         return (0, errΔ1);
     }
     var (r, e) = Ꮡf.seek(offset, whence);
@@ -382,7 +382,7 @@ internal static (int64 ret, error err) Seekᴍ(ж<File> Ꮡf, int64 offset, nint
         e = syscall.EISDIR;
     }
     if (e != nil) {
-        return (0, f.wrapErr(seekˢ, e));
+        return (0, f.wrapErr(seekˢᴍFile, e));
     }
     return (r, default);
 }
@@ -834,13 +834,13 @@ internal static error SetWriteDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syscallConnˢ => ref syscallConnˢᵇ;
-private static readonly @string syscallConnˢᵇ = "SyscallConn"u8;
+internal static ref readonly @string syscallConnˢᴍFile => ref syscallConnˢᵇᴍFile;
+private static readonly @string syscallConnˢᵇᴍFile = "SyscallConn"u8;
 
 // SyscallConn returns a raw file.
 // This implements the syscall.Conn interface.
 internal static (syscall.RawConn, error) SyscallConnᴍ(ж<File> Ꮡf) {
-    var err = Ꮡf.checkValid(syscallConnˢ); if (err != nil) {
+    var err = Ꮡf.checkValid(syscallConnˢᴍFile); if (err != nil) {
         return (default, err);
     }
     var (ᴛ1, ᴛ2) = newRawConn(Ꮡf);
@@ -992,13 +992,13 @@ internal static (@string, error) ReadLinkᴍ(dirFS dir, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string osDirFSWithEmptyRootˢ => ref osDirFSWithEmptyRootˢᵇ;
-private static readonly @string osDirFSWithEmptyRootˢᵇ = "os: DirFS with empty root"u8;
+internal static ref readonly @string osDirFSWithEmptyRootˢᴍdirFS => ref osDirFSWithEmptyRootˢᵇᴍdirFS;
+private static readonly @string osDirFSWithEmptyRootˢᵇᴍdirFS = "os: DirFS with empty root"u8;
 
 // join returns the path for name in dir.
 internal static (@string, error) joinᴍ(dirFS dir, @string name) {
     if (dir == ""u8) {
-        return ("", errors.New(osDirFSWithEmptyRootˢ));
+        return ("", errors.New(osDirFSWithEmptyRootˢᴍdirFS));
     }
     (name, var err) = filepathlite.Localize(name);
     if (err != nil) {

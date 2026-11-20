@@ -13,12 +13,12 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string objectˢ => ref objectˢᵇ;
-private static readonly @string objectˢᵇ = "object"u8;
-internal static ref readonly @string fieldˢ => ref fieldˢᵇ;
-private static readonly @string fieldˢᵇ = "field"u8;
-internal static ref readonly @string methodˢ => ref methodˢᵇ;
-private static readonly @string methodˢᵇ = "method"u8;
+internal static ref readonly @string objectˢᴍChecker => ref objectˢᵇᴍChecker;
+private static readonly @string objectˢᵇᴍChecker = "object"u8;
+internal static ref readonly @string fieldˢᴍChecker => ref fieldˢᵇᴍChecker;
+private static readonly @string fieldˢᵇᴍChecker = "field"u8;
+internal static ref readonly @string methodˢᴍChecker => ref methodˢᵇᴍChecker;
+private static readonly @string methodˢᵇᴍChecker = "method"u8;
 
 // lookupError returns a case-specific error when a lookup of selector sel in the
 // given type fails but an object with alternative spelling (case folding) is found.
@@ -96,14 +96,14 @@ internal static @string lookupErrorᴍ(ж<Checker> Ꮡcheck, Type typ, @string s
             return Ꮡcheck.sprintf("cannot refer to unexported field %s in struct literal of type %s", alt, typ);
         }}
     } else {
-        @string what = objectˢ;
+        @string what = objectˢᴍChecker;
         switch (obj.type()) {
         case ж<Var>: {
-            what = fieldˢ;
+            what = fieldˢᴍChecker;
             break;
         }
         case ж<Func>: {
-            what = methodˢ;
+            what = methodˢᴍChecker;
             break;
         }}
         switch (e) {

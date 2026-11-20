@@ -25,10 +25,10 @@ partial struct typeUnit {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeUnitLengthOverflowˢ => ref typeUnitLengthOverflowˢᵇ;
-private static readonly @string typeUnitLengthOverflowˢᵇ = "type unit length overflow"u8;
-internal static ref readonly @string typeUnitTypeOffsetˢ => ref typeUnitTypeOffsetˢᵇ;
-private static readonly @string typeUnitTypeOffsetˢᵇ = "type unit type offset overflow"u8;
+internal static ref readonly @string typeUnitLengthOverflowˢᴍData => ref typeUnitLengthOverflowˢᵇᴍData;
+private static readonly @string typeUnitLengthOverflowˢᵇᴍData = "type unit length overflow"u8;
+internal static ref readonly @string typeUnitTypeOffsetˢᴍData => ref typeUnitTypeOffsetˢᵇᴍData;
+private static readonly @string typeUnitTypeOffsetˢᵇᴍData = "type unit type offset overflow"u8;
 
 // Parse a .debug_types section.
 internal static error parseTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> types) {
@@ -39,7 +39,7 @@ internal static error parseTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> typ
         var @base = b.off;
         var (n, dwarf64) = b.unitLength();
         if (n != ((Offset)(uint32)n)) {
-            b.error(typeUnitLengthOverflowˢ);
+            b.error(typeUnitLengthOverflowˢᴍData);
             return b.err;
         }
         var hdroff = b.off;
@@ -67,7 +67,7 @@ internal static error parseTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> typ
         } else {
             var to64 = b.uint64();
             if (to64 != (uint64)(uint32)to64) {
-                b.error(typeUnitTypeOffsetˢ);
+                b.error(typeUnitTypeOffsetˢᴍData);
                 return b.err;
             }
             toff = (uint32)to64;

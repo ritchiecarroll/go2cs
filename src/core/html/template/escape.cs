@@ -147,10 +147,10 @@ private static readonly @string filterFailsafeᵇ = "ZgotmplZ"u8;
 } partial class template_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
-private static readonly @string rangeˢᵇ = "range"u8;
-internal static ref readonly @string withˢ => ref withˢᵇ;
-private static readonly @string withˢᵇ = "with"u8;
+internal static ref readonly @string rangeˢᴍescaper => ref rangeˢᵇᴍescaper;
+private static readonly @string rangeˢᵇᴍescaper = "range"u8;
+internal static ref readonly @string withˢᴍescaper => ref withˢᵇᴍescaper;
+private static readonly @string withˢᵇᴍescaper = "with"u8;
 
 // escape escapes a template node.
 internal static context escapeᴍ(ref escaper e, context c, parse.Node n) {
@@ -178,7 +178,7 @@ internal static context escapeᴍ(ref escaper e, context c, parse.Node n) {
         return e.escapeList(c, nΔ1);
     }
     case ж<parse.RangeNode> nΔ1: {
-        return e.escapeBranch(c, nΔ1.ᏑBranchNode, rangeˢ);
+        return e.escapeBranch(c, nΔ1.ᏑBranchNode, rangeˢᴍescaper);
     }
     case ж<parse.TemplateNode> nΔ1: {
         return e.escapeTemplate(c, nΔ1);
@@ -187,7 +187,7 @@ internal static context escapeᴍ(ref escaper e, context c, parse.Node n) {
         return e.escapeText(c, nΔ1);
     }
     case ж<parse.WithNode> nΔ1: {
-        return e.escapeBranch(c, nΔ1.ᏑBranchNode, withˢ);
+        return e.escapeBranch(c, nΔ1.ᏑBranchNode, withˢᴍescaper);
     }}
     throw panic("escaping " + n.String() + " is unimplemented");
 }

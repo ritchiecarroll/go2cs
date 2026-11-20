@@ -42,12 +42,12 @@ internal static ж<nssConf> getSystemNSS() {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string etcNsswitchConfˢ => ref etcNsswitchConfˢᵇ;
-private static readonly @string etcNsswitchConfˢᵇ = "/etc/nsswitch.conf"u8;
+internal static ref readonly @string etcNsswitchConfˢᴍnsswitchConfig => ref etcNsswitchConfˢᵇᴍnsswitchConfig;
+private static readonly @string etcNsswitchConfˢᵇᴍnsswitchConfig = "/etc/nsswitch.conf"u8;
 
 // init initializes conf and is only called via conf.initOnce.
 internal static void initᴍ(ref nsswitchConfig conf) {
-    conf.nssConf = parseNSSConfFile(etcNsswitchConfˢ);
+    conf.nssConf = parseNSSConfFile(etcNsswitchConfˢᴍnsswitchConfig);
     conf.lastChecked = time.Now();
     conf.ch = new channel<EmptyStruct>(1);
 }
@@ -149,10 +149,10 @@ partial struct nssCriterion {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string returnˢ => ref returnˢᵇ;
-private static readonly @string returnˢᵇ = "return"u8;
-internal static ref readonly @string continueˢ => ref continueˢᵇ;
-private static readonly @string continueˢᵇ = "continue"u8;
+internal static ref readonly @string returnˢᴍnssCriterion => ref returnˢᵇᴍnssCriterion;
+private static readonly @string returnˢᵇᴍnssCriterion = "return"u8;
+internal static ref readonly @string continueˢᴍnssCriterion => ref continueˢᵇᴍnssCriterion;
+private static readonly @string continueˢᵇᴍnssCriterion = "continue"u8;
 
 // standardStatusAction reports whether c is equivalent to not
 // specifying the criterion at all. last is whether this criteria is the
@@ -165,11 +165,11 @@ internal static bool standardStatusActionᴍ(nssCriterion c, bool last) {
     var exprᴛ1 = c.status;
     switch (ᐧ) {
     case {} when exprᴛ1 == "success"u8: {
-        def = returnˢ;
+        def = returnˢᴍnssCriterion;
         break;
     }
     case {} when exprᴛ1 == "notfound"u8 || exprᴛ1 == "unavail"u8 || exprᴛ1 == "tryagain"u8: {
-        def = continueˢ;
+        def = continueˢᴍnssCriterion;
         break;
     }
     default: {

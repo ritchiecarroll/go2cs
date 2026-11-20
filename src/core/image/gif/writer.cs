@@ -142,16 +142,16 @@ internal static void writeByteᴍ(ref encoder e, byte b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gif89aˢ => ref gif89aˢᵇ;
-private static readonly @string gif89aˢᵇ = "GIF89a"u8;
-internal static ref readonly @string netscape20ˢ => ref netscape20ˢᵇ;
-private static readonly @string netscape20ˢᵇ = "NETSCAPE2.0"u8;
+internal static ref readonly @string gif89aˢᴍencoder => ref gif89aˢᵇᴍencoder;
+private static readonly @string gif89aˢᵇᴍencoder = "GIF89a"u8;
+internal static ref readonly @string netscape20ˢᴍencoder => ref netscape20ˢᵇᴍencoder;
+private static readonly @string netscape20ˢᵇᴍencoder = "NETSCAPE2.0"u8;
 
 internal static void writeHeaderᴍ(ref encoder e) {
     if (e.err != nil) {
         return;
     }
-    (_, e.err) = io.WriteString(e.w, gif89aˢ);
+    (_, e.err) = io.WriteString(e.w, gif89aˢᴍencoder);
     if (e.err != nil) {
         return;
     }
@@ -189,7 +189,7 @@ internal static void writeHeaderᴍ(ref encoder e) {
         e.buf[1] = 0xff; // Application Label.
         e.buf[2] = 0x0b; // Block Size.
         e.write(e.buf[..3]);
-        var (_, err) = io.WriteString(e.w, netscape20ˢ); // Application Identifier.
+        var (_, err) = io.WriteString(e.w, netscape20ˢᴍencoder); // Application Identifier.
         if (err != nil && e.err == nil) {
             e.err = err;
             return;
@@ -253,14 +253,14 @@ internal static bool colorTablesMatchᴍ(ref encoder e, nint localLen, nint tran
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gifCannotEncodeImageˢ => ref gifCannotEncodeImageˢᵇ;
-private static readonly @string gifCannotEncodeImageˢᵇ = "gif: cannot encode image block with empty palette"u8;
-internal static ref readonly @string gifImageBlockIsTooLargeˢ => ref gifImageBlockIsTooLargeˢᵇ;
-private static readonly @string gifImageBlockIsTooLargeˢᵇ = "gif: image block is too large to encode"u8;
-internal static ref readonly @string gifImageBlockIsOutOfˢ => ref gifImageBlockIsOutOfˢᵇ;
-private static readonly @string gifImageBlockIsOutOfˢᵇ = "gif: image block is out of bounds"u8;
-internal static ref readonly @string gifCannotEncodeColorˢ2 => ref gifCannotEncodeColorˢ2ᵇ;
-private static readonly @string gifCannotEncodeColorˢ2ᵇ = "gif: cannot encode color table with nil entries"u8;
+internal static ref readonly @string gifCannotEncodeImageˢᴍencoder => ref gifCannotEncodeImageˢᵇᴍencoder;
+private static readonly @string gifCannotEncodeImageˢᵇᴍencoder = "gif: cannot encode image block with empty palette"u8;
+internal static ref readonly @string gifImageBlockIsTooLargeˢᴍencoder => ref gifImageBlockIsTooLargeˢᵇᴍencoder;
+private static readonly @string gifImageBlockIsTooLargeˢᵇᴍencoder = "gif: image block is too large to encode"u8;
+internal static ref readonly @string gifImageBlockIsOutOfˢᴍencoder => ref gifImageBlockIsOutOfˢᵇᴍencoder;
+private static readonly @string gifImageBlockIsOutOfˢᵇᴍencoder = "gif: image block is out of bounds"u8;
+internal static ref readonly @string gifCannotEncodeColorˢ2ᴍencoder => ref gifCannotEncodeColorˢ2ᵇᴍencoder;
+private static readonly @string gifCannotEncodeColorˢ2ᵇᴍencoder = "gif: cannot encode color table with nil entries"u8;
 
 internal static void writeImageBlockᴍ(ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -271,24 +271,24 @@ internal static void writeImageBlockᴍ(ж<encoder> Ꮡe, ж<image.Paletted> Ꮡ
     }
 
     if (len(pm.Palette) == 0) {
-        e.err = errors.New(gifCannotEncodeImageˢ);
+        e.err = errors.New(gifCannotEncodeImageˢᴍencoder);
         return;
     }
 
     var b = pm.Bounds();
     if (b.Min.X < 0 || b.Max.X >= 1 << 16 || b.Min.Y < 0 || b.Max.Y >= 1 << 16) {
-        e.err = errors.New(gifImageBlockIsTooLargeˢ);
+        e.err = errors.New(gifImageBlockIsTooLargeˢᴍencoder);
         return;
     }
     if (!b.In(new image.Rectangle(Max: new image.Point(e.g.Config.Width, e.g.Config.Height)))) {
-        e.err = errors.New(gifImageBlockIsOutOfˢ);
+        e.err = errors.New(gifImageBlockIsOutOfˢᴍencoder);
         return;
     }
 
     nint transparentIndex = -1;
     foreach (var (i, c) in range<Δcolor.Color>(pm.Palette)) {
         if (c == nil) {
-            e.err = errors.New(gifCannotEncodeColorˢ2);
+            e.err = errors.New(gifCannotEncodeColorˢ2ᴍencoder);
             return;
         }
         var (_, _, _, a) = c.RGBA(); if (a == 0) {

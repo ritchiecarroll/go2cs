@@ -126,8 +126,8 @@ internal static error incHiᴍ(ж<Writer> Ꮡw) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwInputByteTooLargeForˢ => ref lzwInputByteTooLargeForˢᵇ;
-private static readonly @string lzwInputByteTooLargeForˢᵇ = "lzw: input byte too large for the litWidth"u8;
+internal static ref readonly @string lzwInputByteTooLargeForˢᴍWriter => ref lzwInputByteTooLargeForˢᵇᴍWriter;
+private static readonly @string lzwInputByteTooLargeForˢᵇᴍWriter = "lzw: input byte too large for the litWidth"u8;
 
 // Write writes a compressed representation of p to w's underlying writer.
 internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡw, slice<byte> p) {
@@ -143,7 +143,7 @@ internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡw, slice<byte> p) {
     var maxLit = (uint8)(((uint8)1).Lsh(w.litWidth) - 1); if (maxLit != 0xff) {
         foreach (var (_, x) in range(p)) {
             if (x > maxLit) {
-                w.err = errors.New(lzwInputByteTooLargeForˢ);
+                w.err = errors.New(lzwInputByteTooLargeForˢᴍWriter);
                 return (0, w.err);
             }
         }
@@ -293,8 +293,8 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
 } partial class lzw_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwUnknownOrderˢ => ref lzwUnknownOrderˢᵇ;
-private static readonly @string lzwUnknownOrderˢᵇ = "lzw: unknown order"u8;
+internal static ref readonly @string lzwUnknownOrderˢᴍWriter => ref lzwUnknownOrderˢᵇᴍWriter;
+private static readonly @string lzwUnknownOrderˢᵇᴍWriter = "lzw: unknown order"u8;
 
 internal static void initᴍ(ref Writer w, io.Writer dst, Order order, nint litWidth) {
     switch (order) {
@@ -307,7 +307,7 @@ internal static void initᴍ(ref Writer w, io.Writer dst, Order order, nint litW
         break;
     }
     default: {
-        w.err = errors.New(lzwUnknownOrderˢ);
+        w.err = errors.New(lzwUnknownOrderˢᴍWriter);
         return;
     }}
     if (litWidth < 2 || 8 < litWidth) {

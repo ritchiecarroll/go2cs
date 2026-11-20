@@ -719,14 +719,14 @@ internal static void decodeMapᴍ(ref Decoder dec, reflect.Type mtyp, ж<decoder
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noErrorˢ => ref noErrorˢᵇ;
-private static readonly @string noErrorˢᵇ = "no error"u8;
+internal static ref readonly @string noErrorˢᴍDecoder => ref noErrorˢᵇᴍDecoder;
+private static readonly @string noErrorˢᵇᴍDecoder = "no error"u8;
 
 // ignoreArrayHelper does the work for discarding arrays and slices.
 internal static void ignoreArrayHelperᴍ(ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflect.Value> elemOp, nint length) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    var instr = Ꮡ(new decInstr(elemOp, 0, default, errors.New(noErrorˢ)));
+    var instr = Ꮡ(new decInstr(elemOp, 0, default, errors.New(noErrorˢᴍDecoder)));
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
             errorf("decoding array or slice: length exceeds input size (%d elements)", length);
@@ -750,8 +750,8 @@ internal static void ignoreMapᴍ(ref Decoder dec, ж<decoderState> Ꮡstate, Ac
     ref var state = ref Ꮡstate.DerefOrNull();
 
     nint n = (nint)state.decodeUint();
-    var keyInstr = Ꮡ(new decInstr(keyOp, 0, default, errors.New(noErrorˢ)));
-    var elemInstr = Ꮡ(new decInstr(elemOp, 0, default, errors.New(noErrorˢ)));
+    var keyInstr = Ꮡ(new decInstr(keyOp, 0, default, errors.New(noErrorˢᴍDecoder)));
+    var elemInstr = Ꮡ(new decInstr(elemOp, 0, default, errors.New(noErrorˢᴍDecoder)));
     for (nint i = 0; i < n; i++) {
         keyOp(keyInstr, Ꮡstate, noValue);
         elemOp(elemInstr, Ꮡstate, noValue);
@@ -1084,8 +1084,8 @@ internal static nint maxIgnoreNestingDepth = 10000;
 } partial class gob_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidNestingDepthˢ => ref invalidNestingDepthˢᵇ;
-private static readonly @string invalidNestingDepthˢᵇ = "invalid nesting depth"u8;
+internal static ref readonly @string invalidNestingDepthˢᴍDecoder => ref invalidNestingDepthˢᵇᴍDecoder;
+private static readonly @string invalidNestingDepthˢᵇᴍDecoder = "invalid nesting depth"u8;
 
 // decIgnoreOpFor returns the decoding op for a field that has no destination.
 internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgnoreOpForᴍ(ж<Decoder> Ꮡdec, typeId wireId, map<typeId, ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>>> inProgress) {
@@ -1099,7 +1099,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflect.Value>> decIgn
             Ꮡdec.Value.ignoreDepth--;
         }, ref ᒐ);
         if (dec.ignoreDepth > maxIgnoreNestingDepth) {
-            error_(errors.New(invalidNestingDepthˢ));
+            error_(errors.New(invalidNestingDepthˢᴍDecoder));
         }
         // If this type is already in progress, it's a recursive type (e.g. map[string]*T).
         // Return the pointer to the op we're already building.

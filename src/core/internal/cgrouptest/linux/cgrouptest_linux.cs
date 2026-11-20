@@ -35,21 +35,21 @@ internal static @string Pathᴍ(ref CgroupV2 c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cpuMaxˢ => ref cpuMaxˢᵇ;
-private static readonly @string cpuMaxˢᵇ = "cpu.max"u8;
+internal static ref readonly @string cpuMaxˢᴍCgroupV2 => ref cpuMaxˢᵇᴍCgroupV2;
+private static readonly @string cpuMaxˢᵇᴍCgroupV2 = "cpu.max"u8;
 
 // Path to cpu.max.
 internal static @string CPUMaxPathᴍ(ref CgroupV2 c) {
-    return filepath.Join(c.path, cpuMaxˢ);
+    return filepath.Join(c.path, cpuMaxˢᴍCgroupV2);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string maxˢ => ref maxˢᵇ;
-private static readonly @string maxˢᵇ = "max"u8;
+internal static ref readonly @string maxˢᴍCgroupV2 => ref maxˢᵇᴍCgroupV2;
+private static readonly @string maxˢᵇᴍCgroupV2 = "max"u8;
 
 // Set cpu.max. Pass -1 for quota to disable the limit.
 internal static error SetCPUMaxᴍ(ref CgroupV2 c, int64 quota, int64 period) {
-    @string q = maxˢ;
+    @string q = maxˢᴍCgroupV2;
     if (quota >= 0) {
         q = strconv.FormatInt(quota, 10);
     }

@@ -81,8 +81,8 @@ internal static uintptr argBytesᴍ(ref stkframe frame) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string reflectMismatchˢ => ref reflectMismatchˢᵇ;
-private static readonly @string reflectMismatchˢᵇ = "reflect mismatch"u8;
+internal static ref readonly @string reflectMismatchˢᴍstkframe => ref reflectMismatchˢᵇᴍstkframe;
+private static readonly @string reflectMismatchˢᵇᴍstkframe = "reflect mismatch"u8;
 
 // argMapInternal is used internally by stkframe to fetch special
 // argument maps.
@@ -134,7 +134,7 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternalᴍ(re
             // empty.
             if (frame.pc != f.entry()) {
                 print((@string)"runtime: confused by ", funcname(f), (@string)": no frame (sp=", (hex)(uint64)frame.sp, (@string)" fp=", (hex)(uint64)frame.fp, (@string)") at entry+", (hex)(uint64)(frame.pc - f.entry()), (@string)"\n");
-                @throw(reflectMismatchˢ);
+                @throw(reflectMismatchˢᴍstkframe);
             }
             return (new bitvector(), false); // No locals, so also no stack objects
         }
@@ -146,7 +146,7 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternalᴍ(re
         var retValid = ~@unsafe.Pointer.To<bool>((@unsafe.Pointer)(arg0 + (uintptr)(4 * goarch.PtrSize)));
         if (mv.fn != f.entry()) {
             print((@string)"runtime: confused by ", funcname(f), (@string)"\n");
-            @throw(reflectMismatchˢ);
+            @throw(reflectMismatchˢᴍstkframe);
         }
         argMap = mv.stack.Value;
         if (!retValid) {
@@ -163,10 +163,10 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternalᴍ(re
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingStackmapˢ => ref missingStackmapˢᵇ;
-private static readonly @string missingStackmapˢᵇ = "missing stackmap"u8;
-internal static ref readonly @string badSymbolTableˢ => ref badSymbolTableˢᵇ;
-private static readonly @string badSymbolTableˢᵇ = "bad symbol table"u8;
+internal static ref readonly @string missingStackmapˢᴍstkframe => ref missingStackmapˢᵇᴍstkframe;
+private static readonly @string missingStackmapˢᵇᴍstkframe = "missing stackmap"u8;
+internal static ref readonly @string badSymbolTableˢᴍstkframe => ref badSymbolTableˢᵇᴍstkframe;
+private static readonly @string badSymbolTableˢᵇᴍstkframe = "bad symbol table"u8;
 
 // getStackMap returns the locals and arguments live pointer maps, and
 // stack object list for frame.
@@ -215,14 +215,14 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         var stkmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
         if (stkmap == nil || stkmap.n <= 0) {
             print((@string)"runtime: frame ", funcname(f), (@string)" untyped locals ", (hex)(uint64)(frame.varp - size), (@string)"+", (hex)(uint64)size, (@string)"\n");
-            @throw(missingStackmapˢ);
+            @throw(missingStackmapˢᴍstkframe);
         }
         // If nbit == 0, there's no work to do.
         if (stkmap.nbit > 0) {
             if (stackid < 0 || stackid >= stkmap.n) {
                 // don't know where we are
                 print((@string)"runtime: pcdata is ", stackid, (@string)" and ", stkmap.n, (@string)" locals stack map entries for ", funcname(f), (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
-                @throw(badSymbolTableˢ);
+                @throw(badSymbolTableˢᴍstkframe);
             }
             locals = stackmapdata(stkmap, stackid);
             if (stackDebug >= 3 && debug) {
@@ -242,12 +242,12 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         var stackmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
         if (stackmap == nil || stackmap.n <= 0) {
             print((@string)"runtime: frame ", funcname(f), (@string)" untyped args ", (hex)(uint64)frame.argp, (@string)"+", (hex)(uint64)(args.n * (int32)goarch.PtrSize), (@string)"\n");
-            @throw(missingStackmapˢ);
+            @throw(missingStackmapˢᴍstkframe);
         }
         if (pcdata < 0 || pcdata >= stackmap.n) {
             // don't know where we are
             print((@string)"runtime: pcdata is ", pcdata, (@string)" and ", stackmap.n, (@string)" args stack map entries for ", funcname(f), (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
-            @throw(badSymbolTableˢ);
+            @throw(badSymbolTableˢᴍstkframe);
         }
         if (stackmap.nbit == 0) {
             args.n = 0;

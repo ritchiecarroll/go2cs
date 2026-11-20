@@ -67,7 +67,7 @@ internal static nint /*nbreaks*/ linebreakᴍ(ж<printer> Ꮡp, nint line, nint 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object setCommentFoundPendingˢ = (@string)"setComment found pending comments"u8;
+internal static readonly object setCommentFoundPendingˢᴍprinter = (@string)"setComment found pending comments"u8;
 
 // setComment sets g as the next comment if g != nil and if node comments
 // are enabled - this mode is used when printing source code fragments such
@@ -90,7 +90,7 @@ internal static void setCommentᴍ(ж<printer> Ꮡp, ж<ast.CommentGroup> Ꮡg) 
         Ꮡp.flush(p.posFor(g.List[0].Pos()), token.ILLEGAL);
         p.comments = p.comments[0..1];
         // in debug mode, report error
-        p.internalError(setCommentFoundPendingˢ);
+        p.internalError(setCommentFoundPendingˢᴍprinter);
     }
     p.comments[0] = Ꮡg;
     p.cindex = 0;
@@ -541,8 +541,8 @@ internal static void setLineCommentᴍ(ж<printer> Ꮡp, @string text) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string containsFilteredOrˢ => ref containsFilteredOrˢᵇ;
-private static readonly @string containsFilteredOrˢᵇ = "// contains filtered or unexported methods"u8;
+internal static ref readonly @string containsFilteredOrˢᴍprinter => ref containsFilteredOrˢᵇᴍprinter;
+private static readonly @string containsFilteredOrˢᵇᴍprinter = "// contains filtered or unexported methods"u8;
 
 internal static void fieldListᴍ(ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfields, bool isStruct, bool isIncomplete) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -689,7 +689,7 @@ internal static void fieldListᴍ(ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfields,
                 Ꮡp.print(formfeed);
             }
             Ꮡp.flush(p.posFor(rbrace), token.RBRACE); // make sure we don't lose the last line comment
-            Ꮡp.setLineComment(containsFilteredOrˢ);
+            Ꮡp.setLineComment(containsFilteredOrˢᴍprinter);
         }
     }
     Ꮡp.print(unindent, formfeed);
@@ -889,8 +889,8 @@ internal static bool isBinary(ast.Expr expr) {
 } partial class printer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object badExprˢ = (@string)"BadExpr"u8;
-internal static readonly object depth1ˢ = (@string)"depth < 1:"u8;
+internal static readonly object badExprˢᴍprinter = (@string)"BadExpr"u8;
+internal static readonly object depth1ˢᴍprinter = (@string)"depth < 1:"u8;
 
 internal static void expr1ᴍ(ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -900,7 +900,7 @@ internal static void expr1ᴍ(ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint 
 
     switch (expr.type()) {
     case ж<ast.BadExpr> x: {
-        Ꮡp.print(badExprˢ);
+        Ꮡp.print(badExprˢᴍprinter);
         break;
     }
     case ж<ast.Ident> x: {
@@ -909,7 +909,7 @@ internal static void expr1ᴍ(ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint 
     }
     case ж<ast.BinaryExpr> x: {
         if (depth < 1) {
-            p.internalError(depth1ˢ, depth);
+            p.internalError(depth1ˢᴍprinter, depth);
             depth = 1;
         }
         Ꮡp.binaryExpr(x, prec1, cutoff(ref (x).DerefOrNull(), depth), depth);
@@ -1501,7 +1501,7 @@ internal static bool indentListᴍ(ref printer p, slice<ast.Expr> list) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object badStmtˢ = (@string)"BadStmt"u8;
+internal static readonly object badStmtˢᴍprinter = (@string)"BadStmt"u8;
 
 internal static void stmtᴍ(ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrace) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -1510,7 +1510,7 @@ internal static void stmtᴍ(ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrace)
 
     switch (stmt.type()) {
     case ж<ast.BadStmt> s: {
-        Ꮡp.print(badStmtˢ);
+        Ꮡp.print(badStmtˢᴍprinter);
         break;
     }
     case ж<ast.DeclStmt> s: {
@@ -1886,7 +1886,7 @@ internal static ж<ast.BasicLit> sanitizeImportPath(ж<ast.BasicLit> Ꮡlit) {
 } partial class printer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object expectedN1Gotˢ = (@string)"expected n = 1; got"u8;
+internal static readonly object expectedN1Gotˢᴍprinter = (@string)"expected n = 1; got"u8;
 
 // The parameter n is the number of specs in the group. If doIndent is set,
 // multi-line identifier lists in the spec are indented when the first
@@ -1908,7 +1908,7 @@ internal static void specᴍ(ж<printer> Ꮡp, ast.Spec spec, nint n, bool doInd
     }
     case ж<ast.ValueSpec> s: {
         if (n != 1) {
-            p.internalError(expectedN1Gotˢ, n);
+            p.internalError(expectedN1Gotˢᴍprinter, n);
         }
         Ꮡp.setComment(s.Doc);
         Ꮡp.identList(s.Names, doIndent); // always present
@@ -2175,7 +2175,7 @@ internal static void funcDeclᴍ(ж<printer> Ꮡp, ж<ast.FuncDecl> Ꮡd) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object badDeclˢ = (@string)"BadDecl"u8;
+internal static readonly object badDeclˢᴍprinter = (@string)"BadDecl"u8;
 
 internal static void declᴍ(ж<printer> Ꮡp, ast.Decl decl) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -2183,7 +2183,7 @@ internal static void declᴍ(ж<printer> Ꮡp, ast.Decl decl) {
     switch (decl.type()) {
     case ж<ast.BadDecl> d: {
         p.setPos(d.Pos());
-        Ꮡp.print(badDeclˢ);
+        Ꮡp.print(badDeclˢᴍprinter);
         break;
     }
     case ж<ast.GenDecl> d: {

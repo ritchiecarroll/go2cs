@@ -70,17 +70,17 @@ internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoSha1InvalidHashˢ => ref cryptoSha1InvalidHashˢᵇ;
-private static readonly @string cryptoSha1InvalidHashˢᵇ = "crypto/sha1: invalid hash state identifier"u8;
-internal static ref readonly @string cryptoSha1InvalidHashˢ2 => ref cryptoSha1InvalidHashˢ2ᵇ;
-private static readonly @string cryptoSha1InvalidHashˢ2ᵇ = "crypto/sha1: invalid hash state size"u8;
+internal static ref readonly @string cryptoSha1InvalidHashˢᴍdigest => ref cryptoSha1InvalidHashˢᵇᴍdigest;
+private static readonly @string cryptoSha1InvalidHashˢᵇᴍdigest = "crypto/sha1: invalid hash state identifier"u8;
+internal static ref readonly @string cryptoSha1InvalidHashˢ2ᴍdigest => ref cryptoSha1InvalidHashˢ2ᵇᴍdigest;
+private static readonly @string cryptoSha1InvalidHashˢ2ᵇᴍdigest = "crypto/sha1: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
-        return errors.New(cryptoSha1InvalidHashˢ);
+        return errors.New(cryptoSha1InvalidHashˢᴍdigest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(cryptoSha1InvalidHashˢ2);
+        return errors.New(cryptoSha1InvalidHashˢ2ᴍdigest);
     }
     b = b[(int)(len(magic))..];
     (b, d.h[0]) = consumeUint32(b);
@@ -143,8 +143,8 @@ internal static nint Sizeᴍ(ref digest d) { return sha1.Size; }
 internal static nint BlockSizeᴍ(ref digest d) { return sha1.BlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoSha1UseOfSha1IsNotˢ => ref cryptoSha1UseOfSha1IsNotˢᵇ;
-private static readonly @string cryptoSha1UseOfSha1IsNotˢᵇ = "crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoSha1UseOfSha1IsNotˢᴍdigest => ref cryptoSha1UseOfSha1IsNotˢᵇᴍdigest;
+private static readonly @string cryptoSha1UseOfSha1IsNotˢᵇᴍdigest = "crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode"u8;
 
 internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default;
@@ -152,7 +152,7 @@ internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
-        return (0, errors.New(cryptoSha1UseOfSha1IsNotˢ));
+        return (0, errors.New(cryptoSha1UseOfSha1IsNotˢᴍdigest));
     }
     boring.Unreachable();
     nn = len(p);

@@ -127,10 +127,10 @@ internal static void initᴍ(ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotTraceUserGoroutineˢ => ref cannotTraceUserGoroutineˢᵇ;
-private static readonly @string cannotTraceUserGoroutineˢᵇ = "cannot trace user goroutine on its own stack"u8;
-internal static ref readonly @string unknownPcˢ => ref unknownPcˢᵇ;
-private static readonly @string unknownPcˢᵇ = "unknown pc"u8;
+internal static ref readonly @string cannotTraceUserGoroutineˢᴍunwinder => ref cannotTraceUserGoroutineˢᵇᴍunwinder;
+private static readonly @string cannotTraceUserGoroutineˢᵇᴍunwinder = "cannot trace user goroutine on its own stack"u8;
+internal static ref readonly @string unknownPcˢᴍunwinder => ref unknownPcˢᵇᴍunwinder;
+private static readonly @string unknownPcˢᵇᴍunwinder = "unknown pc"u8;
 
 internal static void initAtᴍ(ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
     ref var u = ref Ꮡu.DerefOrNull();
@@ -151,7 +151,7 @@ internal static void initAtᴍ(ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uint
         // accepts an sp for the current goroutine (typically obtained by
         // calling GetCallerSP) must not run on that goroutine's stack but
         // instead on the g0 stack.
-        @throw(cannotTraceUserGoroutineˢ);
+        @throw(cannotTraceUserGoroutineˢᴍunwinder);
     }
 
     if (pc0 == ~(uintptr)0 && sp0 == ~(uintptr)0) { // Signal to fetch saved values from gp.
@@ -210,7 +210,7 @@ internal static void initAtᴍ(ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uint
             tracebackHexdump(gp.stack, Ꮡframe, 0);
         }
         if ((unwindFlags)(flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0) {
-            @throw(unknownPcˢ);
+            @throw(unknownPcˢᴍunwinder);
         }
         u = new unwinder();
         return;
@@ -235,8 +235,8 @@ internal static bool validᴍ(ref unwinder u) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tracebackˢ => ref tracebackˢᵇ;
-private static readonly @string tracebackˢᵇ = "traceback"u8;
+internal static ref readonly @string tracebackˢᴍunwinder => ref tracebackˢᵇᴍunwinder;
+private static readonly @string tracebackˢᵇᴍunwinder = "traceback"u8;
 
 // resolveInternal fills in u.frame based on u.frame.fn, pc, and sp.
 //
@@ -377,7 +377,7 @@ internal static void resolveInternalᴍ(ж<unwinder> Ꮡu, bool innermost, bool 
         //  F   F   T  | ignore SPWrite
         if ((unwindFlags)(u.flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0 && !innermost) {
             println((@string)"traceback: unexpected SPWRITE function", funcname(f));
-            @throw(tracebackˢ);
+            @throw(tracebackˢᴍunwinder);
         }
         frame.lr = 0;
     } else {
@@ -461,10 +461,10 @@ internal static bool isInjectedCall(abi.FuncID id) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownCallerPcˢ => ref unknownCallerPcˢᵇ;
-private static readonly @string unknownCallerPcˢᵇ = "unknown caller pc"u8;
-internal static ref readonly @string tracebackStuckˢ => ref tracebackStuckˢᵇ;
-private static readonly @string tracebackStuckˢᵇ = "traceback stuck"u8;
+internal static ref readonly @string unknownCallerPcˢᴍunwinder => ref unknownCallerPcˢᵇᴍunwinder;
+private static readonly @string unknownCallerPcˢᵇᴍunwinder = "unknown caller pc"u8;
+internal static ref readonly @string tracebackStuckˢᴍunwinder => ref tracebackStuckˢᵇᴍunwinder;
+private static readonly @string tracebackStuckˢᵇᴍunwinder = "traceback stuck"u8;
 
 internal static void nextᴍ(ж<unwinder> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
@@ -498,7 +498,7 @@ internal static void nextᴍ(ж<unwinder> Ꮡu) {
             tracebackHexdump((~gp).stack, frame, 0);
         }
         if (fail) {
-            @throw(unknownCallerPcˢ);
+            @throw(unknownCallerPcˢᴍunwinder);
         }
         frame.lr = 0;
         u.finishInternal();
@@ -509,7 +509,7 @@ internal static void nextᴍ(ж<unwinder> Ꮡu) {
         // If the next frame is identical to the current frame, we cannot make progress.
         print((@string)"runtime: traceback stuck. pc=", (hex)(uint64)frame.pc, (@string)" sp=", (hex)(uint64)frame.sp, (@string)"\n");
         tracebackHexdump((~gp).stack, frame, frame.sp);
-        @throw(tracebackStuckˢ);
+        @throw(tracebackStuckˢᴍunwinder);
     }
 
     var injectedCall = isInjectedCall(f.funcID);
@@ -546,8 +546,8 @@ internal static void nextᴍ(ж<unwinder> Ꮡu) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tracebackDidNotUnwindˢ => ref tracebackDidNotUnwindˢᵇ;
-private static readonly @string tracebackDidNotUnwindˢᵇ = "traceback did not unwind completely"u8;
+internal static ref readonly @string tracebackDidNotUnwindˢᴍunwinder => ref tracebackDidNotUnwindˢᵇᴍunwinder;
+private static readonly @string tracebackDidNotUnwindˢᵇᴍunwinder = "traceback did not unwind completely"u8;
 
 // finishInternal is an unwinder-internal helper called after the stack has been
 // exhausted. It sets the unwinder to an invalid state and checks that it
@@ -599,7 +599,7 @@ internal static void finishInternalᴍ(ref unwinder u) {
     if ((unwindFlags)(u.flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0 && u.frame.sp != (~gp).stktopsp) {
         print((@string)"runtime: g", (~gp).goid, (@string)": frame.sp=", (hex)(uint64)u.frame.sp, (@string)" top=", (hex)(uint64)(~gp).stktopsp, (@string)"\n");
         print((@string)"\tstack=[", (hex)(uint64)(~gp).stack.lo, (@string)"-", (hex)(uint64)(~gp).stack.hi, (@string)"\n");
-        @throw(tracebackDidNotUnwindˢ);
+        @throw(tracebackDidNotUnwindˢᴍunwinder);
     }
 }
 

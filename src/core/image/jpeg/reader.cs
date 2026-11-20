@@ -313,25 +313,25 @@ internal static error ignoreᴍ(ref decoder d, nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string multipleSofMarkersˢ => ref multipleSofMarkersˢᵇ;
-private static readonly @string multipleSofMarkersˢᵇ = "multiple SOF markers"u8;
-internal static ref readonly @string numberOfComponentsˢ => ref numberOfComponentsˢᵇ;
-private static readonly @string numberOfComponentsˢᵇ = "number of components"u8;
-internal static ref readonly @string precisionˢ => ref precisionˢᵇ;
-private static readonly @string precisionˢᵇ = "precision"u8;
-internal static ref readonly @string sofHasWrongLengthˢ => ref sofHasWrongLengthˢᵇ;
-private static readonly @string sofHasWrongLengthˢᵇ = "SOF has wrong length"u8;
-internal static ref readonly @string repeatedComponentˢ => ref repeatedComponentˢᵇ;
-private static readonly @string repeatedComponentˢᵇ = "repeated component identifier"u8;
-internal static ref readonly @string badTqValueˢ => ref badTqValueˢᵇ;
-private static readonly @string badTqValueˢᵇ = "bad Tq value"u8;
-internal static ref readonly @string lumaChromaSubsamplingˢ => ref lumaChromaSubsamplingˢᵇ;
-private static readonly @string lumaChromaSubsamplingˢᵇ = "luma/chroma subsampling ratio"u8;
+internal static ref readonly @string multipleSofMarkersˢᴍdecoder => ref multipleSofMarkersˢᵇᴍdecoder;
+private static readonly @string multipleSofMarkersˢᵇᴍdecoder = "multiple SOF markers"u8;
+internal static ref readonly @string numberOfComponentsˢᴍdecoder => ref numberOfComponentsˢᵇᴍdecoder;
+private static readonly @string numberOfComponentsˢᵇᴍdecoder = "number of components"u8;
+internal static ref readonly @string precisionˢᴍdecoder => ref precisionˢᵇᴍdecoder;
+private static readonly @string precisionˢᵇᴍdecoder = "precision"u8;
+internal static ref readonly @string sofHasWrongLengthˢᴍdecoder => ref sofHasWrongLengthˢᵇᴍdecoder;
+private static readonly @string sofHasWrongLengthˢᵇᴍdecoder = "SOF has wrong length"u8;
+internal static ref readonly @string repeatedComponentˢᴍdecoder => ref repeatedComponentˢᵇᴍdecoder;
+private static readonly @string repeatedComponentˢᵇᴍdecoder = "repeated component identifier"u8;
+internal static ref readonly @string badTqValueˢᴍdecoder => ref badTqValueˢᵇᴍdecoder;
+private static readonly @string badTqValueˢᵇᴍdecoder = "bad Tq value"u8;
+internal static ref readonly @string lumaChromaSubsamplingˢᴍdecoder => ref lumaChromaSubsamplingˢᵇᴍdecoder;
+private static readonly @string lumaChromaSubsamplingˢᵇᴍdecoder = "luma/chroma subsampling ratio"u8;
 
 // Specified in section B.2.2.
 internal static error processSOFᴍ(ref decoder d, nint n) {
     if (d.nComp != 0) {
-        return ((FormatError)(@string)multipleSofMarkersˢ);
+        return ((FormatError)(@string)multipleSofMarkersˢᴍdecoder);
     }
     switch (n) {
     case var ᴛ when ᴛ == 6 + 3 * 1: { // Grayscale image.
@@ -347,19 +347,19 @@ internal static error processSOFᴍ(ref decoder d, nint n) {
         break;
     }
     default: {
-        return ((UnsupportedError)(@string)numberOfComponentsˢ);
+        return ((UnsupportedError)(@string)numberOfComponentsˢᴍdecoder);
     }}
     var err = d.readFull(d.tmp.slice(0, n)); if (err != nil) {
         return err;
     }
     // We only support 8-bit precision.
     if (d.tmp[0] != 8) {
-        return ((UnsupportedError)(@string)precisionˢ);
+        return ((UnsupportedError)(@string)precisionˢᴍdecoder);
     }
     d.height = ((nint)d.tmp[1] << 8) + (nint)d.tmp[2];
     d.width = ((nint)d.tmp[3] << 8) + (nint)d.tmp[4];
     if ((nint)d.tmp[5] != d.nComp) {
-        return ((FormatError)(@string)sofHasWrongLengthˢ);
+        return ((FormatError)(@string)sofHasWrongLengthˢᴍdecoder);
     }
 
     for (nint i = 0; i < d.nComp; i++) {
@@ -368,20 +368,20 @@ internal static error processSOFᴍ(ref decoder d, nint n) {
         // the values of C_1 through C_(i-1)".
         for (nint j = 0; j < i; j++) {
             if (d.comp[i].c == d.comp[j].c) {
-                return ((FormatError)(@string)repeatedComponentˢ);
+                return ((FormatError)(@string)repeatedComponentˢᴍdecoder);
             }
         }
 
         d.comp[i].tq = d.tmp[8 + 3 * i];
         if (d.comp[i].tq > maxTq) {
-            return ((FormatError)(@string)badTqValueˢ);
+            return ((FormatError)(@string)badTqValueˢᴍdecoder);
         }
 
         var hv = d.tmp[7 + 3 * i];
         nint h = (nint)(hv >> 4);
         nint v = (nint)((byte)(hv & 0x0f));
         if (h < 1 || 4 < h || v < 1 || 4 < v) {
-            return ((FormatError)(@string)lumaChromaSubsamplingˢ);
+            return ((FormatError)(@string)lumaChromaSubsamplingˢᴍdecoder);
         }
         if (h == 3 || v == 3) {
             return errUnsupportedSubsamplingRatio;
@@ -473,10 +473,10 @@ internal static error processSOFᴍ(ref decoder d, nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badPqValueˢ => ref badPqValueˢᵇ;
-private static readonly @string badPqValueˢᵇ = "bad Pq value"u8;
-internal static ref readonly @string dqtHasWrongLengthˢ => ref dqtHasWrongLengthˢᵇ;
-private static readonly @string dqtHasWrongLengthˢᵇ = "DQT has wrong length"u8;
+internal static ref readonly @string badPqValueˢᴍdecoder => ref badPqValueˢᵇᴍdecoder;
+private static readonly @string badPqValueˢᵇᴍdecoder = "bad Pq value"u8;
+internal static ref readonly @string dqtHasWrongLengthˢᴍdecoder => ref dqtHasWrongLengthˢᵇᴍdecoder;
+private static readonly @string dqtHasWrongLengthˢᵇᴍdecoder = "DQT has wrong length"u8;
 
 // Specified in section B.2.4.1.
 internal static error processDQTᴍ(ref decoder d, nint n) {
@@ -489,11 +489,11 @@ loop:
         }
         var tq = (byte)(x & 0x0f);
         if (tq > maxTq) {
-            return ((FormatError)(@string)badTqValueˢ);
+            return ((FormatError)(@string)badTqValueˢᴍdecoder);
         }
         switch ((x >> 4)) {
         default: {
-            return ((FormatError)(@string)badPqValueˢ);
+            return ((FormatError)(@string)badPqValueˢᴍdecoder);
         }
         case 0: {
             if (n < blockSize) {
@@ -525,19 +525,19 @@ continue_loop:;
     }
 break_loop:;
     if (n != 0) {
-        return ((FormatError)(@string)dqtHasWrongLengthˢ);
+        return ((FormatError)(@string)dqtHasWrongLengthˢᴍdecoder);
     }
     return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string driHasWrongLengthˢ => ref driHasWrongLengthˢᵇ;
-private static readonly @string driHasWrongLengthˢᵇ = "DRI has wrong length"u8;
+internal static ref readonly @string driHasWrongLengthˢᴍdecoder => ref driHasWrongLengthˢᵇᴍdecoder;
+private static readonly @string driHasWrongLengthˢᵇᴍdecoder = "DRI has wrong length"u8;
 
 // Specified in section B.2.4.4.
 internal static error processDRIᴍ(ref decoder d, nint n) {
     if (n != 2) {
-        return ((FormatError)(@string)driHasWrongLengthˢ);
+        return ((FormatError)(@string)driHasWrongLengthˢᴍdecoder);
     }
     var err = d.readFull(d.tmp[..2]); if (err != nil) {
         return err;
@@ -584,14 +584,14 @@ internal static error processApp14Markerᴍ(ref decoder d, nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingSoiMarkerˢ => ref missingSoiMarkerˢᵇ;
-private static readonly @string missingSoiMarkerˢᵇ = "missing SOI marker"u8;
-internal static ref readonly @string shortSegmentLengthˢ => ref shortSegmentLengthˢᵇ;
-private static readonly @string shortSegmentLengthˢᵇ = "short segment length"u8;
-internal static ref readonly @string unknownMarkerˢ => ref unknownMarkerˢᵇ;
-private static readonly @string unknownMarkerˢᵇ = "unknown marker"u8;
-internal static ref readonly @string missingSosMarkerˢ => ref missingSosMarkerˢᵇ;
-private static readonly @string missingSosMarkerˢᵇ = "missing SOS marker"u8;
+internal static ref readonly @string missingSoiMarkerˢᴍdecoder => ref missingSoiMarkerˢᵇᴍdecoder;
+private static readonly @string missingSoiMarkerˢᵇᴍdecoder = "missing SOI marker"u8;
+internal static ref readonly @string shortSegmentLengthˢᴍdecoder => ref shortSegmentLengthˢᵇᴍdecoder;
+private static readonly @string shortSegmentLengthˢᵇᴍdecoder = "short segment length"u8;
+internal static ref readonly @string unknownMarkerˢᴍdecoder => ref unknownMarkerˢᵇᴍdecoder;
+private static readonly @string unknownMarkerˢᵇᴍdecoder = "unknown marker"u8;
+internal static ref readonly @string missingSosMarkerˢᴍdecoder => ref missingSosMarkerˢᵇᴍdecoder;
+private static readonly @string missingSosMarkerˢᵇᴍdecoder = "missing SOS marker"u8;
 
 // decode reads a JPEG image from r and returns it as an image.Image.
 internal static (image.Image, error) decodeᴍ(ref decoder d, io.Reader r, bool configOnly) {
@@ -604,7 +604,7 @@ internal static (image.Image, error) decodeᴍ(ref decoder d, io.Reader r, bool 
         }
     }
     if (d.tmp[0] != 0xff || d.tmp[1] != soiMarker) {
-        return (default, ((FormatError)(@string)missingSoiMarkerˢ));
+        return (default, ((FormatError)(@string)missingSoiMarkerˢᴍdecoder));
     }
 
     // Process the remaining segments until the End Of Image marker.
@@ -673,7 +673,7 @@ internal static (image.Image, error) decodeᴍ(ref decoder d, io.Reader r, bool 
         }
         nint n = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1] - 2;
         if (n < 0) {
-            return (default, ((FormatError)(@string)shortSegmentLengthˢ));
+            return (default, ((FormatError)(@string)shortSegmentLengthˢᴍdecoder));
         }
 
         switch (marker) {
@@ -729,9 +729,9 @@ internal static (image.Image, error) decodeᴍ(ref decoder d, io.Reader r, bool 
             if (app0Marker <= marker && marker <= app15Marker || marker == comMarker) {
                 err = d.ignore(n);
             } else if (marker < 0xc0) { // See Table B.1 "Marker code assignments".
-                err = ((FormatError)(@string)unknownMarkerˢ);
+                err = ((FormatError)(@string)unknownMarkerˢᴍdecoder);
             } else {
-                err = ((UnsupportedError)(@string)unknownMarkerˢ);
+                err = ((UnsupportedError)(@string)unknownMarkerˢᴍdecoder);
             }
             break;
         }}
@@ -756,7 +756,7 @@ internal static (image.Image, error) decodeᴍ(ref decoder d, io.Reader r, bool 
         }
         return (new image.YCbCrжImage(d.img3), default);
     }
-    return (default, ((FormatError)(@string)missingSosMarkerˢ));
+    return (default, ((FormatError)(@string)missingSosMarkerˢᴍdecoder));
 }
 
 } partial class jpeg_package {
@@ -769,8 +769,8 @@ internal partial struct applyBlack_translations /*dyn*/ {
 } partial class jpeg_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownColorModel4ˢ => ref unknownColorModel4ˢᵇ;
-private static readonly @string unknownColorModel4ˢᵇ = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
+internal static ref readonly @string unknownColorModel4ˢᴍdecoder => ref unknownColorModel4ˢᵇᴍdecoder;
+private static readonly @string unknownColorModel4ˢᵇᴍdecoder = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
 
 // applyBlack combines d.img3 and d.blackPix into a CMYK image. The formula
 // used depends on whether the JPEG image is stored as CMYK or YCbCrK,
@@ -781,7 +781,7 @@ private static readonly @string unknownColorModel4ˢᵇ = "unknown color model: 
 // inversion is a no-op, so inversions might be implicit in the code below.
 internal static (image.Image, error) applyBlackᴍ(ref decoder d) {
     if (!d.adobeTransformValid) {
-        return (default, ((UnsupportedError)(@string)unknownColorModel4ˢ));
+        return (default, ((UnsupportedError)(@string)unknownColorModel4ˢᴍdecoder));
     }
 
     // If the 4-component JPEG image isn't explicitly marked as "Unknown (RGB

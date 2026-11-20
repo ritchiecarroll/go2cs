@@ -822,8 +822,8 @@ internal static absSeconds absSecᴍ(Time t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string utcˢ => ref utcˢᵇ;
-private static readonly @string utcˢᵇ = "UTC"u8;
+internal static ref readonly @string utcˢᴍTime => ref utcˢᵇᴍTime;
+private static readonly @string utcˢᵇᴍTime = "UTC"u8;
 
 // locabs is a combination of the Zone and abs methods,
 // extracting both return values from a single zone lookup.
@@ -847,7 +847,7 @@ internal static (@string name, nint offset, absSeconds abs) locabsᴍ(Time t) {
         }
         sec += (int64)offset;
     } else {
-        name = utcˢ;
+        name = utcˢᴍTime;
     }
     abs = (absSeconds)(uint64)(sec + (9223372028741760000L));
     return (name, offset, abs);
@@ -1566,8 +1566,8 @@ internal const byte timeBinaryVersionV2 = 2;                // For LMT only
 } partial class time_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeMarshalBinaryˢ => ref timeMarshalBinaryˢᵇ;
-private static readonly @string timeMarshalBinaryˢᵇ = "Time.MarshalBinary: unexpected zone offset"u8;
+internal static ref readonly @string timeMarshalBinaryˢᴍTime => ref timeMarshalBinaryˢᵇᴍTime;
+private static readonly @string timeMarshalBinaryˢᵇᴍTime = "Time.MarshalBinary: unexpected zone offset"u8;
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
 internal static (slice<byte>, error) AppendBinaryᴍ(Time t, slice<byte> b) {
@@ -1586,7 +1586,7 @@ internal static (slice<byte>, error) AppendBinaryᴍ(Time t, slice<byte> b) {
 
         offset /= 60;
         if (offset < -32768 || offset == -1 || offset > 32767) {
-            return (b, errors.New(timeMarshalBinaryˢ));
+            return (b, errors.New(timeMarshalBinaryˢᴍTime));
         }
         offsetMin = (int16)offset;
     }
@@ -1625,23 +1625,23 @@ internal static (slice<byte>, error) MarshalBinaryᴍ(Time t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeUnmarshalBinaryNoˢ => ref timeUnmarshalBinaryNoˢᵇ;
-private static readonly @string timeUnmarshalBinaryNoˢᵇ = "Time.UnmarshalBinary: no data"u8;
-internal static ref readonly @string timeUnmarshalBinaryˢ => ref timeUnmarshalBinaryˢᵇ;
-private static readonly @string timeUnmarshalBinaryˢᵇ = "Time.UnmarshalBinary: unsupported version"u8;
-internal static ref readonly @string timeUnmarshalBinaryˢ2 => ref timeUnmarshalBinaryˢ2ᵇ;
-private static readonly @string timeUnmarshalBinaryˢ2ᵇ = "Time.UnmarshalBinary: invalid length"u8;
+internal static ref readonly @string timeUnmarshalBinaryNoˢᴍTime => ref timeUnmarshalBinaryNoˢᵇᴍTime;
+private static readonly @string timeUnmarshalBinaryNoˢᵇᴍTime = "Time.UnmarshalBinary: no data"u8;
+internal static ref readonly @string timeUnmarshalBinaryˢᴍTime => ref timeUnmarshalBinaryˢᵇᴍTime;
+private static readonly @string timeUnmarshalBinaryˢᵇᴍTime = "Time.UnmarshalBinary: unsupported version"u8;
+internal static ref readonly @string timeUnmarshalBinaryˢ2ᴍTime => ref timeUnmarshalBinaryˢ2ᵇᴍTime;
+private static readonly @string timeUnmarshalBinaryˢ2ᵇᴍTime = "Time.UnmarshalBinary: invalid length"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 internal static error UnmarshalBinaryᴍ(ref Time t, slice<byte> data) {
     var buf = data;
     if (len(buf) == 0) {
-        return errors.New(timeUnmarshalBinaryNoˢ);
+        return errors.New(timeUnmarshalBinaryNoˢᴍTime);
     }
 
     var version = buf[0];
     if (version != timeBinaryVersionV1 && version != timeBinaryVersionV2) {
-        return errors.New(timeUnmarshalBinaryˢ);
+        return errors.New(timeUnmarshalBinaryˢᴍTime);
     }
 
     nint wantLen = 1 + /*sec*/ 8 + /*nsec*/ 4 + /*zone offset*/ 2;
@@ -1650,7 +1650,7 @@ internal static error UnmarshalBinaryᴍ(ref Time t, slice<byte> data) {
         wantLen++;
     }
     if (len(buf) != wantLen) {
-        return errors.New(timeUnmarshalBinaryˢ2);
+        return errors.New(timeUnmarshalBinaryˢ2ᴍTime);
     }
 
     buf = buf[1..];
@@ -1710,8 +1710,8 @@ internal static (slice<byte>, error) MarshalJSONᴍ(Time t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeUnmarshalJSONInputIsˢ => ref timeUnmarshalJSONInputIsˢᵇ;
-private static readonly @string timeUnmarshalJSONInputIsˢᵇ = "Time.UnmarshalJSON: input is not a JSON string"u8;
+internal static ref readonly @string timeUnmarshalJSONInputIsˢᴍTime => ref timeUnmarshalJSONInputIsˢᵇᴍTime;
+private static readonly @string timeUnmarshalJSONInputIsˢᵇᴍTime = "Time.UnmarshalJSON: input is not a JSON string"u8;
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
 // The time must be a quoted string in the RFC 3339 format.
@@ -1721,7 +1721,7 @@ internal static error UnmarshalJSONᴍ(ref Time t, slice<byte> data) {
     }
     // TODO(https://go.dev/issue/47353): Properly unescape a JSON string.
     if (len(data) < 2 || data[0] != '"' || data[len(data) - 1] != '"') {
-        return errors.New(timeUnmarshalJSONInputIsˢ);
+        return errors.New(timeUnmarshalJSONInputIsˢᴍTime);
     }
     data = data.slice(len(@""""), len(data) - len(@""""));
     error err = default;
@@ -1738,27 +1738,27 @@ internal static (slice<byte>, error) appendToᴍ(Time t, slice<byte> b, @string 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeAppendTextˢ => ref timeAppendTextˢᵇ;
-private static readonly @string timeAppendTextˢᵇ = "Time.AppendText: "u8;
+internal static ref readonly @string timeAppendTextˢᴍTime => ref timeAppendTextˢᵇᴍTime;
+private static readonly @string timeAppendTextˢᵇᴍTime = "Time.AppendText: "u8;
 
 // AppendText implements the [encoding.TextAppender] interface.
 // The time is formatted in RFC 3339 format with sub-second precision.
 // If the timestamp cannot be represented as valid RFC 3339
 // (e.g., the year is out of range), then an error is returned.
 internal static (slice<byte>, error) AppendTextᴍ(Time t, slice<byte> b) {
-    return t.appendTo(b, timeAppendTextˢ);
+    return t.appendTo(b, timeAppendTextˢᴍTime);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeMarshalTextˢ => ref timeMarshalTextˢᵇ;
-private static readonly @string timeMarshalTextˢᵇ = "Time.MarshalText: "u8;
+internal static ref readonly @string timeMarshalTextˢᴍTime => ref timeMarshalTextˢᵇᴍTime;
+private static readonly @string timeMarshalTextˢᵇᴍTime = "Time.MarshalText: "u8;
 
 // MarshalText implements the [encoding.TextMarshaler] interface. The output
 // matches that of calling the [Time.AppendText] method.
 //
 // See [Time.AppendText] for more information.
 internal static (slice<byte>, error) MarshalTextᴍ(Time t) {
-    return t.appendTo(new slice<byte>(0, len(RFC3339Nano)), timeMarshalTextˢ);
+    return t.appendTo(new slice<byte>(0, len(RFC3339Nano)), timeMarshalTextˢᴍTime);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.

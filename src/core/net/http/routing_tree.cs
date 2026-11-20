@@ -137,8 +137,8 @@ internal static (ж<routingNode>, slice<@string>) matchᴍ(ж<routingNode> Ꮡro
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string getˢ => ref getˢᵇ;
-private static readonly @string getˢᵇ = "GET"u8;
+internal static ref readonly @string getˢᴍroutingNode => ref getˢᵇᴍroutingNode;
+private static readonly @string getˢᵇᴍroutingNode = "GET"u8;
 
 // matchMethodAndPath matches the method and path.
 // Its return values are the same as [routingNode.match].
@@ -157,7 +157,7 @@ internal static (ж<routingNode>, slice<@string>) matchMethodAndPathᴍ(ж<routi
     }
     if (method == "HEAD"u8) {
         // GET matches HEAD too.
-        var (l, m) = Ꮡn.findChild(getˢ).matchPath(path, default); if (l != nil) {
+        var (l, m) = Ꮡn.findChild(getˢᴍroutingNode).matchPath(path, default); if (l != nil) {
             return (l, m);
         }
     }
@@ -241,8 +241,8 @@ internal static (@string seg, @string rest) firstSegment(@string path) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string headˢ => ref headˢᵇ;
-private static readonly @string headˢᵇ = "HEAD"u8;
+internal static ref readonly @string headˢᴍroutingNode => ref headˢᵇᴍroutingNode;
+private static readonly @string headˢᵇᴍroutingNode = "HEAD"u8;
 
 // matchingMethods adds to methodSet all the methods that would result in a
 // match if passed to routingNode.match with the given host and path.
@@ -254,7 +254,7 @@ internal static void matchingMethodsᴍ(ж<routingNode> Ꮡroot, @string host, @
     }
     root.emptyChild.matchingMethodsPath(path, methodSet);
     if (methodSet[getˢ]) {
-        methodSet[headˢ] = true;
+        methodSet[headˢᴍroutingNode] = true;
     }
 }
 

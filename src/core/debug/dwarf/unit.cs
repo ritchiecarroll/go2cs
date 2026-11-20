@@ -76,8 +76,8 @@ internal static uint64 locListsBaseᴍ(ref unit u) {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unitLengthOverflowˢ => ref unitLengthOverflowˢᵇ;
-private static readonly @string unitLengthOverflowˢᵇ = "unit length overflow"u8;
+internal static ref readonly @string unitLengthOverflowˢᴍData => ref unitLengthOverflowˢᵇᴍData;
+private static readonly @string unitLengthOverflowˢᵇᴍData = "unit length overflow"u8;
 
 internal static (slice<unit>, error) parseUnitsᴍ(ж<Data> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
@@ -88,7 +88,7 @@ internal static (slice<unit>, error) parseUnitsᴍ(ж<Data> Ꮡd) {
     while (len(b.data) > 0) {
         var (lenΔ1, _) = b.unitLength();
         if (lenΔ1 != ((Offset)(uint32)lenΔ1)) {
-            b.error(unitLengthOverflowˢ);
+            b.error(unitLengthOverflowˢᴍData);
             break;
         }
         b.skip((nint)lenΔ1);

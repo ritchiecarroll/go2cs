@@ -276,14 +276,14 @@ internal const bool debugReflectCall = false;
 } partial class reflect_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string reflectValueCallˢ => ref reflectValueCallˢᵇ;
-private static readonly @string reflectValueCallˢᵇ = "reflect.Value.Call"u8;
-internal static ref readonly @string precomputedStackArgˢ => ref precomputedStackArgˢᵇ;
-private static readonly @string precomputedStackArgˢᵇ = "precomputed stack arg offset"u8;
-internal static ref readonly @string precomputedValueOffsetˢ => ref precomputedValueOffsetˢᵇ;
-private static readonly @string precomputedValueOffsetˢᵇ = "precomputed value offset"u8;
-internal static ref readonly @string tvSize0ˢ => ref tvSize0ˢᵇ;
-private static readonly @string tvSize0ˢᵇ = "tv.Size() != 0"u8;
+internal static ref readonly @string reflectValueCallˢᴍValue => ref reflectValueCallˢᵇᴍValue;
+private static readonly @string reflectValueCallˢᵇᴍValue = "reflect.Value.Call"u8;
+internal static ref readonly @string precomputedStackArgˢᴍValue => ref precomputedStackArgˢᵇᴍValue;
+private static readonly @string precomputedStackArgˢᵇᴍValue = "precomputed stack arg offset"u8;
+internal static ref readonly @string precomputedValueOffsetˢᴍValue => ref precomputedValueOffsetˢᵇᴍValue;
+private static readonly @string precomputedValueOffsetˢᵇᴍValue = "precomputed value offset"u8;
+internal static ref readonly @string tvSize0ˢᴍValue => ref tvSize0ˢᵇᴍValue;
+private static readonly @string tvSize0ˢᵇᴍValue = "tv.Size() != 0"u8;
 
 internal static slice<Value> callᴍ(Value v, @string op, slice<Value> @in) {
     // Get function pointer, type.
@@ -425,13 +425,13 @@ internal static slice<Value> callᴍ(Value v, @string op, slice<Value> @in) {
         // TODO(mknyszek): Figure out if it's possible to get some
         // scratch space for this assignment check. Previously, it
         // was possible to use space in the argument frame.
-        vΔ1 = vΔ1.assignTo(reflectValueCallˢ, targ.Ꮡt, nil);
+        vΔ1 = vΔ1.assignTo(reflectValueCallˢᴍValue, targ.Ꮡt, nil);
 stepsLoop:
         foreach (var (_, st) in range(abid.call.stepsForValue(i + inStart))) {
             switch (st.kind) {
             case var ᴛ when ᴛ == abiStepStack: {
                 // Copy values to the "stack."
-                @unsafe.Pointer addr = add(stackArgs, st.stkOff, precomputedStackArgˢ);
+                @unsafe.Pointer addr = add(stackArgs, st.stkOff, precomputedStackArgˢᴍValue);
                 if ((flag)(vΔ1.flag & flagIndir) != 0) {
                     typedmemmove(targ.Ꮡt, addr, vΔ1.ptr);
                 } else {
@@ -444,7 +444,7 @@ stepsLoop:
             case var ᴛ when ᴛ == abiStepIntReg || ᴛ == abiStepPointer: {
                 // Copy values to "integer registers."
                 if ((flag)(vΔ1.flag & flagIndir) != 0) {
-                    @unsafe.Pointer offset = add(vΔ1.ptr, st.offset, precomputedValueOffsetˢ);
+                    @unsafe.Pointer offset = add(vΔ1.ptr, st.offset, precomputedValueOffsetˢᴍValue);
                     if (st.kind == abiStepPointer) {
                         // Duplicate this pointer in the pointer area of the
                         // register space. Otherwise, there's the potential for
@@ -466,7 +466,7 @@ stepsLoop:
                 if ((flag)(vΔ1.flag & flagIndir) == 0) {
                     throw panic("attempted to copy pointer to FP register");
                 }
-                @unsafe.Pointer offset = add(vΔ1.ptr, st.offset, precomputedValueOffsetˢ);
+                @unsafe.Pointer offset = add(vΔ1.ptr, st.offset, precomputedValueOffsetˢᴍValue);
                 floatToReg(ref regArgs, st.freg, st.size, offset);
                 break;
             }
@@ -534,7 +534,7 @@ break_stepsLoop:;
                     // allocated, the entire value is according to the ABI. So
                     // just make an indirection into the allocated frame.
                     var fl = (flag)(flagIndir | ((flag)(uintptr)tv.Kind()));
-                    ret[i] = new Value(tv, add(stackArgs, st.stkOff, tvSize0ˢ), fl);
+                    ret[i] = new Value(tv, add(stackArgs, st.stkOff, tvSize0ˢᴍValue), fl);
                     // Note: this does introduce false sharing between results -
                     // if any result is live, they are all live.
                     // (And the space for the args is live as well, but as we've
@@ -568,17 +568,17 @@ break_stepsLoop:;
             foreach (var (_, st) in range(steps)) {
                 switch (st.kind) {
                 case var ᴛ when ᴛ == abiStepIntReg: {
-                    @unsafe.Pointer offset = add(s, st.offset, precomputedValueOffsetˢ);
+                    @unsafe.Pointer offset = add(s, st.offset, precomputedValueOffsetˢᴍValue);
                     intFromReg(ᏑregArgs, st.ireg, st.size, offset);
                     break;
                 }
                 case var ᴛ when ᴛ == abiStepPointer: {
-                    @unsafe.Pointer sΔ2 = add(s, st.offset, precomputedValueOffsetˢ);
+                    @unsafe.Pointer sΔ2 = add(s, st.offset, precomputedValueOffsetˢᴍValue);
                     (@unsafe.Pointer.To<@unsafe.Pointer>(sΔ2)).Value = regArgs.Ptrs[st.ireg];
                     break;
                 }
                 case var ᴛ when ᴛ == abiStepFloatReg: {
-                    @unsafe.Pointer offset = add(s, st.offset, precomputedValueOffsetˢ);
+                    @unsafe.Pointer offset = add(s, st.offset, precomputedValueOffsetˢᴍValue);
                     floatFromReg(ᏑregArgs, st.freg, st.size, offset);
                     break;
                 }
@@ -1624,12 +1624,12 @@ internal static void SetPointerᴍ(Value v, @unsafe.Pointer x) {
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidValueˢ => ref invalidValueˢᵇ;
-private static readonly @string invalidValueˢᵇ = "<invalid Value>"u8;
+internal static ref readonly @string invalidValueˢᴍValue => ref invalidValueˢᵇᴍValue;
+private static readonly @string invalidValueˢᵇᴍValue = "<invalid Value>"u8;
 
 internal static @string stringNonStringᴍ(Value v) {
     if (v.kind() == Invalid) {
-        return invalidValueˢ;
+        return invalidValueˢᴍValue;
     }
     // If you call String on a reflect.Value of other type, it's better to
     // print something than to panic. Useful in debugging.

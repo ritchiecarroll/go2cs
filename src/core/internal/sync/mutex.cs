@@ -100,8 +100,8 @@ internal static bool TryLockᴍ(ж<Mutex> Ꮡm) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syncInconsistentMutexˢ => ref syncInconsistentMutexˢᵇ;
-private static readonly @string syncInconsistentMutexˢᵇ = "sync: inconsistent mutex state"u8;
+internal static ref readonly @string syncInconsistentMutexˢᴍMutex => ref syncInconsistentMutexˢᵇᴍMutex;
+private static readonly @string syncInconsistentMutexˢᵇᴍMutex = "sync: inconsistent mutex state"u8;
 
 internal static void lockSlowᴍ(ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
@@ -145,7 +145,7 @@ internal static void lockSlowᴍ(ж<Mutex> Ꮡm) {
             // The goroutine has been woken from sleep,
             // so we need to reset the flag in either case.
             if ((@new & (int32)mutexWoken) == 0) {
-                @throw(syncInconsistentMutexˢ);
+                @throw(syncInconsistentMutexˢᴍMutex);
             }
             @new &= ~(int32)(mutexWoken);
         }
@@ -167,7 +167,7 @@ internal static void lockSlowᴍ(ж<Mutex> Ꮡm) {
                 // inconsistent state: mutexLocked is not set and we are still
                 // accounted as waiter. Fix that.
                 if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexWoken))) != 0 || old >> (int)(mutexWaiterShift) == 0) {
-                    @throw(syncInconsistentMutexˢ);
+                    @throw(syncInconsistentMutexˢᴍMutex);
                 }
                 var delta = (int32)(mutexLocked - (1 << (int)(mutexWaiterShift)));
                 if (!starving || old >> (int)(mutexWaiterShift) == 1) {
@@ -214,14 +214,14 @@ internal static void Unlockᴍ(ж<Mutex> Ꮡm) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syncUnlockOfUnlockedˢ => ref syncUnlockOfUnlockedˢᵇ;
-private static readonly @string syncUnlockOfUnlockedˢᵇ = "sync: unlock of unlocked mutex"u8;
+internal static ref readonly @string syncUnlockOfUnlockedˢᴍMutex => ref syncUnlockOfUnlockedˢᵇᴍMutex;
+private static readonly @string syncUnlockOfUnlockedˢᵇᴍMutex = "sync: unlock of unlocked mutex"u8;
 
 internal static void unlockSlowᴍ(ж<Mutex> Ꮡm, int32 @new) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (((@new + (int32)mutexLocked) & (int32)mutexLocked) == 0) {
-        fatal(syncUnlockOfUnlockedˢ);
+        fatal(syncUnlockOfUnlockedˢᴍMutex);
     }
     if ((@new & (int32)mutexStarving) == 0) {
         var old = @new;

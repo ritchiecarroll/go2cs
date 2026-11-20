@@ -27,14 +27,14 @@ partial struct Func {
 } partial class asmgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string funcˢ => ref funcˢᵇ;
-private static readonly @string funcˢᵇ = "func "u8;
+internal static ref readonly @string funcˢᴍAsm => ref funcˢᵇᴍAsm;
+private static readonly @string funcˢᵇᴍAsm = "func "u8;
 
 // Func starts a new function in the assembly output.
 internal static ж<Func> Funcᴍ(ж<Asm> Ꮡa, @string decl) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    var (d, ok) = strings.CutPrefix(decl, funcˢ);
+    var (d, ok) = strings.CutPrefix(decl, funcˢᴍAsm);
     if (!ok) {
         Ꮡa.Fatalf("func decl does not begin with 'func '");
     }

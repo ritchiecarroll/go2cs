@@ -42,23 +42,23 @@ internal static uintptr traceRegionAllocBlockData => /* 64<<10 - unsafe.Sizeof(t
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string traceRegionAllocTooLargeˢ => ref traceRegionAllocTooLargeˢᵇ;
-private static readonly @string traceRegionAllocTooLargeˢᵇ = "traceRegion: alloc too large"u8;
-internal static ref readonly @string traceRegionAllocWithˢ => ref traceRegionAllocWithˢᵇ;
-private static readonly @string traceRegionAllocWithˢᵇ = "traceRegion: alloc with concurrent drop"u8;
-internal static ref readonly @string traceArenaAllocˢ => ref traceArenaAllocˢᵇ;
-private static readonly @string traceArenaAllocˢᵇ = "trace arena alloc"u8;
-internal static ref readonly @string traceRegionOutOfMemoryˢ => ref traceRegionOutOfMemoryˢᵇ;
-private static readonly @string traceRegionOutOfMemoryˢᵇ = "traceRegion: out of memory"u8;
+internal static ref readonly @string traceRegionAllocTooLargeˢᴍtraceRegionAlloc => ref traceRegionAllocTooLargeˢᵇᴍtraceRegionAlloc;
+private static readonly @string traceRegionAllocTooLargeˢᵇᴍtraceRegionAlloc = "traceRegion: alloc too large"u8;
+internal static ref readonly @string traceRegionAllocWithˢᴍtraceRegionAlloc => ref traceRegionAllocWithˢᵇᴍtraceRegionAlloc;
+private static readonly @string traceRegionAllocWithˢᵇᴍtraceRegionAlloc = "traceRegion: alloc with concurrent drop"u8;
+internal static ref readonly @string traceArenaAllocˢᴍtraceRegionAlloc => ref traceArenaAllocˢᵇᴍtraceRegionAlloc;
+private static readonly @string traceArenaAllocˢᵇᴍtraceRegionAlloc = "trace arena alloc"u8;
+internal static ref readonly @string traceRegionOutOfMemoryˢᴍtraceRegionAlloc => ref traceRegionOutOfMemoryˢᵇᴍtraceRegionAlloc;
+private static readonly @string traceRegionOutOfMemoryˢᵇᴍtraceRegionAlloc = "traceRegion: out of memory"u8;
 
 // alloc allocates n-byte block. The block is always aligned to 8 bytes, regardless of platform.
 internal static ж<notInHeap> allocᴍ(ж<traceRegionAlloc> Ꮡa, uintptr n) {
     n = alignUp(n, 8);
     if (n > traceRegionAllocBlockData) {
-        @throw(traceRegionAllocTooLargeˢ);
+        @throw(traceRegionAllocTooLargeˢᴍtraceRegionAlloc);
     }
     if (Ꮡa.Ꮡdropping.Load()) {
-        @throw(traceRegionAllocWithˢ);
+        @throw(traceRegionAllocWithˢᴍtraceRegionAlloc);
     }
 
     // Try to bump-pointer allocate into the current block.
@@ -94,9 +94,9 @@ internal static ж<notInHeap> allocᴍ(ж<traceRegionAlloc> Ꮡa, uintptr n) {
         }
 
         // Allocate a new block.
-        Ꮡblock.ValueSlot = @unsafe.Pointer.To<traceRegionAllocBlock>(sysAlloc(/* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceArenaAllocˢ));
+        Ꮡblock.ValueSlot = @unsafe.Pointer.To<traceRegionAllocBlock>(sysAlloc(/* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceArenaAllocˢᴍtraceRegionAlloc));
         if (Ꮡblock.ValueSlot == nil) {
-            @throw(traceRegionOutOfMemoryˢ);
+            @throw(traceRegionOutOfMemoryˢᴍtraceRegionAlloc);
         }
 
         // Allocate space for our current request, so we always make

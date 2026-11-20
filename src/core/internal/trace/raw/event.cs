@@ -30,8 +30,8 @@ partial struct Event {
 } partial class raw_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string dataˢ => ref dataˢᵇ;
-private static readonly @string dataˢᵇ = "\n\tdata="u8;
+private static ref readonly @string dataˢᴍEvent => ref dataˢᵇᴍEvent;
+private static readonly @string dataˢᵇᴍEvent = "\n\tdata="u8;
 
 // String returns the canonical string representation of the event.
 //
@@ -62,7 +62,7 @@ internal static @string Stringᴍ(ref Event e) {
         }
     }
     if (e.Data != nil) {
-        Ꮡs.WriteString(dataˢ);
+        Ꮡs.WriteString(dataˢᴍEvent);
         Ꮡs.WriteString(strconv.Quote((@string)e.Data));
     }
     return s.String();

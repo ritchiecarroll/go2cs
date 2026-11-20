@@ -307,34 +307,34 @@ internal static bool shouldSendContentLengthᴍ(ref transferWriter t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
-private static readonly @string connectionˢᵇ = "Connection"u8;
-internal static ref readonly @string closeˢ => ref closeˢᵇ;
-private static readonly @string closeˢᵇ = "close"u8;
-internal static ref readonly @string connectionCloseˢ => ref connectionCloseˢᵇ;
-private static readonly @string connectionCloseˢᵇ = "Connection: close\r\n"u8;
-internal static ref readonly @string contentLengthˢ3 => ref contentLengthˢ3ᵇ;
-private static readonly @string contentLengthˢ3ᵇ = "Content-Length: "u8;
-internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
-private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
-internal static ref readonly @string transferEncodingChunkedˢ => ref transferEncodingChunkedˢᵇ;
-private static readonly @string transferEncodingChunkedˢᵇ = "Transfer-Encoding: chunked\r\n"u8;
-internal static ref readonly @string transferEncodingˢ => ref transferEncodingˢᵇ;
-private static readonly @string transferEncodingˢᵇ = "Transfer-Encoding"u8;
-internal static ref readonly @string invalidTrailerKeyˢ => ref invalidTrailerKeyˢᵇ;
-private static readonly @string invalidTrailerKeyˢᵇ = "invalid Trailer key"u8;
-internal static ref readonly @string trailerˢ => ref trailerˢᵇ;
-private static readonly @string trailerˢᵇ = "Trailer"u8;
+internal static ref readonly @string connectionˢᴍtransferWriter => ref connectionˢᵇᴍtransferWriter;
+private static readonly @string connectionˢᵇᴍtransferWriter = "Connection"u8;
+internal static ref readonly @string closeˢᴍtransferWriter => ref closeˢᵇᴍtransferWriter;
+private static readonly @string closeˢᵇᴍtransferWriter = "close"u8;
+internal static ref readonly @string connectionCloseˢᴍtransferWriter => ref connectionCloseˢᵇᴍtransferWriter;
+private static readonly @string connectionCloseˢᵇᴍtransferWriter = "Connection: close\r\n"u8;
+internal static ref readonly @string contentLengthˢ3ᴍtransferWriter => ref contentLengthˢ3ᵇᴍtransferWriter;
+private static readonly @string contentLengthˢ3ᵇᴍtransferWriter = "Content-Length: "u8;
+internal static ref readonly @string contentLengthˢᴍtransferWriter => ref contentLengthˢᵇᴍtransferWriter;
+private static readonly @string contentLengthˢᵇᴍtransferWriter = "Content-Length"u8;
+internal static ref readonly @string transferEncodingChunkedˢᴍtransferWriter => ref transferEncodingChunkedˢᵇᴍtransferWriter;
+private static readonly @string transferEncodingChunkedˢᵇᴍtransferWriter = "Transfer-Encoding: chunked\r\n"u8;
+internal static ref readonly @string transferEncodingˢᴍtransferWriter => ref transferEncodingˢᵇᴍtransferWriter;
+private static readonly @string transferEncodingˢᵇᴍtransferWriter = "Transfer-Encoding"u8;
+internal static ref readonly @string invalidTrailerKeyˢᴍtransferWriter => ref invalidTrailerKeyˢᵇᴍtransferWriter;
+private static readonly @string invalidTrailerKeyˢᵇᴍtransferWriter = "invalid Trailer key"u8;
+internal static ref readonly @string trailerˢᴍtransferWriter => ref trailerˢᵇᴍtransferWriter;
+private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
 
 internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
-    if (t.Close && !hasToken(t.Header.get(connectionˢ), closeˢ)) {
-        var (_, err) = io.WriteString(w, connectionCloseˢ); if (err != nil) {
+    if (t.Close && !hasToken(t.Header.get(connectionˢᴍtransferWriter), closeˢᴍtransferWriter)) {
+        var (_, err) = io.WriteString(w, connectionCloseˢᴍtransferWriter); if (err != nil) {
             return err;
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(connectionˢ, ["close"]);
+            trace.WroteHeaderField(connectionˢᴍtransferWriter, ["close"]);
         }
     }
 
@@ -343,7 +343,7 @@ internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httpt
     // TransferEncoding)
     if (t.shouldSendContentLength()) {
         {
-            var (_, err) = io.WriteString(w, contentLengthˢ3); if (err != nil) {
+            var (_, err) = io.WriteString(w, contentLengthˢ3ᴍtransferWriter); if (err != nil) {
                 return err;
             }
         }
@@ -353,14 +353,14 @@ internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httpt
             }
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(contentLengthˢ, slice<@string>([strconv.FormatInt(t.ContentLength, 10)]));
+            trace.WroteHeaderField(contentLengthˢᴍtransferWriter, slice<@string>([strconv.FormatInt(t.ContentLength, 10)]));
         }
     } else if (chunked(t.TransferEncoding)) {
-        var (_, err) = io.WriteString(w, transferEncodingChunkedˢ); if (err != nil) {
+        var (_, err) = io.WriteString(w, transferEncodingChunkedˢᴍtransferWriter); if (err != nil) {
             return err;
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(transferEncodingˢ, ["chunked"]);
+            trace.WroteHeaderField(transferEncodingˢᴍtransferWriter, ["chunked"]);
         }
     }
 
@@ -373,7 +373,7 @@ internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httpt
             k = CanonicalHeaderKey(k);
             switch (ᐧ) {
             case {} when k == "Transfer-Encoding"u8 || k == "Trailer"u8 || k == "Content-Length"u8: {
-                return badStringError(invalidTrailerKeyˢ, k);
+                return badStringError(invalidTrailerKeyˢᴍtransferWriter, k);
             }}
             keys = append(keys, k);
         }
@@ -385,7 +385,7 @@ internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httpt
                 return err;
             }
             if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-                trace.WroteHeaderField(trailerˢ, keys);
+                trace.WroteHeaderField(trailerˢᴍtransferWriter, keys);
             }
         }
     }
@@ -740,14 +740,14 @@ internal static bool isUnsupportedTEError(error err) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string transferEncodingˢ => ref transferEncodingˢᵇ;
-private static readonly @string transferEncodingˢᵇ = "Transfer-Encoding"u8;
-internal static ref readonly @string chunkedˢ => ref chunkedˢᵇ;
-private static readonly @string chunkedˢᵇ = "chunked"u8;
+internal static ref readonly @string transferEncodingˢᴍtransferReader => ref transferEncodingˢᵇᴍtransferReader;
+private static readonly @string transferEncodingˢᵇᴍtransferReader = "Transfer-Encoding"u8;
+internal static ref readonly @string chunkedˢᴍtransferReader => ref chunkedˢᵇᴍtransferReader;
+private static readonly @string chunkedˢᵇᴍtransferReader = "chunked"u8;
 
 // parseTransferEncoding sets t.Chunked based on the Transfer-Encoding header.
 internal static error parseTransferEncodingᴍ(ref transferReader t) {
-    var (raw, present) = t.Header[transferEncodingˢ, ꟷ];
+    var (raw, present) = t.Header[transferEncodingˢᴍtransferReader, ꟷ];
     if (!present) {
         return default;
     }
@@ -765,7 +765,7 @@ internal static error parseTransferEncodingᴍ(ref transferReader t) {
     if (len(raw) != 1) {
         return new unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(fmt.Sprintf("too many transfer encodings: %q"u8, raw))));
     }
-    if (!ascii.EqualFold(raw[0], chunkedˢ)) {
+    if (!ascii.EqualFold(raw[0], chunkedˢᴍtransferReader)) {
         return new unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(fmt.Sprintf("unsupported transfer encoding: %q"u8, raw[0]))));
     }
 
@@ -1065,8 +1065,8 @@ internal static error errTrailerEOF = errors.New("http: unexpected EOF reading t
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpSuspiciouslyLongˢ => ref httpSuspiciouslyLongˢᵇ;
-private static readonly @string httpSuspiciouslyLongˢᵇ = "http: suspiciously long trailer after chunked body"u8;
+internal static ref readonly @string httpSuspiciouslyLongˢᴍbody => ref httpSuspiciouslyLongˢᵇᴍbody;
+private static readonly @string httpSuspiciouslyLongˢᵇᴍbody = "http: suspiciously long trailer after chunked body"u8;
 
 internal static error readTrailerᴍ(ref body b) {
     // The common case, since nobody uses trailers.
@@ -1091,7 +1091,7 @@ internal static error readTrailerᴍ(ref body b) {
     // to the bufio.Reader's max size, looking for a double CRLF.
     // This limits the trailer to the underlying buffer size, typically 4kB.
     if (!seeUpcomingDoubleCRLF(b.r)) {
-        return errors.New(httpSuspiciouslyLongˢ);
+        return errors.New(httpSuspiciouslyLongˢᴍbody);
     }
 
     (var hdr, err) = textproto.NewReader(b.r).ReadMIMEHeader();

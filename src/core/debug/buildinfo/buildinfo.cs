@@ -603,8 +603,8 @@ partial struct xcoffExe {
 } partial class buildinfo_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string addressNotMappedˢ => ref addressNotMappedˢᵇ;
-private static readonly @string addressNotMappedˢᵇ = "address not mapped"u8;
+internal static ref readonly @string addressNotMappedˢᴍxcoffExe => ref addressNotMappedˢᵇᴍxcoffExe;
+private static readonly @string addressNotMappedˢᵇᴍxcoffExe = "address not mapped"u8;
 
 internal static (io.ReaderAt, error) DataReaderᴍ(ref xcoffExe x, uint64 addr) {
     foreach (var (_, sect) in range(x.f.Sections)) {
@@ -613,7 +613,7 @@ internal static (io.ReaderAt, error) DataReaderᴍ(ref xcoffExe x, uint64 addr) 
             return (new io.SectionReaderжReaderAt(io.NewSectionReader(new xcoff_SectionжReaderAt(sect), (int64)(addr - sect.VirtualAddress), (int64)remaining)), default);
         }
     }
-    return (default, errors.New(addressNotMappedˢ));
+    return (default, errors.New(addressNotMappedˢᴍxcoffExe));
 }
 
 internal static (uint64, uint64) DataStartᴍ(ref xcoffExe x) {
@@ -633,19 +633,19 @@ partial struct plan9objExe {
 } partial class buildinfo_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dataˢ => ref dataˢᵇ;
-private static readonly @string dataˢᵇ = "data"u8;
+internal static ref readonly @string dataˢᴍplan9objExe => ref dataˢᵇᴍplan9objExe;
+private static readonly @string dataˢᵇᴍplan9objExe = "data"u8;
 
 internal static (uint64, uint64) DataStartᴍ(ref plan9objExe x) {
-    var s = x.f.Section(dataˢ); if (s != nil) {
+    var s = x.f.Section(dataˢᴍplan9objExe); if (s != nil) {
         return ((uint64)s.Offset, (uint64)s.Size);
     }
     return (0, 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string addressNotMappedˢ => ref addressNotMappedˢᵇ;
-private static readonly @string addressNotMappedˢᵇ = "address not mapped"u8;
+internal static ref readonly @string addressNotMappedˢᴍplan9objExe => ref addressNotMappedˢᵇᴍplan9objExe;
+private static readonly @string addressNotMappedˢᵇᴍplan9objExe = "address not mapped"u8;
 
 internal static (io.ReaderAt, error) DataReaderᴍ(ref plan9objExe x, uint64 addr) {
     foreach (var (_, sect) in range(x.f.Sections)) {
@@ -654,7 +654,7 @@ internal static (io.ReaderAt, error) DataReaderᴍ(ref plan9objExe x, uint64 add
             return (new io.SectionReaderжReaderAt(io.NewSectionReader(new plan9obj_SectionжReaderAt(sect), (int64)(addr - (uint64)sect.Offset), (int64)remaining)), default);
         }
     }
-    return (default, errors.New(addressNotMappedˢ));
+    return (default, errors.New(addressNotMappedˢᴍplan9objExe));
 }
 
 }

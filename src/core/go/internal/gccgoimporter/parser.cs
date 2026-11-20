@@ -142,13 +142,13 @@ internal static @string parseStringᴍ(ref parser p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object unexpectedEofˢ = (@string)"unexpected EOF"u8;
+internal static readonly object unexpectedEofˢᴍparser = (@string)"unexpected EOF"u8;
 
 // unquotedString     = { unquotedStringChar } .
 // unquotedStringChar = <neither a whitespace nor a ';' char> .
 internal static @string parseUnquotedStringᴍ(ref parser p) {
     if (p.tok == scanner.EOF) {
-        p.error(unexpectedEofˢ);
+        p.error(unexpectedEofˢᴍparser);
     }
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     Ꮡb.WriteString(p.scanner.TokenText());
@@ -276,7 +276,7 @@ internal static types.Type deref(types.Type typ) {
 } partial class gccgoimporter_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object embeddedFieldExpectedˢ = (@string)"embedded field expected"u8;
+internal static readonly object embeddedFieldExpectedˢᴍparser = (@string)"embedded field expected"u8;
 
 // Field = Name Type [string] .
 internal static (ж<types.Var> field, @string tag) parseFieldᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
@@ -305,7 +305,7 @@ internal static (ж<types.Var> field, @string tag) parseFieldᴍ(ж<parser> Ꮡp
             }
             default: {
                 var typΔ1 = switchᴛ1;
-                p.error(embeddedFieldExpectedˢ);
+                p.error(embeddedFieldExpectedˢᴍparser);
                 break;
             }}
         }
@@ -318,10 +318,10 @@ internal static (ж<types.Var> field, @string tag) parseFieldᴍ(ж<parser> Ꮡp
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string retˢ => ref retˢᵇ;
-private static readonly @string retˢᵇ = "$ret"u8;
-internal static ref readonly @string escˢ => ref escˢᵇ;
-private static readonly @string escˢᵇ = "esc"u8;
+internal static ref readonly @string retˢᴍparser => ref retˢᵇᴍparser;
+private static readonly @string retˢᵇᴍparser = "$ret"u8;
+internal static ref readonly @string escˢᴍparser => ref escˢᵇᴍparser;
+private static readonly @string escˢᵇᴍparser = "esc"u8;
 
 // Param = Name ["..."] Type .
 internal static (ж<types.Var> param, bool isVariadic) parseParamᴍ(ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) {
@@ -331,13 +331,13 @@ internal static (ж<types.Var> param, bool isVariadic) parseParamᴍ(ж<parser> 
 
     @string name = p.parseName();
     // Ignore names invented for inlinable functions.
-    if (strings.HasPrefix(name, "p.") || strings.HasPrefix(name, "r.") || strings.HasPrefix(name, retˢ)) {
+    if (strings.HasPrefix(name, "p.") || strings.HasPrefix(name, "r.") || strings.HasPrefix(name, retˢᴍparser)) {
         name = ""u8;
     }
     if (p.tok == '<' && p.scanner.Peek() == 'e') {
         // EscInfo = "<esc:" int ">" . (optional and ignored)
         p.next();
-        p.expectKeyword(escˢ);
+        p.expectKeyword(escˢᴍparser);
         p.expect(':');
         p.expect(scanner.Int);
         p.expect('>');
@@ -373,8 +373,8 @@ internal static ж<types.Var> parseVarᴍ(ж<parser> Ꮡp, ж<types.Package> pkg
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string convertˢ => ref convertˢᵇ;
-private static readonly @string convertˢᵇ = "convert"u8;
+internal static ref readonly @string convertˢᴍparser => ref convertˢᵇᴍparser;
+private static readonly @string convertˢᵇᴍparser = "convert"u8;
 
 // Conversion = "convert" "(" Type "," ConstValue ")" .
 internal static (constant.Value val, types.Type typ) parseConversionᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
@@ -382,7 +382,7 @@ internal static (constant.Value val, types.Type typ) parseConversionᴍ(ж<parse
     types.Type typ = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
-    p.expectKeyword(convertˢ);
+    p.expectKeyword(convertˢᴍparser);
     p.expect('(');
     typ = Ꮡp.parseType(pkg);
     p.expect(',');
@@ -392,10 +392,10 @@ internal static (constant.Value val, types.Type typ) parseConversionᴍ(ж<parse
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object couldNotParseIntegerˢ = (@string)"could not parse integer literal"u8;
-internal static readonly object couldNotParseFloatˢ = (@string)"could not parse float literal"u8;
-internal static readonly object couldNotParseRealˢ = (@string)"could not parse real component of complex literal"u8;
-internal static readonly object couldNotParseImagˢ = (@string)"could not parse imag component of complex literal"u8;
+internal static readonly object couldNotParseIntegerˢᴍparser = (@string)"could not parse integer literal"u8;
+internal static readonly object couldNotParseFloatˢᴍparser = (@string)"could not parse float literal"u8;
+internal static readonly object couldNotParseRealˢᴍparser = (@string)"could not parse real component of complex literal"u8;
+internal static readonly object couldNotParseImagˢᴍparser = (@string)"could not parse imag component of complex literal"u8;
 
 // ConstValue     = string | "false" | "true" | ["-"] (int ["'"] | FloatOrComplex) | Conversion .
 // FloatOrComplex = float ["i" | ("+"|"-") float "i"] .
@@ -455,7 +455,7 @@ internal static (constant.Value val, types.Type typ) parseConstValueᴍ(ж<parse
     case var ᴛ when ᴛ == scanner.Int: {
         val = constant.MakeFromLiteral(sign + p.lit, token.INT, 0);
         if (val == nil) {
-            p.error(couldNotParseIntegerˢ);
+            p.error(couldNotParseIntegerˢᴍparser);
         }
 
         p.next();
@@ -492,7 +492,7 @@ internal static (constant.Value val, types.Type typ) parseConstValueᴍ(ж<parse
         default: {
             val = constant.MakeFromLiteral(re, token.FLOAT, 0);
             if (val == nil) {
-                p.error(couldNotParseFloatˢ);
+                p.error(couldNotParseFloatˢᴍparser);
             }
             typ = new types.BasicжType(types.Typ[types.ΔUntypedFloat]);
             return (val, typ);
@@ -501,11 +501,11 @@ internal static (constant.Value val, types.Type typ) parseConstValueᴍ(ж<parse
         p.expectKeyword("i");
         var reval = constant.MakeFromLiteral(re, token.FLOAT, 0);
         if (reval == nil) {
-            p.error(couldNotParseRealˢ);
+            p.error(couldNotParseRealˢᴍparser);
         }
         var imval = constant.MakeFromLiteral(im + "i"u8, token.IMAG, 0);
         if (imval == nil) {
-            p.error(couldNotParseImagˢ);
+            p.error(couldNotParseImagˢᴍparser);
         }
         val = constant.BinaryOp(reval, token.ADD, imval);
         typ = new types.BasicжType(types.Typ[types.ΔUntypedComplex]);
@@ -616,9 +616,9 @@ internal static void updateᴍ(ref parser p, types.Type t, slice<any> nlist) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object unexpectedUnderlyingTypeˢ = (@string)"unexpected underlying type for non-named TypeName"u8;
-internal static ref readonly @string funcˢ => ref funcˢᵇ;
-private static readonly @string funcˢᵇ = "func"u8;
+internal static readonly object unexpectedUnderlyingTypeˢᴍparser = (@string)"unexpected underlying type for non-named TypeName"u8;
+internal static ref readonly @string funcˢᴍparser => ref funcˢᵇᴍparser;
+private static readonly @string funcˢᵇᴍparser = "func"u8;
 
 // NamedType = TypeName [ "=" ] Type { Method } .
 // TypeName  = ExportedName .
@@ -676,7 +676,7 @@ internal static types.Type parseNamedTypeᴍ(ж<parser> Ꮡp, slice<any> nlist) 
         // This can happen for unsafe.Pointer, which is a TypeName holding a Basic type.
         var pt = Ꮡp.parseType(pkg);
         if (!AreEqual(pt, t)) {
-            p.error(unexpectedUnderlyingTypeˢ);
+            p.error(unexpectedUnderlyingTypeˢᴍparser);
         }
         return t;
     }
@@ -695,7 +695,7 @@ internal static types.Type parseNamedTypeᴍ(ж<parser> Ꮡp, slice<any> nlist) 
         p.next();
         // collect associated methods
         while (p.tok == scanner.Ident) {
-            p.expectKeyword(funcˢ);
+            p.expectKeyword(funcˢᴍparser);
             if (p.tok == '/') {
                 // Skip a /*nointerface*/ or /*asm ID */ comment.
                 p.expect('/');
@@ -767,14 +767,14 @@ internal static types.Type parseArrayOrSliceTypeᴍ(ж<parser> Ꮡp, ж<types.Pa
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mapˢ => ref mapˢᵇ;
-private static readonly @string mapˢᵇ = "map"u8;
+internal static ref readonly @string mapˢᴍparser => ref mapˢᵇᴍparser;
+private static readonly @string mapˢᵇᴍparser = "map"u8;
 
 // MapType = "map" "[" Type "]" Type .
 internal static types.Type parseMapTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    p.expectKeyword(mapˢ);
+    p.expectKeyword(mapˢᴍparser);
 
     var t = @new<types.Map>();
     p.update(new types.MapжType(t), nlist);
@@ -789,14 +789,14 @@ internal static types.Type parseMapTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pk
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chanˢ => ref chanˢᵇ;
-private static readonly @string chanˢᵇ = "chan"u8;
+internal static ref readonly @string chanˢᴍparser => ref chanˢᵇᴍparser;
+private static readonly @string chanˢᵇᴍparser = "chan"u8;
 
 // ChanType = "chan" ["<-" | "-<"] Type .
 internal static types.Type parseChanTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    p.expectKeyword(chanˢ);
+    p.expectKeyword(chanˢᴍparser);
 
     var t = @new<types.Chan>();
     p.update(new types.ChanжType(t), nlist);
@@ -824,14 +824,14 @@ internal static types.Type parseChanTypeᴍ(ж<parser> Ꮡp, ж<types.Package> p
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string structˢ => ref structˢᵇ;
-private static readonly @string structˢᵇ = "struct"u8;
+internal static ref readonly @string structˢᴍparser => ref structˢᵇᴍparser;
+private static readonly @string structˢᵇᴍparser = "struct"u8;
 
 // StructType = "struct" "{" { Field } "}" .
 internal static types.Type parseStructTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    p.expectKeyword(structˢ);
+    p.expectKeyword(structˢᴍparser);
 
     var t = @new<types.Struct>();
     p.update(new types.StructжType(t), nlist);
@@ -853,7 +853,7 @@ internal static types.Type parseStructTypeᴍ(ж<parser> Ꮡp, ж<types.Package>
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object notOnFinalArgumentˢ = (@string)"... not on final argument"u8;
+internal static readonly object notOnFinalArgumentˢᴍparser = (@string)"... not on final argument"u8;
 
 // ParamList = "(" [ { Parameter "," } Parameter ] ")" .
 internal static (ж<types.Tuple>, bool) parseParamListᴍ(ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) {
@@ -871,7 +871,7 @@ internal static (ж<types.Tuple>, bool) parseParamListᴍ(ж<parser> Ꮡp, types
         list = append(list, par);
         if (variadic) {
             if (isVariadic) {
-                p.error(notOnFinalArgumentˢ);
+                p.error(notOnFinalArgumentˢᴍparser);
             }
             isVariadic = true;
         }
@@ -950,14 +950,14 @@ internal static ж<types.Func> parseFuncᴍ(ж<parser> Ꮡp, ж<types.Package> p
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
-private static readonly @string interfaceˢᵇ = "interface"u8;
+internal static ref readonly @string interfaceˢᴍparser => ref interfaceˢᵇᴍparser;
+private static readonly @string interfaceˢᵇᴍparser = "interface"u8;
 
 // InterfaceType = "interface" "{" { ("?" Type | Func) ";" } "}" .
 internal static types.Type parseInterfaceTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    p.expectKeyword(interfaceˢ);
+    p.expectKeyword(interfaceˢᴍparser);
 
     var t = @new<types.Interface>();
     p.update(new types.InterfaceжType(t), nlist);
@@ -985,8 +985,8 @@ internal static types.Type parseInterfaceTypeᴍ(ж<parser> Ꮡp, ж<types.Packa
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string anyˢ => ref anyˢᵇ;
-private static readonly @string anyˢᵇ = "any"u8;
+internal static ref readonly @string anyˢᴍparser => ref anyˢᵇᴍparser;
+private static readonly @string anyˢᵇᴍparser = "any"u8;
 
 // PointerType = "*" ("any" | Type) .
 internal static types.Type parsePointerTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
@@ -994,7 +994,7 @@ internal static types.Type parsePointerTypeᴍ(ж<parser> Ꮡp, ж<types.Package
 
     p.expect('*');
     if (p.tok == scanner.Ident) {
-        p.expectKeyword(anyˢ);
+        p.expectKeyword(anyˢᴍparser);
         var tΔ1 = types.Typ[types.UnsafePointer];
         p.update(new types.BasicжType(tΔ1), nlist);
         return new types.BasicжType(tΔ1);
@@ -1104,8 +1104,8 @@ internal static types.Type parseTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeˢ => ref typeˢᵇ;
-private static readonly @string typeˢᵇ = "type"u8;
+internal static ref readonly @string typeˢᴍparser => ref typeˢᵇᴍparser;
+private static readonly @string typeˢᵇᴍparser = "type"u8;
 
 // (*parser).Type after reading the "<".
 internal static (types.Type t, nint n1) parseTypeAfterAngleᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
@@ -1114,7 +1114,7 @@ internal static (types.Type t, nint n1) parseTypeAfterAngleᴍ(ж<parser> Ꮡp, 
     var n = nʗp.slice();
     ref var p = ref Ꮡp.DerefOrNull();
 
-    p.expectKeyword(typeˢ);
+    p.expectKeyword(typeˢᴍparser);
 
     n1 = 0;
     switch (p.tok) {
@@ -1170,8 +1170,8 @@ internal static (types.Type t, nint n1) parseTypeExtendedᴍ(ж<parser> Ꮡp, ж
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inlˢ => ref inlˢᵇ;
-private static readonly @string inlˢᵇ = "inl"u8;
+internal static ref readonly @string inlˢᴍparser => ref inlˢᵇᴍparser;
+private static readonly @string inlˢᵇᴍparser = "inl"u8;
 
 // InlineBody = "<inl:NN>" .{NN}
 // Reports whether a body was skipped.
@@ -1184,7 +1184,7 @@ internal static void skipInlineBodyᴍ(ж<parser> Ꮡp) {
         // whether the function had a result type or not.
         if (p.tok == '<') {
             p.next();
-            p.expectKeyword(inlˢ);
+            p.expectKeyword(inlˢᴍparser);
         } else if (p.tok != scanner.Ident || p.lit != "inl"u8) {
             return;
         } else {

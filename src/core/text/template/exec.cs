@@ -279,8 +279,8 @@ internal static error /*err*/ executeᴍ(ж<Template> Ꮡt, io.Writer wr, any da
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string definedTemplatesAreˢ => ref definedTemplatesAreˢᵇ;
-private static readonly @string definedTemplatesAreˢᵇ = "; defined templates are: "u8;
+internal static ref readonly @string definedTemplatesAreˢᴍTemplate => ref definedTemplatesAreˢᵇᴍTemplate;
+private static readonly @string definedTemplatesAreˢᵇᴍTemplate = "; defined templates are: "u8;
 
 // DefinedTemplates returns a string listing the defined templates,
 // prefixed by the string "; defined templates are: ". If there are none,
@@ -303,7 +303,7 @@ internal static @string DefinedTemplatesᴍ(ж<Template> Ꮡt) {
                 continue;
             }
             if (b.Len() == 0) {
-                Ꮡb.WriteString(definedTemplatesAreˢ);
+                Ꮡb.WriteString(definedTemplatesAreˢᴍTemplate);
             } else {
                 Ꮡb.WriteString(", ");
             }
@@ -755,8 +755,8 @@ internal static reflect.Value evalCommandᴍ(ref state s, reflect.Value dot, ж<
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string eEpPˢ => ref eEpPˢᵇ;
-private static readonly @string eEpPˢᵇ = ".eEpP"u8;
+internal static ref readonly @string eEpPˢᴍstate => ref eEpPˢᵇᴍstate;
+private static readonly @string eEpPˢᵇᴍstate = ".eEpP"u8;
 
 // idealConstant is called to return the value of a number in a context where
 // we don't know the type. In that case, the syntax of the number tells us
@@ -773,7 +773,7 @@ internal static reflect.Value idealConstantᴍ(ref state s, ж<parse.NumberNode>
     case {} when constant.IsComplex: {
         return reflect.ValueOf(constant.Complex128); // incontrovertible.
     }
-    case {} when constant.IsFloat && !isHexInt(constant.Text) && !isRuneInt(constant.Text) && strings.ContainsAny(constant.Text, eEpPˢ): {
+    case {} when constant.IsFloat && !isHexInt(constant.Text) && !isRuneInt(constant.Text) && strings.ContainsAny(constant.Text, eEpPˢᴍstate): {
         return reflect.ValueOf(constant.Float64);
     }
     case {} when constant.IsInt: {

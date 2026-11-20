@@ -144,10 +144,10 @@ internal static error Decodeᴍ(ж<Decoder> Ꮡd, any v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nonPointerPassedToˢ => ref nonPointerPassedToˢᵇ;
-private static readonly @string nonPointerPassedToˢᵇ = "non-pointer passed to Unmarshal"u8;
-internal static ref readonly @string nilPointerPassedToˢ => ref nilPointerPassedToˢᵇ;
-private static readonly @string nilPointerPassedToˢᵇ = "nil pointer passed to Unmarshal"u8;
+internal static ref readonly @string nonPointerPassedToˢᴍDecoder => ref nonPointerPassedToˢᵇᴍDecoder;
+private static readonly @string nonPointerPassedToˢᵇᴍDecoder = "non-pointer passed to Unmarshal"u8;
+internal static ref readonly @string nilPointerPassedToˢᴍDecoder => ref nilPointerPassedToˢᵇᴍDecoder;
+private static readonly @string nilPointerPassedToˢᵇᴍDecoder = "nil pointer passed to Unmarshal"u8;
 
 // DecodeElement works like [Unmarshal] except that it takes
 // a pointer to the start XML element to decode into v.
@@ -156,11 +156,11 @@ private static readonly @string nilPointerPassedToˢᵇ = "nil pointer passed to
 internal static error DecodeElementᴍ(ж<Decoder> Ꮡd, any v, ж<StartElement> start) {
     var val = reflect.ValueOf(v);
     if (val.Kind() != reflect.Pointer) {
-        return errors.New(nonPointerPassedToˢ);
+        return errors.New(nonPointerPassedToˢᴍDecoder);
     }
 
     if (val.IsNil()) {
-        return errors.New(nilPointerPassedToˢ);
+        return errors.New(nilPointerPassedToˢᴍDecoder);
     }
     return Ꮡd.unmarshal(val.Elem(), start);
 }

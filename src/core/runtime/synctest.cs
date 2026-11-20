@@ -41,10 +41,10 @@ partial struct synctestBubble {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string total0ˢ => ref total0ˢᵇ;
-private static readonly @string total0ˢᵇ = "total < 0"u8;
-internal static ref readonly @string running0ˢ => ref running0ˢᵇ;
-private static readonly @string running0ˢᵇ = "running < 0"u8;
+internal static ref readonly @string total0ˢᴍsynctestBubble => ref total0ˢᵇᴍsynctestBubble;
+private static readonly @string total0ˢᵇᴍsynctestBubble = "total < 0"u8;
+internal static ref readonly @string running0ˢᴍsynctestBubble => ref running0ˢᵇᴍsynctestBubble;
+private static readonly @string running0ˢᵇᴍsynctestBubble = "running < 0"u8;
 
 // changegstatus is called when the non-lock status of a g changes.
 // It is never called with a Gscanstatus.
@@ -111,10 +111,10 @@ internal static void changegstatusᴍ(ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp,
         }
     }
     if (bubble.total < 0) {
-        fatal(total0ˢ);
+        fatal(total0ˢᴍsynctestBubble);
     }
     if (bubble.running < 0) {
-        fatal(running0ˢ);
+        fatal(running0ˢᴍsynctestBubble);
     }
     var wake = Ꮡbubble.maybeWakeLocked();
     unlock(Ꮡbubble.Ꮡmu);
@@ -134,8 +134,8 @@ internal static void incActiveᴍ(ж<synctestBubble> Ꮡbubble) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string active0ˢ => ref active0ˢᵇ;
-private static readonly @string active0ˢᵇ = "active < 0"u8;
+internal static ref readonly @string active0ˢᴍsynctestBubble => ref active0ˢᵇᴍsynctestBubble;
+private static readonly @string active0ˢᵇᴍsynctestBubble = "active < 0"u8;
 
 // decActive decrements the active-count for the bubble.
 internal static void decActiveᴍ(ж<synctestBubble> Ꮡbubble) {
@@ -144,7 +144,7 @@ internal static void decActiveᴍ(ж<synctestBubble> Ꮡbubble) {
     @lock(Ꮡbubble.Ꮡmu);
     bubble.active--;
     if (bubble.active < 0) {
-        @throw(active0ˢ);
+        @throw(active0ˢᴍsynctestBubble);
     }
     var wake = Ꮡbubble.maybeWakeLocked();
     unlock(Ꮡbubble.Ꮡmu);

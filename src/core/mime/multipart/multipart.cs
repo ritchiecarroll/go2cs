@@ -75,8 +75,8 @@ partial struct Part {
 } partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nameˢ => ref nameˢᵇ;
-private static readonly @string nameˢᵇ = "name"u8;
+internal static ref readonly @string nameˢᴍPart => ref nameˢᵇᴍPart;
+private static readonly @string nameˢᵇᴍPart = "name"u8;
 
 // FormName returns the name parameter if p has a Content-Disposition
 // of type "form-data".  Otherwise it returns the empty string.
@@ -89,12 +89,12 @@ internal static @string FormNameᴍ(ref Part p) {
     if (p.disposition != "form-data"u8) {
         return ""u8;
     }
-    return p.dispositionParams[nameˢ];
+    return p.dispositionParams[nameˢᴍPart];
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string filenameˢ => ref filenameˢᵇ;
-private static readonly @string filenameˢᵇ = "filename"u8;
+internal static ref readonly @string filenameˢᴍPart => ref filenameˢᵇᴍPart;
+private static readonly @string filenameˢᵇᴍPart = "filename"u8;
 
 // FileName returns the filename parameter of the [Part]'s Content-Disposition
 // header. If not empty, the filename is passed through filepath.Base (which is
@@ -103,7 +103,7 @@ internal static @string FileNameᴍ(ref Part p) {
     if (p.dispositionParams == nil) {
         p.parseContentDisposition();
     }
-    @string filename = p.dispositionParams[filenameˢ];
+    @string filename = p.dispositionParams[filenameˢᴍPart];
     if (filename == ""u8) {
         return ""u8;
     }
@@ -113,11 +113,11 @@ internal static @string FileNameᴍ(ref Part p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
-private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
+internal static ref readonly @string contentDispositionˢᴍPart => ref contentDispositionˢᵇᴍPart;
+private static readonly @string contentDispositionˢᵇᴍPart = "Content-Disposition"u8;
 
 internal static void parseContentDispositionᴍ(ref Part p) {
-    @string v = p.Header.Get(contentDispositionˢ);
+    @string v = p.Header.Get(contentDispositionˢᴍPart);
     error err = default;
     (p.disposition, p.dispositionParams, err) = mime.ParseMediaType(v);
     if (err != nil) {

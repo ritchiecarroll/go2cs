@@ -48,14 +48,14 @@ partial struct IPAddr {
 internal static @string Networkᴍ(ref IPAddr a) { return "ip"; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍIPAddr => ref nilˢᵇᴍIPAddr;
+private static readonly @string nilˢᵇᴍIPAddr = "<nil>"u8;
 
 internal static @string Stringᴍ(ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return nilˢ;
+        return nilˢᴍIPAddr;
     }
     @string ip = ipEmptyString(a.IP);
     if (a.Zone != ""u8) {

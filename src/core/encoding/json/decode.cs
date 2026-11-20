@@ -170,12 +170,12 @@ partial struct InvalidUnmarshalError {
 } partial class json_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string jsonUnmarshalNilˢ => ref jsonUnmarshalNilˢᵇ;
-private static readonly @string jsonUnmarshalNilˢᵇ = "json: Unmarshal(nil)"u8;
+internal static ref readonly @string jsonUnmarshalNilˢᴍInvalidUnmarshalError => ref jsonUnmarshalNilˢᵇᴍInvalidUnmarshalError;
+private static readonly @string jsonUnmarshalNilˢᵇᴍInvalidUnmarshalError = "json: Unmarshal(nil)"u8;
 
 internal static @string Errorᴍ(ref InvalidUnmarshalError e) {
     if (e.Type == nil) {
-        return jsonUnmarshalNilˢ;
+        return jsonUnmarshalNilˢᴍInvalidUnmarshalError;
     }
 
     if (e.Type.Kind() != reflect.Pointer) {
@@ -975,12 +975,12 @@ internal static reflect.Type numberType = reflect.TypeFor<Number>();
 } partial class json_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string numberˢ => ref numberˢᵇ;
-private static readonly @string numberˢᵇ = "number"u8;
-internal static ref readonly @string nullˢ => ref nullˢᵇ;
-private static readonly @string nullˢᵇ = "null"u8;
-internal static ref readonly @string boolˢ => ref boolˢᵇ;
-private static readonly @string boolˢᵇ = "bool"u8;
+internal static ref readonly @string numberˢᴍdecodeState => ref numberˢᵇᴍdecodeState;
+private static readonly @string numberˢᵇᴍdecodeState = "number"u8;
+internal static ref readonly @string nullˢᴍdecodeState => ref nullˢᵇᴍdecodeState;
+private static readonly @string nullˢᵇᴍdecodeState = "null"u8;
+internal static ref readonly @string boolˢᴍdecodeState => ref boolˢᵇᴍdecodeState;
+private static readonly @string boolˢᵇᴍdecodeState = "bool"u8;
 
 // literalStore decodes a literal stored in item into v.
 //
@@ -1005,14 +1005,14 @@ internal static error literalStoreᴍ(ref decodeState d, slice<byte> item, refle
                 d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
                 return default;
             }
-            ref var val = ref heap<@string>(numberˢ, out var Ꮡval);
+            ref var val = ref heap<@string>(numberˢᴍdecodeState, out var Ꮡval);
             switch (item[0]) {
             case (byte)'n': {
-                val = nullˢ;
+                val = nullˢᴍdecodeState;
                 break;
             }
             case (byte)'t' or (byte)'f': {
-                val = boolˢ;
+                val = boolˢᴍdecodeState;
                 break;
             }}
             d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: val, Type: v.Type(), Offset: (int64)d.readIndex()))));

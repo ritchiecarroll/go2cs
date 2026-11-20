@@ -92,8 +92,8 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
 } partial class comment_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string fourSpaceᶜ2 => ref fourSpaceᶜ2ᵇ;
-private static readonly @string fourSpaceᶜ2ᵇ = "    "u8;
+internal static ref readonly @string fourSpaceᶜ2ᴍtextPrinter => ref fourSpaceᶜ2ᵇᴍtextPrinter;
+private static readonly @string fourSpaceᶜ2ᵇᴍtextPrinter = "    "u8;
 
 // block prints the block x to out.
 internal static void blockᴍ(ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
@@ -146,7 +146,7 @@ internal static void blockᴍ(ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Blo
                 @out.WriteString(". ");
             }
             foreach (var (iΔ1, blk) in range(item.Content)) {
-                @string fourSpace = fourSpaceᶜ2;
+                @string fourSpace = fourSpaceᶜ2ᴍtextPrinter;
                 if (iΔ1 > 0) {
                     writeNL(Ꮡout);
                     @out.WriteString(p.prefix);

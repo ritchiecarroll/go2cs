@@ -140,51 +140,51 @@ internal static @string Errorᴍ(UnsupportedError e) { return "png: unsupported 
 } partial class png_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badIhdrLengthˢ => ref badIhdrLengthˢᵇ;
-private static readonly @string badIhdrLengthˢᵇ = "bad IHDR length"u8;
-internal static ref readonly @string compressionMethodˢ => ref compressionMethodˢᵇ;
-private static readonly @string compressionMethodˢᵇ = "compression method"u8;
-internal static ref readonly @string filterMethodˢ => ref filterMethodˢᵇ;
-private static readonly @string filterMethodˢᵇ = "filter method"u8;
-internal static ref readonly @string invalidInterlaceMethodˢ => ref invalidInterlaceMethodˢᵇ;
-private static readonly @string invalidInterlaceMethodˢᵇ = "invalid interlace method"u8;
-internal static ref readonly @string nonPositiveDimensionˢ => ref nonPositiveDimensionˢᵇ;
-private static readonly @string nonPositiveDimensionˢᵇ = "non-positive dimension"u8;
-internal static ref readonly @string dimensionOverflowˢ => ref dimensionOverflowˢᵇ;
-private static readonly @string dimensionOverflowˢᵇ = "dimension overflow"u8;
+internal static ref readonly @string badIhdrLengthˢᴍdecoder => ref badIhdrLengthˢᵇᴍdecoder;
+private static readonly @string badIhdrLengthˢᵇᴍdecoder = "bad IHDR length"u8;
+internal static ref readonly @string compressionMethodˢᴍdecoder => ref compressionMethodˢᵇᴍdecoder;
+private static readonly @string compressionMethodˢᵇᴍdecoder = "compression method"u8;
+internal static ref readonly @string filterMethodˢᴍdecoder => ref filterMethodˢᵇᴍdecoder;
+private static readonly @string filterMethodˢᵇᴍdecoder = "filter method"u8;
+internal static ref readonly @string invalidInterlaceMethodˢᴍdecoder => ref invalidInterlaceMethodˢᵇᴍdecoder;
+private static readonly @string invalidInterlaceMethodˢᵇᴍdecoder = "invalid interlace method"u8;
+internal static ref readonly @string nonPositiveDimensionˢᴍdecoder => ref nonPositiveDimensionˢᵇᴍdecoder;
+private static readonly @string nonPositiveDimensionˢᵇᴍdecoder = "non-positive dimension"u8;
+internal static ref readonly @string dimensionOverflowˢᴍdecoder => ref dimensionOverflowˢᵇᴍdecoder;
+private static readonly @string dimensionOverflowˢᵇᴍdecoder = "dimension overflow"u8;
 
 internal static error parseIHDRᴍ(ref decoder d, uint32 length) {
     if (length != 13) {
-        return ((FormatError)(@string)badIhdrLengthˢ);
+        return ((FormatError)(@string)badIhdrLengthˢᴍdecoder);
     }
     var (_, err) = io.ReadFull(d.r, d.tmp[..13]); if (err != nil) {
         return err;
     }
     d.crc.Write(d.tmp[..13]);
     if (d.tmp[10] != 0) {
-        return ((UnsupportedError)(@string)compressionMethodˢ);
+        return ((UnsupportedError)(@string)compressionMethodˢᴍdecoder);
     }
     if (d.tmp[11] != 0) {
-        return ((UnsupportedError)(@string)filterMethodˢ);
+        return ((UnsupportedError)(@string)filterMethodˢᴍdecoder);
     }
     if (d.tmp[12] != itNone && d.tmp[12] != itAdam7) {
-        return ((FormatError)(@string)invalidInterlaceMethodˢ);
+        return ((FormatError)(@string)invalidInterlaceMethodˢᴍdecoder);
     }
     d.interlace = (nint)d.tmp[12];
 
     var w = (int32)binary.BigEndian.Uint32(d.tmp[0..4]);
     var h = (int32)binary.BigEndian.Uint32(d.tmp[4..8]);
     if (w <= 0 || h <= 0) {
-        return ((FormatError)(@string)nonPositiveDimensionˢ);
+        return ((FormatError)(@string)nonPositiveDimensionˢᴍdecoder);
     }
     var nPixels64 = (int64)w * (int64)h;
     nint nPixels = (nint)nPixels64;
     if (nPixels64 != (int64)nPixels) {
-        return ((UnsupportedError)(@string)dimensionOverflowˢ);
+        return ((UnsupportedError)(@string)dimensionOverflowˢᴍdecoder);
     }
     // There can be up to 8 bytes per pixel, for 16 bits per channel RGBA.
     if (nPixels != (nPixels * 8) / 8) {
-        return ((UnsupportedError)(@string)dimensionOverflowˢ);
+        return ((UnsupportedError)(@string)dimensionOverflowˢᴍdecoder);
     }
 
     d.cb = cbInvalid;
@@ -278,15 +278,15 @@ internal static error parseIHDRᴍ(ref decoder d, uint32 length) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badPlteLengthˢ => ref badPlteLengthˢᵇ;
-private static readonly @string badPlteLengthˢᵇ = "bad PLTE length"u8;
-internal static ref readonly @string plteColorTypeMismatchˢ => ref plteColorTypeMismatchˢᵇ;
-private static readonly @string plteColorTypeMismatchˢᵇ = "PLTE, color type mismatch"u8;
+internal static ref readonly @string badPlteLengthˢᴍdecoder => ref badPlteLengthˢᵇᴍdecoder;
+private static readonly @string badPlteLengthˢᵇᴍdecoder = "bad PLTE length"u8;
+internal static ref readonly @string plteColorTypeMismatchˢᴍdecoder => ref plteColorTypeMismatchˢᵇᴍdecoder;
+private static readonly @string plteColorTypeMismatchˢᵇᴍdecoder = "PLTE, color type mismatch"u8;
 
 internal static error parsePLTEᴍ(ref decoder d, uint32 length) {
     nint np = (nint)(length / 3); // The number of palette entries.
     if (length % 3 != 0 || np <= 0 || np > 256 || np > ((nint)1).Lsh((nuint)d.depth)) {
-        return ((FormatError)(@string)badPlteLengthˢ);
+        return ((FormatError)(@string)badPlteLengthˢᴍdecoder);
     }
     var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, 3 * np));
     if (err != nil) {
@@ -316,22 +316,22 @@ internal static error parsePLTEᴍ(ref decoder d, uint32 length) {
         break;
     }
     default: {
-        return ((FormatError)(@string)plteColorTypeMismatchˢ);
+        return ((FormatError)(@string)plteColorTypeMismatchˢᴍdecoder);
     }}
     return d.verifyChecksum();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badTRNSLengthˢ => ref badTRNSLengthˢᵇ;
-private static readonly @string badTRNSLengthˢᵇ = "bad tRNS length"u8;
-internal static ref readonly @string tRNSColorTypeMismatchˢ => ref tRNSColorTypeMismatchˢᵇ;
-private static readonly @string tRNSColorTypeMismatchˢᵇ = "tRNS, color type mismatch"u8;
+internal static ref readonly @string badTRNSLengthˢᴍdecoder => ref badTRNSLengthˢᵇᴍdecoder;
+private static readonly @string badTRNSLengthˢᵇᴍdecoder = "bad tRNS length"u8;
+internal static ref readonly @string tRNSColorTypeMismatchˢᴍdecoder => ref tRNSColorTypeMismatchˢᵇᴍdecoder;
+private static readonly @string tRNSColorTypeMismatchˢᵇᴍdecoder = "tRNS, color type mismatch"u8;
 
 internal static error parsetRNSᴍ(ref decoder d, uint32 length) {
     switch (d.cb) {
     case var ᴛ when ᴛ == cbG1 || ᴛ == cbG2 || ᴛ == cbG4 || ᴛ == cbG8 || ᴛ == cbG16: {
         if (length != 2) {
-            return ((FormatError)(@string)badTRNSLengthˢ);
+            return ((FormatError)(@string)badTRNSLengthˢᴍdecoder);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
         if (err != nil) {
@@ -358,7 +358,7 @@ internal static error parsetRNSᴍ(ref decoder d, uint32 length) {
     }
     case var ᴛ when ᴛ == cbTC8 || ᴛ == cbTC16: {
         if (length != 6) {
-            return ((FormatError)(@string)badTRNSLengthˢ);
+            return ((FormatError)(@string)badTRNSLengthˢᴍdecoder);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
         if (err != nil) {
@@ -372,7 +372,7 @@ internal static error parsetRNSᴍ(ref decoder d, uint32 length) {
     }
     case var ᴛ when ᴛ == cbP1 || ᴛ == cbP2 || ᴛ == cbP4 || ᴛ == cbP8: {
         if (length > 256) {
-            return ((FormatError)(@string)badTRNSLengthˢ);
+            return ((FormatError)(@string)badTRNSLengthˢᴍdecoder);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp.slice(0, (nint)(length)));
         if (err != nil) {
@@ -390,16 +390,16 @@ internal static error parsetRNSᴍ(ref decoder d, uint32 length) {
         break;
     }
     default: {
-        return ((FormatError)(@string)tRNSColorTypeMismatchˢ);
+        return ((FormatError)(@string)tRNSColorTypeMismatchˢᴍdecoder);
     }}
     return d.verifyChecksum();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string notEnoughPixelDataˢ => ref notEnoughPixelDataˢᵇ;
-private static readonly @string notEnoughPixelDataˢᵇ = "not enough pixel data"u8;
-internal static ref readonly @string idatChunkLengthOverflowˢ => ref idatChunkLengthOverflowˢᵇ;
-private static readonly @string idatChunkLengthOverflowˢᵇ = "IDAT chunk length overflow"u8;
+internal static ref readonly @string notEnoughPixelDataˢᴍdecoder => ref notEnoughPixelDataˢᵇᴍdecoder;
+private static readonly @string notEnoughPixelDataˢᵇᴍdecoder = "not enough pixel data"u8;
+internal static ref readonly @string idatChunkLengthOverflowˢᴍdecoder => ref idatChunkLengthOverflowˢᵇᴍdecoder;
+private static readonly @string idatChunkLengthOverflowˢᵇᴍdecoder = "IDAT chunk length overflow"u8;
 
 // Read presents one or more IDAT chunks as one continuous stream (minus the
 // intermediate chunk headers and footers). If the PNG data looked like:
@@ -426,13 +426,13 @@ internal static (nint, error) Readᴍ(ref decoder d, slice<byte> p) {
         }
         d.idatLength = binary.BigEndian.Uint32(d.tmp[..4]);
         if (((sstring)(d.tmp[4..8])) != "IDAT"u8) {
-            return (0, ((FormatError)(@string)notEnoughPixelDataˢ));
+            return (0, ((FormatError)(@string)notEnoughPixelDataˢᴍdecoder));
         }
         d.crc.Reset();
         d.crc.Write(d.tmp[4..8]);
     }
     if ((nint)d.idatLength < 0) {
-        return (0, ((UnsupportedError)(@string)idatChunkLengthOverflowˢ));
+        return (0, ((UnsupportedError)(@string)idatChunkLengthOverflowˢᴍdecoder));
     }
     var (n, err) = d.r.Read(p.slice(0, min(len(p), (nint)d.idatLength)));
     d.crc.Write(p.slice(0, n));
@@ -441,8 +441,8 @@ internal static (nint, error) Readᴍ(ref decoder d, slice<byte> p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tooMuchPixelDataˢ => ref tooMuchPixelDataˢᵇ;
-private static readonly @string tooMuchPixelDataˢᵇ = "too much pixel data"u8;
+internal static ref readonly @string tooMuchPixelDataˢᴍdecoder => ref tooMuchPixelDataˢᵇᴍdecoder;
+private static readonly @string tooMuchPixelDataˢᵇᴍdecoder = "too much pixel data"u8;
 
 // decode decodes the IDAT data into an image.
 internal static (image.Image, error) decodeᴍ(ж<decoder> Ꮡd) {
@@ -491,7 +491,7 @@ internal static (image.Image, error) decodeᴍ(ж<decoder> Ꮡd) {
             return (default, ((FormatError)err.Error()));
         }
         if (n != 0 || d.idatLength != 0) {
-            return (default, ((FormatError)(@string)tooMuchPixelDataˢ));
+            return (default, ((FormatError)(@string)tooMuchPixelDataˢᴍdecoder));
         }
 
         return (img, default);
@@ -501,8 +501,8 @@ internal static (image.Image, error) decodeᴍ(ж<decoder> Ꮡd) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badFilterTypeˢ => ref badFilterTypeˢᵇ;
-private static readonly @string badFilterTypeˢᵇ = "bad filter type"u8;
+internal static ref readonly @string badFilterTypeˢᴍdecoder => ref badFilterTypeˢᵇᴍdecoder;
+private static readonly @string badFilterTypeˢᵇᴍdecoder = "bad filter type"u8;
 
 // readImagePass reads a single image pass, sized according to the pass number.
 internal static (image.Image, error) readImagePassᴍ(ref decoder d, io.Reader r, nint pass, bool allocateOnly) {
@@ -613,7 +613,7 @@ internal static (image.Image, error) readImagePassᴍ(ref decoder d, io.Reader r
     // The +1 is for the per-row filter type, which is at cr[0].
     var rowSize = 1 + ((int64)bitsPerPixel * (int64)width + 7) / 8;
     if (rowSize != (int64)(nint)rowSize) {
-        return (default, ((UnsupportedError)(@string)dimensionOverflowˢ));
+        return (default, ((UnsupportedError)(@string)dimensionOverflowˢᴍdecoder));
     }
     // cr and pr are the bytes for the current and previous row.
     var cr = new slice<uint8>((nint)(rowSize));
@@ -624,7 +624,7 @@ internal static (image.Image, error) readImagePassᴍ(ref decoder d, io.Reader r
         var (_, err) = io.ReadFull(r, cr);
         if (err != nil) {
             if (AreEqual(err, io.EOF) || AreEqual(err, io.ErrUnexpectedEOF)) {
-                return (default, ((FormatError)(@string)notEnoughPixelDataˢ));
+                return (default, ((FormatError)(@string)notEnoughPixelDataˢᴍdecoder));
             }
             return (default, err);
         }
@@ -666,7 +666,7 @@ internal static (image.Image, error) readImagePassᴍ(ref decoder d, io.Reader r
             break;
         }
         default: {
-            return (default, ((FormatError)(@string)badFilterTypeˢ));
+            return (default, ((FormatError)(@string)badFilterTypeˢᴍdecoder));
         }}
 
         // Convert from bytes to colors.
@@ -1036,12 +1036,12 @@ internal static error /*err*/ parseIDATᴍ(ж<decoder> Ꮡd, uint32 length) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badIendLengthˢ => ref badIendLengthˢᵇ;
-private static readonly @string badIendLengthˢᵇ = "bad IEND length"u8;
+internal static ref readonly @string badIendLengthˢᴍdecoder => ref badIendLengthˢᵇᴍdecoder;
+private static readonly @string badIendLengthˢᵇᴍdecoder = "bad IEND length"u8;
 
 internal static error parseIENDᴍ(ref decoder d, uint32 length) {
     if (length != 0) {
-        return ((FormatError)(@string)badIendLengthˢ);
+        return ((FormatError)(@string)badIendLengthˢᴍdecoder);
     }
     return d.verifyChecksum();
 }
@@ -1132,22 +1132,22 @@ internal static error parseChunkᴍ(ж<decoder> Ꮡd, bool configOnly) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidChecksumˢ => ref invalidChecksumˢᵇ;
-private static readonly @string invalidChecksumˢᵇ = "invalid checksum"u8;
+internal static ref readonly @string invalidChecksumˢᴍdecoder => ref invalidChecksumˢᵇᴍdecoder;
+private static readonly @string invalidChecksumˢᵇᴍdecoder = "invalid checksum"u8;
 
 internal static error verifyChecksumᴍ(ref decoder d) {
     var (_, err) = io.ReadFull(d.r, d.tmp[..4]); if (err != nil) {
         return err;
     }
     if (binary.BigEndian.Uint32(d.tmp[..4]) != d.crc.Sum32()) {
-        return ((FormatError)(@string)invalidChecksumˢ);
+        return ((FormatError)(@string)invalidChecksumˢᴍdecoder);
     }
     return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string notAPngFileˢ => ref notAPngFileˢᵇ;
-private static readonly @string notAPngFileˢᵇ = "not a PNG file"u8;
+internal static ref readonly @string notAPngFileˢᴍdecoder => ref notAPngFileˢᵇᴍdecoder;
+private static readonly @string notAPngFileˢᵇᴍdecoder = "not a PNG file"u8;
 
 internal static error checkHeaderᴍ(ref decoder d) {
     var (_, err) = io.ReadFull(d.r, d.tmp[..(int)(len(pngHeader))]);
@@ -1155,7 +1155,7 @@ internal static error checkHeaderᴍ(ref decoder d) {
         return err;
     }
     if (((sstring)(d.tmp[..(int)(len(pngHeader))])) != pngHeader) {
-        return ((FormatError)(@string)notAPngFileˢ);
+        return ((FormatError)(@string)notAPngFileˢᴍdecoder);
     }
     return default;
 }

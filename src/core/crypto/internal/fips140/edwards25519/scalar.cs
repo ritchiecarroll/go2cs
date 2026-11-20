@@ -124,8 +124,8 @@ internal static ж<Scalar> Setᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string edwards25519Invalidˢ => ref edwards25519Invalidˢᵇ;
-private static readonly @string edwards25519Invalidˢᵇ = "edwards25519: invalid SetUniformBytes input length"u8;
+internal static ref readonly @string edwards25519InvalidˢᴍScalar => ref edwards25519InvalidˢᵇᴍScalar;
+private static readonly @string edwards25519InvalidˢᵇᴍScalar = "edwards25519: invalid SetUniformBytes input length"u8;
 
 // SetUniformBytes sets s = x mod l, where x is a 64-byte little-endian integer.
 // If x is not of the right length, SetUniformBytes returns nil and an error,
@@ -135,7 +135,7 @@ private static readonly @string edwards25519Invalidˢᵇ = "edwards25519: invali
 // 64 uniformly distributed random bytes.
 internal static (ж<Scalar>, error) SetUniformBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
     if (len(x) != 64) {
-        return (default, errors.New(edwards25519Invalidˢ));
+        return (default, errors.New(edwards25519InvalidˢᴍScalar));
     }
 
     // We have a value x of 512 bits, but our fiatScalarFromBytes function
@@ -190,10 +190,10 @@ internal static ж<Scalar> setShortBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢ => ref invalidScalarLengthˢᵇ;
-private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar length"u8;
-internal static ref readonly @string invalidScalarEncodingˢ => ref invalidScalarEncodingˢᵇ;
-private static readonly @string invalidScalarEncodingˢᵇ = "invalid scalar encoding"u8;
+internal static ref readonly @string invalidScalarLengthˢᴍScalar => ref invalidScalarLengthˢᵇᴍScalar;
+private static readonly @string invalidScalarLengthˢᵇᴍScalar = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarEncodingˢᴍScalar => ref invalidScalarEncodingˢᵇᴍScalar;
+private static readonly @string invalidScalarEncodingˢᵇᴍScalar = "invalid scalar encoding"u8;
 
 // SetCanonicalBytes sets s = x, where x is a 32-byte little-endian encoding of
 // s, and returns s. If x is not a canonical encoding of s, SetCanonicalBytes
@@ -202,10 +202,10 @@ internal static (ж<Scalar>, error) SetCanonicalBytesᴍ(ж<Scalar> Ꮡs, slice<
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (len(x) != 32) {
-        return (default, errors.New(invalidScalarLengthˢ));
+        return (default, errors.New(invalidScalarLengthˢᴍScalar));
     }
     if (!isReduced(x)) {
-        return (default, errors.New(invalidScalarEncodingˢ));
+        return (default, errors.New(invalidScalarEncodingˢᴍScalar));
     }
 
     var ᴛ3 = nonnil(ref s).s.Value;
@@ -250,8 +250,8 @@ internal static bool isReduced(slice<byte> s) {
 } partial class edwards25519_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string edwards25519Invalidˢ2 => ref edwards25519Invalidˢ2ᵇ;
-private static readonly @string edwards25519Invalidˢ2ᵇ = "edwards25519: invalid SetBytesWithClamping input length"u8;
+internal static ref readonly @string edwards25519Invalidˢ2ᴍScalar => ref edwards25519Invalidˢ2ᵇᴍScalar;
+private static readonly @string edwards25519Invalidˢ2ᵇᴍScalar = "edwards25519: invalid SetBytesWithClamping input length"u8;
 
 // SetBytesWithClamping applies the buffer pruning described in RFC 8032,
 // Section 5.1.5 (also known as clamping) and sets s to the result. The input
@@ -270,7 +270,7 @@ internal static (ж<Scalar>, error) SetBytesWithClampingᴍ(ж<Scalar> Ꮡs, sli
     // irrelevant to edwards25519 as they protect against a specific
     // implementation bug that was once observed in a generic Montgomery ladder.
     if (len(x) != 32) {
-        return (default, errors.New(edwards25519Invalidˢ2));
+        return (default, errors.New(edwards25519Invalidˢ2ᴍScalar));
     }
 
     // We need to use the wide reduction from SetUniformBytes, since clamping

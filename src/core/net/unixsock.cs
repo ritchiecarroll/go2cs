@@ -32,14 +32,14 @@ internal static @string Networkᴍ(ref UnixAddr a) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍUnixAddr => ref nilˢᵇᴍUnixAddr;
+private static readonly @string nilˢᵇᴍUnixAddr = "<nil>"u8;
 
 internal static @string Stringᴍ(ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return nilˢ;
+        return nilˢᴍUnixAddr;
     }
     return a.Name;
 }

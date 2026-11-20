@@ -317,8 +317,8 @@ internal static Expr notᴍ(ж<exprParser> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingCloseParenˢ => ref missingCloseParenˢᵇ;
-private static readonly @string missingCloseParenˢᵇ = "missing close paren"u8;
+internal static ref readonly @string missingCloseParenˢᴍexprParser => ref missingCloseParenˢᵇᴍexprParser;
+private static readonly @string missingCloseParenˢᵇᴍexprParser = "missing close paren"u8;
 
 // atom parses a tag or a parenthesized expression.
 // On entry, the next input token HAS been lexed.
@@ -334,7 +334,7 @@ internal static Expr atomᴍ(ж<exprParser> Ꮡp) {
             defer(() => {
                 var e = recover(); if (e != nil) {
                     var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok && eΔ1.Err == "unexpected end of expression"u8) {
-                        eΔ1.Err = missingCloseParenˢ;
+                        eΔ1.Err = missingCloseParenˢᴍexprParser;
                     }
                     throw panic(e);
                 }

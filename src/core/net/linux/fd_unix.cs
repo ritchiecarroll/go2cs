@@ -51,10 +51,10 @@ internal static error initᴍ(ж<netFD> Ꮡfd) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectˢ => ref connectˢᵇ;
-private static readonly @string connectˢᵇ = "connect"u8;
-internal static ref readonly @string getsockoptˢ => ref getsockoptˢᵇ;
-private static readonly @string getsockoptˢᵇ = "getsockopt"u8;
+internal static ref readonly @string connectˢᴍnetFD => ref connectˢᵇᴍnetFD;
+private static readonly @string connectˢᵇᴍnetFD = "connect"u8;
+internal static ref readonly @string getsockoptˢᴍnetFD => ref getsockoptˢᵇᴍnetFD;
+private static readonly @string getsockoptˢᵇᴍnetFD = "getsockopt"u8;
 
 internal static (syscall.Sockaddr rsa, error ret) connectᴍ(ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     syscall.Sockaddr rsa = default;
@@ -98,7 +98,7 @@ internal static (syscall.Sockaddr rsa, error ret) connectᴍ(ж<netFD> Ꮡfd, co
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ1) { /* default: */
-                (rsa, ret) = (default, os.NewSyscallError(connectˢ, err)); goto ᒐdone;
+                (rsa, ret) = (default, os.NewSyscallError(connectˢᴍnetFD, err)); goto ᒐdone;
             }
         }
         {
@@ -167,7 +167,7 @@ internal static (syscall.Sockaddr rsa, error ret) connectᴍ(ж<netFD> Ꮡfd, co
             }
             var (nerr, err) = getsockoptIntFunc(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_ERROR);
             if (err != nil) {
-                (rsa, ret) = (default, os.NewSyscallError(getsockoptˢ, err)); goto ᒐdone;
+                (rsa, ret) = (default, os.NewSyscallError(getsockoptˢᴍnetFD, err)); goto ᒐdone;
             }
             {
                 var errΔ1 = (syscall.Errno)(uintptr)nerr;
@@ -188,7 +188,7 @@ internal static (syscall.Sockaddr rsa, error ret) connectᴍ(ж<netFD> Ꮡfd, co
                     break;
                 }
                 default: {
-                    (rsa, ret) = (default, os.NewSyscallError(connectˢ, errΔ1)); goto ᒐdone;
+                    (rsa, ret) = (default, os.NewSyscallError(connectˢᴍnetFD, errΔ1)); goto ᒐdone;
                 }}
             }
             runtime.KeepAlive(Ꮡfd.OrTypedNil());

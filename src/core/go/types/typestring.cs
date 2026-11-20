@@ -115,38 +115,38 @@ internal static void errorᴍ(ref typeWriter w, @string msg) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ2 => ref nilˢ2ᵇ;
-private static readonly @string nilˢ2ᵇ = "nil"u8;
-internal static ref readonly @string structˢ => ref structˢᵇ;
-private static readonly @string structˢᵇ = "struct{"u8;
-internal static ref readonly @string packageˢ => ref packageˢᵇ;
-private static readonly @string packageˢᵇ = " /* package "u8;
-internal static ref readonly @string funcˢ => ref funcˢᵇ;
-private static readonly @string funcˢᵇ = "func"u8;
-internal static ref readonly @string emptyUnionˢ => ref emptyUnionˢᵇ;
-private static readonly @string emptyUnionˢᵇ = "empty union"u8;
-internal static ref readonly @string anyˢ => ref anyˢᵇ;
-private static readonly @string anyˢᵇ = "any"u8;
-internal static ref readonly @string interfaceComparableˢ => ref interfaceComparableˢᵇ;
-private static readonly @string interfaceComparableˢᵇ = "interface{comparable}"u8;
-internal static ref readonly @string implicitˢ => ref implicitˢᵇ;
-private static readonly @string implicitˢᵇ = "/* implicit */ "u8;
-internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
-private static readonly @string interfaceˢᵇ = "interface{"u8;
-internal static ref readonly @string mapˢ => ref mapˢᵇ;
-private static readonly @string mapˢᵇ = "map["u8;
-internal static ref readonly @string chanˢ3 => ref chanˢ3ᵇ;
-private static readonly @string chanˢ3ᵇ = "chan "u8;
-internal static ref readonly @string chanˢ => ref chanˢᵇ;
-private static readonly @string chanˢᵇ = "chan<- "u8;
-internal static ref readonly @string chanˢ2 => ref chanˢ2ᵇ;
-private static readonly @string chanˢ2ᵇ = "<-chan "u8;
-internal static ref readonly @string unknownChannelDirectionˢ => ref unknownChannelDirectionˢᵇ;
-private static readonly @string unknownChannelDirectionˢᵇ = "unknown channel direction"u8;
-internal static ref readonly @string unnamedTypeParameterˢ => ref unnamedTypeParameterˢᵇ;
-private static readonly @string unnamedTypeParameterˢᵇ = "unnamed type parameter"u8;
-internal static ref readonly @string typeParameterˢ2 => ref typeParameterˢ2ᵇ;
-private static readonly @string typeParameterˢ2ᵇ = "/* type parameter */"u8;
+internal static ref readonly @string nilˢ2ᴍtypeWriter => ref nilˢ2ᵇᴍtypeWriter;
+private static readonly @string nilˢ2ᵇᴍtypeWriter = "nil"u8;
+internal static ref readonly @string structˢᴍtypeWriter => ref structˢᵇᴍtypeWriter;
+private static readonly @string structˢᵇᴍtypeWriter = "struct{"u8;
+internal static ref readonly @string packageˢᴍtypeWriter => ref packageˢᵇᴍtypeWriter;
+private static readonly @string packageˢᵇᴍtypeWriter = " /* package "u8;
+internal static ref readonly @string funcˢᴍtypeWriter => ref funcˢᵇᴍtypeWriter;
+private static readonly @string funcˢᵇᴍtypeWriter = "func"u8;
+internal static ref readonly @string emptyUnionˢᴍtypeWriter => ref emptyUnionˢᵇᴍtypeWriter;
+private static readonly @string emptyUnionˢᵇᴍtypeWriter = "empty union"u8;
+internal static ref readonly @string anyˢᴍtypeWriter => ref anyˢᵇᴍtypeWriter;
+private static readonly @string anyˢᵇᴍtypeWriter = "any"u8;
+internal static ref readonly @string interfaceComparableˢᴍtypeWriter => ref interfaceComparableˢᵇᴍtypeWriter;
+private static readonly @string interfaceComparableˢᵇᴍtypeWriter = "interface{comparable}"u8;
+internal static ref readonly @string implicitˢᴍtypeWriter => ref implicitˢᵇᴍtypeWriter;
+private static readonly @string implicitˢᵇᴍtypeWriter = "/* implicit */ "u8;
+internal static ref readonly @string interfaceˢᴍtypeWriter => ref interfaceˢᵇᴍtypeWriter;
+private static readonly @string interfaceˢᵇᴍtypeWriter = "interface{"u8;
+internal static ref readonly @string mapˢᴍtypeWriter => ref mapˢᵇᴍtypeWriter;
+private static readonly @string mapˢᵇᴍtypeWriter = "map["u8;
+internal static ref readonly @string chanˢ3ᴍtypeWriter => ref chanˢ3ᵇᴍtypeWriter;
+private static readonly @string chanˢ3ᵇᴍtypeWriter = "chan "u8;
+internal static ref readonly @string chanˢᴍtypeWriter => ref chanˢᵇᴍtypeWriter;
+private static readonly @string chanˢᵇᴍtypeWriter = "chan<- "u8;
+internal static ref readonly @string chanˢ2ᴍtypeWriter => ref chanˢ2ᵇᴍtypeWriter;
+private static readonly @string chanˢ2ᵇᴍtypeWriter = "<-chan "u8;
+internal static ref readonly @string unknownChannelDirectionˢᴍtypeWriter => ref unknownChannelDirectionˢᵇᴍtypeWriter;
+private static readonly @string unknownChannelDirectionˢᵇᴍtypeWriter = "unknown channel direction"u8;
+internal static ref readonly @string unnamedTypeParameterˢᴍtypeWriter => ref unnamedTypeParameterˢᵇᴍtypeWriter;
+private static readonly @string unnamedTypeParameterˢᵇᴍtypeWriter = "unnamed type parameter"u8;
+internal static ref readonly @string typeParameterˢ2ᴍtypeWriter => ref typeParameterˢ2ᵇᴍtypeWriter;
+private static readonly @string typeParameterˢ2ᵇᴍtypeWriter = "/* type parameter */"u8;
 
 internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
     GoFrame ᒐ = default;
@@ -162,7 +162,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
 
         switch (typ.type()) {
         case null: {
-            w.error(nilˢ2);
+            w.error(nilˢ2ᴍtypeWriter);
             break;
         }
         case ж<Basic> t: {
@@ -190,7 +190,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
             break;
         }
         case ж<Struct> t: {
-            w.@string(structˢ);
+            w.@string(structˢᴍtypeWriter);
             foreach (var (i, f) in range(t.fields)) {
                 if (i > 0) {
                     w.@byte((byte)';');
@@ -214,7 +214,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
                 }
                 Ꮡw.typ(f.typ);
                 if (pkgAnnotate) {
-                    w.@string(packageˢ);
+                    w.@string(packageˢᴍtypeWriter);
                     w.@string(f.pkg.Path());
                     w.@string(" */ ");
                 }
@@ -239,7 +239,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
             break;
         }
         case ж<Signature> t: {
-            w.@string(funcˢ);
+            w.@string(funcˢᴍtypeWriter);
             Ꮡw.signature(t);
             break;
         }
@@ -247,7 +247,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
             // Unions only appear as (syntactic) embedded elements
             // in interfaces and syntactically cannot be empty.
             if (t.Len() == 0) {
-                w.error(emptyUnionˢ);
+                w.error(emptyUnionˢᴍtypeWriter);
                 break;
             }
             foreach (var (i, tΔ1) in range(t.terms)) {
@@ -268,11 +268,11 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
                     // for a type that is pointer-identical to universeAny.
                     // TODO(rfindley): this logic should not be necessary with
                     // gotypesalias=1. Remove once that is always the case.
-                    w.@string(anyˢ);
+                    w.@string(anyˢᴍtypeWriter);
                     break;
                 }
                 if (AreEqual(t, asNamed(universeComparable.Type()).underlying)) {
-                    w.@string(interfaceComparableˢ);
+                    w.@string(interfaceComparableˢᴍtypeWriter);
                     break;
                 }
             }
@@ -283,9 +283,9 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
                 }
                 // Something's wrong with the implicit interface.
                 // Print it as such and continue.
-                w.@string(implicitˢ);
+                w.@string(implicitˢᴍtypeWriter);
             }
-            w.@string(interfaceˢ);
+            w.@string(interfaceˢᴍtypeWriter);
             var first = true;
             if (w.ctxt != nil) {
                 Ꮡw.typeSet(t.typeSet());
@@ -310,7 +310,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
             break;
         }
         case ж<Map> t: {
-            w.@string(mapˢ);
+            w.@string(mapˢᴍtypeWriter);
             Ꮡw.typ(t.key);
             w.@byte((byte)']');
             Ꮡw.typ(t.elem);
@@ -321,7 +321,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
             bool parens = default;
             switch (t.dir) {
             case var ᴛ when ᴛ == SendRecv: {
-                s = chanˢ3;
+                s = chanˢ3ᴍtypeWriter;
                 // chan (<-chan T) requires parentheses
                 var (c, _) = t.elem._<ж<Chan>>(ᐧ); if (c != nil && c.dir == RecvOnly) {
                     parens = true;
@@ -329,15 +329,15 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
                 break;
             }
             case var ᴛ when ᴛ == SendOnly: {
-                s = chanˢ;
+                s = chanˢᴍtypeWriter;
                 break;
             }
             case var ᴛ when ᴛ == RecvOnly: {
-                s = chanˢ2;
+                s = chanˢ2ᴍtypeWriter;
                 break;
             }
             default: {
-                w.error(unknownChannelDirectionˢ);
+                w.error(unknownChannelDirectionˢᴍtypeWriter);
                 break;
             }}
             w.@string(s);
@@ -368,7 +368,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
         }
         case ж<TypeParam> t: {
             if (t.obj == nil) {
-                w.error(unnamedTypeParameterˢ);
+                w.error(unnamedTypeParameterˢᴍtypeWriter);
                 break;
             }
             {
@@ -392,7 +392,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
                         } else {
                             // Can't print position information because
                             // we don't have a token.FileSet accessible.
-                            w.@string(typeParameterˢ2);
+                            w.@string(typeParameterˢ2ᴍtypeWriter);
                         }
                     }
                 }
@@ -485,8 +485,8 @@ internal static void typeListᴍ(ж<typeWriter> Ꮡw, slice<Type> list) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilTypeParameterˢ => ref nilTypeParameterˢᵇ;
-private static readonly @string nilTypeParameterˢᵇ = "nil type parameter"u8;
+internal static ref readonly @string nilTypeParameterˢᴍtypeWriter => ref nilTypeParameterˢᵇᴍtypeWriter;
+private static readonly @string nilTypeParameterˢᵇᴍtypeWriter = "nil type parameter"u8;
 
 internal static void tParamListᴍ(ж<typeWriter> Ꮡw, slice<ж<TypeParam>> list) {
     ref var w = ref Ꮡw.DerefOrNull();
@@ -498,7 +498,7 @@ internal static void tParamListᴍ(ж<typeWriter> Ꮡw, slice<ж<TypeParam>> lis
         // list is expected to hold type parameter names,
         // but don't crash if that's not the case.
         if (tpar == nil) {
-            w.error(nilTypeParameterˢ);
+            w.error(nilTypeParameterˢᴍtypeWriter);
             continue;
         }
         if (i > 0) {

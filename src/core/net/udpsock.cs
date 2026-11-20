@@ -44,21 +44,21 @@ internal static netip.AddrPort AddrPortᴍ(ж<UDPAddr> Ꮡa) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string udpˢ => ref udpˢᵇ;
-private static readonly @string udpˢᵇ = "udp"u8;
+internal static ref readonly @string udpˢᴍUDPAddr => ref udpˢᵇᴍUDPAddr;
+private static readonly @string udpˢᵇᴍUDPAddr = "udp"u8;
 
 // Network returns the address's network name, "udp".
-internal static @string Networkᴍ(ref UDPAddr a) { return udpˢ; }
+internal static @string Networkᴍ(ref UDPAddr a) { return udpˢᴍUDPAddr; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍUDPAddr => ref nilˢᵇᴍUDPAddr;
+private static readonly @string nilˢᵇᴍUDPAddr = "<nil>"u8;
 
 internal static @string Stringᴍ(ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return nilˢ;
+        return nilˢᴍUDPAddr;
     }
     @string ip = ipEmptyString(a.IP);
     if (a.Zone != ""u8) {
@@ -138,10 +138,10 @@ partial struct addrPortUDPAddr {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string udpˢ => ref udpˢᵇ;
-private static readonly @string udpˢᵇ = "udp"u8;
+internal static ref readonly @string udpˢᴍaddrPortUDPAddr => ref udpˢᵇᴍaddrPortUDPAddr;
+private static readonly @string udpˢᵇᴍaddrPortUDPAddr = "udp"u8;
 
-internal static @string Networkᴍ(addrPortUDPAddr _) { return udpˢ; }
+internal static @string Networkᴍ(addrPortUDPAddr _) { return udpˢᴍaddrPortUDPAddr; }
 
 } partial class net_package {
 

@@ -209,15 +209,15 @@ public static FileMode ModePerm => /* 0777 */ 511; // Unix permission bits
 } partial class fs_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static ref readonly @string strᶜ => ref strᶜᵇ;
-private static readonly @string strᶜᵇ = "dalTLDpSugct?"u8;
+private static ref readonly @string strᶜᴍFileMode => ref strᶜᵇᴍFileMode;
+private static readonly @string strᶜᵇᴍFileMode = "dalTLDpSugct?"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static ref readonly @string rwxᶜ => ref rwxᶜᵇ;
-private static readonly @string rwxᶜᵇ = "rwxrwxrwx"u8;
+private static ref readonly @string rwxᶜᴍFileMode => ref rwxᶜᵇᴍFileMode;
+private static readonly @string rwxᶜᵇᴍFileMode = "rwxrwxrwx"u8;
 
 internal static @string Stringᴍ(FileMode m) {
-    @string str = strᶜ;
+    @string str = strᶜᴍFileMode;
     array<byte> buf = new(32); // Mode is uint32.
     nint w = 0;
     foreach (var (i, c) in (@string)str) {
@@ -230,7 +230,7 @@ internal static @string Stringᴍ(FileMode m) {
         buf[w] = (byte)'-';
         w++;
     }
-    @string rwx = rwxᶜ;
+    @string rwx = rwxᶜᴍFileMode;
     foreach (var (i, c) in (@string)rwx) {
         if ((FileMode)(m & ((FileMode)((uint32)1 << (int)((nuint)(9 - 1 - i))))) != 0) {
             buf[w] = (byte)c;

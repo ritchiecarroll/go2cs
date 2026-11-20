@@ -109,11 +109,11 @@ partial struct pipeAddr {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pipeˢ => ref pipeˢᵇ;
-private static readonly @string pipeˢᵇ = "pipe"u8;
+internal static ref readonly @string pipeˢᴍpipeAddr => ref pipeˢᵇᴍpipeAddr;
+private static readonly @string pipeˢᵇᴍpipeAddr = "pipe"u8;
 
-internal static @string Networkᴍ(pipeAddr _) { return pipeˢ; }
-internal static @string Stringᴍ(pipeAddr _) { return pipeˢ; }
+internal static @string Networkᴍ(pipeAddr _) { return pipeˢᴍpipeAddr; }
+internal static @string Stringᴍ(pipeAddr _) { return pipeˢᴍpipeAddr; }
 
 } partial class net_package {
 

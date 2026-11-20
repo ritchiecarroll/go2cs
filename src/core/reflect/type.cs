@@ -920,23 +920,23 @@ internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x, @string whySaf
 } partial class reflect_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chanˢ => ref chanˢᵇ;
-private static readonly @string chanˢᵇ = "chan<-"u8;
-internal static ref readonly @string chanˢ2 => ref chanˢ2ᵇ;
-private static readonly @string chanˢ2ᵇ = "<-chan"u8;
-internal static ref readonly @string chanˢ3 => ref chanˢ3ᵇ;
-private static readonly @string chanˢ3ᵇ = "chan"u8;
+internal static ref readonly @string chanˢᴍChanDir => ref chanˢᵇᴍChanDir;
+private static readonly @string chanˢᵇᴍChanDir = "chan<-"u8;
+internal static ref readonly @string chanˢ2ᴍChanDir => ref chanˢ2ᵇᴍChanDir;
+private static readonly @string chanˢ2ᵇᴍChanDir = "<-chan"u8;
+internal static ref readonly @string chanˢ3ᴍChanDir => ref chanˢ3ᵇᴍChanDir;
+private static readonly @string chanˢ3ᵇᴍChanDir = "chan"u8;
 
 internal static @string Stringᴍ(ChanDir d) {
     switch (d) {
     case var ᴛ when ᴛ == SendDir: {
-        return chanˢ;
+        return chanˢᴍChanDir;
     }
     case var ᴛ when ᴛ == RecvDir: {
-        return chanˢ2;
+        return chanˢ2ᴍChanDir;
     }
     case var ᴛ when ᴛ == BothDir: {
-        return chanˢ3;
+        return chanˢ3ᴍChanDir;
     }}
     return "ChanDir"u8 + strconv.Itoa((nint)d);
 }

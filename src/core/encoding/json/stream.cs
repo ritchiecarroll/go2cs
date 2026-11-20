@@ -304,15 +304,15 @@ internal static (slice<byte>, error) MarshalJSONᴍ(RawMessage m) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string jsonRawMessageˢ => ref jsonRawMessageˢᵇ;
-private static readonly @string jsonRawMessageˢᵇ = "json.RawMessage: UnmarshalJSON on nil pointer"u8;
+internal static ref readonly @string jsonRawMessageˢᴍRawMessage => ref jsonRawMessageˢᵇᴍRawMessage;
+private static readonly @string jsonRawMessageˢᵇᴍRawMessage = "json.RawMessage: UnmarshalJSON on nil pointer"u8;
 
 // UnmarshalJSON sets *m to a copy of data.
 internal static error UnmarshalJSONᴍ(ж<RawMessage> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
-        return errors.New(jsonRawMessageˢ);
+        return errors.New(jsonRawMessageˢᴍRawMessage);
     }
     m = appendꓸꓸꓸ((m)[0..0], data);
     return default;
@@ -509,42 +509,42 @@ internal static (Token, error) Tokenᴍ(ж<Decoder> Ꮡdec) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lookingForBeginningOfˢ3 => ref lookingForBeginningOfˢ3ᵇ;
-private static readonly @string lookingForBeginningOfˢ3ᵇ = " looking for beginning of value"u8;
-internal static ref readonly @string afterArrayElementˢ2 => ref afterArrayElementˢ2ᵇ;
-private static readonly @string afterArrayElementˢ2ᵇ = " after array element"u8;
-internal static ref readonly @string lookingForBeginningOfˢ4 => ref lookingForBeginningOfˢ4ᵇ;
-private static readonly @string lookingForBeginningOfˢ4ᵇ = " looking for beginning of object key string"u8;
-internal static ref readonly @string afterObjectKeyˢ2 => ref afterObjectKeyˢ2ᵇ;
-private static readonly @string afterObjectKeyˢ2ᵇ = " after object key"u8;
-internal static ref readonly @string afterObjectKeyValuePairˢ2 => ref afterObjectKeyValuePairˢ2ᵇ;
-private static readonly @string afterObjectKeyValuePairˢ2ᵇ = " after object key:value pair"u8;
+internal static ref readonly @string lookingForBeginningOfˢ3ᴍDecoder => ref lookingForBeginningOfˢ3ᵇᴍDecoder;
+private static readonly @string lookingForBeginningOfˢ3ᵇᴍDecoder = " looking for beginning of value"u8;
+internal static ref readonly @string afterArrayElementˢ2ᴍDecoder => ref afterArrayElementˢ2ᵇᴍDecoder;
+private static readonly @string afterArrayElementˢ2ᵇᴍDecoder = " after array element"u8;
+internal static ref readonly @string lookingForBeginningOfˢ4ᴍDecoder => ref lookingForBeginningOfˢ4ᵇᴍDecoder;
+private static readonly @string lookingForBeginningOfˢ4ᵇᴍDecoder = " looking for beginning of object key string"u8;
+internal static ref readonly @string afterObjectKeyˢ2ᴍDecoder => ref afterObjectKeyˢ2ᵇᴍDecoder;
+private static readonly @string afterObjectKeyˢ2ᵇᴍDecoder = " after object key"u8;
+internal static ref readonly @string afterObjectKeyValuePairˢ2ᴍDecoder => ref afterObjectKeyValuePairˢ2ᵇᴍDecoder;
+private static readonly @string afterObjectKeyValuePairˢ2ᵇᴍDecoder = " after object key:value pair"u8;
 
 internal static (Token, error) tokenErrorᴍ(ref Decoder dec, byte c) {
     @string context = default;
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenTopValue: {
-        context = lookingForBeginningOfˢ3;
+        context = lookingForBeginningOfˢ3ᴍDecoder;
         break;
     }
     case var ᴛ when ᴛ == tokenArrayStart || ᴛ == tokenArrayValue || ᴛ == tokenObjectValue: {
-        context = lookingForBeginningOfˢ3;
+        context = lookingForBeginningOfˢ3ᴍDecoder;
         break;
     }
     case var ᴛ when ᴛ == tokenArrayComma: {
-        context = afterArrayElementˢ2;
+        context = afterArrayElementˢ2ᴍDecoder;
         break;
     }
     case var ᴛ when ᴛ == tokenObjectKey: {
-        context = lookingForBeginningOfˢ4;
+        context = lookingForBeginningOfˢ4ᴍDecoder;
         break;
     }
     case var ᴛ when ᴛ == tokenObjectColon: {
-        context = afterObjectKeyˢ2;
+        context = afterObjectKeyˢ2ᴍDecoder;
         break;
     }
     case var ᴛ when ᴛ == tokenObjectComma: {
-        context = afterObjectKeyValuePairˢ2;
+        context = afterObjectKeyValuePairˢ2ᴍDecoder;
         break;
     }}
     return (default, new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + context, dec.InputOffset()))));

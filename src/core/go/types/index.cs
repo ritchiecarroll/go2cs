@@ -18,8 +18,8 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mapIndexˢ => ref mapIndexˢᵇ;
-private static readonly @string mapIndexˢᵇ = "map index"u8;
+internal static ref readonly @string mapIndexˢᴍChecker => ref mapIndexˢᵇᴍChecker;
+private static readonly @string mapIndexˢᵇᴍChecker = "map index"u8;
 
 // If e is a valid function instantiation, indexExpr returns true.
 // In that case x represents the uninstantiated function value and
@@ -110,7 +110,7 @@ internal static bool /*isFuncInst*/ indexExprᴍ(ж<Checker> Ꮡcheck, ж<operan
         }
         ref var key = ref heap(new operand(), out var Ꮡkey);
         Ꮡcheck.expr(nil, Ꮡkey, indexΔ1);
-        Ꮡcheck.assignment(Ꮡkey, typ.key, mapIndexˢ);
+        Ꮡcheck.assignment(Ꮡkey, typ.key, mapIndexˢᴍChecker);
         // ok to continue even if indexing failed - map element type is known
         x.mode = mapindex;
         x.typ = typ.elem;
@@ -195,7 +195,7 @@ internal static bool /*isFuncInst*/ indexExprᴍ(ж<Checker> Ꮡcheck, ж<operan
                 }
                 ref var k = ref heap(new operand(), out var Ꮡk);
                 Ꮡcheck.expr(nil, Ꮡk, indexΔ2);
-                Ꮡcheck.assignment(Ꮡk, key, mapIndexˢ);
+                Ꮡcheck.assignment(Ꮡk, key, mapIndexˢᴍChecker);
                 // ok to continue even if indexing failed - map element type is known
                 x.mode = mapindex;
                 x.typ = elem;
@@ -237,8 +237,8 @@ internal static bool /*isFuncInst*/ indexExprᴍ(ж<Checker> Ꮡcheck, ж<operan
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string and3rdIndexRequiredIn3ˢ => ref and3rdIndexRequiredIn3ˢᵇ;
-private static readonly @string and3rdIndexRequiredIn3ˢᵇ = "2nd and 3rd index required in 3-index slice"u8;
+internal static ref readonly @string and3rdIndexRequiredIn3ˢᴍChecker => ref and3rdIndexRequiredIn3ˢᵇᴍChecker;
+private static readonly @string and3rdIndexRequiredIn3ˢᵇᴍChecker = "2nd and 3rd index required in 3-index slice"u8;
 
 internal static void sliceExprᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SliceExpr> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -358,7 +358,7 @@ internal static void sliceExprᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast
 
     // spec: "Only the first index may be omitted; it defaults to 0."
     if (e.Slice3 && (e.High == nil || e.Max == nil)) {
-        Ꮡcheck.error(inNode(new ast.SliceExprжNode(Ꮡe), e.Rbrack), InvalidSyntaxTree, and3rdIndexRequiredIn3ˢ);
+        Ꮡcheck.error(inNode(new ast.SliceExprжNode(Ꮡe), e.Rbrack), InvalidSyntaxTree, and3rdIndexRequiredIn3ˢᴍChecker);
         x.mode = invalid;
         return;
     }
@@ -433,8 +433,8 @@ internal static ast.Expr singleIndexᴍ(ж<Checker> Ꮡcheck, ж<indexedExpr> �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string indexˢ => ref indexˢᵇ;
-private static readonly @string indexˢᵇ = "index"u8;
+internal static ref readonly @string indexˢᴍChecker => ref indexˢᵇᴍChecker;
+private static readonly @string indexˢᵇᴍChecker = "index"u8;
 
 // index checks an index expression for validity.
 // If max >= 0, it is the upper bound for index.
@@ -449,7 +449,7 @@ internal static (Type typ, int64 val) indexᴍ(ж<Checker> Ꮡcheck, ast.Expr in
 
     ref var x = ref heap(new operand(), out var Ꮡx);
     Ꮡcheck.expr(nil, Ꮡx, index);
-    if (!Ꮡcheck.isValidIndex(Ꮡx, InvalidIndex, indexˢ, false)) {
+    if (!Ꮡcheck.isValidIndex(Ꮡx, InvalidIndex, indexˢᴍChecker, false)) {
         return (typ, val);
     }
 

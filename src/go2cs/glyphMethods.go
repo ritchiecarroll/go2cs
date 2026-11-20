@@ -57,6 +57,7 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 	lines := strings.Split(text, "\n")
 	current := ""
 	var forwarders []glyphForwarder
+	switches := map[int]string{} // line index of each holder switch → the holder it opened
 
 	for i, line := range lines {
 		trimmed := strings.TrimRight(line, "\r")
@@ -71,6 +72,7 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 
 			if current != packageClass {
 				lines[i] = strings.Replace(line, "partial class "+current+" {", "partial class "+packageClass+" {", 1)
+				switches[i] = current
 			}
 
 			continue
@@ -100,6 +102,8 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 	if len(forwarders) == 0 {
 		return text
 	}
+
+	glyphRenameHolderHoists(lines, packageClass, switches)
 
 	// A file whose methods were in the package class (package main under the main-holders rule) reads its own
 	// package's names bare only inside that class: the forwarders, outside it, need the class's static using.
@@ -567,4 +571,62 @@ func containsWord(words []string, word string) bool {
 	}
 
 	return false
+}
+
+// The hoisted members a holder block declares (a hoisted string literal `invalidˢ` and its backing `invalidˢᵇ`, a hoisted
+// constant, a static backing field, a twin's value delegate) were members of the HOLDER, so the package class may
+// declare the same name for its own use (CS0102 once the block reopens the package class). Each such name declared in a
+// former holder block is renamed, with its uses inside that block, by the holder's name: `invalidˢ` becomes
+// `invalidˢᴍReader`. Nothing outside the block can name a holder's private hoist.
+var glyphHoistDeclaration = regexp.MustCompile(`^(?:private|internal|public) static [^(=]*?([\p{L}_][\p{L}\p{N}_]*)\s*(?:=>|=|;)`)
+
+func glyphRenameHolderHoists(lines []string, packageClass string, switches map[int]string) {
+	stem := strings.TrimSuffix(packageClass, PackageSuffix)
+	start, holder := -1, ""
+
+	flush := func(end int) {
+		if start < 0 || holder == "" {
+			return
+		}
+
+		tag := GlyphMethodSuffix + strings.TrimPrefix(strings.TrimPrefix(holder, stem), TempVarMarker)
+		names := map[string]bool{}
+
+		for i := start; i < end; i++ {
+			if match := glyphHoistDeclaration.FindStringSubmatch(lines[i]); match != nil && strings.ContainsAny(match[1], "ˢᵇᶜᶠ") {
+				names[match[1]] = true
+			}
+		}
+
+		for name := range names {
+			pattern := regexp.MustCompile(`(^|[^\p{L}\p{N}_])` + regexp.QuoteMeta(name) + `($|[^\p{L}\p{N}_])`)
+
+			for i := start; i < end; i++ {
+				if strings.Contains(lines[i], name) {
+					// Twice, for adjacent occurrences sharing one separator.
+					lines[i] = pattern.ReplaceAllString(lines[i], "${1}"+name+tag+"${2}")
+					lines[i] = pattern.ReplaceAllString(lines[i], "${1}"+name+tag+"${2}")
+				}
+			}
+		}
+	}
+
+	for i, line := range lines {
+		trimmed := strings.TrimRight(line, "\r")
+
+		if !strings.HasPrefix(trimmed, "} partial class ") {
+			continue
+		}
+
+		flush(i)
+		start, holder = -1, ""
+
+		// The transform has already rewritten each holder switch to reopen the package class, so the switches it
+		// rewrote say which blocks were a holder's, and whose.
+		if name, ok := switches[i]; ok {
+			start, holder = i+1, name
+		}
+	}
+
+	flush(len(lines))
 }

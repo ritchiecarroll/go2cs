@@ -110,23 +110,23 @@ internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mlDsa44ˢ => ref mlDsa44ˢᵇ;
-private static readonly @string mlDsa44ˢᵇ = "ML-DSA-44"u8;
-internal static ref readonly @string mlDsa65ˢ => ref mlDsa65ˢᵇ;
-private static readonly @string mlDsa65ˢᵇ = "ML-DSA-65"u8;
-internal static ref readonly @string mlDsa87ˢ => ref mlDsa87ˢᵇ;
-private static readonly @string mlDsa87ˢᵇ = "ML-DSA-87"u8;
+internal static ref readonly @string mlDsa44ˢᴍPublicKey => ref mlDsa44ˢᵇᴍPublicKey;
+private static readonly @string mlDsa44ˢᵇᴍPublicKey = "ML-DSA-44"u8;
+internal static ref readonly @string mlDsa65ˢᴍPublicKey => ref mlDsa65ˢᵇᴍPublicKey;
+private static readonly @string mlDsa65ˢᵇᴍPublicKey = "ML-DSA-65"u8;
+internal static ref readonly @string mlDsa87ˢᴍPublicKey => ref mlDsa87ˢᵇᴍPublicKey;
+private static readonly @string mlDsa87ˢᵇᴍPublicKey = "ML-DSA-87"u8;
 
 internal static @string Parametersᴍ(ref PublicKey pub) {
     switch (pub.p) {
     case var ᴛ when ᴛ == params44: {
-        return mlDsa44ˢ;
+        return mlDsa44ˢᴍPublicKey;
     }
     case var ᴛ when ᴛ == params65: {
-        return mlDsa65ˢ;
+        return mlDsa65ˢᴍPublicKey;
     }
     case var ᴛ when ᴛ == params87: {
-        return mlDsa87ˢ;
+        return mlDsa87ˢᴍPublicKey;
     }
     default: {
         throw panic("mldsa: internal error: unknown parameters");

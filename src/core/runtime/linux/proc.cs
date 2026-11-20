@@ -5603,8 +5603,8 @@ internal static void setcpuprofilerate(int32 hz) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingMcacheˢ => ref missingMcacheˢᵇ;
-private static readonly @string missingMcacheˢᵇ = "missing mcache?"u8;
+internal static ref readonly @string missingMcacheˢᴍp => ref missingMcacheˢᵇᴍp;
+private static readonly @string missingMcacheˢᵇᴍp = "missing mcache?"u8;
 
 // init initializes pp, which may be a freshly allocated p or a
 // previously destroyed p, and transitions it to status _Pgcstop.
@@ -5620,7 +5620,7 @@ internal static void initᴍ(ж<p> Ꮡpp, int32 id) {
     if (pp.mcache == nil) {
         if (id == 0) {
             if (mcache0 == nil) {
-                @throw(missingMcacheˢ);
+                @throw(missingMcacheˢᴍp);
             }
             // Use the bootstrap mcache0. Only one P will get
             // mcache0: the one with ID 0.
@@ -5648,8 +5648,8 @@ internal static void initᴍ(ж<p> Ꮡpp, int32 id) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pDestroyedWhileGcIsˢ => ref pDestroyedWhileGcIsˢᵇ;
-private static readonly @string pDestroyedWhileGcIsˢᵇ = "P destroyed while GC is running"u8;
+internal static ref readonly @string pDestroyedWhileGcIsˢᴍp => ref pDestroyedWhileGcIsˢᵇᴍp;
+private static readonly @string pDestroyedWhileGcIsˢᵇᴍp = "P destroyed while GC is running"u8;
 
 // destroy releases all of the resources associated with pp and
 // transitions it to status _Pdead.
@@ -5681,7 +5681,7 @@ internal static void destroyᴍ(ж<p> Ꮡpp) {
     // cannot be destroyed during the mark phase.
     var phase = gcphase; if (phase != _GCoff) {
         println((@string)"runtime: p id", pp.id, (@string)"destroyed during GC phase", phase);
-        @throw(pDestroyedWhileGcIsˢ);
+        @throw(pDestroyedWhileGcIsˢᴍp);
     }
     // We should free the queues though.
     Ꮡpp.of(p.Ꮡgcw).Ꮡspanq.destroy();
@@ -6567,15 +6567,15 @@ internal static void takePᴍ(syscallingThread s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string attemptedToReleasePIntoAˢ => ref attemptedToReleasePIntoAˢᵇ;
-private static readonly @string attemptedToReleasePIntoAˢᵇ = "attempted to release P into a bad state"u8;
+internal static ref readonly @string attemptedToReleasePIntoAˢᴍsyscallingThread => ref attemptedToReleasePIntoAˢᵇᴍsyscallingThread;
+private static readonly @string attemptedToReleasePIntoAˢᵇᴍsyscallingThread = "attempted to release P into a bad state"u8;
 
 // releaseP unwires the P from the syscalling thread, moving
 // it to the provided state. Callers should prefer to use
 // takeP and gcstopP.
 internal static void releasePᴍ(syscallingThread s, uint32 state) {
     if (state != _Pidle && state != _Pgcstop) {
-        @throw(attemptedToReleasePIntoAˢ);
+        @throw(attemptedToReleasePIntoAˢᴍsyscallingThread);
     }
     var trace = traceAcquire();
     s.pp.Value.m = 0;

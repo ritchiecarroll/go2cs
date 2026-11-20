@@ -106,35 +106,35 @@ partial struct testLog {
 } partial class testdeps_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string getenvˢ => ref getenvˢᵇ;
-private static readonly @string getenvˢᵇ = "getenv"u8;
+private static ref readonly @string getenvˢᴍtestLog => ref getenvˢᵇᴍtestLog;
+private static readonly @string getenvˢᵇᴍtestLog = "getenv"u8;
 
 internal static void Getenvᴍ(ж<testLog> Ꮡl, @string key) {
-    Ꮡl.add(getenvˢ, key);
+    Ꮡl.add(getenvˢᴍtestLog, key);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string openˢ => ref openˢᵇ;
-private static readonly @string openˢᵇ = "open"u8;
+private static ref readonly @string openˢᴍtestLog => ref openˢᵇᴍtestLog;
+private static readonly @string openˢᵇᴍtestLog = "open"u8;
 
 internal static void Openᴍ(ж<testLog> Ꮡl, @string name) {
-    Ꮡl.add(openˢ, name);
+    Ꮡl.add(openˢᴍtestLog, name);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string statˢ => ref statˢᵇ;
-private static readonly @string statˢᵇ = "stat"u8;
+private static ref readonly @string statˢᴍtestLog => ref statˢᵇᴍtestLog;
+private static readonly @string statˢᵇᴍtestLog = "stat"u8;
 
 internal static void Statᴍ(ж<testLog> Ꮡl, @string name) {
-    Ꮡl.add(statˢ, name);
+    Ꮡl.add(statˢᴍtestLog, name);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string chdirˢ => ref chdirˢᵇ;
-private static readonly @string chdirˢᵇ = "chdir"u8;
+private static ref readonly @string chdirˢᴍtestLog => ref chdirˢᵇᴍtestLog;
+private static readonly @string chdirˢᵇᴍtestLog = "chdir"u8;
 
 internal static void Chdirᴍ(ж<testLog> Ꮡl, @string name) {
-    Ꮡl.add(chdirˢ, name);
+    Ꮡl.add(chdirˢᴍtestLog, name);
 }
 
 // add adds the (op, name) pair to the test log.
@@ -170,8 +170,8 @@ internal static ref testLog log => ref ((StaticBox<testLog>)Ꮡlog).ValueSlot;
 } partial class testdeps_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string testLogˢ => ref testLogˢᵇ;
-private static readonly @string testLogˢᵇ = "# test log\n"u8;
+private static ref readonly @string testLogˢᴍTestDeps => ref testLogˢᵇᴍTestDeps;
+private static readonly @string testLogˢᵇᴍTestDeps = "# test log\n"u8;
 
 internal static void StartTestLogᴍ(TestDeps _, io.Writer w) {
     Ꮡlog.Ꮡmu.Lock();
@@ -183,7 +183,7 @@ internal static void StartTestLogᴍ(TestDeps _, io.Writer w) {
         // (which will panic) and also avoids writing the header multiple times.
         log.set = true;
         testlog.SetLogger(new testLogжInterface(Ꮡlog));
-        log.w.WriteString(testLogˢ); // known to cmd/go/internal/test/test.go
+        log.w.WriteString(testLogˢᴍTestDeps); // known to cmd/go/internal/test/test.go
     }
     Ꮡlog.Ꮡmu.Unlock();
 }

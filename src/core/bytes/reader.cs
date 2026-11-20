@@ -53,8 +53,8 @@ internal static (nint n, error err) Readᴍ(ref Reader r, slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesReaderReadAtˢ => ref bytesReaderReadAtˢᵇ;
-private static readonly @string bytesReaderReadAtˢᵇ = "bytes.Reader.ReadAt: negative offset"u8;
+internal static ref readonly @string bytesReaderReadAtˢᴍReader => ref bytesReaderReadAtˢᵇᴍReader;
+private static readonly @string bytesReaderReadAtˢᵇᴍReader = "bytes.Reader.ReadAt: negative offset"u8;
 
 // ReadAt implements the [io.ReaderAt] interface.
 internal static (nint n, error err) ReadAtᴍ(ref Reader r, slice<byte> b, int64 off) {
@@ -63,7 +63,7 @@ internal static (nint n, error err) ReadAtᴍ(ref Reader r, slice<byte> b, int64
 
     // cannot modify state - see io.ReaderAt
     if (off < 0) {
-        return (0, errors.New(bytesReaderReadAtˢ));
+        return (0, errors.New(bytesReaderReadAtˢᴍReader));
     }
     if (off >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -87,13 +87,13 @@ internal static (byte, error) ReadByteᴍ(ref Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesReaderUnreadByteAtˢ => ref bytesReaderUnreadByteAtˢᵇ;
-private static readonly @string bytesReaderUnreadByteAtˢᵇ = "bytes.Reader.UnreadByte: at beginning of slice"u8;
+internal static ref readonly @string bytesReaderUnreadByteAtˢᴍReader => ref bytesReaderUnreadByteAtˢᵇᴍReader;
+private static readonly @string bytesReaderUnreadByteAtˢᵇᴍReader = "bytes.Reader.UnreadByte: at beginning of slice"u8;
 
 // UnreadByte complements [Reader.ReadByte] in implementing the [io.ByteScanner] interface.
 internal static error UnreadByteᴍ(ref Reader r) {
     if (r.i <= 0) {
-        return errors.New(bytesReaderUnreadByteAtˢ);
+        return errors.New(bytesReaderUnreadByteAtˢᴍReader);
     }
     r.prevRune = -1;
     r.i--;
@@ -121,18 +121,18 @@ internal static (rune ch, nint size, error err) ReadRuneᴍ(ref Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesReaderUnreadRuneAtˢ => ref bytesReaderUnreadRuneAtˢᵇ;
-private static readonly @string bytesReaderUnreadRuneAtˢᵇ = "bytes.Reader.UnreadRune: at beginning of slice"u8;
-internal static ref readonly @string bytesReaderUnreadRuneˢ => ref bytesReaderUnreadRuneˢᵇ;
-private static readonly @string bytesReaderUnreadRuneˢᵇ = "bytes.Reader.UnreadRune: previous operation was not ReadRune"u8;
+internal static ref readonly @string bytesReaderUnreadRuneAtˢᴍReader => ref bytesReaderUnreadRuneAtˢᵇᴍReader;
+private static readonly @string bytesReaderUnreadRuneAtˢᵇᴍReader = "bytes.Reader.UnreadRune: at beginning of slice"u8;
+internal static ref readonly @string bytesReaderUnreadRuneˢᴍReader => ref bytesReaderUnreadRuneˢᵇᴍReader;
+private static readonly @string bytesReaderUnreadRuneˢᵇᴍReader = "bytes.Reader.UnreadRune: previous operation was not ReadRune"u8;
 
 // UnreadRune complements [Reader.ReadRune] in implementing the [io.RuneScanner] interface.
 internal static error UnreadRuneᴍ(ref Reader r) {
     if (r.i <= 0) {
-        return errors.New(bytesReaderUnreadRuneAtˢ);
+        return errors.New(bytesReaderUnreadRuneAtˢᴍReader);
     }
     if (r.prevRune < 0) {
-        return errors.New(bytesReaderUnreadRuneˢ);
+        return errors.New(bytesReaderUnreadRuneˢᴍReader);
     }
     r.i = (int64)r.prevRune;
     r.prevRune = -1;
@@ -140,10 +140,10 @@ internal static error UnreadRuneᴍ(ref Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesReaderSeekInvalidˢ => ref bytesReaderSeekInvalidˢᵇ;
-private static readonly @string bytesReaderSeekInvalidˢᵇ = "bytes.Reader.Seek: invalid whence"u8;
-internal static ref readonly @string bytesReaderSeekNegativeˢ => ref bytesReaderSeekNegativeˢᵇ;
-private static readonly @string bytesReaderSeekNegativeˢᵇ = "bytes.Reader.Seek: negative position"u8;
+internal static ref readonly @string bytesReaderSeekInvalidˢᴍReader => ref bytesReaderSeekInvalidˢᵇᴍReader;
+private static readonly @string bytesReaderSeekInvalidˢᵇᴍReader = "bytes.Reader.Seek: invalid whence"u8;
+internal static ref readonly @string bytesReaderSeekNegativeˢᴍReader => ref bytesReaderSeekNegativeˢᵇᴍReader;
+private static readonly @string bytesReaderSeekNegativeˢᵇᴍReader = "bytes.Reader.Seek: negative position"u8;
 
 // Seek implements the [io.Seeker] interface.
 internal static (int64, error) Seekᴍ(ref Reader r, int64 offset, nint whence) {
@@ -163,10 +163,10 @@ internal static (int64, error) Seekᴍ(ref Reader r, int64 offset, nint whence) 
         break;
     }
     default: {
-        return (0, errors.New(bytesReaderSeekInvalidˢ));
+        return (0, errors.New(bytesReaderSeekInvalidˢᴍReader));
     }}
     if (abs < 0) {
-        return (0, errors.New(bytesReaderSeekNegativeˢ));
+        return (0, errors.New(bytesReaderSeekNegativeˢᴍReader));
     }
     r.i = abs;
     return (abs, default);

@@ -69,16 +69,16 @@ internal static void SetURLᴍ(ref ProxyRequest r, ж<url.URL> target) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xForwardedForˢ => ref xForwardedForˢᵇ;
-private static readonly @string xForwardedForˢᵇ = "X-Forwarded-For"u8;
-internal static ref readonly @string xForwardedHostˢ => ref xForwardedHostˢᵇ;
-private static readonly @string xForwardedHostˢᵇ = "X-Forwarded-Host"u8;
-internal static ref readonly @string xForwardedProtoˢ => ref xForwardedProtoˢᵇ;
-private static readonly @string xForwardedProtoˢᵇ = "X-Forwarded-Proto"u8;
-internal static ref readonly @string httpˢ => ref httpˢᵇ;
-private static readonly @string httpˢᵇ = "http"u8;
-internal static ref readonly @string httpsˢ2 => ref httpsˢ2ᵇ;
-private static readonly @string httpsˢ2ᵇ = "https"u8;
+internal static ref readonly @string xForwardedForˢᴍProxyRequest => ref xForwardedForˢᵇᴍProxyRequest;
+private static readonly @string xForwardedForˢᵇᴍProxyRequest = "X-Forwarded-For"u8;
+internal static ref readonly @string xForwardedHostˢᴍProxyRequest => ref xForwardedHostˢᵇᴍProxyRequest;
+private static readonly @string xForwardedHostˢᵇᴍProxyRequest = "X-Forwarded-Host"u8;
+internal static ref readonly @string xForwardedProtoˢᴍProxyRequest => ref xForwardedProtoˢᵇᴍProxyRequest;
+private static readonly @string xForwardedProtoˢᵇᴍProxyRequest = "X-Forwarded-Proto"u8;
+internal static ref readonly @string httpˢᴍProxyRequest => ref httpˢᵇᴍProxyRequest;
+private static readonly @string httpˢᵇᴍProxyRequest = "http"u8;
+internal static ref readonly @string httpsˢ2ᴍProxyRequest => ref httpsˢ2ᵇᴍProxyRequest;
+private static readonly @string httpsˢ2ᵇᴍProxyRequest = "https"u8;
 
 // SetXForwarded sets the X-Forwarded-For, X-Forwarded-Host, and
 // X-Forwarded-Proto headers of the outbound request.
@@ -102,19 +102,19 @@ private static readonly @string httpsˢ2ᵇ = "https"u8;
 internal static void SetXForwardedᴍ(ref ProxyRequest r) {
     var (clientIP, _, err) = net.SplitHostPort(r.In.RemoteAddr);
     if (err == nil) {
-        var prior = r.Out.Header[xForwardedForˢ];
+        var prior = r.Out.Header[xForwardedForˢᴍProxyRequest];
         if (len(prior) > 0) {
             clientIP = strings.Join(prior, ", ") + ", "u8 + clientIP;
         }
-        r.Out.Header.Set(xForwardedForˢ, clientIP);
+        r.Out.Header.Set(xForwardedForˢᴍProxyRequest, clientIP);
     } else {
-        r.Out.Header.Del(xForwardedForˢ);
+        r.Out.Header.Del(xForwardedForˢᴍProxyRequest);
     }
-    r.Out.Header.Set(xForwardedHostˢ, r.In.Host);
+    r.Out.Header.Set(xForwardedHostˢᴍProxyRequest, r.In.Host);
     if (r.In.TLS == nil) {
-        r.Out.Header.Set(xForwardedProtoˢ, httpˢ);
+        r.Out.Header.Set(xForwardedProtoˢᴍProxyRequest, httpˢᴍProxyRequest);
     } else {
-        r.Out.Header.Set(xForwardedProtoˢ, httpsˢ2);
+        r.Out.Header.Set(xForwardedProtoˢᴍProxyRequest, httpsˢ2ᴍProxyRequest);
     }
 }
 
@@ -430,28 +430,28 @@ internal static bool modifyResponseᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWrite
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string reverseProxyMustHaveˢ => ref reverseProxyMustHaveˢᵇ;
-private static readonly @string reverseProxyMustHaveˢᵇ = "ReverseProxy must have exactly one of Director or Rewrite set"u8;
-internal static ref readonly @string trailersˢ => ref trailersˢᵇ;
-private static readonly @string trailersˢᵇ = "trailers"u8;
-internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
-private static readonly @string connectionˢᵇ = "Connection"u8;
-internal static ref readonly @string upgradeˢ => ref upgradeˢᵇ;
-private static readonly @string upgradeˢᵇ = "Upgrade"u8;
-internal static ref readonly @string forwardedˢ => ref forwardedˢᵇ;
-private static readonly @string forwardedˢᵇ = "Forwarded"u8;
-internal static ref readonly @string xForwardedForˢ => ref xForwardedForˢᵇ;
-private static readonly @string xForwardedForˢᵇ = "X-Forwarded-For"u8;
-internal static ref readonly @string xForwardedHostˢ => ref xForwardedHostˢᵇ;
-private static readonly @string xForwardedHostˢᵇ = "X-Forwarded-Host"u8;
-internal static ref readonly @string xForwardedProtoˢ => ref xForwardedProtoˢᵇ;
-private static readonly @string xForwardedProtoˢᵇ = "X-Forwarded-Proto"u8;
-internal static ref readonly @string clientSentUnsupportedˢ => ref clientSentUnsupportedˢᵇ;
-private static readonly @string clientSentUnsupportedˢᵇ = "client sent unsupported CONNECT request"u8;
-internal static ref readonly @string userAgentˢ => ref userAgentˢᵇ;
-private static readonly @string userAgentˢᵇ = "User-Agent"u8;
-internal static ref readonly @string trailerˢ => ref trailerˢᵇ;
-private static readonly @string trailerˢᵇ = "Trailer"u8;
+internal static ref readonly @string reverseProxyMustHaveˢᴍReverseProxy => ref reverseProxyMustHaveˢᵇᴍReverseProxy;
+private static readonly @string reverseProxyMustHaveˢᵇᴍReverseProxy = "ReverseProxy must have exactly one of Director or Rewrite set"u8;
+internal static ref readonly @string trailersˢᴍReverseProxy => ref trailersˢᵇᴍReverseProxy;
+private static readonly @string trailersˢᵇᴍReverseProxy = "trailers"u8;
+internal static ref readonly @string connectionˢᴍReverseProxy => ref connectionˢᵇᴍReverseProxy;
+private static readonly @string connectionˢᵇᴍReverseProxy = "Connection"u8;
+internal static ref readonly @string upgradeˢᴍReverseProxy => ref upgradeˢᵇᴍReverseProxy;
+private static readonly @string upgradeˢᵇᴍReverseProxy = "Upgrade"u8;
+internal static ref readonly @string forwardedˢᴍReverseProxy => ref forwardedˢᵇᴍReverseProxy;
+private static readonly @string forwardedˢᵇᴍReverseProxy = "Forwarded"u8;
+internal static ref readonly @string xForwardedForˢᴍReverseProxy => ref xForwardedForˢᵇᴍReverseProxy;
+private static readonly @string xForwardedForˢᵇᴍReverseProxy = "X-Forwarded-For"u8;
+internal static ref readonly @string xForwardedHostˢᴍReverseProxy => ref xForwardedHostˢᵇᴍReverseProxy;
+private static readonly @string xForwardedHostˢᵇᴍReverseProxy = "X-Forwarded-Host"u8;
+internal static ref readonly @string xForwardedProtoˢᴍReverseProxy => ref xForwardedProtoˢᵇᴍReverseProxy;
+private static readonly @string xForwardedProtoˢᵇᴍReverseProxy = "X-Forwarded-Proto"u8;
+internal static ref readonly @string clientSentUnsupportedˢᴍReverseProxy => ref clientSentUnsupportedˢᵇᴍReverseProxy;
+private static readonly @string clientSentUnsupportedˢᵇᴍReverseProxy = "client sent unsupported CONNECT request"u8;
+internal static ref readonly @string userAgentˢᴍReverseProxy => ref userAgentˢᵇᴍReverseProxy;
+private static readonly @string userAgentˢᵇᴍReverseProxy = "User-Agent"u8;
+internal static ref readonly @string trailerˢᴍReverseProxy => ref trailerˢᵇᴍReverseProxy;
+private static readonly @string trailerˢᵇᴍReverseProxy = "Trailer"u8;
 
 internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
@@ -531,7 +531,7 @@ internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWr
         }
 
         if ((p.Director != nil) == (p.Rewrite != nil)) {
-            Ꮡp.getErrorHandler()(rw, Ꮡreq, errors.New(reverseProxyMustHaveˢ));
+            Ꮡp.getErrorHandler()(rw, Ꮡreq, errors.New(reverseProxyMustHaveˢᴍReverseProxy));
             return;
         }
 
@@ -555,25 +555,25 @@ internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWr
         // advertise that unless the incoming client request thought it was worth
         // mentioning.) Note that we look at req.Header, not outreq.Header, since
         // the latter has passed through removeHopByHopHeaders.
-        if (httpguts.HeaderValuesContainsToken(req.Header["Te"], trailersˢ)) {
-            outreq.Header.Set("Te", trailersˢ);
+        if (httpguts.HeaderValuesContainsToken(req.Header["Te"], trailersˢᴍReverseProxy)) {
+            outreq.Header.Set("Te", trailersˢᴍReverseProxy);
         }
 
         // After stripping all the hop-by-hop connection headers above, add back any
         // necessary for protocol upgrades, such as for websockets.
         if (reqUpType != ""u8) {
-            outreq.Header.Set(connectionˢ, upgradeˢ);
-            outreq.Header.Set(upgradeˢ, reqUpType);
+            outreq.Header.Set(connectionˢᴍReverseProxy, upgradeˢᴍReverseProxy);
+            outreq.Header.Set(upgradeˢᴍReverseProxy, reqUpType);
         }
 
         if (p.Rewrite != nil) {
             // Strip client-provided forwarding headers.
             // The Rewrite func may use SetXForwarded to set new values
             // for these or copy the previous values from the inbound request.
-            outreq.Header.Del(forwardedˢ);
-            outreq.Header.Del(xForwardedForˢ);
-            outreq.Header.Del(xForwardedHostˢ);
-            outreq.Header.Del(xForwardedProtoˢ);
+            outreq.Header.Del(forwardedˢᴍReverseProxy);
+            outreq.Header.Del(xForwardedForˢᴍReverseProxy);
+            outreq.Header.Del(xForwardedHostˢᴍReverseProxy);
+            outreq.Header.Del(xForwardedProtoˢᴍReverseProxy);
 
             // Remove unparsable query parameters from the outbound request.
             outreq.URL.RawQuery = cleanQueryParams(outreq.URL.RawQuery);
@@ -589,13 +589,13 @@ internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWr
                 // If we aren't the first proxy retain prior
                 // X-Forwarded-For information as a comma+space
                 // separated list and fold multiple headers into one.
-                var (prior, ok) = outreq.Header[xForwardedForˢ, ꟷ];
+                var (prior, ok) = outreq.Header[xForwardedForˢᴍReverseProxy, ꟷ];
                 var omit = ok && prior == nil; // Issue 38079: nil now means don't populate the header
                 if (len(prior) > 0) {
                     clientIP = strings.Join(prior, ", ") + ", "u8 + clientIP;
                 }
                 if (!omit) {
-                    outreq.Header.Set(xForwardedForˢ, clientIP);
+                    outreq.Header.Set(xForwardedForˢᴍReverseProxy, clientIP);
                 }
             }
         }
@@ -605,7 +605,7 @@ internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWr
             // (Perhaps we should just send a 405 and never call ErrorHandler?
             // More consistent to always call ErrorHandler or ModifyResponse,
             // so we do that for now.)
-            var errΔ2 = errors.New(clientSentUnsupportedˢ);
+            var errΔ2 = errors.New(clientSentUnsupportedˢᴍReverseProxy);
             if (p.ErrorHandler != nil) {
                 p.ErrorHandler(rw, outreq, errΔ2);
             } else {
@@ -615,10 +615,10 @@ internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWr
             return;
         }
 
-        if (outreq.Header[userAgentˢ, ꟷ] is not (_, true)) {
+        if (outreq.Header[userAgentˢᴍReverseProxy, ꟷ] is not (_, true)) {
             // If the outbound request doesn't have a User-Agent header set,
             // don't send the default Go HTTP client User-Agent.
-            outreq.Header.Set(userAgentˢ, ""u8);
+            outreq.Header.Set(userAgentˢᴍReverseProxy, ""u8);
         }
 
         ref var roundTripMutex = ref heap(new sync.Mutex(), out var ᏑroundTripMutex);
@@ -682,7 +682,7 @@ internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWr
             foreach (var (k, _) in res.Trailer) {
                 trailerKeys = append(trailerKeysᴷ, trailerKeys, k);
             }
-            rw.Header().Add(trailerˢ, strings.Join(trailerKeys, ", "));
+            rw.Header().Add(trailerˢᴍReverseProxy, strings.Join(trailerKeys, ", "));
         }
 
         rw.WriteHeader(res.StatusCode);
@@ -779,15 +779,15 @@ internal static void removeHopByHopHeaders(http.Header h) {
 } partial class httputil_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
-private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
+internal static ref readonly @string contentTypeˢᴍReverseProxy => ref contentTypeˢᵇᴍReverseProxy;
+private static readonly @string contentTypeˢᵇᴍReverseProxy = "Content-Type"u8;
 
 // flushInterval returns the p.FlushInterval value, conditionally
 // overriding its value for a specific request/response.
 internal static time.Duration flushIntervalᴍ(ref ReverseProxy p, ж<http.Response> Ꮡres) {
     ref var res = ref Ꮡres.DerefOrNull();
 
-    @string resCT = res.Header.Get(contentTypeˢ);
+    @string resCT = res.Header.Get(contentTypeˢᴍReverseProxy);
 
     // For Server-Sent Events responses, flush immediately.
     // The MIME type is defined in https://www.w3.org/TR/eventsource/#text-event-stream
@@ -1172,14 +1172,14 @@ internal static error Closeᴍ(ж<noopCloseReader> Ꮡncr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string reverseProxyDoesAnˢ => ref reverseProxyDoesAnˢᵇ;
-private static readonly @string reverseProxyDoesAnˢᵇ = "ReverseProxy does an invalid Read on closed Body"u8;
+internal static ref readonly @string reverseProxyDoesAnˢᴍnoopCloseReader => ref reverseProxyDoesAnˢᵇᴍnoopCloseReader;
+private static readonly @string reverseProxyDoesAnˢᵇᴍnoopCloseReader = "ReverseProxy does an invalid Read on closed Body"u8;
 
 internal static (nint, error) Readᴍ(ж<noopCloseReader> Ꮡncr, slice<byte> p) {
     ref var ncr = ref Ꮡncr.DerefOrNull();
 
     if (Ꮡncr.Ꮡclosed.Load()) {
-        return (0, errors.New(reverseProxyDoesAnˢ));
+        return (0, errors.New(reverseProxyDoesAnˢᴍnoopCloseReader));
     }
     return ncr.readCloser.Read(p);
 }

@@ -62,51 +62,51 @@ internal static ref gccgoDirs gccgoSearch => ref ((StaticBox<gccgoDirs>)Ꮡgccgo
 } partial class goroot_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string gccgoˢ => ref gccgoˢᵇ;
-private static readonly @string gccgoˢᵇ = "GCCGO"u8;
-private static ref readonly @string gccgoˢ2 => ref gccgoˢ2ᵇ;
-private static readonly @string gccgoˢ2ᵇ = "gccgo"u8;
-private static ref readonly @string printSearchDirsˢ => ref printSearchDirsˢᵇ;
-private static readonly @string printSearchDirsˢᵇ = "-print-search-dirs"u8;
-private static ref readonly @string dumpversionˢ => ref dumpversionˢᵇ;
-private static readonly @string dumpversionˢᵇ = "-dumpversion"u8;
-private static ref readonly @string dumpmachineˢ => ref dumpmachineˢᵇ;
-private static readonly @string dumpmachineˢᵇ = "-dumpmachine"u8;
+private static ref readonly @string gccgoˢᴍgccgoDirs => ref gccgoˢᵇᴍgccgoDirs;
+private static readonly @string gccgoˢᵇᴍgccgoDirs = "GCCGO"u8;
+private static ref readonly @string gccgoˢ2ᴍgccgoDirs => ref gccgoˢ2ᵇᴍgccgoDirs;
+private static readonly @string gccgoˢ2ᵇᴍgccgoDirs = "gccgo"u8;
+private static ref readonly @string printSearchDirsˢᴍgccgoDirs => ref printSearchDirsˢᵇᴍgccgoDirs;
+private static readonly @string printSearchDirsˢᵇᴍgccgoDirs = "-print-search-dirs"u8;
+private static ref readonly @string dumpversionˢᴍgccgoDirs => ref dumpversionˢᵇᴍgccgoDirs;
+private static readonly @string dumpversionˢᵇᴍgccgoDirs = "-dumpversion"u8;
+private static ref readonly @string dumpmachineˢᴍgccgoDirs => ref dumpmachineˢᵇᴍgccgoDirs;
+private static readonly @string dumpmachineˢᵇᴍgccgoDirs = "-dumpmachine"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static ref readonly @string prefixᶜ => ref prefixᶜᵇ;
-private static readonly @string prefixᶜᵇ = "libraries: ="u8;
+private static ref readonly @string prefixᶜᴍgccgoDirs => ref prefixᶜᵇᴍgccgoDirs;
+private static readonly @string prefixᶜᵇᴍgccgoDirs = "libraries: ="u8;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
 internal static void initᴍ(ref gccgoDirs gd) {
     var lastDirsᴷ = new stackAppend<@string>();
 
-    @string gccgo = os.Getenv(gccgoˢ);
+    @string gccgo = os.Getenv(gccgoˢᴍgccgoDirs);
     if (gccgo == ""u8) {
-        gccgo = gccgoˢ2;
+        gccgo = gccgoˢ2ᴍgccgoDirs;
     }
     var (bin, err) = exec.LookPath(gccgo);
     if (err != nil) {
         return;
     }
 
-    (var allDirs, err) = exec.Command(bin, printSearchDirsˢ).Output();
+    (var allDirs, err) = exec.Command(bin, printSearchDirsˢᴍgccgoDirs).Output();
     if (err != nil) {
         return;
     }
-    (var versionB, err) = exec.Command(bin, dumpversionˢ).Output();
+    (var versionB, err) = exec.Command(bin, dumpversionˢᴍgccgoDirs).Output();
     if (err != nil) {
         return;
     }
     @string version = strings.TrimSpace((@string)versionB);
-    (var machineB, err) = exec.Command(bin, dumpmachineˢ).Output();
+    (var machineB, err) = exec.Command(bin, dumpmachineˢᴍgccgoDirs).Output();
     if (err != nil) {
         return;
     }
     @string machine = strings.TrimSpace((@string)machineB);
 
     var dirsEntries = strings.Split((@string)allDirs, "\n");
-    @string prefix = prefixᶜ;
+    @string prefix = prefixᶜᴍgccgoDirs;
     slice<@string> dirs = default;
     foreach (var (_, dirEntry) in range(dirsEntries)) {
         var (after, ok) = strings.CutPrefix(dirEntry, prefix); if (ok) {

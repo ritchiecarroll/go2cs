@@ -78,17 +78,17 @@ internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashAdler32InvalidHashˢ => ref hashAdler32InvalidHashˢᵇ;
-private static readonly @string hashAdler32InvalidHashˢᵇ = "hash/adler32: invalid hash state identifier"u8;
-internal static ref readonly @string hashAdler32InvalidHashˢ2 => ref hashAdler32InvalidHashˢ2ᵇ;
-private static readonly @string hashAdler32InvalidHashˢ2ᵇ = "hash/adler32: invalid hash state size"u8;
+internal static ref readonly @string hashAdler32InvalidHashˢᴍdigest => ref hashAdler32InvalidHashˢᵇᴍdigest;
+private static readonly @string hashAdler32InvalidHashˢᵇᴍdigest = "hash/adler32: invalid hash state identifier"u8;
+internal static ref readonly @string hashAdler32InvalidHashˢ2ᴍdigest => ref hashAdler32InvalidHashˢ2ᵇᴍdigest;
+private static readonly @string hashAdler32InvalidHashˢ2ᵇᴍdigest = "hash/adler32: invalid hash state size"u8;
 
 internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
-        return errors.New(hashAdler32InvalidHashˢ);
+        return errors.New(hashAdler32InvalidHashˢᴍdigest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(hashAdler32InvalidHashˢ2);
+        return errors.New(hashAdler32InvalidHashˢ2ᴍdigest);
     }
     d = (digest)byteorder.BEUint32(b[(int)(len(magic))..]);
     return default;

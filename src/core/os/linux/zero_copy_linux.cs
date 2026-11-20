@@ -19,8 +19,8 @@ internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> 
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sendfileˢ => ref sendfileˢᵇ;
-private static readonly @string sendfileˢᵇ = "sendfile"u8;
+internal static ref readonly @string sendfileˢᴍFile => ref sendfileˢᵇᴍFile;
+private static readonly @string sendfileˢᵇᴍFile = "sendfile"u8;
 
 internal static (int64 written, bool handled, error err) writeToᴍ(ж<File> Ꮡf, Δio.Writer w) {
     int64 written = default;
@@ -48,7 +48,7 @@ internal static (int64 written, bool handled, error err) writeToᴍ(ж<File> Ꮡ
         err = rerr;
     }
 
-    return (written, handled, wrapSyscallError(sendfileˢ, err));
+    return (written, handled, wrapSyscallError(sendfileˢᴍFile, err));
 }
 
 internal static (int64 written, bool handled, error err) readFromᴍ(ж<File> Ꮡf, Δio.Reader r) {
@@ -74,8 +74,8 @@ internal static (int64 written, bool handled, error err) readFromᴍ(ж<File> �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string spliceˢ => ref spliceˢᵇ;
-private static readonly @string spliceˢᵇ = "splice"u8;
+internal static ref readonly @string spliceˢᴍFile => ref spliceˢᵇᴍFile;
+private static readonly @string spliceˢᵇᴍFile = "splice"u8;
 
 internal static (int64 written, bool handled, error err) spliceToFileᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
@@ -106,14 +106,14 @@ internal static (int64 written, bool handled, error err) spliceToFileᴍ(ж<File
         lr.N = remain - written;
     }
 
-    return (written, handled, wrapSyscallError(spliceˢ, err));
+    return (written, handled, wrapSyscallError(spliceˢᴍFile, err));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readFromˢ => ref readFromˢᵇ;
-private static readonly @string readFromˢᵇ = "ReadFrom"u8;
-internal static ref readonly @string copyFileRangeˢ => ref copyFileRangeˢᵇ;
-private static readonly @string copyFileRangeˢᵇ = "copy_file_range"u8;
+internal static ref readonly @string readFromˢᴍFile => ref readFromˢᵇᴍFile;
+private static readonly @string readFromˢᵇᴍFile = "ReadFrom"u8;
+internal static ref readonly @string copyFileRangeˢᴍFile => ref copyFileRangeˢᵇᴍFile;
+private static readonly @string copyFileRangeˢᵇᴍFile = "copy_file_range"u8;
 
 internal static (int64 written, bool handled, error err) copyFileRangeᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
@@ -141,7 +141,7 @@ internal static (int64 written, bool handled, error err) copyFileRangeᴍ(ж<Fil
         return (0, false, default);
     }}
 
-    if (src.checkValid(readFromˢ) != nil) {
+    if (src.checkValid(readFromˢᴍFile) != nil) {
         // Avoid returning the error as we report handled as false,
         // leave further error handling as the responsibility of the caller.
         return (0, false, default);
@@ -151,7 +151,7 @@ internal static (int64 written, bool handled, error err) copyFileRangeᴍ(ж<Fil
     if (lr != nil) {
         lr.N -= written;
     }
-    return (written, handled, wrapSyscallError(copyFileRangeˢ, err));
+    return (written, handled, wrapSyscallError(copyFileRangeˢᴍFile, err));
 }
 
 } partial class os_package {

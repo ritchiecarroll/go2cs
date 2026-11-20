@@ -96,14 +96,14 @@ internal static void RemoveMultiplesᴍ(ж<ErrorList> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noErrorsˢ => ref noErrorsˢᵇ;
-private static readonly @string noErrorsˢᵇ = "no errors"u8;
+internal static ref readonly @string noErrorsˢᴍErrorList => ref noErrorsˢᵇᴍErrorList;
+private static readonly @string noErrorsˢᵇᴍErrorList = "no errors"u8;
 
 // An [ErrorList] implements the error interface.
 internal static @string Errorᴍ(ErrorList p) {
     switch (len(p)) {
     case 0: {
-        return noErrorsˢ;
+        return noErrorsˢᴍErrorList;
     }
     case 1: {
         return p[0].Error();

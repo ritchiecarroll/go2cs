@@ -167,8 +167,8 @@ internal static void writeBitsᴍ(ref huffmanBitWriter w, int32 b, nuint nb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string writeBytesWithUnfinishedˢ => ref writeBytesWithUnfinishedˢᵇ;
-private static readonly @string writeBytesWithUnfinishedˢᵇ = "writeBytes with unfinished bits"u8;
+internal static ref readonly @string writeBytesWithUnfinishedˢᴍhuffmanBitWriter => ref writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter;
+private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter = "writeBytes with unfinished bits"u8;
 
 internal static void writeBytesᴍ(ref huffmanBitWriter w, slice<byte> bytes) {
     if (w.err != nil) {
@@ -176,7 +176,7 @@ internal static void writeBytesᴍ(ref huffmanBitWriter w, slice<byte> bytes) {
     }
     nint n = w.nbytes;
     if ((w.nbits & 7) != 0) {
-        w.err = ((InternalError)(@string)writeBytesWithUnfinishedˢ);
+        w.err = ((InternalError)(@string)writeBytesWithUnfinishedˢᴍhuffmanBitWriter);
         return;
     }
     while (w.nbits != 0) {

@@ -146,16 +146,16 @@ internal static any sysUsageᴍ(ref ProcessState p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
-internal static ref readonly @string continuedˢ => ref continuedˢᵇ;
-private static readonly @string continuedˢᵇ = "continued"u8;
+internal static ref readonly @string nilˢᴍProcessState => ref nilˢᵇᴍProcessState;
+private static readonly @string nilˢᵇᴍProcessState = "<nil>"u8;
+internal static ref readonly @string continuedˢᴍProcessState => ref continuedˢᵇᴍProcessState;
+private static readonly @string continuedˢᵇᴍProcessState = "continued"u8;
 
 internal static @string Stringᴍ(ж<ProcessState> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil) {
-        return nilˢ;
+        return nilˢᴍProcessState;
     }
     var status = p.Sys()._<syscall.WaitStatus>();
     @string res = ""u8;
@@ -181,7 +181,7 @@ internal static @string Stringᴍ(ж<ProcessState> Ꮡp) {
         break;
     }
     case {} when status.Continued(): {
-        res = continuedˢ;
+        res = continuedˢᴍProcessState;
         break;
     }}
     if (status.CoreDump()) {

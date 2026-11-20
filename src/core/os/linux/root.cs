@@ -118,8 +118,8 @@ internal static (ж<File>, error) Createᴍ(ж<Root> Ꮡr, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unsupportedFileModeˢ => ref unsupportedFileModeˢᵇ;
-private static readonly @string unsupportedFileModeˢᵇ = "unsupported file mode"u8;
+internal static ref readonly @string unsupportedFileModeˢᴍRoot => ref unsupportedFileModeˢᵇᴍRoot;
+private static readonly @string unsupportedFileModeˢᵇᴍRoot = "unsupported file mode"u8;
 
 // OpenFile opens the named file in the root.
 // See [OpenFile] for more details.
@@ -130,7 +130,7 @@ internal static (ж<File>, error) OpenFileᴍ(ж<Root> Ꮡr, @string name, nint 
     ref var r = ref Ꮡr.DerefOrNull();
 
     if ((FileMode)(perm & 511) != perm) {
-        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat", Path: name, Err: errors.New(unsupportedFileModeˢ)))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat", Path: name, Err: errors.New(unsupportedFileModeˢᴍRoot)))));
     }
     r.logOpen(name);
     var (rf, err) = rootOpenFileNolog(Ꮡr, name, flag, perm);
@@ -164,7 +164,7 @@ internal static error Chmodᴍ(ж<Root> Ꮡr, @string name, FileMode mode) {
 // Mkdir returns an error.
 internal static error Mkdirᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
     if ((FileMode)(perm & 511) != perm) {
-        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢ))));
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢᴍRoot))));
     }
     return rootMkdir(ref (Ꮡr).DerefOrNull(), name, perm);
 }
@@ -176,7 +176,7 @@ internal static error Mkdirᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
 // MkdirAll returns an error.
 internal static error MkdirAllᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
     if ((FileMode)(perm & 511) != perm) {
-        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢ))));
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢᴍRoot))));
     }
     return rootMkdirAll(Ꮡr, name, perm);
 }

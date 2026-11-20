@@ -20,10 +20,10 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object objectDependencyGraphˢ = (@string)"Object dependency graph:"u8;
-internal static readonly object transposedObjectˢ = (@string)"Transposed object dependency graph (functions eliminated):"u8;
-internal static readonly object processingNodesˢ = (@string)"Processing nodes:"u8;
-internal static readonly object initializationOrderˢ = (@string)"Initialization order:"u8;
+internal static readonly object objectDependencyGraphˢᴍChecker = (@string)"Object dependency graph:"u8;
+internal static readonly object transposedObjectˢᴍChecker = (@string)"Transposed object dependency graph (functions eliminated):"u8;
+internal static readonly object processingNodesˢᴍChecker = (@string)"Processing nodes:"u8;
+internal static readonly object initializationOrderˢᴍChecker = (@string)"Initialization order:"u8;
 
 // initOrder computes the Info.InitOrder for package variables.
 internal static void initOrderᴍ(ж<Checker> Ꮡcheck) {
@@ -41,7 +41,7 @@ internal static void initOrderᴍ(ж<Checker> Ꮡcheck) {
     const bool debug = false;
     if (debug) {
         fmt.Printf("Computing initialization order for %s\n\n"u8, check.pkg.OrTypedNil());
-        fmt.Println(objectDependencyGraphˢ);
+        fmt.Println(objectDependencyGraphˢᴍChecker);
         foreach (var (obj, d) in check.objMap) {
             // only print objects that may appear in the dependency graph
             var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
@@ -57,7 +57,7 @@ internal static void initOrderᴍ(ж<Checker> Ꮡcheck) {
         }
         fmt.Println();
 
-        fmt.Println(transposedObjectˢ);
+        fmt.Println(transposedObjectˢᴍChecker);
         foreach (var (_, n) in range<ж<graphNode>>(pq)) {
             fmt.Printf("\t%s depends on %d nodes\n"u8, n.obj.Name(), n.ndeps);
             foreach (var (p, _) in n.pred) {
@@ -66,7 +66,7 @@ internal static void initOrderᴍ(ж<Checker> Ꮡcheck) {
         }
         fmt.Println();
 
-        fmt.Println(processingNodesˢ);
+        fmt.Println(processingNodesˢᴍChecker);
     }
 
     // Determine initialization order by removing the highest priority node
@@ -137,7 +137,7 @@ internal static void initOrderᴍ(ж<Checker> Ꮡcheck) {
 
     if (debug) {
         fmt.Println();
-        fmt.Println(initializationOrderˢ);
+        fmt.Println(initializationOrderˢᴍChecker);
         foreach (var (_, init) in range(check.Info.InitOrder)) {
             fmt.Printf("\t%s\n"u8, init.OrTypedNil());
         }

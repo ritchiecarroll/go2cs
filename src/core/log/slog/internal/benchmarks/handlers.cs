@@ -37,12 +37,12 @@ internal static slog.Handler newFastTextHandler(io.Writer w) {
 internal static bool Enabledᴍ(ref fastTextHandler h, context.Context _Δp1, slog.Level _Δp2) { return true; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeˢ => ref timeˢᵇ;
-private static readonly @string timeˢᵇ = "time="u8;
-internal static ref readonly @string levelˢ => ref levelˢᵇ;
-private static readonly @string levelˢᵇ = "level="u8;
-internal static ref readonly @string msgˢ => ref msgˢᵇ;
-private static readonly @string msgˢᵇ = "msg="u8;
+internal static ref readonly @string timeˢᴍfastTextHandler => ref timeˢᵇᴍfastTextHandler;
+private static readonly @string timeˢᵇᴍfastTextHandler = "time="u8;
+internal static ref readonly @string levelˢᴍfastTextHandler => ref levelˢᵇᴍfastTextHandler;
+private static readonly @string levelˢᵇᴍfastTextHandler = "level="u8;
+internal static ref readonly @string msgˢᴍfastTextHandler => ref msgˢᵇᴍfastTextHandler;
+private static readonly @string msgˢᵇᴍfastTextHandler = "msg="u8;
 
 internal static error Handleᴍ(ж<fastTextHandler> Ꮡh, context.Context _Δp1, slog.Record r) {
     GoFrame ᒐ = default;
@@ -55,14 +55,14 @@ internal static error Handleᴍ(ж<fastTextHandler> Ꮡh, context.Context _Δp1,
         defer(bufʗ1.Free, ref ᒐ);
 
         if (!r.Time.IsZero()) {
-            buf.WriteString(timeˢ);
+            buf.WriteString(timeˢᴍfastTextHandler);
             h.appendTime(buf, r.Time);
             buf.WriteByte((byte)' ');
         }
-        buf.WriteString(levelˢ);
+        buf.WriteString(levelˢᴍfastTextHandler);
         buf.ValueSlot = strconv.AppendInt(buf.ValueSlot, (int64)r.Level, 10);
         buf.WriteByte((byte)' ');
-        buf.WriteString(msgˢ);
+        buf.WriteString(msgˢᴍfastTextHandler);
         buf.WriteString(r.Message);
         var bufʗ2 = buf;
         r.Attrs((slog.Attr a) => {

@@ -222,13 +222,13 @@ internal static gobType gobTypeᴍ(typeId t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍtypeId => ref nilˢᵇᴍtypeId;
+private static readonly @string nilˢᵇᴍtypeId = "<nil>"u8;
 
 // string returns the string representation of the type associated with the typeId.
 internal static @string @stringᴍ(typeId t) {
     if (t.gobType() == nil) {
-        return nilˢ;
+        return nilˢᴍtypeId;
     }
     return t.gobType().@string();
 }
@@ -236,7 +236,7 @@ internal static @string @stringᴍ(typeId t) {
 // Name returns the name of the type associated with the typeId.
 internal static @string nameᴍ(typeId t) {
     if (t.gobType() == nil) {
-        return nilˢ;
+        return nilˢᴍtypeId;
     }
     return t.gobType().name();
 }
@@ -484,14 +484,14 @@ public partial struct structType {
 } partial class gob_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍstructType => ref nilˢᵇᴍstructType;
+private static readonly @string nilˢᵇᴍstructType = "<nil>"u8;
 
 internal static @string safeStringᴍ(ж<structType> Ꮡs, map<typeId, bool> seen) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
-        return nilˢ;
+        return nilˢᴍstructType;
     }
     var (_, ok) = seen[s.Id, ꟷ]; if (ok) {
         return s.Name;
@@ -742,13 +742,13 @@ partial struct wireType {
 } partial class gob_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string unknownᶜ => ref unknownᶜᵇ;
-private static readonly @string unknownᶜᵇ = "unknown type"u8;
+internal static ref readonly @string unknownᶜᴍwireType => ref unknownᶜᵇᴍwireType;
+private static readonly @string unknownᶜᵇᴍwireType = "unknown type"u8;
 
 internal static @string @stringᴍ(ж<wireType> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
-    @string unknown = unknownᶜ;
+    @string unknown = unknownᶜᴍwireType;
     if (Ꮡw == nil) {
         return unknown;
     }

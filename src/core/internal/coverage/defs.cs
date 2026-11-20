@@ -210,37 +210,37 @@ public static CounterMode CtrModeTestMain => 5; // testmain pseudo-mode
 } partial class coverage_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string setˢ => ref setˢᵇ;
-private static readonly @string setˢᵇ = "set"u8;
-private static ref readonly @string countˢ => ref countˢᵇ;
-private static readonly @string countˢᵇ = "count"u8;
-private static ref readonly @string atomicˢ => ref atomicˢᵇ;
-private static readonly @string atomicˢᵇ = "atomic"u8;
-private static ref readonly @string regonlyˢ => ref regonlyˢᵇ;
-private static readonly @string regonlyˢᵇ = "regonly"u8;
-private static ref readonly @string testmainˢ => ref testmainˢᵇ;
-private static readonly @string testmainˢᵇ = "testmain"u8;
-private static ref readonly @string invalidˢ => ref invalidˢᵇ;
-private static readonly @string invalidˢᵇ = "<invalid>"u8;
+private static ref readonly @string setˢᴍCounterMode => ref setˢᵇᴍCounterMode;
+private static readonly @string setˢᵇᴍCounterMode = "set"u8;
+private static ref readonly @string countˢᴍCounterMode => ref countˢᵇᴍCounterMode;
+private static readonly @string countˢᵇᴍCounterMode = "count"u8;
+private static ref readonly @string atomicˢᴍCounterMode => ref atomicˢᵇᴍCounterMode;
+private static readonly @string atomicˢᵇᴍCounterMode = "atomic"u8;
+private static ref readonly @string regonlyˢᴍCounterMode => ref regonlyˢᵇᴍCounterMode;
+private static readonly @string regonlyˢᵇᴍCounterMode = "regonly"u8;
+private static ref readonly @string testmainˢᴍCounterMode => ref testmainˢᵇᴍCounterMode;
+private static readonly @string testmainˢᵇᴍCounterMode = "testmain"u8;
+private static ref readonly @string invalidˢᴍCounterMode => ref invalidˢᵇᴍCounterMode;
+private static readonly @string invalidˢᵇᴍCounterMode = "<invalid>"u8;
 
 internal static @string Stringᴍ(CounterMode cm) {
     switch (cm) {
     case var ᴛ when ᴛ == CtrModeSet: {
-        return setˢ;
+        return setˢᴍCounterMode;
     }
     case var ᴛ when ᴛ == CtrModeCount: {
-        return countˢ;
+        return countˢᴍCounterMode;
     }
     case var ᴛ when ᴛ == CtrModeAtomic: {
-        return atomicˢ;
+        return atomicˢᴍCounterMode;
     }
     case var ᴛ when ᴛ == CtrModeRegOnly: {
-        return regonlyˢ;
+        return regonlyˢᴍCounterMode;
     }
     case var ᴛ when ᴛ == CtrModeTestMain: {
-        return testmainˢ;
+        return testmainˢᴍCounterMode;
     }}
-    return invalidˢ;
+    return invalidˢᴍCounterMode;
 }
 
 } partial class coverage_package {
@@ -286,22 +286,22 @@ public static CounterGranularity CtrGranularityPerFunc => 2;
 } partial class coverage_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string perblockˢ => ref perblockˢᵇ;
-private static readonly @string perblockˢᵇ = "perblock"u8;
-private static ref readonly @string perfuncˢ => ref perfuncˢᵇ;
-private static readonly @string perfuncˢᵇ = "perfunc"u8;
-private static ref readonly @string invalidˢ => ref invalidˢᵇ;
-private static readonly @string invalidˢᵇ = "<invalid>"u8;
+private static ref readonly @string perblockˢᴍCounterGranularity => ref perblockˢᵇᴍCounterGranularity;
+private static readonly @string perblockˢᵇᴍCounterGranularity = "perblock"u8;
+private static ref readonly @string perfuncˢᴍCounterGranularity => ref perfuncˢᵇᴍCounterGranularity;
+private static readonly @string perfuncˢᵇᴍCounterGranularity = "perfunc"u8;
+private static ref readonly @string invalidˢᴍCounterGranularity => ref invalidˢᵇᴍCounterGranularity;
+private static readonly @string invalidˢᵇᴍCounterGranularity = "<invalid>"u8;
 
 internal static @string Stringᴍ(CounterGranularity cm) {
     switch (cm) {
     case var ᴛ when ᴛ == CtrGranularityPerBlock: {
-        return perblockˢ;
+        return perblockˢᴍCounterGranularity;
     }
     case var ᴛ when ᴛ == CtrGranularityPerFunc: {
-        return perfuncˢ;
+        return perfuncˢᴍCounterGranularity;
     }}
-    return invalidˢ;
+    return invalidˢᴍCounterGranularity;
 }
 
 } partial class coverage_package {

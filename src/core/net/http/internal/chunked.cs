@@ -46,8 +46,8 @@ partial struct chunkedReader {
 } partial class internal_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chunkedEncodingContainsˢ => ref chunkedEncodingContainsˢᵇ;
-private static readonly @string chunkedEncodingContainsˢᵇ = "chunked encoding contains too much non-data"u8;
+internal static ref readonly @string chunkedEncodingContainsˢᴍchunkedReader => ref chunkedEncodingContainsˢᵇᴍchunkedReader;
+private static readonly @string chunkedEncodingContainsˢᵇᴍchunkedReader = "chunked encoding contains too much non-data"u8;
 
 internal static void beginChunkᴍ(ref chunkedReader cr) {
     // chunk-size CRLF
@@ -84,7 +84,7 @@ internal static void beginChunkᴍ(ref chunkedReader cr) {
     cr.excess -= 16 + (2 * (int64)cr.n);
     cr.excess = max(cr.excess, 0);
     if (cr.excess > 16 * 1024) {
-        cr.err = errors.New(chunkedEncodingContainsˢ);
+        cr.err = errors.New(chunkedEncodingContainsˢᴍchunkedReader);
     }
     if (cr.n == 0) {
         cr.err = io.EOF;
@@ -101,8 +101,8 @@ internal static bool chunkHeaderAvailableᴍ(ref chunkedReader cr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string malformedChunkedEncodingˢ => ref malformedChunkedEncodingˢᵇ;
-private static readonly @string malformedChunkedEncodingˢᵇ = "malformed chunked encoding"u8;
+internal static ref readonly @string malformedChunkedEncodingˢᴍchunkedReader => ref malformedChunkedEncodingˢᵇᴍchunkedReader;
+private static readonly @string malformedChunkedEncodingˢᵇᴍchunkedReader = "malformed chunked encoding"u8;
 
 internal static (nint n, error err) Readᴍ(ref chunkedReader cr, slice<uint8> b) {
     nint n = default;
@@ -117,7 +117,7 @@ internal static (nint n, error err) Readᴍ(ref chunkedReader cr, slice<uint8> b
             }
             (_, cr.err) = io.ReadFull(new bufio_ReaderжReader(cr.r), cr.buf[..2]); if (cr.err == nil) {
                 if (((sstring)(cr.buf[..])) != "\r\n"u8) {
-                    cr.err = errors.New(malformedChunkedEncodingˢ);
+                    cr.err = errors.New(malformedChunkedEncodingˢᴍchunkedReader);
                     break;
                 }
             } else {

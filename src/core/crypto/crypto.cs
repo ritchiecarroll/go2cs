@@ -52,103 +52,103 @@ internal static Hash HashFuncᴍ(Hash h) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string md4ˢ => ref md4ˢᵇ;
-private static readonly @string md4ˢᵇ = "MD4"u8;
-private static ref readonly @string md5ˢ => ref md5ˢᵇ;
-private static readonly @string md5ˢᵇ = "MD5"u8;
-private static ref readonly @string sha1ˢ => ref sha1ˢᵇ;
-private static readonly @string sha1ˢᵇ = "SHA-1"u8;
-private static ref readonly @string sha224ˢ => ref sha224ˢᵇ;
-private static readonly @string sha224ˢᵇ = "SHA-224"u8;
-private static ref readonly @string sha256ˢ => ref sha256ˢᵇ;
-private static readonly @string sha256ˢᵇ = "SHA-256"u8;
-private static ref readonly @string sha384ˢ => ref sha384ˢᵇ;
-private static readonly @string sha384ˢᵇ = "SHA-384"u8;
-private static ref readonly @string sha512ˢ => ref sha512ˢᵇ;
-private static readonly @string sha512ˢᵇ = "SHA-512"u8;
-private static ref readonly @string md5Sha1ˢ => ref md5Sha1ˢᵇ;
-private static readonly @string md5Sha1ˢᵇ = "MD5+SHA1"u8;
-private static ref readonly @string ripemd160ˢ => ref ripemd160ˢᵇ;
-private static readonly @string ripemd160ˢᵇ = "RIPEMD-160"u8;
-private static ref readonly @string sha3224ˢ => ref sha3224ˢᵇ;
-private static readonly @string sha3224ˢᵇ = "SHA3-224"u8;
-private static ref readonly @string sha3256ˢ => ref sha3256ˢᵇ;
-private static readonly @string sha3256ˢᵇ = "SHA3-256"u8;
-private static ref readonly @string sha3384ˢ => ref sha3384ˢᵇ;
-private static readonly @string sha3384ˢᵇ = "SHA3-384"u8;
-private static ref readonly @string sha3512ˢ => ref sha3512ˢᵇ;
-private static readonly @string sha3512ˢᵇ = "SHA3-512"u8;
-private static ref readonly @string sha512224ˢ => ref sha512224ˢᵇ;
-private static readonly @string sha512224ˢᵇ = "SHA-512/224"u8;
-private static ref readonly @string sha512256ˢ => ref sha512256ˢᵇ;
-private static readonly @string sha512256ˢᵇ = "SHA-512/256"u8;
-private static ref readonly @string blake2s256ˢ => ref blake2s256ˢᵇ;
-private static readonly @string blake2s256ˢᵇ = "BLAKE2s-256"u8;
-private static ref readonly @string blake2b256ˢ => ref blake2b256ˢᵇ;
-private static readonly @string blake2b256ˢᵇ = "BLAKE2b-256"u8;
-private static ref readonly @string blake2b384ˢ => ref blake2b384ˢᵇ;
-private static readonly @string blake2b384ˢᵇ = "BLAKE2b-384"u8;
-private static ref readonly @string blake2b512ˢ => ref blake2b512ˢᵇ;
-private static readonly @string blake2b512ˢᵇ = "BLAKE2b-512"u8;
+private static ref readonly @string md4ˢᴍHash => ref md4ˢᵇᴍHash;
+private static readonly @string md4ˢᵇᴍHash = "MD4"u8;
+private static ref readonly @string md5ˢᴍHash => ref md5ˢᵇᴍHash;
+private static readonly @string md5ˢᵇᴍHash = "MD5"u8;
+private static ref readonly @string sha1ˢᴍHash => ref sha1ˢᵇᴍHash;
+private static readonly @string sha1ˢᵇᴍHash = "SHA-1"u8;
+private static ref readonly @string sha224ˢᴍHash => ref sha224ˢᵇᴍHash;
+private static readonly @string sha224ˢᵇᴍHash = "SHA-224"u8;
+private static ref readonly @string sha256ˢᴍHash => ref sha256ˢᵇᴍHash;
+private static readonly @string sha256ˢᵇᴍHash = "SHA-256"u8;
+private static ref readonly @string sha384ˢᴍHash => ref sha384ˢᵇᴍHash;
+private static readonly @string sha384ˢᵇᴍHash = "SHA-384"u8;
+private static ref readonly @string sha512ˢᴍHash => ref sha512ˢᵇᴍHash;
+private static readonly @string sha512ˢᵇᴍHash = "SHA-512"u8;
+private static ref readonly @string md5Sha1ˢᴍHash => ref md5Sha1ˢᵇᴍHash;
+private static readonly @string md5Sha1ˢᵇᴍHash = "MD5+SHA1"u8;
+private static ref readonly @string ripemd160ˢᴍHash => ref ripemd160ˢᵇᴍHash;
+private static readonly @string ripemd160ˢᵇᴍHash = "RIPEMD-160"u8;
+private static ref readonly @string sha3224ˢᴍHash => ref sha3224ˢᵇᴍHash;
+private static readonly @string sha3224ˢᵇᴍHash = "SHA3-224"u8;
+private static ref readonly @string sha3256ˢᴍHash => ref sha3256ˢᵇᴍHash;
+private static readonly @string sha3256ˢᵇᴍHash = "SHA3-256"u8;
+private static ref readonly @string sha3384ˢᴍHash => ref sha3384ˢᵇᴍHash;
+private static readonly @string sha3384ˢᵇᴍHash = "SHA3-384"u8;
+private static ref readonly @string sha3512ˢᴍHash => ref sha3512ˢᵇᴍHash;
+private static readonly @string sha3512ˢᵇᴍHash = "SHA3-512"u8;
+private static ref readonly @string sha512224ˢᴍHash => ref sha512224ˢᵇᴍHash;
+private static readonly @string sha512224ˢᵇᴍHash = "SHA-512/224"u8;
+private static ref readonly @string sha512256ˢᴍHash => ref sha512256ˢᵇᴍHash;
+private static readonly @string sha512256ˢᵇᴍHash = "SHA-512/256"u8;
+private static ref readonly @string blake2s256ˢᴍHash => ref blake2s256ˢᵇᴍHash;
+private static readonly @string blake2s256ˢᵇᴍHash = "BLAKE2s-256"u8;
+private static ref readonly @string blake2b256ˢᴍHash => ref blake2b256ˢᵇᴍHash;
+private static readonly @string blake2b256ˢᵇᴍHash = "BLAKE2b-256"u8;
+private static ref readonly @string blake2b384ˢᴍHash => ref blake2b384ˢᵇᴍHash;
+private static readonly @string blake2b384ˢᵇᴍHash = "BLAKE2b-384"u8;
+private static ref readonly @string blake2b512ˢᴍHash => ref blake2b512ˢᵇᴍHash;
+private static readonly @string blake2b512ˢᵇᴍHash = "BLAKE2b-512"u8;
 
 internal static @string Stringᴍ(Hash h) {
     switch (h) {
     case var ᴛ when ᴛ == MD4: {
-        return md4ˢ;
+        return md4ˢᴍHash;
     }
     case var ᴛ when ᴛ == MD5: {
-        return md5ˢ;
+        return md5ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA1: {
-        return sha1ˢ;
+        return sha1ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA224: {
-        return sha224ˢ;
+        return sha224ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA256: {
-        return sha256ˢ;
+        return sha256ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA384: {
-        return sha384ˢ;
+        return sha384ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA512: {
-        return sha512ˢ;
+        return sha512ˢᴍHash;
     }
     case var ᴛ when ᴛ == MD5SHA1: {
-        return md5Sha1ˢ;
+        return md5Sha1ˢᴍHash;
     }
     case var ᴛ when ᴛ == RIPEMD160: {
-        return ripemd160ˢ;
+        return ripemd160ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA3_224: {
-        return sha3224ˢ;
+        return sha3224ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA3_256: {
-        return sha3256ˢ;
+        return sha3256ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA3_384: {
-        return sha3384ˢ;
+        return sha3384ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA3_512: {
-        return sha3512ˢ;
+        return sha3512ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA512_224: {
-        return sha512224ˢ;
+        return sha512224ˢᴍHash;
     }
     case var ᴛ when ᴛ == SHA512_256: {
-        return sha512256ˢ;
+        return sha512256ˢᴍHash;
     }
     case var ᴛ when ᴛ == BLAKE2s_256: {
-        return blake2s256ˢ;
+        return blake2s256ˢᴍHash;
     }
     case var ᴛ when ᴛ == BLAKE2b_256: {
-        return blake2b256ˢ;
+        return blake2b256ˢᴍHash;
     }
     case var ᴛ when ᴛ == BLAKE2b_384: {
-        return blake2b384ˢ;
+        return blake2b384ˢᴍHash;
     }
     case var ᴛ when ᴛ == BLAKE2b_512: {
-        return blake2b512ˢ;
+        return blake2b512ˢᴍHash;
     }
     default: {
         return "unknown hash value "u8 + strconv.Itoa((nint)h);

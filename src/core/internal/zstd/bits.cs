@@ -87,8 +87,8 @@ partial struct reverseBitReader {
 } partial class zstd_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zeroByteAtReverseBitˢ => ref zeroByteAtReverseBitˢᵇ;
-private static readonly @string zeroByteAtReverseBitˢᵇ = "zero byte at reverse bit stream start"u8;
+internal static ref readonly @string zeroByteAtReverseBitˢᴍReader => ref zeroByteAtReverseBitˢᵇᴍReader;
+private static readonly @string zeroByteAtReverseBitˢᵇᴍReader = "zero byte at reverse bit stream start"u8;
 
 // makeReverseBitReader makes a reverseBitReader reading backward
 // from off to start. The bitstream starts with a 1 bit in the last
@@ -98,7 +98,7 @@ internal static (reverseBitReader, error) makeReverseBitReaderᴍ(ж<Reader> Ꮡ
 
     var streamStart = data[off];
     if (streamStart == 0) {
-        return (new reverseBitReader(), r.makeError(off, zeroByteAtReverseBitˢ));
+        return (new reverseBitReader(), r.makeError(off, zeroByteAtReverseBitˢᴍReader));
     }
     var rbr = new reverseBitReader(
         r: Ꮡr,

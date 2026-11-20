@@ -245,10 +245,10 @@ internal static (nint, error) verifyᴍ(ж<Checker> Ꮡcheck, token.Pos pos, sli
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string implementˢ => ref implementˢᵇ;
-private static readonly @string implementˢᵇ = "implement"u8;
-internal static ref readonly @string satisfyˢ => ref satisfyˢᵇ;
-private static readonly @string satisfyˢᵇ = "satisfy"u8;
+internal static ref readonly @string implementˢᴍChecker => ref implementˢᵇᴍChecker;
+private static readonly @string implementˢᵇᴍChecker = "implement"u8;
+internal static ref readonly @string satisfyˢᴍChecker => ref satisfyˢᵇᴍChecker;
+private static readonly @string satisfyˢᵇᴍChecker = "satisfy"u8;
 
 // implements checks if V implements T. The receiver may be nil if implements
 // is called through an exported API call such as AssignableTo. If constraint
@@ -268,9 +268,9 @@ internal static bool implementsᴍ(ж<Checker> Ꮡcheck, Type V, Type T, bool co
         return true; // avoid follow-on errors (see go.dev/issue/49541 for an example)
     }
 
-    @string verb = implementˢ;
+    @string verb = implementˢᴍChecker;
     if (constraint) {
-        verb = satisfyˢ;
+        verb = satisfyˢᴍChecker;
     }
 
     var (Ti, _) = Tu._<ж<Interface>>(ᐧ);

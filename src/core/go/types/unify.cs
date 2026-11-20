@@ -122,28 +122,28 @@ internal static unifyMode exact => 2;
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inexactˢ => ref inexactˢᵇ;
-private static readonly @string inexactˢᵇ = "inexact"u8;
-internal static ref readonly @string assignˢ => ref assignˢᵇ;
-private static readonly @string assignˢᵇ = "assign"u8;
-internal static ref readonly @string exactˢ => ref exactˢᵇ;
-private static readonly @string exactˢᵇ = "exact"u8;
-internal static ref readonly @string assignExactˢ => ref assignExactˢᵇ;
-private static readonly @string assignExactˢᵇ = "assign, exact"u8;
+internal static ref readonly @string inexactˢᴍunifyMode => ref inexactˢᵇᴍunifyMode;
+private static readonly @string inexactˢᵇᴍunifyMode = "inexact"u8;
+internal static ref readonly @string assignˢᴍunifyMode => ref assignˢᵇᴍunifyMode;
+private static readonly @string assignˢᵇᴍunifyMode = "assign"u8;
+internal static ref readonly @string exactˢᴍunifyMode => ref exactˢᵇᴍunifyMode;
+private static readonly @string exactˢᵇᴍunifyMode = "exact"u8;
+internal static ref readonly @string assignExactˢᴍunifyMode => ref assignExactˢᵇᴍunifyMode;
+private static readonly @string assignExactˢᵇᴍunifyMode = "assign, exact"u8;
 
 internal static @string Stringᴍ(unifyMode m) {
     switch (m) {
     case var ᴛ when ᴛ == (unifyMode)(0): {
-        return inexactˢ;
+        return inexactˢᴍunifyMode;
     }
     case var ᴛ when ᴛ == assign: {
-        return assignˢ;
+        return assignˢᴍunifyMode;
     }
     case var ᴛ when ᴛ == exact: {
-        return exactˢ;
+        return exactˢᴍunifyMode;
     }
     case var ᴛ when ᴛ == (unifyMode)((unifyMode)(assign | exact)): {
-        return assignExactˢ;
+        return assignExactˢᴍunifyMode;
     }}
     return fmt.Sprintf("mode %d"u8, m);
 }

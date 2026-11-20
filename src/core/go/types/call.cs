@@ -142,10 +142,10 @@ internal static slice<Type> funcInstᴍ(ж<Checker> Ꮡcheck, ж<target> ᏑT, t
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string instantiatingSignatureSˢ => ref instantiatingSignatureSˢᵇ;
-private static readonly @string instantiatingSignatureSˢᵇ = "-- instantiating signature %s with %s"u8;
-internal static ref readonly @string sUnderSˢ => ref sUnderSˢᵇ;
-private static readonly @string sUnderSˢᵇ = "=> %s (under = %s)"u8;
+internal static ref readonly @string instantiatingSignatureSˢᴍChecker => ref instantiatingSignatureSˢᵇᴍChecker;
+private static readonly @string instantiatingSignatureSˢᵇᴍChecker = "-- instantiating signature %s with %s"u8;
+internal static ref readonly @string sUnderSˢᴍChecker => ref sUnderSˢᵇᴍChecker;
+private static readonly @string sUnderSˢᵇᴍChecker = "=> %s (under = %s)"u8;
 
 internal static ж<Signature> /*res*/ instantiateSignatureᴍ(ж<Checker> Ꮡcheck, token.Pos pos, ast.Expr expr, ж<Signature> Ꮡtyp, slice<Type> targs, slice<ast.Expr> xlist) {
     ж<Signature> res = default;
@@ -158,11 +158,11 @@ internal static ж<Signature> /*res*/ instantiateSignatureᴍ(ж<Checker> Ꮡche
         assert(len(targs) == typ.TypeParams().Len());
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(pos, instantiatingSignatureSˢ, Ꮡtyp.OrTypedNil(), targs);
+            Ꮡcheck.trace(pos, instantiatingSignatureSˢᴍChecker, Ꮡtyp.OrTypedNil(), targs);
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
-                Ꮡcheck.trace(pos, sUnderSˢ, res.OrTypedNil(), res.Underlying());
+                Ꮡcheck.trace(pos, sUnderSˢᴍChecker, res.OrTypedNil(), res.Underlying());
             }, ref ᒐ);
         }
 
@@ -743,18 +743,18 @@ internal static array<@string> cgoPrefixes = new @string[]{
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cMallocˢ => ref cMallocˢᵇ;
-private static readonly @string cMallocˢᵇ = "_CMalloc"u8;
-internal static ref readonly @string cvarˢ => ref cvarˢᵇ;
-private static readonly @string cvarˢᵇ = "_Cvar_"u8;
-internal static ref readonly @string cmacroˢ => ref cmacroˢᵇ;
-private static readonly @string cmacroˢᵇ = "_Cmacro_"u8;
-internal static ref readonly @string vUnexpectedObjectVˢ => ref vUnexpectedObjectVˢᵇ;
-private static readonly @string vUnexpectedObjectVˢᵇ = "%v: unexpected object %v"u8;
-internal static ref readonly @string illegalCycleInMethodˢ => ref illegalCycleInMethodˢᵇ;
-private static readonly @string illegalCycleInMethodˢᵇ = "illegal cycle in method declaration"u8;
-internal static ref readonly @string vSVSˢ => ref vSVSˢᵇ;
-private static readonly @string vSVSˢᵇ = "%v: (%s).%v -> %s"u8;
+internal static ref readonly @string cMallocˢᴍChecker => ref cMallocˢᵇᴍChecker;
+private static readonly @string cMallocˢᵇᴍChecker = "_CMalloc"u8;
+internal static ref readonly @string cvarˢᴍChecker => ref cvarˢᵇᴍChecker;
+private static readonly @string cvarˢᵇᴍChecker = "_Cvar_"u8;
+internal static ref readonly @string cmacroˢᴍChecker => ref cmacroˢᵇᴍChecker;
+private static readonly @string cmacroˢᵇᴍChecker = "_Cmacro_"u8;
+internal static ref readonly @string vUnexpectedObjectVˢᴍChecker => ref vUnexpectedObjectVˢᵇᴍChecker;
+private static readonly @string vUnexpectedObjectVˢᵇᴍChecker = "%v: unexpected object %v"u8;
+internal static ref readonly @string illegalCycleInMethodˢᴍChecker => ref illegalCycleInMethodˢᵇᴍChecker;
+private static readonly @string illegalCycleInMethodˢᵇᴍChecker = "illegal cycle in method declaration"u8;
+internal static ref readonly @string vSVSˢᴍChecker => ref vSVSˢᵇᴍChecker;
+private static readonly @string vSVSˢᵇᴍChecker = "%v: (%s).%v -> %s"u8;
 
 internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SelectorExpr> Ꮡe, bool wantType) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -786,7 +786,7 @@ internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.
                 // rewritten to _CMalloc and does not
                 // support two-result calls.
                 if (sel == "malloc"u8) {
-                    sel = cMallocˢ;
+                    sel = cMallocˢᴍChecker;
                 } else {
                     funcMode = cgofunc;
                 }
@@ -845,7 +845,7 @@ internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.
             case ж<Var> expΔ1: {
                 x.mode = variable;
                 x.typ = expΔ1.typ;
-                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cvarˢ)) {
+                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cvarˢᴍChecker)) {
                     x.typ = x.typ._<ж<Pointer>>().@base;
                 }
                 break;
@@ -853,7 +853,7 @@ internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.
             case ж<Func> expΔ1: {
                 x.mode = funcMode;
                 x.typ = expΔ1.typ;
-                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cmacroˢ)) {
+                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cmacroˢᴍChecker)) {
                     x.mode = value;
                     x.typ = x.typ._<ж<Signature>>().results.vars[0].typ;
                 }
@@ -867,7 +867,7 @@ internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.
             }
             default: {
                 var expΔ1 = exp;
-                Ꮡcheck.dump(vUnexpectedObjectVˢ, e.Sel.Pos(), expΔ1);
+                Ꮡcheck.dump(vUnexpectedObjectVˢᴍChecker, e.Sel.Pos(), expΔ1);
                 throw panic("unreachable");
                 break;
             }}
@@ -960,7 +960,7 @@ internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.
 
         var sig = m.typ._<ж<Signature>>();
         if (sig.recv == nil) {
-            Ꮡcheck.error(new ast_SelectorExprжpositioner(Ꮡe), InvalidDeclCycle, illegalCycleInMethodˢ);
+            Ꮡcheck.error(new ast_SelectorExprжpositioner(Ꮡe), InvalidDeclCycle, illegalCycleInMethodˢᴍChecker);
             goto Error;
         }
 
@@ -1046,7 +1046,7 @@ internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.
                 // lookup.
                 var mset = NewMethodSet(typ);
                 var m = mset.Lookup(check.pkg, sel); if (m == nil || !AreEqual(m.obj, objΔ2)) {
-                    Ꮡcheck.dump(vSVSˢ, e.Pos(), typ, objΔ2.name, m.OrTypedNil());
+                    Ꮡcheck.dump(vSVSˢᴍChecker, e.Pos(), typ, objΔ2.name, m.OrTypedNil());
                     Ꮡcheck.dump("%s\n", mset.OrTypedNil());
                     // Caution: MethodSets are supposed to be used externally
                     // only (after all interface types were completed). It's

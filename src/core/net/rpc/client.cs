@@ -117,7 +117,7 @@ internal static void sendᴍ(ж<Client> Ꮡclient, ж<Call> Ꮡcall) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object rpcClientProtocolErrorˢ = (@string)"rpc: client protocol error:"u8;
+internal static readonly object rpcClientProtocolErrorˢᴍClient = (@string)"rpc: client protocol error:"u8;
 
 internal static void inputᴍ(ж<Client> Ꮡclient) {
     ref var client = ref Ꮡclient.DerefOrNull();
@@ -189,14 +189,14 @@ internal static void inputᴍ(ж<Client> Ꮡclient) {
     client.mutex.Unlock();
     client.reqMutex.Unlock();
     if (debugLog && !AreEqual(err, io.EOF) && !closing) {
-        log.Println(rpcClientProtocolErrorˢ, err);
+        log.Println(rpcClientProtocolErrorˢᴍClient, err);
     }
 }
 
 } partial class rpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object rpcDiscardingCallReplyˢ = (@string)"rpc: discarding Call reply due to insufficient Done chan capacity"u8;
+internal static readonly object rpcDiscardingCallReplyˢᴍCall = (@string)"rpc: discarding Call reply due to insufficient Done chan capacity"u8;
 
 internal static void doneᴍ(ж<Call> Ꮡcall) {
     ref var call = ref Ꮡcall.DerefOrNull();
@@ -211,7 +211,7 @@ internal static void doneᴍ(ж<Call> Ꮡcall) {
         // We don't want to block here. It is the caller's responsibility to make
         // sure the channel has enough buffer space. See comment in Go().
         if (debugLog) {
-            log.Println(rpcDiscardingCallReplyˢ);
+            log.Println(rpcDiscardingCallReplyˢᴍCall);
         }
         break;
     }}
@@ -341,7 +341,7 @@ internal static error Closeᴍ(ж<Client> Ꮡclient) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object rpcDoneChannelIsˢ = (@string)"rpc: done channel is unbuffered"u8;
+internal static readonly object rpcDoneChannelIsˢᴍClient = (@string)"rpc: done channel is unbuffered"u8;
 
 // Go invokes the function asynchronously. It returns the [Call] structure representing
 // the invocation. The done channel will signal when the call is complete by returning
@@ -360,7 +360,7 @@ internal static ж<Call> Goᴍ(ж<Client> Ꮡclient, @string serviceMethod, any 
         // RPCs that will be using that channel. If the channel
         // is totally unbuffered, it's best not to run at all.
         if (cap(done) == 0) {
-            log.Panic(rpcDoneChannelIsˢ);
+            log.Panic(rpcDoneChannelIsˢᴍClient);
         }
     }
     call.Done = done;

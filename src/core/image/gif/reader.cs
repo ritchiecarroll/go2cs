@@ -382,8 +382,8 @@ internal static error readGraphicControlᴍ(ref decoder d) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gifNoColorTableˢ => ref gifNoColorTableˢᵇ;
-private static readonly @string gifNoColorTableˢᵇ = "gif: no color table"u8;
+internal static ref readonly @string gifNoColorTableˢᴍdecoder => ref gifNoColorTableˢᵇᴍdecoder;
+private static readonly @string gifNoColorTableˢᵇᴍdecoder = "gif: no color table"u8;
 
 internal static error readImageDescriptorᴍ(ж<decoder> Ꮡd, bool keepAllFrames) {
     GoFrame ᒐ = default;
@@ -402,7 +402,7 @@ internal static error readImageDescriptorᴍ(ж<decoder> Ꮡd, bool keepAllFrame
             }
         } else {
             if (d.globalColorTable == nil) {
-                return errors.New(gifNoColorTableˢ);
+                return errors.New(gifNoColorTableˢᴍdecoder);
             }
             m.Palette = d.globalColorTable;
         }
@@ -501,8 +501,8 @@ internal static error readImageDescriptorᴍ(ж<decoder> Ꮡd, bool keepAllFrame
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gifFrameBoundsLargerThanˢ => ref gifFrameBoundsLargerThanˢᵇ;
-private static readonly @string gifFrameBoundsLargerThanˢᵇ = "gif: frame bounds larger than image bounds"u8;
+internal static ref readonly @string gifFrameBoundsLargerThanˢᴍdecoder => ref gifFrameBoundsLargerThanˢᵇᴍdecoder;
+private static readonly @string gifFrameBoundsLargerThanˢᵇᴍdecoder = "gif: frame bounds larger than image bounds"u8;
 
 internal static (ж<image.Paletted>, error) newImageFromDescriptorᴍ(ref decoder d) {
     var err = readFull(d.r, d.tmp[..9]); if (err != nil) {
@@ -531,7 +531,7 @@ internal static (ж<image.Paletted>, error) newImageFromDescriptorᴍ(ref decode
     // imageBounds.Max (d.width, d.height) and not frameBounds.Min (left, top)
     // against imageBounds.Min (0, 0).
     if (left + width > d.width || top + height > d.height) {
-        return (default, errors.New(gifFrameBoundsLargerThanˢ));
+        return (default, errors.New(gifFrameBoundsLargerThanˢᴍdecoder));
     }
     return (image.NewPaletted(new image.Rectangle(
         Min: new image.Point(left, top),

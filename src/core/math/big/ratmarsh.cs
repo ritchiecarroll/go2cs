@@ -19,8 +19,8 @@ internal const byte ratGobVersion = 1;
 } partial class big_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ratGobEncodeNumeratorTooˢ => ref ratGobEncodeNumeratorTooˢᵇ;
-private static readonly @string ratGobEncodeNumeratorTooˢᵇ = "Rat.GobEncode: numerator too large"u8;
+internal static ref readonly @string ratGobEncodeNumeratorTooˢᴍRat => ref ratGobEncodeNumeratorTooˢᵇᴍRat;
+private static readonly @string ratGobEncodeNumeratorTooˢᵇᴍRat = "Rat.GobEncode: numerator too large"u8;
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
 internal static (slice<byte>, error) GobEncodeᴍ(ж<Rat> Ꮡx) {
@@ -35,7 +35,7 @@ internal static (slice<byte>, error) GobEncodeᴍ(ж<Rat> Ꮡx) {
     nint n = i - j;
     if ((nint)(uint32)n != n) {
         // this should never happen
-        return (default, errors.New(ratGobEncodeNumeratorTooˢ));
+        return (default, errors.New(ratGobEncodeNumeratorTooˢᴍRat));
     }
     byteorder.BEPutUint32(buf.slice(j - 4, j), (uint32)n);
     j -= 1 + 4;
@@ -48,10 +48,10 @@ internal static (slice<byte>, error) GobEncodeᴍ(ж<Rat> Ꮡx) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ratGobDecodeBufferTooˢ => ref ratGobDecodeBufferTooˢᵇ;
-private static readonly @string ratGobDecodeBufferTooˢᵇ = "Rat.GobDecode: buffer too small"u8;
-internal static ref readonly @string ratGobDecodeInvalidˢ => ref ratGobDecodeInvalidˢᵇ;
-private static readonly @string ratGobDecodeInvalidˢᵇ = "Rat.GobDecode: invalid length"u8;
+internal static ref readonly @string ratGobDecodeBufferTooˢᴍRat => ref ratGobDecodeBufferTooˢᵇᴍRat;
+private static readonly @string ratGobDecodeBufferTooˢᵇᴍRat = "Rat.GobDecode: buffer too small"u8;
+internal static ref readonly @string ratGobDecodeInvalidˢᴍRat => ref ratGobDecodeInvalidˢᵇᴍRat;
+private static readonly @string ratGobDecodeInvalidˢᵇᴍRat = "Rat.GobDecode: invalid length"u8;
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
 internal static error GobDecodeᴍ(ref Rat z, slice<byte> buf) {
@@ -61,7 +61,7 @@ internal static error GobDecodeᴍ(ref Rat z, slice<byte> buf) {
         return default;
     }
     if (len(buf) < 5) {
-        return errors.New(ratGobDecodeBufferTooˢ);
+        return errors.New(ratGobDecodeBufferTooˢᴍRat);
     }
     var b = buf[0];
     if ((byte)((b >> 1)) != ratGobVersion) {
@@ -70,11 +70,11 @@ internal static error GobDecodeᴍ(ref Rat z, slice<byte> buf) {
     UntypedInt j = /* 1 + 4 */ 5;
     var ln = byteorder.BEUint32(buf[(int)(j - 4)..(int)(j)]);
     if ((uint64)ln > (uint64)(math.MaxInt - j)) {
-        return errors.New(ratGobDecodeInvalidˢ);
+        return errors.New(ratGobDecodeInvalidˢᴍRat);
     }
     nint i = (nint)j + (nint)ln;
     if (len(buf) < i) {
-        return errors.New(ratGobDecodeBufferTooˢ);
+        return errors.New(ratGobDecodeBufferTooˢᴍRat);
     }
     z.a.neg = (byte)(b & 1) != 0;
     z.a.abs = z.a.abs.setBytes(buf.slice(j, i));

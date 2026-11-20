@@ -15,8 +15,8 @@ partial class runtime_package {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string attemptedToTraceABadˢ => ref attemptedToTraceABadˢᵇ;
-private static readonly @string attemptedToTraceABadˢᵇ = "attempted to trace a bad status for a goroutine"u8;
+internal static ref readonly @string attemptedToTraceABadˢᴍtraceWriter => ref attemptedToTraceABadˢᵇᴍtraceWriter;
+private static readonly @string attemptedToTraceABadˢᵇᴍtraceWriter = "attempted to trace a bad status for a goroutine"u8;
 
 // writeGoStatus emits a GoStatus event as well as any active ranges on the goroutine.
 //
@@ -28,7 +28,7 @@ internal static traceWriter writeGoStatusᴍ(traceWriter w, uint64 goid, int64 m
     // The status should never be bad. Some invariant must have been violated.
     if (status == tracev2.GoBad) {
         print((@string)"runtime: goid=", goid, (@string)"\n");
-        @throw(attemptedToTraceABadˢ);
+        @throw(attemptedToTraceABadˢᴍtraceWriter);
     }
 
     // Trace the status.
@@ -46,8 +46,8 @@ internal static traceWriter writeGoStatusᴍ(traceWriter w, uint64 goid, int64 m
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string attemptToTraceInvalidOrˢ => ref attemptToTraceInvalidOrˢᵇ;
-private static readonly @string attemptToTraceInvalidOrˢᵇ = "attempt to trace invalid or unsupported P status"u8;
+internal static ref readonly @string attemptToTraceInvalidOrˢᴍtraceWriter => ref attemptToTraceInvalidOrˢᵇᴍtraceWriter;
+private static readonly @string attemptToTraceInvalidOrˢᵇᴍtraceWriter = "attempt to trace invalid or unsupported P status"u8;
 
 // writeProcStatusForP emits a ProcStatus event for the provided p based on its status.
 //
@@ -88,7 +88,7 @@ internal static traceWriter writeProcStatusForPᴍ(traceWriter w, ж<p> Ꮡpp, b
         break;
     }
     default: {
-        @throw(attemptToTraceInvalidOrˢ);
+        @throw(attemptToTraceInvalidOrˢᴍtraceWriter);
         break;
     }}
     w = w.writeProcStatus((uint64)pp.id, status, pp.trace.inSweep);
@@ -96,8 +96,8 @@ internal static traceWriter writeProcStatusForPᴍ(traceWriter w, ж<p> Ꮡpp, b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string attemptedToTraceABadˢ2 => ref attemptedToTraceABadˢ2ᵇ;
-private static readonly @string attemptedToTraceABadˢ2ᵇ = "attempted to trace a bad status for a proc"u8;
+internal static ref readonly @string attemptedToTraceABadˢ2ᴍtraceWriter => ref attemptedToTraceABadˢ2ᵇᴍtraceWriter;
+private static readonly @string attemptedToTraceABadˢ2ᵇᴍtraceWriter = "attempted to trace a bad status for a proc"u8;
 
 // writeProcStatus emits a ProcStatus event with all the provided information.
 //
@@ -112,7 +112,7 @@ internal static traceWriter writeProcStatusᴍ(traceWriter w, uint64 pid, tracev
     // The status should never be bad. Some invariant must have been violated.
     if (status == tracev2.ProcBad) {
         print((@string)"runtime: pid=", pid, (@string)"\n");
-        @throw(attemptedToTraceABadˢ2);
+        @throw(attemptedToTraceABadˢ2ᴍtraceWriter);
     }
 
     // Trace the status.

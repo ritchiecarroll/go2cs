@@ -27,8 +27,8 @@ internal const bool enableReverseTypeInference = true; // disable for debugging
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inferSSSˢ => ref inferSSSˢᵇ;
-private static readonly @string inferSSSˢᵇ = "== infer : %s%s ➞ %s"u8;
+internal static ref readonly @string inferSSSˢᴍChecker => ref inferSSSˢᵇᴍChecker;
+private static readonly @string inferSSSˢᵇᴍChecker = "== infer : %s%s ➞ %s"u8;
 
 // infer attempts to infer the complete set of type arguments for generic function instantiation/call
 // based on the given type parameters tparams, type arguments targs, function parameters params, and
@@ -61,7 +61,7 @@ internal static slice<Type> /*inferred*/ inferᴍ(ж<Checker> Ꮡcheck, position
         }
 
         if (traceInference) {
-            Ꮡcheck.dump(inferSSSˢ, tparams, Ꮡparams.OrTypedNil(), targs); // aligned with rename print below
+            Ꮡcheck.dump(inferSSSˢᴍChecker, tparams, Ꮡparams.OrTypedNil(), targs); // aligned with rename print below
             var tparamsʗ2 = tparams;
             defer(() => {
                 Ꮡcheck.dump("=> %s ➞ %s\n", tparamsʗ2, inferred);

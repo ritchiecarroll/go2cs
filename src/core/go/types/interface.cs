@@ -179,10 +179,10 @@ internal static void cleanupᴍ(ж<Interface> Ꮡt) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string methodsMustHaveAUniqueˢ => ref methodsMustHaveAUniqueˢᵇ;
-private static readonly @string methodsMustHaveAUniqueˢᵇ = "methods must have a unique non-blank name"u8;
-internal static ref readonly @string methodsCannotHaveTypeˢ => ref methodsCannotHaveTypeˢᵇ;
-private static readonly @string methodsCannotHaveTypeˢᵇ = "methods cannot have type parameters"u8;
+internal static ref readonly @string methodsMustHaveAUniqueˢᴍChecker => ref methodsMustHaveAUniqueˢᵇᴍChecker;
+private static readonly @string methodsMustHaveAUniqueˢᵇᴍChecker = "methods must have a unique non-blank name"u8;
+internal static ref readonly @string methodsCannotHaveTypeˢᴍChecker => ref methodsCannotHaveTypeˢᵇᴍChecker;
+private static readonly @string methodsCannotHaveTypeˢᵇᴍChecker = "methods cannot have type parameters"u8;
 
 internal static void interfaceTypeᴍ(ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -208,7 +208,7 @@ internal static void interfaceTypeᴍ(ж<Checker> Ꮡcheck, ж<Interface> Ꮡity
         // We have a method with name f.Names[0].
         var name = f.Names[0];
         if (name.Name == "_"u8) {
-            Ꮡcheck.error(new ast_Identжpositioner(name), BlankIfaceMethod, methodsMustHaveAUniqueˢ);
+            Ꮡcheck.error(new ast_Identжpositioner(name), BlankIfaceMethod, methodsMustHaveAUniqueˢᴍChecker);
             continue; // ignore
         }
 
@@ -227,7 +227,7 @@ internal static void interfaceTypeᴍ(ж<Checker> Ꮡcheck, ж<Interface> Ꮡity
             var (ftyp, _) = f.Type._<ж<ast.FuncType>>(ᐧ); if (ftyp != nil && ftyp.TypeParams != nil) {
                 at = new ast_FieldListжpositioner(ftyp.TypeParams);
             }
-            Ꮡcheck.error(at, InvalidSyntaxTree, methodsCannotHaveTypeˢ);
+            Ꮡcheck.error(at, InvalidSyntaxTree, methodsCannotHaveTypeˢᴍChecker);
         }
 
         // use named receiver type if available (for better error messages)

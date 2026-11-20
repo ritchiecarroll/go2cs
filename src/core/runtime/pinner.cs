@@ -316,8 +316,8 @@ internal static void incPinCounterᴍ(ж<mspan> Ꮡspan, uintptr offset) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimePinnerDecreasedˢ => ref runtimePinnerDecreasedˢᵇ;
-private static readonly @string runtimePinnerDecreasedˢᵇ = "runtime.Pinner: decreased non-existing pin counter"u8;
+internal static ref readonly @string runtimePinnerDecreasedˢᴍmspan => ref runtimePinnerDecreasedˢᵇᴍmspan;
+private static readonly @string runtimePinnerDecreasedˢᵇᴍmspan = "runtime.Pinner: decreased non-existing pin counter"u8;
 
 // decPinCounter decreases the counter. If the counter reaches 0, the counter
 // special is deleted and false is returned. Otherwise true is returned.
@@ -326,7 +326,7 @@ internal static bool decPinCounterᴍ(ж<mspan> Ꮡspan, uintptr offset) {
 
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
     if (!exists) {
-        @throw(runtimePinnerDecreasedˢ);
+        @throw(runtimePinnerDecreasedˢᴍmspan);
     }
     var counter = @ref.ValueSlot.Reinterpret<special, specialPinCounter>();
     counter.counter--;

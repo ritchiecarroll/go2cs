@@ -50,8 +50,8 @@ internal partial struct readForm_writerOnly /*dyn*/ {
 } partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string multipartˢ => ref multipartˢᵇ;
-private static readonly @string multipartˢᵇ = "multipart-"u8;
+internal static ref readonly @string multipartˢᴍReader => ref multipartˢᵇᴍReader;
+private static readonly @string multipartˢᵇᴍReader = "multipart-"u8;
 
 internal static (ж<Form>, error err) readFormᴍ(ж<Reader> Ꮡr, int64 maxMemory) {
     ж<Form> _ᴛ1 = default;
@@ -193,7 +193,7 @@ internal static (ж<Form>, error err) readFormᴍ(ж<Reader> Ꮡr, int64 maxMemo
             }
             if (n > maxFileMemoryBytes) {
                 if (@file == nil) {
-                    (@file, errΔ2) = os.CreateTemp(r.tempDir, multipartˢ);
+                    (@file, errΔ2) = os.CreateTemp(r.tempDir, multipartˢᴍReader);
                     if (errΔ2 != nil) {
                         (_ᴛ1, err) = (default, errΔ2); goto ᒐdone;
                     }

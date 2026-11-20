@@ -401,8 +401,8 @@ partial struct workbuf {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string workbufIsEmptyˢ => ref workbufIsEmptyˢᵇ;
-private static readonly @string workbufIsEmptyˢᵇ = "workbuf is empty"u8;
+internal static ref readonly @string workbufIsEmptyˢᴍworkbuf => ref workbufIsEmptyˢᵇᴍworkbuf;
+private static readonly @string workbufIsEmptyˢᵇᴍworkbuf = "workbuf is empty"u8;
 
 // workbuf factory routines. These funcs are used to manage the
 // workbufs.
@@ -410,17 +410,17 @@ private static readonly @string workbufIsEmptyˢᵇ = "workbuf is empty"u8;
 // make wbufs available to the GC.
 internal static void checknonemptyᴍ(ref workbuf b) {
     if (b.nobj == 0) {
-        @throw(workbufIsEmptyˢ);
+        @throw(workbufIsEmptyˢᴍworkbuf);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string workbufIsNotEmptyˢ => ref workbufIsNotEmptyˢᵇ;
-private static readonly @string workbufIsNotEmptyˢᵇ = "workbuf is not empty"u8;
+internal static ref readonly @string workbufIsNotEmptyˢᴍworkbuf => ref workbufIsNotEmptyˢᵇᴍworkbuf;
+private static readonly @string workbufIsNotEmptyˢᵇᴍworkbuf = "workbuf is not empty"u8;
 
 internal static void checkemptyᴍ(ref workbuf b) {
     if (b.nobj != 0) {
-        @throw(workbufIsNotEmptyˢ);
+        @throw(workbufIsNotEmptyˢᴍworkbuf);
     }
 }
 

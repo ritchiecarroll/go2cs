@@ -63,8 +63,8 @@ internal static void setErrorᴍ(ref Encoder enc, error err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gobEncoderMessageTooBigˢ => ref gobEncoderMessageTooBigˢᵇ;
-private static readonly @string gobEncoderMessageTooBigˢᵇ = "gob: encoder: message too big"u8;
+internal static ref readonly @string gobEncoderMessageTooBigˢᴍEncoder => ref gobEncoderMessageTooBigˢᵇᴍEncoder;
+private static readonly @string gobEncoderMessageTooBigˢᵇᴍEncoder = "gob: encoder: message too big"u8;
 
 // writeMessage sends the data item preceded by an unsigned count of its length.
 internal static void writeMessageᴍ(ref Encoder enc, io.Writer w, ж<encBuffer> Ꮡb) {
@@ -77,7 +77,7 @@ internal static void writeMessageᴍ(ref Encoder enc, io.Writer w, ж<encBuffer>
     nint messageLen = len(message) - (nint)maxLength;
     // Length cannot be bigger than the decoder can handle.
     if (messageLen >= tooBig) {
-        enc.setError(errors.New(gobEncoderMessageTooBigˢ));
+        enc.setError(errors.New(gobEncoderMessageTooBigˢᴍEncoder));
         return;
     }
     // Encode the length.
@@ -250,8 +250,8 @@ internal static void sendTypeIdᴍ(ref Encoder enc, ж<encoderState> Ꮡstate, �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gobCannotEncodeNilValueˢ => ref gobCannotEncodeNilValueˢᵇ;
-private static readonly @string gobCannotEncodeNilValueˢᵇ = "gob: cannot encode nil value"u8;
+internal static ref readonly @string gobCannotEncodeNilValueˢᴍEncoder => ref gobCannotEncodeNilValueˢᵇᴍEncoder;
+private static readonly @string gobCannotEncodeNilValueˢᵇᴍEncoder = "gob: cannot encode nil value"u8;
 
 // EncodeValue transmits the data item represented by the reflection value,
 // guaranteeing that all necessary type information has been transmitted first.
@@ -263,7 +263,7 @@ internal static error EncodeValueᴍ(ж<Encoder> Ꮡenc, reflect.Value value) {
         ref var enc = ref Ꮡenc.DerefOrNull();
 
         if (value.Kind() == reflect.Invalid) {
-            return errors.New(gobCannotEncodeNilValueˢ);
+            return errors.New(gobCannotEncodeNilValueˢᴍEncoder);
         }
         if (value.Kind() == reflect.Pointer && value.IsNil()) {
             throw panic("gob: cannot encode nil pointer of type " + value.Type().String());

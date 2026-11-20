@@ -568,8 +568,8 @@ internal static slice<byte> appendNano(slice<byte> b, nint nanosec, nint std) {
 } partial class time_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mstˢ => ref mstˢᵇ;
-private static readonly @string mstˢᵇ = "2006-01-02 15:04:05.999999999 -0700 MST"u8;
+internal static ref readonly @string mstˢᴍTime => ref mstˢᵇᴍTime;
+private static readonly @string mstˢᵇᴍTime = "2006-01-02 15:04:05.999999999 -0700 MST"u8;
 
 // String returns the time formatted using the format string
 //
@@ -585,7 +585,7 @@ private static readonly @string mstˢᵇ = "2006-01-02 15:04:05.999999999 -0700 
 internal static @string Stringᴍ(Time t) {
     var bufᴷ = new stackAppend<byte>();
 
-    @string s = t.Format(mstˢ);
+    @string s = t.Format(mstˢᴍTime);
 
     // Format monotonic clock reading as m=±ddd.nnnnnnnnn.
     if ((t.wall & (uint64)hasMonotonic) != 0) {

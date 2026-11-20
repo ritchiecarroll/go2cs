@@ -100,10 +100,10 @@ internal static ref fips140cache.Cache<byte, ed25519.PrivateKey> privateKeyCache
 } partial class ed25519_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoEd25519UseOfˢ => ref cryptoEd25519UseOfˢᵇ;
-private static readonly @string cryptoEd25519UseOfˢᵇ = "crypto/ed25519: use of Ed25519ctx is not allowed in FIPS 140-only mode"u8;
-internal static ref readonly @string ed25519ExpectedOptsˢ => ref ed25519ExpectedOptsˢᵇ;
-private static readonly @string ed25519ExpectedOptsˢᵇ = "ed25519: expected opts.HashFunc() zero (unhashed message, for standard Ed25519) or SHA-512 (for Ed25519ph)"u8;
+internal static ref readonly @string cryptoEd25519UseOfˢᴍPrivateKey => ref cryptoEd25519UseOfˢᵇᴍPrivateKey;
+private static readonly @string cryptoEd25519UseOfˢᵇᴍPrivateKey = "crypto/ed25519: use of Ed25519ctx is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string ed25519ExpectedOptsˢᴍPrivateKey => ref ed25519ExpectedOptsˢᵇᴍPrivateKey;
+private static readonly @string ed25519ExpectedOptsˢᵇᴍPrivateKey = "ed25519: expected opts.HashFunc() zero (unhashed message, for standard Ed25519) or SHA-512 (for Ed25519ph)"u8;
 
 // Sign signs the given message with priv. rand is ignored and can be nil.
 //
@@ -135,7 +135,7 @@ internal static (slice<byte> signature, error err) Signᴍ(PrivateKey priv, io.R
     }
     case {} when hash == ((crypto.Hash)0) && context != ""u8: { // Ed25519ctx
         if (fips140only.Enforced()) {
-            return (default, errors.New(cryptoEd25519UseOfˢ));
+            return (default, errors.New(cryptoEd25519UseOfˢᴍPrivateKey));
         }
         return ed25519.SignCtx(k, message, context);
     }
@@ -143,7 +143,7 @@ internal static (slice<byte> signature, error err) Signᴍ(PrivateKey priv, io.R
         return (ed25519.Sign(k, message), default);
     }
     default: {
-        return (default, errors.New(ed25519ExpectedOptsˢ));
+        return (default, errors.New(ed25519ExpectedOptsˢᴍPrivateKey));
     }}
 }
 
