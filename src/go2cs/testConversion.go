@@ -6080,18 +6080,35 @@ func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded ma
 	// compiles here or grants InternalsVisibleTo.
 	typesByPath := rootTypesByPath(roots)
 
+	//
+	// The candidate scan and the interface-base walk feed each other, so they run as ONE loop to a fixpoint: drain the
+	// base walk, scan every visible package not yet scanned, and repeat until neither adds anything. A package only the
+	// base walk reaches is visible like any other (TestDeclarationClosureImportsScansPackagesTheBaseWalkReaches), and a
+	// candidate's signature can name an interface whose bases need walking.
 	scanned := hashset.HashSet[string]{}
 
 	for {
-		var pending []string
+		for len(queue) > 0 {
+			named := queue[0]
+			queue = queue[1:]
 
-		for _, path := range seen.Keys() {
-			if !scanned.Contains(path) && typesByPath[path] != nil {
-				pending = append(pending, path)
+			for _, base := range interfaceBaseCandidates(named) {
+				reach(base)
+				enqueue(base)
 			}
 		}
 
-		if len(pending) == 0 || len(calledMethods) == 0 {
+		var pending []string
+
+		if len(calledMethods) > 0 {
+			for _, path := range seen.Keys() {
+				if !scanned.Contains(path) && typesByPath[path] != nil {
+					pending = append(pending, path)
+				}
+			}
+		}
+
+		if len(pending) == 0 {
 			break
 		}
 
@@ -6106,16 +6123,6 @@ func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded ma
 					enqueue(mentioned)
 				}
 			}
-		}
-	}
-
-	for len(queue) > 0 {
-		named := queue[0]
-		queue = queue[1:]
-
-		for _, base := range interfaceBaseCandidates(named) {
-			reach(base)
-			enqueue(base)
 		}
 	}
 
