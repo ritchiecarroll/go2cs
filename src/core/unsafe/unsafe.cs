@@ -1343,7 +1343,9 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
                 throw RuntimeErrorPanic.RuntimeRaised(UnheldSlotText);
 
             default:
-                return p!.Value;
+                // A managed slot: its slot itself, never Value, which throws on a box whose held unsafe.Pointer is nil (a nil
+                // unsafe.Pointer is that held null). RequireSlot has already refused a nil POINTER, structurally.
+                return p!.ValueSlot;
         }
     }
 
@@ -1377,7 +1379,8 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
                 throw RuntimeErrorPanic.RuntimeRaised(UnheldSlotText);
 
             default:
-                p!.Value = v!;
+                // A managed slot: written through its slot, as LoadWord reads it (Value would read the held nil first).
+                p!.ValueSlot = v!;
                 return;
         }
     }
