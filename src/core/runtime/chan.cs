@@ -948,9 +948,9 @@ internal static void reflect_chanclose(ж<hchan> c) {
     closechan(c);
 }
 
-} partial class runtimeᴛwaitq {
+} partial class runtime_package {
 
-internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
+internal static void enqueueᴍ(ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     sgp.next = default;
@@ -966,7 +966,7 @@ internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
     q.last = Ꮡsgp;
 }
 
-internal static ж<sudog> dequeue(this ref waitq q) {
+internal static ж<sudog> dequeueᴍ(ref waitq q) {
     for (;;) {
         var sgp = q.first;
         if (sgp == nil) {
@@ -1001,9 +1001,9 @@ internal static ж<sudog> dequeue(this ref waitq q) {
     }
 }
 
-} partial class runtimeᴛhchan {
+} partial class runtime_package {
 
-internal static @unsafe.Pointer raceaddr(this ж<hchan> Ꮡc) {
+internal static @unsafe.Pointer raceaddrᴍ(ж<hchan> Ꮡc) {
     // Treat read-like and write-like operations on the channel to
     // happen at this address. Avoid using the address of qcount
     // or dataqsiz, because the len() and cap() builtins read
@@ -1060,3 +1060,13 @@ internal static void racenotify(ж<hchan> Ꮡc, nuint idx, ж<sudog> Ꮡsg) {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛwaitq {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) => runtime_package.enqueueᴍ(ref q, Ꮡsgp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<sudog> dequeue(this ref waitq q) => runtime_package.dequeueᴍ(ref q);
+}
+partial class runtimeᴛhchan {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer raceaddr(this ж<hchan> Ꮡc) => runtime_package.raceaddrᴍ(Ꮡc);
+}
+// </GlyphForwarders>

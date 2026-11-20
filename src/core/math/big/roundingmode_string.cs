@@ -23,9 +23,9 @@ private static readonly @string _RoundingMode_nameᵇ = "ToNearestEvenToNearestA
 
 internal static array<uint8> _RoundingMode_index = new uint8[]{0, 13, 26, 32, 44, 57, 70}.array();
 
-} partial class bigᴛRoundingMode {
+} partial class big_package {
 
-public static @string String(this RoundingMode i) {
+internal static @string Stringᴍ(RoundingMode i) {
     if (i >= ((RoundingMode)(byte)(len(_RoundingMode_index) - 1))) {
         return "RoundingMode("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -33,3 +33,9 @@ public static @string String(this RoundingMode i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bigᴛRoundingMode {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RoundingMode i) => big_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

@@ -31,9 +31,9 @@ public static void UnreachableExceptTests() { }
 
 public partial struct randReader /*num:nint*/;
 
-} partial class boringᴛrandReader {
+} partial class boring_package {
 
-public static (nint, error) Read(this randReader _, slice<byte> b) { throw panic("boringcrypto: not available"); }
+internal static (nint, error) Readᴍ(randReader _, slice<byte> b) { throw panic("boringcrypto: not available"); }
 
 } partial class boring_package {
 
@@ -135,12 +135,24 @@ public static (ж<PrivateKeyECDH>, slice<byte>, error) GenerateKeyECDH(@string _
 public static (ж<PrivateKeyECDH>, error) NewPrivateKeyECDH(@string _Δp0, slice<byte> _Δp1) { throw panic("boringcrypto: not available"); }
 public static (ж<PublicKeyECDH>, error) NewPublicKeyECDH(@string _Δp0, slice<byte> _Δp1) { throw panic("boringcrypto: not available"); }
 
-} partial class boringᴛPublicKeyECDH {
+} partial class boring_package {
 
-public static slice<byte> Bytes(this ref PublicKeyECDH _) { throw panic("boringcrypto: not available"); }
+internal static slice<byte> Bytesᴍ(ref PublicKeyECDH _) { throw panic("boringcrypto: not available"); }
 
-} partial class boringᴛPrivateKeyECDH {
+} partial class boring_package {
 
-public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) { throw panic("boringcrypto: not available"); }
+internal static (ж<PublicKeyECDH>, error) PublicKeyᴍ(ref PrivateKeyECDH _) { throw panic("boringcrypto: not available"); }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class boringᴛrandReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this randReader _, slice<byte> b) => boring_package.Readᴍ(_, b);
+}
+partial class boringᴛPublicKeyECDH {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKeyECDH _) => boring_package.Bytesᴍ(ref _);
+}
+partial class boringᴛPrivateKeyECDH {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) => boring_package.PublicKeyᴍ(ref _);
+}
+// </GlyphForwarders>

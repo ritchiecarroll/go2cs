@@ -77,12 +77,12 @@ partial struct rfc1423Algo {
 ]); }
 internal static ref slice<rfc1423Algo> rfc1423Algos => ref ((StaticBox<slice<rfc1423Algo>>)Ꮡrfc1423Algos).ValueSlot;
 
-} partial class x509ᴛrfc1423Algo {
+} partial class x509_package {
 
 // deriveKey uses a key derivation function to stretch the password into a key
 // with the number of bits our cipher requires. This algorithm was derived from
 // the OpenSSL source.
-internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, slice<byte> salt) {
+internal static slice<byte> deriveKeyᴍ(rfc1423Algo c, slice<byte> password, slice<byte> salt) {
     var hash = md5.New();
     var @out = new slice<byte>(c.keySize);
     slice<byte> digest = default;
@@ -279,3 +279,9 @@ internal static ж<rfc1423Algo> cipherByKey(PEMCipher key) {
 }
 
 } // end x509_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class x509ᴛrfc1423Algo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, slice<byte> salt) => x509_package.deriveKeyᴍ(c, password, salt);
+}
+// </GlyphForwarders>

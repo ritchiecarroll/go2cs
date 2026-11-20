@@ -28,15 +28,24 @@ public static ж<Chan> NewChan(ChanDir dir, Type elem) {
     return Ꮡ(new Chan(dir: dir, elem: elem));
 }
 
-} partial class typesᴛChan {
+} partial class types_package {
 
 // Dir returns the direction of channel c.
-public static ChanDir Dir(this ref Chan c) { return c.dir; }
+internal static ChanDir Dirᴍ(ref Chan c) { return c.dir; }
 
 // Elem returns the element type of channel c.
-public static Type Elem(this ref Chan c) { return c.elem; }
+internal static Type Elemᴍ(ref Chan c) { return c.elem; }
 
-public static Type Underlying(this ж<Chan> Ꮡc) { return new ChanжType(Ꮡc); }
-public static @string String(this ж<Chan> Ꮡc) { return TypeString(new ChanжType(Ꮡc), default); }
+internal static Type Underlyingᴍ(ж<Chan> Ꮡc) { return new ChanжType(Ꮡc); }
+internal static @string Stringᴍ(ж<Chan> Ꮡc) { return TypeString(new ChanжType(Ꮡc), default); }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛChan {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ChanDir Dir(this ref Chan c) => types_package.Dirᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Elem(this ref Chan c) => types_package.Elemᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Chan> Ꮡc) => types_package.Underlyingᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Chan> Ꮡc) => types_package.Stringᴍ(Ꮡc);
+}
+// </GlyphForwarders>

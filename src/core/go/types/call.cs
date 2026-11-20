@@ -17,7 +17,7 @@ using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // funcInst type-checks a function instantiation.
 // The incoming x must be a generic function.
@@ -37,7 +37,7 @@ partial class types_package {
 //
 // If an error (other than a version error) occurs in any case, it is reported
 // and x.mode is set to invalid.
-internal static slice<Type> funcInst(this ж<Checker> Ꮡcheck, ж<target> ᏑT, token.Pos pos, ж<operand> Ꮡx, ж<indexedExpr> Ꮡix, bool infer) {
+internal static slice<Type> funcInstᴍ(ж<Checker> Ꮡcheck, ж<target> ᏑT, token.Pos pos, ж<operand> Ꮡx, ж<indexedExpr> Ꮡix, bool infer) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var T = ref ᏑT.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
@@ -147,7 +147,7 @@ private static readonly @string instantiatingSignatureSˢᵇ = "-- instantiating
 internal static ref readonly @string sUnderSˢ => ref sUnderSˢᵇ;
 private static readonly @string sUnderSˢᵇ = "=> %s (under = %s)"u8;
 
-internal static ж<Signature> /*res*/ instantiateSignature(this ж<Checker> Ꮡcheck, token.Pos pos, ast.Expr expr, ж<Signature> Ꮡtyp, slice<Type> targs, slice<ast.Expr> xlist) {
+internal static ж<Signature> /*res*/ instantiateSignatureᴍ(ж<Checker> Ꮡcheck, token.Pos pos, ast.Expr expr, ж<Signature> Ꮡtyp, slice<Type> targs, slice<ast.Expr> xlist) {
     ж<Signature> res = default;
     GoFrame ᒐ = default;
     try {
@@ -199,7 +199,7 @@ internal static ж<Signature> /*res*/ instantiateSignature(this ж<Checker> Ꮡc
     return res;
 }
 
-internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall) {
+internal static exprKind callExprᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var call = ref Ꮡcall.DerefOrNull();
@@ -386,7 +386,7 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
 
 // exprList evaluates a list of expressions and returns the corresponding operands.
 // A single-element expression list may evaluate to multiple operands.
-internal static slice<ж<operand>> /*xlist*/ exprList(this ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
+internal static slice<ж<operand>> /*xlist*/ exprListᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
     slice<ж<operand>> xlist = default;
 
     nint n = len(elist); if (n == 1) {
@@ -410,7 +410,7 @@ internal static slice<ж<operand>> /*xlist*/ exprList(this ж<Checker> Ꮡcheck,
 // elements do not exist (targsList is nil) or the elements are nil.
 // For each partially instantiated generic function operand, the corresponding
 // targsList elements are the operand's partial type arguments.
-internal static (slice<ж<operand>> resList, slice<slice<Type>> targsList) genericExprList(this ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
+internal static (slice<ж<operand>> resList, slice<slice<Type>> targsList) genericExprListᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
     slice<ж<operand>> resList = default;
     slice<slice<Type>> targsList = default;
     GoFrame ᒐ = default;
@@ -515,7 +515,7 @@ internal static (slice<ж<operand>> resList, slice<slice<Type>> targsList) gener
 // functions are instantiated as necessary.
 // The result signature is the (possibly adjusted and instantiated) function signature.
 // If an error occurred, the result signature is the incoming sig.
-internal static ж<Signature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж<ast.CallExpr> Ꮡcall, ж<Signature> Ꮡsig, slice<Type> targs, slice<ast.Expr> xlist, slice<ж<operand>> args, slice<slice<Type>> atargs) {
+internal static ж<Signature> /*rsig*/ argumentsᴍ(ж<Checker> Ꮡcheck, ж<ast.CallExpr> Ꮡcall, ж<Signature> Ꮡsig, slice<Type> targs, slice<ast.Expr> xlist, slice<ж<operand>> args, slice<slice<Type>> atargs) {
     ж<Signature> rsig = default;
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var call = ref Ꮡcall.DerefOrNull();
@@ -740,7 +740,7 @@ internal static array<@string> cgoPrefixes = new @string[]{
     "_Cmacro_" // function to evaluate the expanded expression
 }.array();
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cMallocˢ => ref cMallocˢᵇ;
@@ -756,7 +756,7 @@ private static readonly @string illegalCycleInMethodˢᵇ = "illegal cycle in me
 internal static ref readonly @string vSVSˢ => ref vSVSˢᵇ;
 private static readonly @string vSVSˢᵇ = "%v: (%s).%v -> %s"u8;
 
-internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SelectorExpr> Ꮡe, bool wantType) {
+internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SelectorExpr> Ꮡe, bool wantType) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -1089,7 +1089,7 @@ Error:
 // (and variables are "used") in the presence of
 // other errors. Arguments may be nil.
 // Reports if all arguments evaluated without error.
-internal static bool use(this ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) {
+internal static bool useᴍ(ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) {
     var args = argsʗp.slice();
 
     return Ꮡcheck.useN(args, false);
@@ -1098,13 +1098,13 @@ internal static bool use(this ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr a
 // useLHS is like use, but doesn't "use" top-level identifiers.
 // It should be called instead of use if the arguments are
 // expressions on the lhs of an assignment.
-internal static bool useLHS(this ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) {
+internal static bool useLHSᴍ(ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) {
     var args = argsʗp.slice();
 
     return Ꮡcheck.useN(args, true);
 }
 
-internal static bool useN(this ж<Checker> Ꮡcheck, slice<ast.Expr> args, bool lhs) {
+internal static bool useNᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> args, bool lhs) {
     var ok = true;
     foreach (var (_, e) in range(args)) {
         if (!Ꮡcheck.use1(e, lhs)) {
@@ -1114,7 +1114,7 @@ internal static bool useN(this ж<Checker> Ꮡcheck, slice<ast.Expr> args, bool 
     return ok;
 }
 
-internal static bool use1(this ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
+internal static bool use1ᴍ(ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ref var x = ref heap(new operand(), out var Ꮡx);
@@ -1161,3 +1161,19 @@ internal static bool use1(this ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Type> funcInst(this ж<Checker> Ꮡcheck, ж<target> ᏑT, token.Pos pos, ж<operand> Ꮡx, ж<indexedExpr> Ꮡix, bool infer) => types_package.funcInstᴍ(Ꮡcheck, ᏑT, pos, Ꮡx, Ꮡix, infer);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Signature> /*res*/ instantiateSignature(this ж<Checker> Ꮡcheck, token.Pos pos, ast.Expr expr, ж<Signature> Ꮡtyp, slice<Type> targs, slice<ast.Expr> xlist) => types_package.instantiateSignatureᴍ(Ꮡcheck, pos, expr, Ꮡtyp, targs, xlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall) => types_package.callExprᴍ(Ꮡcheck, Ꮡx, Ꮡcall);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<operand>> /*xlist*/ exprList(this ж<Checker> Ꮡcheck, slice<ast.Expr> elist) => types_package.exprListᴍ(Ꮡcheck, elist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<ж<operand>> resList, slice<slice<Type>> targsList) genericExprList(this ж<Checker> Ꮡcheck, slice<ast.Expr> elist) => types_package.genericExprListᴍ(Ꮡcheck, elist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Signature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж<ast.CallExpr> Ꮡcall, ж<Signature> Ꮡsig, slice<Type> targs, slice<ast.Expr> xlist, slice<ж<operand>> args, slice<slice<Type>> atargs) => types_package.argumentsᴍ(Ꮡcheck, Ꮡcall, Ꮡsig, targs, xlist, args, atargs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SelectorExpr> Ꮡe, bool wantType) => types_package.selectorᴍ(Ꮡcheck, Ꮡx, Ꮡe, wantType);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool use(this ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) => types_package.useᴍ(Ꮡcheck, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool useLHS(this ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) => types_package.useLHSᴍ(Ꮡcheck, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool useN(this ж<Checker> Ꮡcheck, slice<ast.Expr> args, bool lhs) => types_package.useNᴍ(Ꮡcheck, args, lhs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool use1(this ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) => types_package.use1ᴍ(Ꮡcheck, e, lhs);
+}
+// </GlyphForwarders>

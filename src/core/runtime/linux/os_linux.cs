@@ -541,10 +541,10 @@ internal static void setSignalstackSP(ж<stackt> s, uintptr sp) {
     (s.Ꮡss_sp.Reinterpret<ж<byte>, uintptr>()).Value = sp;
 }
 
-} partial class runtimeᴛsigctxt {
+} partial class runtime_package {
 
 //go:nosplit
-internal static void fixsigcode(this ref sigctxt c, uint32 sig) {
+internal static void fixsigcodeᴍ(ref sigctxt c, uint32 sig) {
 }
 
 } partial class runtime_package {
@@ -722,13 +722,13 @@ internal static UntypedInt _SI_USER => 0;
 internal static UntypedInt _SI_TKILL => -6;
 internal static UntypedInt _SYS_SECCOMP => 1;
 
-} partial class runtimeᴛsigctxt {
+} partial class runtime_package {
 
 // sigFromUser reports whether the signal was sent because of a call
 // to kill or tgkill.
 //
 //go:nosplit
-internal static bool sigFromUser(this ref sigctxt c) {
+internal static bool sigFromUserᴍ(ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SI_USER || code == _SI_TKILL;
 }
@@ -736,7 +736,7 @@ internal static bool sigFromUser(this ref sigctxt c) {
 // sigFromSeccomp reports whether the signal was sent from seccomp.
 //
 //go:nosplit
-internal static bool sigFromSeccomp(this ref sigctxt c) {
+internal static bool sigFromSeccompᴍ(ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SYS_SECCOMP;
 }
@@ -827,12 +827,23 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     return (major, minor, patch, true);
 }
 
-} partial class runtimeᴛkernelVersion {
+} partial class runtime_package {
 
 // GE checks if the running kernel version
 // is greater than or equal to the provided version.
-internal static bool GE(this kernelVersion kv, nint x, nint y) {
+internal static bool GEᴍ(kernelVersion kv, nint x, nint y) {
     return kv.major > x || (kv.major == x && kv.minor >= y);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛsigctxt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fixsigcode(this ref sigctxt c, uint32 sig) => runtime_package.fixsigcodeᴍ(ref c, sig);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool sigFromUser(this ref sigctxt c) => runtime_package.sigFromUserᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool sigFromSeccomp(this ref sigctxt c) => runtime_package.sigFromSeccompᴍ(ref c);
+}
+partial class runtimeᴛkernelVersion {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool GE(this kernelVersion kv, nint x, nint y) => runtime_package.GEᴍ(kv, x, y);
+}
+// </GlyphForwarders>

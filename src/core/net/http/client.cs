@@ -174,10 +174,10 @@ internal static @string refererForURL(ж<url.URL> ᏑlastReq, ref url.URL newReq
     return referer;
 }
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // didTimeout is non-nil only if err != nil.
-internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this ref Client c, ж<Request> Ꮡreq, time.Time deadline) {
+internal static (ж<Response> resp, Func<bool> didTimeout, error err) sendᴍ(ref Client c, ж<Request> Ꮡreq, time.Time deadline) {
     ж<Response> resp = default;
     Func<bool> didTimeout = default;
     error err = default;
@@ -205,14 +205,14 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this 
     return (resp, default, default);
 }
 
-internal static time.Time deadline(this ref Client c) {
+internal static time.Time deadlineᴍ(ref Client c) {
     if (c.Timeout > 0) {
         return time.Now().Add(c.Timeout);
     }
     return new time.Time();
 }
 
-internal static RoundTripper transport(this ref Client c) {
+internal static RoundTripper transportᴍ(ref Client c) {
     if (c.Transport != nil) {
         return c.Transport;
     }
@@ -511,7 +511,7 @@ public static (ж<Response> resp, error err) Get(@string url) {
     return DefaultClient.Get(url);
 }
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string getˢ => ref getˢᵇ;
@@ -540,7 +540,7 @@ private static readonly @string getˢᵇ = "GET"u8;
 //
 // To make a request with a specified context.Context, use [NewRequestWithContext]
 // and Client.Do.
-public static (ж<Response> resp, error err) Get(this ж<Client> Ꮡc, @string url) {
+internal static (ж<Response> resp, error err) Getᴍ(ж<Client> Ꮡc, @string url) {
     error err = default;
 
     (var req, err) = NewRequest(getˢ, url, default);
@@ -560,11 +560,11 @@ internal static bool alwaysFalse() { return false; }
 // unclosed.
 public static error ErrUseLastResponse = errors.New("net/http: use last response");
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // checkRedirect calls either the user's configured CheckRedirect
 // function, or the default.
-internal static error checkRedirect(this ref Client c, ж<Request> req, slice<ж<Request>> via) {
+internal static error checkRedirectᴍ(ref Client c, ж<Request> req, slice<ж<Request>> via) {
     var fn = c.CheckRedirect;
     if (fn == nil) {
         fn = defaultCheckRedirect;
@@ -634,7 +634,7 @@ internal static @string urlErrorOp(@string method) {
     return method;
 }
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // Do sends an HTTP request and returns an HTTP response, following
 // policy (such as redirects, cookies, auth) as configured on the
@@ -673,7 +673,7 @@ internal static @string urlErrorOp(@string method) {
 //
 // Any returned error will be of type [*url.Error]. The url.Error
 // value's Timeout method will report true if the request timed out.
-public static (ж<Response>, error) Do(this ж<Client> Ꮡc, ж<Request> req) {
+internal static (ж<Response>, error) Doᴍ(ж<Client> Ꮡc, ж<Request> req) {
     return Ꮡc.@do(req);
 }
 
@@ -681,7 +681,7 @@ public static (ж<Response>, error) Do(this ж<Client> Ꮡc, ж<Request> req) {
 
 internal static Action<ж<Response>, error> testHookClientDoResult;
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpNilRequestUrlˢ => ref httpNilRequestUrlˢᵇ;
@@ -691,7 +691,7 @@ private static readonly @string locationˢᵇ = "Location"u8;
 internal static ref readonly @string refererˢ => ref refererˢᵇ;
 private static readonly @string refererˢᵇ = "Referer"u8;
 
-internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж<Request> Ꮡreq) {
+internal static (ж<Response> retres, error reterr) @doᴍ(ж<Client> Ꮡc, ж<Request> Ꮡreq) {
     ж<Response> retres = default;
     error reterr = default;
     GoFrame ᒐ = default;
@@ -870,7 +870,7 @@ private static readonly @string cookieˢᵇ = "Cookie"u8;
 // makeHeadersCopier makes a function that copies headers from the
 // initial Request, ireq. For every redirect, this function must be called
 // so that it can copy headers into the upcoming Request.
-internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client> Ꮡc, ж<Request> Ꮡireq) {
+internal static Action<ж<Request>, bool, bool> makeHeadersCopierᴍ(ж<Client> Ꮡc, ж<Request> Ꮡireq) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var ireq = ref Ꮡireq.DerefOrNull();
 
@@ -980,7 +980,7 @@ public static (ж<Response> resp, error err) Post(@string url, @string contentTy
     return DefaultClient.Post(url, contentType, body);
 }
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string postˢ => ref postˢᵇ;
@@ -1002,7 +1002,7 @@ private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 //
 // See the [Client.Do] method documentation for details on how redirects
 // are handled.
-public static (ж<Response> resp, error err) Post(this ж<Client> Ꮡc, @string url, @string contentType, io.Reader body) {
+internal static (ж<Response> resp, error err) Postᴍ(ж<Client> Ꮡc, @string url, @string contentType, io.Reader body) {
     error err = default;
 
     (var req, err) = NewRequest(postˢ, url, body);
@@ -1035,7 +1035,7 @@ public static (ж<Response> resp, error err) PostForm(@string urlΔ1, url.Values
     return DefaultClient.PostForm(urlΔ1, data);
 }
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string applicationXWwwFormˢ => ref applicationXWwwFormˢᵇ;
@@ -1055,7 +1055,7 @@ private static readonly @string applicationXWwwFormˢᵇ = "application/x-www-fo
 //
 // To make a request with a specified context.Context, use [NewRequestWithContext]
 // and Client.Do.
-public static (ж<Response> resp, error err) PostForm(this ж<Client> Ꮡc, @string urlΔ1, url.Values data) {
+internal static (ж<Response> resp, error err) PostFormᴍ(ж<Client> Ꮡc, @string urlΔ1, url.Values data) {
     return Ꮡc.Post(urlΔ1, applicationXWwwFormˢ, new strings_ReaderжReader(strings.NewReader(data.Encode())));
 }
 
@@ -1079,7 +1079,7 @@ public static (ж<Response> resp, error err) Head(@string url) {
     return DefaultClient.Head(url);
 }
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string headˢ => ref headˢᵇ;
@@ -1097,7 +1097,7 @@ private static readonly @string headˢᵇ = "HEAD"u8;
 //
 // To make a request with a specified [context.Context], use [NewRequestWithContext]
 // and [Client.Do].
-public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string url) {
+internal static (ж<Response> resp, error err) Headᴍ(ж<Client> Ꮡc, @string url) {
     error err = default;
 
     (var req, err) = NewRequest(headˢ, url, default);
@@ -1113,7 +1113,7 @@ internal partial interface CloseIdleConnections_closeIdler /*dyn*/ {
     void CloseIdleConnections();
 }
 
-} partial class httpᴛClient {
+} partial class http_package {
 
 // CloseIdleConnections closes any connections on its [Transport] which
 // were previously connected from previous requests but are now
@@ -1122,7 +1122,7 @@ internal partial interface CloseIdleConnections_closeIdler /*dyn*/ {
 //
 // If [Client.Transport] does not have a [Client.CloseIdleConnections] method
 // then this method does nothing.
-public static void CloseIdleConnections(this ref Client c) {
+internal static void CloseIdleConnectionsᴍ(ref Client c) {
     var (tr, ok) = c.transport()._<CloseIdleConnections_closeIdler>(ᐧ); if (ok) {
         tr.CloseIdleConnections();
     }
@@ -1140,9 +1140,9 @@ partial struct cancelTimerBody {
     internal Func<bool> reqDidTimeout;
 }
 
-} partial class httpᴛcancelTimerBody {
+} partial class http_package {
 
-internal static (nint n, error err) Read(this ref cancelTimerBody b, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref cancelTimerBody b, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1159,7 +1159,7 @@ internal static (nint n, error err) Read(this ref cancelTimerBody b, slice<byte>
     return (n, err);
 }
 
-internal static error Close(this ref cancelTimerBody b) {
+internal static error Closeᴍ(ref cancelTimerBody b) {
     var err = b.rc.Close();
     b.stop();
     return err;
@@ -1220,3 +1220,24 @@ internal static @string stripPassword(ж<url.URL> Ꮡu) {
 }
 
 } // end http_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛClient {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(this ref Client c, ж<Request> Ꮡreq, time.Time deadline) => http_package.sendᴍ(ref c, Ꮡreq, deadline);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time deadline(this ref Client c) => http_package.deadlineᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static RoundTripper transport(this ref Client c) => http_package.transportᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Response> resp, error err) Get(this ж<Client> Ꮡc, @string url) => http_package.Getᴍ(Ꮡc, url);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkRedirect(this ref Client c, ж<Request> req, slice<ж<Request>> via) => http_package.checkRedirectᴍ(ref c, req, via);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Response>, error) Do(this ж<Client> Ꮡc, ж<Request> req) => http_package.Doᴍ(Ꮡc, req);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж<Request> Ꮡreq) => http_package.@doᴍ(Ꮡc, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client> Ꮡc, ж<Request> Ꮡireq) => http_package.makeHeadersCopierᴍ(Ꮡc, Ꮡireq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Response> resp, error err) Post(this ж<Client> Ꮡc, @string url, @string contentType, io.Reader body) => http_package.Postᴍ(Ꮡc, url, contentType, body);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Response> resp, error err) PostForm(this ж<Client> Ꮡc, @string urlΔ1, url.Values data) => http_package.PostFormᴍ(Ꮡc, urlΔ1, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string url) => http_package.Headᴍ(Ꮡc, url);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CloseIdleConnections(this ref Client c) => http_package.CloseIdleConnectionsᴍ(ref c);
+}
+partial class httpᴛcancelTimerBody {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref cancelTimerBody b, slice<byte> p) => http_package.Readᴍ(ref b, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref cancelTimerBody b) => http_package.Closeᴍ(ref b);
+}
+// </GlyphForwarders>

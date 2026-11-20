@@ -29,9 +29,9 @@ internal static void writeUint64(ж<poly1305.MAC> p, nint n) {
     p.Write(buf[..]);
 }
 
-} partial class chacha20poly1305ᴛchacha20poly1305 {
+} partial class chacha20poly1305_package {
 
-internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> sealGenericᴍ(ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     var (ret, @out) = sliceForAppend(dst, len(plaintext) + (nint)poly1305.TagSize);
     var (ciphertext, tag) = (@out.slice(0, len(plaintext)), @out.slice(len(plaintext)));
     if (alias.InexactOverlap(@out, plaintext)) {
@@ -57,7 +57,7 @@ internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte>
     return ret;
 }
 
-internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) openGenericᴍ(ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     var tag = ciphertext.slice(len(ciphertext) - 16);
     ciphertext = ciphertext.slice(0, len(ciphertext) - 16);
 
@@ -91,3 +91,10 @@ internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, sl
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class chacha20poly1305ᴛchacha20poly1305 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => chacha20poly1305_package.sealGenericᴍ(ref c, dst, nonce, plaintext, additionalData);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => chacha20poly1305_package.openGenericᴍ(ref c, dst, nonce, ciphertext, additionalData);
+}
+// </GlyphForwarders>

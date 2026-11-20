@@ -347,9 +347,9 @@ partial struct instanceLookup {
     internal map<ж<Named>, slice<ж<Named>>> m;
 }
 
-} partial class typesᴛinstanceLookup {
+} partial class types_package {
 
-internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> inst) {
+internal static ж<Named> lookupᴍ(ref instanceLookup l, ж<Named> inst) {
     foreach (var (_, t) in range(l.buf.ΔRangeSnapshot())) {
         if (t != nil && Identical(new NamedжType(inst), new NamedжType(t))) {
             return t;
@@ -363,7 +363,7 @@ internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> inst) {
     return default;
 }
 
-internal static void add(this ref instanceLookup l, ж<Named> inst) {
+internal static void addᴍ(ref instanceLookup l, ж<Named> inst) {
     foreach (var (i, t) in range(l.buf.ΔRangeSnapshot())) {
         if (t == nil) {
             l.buf[i] = inst;
@@ -392,7 +392,7 @@ public static (ж<Func> method, bool wrongType) MissingMethod(Type V, ж<Interfa
     return (((ж<Checker>)nil)).missingMethod(V, new InterfaceжType(T), @static, Identical, nil);
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // missingMethod is like MissingMethod but accepts a *Checker as receiver,
 // a comparator equivalent for type comparison, and a *string for error causes.
@@ -403,7 +403,7 @@ public static (ж<Func> method, bool wrongType) MissingMethod(Type V, ж<Interfa
 // lying type) is used for better error messages (reported through *cause).
 // The comparator is used to compare signatures.
 // If a method is missing and cause is not nil, *cause describes the error.
-internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker> Ꮡcheck, Type V, Type T, bool @static, Func<Type, Type, bool> equivalent, ж<@string> Ꮡcause) {
+internal static (ж<Func> method, bool wrongType) missingMethodᴍ(ж<Checker> Ꮡcheck, Type V, Type T, bool @static, Func<Type, Type, bool> equivalent, ж<@string> Ꮡcause) {
     ref var cause = ref Ꮡcause.DerefOrNull();
 
     var methods = T.Underlying()._<ж<Interface>>().typeSet().methods; // T must be an interface
@@ -585,7 +585,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
 // (an embedded field may have the method in question).
 // If the result is false and cause is not nil, *cause describes the error.
 // Use hasAllMethods to avoid follow-on errors due to incorrect types.
-internal static bool hasAllMethods(this ж<Checker> Ꮡcheck, Type V, Type T, bool @static, Func<Type, Type, bool> equivalent, ж<@string> cause) {
+internal static bool hasAllMethodsᴍ(ж<Checker> Ꮡcheck, Type V, Type T, bool @static, Func<Type, Type, bool> equivalent, ж<@string> cause) {
     if (!isValid(V)) {
         return true; // we don't know anything about V, assume it implements T
     }
@@ -617,10 +617,10 @@ internal static bool isInterfacePtr(Type T) {
     return p != nil && IsInterface(p.@base);
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // check may be nil.
-internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, Type T) {
+internal static @string interfacePtrErrorᴍ(ж<Checker> Ꮡcheck, Type T) {
     assert(isInterfacePtr(T));
     var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ); if (isTypeParam(p.@base)) {
         return Ꮡcheck.sprintf("type %s is pointer to type parameter, not type parameter", T);
@@ -630,7 +630,7 @@ internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, Type T) {
 
 // funcString returns a string of the form name + signature for f.
 // check may be nil.
-internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, bool pkgInfo) {
+internal static @string funcStringᴍ(ж<Checker> Ꮡcheck, ж<Func> Ꮡf, bool pkgInfo) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var buf = bytes.NewBufferString(f.name);
@@ -651,7 +651,7 @@ internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, boo
 // The underlying type of V must be an interface.
 // If the result is false and cause is not nil, *cause describes the error.
 // TODO(gri) replace calls to this function with calls to newAssertableTo.
-internal static bool assertableTo(this ж<Checker> Ꮡcheck, Type V, Type T, ж<@string> cause) {
+internal static bool assertableToᴍ(ж<Checker> Ꮡcheck, Type V, Type T, ж<@string> cause) {
     // no static check is required if T is an interface
     // spec: "If T is an interface type, x.(T) asserts that the
     //        dynamic type of x implements the interface T."
@@ -667,7 +667,7 @@ internal static bool assertableTo(this ж<Checker> Ꮡcheck, Type V, Type T, ж<
 // in constraint position (we have not yet defined that behavior in the spec).
 // The underlying type of V must be an interface.
 // If the result is false and cause is not nil, *cause is set to the error cause.
-internal static bool newAssertableTo(this ж<Checker> Ꮡcheck, Type V, Type T, ж<@string> cause) {
+internal static bool newAssertableToᴍ(ж<Checker> Ꮡcheck, Type V, Type T, ж<@string> cause) {
     // no static check is required if T is an interface
     // spec: "If T is an interface type, x.(T) asserts that the
     //        dynamic type of x implements the interface T."
@@ -742,3 +742,18 @@ internal static (nint, ж<Func>) methodIndex(slice<ж<Func>> methods, ж<Package
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛinstanceLookup {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> inst) => types_package.lookupᴍ(ref l, inst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref instanceLookup l, ж<Named> inst) => types_package.addᴍ(ref l, inst);
+}
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker> Ꮡcheck, Type V, Type T, bool @static, Func<Type, Type, bool> equivalent, ж<@string> Ꮡcause) => types_package.missingMethodᴍ(Ꮡcheck, V, T, @static, equivalent, Ꮡcause);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasAllMethods(this ж<Checker> Ꮡcheck, Type V, Type T, bool @static, Func<Type, Type, bool> equivalent, ж<@string> cause) => types_package.hasAllMethodsᴍ(Ꮡcheck, V, T, @static, equivalent, cause);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, Type T) => types_package.interfacePtrErrorᴍ(Ꮡcheck, T);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, bool pkgInfo) => types_package.funcStringᴍ(Ꮡcheck, Ꮡf, pkgInfo);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool assertableTo(this ж<Checker> Ꮡcheck, Type V, Type T, ж<@string> cause) => types_package.assertableToᴍ(Ꮡcheck, V, T, cause);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool newAssertableTo(this ж<Checker> Ꮡcheck, Type V, Type T, ж<@string> cause) => types_package.newAssertableToᴍ(Ꮡcheck, V, T, cause);
+}
+// </GlyphForwarders>

@@ -24,10 +24,10 @@ partial struct serializedFileSet {
     public slice<serializedFile> Files;
 }
 
-} partial class tokenᴛFileSet {
+} partial class token_package {
 
 // Read calls decode to deserialize a file set into s; s must not be nil.
-public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
+internal static error Readᴍ(ж<FileSet> Ꮡs, Func<any, error> decode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var ss = ref heap(new serializedFileSet(), out var Ꮡss);
@@ -53,7 +53,7 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
 }
 
 // Write calls encode to serialize the file set s.
-public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
+internal static error Writeᴍ(ж<FileSet> Ꮡs, Func<any, error> encode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     serializedFileSet ss = default;
@@ -79,3 +79,10 @@ public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tokenᴛFileSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) => token_package.Readᴍ(Ꮡs, decode);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) => token_package.Writeᴍ(Ꮡs, encode);
+}
+// </GlyphForwarders>

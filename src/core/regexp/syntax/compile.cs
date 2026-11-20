@@ -26,9 +26,9 @@ internal static patchList makePatchList(uint32 n) {
     return new patchList(n, n);
 }
 
-} partial class syntaxᴛpatchList {
+} partial class syntax_package {
 
-internal static void patch(this patchList l, ж<Prog> Ꮡp, uint32 val) {
+internal static void patchᴍ(patchList l, ж<Prog> Ꮡp, uint32 val) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var head = l.head;
@@ -44,7 +44,7 @@ internal static void patch(this patchList l, ж<Prog> Ꮡp, uint32 val) {
     }
 }
 
-internal static patchList append(this patchList l1, ж<Prog> Ꮡp, patchList l2) {
+internal static patchList appendᴍ(patchList l1, ж<Prog> Ꮡp, patchList l2) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (l1.head == 0) {
@@ -87,9 +87,9 @@ public static (ж<Prog>, error) Compile(ж<Regexp> re) {
     return (c.p, default);
 }
 
-} partial class syntaxᴛcompiler {
+} partial class syntax_package {
 
-internal static void init(this ref compiler c) {
+internal static void initᴍ(ref compiler c) {
     c.p = @new<Prog>();
     c.p.NumCap = 2; // implicit ( and ) for whole match $0
     c.inst(InstFail);
@@ -100,9 +100,9 @@ internal static void init(this ref compiler c) {
 internal static slice<rune> anyRuneNotNL = [0, (rune)'\n' - 1, (rune)'\n' + 1, unicode.MaxRune];
 internal static slice<rune> anyRune = [0, unicode.MaxRune];
 
-} partial class syntaxᴛcompiler {
+} partial class syntax_package {
 
-internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
+internal static frag compileᴍ(ref compiler c, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     switch (re.Op) {
@@ -193,24 +193,24 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
     throw panic("regexp: unhandled case in compile");
 }
 
-internal static frag inst(this ref compiler c, InstOp op) {
+internal static frag instᴍ(ref compiler c, InstOp op) {
     // TODO: impose length limit
     var f = new frag(i: (uint32)len(c.p.Inst), nullable: true);
     c.p.Inst = append(c.p.Inst, new Inst(Op: op));
     return f;
 }
 
-internal static frag nop(this ref compiler c) {
+internal static frag nopᴍ(ref compiler c) {
     var f = c.inst(InstNop);
     f.@out = makePatchList(f.i << 1);
     return f;
 }
 
-internal static frag fail(this ref compiler c) {
+internal static frag failᴍ(ref compiler c) {
     return new frag();
 }
 
-internal static frag cap(this ref compiler c, uint32 arg) {
+internal static frag capᴍ(ref compiler c, uint32 arg) {
     var f = c.inst(InstCapture);
     f.@out = makePatchList(f.i << 1);
     c.p.Inst[f.i].Arg = arg;
@@ -221,7 +221,7 @@ internal static frag cap(this ref compiler c, uint32 arg) {
     return f;
 }
 
-internal static frag cat(this ref compiler c, frag f1, frag f2) {
+internal static frag catᴍ(ref compiler c, frag f1, frag f2) {
     // concat of failure is failure
     if (f1.i == 0 || f2.i == 0) {
         return new frag();
@@ -233,7 +233,7 @@ internal static frag cat(this ref compiler c, frag f1, frag f2) {
     return new frag(f1.i, f2.@out, f1.nullable && f2.nullable);
 }
 
-internal static frag alt(this ref compiler c, frag f1, frag f2) {
+internal static frag altᴍ(ref compiler c, frag f1, frag f2) {
     // alt of failure is other
     if (f1.i == 0) {
         return f2;
@@ -251,7 +251,7 @@ internal static frag alt(this ref compiler c, frag f1, frag f2) {
     return f;
 }
 
-internal static frag quest(this ref compiler c, frag f1, bool nongreedy) {
+internal static frag questᴍ(ref compiler c, frag f1, bool nongreedy) {
     var f = c.inst(InstAlt);
     var i = Ꮡ(c.p.Inst, f.i);
     if (nongreedy) {
@@ -270,7 +270,7 @@ internal static frag quest(this ref compiler c, frag f1, bool nongreedy) {
 // For star, it can be used directly when f1 can't match an empty string.
 // (When f1 can match an empty string, f1* must be implemented as (f1+)?
 // to get the priority match order correct.)
-internal static frag loop(this ref compiler c, frag f1, bool nongreedy) {
+internal static frag loopᴍ(ref compiler c, frag f1, bool nongreedy) {
     var f = c.inst(InstAlt);
     var i = Ꮡ(c.p.Inst, f.i);
     if (nongreedy) {
@@ -284,7 +284,7 @@ internal static frag loop(this ref compiler c, frag f1, bool nongreedy) {
     return f;
 }
 
-internal static frag star(this ref compiler c, frag f1, bool nongreedy) {
+internal static frag starᴍ(ref compiler c, frag f1, bool nongreedy) {
     if (f1.nullable) {
         // Use (f1+)? to get priority match order correct.
         // See golang.org/issue/46123.
@@ -293,18 +293,18 @@ internal static frag star(this ref compiler c, frag f1, bool nongreedy) {
     return c.loop(f1, nongreedy);
 }
 
-internal static frag plus(this ref compiler c, frag f1, bool nongreedy) {
+internal static frag plusᴍ(ref compiler c, frag f1, bool nongreedy) {
     return new frag(f1.i, c.loop(f1, nongreedy).@out, f1.nullable);
 }
 
-internal static frag empty(this ref compiler c, EmptyOp op) {
+internal static frag emptyᴍ(ref compiler c, EmptyOp op) {
     var f = c.inst(InstEmptyWidth);
     c.p.Inst[f.i].Arg = (uint32)op;
     f.@out = makePatchList(f.i << 1);
     return f;
 }
 
-internal static frag rune(this ref compiler c, slice<rune> r, Flags flags) {
+internal static frag runeᴍ(ref compiler c, slice<rune> r, Flags flags) {
     var f = c.inst(InstRune);
     f.nullable = false;
     var i = Ꮡ(c.p.Inst, f.i);
@@ -336,3 +336,26 @@ internal static frag rune(this ref compiler c, slice<rune> r, Flags flags) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class syntaxᴛpatchList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void patch(this patchList l, ж<Prog> Ꮡp, uint32 val) => syntax_package.patchᴍ(l, Ꮡp, val);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static patchList append(this patchList l1, ж<Prog> Ꮡp, patchList l2) => syntax_package.appendᴍ(l1, Ꮡp, l2);
+}
+partial class syntaxᴛcompiler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref compiler c) => syntax_package.initᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) => syntax_package.compileᴍ(ref c, Ꮡre);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag inst(this ref compiler c, InstOp op) => syntax_package.instᴍ(ref c, op);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag nop(this ref compiler c) => syntax_package.nopᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag fail(this ref compiler c) => syntax_package.failᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag cap(this ref compiler c, uint32 arg) => syntax_package.capᴍ(ref c, arg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag cat(this ref compiler c, frag f1, frag f2) => syntax_package.catᴍ(ref c, f1, f2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag alt(this ref compiler c, frag f1, frag f2) => syntax_package.altᴍ(ref c, f1, f2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag quest(this ref compiler c, frag f1, bool nongreedy) => syntax_package.questᴍ(ref c, f1, nongreedy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag loop(this ref compiler c, frag f1, bool nongreedy) => syntax_package.loopᴍ(ref c, f1, nongreedy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag star(this ref compiler c, frag f1, bool nongreedy) => syntax_package.starᴍ(ref c, f1, nongreedy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag plus(this ref compiler c, frag f1, bool nongreedy) => syntax_package.plusᴍ(ref c, f1, nongreedy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag empty(this ref compiler c, EmptyOp op) => syntax_package.emptyᴍ(ref c, op);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static frag rune(this ref compiler c, slice<rune> r, Flags flags) => syntax_package.runeᴍ(ref c, r, flags);
+}
+// </GlyphForwarders>

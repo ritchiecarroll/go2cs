@@ -40,9 +40,9 @@ private static readonly @string _KeyUsage_name_7ᵇ = "decipherOnly"u8;
 
 internal static array<uint8> _KeyUsage_index_0 = new uint8[]{0, 16, 33}.array();
 
-} partial class x509ᴛKeyUsage {
+} partial class x509_package {
 
-public static @string String(this KeyUsage i) {
+internal static @string Stringᴍ(KeyUsage i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 2: {
         i -= 1;
@@ -101,9 +101,9 @@ private static readonly @string _ExtKeyUsage_nameᵇ = "anyExtendedKeyUsageserve
 
 internal static array<uint8> _ExtKeyUsage_index = new uint8[]{0, 19, 29, 39, 50, 65, 79, 90, 99, 111, 122, 127, 132, 141, 153}.array();
 
-} partial class x509ᴛExtKeyUsage {
+} partial class x509_package {
 
-public static @string String(this ExtKeyUsage i) {
+internal static @string Stringᴍ(ExtKeyUsage i) {
     nint idx = (nint)i - 0;
     if (i < 0 || idx >= len(_ExtKeyUsage_index) - 1) {
         return "ExtKeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
@@ -112,3 +112,12 @@ public static @string String(this ExtKeyUsage i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class x509ᴛKeyUsage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this KeyUsage i) => x509_package.Stringᴍ(i);
+}
+partial class x509ᴛExtKeyUsage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ExtKeyUsage i) => x509_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

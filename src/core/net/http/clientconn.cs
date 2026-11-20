@@ -93,7 +93,7 @@ partial interface genericClientConn :
     nint InFlight();
 }
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpNewClientConnˢ => ref httpNewClientConnˢᵇ;
@@ -119,7 +119,7 @@ private static readonly @string httpNewClientConnˢᵇ = "http: NewClientConn re
 // It does not count against the MaxIdleConns and MaxConnsPerHost limits.
 //
 // The caller is responsible for closing the new connection.
-public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, context.Context ctx, @string scheme, @string address) {
+internal static (ж<ClientConn>, error) NewClientConnᴍ(ж<Transport> Ꮡt, context.Context ctx, @string scheme, @string address) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -217,11 +217,11 @@ public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, con
     finally { ᒐ.Run(); }
 }
 
-} partial class httpᴛClientConn {
+} partial class http_package {
 
 // Close closes the connection.
 // Outstanding RoundTrip calls are interrupted.
-public static error Close(this ж<ClientConn> Ꮡcc) {
+internal static error Closeᴍ(ж<ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -236,7 +236,7 @@ public static error Close(this ж<ClientConn> Ꮡcc) {
 // Err reports any fatal connection errors.
 // It returns nil if the connection is usable.
 // If it returns non-nil, the connection can no longer be used.
-public static error Err(this ref ClientConn cc) {
+internal static error Errᴍ(ref ClientConn cc) {
     return cc.cc.Err();
 }
 
@@ -276,7 +276,7 @@ internal static error validateClientConnRequest(ref Request req) {
     return default;
 }
 
-} partial class httpᴛClientConn {
+} partial class http_package {
 
 // RoundTrip implements the [RoundTripper] interface.
 //
@@ -286,7 +286,7 @@ internal static error validateClientConnRequest(ref Request req) {
 // If the connection is at its concurrency limit,
 // RoundTrip waits for the connection to become available
 // before sending the request.
-public static (ж<Response>, error) RoundTrip(this ж<ClientConn> Ꮡcc, ж<Request> req) {
+internal static (ж<Response>, error) RoundTripᴍ(ж<ClientConn> Ꮡcc, ж<Request> req) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -305,14 +305,14 @@ public static (ж<Response>, error) RoundTrip(this ж<ClientConn> Ꮡcc, ж<Requ
 // Available reports the number of requests that may be sent
 // to the connection without blocking.
 // It returns 0 if the connection is closed.
-public static nint Available(this ref ClientConn cc) {
+internal static nint Availableᴍ(ref ClientConn cc) {
     return cc.cc.Available();
 }
 
 // InFlight reports the number of requests in flight,
 // including reserved requests.
 // It returns 0 if the connection is closed.
-public static nint InFlight(this ref ClientConn cc) {
+internal static nint InFlightᴍ(ref ClientConn cc) {
     return cc.cc.InFlight();
 }
 
@@ -329,7 +329,7 @@ public static nint InFlight(this ref ClientConn cc) {
 //
 // If the connection is closed or at its concurrency limit,
 // Reserve returns an error.
-public static error Reserve(this ж<ClientConn> Ꮡcc) {
+internal static error Reserveᴍ(ж<ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -343,7 +343,7 @@ public static error Reserve(this ж<ClientConn> Ꮡcc) {
 
 // Release releases an unused concurrency slot reserved by Reserve.
 // If there are no reserved concurrency slots, it has no effect.
-public static void Release(this ж<ClientConn> Ꮡcc) {
+internal static void Releaseᴍ(ж<ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -357,7 +357,7 @@ public static void Release(this ж<ClientConn> Ꮡcc) {
 
 // shouldRunStateHook returns the user's state hook if we should call it,
 // or nil if we don't need to call it at this time.
-internal static Action<ж<ClientConn>> shouldRunStateHook(this ж<ClientConn> Ꮡcc, bool stopRunning) {
+internal static Action<ж<ClientConn>> shouldRunStateHookᴍ(ж<ClientConn> Ꮡcc, bool stopRunning) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -394,7 +394,7 @@ internal static Action<ж<ClientConn>> shouldRunStateHook(this ж<ClientConn> �
     finally { if (ᒐd1) Ꮡcc.DerefOrNull().stateHookMu.Unlock(); ᒐ.Run(); }
 }
 
-internal static partial void maybeRunStateHook(this ж<ClientConn> Ꮡcc) {
+internal static partial void maybeRunStateHookᴍ(ж<ClientConn> Ꮡcc) {
     ref var hook = ref heap<Action<ж<ClientConn>>>(Ꮡcc.shouldRunStateHook(false), out var Ꮡhook);
     if (hook == nil) {
         return;
@@ -433,7 +433,7 @@ internal static partial void maybeRunStateHook(this ж<ClientConn> Ꮡcc) {
 // f is called when Available increases (more requests may be sent on the connection),
 // InFlight decreases (existing requests complete), or Err begins returning non-nil
 // (the connection is no longer usable).
-public static void SetStateHook(this ж<ClientConn> Ꮡcc, Action<ж<ClientConn>> f) {
+internal static void SetStateHookᴍ(ж<ClientConn> Ꮡcc, Action<ж<ClientConn>> f) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     cc.stateHookMu.Lock();
@@ -450,9 +450,9 @@ partial struct http1ClientConn {
     internal ж<persistConn> pconn;
 }
 
-} partial class httpᴛhttp1ClientConn {
+} partial class http_package {
 
-internal static partial (ж<Response>, error) RoundTrip(this http1ClientConn cc, ж<Request> Ꮡreq) {
+internal static partial (ж<Response>, error) RoundTripᴍ(http1ClientConn cc, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var ctx = req.Context();
@@ -477,12 +477,12 @@ internal static partial (ж<Response>, error) RoundTrip(this http1ClientConn cc,
 internal static ref readonly @string clientConnClosedˢ => ref clientConnClosedˢᵇ;
 private static readonly @string clientConnClosedˢᵇ = "ClientConn closed"u8;
 
-internal static error Close(this http1ClientConn cc) {
+internal static error Closeᴍ(http1ClientConn cc) {
     cc.pconn.close(errors.New(clientConnClosedˢ));
     return default;
 }
 
-internal static error Err(this http1ClientConn cc) {
+internal static error Errᴍ(http1ClientConn cc) {
     var selᴛ4 = cc.pconn.closech;
     switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out _): {
@@ -493,7 +493,7 @@ internal static error Err(this http1ClientConn cc) {
     }}
 }
 
-internal static nint Available(this http1ClientConn cc) {
+internal static nint Availableᴍ(http1ClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.pconn.Ꮡmu.Lock();
@@ -508,7 +508,7 @@ internal static nint Available(this http1ClientConn cc) {
     finally { ᒐ.Run(); }
 }
 
-internal static nint InFlight(this http1ClientConn cc) {
+internal static nint InFlightᴍ(http1ClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.pconn.Ꮡmu.Lock();
@@ -527,7 +527,7 @@ internal static nint InFlight(this http1ClientConn cc) {
 internal static ref readonly @string connectionIsUnavailableˢ => ref connectionIsUnavailableˢᵇ;
 private static readonly @string connectionIsUnavailableˢᵇ = "connection is unavailable"u8;
 
-internal static error Reserve(this http1ClientConn cc) {
+internal static error Reserveᴍ(http1ClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.pconn.Ꮡmu.Lock();
@@ -551,7 +551,7 @@ internal static error Reserve(this http1ClientConn cc) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Release(this http1ClientConn cc) {
+internal static void Releaseᴍ(http1ClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.pconn.Ꮡmu.Lock();
@@ -575,3 +575,30 @@ internal static void Release(this http1ClientConn cc) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛTransport {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, context.Context ctx, @string scheme, @string address) => http_package.NewClientConnᴍ(Ꮡt, ctx, scheme, address);
+}
+partial class httpᴛClientConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<ClientConn> Ꮡcc) => http_package.Closeᴍ(Ꮡcc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Err(this ref ClientConn cc) => http_package.Errᴍ(ref cc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Response>, error) RoundTrip(this ж<ClientConn> Ꮡcc, ж<Request> req) => http_package.RoundTripᴍ(Ꮡcc, req);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Available(this ref ClientConn cc) => http_package.Availableᴍ(ref cc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint InFlight(this ref ClientConn cc) => http_package.InFlightᴍ(ref cc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Reserve(this ж<ClientConn> Ꮡcc) => http_package.Reserveᴍ(Ꮡcc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Release(this ж<ClientConn> Ꮡcc) => http_package.Releaseᴍ(Ꮡcc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Action<ж<ClientConn>> shouldRunStateHook(this ж<ClientConn> Ꮡcc, bool stopRunning) => http_package.shouldRunStateHookᴍ(Ꮡcc, stopRunning);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void maybeRunStateHook(this ж<ClientConn> Ꮡcc) => http_package.maybeRunStateHookᴍ(Ꮡcc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetStateHook(this ж<ClientConn> Ꮡcc, Action<ж<ClientConn>> f) => http_package.SetStateHookᴍ(Ꮡcc, f);
+}
+partial class httpᴛhttp1ClientConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) RoundTrip(this http1ClientConn cc, ж<Request> Ꮡreq) => http_package.RoundTripᴍ(cc, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this http1ClientConn cc) => http_package.Closeᴍ(cc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this http1ClientConn cc) => http_package.Errᴍ(cc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Available(this http1ClientConn cc) => http_package.Availableᴍ(cc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint InFlight(this http1ClientConn cc) => http_package.InFlightᴍ(cc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Reserve(this http1ClientConn cc) => http_package.Reserveᴍ(cc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Release(this http1ClientConn cc) => http_package.Releaseᴍ(cc);
+}
+// </GlyphForwarders>

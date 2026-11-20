@@ -365,9 +365,9 @@ partial struct TagPathError {
     public @string Field2, Tag2;
 }
 
-} partial class xmlᴛTagPathError {
+} partial class xml_package {
 
-public static @string Error(this ref TagPathError e) {
+internal static @string Errorᴍ(ref TagPathError e) {
     return fmt.Sprintf("%s field %q with tag %q conflicts with field %q with tag %q"u8, e.Struct, e.Field1, e.Tag1, e.Field2, e.Tag2);
 }
 
@@ -376,14 +376,14 @@ public static @string Error(this ref TagPathError e) {
 internal const bool initNilPointers = true;
 internal const bool dontInitNilPointers = false;
 
-} partial class xmlᴛfieldInfo {
+} partial class xml_package {
 
 // value returns v's field value corresponding to finfo.
 // It's equivalent to v.FieldByIndex(finfo.idx), but when passed
 // initNilPointers, it initializes and dereferences pointers as necessary.
 // When passed dontInitNilPointers and a nil pointer is reached, the function
 // returns a zero reflect.Value.
-internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) {
+internal static reflect.Value valueᴍ(ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) {
     foreach (var (i, x) in range(finfo.idx)) {
         if (i > 0) {
             var t = v.Type();
@@ -403,3 +403,12 @@ internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, b
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class xmlᴛTagPathError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref TagPathError e) => xml_package.Errorᴍ(ref e);
+}
+partial class xmlᴛfieldInfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) => xml_package.valueᴍ(ref finfo, v, shouldInitNilPointers);
+}
+// </GlyphForwarders>

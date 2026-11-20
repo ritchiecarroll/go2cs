@@ -45,9 +45,9 @@ private static readonly @string _SignatureScheme_name_8ᵇ = "PSSWithSHA256PSSWi
 
 internal static array<uint8> _SignatureScheme_index_8 = new uint8[]{0, 13, 26, 39, 46}.array();
 
-} partial class tlsᴛSignatureScheme {
+} partial class tls_package {
 
-public static @string String(this SignatureScheme i) {
+internal static @string Stringᴍ(SignatureScheme i) {
     switch (ᐧ) {
     case {} when i == 513: {
         return _SignatureScheme_name_0;
@@ -107,9 +107,9 @@ private static readonly @string _CurveID_name_2ᵇ = "SecP256r1MLKEM768X25519MLK
 internal static array<uint8> _CurveID_index_0 = new uint8[]{0, 9, 18, 27}.array();
 internal static array<uint8> _CurveID_index_2 = new uint8[]{0, 17, 31, 49}.array();
 
-} partial class tlsᴛCurveID {
+} partial class tls_package {
 
-public static @string String(this CurveID i) {
+internal static @string Stringᴍ(CurveID i) {
     switch (ᐧ) {
     case {} when 23 <= i && i <= 25: {
         i -= 23;
@@ -145,9 +145,9 @@ private static readonly @string _ClientAuthType_nameᵇ = "NoClientCertRequestCl
 
 internal static array<uint8> _ClientAuthType_index = new uint8[]{0, 12, 29, 49, 72, 98}.array();
 
-} partial class tlsᴛClientAuthType {
+} partial class tls_package {
 
-public static @string String(this ClientAuthType i) {
+internal static @string Stringᴍ(ClientAuthType i) {
     if (i < 0 || i >= ((ClientAuthType)(len(_ClientAuthType_index) - 1))) {
         return "ClientAuthType("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -155,3 +155,15 @@ public static @string String(this ClientAuthType i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tlsᴛSignatureScheme {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SignatureScheme i) => tls_package.Stringᴍ(i);
+}
+partial class tlsᴛCurveID {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CurveID i) => tls_package.Stringᴍ(i);
+}
+partial class tlsᴛClientAuthType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ClientAuthType i) => tls_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

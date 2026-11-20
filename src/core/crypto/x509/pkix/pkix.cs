@@ -38,11 +38,11 @@ partial struct RDNSequence /*[]RelativeDistinguishedNameSET*/;
     ["2.5.4.17"] = "POSTALCODE"
 }; }
 
-} partial class pkixᴛRDNSequence {
+} partial class pkix_package {
 
 // String returns a string representation of the sequence r,
 // roughly following the RFC 2253 Distinguished Names syntax.
-public static @string String(this RDNSequence r) {
+internal static @string Stringᴍ(RDNSequence r) {
     var escapedᴷ = new stackAppend<rune>();
 
     @string s = ""u8;
@@ -148,12 +148,12 @@ partial struct Name {
     public slice<AttributeTypeAndValue> ExtraNames;
 }
 
-} partial class pkixᴛName {
+} partial class pkix_package {
 
 // FillFromRDNSequence populates n from the provided [RDNSequence].
 // Multi-entry RDNs are flattened, all entries are added to the
 // relevant n fields, and the grouping is not preserved.
-public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns) {
+internal static void FillFromRDNSequenceᴍ(ref Name n, ж<RDNSequence> Ꮡrdns) {
     ref var rdns = ref Ꮡrdns.DerefOrNull();
 
     foreach (var (_, rdn) in range<RelativeDistinguishedNameSET>(rdns)) {
@@ -224,13 +224,13 @@ internal static slice<nint> oidProvince = [2, 5, 4, 8];
 internal static slice<nint> oidStreetAddress = [2, 5, 4, 9];
 internal static slice<nint> oidPostalCode = [2, 5, 4, 17];
 
-} partial class pkixᴛName {
+} partial class pkix_package {
 
 // appendRDNs appends a relativeDistinguishedNameSET to the given RDNSequence
 // and returns the new value. The relativeDistinguishedNameSET contains an
 // attributeTypeAndValue for each of the given values. See RFC 5280, A.1, and
 // search for AttributeTypeAndValue.
-internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@string> values, asn1.ObjectIdentifier oid) {
+internal static RDNSequence appendRDNsᴍ(Name n, RDNSequence @in, slice<@string> values, asn1.ObjectIdentifier oid) {
     if (len(values) == 0 || oidInAttributeTypeAndValue(oid, n.ExtraNames)) {
         return @in;
     }
@@ -256,7 +256,7 @@ internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@stri
 //   - PostalCode
 //
 // Each ExtraNames entry is encoded as an individual RDN.
-public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
+internal static RDNSequence /*ret*/ ToRDNSequenceᴍ(Name n) {
     RDNSequence ret = default;
 
     ret = n.appendRDNs(ret, n.Country, oidCountry);
@@ -281,7 +281,7 @@ public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
 
 // String returns the string form of n, roughly following
 // the RFC 2253 Distinguished Names syntax.
-public static @string String(this Name n) {
+internal static @string Stringᴍ(Name n) {
     var rdnsᴷ = new stackAppend<RelativeDistinguishedNameSET>();
 
     RDNSequence rdns = default;
@@ -331,10 +331,10 @@ partial struct CertificateList {
     public asn1.BitString SignatureValue;
 }
 
-} partial class pkixᴛCertificateList {
+} partial class pkix_package {
 
 // HasExpired reports whether certList should have been updated by now.
-public static bool HasExpired(this ref CertificateList certList, time.Time now) {
+internal static bool HasExpiredᴍ(ref CertificateList certList, time.Time now) {
     return !now.Before(certList.TBSCertList.NextUpdate);
 }
 
@@ -364,3 +364,18 @@ partial struct RevokedCertificate {
 }
 
 } // end pkix_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pkixᴛRDNSequence {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RDNSequence r) => pkix_package.Stringᴍ(r);
+}
+partial class pkixᴛName {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns) => pkix_package.FillFromRDNSequenceᴍ(ref n, Ꮡrdns);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@string> values, asn1.ObjectIdentifier oid) => pkix_package.appendRDNsᴍ(n, @in, values, oid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static RDNSequence /*ret*/ ToRDNSequence(this Name n) => pkix_package.ToRDNSequenceᴍ(n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Name n) => pkix_package.Stringᴍ(n);
+}
+partial class pkixᴛCertificateList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasExpired(this ref CertificateList certList, time.Time now) => pkix_package.HasExpiredᴍ(ref certList, now);
+}
+// </GlyphForwarders>

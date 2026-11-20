@@ -24,9 +24,9 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
     return default;
 }
 
-} partial class netᴛTCPAddr {
+} partial class net_package {
 
-internal static nint family(this ж<TCPAddr> Ꮡa) {
+internal static nint familyᴍ(ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
@@ -38,7 +38,7 @@ internal static nint family(this ж<TCPAddr> Ꮡa) {
     return syscall.AF_INET6;
 }
 
-internal static (syscall.Sockaddr, error) sockaddr(this ж<TCPAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<TCPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -47,13 +47,13 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<TCPAddr> Ꮡa, nint f
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
 
-internal static sockaddr toLocal(this ref TCPAddr a, @string net) {
+internal static sockaddr toLocalᴍ(ref TCPAddr a, @string net) {
     return new TCPAddrжsockaddr(Ꮡ(new TCPAddr(loopbackIP(net), a.Port, a.Zone)));
 }
 
-} partial class netᴛTCPConn {
+} partial class net_package {
 
-internal static (int64, error) readFrom(this ж<TCPConn> Ꮡc, Δio.Reader r) {
+internal static (int64, error) readFromᴍ(ж<TCPConn> Ꮡc, Δio.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
@@ -69,7 +69,7 @@ internal static (int64, error) readFrom(this ж<TCPConn> Ꮡc, Δio.Reader r) {
     return genericReadFrom(Ꮡc, r);
 }
 
-internal static (int64, error) writeTo(this ж<TCPConn> Ꮡc, Δio.Writer w) {
+internal static (int64, error) writeToᴍ(ж<TCPConn> Ꮡc, Δio.Writer w) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (n, err, handled) = spliceTo(w, c.fd); if (handled) {
@@ -78,9 +78,9 @@ internal static (int64, error) writeTo(this ж<TCPConn> Ꮡc, Δio.Writer w) {
     return genericWriteTo(Ꮡc, w);
 }
 
-} partial class netᴛsysDialer {
+} partial class net_package {
 
-internal static (ж<TCPConn>, error) dialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+internal static (ж<TCPConn>, error) dialTCPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     {
@@ -96,11 +96,11 @@ internal static (ж<TCPConn>, error) dialTCP(this ж<sysDialer> Ꮡsd, context.C
     return Ꮡsd.doDialTCP(ctx, laddr, raddr);
 }
 
-internal static (ж<TCPConn>, error) doDialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+internal static (ж<TCPConn>, error) doDialTCPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     return Ꮡsd.doDialTCPProto(ctx, laddr, raddr, 0);
 }
 
-internal static (ж<TCPConn>, error) doDialTCPProto(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> raddr, nint proto) {
+internal static (ж<TCPConn>, error) doDialTCPProtoᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> raddr, nint proto) {
     ref var sd = ref Ꮡsd.DerefOrNull();
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
@@ -181,15 +181,15 @@ internal static bool spuriousENOTAVAIL(error err) {
     return AreEqual(err, syscall.EADDRNOTAVAIL);
 }
 
-} partial class netᴛTCPListener {
+} partial class net_package {
 
-internal static bool ok(this ж<TCPListener> Ꮡln) {
+internal static bool okᴍ(ж<TCPListener> Ꮡln) {
     ref var ln = ref Ꮡln.DerefOrNull();
 
     return Ꮡln != nil && ln.fd != nil;
 }
 
-internal static (ж<TCPConn>, error) accept(this ref TCPListener ln) {
+internal static (ж<TCPConn>, error) acceptᴍ(ref TCPListener ln) {
     var (fd, err) = ln.fd.accept();
     if (err != nil) {
         return (default, err);
@@ -197,11 +197,11 @@ internal static (ж<TCPConn>, error) accept(this ref TCPListener ln) {
     return (newTCPConn(fd, ln.lc.KeepAlive, ln.lc.KeepAliveConfig, testPreHookSetKeepAlive, testHookSetKeepAlive), default);
 }
 
-internal static error close(this ref TCPListener ln) {
+internal static error closeᴍ(ref TCPListener ln) {
     return ln.fd.Close();
 }
 
-internal static (ж<os.File>, error) @file(this ref TCPListener ln) {
+internal static (ж<os.File>, error) @fileᴍ(ref TCPListener ln) {
     var (f, err) = ln.fd.dup();
     if (err != nil) {
         return (default, err);
@@ -209,13 +209,13 @@ internal static (ж<os.File>, error) @file(this ref TCPListener ln) {
     return (f, default);
 }
 
-} partial class netᴛsysListener {
+} partial class net_package {
 
-internal static (ж<TCPListener>, error) listenTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
+internal static (ж<TCPListener>, error) listenTCPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
     return Ꮡsl.listenTCPProto(ctx, laddr, 0);
 }
 
-internal static (ж<TCPListener>, error) listenTCPProto(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr, nint proto) {
+internal static (ж<TCPListener>, error) listenTCPProtoᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr, nint proto) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
@@ -230,3 +230,30 @@ internal static (ж<TCPListener>, error) listenTCPProto(this ж<sysListener> Ꮡ
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛTCPAddr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint family(this ж<TCPAddr> Ꮡa) => net_package.familyᴍ(Ꮡa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (syscall.Sockaddr, error) sockaddr(this ж<TCPAddr> Ꮡa, nint family) => net_package.sockaddrᴍ(Ꮡa, family);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sockaddr toLocal(this ref TCPAddr a, @string net) => net_package.toLocalᴍ(ref a, net);
+}
+partial class netᴛTCPConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) readFrom(this ж<TCPConn> Ꮡc, Δio.Reader r) => net_package.readFromᴍ(Ꮡc, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) writeTo(this ж<TCPConn> Ꮡc, Δio.Writer w) => net_package.writeToᴍ(Ꮡc, w);
+}
+partial class netᴛsysDialer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<TCPConn>, error) dialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) => net_package.dialTCPᴍ(Ꮡsd, ctx, laddr, raddr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<TCPConn>, error) doDialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) => net_package.doDialTCPᴍ(Ꮡsd, ctx, laddr, raddr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<TCPConn>, error) doDialTCPProto(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> raddr, nint proto) => net_package.doDialTCPProtoᴍ(Ꮡsd, ctx, Ꮡladdr, raddr, proto);
+}
+partial class netᴛTCPListener {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool ok(this ж<TCPListener> Ꮡln) => net_package.okᴍ(Ꮡln);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<TCPConn>, error) accept(this ref TCPListener ln) => net_package.acceptᴍ(ref ln);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ref TCPListener ln) => net_package.closeᴍ(ref ln);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<os.File>, error) @file(this ref TCPListener ln) => net_package.@fileᴍ(ref ln);
+}
+partial class netᴛsysListener {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<TCPListener>, error) listenTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) => net_package.listenTCPᴍ(Ꮡsl, ctx, laddr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<TCPListener>, error) listenTCPProto(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr, nint proto) => net_package.listenTCPProtoᴍ(Ꮡsl, ctx, laddr, proto);
+}
+// </GlyphForwarders>

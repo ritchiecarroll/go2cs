@@ -24,7 +24,7 @@ internal static uint32 absInt32(int32 i) {
     return (uint32)i;
 }
 
-} partial class randᴛRand {
+} partial class rand_package {
 
 // NormFloat64 returns a normally distributed float64 in
 // the range -[math.MaxFloat64] through +[math.MaxFloat64] inclusive,
@@ -33,7 +33,7 @@ internal static uint32 absInt32(int32 i) {
 // adjust the output using:
 //
 //	sample = NormFloat64() * desiredStdDev + desiredMean
-public static float64 NormFloat64(this ref Rand r) {
+internal static float64 NormFloat64ᴍ(ref Rand r) {
     for (;;) {
         var j = (int32)r.Uint32(); // Possibly negative
         var i = j & 0x7F;
@@ -157,3 +157,9 @@ public static float64 NormFloat64(this ref Rand r) {
 }.array(); }
 
 } // end rand_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class randᴛRand {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 NormFloat64(this ref Rand r) => rand_package.NormFloat64ᴍ(ref r);
+}
+// </GlyphForwarders>

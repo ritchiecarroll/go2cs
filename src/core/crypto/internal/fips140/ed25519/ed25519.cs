@@ -31,21 +31,21 @@ partial struct PrivateKey {
     internal array<byte> prefix = new(sha512Size / 2);
 }
 
-} partial class ed25519ᴛPrivateKey {
+} partial class ed25519_package {
 
-public static slice<byte> Bytes(this ref PrivateKey priv) {
+internal static slice<byte> Bytesᴍ(ref PrivateKey priv) {
     var k = new slice<byte>(0, privateKeySize);
     k = appendꓸꓸꓸ(k, priv.seed[..]);
     k = appendꓸꓸꓸ(k, priv.pub[..]);
     return k;
 }
 
-public static slice<byte> Seed(this ref PrivateKey priv) {
+internal static slice<byte> Seedᴍ(ref PrivateKey priv) {
     var seed = priv.seed.Clone();
     return seed[..];
 }
 
-public static slice<byte> PublicKey(this ref PrivateKey priv) {
+internal static slice<byte> PublicKeyᴍ(ref PrivateKey priv) {
     var pub = priv.pub.Clone();
     return pub[..];
 }
@@ -57,9 +57,9 @@ partial struct PublicKey {
     internal array<byte> aBytes = new(32);
 }
 
-} partial class ed25519ᴛPublicKey {
+} partial class ed25519_package {
 
-public static slice<byte> Bytes(this ref PublicKey pub) {
+internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
     var a = pub.aBytes.Clone();
     return a[..];
 }
@@ -369,3 +369,14 @@ internal static error verifyWithDom(ж<PublicKey> Ꮡpub, slice<byte> message, s
 }
 
 } // end ed25519_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class ed25519ᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ed25519_package.Bytesᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seed(this ref PrivateKey priv) => ed25519_package.Seedᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> PublicKey(this ref PrivateKey priv) => ed25519_package.PublicKeyᴍ(ref priv);
+}
+partial class ed25519ᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ed25519_package.Bytesᴍ(ref pub);
+}
+// </GlyphForwarders>

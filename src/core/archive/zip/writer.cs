@@ -49,13 +49,13 @@ public static ж<Writer> NewWriter(io.Writer w) {
     return Ꮡ(new Writer(cw: Ꮡ(new countWriter(w: new bufio_WriterжWriter(bufio.NewWriter(w))))));
 }
 
-} partial class zipᴛWriter {
+} partial class zip_package {
 
 // SetOffset sets the offset of the beginning of the zip data within the
 // underlying writer. It should be used when the zip data is appended to an
 // existing file, such as a binary executable.
 // It must be called before any data is written.
-public static void SetOffset(this ref Writer w, int64 n) {
+internal static void SetOffsetᴍ(ref Writer w, int64 n) {
     if (w.cw.count != 0) {
         throw panic("zip: SetOffset called after data was written");
     }
@@ -64,7 +64,7 @@ public static void SetOffset(this ref Writer w, int64 n) {
 
 // Flush flushes any buffered data to the underlying writer.
 // Calling Flush is not normally necessary; calling Close is sufficient.
-public static error Flush(this ref Writer w) {
+internal static error Flushᴍ(ref Writer w) {
     return w.cw.w._<ж<bufio.Writer>>().Flush();
 }
 
@@ -74,7 +74,7 @@ private static readonly @string zipWriterCommentTooLongˢᵇ = "zip: Writer.Comm
 
 // SetComment sets the end-of-central-directory comment field.
 // It can only be called before [Writer.Close].
-public static error SetComment(this ref Writer w, @string comment) {
+internal static error SetCommentᴍ(ref Writer w, @string comment) {
     if (len(comment) > uint16max) {
         return errors.New(zipWriterCommentTooLongˢ);
     }
@@ -88,7 +88,7 @@ private static readonly @string zipWriterClosedTwiceˢᵇ = "zip: writer closed 
 
 // Close finishes writing the zip file by writing the central directory.
 // It does not close the underlying writer.
-public static error Close(this ref Writer w) {
+internal static error Closeᴍ(ref Writer w) {
     if (w.last != nil && !w.last.closed) {
         var err = w.last.close(); if (err != nil) {
             return err;
@@ -242,7 +242,7 @@ public static error Close(this ref Writer w) {
 // and are appended to the zip file.
 // The file's contents must be written to the [io.Writer] before the next
 // call to [Writer.Create], [Writer.CreateHeader], or [Writer.Close].
-public static (io.Writer, error) Create(this ref Writer w, @string name) {
+internal static (io.Writer, error) Createᴍ(ref Writer w, @string name) {
     var header = Ꮡ(new FileHeader(
         Name: name,
         Method: Deflate
@@ -277,7 +277,7 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
     return (true, require);
 }
 
-} partial class zipᴛWriter {
+} partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string archiveZipInvalidˢ => ref archiveZipInvalidˢᵇ;
@@ -285,7 +285,7 @@ private static readonly @string archiveZipInvalidˢᵇ = "archive/zip: invalid d
 
 // prepare performs the bookkeeping operations required at the start of
 // CreateHeader and CreateRaw.
-internal static error prepare(this ref Writer w, ж<FileHeader> fh) {
+internal static error prepareᴍ(ref Writer w, ж<FileHeader> fh) {
     if (w.last != nil && !w.last.closed) {
         var err = w.last.close(); if (err != nil) {
             return err;
@@ -305,7 +305,7 @@ internal static error prepare(this ref Writer w, ж<FileHeader> fh) {
 // This returns a [Writer] to which the file contents should be written.
 // The file's contents must be written to the io.Writer before the next
 // call to [Writer.Create], [Writer.CreateHeader], [Writer.CreateRaw], or [Writer.Close].
-public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> Ꮡfh) {
+internal static (io.Writer, error) CreateHeaderᴍ(ref Writer w, ж<FileHeader> Ꮡfh) {
     ref var fh = ref Ꮡfh.DerefOrNull();
 
     {
@@ -474,7 +474,7 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     return err;
 }
 
-} partial class zipᴛWriter {
+} partial class zip_package {
 
 // CreateRaw adds a file to the zip archive using the provided [FileHeader] and
 // returns a [Writer] to which the file contents should be written. The file's
@@ -486,7 +486,7 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 // CreateRaw's argument is stored in w. If the argument is a pointer to the embedded
 // [FileHeader] in a [File] obtained from a [Reader] created from in-memory data,
 // then w will refer to all of that memory.
-public static (io.Writer, error) CreateRaw(this ref Writer w, ж<FileHeader> Ꮡfh) {
+internal static (io.Writer, error) CreateRawᴍ(ref Writer w, ж<FileHeader> Ꮡfh) {
     ref var fh = ref Ꮡfh.DerefOrNull();
 
     {
@@ -525,7 +525,7 @@ public static (io.Writer, error) CreateRaw(this ref Writer w, ж<FileHeader> Ꮡ
 
 // Copy copies the file f (obtained from a [Reader]) into w. It copies the raw
 // form directly bypassing decompression, compression, and validation.
-public static error Copy(this ref Writer w, ж<File> Ꮡf) {
+internal static error Copyᴍ(ref Writer w, ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var (r, err) = f.OpenRaw();
@@ -546,7 +546,7 @@ public static error Copy(this ref Writer w, ж<File> Ꮡf) {
 // RegisterCompressor registers or overrides a custom compressor for a specific
 // method ID. If a compressor for a given method is not found, [Writer] will
 // default to looking up the compressor at the package level.
-public static void RegisterCompressor(this ref Writer w, uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
+internal static void RegisterCompressorᴍ(ref Writer w, uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
     if (w.compressors == nil) {
         w.compressors = new map<uint16, Func<io.Writer, (io.WriteCloser, error)>>();
     }
@@ -560,7 +560,7 @@ private static readonly @string zipCannotAddNonRegularˢᵇ = "zip: cannot add n
 // AddFS adds the files from fs.FS to the archive.
 // It walks the directory tree starting at the root of the filesystem
 // adding each file to the zip using deflate while maintaining the directory structure.
-public static error AddFS(this ж<Writer> Ꮡw, fs.FS fsys) {
+internal static error AddFSᴍ(ж<Writer> Ꮡw, fs.FS fsys) {
     return fs.WalkDir(fsys, ".", error (@string name, fs.DirEntry d, error err) => {
         GoFrame ᒐ = default;
         try {
@@ -607,7 +607,7 @@ public static error AddFS(this ж<Writer> Ꮡw, fs.FS fsys) {
     });
 }
 
-internal static Func<io.Writer, (io.WriteCloser, error)> compressor(this ref Writer w, uint16 method) {
+internal static Func<io.Writer, (io.WriteCloser, error)> compressorᴍ(ref Writer w, uint16 method) {
     var comp = w.compressors[method];
     if (comp == nil) {
         comp = zip.compressor(method);
@@ -620,13 +620,13 @@ internal static Func<io.Writer, (io.WriteCloser, error)> compressor(this ref Wri
 partial struct dirWriter {
 }
 
-} partial class zipᴛdirWriter {
+} partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string zipWriteToDirectoryˢ => ref zipWriteToDirectoryˢᵇ;
 private static readonly @string zipWriteToDirectoryˢᵇ = "zip: write to directory"u8;
 
-internal static (nint, error) Write(this dirWriter _, slice<byte> b) {
+internal static (nint, error) Writeᴍ(dirWriter _, slice<byte> b) {
     if (len(b) == 0) {
         return (0, default);
     }
@@ -645,13 +645,13 @@ partial struct fileWriter {
     internal bool closed;
 }
 
-} partial class zipᴛfileWriter {
+} partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string zipWriteToClosedFileˢ => ref zipWriteToClosedFileˢᵇ;
 private static readonly @string zipWriteToClosedFileˢᵇ = "zip: write to closed file"u8;
 
-internal static (nint, error) Write(this ref fileWriter w, slice<byte> p) {
+internal static (nint, error) Writeᴍ(ref fileWriter w, slice<byte> p) {
     if (w.closed) {
         return (0, errors.New(zipWriteToClosedFileˢ));
     }
@@ -666,7 +666,7 @@ internal static (nint, error) Write(this ref fileWriter w, slice<byte> p) {
 internal static ref readonly @string zipFileClosedTwiceˢ => ref zipFileClosedTwiceˢᵇ;
 private static readonly @string zipFileClosedTwiceˢᵇ = "zip: file closed twice"u8;
 
-internal static error close(this ref fileWriter w) {
+internal static error closeᴍ(ref fileWriter w) {
     if (w.closed) {
         return errors.New(zipFileClosedTwiceˢ);
     }
@@ -696,7 +696,7 @@ internal static error close(this ref fileWriter w) {
     return w.writeDataDescriptor();
 }
 
-internal static error writeDataDescriptor(this ref fileWriter w) {
+internal static error writeDataDescriptorᴍ(ref fileWriter w) {
     if (!w.hasDataDescriptor()) {
         return default;
     }
@@ -732,9 +732,9 @@ partial struct countWriter {
     internal int64 count;
 }
 
-} partial class zipᴛcountWriter {
+} partial class zip_package {
 
-internal static (nint, error) Write(this ref countWriter w, slice<byte> p) {
+internal static (nint, error) Writeᴍ(ref countWriter w, slice<byte> p) {
     var (n, err) = w.w.Write(p);
     w.count += (int64)n;
     return (n, err);
@@ -746,9 +746,9 @@ partial struct nopCloser {
     /*embed*/ public io_package.Writer Writer;
 }
 
-} partial class zipᴛnopCloser {
+} partial class zip_package {
 
-internal static error Close(this nopCloser w) {
+internal static error Closeᴍ(nopCloser w) {
     return default;
 }
 
@@ -756,26 +756,63 @@ internal static error Close(this nopCloser w) {
 
 partial struct writeBuf /*[]byte*/;
 
-} partial class zipᴛwriteBuf {
+} partial class zip_package {
 
-internal static void uint8(this ref writeBuf b, uint8 v) {
+internal static void uint8ᴍ(ref writeBuf b, uint8 v) {
     (b)[0] = v;
     b = (b)[1..];
 }
 
-internal static void uint16(this ref writeBuf b, uint16 v) {
+internal static void uint16ᴍ(ref writeBuf b, uint16 v) {
     binary.LittleEndian.PutUint16(b, v);
     b = (b)[2..];
 }
 
-internal static void uint32(this ref writeBuf b, uint32 v) {
+internal static void uint32ᴍ(ref writeBuf b, uint32 v) {
     binary.LittleEndian.PutUint32(b, v);
     b = (b)[4..];
 }
 
-internal static void uint64(this ref writeBuf b, uint64 v) {
+internal static void uint64ᴍ(ref writeBuf b, uint64 v) {
     binary.LittleEndian.PutUint64(b, v);
     b = (b)[8..];
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class zipᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetOffset(this ref Writer w, int64 n) => zip_package.SetOffsetᴍ(ref w, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ref Writer w) => zip_package.Flushᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetComment(this ref Writer w, @string comment) => zip_package.SetCommentᴍ(ref w, comment);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer w) => zip_package.Closeᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) Create(this ref Writer w, @string name) => zip_package.Createᴍ(ref w, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error prepare(this ref Writer w, ж<FileHeader> fh) => zip_package.prepareᴍ(ref w, fh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> Ꮡfh) => zip_package.CreateHeaderᴍ(ref w, Ꮡfh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) CreateRaw(this ref Writer w, ж<FileHeader> Ꮡfh) => zip_package.CreateRawᴍ(ref w, Ꮡfh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Copy(this ref Writer w, ж<File> Ꮡf) => zip_package.Copyᴍ(ref w, Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RegisterCompressor(this ref Writer w, uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) => zip_package.RegisterCompressorᴍ(ref w, method, comp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error AddFS(this ж<Writer> Ꮡw, fs.FS fsys) => zip_package.AddFSᴍ(Ꮡw, fsys);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Func<io.Writer, (io.WriteCloser, error)> compressor(this ref Writer w, uint16 method) => zip_package.compressorᴍ(ref w, method);
+}
+partial class zipᴛdirWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this dirWriter _, slice<byte> b) => zip_package.Writeᴍ(_, b);
+}
+partial class zipᴛfileWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref fileWriter w, slice<byte> p) => zip_package.Writeᴍ(ref w, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ref fileWriter w) => zip_package.closeᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeDataDescriptor(this ref fileWriter w) => zip_package.writeDataDescriptorᴍ(ref w);
+}
+partial class zipᴛcountWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref countWriter w, slice<byte> p) => zip_package.Writeᴍ(ref w, p);
+}
+partial class zipᴛnopCloser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this nopCloser w) => zip_package.Closeᴍ(w);
+}
+partial class zipᴛwriteBuf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void uint8(this ref writeBuf b, uint8 v) => zip_package.uint8ᴍ(ref b, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void uint16(this ref writeBuf b, uint16 v) => zip_package.uint16ᴍ(ref b, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void uint32(this ref writeBuf b, uint32 v) => zip_package.uint32ᴍ(ref b, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void uint64(this ref writeBuf b, uint64 v) => zip_package.uint64ᴍ(ref b, v);
+}
+// </GlyphForwarders>

@@ -25,7 +25,7 @@ internal static readdirMode readdirName => /* iota */ 0;
 internal static readdirMode readdirDirEntry => 1;
 internal static readdirMode readdirFileInfo => 2;
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // Readdir reads the contents of the directory associated with file and
 // returns a slice of up to n [FileInfo] values, as would be returned
@@ -44,7 +44,7 @@ internal static readdirMode readdirFileInfo => 2;
 // and a non-nil error.
 //
 // Most clients are better served by the more efficient ReadDir method.
-public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
+internal static (slice<FileInfo>, error) Readdirᴍ(ж<File> Ꮡf, nint n) {
     if (Ꮡf == nil) {
         return (default, ErrInvalid);
     }
@@ -73,7 +73,7 @@ public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
 // nil error. If it encounters an error before the end of the
 // directory, Readdirnames returns the names read until that point and
 // a non-nil error.
-public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf, nint n) {
+internal static (slice<@string> names, error err) Readdirnamesᴍ(ж<File> Ꮡf, nint n) {
     slice<@string> names = default;
     error err = default;
 
@@ -100,7 +100,7 @@ public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf,
 //
 // If n <= 0, ReadDir returns all the DirEntry records remaining in the directory.
 // When it succeeds, it returns a nil error (not io.EOF).
-public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) {
+internal static (slice<DirEntry>, error) ReadDirᴍ(ж<File> Ꮡf, nint n) {
     if (Ꮡf == nil) {
         return (default, ErrInvalid);
     }
@@ -211,3 +211,11 @@ public static error CopyFS(@string dir, fs.FS fsys) {
 }
 
 } // end os_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) => os_package.Readdirᴍ(Ꮡf, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf, nint n) => os_package.Readdirnamesᴍ(Ꮡf, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) => os_package.ReadDirᴍ(Ꮡf, n);
+}
+// </GlyphForwarders>

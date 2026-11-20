@@ -45,10 +45,10 @@ internal static fs.FS _ᴛ1ʗ = ((MapFS)default);
 internal static fs.ReadLinkFS _ᴛ2ʗ = ((MapFS)default);
 internal static fs.File _ᴛ3ʗ = new openMapFileжFile(((ж<openMapFile>)nil));
 
-} partial class fstestᴛMapFS {
+} partial class fstest_package {
 
 // Open opens the named file after following any symbolic links.
-public static (fs.File, error) Open(this MapFS fsys, @string name) {
+internal static (fs.File, error) Openᴍ(MapFS fsys, @string name) {
     if (!fs.ValidPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrNotExist))));
     }
@@ -120,7 +120,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
     return (new mapDirжFile(Ꮡ(new mapDir(name, new mapFileInfo(elem, @file), list, 0))), default);
 }
 
-internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name) {
+internal static (@string, bool ok) resolveSymlinksᴍ(MapFS fsys, @string name) {
     // Fast path: if a symlink is in the map, resolve it.
     {
         var @file = fsys[name]; if (@file != nil && @file.Mode.Type() == fs.ModeSymlink) {
@@ -156,7 +156,7 @@ internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name
 }
 
 // ReadLink returns the destination of the named symbolic link.
-public static (@string, error) ReadLink(this MapFS fsys, @string name) {
+internal static (@string, error) ReadLinkᴍ(MapFS fsys, @string name) {
     var (info, err) = fsys.lstat(name);
     if (err != nil) {
         return ("", new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "readlink", Path: name, Err: err))));
@@ -170,7 +170,7 @@ public static (@string, error) ReadLink(this MapFS fsys, @string name) {
 // Lstat returns a FileInfo describing the named file.
 // If the file is a symbolic link, the returned FileInfo describes the symbolic link.
 // Lstat makes no attempt to follow the link.
-public static (fs.FileInfo, error) Lstat(this MapFS fsys, @string name) {
+internal static (fs.FileInfo, error) Lstatᴍ(MapFS fsys, @string name) {
     var (info, err) = fsys.lstat(name);
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "lstat", Path: name, Err: err))));
@@ -178,7 +178,7 @@ public static (fs.FileInfo, error) Lstat(this MapFS fsys, @string name) {
     return (new mapFileInfoжFileInfo(info), default);
 }
 
-internal static (ж<mapFileInfo>, error) lstat(this MapFS fsys, @string name) {
+internal static (ж<mapFileInfo>, error) lstatᴍ(MapFS fsys, @string name) {
     if (!fs.ValidPath(name)) {
         return (default, fs.ErrNotExist);
     }
@@ -222,21 +222,21 @@ partial struct fsOnly {
     /*embed*/ public go.io.fs_package.FS FS;
 }
 
-} partial class fstestᴛMapFS {
+} partial class fstest_package {
 
-public static (slice<byte>, error) ReadFile(this MapFS fsys, @string name) {
+internal static (slice<byte>, error) ReadFileᴍ(MapFS fsys, @string name) {
     return fs.ReadFile(new fsOnly(fsys), name);
 }
 
-public static (fs.FileInfo, error) Stat(this MapFS fsys, @string name) {
+internal static (fs.FileInfo, error) Statᴍ(MapFS fsys, @string name) {
     return fs.Stat(new fsOnly(fsys), name);
 }
 
-public static (slice<fs.DirEntry>, error) ReadDir(this MapFS fsys, @string name) {
+internal static (slice<fs.DirEntry>, error) ReadDirᴍ(MapFS fsys, @string name) {
     return fs.ReadDir(new fsOnly(fsys), name);
 }
 
-public static (slice<@string>, error) Glob(this MapFS fsys, @string pattern) {
+internal static (slice<@string>, error) Globᴍ(MapFS fsys, @string pattern) {
     return fs.Glob(new fsOnly(fsys), pattern);
 }
 
@@ -246,14 +246,14 @@ partial struct noSub {
     /*embed*/ public MapFS MapFS;
 }
 
-} partial class fstestᴛnoSub {
+} partial class fstest_package {
 
-internal static void Sub(this noSub _) { }
+internal static void Subᴍ(noSub _) { }
 
-} partial class fstestᴛMapFS {
+} partial class fstest_package {
 
 // not the fs.SubFS signature
-public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
+internal static (fs.FS, error) Subᴍ(MapFS fsys, @string dir) {
     return fs.Sub(new noSub(fsys), dir);
 }
 
@@ -265,18 +265,18 @@ partial struct mapFileInfo {
     internal ж<MapFile> f;
 }
 
-} partial class fstestᴛmapFileInfo {
+} partial class fstest_package {
 
-internal static @string Name(this ref mapFileInfo i) { return path.Base(i.name); }
-internal static int64 Size(this ref mapFileInfo i) { return (int64)len(i.f.Data); }
-internal static fs.FileMode Mode(this ref mapFileInfo i) { return i.f.Mode; }
-internal static fs.FileMode Type(this ref mapFileInfo i) { return i.f.Mode.Type(); }
-internal static time.Time ModTime(this ref mapFileInfo i) { return i.f.ModTime; }
-internal static bool IsDir(this ref mapFileInfo i) { return (fs.FileMode)(i.f.Mode & fs.ModeDir) != 0; }
-internal static any Sys(this ref mapFileInfo i) { return i.f.Sys; }
-internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) { return (new mapFileInfoжFileInfo(Ꮡi), default); }
+internal static @string Nameᴍ(ref mapFileInfo i) { return path.Base(i.name); }
+internal static int64 Sizeᴍ(ref mapFileInfo i) { return (int64)len(i.f.Data); }
+internal static fs.FileMode Modeᴍ(ref mapFileInfo i) { return i.f.Mode; }
+internal static fs.FileMode Typeᴍ(ref mapFileInfo i) { return i.f.Mode.Type(); }
+internal static time.Time ModTimeᴍ(ref mapFileInfo i) { return i.f.ModTime; }
+internal static bool IsDirᴍ(ref mapFileInfo i) { return (fs.FileMode)(i.f.Mode & fs.ModeDir) != 0; }
+internal static any Sysᴍ(ref mapFileInfo i) { return i.f.Sys; }
+internal static (fs.FileInfo, error) Infoᴍ(ж<mapFileInfo> Ꮡi) { return (new mapFileInfoжFileInfo(Ꮡi), default); }
 
-internal static @string String(this ж<mapFileInfo> Ꮡi) {
+internal static @string Stringᴍ(ж<mapFileInfo> Ꮡi) {
     return fs.FormatFileInfo(new mapFileInfoжFileInfo(Ꮡi));
 }
 
@@ -289,13 +289,13 @@ partial struct openMapFile {
     internal int64 offset;
 }
 
-} partial class fstestᴛopenMapFile {
+} partial class fstest_package {
 
-internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) { return (new mapFileInfoжFileInfo(Ꮡf.ᏑmapFileInfo), default); }
+internal static (fs.FileInfo, error) Statᴍ(ж<openMapFile> Ꮡf) { return (new mapFileInfoжFileInfo(Ꮡf.ᏑmapFileInfo), default); }
 
-internal static error Close(this ref openMapFile f) { return default; }
+internal static error Closeᴍ(ref openMapFile f) { return default; }
 
-internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) {
+internal static (nint, error) Readᴍ(ref openMapFile f, slice<byte> b) {
     if (f.offset >= (int64)len(f.f.Data)) {
         return (0, io.EOF);
     }
@@ -307,7 +307,7 @@ internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) {
     return (n, default);
 }
 
-internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint whence) {
+internal static (int64, error) Seekᴍ(ref openMapFile f, int64 offset, nint whence) {
     switch (whence) {
     case 0: {
         // offset += 0
@@ -328,7 +328,7 @@ internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint w
     return (offset, default);
 }
 
-internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int64 offset) {
+internal static (nint, error) ReadAtᴍ(ref openMapFile f, slice<byte> b, int64 offset) {
     if (offset < 0 || offset > (int64)len(f.f.Data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: f.path, Err: fs.ErrInvalid))));
     }
@@ -349,15 +349,15 @@ partial struct mapDir {
     internal nint offset;
 }
 
-} partial class fstestᴛmapDir {
+} partial class fstest_package {
 
-internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) { return (new mapFileInfoжFileInfo(Ꮡd.ᏑmapFileInfo), default); }
-internal static error Close(this ref mapDir d) { return default; }
-internal static (nint, error) Read(this ref mapDir d, slice<byte> b) {
+internal static (fs.FileInfo, error) Statᴍ(ж<mapDir> Ꮡd) { return (new mapFileInfoжFileInfo(Ꮡd.ᏑmapFileInfo), default); }
+internal static error Closeᴍ(ref mapDir d) { return default; }
+internal static (nint, error) Readᴍ(ref mapDir d, slice<byte> b) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.path, Err: fs.ErrInvalid))));
 }
 
-internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint count) {
+internal static (slice<fs.DirEntry>, error) ReadDirᴍ(ref mapDir d, nint count) {
     nint n = len(d.entry) - d.offset;
     if (n == 0 && count > 0) {
         return (default, io.EOF);
@@ -374,3 +374,45 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint coun
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fstestᴛMapFS {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.File, error) Open(this MapFS fsys, @string name) => fstest_package.Openᴍ(fsys, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name) => fstest_package.resolveSymlinksᴍ(fsys, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) ReadLink(this MapFS fsys, @string name) => fstest_package.ReadLinkᴍ(fsys, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.FileInfo, error) Lstat(this MapFS fsys, @string name) => fstest_package.Lstatᴍ(fsys, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<mapFileInfo>, error) lstat(this MapFS fsys, @string name) => fstest_package.lstatᴍ(fsys, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ReadFile(this MapFS fsys, @string name) => fstest_package.ReadFileᴍ(fsys, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.FileInfo, error) Stat(this MapFS fsys, @string name) => fstest_package.Statᴍ(fsys, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<fs.DirEntry>, error) ReadDir(this MapFS fsys, @string name) => fstest_package.ReadDirᴍ(fsys, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) Glob(this MapFS fsys, @string pattern) => fstest_package.Globᴍ(fsys, pattern);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.FS, error) Sub(this MapFS fsys, @string dir) => fstest_package.Subᴍ(fsys, dir);
+}
+partial class fstestᴛnoSub {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Sub(this noSub _) => fstest_package.Subᴍ(_);
+}
+partial class fstestᴛmapFileInfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this ref mapFileInfo i) => fstest_package.Nameᴍ(ref i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Size(this ref mapFileInfo i) => fstest_package.Sizeᴍ(ref i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.FileMode Mode(this ref mapFileInfo i) => fstest_package.Modeᴍ(ref i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.FileMode Type(this ref mapFileInfo i) => fstest_package.Typeᴍ(ref i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time ModTime(this ref mapFileInfo i) => fstest_package.ModTimeᴍ(ref i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsDir(this ref mapFileInfo i) => fstest_package.IsDirᴍ(ref i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Sys(this ref mapFileInfo i) => fstest_package.Sysᴍ(ref i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) => fstest_package.Infoᴍ(Ꮡi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<mapFileInfo> Ꮡi) => fstest_package.Stringᴍ(Ꮡi);
+}
+partial class fstestᴛopenMapFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) => fstest_package.Statᴍ(Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref openMapFile f) => fstest_package.Closeᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) => fstest_package.Readᴍ(ref f, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint whence) => fstest_package.Seekᴍ(ref f, offset, whence);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int64 offset) => fstest_package.ReadAtᴍ(ref f, b, offset);
+}
+partial class fstestᴛmapDir {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) => fstest_package.Statᴍ(Ꮡd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref mapDir d) => fstest_package.Closeᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref mapDir d, slice<byte> b) => fstest_package.Readᴍ(ref d, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint count) => fstest_package.ReadDirᴍ(ref d, count);
+}
+// </GlyphForwarders>

@@ -20,7 +20,7 @@ partial class http_package {
 //go:linkname badRoundTrip net/http.(*Transport).RoundTrip
 internal static partial (ж<Response>, error) badRoundTrip(ж<Transport> _Δp0, ж<Request> _Δp1);
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // RoundTrip implements the [RoundTripper] interface.
 //
@@ -29,7 +29,7 @@ internal static partial (ж<Response>, error) badRoundTrip(ж<Transport> _Δp0, 
 //
 // Like the RoundTripper interface, the error types returned
 // by RoundTrip are unspecified.
-public static (ж<Response>, error) RoundTrip(this ж<Transport> Ꮡt, ж<Request> req) {
+internal static (ж<Response>, error) RoundTripᴍ(ж<Transport> Ꮡt, ж<Request> req) {
     if (Ꮡt == nil) {
         throw panic("transport is nil");
     }
@@ -37,3 +37,9 @@ public static (ж<Response>, error) RoundTrip(this ж<Transport> Ꮡt, ж<Reques
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛTransport {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Response>, error) RoundTrip(this ж<Transport> Ꮡt, ж<Request> req) => http_package.RoundTripᴍ(Ꮡt, req);
+}
+// </GlyphForwarders>

@@ -58,14 +58,14 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
     return dec;
 }
 
-} partial class gobᴛDecoder {
+} partial class gob_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gobDuplicateTypeReceivedˢ => ref gobDuplicateTypeReceivedˢᵇ;
 private static readonly @string gobDuplicateTypeReceivedˢᵇ = "gob: duplicate type received"u8;
 
 // recvType loads the definition of a type.
-internal static void recvType(this ж<Decoder> Ꮡdec, typeId id) {
+internal static void recvTypeᴍ(ж<Decoder> Ꮡdec, typeId id) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     // Have we already seen this type? That's an error
@@ -88,11 +88,11 @@ internal static void recvType(this ж<Decoder> Ꮡdec, typeId id) {
 
 internal static error errBadCount = errors.New("invalid message length");
 
-} partial class gobᴛDecoder {
+} partial class gob_package {
 
 // recvMessage reads the next count-delimited item from the input. It is the converse
 // of Encoder.writeMessage. It returns false on EOF or other error reading the message.
-internal static bool recvMessage(this ref Decoder dec) {
+internal static bool recvMessageᴍ(ref Decoder dec) {
     // Read a count.
     var (nbytes, _, err) = decodeUintReader(dec.r, dec.countBuf);
     if (err != nil) {
@@ -108,7 +108,7 @@ internal static bool recvMessage(this ref Decoder dec) {
 }
 
 // readMessage reads the next nbytes bytes from the input.
-internal static void readMessage(this ref Decoder dec, nint nbytes) {
+internal static void readMessageᴍ(ref Decoder dec, nint nbytes) {
     if (dec.buf.Len() != 0) {
         // The buffer should always be empty now.
         throw panic("non-empty decoder buffer");
@@ -133,9 +133,9 @@ internal static int64 toInt(uint64 x) {
     return i;
 }
 
-} partial class gobᴛDecoder {
+} partial class gob_package {
 
-internal static int64 nextInt(this ж<Decoder> Ꮡdec) {
+internal static int64 nextIntᴍ(ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var (n, _, err) = decodeUintReader(new decBufferжReader(Ꮡdec.Ꮡbuf), dec.countBuf);
@@ -145,7 +145,7 @@ internal static int64 nextInt(this ж<Decoder> Ꮡdec) {
     return toInt(n);
 }
 
-internal static uint64 nextUint(this ж<Decoder> Ꮡdec) {
+internal static uint64 nextUintᴍ(ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var (n, _, err) = decodeUintReader(new decBufferжReader(Ꮡdec.Ꮡbuf), dec.countBuf);
@@ -168,7 +168,7 @@ private static readonly @string extraDataInBufferˢᵇ = "extra data in buffer"u
 // EOF.  Upon return, the remainder of dec.buf is the value to be
 // decoded. If this is an interface value, it can be ignored by
 // resetting that buffer.
-internal static typeId decodeTypeSequence(this ж<Decoder> Ꮡdec, bool isInterface) {
+internal static typeId decodeTypeSequenceᴍ(ж<Decoder> Ꮡdec, bool isInterface) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var firstMessage = true;
@@ -223,7 +223,7 @@ private static readonly @string gobAttemptToDecodeIntoAˢᵇ = "gob: attempt to 
 // correct type for the next data item received.
 // If the input is at EOF, Decode returns [io.EOF] and
 // does not modify e.
-public static error Decode(this ж<Decoder> Ꮡdec, any e) {
+internal static error Decodeᴍ(ж<Decoder> Ꮡdec, any e) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     if (e == nil) {
@@ -249,7 +249,7 @@ private static readonly @string gobDecodeValueOfˢᵇ = "gob: DecodeValue of una
 // a non-nil pointer to data or be an assignable reflect.Value (v.CanSet())
 // If the input is at EOF, DecodeValue returns [io.EOF] and
 // does not modify v.
-public static error DecodeValue(this ж<Decoder> Ꮡdec, reflect.Value v) {
+internal static error DecodeValueᴍ(ж<Decoder> Ꮡdec, reflect.Value v) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -286,3 +286,16 @@ public static error DecodeValue(this ж<Decoder> Ꮡdec, reflect.Value v) {
 internal static Action<io.Reader> debugFunc;
 
 } // end gob_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gobᴛDecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recvType(this ж<Decoder> Ꮡdec, typeId id) => gob_package.recvTypeᴍ(Ꮡdec, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool recvMessage(this ref Decoder dec) => gob_package.recvMessageᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readMessage(this ref Decoder dec, nint nbytes) => gob_package.readMessageᴍ(ref dec, nbytes);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 nextInt(this ж<Decoder> Ꮡdec) => gob_package.nextIntᴍ(Ꮡdec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 nextUint(this ж<Decoder> Ꮡdec) => gob_package.nextUintᴍ(Ꮡdec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typeId decodeTypeSequence(this ж<Decoder> Ꮡdec, bool isInterface) => gob_package.decodeTypeSequenceᴍ(Ꮡdec, isInterface);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Decode(this ж<Decoder> Ꮡdec, any e) => gob_package.Decodeᴍ(Ꮡdec, e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error DecodeValue(this ж<Decoder> Ꮡdec, reflect.Value v) => gob_package.DecodeValueᴍ(Ꮡdec, v);
+}
+// </GlyphForwarders>

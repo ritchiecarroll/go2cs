@@ -11,12 +11,12 @@ using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // isTerminating reports if s is a terminating statement.
 // If s is labeled, label is the label name; otherwise s
 // is "".
-internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string label) {
+internal static bool isTerminatingᴍ(ref Checker check, ast.Stmt s, @string label) {
     switch (s.type()) {
     default: {
         var sΔ1 = s;
@@ -89,7 +89,7 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
     return false;
 }
 
-internal static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> list, @string label) {
+internal static bool isTerminatingListᴍ(ref Checker check, slice<ast.Stmt> list, @string label) {
     // trailing empty statements are permitted - skip them
     for (nint i = len(list) - 1; i >= 0; i--) {
         var (_, ok) = list[i]._<ж<ast.EmptyStmt>>(ᐧ); if (!ok) {
@@ -99,7 +99,7 @@ internal static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> l
     return false; // all statements are empty
 }
 
-internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
+internal static bool isTerminatingSwitchᴍ(ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
     ref var body = ref Ꮡbody.DerefOrNull();
 
     var hasDefault = false;
@@ -218,3 +218,11 @@ internal static bool hasBreakList(slice<ast.Stmt> list, @string label, bool @imp
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string label) => types_package.isTerminatingᴍ(ref check, s, label);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> list, @string label) => types_package.isTerminatingListᴍ(ref check, list, label);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) => types_package.isTerminatingSwitchᴍ(ref check, Ꮡbody, label);
+}
+// </GlyphForwarders>

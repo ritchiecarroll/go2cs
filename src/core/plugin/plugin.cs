@@ -120,14 +120,20 @@ public static (ж<Plugin>, error) Open(@string path) {
     return open(path);
 }
 
-} partial class pluginᴛPlugin {
+} partial class plugin_package {
 
 // Lookup searches for a symbol named symName in plugin p.
 // A symbol is any exported variable or function.
 // It reports an error if the symbol is not found.
 // It is safe for concurrent use by multiple goroutines.
-public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) {
+internal static (Symbol, error) Lookupᴍ(ж<Plugin> Ꮡp, @string symName) {
     return lookup(ref (Ꮡp).DerefOrNull(), symName);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pluginᴛPlugin {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) => plugin_package.Lookupᴍ(Ꮡp, symName);
+}
+// </GlyphForwarders>

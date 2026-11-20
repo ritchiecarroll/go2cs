@@ -95,9 +95,9 @@ public static EventType EvEndOfGeneration => 52;
 
 public static EventType NumEvents => 53;
 
-} partial class tracev2ᴛEventType {
+} partial class tracev2_package {
 
-public static bool Experimental(this EventType ev) {
+internal static bool Experimentalᴍ(EventType ev) {
     return ev > MaxEvent && ev < MaxExperimentalEvent;
 }
 
@@ -510,7 +510,7 @@ public static GoStatus GoRunning => 2;
 public static GoStatus GoSyscall => 3;
 public static GoStatus GoWaiting => 4;
 
-} partial class tracev2ᴛGoStatus {
+} partial class tracev2_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string runnableˢ => ref runnableˢᵇ;
@@ -524,7 +524,7 @@ private static readonly @string waitingˢᵇ = "Waiting"u8;
 private static ref readonly @string badˢ => ref badˢᵇ;
 private static readonly @string badˢᵇ = "Bad"u8;
 
-public static @string String(this GoStatus s) {
+internal static @string Stringᴍ(GoStatus s) {
     switch (s) {
     case var ᴛ when ᴛ == GoRunnable: {
         return runnableˢ;
@@ -564,7 +564,7 @@ public static ProcStatus ProcSyscall => 3;
 // corresponds with the ProcSteal.
 public static ProcStatus ProcSyscallAbandoned => 4;
 
-} partial class tracev2ᴛProcStatus {
+} partial class tracev2_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string runningˢ => ref runningˢᵇ;
@@ -576,7 +576,7 @@ private static readonly @string syscallˢᵇ = "Syscall"u8;
 private static ref readonly @string badˢ => ref badˢᵇ;
 private static readonly @string badˢᵇ = "Bad"u8;
 
-public static @string String(this ProcStatus s) {
+internal static @string Stringᴍ(ProcStatus s) {
     switch (s) {
     case var ᴛ when ᴛ == ProcRunning: {
         return runningˢ;
@@ -620,3 +620,15 @@ public static UntypedInt MaxFramesPerStack => 128;
 public static UntypedInt MaxEventTrailerDataSize => /* 1 << 10 */ 1024;
 
 } // end tracev2_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tracev2ᴛEventType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Experimental(this EventType ev) => tracev2_package.Experimentalᴍ(ev);
+}
+partial class tracev2ᴛGoStatus {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this GoStatus s) => tracev2_package.Stringᴍ(s);
+}
+partial class tracev2ᴛProcStatus {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ProcStatus s) => tracev2_package.Stringᴍ(s);
+}
+// </GlyphForwarders>

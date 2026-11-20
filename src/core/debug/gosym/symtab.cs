@@ -32,17 +32,17 @@ partial struct Sym {
     internal version goVersion;
 }
 
-} partial class gosymᴛSym {
+} partial class gosym_package {
 
 // Static reports whether this symbol is static (not visible outside its file).
-public static bool Static(this ref Sym s) { return s.Type >= 'a'; }
+internal static bool Staticᴍ(ref Sym s) { return s.Type >= 'a'; }
 
 // nameWithoutInst returns s.Name if s.Name has no brackets (does not reference an
 // instantiated type, function, or method). If s.Name contains brackets, then it
 // returns s.Name with all the contents between (and including) the outermost left
 // and right bracket removed. This is useful to ignore any extra slashes or dots
 // inside the brackets from the string searches below, where needed.
-internal static @string nameWithoutInst(this ref Sym s) {
+internal static @string nameWithoutInstᴍ(ref Sym s) {
     nint start = strings.Index(s.Name, "[");
     if (start < 0) {
         return s.Name;
@@ -63,7 +63,7 @@ private static readonly @string typeˢ2ᵇ = "type."u8;
 
 // PackageName returns the package part of the symbol name,
 // or the empty string if there is none.
-public static @string PackageName(this ref Sym s) {
+internal static @string PackageNameᴍ(ref Sym s) {
     @string name = s.nameWithoutInst();
 
     // Since go1.20, a prefix of "type:" and "go:" is a compiler-generated symbol,
@@ -93,7 +93,7 @@ public static @string PackageName(this ref Sym s) {
 // ReceiverName returns the receiver type name of this symbol,
 // or the empty string if there is none.  A receiver name is only detected in
 // the case that s.Name is fully-specified with a package name.
-public static @string ReceiverName(this ref Sym s) {
+internal static @string ReceiverNameᴍ(ref Sym s) {
     @string name = s.nameWithoutInst();
     // If we find a slash in name, it should precede any bracketed expression
     // that was removed, so pathend will apply correctly to name and s.Name.
@@ -118,7 +118,7 @@ public static @string ReceiverName(this ref Sym s) {
 }
 
 // BaseName returns the symbol name without the package or receiver name.
-public static @string BaseName(this ref Sym s) {
+internal static @string BaseNameᴍ(ref Sym s) {
     @string name = s.nameWithoutInst();
     nint i = strings.LastIndex(name, "."); if (i != -1) {
         if (s.Name != name) {
@@ -570,11 +570,11 @@ break_countloop:;
     return (Ꮡt, default);
 }
 
-} partial class gosymᴛTable {
+} partial class gosym_package {
 
 // PCToFunc returns the function containing the program counter pc,
 // or nil if there is no such function.
-public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
+internal static ж<Func> PCToFuncᴍ(ref Table t, uint64 pc) {
     var funcs = t.Funcs;
     while (len(funcs) > 0) {
         nint m = len(funcs) / 2;
@@ -597,7 +597,7 @@ public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
 
 // PCToLine looks up line number information for a program counter.
 // If there is no information, it returns fn == nil.
-public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t, uint64 pc) {
+internal static (@string @file, nint line, ж<Func> fn) PCToLineᴍ(ref Table t, uint64 pc) {
     @string @file = default;
     nint line = default;
     ж<Func> fn = default;
@@ -617,7 +617,7 @@ public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t,
 // LineToPC looks up the first program counter on the given line in
 // the named file. It returns [UnknownFileError] or [UnknownLineError] if
 // there is an error looking up this line.
-public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @string @file, nint line) {
+internal static (uint64 pc, ж<Func> fn, error err) LineToPCᴍ(ref Table t, @string @file, nint line) {
     uint64 pc = default;
     ж<Func> fn = default;
     error err = default;
@@ -651,7 +651,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
 
 // LookupSym returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
-public static ж<Sym> LookupSym(this ref Table t, @string name) {
+internal static ж<Sym> LookupSymᴍ(ref Table t, @string name) {
     // TODO(austin) Maybe make a map
     foreach (var i in range(len(t.Syms))) {
         var s = Ꮡ(t.Syms, i);
@@ -668,7 +668,7 @@ public static ж<Sym> LookupSym(this ref Table t, @string name) {
 
 // LookupFunc returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
-public static ж<Func> LookupFunc(this ref Table t, @string name) {
+internal static ж<Func> LookupFuncᴍ(ref Table t, @string name) {
     foreach (var i in range(len(t.Funcs))) {
         var f = Ꮡ(t.Funcs, i);
         if (f.Sym.Name == name) {
@@ -679,7 +679,7 @@ public static ж<Func> LookupFunc(this ref Table t, @string name) {
 }
 
 // SymByAddr returns the text, data, or bss symbol starting at the given address.
-public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
+internal static ж<Sym> SymByAddrᴍ(ref Table t, uint64 addr) {
     foreach (var i in range(len(t.Syms))) {
         var s = Ꮡ(t.Syms, i);
         switch (s.Type) {
@@ -702,7 +702,7 @@ internal partial struct lineFromAline_stackEnt /*dyn*/ {
     internal ж<lineFromAline_stackEnt> prev;
 }
 
-} partial class gosymᴛObj {
+} partial class gosym_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string malformedSymbolTableˢ => ref malformedSymbolTableˢᵇ;
@@ -717,7 +717,7 @@ private static readonly @string malformedSymbolTableˢᵇ = "<malformed symbol t
 // we never quite found all the corner cases.
 //
 // Go 1.2 and later use a simpler format, documented at golang.org/s/go12symtab.
-internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) {
+internal static (@string, nint) lineFromAlineᴍ(ref Obj o, nint aline) {
     var noPath = Ꮡ(new lineFromAline_stackEnt("", 0, 0, nil));
     var tos = noPath;
 
@@ -758,7 +758,7 @@ break_pathloop:;
     return (tos.path, aline - tos.start - tos.offset + 1);
 }
 
-internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint line) {
+internal static (nint, error) alineFromLineᴍ(ref Obj o, @string path, nint line) {
     if (line < 1) {
         return (0, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(path, line))));
     }
@@ -814,9 +814,9 @@ break_pathloop:;
 // the symbol table.
 partial struct UnknownFileError /*@string*/;
 
-} partial class gosymᴛUnknownFileError {
+} partial class gosym_package {
 
-public static @string Error(this UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
+internal static @string Errorᴍ(UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
 
 } partial class gosym_package {
 
@@ -828,9 +828,9 @@ partial struct UnknownLineError {
     public nint Line;
 }
 
-} partial class gosymᴛUnknownLineError {
+} partial class gosym_package {
 
-public static @string Error(this ref UnknownLineError e) {
+internal static @string Errorᴍ(ref UnknownLineError e) {
     return "no code at "u8 + e.File + ":"u8 + strconv.Itoa(e.Line);
 }
 
@@ -844,9 +844,9 @@ partial struct DecodingError {
     internal any val;
 }
 
-} partial class gosymᴛDecodingError {
+} partial class gosym_package {
 
-public static @string Error(this ref DecodingError e) {
+internal static @string Errorᴍ(ref DecodingError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -856,3 +856,34 @@ public static @string Error(this ref DecodingError e) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gosymᴛSym {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Static(this ref Sym s) => gosym_package.Staticᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string nameWithoutInst(this ref Sym s) => gosym_package.nameWithoutInstᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PackageName(this ref Sym s) => gosym_package.PackageNameᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string ReceiverName(this ref Sym s) => gosym_package.ReceiverNameᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string BaseName(this ref Sym s) => gosym_package.BaseNameᴍ(ref s);
+}
+partial class gosymᴛTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> PCToFunc(this ref Table t, uint64 pc) => gosym_package.PCToFuncᴍ(ref t, pc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t, uint64 pc) => gosym_package.PCToLineᴍ(ref t, pc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @string @file, nint line) => gosym_package.LineToPCᴍ(ref t, @file, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Sym> LookupSym(this ref Table t, @string name) => gosym_package.LookupSymᴍ(ref t, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> LookupFunc(this ref Table t, @string name) => gosym_package.LookupFuncᴍ(ref t, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) => gosym_package.SymByAddrᴍ(ref t, addr);
+}
+partial class gosymᴛObj {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) => gosym_package.lineFromAlineᴍ(ref o, aline);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint line) => gosym_package.alineFromLineᴍ(ref o, path, line);
+}
+partial class gosymᴛUnknownFileError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownFileError e) => gosym_package.Errorᴍ(e);
+}
+partial class gosymᴛUnknownLineError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnknownLineError e) => gosym_package.Errorᴍ(ref e);
+}
+partial class gosymᴛDecodingError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref DecodingError e) => gosym_package.Errorᴍ(ref e);
+}
+// </GlyphForwarders>

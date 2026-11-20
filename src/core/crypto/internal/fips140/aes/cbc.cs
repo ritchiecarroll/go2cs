@@ -27,11 +27,11 @@ public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     return Ꮡ(new CBCEncrypter(b: b.ΔClone(), iv: iv.Clone()));
 }
 
-} partial class aesᴛCBCEncrypter {
+} partial class aes_package {
 
-public static nint BlockSize(this ref CBCEncrypter c) { return aes.BlockSize; }
+internal static nint BlockSizeᴍ(ref CBCEncrypter c) { return aes.BlockSize; }
 
-public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocksᴍ(ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(src) % (nint)aes.BlockSize != 0) {
@@ -50,7 +50,7 @@ public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slic
     cryptBlocksEnc(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
-public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) {
+internal static void SetIVᴍ(ref CBCEncrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
@@ -92,11 +92,11 @@ public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     return Ꮡ(new CBCDecrypter(b: b.ΔClone(), iv: iv.Clone()));
 }
 
-} partial class aesᴛCBCDecrypter {
+} partial class aes_package {
 
-public static nint BlockSize(this ref CBCDecrypter c) { return aes.BlockSize; }
+internal static nint BlockSizeᴍ(ref CBCDecrypter c) { return aes.BlockSize; }
 
-public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocksᴍ(ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(src) % (nint)aes.BlockSize != 0) {
@@ -115,7 +115,7 @@ public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slic
     cryptBlocksDec(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
-public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) {
+internal static void SetIVᴍ(ref CBCDecrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
@@ -155,3 +155,16 @@ internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>>
 }
 
 } // end aes_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class aesᴛCBCEncrypter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref CBCEncrypter c) => aes_package.BlockSizeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.CryptBlocksᴍ(Ꮡc, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) => aes_package.SetIVᴍ(ref x, iv);
+}
+partial class aesᴛCBCDecrypter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref CBCDecrypter c) => aes_package.BlockSizeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.CryptBlocksᴍ(Ꮡc, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) => aes_package.SetIVᴍ(ref x, iv);
+}
+// </GlyphForwarders>

@@ -173,9 +173,9 @@ partial struct huffmanSpec {
 // The maximum codeword size is 16 bits.
 partial struct huffmanLUT /*[]uint32*/;
 
-} partial class jpegᴛhuffmanLUT {
+} partial class jpeg_package {
 
-internal static void init(this ref huffmanLUT h, huffmanSpec s) {
+internal static void initᴍ(ref huffmanLUT h, huffmanSpec s) {
     s = s.ΔClone();
 
     nint maxValue = 0;
@@ -234,23 +234,23 @@ partial struct encoder {
     internal array<array<byte>> quant = new(nQuantIndex, () => new(64));
 }
 
-} partial class jpegᴛencoder {
+} partial class jpeg_package {
 
-internal static void flush(this ref encoder e) {
+internal static void flushᴍ(ref encoder e) {
     if (e.err != nil) {
         return;
     }
     e.err = e.w.Flush();
 }
 
-internal static void write(this ref encoder e, slice<byte> p) {
+internal static void writeᴍ(ref encoder e, slice<byte> p) {
     if (e.err != nil) {
         return;
     }
     (_, e.err) = e.w.Write(p);
 }
 
-internal static void writeByte(this ref encoder e, byte b) {
+internal static void writeByteᴍ(ref encoder e, byte b) {
     if (e.err != nil) {
         return;
     }
@@ -259,7 +259,7 @@ internal static void writeByte(this ref encoder e, byte b) {
 
 // emit emits the least significant nBits bits of bits to the bit-stream.
 // The precondition is bits < 1<<nBits && nBits <= 16.
-internal static void emit(this ref encoder e, uint32 bits, uint32 nBits) {
+internal static void emitᴍ(ref encoder e, uint32 bits, uint32 nBits) {
     nBits += e.nBits;
     bits.LshAssign((uint64)(32 - nBits));
     bits |= (uint32)(e.bits);
@@ -276,14 +276,14 @@ internal static void emit(this ref encoder e, uint32 bits, uint32 nBits) {
 }
 
 // emitHuff emits the given value with the given Huffman encoder.
-internal static void emitHuff(this ref encoder e, huffIndex h, int32 value) {
+internal static void emitHuffᴍ(ref encoder e, huffIndex h, int32 value) {
     var x = theHuffmanLUT[h][value];
     e.emit((uint32)(x & ((1 << 24) - 1)), x >> 24);
 }
 
 // emitHuffRLE emits a run of runLength copies of value encoded with the given
 // Huffman encoder.
-internal static void emitHuffRLE(this ref encoder e, huffIndex h, int32 runLength, int32 value) {
+internal static void emitHuffRLEᴍ(ref encoder e, huffIndex h, int32 runLength, int32 value) {
     var (a, b) = (value, value);
     if (a < 0) {
         (a, b) = (-value, value - 1);
@@ -301,7 +301,7 @@ internal static void emitHuffRLE(this ref encoder e, huffIndex h, int32 runLengt
 }
 
 // writeMarkerHeader writes the header for a marker with the given length.
-internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint markerlen) {
+internal static void writeMarkerHeaderᴍ(ref encoder e, uint8 marker, nint markerlen) {
     e.buf[0] = 0xff;
     e.buf[1] = marker;
     e.buf[2] = (uint8)(markerlen >> 8);
@@ -310,7 +310,7 @@ internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint ma
 }
 
 // writeDQT writes the Define Quantization Table marker.
-internal static void writeDQT(this ref encoder e) {
+internal static void writeDQTᴍ(ref encoder e) {
     const nint markerlen = /* 2 + int(nQuantIndex)*(1+blockSize) */ 132;
     e.writeMarkerHeader(dqtMarker, markerlen);
     foreach (var i in range(len(e.quant))) {
@@ -320,7 +320,7 @@ internal static void writeDQT(this ref encoder e) {
 }
 
 // writeSOF0 writes the Start Of Frame (Baseline Sequential) marker.
-internal static void writeSOF0(this ref encoder e, image.Point size, nint nComponent) {
+internal static void writeSOF0ᴍ(ref encoder e, image.Point size, nint nComponent) {
     nint markerlen = 8 + 3 * nComponent;
     e.writeMarkerHeader(sof0Marker, markerlen);
     e.buf[0] = 8; // 8-bit color.
@@ -346,7 +346,7 @@ internal static void writeSOF0(this ref encoder e, image.Point size, nint nCompo
 }
 
 // writeDHT writes the Define Huffman Table marker.
-internal static void writeDHT(this ref encoder e, nint nComponent) {
+internal static void writeDHTᴍ(ref encoder e, nint nComponent) {
     nint markerlen = 2;
     var specs = theHuffmanSpec[..];
     if (nComponent == 1) {
@@ -371,7 +371,7 @@ internal static void writeDHT(this ref encoder e, nint nComponent) {
 // writeBlock writes a block of pixel data using the given quantization table,
 // returning the post-quantized DC value of the DCT-transformed block. b is in
 // natural (not zig-zag) order.
-internal static int32 writeBlock(this ref encoder e, ж<block> Ꮡb, quantIndex q, int32 prevDC) {
+internal static int32 writeBlockᴍ(ref encoder e, ж<block> Ꮡb, quantIndex q, int32 prevDC) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     fdct(Ꮡb);
@@ -528,10 +528,10 @@ internal static slice<byte> sosHeaderYCbCr = [
     0x11, 0x03, 0x11, 0x00, 0x3f, 0x00
 ];
 
-} partial class jpegᴛencoder {
+} partial class jpeg_package {
 
 // writeSOS writes the StartOfScan marker.
-internal static void writeSOS(this ref encoder e, image.Image m) {
+internal static void writeSOSᴍ(ref encoder e, image.Image m) {
     switch (m.type()) {
     case ж<image.Gray>: {
         e.write(sosHeaderY);
@@ -683,3 +683,23 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
 }
 
 } // end jpeg_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class jpegᴛhuffmanLUT {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref huffmanLUT h, huffmanSpec s) => jpeg_package.initᴍ(ref h, s);
+}
+partial class jpegᴛencoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flush(this ref encoder e) => jpeg_package.flushᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ref encoder e, slice<byte> p) => jpeg_package.writeᴍ(ref e, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeByte(this ref encoder e, byte b) => jpeg_package.writeByteᴍ(ref e, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void emit(this ref encoder e, uint32 bits, uint32 nBits) => jpeg_package.emitᴍ(ref e, bits, nBits);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void emitHuff(this ref encoder e, huffIndex h, int32 value) => jpeg_package.emitHuffᴍ(ref e, h, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void emitHuffRLE(this ref encoder e, huffIndex h, int32 runLength, int32 value) => jpeg_package.emitHuffRLEᴍ(ref e, h, runLength, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint markerlen) => jpeg_package.writeMarkerHeaderᴍ(ref e, marker, markerlen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeDQT(this ref encoder e) => jpeg_package.writeDQTᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeSOF0(this ref encoder e, image.Point size, nint nComponent) => jpeg_package.writeSOF0ᴍ(ref e, size, nComponent);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeDHT(this ref encoder e, nint nComponent) => jpeg_package.writeDHTᴍ(ref e, nComponent);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 writeBlock(this ref encoder e, ж<block> Ꮡb, quantIndex q, int32 prevDC) => jpeg_package.writeBlockᴍ(ref e, Ꮡb, q, prevDC);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeSOS(this ref encoder e, image.Image m) => jpeg_package.writeSOSᴍ(ref e, m);
+}
+// </GlyphForwarders>

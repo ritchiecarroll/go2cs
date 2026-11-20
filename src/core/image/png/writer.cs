@@ -94,9 +94,9 @@ internal static nint abs8(uint8 d) {
     return 256 - (nint)d;
 }
 
-} partial class pngᴛencoder {
+} partial class png_package {
 
-internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) {
+internal static void writeChunkᴍ(ref encoder e, slice<byte> b, @string name) {
     if (e.err != nil) {
         return;
     }
@@ -130,7 +130,7 @@ internal static void writeChunk(this ref encoder e, slice<byte> b, @string name)
 internal static ref readonly @string ihdrˢ => ref ihdrˢᵇ;
 private static readonly @string ihdrˢᵇ = "IHDR"u8;
 
-internal static void writeIHDR(this ref encoder e) {
+internal static void writeIHDRᴍ(ref encoder e) {
     var b = e.m.Bounds();
     binary.BigEndian.PutUint32(e.tmp[0..4], (uint32)b.Dx());
     binary.BigEndian.PutUint32(e.tmp[4..8], (uint32)b.Dy());
@@ -198,7 +198,7 @@ private static readonly @string plteˢᵇ = "PLTE"u8;
 internal static ref readonly @string tRNSˢ => ref tRNSˢᵇ;
 private static readonly @string tRNSˢᵇ = "tRNS"u8;
 
-internal static void writePLTEAndTRNS(this ref encoder e, color.Palette p) {
+internal static void writePLTEAndTRNSᴍ(ref encoder e, color.Palette p) {
     if (len(p) < 1 || len(p) > 256) {
         e.err = ((FormatError)("bad palette length: "u8 + strconv.Itoa(len(p))));
         return;
@@ -230,7 +230,7 @@ private static readonly @string idatˢᵇ = "IDAT"u8;
 //
 // This method should only be called from writeIDATs (via writeImage).
 // No other code should treat an encoder as an io.Writer.
-public static (nint, error) Write(this ref encoder e, slice<byte> b) {
+internal static (nint, error) Writeᴍ(ref encoder e, slice<byte> b) {
     e.writeChunk(b, idatˢ);
     if (e.err != nil) {
         return (0, e.err);
@@ -333,9 +333,9 @@ internal static nint filter(ref array<slice<byte>> cr, slice<byte> pr, nint bpp)
     return filter;
 }
 
-} partial class pngᴛencoder {
+} partial class png_package {
 
-internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) {
+internal static error writeImageᴍ(ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -625,7 +625,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
 }
 
 // Write the actual image data to one or more IDAT chunks.
-internal static void writeIDATs(this ж<encoder> Ꮡe) {
+internal static void writeIDATsᴍ(ж<encoder> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (e.err != nil) {
@@ -666,13 +666,13 @@ internal static nint levelToZlib(CompressionLevel l) {
     }}
 }
 
-} partial class pngᴛencoder {
+} partial class png_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iendˢ => ref iendˢᵇ;
 private static readonly @string iendˢᵇ = "IEND"u8;
 
-internal static void writeIEND(this ref encoder e) { e.writeChunk(default, iendˢ); }
+internal static void writeIENDᴍ(ref encoder e) { e.writeChunk(default, iendˢ); }
 
 } partial class png_package {
 
@@ -683,10 +683,10 @@ public static error Encode(io.Writer w, image.Image m) {
     return Ꮡe.Encode(w, m);
 }
 
-} partial class pngᴛEncoder {
+} partial class png_package {
 
 // Encode writes the Image m to w in PNG format.
-public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) {
+internal static error Encodeᴍ(ж<Encoder> Ꮡenc, io.Writer w, image.Image m) {
     GoFrame ᒐ = default;
     try {
         ref var enc = ref Ꮡenc.DerefOrNull();
@@ -772,3 +772,18 @@ public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) 
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pngᴛencoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) => png_package.writeChunkᴍ(ref e, b, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeIHDR(this ref encoder e) => png_package.writeIHDRᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writePLTEAndTRNS(this ref encoder e, color.Palette p) => png_package.writePLTEAndTRNSᴍ(ref e, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ref encoder e, slice<byte> b) => png_package.Writeᴍ(ref e, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) => png_package.writeImageᴍ(Ꮡe, w, m, cb, level);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeIDATs(this ж<encoder> Ꮡe) => png_package.writeIDATsᴍ(Ꮡe);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeIEND(this ref encoder e) => png_package.writeIENDᴍ(ref e);
+}
+partial class pngᴛEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) => png_package.Encodeᴍ(Ꮡenc, w, m);
+}
+// </GlyphForwarders>

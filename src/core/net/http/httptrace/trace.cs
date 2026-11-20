@@ -162,11 +162,11 @@ partial struct WroteRequestInfo {
     public error Err;
 }
 
-} partial class httptraceᴛClientTrace {
+} partial class httptrace_package {
 
 // compose modifies t such that it respects the previously-registered hooks in old,
 // subject to the composition policy requested in t.Compose.
-internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
+internal static void composeᴍ(ж<ClientTrace> Ꮡt, ж<ClientTrace> old) {
     if (old == nil) {
         return;
     }
@@ -222,9 +222,9 @@ partial struct DNSDoneInfo {
     public bool Coalesced;
 }
 
-} partial class httptraceᴛClientTrace {
+} partial class httptrace_package {
 
-internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
+internal static bool hasNetHooksᴍ(ж<ClientTrace> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -254,3 +254,10 @@ partial struct GotConnInfo {
 }
 
 } // end httptrace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httptraceᴛClientTrace {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) => httptrace_package.composeᴍ(Ꮡt, old);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) => httptrace_package.hasNetHooksᴍ(Ꮡt);
+}
+// </GlyphForwarders>

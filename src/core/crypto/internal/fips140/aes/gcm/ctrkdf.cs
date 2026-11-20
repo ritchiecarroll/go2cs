@@ -30,10 +30,10 @@ public static ж<CounterKDF> NewCounterKDF(ж<aes.Block> b) {
     return Ꮡ(new CounterKDF(mac: NewCMAC(b).Value.ΔClone()));
 }
 
-} partial class gcmᴛCounterKDF {
+} partial class gcm_package {
 
 // DeriveKey derives a key from the given label and context.
-public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) {
+internal static array<byte> DeriveKeyᴍ(ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) {
     context = context.Clone();
 
     fips140.RecordApproved();
@@ -55,3 +55,9 @@ public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[1
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gcmᴛCounterKDF {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) => gcm_package.DeriveKeyᴍ(Ꮡkdf, label, context);
+}
+// </GlyphForwarders>

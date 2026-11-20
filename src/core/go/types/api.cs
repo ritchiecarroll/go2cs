@@ -66,11 +66,11 @@ partial struct Error {
     internal token.Pos go116end;
 }
 
-} partial class typesᴛError {
+} partial class types_package {
 
 // Error returns an error string formatted as follows:
 // filename:line:column: message
-public static @string Error(this Error err) {
+internal static @string Errorᴍ(Error err) {
     return fmt.Sprintf("%s: %s"u8, err.Fset.Position(err.Pos), err.Msg);
 }
 
@@ -82,10 +82,10 @@ partial struct ArgumentError {
     public error Err;
 }
 
-} partial class typesᴛArgumentError {
+} partial class types_package {
 
-public static @string Error(this ref ArgumentError e) { return e.Err.Error(); }
-public static error Unwrap(this ref ArgumentError e) { return e.Err; }
+internal static @string Errorᴍ(ref ArgumentError e) { return e.Err.Error(); }
+internal static error Unwrapᴍ(ref ArgumentError e) { return e.Err; }
 
 } partial class types_package {
 
@@ -330,15 +330,15 @@ partial struct Info {
     public map<ж<ast.File>, @string> FileVersions;
 }
 
-} partial class typesᴛInfo {
+} partial class types_package {
 
-internal static bool recordTypes(this ref Info info) {
+internal static bool recordTypesᴍ(ref Info info) {
     return info.Types != nil;
 }
 
 // TypeOf returns the type of expression e, or nil if not found.
 // Precondition: the Types, Uses and Defs maps are populated.
-public static Type TypeOf(this ref Info info, ast.Expr e) {
+internal static Type TypeOfᴍ(ref Info info, ast.Expr e) {
     var (t, ok) = info.Types[e, ꟷ]; if (ok) {
         return t.Type;
     }
@@ -357,7 +357,7 @@ public static Type TypeOf(this ref Info info, ast.Expr e) {
 // it defines, not the type (*[TypeName]) it uses.
 //
 // Precondition: the Uses and Defs maps are populated.
-public static Object ObjectOf(this ref Info info, ж<ast.Ident> id) {
+internal static Object ObjectOfᴍ(ref Info info, ж<ast.Ident> id) {
     var obj = info.Defs[id]; if (obj != nil) {
         return obj;
     }
@@ -370,7 +370,7 @@ public static Object ObjectOf(this ref Info info, ж<ast.Ident> id) {
 // For dot-imports, the package name is ".".
 //
 // Precondition: the Defs and Implicts maps are populated.
-public static ж<PkgName> PkgNameOf(this ref Info info, ж<ast.ImportSpec> Ꮡimp) {
+internal static ж<PkgName> PkgNameOfᴍ(ref Info info, ж<ast.ImportSpec> Ꮡimp) {
     ref var imp = ref Ꮡimp.DerefOrNull();
 
     Object obj = default;
@@ -393,29 +393,29 @@ partial struct TypeAndValue {
     public constant.Value Value;
 }
 
-} partial class typesᴛTypeAndValue {
+} partial class types_package {
 
 // IsVoid reports whether the corresponding expression
 // is a function call without results.
-public static bool IsVoid(this TypeAndValue tv) {
+internal static bool IsVoidᴍ(TypeAndValue tv) {
     return tv.mode == novalue;
 }
 
 // IsType reports whether the corresponding expression specifies a type.
-public static bool IsType(this TypeAndValue tv) {
+internal static bool IsTypeᴍ(TypeAndValue tv) {
     return tv.mode == typexpr;
 }
 
 // IsBuiltin reports whether the corresponding expression denotes
 // a (possibly parenthesized) built-in function.
-public static bool IsBuiltin(this TypeAndValue tv) {
+internal static bool IsBuiltinᴍ(TypeAndValue tv) {
     return tv.mode == Δbuiltin;
 }
 
 // IsValue reports whether the corresponding expression is a value.
 // Builtins are not considered values. Constant values have a non-
 // nil Value.
-public static bool IsValue(this TypeAndValue tv) {
+internal static bool IsValueᴍ(TypeAndValue tv) {
     switch (tv.mode) {
     case var ᴛ when ᴛ == constant_ || ᴛ == variable || ᴛ == mapindex || ᴛ == value || ᴛ == commaok || ᴛ == commaerr: {
         return true;
@@ -425,25 +425,25 @@ public static bool IsValue(this TypeAndValue tv) {
 
 // IsNil reports whether the corresponding expression denotes the
 // predeclared value nil.
-public static bool IsNil(this TypeAndValue tv) {
+internal static bool IsNilᴍ(TypeAndValue tv) {
     return tv.mode == value && AreEqual(tv.Type, Typ[UntypedNil]);
 }
 
 // Addressable reports whether the corresponding expression
 // is addressable (https://golang.org/ref/spec#Address_operators).
-public static bool Addressable(this TypeAndValue tv) {
+internal static bool Addressableᴍ(TypeAndValue tv) {
     return tv.mode == variable;
 }
 
 // Assignable reports whether the corresponding expression
 // is assignable to (provided a value of the right type).
-public static bool Assignable(this TypeAndValue tv) {
+internal static bool Assignableᴍ(TypeAndValue tv) {
     return tv.mode == variable || tv.mode == mapindex;
 }
 
 // HasOk reports whether the corresponding expression may be
 // used on the rhs of a comma-ok assignment.
-public static bool HasOk(this TypeAndValue tv) {
+internal static bool HasOkᴍ(TypeAndValue tv) {
     return tv.mode == commaok || tv.mode == mapindex;
 }
 
@@ -466,9 +466,9 @@ partial struct Initializer {
     public ast.Expr Rhs;
 }
 
-} partial class typesᴛInitializer {
+} partial class types_package {
 
-public static @string String(this ref Initializer init) {
+internal static @string Stringᴍ(ref Initializer init) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (i, lhs) in range(init.Lhs)) {
         if (i > 0) {
@@ -481,7 +481,7 @@ public static @string String(this ref Initializer init) {
     return Ꮡbuf.String();
 }
 
-} partial class typesᴛConfig {
+} partial class types_package {
 
 // Check type-checks a package and returns the resulting package object and
 // the first error if any. Additionally, if info != nil, Check populates each
@@ -494,9 +494,41 @@ public static @string String(this ref Initializer init) {
 // The package is specified by a list of *ast.Files and corresponding
 // file set, and the package path the package is identified with.
 // The clean path must not be empty or dot (".").
-public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, ж<token.FileSet> fset, slice<ж<ast.File>> files, ж<Info> info) {
+internal static (ж<Package>, error) Checkᴍ(ж<Config> Ꮡconf, @string path, ж<token.FileSet> fset, slice<ж<ast.File>> files, ж<Info> info) {
     var pkg = NewPackage(path, ""u8);
     return (pkg, NewChecker(Ꮡconf, fset, pkg, info).Files(files));
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this Error err) => types_package.Errorᴍ(err);
+}
+partial class typesᴛArgumentError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ArgumentError e) => types_package.Errorᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref ArgumentError e) => types_package.Unwrapᴍ(ref e);
+}
+partial class typesᴛInfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool recordTypes(this ref Info info) => types_package.recordTypesᴍ(ref info);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type TypeOf(this ref Info info, ast.Expr e) => types_package.TypeOfᴍ(ref info, e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Object ObjectOf(this ref Info info, ж<ast.Ident> id) => types_package.ObjectOfᴍ(ref info, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PkgName> PkgNameOf(this ref Info info, ж<ast.ImportSpec> Ꮡimp) => types_package.PkgNameOfᴍ(ref info, Ꮡimp);
+}
+partial class typesᴛTypeAndValue {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsVoid(this TypeAndValue tv) => types_package.IsVoidᴍ(tv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsType(this TypeAndValue tv) => types_package.IsTypeᴍ(tv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsBuiltin(this TypeAndValue tv) => types_package.IsBuiltinᴍ(tv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsValue(this TypeAndValue tv) => types_package.IsValueᴍ(tv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsNil(this TypeAndValue tv) => types_package.IsNilᴍ(tv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Addressable(this TypeAndValue tv) => types_package.Addressableᴍ(tv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Assignable(this TypeAndValue tv) => types_package.Assignableᴍ(tv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasOk(this TypeAndValue tv) => types_package.HasOkᴍ(tv);
+}
+partial class typesᴛInitializer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Initializer init) => types_package.Stringᴍ(ref init);
+}
+partial class typesᴛConfig {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, ж<token.FileSet> fset, slice<ж<ast.File>> files, ж<Info> info) => types_package.Checkᴍ(Ꮡconf, path, fset, files, info);
+}
+// </GlyphForwarders>

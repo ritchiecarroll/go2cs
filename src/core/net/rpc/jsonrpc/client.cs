@@ -50,9 +50,9 @@ partial struct clientRequest {
     public uint64 Id; /*`json:"id"`*/
 }
 
-} partial class jsonrpcᴛclientCodec {
+} partial class jsonrpc_package {
 
-internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) {
+internal static error WriteRequestᴍ(ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -73,21 +73,21 @@ partial struct clientResponse {
     public any Error; /*`json:"error"`*/
 }
 
-} partial class jsonrpcᴛclientResponse {
+} partial class jsonrpc_package {
 
-internal static void reset(this ref clientResponse r) {
+internal static void resetᴍ(ref clientResponse r) {
     r.Id = 0;
     r.Result = default;
     r.Error = default;
 }
 
-} partial class jsonrpcᴛclientCodec {
+} partial class jsonrpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unspecifiedErrorˢ => ref unspecifiedErrorˢᵇ;
 private static readonly @string unspecifiedErrorˢᵇ = "unspecified error"u8;
 
-internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) {
+internal static error ReadResponseHeaderᴍ(ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -116,14 +116,14 @@ internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Respo
     return default;
 }
 
-internal static error ReadResponseBody(this ref clientCodec c, any x) {
+internal static error ReadResponseBodyᴍ(ref clientCodec c, any x) {
     if (x == nil) {
         return default;
     }
     return json.Unmarshal(c.resp.Result.ValueSlot, x);
 }
 
-internal static error Close(this ref clientCodec c) {
+internal static error Closeᴍ(ref clientCodec c) {
     return c.c.Close();
 }
 
@@ -145,3 +145,15 @@ public static (ж<rpc.Client>, error) Dial(@string network, @string address) {
 }
 
 } // end jsonrpc_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class jsonrpcᴛclientCodec {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) => jsonrpc_package.WriteRequestᴍ(Ꮡc, Ꮡr, param);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) => jsonrpc_package.ReadResponseHeaderᴍ(Ꮡc, Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadResponseBody(this ref clientCodec c, any x) => jsonrpc_package.ReadResponseBodyᴍ(ref c, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref clientCodec c) => jsonrpc_package.Closeᴍ(ref c);
+}
+partial class jsonrpcᴛclientResponse {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref clientResponse r) => jsonrpc_package.resetᴍ(ref r);
+}
+// </GlyphForwarders>

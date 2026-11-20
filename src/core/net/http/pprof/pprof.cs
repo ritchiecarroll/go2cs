@@ -291,7 +291,7 @@ public static http.Handler Handler(@string name) {
 
 partial struct handler /*@string*/;
 
-} partial class pprofᴛhandler {
+} partial class pprof_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string xContentTypeOptionsˢ => ref xContentTypeOptionsˢᵇ;
@@ -313,7 +313,7 @@ private static readonly @string applicationOctetStreamˢᵇ = "application/octet
 internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
 private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
 
-internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> r) {
+internal static void ServeHTTPᴍ(handler name, http.ResponseWriter w, ж<http.Request> r) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
     var p = pprof.Lookup((@string)name);
     if (p == nil) {
@@ -350,7 +350,7 @@ private static readonly @string failedToCollectProfileˢᵇ = "failed to collect
 internal static ref readonly @string failedToComputeDeltaˢ => ref failedToComputeDeltaˢᵇ;
 private static readonly @string failedToComputeDeltaˢᵇ = "failed to compute delta"u8;
 
-internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) {
+internal static void serveDeltaProfileᴍ(handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) {
     GoFrame ᒐ = default;
     try {
         ref var r = ref Ꮡr.DerefOrNull();
@@ -588,3 +588,10 @@ internal static error indexTmplExecute(io.Writer w, slice<profileEntry> profiles
 }
 
 } // end pprof_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pprofᴛhandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> r) => pprof_package.ServeHTTPᴍ(name, w, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) => pprof_package.serveDeltaProfileᴍ(name, w, Ꮡr, p, secStr);
+}
+// </GlyphForwarders>

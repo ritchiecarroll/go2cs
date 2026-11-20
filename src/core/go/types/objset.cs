@@ -18,13 +18,13 @@ partial class types_package {
 // The zero value for objset is a ready-to-use empty objset.
 partial struct objset /*map[@string, Object]*/; // initialized lazily
 
-} partial class typesᴛobjset {
+} partial class types_package {
 
 // insert attempts to insert an object obj into objset s.
 // If s already contains an alternative object alt with
 // the same name, insert leaves s unchanged and returns alt.
 // Otherwise it inserts obj and returns nil.
-internal static Object insert(this ref objset s, Object obj) {
+internal static Object insertᴍ(ref objset s, Object obj) {
     @string id = obj.Id();
     var alt = (s)[id]; if (alt != nil) {
         return alt;
@@ -37,3 +37,9 @@ internal static Object insert(this ref objset s, Object obj) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛobjset {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Object insert(this ref objset s, Object obj) => types_package.insertᴍ(ref s, obj);
+}
+// </GlyphForwarders>

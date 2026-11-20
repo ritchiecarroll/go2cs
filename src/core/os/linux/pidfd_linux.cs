@@ -80,7 +80,7 @@ internal static (uintptr, error) pidfdFind(nint pid) {
     return (h, default);
 }
 
-} partial class osᴛProcess {
+} partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string waitidˢ => ref waitidˢᵇ;
@@ -88,7 +88,7 @@ private static readonly @string waitidˢᵇ = "waitid"u8;
 
 // pidfdWait waits for the process to complete,
 // and updates the process status to done.
-internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) {
+internal static (ж<ProcessState>, error) pidfdWaitᴍ(ж<Process> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -134,7 +134,7 @@ internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) {
 }
 
 // pidfdSendSignal sends a signal to the process.
-internal static error pidfdSendSignal(this ж<Process> Ꮡp, syscall.Signal s) {
+internal static error pidfdSendSignalᴍ(ж<Process> Ꮡp, syscall.Signal s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -244,3 +244,10 @@ internal static partial void ignoreSIGSYS();
 internal static partial void restoreSIGSYS();
 
 } // end os_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛProcess {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) => os_package.pidfdWaitᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error pidfdSendSignal(this ж<Process> Ꮡp, syscall.Signal s) => os_package.pidfdSendSignalᴍ(Ꮡp, s);
+}
+// </GlyphForwarders>

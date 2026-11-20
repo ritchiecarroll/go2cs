@@ -214,7 +214,7 @@ partial struct userArena {
 
 // go2cs generated this placeholder — func newUserArena is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class runtimeᴛuserArena {
+} partial class runtime_package {
 
 // go2cs generated this placeholder — func new is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -226,7 +226,7 @@ partial struct userArena {
 // in a new chunk. If cap is negative, the type will be taken literally, otherwise
 // it will be considered as an element type for a slice backing store with capacity
 // cap.
-internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> typ, nint cap) {
+internal static @unsafe.Pointer allocᴍ(ref userArena a, ж<_type> typ, nint cap) {
     var s = a.active;
     @unsafe.Pointer x = default;
     for (;;) {
@@ -247,7 +247,7 @@ private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
 
 // refill inserts the current arena chunk onto the full list and obtains a new
 // one, either from the partial list or allocating a new one, both from mheap.
-internal static ж<mspan> refill(this ref userArena a) {
+internal static ж<mspan> refillᴍ(ref userArena a) {
     // If there's an active chunk, assume it's full.
     var s = a.active;
     if (s != nil) {
@@ -313,7 +313,7 @@ partial struct userArenaStateᴛ1 /*dyn*/ {
 internal static readonly ж<userArenaStateᴛ1> ᏑuserArenaState = new StaticBox<userArenaStateᴛ1>(new userArenaStateᴛ1());
 internal static ref userArenaStateᴛ1 userArenaState => ref ((StaticBox<userArenaStateᴛ1>)ᏑuserArenaState).ValueSlot;
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string outOfMemoryˢ => ref outOfMemoryˢᵇ;
@@ -329,7 +329,7 @@ private static readonly @string mallocgcCalledWithoutAPˢᵇ = "mallocgc called 
 
 // userArenaNextFree reserves space in the user arena for an item of the specified
 // type. If cap is not -1, this is for an array of cap elements of type t.
-internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type> Ꮡtyp, nint cap) {
+internal static @unsafe.Pointer userArenaNextFreeᴍ(ж<mspan> Ꮡs, ж<_type> Ꮡtyp, nint cap) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -494,9 +494,9 @@ partial struct writeUserArenaHeapBits {
     internal uintptr low;    // number of low-order bits to not overwrite
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
-internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref mspan s, uintptr addr) {
+internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBitsᴍ(ref mspan s, uintptr addr) {
     writeUserArenaHeapBits h = default;
 
     var offset = addr - s.@base();
@@ -516,11 +516,11 @@ internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref msp
     return h;
 }
 
-} partial class runtimeᴛwriteUserArenaHeapBits {
+} partial class runtime_package {
 
 // write appends the pointerness of the next valid pointer slots
 // using the low valid bits of bits. 1=pointer, 0=scalar.
-internal static writeUserArenaHeapBits write(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
+internal static writeUserArenaHeapBits writeᴍ(writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (h.valid + valid <= ptrBits) {
@@ -553,7 +553,7 @@ internal static writeUserArenaHeapBits write(this writeUserArenaHeapBits h, ж<m
 }
 
 // Add padding of size bytes.
-internal static writeUserArenaHeapBits pad(this writeUserArenaHeapBits h, ж<mspan> s, uintptr size) {
+internal static writeUserArenaHeapBits padᴍ(writeUserArenaHeapBits h, ж<mspan> s, uintptr size) {
     if (size == 0) {
         return h;
     }
@@ -567,7 +567,7 @@ internal static writeUserArenaHeapBits pad(this writeUserArenaHeapBits h, ж<msp
 
 // Flush the bits that have been written, and add zeros as needed
 // to cover the full object [addr, addr+size).
-internal static void flush(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
+internal static void flushᴍ(writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var offset = addr - s.@base();
@@ -756,7 +756,7 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     return (x, span);
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // isUnusedUserArenaChunk indicates that the arena chunk has been set to fault
 // and doesn't contain any scannable memory anymore. However, it might still be
@@ -768,7 +768,7 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
 // This is really only meant to be used by accounting tests in the runtime to
 // distinguish when a span shouldn't be counted (since mSpanInUse might not be
 // enough).
-internal static bool isUnusedUserArenaChunk(this ref mspan s) {
+internal static bool isUnusedUserArenaChunkᴍ(ref mspan s) {
     return s.isUserArenaChunk && s.spanclass == makeSpanClass(0, true);
 }
 
@@ -783,7 +783,7 @@ private static readonly @string spanOnUserArenaFaultListˢᵇ = "span on userAre
 //
 // Must be in a non-preemptible state to ensure the consistency of statistics
 // exported to MemStats.
-internal static void setUserArenaChunkToFault(this ж<mspan> Ꮡs) {
+internal static void setUserArenaChunkToFaultᴍ(ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (!s.isUserArenaChunk) {
@@ -928,7 +928,7 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
     releasem(ref (mp).DerefOrNull());
 }
 
-} partial class runtimeᴛmheap {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sysAllocSizeIsNotˢ => ref sysAllocSizeIsNotˢᵇ;
@@ -945,7 +945,7 @@ private static readonly @string userArenaChunkˢᵇ = "user arena chunk"u8;
 // Acquires the heap lock. Must run on the system stack for that reason.
 //
 //go:systemstack
-internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
+internal static ж<mspan> allocUserArenaChunkᴍ(ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     ж<mspan> s = default;
@@ -1083,3 +1083,24 @@ internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛuserArena {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> typ, nint cap) => runtime_package.allocᴍ(ref a, typ, cap);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> refill(this ref userArena a) => runtime_package.refillᴍ(ref a);
+}
+partial class runtimeᴛmspan {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type> Ꮡtyp, nint cap) => runtime_package.userArenaNextFreeᴍ(Ꮡs, Ꮡtyp, cap);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref mspan s, uintptr addr) => runtime_package.writeUserArenaHeapBitsᴍ(ref s, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isUnusedUserArenaChunk(this ref mspan s) => runtime_package.isUnusedUserArenaChunkᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setUserArenaChunkToFault(this ж<mspan> Ꮡs) => runtime_package.setUserArenaChunkToFaultᴍ(Ꮡs);
+}
+partial class runtimeᴛwriteUserArenaHeapBits {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static writeUserArenaHeapBits write(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) => runtime_package.writeᴍ(h, Ꮡs, bits, valid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static writeUserArenaHeapBits pad(this writeUserArenaHeapBits h, ж<mspan> s, uintptr size) => runtime_package.padᴍ(h, s, size);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flush(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) => runtime_package.flushᴍ(h, Ꮡs, addr, size);
+}
+partial class runtimeᴛmheap {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) => runtime_package.allocUserArenaChunkᴍ(Ꮡh);
+}
+// </GlyphForwarders>

@@ -167,10 +167,10 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
     return (p, default);
 }
 
-} partial class profileᴛProfile {
+} partial class profile_package {
 
 // Write writes the profile as a gzip-compressed marshaled protobuf.
-public static error Write(this ж<Profile> Ꮡp, io.Writer w) {
+internal static error Writeᴍ(ж<Profile> Ꮡp, io.Writer w) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -191,7 +191,7 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) {
 // not limited to:
 //   - len(Profile.Sample[n].value) == len(Profile.value_unit)
 //   - Sample.id has a corresponding Profile.Location
-public static error CheckValid(this ref Profile p) {
+internal static error CheckValidᴍ(ref Profile p) {
     // Check that sample values are consistent
     nint sampleLen = len(p.SampleType);
     if (sampleLen == 0 && len(p.Sample) != 0) {
@@ -253,7 +253,7 @@ public static error CheckValid(this ref Profile p) {
 // Aggregate merges the locations in the profile into equivalence
 // classes preserving the request attributes. It also updates the
 // samples to point to the merged locations.
-public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
+internal static error Aggregateᴍ(ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
     foreach (var (_, m) in range(p.Mapping)) {
         m.HasInlineFrames = m.HasInlineFrames && inlineFrame;
         m.HasFunctions = m.HasFunctions && function;
@@ -300,7 +300,7 @@ private static readonly @string labelHeaderᶜᵇ = "                "u8;
 
 // Print dumps a text representation of a profile. Intended mainly
 // for debugging purposes.
-public static @string String(this ref Profile p) {
+internal static @string Stringᴍ(ref Profile p) {
     var ssᴷ = new stackAppend<@string>();
 
     var ss = new slice<@string>(0, len(p.Sample) + len(p.Mapping) + len(p.Location));
@@ -405,7 +405,7 @@ public static @string String(this ref Profile p) {
 // must be compatible (same Type and SampleType).
 // TODO(rsilvera): consider normalizing the profiles based on the
 // total samples collected.
-public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
+internal static error Mergeᴍ(ref Profile p, ж<Profile> Ꮡpb, float64 r) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     var err = p.Compatible(Ꮡpb); if (err != nil) {
@@ -448,7 +448,7 @@ public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
 // Compatible determines if two profiles can be compared/merged.
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
-public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
+internal static error Compatibleᴍ(ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     if (!compatibleValueTypes(p.PeriodType, pb.PeriodType)) {
@@ -470,7 +470,7 @@ public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
 
 // HasFunctions determines if all locations in this profile have
 // symbolized function information.
-public static bool HasFunctions(this ref Profile p) {
+internal static bool HasFunctionsᴍ(ref Profile p) {
     foreach (var (_, l) in range(p.Location)) {
         if (l.Mapping == nil || !l.Mapping.HasFunctions) {
             return false;
@@ -481,7 +481,7 @@ public static bool HasFunctions(this ref Profile p) {
 
 // HasFileLines determines if all locations in this profile have
 // symbolized file and line number information.
-public static bool HasFileLines(this ref Profile p) {
+internal static bool HasFileLinesᴍ(ref Profile p) {
     foreach (var (_, l) in range(p.Location)) {
         if (l.Mapping == nil || (!l.Mapping.HasFilenames || !l.Mapping.HasLineNumbers)) {
             return false;
@@ -502,10 +502,10 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
     return v1.Type == v2.Type && v1.Unit == v2.Unit;
 }
 
-} partial class profileᴛProfile {
+} partial class profile_package {
 
 // Copy makes a fully independent copy of a profile.
-public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
+internal static ж<Profile> Copyᴍ(ж<Profile> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.preEncode();
@@ -533,12 +533,12 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
 // are not demangled may be missing from the resulting map.
 // type Demangler is a methodless func type — rendered inline as its base delegate
 
-} partial class profileᴛProfile {
+} partial class profile_package {
 
 // Demangle attempts to demangle and optionally simplify any function
 // names referenced in the profile. It works on a best-effort basis:
 // it will silently preserve the original names in case of any errors.
-public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
+internal static error Demangleᴍ(ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
     // Collect names to demangle.
     slice<@string> names = default;
     foreach (var (_, fn) in range(p.Function)) {
@@ -559,12 +559,12 @@ public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@stri
 }
 
 // Empty reports whether the profile contains no samples.
-public static bool Empty(this ref Profile p) {
+internal static bool Emptyᴍ(ref Profile p) {
     return len(p.Sample) == 0;
 }
 
 // Scale multiplies all sample values in a profile by a constant.
-public static void Scale(this ref Profile p, float64 ratio) {
+internal static void Scaleᴍ(ref Profile p, float64 ratio) {
     if (ratio == 1D) {
         return;
     }
@@ -576,7 +576,7 @@ public static void Scale(this ref Profile p, float64 ratio) {
 }
 
 // ScaleN multiplies each sample values in a sample by a different amount.
-public static error ScaleN(this ref Profile p, slice<float64> ratios) {
+internal static error ScaleNᴍ(ref Profile p, slice<float64> ratios) {
     if (len(p.SampleType) != len(ratios)) {
         return fmt.Errorf("mismatched scale ratios, got %d, want %d"u8, len(ratios), len(p.SampleType));
     }
@@ -601,3 +601,21 @@ public static error ScaleN(this ref Profile p, slice<float64> ratios) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class profileᴛProfile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<Profile> Ꮡp, io.Writer w) => profile_package.Writeᴍ(Ꮡp, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckValid(this ref Profile p) => profile_package.CheckValidᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) => profile_package.Aggregateᴍ(ref p, inlineFrame, function, filename, linenumber, address);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Profile p) => profile_package.Stringᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) => profile_package.Mergeᴍ(ref p, Ꮡpb, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) => profile_package.Compatibleᴍ(ref p, Ꮡpb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasFunctions(this ref Profile p) => profile_package.HasFunctionsᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasFileLines(this ref Profile p) => profile_package.HasFileLinesᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Profile> Copy(this ж<Profile> Ꮡp) => profile_package.Copyᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) => profile_package.Demangleᴍ(ref p, d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Empty(this ref Profile p) => profile_package.Emptyᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Scale(this ref Profile p, float64 ratio) => profile_package.Scaleᴍ(ref p, ratio);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ScaleN(this ref Profile p, slice<float64> ratios) => profile_package.ScaleNᴍ(ref p, ratios);
+}
+// </GlyphForwarders>

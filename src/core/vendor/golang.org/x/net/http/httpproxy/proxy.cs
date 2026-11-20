@@ -120,7 +120,7 @@ internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
     return ""u8;
 }
 
-} partial class httpproxyᴛConfig {
+} partial class httpproxy_package {
 
 // ProxyFunc returns a function that determines the proxy URL to use for
 // a given request URL. Changing the contents of cfg will not affect
@@ -132,7 +132,7 @@ internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
 //
 // As a special case, if req.URL.Host is "localhost" or a loopback address
 // (with or without a port number), then a nil URL and nil error will be returned.
-public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config cfg) {
+internal static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFuncᴍ(ref Config cfg) {
     // Preprocess the Config settings for more efficient evaluation.
     var cfg1 = Ꮡ(new config(
         Config: cfg
@@ -141,13 +141,13 @@ public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config 
     return cfg1.proxyForURL;
 }
 
-} partial class httpproxyᴛconfig {
+} partial class httpproxy_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string refusingToUseHttpProxyˢ => ref refusingToUseHttpProxyˢᵇ;
 private static readonly @string refusingToUseHttpProxyˢᵇ = "refusing to use HTTP_PROXY value in CGI environment; see golang.org/s/cgihttpproxy"u8;
 
-internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL> ᏑreqURL) {
+internal static (ж<url.URL>, error) proxyForURLᴍ(ref config cfg, ж<url.URL> ᏑreqURL) {
     ref var reqURL = ref ᏑreqURL.DerefOrNull();
 
     ж<url.URL> proxy = default;
@@ -191,12 +191,12 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
     return (proxyURL, default);
 }
 
-} partial class httpproxyᴛconfig {
+} partial class httpproxy_package {
 
 // useProxy reports whether requests to addr should use a proxy,
 // according to the NO_PROXY or no_proxy environment variable.
 // addr is always a canonicalAddr with a host and port.
-internal static bool useProxy(this ref config cfg, @string addr) {
+internal static bool useProxyᴍ(ref config cfg, @string addr) {
     if (len(addr) == 0) {
         return true;
     }
@@ -233,7 +233,7 @@ internal static bool useProxy(this ref config cfg, @string addr) {
     return true;
 }
 
-internal static void init(this ref config c) {
+internal static void initᴍ(ref config c) {
     {
         var (parsed, err) = parseProxy(c.HTTPProxy); if (err == nil) {
             c.httpProxy = parsed;
@@ -375,9 +375,9 @@ partial interface matcher {
 partial struct allMatch {
 }
 
-} partial class httpproxyᴛallMatch {
+} partial class httpproxy_package {
 
-internal static bool match(this allMatch a, @string host, @string port, net.IP ip) {
+internal static bool matchᴍ(allMatch a, @string host, @string port, net.IP ip) {
     return true;
 }
 
@@ -387,9 +387,9 @@ partial struct cidrMatch {
     internal ж<net.IPNet> cidr;
 }
 
-} partial class httpproxyᴛcidrMatch {
+} partial class httpproxy_package {
 
-internal static bool match(this cidrMatch m, @string host, @string port, net.IP ip) {
+internal static bool matchᴍ(cidrMatch m, @string host, @string port, net.IP ip) {
     return m.cidr.Contains(ip);
 }
 
@@ -400,9 +400,9 @@ partial struct ipMatch {
     internal @string port;
 }
 
-} partial class httpproxyᴛipMatch {
+} partial class httpproxy_package {
 
-internal static bool match(this ipMatch m, @string host, @string port, net.IP ip) {
+internal static bool matchᴍ(ipMatch m, @string host, @string port, net.IP ip) {
     if (m.ip.Equal(ip)) {
         return m.port == ""u8 || m.port == port;
     }
@@ -417,9 +417,9 @@ partial struct domainMatch {
     internal bool matchHost;
 }
 
-} partial class httpproxyᴛdomainMatch {
+} partial class httpproxy_package {
 
-internal static bool match(this domainMatch m, @string host, @string port, net.IP ip) {
+internal static bool matchᴍ(domainMatch m, @string host, @string port, net.IP ip) {
     if (ip != nil) {
         return false;
     }
@@ -430,3 +430,26 @@ internal static bool match(this domainMatch m, @string host, @string port, net.I
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpproxyᴛConfig {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config cfg) => httpproxy_package.ProxyFuncᴍ(ref cfg);
+}
+partial class httpproxyᴛconfig {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL> ᏑreqURL) => httpproxy_package.proxyForURLᴍ(ref cfg, ᏑreqURL);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool useProxy(this ref config cfg, @string addr) => httpproxy_package.useProxyᴍ(ref cfg, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref config c) => httpproxy_package.initᴍ(ref c);
+}
+partial class httpproxyᴛallMatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this allMatch a, @string host, @string port, net.IP ip) => httpproxy_package.matchᴍ(a, host, port, ip);
+}
+partial class httpproxyᴛcidrMatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this cidrMatch m, @string host, @string port, net.IP ip) => httpproxy_package.matchᴍ(m, host, port, ip);
+}
+partial class httpproxyᴛipMatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this ipMatch m, @string host, @string port, net.IP ip) => httpproxy_package.matchᴍ(m, host, port, ip);
+}
+partial class httpproxyᴛdomainMatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this domainMatch m, @string host, @string port, net.IP ip) => httpproxy_package.matchᴍ(m, host, port, ip);
+}
+// </GlyphForwarders>

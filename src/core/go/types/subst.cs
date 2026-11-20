@@ -36,20 +36,20 @@ internal static substMap makeRenameMap(slice<ж<TypeParam>> from, slice<ж<TypeP
     return proj;
 }
 
-} partial class typesᴛsubstMap {
+} partial class types_package {
 
-internal static bool empty(this substMap m) {
+internal static bool emptyᴍ(substMap m) {
     return len(m) == 0;
 }
 
-internal static Type lookup(this substMap m, ж<TypeParam> tpar) {
+internal static Type lookupᴍ(substMap m, ж<TypeParam> tpar) {
     var t = m[tpar]; if (t != nil) {
         return t;
     }
     return new TypeParamжType(tpar);
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // subst returns the type typ with its type parameters tpars replaced by the
 // corresponding type arguments targs, recursively. subst doesn't modify the
@@ -58,7 +58,7 @@ internal static Type lookup(this substMap m, ж<TypeParam> tpar) {
 //
 // If expanding is non-nil, it is the instance type currently being expanded.
 // One of expanding or ctxt must be non-nil.
-internal static Type subst(this ж<Checker> Ꮡcheck, token.Pos pos, Type typ, substMap smap, ж<Named> expanding, ж<Context> ctxt) {
+internal static Type substᴍ(ж<Checker> Ꮡcheck, token.Pos pos, Type typ, substMap smap, ж<Named> expanding, ж<Context> ctxt) {
     assert(expanding != nil || ctxt != nil);
 
     if (smap.empty()) {
@@ -95,9 +95,9 @@ partial struct subster {
     internal ж<Context> ctxt;
 }
 
-} partial class typesᴛsubster {
+} partial class types_package {
 
-internal static Type typ(this ж<subster> Ꮡsubst, Type typ) {
+internal static Type typᴍ(ж<subster> Ꮡsubst, Type typ) {
     ref var subst = ref Ꮡsubst.DerefOrNull();
 
     switch (typ.type()) {
@@ -312,14 +312,14 @@ internal static Type typ(this ж<subster> Ꮡsubst, Type typ) {
 // typOrNil is like typ but if the argument is nil it is replaced with Typ[Invalid].
 // A nil type may appear in pathological cases such as type T[P any] []func(_ T([]_))
 // where an array/slice element is accessed before it is set up.
-internal static Type typOrNil(this ж<subster> Ꮡsubst, Type typ) {
+internal static Type typOrNilᴍ(ж<subster> Ꮡsubst, Type typ) {
     if (typ == nil) {
         return new BasicжType(Typ[Invalid]);
     }
     return Ꮡsubst.typ(typ);
 }
 
-internal static ж<Var> var_(this ж<subster> Ꮡsubst, ж<Var> Ꮡv) {
+internal static ж<Var> var_ᴍ(ж<subster> Ꮡsubst, ж<Var> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     if (Ꮡv != nil) {
@@ -341,9 +341,9 @@ internal static ж<Var> cloneVar(ж<Var> Ꮡv, Type typ) {
     return Ꮡcopy;
 }
 
-} partial class typesᴛsubster {
+} partial class types_package {
 
-internal static ж<Tuple> tuple(this ж<subster> Ꮡsubst, ж<Tuple> Ꮡt) {
+internal static ж<Tuple> tupleᴍ(ж<subster> Ꮡsubst, ж<Tuple> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt != nil) {
@@ -378,9 +378,9 @@ internal static slice<T> /*out*/ substList<T>(slice<T> @in, Func<T, T> subst) {
     return @out;
 }
 
-} partial class typesᴛsubster {
+} partial class types_package {
 
-internal static ж<Func> func_(this ж<subster> Ꮡsubst, ж<Func> Ꮡf) {
+internal static ж<Func> func_ᴍ(ж<subster> Ꮡsubst, ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf != nil) {
@@ -402,9 +402,9 @@ internal static ж<Func> cloneFunc(ж<Func> Ꮡf, Type typ) {
     return Ꮡcopy;
 }
 
-} partial class typesᴛsubster {
+} partial class types_package {
 
-internal static ж<Term> term(this ж<subster> Ꮡsubst, ж<Term> Ꮡt) {
+internal static ж<Term> termᴍ(ж<subster> Ꮡsubst, ж<Term> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var typ = Ꮡsubst.typ(t.typ); if (!AreEqual(typ, t.typ)) {
@@ -446,3 +446,21 @@ internal static (slice<ж<Func>> @out, bool copied) replaceRecvType(slice<ж<Fun
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛsubstMap {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this substMap m) => types_package.emptyᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type lookup(this substMap m, ж<TypeParam> tpar) => types_package.lookupᴍ(m, tpar);
+}
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type subst(this ж<Checker> Ꮡcheck, token.Pos pos, Type typ, substMap smap, ж<Named> expanding, ж<Context> ctxt) => types_package.substᴍ(Ꮡcheck, pos, typ, smap, expanding, ctxt);
+}
+partial class typesᴛsubster {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type typ(this ж<subster> Ꮡsubst, Type typ) => types_package.typᴍ(Ꮡsubst, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type typOrNil(this ж<subster> Ꮡsubst, Type typ) => types_package.typOrNilᴍ(Ꮡsubst, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Var> var_(this ж<subster> Ꮡsubst, ж<Var> Ꮡv) => types_package.var_ᴍ(Ꮡsubst, Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Tuple> tuple(this ж<subster> Ꮡsubst, ж<Tuple> Ꮡt) => types_package.tupleᴍ(Ꮡsubst, Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Func> func_(this ж<subster> Ꮡsubst, ж<Func> Ꮡf) => types_package.func_ᴍ(Ꮡsubst, Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Term> term(this ж<subster> Ꮡsubst, ж<Term> Ꮡt) => types_package.termᴍ(Ꮡsubst, Ꮡt);
+}
+// </GlyphForwarders>

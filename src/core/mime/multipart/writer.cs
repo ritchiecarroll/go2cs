@@ -35,10 +35,10 @@ public static ж<Writer> NewWriter(io.Writer w) {
     ));
 }
 
-} partial class multipartᴛWriter {
+} partial class multipart_package {
 
 // Boundary returns the [Writer]'s boundary.
-public static @string Boundary(this ref Writer w) {
+internal static @string Boundaryᴍ(ref Writer w) {
     return w.boundary;
 }
 
@@ -56,7 +56,7 @@ private static readonly @string mimeInvalidBoundaryˢ2ᵇ = "mime: invalid bound
 // SetBoundary must be called before any parts are created, may only
 // contain certain ASCII characters, and must be non-empty and
 // at most 70 bytes long.
-public static error SetBoundary(this ref Writer w, @string boundary) {
+internal static error SetBoundaryᴍ(ref Writer w, @string boundary) {
     if (w.lastpart != nil) {
         return errors.New(mimeSetBoundaryCalledˢ);
     }
@@ -88,7 +88,7 @@ public static error SetBoundary(this ref Writer w, @string boundary) {
 
 // FormDataContentType returns the Content-Type for an HTTP
 // multipart/form-data with this [Writer]'s Boundary.
-public static @string FormDataContentType(this ref Writer w) {
+internal static @string FormDataContentTypeᴍ(ref Writer w) {
     @string b = w.boundary;
     // We must quote the boundary if it contains any of the
     // tspecials characters defined by RFC 2045, or space.
@@ -109,13 +109,13 @@ internal static @string randomBoundary() {
     return fmt.Sprintf("%x"u8, buf[..]);
 }
 
-} partial class multipartᴛWriter {
+} partial class multipart_package {
 
 // CreatePart creates a new multipart section with the provided
 // header. The body of the part should be written to the returned
 // [Writer]. After calling CreatePart, any previous part may no longer
 // be written to.
-public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIMEHeader header) {
+internal static (io.Writer, error) CreatePartᴍ(ж<Writer> Ꮡw, textproto.MIMEHeader header) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.lastpart != nil) {
@@ -167,7 +167,7 @@ internal static @string escapeQuotes(@string s) {
     return quoteEscaper.Replace(s);
 }
 
-} partial class multipartᴛWriter {
+} partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
@@ -179,7 +179,7 @@ private static readonly @string applicationOctetStreamˢᵇ = "application/octet
 
 // CreateFormFile is a convenience wrapper around [Writer.CreatePart]. It creates
 // a new form-data header with the provided field name and file name.
-public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fieldname, @string filename) {
+internal static (io.Writer, error) CreateFormFileᴍ(ж<Writer> Ꮡw, @string fieldname, @string filename) {
     var h = new textproto.MIMEHeader(0);
     h.Set(contentDispositionˢ, FileContentDisposition(fieldname, filename));
     h.Set(contentTypeˢ, applicationOctetStreamˢ);
@@ -188,7 +188,7 @@ public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fi
 
 // CreateFormField calls [Writer.CreatePart] with a header using the
 // given field name.
-public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string fieldname) {
+internal static (io.Writer, error) CreateFormFieldᴍ(ж<Writer> Ꮡw, @string fieldname) {
     var h = new textproto.MIMEHeader(0);
     h.Set(contentDispositionˢ,
         fmt.Sprintf(@"form-data; name=""%s"""u8, escapeQuotes(fieldname)));
@@ -204,10 +204,10 @@ public static @string FileContentDisposition(@string fieldname, @string filename
         escapeQuotes(fieldname), escapeQuotes(filename));
 }
 
-} partial class multipartᴛWriter {
+} partial class multipart_package {
 
 // WriteField calls [Writer.CreateFormField] and then writes the given value.
-public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string value) {
+internal static error WriteFieldᴍ(ж<Writer> Ꮡw, @string fieldname, @string value) {
     var (p, err) = Ꮡw.CreateFormField(fieldname);
     if (err != nil) {
         return err;
@@ -218,7 +218,7 @@ public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string 
 
 // Close finishes the multipart message and writes the trailing
 // boundary end line to the output.
-public static error Close(this ref Writer w) {
+internal static error Closeᴍ(ref Writer w) {
     if (w.lastpart != nil) {
         var errΔ1 = w.lastpart.close(); if (errΔ1 != nil) {
             return errΔ1;
@@ -237,9 +237,9 @@ partial struct part {
     internal error we; // last error that occurred writing
 }
 
-} partial class multipartᴛpart {
+} partial class multipart_package {
 
-internal static error close(this ref part p) {
+internal static error closeᴍ(ref part p) {
     p.closed = true;
     return p.we;
 }
@@ -248,7 +248,7 @@ internal static error close(this ref part p) {
 internal static ref readonly @string multipartCanTWriteToˢ => ref multipartCanTWriteToˢᵇ;
 private static readonly @string multipartCanTWriteToˢᵇ = "multipart: can't write to finished part"u8;
 
-internal static (nint n, error err) Write(this ref part p, slice<byte> d) {
+internal static (nint n, error err) Writeᴍ(ref part p, slice<byte> d) {
     nint n = default;
     error err = default;
 
@@ -263,3 +263,20 @@ internal static (nint n, error err) Write(this ref part p, slice<byte> d) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class multipartᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Boundary(this ref Writer w) => multipart_package.Boundaryᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetBoundary(this ref Writer w, @string boundary) => multipart_package.SetBoundaryᴍ(ref w, boundary);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FormDataContentType(this ref Writer w) => multipart_package.FormDataContentTypeᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIMEHeader header) => multipart_package.CreatePartᴍ(Ꮡw, header);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fieldname, @string filename) => multipart_package.CreateFormFileᴍ(Ꮡw, fieldname, filename);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string fieldname) => multipart_package.CreateFormFieldᴍ(Ꮡw, fieldname);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string value) => multipart_package.WriteFieldᴍ(Ꮡw, fieldname, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer w) => multipart_package.Closeᴍ(ref w);
+}
+partial class multipartᴛpart {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ref part p) => multipart_package.closeᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref part p, slice<byte> d) => multipart_package.Writeᴍ(ref p, d);
+}
+// </GlyphForwarders>

@@ -27,25 +27,25 @@ partial struct batch {
     internal tracev2.Experiment exp;
 }
 
-} partial class traceᴛbatch {
+} partial class trace_package {
 
-internal static bool isStringsBatch(this ref batch b) {
+internal static bool isStringsBatchᴍ(ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvStrings;
 }
 
-internal static bool isStacksBatch(this ref batch b) {
+internal static bool isStacksBatchᴍ(ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvStacks;
 }
 
-internal static bool isCPUSamplesBatch(this ref batch b) {
+internal static bool isCPUSamplesBatchᴍ(ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvCPUSamples;
 }
 
-internal static bool isSyncBatch(this ref batch b, version.Version ver) {
+internal static bool isSyncBatchᴍ(ref batch b, version.Version ver) {
     return (b.exp == tracev2.NoExperiment && len(b.data) > 0) && ((((tracev2.EventType)b.data[0]) == tracev2.EvFrequency && ver < version.Go125) || (((tracev2.EventType)b.data[0]) == tracev2.EvSync && ver >= version.Go125));
 }
 
-internal static bool isEndOfGeneration(this ref batch b) {
+internal static bool isEndOfGenerationᴍ(ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvEndOfGeneration;
 }
 
@@ -130,3 +130,13 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
 }
 
 } // end trace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛbatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isStringsBatch(this ref batch b) => trace_package.isStringsBatchᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isStacksBatch(this ref batch b) => trace_package.isStacksBatchᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isCPUSamplesBatch(this ref batch b) => trace_package.isCPUSamplesBatchᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isSyncBatch(this ref batch b, version.Version ver) => trace_package.isSyncBatchᴍ(ref b, ver);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isEndOfGeneration(this ref batch b) => trace_package.isEndOfGenerationᴍ(ref b);
+}
+// </GlyphForwarders>

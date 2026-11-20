@@ -77,9 +77,9 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
     return (0D, 0, false);
 }
 
-} partial class strconvᴛdecimal {
+} partial class strconv_package {
 
-internal static bool /*ok*/ set(this ref @decimal b, @string s) {
+internal static bool /*ok*/ setᴍ(ref @decimal b, @string s) {
     bool ok = default;
 
     nint i = 0;
@@ -356,9 +356,9 @@ break_loop:;
 // decimal power of ten to binary power of two.
 internal static slice<nint> powtab = [1, 3, 6, 9, 13, 16, 19, 23, 26];
 
-} partial class strconvᴛdecimal {
+} partial class strconv_package {
 
-internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) {
+internal static (uint64 b, bool overflow) floatBitsᴍ(ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) {
     bool overflow = default;
     ref var d = ref Ꮡd.DerefOrNull();
     ref var flt = ref Ꮡflt.DerefOrNull();
@@ -783,3 +783,10 @@ internal static (float64, nint, error) parseFloatPrefix(@string s, nint bitSize)
 }
 
 } // end strconv_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class strconvᴛdecimal {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*ok*/ set(this ref @decimal b, @string s) => strconv_package.setᴍ(ref b, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) => strconv_package.floatBitsᴍ(Ꮡd, Ꮡflt);
+}
+// </GlyphForwarders>

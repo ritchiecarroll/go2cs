@@ -23,7 +23,7 @@ public static Error ErrSyntax => 2;
 public static Error ErrBase => 3;
 public static Error ErrBitSize => 4;
 
-} partial class strconvᴛError {
+} partial class strconv_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string valueOutOfRangeˢ => ref valueOutOfRangeˢᵇ;
@@ -37,7 +37,7 @@ private static readonly @string invalidBitSizeˢᵇ = "invalid bit size"u8;
 internal static ref readonly @string unknownErrorˢ => ref unknownErrorˢᵇ;
 private static readonly @string unknownErrorˢᵇ = "unknown error"u8;
 
-public static @string Error(this Error e) {
+internal static @string Errorᴍ(Error e) {
     switch (e) {
     case var ᴛ when ᴛ == ErrRange: {
         return valueOutOfRangeˢ;
@@ -354,3 +354,9 @@ internal static bool underscoreOK(@string s) {
 }
 
 } // end strconv_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class strconvᴛError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this Error e) => strconv_package.Errorᴍ(e);
+}
+// </GlyphForwarders>

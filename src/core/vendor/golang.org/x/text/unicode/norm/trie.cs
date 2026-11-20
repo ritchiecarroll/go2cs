@@ -32,13 +32,13 @@ internal static ref sparseBlocks nfkcSparse => ref ((StaticBox<sparseBlocks>)Ꮡ
 internal static ж<nfcTrie> nfcData = newNfcTrie(0);
 internal static ж<nfkcTrie> nfkcData = newNfkcTrie(0);
 
-} partial class normᴛsparseBlocks {
+} partial class norm_package {
 
 // lookup determines the type of block n and looks up the value for b.
 // For n < t.cutoff, the block is a simple lookup table. Otherwise, the block
 // is a list of ranges with an accompanying value. Given a matching range r,
 // the value for b is by r.value + (b - r.lo) * stride.
-internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
+internal static uint16 lookupᴍ(ref sparseBlocks t, uint32 n, byte b) {
     var offset = t.offset[n];
     var header = t.values[offset];
     var lo = (uint16)(offset + 1);
@@ -59,3 +59,9 @@ internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class normᴛsparseBlocks {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) => norm_package.lookupᴍ(ref t, n, b);
+}
+// </GlyphForwarders>

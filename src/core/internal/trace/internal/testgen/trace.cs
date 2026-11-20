@@ -83,24 +83,24 @@ public static ж<Trace> NewTrace(version.Version ver) {
     ));
 }
 
-} partial class testgenᴛTrace {
+} partial class testgen_package {
 
 // ExpectFailure writes down that the trace should be broken. The caller
 // must provide a pattern matching the expected error produced by the parser.
-public static void ExpectFailure(this ref Trace t, @string pattern) {
+internal static void ExpectFailureᴍ(ref Trace t, @string pattern) {
     t.bad = true;
     t.badMatch = regexp.MustCompile(pattern);
 }
 
 // ExpectSuccess writes down that the trace should successfully parse.
-public static void ExpectSuccess(this ref Trace t) {
+internal static void ExpectSuccessᴍ(ref Trace t) {
     t.bad = false;
 }
 
 // RawEvent emits an event into the trace. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace.
-public static void RawEvent(this ref Trace t, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+internal static void RawEventᴍ(ref Trace t, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
     t.events = append(t.events, t.createEvent(typ, data, args.ꓸꓸꓸ));
@@ -109,7 +109,7 @@ public static void RawEvent(this ref Trace t, tracev2.EventType typ, slice<byte>
 // DisableTimestamps makes the timestamps for all events generated after
 // this call zero. Raw events are exempted from this because the caller
 // has to pass their own timestamp into those events anyway.
-public static void DisableTimestamps(this ref Trace t) {
+internal static void DisableTimestampsᴍ(ref Trace t) {
     t.validTimestamps = false;
 }
 
@@ -117,7 +117,7 @@ public static void DisableTimestamps(this ref Trace t) {
 //
 // This provides more structure than Event to allow for more easily
 // creating complex traces that are mostly or completely correct.
-public static ж<Generation> Generation(this ж<Trace> Ꮡt, uint64 gen) {
+internal static ж<Generation> Generationᴍ(ж<Trace> Ꮡt, uint64 gen) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var g = Ꮡ(new Generation(
@@ -132,7 +132,7 @@ public static ж<Generation> Generation(this ж<Trace> Ꮡt, uint64 gen) {
 }
 
 // Generate creates a test file for the trace.
-public static slice<byte> Generate(this ref Trace t) {
+internal static slice<byte> Generateᴍ(ref Trace t) {
     // Trace file contents.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var (tw, err) = raw.NewTextWriter(new bytes_BufferжWriter(Ꮡbuf), t.ver);
@@ -165,7 +165,7 @@ public static slice<byte> Generate(this ref Trace t) {
     )));
 }
 
-internal static raw.Event createEvent(this ref Trace t, tracev2.EventType ev, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+internal static raw.Event createEventᴍ(ref Trace t, tracev2.EventType ev, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.slice();
 
     var spec = t.specs[ev];
@@ -207,12 +207,12 @@ partial struct Generation {
     internal bool ignoreStackBatchSizeLimit;
 }
 
-} partial class testgenᴛGeneration {
+} partial class testgen_package {
 
 // Batch starts a new event batch in the trace data.
 //
 // This is convenience function for generating correct batches.
-public static ж<Batch> Batch(this ж<Generation> Ꮡg, trace.ThreadID thread, Time time) {
+internal static ж<Batch> Batchᴍ(ж<Generation> Ꮡg, trace.ThreadID thread, Time time) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var b = Ꮡ(new Batch(
@@ -228,7 +228,7 @@ public static ж<Batch> Batch(this ж<Generation> Ꮡg, trace.ThreadID thread, T
 //
 // This is a convenience function for easily adding correct
 // strings to traces.
-public static uint64 String(this ref Generation g, @string s) {
+internal static uint64 Stringᴍ(ref Generation g, @string s) {
     if (len(s) == 0) {
         return 0;
     }
@@ -244,7 +244,7 @@ public static uint64 String(this ref Generation g, @string s) {
 //
 // This is a convenience function for easily adding correct
 // stacks to traces.
-public static uint64 Stack(this ref Generation g, slice<trace.StackFrame> stk) {
+internal static uint64 Stackᴍ(ref Generation g, slice<trace.StackFrame> stk) {
     if (len(stk) == 0) {
         return 0;
     }
@@ -266,7 +266,7 @@ public static uint64 Stack(this ref Generation g, slice<trace.StackFrame> stk) {
 // the time value is the timestamp of the EvClockSnapshot event. For earlier
 // version, the time value is the timestamp of the batch containing a lone
 // EvFrequency event.
-public static void Sync(this ref Generation g, uint64 freq, Time timeΔ1, uint64 mono, time.Time wall) {
+internal static void Syncᴍ(ref Generation g, uint64 freq, Time timeΔ1, uint64 mono, time.Time wall) {
     if (g.trace.ver < version.Go125 && (mono != 0 || !wall.IsZero())) {
         throw panic(fmt.Sprintf("mono and wall args are not supported in go1.%d traces"u8, g.trace.ver));
     }
@@ -287,14 +287,14 @@ partial struct sync {
     internal time.Time walltime;
 }
 
-} partial class testgenᴛGeneration {
+} partial class testgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string clockSnapshotˢ => ref clockSnapshotˢᵇ;
 private static readonly @string clockSnapshotˢᵇ = "ClockSnapshot"u8;
 
 // writeEventsTo emits event batches in the generation to tw.
-internal static void writeEventsTo(this ж<Generation> Ꮡg, ж<raw.TextWriter> Ꮡtw) {
+internal static void writeEventsToᴍ(ж<Generation> Ꮡg, ж<raw.TextWriter> Ꮡtw) {
     ref var g = ref Ꮡg.DerefOrNull();
     ref var tw = ref Ꮡtw.DerefOrNull();
 
@@ -368,7 +368,7 @@ internal static void writeEventsTo(this ж<Generation> Ꮡg, ж<raw.TextWriter> 
     }
 }
 
-internal static ж<Batch> newStructuralBatch(this ж<Generation> Ꮡg) {
+internal static ж<Batch> newStructuralBatchᴍ(ж<Generation> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var b = Ꮡ(new Batch(gen: Ꮡg, thread: trace.NoThread));
@@ -387,12 +387,12 @@ partial struct Batch {
     internal slice<raw.Event> events;
 }
 
-} partial class testgenᴛBatch {
+} partial class testgen_package {
 
 // Event emits an event into a batch. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace. Callers must omit the timestamp delta.
-public static void Event(this ref Batch b, @string name, params ꓸꓸꓸany argsʗp) {
+internal static void Eventᴍ(ref Batch b, @string name, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (ev, ok) = b.gen.trace.names[name, ꟷ];
@@ -420,7 +420,7 @@ public static void Event(this ref Batch b, @string name, params ꓸꓸꓸany arg
     b.RawEvent(ev, default, uintArgs.ꓸꓸꓸ);
 }
 
-internal static uint64 uintArgFor(this ref Batch b, any arg, @string argSpec) {
+internal static uint64 uintArgForᴍ(ref Batch b, any arg, @string argSpec) {
     var components = strings.SplitN(argSpec, "_", 2);
     @string typStr = components[0];
     if (len(components) == 2) {
@@ -478,7 +478,7 @@ internal static uint64 uintArgFor(this ref Batch b, any arg, @string argSpec) {
 // RawEvent emits an event into a batch. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace.
-public static void RawEvent(this ref Batch b, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+internal static void RawEventᴍ(ref Batch b, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
     var ev = b.gen.trace.createEvent(typ, data, args.ꓸꓸꓸ);
@@ -499,7 +499,7 @@ public static void RawEvent(this ref Batch b, tracev2.EventType typ, slice<byte>
 }
 
 // writeEventsTo emits events in the batch, including the batch header, to tw.
-internal static void writeEventsTo(this ref Batch b, ж<raw.TextWriter> Ꮡtw) {
+internal static void writeEventsToᴍ(ref Batch b, ж<raw.TextWriter> Ꮡtw) {
     ref var tw = ref Ꮡtw.DerefOrNull();
 
     tw.WriteEvent(new raw.Event(
@@ -513,7 +513,7 @@ internal static void writeEventsTo(this ref Batch b, ж<raw.TextWriter> Ꮡtw) {
 }
 
 // setTimestamp sets the timestamp for the batch.
-internal static void setTimestamp(this ref Batch b, Time t) {
+internal static void setTimestampᴍ(ref Batch b, Time t) {
     if (b.gen.trace.validTimestamps) {
         b.timestamp = t;
         b.gen.trace.lastTs = t;
@@ -530,3 +530,30 @@ partial struct Seq /*num:uint64*/;
 partial struct Time /*num:uint64*/;
 
 } // end testgen_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class testgenᴛTrace {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ExpectFailure(this ref Trace t, @string pattern) => testgen_package.ExpectFailureᴍ(ref t, pattern);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ExpectSuccess(this ref Trace t) => testgen_package.ExpectSuccessᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RawEvent(this ref Trace t, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) => testgen_package.RawEventᴍ(ref t, typ, data, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void DisableTimestamps(this ref Trace t) => testgen_package.DisableTimestampsᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Generation> Generation(this ж<Trace> Ꮡt, uint64 gen) => testgen_package.Generationᴍ(Ꮡt, gen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Generate(this ref Trace t) => testgen_package.Generateᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static raw.Event createEvent(this ref Trace t, tracev2.EventType ev, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) => testgen_package.createEventᴍ(ref t, ev, data, argsʗp);
+}
+partial class testgenᴛGeneration {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Batch> Batch(this ж<Generation> Ꮡg, trace.ThreadID thread, Time time) => testgen_package.Batchᴍ(Ꮡg, thread, time);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 String(this ref Generation g, @string s) => testgen_package.Stringᴍ(ref g, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Stack(this ref Generation g, slice<trace.StackFrame> stk) => testgen_package.Stackᴍ(ref g, stk);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sync(this ref Generation g, uint64 freq, Time timeΔ1, uint64 mono, time.Time wall) => testgen_package.Syncᴍ(ref g, freq, timeΔ1, mono, wall);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeEventsTo(this ж<Generation> Ꮡg, ж<raw.TextWriter> Ꮡtw) => testgen_package.writeEventsToᴍ(Ꮡg, Ꮡtw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Batch> newStructuralBatch(this ж<Generation> Ꮡg) => testgen_package.newStructuralBatchᴍ(Ꮡg);
+}
+partial class testgenᴛBatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Event(this ref Batch b, @string name, params ꓸꓸꓸany argsʗp) => testgen_package.Eventᴍ(ref b, name, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 uintArgFor(this ref Batch b, any arg, @string argSpec) => testgen_package.uintArgForᴍ(ref b, arg, argSpec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RawEvent(this ref Batch b, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) => testgen_package.RawEventᴍ(ref b, typ, data, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeEventsTo(this ref Batch b, ж<raw.TextWriter> Ꮡtw) => testgen_package.writeEventsToᴍ(ref b, Ꮡtw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setTimestamp(this ref Batch b, Time t) => testgen_package.setTimestampᴍ(ref b, t);
+}
+// </GlyphForwarders>

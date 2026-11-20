@@ -289,7 +289,7 @@ public static void SetCookie(ResponseWriter w, ж<Cookie> cookie) {
     }
 }
 
-} partial class httpᴛCookie {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pathˢ => ref pathˢᵇ;
@@ -319,7 +319,7 @@ private static readonly @string partitionedˢᵇ = "; Partitioned"u8;
 // header (if only Name and Value are set) or a Set-Cookie response
 // header (if other fields are set).
 // If c is nil or c.Name is invalid, the empty string is returned.
-public static @string String(this ж<Cookie> Ꮡc) {
+internal static @string Stringᴍ(ж<Cookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil || !isToken(c.Name)) {
@@ -407,7 +407,7 @@ internal static ref readonly @string httpPartitionedCookiesˢ => ref httpPartiti
 private static readonly @string httpPartitionedCookiesˢᵇ = "http: partitioned cookies must be set with Secure"u8;
 
 // Valid reports whether the cookie is valid.
-public static error Valid(this ж<Cookie> Ꮡc) {
+internal static error Validᴍ(ж<Cookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
@@ -690,3 +690,10 @@ internal static (@string value, bool quoted, bool ok) parseCookieValue(@string r
 }
 
 } // end http_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛCookie {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Cookie> Ꮡc) => http_package.Stringᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Valid(this ж<Cookie> Ꮡc) => http_package.Validᴍ(Ꮡc);
+}
+// </GlyphForwarders>

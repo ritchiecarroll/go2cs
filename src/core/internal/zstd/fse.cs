@@ -16,7 +16,7 @@ partial struct fseEntry {
     internal uint16 @base; // add those bits to this state to get the next state
 }
 
-} partial class zstdᴛReader {
+} partial class zstd_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fseAccuracyLogTooLargeˢ => ref fseAccuracyLogTooLargeˢᵇ;
@@ -34,7 +34,7 @@ private static readonly @string tooManySymbolsInFseTableˢᵇ = "too many symbol
 // The FSE is written into table, which must be at least 1<<maxBits in size.
 // This returns the number of bits in the FSE table and the new offset.
 // RFC 4.1.1.
-internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> Ꮡr, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) {
+internal static (nint tableBits, nint roff, error err) readFSEᴍ(ж<Reader> Ꮡr, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var br = Ꮡr.makeBitReader(data, off);
@@ -174,7 +174,7 @@ private static readonly @string fseStateErrorˢᵇ = "FSE state error"u8;
 // buildFSE builds an FSE decoding table from a list of probabilities.
 // The probabilities are in norm. next is scratch space. The number of bits
 // in the table is tableBits.
-internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
+internal static error buildFSEᴍ(ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
     nint tableSize = ((nint)1).Lsh((int64)(tableBits));
     nint highThreshold = tableSize - 1;
 
@@ -268,14 +268,14 @@ internal static UntypedInt literalLengthOffset => 16;
     (uint32)(65536 | (16 << 24))
 ]; }
 
-} partial class zstdᴛReader {
+} partial class zstd_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fseBaselineSymbolˢ => ref fseBaselineSymbolˢᵇ;
 private static readonly @string fseBaselineSymbolˢᵇ = "FSE baseline symbol overflow"u8;
 
 // makeLiteralBaselineFSE converts the literal length fseTable to baselineTable.
-internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeLiteralBaselineFSEᴍ(ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -303,7 +303,7 @@ internal static ref readonly @string fseOffsetSymbolOverflowˢ => ref fseOffsetS
 private static readonly @string fseOffsetSymbolOverflowˢᵇ = "FSE offset symbol overflow"u8;
 
 // makeOffsetBaselineFSE converts the offset length fseTable to baselineTable.
-internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeOffsetBaselineFSEᴍ(ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -372,10 +372,10 @@ internal static UntypedInt matchLengthOffset => 32;
     (uint32)(65539 | (16 << 24))
 ]; }
 
-} partial class zstdᴛReader {
+} partial class zstd_package {
 
 // makeMatchBaselineFSE converts the match length fseTable to baselineTable.
-internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeMatchBaselineFSEᴍ(ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -474,3 +474,13 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
 }.array(); }
 
 } // end zstd_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class zstdᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> Ꮡr, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) => zstd_package.readFSEᴍ(Ꮡr, data, off, maxSym, maxBits, table);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) => zstd_package.buildFSEᴍ(ref r, off, norm, table, tableBits);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) => zstd_package.makeLiteralBaselineFSEᴍ(ref r, off, fseTable, baselineTable);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) => zstd_package.makeOffsetBaselineFSEᴍ(ref r, off, fseTable, baselineTable);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) => zstd_package.makeMatchBaselineFSEᴍ(ref r, off, fseTable, baselineTable);
+}
+// </GlyphForwarders>

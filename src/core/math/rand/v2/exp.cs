@@ -17,7 +17,7 @@ partial class rand_package {
  */
 internal static UntypedFloat re => 7.69711747013104972;
 
-} partial class randᴛRand {
+} partial class rand_package {
 
 // ExpFloat64 returns an exponentially distributed float64 in the range
 // (0, +math.MaxFloat64] with an exponential distribution whose rate parameter
@@ -26,7 +26,7 @@ internal static UntypedFloat re => 7.69711747013104972;
 // callers can adjust the output using:
 //
 //	sample = ExpFloat64() / desiredRateParameter
-public static float64 ExpFloat64(this ref Rand r) {
+internal static float64 ExpFloat64ᴍ(ref Rand r) {
     for (;;) {
         var u = r.Uint64();
         var j = (uint32)u;
@@ -223,3 +223,9 @@ public static float64 ExpFloat64(this ref Rand r) {
 }.array(); }
 
 } // end rand_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class randᴛRand {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 ExpFloat64(this ref Rand r) => rand_package.ExpFloat64ᴍ(ref r);
+}
+// </GlyphForwarders>

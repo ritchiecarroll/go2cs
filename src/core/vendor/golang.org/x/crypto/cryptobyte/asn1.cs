@@ -15,28 +15,28 @@ using static cryptobyte_package;
 
 partial class cryptobyte_package {
 
-} partial class cryptobyteᴛBuilder {
+} partial class cryptobyte_package {
 
 // This file contains ASN.1-related methods for String and Builder.
 // Builder
 
 // AddASN1Int64 appends a DER-encoded ASN.1 INTEGER.
-public static void AddASN1Int64(this ж<Builder> Ꮡb, int64 v) {
+internal static void AddASN1Int64ᴍ(ж<Builder> Ꮡb, int64 v) {
     Ꮡb.addASN1Signed(asn1.INTEGER, v);
 }
 
 // AddASN1Int64WithTag appends a DER-encoded ASN.1 INTEGER with the
 // given tag.
-public static void AddASN1Int64WithTag(this ж<Builder> Ꮡb, int64 v, asn1.Tag tag) {
+internal static void AddASN1Int64WithTagᴍ(ж<Builder> Ꮡb, int64 v, asn1.Tag tag) {
     Ꮡb.addASN1Signed(tag, v);
 }
 
 // AddASN1Enum appends a DER-encoded ASN.1 ENUMERATION.
-public static void AddASN1Enum(this ж<Builder> Ꮡb, int64 v) {
+internal static void AddASN1Enumᴍ(ж<Builder> Ꮡb, int64 v) {
     Ꮡb.addASN1Signed(asn1.ENUM, v);
 }
 
-internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v) {
+internal static void addASN1Signedᴍ(ж<Builder> Ꮡb, asn1.Tag tag, int64 v) {
     Ꮡb.AddASN1(tag, (ж<Builder> c) => {
         nint length = 1;
         for (var i = v; i >= 0x80 || i < -0x80; i >>= 8) {
@@ -51,7 +51,7 @@ internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v)
 }
 
 // AddASN1Uint64 appends a DER-encoded ASN.1 INTEGER.
-public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
+internal static void AddASN1Uint64ᴍ(ж<Builder> Ꮡb, uint64 v) {
     Ꮡb.AddASN1(asn1.INTEGER, (ж<Builder> c) => {
         nint length = 1;
         for (var i = v; i >= 0x80; i >>= 8) {
@@ -66,7 +66,7 @@ public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
 }
 
 // AddASN1BigInt appends a DER-encoded ASN.1 INTEGER.
-public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<big.Int> n) {
+internal static void AddASN1BigIntᴍ(ж<Builder> Ꮡb, ж<big.Int> n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (b.err != nil) {
@@ -102,7 +102,7 @@ public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<big.Int> n) {
 }
 
 // AddASN1OctetString appends a DER-encoded ASN.1 OCTET STRING.
-public static void AddASN1OctetString(this ж<Builder> Ꮡb, slice<byte> bytes) {
+internal static void AddASN1OctetStringᴍ(ж<Builder> Ꮡb, slice<byte> bytes) {
     var bytesʗ1 = bytes;
     Ꮡb.AddASN1(asn1.OCTET_STRING, (ж<Builder> c) => {
         c.AddBytes(bytesʗ1);
@@ -114,10 +114,10 @@ public static void AddASN1OctetString(this ж<Builder> Ꮡb, slice<byte> bytes) 
 internal static ref readonly @string generalizedTimeFormatStr => ref generalizedTimeFormatStrᵇ;
 private static readonly @string generalizedTimeFormatStrᵇ = "20060102150405Z0700"u8;
 
-} partial class cryptobyteᴛBuilder {
+} partial class cryptobyte_package {
 
 // AddASN1GeneralizedTime appends a DER-encoded ASN.1 GENERALIZEDTIME.
-public static void AddASN1GeneralizedTime(this ж<Builder> Ꮡb, time.Time t) {
+internal static void AddASN1GeneralizedTimeᴍ(ж<Builder> Ꮡb, time.Time t) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (t.Year() < 0 || t.Year() > 9999) {
@@ -131,7 +131,7 @@ public static void AddASN1GeneralizedTime(this ж<Builder> Ꮡb, time.Time t) {
 }
 
 // AddASN1UTCTime appends a DER-encoded ASN.1 UTCTime.
-public static void AddASN1UTCTime(this ж<Builder> Ꮡb, time.Time t) {
+internal static void AddASN1UTCTimeᴍ(ж<Builder> Ꮡb, time.Time t) {
     var tʗ1 = t;
     Ꮡb.AddASN1(asn1.UTCTime, (ж<Builder> c) => {
         // As utilized by the X.509 profile, UTCTime can only
@@ -146,7 +146,7 @@ public static void AddASN1UTCTime(this ж<Builder> Ꮡb, time.Time t) {
 
 // AddASN1BitString appends a DER-encoded ASN.1 BIT STRING. This does not
 // support BIT STRINGs that are not a whole number of bytes.
-public static void AddASN1BitString(this ж<Builder> Ꮡb, slice<byte> data) {
+internal static void AddASN1BitStringᴍ(ж<Builder> Ꮡb, slice<byte> data) {
     var dataʗ1 = data;
     Ꮡb.AddASN1(asn1.BIT_STRING, (ж<Builder> bΔ1) => {
         bΔ1.AddUint8(0);
@@ -154,7 +154,7 @@ public static void AddASN1BitString(this ж<Builder> Ꮡb, slice<byte> data) {
     });
 }
 
-internal static void addBase128Int(this ref Builder b, int64 n) {
+internal static void addBase128Intᴍ(ref Builder b, int64 n) {
     nint length = default;
     if (n == 0) {
         length = 1;
@@ -195,9 +195,9 @@ internal static bool isValidOID(encoding_asn1.ObjectIdentifier oid) {
     return true;
 }
 
-} partial class cryptobyteᴛBuilder {
+} partial class cryptobyte_package {
 
-public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.ObjectIdentifier oid) {
+internal static void AddASN1ObjectIdentifierᴍ(ж<Builder> Ꮡb, encoding_asn1.ObjectIdentifier oid) {
     var oidʗ1 = oid;
     Ꮡb.AddASN1(asn1.OBJECT_IDENTIFIER, (ж<Builder> bΔ1) => {
         if (!isValidOID(oidʗ1)) {
@@ -212,7 +212,7 @@ public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.
     });
 }
 
-public static void AddASN1Boolean(this ж<Builder> Ꮡb, bool v) {
+internal static void AddASN1Booleanᴍ(ж<Builder> Ꮡb, bool v) {
     Ꮡb.AddASN1(asn1.BOOLEAN, (ж<Builder> bΔ1) => {
         if (v) {
             bΔ1.AddUint8(0xff);
@@ -222,13 +222,13 @@ public static void AddASN1Boolean(this ж<Builder> Ꮡb, bool v) {
     });
 }
 
-public static void AddASN1NULL(this ref Builder b) {
+internal static void AddASN1NULLᴍ(ref Builder b) {
     b.add((uint8)asn1.NULL, 0);
 }
 
 // MarshalASN1 calls encoding_asn1.Marshal on its input and appends the result if
 // successful or records an error if one occurred.
-public static void MarshalASN1(this ref Builder b, any v) {
+internal static void MarshalASN1ᴍ(ref Builder b, any v) {
     // NOTE(martinkr): This is somewhat of a hack to allow propagation of
     // encoding_asn1.Marshal errors into Builder.err. N.B. if you call MarshalASN1 with a
     // value embedded into a struct, its tag information is lost.
@@ -247,7 +247,7 @@ public static void MarshalASN1(this ref Builder b, any v) {
 // Tags greater than 30 are not supported and result in an error (i.e.
 // low-tag-number form only). The child builder passed to the
 // BuilderContinuation can be used to build the content of the ASN.1 object.
-public static void AddASN1(this ж<Builder> Ꮡb, asn1.Tag tag, Action<ж<Builder>> f) {
+internal static void AddASN1ᴍ(ж<Builder> Ꮡb, asn1.Tag tag, Action<ж<Builder>> f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (b.err != nil) {
@@ -263,14 +263,14 @@ public static void AddASN1(this ж<Builder> Ꮡb, asn1.Tag tag, Action<ж<Builde
     Ꮡb.addLengthPrefixed(1, true, f);
 }
 
-} partial class cryptobyteᴛString {
+} partial class cryptobyte_package {
 
 // String
 
 // ReadASN1Boolean decodes an ASN.1 BOOLEAN and converts it to a boolean
 // representation into out and advances. It reports whether the read
 // was successful.
-public static bool ReadASN1Boolean(this ref String s, ж<bool> Ꮡout) {
+internal static bool ReadASN1Booleanᴍ(ref String s, ж<bool> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
@@ -300,7 +300,7 @@ public static bool ReadASN1Boolean(this ref String s, ж<bool> Ꮡout) {
 // big-endian binary values that share memory with s. Positive values will have
 // no leading zeroes, and zero will be returned as a single zero byte.
 // ReadASN1Integer reports whether the read was successful.
-public static bool ReadASN1Integer(this ref String s, any @out) {
+internal static bool ReadASN1Integerᴍ(ref String s, any @out) {
     switch (@out.type()) {
     case ж<nint> _:
     case ж<int8> _:
@@ -360,9 +360,9 @@ internal static bool checkASN1Integer(slice<byte> bytes) {
 
 internal static ж<big.Int> bigOne = big.NewInt(1);
 
-} partial class cryptobyteᴛString {
+} partial class cryptobyte_package {
 
-internal static bool readASN1BigInt(this ref String s, ж<big.Int> @out) {
+internal static bool readASN1BigIntᴍ(ref String s, ж<big.Int> @out) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes)) {
         return false;
@@ -382,7 +382,7 @@ internal static bool readASN1BigInt(this ref String s, ж<big.Int> @out) {
     return true;
 }
 
-internal static bool readASN1Bytes(this ref String s, ж<slice<byte>> Ꮡout) {
+internal static bool readASN1Bytesᴍ(ref String s, ж<slice<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
@@ -399,7 +399,7 @@ internal static bool readASN1Bytes(this ref String s, ж<slice<byte>> Ꮡout) {
     return true;
 }
 
-internal static bool readASN1Int64(this ref String s, ж<int64> @out) {
+internal static bool readASN1Int64ᴍ(ref String s, ж<int64> @out) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Signed(ref (@out).DerefOrNull(), bytes)) {
         return false;
@@ -424,9 +424,9 @@ internal static bool asn1Signed(ref int64 @out, slice<byte> n) {
     return true;
 }
 
-} partial class cryptobyteᴛString {
+} partial class cryptobyte_package {
 
-internal static bool readASN1Uint64(this ref String s, ж<uint64> @out) {
+internal static bool readASN1Uint64ᴍ(ref String s, ж<uint64> @out) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Unsigned(ref (@out).DerefOrNull(), bytes)) {
         return false;
@@ -453,19 +453,19 @@ internal static bool asn1Unsigned(ref uint64 @out, slice<byte> n) {
     return true;
 }
 
-} partial class cryptobyteᴛString {
+} partial class cryptobyte_package {
 
 // ReadASN1Int64WithTag decodes an ASN.1 INTEGER with the given tag into out
 // and advances. It reports whether the read was successful and resulted in a
 // value that can be represented in an int64.
-public static bool ReadASN1Int64WithTag(this ref String s, ж<int64> @out, asn1.Tag tag) {
+internal static bool ReadASN1Int64WithTagᴍ(ref String s, ж<int64> @out, asn1.Tag tag) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     return s.ReadASN1(Ꮡbytes, tag) && checkASN1Integer(bytes) && asn1Signed(ref (@out).DerefOrNull(), bytes);
 }
 
 // ReadASN1Enum decodes an ASN.1 ENUMERATION into out and advances. It reports
 // whether the read was successful.
-public static bool ReadASN1Enum(this ref String s, ж<nint> Ꮡout) {
+internal static bool ReadASN1Enumᴍ(ref String s, ж<nint> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
@@ -480,7 +480,7 @@ public static bool ReadASN1Enum(this ref String s, ж<nint> Ꮡout) {
     return true;
 }
 
-internal static bool readBase128Int(this ref String s, ж<nint> Ꮡout) {
+internal static bool readBase128Intᴍ(ref String s, ж<nint> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint ret = 0;
@@ -514,7 +514,7 @@ internal static bool readBase128Int(this ref String s, ж<nint> Ꮡout) {
 
 // ReadASN1ObjectIdentifier decodes an ASN.1 OBJECT IDENTIFIER into out and
 // advances. It reports whether the read was successful.
-public static bool ReadASN1ObjectIdentifier(this ref String s, ж<encoding_asn1.ObjectIdentifier> Ꮡout) {
+internal static bool ReadASN1ObjectIdentifierᴍ(ref String s, ж<encoding_asn1.ObjectIdentifier> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
@@ -555,7 +555,7 @@ public static bool ReadASN1ObjectIdentifier(this ref String s, ж<encoding_asn1.
 
 // ReadASN1GeneralizedTime decodes an ASN.1 GENERALIZEDTIME into out and
 // advances. It reports whether the read was successful.
-public static bool ReadASN1GeneralizedTime(this ref String s, ж<time.Time> Ꮡout) {
+internal static bool ReadASN1GeneralizedTimeᴍ(ref String s, ж<time.Time> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
@@ -579,11 +579,11 @@ public static bool ReadASN1GeneralizedTime(this ref String s, ж<time.Time> Ꮡo
 internal static ref readonly @string defaultUTCTimeFormatStr => ref defaultUTCTimeFormatStrᵇ;
 private static readonly @string defaultUTCTimeFormatStrᵇ = "060102150405Z0700"u8;
 
-} partial class cryptobyteᴛString {
+} partial class cryptobyte_package {
 
 // ReadASN1UTCTime decodes an ASN.1 UTCTime into out and advances.
 // It reports whether the read was successful.
-public static bool ReadASN1UTCTime(this ref String s, ж<time.Time> Ꮡout) {
+internal static bool ReadASN1UTCTimeᴍ(ref String s, ж<time.Time> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
@@ -622,7 +622,7 @@ public static bool ReadASN1UTCTime(this ref String s, ж<time.Time> Ꮡout) {
 
 // ReadASN1BitString decodes an ASN.1 BIT STRING into out and advances.
 // It reports whether the read was successful.
-public static bool ReadASN1BitString(this ref String s, ж<encoding_asn1.BitString> Ꮡout) {
+internal static bool ReadASN1BitStringᴍ(ref String s, ж<encoding_asn1.BitString> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
@@ -644,7 +644,7 @@ public static bool ReadASN1BitString(this ref String s, ж<encoding_asn1.BitStri
 // ReadASN1BitStringAsBytes decodes an ASN.1 BIT STRING into out and advances. It is
 // an error if the BIT STRING is not a whole number of bytes. It reports
 // whether the read was successful.
-public static bool ReadASN1BitStringAsBytes(this ref String s, ж<slice<byte>> Ꮡout) {
+internal static bool ReadASN1BitStringAsBytesᴍ(ref String s, ж<slice<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var bytes = ref heap<String>(out var Ꮡbytes);
@@ -663,7 +663,7 @@ public static bool ReadASN1BitStringAsBytes(this ref String s, ж<slice<byte>> �
 // ReadASN1Bytes reads the contents of a DER-encoded ASN.1 element (not including
 // tag and length bytes) into out, and advances. The element must match the
 // given tag. It reports whether the read was successful.
-public static bool ReadASN1Bytes(this ref String s, ж<slice<byte>> @out, asn1.Tag tag) {
+internal static bool ReadASN1Bytesᴍ(ref String s, ж<slice<byte>> @out, asn1.Tag tag) {
     return s.ReadASN1(@out.Reinterpret<slice<byte>, String>(), tag);
 }
 
@@ -672,7 +672,7 @@ public static bool ReadASN1Bytes(this ref String s, ж<slice<byte>> @out, asn1.T
 // given tag. It reports whether the read was successful.
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
-public static bool ReadASN1(this ref String s, ж<String> @out, asn1.Tag tag) {
+internal static bool ReadASN1ᴍ(ref String s, ж<String> @out, asn1.Tag tag) {
     ref var t = ref heap(new golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡt);
     if (!s.ReadAnyASN1(@out, Ꮡt) || t != tag) {
         return false;
@@ -685,7 +685,7 @@ public static bool ReadASN1(this ref String s, ж<String> @out, asn1.Tag tag) {
 // given tag. It reports whether the read was successful.
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
-public static bool ReadASN1Element(this ref String s, ж<String> @out, asn1.Tag tag) {
+internal static bool ReadASN1Elementᴍ(ref String s, ж<String> @out, asn1.Tag tag) {
     ref var t = ref heap(new golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡt);
     if (!s.ReadAnyASN1Element(@out, Ꮡt) || t != tag) {
         return false;
@@ -698,7 +698,7 @@ public static bool ReadASN1Element(this ref String s, ж<String> @out, asn1.Tag 
 // It reports whether the read was successful.
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
-public static bool ReadAnyASN1(this ref String s, ж<String> @out, ж<asn1.Tag> outTag) {
+internal static bool ReadAnyASN1ᴍ(ref String s, ж<String> @out, ж<asn1.Tag> outTag) {
     return s.readASN1(@out, outTag, true /* skip header */);
 }
 
@@ -707,13 +707,13 @@ public static bool ReadAnyASN1(this ref String s, ж<String> @out, ж<asn1.Tag> 
 // advances. It reports whether the read was successful.
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
-public static bool ReadAnyASN1Element(this ref String s, ж<String> @out, ж<asn1.Tag> outTag) {
+internal static bool ReadAnyASN1Elementᴍ(ref String s, ж<String> @out, ж<asn1.Tag> outTag) {
     return s.readASN1(@out, outTag, false /* include header */);
 }
 
 // PeekASN1Tag reports whether the next ASN.1 value on the string starts with
 // the given tag.
-public static bool PeekASN1Tag(this String s, asn1.Tag tag) {
+internal static bool PeekASN1Tagᴍ(String s, asn1.Tag tag) {
     if (len(s) == 0) {
         return false;
     }
@@ -722,7 +722,7 @@ public static bool PeekASN1Tag(this String s, asn1.Tag tag) {
 
 // SkipASN1 reads and discards an ASN.1 element with the given tag. It
 // reports whether the operation was successful.
-public static bool SkipASN1(this ref String s, asn1.Tag tag) {
+internal static bool SkipASN1ᴍ(ref String s, asn1.Tag tag) {
     ref var unused = ref heap<String>(out var Ꮡunused);
     return s.ReadASN1(Ꮡunused, tag);
 }
@@ -731,7 +731,7 @@ public static bool SkipASN1(this ref String s, asn1.Tag tag) {
 // element (not including tag and length bytes) tagged with the given tag into
 // out. It stores whether an element with the tag was found in outPresent,
 // unless outPresent is nil. It reports whether the read was successful.
-public static bool ReadOptionalASN1(this ж<String> Ꮡs, ж<String> @out, ж<bool> ᏑoutPresent, asn1.Tag tag) {
+internal static bool ReadOptionalASN1ᴍ(ж<String> Ꮡs, ж<String> @out, ж<bool> ᏑoutPresent, asn1.Tag tag) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var outPresent = ref ᏑoutPresent.DerefOrNull();
 
@@ -747,7 +747,7 @@ public static bool ReadOptionalASN1(this ж<String> Ꮡs, ж<String> @out, ж<bo
 
 // SkipOptionalASN1 advances s over an ASN.1 element with the given tag, or
 // else leaves s unchanged. It reports whether the operation was successful.
-public static bool SkipOptionalASN1(this ж<String> Ꮡs, asn1.Tag tag) {
+internal static bool SkipOptionalASN1ᴍ(ж<String> Ꮡs, asn1.Tag tag) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (!Ꮡs.PeekASN1Tag(tag)) {
@@ -761,7 +761,7 @@ public static bool SkipOptionalASN1(this ж<String> Ꮡs, asn1.Tag tag) {
 // tagged with tag into out and advances. If no element with a matching tag is
 // present, it writes defaultValue into out instead. Otherwise, it behaves like
 // ReadASN1Integer.
-public static bool ReadOptionalASN1Integer(this ж<String> Ꮡs, any @out, asn1.Tag tag, any defaultValue) {
+internal static bool ReadOptionalASN1Integerᴍ(ж<String> Ꮡs, any @out, asn1.Tag tag, any defaultValue) {
     ref var present = ref heap(new bool(), out var Ꮡpresent);
     ref var i = ref heap<String>(out var Ꮡi);
     if (!Ꮡs.ReadOptionalASN1(Ꮡi, Ꮡpresent, tag)) {
@@ -807,7 +807,7 @@ public static bool ReadOptionalASN1Integer(this ж<String> Ꮡs, any @out, asn1.
 // explicitly tagged with tag into out and advances. If no element with a
 // matching tag is present, it sets "out" to nil instead. It reports
 // whether the read was successful.
-public static bool ReadOptionalASN1OctetString(this ж<String> Ꮡs, ж<slice<byte>> Ꮡout, ж<bool> ᏑoutPresent, asn1.Tag tag) {
+internal static bool ReadOptionalASN1OctetStringᴍ(ж<String> Ꮡs, ж<slice<byte>> Ꮡout, ж<bool> ᏑoutPresent, asn1.Tag tag) {
     ref var @out = ref Ꮡout.DerefOrNull();
     ref var outPresent = ref ᏑoutPresent.DerefOrNull();
 
@@ -835,7 +835,7 @@ public static bool ReadOptionalASN1OctetString(this ж<String> Ꮡs, ж<slice<by
 // explicitly tagged with tag into out and advances. If no element with a
 // matching tag is present, it sets "out" to defaultValue instead. It reports
 // whether the read was successful.
-public static bool ReadOptionalASN1Boolean(this ж<String> Ꮡs, ж<bool> Ꮡout, asn1.Tag tag, bool defaultValue) {
+internal static bool ReadOptionalASN1Booleanᴍ(ж<String> Ꮡs, ж<bool> Ꮡout, asn1.Tag tag, bool defaultValue) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var present = ref heap(new bool(), out var Ꮡpresent);
@@ -852,7 +852,7 @@ public static bool ReadOptionalASN1Boolean(this ж<String> Ꮡs, ж<bool> Ꮡout
     return child.ReadASN1Boolean(Ꮡout);
 }
 
-internal static bool readASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag> ᏑoutTag, bool skipHeader) {
+internal static bool readASN1ᴍ(ref String s, ж<String> Ꮡout, ж<asn1.Tag> ᏑoutTag, bool skipHeader) {
     ref var @out = ref Ꮡout.DerefOrNull();
     ref var outTag = ref ᏑoutTag.DerefOrNull();
 
@@ -929,3 +929,53 @@ internal static bool readASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag>
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class cryptobyteᴛBuilder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1Int64(this ж<Builder> Ꮡb, int64 v) => cryptobyte_package.AddASN1Int64ᴍ(Ꮡb, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1Int64WithTag(this ж<Builder> Ꮡb, int64 v, asn1.Tag tag) => cryptobyte_package.AddASN1Int64WithTagᴍ(Ꮡb, v, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1Enum(this ж<Builder> Ꮡb, int64 v) => cryptobyte_package.AddASN1Enumᴍ(Ꮡb, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v) => cryptobyte_package.addASN1Signedᴍ(Ꮡb, tag, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) => cryptobyte_package.AddASN1Uint64ᴍ(Ꮡb, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<big.Int> n) => cryptobyte_package.AddASN1BigIntᴍ(Ꮡb, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1OctetString(this ж<Builder> Ꮡb, slice<byte> bytes) => cryptobyte_package.AddASN1OctetStringᴍ(Ꮡb, bytes);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1GeneralizedTime(this ж<Builder> Ꮡb, time.Time t) => cryptobyte_package.AddASN1GeneralizedTimeᴍ(Ꮡb, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1UTCTime(this ж<Builder> Ꮡb, time.Time t) => cryptobyte_package.AddASN1UTCTimeᴍ(Ꮡb, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1BitString(this ж<Builder> Ꮡb, slice<byte> data) => cryptobyte_package.AddASN1BitStringᴍ(Ꮡb, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addBase128Int(this ref Builder b, int64 n) => cryptobyte_package.addBase128Intᴍ(ref b, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.ObjectIdentifier oid) => cryptobyte_package.AddASN1ObjectIdentifierᴍ(Ꮡb, oid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1Boolean(this ж<Builder> Ꮡb, bool v) => cryptobyte_package.AddASN1Booleanᴍ(Ꮡb, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1NULL(this ref Builder b) => cryptobyte_package.AddASN1NULLᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MarshalASN1(this ref Builder b, any v) => cryptobyte_package.MarshalASN1ᴍ(ref b, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddASN1(this ж<Builder> Ꮡb, asn1.Tag tag, Action<ж<Builder>> f) => cryptobyte_package.AddASN1ᴍ(Ꮡb, tag, f);
+}
+partial class cryptobyteᴛString {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1Boolean(this ref String s, ж<bool> Ꮡout) => cryptobyte_package.ReadASN1Booleanᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1Integer(this ref String s, any @out) => cryptobyte_package.ReadASN1Integerᴍ(ref s, @out);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool readASN1BigInt(this ref String s, ж<big.Int> @out) => cryptobyte_package.readASN1BigIntᴍ(ref s, @out);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool readASN1Bytes(this ref String s, ж<slice<byte>> Ꮡout) => cryptobyte_package.readASN1Bytesᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool readASN1Int64(this ref String s, ж<int64> @out) => cryptobyte_package.readASN1Int64ᴍ(ref s, @out);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool readASN1Uint64(this ref String s, ж<uint64> @out) => cryptobyte_package.readASN1Uint64ᴍ(ref s, @out);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1Int64WithTag(this ref String s, ж<int64> @out, asn1.Tag tag) => cryptobyte_package.ReadASN1Int64WithTagᴍ(ref s, @out, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1Enum(this ref String s, ж<nint> Ꮡout) => cryptobyte_package.ReadASN1Enumᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool readBase128Int(this ref String s, ж<nint> Ꮡout) => cryptobyte_package.readBase128Intᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1ObjectIdentifier(this ref String s, ж<encoding_asn1.ObjectIdentifier> Ꮡout) => cryptobyte_package.ReadASN1ObjectIdentifierᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1GeneralizedTime(this ref String s, ж<time.Time> Ꮡout) => cryptobyte_package.ReadASN1GeneralizedTimeᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1UTCTime(this ref String s, ж<time.Time> Ꮡout) => cryptobyte_package.ReadASN1UTCTimeᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1BitString(this ref String s, ж<encoding_asn1.BitString> Ꮡout) => cryptobyte_package.ReadASN1BitStringᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1BitStringAsBytes(this ref String s, ж<slice<byte>> Ꮡout) => cryptobyte_package.ReadASN1BitStringAsBytesᴍ(ref s, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1Bytes(this ref String s, ж<slice<byte>> @out, asn1.Tag tag) => cryptobyte_package.ReadASN1Bytesᴍ(ref s, @out, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1(this ref String s, ж<String> @out, asn1.Tag tag) => cryptobyte_package.ReadASN1ᴍ(ref s, @out, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadASN1Element(this ref String s, ж<String> @out, asn1.Tag tag) => cryptobyte_package.ReadASN1Elementᴍ(ref s, @out, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadAnyASN1(this ref String s, ж<String> @out, ж<asn1.Tag> outTag) => cryptobyte_package.ReadAnyASN1ᴍ(ref s, @out, outTag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadAnyASN1Element(this ref String s, ж<String> @out, ж<asn1.Tag> outTag) => cryptobyte_package.ReadAnyASN1Elementᴍ(ref s, @out, outTag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool PeekASN1Tag(this String s, asn1.Tag tag) => cryptobyte_package.PeekASN1Tagᴍ(s, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool SkipASN1(this ref String s, asn1.Tag tag) => cryptobyte_package.SkipASN1ᴍ(ref s, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadOptionalASN1(this ж<String> Ꮡs, ж<String> @out, ж<bool> ᏑoutPresent, asn1.Tag tag) => cryptobyte_package.ReadOptionalASN1ᴍ(Ꮡs, @out, ᏑoutPresent, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool SkipOptionalASN1(this ж<String> Ꮡs, asn1.Tag tag) => cryptobyte_package.SkipOptionalASN1ᴍ(Ꮡs, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadOptionalASN1Integer(this ж<String> Ꮡs, any @out, asn1.Tag tag, any defaultValue) => cryptobyte_package.ReadOptionalASN1Integerᴍ(Ꮡs, @out, tag, defaultValue);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadOptionalASN1OctetString(this ж<String> Ꮡs, ж<slice<byte>> Ꮡout, ж<bool> ᏑoutPresent, asn1.Tag tag) => cryptobyte_package.ReadOptionalASN1OctetStringᴍ(Ꮡs, Ꮡout, ᏑoutPresent, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadOptionalASN1Boolean(this ж<String> Ꮡs, ж<bool> Ꮡout, asn1.Tag tag, bool defaultValue) => cryptobyte_package.ReadOptionalASN1Booleanᴍ(Ꮡs, Ꮡout, tag, defaultValue);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool readASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag> ᏑoutTag, bool skipHeader) => cryptobyte_package.readASN1ᴍ(ref s, Ꮡout, ᏑoutTag, skipHeader);
+}
+// </GlyphForwarders>

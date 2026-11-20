@@ -48,10 +48,10 @@ public static Type TypeBundle => 8;
     new((uint32)TypeBundle, "Bundle")
 ]; }
 
-} partial class machoᴛType {
+} partial class macho_package {
 
-public static @string String(this Type t) { return stringName((uint32)t, typeStrings, false); }
-public static @string GoString(this Type t) { return stringName((uint32)t, typeStrings, true); }
+internal static @string Stringᴍ(Type t) { return stringName((uint32)t, typeStrings, false); }
+internal static @string GoStringᴍ(Type t) { return stringName((uint32)t, typeStrings, true); }
 
 } partial class macho_package {
 
@@ -76,10 +76,10 @@ public static Cpu CpuPpc64 => /* CpuPpc | cpuArch64 */ 16777234;
     new((uint32)CpuPpc64, "CpuPpc64")
 ]; }
 
-} partial class machoᴛCpu {
+} partial class macho_package {
 
-public static @string String(this Cpu i) { return stringName((uint32)i, cpuStrings, false); }
-public static @string GoString(this Cpu i) { return stringName((uint32)i, cpuStrings, true); }
+internal static @string Stringᴍ(Cpu i) { return stringName((uint32)i, cpuStrings, false); }
+internal static @string GoStringᴍ(Cpu i) { return stringName((uint32)i, cpuStrings, true); }
 
 } partial class macho_package {
 
@@ -105,10 +105,10 @@ public static LoadCmd LoadCmdRpath => 0x8000001c;
     new((uint32)LoadCmdRpath, "LoadCmdRpath")
 ]; }
 
-} partial class machoᴛLoadCmd {
+} partial class macho_package {
 
-public static @string String(this LoadCmd i) { return stringName((uint32)i, cmdStrings, false); }
-public static @string GoString(this LoadCmd i) { return stringName((uint32)i, cmdStrings, true); }
+internal static @string Stringᴍ(LoadCmd i) { return stringName((uint32)i, cmdStrings, false); }
+internal static @string GoStringᴍ(LoadCmd i) { return stringName((uint32)i, cmdStrings, true); }
 
 } partial class macho_package {
 
@@ -340,3 +340,18 @@ internal static @string stringName(uint32 i, slice<intName> names, bool goSyntax
 }
 
 } // end macho_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class machoᴛType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Type t) => macho_package.Stringᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Type t) => macho_package.GoStringᴍ(t);
+}
+partial class machoᴛCpu {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Cpu i) => macho_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Cpu i) => macho_package.GoStringᴍ(i);
+}
+partial class machoᴛLoadCmd {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this LoadCmd i) => macho_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this LoadCmd i) => macho_package.GoStringᴍ(i);
+}
+// </GlyphForwarders>

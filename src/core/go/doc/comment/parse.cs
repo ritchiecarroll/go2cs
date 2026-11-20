@@ -38,9 +38,9 @@ partial struct Heading {
     public slice<Text> Text; // the heading text
 }
 
-} partial class commentᴛHeading {
+} partial class comment_package {
 
-internal static void block(this ref Heading _) { }
+internal static void blockᴍ(ref Heading _) { }
 
 } partial class comment_package {
 
@@ -69,9 +69,9 @@ partial struct List {
     public bool ForceBlankBetween;
 }
 
-} partial class commentᴛList {
+} partial class comment_package {
 
-internal static void block(this ref List _) { }
+internal static void blockᴍ(ref List _) { }
 
 // BlankBefore reports whether a reformatting of the comment
 // should include a blank line before the list.
@@ -80,7 +80,7 @@ internal static void block(this ref List _) { }
 // (meaning at least one item has multiple paragraphs)
 // then the list itself must be preceded by a blank line.
 // A preceding blank line can be forced by setting [List].ForceBlankBefore.
-public static bool BlankBefore(this ref List l) {
+internal static bool BlankBeforeᴍ(ref List l) {
     return l.ForceBlankBefore || l.BlankBetween();
 }
 
@@ -90,7 +90,7 @@ public static bool BlankBefore(this ref List l) {
 // (meaning at least one item has multiple paragraphs)
 // then list items must themselves be separated by blank lines.
 // Blank line separators can be forced by setting [List].ForceBlankBetween.
-public static bool BlankBetween(this ref List l) {
+internal static bool BlankBetweenᴍ(ref List l) {
     if (l.ForceBlankBetween) {
         return true;
     }
@@ -124,9 +124,9 @@ partial struct Paragraph {
     public slice<Text> Text;
 }
 
-} partial class commentᴛParagraph {
+} partial class comment_package {
 
-internal static void block(this ref Paragraph _) { }
+internal static void blockᴍ(ref Paragraph _) { }
 
 } partial class comment_package {
 
@@ -138,9 +138,9 @@ partial struct Code {
     public @string Text;
 }
 
-} partial class commentᴛCode {
+} partial class comment_package {
 
-internal static void block(this ref Code _) { }
+internal static void blockᴍ(ref Code _) { }
 
 } partial class comment_package {
 
@@ -153,18 +153,18 @@ partial interface Text {
 // A Plain is a string rendered as plain text (not italicized).
 partial struct Plain /*@string*/;
 
-} partial class commentᴛPlain {
+} partial class comment_package {
 
-internal static void text(this Plain _) { }
+internal static void textᴍ(Plain _) { }
 
 } partial class comment_package {
 
 // An Italic is a string rendered as italicized text.
 partial struct Italic /*@string*/;
 
-} partial class commentᴛItalic {
+} partial class comment_package {
 
-internal static void text(this Italic _) { }
+internal static void textᴍ(Italic _) { }
 
 } partial class comment_package {
 
@@ -175,9 +175,9 @@ partial struct Link {
     public @string URL;      // target URL of link
 }
 
-} partial class commentᴛLink {
+} partial class comment_package {
 
-internal static void text(this ref Link _) { }
+internal static void textᴍ(ref Link _) { }
 
 } partial class comment_package {
 
@@ -197,9 +197,9 @@ partial struct DocLink {
     public @string Name;       // const, func, type, var, or method name
 }
 
-} partial class commentᴛDocLink {
+} partial class comment_package {
 
-internal static void text(this ref DocLink _) { }
+internal static void textᴍ(ref DocLink _) { }
 
 } partial class comment_package {
 
@@ -258,7 +258,7 @@ partial struct parseDoc {
     internal Func<@string, @string, bool> lookupSym;
 }
 
-} partial class commentᴛparseDoc {
+} partial class comment_package {
 
 // lookupPkg is called to look up the pkg in [pkg], [pkg.Name], and [pkg.Name.Recv].
 // If pkg has a slash, it is assumed to be the full import path and is returned with ok = true.
@@ -271,7 +271,7 @@ partial struct parseDoc {
 // like "math" are full import paths but don't contain slashes. We let d.LookupPackage have
 // the first chance to resolve it, in case there's a different package imported as math,
 // and otherwise we refer to a built-in list of single-element standard library package names.
-internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) {
+internal static (@string importPath, bool ok) lookupPkgᴍ(ref parseDoc d, @string pkg) {
     if (strings.Contains(pkg, "/")) { // assume a full import path
         if (validImportPath(pkg)) {
             return (pkg, true);
@@ -309,11 +309,11 @@ public static (@string importPath, bool ok) DefaultLookupPackage(@string name) {
     return ("", false);
 }
 
-} partial class commentᴛParser {
+} partial class comment_package {
 
 // Parse parses the doc comment text and returns the *[Doc] form.
 // Comment markers (/* // and */) in the text must have already been removed.
-public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
+internal static ж<Doc> Parseᴍ(ж<Parser> Ꮡp, @string text) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var lines = unindent(strings.Split(text, "\n"));
@@ -671,10 +671,10 @@ internal static bool isOldHeading(@string line, slice<@string> all, nint off) {
     return true;
 }
 
-} partial class commentᴛparseDoc {
+} partial class comment_package {
 
 // oldHeading returns the *Heading for the given old-style section heading line.
-internal static Block oldHeading(this ref parseDoc d, @string line) {
+internal static Block oldHeadingᴍ(ref parseDoc d, @string line) {
     return new HeadingжBlock(Ꮡ(new Heading(Text: slice<Text>([((Plain)strings.TrimSpace(line))]))));
 }
 
@@ -685,15 +685,15 @@ internal static bool isHeading(@string line) {
     return len(line) >= 2 && line[0] == '#' && (line[1] == ' ' || line[1] == '\t') && strings.TrimSpace(line) != "#"u8;
 }
 
-} partial class commentᴛparseDoc {
+} partial class comment_package {
 
 // heading returns the *Heading for the given new-style section heading line.
-internal static Block heading(this ref parseDoc d, @string line) {
+internal static Block headingᴍ(ref parseDoc d, @string line) {
     return new HeadingжBlock(Ꮡ(new Heading(Text: slice<Text>([((Plain)strings.TrimSpace(line[1..]))]))));
 }
 
 // code returns a code block built from the lines.
-internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
+internal static ж<Code> codeᴍ(ref parseDoc d, slice<@string> lines) {
     var bodyᴷ = new stackAppend<@string>();
 
     var body = unindent(lines);
@@ -703,7 +703,7 @@ internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
 
 // paragraph returns a paragraph block built from the lines.
 // If the lines are link definitions, paragraph adds them to d and returns nil.
-internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
+internal static Block paragraphᴍ(ref parseDoc d, slice<@string> lines) {
     var defsᴷ = new stackAppend<ж<LinkDef>>(moves: true);
 
     // Is this a block of known links? Handle.
@@ -757,11 +757,11 @@ internal static (ж<LinkDef>, bool) parseLink(@string line) {
     return (Ꮡ(new LinkDef(Text: text, URL: url)), true);
 }
 
-} partial class commentᴛparseDoc {
+} partial class comment_package {
 
 // list returns a list built from the indented lines,
 // using forceBlankBefore as the value of the List's ForceBlankBefore field.
-internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
+internal static ж<List> listᴍ(ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
     var textᴷ = new stackAppend<@string>();
 
     var (num, _, _) = listMarker(lines[0]);
@@ -847,7 +847,7 @@ internal static bool isList(@string line) {
     return ok;
 }
 
-} partial class commentᴛparseDoc {
+} partial class comment_package {
 
 // parseLinkedText parses text that is allowed to contain explicit links,
 // such as [math.Sin] or [Go home page], into a slice of Text items.
@@ -859,7 +859,7 @@ internal static bool isList(@string line) {
 // must be both preceded and followed by punctuation, spaces, tabs,
 // or the start or end of a line. An example problem would be treating
 // map[ast.Expr]TypeAndValue as containing a link.
-internal static slice<Text> parseLinkedText(this ж<parseDoc> Ꮡd, @string text) {
+internal static slice<Text> parseLinkedTextᴍ(ж<parseDoc> Ꮡd, @string text) {
     ref var d = ref Ꮡd.DerefOrNull();
     var bufᴷ = new stackAppend<byte>();
 
@@ -920,7 +920,7 @@ internal static slice<Text> parseLinkedText(this ж<parseDoc> Ꮡd, @string text
 // The before and after strings are the text before the [ and after the ]
 // on the same line. Doc links must be preceded and followed by
 // punctuation, spaces, tabs, or the start or end of a line.
-internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) {
+internal static (ж<DocLink> link, bool ok) docLinkᴍ(ref parseDoc d, @string text, @string before, @string after) {
     ж<DocLink> link = default;
     bool ok = default;
 
@@ -981,7 +981,7 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
     return (before, name, true);
 }
 
-} partial class commentᴛparseDoc {
+} partial class comment_package {
 
 // parseText parses s as text and returns the result of appending
 // those parsed Text elements to out.
@@ -989,7 +989,7 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
 // those are handled by parseLinkedText.
 // If autoLink is true, then parseText recognizes URLs and words from d.Words
 // and converts those to links as appropriate.
-internal static slice<Text> parseText(this ref parseDoc d, slice<Text> @out, @string s, bool autoLink) {
+internal static slice<Text> parseTextᴍ(ref parseDoc d, slice<Text> @out, @string s, bool autoLink) {
     ref var w = ref heap(new strings.Builder(), out var Ꮡw);
     nint wrote = 0;
     void writeUntil(nint i) {
@@ -1399,3 +1399,46 @@ internal static bool importPathOK(byte c) {
 }
 
 } // end comment_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class commentᴛHeading {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref Heading _) => comment_package.blockᴍ(ref _);
+}
+partial class commentᴛList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref List _) => comment_package.blockᴍ(ref _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool BlankBefore(this ref List l) => comment_package.BlankBeforeᴍ(ref l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool BlankBetween(this ref List l) => comment_package.BlankBetweenᴍ(ref l);
+}
+partial class commentᴛParagraph {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref Paragraph _) => comment_package.blockᴍ(ref _);
+}
+partial class commentᴛCode {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref Code _) => comment_package.blockᴍ(ref _);
+}
+partial class commentᴛPlain {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this Plain _) => comment_package.textᴍ(_);
+}
+partial class commentᴛItalic {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this Italic _) => comment_package.textᴍ(_);
+}
+partial class commentᴛLink {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ref Link _) => comment_package.textᴍ(ref _);
+}
+partial class commentᴛDocLink {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ref DocLink _) => comment_package.textᴍ(ref _);
+}
+partial class commentᴛparseDoc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) => comment_package.lookupPkgᴍ(ref d, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Block oldHeading(this ref parseDoc d, @string line) => comment_package.oldHeadingᴍ(ref d, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Block heading(this ref parseDoc d, @string line) => comment_package.headingᴍ(ref d, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) => comment_package.codeᴍ(ref d, lines);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Block paragraph(this ref parseDoc d, slice<@string> lines) => comment_package.paragraphᴍ(ref d, lines);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) => comment_package.listᴍ(Ꮡd, lines, forceBlankBefore);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Text> parseLinkedText(this ж<parseDoc> Ꮡd, @string text) => comment_package.parseLinkedTextᴍ(Ꮡd, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) => comment_package.docLinkᴍ(ref d, text, before, after);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Text> parseText(this ref parseDoc d, slice<Text> @out, @string s, bool autoLink) => comment_package.parseTextᴍ(ref d, @out, s, autoLink);
+}
+partial class commentᴛParser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) => comment_package.Parseᴍ(Ꮡp, text);
+}
+// </GlyphForwarders>

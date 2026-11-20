@@ -32,9 +32,9 @@ internal static slog.Handler newFastTextHandler(io.Writer w) {
     return new fastTextHandlerжHandler(Ꮡ(new fastTextHandler(w: w)));
 }
 
-} partial class benchmarksᴛfastTextHandler {
+} partial class benchmarks_package {
 
-internal static bool Enabled(this ref fastTextHandler h, context.Context _Δp1, slog.Level _Δp2) { return true; }
+internal static bool Enabledᴍ(ref fastTextHandler h, context.Context _Δp1, slog.Level _Δp2) { return true; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string timeˢ => ref timeˢᵇ;
@@ -44,7 +44,7 @@ private static readonly @string levelˢᵇ = "level="u8;
 internal static ref readonly @string msgˢ => ref msgˢᵇ;
 private static readonly @string msgˢᵇ = "msg="u8;
 
-internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp1, slog.Record r) {
+internal static error Handleᴍ(ж<fastTextHandler> Ꮡh, context.Context _Δp1, slog.Record r) {
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
@@ -80,7 +80,7 @@ internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp
     finally { ᒐ.Run(); }
 }
 
-internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) {
+internal static void appendValueᴍ(ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     switch (v.Kind()) {
@@ -132,17 +132,17 @@ internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> �
     }}
 }
 
-internal static void appendTime(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {
+internal static void appendTimeᴍ(ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     buf = strconv.AppendInt(buf, t.Unix(), 10);
 }
 
-internal static slog.Handler WithAttrs(this ref fastTextHandler h, slice<slog.Attr> _) {
+internal static slog.Handler WithAttrsᴍ(ref fastTextHandler h, slice<slog.Attr> _) {
     throw panic("fastTextHandler: With unimplemented");
 }
 
-internal static slog.Handler WithGroup(this ref fastTextHandler _Δp0, @string _Δp1) {
+internal static slog.Handler WithGroupᴍ(ref fastTextHandler _Δp0, @string _Δp1) {
     throw panic("fastTextHandler: WithGroup unimplemented");
 }
 
@@ -165,11 +165,11 @@ internal static ж<asyncHandler> newAsyncHandler() {
     return Ꮡ(new asyncHandler());
 }
 
-} partial class benchmarksᴛasyncHandler {
+} partial class benchmarks_package {
 
-internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) { return true; }
+internal static bool Enabledᴍ(ref asyncHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) { return true; }
 
-internal static error Handle(this ref asyncHandler h, context.Context _, slog.Record r) {
+internal static error Handleᴍ(ref asyncHandler h, context.Context _, slog.Record r) {
     r = r.ΔClone();
 
     h.ringBuffer[h.next].AssignFrom(r.Clone());
@@ -177,11 +177,11 @@ internal static error Handle(this ref asyncHandler h, context.Context _, slog.Re
     return default;
 }
 
-internal static slog.Handler WithAttrs(this ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) {
+internal static slog.Handler WithAttrsᴍ(ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) {
     throw panic("asyncHandler: With unimplemented");
 }
 
-internal static slog.Handler WithGroup(this ref asyncHandler _Δp0, @string _Δp1) {
+internal static slog.Handler WithGroupᴍ(ref asyncHandler _Δp0, @string _Δp1) {
     throw panic("asyncHandler: WithGroup unimplemented");
 }
 
@@ -191,17 +191,40 @@ internal static slog.Handler WithGroup(this ref asyncHandler _Δp0, @string _Δp
 partial struct disabledHandler {
 }
 
-} partial class benchmarksᴛdisabledHandler {
+} partial class benchmarks_package {
 
-internal static bool Enabled(this disabledHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) { return false; }
-internal static error Handle(this disabledHandler _Δp0, context.Context _Δp1, slog.Record _Δp2) { throw panic("should not be called"); }
+internal static bool Enabledᴍ(disabledHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) { return false; }
+internal static error Handleᴍ(disabledHandler _Δp0, context.Context _Δp1, slog.Record _Δp2) { throw panic("should not be called"); }
 
-internal static slog.Handler WithAttrs(this disabledHandler _Δp0, slice<slog.Attr> _Δp1) {
+internal static slog.Handler WithAttrsᴍ(disabledHandler _Δp0, slice<slog.Attr> _Δp1) {
     throw panic("disabledHandler: With unimplemented");
 }
 
-internal static slog.Handler WithGroup(this disabledHandler _Δp0, @string _Δp1) {
+internal static slog.Handler WithGroupᴍ(disabledHandler _Δp0, @string _Δp1) {
     throw panic("disabledHandler: WithGroup unimplemented");
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class benchmarksᴛfastTextHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this ref fastTextHandler h, context.Context _Δp1, slog.Level _Δp2) => benchmarks_package.Enabledᴍ(ref h, _Δp1, _Δp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp1, slog.Record r) => benchmarks_package.Handleᴍ(Ꮡh, _Δp1, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) => benchmarks_package.appendValueᴍ(ref h, Ꮡbuf, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendTime(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) => benchmarks_package.appendTimeᴍ(ref h, Ꮡbuf, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithAttrs(this ref fastTextHandler h, slice<slog.Attr> _) => benchmarks_package.WithAttrsᴍ(ref h, _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithGroup(this ref fastTextHandler _Δp0, @string _Δp1) => benchmarks_package.WithGroupᴍ(ref _Δp0, _Δp1);
+}
+partial class benchmarksᴛasyncHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) => benchmarks_package.Enabledᴍ(ref _Δp0, _Δp1, _Δp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this ref asyncHandler h, context.Context _, slog.Record r) => benchmarks_package.Handleᴍ(ref h, _, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithAttrs(this ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) => benchmarks_package.WithAttrsᴍ(ref _Δp0, _Δp1);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithGroup(this ref asyncHandler _Δp0, @string _Δp1) => benchmarks_package.WithGroupᴍ(ref _Δp0, _Δp1);
+}
+partial class benchmarksᴛdisabledHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this disabledHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) => benchmarks_package.Enabledᴍ(_Δp0, _Δp1, _Δp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this disabledHandler _Δp0, context.Context _Δp1, slog.Record _Δp2) => benchmarks_package.Handleᴍ(_Δp0, _Δp1, _Δp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithAttrs(this disabledHandler _Δp0, slice<slog.Attr> _Δp1) => benchmarks_package.WithAttrsᴍ(_Δp0, _Δp1);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithGroup(this disabledHandler _Δp0, @string _Δp1) => benchmarks_package.WithGroupᴍ(_Δp0, _Δp1);
+}
+// </GlyphForwarders>

@@ -13,25 +13,25 @@ partial class runtime_package {
 /* [pallocChunkPages / 64]uint64 */
 partial struct pageBits /*[8]uint64*/;
 
-} partial class runtimeᴛpageBits {
+} partial class runtime_package {
 
 // get returns the value of the i'th bit in the bitmap.
-internal static nuint get(this ref pageBits b, nuint i) {
+internal static nuint getᴍ(ref pageBits b, nuint i) {
     return (nuint)((b.Value[i / 64] >> (int)(i % 64)) & 1);
 }
 
 // block64 returns the 64-bit aligned block of bits containing the i'th bit.
-internal static uint64 block64(this ref pageBits b, nuint i) {
+internal static uint64 block64ᴍ(ref pageBits b, nuint i) {
     return b.Value[i / 64];
 }
 
 // set sets bit i of pageBits.
-internal static void set(this ref pageBits b, nuint i) {
+internal static void setᴍ(ref pageBits b, nuint i) {
     b.Value[i / 64] |= (uint64)(((uint64)1 << (int)(i % 64)));
 }
 
 // setRange sets bits in the range [i, i+n).
-internal static void setRange(this ref pageBits b, nuint i, nuint n) {
+internal static void setRangeᴍ(ref pageBits b, nuint i, nuint n) {
     _ = b.Value[i / 64];
     if (n == 1) {
         // Fast path for the n == 1 case.
@@ -55,7 +55,7 @@ internal static void setRange(this ref pageBits b, nuint i, nuint n) {
 }
 
 // setAll sets all the bits of b.
-internal static void setAll(this ref pageBits b) {
+internal static void setAllᴍ(ref pageBits b) {
     foreach (var i in range(8)) {
         b.Value[i] = ~(uint64)0;
     }
@@ -63,17 +63,17 @@ internal static void setAll(this ref pageBits b) {
 
 // setBlock64 sets the 64-bit aligned block of bits containing the i'th bit that
 // are set in v.
-internal static void setBlock64(this ref pageBits b, nuint i, uint64 v) {
+internal static void setBlock64ᴍ(ref pageBits b, nuint i, uint64 v) {
     b.Value[i / 64] |= (uint64)(v);
 }
 
 // clear clears bit i of pageBits.
-internal static void clear(this ref pageBits b, nuint i) {
+internal static void clearᴍ(ref pageBits b, nuint i) {
     b.Value[i / 64] &= unchecked((uint64)~(uint64)(((uint64)1 << (int)(i % 64))));
 }
 
 // clearRange clears bits in the range [i, i+n).
-internal static void clearRange(this ref pageBits b, nuint i, nuint n) {
+internal static void clearRangeᴍ(ref pageBits b, nuint i, nuint n) {
     _ = b.Value[i / 64];
     if (n == 1) {
         // Fast path for the n == 1 case.
@@ -95,19 +95,19 @@ internal static void clearRange(this ref pageBits b, nuint i, nuint n) {
 }
 
 // clearAll frees all the bits of b.
-internal static void clearAll(this ref pageBits b) {
+internal static void clearAllᴍ(ref pageBits b) {
     builtin.clear(b.Value[..]);
 }
 
 // clearBlock64 clears the 64-bit aligned block of bits containing the i'th bit that
 // are set in v.
-internal static void clearBlock64(this ref pageBits b, nuint i, uint64 v) {
+internal static void clearBlock64ᴍ(ref pageBits b, nuint i, uint64 v) {
     b.Value[i / 64] &= unchecked((uint64)~(uint64)(v));
 }
 
 // popcntRange counts the number of set bits in the
 // range [i, i+n).
-internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) {
+internal static nuint /*s*/ popcntRangeᴍ(ref pageBits b, nuint i, nuint n) {
     nuint s = default;
 
     if (n == 1) {
@@ -136,10 +136,10 @@ internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) {
 // sake of documentation, 0s are free pages and 1s are allocated pages.
 partial struct pallocBits /*pageBits*/;
 
-} partial class runtimeᴛpallocBits {
+} partial class runtime_package {
 
 // summarize returns a packed summary of the bitmap in pallocBits.
-internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
+internal static pallocSum summarizeᴍ(ж<pallocBits> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nuint start = default;
@@ -245,7 +245,7 @@ break_outer:;
 // the new searchIdx should be ignored.
 //
 // Note that if npages == 1, the two returned values will always be identical.
-internal static (nuint, nuint) find(this ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
+internal static (nuint, nuint) findᴍ(ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
     if (npages == 1) {
         nuint addr = Ꮡb.find1(searchIdx);
         return (addr, addr);
@@ -259,7 +259,7 @@ internal static (nuint, nuint) find(this ж<pallocBits> Ꮡb, uintptr npages, nu
 // in the pallocBits and returns the index.
 //
 // See find for an explanation of the searchIdx parameter.
-internal static nuint find1(this ж<pallocBits> Ꮡb, nuint searchIdx) {
+internal static nuint find1ᴍ(ж<pallocBits> Ꮡb, nuint searchIdx) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     _ = b.Value[0]; // lift nil check out of loop
@@ -283,7 +283,7 @@ internal static nuint find1(this ж<pallocBits> Ꮡb, nuint searchIdx) {
 //
 // findSmallN assumes npages <= 64, where any such contiguous run of pages
 // crosses at most one aligned 64-bit boundary in the bits.
-internal static (nuint, nuint) findSmallN(this ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
+internal static (nuint, nuint) findSmallNᴍ(ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nuint end = (nuint)0;
@@ -325,7 +325,7 @@ internal static (nuint, nuint) findSmallN(this ж<pallocBits> Ꮡb, uintptr npag
 //
 // findLargeN assumes npages > 64, where any such run of free pages
 // crosses at least one aligned 64-bit boundary in the bits.
-internal static (nuint, nuint) findLargeN(this ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
+internal static (nuint, nuint) findLargeNᴍ(ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nuint start = ~(nuint)0;
@@ -365,40 +365,40 @@ internal static (nuint, nuint) findLargeN(this ж<pallocBits> Ꮡb, uintptr npag
 }
 
 // allocRange allocates the range [i, i+n).
-internal static void allocRange(this ж<pallocBits> Ꮡb, nuint i, nuint n) {
+internal static void allocRangeᴍ(ж<pallocBits> Ꮡb, nuint i, nuint n) {
     (Ꮡb.Reinterpret<pallocBits, pageBits>()).setRange(i, n);
 }
 
 // allocAll allocates all the bits of b.
-internal static void allocAll(this ж<pallocBits> Ꮡb) {
+internal static void allocAllᴍ(ж<pallocBits> Ꮡb) {
     (Ꮡb.Reinterpret<pallocBits, pageBits>()).setAll();
 }
 
 // free1 frees a single page in the pallocBits at i.
-internal static void free1(this ж<pallocBits> Ꮡb, nuint i) {
+internal static void free1ᴍ(ж<pallocBits> Ꮡb, nuint i) {
     (Ꮡb.Reinterpret<pallocBits, pageBits>()).clear(i);
 }
 
 // free frees the range [i, i+n) of pages in the pallocBits.
-internal static void free(this ж<pallocBits> Ꮡb, nuint i, nuint n) {
+internal static void freeᴍ(ж<pallocBits> Ꮡb, nuint i, nuint n) {
     (Ꮡb.Reinterpret<pallocBits, pageBits>()).clearRange(i, n);
 }
 
 // freeAll frees all the bits of b.
-internal static void freeAll(this ж<pallocBits> Ꮡb) {
+internal static void freeAllᴍ(ж<pallocBits> Ꮡb) {
     (Ꮡb.Reinterpret<pallocBits, pageBits>()).clearAll();
 }
 
 // pages64 returns a 64-bit bitmap representing a block of 64 pages aligned
 // to 64 pages. The returned block of pages is the one containing the i'th
 // page in this pallocBits. Each bit represents whether the page is in-use.
-internal static uint64 pages64(this ж<pallocBits> Ꮡb, nuint i) {
+internal static uint64 pages64ᴍ(ж<pallocBits> Ꮡb, nuint i) {
     return (Ꮡb.Reinterpret<pallocBits, pageBits>()).block64(i);
 }
 
 // allocPages64 allocates a 64-bit block of 64 pages aligned to 64 pages according
 // to the bits set in alloc. The block set is the one containing the i'th page.
-internal static void allocPages64(this ж<pallocBits> Ꮡb, nuint i, uint64 alloc) {
+internal static void allocPages64ᴍ(ж<pallocBits> Ꮡb, nuint i, uint64 alloc) {
     (Ꮡb.Reinterpret<pallocBits, pageBits>()).setBlock64(i, alloc);
 }
 
@@ -448,11 +448,11 @@ partial struct pallocData {
     internal pageBits scavenged;
 }
 
-} partial class runtimeᴛpallocData {
+} partial class runtime_package {
 
 // allocRange sets bits [i, i+n) in the bitmap to 1 and
 // updates the scavenged bits appropriately.
-internal static void allocRange(this ж<pallocData> Ꮡm, nuint i, nuint n) {
+internal static void allocRangeᴍ(ж<pallocData> Ꮡm, nuint i, nuint n) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Clear the scavenged bits when we alloc the range.
@@ -462,7 +462,7 @@ internal static void allocRange(this ж<pallocData> Ꮡm, nuint i, nuint n) {
 
 // allocAll sets every bit in the bitmap to 1 and updates
 // the scavenged bits appropriately.
-internal static void allocAll(this ж<pallocData> Ꮡm) {
+internal static void allocAllᴍ(ж<pallocData> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Clear the scavenged bits when we alloc the range.
@@ -471,3 +471,37 @@ internal static void allocAll(this ж<pallocData> Ꮡm) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛpageBits {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint get(this ref pageBits b, nuint i) => runtime_package.getᴍ(ref b, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 block64(this ref pageBits b, nuint i) => runtime_package.block64ᴍ(ref b, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref pageBits b, nuint i) => runtime_package.setᴍ(ref b, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setRange(this ref pageBits b, nuint i, nuint n) => runtime_package.setRangeᴍ(ref b, i, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setAll(this ref pageBits b) => runtime_package.setAllᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setBlock64(this ref pageBits b, nuint i, uint64 v) => runtime_package.setBlock64ᴍ(ref b, i, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ref pageBits b, nuint i) => runtime_package.clearᴍ(ref b, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clearRange(this ref pageBits b, nuint i, nuint n) => runtime_package.clearRangeᴍ(ref b, i, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clearAll(this ref pageBits b) => runtime_package.clearAllᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clearBlock64(this ref pageBits b, nuint i, uint64 v) => runtime_package.clearBlock64ᴍ(ref b, i, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) => runtime_package.popcntRangeᴍ(ref b, i, n);
+}
+partial class runtimeᴛpallocBits {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static pallocSum summarize(this ж<pallocBits> Ꮡb) => runtime_package.summarizeᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nuint, nuint) find(this ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) => runtime_package.findᴍ(Ꮡb, npages, searchIdx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint find1(this ж<pallocBits> Ꮡb, nuint searchIdx) => runtime_package.find1ᴍ(Ꮡb, searchIdx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nuint, nuint) findSmallN(this ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) => runtime_package.findSmallNᴍ(Ꮡb, npages, searchIdx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nuint, nuint) findLargeN(this ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) => runtime_package.findLargeNᴍ(Ꮡb, npages, searchIdx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void allocRange(this ж<pallocBits> Ꮡb, nuint i, nuint n) => runtime_package.allocRangeᴍ(Ꮡb, i, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void allocAll(this ж<pallocBits> Ꮡb) => runtime_package.allocAllᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free1(this ж<pallocBits> Ꮡb, nuint i) => runtime_package.free1ᴍ(Ꮡb, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ж<pallocBits> Ꮡb, nuint i, nuint n) => runtime_package.freeᴍ(Ꮡb, i, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeAll(this ж<pallocBits> Ꮡb) => runtime_package.freeAllᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 pages64(this ж<pallocBits> Ꮡb, nuint i) => runtime_package.pages64ᴍ(Ꮡb, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void allocPages64(this ж<pallocBits> Ꮡb, nuint i, uint64 alloc) => runtime_package.allocPages64ᴍ(Ꮡb, i, alloc);
+}
+partial class runtimeᴛpallocData {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void allocRange(this ж<pallocData> Ꮡm, nuint i, nuint n) => runtime_package.allocRangeᴍ(Ꮡm, i, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void allocAll(this ж<pallocData> Ꮡm) => runtime_package.allocAllᴍ(Ꮡm);
+}
+// </GlyphForwarders>

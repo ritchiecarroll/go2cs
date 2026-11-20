@@ -11,9 +11,9 @@ using static net_package;
 
 partial class net_package {
 
-} partial class netᴛconn {
+} partial class net_package {
 
-internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> v) {
+internal static (int64, error) writeBuffersᴍ(ж<conn> Ꮡc, ж<Buffers> v) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -26,13 +26,13 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> v) {
     return (n, default);
 }
 
-} partial class netᴛnetFD {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string writevˢ => ref writevˢᵇ;
 private static readonly @string writevˢᵇ = "writev"u8;
 
-internal static (int64 n, error err) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffers> v) {
+internal static (int64 n, error err) writeBuffersᴍ(ж<netFD> Ꮡfd, ж<Buffers> v) {
     int64 n = default;
     error err = default;
 
@@ -42,3 +42,12 @@ internal static (int64 n, error err) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffe
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛconn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> v) => net_package.writeBuffersᴍ(Ꮡc, v);
+}
+partial class netᴛnetFD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 n, error err) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffers> v) => net_package.writeBuffersᴍ(Ꮡfd, v);
+}
+// </GlyphForwarders>

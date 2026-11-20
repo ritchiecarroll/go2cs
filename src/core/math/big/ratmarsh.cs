@@ -16,14 +16,14 @@ partial class big_package {
 // Gob codec version. Permits backward-compatible changes to the encoding.
 internal const byte ratGobVersion = 1;
 
-} partial class bigᴛRat {
+} partial class big_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ratGobEncodeNumeratorTooˢ => ref ratGobEncodeNumeratorTooˢᵇ;
 private static readonly @string ratGobEncodeNumeratorTooˢᵇ = "Rat.GobEncode: numerator too large"u8;
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
-public static (slice<byte>, error) GobEncode(this ж<Rat> Ꮡx) {
+internal static (slice<byte>, error) GobEncodeᴍ(ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -54,7 +54,7 @@ internal static ref readonly @string ratGobDecodeInvalidˢ => ref ratGobDecodeIn
 private static readonly @string ratGobDecodeInvalidˢᵇ = "Rat.GobDecode: invalid length"u8;
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
-public static error GobDecode(this ref Rat z, slice<byte> buf) {
+internal static error GobDecodeᴍ(ref Rat z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
         z = new Rat();
@@ -83,7 +83,7 @@ public static error GobDecode(this ref Rat z, slice<byte> buf) {
 }
 
 // AppendText implements the [encoding.TextAppender] interface.
-public static (slice<byte>, error) AppendText(this ж<Rat> Ꮡx, slice<byte> b) {
+internal static (slice<byte>, error) AppendTextᴍ(ж<Rat> Ꮡx, slice<byte> b) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.IsInt()) {
@@ -93,12 +93,12 @@ public static (slice<byte>, error) AppendText(this ж<Rat> Ꮡx, slice<byte> b) 
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-public static (slice<byte> text, error err) MarshalText(this ж<Rat> Ꮡx) {
+internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Rat> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-public static error UnmarshalText(this ж<Rat> Ꮡz, slice<byte> text) {
+internal static error UnmarshalTextᴍ(ж<Rat> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
     var (_, ok) = Ꮡz.SetString((@string)text); if (!ok) {
         return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Rat"u8, text);
@@ -107,3 +107,13 @@ public static error UnmarshalText(this ж<Rat> Ꮡz, slice<byte> text) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bigᴛRat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) GobEncode(this ж<Rat> Ꮡx) => big_package.GobEncodeᴍ(Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error GobDecode(this ref Rat z, slice<byte> buf) => big_package.GobDecodeᴍ(ref z, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this ж<Rat> Ꮡx, slice<byte> b) => big_package.AppendTextᴍ(Ꮡx, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> text, error err) MarshalText(this ж<Rat> Ꮡx) => big_package.MarshalTextᴍ(Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ж<Rat> Ꮡz, slice<byte> text) => big_package.UnmarshalTextᴍ(Ꮡz, text);
+}
+// </GlyphForwarders>

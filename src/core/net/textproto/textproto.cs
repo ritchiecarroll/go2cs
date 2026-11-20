@@ -42,9 +42,9 @@ partial struct Error {
     public @string Msg;
 }
 
-} partial class textprotoᴛError {
+} partial class textproto_package {
 
-public static @string Error(this ref Error e) {
+internal static @string Errorᴍ(ref Error e) {
     return fmt.Sprintf("%03d %q"u8, e.Code, e.Msg);
 }
 
@@ -54,9 +54,9 @@ public static @string Error(this ref Error e) {
 // as an invalid response or a hung-up connection.
 partial struct ProtocolError /*@string*/;
 
-} partial class textprotoᴛProtocolError {
+} partial class textproto_package {
 
-public static @string Error(this ProtocolError p) {
+internal static @string Errorᴍ(ProtocolError p) {
     return (@string)p;
 }
 
@@ -83,10 +83,10 @@ public static ж<Conn> NewConn(io.ReadWriteCloser conn) {
     ));
 }
 
-} partial class textprotoᴛConn {
+} partial class textproto_package {
 
 // Close closes the connection.
-public static error Close(this ref Conn c) {
+internal static error Closeᴍ(ref Conn c) {
     return c.conn.Close();
 }
 
@@ -102,7 +102,7 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
     return (NewConn(new net_ConnᴠReadWriteCloser(c)), default);
 }
 
-} partial class textprotoᴛConn {
+} partial class textproto_package {
 
 // Cmd is a convenience method that sends a command after
 // waiting its turn in the pipeline. The command text is the
@@ -128,7 +128,7 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
 //		return nil, err
 //	}
 //	return c.ReadCodeLine(250)
-public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
+internal static (nuint id, error err) Cmdᴍ(ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     nuint id = default;
     error err = default;
     var args = argsʗp.sslice();
@@ -177,3 +177,16 @@ internal static bool isASCIILetter(byte b) {
 }
 
 } // end textproto_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class textprotoᴛError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref Error e) => textproto_package.Errorᴍ(ref e);
+}
+partial class textprotoᴛProtocolError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ProtocolError p) => textproto_package.Errorᴍ(p);
+}
+partial class textprotoᴛConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Conn c) => textproto_package.Closeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) => textproto_package.Cmdᴍ(Ꮡc, format, argsʗp);
+}
+// </GlyphForwarders>

@@ -90,12 +90,12 @@ public static (ж<Archive>, error) OpenArchive(@string name) {
     return (arch, default);
 }
 
-} partial class xcoffᴛArchive {
+} partial class xcoff_package {
 
 // Close closes the Archive.
 // If the Archive was created using NewArchive directly instead of OpenArchive,
 // Close has no effect.
-public static error Close(this ref Archive a) {
+internal static error Closeᴍ(ref Archive a) {
     error err = default;
     if (a.closer != nil) {
         err = a.closer.Close();
@@ -221,12 +221,12 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
     return (arch, default);
 }
 
-} partial class xcoffᴛArchive {
+} partial class xcoff_package {
 
 // GetFile returns the XCOFF file defined by member name.
 // FIXME: This doesn't work if an archive has two members with the same
 // name which can occur if an archive has both 32-bits and 64-bits files.
-public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
+internal static (ж<File>, error) GetFileᴍ(ref Archive arch, @string name) {
     foreach (var (_, mem) in range(arch.Members)) {
         if (mem.Name == name) {
             return NewFile(new io.SectionReaderжReaderAt(mem.sr));
@@ -236,3 +236,10 @@ public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class xcoffᴛArchive {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Archive a) => xcoff_package.Closeᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<File>, error) GetFile(this ref Archive arch, @string name) => xcoff_package.GetFileᴍ(ref arch, name);
+}
+// </GlyphForwarders>

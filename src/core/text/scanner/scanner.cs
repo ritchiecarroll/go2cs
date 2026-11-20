@@ -35,16 +35,16 @@ partial struct Position {
     public nint Column;      // column number, starting at 1 (character count per line)
 }
 
-} partial class scannerᴛPosition {
+} partial class scanner_package {
 
 // IsValid reports whether the position is valid.
-public static bool IsValid(this ref Position pos) { return pos.Line > 0; }
+internal static bool IsValidᴍ(ref Position pos) { return pos.Line > 0; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string inputˢ => ref inputˢᵇ;
 private static readonly @string inputˢᵇ = "<input>"u8;
 
-public static @string String(this Position pos) {
+internal static @string Stringᴍ(Position pos) {
     @string s = pos.Filename;
     if (s == ""u8) {
         s = inputˢ;
@@ -172,12 +172,12 @@ partial struct Scanner {
     /*embed*/ public Position Position;
 }
 
-} partial class scannerᴛScanner {
+} partial class scanner_package {
 
 // Init initializes a [Scanner] with a new source and returns s.
 // [Scanner.Error] is set to nil, [Scanner.ErrorCount] is set to 0, [Scanner.Mode] is set to [GoTokens],
 // and [Scanner.Whitespace] is set to [GoWhitespace].
-public static ж<Scanner> Init(this ж<Scanner> Ꮡs, io.Reader src) {
+internal static ж<Scanner> Initᴍ(ж<Scanner> Ꮡs, io.Reader src) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.src = src;
@@ -222,7 +222,7 @@ private static readonly @string invalidCharacterNulˢᵇ = "invalid character NU
 // that only a minimal amount of work needs to be done in the common ASCII
 // case (one test to check for both ASCII and end-of-buffer, and one test
 // to check for newlines).
-internal static rune next(this ж<Scanner> Ꮡs) {
+internal static rune nextᴍ(ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var ch = (rune)s.srcBuf[s.srcPos];
@@ -314,7 +314,7 @@ internal static rune next(this ж<Scanner> Ꮡs) {
 // it prints an error message to [os.Stderr]. Next does not
 // update the [Scanner.Position] field; use [Scanner.Pos]() to
 // get the current position.
-public static rune Next(this ж<Scanner> Ꮡs) {
+internal static rune Nextᴍ(ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.tokPos = -1; // don't collect token text
@@ -329,7 +329,7 @@ public static rune Next(this ж<Scanner> Ꮡs) {
 // Peek returns the next Unicode character in the source without advancing
 // the scanner. It returns [EOF] if the scanner's position is at the last
 // character of the source.
-public static rune Peek(this ж<Scanner> Ꮡs) {
+internal static rune Peekᴍ(ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.ch == -2) {
@@ -342,7 +342,7 @@ public static rune Peek(this ж<Scanner> Ꮡs) {
     return s.ch;
 }
 
-internal static void error(this ж<Scanner> Ꮡs, @string msg) {
+internal static void errorᴍ(ж<Scanner> Ꮡs, @string msg) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.tokEnd = s.srcPos - s.lastCharLen; // make sure token text is terminated
@@ -358,20 +358,20 @@ internal static void error(this ж<Scanner> Ꮡs, @string msg) {
     fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %s\n"u8, pos, msg);
 }
 
-internal static void errorf(this ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorfᴍ(ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     Ꮡs.error(fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
-internal static bool isIdentRune(this ref Scanner s, rune ch, nint i) {
+internal static bool isIdentRuneᴍ(ref Scanner s, rune ch, nint i) {
     if (s.IsIdentRune != nil) {
         return ch != EOF && s.IsIdentRune(ch, i);
     }
     return ch == '_' || unicode.IsLetter(ch) || unicode.IsDigit(ch) && i > 0;
 }
 
-internal static rune scanIdentifier(this ж<Scanner> Ꮡs) {
+internal static rune scanIdentifierᴍ(ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // we know the zero'th rune is OK; start scanning at the next one
@@ -388,7 +388,7 @@ internal static rune lower(rune ch) { return (rune)(((rune)'a' - (rune)'A') | ch
 internal static bool isDecimal(rune ch) { return '0' <= ch && ch <= '9'; }
 internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f'; }
 
-} partial class scannerᴛScanner {
+} partial class scanner_package {
 
 // digits accepts the sequence { digit | '_' } starting with ch0.
 // If base <= 10, digits accepts any decimal digit but records
@@ -396,7 +396,7 @@ internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lo
 // digits returns the first rune that is not part of the sequence
 // anymore, and a bitset describing whether the sequence contained
 // digits (bit 0 is set), or separators '_' (bit 1 is set).
-internal static (rune ch, nint digsep) digits(this ж<Scanner> Ꮡs, rune ch0, nint @base, ж<rune> Ꮡinvalid) {
+internal static (rune ch, nint digsep) digitsᴍ(ж<Scanner> Ꮡs, rune ch0, nint @base, ж<rune> Ꮡinvalid) {
     rune ch = default;
     nint digsep = default;
     ref var invalid = ref Ꮡinvalid.DerefOrNull();
@@ -435,7 +435,7 @@ private static readonly @string hexadecimalMantissaˢᵇ = "hexadecimal mantissa
 internal static ref readonly @string mustSeparateSuccessiveˢ => ref mustSeparateSuccessiveˢᵇ;
 private static readonly @string mustSeparateSuccessiveˢᵇ = "'_' must separate successive digits"u8;
 
-internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool seenDot) {
+internal static (rune, rune) scanNumberᴍ(ж<Scanner> Ꮡs, rune ch, bool seenDot) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     nint @base = 10;                                             // number base
@@ -617,13 +617,13 @@ internal static nint digitVal(rune ch) {
     return 16; // larger than any legal digit val
 }
 
-} partial class scannerᴛScanner {
+} partial class scanner_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidCharEscapeˢ => ref invalidCharEscapeˢᵇ;
 private static readonly @string invalidCharEscapeˢᵇ = "invalid char escape"u8;
 
-internal static rune scanDigits(this ж<Scanner> Ꮡs, rune ch, nint @base, nint n) {
+internal static rune scanDigitsᴍ(ж<Scanner> Ꮡs, rune ch, nint @base, nint n) {
     while (n > 0 && digitVal(ch) < @base) {
         ch = Ꮡs.next();
         n--;
@@ -634,7 +634,7 @@ internal static rune scanDigits(this ж<Scanner> Ꮡs, rune ch, nint @base, nint
     return ch;
 }
 
-internal static rune scanEscape(this ж<Scanner> Ꮡs, rune quote) {
+internal static rune scanEscapeᴍ(ж<Scanner> Ꮡs, rune quote) {
     var ch = Ꮡs.next(); // read character after '/'
     switch (ch) {
     case var ᴛ when ᴛ == 'a' || ᴛ == 'b' || ᴛ == 'f' || ᴛ == 'n' || ᴛ == 'r' || ᴛ == 't' || ᴛ == 'v' || ᴛ == '\\' || ᴛ == quote: {
@@ -669,7 +669,7 @@ internal static rune scanEscape(this ж<Scanner> Ꮡs, rune quote) {
 internal static ref readonly @string literalNotTerminatedˢ => ref literalNotTerminatedˢᵇ;
 private static readonly @string literalNotTerminatedˢᵇ = "literal not terminated"u8;
 
-internal static nint /*n*/ scanString(this ж<Scanner> Ꮡs, rune quote) {
+internal static nint /*n*/ scanStringᴍ(ж<Scanner> Ꮡs, rune quote) {
     nint n = default;
 
     var ch = Ꮡs.next(); // read character after quote
@@ -688,7 +688,7 @@ internal static nint /*n*/ scanString(this ж<Scanner> Ꮡs, rune quote) {
     return n;
 }
 
-internal static void scanRawString(this ж<Scanner> Ꮡs) {
+internal static void scanRawStringᴍ(ж<Scanner> Ꮡs) {
     var ch = Ꮡs.next(); // read character after '`'
     while (ch != '`') {
         if (ch < 0) {
@@ -703,7 +703,7 @@ internal static void scanRawString(this ж<Scanner> Ꮡs) {
 internal static ref readonly @string invalidCharLiteralˢ => ref invalidCharLiteralˢᵇ;
 private static readonly @string invalidCharLiteralˢᵇ = "invalid char literal"u8;
 
-internal static void scanChar(this ж<Scanner> Ꮡs) {
+internal static void scanCharᴍ(ж<Scanner> Ꮡs) {
     if (Ꮡs.scanString('\'') != 1) {
         Ꮡs.error(invalidCharLiteralˢ);
     }
@@ -713,7 +713,7 @@ internal static void scanChar(this ж<Scanner> Ꮡs) {
 internal static ref readonly @string commentNotTerminatedˢ => ref commentNotTerminatedˢᵇ;
 private static readonly @string commentNotTerminatedˢᵇ = "comment not terminated"u8;
 
-internal static rune scanComment(this ж<Scanner> Ꮡs, rune ch) {
+internal static rune scanCommentᴍ(ж<Scanner> Ꮡs, rune ch) {
     // ch == '/' || ch == '*'
     if (ch == '/') {
         // line comment
@@ -746,7 +746,7 @@ internal static rune scanComment(this ж<Scanner> Ꮡs, rune ch) {
 // It returns [EOF] at the end of the source. It reports scanner errors (read and
 // token errors) by calling s.Error, if not nil; otherwise it prints an error
 // message to [os.Stderr].
-public static rune Scan(this ж<Scanner> Ꮡs) {
+internal static rune Scanᴍ(ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var ch = Ꮡs.Peek();
@@ -870,7 +870,7 @@ break_redo:;
 // the character or token returned by the last call to [Scanner.Next] or [Scanner.Scan].
 // Use the [Scanner.Position] field for the start position of the most
 // recently scanned token.
-public static Position /*pos*/ Pos(this ref Scanner s) {
+internal static Position /*pos*/ Posᴍ(ref Scanner s) {
     Position pos = default;
 
     pos.Filename = s.Filename;
@@ -899,7 +899,7 @@ public static Position /*pos*/ Pos(this ref Scanner s) {
 
 // TokenText returns the string corresponding to the most recently scanned token.
 // Valid after calling [Scanner.Scan] and in calls of [Scanner.Error].
-public static @string TokenText(this ж<Scanner> Ꮡs) {
+internal static @string TokenTextᴍ(ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.tokPos < 0) {
@@ -926,3 +926,31 @@ public static @string TokenText(this ж<Scanner> Ꮡs) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class scannerᴛPosition {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsValid(this ref Position pos) => scanner_package.IsValidᴍ(ref pos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Position pos) => scanner_package.Stringᴍ(pos);
+}
+partial class scannerᴛScanner {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scanner> Init(this ж<Scanner> Ꮡs, io.Reader src) => scanner_package.Initᴍ(Ꮡs, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune next(this ж<Scanner> Ꮡs) => scanner_package.nextᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune Next(this ж<Scanner> Ꮡs) => scanner_package.Nextᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune Peek(this ж<Scanner> Ꮡs) => scanner_package.Peekᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ж<Scanner> Ꮡs, @string msg) => scanner_package.errorᴍ(Ꮡs, msg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) => scanner_package.errorfᴍ(Ꮡs, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isIdentRune(this ref Scanner s, rune ch, nint i) => scanner_package.isIdentRuneᴍ(ref s, ch, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune scanIdentifier(this ж<Scanner> Ꮡs) => scanner_package.scanIdentifierᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (rune ch, nint digsep) digits(this ж<Scanner> Ꮡs, rune ch0, nint @base, ж<rune> Ꮡinvalid) => scanner_package.digitsᴍ(Ꮡs, ch0, @base, Ꮡinvalid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool seenDot) => scanner_package.scanNumberᴍ(Ꮡs, ch, seenDot);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune scanDigits(this ж<Scanner> Ꮡs, rune ch, nint @base, nint n) => scanner_package.scanDigitsᴍ(Ꮡs, ch, @base, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune scanEscape(this ж<Scanner> Ꮡs, rune quote) => scanner_package.scanEscapeᴍ(Ꮡs, quote);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*n*/ scanString(this ж<Scanner> Ꮡs, rune quote) => scanner_package.scanStringᴍ(Ꮡs, quote);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scanRawString(this ж<Scanner> Ꮡs) => scanner_package.scanRawStringᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scanChar(this ж<Scanner> Ꮡs) => scanner_package.scanCharᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune scanComment(this ж<Scanner> Ꮡs, rune ch) => scanner_package.scanCommentᴍ(Ꮡs, ch);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune Scan(this ж<Scanner> Ꮡs) => scanner_package.Scanᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Position /*pos*/ Pos(this ref Scanner s) => scanner_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string TokenText(this ж<Scanner> Ꮡs) => scanner_package.TokenTextᴍ(Ꮡs);
+}
+// </GlyphForwarders>

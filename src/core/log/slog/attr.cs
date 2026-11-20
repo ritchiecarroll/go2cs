@@ -98,21 +98,29 @@ public static Attr Any(@string key, any value) {
     return new Attr(key, AnyValue(value));
 }
 
-} partial class slogᴛAttr {
+} partial class slog_package {
 
 // Equal reports whether a and b have equal keys and values.
-public static bool Equal(this Attr a, Attr b) {
+internal static bool Equalᴍ(Attr a, Attr b) {
     return a.Key == b.Key && a.Value.Equal(b.Value);
 }
 
-public static @string String(this Attr a) {
+internal static @string Stringᴍ(Attr a) {
     return a.Key + "="u8 + a.Value.String();
 }
 
 // isEmpty reports whether a has an empty key and a nil value.
 // That can be written as Attr{} or Any("", nil).
-internal static bool isEmpty(this Attr a) {
+internal static bool isEmptyᴍ(Attr a) {
     return a.Key == ""u8 && a.Value.num == 0 && a.Value.any == nil;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class slogᴛAttr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this Attr a, Attr b) => slog_package.Equalᴍ(a, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Attr a) => slog_package.Stringᴍ(a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isEmpty(this Attr a) => slog_package.isEmptyᴍ(a);
+}
+// </GlyphForwarders>

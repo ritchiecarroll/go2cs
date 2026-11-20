@@ -71,14 +71,14 @@ internal static UntypedInt wbBufEntries => 512;
 // buffer in a single call.
 internal static UntypedInt wbMaxEntriesPerCall => 8;
 
-} partial class runtimeᴛwbBuf {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badWriteBarrierBufferˢ => ref badWriteBarrierBufferˢᵇ;
 private static readonly @string badWriteBarrierBufferˢᵇ = "bad write barrier buffer bounds"u8;
 
 // reset empties b by resetting its next and end pointers.
-internal static void reset(this ref wbBuf b) {
+internal static void resetᴍ(ref wbBuf b) {
     var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
     b.next = start;
     if (testSmallBuf) {
@@ -100,12 +100,12 @@ internal static void reset(this ref wbBuf b) {
 // This must be nosplit because it's called by wbBufFlush.
 //
 //go:nosplit
-internal static void discard(this ref wbBuf b) {
+internal static void discardᴍ(ref wbBuf b) {
     b.next = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
 }
 
 // empty reports whether b contains no pointers.
-internal static bool empty(this ref wbBuf b) {
+internal static bool emptyᴍ(ref wbBuf b) {
     return b.next == (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
 }
 
@@ -131,7 +131,7 @@ internal static bool empty(this ref wbBuf b) {
 //
 //go:nowritebarrierrec
 //go:nosplit
-internal static ж<array<uintptr>> get1(this ref wbBuf b) {
+internal static ж<array<uintptr>> get1ᴍ(ref wbBuf b) {
     if (b.next + (uintptr)goarch.PtrSize > b.end) {
         wbBufFlush();
     }
@@ -142,7 +142,7 @@ internal static ж<array<uintptr>> get1(this ref wbBuf b) {
 
 //go:nowritebarrierrec
 //go:nosplit
-internal static ж<array<uintptr>> get2(this ref wbBuf b) {
+internal static ж<array<uintptr>> get2ᴍ(ref wbBuf b) {
     if (b.next + (uintptr)(2 * goarch.PtrSize) > b.end) {
         wbBufFlush();
     }
@@ -280,3 +280,13 @@ internal static void wbBufFlush1(ж<p> Ꮡpp) {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛwbBuf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref wbBuf b) => runtime_package.resetᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void discard(this ref wbBuf b) => runtime_package.discardᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref wbBuf b) => runtime_package.emptyᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<array<uintptr>> get1(this ref wbBuf b) => runtime_package.get1ᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<array<uintptr>> get2(this ref wbBuf b) => runtime_package.get2ᴍ(ref b);
+}
+// </GlyphForwarders>

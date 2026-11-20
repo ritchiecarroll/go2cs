@@ -45,11 +45,11 @@ public static GoState GoRunning => 3;                 // Goroutine is running.
 public static GoState GoWaiting => 4;                 // Goroutine is waiting on something to happen.
 public static GoState GoSyscall => 5;                 // Goroutine is in a system call.
 
-} partial class traceᴛGoState {
+} partial class trace_package {
 
 // Executing returns true if the state indicates that the goroutine is executing
 // and bound to its thread.
-public static bool Executing(this GoState s) {
+internal static bool Executingᴍ(GoState s) {
     return s == GoRunning || s == GoSyscall;
 }
 
@@ -72,7 +72,7 @@ private static readonly @string badˢᵇ = "Bad"u8;
 // String returns a human-readable representation of a GoState.
 //
 // The format of the returned string is for debugging purposes and is subject to change.
-public static @string String(this GoState s) {
+internal static @string Stringᴍ(GoState s) {
     switch (s) {
     case var ᴛ when ᴛ == GoUndetermined: {
         return undeterminedˢ;
@@ -108,11 +108,11 @@ public static ProcState ProcNotExist => 1;                // Proc does not exist
 public static ProcState ProcRunning => 2;                 // Proc is running.
 public static ProcState ProcIdle => 3;                    // Proc is idle.
 
-} partial class traceᴛProcState {
+} partial class trace_package {
 
 // Executing returns true if the state indicates that the proc is executing
 // and bound to its thread.
-public static bool Executing(this ProcState s) {
+internal static bool Executingᴍ(ProcState s) {
     return s == ProcRunning;
 }
 
@@ -131,7 +131,7 @@ private static readonly @string badˢᵇ = "Bad"u8;
 // String returns a human-readable representation of a ProcState.
 //
 // The format of the returned string is for debugging purposes and is subject to change.
-public static @string String(this ProcState s) {
+internal static @string Stringᴍ(ProcState s) {
     switch (s) {
     case var ᴛ when ᴛ == ProcUndetermined: {
         return undeterminedˢ;
@@ -161,7 +161,7 @@ public static ResourceKind ResourceGoroutine => 1;       // Goroutine.
 public static ResourceKind ResourceProc => 2;            // Proc.
 public static ResourceKind ResourceThread => 3;          // Thread.
 
-} partial class traceᴛResourceKind {
+} partial class trace_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noneˢ => ref noneˢᵇ;
@@ -178,7 +178,7 @@ private static readonly @string badˢᵇ = "Bad"u8;
 // String returns a human-readable representation of a ResourceKind.
 //
 // The format of the returned string is for debugging purposes and is subject to change.
-public static @string String(this ResourceKind r) {
+internal static @string Stringᴍ(ResourceKind r) {
     switch (r) {
     case var ᴛ when ᴛ == ResourceNone: {
         return noneˢ;
@@ -227,12 +227,12 @@ public static ResourceID MakeResourceID<T>(T id)
     return rd;
 }
 
-} partial class traceᴛResourceID {
+} partial class trace_package {
 
 // Goroutine obtains a GoID from the resource ID.
 //
 // r.Kind must be ResourceGoroutine or this function will panic.
-public static GoID Goroutine(this ResourceID r) {
+internal static GoID Goroutineᴍ(ResourceID r) {
     if (r.Kind != ResourceGoroutine) {
         throw panic(fmt.Sprintf("attempted to get GoID from %s resource ID"u8, r.Kind));
     }
@@ -242,7 +242,7 @@ public static GoID Goroutine(this ResourceID r) {
 // Proc obtains a ProcID from the resource ID.
 //
 // r.Kind must be ResourceProc or this function will panic.
-public static ProcID Proc(this ResourceID r) {
+internal static ProcID Procᴍ(ResourceID r) {
     if (r.Kind != ResourceProc) {
         throw panic(fmt.Sprintf("attempted to get ProcID from %s resource ID"u8, r.Kind));
     }
@@ -252,7 +252,7 @@ public static ProcID Proc(this ResourceID r) {
 // Thread obtains a ThreadID from the resource ID.
 //
 // r.Kind must be ResourceThread or this function will panic.
-public static ThreadID Thread(this ResourceID r) {
+internal static ThreadID Threadᴍ(ResourceID r) {
     if (r.Kind != ResourceThread) {
         throw panic(fmt.Sprintf("attempted to get ThreadID from %s resource ID"u8, r.Kind));
     }
@@ -262,7 +262,7 @@ public static ThreadID Thread(this ResourceID r) {
 // String returns a human-readable string representation of the ResourceID.
 //
 // This representation is subject to change and is intended primarily for debugging.
-public static @string String(this ResourceID r) {
+internal static @string Stringᴍ(ResourceID r) {
     if (r.Kind == ResourceNone) {
         return r.Kind.String();
     }
@@ -313,7 +313,7 @@ public static StateTransition MakeProcStateTransition(ProcID id, ProcState from,
     );
 }
 
-} partial class traceᴛStateTransition {
+} partial class trace_package {
 
 // Goroutine returns the state transition for a goroutine.
 //
@@ -322,7 +322,7 @@ public static StateTransition MakeProcStateTransition(ProcID id, ProcState from,
 // on the same thread will feature the same goroutine until it stops running.
 //
 // Panics if d.Resource.Kind is not ResourceGoroutine.
-public static (GoState from, GoState to) Goroutine(this StateTransition d) {
+internal static (GoState from, GoState to) Goroutineᴍ(StateTransition d) {
     if (d.Resource.Kind != ResourceGoroutine) {
         throw panic("Goroutine called on non-Goroutine state transition");
     }
@@ -336,7 +336,7 @@ public static (GoState from, GoState to) Goroutine(this StateTransition d) {
 // on the same thread will feature the same goroutine until it stops running.
 //
 // Panics if d.Resource.Kind is not ResourceProc.
-public static (ProcState from, ProcState to) Proc(this StateTransition d) {
+internal static (ProcState from, ProcState to) Procᴍ(StateTransition d) {
     if (d.Resource.Kind != ResourceProc) {
         throw panic("Proc called on non-Proc state transition");
     }
@@ -344,3 +344,27 @@ public static (ProcState from, ProcState to) Proc(this StateTransition d) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛGoState {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Executing(this GoState s) => trace_package.Executingᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this GoState s) => trace_package.Stringᴍ(s);
+}
+partial class traceᴛProcState {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Executing(this ProcState s) => trace_package.Executingᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ProcState s) => trace_package.Stringᴍ(s);
+}
+partial class traceᴛResourceKind {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ResourceKind r) => trace_package.Stringᴍ(r);
+}
+partial class traceᴛResourceID {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static GoID Goroutine(this ResourceID r) => trace_package.Goroutineᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ProcID Proc(this ResourceID r) => trace_package.Procᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ThreadID Thread(this ResourceID r) => trace_package.Threadᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ResourceID r) => trace_package.Stringᴍ(r);
+}
+partial class traceᴛStateTransition {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (GoState from, GoState to) Goroutine(this StateTransition d) => trace_package.Goroutineᴍ(d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ProcState from, ProcState to) Proc(this StateTransition d) => trace_package.Procᴍ(d);
+}
+// </GlyphForwarders>

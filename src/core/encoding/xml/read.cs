@@ -135,11 +135,11 @@ public static error Unmarshal(slice<byte> data, any v) {
     return NewDecoder(new bytes_ReaderжReader(bytes.NewReader(data))).Decode(v);
 }
 
-} partial class xmlᴛDecoder {
+} partial class xml_package {
 
 // Decode works like [Unmarshal], except it reads the decoder
 // stream to find the start element.
-public static error Decode(this ж<Decoder> Ꮡd, any v) {
+internal static error Decodeᴍ(ж<Decoder> Ꮡd, any v) {
     return Ꮡd.DecodeElement(v, nil);
 }
 
@@ -153,7 +153,7 @@ private static readonly @string nilPointerPassedToˢᵇ = "nil pointer passed to
 // a pointer to the start XML element to decode into v.
 // It is useful when a client reads some raw XML tokens itself
 // but also wants to defer to [Unmarshal] for some elements.
-public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement> start) {
+internal static error DecodeElementᴍ(ж<Decoder> Ꮡd, any v, ж<StartElement> start) {
     var val = reflect.ValueOf(v);
     if (val.Kind() != reflect.Pointer) {
         return errors.New(nonPointerPassedToˢ);
@@ -170,9 +170,9 @@ public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement>
 // An UnmarshalError represents an error in the unmarshaling process.
 partial struct UnmarshalError /*@string*/;
 
-} partial class xmlᴛUnmarshalError {
+} partial class xml_package {
 
-public static @string Error(this UnmarshalError e) { return (@string)e; }
+internal static @string Errorᴍ(UnmarshalError e) { return (@string)e; }
 
 } partial class xml_package {
 
@@ -216,11 +216,11 @@ internal static @string receiverType(any val) {
     return "("u8 + t.String() + ")"u8;
 }
 
-} partial class xmlᴛDecoder {
+} partial class xml_package {
 
 // unmarshalInterface unmarshals a single XML element into val.
 // start is the opening tag of the element.
-internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) {
+internal static error unmarshalInterfaceᴍ(ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -254,7 +254,7 @@ internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val,
 // unmarshalTextInterface unmarshals a single XML element into val.
 // The chardata contained in the element (but not its children)
 // is passed to the text unmarshaler.
-internal static error unmarshalTextInterface(this ref Decoder d, encoding.TextUnmarshaler val) {
+internal static error unmarshalTextInterfaceᴍ(ref Decoder d, encoding.TextUnmarshaler val) {
     slice<byte> buf = default;
     nint depth = 1;
     while (depth > 0) {
@@ -282,7 +282,7 @@ internal static error unmarshalTextInterface(this ref Decoder d, encoding.TextUn
 }
 
 // unmarshalAttr unmarshals a single XML attribute into val.
-internal static error unmarshalAttr(this ref Decoder d, reflect.Value val, Attr attr) {
+internal static error unmarshalAttrᴍ(ref Decoder d, reflect.Value val, Attr attr) {
     if (val.Kind() == reflect.Pointer) {
         if (val.IsNil()) {
             val.Set(reflect.New(val.Type().Elem()));
@@ -354,10 +354,10 @@ internal static UntypedInt maxUnmarshalDepthWasm => 5000; // go.dev/issue/56498
 
 internal static error errUnmarshalDepth = errors.New("exceeded max depth");
 
-} partial class xmlᴛDecoder {
+} partial class xml_package {
 
 // Unmarshal a single XML element into val.
-internal static error unmarshal(this ж<Decoder> Ꮡd, reflect.Value val, ж<StartElement> Ꮡstart) {
+internal static error unmarshalᴍ(ж<Decoder> Ꮡd, reflect.Value val, ж<StartElement> Ꮡstart) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var start = ref Ꮡstart.DerefOrNull();
 
@@ -781,14 +781,14 @@ internal static error /*err*/ copyValue(reflect.Value dst, slice<byte> src) {
     return default;
 }
 
-} partial class xmlᴛDecoder {
+} partial class xml_package {
 
 // unmarshalPath walks down an XML structure looking for wanted
 // paths, and calls unmarshal on them.
 // The consumed result tells whether XML elements have been consumed
 // from the Decoder until start's matching end element, or if it's
 // still untouched because start is uninteresting for sv's fields.
-internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflect.Value sv, slice<@string> parents, ж<StartElement> Ꮡstart) {
+internal static (bool consumed, error err) unmarshalPathᴍ(ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflect.Value sv, slice<@string> parents, ж<StartElement> Ꮡstart) {
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
@@ -862,7 +862,7 @@ break_Loop:;
 // skipping nested structures.
 // It returns nil if it finds an end element matching the start
 // element; otherwise it returns an error describing the problem.
-public static error Skip(this ref Decoder d) {
+internal static error Skipᴍ(ref Decoder d) {
     int64 depth = default;
     for (;;) {
         var (tok, err) = d.Token();
@@ -885,3 +885,19 @@ public static error Skip(this ref Decoder d) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class xmlᴛDecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Decode(this ж<Decoder> Ꮡd, any v) => xml_package.Decodeᴍ(Ꮡd, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement> start) => xml_package.DecodeElementᴍ(Ꮡd, v, start);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) => xml_package.unmarshalInterfaceᴍ(Ꮡd, val, Ꮡstart);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshalTextInterface(this ref Decoder d, encoding.TextUnmarshaler val) => xml_package.unmarshalTextInterfaceᴍ(ref d, val);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshalAttr(this ref Decoder d, reflect.Value val, Attr attr) => xml_package.unmarshalAttrᴍ(ref d, val, attr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshal(this ж<Decoder> Ꮡd, reflect.Value val, ж<StartElement> Ꮡstart) => xml_package.unmarshalᴍ(Ꮡd, val, Ꮡstart);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflect.Value sv, slice<@string> parents, ж<StartElement> Ꮡstart) => xml_package.unmarshalPathᴍ(Ꮡd, Ꮡtinfo, sv, parents, Ꮡstart);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Skip(this ref Decoder d) => xml_package.Skipᴍ(ref d);
+}
+partial class xmlᴛUnmarshalError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnmarshalError e) => xml_package.Errorᴍ(e);
+}
+// </GlyphForwarders>

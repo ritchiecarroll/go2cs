@@ -31,17 +31,17 @@ partial struct Value {
     internal @unsafe.Pointer pointer; // contains non-scalar values.
 }
 
-} partial class metricsᴛValue {
+} partial class metrics_package {
 
 // Kind returns the tag representing the kind of value this is.
-public static ValueKind Kind(this Value v) {
+internal static ValueKind Kindᴍ(Value v) {
     return v.kind;
 }
 
 // Uint64 returns the internal uint64 value for the metric.
 //
 // If v.Kind() != KindUint64, this method panics.
-public static uint64 Uint64(this Value v) {
+internal static uint64 Uint64ᴍ(Value v) {
     if (v.kind != KindUint64) {
         throw panic("called Uint64 on non-uint64 metric value");
     }
@@ -51,7 +51,7 @@ public static uint64 Uint64(this Value v) {
 // Float64 returns the internal float64 value for the metric.
 //
 // If v.Kind() != KindFloat64, this method panics.
-public static float64 Float64(this Value v) {
+internal static float64 Float64ᴍ(Value v) {
     if (v.kind != KindFloat64) {
         throw panic("called Float64 on non-float64 metric value");
     }
@@ -61,7 +61,7 @@ public static float64 Float64(this Value v) {
 // Float64Histogram returns the internal *Float64Histogram value for the metric.
 //
 // If v.Kind() != KindFloat64Histogram, this method panics.
-public static ж<Float64Histogram> Float64Histogram(this Value v) {
+internal static ж<Float64Histogram> Float64Histogramᴍ(Value v) {
     if (v.kind != KindFloat64Histogram) {
         throw panic("called Float64Histogram on non-Float64Histogram metric value");
     }
@@ -69,3 +69,12 @@ public static ж<Float64Histogram> Float64Histogram(this Value v) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class metricsᴛValue {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ValueKind Kind(this Value v) => metrics_package.Kindᴍ(v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this Value v) => metrics_package.Uint64ᴍ(v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Float64(this Value v) => metrics_package.Float64ᴍ(v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Float64Histogram> Float64Histogram(this Value v) => metrics_package.Float64Histogramᴍ(v);
+}
+// </GlyphForwarders>

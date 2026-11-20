@@ -10,9 +10,9 @@ using static os_package;
 
 partial class os_package {
 
-} partial class osᴛFile {
+} partial class os_package {
 
-internal static (FileInfo, error) lstatat(this ж<File> Ꮡf, @string name) {
+internal static (FileInfo, error) lstatatᴍ(ж<File> Ꮡf, @string name) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (stathook != nil) {
@@ -28,3 +28,9 @@ internal static (FileInfo, error) lstatat(this ж<File> Ꮡf, @string name) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (FileInfo, error) lstatat(this ж<File> Ꮡf, @string name) => os_package.lstatatᴍ(Ꮡf, name);
+}
+// </GlyphForwarders>

@@ -52,21 +52,21 @@ partial struct formatter {
     internal error err; // Last error seen
 }
 
-} partial class tarᴛparser {
+} partial class tar_package {
 
 // parseString parses bytes as a NUL-terminated C-style string.
 // If a NUL byte is not found then the whole slice is returned as a string.
-internal static @string parseString(this ref parser _, slice<byte> b) {
+internal static @string parseStringᴍ(ref parser _, slice<byte> b) {
     nint i = bytes.IndexByte(b, 0); if (i >= 0) {
         return (@string)(b.slice(0, i));
     }
     return (@string)b;
 }
 
-} partial class tarᴛformatter {
+} partial class tar_package {
 
 // formatString copies s into b, NUL-terminating if possible.
-internal static void formatString(this ref formatter f, slice<byte> b, @string s) {
+internal static void formatStringᴍ(ref formatter f, slice<byte> b, @string s) {
     if (len(s) > len(b)) {
         f.err = ErrFieldTooLong;
     }
@@ -98,12 +98,12 @@ internal static bool fitsInBase256(nint n, int64 x) {
     return n >= 9 || (x >= ((int64)(-1)).Lsh(binBits) && x < ((int64)1).Lsh(binBits));
 }
 
-} partial class tarᴛparser {
+} partial class tar_package {
 
 // parseNumeric parses the input as being encoded in either base-256 or octal.
 // This function may return negative numbers.
 // If parsing fails or an integer overflow occurs, err will be set.
-internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
+internal static int64 parseNumericᴍ(ref parser p, slice<byte> b) {
     // Check for base-256 (binary) format first.
     // If the first bit is set, then all following bits constitute a two's
     // complement encoded number in big-endian byte order.
@@ -146,11 +146,11 @@ internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
     return p.parseOctal(b);
 }
 
-} partial class tarᴛformatter {
+} partial class tar_package {
 
 // formatNumeric encodes x into b using base-8 (octal) encoding if possible.
 // Otherwise it will attempt to use base-256 (binary) encoding.
-internal static void formatNumeric(this ref formatter f, slice<byte> b, int64 x) {
+internal static void formatNumericᴍ(ref formatter f, slice<byte> b, int64 x) {
     if (fitsInOctal(len(b), x)) {
         f.formatOctal(b, x);
         return;
@@ -169,9 +169,9 @@ internal static void formatNumeric(this ref formatter f, slice<byte> b, int64 x)
     f.err = ErrFieldTooLong;
 }
 
-} partial class tarᴛparser {
+} partial class tar_package {
 
-internal static int64 parseOctal(this ref parser p, slice<byte> b) {
+internal static int64 parseOctalᴍ(ref parser p, slice<byte> b) {
     // Because unused fields are filled with NULs, we need
     // to skip leading NULs. Fields may also be padded with
     // spaces or NULs.
@@ -189,9 +189,9 @@ internal static int64 parseOctal(this ref parser p, slice<byte> b) {
     return (int64)x;
 }
 
-} partial class tarᴛformatter {
+} partial class tar_package {
 
-internal static void formatOctal(this ref formatter f, slice<byte> b, int64 x) {
+internal static void formatOctalᴍ(ref formatter f, slice<byte> b, int64 x) {
     if (!fitsInOctal(len(b), x)) {
         x = 0; // Last resort, just write zero
         f.err = ErrFieldTooLong;
@@ -359,3 +359,16 @@ internal static bool validPAXRecord(@string k, @string v) {
 }
 
 } // end tar_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tarᴛparser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string parseString(this ref parser _, slice<byte> b) => tar_package.parseStringᴍ(ref _, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 parseNumeric(this ref parser p, slice<byte> b) => tar_package.parseNumericᴍ(ref p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 parseOctal(this ref parser p, slice<byte> b) => tar_package.parseOctalᴍ(ref p, b);
+}
+partial class tarᴛformatter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void formatString(this ref formatter f, slice<byte> b, @string s) => tar_package.formatStringᴍ(ref f, b, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void formatNumeric(this ref formatter f, slice<byte> b, int64 x) => tar_package.formatNumericᴍ(ref f, b, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void formatOctal(this ref formatter f, slice<byte> b, int64 x) => tar_package.formatOctalᴍ(ref f, b, x);
+}
+// </GlyphForwarders>

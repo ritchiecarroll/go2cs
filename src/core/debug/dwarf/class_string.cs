@@ -37,9 +37,9 @@ private static readonly @string _Class_nameᵇ = "ClassUnknownClassAddressClassB
 
 [GoLazy] partial class lazyᴛ_Class_index { internal static array<uint16> _Class_index = new uint16[]{0, 12, 24, 34, 47, 59, 68, 80, 95, 106, 123, 137, 154, 165, 182, 196, 208, 220, 232, 248, 266}.array(); }
 
-} partial class dwarfᴛClass {
+} partial class dwarf_package {
 
-public static @string String(this Class i) {
+internal static @string Stringᴍ(Class i) {
     if (i < 0 || i >= ((Class)(len(_Class_index) - 1))) {
         return "Class("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -47,3 +47,9 @@ public static @string String(this Class i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class dwarfᴛClass {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Class i) => dwarf_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

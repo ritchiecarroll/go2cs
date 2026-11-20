@@ -437,17 +437,17 @@ partial struct crashError {
     internal error err;
 }
 
-} partial class fuzzᴛcrashError {
+} partial class fuzz_package {
 
-internal static @string Error(this ref crashError e) {
+internal static @string Errorᴍ(ref crashError e) {
     return e.err.Error();
 }
 
-internal static error Unwrap(this ref crashError e) {
+internal static error Unwrapᴍ(ref crashError e) {
     return e.err;
 }
 
-internal static @string CrashPath(this ref crashError e) {
+internal static @string CrashPathᴍ(ref crashError e) {
     return e.path;
 }
 
@@ -458,13 +458,13 @@ partial struct corpus {
     internal map</*[32]*/ array<byte>, bool> hashes;
 }
 
-} partial class fuzzᴛcoordinator {
+} partial class fuzz_package {
 
 // addCorpusEntries adds entries to the corpus, and optionally writes the entries
 // to the cache directory. If an entry is already in the corpus it is skipped. If
 // all of the entries are unique, addCorpusEntries returns true and a nil error,
 // if at least one of the entries was a duplicate, it returns false and a nil error.
-internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) {
+internal static (bool, error) addCorpusEntriesᴍ(ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) {
     var entries = entriesʗp.sslice();
 
     var noDupes = true;
@@ -723,15 +723,15 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     return (c, default);
 }
 
-} partial class fuzzᴛcoordinator {
+} partial class fuzz_package {
 
-internal static void updateStats(this ref coordinator c, fuzzResult result) {
+internal static void updateStatsᴍ(ref coordinator c, fuzzResult result) {
     c.count += result.count;
     c.countWaiting -= result.limit;
     c.duration += result.totalDuration;
 }
 
-internal static void logStats(this ref coordinator c) {
+internal static void logStatsᴍ(ref coordinator c) {
     var now = time.Now();
     if (c.warmupRun()) {
         nint runSoFar = c.warmupInputCount - c.warmupInputLeft;
@@ -765,7 +765,7 @@ internal static void logStats(this ref coordinator c) {
 //
 // If the input queue is empty and the coverage/testing-only run has completed,
 // queue refills it from the corpus.
-internal static (fuzzInput, bool) peekInput(this ref coordinator c) {
+internal static (fuzzInput, bool) peekInputᴍ(ref coordinator c) {
     if (c.opts.Limit > 0 && c.count + c.countWaiting >= c.opts.Limit) {
         // Already making the maximum number of calls to the fuzz function.
         // Don't send more inputs right now.
@@ -813,14 +813,14 @@ internal static (fuzzInput, bool) peekInput(this ref coordinator c) {
 }
 
 // sentInput updates internal counters after an input is sent to c.inputC.
-internal static void sentInput(this ref coordinator c, fuzzInput input) {
+internal static void sentInputᴍ(ref coordinator c, fuzzInput input) {
     c.inputQueue.dequeue();
     c.countWaiting += input.limit;
 }
 
 // refillInputQueue refills the input queue from the corpus after it becomes
 // empty.
-internal static void refillInputQueue(this ref coordinator c) {
+internal static void refillInputQueueᴍ(ref coordinator c) {
     foreach (var (_, e) in range(c.corpus.entries)) {
         c.inputQueue.enqueue(e);
     }
@@ -828,7 +828,7 @@ internal static void refillInputQueue(this ref coordinator c) {
 
 // queueForMinimization creates a fuzzMinimizeInput from result and adds it
 // to the minimization queue to be sent to workers.
-internal static void queueForMinimization(this ref coordinator c, fuzzResult result, slice<byte> keepCoverage) {
+internal static void queueForMinimizationᴍ(ref coordinator c, fuzzResult result, slice<byte> keepCoverage) {
     if (shouldPrintDebugInfo()) {
         c.debugLogf(
             "queueing input for minimization, id: %s, parent: %s, keepCoverage: %t, crasher: %t",
@@ -851,7 +851,7 @@ internal static void queueForMinimization(this ref coordinator c, fuzzResult res
 
 // peekMinimizeInput returns the next input that should be sent to workers for
 // minimization.
-internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator c) {
+internal static (fuzzMinimizeInput, bool) peekMinimizeInputᴍ(ref coordinator c) {
     if (!c.canMinimize()) {
         // Already making the maximum number of calls to the fuzz function.
         // Don't send more inputs right now.
@@ -889,7 +889,7 @@ internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator
 
 // sentMinimizeInput removes an input from the minimization queue after it's
 // sent to minimizeC.
-internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput input) {
+internal static void sentMinimizeInputᴍ(ref coordinator c, fuzzMinimizeInput input) {
     c.minimizeQueue.dequeue();
     c.countWaiting += input.limit;
 }
@@ -907,14 +907,14 @@ internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput
 // gather coverage for that entry only, without fuzzing or minimizing. This
 // phase ends when all workers have finished, and the coordinator has a combined
 // coverage map.
-internal static bool warmupRun(this ref coordinator c) {
+internal static bool warmupRunᴍ(ref coordinator c) {
     return c.warmupInputLeft > 0;
 }
 
 // updateCoverage sets bits in c.coverageMask that are set in newCoverage.
 // updateCoverage returns the number of newly set bits. See the comment on
 // coverageMask for the format.
-internal static nint updateCoverage(this ref coordinator c, slice<byte> newCoverage) {
+internal static nint updateCoverageᴍ(ref coordinator c, slice<byte> newCoverage) {
     if (len(newCoverage) != len(c.coverageMask)) {
         throw panic(fmt.Sprintf("number of coverage counters changed at runtime: %d, expected %d"u8, len(newCoverage), len(c.coverageMask)));
     }
@@ -929,11 +929,11 @@ internal static nint updateCoverage(this ref coordinator c, slice<byte> newCover
 
 // canMinimize returns whether the coordinator should attempt to find smaller
 // inputs that reproduce a crash or new coverage.
-internal static bool canMinimize(this ref coordinator c) {
+internal static bool canMinimizeᴍ(ref coordinator c) {
     return c.minimizationAllowed && (c.opts.Limit == 0 || c.count + c.countWaiting < c.opts.Limit);
 }
 
-internal static time.Duration elapsed(this ref coordinator c) {
+internal static time.Duration elapsedᴍ(ref coordinator c) {
     return time.Since(c.startTime).Round(1 * time.Second);
 }
 
@@ -942,7 +942,7 @@ internal static time.Duration elapsed(this ref coordinator c) {
 //
 // TODO(fuzzing): need a mechanism that can remove values that
 // aren't useful anymore, for example, because they have the wrong type.
-internal static error readCache(this ref coordinator c) {
+internal static error readCacheᴍ(ref coordinator c) {
     var (_, errΔ1) = c.addCorpusEntries(false, c.opts.Seed.ꓸꓸꓸ); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -972,9 +972,9 @@ partial struct MalformedCorpusError {
     internal slice<error> errs;
 }
 
-} partial class fuzzᴛMalformedCorpusError {
+} partial class fuzz_package {
 
-public static @string Error(this ref MalformedCorpusError e) {
+internal static @string Errorᴍ(ref MalformedCorpusError e) {
     var msgsᴷ = new stackAppend<@string>();
 
     slice<@string> msgs = default;
@@ -1114,9 +1114,9 @@ internal static bool shouldPrintDebugInfo() {
     return debugInfo;
 }
 
-} partial class fuzzᴛcoordinator {
+} partial class fuzz_package {
 
-internal static void debugLogf(this ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void debugLogfᴍ(ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     @string t = time.Now().Format("2006-01-02 15:04:05.999999999");
@@ -1124,3 +1124,31 @@ internal static void debugLogf(this ref coordinator c, @string format, params �
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fuzzᴛcrashError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref crashError e) => fuzz_package.Errorᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this ref crashError e) => fuzz_package.Unwrapᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string CrashPath(this ref crashError e) => fuzz_package.CrashPathᴍ(ref e);
+}
+partial class fuzzᴛcoordinator {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) => fuzz_package.addCorpusEntriesᴍ(ref c, addToCache, entriesʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateStats(this ref coordinator c, fuzzResult result) => fuzz_package.updateStatsᴍ(ref c, result);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logStats(this ref coordinator c) => fuzz_package.logStatsᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fuzzInput, bool) peekInput(this ref coordinator c) => fuzz_package.peekInputᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sentInput(this ref coordinator c, fuzzInput input) => fuzz_package.sentInputᴍ(ref c, input);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refillInputQueue(this ref coordinator c) => fuzz_package.refillInputQueueᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void queueForMinimization(this ref coordinator c, fuzzResult result, slice<byte> keepCoverage) => fuzz_package.queueForMinimizationᴍ(ref c, result, keepCoverage);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator c) => fuzz_package.peekMinimizeInputᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput input) => fuzz_package.sentMinimizeInputᴍ(ref c, input);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool warmupRun(this ref coordinator c) => fuzz_package.warmupRunᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint updateCoverage(this ref coordinator c, slice<byte> newCoverage) => fuzz_package.updateCoverageᴍ(ref c, newCoverage);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool canMinimize(this ref coordinator c) => fuzz_package.canMinimizeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration elapsed(this ref coordinator c) => fuzz_package.elapsedᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readCache(this ref coordinator c) => fuzz_package.readCacheᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void debugLogf(this ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) => fuzz_package.debugLogfᴍ(ref c, format, argsʗp);
+}
+partial class fuzzᴛMalformedCorpusError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref MalformedCorpusError e) => fuzz_package.Errorᴍ(ref e);
+}
+// </GlyphForwarders>

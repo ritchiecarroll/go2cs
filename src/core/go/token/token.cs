@@ -233,14 +233,14 @@ internal static Token additional_end => 89;
     [(int)TILDE] = "~"
 }.array(89); }
 
-} partial class tokenᴛToken {
+} partial class token_package {
 
 // String returns the string corresponding to the token tok.
 // For operators, delimiters, and keywords the string is the actual
 // token character sequence (e.g., for the token [ADD], the string is
 // "+"). For all other tokens the string corresponds to the token
 // constant name (e.g. for the token [IDENT], the string is "IDENT").
-public static @string String(this Token tok) {
+internal static @string Stringᴍ(Token tok) {
     @string s = ""u8;
     if (0 <= tok && tok < ((Token)len(tokens))) {
         s = tokens[tok];
@@ -262,12 +262,12 @@ public static UntypedInt LowestPrec => 0; // non-operators
 public static UntypedInt UnaryPrec => 6;
 public static UntypedInt HighestPrec => 7;
 
-} partial class tokenᴛToken {
+} partial class token_package {
 
 // Precedence returns the operator precedence of the binary
 // operator op. If op is not a binary operator, the result
 // is LowestPrecedence.
-public static nint Precedence(this Token op) {
+internal static nint Precedenceᴍ(Token op) {
     switch (op) {
     case var ᴛ when ᴛ == LOR: {
         return 1;
@@ -306,23 +306,23 @@ public static Token Lookup(@string ident) {
     return IDENT;
 }
 
-} partial class tokenᴛToken {
+} partial class token_package {
 
 // Predicates
 
 // IsLiteral returns true for tokens corresponding to identifiers
 // and basic type literals; it returns false otherwise.
-public static bool IsLiteral(this Token tok) { return literal_beg < tok && tok < literal_end; }
+internal static bool IsLiteralᴍ(Token tok) { return literal_beg < tok && tok < literal_end; }
 
 // IsOperator returns true for tokens corresponding to operators and
 // delimiters; it returns false otherwise.
-public static bool IsOperator(this Token tok) {
+internal static bool IsOperatorᴍ(Token tok) {
     return (operator_beg < tok && tok < operator_end) || tok == TILDE;
 }
 
 // IsKeyword returns true for tokens corresponding to keywords;
 // it returns false otherwise.
-public static bool IsKeyword(this Token tok) { return keyword_beg < tok && tok < keyword_end; }
+internal static bool IsKeywordᴍ(Token tok) { return keyword_beg < tok && tok < keyword_end; }
 
 } partial class token_package {
 
@@ -355,3 +355,13 @@ public static bool IsIdentifier(@string name) {
 }
 
 } // end token_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tokenᴛToken {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Token tok) => token_package.Stringᴍ(tok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Precedence(this Token op) => token_package.Precedenceᴍ(op);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsLiteral(this Token tok) => token_package.IsLiteralᴍ(tok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsOperator(this Token tok) => token_package.IsOperatorᴍ(tok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsKeyword(this Token tok) => token_package.IsKeywordᴍ(tok);
+}
+// </GlyphForwarders>

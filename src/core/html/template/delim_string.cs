@@ -21,9 +21,9 @@ private static readonly @string _delim_nameᵇ = "delimNonedelimDoubleQuotedelim
 
 internal static array<uint8> _delim_index = new uint8[]{0, 9, 25, 41, 59}.array();
 
-} partial class templateᴛdelim {
+} partial class template_package {
 
-internal static @string String(this delim i) {
+internal static @string Stringᴍ(delim i) {
     if (i >= ((delim)(uint8)(len(_delim_index) - 1))) {
         return "delim("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -31,3 +31,9 @@ internal static @string String(this delim i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class templateᴛdelim {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this delim i) => template_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

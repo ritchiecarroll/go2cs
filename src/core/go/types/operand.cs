@@ -63,11 +63,11 @@ partial struct operand {
     internal builtinId id;
 }
 
-} partial class typesᴛoperand {
+} partial class types_package {
 
 // Pos returns the position of the expression corresponding to x.
 // If x is invalid the position is nopos.
-internal static token.Pos Pos(this ref operand x) {
+internal static token.Pos Posᴍ(ref operand x) {
     // x.expr may not be set if x is invalid
     if (x.expr == nil) {
         return nopos;
@@ -318,14 +318,14 @@ internal static @string compositeKind(Type typ) {
     }}
 }
 
-} partial class typesᴛoperand {
+} partial class types_package {
 
-internal static @string String(this ж<operand> Ꮡx) {
+internal static @string Stringᴍ(ж<operand> Ꮡx) {
     return operandString(ref (Ꮡx).DerefOrNull(), default);
 }
 
 // setConst sets x to the untyped constant for literal lit.
-internal static void setConst(this ref operand x, token.Token k, @string lit) {
+internal static void setConstᴍ(ref operand x, token.Token k, @string lit) {
     BasicKind kind = default;
     switch (k) {
     case var ᴛ when ᴛ == token.INT: {
@@ -365,7 +365,7 @@ internal static void setConst(this ref operand x, token.Token k, @string lit) {
 }
 
 // isNil reports whether x is the (untyped) nil value.
-internal static bool isNil(this ref operand x) {
+internal static bool isNilᴍ(ref operand x) {
     if (isTypes2) {
         return x.mode == nilvalue;
     } else { // go/types
@@ -383,7 +383,7 @@ private static readonly @string needTypeAssertionˢᵇ = "need type assertion"u8
 // is only valid if the (first) result is false. The check parameter may be nil
 // if assignableTo is invoked through an exported API call, i.e., when all
 // methods have been type-checked.
-internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
+internal static (bool, errors.Code) assignableToᴍ(ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
 
@@ -541,3 +541,13 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛoperand {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos Pos(this ref operand x) => types_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<operand> Ꮡx) => types_package.Stringᴍ(Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setConst(this ref operand x, token.Token k, @string lit) => types_package.setConstᴍ(ref x, k, lit);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isNil(this ref operand x) => types_package.isNilᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) => types_package.assignableToᴍ(Ꮡx, check, T, Ꮡcause);
+}
+// </GlyphForwarders>

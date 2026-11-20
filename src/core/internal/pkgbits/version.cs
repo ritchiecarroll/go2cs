@@ -78,11 +78,17 @@ internal static array<Version> removed = new golib.SparseArray<Version>{
     [(int)DerivedInfoNeeded] = V2
 }.array(5);
 
-} partial class pkgbitsᴛVersion {
+} partial class pkgbits_package {
 
 // Has reports whether field f is present in a bitstream at version v.
-public static bool Has(this Version v, Field f) {
+internal static bool Hasᴍ(Version v, Field f) {
     return introduced[f] <= v && (v < removed[f] || removed[f] == V0);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pkgbitsᴛVersion {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Has(this Version v, Field f) => pkgbits_package.Hasᴍ(v, f);
+}
+// </GlyphForwarders>

@@ -11,10 +11,10 @@ using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // Writev wraps the writev system call.
-public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) {
+internal static (int64, error) Writevᴍ(ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -100,3 +100,9 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pollᴛFD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) => poll_package.Writevᴍ(Ꮡfd, Ꮡv);
+}
+// </GlyphForwarders>

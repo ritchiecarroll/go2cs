@@ -22,11 +22,11 @@ partial struct @file {
     internal bool atEOF;
 }
 
-} partial class netᴛfile {
+} partial class net_package {
 
-internal static void close(this ref @file f) { f.ΔΔfile.Close(); }
+internal static void closeᴍ(ref @file f) { f.ΔΔfile.Close(); }
 
-internal static (@string s, bool ok) getLineFromData(this ref @file f) {
+internal static (@string s, bool ok) getLineFromDataᴍ(ref @file f) {
     @string s = default;
     bool ok = default;
 
@@ -53,7 +53,7 @@ internal static (@string s, bool ok) getLineFromData(this ref @file f) {
     return (s, ok);
 }
 
-internal static (@string s, bool ok) readLine(this ref @file f) {
+internal static (@string s, bool ok) readLineᴍ(ref @file f) {
     @string s = default;
     bool ok = default;
 
@@ -74,7 +74,7 @@ internal static (@string s, bool ok) readLine(this ref @file f) {
     return (s, ok);
 }
 
-internal static (time.Time mtime, int64 size, error err) stat(this ref @file f) {
+internal static (time.Time mtime, int64 size, error err) statᴍ(ref @file f) {
     error err = default;
 
     (var st, err) = f.ΔΔfile.Stat();
@@ -294,3 +294,12 @@ internal static bool stringsEqualFold(@string s, @string t) {
 }
 
 } // end net_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛfile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ref @file f) => net_package.closeᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string s, bool ok) getLineFromData(this ref @file f) => net_package.getLineFromDataᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string s, bool ok) readLine(this ref @file f) => net_package.readLineᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time mtime, int64 size, error err) stat(this ref @file f) => net_package.statᴍ(ref f);
+}
+// </GlyphForwarders>

@@ -19,9 +19,9 @@ partial struct weakCertCache {
     /*embed*/ public sync_package.Map Map;
 }
 
-} partial class tlsᴛweakCertCache {
+} partial class tls_package {
 
-internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> Ꮡwcc, slice<byte> der) {
+internal static (ж<Δx509.Certificate>, error) newCertᴍ(ж<weakCertCache> Ꮡwcc, slice<byte> der) {
     {
         var (entry, ok) = Ꮡwcc.of(weakCertCache.ᏑMap).Load((@string)der); if (ok) {
             var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil) {
@@ -63,3 +63,9 @@ internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> �
 internal static ж<weakCertCache> globalCertCache = @new<weakCertCache>();
 
 } // end tls_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tlsᴛweakCertCache {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> Ꮡwcc, slice<byte> der) => tls_package.newCertᴍ(Ꮡwcc, der);
+}
+// </GlyphForwarders>

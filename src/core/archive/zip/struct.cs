@@ -145,10 +145,10 @@ partial struct FileHeader {
     public uint32 ExternalAttrs; // Meaning depends on CreatorVersion
 }
 
-} partial class zipᴛFileHeader {
+} partial class zip_package {
 
 // FileInfo returns an fs.FileInfo for the [FileHeader].
-public static fs.FileInfo FileInfo(this ж<FileHeader> Ꮡh) {
+internal static fs.FileInfo FileInfoᴍ(ж<FileHeader> Ꮡh) {
     return new headerFileInfo(Ꮡh);
 }
 
@@ -159,29 +159,29 @@ partial struct headerFileInfo {
     internal ж<FileHeader> fh;
 }
 
-} partial class zipᴛheaderFileInfo {
+} partial class zip_package {
 
-internal static @string Name(this headerFileInfo fi) { return path.Base(fi.fh.Name); }
-internal static int64 Size(this headerFileInfo fi) {
+internal static @string Nameᴍ(headerFileInfo fi) { return path.Base(fi.fh.Name); }
+internal static int64 Sizeᴍ(headerFileInfo fi) {
     if (fi.fh.UncompressedSize64 > 0) {
         return (int64)fi.fh.UncompressedSize64;
     }
     return (int64)fi.fh.UncompressedSize;
 }
-internal static bool IsDir(this headerFileInfo fi) { return fi.Mode().IsDir(); }
-internal static time.Time ModTime(this headerFileInfo fi) {
+internal static bool IsDirᴍ(headerFileInfo fi) { return fi.Mode().IsDir(); }
+internal static time.Time ModTimeᴍ(headerFileInfo fi) {
     if (fi.fh.Modified.IsZero()) {
         return fi.fh.ModTime();
     }
     return fi.fh.Modified.UTC();
 }
-internal static fs.FileMode Mode(this headerFileInfo fi) { return fi.fh.Mode(); }
-internal static fs.FileMode Type(this headerFileInfo fi) { return fi.fh.Mode().Type(); }
-internal static any Sys(this headerFileInfo fi) { return fi.fh.OrTypedNil(); }
+internal static fs.FileMode Modeᴍ(headerFileInfo fi) { return fi.fh.Mode(); }
+internal static fs.FileMode Typeᴍ(headerFileInfo fi) { return fi.fh.Mode().Type(); }
+internal static any Sysᴍ(headerFileInfo fi) { return fi.fh.OrTypedNil(); }
 
-internal static (fs.FileInfo, error) Info(this headerFileInfo fi) { return (fi, default); }
+internal static (fs.FileInfo, error) Infoᴍ(headerFileInfo fi) { return (fi, default); }
 
-internal static @string String(this headerFileInfo fi) {
+internal static @string Stringᴍ(headerFileInfo fi) {
     return fs.FormatFileInfo(fi);
 }
 
@@ -265,13 +265,13 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
     return (fDate, fTime);
 }
 
-} partial class zipᴛFileHeader {
+} partial class zip_package {
 
 // ModTime returns the modification time in UTC using the legacy
 // [ModifiedDate] and [ModifiedTime] fields.
 //
 // Deprecated: Use [Modified] instead.
-public static time.Time ModTime(this ref FileHeader h) {
+internal static time.Time ModTimeᴍ(ref FileHeader h) {
     return msDosTimeToTime(h.ModifiedDate, h.ModifiedTime);
 }
 
@@ -279,7 +279,7 @@ public static time.Time ModTime(this ref FileHeader h) {
 // to the given time in UTC.
 //
 // Deprecated: Use [Modified] instead.
-public static void SetModTime(this ref FileHeader h, time.Time t) {
+internal static void SetModTimeᴍ(ref FileHeader h, time.Time t) {
     t = t.UTC(); // Convert to UTC for compatibility
     h.Modified = t;
     (h.ModifiedDate, h.ModifiedTime) = timeToMsDosTime(t);
@@ -304,10 +304,10 @@ internal static UntypedInt s_ISVTX => 0x200;
 internal static UntypedInt msdosDir => 0x10;
 internal static UntypedInt msdosReadOnly => 0x01;
 
-} partial class zipᴛFileHeader {
+} partial class zip_package {
 
 // Mode returns the permission and mode bits for the [FileHeader].
-public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
+internal static fs.FileMode /*mode*/ Modeᴍ(ref FileHeader h) {
     fs.FileMode mode = default;
 
     switch ((h.CreatorVersion >> 8)) {
@@ -326,7 +326,7 @@ public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
 }
 
 // SetMode changes the permission and mode bits for the [FileHeader].
-public static void SetMode(this ref FileHeader h, fs.FileMode mode) {
+internal static void SetModeᴍ(ref FileHeader h, fs.FileMode mode) {
     h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 0xff) | (uint16)(creatorUnix << 8));
     h.ExternalAttrs = fileModeToUnixMode(mode) << 16;
 
@@ -340,11 +340,11 @@ public static void SetMode(this ref FileHeader h, fs.FileMode mode) {
 }
 
 // isZip64 reports whether the file size exceeds the 32 bit limit
-internal static bool isZip64(this ref FileHeader h) {
+internal static bool isZip64ᴍ(ref FileHeader h) {
     return h.CompressedSize64 >= uint32max || h.UncompressedSize64 >= uint32max;
 }
 
-internal static bool hasDataDescriptor(this ref FileHeader h) {
+internal static bool hasDataDescriptorᴍ(ref FileHeader h) {
     return (uint16)(h.Flags & 0x8) != 0;
 }
 
@@ -451,3 +451,26 @@ internal static fs.FileMode unixModeToFileMode(uint32 m) {
 }
 
 } // end zip_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class zipᴛFileHeader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static fs.FileInfo FileInfo(this ж<FileHeader> Ꮡh) => zip_package.FileInfoᴍ(Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Time ModTime(this ref FileHeader h) => zip_package.ModTimeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetModTime(this ref FileHeader h, time.Time t) => zip_package.SetModTimeᴍ(ref h, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) => zip_package.Modeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMode(this ref FileHeader h, fs.FileMode mode) => zip_package.SetModeᴍ(ref h, mode);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isZip64(this ref FileHeader h) => zip_package.isZip64ᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasDataDescriptor(this ref FileHeader h) => zip_package.hasDataDescriptorᴍ(ref h);
+}
+partial class zipᴛheaderFileInfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this headerFileInfo fi) => zip_package.Nameᴍ(fi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Size(this headerFileInfo fi) => zip_package.Sizeᴍ(fi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsDir(this headerFileInfo fi) => zip_package.IsDirᴍ(fi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time ModTime(this headerFileInfo fi) => zip_package.ModTimeᴍ(fi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.FileMode Mode(this headerFileInfo fi) => zip_package.Modeᴍ(fi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.FileMode Type(this headerFileInfo fi) => zip_package.Typeᴍ(fi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Sys(this headerFileInfo fi) => zip_package.Sysᴍ(fi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Info(this headerFileInfo fi) => zip_package.Infoᴍ(fi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this headerFileInfo fi) => zip_package.Stringᴍ(fi);
+}
+// </GlyphForwarders>

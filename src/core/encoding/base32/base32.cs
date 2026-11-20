@@ -75,7 +75,7 @@ public static ж<Encoding> StdEncoding = NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZ
 // It is typically used in DNS.
 public static ж<Encoding> HexEncoding = NewEncoding("0123456789ABCDEFGHIJKLMNOPQRSTUV");
 
-} partial class base32ᴛEncoding {
+} partial class base32_package {
 
 // WithPadding creates a new encoding identical to enc except
 // with a specified padding character, or NoPadding to disable padding.
@@ -84,7 +84,7 @@ public static ж<Encoding> HexEncoding = NewEncoding("0123456789ABCDEFGHIJKLMNOP
 // must not be negative, and must be a rune equal or below '\xff'.
 // Padding characters above '\x7f' are encoded as their exact byte value
 // rather than using the UTF-8 representation of the codepoint.
-public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
+internal static ж<Encoding> WithPaddingᴍ(Encoding encʗp, rune padding) {
     ref var enc = ref heap(encʗp.ΔClone(), out var Ꮡenc);
 
     switch (ᐧ) {
@@ -110,7 +110,7 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
 // The encoding pads the output to a multiple of 8 bytes,
 // so Encode is not appropriate for use on individual blocks
 // of a large data stream. Use [NewEncoder] instead.
-public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static void Encodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
     if (len(src) == 0) {
         return;
     }
@@ -184,7 +184,7 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
 
 // AppendEncode appends the base32 encoded src to dst
 // and returns the extended buffer.
-public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static slice<byte> AppendEncodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = enc.EncodedLen(len(src));
     dst = slices.Grow<slice<byte>, byte>(dst, n);
     enc.Encode(dst.slice(len(dst)).slice(0, n), src);
@@ -192,7 +192,7 @@ public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, s
 }
 
 // EncodeToString returns the base32 encoding of src.
-public static @string EncodeToString(this ref Encoding enc, slice<byte> src) {
+internal static @string EncodeToStringᴍ(ref Encoding enc, slice<byte> src) {
     var buf = new slice<byte>(enc.EncodedLen(len(src)));
     enc.Encode(buf, src);
     return (@string)buf;
@@ -209,9 +209,9 @@ partial struct encoder {
     internal array<byte> @out = new(1024); // output buffer
 }
 
-} partial class base32ᴛencoder {
+} partial class base32_package {
 
-internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(ref encoder e, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -262,7 +262,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
 
 // Close flushes any pending output from the encoder.
 // It is an error to call Write after calling Close.
-internal static error Close(this ref encoder e) {
+internal static error Closeᴍ(ref encoder e) {
     // If there's anything left in the buffer, flush it out
     if (e.err == nil && e.nbuf > 0) {
         e.enc.Encode(e.@out[0..], e.buf.slice(0, e.nbuf));
@@ -284,11 +284,11 @@ public static io.WriteCloser NewEncoder(ж<Encoding> enc, io.Writer w) {
     return new encoderжWriteCloser(Ꮡ(new encoder(enc: enc, w: w)));
 }
 
-} partial class base32ᴛEncoding {
+} partial class base32_package {
 
 // EncodedLen returns the length in bytes of the base32 encoding
 // of an input buffer of length n.
-public static nint EncodedLen(this ref Encoding enc, nint n) {
+internal static nint EncodedLenᴍ(ref Encoding enc, nint n) {
     if (enc.padChar == NoPadding) {
         return n / 5 * 8 + (n % 5 * 8 + 4) / 5;
     }
@@ -299,22 +299,22 @@ public static nint EncodedLen(this ref Encoding enc, nint n) {
 
 partial struct CorruptInputError /*num:int64*/;
 
-} partial class base32ᴛCorruptInputError {
+} partial class base32_package {
 
 /*
  * Decoder
  */
-public static @string Error(this CorruptInputError e) {
+internal static @string Errorᴍ(CorruptInputError e) {
     return "illegal base32 data at input byte "u8 + strconv.FormatInt((int64)e, 10);
 }
 
-} partial class base32ᴛEncoding {
+} partial class base32_package {
 
 // decode is like Decode but returns an additional 'end' value, which
 // indicates if end-of-message padding was encountered and thus any
 // additional data is an error. This method assumes that src has been
 // stripped of all supported whitespace ('\r' and '\n').
-internal static (nint n, bool end, error err) decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static (nint n, bool end, error err) decodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = default;
     bool end = default;
 
@@ -409,7 +409,7 @@ internal static (nint n, bool end, error err) decode(this ref Encoding enc, slic
 // the decoded data. If src contains invalid base32 data, it will return the
 // number of bytes successfully written and [CorruptInputError].
 // Newline characters (\r and \n) are ignored.
-public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static (nint n, error err) Decodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = default;
     error err = default;
 
@@ -423,7 +423,7 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
 // and returns the extended buffer.
 // If the input is malformed, it returns the partially decoded src and an error.
 // New line characters (\r and \n) are ignored.
-public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static (slice<byte>, error) AppendDecodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
     // Compute the output size without padding to avoid over allocating.
     nint n = len(src);
     while (n > 0 && (rune)src[n - 1] == enc.padChar) {
@@ -439,7 +439,7 @@ public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byt
 // DecodeString returns the bytes represented by the base32 string s.
 // If the input is malformed, it returns the partially decoded data and
 // [CorruptInputError]. New line characters (\r and \n) are ignored.
-public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) {
+internal static (slice<byte>, error) DecodeStringᴍ(ref Encoding enc, @string s) {
     var buf = slice<byte>(s);
     nint l = stripNewlines(buf, buf);
     var (n, _, err) = enc.decode(buf, buf.slice(0, l));
@@ -481,9 +481,9 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
     return (n, err);
 }
 
-} partial class base32ᴛdecoder {
+} partial class base32_package {
 
-internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref decoder d, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -587,9 +587,9 @@ internal static nint stripNewlines(slice<byte> dst, slice<byte> src) {
     return offset;
 }
 
-} partial class base32ᴛnewlineFilteringReader {
+} partial class base32_package {
 
-internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) {
+internal static (nint, error) Readᴍ(ref newlineFilteringReader r, slice<byte> p) {
     var (n, err) = r.wrapped.Read(p);
     while (n > 0) {
         var s = p.slice(0, n);
@@ -610,11 +610,11 @@ public static io.Reader NewDecoder(ж<Encoding> enc, io.Reader r) {
     return new decoderжReader(Ꮡ(new decoder(enc: enc, r: new newlineFilteringReaderжReader(Ꮡ(new newlineFilteringReader(r))))));
 }
 
-} partial class base32ᴛEncoding {
+} partial class base32_package {
 
 // DecodedLen returns the maximum length in bytes of the decoded data
 // corresponding to n bytes of base32-encoded data.
-public static nint DecodedLen(this ref Encoding enc, nint n) {
+internal static nint DecodedLenᴍ(ref Encoding enc, nint n) {
     return decodedLen(n, enc.padChar);
 }
 
@@ -628,3 +628,31 @@ internal static nint decodedLen(nint n, rune padChar) {
 }
 
 } // end base32_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class base32ᴛEncoding {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) => base32_package.WithPaddingᴍ(encʗp, padding);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.Encodeᴍ(ref enc, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.AppendEncodeᴍ(ref enc, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string EncodeToString(this ref Encoding enc, slice<byte> src) => base32_package.EncodeToStringᴍ(ref enc, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint EncodedLen(this ref Encoding enc, nint n) => base32_package.EncodedLenᴍ(ref enc, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, bool end, error err) decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.decodeᴍ(ref enc, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.Decodeᴍ(ref enc, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base32_package.AppendDecodeᴍ(ref enc, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) => base32_package.DecodeStringᴍ(ref enc, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint DecodedLen(this ref Encoding enc, nint n) => base32_package.DecodedLenᴍ(ref enc, n);
+}
+partial class base32ᴛencoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => base32_package.Writeᴍ(ref e, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref encoder e) => base32_package.Closeᴍ(ref e);
+}
+partial class base32ᴛCorruptInputError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this CorruptInputError e) => base32_package.Errorᴍ(e);
+}
+partial class base32ᴛdecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => base32_package.Readᴍ(ref d, p);
+}
+partial class base32ᴛnewlineFilteringReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) => base32_package.Readᴍ(ref r, p);
+}
+// </GlyphForwarders>

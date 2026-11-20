@@ -40,20 +40,20 @@ partial struct pairNameValue {
     internal @string name, value;
 }
 
-} partial class hpackᴛheaderFieldTable {
+} partial class hpack_package {
 
-internal static void init(this ref headerFieldTable t) {
+internal static void initᴍ(ref headerFieldTable t) {
     t.byName = new map<@string, uint64>();
     t.byNameValue = new map<pairNameValue, uint64>();
 }
 
 // len reports the number of entries in the table.
-internal static nint len(this ref headerFieldTable t) {
+internal static nint lenᴍ(ref headerFieldTable t) {
     return builtin.len(t.ents);
 }
 
 // addEntry adds a new entry.
-internal static void addEntry(this ref headerFieldTable t, HeaderField f) {
+internal static void addEntryᴍ(ref headerFieldTable t, HeaderField f) {
     var id = (uint64)t.len() + t.evictCount + 1;
     t.byName[f.Name] = id;
     t.byNameValue[new pairNameValue(f.Name, f.Value)] = id;
@@ -61,7 +61,7 @@ internal static void addEntry(this ref headerFieldTable t, HeaderField f) {
 }
 
 // evictOldest evicts the n oldest entries in the table.
-internal static void evictOldest(this ref headerFieldTable t, nint n) {
+internal static void evictOldestᴍ(ref headerFieldTable t, nint n) {
     if (n > t.len()) {
         throw panic(fmt.Sprintf("evictOldest(%v) on table with %v entries"u8, n, t.len()));
     }
@@ -99,7 +99,7 @@ internal static void evictOldest(this ref headerFieldTable t, nint n) {
 // All tables are assumed to be a dynamic tables except for the global staticTable.
 //
 // See Section 2.3.3.
-internal static (uint64 i, bool nameValueMatch) search(this ж<headerFieldTable> Ꮡt, HeaderField f) {
+internal static (uint64 i, bool nameValueMatch) searchᴍ(ж<headerFieldTable> Ꮡt, HeaderField f) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!f.Sensitive) {
@@ -117,7 +117,7 @@ internal static (uint64 i, bool nameValueMatch) search(this ж<headerFieldTable>
 
 // idToIndex converts a unique id to an HPACK index.
 // See Section 2.3.3.
-internal static uint64 idToIndex(this ж<headerFieldTable> Ꮡt, uint64 id) {
+internal static uint64 idToIndexᴍ(ж<headerFieldTable> Ꮡt, uint64 id) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (id <= t.evictCount) {
@@ -411,3 +411,14 @@ internal static uint64 idToIndex(this ж<headerFieldTable> Ꮡt, uint64 id) {
 }.array(); }
 
 } // end hpack_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class hpackᴛheaderFieldTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref headerFieldTable t) => hpack_package.initᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint len(this ref headerFieldTable t) => hpack_package.lenᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addEntry(this ref headerFieldTable t, HeaderField f) => hpack_package.addEntryᴍ(ref t, f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void evictOldest(this ref headerFieldTable t, nint n) => hpack_package.evictOldestᴍ(ref t, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 i, bool nameValueMatch) search(this ж<headerFieldTable> Ꮡt, HeaderField f) => hpack_package.searchᴍ(Ꮡt, f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 idToIndex(this ж<headerFieldTable> Ꮡt, uint64 id) => hpack_package.idToIndexᴍ(Ꮡt, id);
+}
+// </GlyphForwarders>

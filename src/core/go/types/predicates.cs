@@ -263,9 +263,9 @@ partial struct ifacePair {
     internal ж<ifacePair> prev;
 }
 
-} partial class typesᴛifacePair {
+} partial class types_package {
 
-internal static bool identical(this ref ifacePair p, ж<ifacePair> Ꮡq) {
+internal static bool identicalᴍ(ref ifacePair p, ж<ifacePair> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     return p.x == q.x && p.y == q.y || p.x == q.y && p.y == q.x;
@@ -279,10 +279,10 @@ partial struct comparer {
     internal bool ignoreInvalids; // if set, identical treats an invalid type as identical to any type
 }
 
-} partial class typesᴛcomparer {
+} partial class types_package {
 
 // For changes to this code the corresponding changes should be made to unifier.nify.
-internal static bool identical(this ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
+internal static bool identicalᴍ(ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
     var targsᴷ = new stackAppend<Type>();
 
@@ -636,3 +636,12 @@ internal static bool isValidName(@string s) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛifacePair {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool identical(this ref ifacePair p, ж<ifacePair> Ꮡq) => types_package.identicalᴍ(ref p, Ꮡq);
+}
+partial class typesᴛcomparer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool identical(this ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) => types_package.identicalᴍ(ref c, x, y, Ꮡp);
+}
+// </GlyphForwarders>

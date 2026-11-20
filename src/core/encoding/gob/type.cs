@@ -212,9 +212,9 @@ internal static void setTypeId(gobType typ) {
     idToTypeSlice = append(idToTypeSlice, typ);
 }
 
-} partial class gobᴛtypeId {
+} partial class gob_package {
 
-internal static gobType gobType(this typeId t) {
+internal static gobType gobTypeᴍ(typeId t) {
     if (t == 0) {
         return default;
     }
@@ -226,7 +226,7 @@ internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
 // string returns the string representation of the type associated with the typeId.
-internal static @string @string(this typeId t) {
+internal static @string @stringᴍ(typeId t) {
     if (t.gobType() == nil) {
         return nilˢ;
     }
@@ -234,7 +234,7 @@ internal static @string @string(this typeId t) {
 }
 
 // Name returns the name of the type associated with the typeId.
-internal static @string name(this typeId t) {
+internal static @string nameᴍ(typeId t) {
     if (t.gobType() == nil) {
         return nilˢ;
     }
@@ -252,19 +252,19 @@ partial struct CommonType {
     public typeId Id;
 }
 
-} partial class gobᴛCommonType {
+} partial class gob_package {
 
-internal static typeId id(this ref CommonType t) { return t.Id; }
+internal static typeId idᴍ(ref CommonType t) { return t.Id; }
 
-internal static void setId(this ref CommonType t, typeId id) { t.Id = id; }
+internal static void setIdᴍ(ref CommonType t, typeId id) { t.Id = id; }
 
-internal static @string @string(this ref CommonType t) { return t.Name; }
+internal static @string @stringᴍ(ref CommonType t) { return t.Name; }
 
-internal static @string safeString(this ref CommonType t, map<typeId, bool> seen) {
+internal static @string safeStringᴍ(ref CommonType t, map<typeId, bool> seen) {
     return t.Name;
 }
 
-internal static @string name(this ref CommonType t) { return t.Name; }
+internal static @string nameᴍ(ref CommonType t) { return t.Name; }
 
 } partial class gob_package {
 
@@ -351,9 +351,9 @@ internal static ж<arrayType> newArrayType(@string name) {
     return a;
 }
 
-} partial class gobᴛarrayType {
+} partial class gob_package {
 
-internal static void init(this ж<arrayType> Ꮡa, gobType elem, nint len) {
+internal static void initᴍ(ж<arrayType> Ꮡa, gobType elem, nint len) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     // Set our type id before evaluating the element's, in case it's our own.
@@ -362,7 +362,7 @@ internal static void init(this ж<arrayType> Ꮡa, gobType elem, nint len) {
     a.Len = len;
 }
 
-internal static @string safeString(this ref arrayType a, map<typeId, bool> seen) {
+internal static @string safeStringᴍ(ref arrayType a, map<typeId, bool> seen) {
     if (seen[a.Id]) {
         return a.Name;
     }
@@ -370,7 +370,7 @@ internal static @string safeString(this ref arrayType a, map<typeId, bool> seen)
     return fmt.Sprintf("[%d]%s"u8, a.Len, a.Elem.gobType().safeString(seen));
 }
 
-internal static @string @string(this ref arrayType a) { return a.safeString(new map<typeId, bool>()); }
+internal static @string @stringᴍ(ref arrayType a) { return a.safeString(new map<typeId, bool>()); }
 
 } partial class gob_package {
 
@@ -385,13 +385,13 @@ internal static ж<gobEncoderType> newGobEncoderType(@string name) {
     return g;
 }
 
-} partial class gobᴛgobEncoderType {
+} partial class gob_package {
 
-internal static @string safeString(this ref gobEncoderType g, map<typeId, bool> seen) {
+internal static @string safeStringᴍ(ref gobEncoderType g, map<typeId, bool> seen) {
     return g.Name;
 }
 
-internal static @string @string(this ref gobEncoderType g) { return g.Name; }
+internal static @string @stringᴍ(ref gobEncoderType g) { return g.Name; }
 
 } partial class gob_package {
 
@@ -407,9 +407,9 @@ internal static ж<mapType> newMapType(@string name) {
     return m;
 }
 
-} partial class gobᴛmapType {
+} partial class gob_package {
 
-internal static void init(this ж<mapType> Ꮡm, gobType key, gobType elem) {
+internal static void initᴍ(ж<mapType> Ꮡm, gobType key, gobType elem) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Set our type id before evaluating the element's, in case it's our own.
@@ -418,7 +418,7 @@ internal static void init(this ж<mapType> Ꮡm, gobType key, gobType elem) {
     m.Elem = elem.id();
 }
 
-internal static @string safeString(this ref mapType m, map<typeId, bool> seen) {
+internal static @string safeStringᴍ(ref mapType m, map<typeId, bool> seen) {
     if (seen[m.Id]) {
         return m.Name;
     }
@@ -428,7 +428,7 @@ internal static @string safeString(this ref mapType m, map<typeId, bool> seen) {
     return fmt.Sprintf("map[%s]%s"u8, key, elem);
 }
 
-internal static @string @string(this ref mapType m) { return m.safeString(new map<typeId, bool>()); }
+internal static @string @stringᴍ(ref mapType m) { return m.safeString(new map<typeId, bool>()); }
 
 } partial class gob_package {
 
@@ -443,9 +443,9 @@ internal static ж<sliceType> newSliceType(@string name) {
     return s;
 }
 
-} partial class gobᴛsliceType {
+} partial class gob_package {
 
-internal static void init(this ж<sliceType> Ꮡs, gobType elem) {
+internal static void initᴍ(ж<sliceType> Ꮡs, gobType elem) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Set our type id before evaluating the element's, in case it's our own.
@@ -458,7 +458,7 @@ internal static void init(this ж<sliceType> Ꮡs, gobType elem) {
     s.Elem = elem.id();
 }
 
-internal static @string safeString(this ref sliceType s, map<typeId, bool> seen) {
+internal static @string safeStringᴍ(ref sliceType s, map<typeId, bool> seen) {
     if (seen[s.Id]) {
         return s.Name;
     }
@@ -466,7 +466,7 @@ internal static @string safeString(this ref sliceType s, map<typeId, bool> seen)
     return fmt.Sprintf("[]%s"u8, s.Elem.gobType().safeString(seen));
 }
 
-internal static @string @string(this ref sliceType s) { return s.safeString(new map<typeId, bool>()); }
+internal static @string @stringᴍ(ref sliceType s) { return s.safeString(new map<typeId, bool>()); }
 
 } partial class gob_package {
 
@@ -481,13 +481,13 @@ public partial struct structType {
     public slice<fieldType> Field;
 }
 
-} partial class gobᴛstructType {
+} partial class gob_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
-internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> seen) {
+internal static @string safeStringᴍ(ж<structType> Ꮡs, map<typeId, bool> seen) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
@@ -505,7 +505,7 @@ internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> s
     return str;
 }
 
-internal static @string @string(this ж<structType> Ꮡs) { return Ꮡs.safeString(new map<typeId, bool>()); }
+internal static @string @stringᴍ(ж<structType> Ꮡs) { return Ꮡs.safeString(new map<typeId, bool>()); }
 
 } partial class gob_package {
 
@@ -739,13 +739,13 @@ partial struct wireType {
     public ж<gobEncoderType> TextMarshalerT;
 }
 
-} partial class gobᴛwireType {
+} partial class gob_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string unknownᶜ => ref unknownᶜᵇ;
 private static readonly @string unknownᶜᵇ = "unknown type"u8;
 
-internal static @string @string(this ж<wireType> Ꮡw) {
+internal static @string @stringᴍ(ж<wireType> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     @string unknown = unknownᶜ;
@@ -1061,3 +1061,44 @@ internal static void registerBasics() {
 }
 
 } // end gob_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gobᴛtypeId {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static gobType gobType(this typeId t) => gob_package.gobTypeᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this typeId t) => gob_package.@stringᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string name(this typeId t) => gob_package.nameᴍ(t);
+}
+partial class gobᴛCommonType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typeId id(this ref CommonType t) => gob_package.idᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setId(this ref CommonType t, typeId id) => gob_package.setIdᴍ(ref t, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref CommonType t) => gob_package.@stringᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string safeString(this ref CommonType t, map<typeId, bool> seen) => gob_package.safeStringᴍ(ref t, seen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string name(this ref CommonType t) => gob_package.nameᴍ(ref t);
+}
+partial class gobᴛarrayType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<arrayType> Ꮡa, gobType elem, nint len) => gob_package.initᴍ(Ꮡa, elem, len);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string safeString(this ref arrayType a, map<typeId, bool> seen) => gob_package.safeStringᴍ(ref a, seen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref arrayType a) => gob_package.@stringᴍ(ref a);
+}
+partial class gobᴛgobEncoderType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string safeString(this ref gobEncoderType g, map<typeId, bool> seen) => gob_package.safeStringᴍ(ref g, seen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref gobEncoderType g) => gob_package.@stringᴍ(ref g);
+}
+partial class gobᴛmapType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<mapType> Ꮡm, gobType key, gobType elem) => gob_package.initᴍ(Ꮡm, key, elem);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string safeString(this ref mapType m, map<typeId, bool> seen) => gob_package.safeStringᴍ(ref m, seen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref mapType m) => gob_package.@stringᴍ(ref m);
+}
+partial class gobᴛsliceType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<sliceType> Ꮡs, gobType elem) => gob_package.initᴍ(Ꮡs, elem);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string safeString(this ref sliceType s, map<typeId, bool> seen) => gob_package.safeStringᴍ(ref s, seen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref sliceType s) => gob_package.@stringᴍ(ref s);
+}
+partial class gobᴛstructType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> seen) => gob_package.safeStringᴍ(Ꮡs, seen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ж<structType> Ꮡs) => gob_package.@stringᴍ(Ꮡs);
+}
+partial class gobᴛwireType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ж<wireType> Ꮡw) => gob_package.@stringᴍ(Ꮡw);
+}
+// </GlyphForwarders>

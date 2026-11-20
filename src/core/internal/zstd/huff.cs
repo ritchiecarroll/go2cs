@@ -13,7 +13,7 @@ partial class zstd_package {
 // maxHuffmanBits is the largest possible Huffman table bits.
 internal static UntypedInt maxHuffmanBits => 11;
 
-} partial class zstdᴛReader {
+} partial class zstd_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string huffmanCountOverflowˢ => ref huffmanCountOverflowˢᵇ;
@@ -33,7 +33,7 @@ private static readonly @string huffmanTableTooSmallˢᵇ = "Huffman table too s
 // appear in the table multiple times.
 // This returns the number of bits in the Huffman table and the new offset.
 // RFC 4.2.1.
-internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) {
+internal static (nint tableBits, nint roff, error err) readHuffᴍ(ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) {
     nint tableBits = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -220,3 +220,9 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class zstdᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) => zstd_package.readHuffᴍ(Ꮡr, data, off, table);
+}
+// </GlyphForwarders>

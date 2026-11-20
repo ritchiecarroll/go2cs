@@ -29,9 +29,9 @@ partial interface sockaddr :
     sockaddr toLocal(@string net);
 }
 
-} partial class netᴛnetFD {
+} partial class net_package {
 
-internal static Func<syscall.Sockaddr, Addr> addrFunc(this ref netFD fd) {
+internal static Func<syscall.Sockaddr, Addr> addrFuncᴍ(ref netFD fd) {
     switch (fd.family) {
     case var ᴛ when ᴛ == syscall.AF_INET || ᴛ == syscall.AF_INET6: {
         switch (fd.sotype) {
@@ -63,3 +63,9 @@ internal static Func<syscall.Sockaddr, Addr> addrFunc(this ref netFD fd) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛnetFD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Func<syscall.Sockaddr, Addr> addrFunc(this ref netFD fd) => net_package.addrFuncᴍ(ref fd);
+}
+// </GlyphForwarders>

@@ -23,7 +23,7 @@ public static ValueKind ValueBad => /* iota */ 0;
 public static ValueKind ValueUint64 => 1;
 public static ValueKind ValueString => 2;
 
-} partial class traceᴛValue {
+} partial class trace_package {
 
 // Kind returns the ValueKind of the value.
 //
@@ -31,14 +31,14 @@ public static ValueKind ValueString => 2;
 //
 // New ValueKinds may be added in the future. Users of this type must be robust
 // to that possibility.
-public static ValueKind Kind(this Value v) {
+internal static ValueKind Kindᴍ(Value v) {
     return v.kind;
 }
 
 // Uint64 returns the uint64 value for a ValueUint64.
 //
 // Panics if this Value's Kind is not ValueUint64.
-public static uint64 Uint64(this Value v) {
+internal static uint64 Uint64ᴍ(Value v) {
     if (v.kind != ValueUint64) {
         throw panic("Uint64 called on Value of a different Kind");
     }
@@ -51,7 +51,7 @@ private static readonly @string valueBadˢᵇ = "Value{Bad}"u8;
 
 // String returns the string value for a ValueString, and otherwise
 // a string representation of the value for other kinds of values.
-public static @string String(this Value v) {
+internal static @string Stringᴍ(Value v) {
     if (v.kind == ValueString) {
         return @unsafe.String(@unsafe.Pointer.To<byte>(v.pointer), (nint)v.scalar);
     }
@@ -75,3 +75,11 @@ public static Value StringValue(@string s) {
 }
 
 } // end trace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛValue {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ValueKind Kind(this Value v) => trace_package.Kindᴍ(v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this Value v) => trace_package.Uint64ᴍ(v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Value v) => trace_package.Stringᴍ(v);
+}
+// </GlyphForwarders>

@@ -174,9 +174,9 @@ partial struct GoarmFeatures {
     public bool SoftFloat;
 }
 
-} partial class buildcfgᴛGoarmFeatures {
+} partial class buildcfg_package {
 
-public static @string String(this GoarmFeatures g) {
+internal static @string Stringᴍ(GoarmFeatures g) {
     @string armStr = strconv.Itoa(g.Version);
     if (g.SoftFloat) {
         armStr += ",softfloat"u8;
@@ -261,9 +261,9 @@ partial struct Goarm64Features {
     public bool Crypto;
 }
 
-} partial class buildcfgᴛGoarm64Features {
+} partial class buildcfg_package {
 
-public static @string String(this Goarm64Features g) {
+internal static @string Stringᴍ(Goarm64Features g) {
     @string arm64Str = g.Version;
     if (g.LSE) {
         arm64Str += ",lse"u8;
@@ -342,11 +342,11 @@ internal static Goarm64Features /*g*/ goarm64() {
     return g;
 }
 
-} partial class buildcfgᴛGoarm64Features {
+} partial class buildcfg_package {
 
 // Returns true if g supports giving ARM64 ISA
 // Note that this function doesn't accept / test suffixes (like ",lse" or ",crypto")
-public static bool Supports(this Goarm64Features g, @string s) {
+internal static bool Supportsᴍ(Goarm64Features g, @string s) {
     // We only accept "v{8-9}.{0-9}. Everything else is malformed.
     if (len(s) != 4) {
         return false;
@@ -449,12 +449,12 @@ internal static nint goriscv64() {
 public partial struct gowasmFeatures {
 }
 
-} partial class buildcfgᴛgowasmFeatures {
+} partial class buildcfg_package {
 
 // Legacy features, now always enabled
 //SatConv bool
 //SignExt bool
-public static @string String(this gowasmFeatures f) {
+internal static @string Stringᴍ(gowasmFeatures f) {
     slice<@string> flags = default;
     return strings.Join(flags, ",");
 }
@@ -636,3 +636,16 @@ internal static slice<@string> gogoarchTags() {
 }
 
 } // end buildcfg_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class buildcfgᴛGoarmFeatures {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this GoarmFeatures g) => buildcfg_package.Stringᴍ(g);
+}
+partial class buildcfgᴛGoarm64Features {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Goarm64Features g) => buildcfg_package.Stringᴍ(g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Supports(this Goarm64Features g, @string s) => buildcfg_package.Supportsᴍ(g, s);
+}
+partial class buildcfgᴛgowasmFeatures {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this gowasmFeatures f) => buildcfg_package.Stringᴍ(f);
+}
+// </GlyphForwarders>

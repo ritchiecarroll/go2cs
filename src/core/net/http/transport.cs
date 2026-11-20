@@ -292,23 +292,23 @@ partial struct Transport {
     public ж<Protocols> Protocols;
 }
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
-internal static nint writeBufferSize(this ref Transport t) {
+internal static nint writeBufferSizeᴍ(ref Transport t) {
     if (t.WriteBufferSize > 0) {
         return t.WriteBufferSize;
     }
     return 4 << 10;
 }
 
-internal static nint readBufferSize(this ref Transport t) {
+internal static nint readBufferSizeᴍ(ref Transport t) {
     if (t.ReadBufferSize > 0) {
         return t.ReadBufferSize;
     }
     return 4 << 10;
 }
 
-internal static int64 maxHeaderResponseSize(this ref Transport t) {
+internal static int64 maxHeaderResponseSizeᴍ(ref Transport t) {
     if (t.MaxResponseHeaderBytes > 0) {
         return t.MaxResponseHeaderBytes;
     }
@@ -316,7 +316,7 @@ internal static int64 maxHeaderResponseSize(this ref Transport t) {
 }
 
 // Clone returns a deep copy of t's exported fields.
-public static ж<Transport> Clone(this ж<Transport> Ꮡt) {
+internal static ж<Transport> Cloneᴍ(ж<Transport> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.ᏑnextProtoOnce.Do(Ꮡt.onceSetNextProtoDefaults);
@@ -376,9 +376,9 @@ partial interface h2Transport {
     void CloseIdleConnections();
 }
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
-internal static bool hasCustomTLSDialer(this ref Transport t) {
+internal static bool hasCustomTLSDialerᴍ(ref Transport t) {
     return t.DialTLS != nil || t.DialTLSContext != nil;
 }
 
@@ -386,7 +386,7 @@ internal static bool hasCustomTLSDialer(this ref Transport t) {
 
 internal static ж<godebug.Setting> http2client = godebug.New("http2client");
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpsˢ => ref httpsˢᵇ;
@@ -394,7 +394,7 @@ private static readonly @string httpsˢᵇ = "https"u8;
 
 // onceSetNextProtoDefaults initializes TLSNextProto.
 // It must be called via t.nextProtoOnce.Do.
-internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) {
+internal static void onceSetNextProtoDefaultsᴍ(ж<Transport> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.tlsNextProtoWasNil = (t.TLSNextProto == nil);
@@ -459,7 +459,7 @@ internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) {
     t.TLSClientConfig.NextProtos = adjustNextProtos(t.TLSClientConfig.NextProtos, protocols);
 }
 
-internal static Protocols protocols(this ref Transport t) {
+internal static Protocols protocolsᴍ(ref Transport t) {
     if (t.Protocols != nil) {
         return t.Protocols.Value; // user-configured set
     }
@@ -536,16 +536,16 @@ partial struct transportRequest {
     internal error err;     // first setError value for mapRoundTripError to consider
 }
 
-} partial class httpᴛtransportRequest {
+} partial class http_package {
 
-internal static Header extraHeaders(this ref transportRequest tr) {
+internal static Header extraHeadersᴍ(ref transportRequest tr) {
     if (tr.extra == nil) {
         tr.extra = new Header(0);
     }
     return tr.extra;
 }
 
-internal static void setError(this ж<transportRequest> Ꮡtr, error err) {
+internal static void setErrorᴍ(ж<transportRequest> Ꮡtr, error err) {
     ref var tr = ref Ꮡtr.DerefOrNull();
 
     tr.mu.Lock();
@@ -555,11 +555,11 @@ internal static void setError(this ж<transportRequest> Ꮡtr, error err) {
     tr.mu.Unlock();
 }
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // useRegisteredProtocol reports whether an alternate protocol (as registered
 // with Transport.RegisterProtocol) should be respected for this request.
-internal static bool useRegisteredProtocol(this ref Transport t, ж<Request> Ꮡreq) {
+internal static bool useRegisteredProtocolᴍ(ref Transport t, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (req.URL.Scheme == "https"u8 && req.requiresHTTP1()) {
@@ -575,7 +575,7 @@ internal static bool useRegisteredProtocol(this ref Transport t, ж<Request> Ꮡ
 // alternateRoundTripper returns the alternate RoundTripper to use
 // for this request if the Request's URL scheme requires one,
 // or nil for the normal case of using the Transport.
-internal static RoundTripper alternateRoundTripper(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
+internal static RoundTripper alternateRoundTripperᴍ(ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -604,7 +604,7 @@ internal static @string validateHeaders(Header hdrs) {
     return ""u8;
 }
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpNilRequestUrlˢ => ref httpNilRequestUrlˢᵇ;
@@ -617,7 +617,7 @@ internal static ref readonly @string httpNoHostInRequestUrlˢ => ref httpNoHostI
 private static readonly @string httpNoHostInRequestUrlˢᵇ = "http: no Host in request URL"u8;
 
 // roundTrip implements a RoundTripper over HTTP.
-internal static partial (ж<Response>, error err) roundTrip(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
+internal static partial (ж<Response>, error err) roundTripᴍ(ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
     ж<Response> _ᴛ1 = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -822,14 +822,14 @@ partial struct readTrackingBody {
     internal atomic.Bool didClose;
 }
 
-} partial class httpᴛreadTrackingBody {
+} partial class http_package {
 
-internal static (nint, error) Read(this ref readTrackingBody r, slice<byte> data) {
+internal static (nint, error) Readᴍ(ref readTrackingBody r, slice<byte> data) {
     r.didRead = true;
     return r.ReadCloser.Read(data);
 }
 
-internal static error Close(this ж<readTrackingBody> Ꮡr) {
+internal static error Closeᴍ(ж<readTrackingBody> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!Ꮡr.ᏑdidClose.CompareAndSwap(false, true)) {
@@ -881,12 +881,12 @@ internal static (ж<Request> rewound, error err) rewindBody(ж<Request> Ꮡreq) 
     return (ᏑnewReq, default);
 }
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
 // shouldRetryRequest reports whether we should retry sending a failed
 // HTTP request on a new connection. The non-nil input error is the
 // error from roundTrip.
-internal static bool shouldRetryRequest(this ж<persistConn> Ꮡpc, ж<Request> Ꮡreq, error err) {
+internal static bool shouldRetryRequestᴍ(ж<persistConn> Ꮡpc, ж<Request> Ꮡreq, error err) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (http2isNoCachedConnError(err)) {
@@ -940,7 +940,7 @@ internal static bool shouldRetryRequest(this ж<persistConn> Ꮡpc, ж<Request> 
 // ErrSkipAltProtocol is a sentinel error value defined by Transport.RegisterProtocol.
 public static error ErrSkipAltProtocol = errors.New("net/http: skip alternate protocol");
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // RegisterProtocol registers a new protocol with scheme.
 // The [Transport] will pass requests using the given scheme to rt.
@@ -952,7 +952,7 @@ public static error ErrSkipAltProtocol = errors.New("net/http: skip alternate pr
 // If rt.RoundTrip returns [ErrSkipAltProtocol], the Transport will
 // handle the [Transport.RoundTrip] itself for that one request, as if the
 // protocol were not registered.
-public static void RegisterProtocol(this ж<Transport> Ꮡt, @string scheme, RoundTripper rt) {
+internal static void RegisterProtocolᴍ(ж<Transport> Ꮡt, @string scheme, RoundTripper rt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -979,7 +979,7 @@ public static void RegisterProtocol(this ж<Transport> Ꮡt, @string scheme, Rou
 // connected from previous requests but are now sitting idle in
 // a "keep-alive" state. It does not interrupt any connections currently
 // in use.
-public static void CloseIdleConnections(this ж<Transport> Ꮡt) {
+internal static void CloseIdleConnectionsᴍ(ж<Transport> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.ᏑnextProtoOnce.Do(Ꮡt.onceSetNextProtoDefaults);
@@ -1007,7 +1007,7 @@ public static void CloseIdleConnections(this ж<Transport> Ꮡt) {
 }
 
 // prepareTransportCancel sets up state to convert Transport.CancelRequest into context cancelation.
-internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж<Request> req, Action<error> origCancel) {
+internal static Action<error> prepareTransportCancelᴍ(ж<Transport> Ꮡt, ж<Request> req, Action<error> origCancel) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Historically, RoundTrip has not modified the Request in any way.
@@ -1037,7 +1037,7 @@ internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж
 // Deprecated: Use [Request.WithContext] to create a request with a
 // cancelable context instead. CancelRequest cannot cancel HTTP/2
 // requests. This may become a no-op in a future release of Go.
-public static void CancelRequest(this ж<Transport> Ꮡt, ж<Request> req) {
+internal static void CancelRequestᴍ(ж<Transport> Ꮡt, ж<Request> req) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.reqMu.Lock();
@@ -1072,9 +1072,9 @@ internal static void resetProxyConfig() {
     envProxyFuncValue = default;
 }
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
-internal static (connectMethod cm, error err) connectMethodForRequest(this ref Transport t, ж<transportRequest> Ꮡtreq) {
+internal static (connectMethod cm, error err) connectMethodForRequestᴍ(ref Transport t, ж<transportRequest> Ꮡtreq) {
     connectMethod cm = default;
     error err = default;
     ref var treq = ref Ꮡtreq.DerefOrNull();
@@ -1088,11 +1088,11 @@ internal static (connectMethod cm, error err) connectMethodForRequest(this ref T
     return (cm, err);
 }
 
-} partial class httpᴛconnectMethod {
+} partial class http_package {
 
 // proxyAuth returns the Proxy-Authorization header to set
 // on requests, if applicable.
-internal static @string proxyAuth(this ref connectMethod cm) {
+internal static @string proxyAuthᴍ(ref connectMethod cm) {
     if (cm.proxyURL == nil) {
         return ""u8;
     }
@@ -1134,23 +1134,23 @@ partial struct transportReadFromServerError {
     internal error err;
 }
 
-} partial class httpᴛtransportReadFromServerError {
+} partial class http_package {
 
-internal static error Unwrap(this transportReadFromServerError e) { return e.err; }
+internal static error Unwrapᴍ(transportReadFromServerError e) { return e.err; }
 
-internal static @string Error(this transportReadFromServerError e) {
+internal static @string Errorᴍ(transportReadFromServerError e) {
     return fmt.Sprintf("net/http: Transport failed to read from server: %v"u8, e.err);
 }
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
-internal static void putOrCloseIdleConn(this ж<Transport> Ꮡt, ж<persistConn> pconn) {
+internal static void putOrCloseIdleConnᴍ(ж<Transport> Ꮡt, ж<persistConn> pconn) {
     var err = Ꮡt.tryPutIdleConn(pconn); if (err != nil) {
         pconn.close(err);
     }
 }
 
-internal static nint maxIdleConnsPerHost(this ref Transport t) {
+internal static nint maxIdleConnsPerHostᴍ(ref Transport t) {
     nint v = t.MaxIdleConnsPerHost; if (v != 0) {
         return v;
     }
@@ -1162,7 +1162,7 @@ internal static nint maxIdleConnsPerHost(this ref Transport t) {
 // If pconn is no longer needed or not in a good state, tryPutIdleConn returns
 // an error explaining why it wasn't registered.
 // tryPutIdleConn does not close pconn. Use putOrCloseIdleConn instead for that.
-internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) {
+internal static error tryPutIdleConnᴍ(ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1286,7 +1286,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
 // queueForIdleConn queues w to receive the next idle connection for w.cm.
 // As an optimization hint to the caller, queueForIdleConn reports whether
 // it successfully delivered an already-idle connection.
-internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
+internal static partial bool /*delivered*/ queueForIdleConnᴍ(ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
     bool delivered = default;
     GoFrame ᒐ = default;
     try {
@@ -1386,7 +1386,7 @@ internal static partial bool /*delivered*/ queueForIdleConn(this ж<Transport> �
 }
 
 // removeIdleConn marks pconn as dead.
-internal static bool removeIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) {
+internal static bool removeIdleConnᴍ(ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1405,7 +1405,7 @@ internal static bool removeIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡ
 }
 
 // t.idleMu must be held.
-internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> Ꮡpconn) {
+internal static bool removeIdleConnLockedᴍ(ref Transport t, ж<persistConn> Ꮡpconn) {
     ref var pconn = ref Ꮡpconn.DerefOrNull();
 
     if (pconn.idleTimer != nil) {
@@ -1449,7 +1449,7 @@ internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> 
 internal static readonly ж<net.Dialer> ᏑzeroDialer = new StaticBox<net.Dialer>(default(net.Dialer));
 internal static ref net.Dialer zeroDialer => ref ((StaticBox<net.Dialer>)ᏑzeroDialer).ValueSlot;
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string netHttpTransportˢ => ref netHttpTransportˢᵇ;
@@ -1457,7 +1457,7 @@ private static readonly @string netHttpTransportˢᵇ = "net/http: Transport.Dia
 internal static ref readonly @string netHttpTransportDialHookˢ => ref netHttpTransportDialHookˢᵇ;
 private static readonly @string netHttpTransportDialHookˢᵇ = "net/http: Transport.Dial hook returned (nil, nil)"u8;
 
-internal static (net.Conn, error) dial(this ref Transport t, context.Context ctx, @string network, @string addr) {
+internal static (net.Conn, error) dialᴍ(ref Transport t, context.Context ctx, @string network, @string addr) {
     if (t.DialContext != nil) {
         var (c, err) = t.DialContext(ctx, network, addr);
         if (c == nil && err == nil) {
@@ -1504,10 +1504,10 @@ partial struct connOrError {
     internal time.Time idleAt;
 }
 
-} partial class httpᴛwantConn {
+} partial class http_package {
 
 // waiting reports whether w is still waiting for an answer (connection or error).
-internal static bool waiting(this ж<wantConn> Ꮡw) {
+internal static bool waitingᴍ(ж<wantConn> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1523,7 +1523,7 @@ internal static bool waiting(this ж<wantConn> Ꮡw) {
 }
 
 // getCtxForDial returns context for dial or nil if connection was delivered or canceled.
-internal static context.Context getCtxForDial(this ж<wantConn> Ꮡw) {
+internal static context.Context getCtxForDialᴍ(ж<wantConn> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1539,7 +1539,7 @@ internal static context.Context getCtxForDial(this ж<wantConn> Ꮡw) {
 }
 
 // tryDeliver attempts to deliver pc, err to w and reports whether it succeeded.
-internal static bool tryDeliver(this ж<wantConn> Ꮡw, ж<persistConn> pc, error err, time.Time idleAt) {
+internal static bool tryDeliverᴍ(ж<wantConn> Ꮡw, ж<persistConn> pc, error err, time.Time idleAt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1568,7 +1568,7 @@ internal static bool tryDeliver(this ж<wantConn> Ꮡw, ж<persistConn> pc, erro
 
 // cancel marks w as no longer wanting a result (for example, due to cancellation).
 // If a connection has been delivered already, cancel returns it with t.putOrCloseIdleConn.
-internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> t) {
+internal static void cancelᴍ(ж<wantConn> Ꮡw, ж<Transport> t) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.mu.Lock();
@@ -1611,20 +1611,20 @@ partial struct wantConnQueue {
     internal slice<ж<wantConn>> tail;
 }
 
-} partial class httpᴛwantConnQueue {
+} partial class http_package {
 
 // len returns the number of items in the queue.
-internal static nint len(this ref wantConnQueue q) {
+internal static nint lenᴍ(ref wantConnQueue q) {
     return builtin.len(q.head) - q.headPos + builtin.len(q.tail);
 }
 
 // pushBack adds w to the back of the queue.
-internal static void pushBack(this ref wantConnQueue q, ж<wantConn> w) {
+internal static void pushBackᴍ(ref wantConnQueue q, ж<wantConn> w) {
     q.tail = append(q.tail, w);
 }
 
 // popFront removes and returns the wantConn at the front of the queue.
-internal static ж<wantConn> popFront(this ref wantConnQueue q) {
+internal static ж<wantConn> popFrontᴍ(ref wantConnQueue q) {
     if (q.headPos >= builtin.len(q.head)) {
         if (builtin.len(q.tail) == 0) {
             return default;
@@ -1639,7 +1639,7 @@ internal static ж<wantConn> popFront(this ref wantConnQueue q) {
 }
 
 // peekFront returns the wantConn at the front of the queue without removing it.
-internal static ж<wantConn> peekFront(this ref wantConnQueue q) {
+internal static ж<wantConn> peekFrontᴍ(ref wantConnQueue q) {
     if (q.headPos < builtin.len(q.head)) {
         return q.head[q.headPos];
     }
@@ -1651,7 +1651,7 @@ internal static ж<wantConn> peekFront(this ref wantConnQueue q) {
 
 // cleanFrontNotWaiting pops any wantConns that are no longer waiting from the head of the
 // queue, reporting whether any were popped.
-internal static bool /*cleaned*/ cleanFrontNotWaiting(this ref wantConnQueue q) {
+internal static bool /*cleaned*/ cleanFrontNotWaitingᴍ(ref wantConnQueue q) {
     bool cleaned = default;
 
     for (;;) {
@@ -1665,7 +1665,7 @@ internal static bool /*cleaned*/ cleanFrontNotWaiting(this ref wantConnQueue q) 
 }
 
 // cleanFrontCanceled pops any wantConns with canceled dials from the head of the queue.
-internal static void cleanFrontCanceled(this ref wantConnQueue q) {
+internal static void cleanFrontCanceledᴍ(ref wantConnQueue q) {
     for (;;) {
         var w = q.peekFront();
         if (w == nil || w.cancelCtx != nil) {
@@ -1677,7 +1677,7 @@ internal static void cleanFrontCanceled(this ref wantConnQueue q) {
 
 // all iterates over all wantConns in the queue.
 // The caller must not modify the queue while iterating.
-internal static void all(this ref wantConnQueue q, Action<ж<wantConn>> f) {
+internal static void allᴍ(ref wantConnQueue q, Action<ж<wantConn>> f) {
     foreach (var (_, w) in range(q.head.slice(q.headPos))) {
         f(w);
     }
@@ -1686,13 +1686,13 @@ internal static void all(this ref wantConnQueue q, Action<ж<wantConn>> f) {
     }
 }
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string netHttpTransportDialTLSˢ => ref netHttpTransportDialTLSˢᵇ;
 private static readonly @string netHttpTransportDialTLSˢᵇ = "net/http: Transport.DialTLS or DialTLSContext returned (nil, nil)"u8;
 
-internal static (net.Conn conn, error err) customDialTLS(this ref Transport t, context.Context ctx, @string network, @string addr) {
+internal static (net.Conn conn, error err) customDialTLSᴍ(ref Transport t, context.Context ctx, @string network, @string addr) {
     net.Conn conn = default;
     error err = default;
 
@@ -1711,7 +1711,7 @@ internal static (net.Conn conn, error err) customDialTLS(this ref Transport t, c
 // specified in the connectMethod. This includes doing a proxy CONNECT
 // and/or setting up TLS.  If this doesn't return an error, the persistConn
 // is ready to write requests to.
-internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж<transportRequest> Ꮡtreq, connectMethod cm) {
+internal static (ж<persistConn>, error err) getConnᴍ(ж<Transport> Ꮡt, ж<transportRequest> Ꮡtreq, connectMethod cm) {
     ж<persistConn> _ᴛ1 = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -1806,7 +1806,7 @@ internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж
 
 // queueForDial queues w to wait for permission to begin dialing.
 // Once w receives permission to dial, it will do so in a separate goroutine.
-internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
+internal static void queueForDialᴍ(ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1846,7 +1846,7 @@ internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
 
 // startDialConnFor calls dialConn in a new goroutine.
 // t.connsPerHostMu must be held.
-internal static partial void startDialConnForLocked(this ж<Transport> Ꮡt, ж<wantConn> w) {
+internal static partial void startDialConnForLockedᴍ(ж<Transport> Ꮡt, ж<wantConn> w) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.dialsInProgress.cleanFrontCanceled();
@@ -1867,7 +1867,7 @@ internal static partial void startDialConnForLocked(this ж<Transport> Ꮡt, ж<
 // dialConnFor dials on behalf of w and delivers the result to w.
 // dialConnFor has received permission to dial w.cm and is counted in t.connCount[w.cm.key()].
 // If the dial is canceled or unsuccessful, dialConnFor decrements t.connCount[w.cm.key()].
-internal static void dialConnFor(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
+internal static void dialConnForᴍ(ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -1898,7 +1898,7 @@ internal static void dialConnFor(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
 
 // decConnsPerHost decrements the per-host connection count for key,
 // which may in turn give a different waiting goroutine permission to dial.
-internal static void decConnsPerHost(this ж<Transport> Ꮡt, connectMethodKey key) {
+internal static void decConnsPerHostᴍ(ж<Transport> Ꮡt, connectMethodKey key) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1954,12 +1954,12 @@ internal static void decConnsPerHost(this ж<Transport> Ꮡt, connectMethodKey k
     finally { if (ᒐd1) Ꮡt.DerefOrNull().connsPerHostMu.Unlock(); ᒐ.Run(); }
 }
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
 // Add TLS to a persistent connection, i.e. negotiate a TLS session. If pconn is already a TLS
 // tunnel, this function establishes a nested TLS session inside the encrypted channel.
 // The remote endpoint's name may be overridden by TLSClientConfig.ServerName.
-internal static partial error addTLS(this ref persistConn pconn, context.Context ctx, @string name, ж<httptrace.ClientTrace> Ꮡtrace) {
+internal static partial error addTLSᴍ(ref persistConn pconn, context.Context ctx, @string name, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     // Initiate TLS and check remote host name against certificate.
@@ -2026,7 +2026,7 @@ partial interface erringRoundTripper {
 
 internal static Func<context.Context, time.Duration, (context.Context, Action)> testHookProxyConnectTimeout = context.WithTimeout;
 
-} partial class httpᴛTransport {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
@@ -2040,7 +2040,7 @@ private static readonly @string httpHttp2Implementationˢᵇ = "http: HTTP/2 imp
 internal static ref readonly @string httpTransportDoesNotˢ => ref httpTransportDoesNotˢᵇ;
 private static readonly @string httpTransportDoesNotˢᵇ = "http: Transport does not support unencrypted HTTP/2"u8;
 
-internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Transport> Ꮡt, context.Context ctx, connectMethod cm, bool isClientConn, Action internalStateHook) {
+internal static partial (ж<persistConn> pconn, error err) dialConnᴍ(ж<Transport> Ꮡt, context.Context ctx, connectMethod cm, bool isClientConn, Action internalStateHook) {
     ж<persistConn> pconn = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -2318,9 +2318,9 @@ partial struct persistConnWriter {
     internal ж<persistConn> pc;
 }
 
-} partial class httpᴛpersistConnWriter {
+} partial class http_package {
 
-internal static (nint n, error err) Write(this persistConnWriter w, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(persistConnWriter w, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -2332,7 +2332,7 @@ internal static (nint n, error err) Write(this persistConnWriter w, slice<byte> 
 // ReadFrom exposes persistConnWriter's underlying Conn to io.Copy and if
 // the Conn implements io.ReaderFrom, it can take advantage of optimizations
 // such as sendfile.
-internal static (int64 n, error err) ReadFrom(this persistConnWriter w, io.Reader r) {
+internal static (int64 n, error err) ReadFromᴍ(persistConnWriter w, io.Reader r) {
     int64 n = default;
     error err = default;
 
@@ -2372,9 +2372,9 @@ partial struct connectMethod {
     internal bool onlyH1; // whether to disable HTTP/2 and force HTTP/1
 }
 
-} partial class httpᴛconnectMethod {
+} partial class http_package {
 
-internal static connectMethodKey key(this ref connectMethod cm) {
+internal static connectMethodKey keyᴍ(ref connectMethod cm) {
     @string proxyStr = ""u8;
     @string targetAddr = cm.targetAddr;
     if (cm.proxyURL != nil) {
@@ -2392,7 +2392,7 @@ internal static connectMethodKey key(this ref connectMethod cm) {
 }
 
 // scheme returns the first hop scheme: http, https, or socks5
-internal static @string scheme(this ref connectMethod cm) {
+internal static @string schemeᴍ(ref connectMethod cm) {
     if (cm.proxyURL != nil) {
         return cm.proxyURL.Scheme;
     }
@@ -2400,7 +2400,7 @@ internal static @string scheme(this ref connectMethod cm) {
 }
 
 // addr returns the first hop "host:port" to which we need to TCP connect.
-internal static @string addr(this ref connectMethod cm) {
+internal static @string addrᴍ(ref connectMethod cm) {
     if (cm.proxyURL != nil) {
         return canonicalAddr(cm.proxyURL);
     }
@@ -2409,7 +2409,7 @@ internal static @string addr(this ref connectMethod cm) {
 
 // tlsHost returns the host name to match against the peer's
 // TLS certificate.
-internal static @string tlsHost(this ref connectMethod cm) {
+internal static @string tlsHostᴍ(ref connectMethod cm) {
     @string h = cm.targetAddr;
     if (hasPort(h)) {
         h = h.slice(0, strings.LastIndex(h, ":"));
@@ -2427,9 +2427,9 @@ partial struct connectMethodKey {
     internal bool onlyH1;
 }
 
-} partial class httpᴛconnectMethodKey {
+} partial class http_package {
 
-internal static @string String(this connectMethodKey k) {
+internal static @string Stringᴍ(connectMethodKey k) {
     // Only used by tests.
     @string h1 = default;
     if (k.onlyH1) {
@@ -2485,13 +2485,13 @@ partial struct persistConn {
     internal Action<Header> mutateHeaderFunc;
 }
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
-internal static int64 maxHeaderResponseSize(this ref persistConn pc) {
+internal static int64 maxHeaderResponseSizeᴍ(ref persistConn pc) {
     return pc.t.maxHeaderResponseSize();
 }
 
-internal static (nint n, error err) Read(this ref persistConn pc, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref persistConn pc, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -2510,7 +2510,7 @@ internal static (nint n, error err) Read(this ref persistConn pc, slice<byte> p)
 }
 
 // isBroken reports whether this connection is in a known broken state.
-internal static bool isBroken(this ж<persistConn> Ꮡpc) {
+internal static bool isBrokenᴍ(ж<persistConn> Ꮡpc) {
     ref var pc = ref Ꮡpc.DerefOrNull();
 
     pc.mu.Lock();
@@ -2521,7 +2521,7 @@ internal static bool isBroken(this ж<persistConn> Ꮡpc) {
 
 // canceled returns non-nil if the connection was closed due to
 // CancelRequest or due to context cancellation.
-internal static error canceled(this ж<persistConn> Ꮡpc) {
+internal static error canceledᴍ(ж<persistConn> Ꮡpc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2536,7 +2536,7 @@ internal static error canceled(this ж<persistConn> Ꮡpc) {
 }
 
 // isReused reports whether this connection has been used before.
-internal static bool isReused(this ж<persistConn> Ꮡpc) {
+internal static bool isReusedᴍ(ж<persistConn> Ꮡpc) {
     ref var pc = ref Ꮡpc.DerefOrNull();
 
     pc.mu.Lock();
@@ -2545,7 +2545,7 @@ internal static bool isReused(this ж<persistConn> Ꮡpc) {
     return r;
 }
 
-internal static void cancelRequest(this ж<persistConn> Ꮡpc, error err) {
+internal static void cancelRequestᴍ(ж<persistConn> Ꮡpc, error err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2563,7 +2563,7 @@ internal static void cancelRequest(this ж<persistConn> Ꮡpc, error err) {
 // closeConnIfStillIdle closes the connection if it's still sitting idle.
 // This is what's called by the persistConn's idleTimer, and is run in its
 // own goroutine.
-internal static void closeConnIfStillIdle(this ж<persistConn> Ꮡpc) {
+internal static void closeConnIfStillIdleᴍ(ж<persistConn> Ꮡpc) {
     GoFrame ᒐ = default;
     try {
         ref var pc = ref Ꮡpc.DerefOrNull();
@@ -2591,7 +2591,7 @@ internal static void closeConnIfStillIdle(this ж<persistConn> Ꮡpc) {
 //
 // The startBytesWritten value should be the value of pc.nwrite before the roundTrip
 // started writing the request.
-internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq, int64 startBytesWritten, error err) {
+internal static error mapRoundTripErrorᴍ(ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq, int64 startBytesWritten, error err) {
     ref var pc = ref Ꮡpc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -2651,7 +2651,7 @@ internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transport
 // closing a net.Conn that is now owned by the caller.
 internal static error errCallerOwnsConn = errors.New("read loop ending; caller owns writable underlying conn");
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentEncodingˢ => ref contentEncodingˢᵇ;
@@ -2661,7 +2661,7 @@ private static readonly @string gzipˢᵇ = "gzip"u8;
 internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
 private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
 
-internal static void readLoop(this ж<persistConn> Ꮡpc) {
+internal static void readLoopᴍ(ж<persistConn> Ꮡpc) {
     GoFrame ᒐ = default;
     try {
         ref var pc = ref Ꮡpc.DerefOrNull();
@@ -2871,7 +2871,7 @@ internal static void readLoop(this ж<persistConn> Ꮡpc) {
     finally { ᒐ.Run(); }
 }
 
-internal static void readLoopPeekFailLocked(this ref persistConn pc, error peekErr) {
+internal static void readLoopPeekFailLockedᴍ(ref persistConn pc, error peekErr) {
     if (pc.closed != nil) {
         return;
     }
@@ -2907,12 +2907,12 @@ internal static bool is408Message(slice<byte> buf) {
     return ((sstring)(buf[8..12])) == " 408"u8;
 }
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
 // readResponse reads an HTTP response (or two, in the case of "Expect:
 // 100-continue") from the server. It returns the final non-100 one.
 // trace is optional.
-internal static (ж<Response> resp, error err) readResponse(this ref persistConn pc, requestAndChan rc, ж<httptrace.ClientTrace> Ꮡtrace) {
+internal static (ж<Response> resp, error err) readResponseᴍ(ref persistConn pc, requestAndChan rc, ж<httptrace.ClientTrace> Ꮡtrace) {
     ж<Response> resp = default;
     error err = default;
     ref var trace = ref Ꮡtrace.DerefOrNull();
@@ -2988,7 +2988,7 @@ internal static (ж<Response> resp, error err) readResponse(this ref persistConn
 // waitForContinue returns the function to block until
 // any response, timeout or connection close. After any of them,
 // the function returns a bool which indicates if the body should be sent.
-internal static Func<bool> waitForContinue(this ж<persistConn> Ꮡpc, /*<-*/channel<EmptyStruct> continueCh) {
+internal static Func<bool> waitForContinueᴍ(ж<persistConn> Ꮡpc, /*<-*/channel<EmptyStruct> continueCh) {
     if (continueCh == nil) {
         return default;
     }
@@ -3043,17 +3043,17 @@ partial struct readWriteCloserBody {
     /*embed*/ public io_package.ReadWriteCloser ReadWriteCloser;
 }
 
-} partial class httpᴛreadWriteCloserBody {
+} partial class http_package {
 
 // Go method set entry for the promoted 'ReadWriteCloser.Close()' - provided ONLY by the embedded
 // interface field in *readWriteCloserBody's method set; see the pointer-only satisfaction record.
-internal static error Close(this readWriteCloserBody recvᴛ) => recvᴛ.ReadWriteCloser.Close();
+internal static error Closeᴍ(readWriteCloserBody recvᴛ) => recvᴛ.ReadWriteCloser.Close();
 
 // Go method set entry for the promoted 'ReadWriteCloser.Write()' - provided ONLY by the embedded
 // interface field in *readWriteCloserBody's method set; see the pointer-only satisfaction record.
-internal static (nint, error) Write(this readWriteCloserBody recvᴛ, slice<byte> p) => recvᴛ.ReadWriteCloser.Write(p);
+internal static (nint, error) Writeᴍ(readWriteCloserBody recvᴛ, slice<byte> p) => recvᴛ.ReadWriteCloser.Write(p);
 
-internal static (nint n, error err) Read(this ref readWriteCloserBody b, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref readWriteCloserBody b, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -3076,9 +3076,9 @@ internal partial interface CloseWrite_type /*dyn*/ {
     error CloseWrite();
 }
 
-} partial class httpᴛreadWriteCloserBody {
+} partial class http_package {
 
-internal static error CloseWrite(this ref readWriteCloserBody b) {
+internal static error CloseWriteᴍ(ref readWriteCloserBody b) {
     var (cw, ok) = b.ReadWriteCloser._<CloseWrite_type>(ᐧ); if (ok) {
         return cw.CloseWrite();
     }
@@ -3092,15 +3092,15 @@ partial struct nothingWrittenError {
     /*embed*/ internal error error;
 }
 
-} partial class httpᴛnothingWrittenError {
+} partial class http_package {
 
-internal static error Unwrap(this nothingWrittenError nwe) {
+internal static error Unwrapᴍ(nothingWrittenError nwe) {
     return nwe.error;
 }
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
-internal static void writeLoop(this ж<persistConn> Ꮡpc) {
+internal static void writeLoopᴍ(ж<persistConn> Ꮡpc) {
     GoFrame ᒐ = default;
     try {
         ref var pc = ref Ꮡpc.DerefOrNull();
@@ -3160,11 +3160,11 @@ internal static void writeLoop(this ж<persistConn> Ꮡpc) {
 internal static readonly ж<time.Duration> ᏑmaxWriteWaitBeforeConnReuse = new StaticBox<time.Duration>(50 * time.Millisecond);
 internal static ref time.Duration maxWriteWaitBeforeConnReuse => ref ((StaticBox<time.Duration>)ᏑmaxWriteWaitBeforeConnReuse).ValueSlot;
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
 // wroteRequest is a check before recycling a connection that the previous write
 // (from writeLoop above) happened and was successful.
-internal static bool wroteRequest(this ж<persistConn> Ꮡpc) {
+internal static bool wroteRequestᴍ(ж<persistConn> Ꮡpc) {
     GoFrame ᒐ = default;
     try {
         ref var pc = ref Ꮡpc.DerefOrNull();
@@ -3252,12 +3252,12 @@ partial struct timeoutError {
     internal @string err;
 }
 
-} partial class httpᴛtimeoutError {
+} partial class http_package {
 
-internal static @string Error(this ref timeoutError e) { return e.err; }
-internal static bool Timeout(this ref timeoutError e) { return true; }
-internal static bool Temporary(this ref timeoutError e) { return true; }
-internal static bool Is(this ref timeoutError e, error err) { return AreEqual(err, context.DeadlineExceeded); }
+internal static @string Errorᴍ(ref timeoutError e) { return e.err; }
+internal static bool Timeoutᴍ(ref timeoutError e) { return true; }
+internal static bool Temporaryᴍ(ref timeoutError e) { return true; }
+internal static bool Isᴍ(ref timeoutError e, error err) { return AreEqual(err, context.DeadlineExceeded); }
 
 } partial class http_package {
 
@@ -3287,9 +3287,9 @@ internal static Action testHookPostPendingDial = nop;
 internal static sync.Locker testHookMu = new fakeLocker(); // guards following
 internal static Action testHookReadLoopBeforeNextRead = nop;
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
-internal static error waitForAvailability(this ref persistConn pc, context.Context ctx) {
+internal static error waitForAvailabilityᴍ(ref persistConn pc, context.Context ctx) {
     var selᴛ124 = pc.availch;
     var selᴛ125 = pc.closech;
     var selᴛ126 = ctx.Done();
@@ -3316,7 +3316,7 @@ private static readonly @string connectionˢᵇ = "Connection"u8;
 internal static ref readonly @string closeˢ => ref closeˢᵇ;
 private static readonly @string closeˢᵇ = "close"u8;
 
-internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq) {
+internal static (ж<Response> resp, error err) roundTripᴍ(ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq) {
     ж<Response> resp = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -3499,9 +3499,9 @@ internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> �
 partial struct tLogKey {
 }
 
-} partial class httpᴛtransportRequest {
+} partial class http_package {
 
-internal static void logf(this ref transportRequest tr, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void logfᴍ(ref transportRequest tr, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (logf, ok) = tr.Request.Context().Value(new tLogKey())._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
@@ -3509,11 +3509,11 @@ internal static void logf(this ref transportRequest tr, @string format, params �
     }
 }
 
-} partial class httpᴛpersistConn {
+} partial class http_package {
 
 // markReused marks this connection as having been successfully used for a
 // request and response.
-internal static void markReused(this ж<persistConn> Ꮡpc) {
+internal static void markReusedᴍ(ж<persistConn> Ꮡpc) {
     ref var pc = ref Ꮡpc.DerefOrNull();
 
     pc.mu.Lock();
@@ -3526,7 +3526,7 @@ internal static void markReused(this ж<persistConn> Ꮡpc) {
 //
 // The provided err is only for testing and debugging; in normal
 // circumstances it should never be seen by users.
-internal static void close(this ж<persistConn> Ꮡpc, error err) {
+internal static void closeᴍ(ж<persistConn> Ꮡpc, error err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3540,7 +3540,7 @@ internal static void close(this ж<persistConn> Ꮡpc, error err) {
     finally { if (ᒐd1) Ꮡpc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void closeLocked(this ref persistConn pc, error err) {
+internal static void closeLockedᴍ(ref persistConn pc, error err) {
     if (err == nil) {
         throw panic("nil error");
     }
@@ -3621,9 +3621,9 @@ partial struct bodyEOFSignal {
 internal static error errReadOnClosedResBody = errors.New("http: read on closed response body");
 internal static error errConcurrentReadOnResBody = errors.New("http: concurrent read on response body");
 
-} partial class httpᴛbodyEOFSignal {
+} partial class http_package {
 
-internal static (nint n, error err) Read(this ж<bodyEOFSignal> Ꮡes, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ж<bodyEOFSignal> Ꮡes, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -3655,7 +3655,7 @@ internal static (nint n, error err) Read(this ж<bodyEOFSignal> Ꮡes, slice<byt
     ᒐdone: return (n, err);
 }
 
-internal static error Close(this ж<bodyEOFSignal> Ꮡes) {
+internal static error Closeᴍ(ж<bodyEOFSignal> Ꮡes) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3678,7 +3678,7 @@ internal static error Close(this ж<bodyEOFSignal> Ꮡes) {
 }
 
 // caller must hold es.mu.
-internal static error condfn(this ref bodyEOFSignal es, error err) {
+internal static error condfnᴍ(ref bodyEOFSignal es, error err) {
     if (es.fn == nil) {
         return err;
     }
@@ -3704,10 +3704,10 @@ partial struct gzipReader {
 partial struct eofReader {
 }
 
-} partial class httpᴛeofReader {
+} partial class http_package {
 
-internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
-internal static (byte, error) ReadByte(this eofReader _) { return (0, io.EOF); }
+internal static (nint, error) Readᴍ(eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
+internal static (byte, error) ReadByteᴍ(eofReader _) { return (0, io.EOF); }
 
 } partial class http_package {
 
@@ -3735,11 +3735,11 @@ internal static void gzipPoolPut(ж<gzip.Reader> Ꮡzr) {
     ᏑgzipPool.Put(Ꮡzr.OrTypedNil());
 }
 
-} partial class httpᴛgzipReader {
+} partial class http_package {
 
 // acquire returns a gzip.Reader for reading response body.
 // The reader must be released after use.
-internal static (ж<gzip.Reader>, error) acquire(this ж<gzipReader> Ꮡgz) {
+internal static (ж<gzip.Reader>, error) acquireᴍ(ж<gzipReader> Ꮡgz) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3765,7 +3765,7 @@ internal static (ж<gzip.Reader>, error) acquire(this ж<gzipReader> Ꮡgz) {
 }
 
 // release returns the gzip.Reader to the pool if Close was called during Read.
-internal static void release(this ж<gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr) {
+internal static void releaseᴍ(ж<gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3786,7 +3786,7 @@ internal static void release(this ж<gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr) {
 
 // close returns the gzip.Reader to the pool immediately or
 // signals release to do so after Read completes.
-internal static void close(this ж<gzipReader> Ꮡgz) {
+internal static void closeᴍ(ж<gzipReader> Ꮡgz) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3804,7 +3804,7 @@ internal static void close(this ж<gzipReader> Ꮡgz) {
     finally { if (ᒐd1) Ꮡgz.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static (nint n, error err) Read(this ж<gzipReader> Ꮡgz, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ж<gzipReader> Ꮡgz, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -3822,7 +3822,7 @@ internal static (nint n, error err) Read(this ж<gzipReader> Ꮡgz, slice<byte> 
     ᒐdone: return (n, err);
 }
 
-internal static error Close(this ж<gzipReader> Ꮡgz) {
+internal static error Closeᴍ(ж<gzipReader> Ꮡgz) {
     ref var gz = ref Ꮡgz.DerefOrNull();
 
     Ꮡgz.close();
@@ -3835,15 +3835,15 @@ internal static error Close(this ж<gzipReader> Ꮡgz) {
 partial struct tlsHandshakeTimeoutError {
 }
 
-} partial class httpᴛtlsHandshakeTimeoutError {
+} partial class http_package {
 
-internal static bool Timeout(this tlsHandshakeTimeoutError _) { return true; }
-internal static bool Temporary(this tlsHandshakeTimeoutError _) { return true; }
+internal static bool Timeoutᴍ(tlsHandshakeTimeoutError _) { return true; }
+internal static bool Temporaryᴍ(tlsHandshakeTimeoutError _) { return true; }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string netHttpTlsHandshakeˢ => ref netHttpTlsHandshakeˢᵇ;
 private static readonly @string netHttpTlsHandshakeˢᵇ = "net/http: TLS handshake timeout"u8;
 
-internal static @string Error(this tlsHandshakeTimeoutError _) { return netHttpTlsHandshakeˢ; }
+internal static @string Errorᴍ(tlsHandshakeTimeoutError _) { return netHttpTlsHandshakeˢ; }
 
 } partial class http_package {
 
@@ -3853,10 +3853,10 @@ internal static @string Error(this tlsHandshakeTimeoutError _) { return netHttpT
 partial struct fakeLocker {
 }
 
-} partial class httpᴛfakeLocker {
+} partial class http_package {
 
-internal static void Lock(this fakeLocker _) { }
-internal static void Unlock(this fakeLocker _) { }
+internal static void Lockᴍ(fakeLocker _) { }
+internal static void Unlockᴍ(fakeLocker _) { }
 
 } partial class http_package {
 
@@ -3885,10 +3885,10 @@ partial struct connLRU {
     internal map<ж<persistConn>, ж<list.Element>> m;
 }
 
-} partial class httpᴛconnLRU {
+} partial class http_package {
 
 // add adds pc to the head of the linked list.
-internal static void add(this ref connLRU cl, ж<persistConn> pc) {
+internal static void addᴍ(ref connLRU cl, ж<persistConn> pc) {
     if (cl.ll == nil) {
         cl.ll = list.New();
         cl.m = new map<ж<persistConn>, ж<list.Element>>();
@@ -3900,7 +3900,7 @@ internal static void add(this ref connLRU cl, ж<persistConn> pc) {
     cl.m[pc] = ele;
 }
 
-internal static ж<persistConn> removeOldest(this ref connLRU cl) {
+internal static ж<persistConn> removeOldestᴍ(ref connLRU cl) {
     var ele = cl.ll.Back();
     var pc = (~ele).Value._<ж<persistConn>>();
     cl.ll.Remove(ele);
@@ -3909,7 +3909,7 @@ internal static ж<persistConn> removeOldest(this ref connLRU cl) {
 }
 
 // remove removes pc from cl.
-internal static void remove(this ref connLRU cl, ж<persistConn> pc) {
+internal static void removeᴍ(ref connLRU cl, ж<persistConn> pc) {
     var (ele, ok) = cl.m[pc, ꟷ]; if (ok) {
         cl.ll.Remove(ele);
         delete(cl.m, pc);
@@ -3917,8 +3917,153 @@ internal static void remove(this ref connLRU cl, ж<persistConn> pc) {
 }
 
 // len returns the number of items in the cache.
-internal static nint len(this ref connLRU cl) {
+internal static nint lenᴍ(ref connLRU cl) {
     return builtin.len(cl.m);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛTransport {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint writeBufferSize(this ref Transport t) => http_package.writeBufferSizeᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint readBufferSize(this ref Transport t) => http_package.readBufferSizeᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 maxHeaderResponseSize(this ref Transport t) => http_package.maxHeaderResponseSizeᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Transport> Clone(this ж<Transport> Ꮡt) => http_package.Cloneᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasCustomTLSDialer(this ref Transport t) => http_package.hasCustomTLSDialerᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onceSetNextProtoDefaults(this ж<Transport> Ꮡt) => http_package.onceSetNextProtoDefaultsᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Protocols protocols(this ref Transport t) => http_package.protocolsᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool useRegisteredProtocol(this ref Transport t, ж<Request> Ꮡreq) => http_package.useRegisteredProtocolᴍ(ref t, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static RoundTripper alternateRoundTripper(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) => http_package.alternateRoundTripperᴍ(Ꮡt, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error err) roundTrip(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) => http_package.roundTripᴍ(Ꮡt, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RegisterProtocol(this ж<Transport> Ꮡt, @string scheme, RoundTripper rt) => http_package.RegisterProtocolᴍ(Ꮡt, scheme, rt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CloseIdleConnections(this ж<Transport> Ꮡt) => http_package.CloseIdleConnectionsᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж<Request> req, Action<error> origCancel) => http_package.prepareTransportCancelᴍ(Ꮡt, req, origCancel);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CancelRequest(this ж<Transport> Ꮡt, ж<Request> req) => http_package.CancelRequestᴍ(Ꮡt, req);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (connectMethod cm, error err) connectMethodForRequest(this ref Transport t, ж<transportRequest> Ꮡtreq) => http_package.connectMethodForRequestᴍ(ref t, Ꮡtreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void putOrCloseIdleConn(this ж<Transport> Ꮡt, ж<persistConn> pconn) => http_package.putOrCloseIdleConnᴍ(Ꮡt, pconn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint maxIdleConnsPerHost(this ref Transport t) => http_package.maxIdleConnsPerHostᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) => http_package.tryPutIdleConnᴍ(Ꮡt, Ꮡpconn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*delivered*/ queueForIdleConn(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) => http_package.queueForIdleConnᴍ(Ꮡt, Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool removeIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) => http_package.removeIdleConnᴍ(Ꮡt, Ꮡpconn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> Ꮡpconn) => http_package.removeIdleConnLockedᴍ(ref t, Ꮡpconn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn, error) dial(this ref Transport t, context.Context ctx, @string network, @string addr) => http_package.dialᴍ(ref t, ctx, network, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn conn, error err) customDialTLS(this ref Transport t, context.Context ctx, @string network, @string addr) => http_package.customDialTLSᴍ(ref t, ctx, network, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж<transportRequest> Ꮡtreq, connectMethod cm) => http_package.getConnᴍ(Ꮡt, Ꮡtreq, cm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) => http_package.queueForDialᴍ(Ꮡt, Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startDialConnForLocked(this ж<Transport> Ꮡt, ж<wantConn> w) => http_package.startDialConnForLockedᴍ(Ꮡt, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dialConnFor(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) => http_package.dialConnForᴍ(Ꮡt, Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void decConnsPerHost(this ж<Transport> Ꮡt, connectMethodKey key) => http_package.decConnsPerHostᴍ(Ꮡt, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<persistConn> pconn, error err) dialConn(this ж<Transport> Ꮡt, context.Context ctx, connectMethod cm, bool isClientConn, Action internalStateHook) => http_package.dialConnᴍ(Ꮡt, ctx, cm, isClientConn, internalStateHook);
+}
+partial class httpᴛtransportRequest {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Header extraHeaders(this ref transportRequest tr) => http_package.extraHeadersᴍ(ref tr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setError(this ж<transportRequest> Ꮡtr, error err) => http_package.setErrorᴍ(Ꮡtr, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logf(this ref transportRequest tr, @string format, params ꓸꓸꓸany argsʗp) => http_package.logfᴍ(ref tr, format, argsʗp);
+}
+partial class httpᴛreadTrackingBody {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref readTrackingBody r, slice<byte> data) => http_package.Readᴍ(ref r, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<readTrackingBody> Ꮡr) => http_package.Closeᴍ(Ꮡr);
+}
+partial class httpᴛpersistConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldRetryRequest(this ж<persistConn> Ꮡpc, ж<Request> Ꮡreq, error err) => http_package.shouldRetryRequestᴍ(Ꮡpc, Ꮡreq, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error addTLS(this ref persistConn pconn, context.Context ctx, @string name, ж<httptrace.ClientTrace> Ꮡtrace) => http_package.addTLSᴍ(ref pconn, ctx, name, Ꮡtrace);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 maxHeaderResponseSize(this ref persistConn pc) => http_package.maxHeaderResponseSizeᴍ(ref pc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref persistConn pc, slice<byte> p) => http_package.Readᴍ(ref pc, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isBroken(this ж<persistConn> Ꮡpc) => http_package.isBrokenᴍ(Ꮡpc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error canceled(this ж<persistConn> Ꮡpc) => http_package.canceledᴍ(Ꮡpc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isReused(this ж<persistConn> Ꮡpc) => http_package.isReusedᴍ(Ꮡpc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cancelRequest(this ж<persistConn> Ꮡpc, error err) => http_package.cancelRequestᴍ(Ꮡpc, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeConnIfStillIdle(this ж<persistConn> Ꮡpc) => http_package.closeConnIfStillIdleᴍ(Ꮡpc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error mapRoundTripError(this ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq, int64 startBytesWritten, error err) => http_package.mapRoundTripErrorᴍ(Ꮡpc, Ꮡreq, startBytesWritten, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readLoop(this ж<persistConn> Ꮡpc) => http_package.readLoopᴍ(Ꮡpc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readLoopPeekFailLocked(this ref persistConn pc, error peekErr) => http_package.readLoopPeekFailLockedᴍ(ref pc, peekErr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response> resp, error err) readResponse(this ref persistConn pc, requestAndChan rc, ж<httptrace.ClientTrace> Ꮡtrace) => http_package.readResponseᴍ(ref pc, rc, Ꮡtrace);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Func<bool> waitForContinue(this ж<persistConn> Ꮡpc, /*<-*/channel<EmptyStruct> continueCh) => http_package.waitForContinueᴍ(Ꮡpc, continueCh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeLoop(this ж<persistConn> Ꮡpc) => http_package.writeLoopᴍ(Ꮡpc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool wroteRequest(this ж<persistConn> Ꮡpc) => http_package.wroteRequestᴍ(Ꮡpc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error waitForAvailability(this ref persistConn pc, context.Context ctx) => http_package.waitForAvailabilityᴍ(ref pc, ctx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response> resp, error err) roundTrip(this ж<persistConn> Ꮡpc, ж<transportRequest> Ꮡreq) => http_package.roundTripᴍ(Ꮡpc, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void markReused(this ж<persistConn> Ꮡpc) => http_package.markReusedᴍ(Ꮡpc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ж<persistConn> Ꮡpc, error err) => http_package.closeᴍ(Ꮡpc, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeLocked(this ref persistConn pc, error err) => http_package.closeLockedᴍ(ref pc, err);
+}
+partial class httpᴛconnectMethod {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string proxyAuth(this ref connectMethod cm) => http_package.proxyAuthᴍ(ref cm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static connectMethodKey key(this ref connectMethod cm) => http_package.keyᴍ(ref cm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string scheme(this ref connectMethod cm) => http_package.schemeᴍ(ref cm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string addr(this ref connectMethod cm) => http_package.addrᴍ(ref cm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string tlsHost(this ref connectMethod cm) => http_package.tlsHostᴍ(ref cm);
+}
+partial class httpᴛtransportReadFromServerError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this transportReadFromServerError e) => http_package.Unwrapᴍ(e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this transportReadFromServerError e) => http_package.Errorᴍ(e);
+}
+partial class httpᴛwantConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool waiting(this ж<wantConn> Ꮡw) => http_package.waitingᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context.Context getCtxForDial(this ж<wantConn> Ꮡw) => http_package.getCtxForDialᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tryDeliver(this ж<wantConn> Ꮡw, ж<persistConn> pc, error err, time.Time idleAt) => http_package.tryDeliverᴍ(Ꮡw, pc, err, idleAt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> t) => http_package.cancelᴍ(Ꮡw, t);
+}
+partial class httpᴛwantConnQueue {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint len(this ref wantConnQueue q) => http_package.lenᴍ(ref q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushBack(this ref wantConnQueue q, ж<wantConn> w) => http_package.pushBackᴍ(ref q, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<wantConn> popFront(this ref wantConnQueue q) => http_package.popFrontᴍ(ref q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<wantConn> peekFront(this ref wantConnQueue q) => http_package.peekFrontᴍ(ref q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*cleaned*/ cleanFrontNotWaiting(this ref wantConnQueue q) => http_package.cleanFrontNotWaitingᴍ(ref q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanFrontCanceled(this ref wantConnQueue q) => http_package.cleanFrontCanceledᴍ(ref q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void all(this ref wantConnQueue q, Action<ж<wantConn>> f) => http_package.allᴍ(ref q, f);
+}
+partial class httpᴛpersistConnWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this persistConnWriter w, slice<byte> p) => http_package.Writeᴍ(w, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 n, error err) ReadFrom(this persistConnWriter w, io.Reader r) => http_package.ReadFromᴍ(w, r);
+}
+partial class httpᴛconnectMethodKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this connectMethodKey k) => http_package.Stringᴍ(k);
+}
+partial class httpᴛreadWriteCloserBody {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this readWriteCloserBody recvᴛ) => http_package.Closeᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this readWriteCloserBody recvᴛ, slice<byte> p) => http_package.Writeᴍ(recvᴛ, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref readWriteCloserBody b, slice<byte> p) => http_package.Readᴍ(ref b, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error CloseWrite(this ref readWriteCloserBody b) => http_package.CloseWriteᴍ(ref b);
+}
+partial class httpᴛnothingWrittenError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this nothingWrittenError nwe) => http_package.Unwrapᴍ(nwe);
+}
+partial class httpᴛtimeoutError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref timeoutError e) => http_package.Errorᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this ref timeoutError e) => http_package.Timeoutᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this ref timeoutError e) => http_package.Temporaryᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Is(this ref timeoutError e, error err) => http_package.Isᴍ(ref e, err);
+}
+partial class httpᴛbodyEOFSignal {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<bodyEOFSignal> Ꮡes, slice<byte> p) => http_package.Readᴍ(Ꮡes, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<bodyEOFSignal> Ꮡes) => http_package.Closeᴍ(Ꮡes);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error condfn(this ref bodyEOFSignal es, error err) => http_package.condfnᴍ(ref es, err);
+}
+partial class httpᴛeofReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) => http_package.Readᴍ(_Δp0, _Δp1);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte, error) ReadByte(this eofReader _) => http_package.ReadByteᴍ(_);
+}
+partial class httpᴛgzipReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<gzip.Reader>, error) acquire(this ж<gzipReader> Ꮡgz) => http_package.acquireᴍ(Ꮡgz);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void release(this ж<gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr) => http_package.releaseᴍ(Ꮡgz, Ꮡzr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ж<gzipReader> Ꮡgz) => http_package.closeᴍ(Ꮡgz);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<gzipReader> Ꮡgz, slice<byte> p) => http_package.Readᴍ(Ꮡgz, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<gzipReader> Ꮡgz) => http_package.Closeᴍ(Ꮡgz);
+}
+partial class httpᴛtlsHandshakeTimeoutError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this tlsHandshakeTimeoutError _) => http_package.Timeoutᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this tlsHandshakeTimeoutError _) => http_package.Temporaryᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this tlsHandshakeTimeoutError _) => http_package.Errorᴍ(_);
+}
+partial class httpᴛfakeLocker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Lock(this fakeLocker _) => http_package.Lockᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Unlock(this fakeLocker _) => http_package.Unlockᴍ(_);
+}
+partial class httpᴛconnLRU {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref connLRU cl, ж<persistConn> pc) => http_package.addᴍ(ref cl, pc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<persistConn> removeOldest(this ref connLRU cl) => http_package.removeOldestᴍ(ref cl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void remove(this ref connLRU cl, ж<persistConn> pc) => http_package.removeᴍ(ref cl, pc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint len(this ref connLRU cl) => http_package.lenᴍ(ref cl);
+}
+// </GlyphForwarders>

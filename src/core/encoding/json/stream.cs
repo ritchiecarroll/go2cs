@@ -43,23 +43,23 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
     return Ꮡ(new Decoder(r: r));
 }
 
-} partial class jsonᴛDecoder {
+} partial class json_package {
 
 // UseNumber causes the Decoder to unmarshal a number into an
 // interface value as a [Number] instead of as a float64.
-public static void UseNumber(this ref Decoder dec) { dec.d.useNumber = true; }
+internal static void UseNumberᴍ(ref Decoder dec) { dec.d.useNumber = true; }
 
 // DisallowUnknownFields causes the Decoder to return an error when the destination
 // is a struct and the input contains object keys which do not match any
 // non-ignored, exported fields in the destination.
-public static void DisallowUnknownFields(this ref Decoder dec) { dec.d.disallowUnknownFields = true; }
+internal static void DisallowUnknownFieldsᴍ(ref Decoder dec) { dec.d.disallowUnknownFields = true; }
 
 // Decode reads the next JSON-encoded value from its
 // input and stores it in the value pointed to by v.
 //
 // See the documentation for [Unmarshal] for details about
 // the conversion of JSON into a Go value.
-public static error Decode(this ж<Decoder> Ꮡdec, any v) {
+internal static error Decodeᴍ(ж<Decoder> Ꮡdec, any v) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     if (dec.err != nil) {
@@ -95,13 +95,13 @@ public static error Decode(this ж<Decoder> Ꮡdec, any v) {
 
 // Buffered returns a reader of the data remaining in the Decoder's
 // buffer. The reader is valid until the next call to [Decoder.Decode].
-public static io.Reader Buffered(this ref Decoder dec) {
+internal static io.Reader Bufferedᴍ(ref Decoder dec) {
     return new bytes_ReaderжReader(bytes.NewReader(dec.buf.slice(dec.scanp)));
 }
 
 // readValue reads a JSON value into dec.buf.
 // It returns the length of the encoding.
-internal static (nint, error) readValue(this ж<Decoder> Ꮡdec) {
+internal static (nint, error) readValueᴍ(ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     dec.scan.reset();
@@ -166,7 +166,7 @@ break_Input:;
     return (scanp - dec.scanp, default);
 }
 
-internal static error refill(this ref Decoder dec) {
+internal static error refillᴍ(ref Decoder dec) {
     // Make room to read more into the buffer.
     // First slide down data already consumed.
     if (dec.scanp > 0) {
@@ -217,7 +217,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
     return Ꮡ(new Encoder(w: w, escapeHTML: true));
 }
 
-} partial class jsonᴛEncoder {
+} partial class json_package {
 
 // Encode writes the JSON encoding of v to the stream,
 // with insignificant space characters elided,
@@ -225,7 +225,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 //
 // See the documentation for [Marshal] for details about the
 // conversion of Go values to JSON.
-public static error Encode(this ж<Encoder> Ꮡenc, any v) {
+internal static error Encodeᴍ(ж<Encoder> Ꮡenc, any v) {
     GoFrame ᒐ = default;
     try {
         ref var enc = ref Ꮡenc.DerefOrNull();
@@ -270,7 +270,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
 // SetIndent instructs the encoder to format each subsequent encoded
 // value as if indented by the package-level function Indent(dst, src, prefix, indent).
 // Calling SetIndent("", "") disables indentation.
-public static void SetIndent(this ref Encoder enc, @string prefix, @string indent) {
+internal static void SetIndentᴍ(ref Encoder enc, @string prefix, @string indent) {
     enc.indentPrefix = prefix;
     enc.indentValue = indent;
 }
@@ -282,7 +282,7 @@ public static void SetIndent(this ref Encoder enc, @string prefix, @string inden
 //
 // In non-HTML settings where the escaping interferes with the readability
 // of the output, SetEscapeHTML(false) disables this behavior.
-public static void SetEscapeHTML(this ref Encoder enc, bool on) {
+internal static void SetEscapeHTMLᴍ(ref Encoder enc, bool on) {
     enc.escapeHTML = on;
 }
 
@@ -293,10 +293,10 @@ public static void SetEscapeHTML(this ref Encoder enc, bool on) {
 // be used to delay JSON decoding or precompute a JSON encoding.
 partial struct RawMessage /*[]byte*/;
 
-} partial class jsonᴛRawMessage {
+} partial class json_package {
 
 // MarshalJSON returns m as the JSON encoding of m.
-public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
+internal static (slice<byte>, error) MarshalJSONᴍ(RawMessage m) {
     if (m == nil) {
         return (slice<byte>("null"u8), default);
     }
@@ -308,7 +308,7 @@ internal static ref readonly @string jsonRawMessageˢ => ref jsonRawMessageˢᵇ
 private static readonly @string jsonRawMessageˢᵇ = "json.RawMessage: UnmarshalJSON on nil pointer"u8;
 
 // UnmarshalJSON sets *m to a copy of data.
-public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
+internal static error UnmarshalJSONᴍ(ж<RawMessage> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
@@ -333,10 +333,10 @@ internal static UntypedInt tokenObjectColon => 6;
 internal static UntypedInt tokenObjectValue => 7;
 internal static UntypedInt tokenObjectComma => 8;
 
-} partial class jsonᴛDecoder {
+} partial class json_package {
 
 // advance tokenstate from a separator state to a value state
-internal static error tokenPrepareForDecode(this ref Decoder dec) {
+internal static error tokenPrepareForDecodeᴍ(ref Decoder dec) {
     // Note: Not calling peek before switch, to avoid
     // putting peek into the standard Decode path.
     // peek is only called when using the Token API.
@@ -368,7 +368,7 @@ internal static error tokenPrepareForDecode(this ref Decoder dec) {
     return default;
 }
 
-internal static bool tokenValueAllowed(this ref Decoder dec) {
+internal static bool tokenValueAllowedᴍ(ref Decoder dec) {
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenTopValue || ᴛ == tokenArrayStart || ᴛ == tokenArrayValue || ᴛ == tokenObjectValue: {
         return true;
@@ -376,7 +376,7 @@ internal static bool tokenValueAllowed(this ref Decoder dec) {
     return false;
 }
 
-internal static void tokenValueEnd(this ref Decoder dec) {
+internal static void tokenValueEndᴍ(ref Decoder dec) {
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenArrayStart || ᴛ == tokenArrayValue: {
         dec.tokenState = tokenArrayComma;
@@ -393,13 +393,13 @@ internal static void tokenValueEnd(this ref Decoder dec) {
 // A Delim is a JSON array or object delimiter, one of [ ] { or }.
 partial struct Delim /*num:rune*/;
 
-} partial class jsonᴛDelim {
+} partial class json_package {
 
-public static @string String(this Delim d) {
+internal static @string Stringᴍ(Delim d) {
     return (@string)(rune)d;
 }
 
-} partial class jsonᴛDecoder {
+} partial class json_package {
 
 // Token returns the next JSON token in the input stream.
 // At the end of the input stream, Token returns nil, [io.EOF].
@@ -412,7 +412,7 @@ public static @string String(this Delim d) {
 // number, and null—along with delimiters [ ] { } of type [Delim]
 // to mark the start and end of arrays and objects.
 // Commas and colons are elided.
-public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
+internal static (Token, error) Tokenᴍ(ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     for (;;) {
@@ -520,7 +520,7 @@ private static readonly @string afterObjectKeyˢ2ᵇ = " after object key"u8;
 internal static ref readonly @string afterObjectKeyValuePairˢ2 => ref afterObjectKeyValuePairˢ2ᵇ;
 private static readonly @string afterObjectKeyValuePairˢ2ᵇ = " after object key:value pair"u8;
 
-internal static (Token, error) tokenError(this ref Decoder dec, byte c) {
+internal static (Token, error) tokenErrorᴍ(ref Decoder dec, byte c) {
     @string context = default;
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenTopValue: {
@@ -552,12 +552,12 @@ internal static (Token, error) tokenError(this ref Decoder dec, byte c) {
 
 // More reports whether there is another element in the
 // current array or object being parsed.
-public static bool More(this ref Decoder dec) {
+internal static bool Moreᴍ(ref Decoder dec) {
     var (c, err) = dec.peek();
     return err == nil && c != ']' && c != '}';
 }
 
-internal static (byte, error) peek(this ref Decoder dec) {
+internal static (byte, error) peekᴍ(ref Decoder dec) {
     error err = default;
     for (;;) {
         for (nint i = dec.scanp; i < len(dec.buf); i++) {
@@ -579,8 +579,39 @@ internal static (byte, error) peek(this ref Decoder dec) {
 // InputOffset returns the input stream byte offset of the current decoder position.
 // The offset gives the location of the end of the most recently returned token
 // and the beginning of the next token.
-public static int64 InputOffset(this ref Decoder dec) {
+internal static int64 InputOffsetᴍ(ref Decoder dec) {
     return dec.scanned + (int64)dec.scanp;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class jsonᴛDecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void UseNumber(this ref Decoder dec) => json_package.UseNumberᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void DisallowUnknownFields(this ref Decoder dec) => json_package.DisallowUnknownFieldsᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Decode(this ж<Decoder> Ꮡdec, any v) => json_package.Decodeᴍ(Ꮡdec, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.Reader Buffered(this ref Decoder dec) => json_package.Bufferedᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) readValue(this ж<Decoder> Ꮡdec) => json_package.readValueᴍ(Ꮡdec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error refill(this ref Decoder dec) => json_package.refillᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error tokenPrepareForDecode(this ref Decoder dec) => json_package.tokenPrepareForDecodeᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tokenValueAllowed(this ref Decoder dec) => json_package.tokenValueAllowedᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void tokenValueEnd(this ref Decoder dec) => json_package.tokenValueEndᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Token, error) Token(this ж<Decoder> Ꮡdec) => json_package.Tokenᴍ(Ꮡdec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Token, error) tokenError(this ref Decoder dec, byte c) => json_package.tokenErrorᴍ(ref dec, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool More(this ref Decoder dec) => json_package.Moreᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte, error) peek(this ref Decoder dec) => json_package.peekᴍ(ref dec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InputOffset(this ref Decoder dec) => json_package.InputOffsetᴍ(ref dec);
+}
+partial class jsonᴛEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, any v) => json_package.Encodeᴍ(Ꮡenc, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetIndent(this ref Encoder enc, @string prefix, @string indent) => json_package.SetIndentᴍ(ref enc, prefix, indent);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetEscapeHTML(this ref Encoder enc, bool on) => json_package.SetEscapeHTMLᴍ(ref enc, on);
+}
+partial class jsonᴛRawMessage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalJSON(this RawMessage m) => json_package.MarshalJSONᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) => json_package.UnmarshalJSONᴍ(Ꮡm, data);
+}
+partial class jsonᴛDelim {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Delim d) => json_package.Stringᴍ(d);
+}
+// </GlyphForwarders>

@@ -19,14 +19,14 @@ partial struct MethodSet {
     internal slice<ж<Selection>> list;
 }
 
-} partial class typesᴛMethodSet {
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string methodSetˢ => ref methodSetˢᵇ;
 private static readonly @string methodSetˢᵇ = "MethodSet {}"u8;
 internal static readonly object methodSetˢ2 = (@string)"MethodSet {"u8;
 
-public static @string String(this ref MethodSet s) {
+internal static @string Stringᴍ(ref MethodSet s) {
     if (s.Len() == 0) {
         return methodSetˢ;
     }
@@ -41,13 +41,13 @@ public static @string String(this ref MethodSet s) {
 }
 
 // Len returns the number of methods in s.
-public static nint Len(this ref MethodSet s) { return len(s.list); }
+internal static nint Lenᴍ(ref MethodSet s) { return len(s.list); }
 
 // At returns the i'th method in s for 0 <= i < s.Len().
-public static ж<Selection> At(this ref MethodSet s, nint i) { return s.list[i]; }
+internal static ж<Selection> Atᴍ(ref MethodSet s, nint i) { return s.list[i]; }
 
 // Lookup returns the method with matching package and name, or nil if not found.
-public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> pkg, @string name) {
+internal static ж<Selection> Lookupᴍ(ж<MethodSet> Ꮡs, ж<Package> pkg, @string name) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.Len() == 0) {
@@ -229,12 +229,12 @@ public static ж<MethodSet> NewMethodSet(Type T) {
 // same unique id, or a field with that id appeared.
 partial struct methodSet /*map[@string, ж<Selection>]*/; // a nil entry indicates a name collision
 
-} partial class typesᴛmethodSet {
+} partial class types_package {
 
 // Add adds all functions in list to the method set s.
 // If multiples is set, every function in list appears multiple times
 // and is treated as a collision.
-internal static methodSet add(this methodSet s, slice<ж<Func>> list, slice<nint> index, bool indirect, bool multiples) {
+internal static methodSet addᴍ(methodSet s, slice<ж<Func>> list, slice<nint> index, bool indirect, bool multiples) {
     if (len(list) == 0) {
         return s;
     }
@@ -244,7 +244,7 @@ internal static methodSet add(this methodSet s, slice<ж<Func>> list, slice<nint
     return s;
 }
 
-internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> index, bool indirect, bool multiples) {
+internal static methodSet addOneᴍ(methodSet s, ж<Func> Ꮡf, slice<nint> index, bool indirect, bool multiples) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (s == nil) {
@@ -267,3 +267,16 @@ internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> in
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛMethodSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref MethodSet s) => types_package.Stringᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref MethodSet s) => types_package.Lenᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Selection> At(this ref MethodSet s, nint i) => types_package.Atᴍ(ref s, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> pkg, @string name) => types_package.Lookupᴍ(Ꮡs, pkg, name);
+}
+partial class typesᴛmethodSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static methodSet add(this methodSet s, slice<ж<Func>> list, slice<nint> index, bool indirect, bool multiples) => types_package.addᴍ(s, list, index, indirect, multiples);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> index, bool indirect, bool multiples) => types_package.addOneᴍ(s, Ꮡf, index, indirect, multiples);
+}
+// </GlyphForwarders>

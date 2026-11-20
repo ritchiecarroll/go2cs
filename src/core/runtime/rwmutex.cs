@@ -28,7 +28,7 @@ partial struct rwmutex {
     internal lockRank readRank; // semantic lock rank for read locking
 }
 
-} partial class runtimeᴛrwmutex {
+} partial class runtime_package {
 
 // Lock ranking an rwmutex has two aspects:
 //
@@ -58,7 +58,7 @@ partial struct rwmutex {
 //     belongs.
 //   - writeRank is placed in the lock order wherever a write lock of this
 //     rwmutex belongs.
-internal static void init(this ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) {
+internal static void initᴍ(ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     rw.readRank = readRank;
@@ -71,10 +71,10 @@ internal static void init(this ж<rwmutex> Ꮡrw, lockRank readRank, lockRank re
 
 internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 
-} partial class runtimeᴛrwmutex {
+} partial class runtime_package {
 
 // rlock locks rw for reading.
-internal static void rlock(this ж<rwmutex> Ꮡrw) {
+internal static void rlockᴍ(ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     // The reader must not be allowed to lose its P or else other
@@ -111,7 +111,7 @@ internal static ref readonly @string runlockOfUnlockedRwmutexˢ => ref runlockOf
 private static readonly @string runlockOfUnlockedRwmutexˢᵇ = "runlock of unlocked rwmutex"u8;
 
 // runlock undoes a single rlock call on rw.
-internal static void runlock(this ж<rwmutex> Ꮡrw) {
+internal static void runlockᴍ(ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     var r = Ꮡrw.ᏑreaderCount.Add(-1); if (r < 0) {
@@ -133,7 +133,7 @@ internal static void runlock(this ж<rwmutex> Ꮡrw) {
 }
 
 // lock locks rw for writing.
-internal static void @lock(this ж<rwmutex> Ꮡrw) {
+internal static void @lockᴍ(ж<rwmutex> Ꮡrw) {
     // Resolve competition with other writers and stick to our P.
     runtime.@lock(Ꮡrw.ᏑwLock);
     var m = getg().Value.m;
@@ -160,7 +160,7 @@ internal static ref readonly @string unlockOfUnlockedRwmutexˢ => ref unlockOfUn
 private static readonly @string unlockOfUnlockedRwmutexˢᵇ = "unlock of unlocked rwmutex"u8;
 
 // unlock unlocks rw for writing.
-internal static void unlock(this ж<rwmutex> Ꮡrw) {
+internal static void unlockᴍ(ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     // Announce to readers that there is no active writer.
@@ -186,3 +186,13 @@ internal static void unlock(this ж<rwmutex> Ꮡrw) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛrwmutex {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) => runtime_package.initᴍ(Ꮡrw, readRank, readRankInternal, writeRank);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rlock(this ж<rwmutex> Ꮡrw) => runtime_package.rlockᴍ(Ꮡrw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void runlock(this ж<rwmutex> Ꮡrw) => runtime_package.runlockᴍ(Ꮡrw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @lock(this ж<rwmutex> Ꮡrw) => runtime_package.@lockᴍ(Ꮡrw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unlock(this ж<rwmutex> Ꮡrw) => runtime_package.unlockᴍ(Ꮡrw);
+}
+// </GlyphForwarders>

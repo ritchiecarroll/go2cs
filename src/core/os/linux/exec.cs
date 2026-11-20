@@ -75,13 +75,13 @@ partial struct processHandle {
     internal atomic.Int32 refs;
 }
 
-} partial class osᴛprocessHandle {
+} partial class os_package {
 
 // acquire adds a reference and returns the handle.
 // The bool result reports whether acquire succeeded;
 // it fails if the handle is already closed.
 // Every successful call to acquire should be paired with a call to release.
-internal static (uintptr, bool) acquire(this ж<processHandle> Ꮡph) {
+internal static (uintptr, bool) acquireᴍ(ж<processHandle> Ꮡph) {
     ref var ph = ref Ꮡph.DerefOrNull();
 
     for (;;) {
@@ -99,7 +99,7 @@ internal static (uintptr, bool) acquire(this ж<processHandle> Ꮡph) {
 }
 
 // release releases a reference to the handle.
-internal static void release(this ж<processHandle> Ꮡph) {
+internal static void releaseᴍ(ж<processHandle> Ꮡph) {
     ref var ph = ref Ꮡph.DerefOrNull();
 
     for (;;) {
@@ -157,11 +157,11 @@ internal static ж<Process> newDoneProcess(nint pid) {
     return p;
 }
 
-} partial class osᴛProcess {
+} partial class os_package {
 
 // handleTransientAcquire returns the process handle or,
 // if the process is not ready, the current status.
-internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process> Ꮡp) {
+internal static (uintptr, processStatus) handleTransientAcquireᴍ(ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.handle == nil) {
@@ -189,7 +189,7 @@ internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process>
 }
 
 // handleTransientRelease releases a handle returned by handleTransientAcquire.
-internal static void handleTransientRelease(this ref Process p) {
+internal static void handleTransientReleaseᴍ(ref Process p) {
     if (p.handle == nil) {
         throw panic("handleTransientRelease called in invalid mode");
     }
@@ -197,7 +197,7 @@ internal static void handleTransientRelease(this ref Process p) {
 }
 
 // pidStatus returns the current process status.
-internal static processStatus pidStatus(this ж<Process> Ꮡp) {
+internal static processStatus pidStatusᴍ(ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.handle != nil) {
@@ -280,12 +280,12 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
     return startProcess(name, argv, attr);
 }
 
-} partial class osᴛProcess {
+} partial class os_package {
 
 // Release releases any resources associated with the [Process] p,
 // rendering it unusable in the future.
 // Release only needs to be called if [Process.Wait] is not.
-public static error Release(this ж<Process> Ꮡp) {
+internal static error Releaseᴍ(ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Unfortunately, for historical reasons, on systems other
@@ -312,7 +312,7 @@ public static error Release(this ж<Process> Ꮡp) {
 // doRelease releases a [Process], setting the status to newStatus.
 // If the previous status is not statusOK, this does nothing.
 // It returns the previous status.
-internal static processStatus doRelease(this ж<Process> Ꮡp, processStatus newStatus) {
+internal static processStatus doReleaseᴍ(ж<Process> Ꮡp, processStatus newStatus) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     for (;;) {
@@ -347,7 +347,7 @@ internal static processStatus doRelease(this ж<Process> Ꮡp, processStatus new
 // Kill causes the [Process] to exit immediately. Kill does not wait until
 // the Process has actually exited. This only kills the Process itself,
 // not any other processes it may have started.
-public static error Kill(this ж<Process> Ꮡp) {
+internal static error Killᴍ(ж<Process> Ꮡp) {
     return Ꮡp.kill();
 }
 
@@ -356,13 +356,13 @@ public static error Kill(this ж<Process> Ꮡp) {
 // Wait releases any resources associated with the Process.
 // On most operating systems, the Process must be a child
 // of the current process or an error will be returned.
-public static (ж<ProcessState>, error) Wait(this ж<Process> Ꮡp) {
+internal static (ж<ProcessState>, error) Waitᴍ(ж<Process> Ꮡp) {
     return Ꮡp.wait();
 }
 
 // Signal sends a signal to the [Process].
 // Sending [Interrupt] on Windows is not implemented.
-public static error Signal(this ж<Process> Ꮡp, Signal sig) {
+internal static error Signalᴍ(ж<Process> Ꮡp, Signal sig) {
     return Ꮡp.signal(sig);
 }
 
@@ -374,39 +374,39 @@ public static error Signal(this ж<Process> Ꮡp, Signal sig) {
 // If process handles are not supported or a handle is not available,
 // it returns [ErrNoHandle]. Currently, process handles are supported
 // on Linux 5.4 or later (pidfd) and Windows.
-public static error WithHandle(this ж<Process> Ꮡp, Action<uintptr> f) {
+internal static error WithHandleᴍ(ж<Process> Ꮡp, Action<uintptr> f) {
     return Ꮡp.withHandle(f);
 }
 
-} partial class osᴛProcessState {
+} partial class os_package {
 
 // UserTime returns the user CPU time of the exited process and its children.
-public static time.Duration UserTime(this ref ProcessState p) {
+internal static time.Duration UserTimeᴍ(ref ProcessState p) {
     return p.userTime();
 }
 
 // SystemTime returns the system CPU time of the exited process and its children.
-public static time.Duration SystemTime(this ref ProcessState p) {
+internal static time.Duration SystemTimeᴍ(ref ProcessState p) {
     return p.systemTime();
 }
 
 // Exited reports whether the program has exited.
 // On Unix systems this reports true if the program exited due to calling exit,
 // but false if the program terminated due to a signal.
-public static bool Exited(this ref ProcessState p) {
+internal static bool Exitedᴍ(ref ProcessState p) {
     return p.exited();
 }
 
 // Success reports whether the program exited successfully,
 // such as with exit status 0 on Unix.
-public static bool Success(this ref ProcessState p) {
+internal static bool Successᴍ(ref ProcessState p) {
     return p.success();
 }
 
 // Sys returns system-dependent exit information about
 // the process. Convert it to the appropriate underlying
 // type, such as [syscall.WaitStatus] on Unix, to access its contents.
-public static any Sys(this ref ProcessState p) {
+internal static any Sysᴍ(ref ProcessState p) {
     return p.sys();
 }
 
@@ -415,8 +415,34 @@ public static any Sys(this ref ProcessState p) {
 // type, such as [*syscall.Rusage] on Unix, to access its contents.
 // (On Unix, *syscall.Rusage matches struct rusage as defined in the
 // getrusage(2) manual page.)
-public static any SysUsage(this ref ProcessState p) {
+internal static any SysUsageᴍ(ref ProcessState p) {
     return p.sysUsage();
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛprocessHandle {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, bool) acquire(this ж<processHandle> Ꮡph) => os_package.acquireᴍ(Ꮡph);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void release(this ж<processHandle> Ꮡph) => os_package.releaseᴍ(Ꮡph);
+}
+partial class osᴛProcess {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process> Ꮡp) => os_package.handleTransientAcquireᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleTransientRelease(this ref Process p) => os_package.handleTransientReleaseᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static processStatus pidStatus(this ж<Process> Ꮡp) => os_package.pidStatusᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Release(this ж<Process> Ꮡp) => os_package.Releaseᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static processStatus doRelease(this ж<Process> Ꮡp, processStatus newStatus) => os_package.doReleaseᴍ(Ꮡp, newStatus);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Kill(this ж<Process> Ꮡp) => os_package.Killᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<ProcessState>, error) Wait(this ж<Process> Ꮡp) => os_package.Waitᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Signal(this ж<Process> Ꮡp, Signal sig) => os_package.Signalᴍ(Ꮡp, sig);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WithHandle(this ж<Process> Ꮡp, Action<uintptr> f) => os_package.WithHandleᴍ(Ꮡp, f);
+}
+partial class osᴛProcessState {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Duration UserTime(this ref ProcessState p) => os_package.UserTimeᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Duration SystemTime(this ref ProcessState p) => os_package.SystemTimeᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Exited(this ref ProcessState p) => os_package.Exitedᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Success(this ref ProcessState p) => os_package.Successᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static any Sys(this ref ProcessState p) => os_package.Sysᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static any SysUsage(this ref ProcessState p) => os_package.SysUsageᴍ(ref p);
+}
+// </GlyphForwarders>

@@ -87,15 +87,15 @@ partial struct resolver {
     internal slice<slice<ж<ast.Ident>>> targetStack; // stack of unresolved labels
 }
 
-} partial class parserᴛresolver {
+} partial class parser_package {
 
-internal static void trace(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void traceᴍ(ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Println(strings.Repeat(". ", r.depth) + r.sprintf(format, args.ꓸꓸꓸ));
 }
 
-internal static @string sprintf(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
+internal static @string sprintfᴍ(ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     foreach (var (i, arg) in range(args)) {
@@ -112,7 +112,7 @@ internal static @string sprintf(this ref resolver r, @string format, params ꓸ�
 internal static ref readonly @string openingScopeVˢ => ref openingScopeVˢᵇ;
 private static readonly @string openingScopeVˢᵇ = "opening scope @%v"u8;
 
-internal static void openScope(this ref resolver r, token.Pos pos) {
+internal static void openScopeᴍ(ref resolver r, token.Pos pos) {
     r.depth++;
     if (r.depth > maxScopeDepth) {
         throw panic(new bailout(pos: pos, msg: "exceeded max scope depth during object resolution"));
@@ -127,7 +127,7 @@ internal static void openScope(this ref resolver r, token.Pos pos) {
 internal static ref readonly @string closingScopeˢ => ref closingScopeˢᵇ;
 private static readonly @string closingScopeˢᵇ = "closing scope"u8;
 
-internal static void closeScope(this ref resolver r) {
+internal static void closeScopeᴍ(ref resolver r) {
     r.depth--;
     if (debugResolve) {
         r.trace(closingScopeˢ);
@@ -135,12 +135,12 @@ internal static void closeScope(this ref resolver r) {
     r.topScope = r.topScope.Outer;
 }
 
-internal static void openLabelScope(this ref resolver r) {
+internal static void openLabelScopeᴍ(ref resolver r) {
     r.labelScope = ast.NewScope(r.labelScope);
     r.targetStack = append(r.targetStack, (slice<ж<ast.Ident>>)(default));
 }
 
-internal static void closeLabelScope(this ref resolver r) {
+internal static void closeLabelScopeᴍ(ref resolver r) {
     // resolve labels
     nint n = len(r.targetStack) - 1;
     var scope = r.labelScope;
@@ -159,7 +159,7 @@ internal static void closeLabelScope(this ref resolver r) {
 internal static ref readonly @string declaringSVˢ => ref declaringSVˢᵇ;
 private static readonly @string declaringSVˢᵇ = "declaring %s@%v"u8;
 
-internal static void declare(this ref resolver r, any decl, any data, ж<ast.Scope> Ꮡscope, ast.ObjKind kind, params ꓸꓸꓸжastꓸIdent identsʗp) {
+internal static void declareᴍ(ref resolver r, any decl, any data, ж<ast.Scope> Ꮡscope, ast.ObjKind kind, params ꓸꓸꓸжastꓸIdent identsʗp) {
     var idents = identsʗp.sslice();
     ref var scope = ref Ꮡscope.DerefOrNull();
 
@@ -198,7 +198,7 @@ private static readonly @string identifierAlreadyˢᵇ = "identifier already dec
 internal static ref readonly @string noNewVariablesOnLeftSideˢ => ref noNewVariablesOnLeftSideˢᵇ;
 private static readonly @string noNewVariablesOnLeftSideˢᵇ = "no new variables on left side of :="u8;
 
-internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdecl) {
+internal static void shortVarDeclᴍ(ref resolver r, ж<ast.AssignStmt> Ꮡdecl) {
     ref var decl = ref Ꮡdecl.DerefOrNull();
 
     // Go spec: A short variable declaration may redeclare variables
@@ -236,7 +236,7 @@ internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdec
 // internal consistency.
 internal static ж<ast.Object> unresolved = @new<ast.Object>();
 
-} partial class parserᴛresolver {
+} partial class parser_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string resolvedVSToVˢ => ref resolvedVSToVˢᵇ;
@@ -248,7 +248,7 @@ private static readonly @string objWithNoNameˢᵇ = "obj with no name"u8;
 // the object it denotes. If no object is found and collectUnresolved is
 // set, x is marked as unresolved and collected in the list of unresolved
 // identifiers.
-internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool collectUnresolved) {
+internal static void resolveᴍ(ref resolver r, ж<ast.Ident> Ꮡident, bool collectUnresolved) {
     ref var ident = ref Ꮡident.DerefOrNull();
 
     if (ident.Obj != nil) {
@@ -283,13 +283,13 @@ internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool c
     }
 }
 
-internal static void walkExprs(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
+internal static void walkExprsᴍ(ж<resolver> Ꮡr, slice<ast.Expr> list) {
     foreach (var (_, node) in range(list)) {
         ast.Walk(new resolverжVisitor(Ꮡr), node);
     }
 }
 
-internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
+internal static void walkLHSᴍ(ж<resolver> Ꮡr, slice<ast.Expr> list) {
     foreach (var (_, expr) in range(list)) {
         var exprΔ1 = ast.Unparen(expr);
         var (_, ok) = exprΔ1._<ж<ast.Ident>>(ᐧ); if (!ok && exprΔ1 != nil) {
@@ -298,7 +298,7 @@ internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
     }
 }
 
-internal static void walkStmts(this ж<resolver> Ꮡr, slice<ast.Stmt> list) {
+internal static void walkStmtsᴍ(ж<resolver> Ꮡr, slice<ast.Stmt> list) {
     foreach (var (_, stmt) in range(list)) {
         ast.Walk(new resolverжVisitor(Ꮡr), stmt);
     }
@@ -308,7 +308,7 @@ internal static void walkStmts(this ж<resolver> Ꮡr, slice<ast.Stmt> list) {
 internal static ref readonly @string nodeTVˢ => ref nodeTVˢᵇ;
 private static readonly @string nodeTVˢᵇ = "node %T@%v"u8;
 
-internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
+internal static ast.Visitor Visitᴍ(ж<resolver> Ꮡr, ast.Node node) {
     GoFrame ᒐ = default;
     try {
         ref var r = ref Ꮡr.DerefOrNull();
@@ -604,7 +604,7 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
     finally { ᒐ.Run(); }
 }
 
-internal static void walkFuncType(this ж<resolver> Ꮡr, ж<ast.FuncType> Ꮡtyp) {
+internal static void walkFuncTypeᴍ(ж<resolver> Ꮡr, ж<ast.FuncType> Ꮡtyp) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -615,7 +615,7 @@ internal static void walkFuncType(this ж<resolver> Ꮡr, ж<ast.FuncType> Ꮡty
     r.declareList(typ.Results, ast.Var);
 }
 
-internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist) {
+internal static void resolveListᴍ(ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist) {
     ref var list = ref Ꮡlist.DerefOrNull();
 
     if (Ꮡlist == nil) {
@@ -628,7 +628,7 @@ internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡli
     }
 }
 
-internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) {
+internal static void declareListᴍ(ref resolver r, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) {
     ref var list = ref Ꮡlist.DerefOrNull();
 
     if (Ꮡlist == nil) {
@@ -639,7 +639,7 @@ internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist,
     }
 }
 
-internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv) {
+internal static void walkRecvᴍ(ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var recv = ref Ꮡrecv.DerefOrNull();
     var resolveExprsᴷ = new stackAppend<ast.Expr>();
@@ -695,7 +695,7 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
     }
 }
 
-internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> list, ast.ObjKind kind) {
+internal static void walkFieldListᴍ(ж<resolver> Ꮡr, ж<ast.FieldList> list, ast.ObjKind kind) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (list == nil) {
@@ -708,14 +708,14 @@ internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> lis
 // walkTParams is like walkFieldList, but declares type parameters eagerly so
 // that they may be resolved in the constraint expressions held in the field
 // Type.
-internal static void walkTParams(this ж<resolver> Ꮡr, ж<ast.FieldList> list) {
+internal static void walkTParamsᴍ(ж<resolver> Ꮡr, ж<ast.FieldList> list) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.declareList(list, ast.Typ);
     Ꮡr.resolveList(list);
 }
 
-internal static void walkBody(this ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody) {
+internal static void walkBodyᴍ(ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -734,3 +734,28 @@ internal static void walkBody(this ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody)
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class parserᴛresolver {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void trace(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) => parser_package.traceᴍ(ref r, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string sprintf(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) => parser_package.sprintfᴍ(ref r, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void openScope(this ref resolver r, token.Pos pos) => parser_package.openScopeᴍ(ref r, pos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeScope(this ref resolver r) => parser_package.closeScopeᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void openLabelScope(this ref resolver r) => parser_package.openLabelScopeᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeLabelScope(this ref resolver r) => parser_package.closeLabelScopeᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declare(this ref resolver r, any decl, any data, ж<ast.Scope> Ꮡscope, ast.ObjKind kind, params ꓸꓸꓸжastꓸIdent identsʗp) => parser_package.declareᴍ(ref r, decl, data, Ꮡscope, kind, identsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdecl) => parser_package.shortVarDeclᴍ(ref r, Ꮡdecl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool collectUnresolved) => parser_package.resolveᴍ(ref r, Ꮡident, collectUnresolved);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walkExprs(this ж<resolver> Ꮡr, slice<ast.Expr> list) => parser_package.walkExprsᴍ(Ꮡr, list);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) => parser_package.walkLHSᴍ(Ꮡr, list);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walkStmts(this ж<resolver> Ꮡr, slice<ast.Stmt> list) => parser_package.walkStmtsᴍ(Ꮡr, list);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) => parser_package.Visitᴍ(Ꮡr, node);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walkFuncType(this ж<resolver> Ꮡr, ж<ast.FuncType> Ꮡtyp) => parser_package.walkFuncTypeᴍ(Ꮡr, Ꮡtyp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist) => parser_package.resolveListᴍ(Ꮡr, Ꮡlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) => parser_package.declareListᴍ(ref r, Ꮡlist, kind);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv) => parser_package.walkRecvᴍ(Ꮡr, Ꮡrecv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> list, ast.ObjKind kind) => parser_package.walkFieldListᴍ(Ꮡr, list, kind);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walkTParams(this ж<resolver> Ꮡr, ж<ast.FieldList> list) => parser_package.walkTParamsᴍ(Ꮡr, list);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walkBody(this ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody) => parser_package.walkBodyᴍ(Ꮡr, Ꮡbody);
+}
+// </GlyphForwarders>

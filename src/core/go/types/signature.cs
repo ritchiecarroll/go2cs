@@ -129,7 +129,7 @@ public static ж<Signature> NewSignatureType(ж<Var> recv, slice<ж<TypeParam>> 
     return sig;
 }
 
-} partial class typesᴛSignature {
+} partial class types_package {
 
 // Recv returns the receiver of signature s (if a method), or nil if a
 // function. It is ignored when comparing signatures for identity.
@@ -137,28 +137,28 @@ public static ж<Signature> NewSignatureType(ж<Var> recv, slice<ж<TypeParam>> 
 // For an abstract method, Recv returns the enclosing interface either
 // as a *[Named] or an *[Interface]. Due to embedding, an interface may
 // contain methods whose receiver type is a different interface.
-public static ж<Var> Recv(this ref Signature s) { return s.recv; }
+internal static ж<Var> Recvᴍ(ref Signature s) { return s.recv; }
 
 // TypeParams returns the type parameters of signature s, or nil.
-public static ж<TypeParamList> TypeParams(this ref Signature s) { return s.tparams; }
+internal static ж<TypeParamList> TypeParamsᴍ(ref Signature s) { return s.tparams; }
 
 // RecvTypeParams returns the receiver type parameters of signature s, or nil.
-public static ж<TypeParamList> RecvTypeParams(this ref Signature s) { return s.rparams; }
+internal static ж<TypeParamList> RecvTypeParamsᴍ(ref Signature s) { return s.rparams; }
 
 // Params returns the parameters of signature s, or nil.
 // See [NewSignatureType] for details of variadic functions.
-public static ж<Tuple> Params(this ref Signature s) { return s.@params; }
+internal static ж<Tuple> Paramsᴍ(ref Signature s) { return s.@params; }
 
 // Results returns the results of signature s, or nil.
-public static ж<Tuple> Results(this ref Signature s) { return s.results; }
+internal static ж<Tuple> Resultsᴍ(ref Signature s) { return s.results; }
 
 // Variadic reports whether the signature s is variadic.
-public static bool Variadic(this ref Signature s) { return s.variadic; }
+internal static bool Variadicᴍ(ref Signature s) { return s.variadic; }
 
-public static Type Underlying(this ж<Signature> Ꮡs) { return new SignatureжType(Ꮡs); }
-public static @string String(this ж<Signature> Ꮡs) { return TypeString(new SignatureжType(Ꮡs), default); }
+internal static Type Underlyingᴍ(ж<Signature> Ꮡs) { return new SignatureжType(Ꮡs); }
+internal static @string Stringᴍ(ж<Signature> Ꮡs) { return TypeString(new SignatureжType(Ꮡs), default); }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string methodHasMultipleˢ => ref methodHasMultipleˢᵇ;
@@ -168,7 +168,7 @@ private static readonly @string methodHasMultipleˢᵇ = "method has multiple re
 // Implementation
 
 // funcType type-checks a function or method type.
-internal static void funcType(this ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<ast.FieldList> ᏑrecvPar, ж<ast.FuncType> Ꮡftyp) {
+internal static void funcTypeᴍ(ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<ast.FieldList> ᏑrecvPar, ж<ast.FuncType> Ꮡftyp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -237,7 +237,7 @@ private static readonly @string typeParameterˢᵇ = "type parameter"u8;
 // collectRecv extracts the method receiver and its type parameters (if any) from rparam.
 // It declares the type parameters (but not the receiver) in the current scope, and
 // returns the receiver variable and its type parameter list (if any).
-internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡcheck, ж<ast.Field> Ꮡrparam, token.Pos scopePos) {
+internal static (ж<Var>, ж<TypeParamList>) collectRecvᴍ(ж<Checker> Ꮡcheck, ж<ast.Field> Ꮡrparam, token.Pos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var rparam = ref Ꮡrparam.DerefOrNull();
 
@@ -408,7 +408,7 @@ internal static Type unpointer(Type t) {
     }
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // recordParenthesizedRecvTypes records parenthesized intermediate receiver type
 // expressions that all map to the same type, by recursively unpacking expr and
@@ -420,7 +420,7 @@ internal static Type unpointer(Type t) {
 //	 *(T[P])         *T[P]
 //	  (T[P])          T[P]
 //	   T[P]           T[P]
-internal static void recordParenthesizedRecvTypes(this ref Checker check, ast.Expr expr, Type typ) {
+internal static void recordParenthesizedRecvTypesᴍ(ref Checker check, ast.Expr expr, Type typ) {
     for (;;) {
         check.recordTypeAndValue(expr, typexpr, typ, default);
         switch (expr.type()) {
@@ -456,7 +456,7 @@ private static readonly @string listContainsBothNamedAndˢᵇ = "list contains b
 // variables of list and returns the list of names and corresponding
 // variables, and whether the (parameter) list is variadic.
 // Anonymous parameters are recorded with nil names.
-internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variadic) collectParams(this ж<Checker> Ꮡcheck, VarKind kind, ж<ast.FieldList> Ꮡlist) {
+internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variadic) collectParamsᴍ(ж<Checker> Ꮡcheck, VarKind kind, ж<ast.FieldList> Ꮡlist) {
     slice<ж<ast.Ident>> names = default;
     slice<ж<Var>> @params = default;
     bool variadic = default;
@@ -524,7 +524,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
 }
 
 // declareParams declares each named parameter in the current scope.
-internal static void declareParams(this ж<Checker> Ꮡcheck, slice<ж<ast.Ident>> names, slice<ж<Var>> @params, token.Pos scopePos) {
+internal static void declareParamsᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.Ident>> names, slice<ж<Var>> @params, token.Pos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     foreach (var (i, name) in range(names)) {
@@ -542,7 +542,7 @@ private static readonly @string pointerOrInterfaceTypeˢᵇ = "pointer or interf
 
 // validRecv verifies that the receiver satisfies its respective spec requirements
 // and reports an error otherwise.
-internal static void validRecv(this ж<Checker> Ꮡcheck, positioner pos, ж<Var> Ꮡrecv) {
+internal static void validRecvᴍ(ж<Checker> Ꮡcheck, positioner pos, ж<Var> Ꮡrecv) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var recv = ref Ꮡrecv.DerefOrNull();
 
@@ -613,3 +613,24 @@ internal static bool isCGoTypeObj(ж<token.FileSet> fset, ref TypeName obj) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛSignature {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Var> Recv(this ref Signature s) => types_package.Recvᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<TypeParamList> TypeParams(this ref Signature s) => types_package.TypeParamsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<TypeParamList> RecvTypeParams(this ref Signature s) => types_package.RecvTypeParamsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Tuple> Params(this ref Signature s) => types_package.Paramsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Tuple> Results(this ref Signature s) => types_package.Resultsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Variadic(this ref Signature s) => types_package.Variadicᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Signature> Ꮡs) => types_package.Underlyingᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Signature> Ꮡs) => types_package.Stringᴍ(Ꮡs);
+}
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void funcType(this ж<Checker> Ꮡcheck, ж<Signature> Ꮡsig, ж<ast.FieldList> ᏑrecvPar, ж<ast.FuncType> Ꮡftyp) => types_package.funcTypeᴍ(Ꮡcheck, Ꮡsig, ᏑrecvPar, Ꮡftyp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡcheck, ж<ast.Field> Ꮡrparam, token.Pos scopePos) => types_package.collectRecvᴍ(Ꮡcheck, Ꮡrparam, scopePos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordParenthesizedRecvTypes(this ref Checker check, ast.Expr expr, Type typ) => types_package.recordParenthesizedRecvTypesᴍ(ref check, expr, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variadic) collectParams(this ж<Checker> Ꮡcheck, VarKind kind, ж<ast.FieldList> Ꮡlist) => types_package.collectParamsᴍ(Ꮡcheck, kind, Ꮡlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declareParams(this ж<Checker> Ꮡcheck, slice<ж<ast.Ident>> names, slice<ж<Var>> @params, token.Pos scopePos) => types_package.declareParamsᴍ(Ꮡcheck, names, @params, scopePos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void validRecv(this ж<Checker> Ꮡcheck, positioner pos, ж<Var> Ꮡrecv) => types_package.validRecvᴍ(Ꮡcheck, pos, Ꮡrecv);
+}
+// </GlyphForwarders>

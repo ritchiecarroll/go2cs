@@ -17,7 +17,7 @@ using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string constantResultIsNotˢ => ref constantResultIsNotˢᵇ;
@@ -26,7 +26,7 @@ private static readonly @string constantResultIsNotˢᵇ = "constant result is n
 // overflow checks that the constant x is representable by its type.
 // For untyped constants, it checks that the value doesn't become
 // arbitrarily large.
-internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token.Pos opPos) {
+internal static void overflowᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token.Pos opPos) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     assert(x.mode == constant_);
@@ -281,11 +281,11 @@ internal static constant.Value roundFloat64(constant.Value x) {
     return default;
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // representable checks that a constant operand is representable in the given
 // basic type.
-internal static void representable(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> typ) {
+internal static void representableᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> typ) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var (v, code) = Ꮡcheck.representation(Ꮡx, typ);
@@ -302,7 +302,7 @@ internal static void representable(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
 // basic type typ.
 //
 // If no such representation is possible, it returns a non-zero error code.
-internal static (constant.Value, errors.Code) representation(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> Ꮡtyp) {
+internal static (constant.Value, errors.Code) representationᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> Ꮡtyp) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -336,7 +336,7 @@ private static readonly @string sTruncatedToSˢᵇ = "%s truncated to %s"u8;
 internal static ref readonly @string sOverflowsSˢ => ref sOverflowsSˢᵇ;
 private static readonly @string sOverflowsSˢᵇ = "%s overflows %s"u8;
 
-internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code code, ж<operand> x, Type target) {
+internal static void invalidConversionᴍ(ж<Checker> Ꮡcheck, errors.Code code, ж<operand> x, Type target) {
     @string msg = cannotConvertSToTypeSˢ;
     switch (code) {
     case var ᴛ when ᴛ == TruncatedFloat: {
@@ -351,7 +351,7 @@ internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code co
 }
 
 // convertUntyped attempts to set the type of an untyped value to the target type.
-internal static void convertUntyped(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
+internal static void convertUntypedᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -376,3 +376,13 @@ internal static void convertUntyped(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx,
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token.Pos opPos) => types_package.overflowᴍ(Ꮡcheck, Ꮡx, opPos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void representable(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> typ) => types_package.representableᴍ(Ꮡcheck, Ꮡx, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (constant.Value, errors.Code) representation(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> Ꮡtyp) => types_package.representationᴍ(Ꮡcheck, Ꮡx, Ꮡtyp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code code, ж<operand> x, Type target) => types_package.invalidConversionᴍ(Ꮡcheck, code, x, target);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void convertUntyped(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) => types_package.convertUntypedᴍ(Ꮡcheck, Ꮡx, target);
+}
+// </GlyphForwarders>

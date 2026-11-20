@@ -100,11 +100,11 @@ internal static nint /*i*/ longestCommonSuffix(@string a, @string b) {
     return i;
 }
 
-} partial class stringsᴛstringFinder {
+} partial class strings_package {
 
 // next returns the index in text of the first occurrence of the pattern. If
 // the pattern is not found, it returns -1.
-internal static nint next(this ref stringFinder f, @string text) {
+internal static nint nextᴍ(ref stringFinder f, @string text) {
     nint i = len(f.pattern) - 1;
     while (i < len(text)) {
         // Compare backwards from the end until the first unmatching character.
@@ -122,3 +122,9 @@ internal static nint next(this ref stringFinder f, @string text) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class stringsᴛstringFinder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint next(this ref stringFinder f, @string text) => strings_package.nextᴍ(ref f, text);
+}
+// </GlyphForwarders>

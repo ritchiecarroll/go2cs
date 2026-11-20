@@ -116,13 +116,13 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
     return (d, default);
 }
 
-} partial class dwarfᴛData {
+} partial class dwarf_package {
 
 // AddTypes will add one .debug_types section to the DWARF data. A
 // typical object with DWARF version 4 debug info will have multiple
 // .debug_types sections. The name is used for error reporting only,
 // and serves to distinguish one .debug_types section from another.
-public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) {
+internal static error AddTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> types) {
     return Ꮡd.parseTypes(name, types);
 }
 
@@ -130,7 +130,7 @@ public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types
 // DWARF section name such as ".debug_addr", ".debug_str_offsets", and
 // so forth. This approach is used for new DWARF sections added in
 // DWARF 5 and later.
-public static error AddSection(this ref Data d, @string name, slice<byte> contents) {
+internal static error AddSectionᴍ(ref Data d, @string name, slice<byte> contents) {
     error err = default;
     switch (ᐧ) {
     case {} when name == ".debug_addr"u8: {
@@ -154,3 +154,10 @@ public static error AddSection(this ref Data d, @string name, slice<byte> conten
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class dwarfᴛData {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) => dwarf_package.AddTypesᴍ(Ꮡd, name, types);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error AddSection(this ref Data d, @string name, slice<byte> contents) => dwarf_package.AddSectionᴍ(ref d, name, contents);
+}
+// </GlyphForwarders>

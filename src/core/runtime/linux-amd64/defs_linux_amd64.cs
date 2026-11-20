@@ -100,10 +100,10 @@ partial struct timespec {
     internal int64 tv_nsec;
 }
 
-} partial class runtimeᴛtimespec {
+} partial class runtime_package {
 
 //go:nosplit
-internal static void setNsec(this ref timespec ts, int64 ns) {
+internal static void setNsecᴍ(ref timespec ts, int64 ns) {
     ts.tv_sec = ns / 1000000000;
     ts.tv_nsec = ns % 1000000000;
 }
@@ -115,9 +115,9 @@ partial struct timeval {
     internal int64 tv_usec;
 }
 
-} partial class runtimeᴛtimeval {
+} partial class runtime_package {
 
-internal static void set_usec(this ref timeval tv, int32 x) {
+internal static void set_usecᴍ(ref timeval tv, int32 x) {
     tv.tv_usec = (int64)x;
 }
 
@@ -293,3 +293,12 @@ partial struct sockaddr_un {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛtimespec {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setNsec(this ref timespec ts, int64 ns) => runtime_package.setNsecᴍ(ref ts, ns);
+}
+partial class runtimeᴛtimeval {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set_usec(this ref timeval tv, int32 x) => runtime_package.set_usecᴍ(ref tv, x);
+}
+// </GlyphForwarders>

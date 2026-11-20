@@ -9,10 +9,10 @@ using static socktest_package;
 
 partial class socktest_package {
 
-} partial class socktestᴛSwitch {
+} partial class socktest_package {
 
 // Accept4 wraps syscall.Accept4.
-public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> Ꮡsw, nint s, nint flags) {
+internal static (nint ns, syscall.Sockaddr sa, error err) Accept4ᴍ(ж<Switch> Ꮡsw, nint s, nint flags) {
     nint ns = default;
     syscall.Sockaddr sa = default;
     error err = default;
@@ -56,3 +56,9 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> 
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class socktestᴛSwitch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> Ꮡsw, nint s, nint flags) => socktest_package.Accept4ᴍ(Ꮡsw, s, flags);
+}
+// </GlyphForwarders>

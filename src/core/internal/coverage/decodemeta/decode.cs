@@ -48,9 +48,9 @@ public static (ж<CoverageMetaDataDecoder>, error) NewCoverageMetaDataDecoder(sl
     return (x, default);
 }
 
-} partial class decodemetaᴛCoverageMetaDataDecoder {
+} partial class decodemeta_package {
 
-internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) {
+internal static error readHeaderᴍ(ж<CoverageMetaDataDecoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var err = binary.Read(new slicereader_ReaderжReader(d.r), binary.LittleEndian, Ꮡd.Ꮡhdr); if (err != nil) {
@@ -62,7 +62,7 @@ internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) {
     return default;
 }
 
-internal static error readStringTable(this ref CoverageMetaDataDecoder d) {
+internal static error readStringTableᴍ(ref CoverageMetaDataDecoder d) {
     // Seek to the correct location to read the string table.
     var stringTableLocation = (int64)((uint32)coverage.CovMetaHeaderSize + 4 * d.hdr.NumFuncs);
     var (_, err) = d.r.Seek(stringTableLocation, io.SeekStart); if (err != nil) {
@@ -75,25 +75,25 @@ internal static error readStringTable(this ref CoverageMetaDataDecoder d) {
     return default;
 }
 
-public static @string PackagePath(this ref CoverageMetaDataDecoder d) {
+internal static @string PackagePathᴍ(ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.PkgPath);
 }
 
-public static @string PackageName(this ref CoverageMetaDataDecoder d) {
+internal static @string PackageNameᴍ(ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.PkgName);
 }
 
-public static @string ModulePath(this ref CoverageMetaDataDecoder d) {
+internal static @string ModulePathᴍ(ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.ModulePath);
 }
 
-public static uint32 NumFuncs(this ref CoverageMetaDataDecoder d) {
+internal static uint32 NumFuncsᴍ(ref CoverageMetaDataDecoder d) {
     return d.hdr.NumFuncs;
 }
 
 // ReadFunc reads the coverage meta-data for the function with index
 // 'findex', filling it into the FuncDesc pointed to by 'f'.
-public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) {
+internal static error ReadFuncᴍ(ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (fidx >= d.hdr.NumFuncs) {
@@ -151,3 +151,15 @@ public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class decodemetaᴛCoverageMetaDataDecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) => decodemeta_package.readHeaderᴍ(Ꮡd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readStringTable(this ref CoverageMetaDataDecoder d) => decodemeta_package.readStringTableᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PackagePath(this ref CoverageMetaDataDecoder d) => decodemeta_package.PackagePathᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PackageName(this ref CoverageMetaDataDecoder d) => decodemeta_package.PackageNameᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string ModulePath(this ref CoverageMetaDataDecoder d) => decodemeta_package.ModulePathᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 NumFuncs(this ref CoverageMetaDataDecoder d) => decodemeta_package.NumFuncsᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) => decodemeta_package.ReadFuncᴍ(ref d, fidx, Ꮡf);
+}
+// </GlyphForwarders>

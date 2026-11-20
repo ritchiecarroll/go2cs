@@ -34,10 +34,10 @@ public static ж<P224Point> NewP224Point() {
     ));
 }
 
-} partial class nistecᴛP224Point {
+} partial class nistec_package {
 
 // SetGenerator sets p to the canonical generator and returns p.
-public static ж<P224Point> SetGenerator(this ж<P224Point> Ꮡp) {
+internal static ж<P224Point> SetGeneratorᴍ(ж<P224Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.x.SetBytes([0xb7, 0xe, 0xc, 0xbd, 0x6b, 0xb4, 0xbf, 0x7f, 0x32, 0x13, 0x90, 0xb9, 0x4a, 0x3, 0xc1, 0xd3, 0x56, 0xc2, 0x11, 0x22, 0x34, 0x32, 0x80, 0xd6, 0x11, 0x5c, 0x1d, 0x21]);
@@ -47,7 +47,7 @@ public static ж<P224Point> SetGenerator(this ж<P224Point> Ꮡp) {
 }
 
 // Set sets p = q and returns p.
-public static ж<P224Point> Set(this ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) {
+internal static ж<P224Point> Setᴍ(ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -67,7 +67,7 @@ private static readonly @string invalidP224PointEncodingˢᵇ = "invalid P224 po
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-public static (ж<P224Point>, error) SetBytes(this ж<P224Point> Ꮡp, slice<byte> b) {
+internal static (ж<P224Point>, error) SetBytesᴍ(ж<P224Point> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -162,19 +162,19 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> x, ж<fiat.P224Eleme
     return default;
 }
 
-} partial class nistecᴛP224Point {
+} partial class nistec_package {
 
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-public static slice<byte> Bytes(this ref P224Point p) {
+internal static slice<byte> Bytesᴍ(ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(57), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytes(this ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesᴍ(ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -193,7 +193,7 @@ internal static slice<byte> bytes(this ref P224Point p, /*[57]*/ ж<array<byte>>
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-public static (slice<byte>, error) BytesX(this ref P224Point p) {
+internal static (slice<byte>, error) BytesXᴍ(ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(28), out var Ꮡout);
@@ -204,7 +204,7 @@ public static (slice<byte>, error) BytesX(this ref P224Point p) {
 internal static ref readonly @string p224PointIsThePointAtˢ => ref p224PointIsThePointAtˢᵇ;
 private static readonly @string p224PointIsThePointAtˢᵇ = "P224 point is the point at infinity"u8;
 
-internal static (slice<byte>, error) bytesX(this ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesXᴍ(ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -220,14 +220,14 @@ internal static (slice<byte>, error) bytesX(this ref P224Point p, /*[28]*/ ж<ar
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-public static slice<byte> BytesCompressed(this ref P224Point p) {
+internal static slice<byte> BytesCompressedᴍ(ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(29), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressedᴍ(ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -247,7 +247,7 @@ internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<ar
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-public static ж<P224Point> Add(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2) {
+internal static ж<P224Point> Addᴍ(ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -306,7 +306,7 @@ public static ж<P224Point> Add(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-public static ж<P224Point> Double(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) {
+internal static ж<P224Point> Doubleᴍ(ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -355,7 +355,7 @@ public static ж<P224Point> Double(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) 
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2, nint cond) {
+internal static ж<P224Point> Selectᴍ(ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2, nint cond) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -373,11 +373,11 @@ public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1,
 // point.
 partial struct p224Table /*[15]ж<P224Point>*/;
 
-} partial class nistecᴛp224Table {
+} partial class nistec_package {
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-internal static void Select(this ref p224Table table, ж<P224Point> p, uint8 n) {
+internal static void Selectᴍ(ref p224Table table, ж<P224Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p224Table called with out-of-bounds value");
     }
@@ -388,10 +388,10 @@ internal static void Select(this ref p224Table table, ж<P224Point> p, uint8 n) 
     }
 }
 
-} partial class nistecᴛP224Point {
+} partial class nistec_package {
 
 // ScalarMult sets p = scalar * q, and returns p.
-public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224Point> q, slice<byte> scalar) {
+internal static (ж<P224Point>, error) ScalarMultᴍ(ж<P224Point> Ꮡp, ж<P224Point> q, slice<byte> scalar) {
     // Compute a p224Table for the base point q. The explicit NewP224Point
     // calls get inlined, letting the allocations live on the stack.
     p224Table table = new p224Table(new ж<P224Point>[]{NewP224Point(), NewP224Point(), NewP224Point(),
@@ -441,12 +441,12 @@ internal static ж<array<p224Table>> p224GeneratorTable;
 internal static readonly ж<sync.Once> Ꮡp224GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p224GeneratorTableOnce => ref ((StaticBox<sync.Once>)Ꮡp224GeneratorTableOnce).ValueSlot;
 
-} partial class nistecᴛP224Point {
+} partial class nistec_package {
 
 // generatorTable returns a sequence of p224Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-internal static ж<array<p224Table>> generatorTable(this ref P224Point p) {
+internal static ж<array<p224Table>> generatorTableᴍ(ref P224Point p) {
     Ꮡp224GeneratorTableOnce.Do(() => {
         p224GeneratorTable = Ꮡ(new array<p224Table>(56));
         var @base = NewP224Point().SetGenerator();
@@ -470,7 +470,7 @@ private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar lengt
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
-public static (ж<P224Point>, error) ScalarBaseMult(this ж<P224Point> Ꮡp, slice<byte> scalar) {
+internal static (ж<P224Point>, error) ScalarBaseMultᴍ(ж<P224Point> Ꮡp, slice<byte> scalar) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p224ElementLength) {
@@ -518,3 +518,26 @@ internal static bool /*isSquare*/ p224Sqrt(ж<fiat.P224Element> e, ж<fiat.P224E
 }
 
 } // end nistec_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class nistecᴛP224Point {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Point> SetGenerator(this ж<P224Point> Ꮡp) => nistec_package.SetGeneratorᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Point> Set(this ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) => nistec_package.Setᴍ(Ꮡp, Ꮡq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P224Point>, error) SetBytes(this ж<P224Point> Ꮡp, slice<byte> b) => nistec_package.SetBytesᴍ(Ꮡp, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref P224Point p) => nistec_package.Bytesᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesᴍ(ref p, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) BytesX(this ref P224Point p) => nistec_package.BytesXᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) bytesX(this ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesXᴍ(ref p, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> BytesCompressed(this ref P224Point p) => nistec_package.BytesCompressedᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesCompressedᴍ(ref p, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Point> Add(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2) => nistec_package.Addᴍ(Ꮡq, Ꮡp1, Ꮡp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Point> Double(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) => nistec_package.Doubleᴍ(Ꮡq, Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2, nint cond) => nistec_package.Selectᴍ(Ꮡq, Ꮡp1, Ꮡp2, cond);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224Point> q, slice<byte> scalar) => nistec_package.ScalarMultᴍ(Ꮡp, q, scalar);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<array<p224Table>> generatorTable(this ref P224Point p) => nistec_package.generatorTableᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P224Point>, error) ScalarBaseMult(this ж<P224Point> Ꮡp, slice<byte> scalar) => nistec_package.ScalarBaseMultᴍ(Ꮡp, scalar);
+}
+partial class nistecᴛp224Table {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Select(this ref p224Table table, ж<P224Point> p, uint8 n) => nistec_package.Selectᴍ(ref table, p, n);
+}
+// </GlyphForwarders>

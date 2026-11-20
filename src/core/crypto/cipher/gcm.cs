@@ -121,17 +121,17 @@ partial struct gcmWithRandomNonce {
     /*embed*/ public ж<crypto.@internal.fips140.aes.gcm_package.GCM> GCM;
 }
 
-} partial class cipherᴛgcmWithRandomNonce {
+} partial class cipher_package {
 
-internal static nint NonceSize(this gcmWithRandomNonce g) {
+internal static nint NonceSizeᴍ(gcmWithRandomNonce g) {
     return 0;
 }
 
-internal static nint Overhead(this gcmWithRandomNonce g) {
+internal static nint Overheadᴍ(gcmWithRandomNonce g) {
     return gcmStandardNonceSize + gcmTagSize;
 }
 
-internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Sealᴍ(gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != 0) {
         throw panic("crypto/cipher: non-empty nonce passed to GCMWithRandomNonce");
     }
@@ -178,7 +178,7 @@ internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, sli
     return ret;
 }
 
-internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Openᴍ(gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != 0) {
         throw panic("crypto/cipher: non-empty nonce passed to GCMWithRandomNonce");
     }
@@ -256,17 +256,17 @@ partial struct gcmFallback {
     internal nint tagSize;
 }
 
-} partial class cipherᴛgcmFallback {
+} partial class cipher_package {
 
-internal static nint NonceSize(this ref gcmFallback g) {
+internal static nint NonceSizeᴍ(ref gcmFallback g) {
     return g.nonceSize;
 }
 
-internal static nint Overhead(this ref gcmFallback g) {
+internal static nint Overheadᴍ(ref gcmFallback g) {
     return g.tagSize;
 }
 
-internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Sealᴍ(ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != g.nonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
@@ -305,9 +305,9 @@ internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<
 
 internal static error errOpen = errors.New("cipher: message authentication failed");
 
-} partial class cipherᴛgcmFallback {
+} partial class cipher_package {
 
-internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Openᴍ(ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != g.nonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
@@ -427,3 +427,18 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 }
 
 } // end cipher_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class cipherᴛgcmWithRandomNonce {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NonceSize(this gcmWithRandomNonce g) => cipher_package.NonceSizeᴍ(g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Overhead(this gcmWithRandomNonce g) => cipher_package.Overheadᴍ(g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => cipher_package.Sealᴍ(g, dst, nonce, plaintext, additionalData);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => cipher_package.Openᴍ(g, dst, nonce, ciphertext, additionalData);
+}
+partial class cipherᴛgcmFallback {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NonceSize(this ref gcmFallback g) => cipher_package.NonceSizeᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Overhead(this ref gcmFallback g) => cipher_package.Overheadᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => cipher_package.Sealᴍ(ref g, dst, nonce, plaintext, additionalData);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => cipher_package.Openᴍ(ref g, dst, nonce, ciphertext, additionalData);
+}
+// </GlyphForwarders>

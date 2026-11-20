@@ -40,9 +40,9 @@ partial struct fileInfo {
 
 internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
 
-} partial class gcimporterᴛfakeFileSet {
+} partial class gcimporter_package {
 
-internal static token.Pos pos(this ref fakeFileSet s, @string @file, nint line, nint column) {
+internal static token.Pos posᴍ(ref fakeFileSet s, @string @file, nint line, nint column) {
     // TODO(mdempsky): Make use of column.
 
     // Since we don't know the set of needed file positions, we reserve
@@ -66,7 +66,7 @@ internal static token.Pos pos(this ref fakeFileSet s, @string @file, nint line, 
     return (token.Pos)(f.@file.Base() + line - 1);
 }
 
-internal static void setLines(this ref fakeFileSet s) {
+internal static void setLinesᴍ(ref fakeFileSet s) {
     ᏑfakeLinesOnce.Do(() => {
         fakeLines = new slice<nint>(maxlines);
         foreach (var i in range(len(fakeLines))) {
@@ -115,3 +115,10 @@ internal static (@string @base, @string suffix) splitVargenSuffix(@string name) 
 }
 
 } // end gcimporter_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gcimporterᴛfakeFileSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos pos(this ref fakeFileSet s, @string @file, nint line, nint column) => gcimporter_package.posᴍ(ref s, @file, line, column);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setLines(this ref fakeFileSet s) => gcimporter_package.setLinesᴍ(ref s);
+}
+// </GlyphForwarders>

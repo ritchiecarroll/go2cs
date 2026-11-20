@@ -14,19 +14,19 @@ partial struct TypeParamList {
     internal slice<ж<TypeParam>> tparams;
 }
 
-} partial class typesᴛTypeParamList {
+} partial class types_package {
 
 // Len returns the number of type parameters in the list.
 // It is safe to call on a nil receiver.
-public static nint Len(this ж<TypeParamList> Ꮡl) { return len(Ꮡl.list()); }
+internal static nint Lenᴍ(ж<TypeParamList> Ꮡl) { return len(Ꮡl.list()); }
 
 // At returns the i'th type parameter in the list.
-public static ж<TypeParam> At(this ref TypeParamList l, nint i) { return l.tparams[i]; }
+internal static ж<TypeParam> Atᴍ(ref TypeParamList l, nint i) { return l.tparams[i]; }
 
 // list is for internal use where we expect a []*TypeParam.
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeParamList instead.
-internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) {
+internal static slice<ж<TypeParam>> listᴍ(ж<TypeParamList> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (Ꮡl == nil) {
@@ -50,19 +50,19 @@ internal static ж<TypeList> newTypeList(slice<Type> list) {
     return Ꮡ(new TypeList(list));
 }
 
-} partial class typesᴛTypeList {
+} partial class types_package {
 
 // Len returns the number of types in the list.
 // It is safe to call on a nil receiver.
-public static nint Len(this ж<TypeList> Ꮡl) { return len(Ꮡl.list()); }
+internal static nint Lenᴍ(ж<TypeList> Ꮡl) { return len(Ꮡl.list()); }
 
 // At returns the i'th type in the list.
-public static Type At(this ref TypeList l, nint i) { return l.types[i]; }
+internal static Type Atᴍ(ref TypeList l, nint i) { return l.types[i]; }
 
 // list is for internal use where we expect a []Type.
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeList instead.
-internal static slice<Type> list(this ж<TypeList> Ꮡl) {
+internal static slice<Type> listᴍ(ж<TypeList> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (Ꮡl == nil) {
@@ -89,3 +89,16 @@ internal static ж<TypeParamList> bindTParams(slice<ж<TypeParam>> list) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛTypeParamList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ж<TypeParamList> Ꮡl) => types_package.Lenᴍ(Ꮡl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<TypeParam> At(this ref TypeParamList l, nint i) => types_package.Atᴍ(ref l, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) => types_package.listᴍ(Ꮡl);
+}
+partial class typesᴛTypeList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ж<TypeList> Ꮡl) => types_package.Lenᴍ(Ꮡl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type At(this ref TypeList l, nint i) => types_package.Atᴍ(ref l, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Type> list(this ж<TypeList> Ꮡl) => types_package.listᴍ(Ꮡl);
+}
+// </GlyphForwarders>

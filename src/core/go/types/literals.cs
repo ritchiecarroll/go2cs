@@ -17,11 +17,11 @@ using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // langCompat reports an error if the representation of a numeric
 // literal is not compatible with the current language version.
-internal static void langCompat(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡlit) {
+internal static void langCompatᴍ(ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡlit) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var lit = ref Ꮡlit.DerefOrNull();
 
@@ -51,7 +51,7 @@ internal static void langCompat(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡl
     }
 }
 
-internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.BasicLit> Ꮡe) {
+internal static void basicLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.BasicLit> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -94,7 +94,7 @@ internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
 internal static ref readonly @string functionLiteralˢ => ref functionLiteralˢᵇ;
 private static readonly @string functionLiteralˢᵇ = "<function literal>"u8;
 
-internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.FuncLit> Ꮡe) {
+internal static void funcLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.FuncLit> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -147,7 +147,7 @@ private static readonly @string elementˢᵇ = " element"u8;
 internal static ref readonly @string noCommonUnderlyingTypeˢ => ref noCommonUnderlyingTypeˢᵇ;
 private static readonly @string noCommonUnderlyingTypeˢᵇ = " (no common underlying type)"u8;
 
-internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, Type hint) {
+internal static void compositeLitᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, Type hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -384,7 +384,7 @@ private static readonly @string arrayOrSliceLiteralˢᵇ = "array or slice liter
 // against the literal's element type (typ), and the element indices against
 // the literal length if known (length >= 0). It returns the length of the
 // literal (maximum index value + 1).
-internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elts, Type typ, int64 length) {
+internal static int64 indexedEltsᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> elts, Type typ, int64 length) {
     var visited = new map<int64, bool>(len(elts));
     int64 index = default;
     int64 max = default;
@@ -429,3 +429,13 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void langCompat(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡlit) => types_package.langCompatᴍ(Ꮡcheck, Ꮡlit);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.BasicLit> Ꮡe) => types_package.basicLitᴍ(Ꮡcheck, Ꮡx, Ꮡe);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.FuncLit> Ꮡe) => types_package.funcLitᴍ(Ꮡcheck, Ꮡx, Ꮡe);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, Type hint) => types_package.compositeLitᴍ(Ꮡcheck, Ꮡx, Ꮡe, hint);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elts, Type typ, int64 length) => types_package.indexedEltsᴍ(Ꮡcheck, elts, typ, length);
+}
+// </GlyphForwarders>

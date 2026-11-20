@@ -40,13 +40,13 @@ internal static nat natTwo = new nat(new Word[]{2}.slice());
 internal static nat natFive = new nat(new Word[]{5}.slice());
 internal static nat natTen = new nat(new Word[]{10}.slice());
 
-} partial class bigᴛnat {
+} partial class big_package {
 
-internal static @string String(this nat z) {
+internal static @string Stringᴍ(nat z) {
     return "0x"u8 + ((sstring)z.itoa(false, 16));
 }
 
-internal static nat norm(this nat z) {
+internal static nat normᴍ(nat z) {
     nint i = len(z);
     while (i > 0 && z[i - 1] == 0) {
         i--;
@@ -54,7 +54,7 @@ internal static nat norm(this nat z) {
     return z.slice(0, i);
 }
 
-internal static nat make(this nat z, nint n) {
+internal static nat makeᴍ(nat z, nint n) {
     if (n <= cap(z)) {
         return z.slice(0, n); // reuse z
     }
@@ -68,7 +68,7 @@ internal static nat make(this nat z, nint n) {
     return new nat(n, n + e);
 }
 
-internal static nat setWord(this nat z, Word x) {
+internal static nat setWordᴍ(nat z, Word x) {
     if (x == 0) {
         return z[..0];
     }
@@ -77,7 +77,7 @@ internal static nat setWord(this nat z, Word x) {
     return z;
 }
 
-internal static nat setUint64(this nat z, uint64 x) {
+internal static nat setUint64ᴍ(nat z, uint64 x) {
     // single-word value
     Word w = (Word)(nuint)x; if ((uint64)w == x) {
         return z.setWord(w);
@@ -89,13 +89,13 @@ internal static nat setUint64(this nat z, uint64 x) {
     return z;
 }
 
-internal static nat set(this nat z, nat x) {
+internal static nat setᴍ(nat z, nat x) {
     z = z.make(len(x));
     copy(z, x);
     return z;
 }
 
-internal static nat add(this nat z, nat x, nat y) {
+internal static nat addᴍ(nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
 
@@ -123,7 +123,7 @@ internal static nat add(this nat z, nat x, nat y) {
     return z.norm();
 }
 
-internal static nat sub(this nat z, nat x, nat y) {
+internal static nat subᴍ(nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
 
@@ -154,7 +154,7 @@ internal static nat sub(this nat z, nat x, nat y) {
     return z.norm();
 }
 
-internal static nint /*r*/ cmp(this nat x, nat y) {
+internal static nint /*r*/ cmpᴍ(nat x, nat y) {
     nint r = default;
 
     nint m = len(x);
@@ -198,7 +198,7 @@ internal static nint /*r*/ cmp(this nat x, nat y) {
 // In the terminology of that paper, this is an "Almost Montgomery Multiplication":
 // x and y are required to satisfy 0 <= z < 2**(n*_W) and then the result
 // z is guaranteed to satisfy 0 <= z < 2**(n*_W), but it may not be < m.
-internal static nat montgomery(this nat z, nat x, nat y, nat m, Word k, nint n) {
+internal static nat montgomeryᴍ(nat z, nat x, nat y, nat m, Word k, nint n) {
     // This code assumes x, y, m are all the same length, n.
     // (required by addMulVVW and the for loop).
     // It also assumes that x, y are already reduced mod m,
@@ -256,12 +256,12 @@ internal static void addTo(nat z, nat x) {
     }
 }
 
-} partial class bigᴛnat {
+} partial class big_package {
 
 // mulRange computes the product of all the unsigned integers in the
 // range [a, b] inclusively. If a > b (empty range), the result is 1.
 // The caller may pass stk == nil to request that mulRange obtain and release one itself.
-internal static nat mulRange(this nat z, ж<stack> Ꮡstk, uint64 a, uint64 b) {
+internal static nat mulRangeᴍ(nat z, ж<stack> Ꮡstk, uint64 a, uint64 b) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -321,10 +321,10 @@ internal static ж<stack> getStack() {
     return s;
 }
 
-} partial class bigᴛstack {
+} partial class big_package {
 
 // free returns the stack for use by another calculation.
-internal static void free(this ж<stack> Ꮡs) {
+internal static void freeᴍ(ж<stack> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.w = s.w[..0];
@@ -334,7 +334,7 @@ internal static void free(this ж<stack> Ꮡs) {
 // save returns the current stack pointer.
 // A future call to restore with the same value
 // frees any temporaries allocated on the stack after the call to save.
-internal static nint save(this ref stack s) {
+internal static nint saveᴍ(ref stack s) {
     return len(s.w);
 }
 
@@ -345,12 +345,12 @@ internal static nint save(this ref stack s) {
 //
 // which makes sure to pop any temporaries allocated in the current function
 // from the stack before returning.
-internal static void restore(this ref stack s, nint n) {
+internal static void restoreᴍ(ref stack s, nint n) {
     s.w = s.w.slice(0, n);
 }
 
 // nat returns a nat of n words, allocated on the stack.
-internal static nat nat(this ref stack s, nint n) {
+internal static nat natᴍ(ref stack s, nint n) {
     nint nr = (n + 3) & ~(nint)3; // round up to multiple of 4
     nint off = len(s.w);
     s.w = slices.Grow<slice<Word>, Word>(s.w, nr);
@@ -362,11 +362,11 @@ internal static nat nat(this ref stack s, nint n) {
     return x;
 }
 
-} partial class bigᴛnat {
+} partial class big_package {
 
 // bitLen returns the length of x in bits.
 // Unlike most methods, it works even if x is not normalized.
-internal static nint bitLen(this nat x) {
+internal static nint bitLenᴍ(nat x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -388,7 +388,7 @@ internal static nint bitLen(this nat x) {
 
 // trailingZeroBits returns the number of consecutive least significant zero
 // bits of x.
-internal static nuint trailingZeroBits(this nat x) {
+internal static nuint trailingZeroBitsᴍ(nat x) {
     if (len(x) == 0) {
         return 0;
     }
@@ -401,7 +401,7 @@ internal static nuint trailingZeroBits(this nat x) {
 }
 
 // isPow2 returns i, true when x == 2**i and 0, false otherwise.
-internal static (nuint, bool) isPow2(this nat x) {
+internal static (nuint, bool) isPow2ᴍ(nat x) {
     nuint i = default;
     while (x[i] == 0) {
         i++;
@@ -418,10 +418,10 @@ internal static bool same(nat x, nat y) {
     return len(x) == len(y) && len(x) > 0 && Ꮡelem<Word>(x, 0) == Ꮡelem<Word>(y, 0);
 }
 
-} partial class bigᴛnat {
+} partial class big_package {
 
 // z = x << s
-internal static nat lsh(this nat z, nat x, nuint s) {
+internal static nat lshᴍ(nat z, nat x, nuint s) {
     if (s == 0) {
         if (same(z, x)) {
             return z;
@@ -451,7 +451,7 @@ internal static nat lsh(this nat z, nat x, nuint s) {
 }
 
 // z = x >> s
-internal static nat rsh(this nat z, nat x, nuint s) {
+internal static nat rshᴍ(nat z, nat x, nuint s) {
     if (s == 0) {
         if (same(z, x)) {
             return z;
@@ -478,7 +478,7 @@ internal static nat rsh(this nat z, nat x, nuint s) {
     return z.norm();
 }
 
-internal static nat setBit(this nat z, nat x, nuint i, nuint b) {
+internal static nat setBitᴍ(nat z, nat x, nuint i, nuint b) {
     nint j = (nint)(i / (nuint)_W);
     Word m = ((Word)1) << (int)(i % (nuint)_W);
     nint n = len(x);
@@ -509,7 +509,7 @@ internal static nat setBit(this nat z, nat x, nuint i, nuint b) {
 }
 
 // bit returns the value of the i'th bit, with lsb == bit 0.
-internal static nuint bit(this nat x, nuint i) {
+internal static nuint bitᴍ(nat x, nuint i) {
     nuint j = i / (nuint)_W;
     if (j >= (nuint)len(x)) {
         return 0;
@@ -520,7 +520,7 @@ internal static nuint bit(this nat x, nuint i) {
 
 // sticky returns 1 if there's a 1 bit within the
 // i least significant bits, otherwise it returns 0.
-internal static nuint sticky(this nat x, nuint i) {
+internal static nuint stickyᴍ(nat x, nuint i) {
     nuint j = i / (nuint)_W;
     if (j >= (nuint)len(x)) {
         if (len(x) == 0) {
@@ -540,7 +540,7 @@ internal static nuint sticky(this nat x, nuint i) {
     return 0;
 }
 
-internal static nat and(this nat z, nat x, nat y) {
+internal static nat andᴍ(nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     if (m > n) {
@@ -557,7 +557,7 @@ internal static nat and(this nat z, nat x, nat y) {
 }
 
 // trunc returns z = x mod 2ⁿ.
-internal static nat trunc(this nat z, nat x, nuint n) {
+internal static nat truncᴍ(nat z, nat x, nuint n) {
     nuint w = (n + (nuint)_W - 1) / (nuint)_W;
     if ((nuint)len(x) < w) {
         return z.set(x);
@@ -570,7 +570,7 @@ internal static nat trunc(this nat z, nat x, nuint n) {
     return z.norm();
 }
 
-internal static nat andNot(this nat z, nat x, nat y) {
+internal static nat andNotᴍ(nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     if (n > m) {
@@ -587,7 +587,7 @@ internal static nat andNot(this nat z, nat x, nat y) {
     return z.norm();
 }
 
-internal static nat or(this nat z, nat x, nat y) {
+internal static nat orᴍ(nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     var s = x;
@@ -606,7 +606,7 @@ internal static nat or(this nat z, nat x, nat y) {
     return z.norm();
 }
 
-internal static nat xor(this nat z, nat x, nat y) {
+internal static nat xorᴍ(nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     var s = x;
@@ -627,7 +627,7 @@ internal static nat xor(this nat z, nat x, nat y) {
 
 // random creates a random integer in [0..limit), using the space in z if
 // possible. n is the bit length of limit.
-internal static nat random(this nat z, ж<rand.Rand> Ꮡrand, nat limit, nint n) {
+internal static nat randomᴍ(nat z, ж<rand.Rand> Ꮡrand, nat limit, nint n) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     if (alias(z, limit)) {
@@ -671,7 +671,7 @@ internal static nat random(this nat z, ж<rand.Rand> Ꮡrand, nat limit, nint n)
 // If m != 0 (i.e., len(m) != 0), expNN sets z to x**y mod m;
 // otherwise it sets z to x**y. The result is the value of z.
 // The caller may pass stk == nil to request that expNN obtain and release one itself.
-internal static nat expNN(this nat z, ж<stack> Ꮡstk, nat x, nat y, nat m, bool slow) {
+internal static nat expNNᴍ(nat z, ж<stack> Ꮡstk, nat x, nat y, nat m, bool slow) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -808,7 +808,7 @@ internal static nat expNN(this nat z, ж<stack> Ꮡstk, nat x, nat y, nat m, boo
 // For more details, see Ç. K. Koç, “Montgomery Reduction with Even Modulus”,
 // IEE Proceedings: Computers and Digital Techniques, 141(5) 314-316, September 1994.
 // http://www.people.vcu.edu/~jwang3/CMSC691/j34monex.pdf
-internal static nat expNNMontgomeryEven(this nat z, ж<stack> stk, nat x, nat y, nat m) {
+internal static nat expNNMontgomeryEvenᴍ(nat z, ж<stack> stk, nat x, nat y, nat m) {
     // Split m = m₁ × m₂ where m₁ = 2ⁿ
     nuint n = m.trailingZeroBits();
     var m1 = ((nat)default).lsh(natOne, n);
@@ -851,7 +851,7 @@ internal static nat expNNMontgomeryEven(this nat z, ж<stack> stk, nat x, nat y,
 
 // expNNWindowed calculates x**y mod m using a fixed, 4-bit window,
 // where m = 2**logM.
-internal static nat expNNWindowed(this nat z, ж<stack> Ꮡstk, nat x, nat y, nuint logM) {
+internal static nat expNNWindowedᴍ(nat z, ж<stack> Ꮡstk, nat x, nat y, nuint logM) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -951,7 +951,7 @@ internal static nat expNNWindowed(this nat z, ж<stack> Ꮡstk, nat x, nat y, nu
 
 // expNNMontgomery calculates x**y mod m using a fixed, 4-bit window.
 // Uses Montgomery representation.
-internal static nat expNNMontgomery(this nat z, ж<stack> stk, nat x, nat y, nat m) {
+internal static nat expNNMontgomeryᴍ(nat z, ж<stack> stk, nat x, nat y, nat m) {
     nint numWords = len(m);
 
     // We want the lengths of x and m to be equal.
@@ -1046,7 +1046,7 @@ internal static nat expNNMontgomery(this nat z, ж<stack> stk, nat x, nat y, nat
 // The value of z is encoded in the slice buf[i:]. If the value of z
 // cannot be represented in buf, bytes panics. The number i of unused
 // bytes at the beginning of buf is returned as result.
-internal static nint /*i*/ bytes(this nat z, slice<byte> buf) {
+internal static nint /*i*/ bytesᴍ(nat z, slice<byte> buf) {
     nint i = default;
 
     // This function is used in cryptographic operations. It must not leak
@@ -1087,11 +1087,11 @@ internal static Word bigEndianWord(slice<byte> buf) {
     return (Word)(nuint)byteorder.BEUint32(buf);
 }
 
-} partial class bigᴛnat {
+} partial class big_package {
 
 // setBytes interprets buf as the bytes of a big-endian unsigned
 // integer, sets z to that value, and returns z.
-internal static nat setBytes(this nat z, slice<byte> buf) {
+internal static nat setBytesᴍ(nat z, slice<byte> buf) {
     z = z.make((len(buf) + (nint)_S - 1) / (nint)_S);
 
     nint i = len(buf);
@@ -1113,7 +1113,7 @@ internal static nat setBytes(this nat z, slice<byte> buf) {
 
 // sqrt sets z = ⌊√x⌋
 // The caller may pass stk == nil to request that sqrt obtain and release one itself.
-internal static nat sqrt(this nat z, ж<stack> Ꮡstk, nat x) {
+internal static nat sqrtᴍ(nat z, ж<stack> Ꮡstk, nat x) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -1160,7 +1160,7 @@ internal static nat sqrt(this nat z, ж<stack> Ꮡstk, nat x) {
 }
 
 // subMod2N returns z = (x - y) mod 2ⁿ.
-internal static nat subMod2N(this nat z, nat x, nat y, nuint n) {
+internal static nat subMod2Nᴍ(nat z, nat x, nat y, nuint n) {
     if ((nuint)x.bitLen() > n) {
         if (alias(z, x)) {
             // ok to overwrite x in place
@@ -1193,3 +1193,47 @@ internal static nat subMod2N(this nat z, nat x, nat y, nuint n) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bigᴛnat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this nat z) => big_package.Stringᴍ(z);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat norm(this nat z) => big_package.normᴍ(z);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat make(this nat z, nint n) => big_package.makeᴍ(z, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat setWord(this nat z, Word x) => big_package.setWordᴍ(z, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat setUint64(this nat z, uint64 x) => big_package.setUint64ᴍ(z, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat set(this nat z, nat x) => big_package.setᴍ(z, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat add(this nat z, nat x, nat y) => big_package.addᴍ(z, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat sub(this nat z, nat x, nat y) => big_package.subᴍ(z, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*r*/ cmp(this nat x, nat y) => big_package.cmpᴍ(x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat montgomery(this nat z, nat x, nat y, nat m, Word k, nint n) => big_package.montgomeryᴍ(z, x, y, m, k, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat mulRange(this nat z, ж<stack> Ꮡstk, uint64 a, uint64 b) => big_package.mulRangeᴍ(z, Ꮡstk, a, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint bitLen(this nat x) => big_package.bitLenᴍ(x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint trailingZeroBits(this nat x) => big_package.trailingZeroBitsᴍ(x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nuint, bool) isPow2(this nat x) => big_package.isPow2ᴍ(x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat lsh(this nat z, nat x, nuint s) => big_package.lshᴍ(z, x, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat rsh(this nat z, nat x, nuint s) => big_package.rshᴍ(z, x, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat setBit(this nat z, nat x, nuint i, nuint b) => big_package.setBitᴍ(z, x, i, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint bit(this nat x, nuint i) => big_package.bitᴍ(x, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint sticky(this nat x, nuint i) => big_package.stickyᴍ(x, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat and(this nat z, nat x, nat y) => big_package.andᴍ(z, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat trunc(this nat z, nat x, nuint n) => big_package.truncᴍ(z, x, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat andNot(this nat z, nat x, nat y) => big_package.andNotᴍ(z, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat or(this nat z, nat x, nat y) => big_package.orᴍ(z, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat xor(this nat z, nat x, nat y) => big_package.xorᴍ(z, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat random(this nat z, ж<rand.Rand> Ꮡrand, nat limit, nint n) => big_package.randomᴍ(z, Ꮡrand, limit, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat expNN(this nat z, ж<stack> Ꮡstk, nat x, nat y, nat m, bool slow) => big_package.expNNᴍ(z, Ꮡstk, x, y, m, slow);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat expNNMontgomeryEven(this nat z, ж<stack> stk, nat x, nat y, nat m) => big_package.expNNMontgomeryEvenᴍ(z, stk, x, y, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat expNNWindowed(this nat z, ж<stack> Ꮡstk, nat x, nat y, nuint logM) => big_package.expNNWindowedᴍ(z, Ꮡstk, x, y, logM);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat expNNMontgomery(this nat z, ж<stack> stk, nat x, nat y, nat m) => big_package.expNNMontgomeryᴍ(z, stk, x, y, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*i*/ bytes(this nat z, slice<byte> buf) => big_package.bytesᴍ(z, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat setBytes(this nat z, slice<byte> buf) => big_package.setBytesᴍ(z, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat sqrt(this nat z, ж<stack> Ꮡstk, nat x) => big_package.sqrtᴍ(z, Ꮡstk, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat subMod2N(this nat z, nat x, nat y, nuint n) => big_package.subMod2Nᴍ(z, x, y, n);
+}
+partial class bigᴛstack {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ж<stack> Ꮡs) => big_package.freeᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint save(this ref stack s) => big_package.saveᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void restore(this ref stack s, nint n) => big_package.restoreᴍ(ref s, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat nat(this ref stack s, nint n) => big_package.natᴍ(ref s, n);
+}
+// </GlyphForwarders>

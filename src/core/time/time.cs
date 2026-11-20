@@ -168,19 +168,19 @@ internal const int64 minWall = /* wallToInternal */ 59453308800;               /
 internal static UntypedInt nsecMask => /* 1<<30 - 1 */ 1073741823;
 internal static UntypedInt nsecShift => 30;
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // These helpers for manipulating the wall and monotonic clock readings
 // take pointer receivers, even when they don't modify the time,
 // to make them cheaper to call.
 
 // nsec returns the time's nanoseconds.
-internal static int32 nsec(this ref Time t) {
+internal static int32 nsecᴍ(ref Time t) {
     return (int32)(t.wall & (uint64)nsecMask);
 }
 
 // sec returns the time's seconds since Jan 1 year 1.
-internal static int64 sec(this ref Time t) {
+internal static int64 secᴍ(ref Time t) {
     if ((t.wall & (uint64)hasMonotonic) != 0) {
         return wallToInternal + (int64)((t.wall << 1) >> (int)(nsecShift + 1));
     }
@@ -188,10 +188,10 @@ internal static int64 sec(this ref Time t) {
 }
 
 // unixSec returns the time's seconds since Jan 1 1970 (Unix time).
-internal static int64 unixSec(this ref Time t) { return t.sec() + internalToUnix; }
+internal static int64 unixSecᴍ(ref Time t) { return t.sec() + internalToUnix; }
 
 // addSec adds d seconds to the time.
-internal static void addSec(this ref Time t, int64 d) {
+internal static void addSecᴍ(ref Time t, int64 d) {
     if ((t.wall & (uint64)hasMonotonic) != 0) {
         var sec = (int64)((t.wall << 1) >> (int)(nsecShift + 1));
         var dsec = sec + d;
@@ -216,7 +216,7 @@ internal static void addSec(this ref Time t, int64 d) {
 }
 
 // setLoc sets the location associated with the time.
-internal static void setLoc(this ref Time t, ж<Location> Ꮡloc) {
+internal static void setLocᴍ(ref Time t, ж<Location> Ꮡloc) {
     ref var loc = ref Ꮡloc.DerefOrNull();
 
     if (Ꮡloc == ᏑutcLoc) {
@@ -227,7 +227,7 @@ internal static void setLoc(this ref Time t, ж<Location> Ꮡloc) {
 }
 
 // stripMono strips the monotonic clock reading in t.
-internal static void stripMono(this ref Time t) {
+internal static void stripMonoᴍ(ref Time t) {
     if ((t.wall & (uint64)hasMonotonic) != 0) {
         t.ext = t.sec();
         t.wall &= (uint64)(nsecMask);
@@ -238,7 +238,7 @@ internal static void stripMono(this ref Time t) {
 // If t cannot hold a monotonic clock reading,
 // because its wall time is too large,
 // setMono is a no-op.
-internal static void setMono(this ref Time t, int64 m) {
+internal static void setMonoᴍ(ref Time t, int64 m) {
     if ((t.wall & (uint64)hasMonotonic) == 0) {
         var sec = t.ext;
         if (sec < minWall || maxWall < sec) {
@@ -254,7 +254,7 @@ internal static void setMono(this ref Time t, int64 m) {
 // This function is used only for testing,
 // so it's OK that technically 0 is a valid
 // monotonic clock reading as well.
-internal static int64 mono(this ref Time t) {
+internal static int64 monoᴍ(ref Time t) {
     if ((t.wall & (uint64)hasMonotonic) == 0) {
         return 0;
     }
@@ -263,7 +263,7 @@ internal static int64 mono(this ref Time t) {
 
 // IsZero reports whether t represents the zero time instant,
 // January 1, year 1, 00:00:00 UTC.
-public static bool IsZero(this Time t) {
+internal static bool IsZeroᴍ(Time t) {
     // If hasMonotonic is set in t.wall, then the time can't be before 1885, so it can't be the year 1.
     // If hasMonotonic is zero, then all the bits in wall other than the nanoseconds field should be 0.
     // So if there are no nanoseconds then t.wall == 0, and if there are no seconds then t.ext == 0.
@@ -272,7 +272,7 @@ public static bool IsZero(this Time t) {
 }
 
 // After reports whether the time instant t is after u.
-public static bool After(this Time t, Time u) {
+internal static bool Afterᴍ(Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return t.ext > u.ext;
     }
@@ -282,7 +282,7 @@ public static bool After(this Time t, Time u) {
 }
 
 // Before reports whether the time instant t is before u.
-public static bool Before(this Time t, Time u) {
+internal static bool Beforeᴍ(Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return t.ext < u.ext;
     }
@@ -293,7 +293,7 @@ public static bool Before(this Time t, Time u) {
 
 // Compare compares the time instant t with u. If t is before u, it returns -1;
 // if t is after u, it returns +1; if they're the same, it returns 0.
-public static nint Compare(this Time t, Time u) {
+internal static nint Compareᴍ(Time t, Time u) {
     int64 tc = default;
     int64 uc = default;
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
@@ -319,7 +319,7 @@ public static nint Compare(this Time t, Time u) {
 // For example, 6:00 +0200 and 4:00 UTC are Equal.
 // See the documentation on the Time type for the pitfalls of using == with
 // Time values; most code should use Equal instead.
-public static bool Equal(this Time t, Time u) {
+internal static bool Equalᴍ(Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return t.ext == u.ext;
     }
@@ -344,10 +344,10 @@ public static Month October => 10;
 public static Month November => 11;
 public static Month December => 12;
 
-} partial class timeᴛMonth {
+} partial class time_package {
 
 // String returns the English name of the month ("January", "February", ...).
-public static @string String(this Month m) {
+internal static @string Stringᴍ(Month m) {
     if (January <= m && m <= December) {
         return longMonthNames[m - 1];
     }
@@ -369,10 +369,10 @@ public static Weekday Thursday => 4;
 public static Weekday Friday => 5;
 public static Weekday Saturday => 6;
 
-} partial class timeᴛWeekday {
+} partial class time_package {
 
 // String returns the English name of the day ("Sunday", "Monday", ...).
-public static @string String(this Weekday d) {
+internal static @string Stringᴍ(Weekday d) {
     if (Sunday <= d && d <= Saturday) {
         return longDayNames[d];
     }
@@ -644,17 +644,17 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
     return (absDays)(centurydays + (uint64)((int64)(cday + ayday) + (int64)day - 1));
 }
 
-} partial class timeᴛabsSeconds {
+} partial class time_package {
 
 // days converts absolute seconds to absolute days.
-internal static absDays days(this absSeconds abs) {
+internal static absDays daysᴍ(absSeconds abs) {
     return (absDays)(uint64)(abs / (uint64)secondsPerDay);
 }
 
-} partial class timeᴛabsDays {
+} partial class time_package {
 
 // split splits days into century, cyear, ayday.
-internal static (absCentury century, absCyear cyear, absYday ayday) split(this absDays days) {
+internal static (absCentury century, absCyear cyear, absYday ayday) splitᴍ(absDays days) {
     absCentury century = default;
     absCyear cyear = default;
     absYday ayday = default;
@@ -695,10 +695,10 @@ internal static (absCentury century, absCyear cyear, absYday ayday) split(this a
     return (century, cyear, ayday);
 }
 
-} partial class timeᴛabsYday {
+} partial class time_package {
 
 // split splits ayday into absolute month and standard (1-based) day-in-month.
-internal static (absMonth m, nint mday) split(this absYday ayday) {
+internal static (absMonth m, nint mday) splitᴍ(absYday ayday) {
     // See “Computations on Times” comment above.
     //
     // For yday in the range [0,366],
@@ -718,7 +718,7 @@ internal static (absMonth m, nint mday) split(this absYday ayday) {
 }
 
 // janFeb returns 1 if the March 1-based ayday is in January or February, 0 otherwise.
-internal static absJanFeb janFeb(this absYday ayday) {
+internal static absJanFeb janFebᴍ(absYday ayday) {
     // See “Computations on Times” comment above.
     absJanFeb jf = (absJanFeb)0;
     if (ayday >= marchThruDecember) {
@@ -727,18 +727,18 @@ internal static absJanFeb janFeb(this absYday ayday) {
     return jf;
 }
 
-} partial class timeᴛabsMonth {
+} partial class time_package {
 
 // month returns the standard Month for (m, janFeb)
-internal static Month month(this absMonth m, absJanFeb janFeb) {
+internal static Month monthᴍ(absMonth m, absJanFeb janFeb) {
     // See “Computations on Times” comment above.
     return ((Month)(nint)m) - ((Month)(nint)janFeb) * 12;
 }
 
-} partial class timeᴛabsCentury {
+} partial class time_package {
 
 // leap returns 1 if (century, cyear) is a leap year, 0 otherwise.
-internal static absLeap leap(this absCentury century, absCyear cyear) {
+internal static absLeap leapᴍ(absCentury century, absCyear cyear) {
     // See “Computations on Times” comment above.
     nint y4ok = 0;
     if (cyear % 4 == 0) {
@@ -756,23 +756,23 @@ internal static absLeap leap(this absCentury century, absCyear cyear) {
 }
 
 // year returns the standard year for (century, cyear, janFeb).
-internal static nint year(this absCentury century, absCyear cyear, absJanFeb janFeb) {
+internal static nint yearᴍ(absCentury century, absCyear cyear, absJanFeb janFeb) {
     // See “Computations on Times” comment above.
     return (nint)((uint64)century * 100 - (uint64)absoluteYears) + (nint)cyear + (nint)janFeb;
 }
 
-} partial class timeᴛabsYday {
+} partial class time_package {
 
 // yday returns the standard 1-based yday for (ayday, janFeb, leap).
-internal static nint yday(this absYday ayday, absJanFeb janFeb, absLeap leap) {
+internal static nint ydayᴍ(absYday ayday, absJanFeb janFeb, absLeap leap) {
     // See “Computations on Times” comment above.
     return (nint)ayday + (1 + 31 + 28) + ((nint)leap & ~(nint)janFeb) - 365 * (nint)janFeb;
 }
 
-} partial class timeᴛabsDays {
+} partial class time_package {
 
 // date converts days into standard year, month, day.
-internal static (nint year, Month month, nint day) date(this absDays days) {
+internal static (nint year, Month month, nint day) dateᴍ(absDays days) {
     nint year = default;
     Month month = default;
     nint day = default;
@@ -786,7 +786,7 @@ internal static (nint year, Month month, nint day) date(this absDays days) {
 }
 
 // yearYday converts days into the standard year and 1-based yday.
-internal static (nint year, nint yday) yearYday(this absDays days) {
+internal static (nint year, nint yday) yearYdayᴍ(absDays days) {
     nint year = default;
     nint yday = default;
 
@@ -797,13 +797,13 @@ internal static (nint year, nint yday) yearYday(this absDays days) {
     return (year, yday);
 }
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // absSec returns the time t as an absolute seconds, adjusted by the zone offset.
 // It is called when computing a presentation property like Month or Hour.
 // We'd rather call it abs, but there are linknames to abs that make that problematic.
 // See timeAbs below.
-internal static absSeconds absSec(this Time t) {
+internal static absSeconds absSecᴍ(Time t) {
     var l = t.loc;
     // Avoid function calls when possible.
     if (l == nil || l == ᏑlocalLoc) {
@@ -827,7 +827,7 @@ private static readonly @string utcˢᵇ = "UTC"u8;
 
 // locabs is a combination of the Zone and abs methods,
 // extracting both return values from a single zone lookup.
-internal static (@string name, nint offset, absSeconds abs) locabs(this Time t) {
+internal static (@string name, nint offset, absSeconds abs) locabsᴍ(Time t) {
     @string name = default;
     nint offset = default;
     absSeconds abs = default;
@@ -854,51 +854,51 @@ internal static (@string name, nint offset, absSeconds abs) locabs(this Time t) 
 }
 
 // Date returns the year, month, and day in which t occurs.
-public static (nint year, Month month, nint day) Date(this Time t) {
+internal static (nint year, Month month, nint day) Dateᴍ(Time t) {
     return t.absSec().days().date();
 }
 
 // Year returns the year in which t occurs.
-public static nint Year(this Time t) {
+internal static nint Yearᴍ(Time t) {
     var (century, cyear, ayday) = t.absSec().days().split();
     absJanFeb janFeb = ayday.janFeb();
     return century.year(cyear, janFeb);
 }
 
 // Month returns the month of the year specified by t.
-public static Month Month(this Time t) {
+internal static Month Monthᴍ(Time t) {
     var (_, _, ayday) = t.absSec().days().split();
     var (amonth, _) = ayday.split();
     return amonth.month(ayday.janFeb());
 }
 
 // Day returns the day of the month specified by t.
-public static nint Day(this Time t) {
+internal static nint Dayᴍ(Time t) {
     var (_, _, ayday) = t.absSec().days().split();
     var (_, day) = ayday.split();
     return day;
 }
 
 // Weekday returns the day of the week specified by t.
-public static Weekday Weekday(this Time t) {
+internal static Weekday Weekdayᴍ(Time t) {
     return t.absSec().days().weekday();
 }
 
-} partial class timeᴛabsDays {
+} partial class time_package {
 
 // weekday returns the day of the week specified by days.
-internal static Weekday weekday(this absDays days) {
+internal static Weekday weekdayᴍ(absDays days) {
     // March 1 of the absolute year, like March 1 of 2000, was a Wednesday.
     return (Weekday)(nint)(((uint64)days + (uint64)Wednesday) % 7);
 }
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // ISOWeek returns the ISO 8601 year and week number in which t occurs.
 // Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to
 // week 52 or 53 of year n-1, and Dec 29 to Dec 31 might belong to week 1
 // of year n+1.
-public static (nint year, nint week) ISOWeek(this Time t) {
+internal static (nint year, nint week) ISOWeekᴍ(Time t) {
     nint year = default;
 
     // According to the rule that the first calendar week of a calendar year is
@@ -918,14 +918,14 @@ public static (nint year, nint week) ISOWeek(this Time t) {
 }
 
 // Clock returns the hour, minute, and second within the day specified by t.
-public static (nint hour, nint min, nint sec) Clock(this Time t) {
+internal static (nint hour, nint min, nint sec) Clockᴍ(Time t) {
     return t.absSec().clock();
 }
 
-} partial class timeᴛabsSeconds {
+} partial class time_package {
 
 // clock returns the hour, minute, and second within the day specified by abs.
-internal static (nint hour, nint min, nint sec) clock(this absSeconds abs) {
+internal static (nint hour, nint min, nint sec) clockᴍ(absSeconds abs) {
     nint hour = default;
     nint min = default;
     nint sec = default;
@@ -938,32 +938,32 @@ internal static (nint hour, nint min, nint sec) clock(this absSeconds abs) {
     return (hour, min, sec);
 }
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // Hour returns the hour within the day specified by t, in the range [0, 23].
-public static nint Hour(this Time t) {
+internal static nint Hourᴍ(Time t) {
     return (nint)(t.absSec() % (uint64)secondsPerDay) / (nint)secondsPerHour;
 }
 
 // Minute returns the minute offset within the hour specified by t, in the range [0, 59].
-public static nint Minute(this Time t) {
+internal static nint Minuteᴍ(Time t) {
     return (nint)(t.absSec() % (uint64)secondsPerHour) / (nint)secondsPerMinute;
 }
 
 // Second returns the second offset within the minute specified by t, in the range [0, 59].
-public static nint Second(this Time t) {
+internal static nint Secondᴍ(Time t) {
     return (nint)(t.absSec() % (uint64)secondsPerMinute);
 }
 
 // Nanosecond returns the nanosecond offset within the second specified by t,
 // in the range [0, 999999999].
-public static nint Nanosecond(this Time t) {
+internal static nint Nanosecondᴍ(Time t) {
     return (nint)t.nsec();
 }
 
 // YearDay returns the day of the year specified by t, in the range [1,365] for non-leap years,
 // and [1,366] in leap years.
-public static nint YearDay(this Time t) {
+internal static nint YearDayᴍ(Time t) {
     var (_, yday) = t.absSec().days().yearYday();
     return yday;
 }
@@ -997,13 +997,13 @@ public static Duration Second => /* 1000 * Millisecond */ 1000000000;
 public static Duration Minute => /* 60 * Second */ 60000000000;
 public static Duration Hour => /* 60 * Minute */ 3600000000000;
 
-} partial class timeᴛDuration {
+} partial class time_package {
 
 // String returns a string representing the duration in the form "72h3m0.5s".
 // Leading zero units are omitted. As a special case, durations less than one
 // second format use a smaller unit (milli-, micro-, or nanoseconds) to ensure
 // that the leading digit is non-zero. The zero duration formats as 0s.
-public static @string String(this Duration d) {
+internal static @string Stringᴍ(Duration d) {
     // This is inlinable to take advantage of "function outlining".
     // Thus, the caller can decide whether a string must be heap allocated.
     ref var arr = ref heap(new array<byte>(32), out var Ꮡarr);
@@ -1013,7 +1013,7 @@ public static @string String(this Duration d) {
 
 // format formats the representation of d into the end of buf and
 // returns the offset of the first character.
-internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
+internal static nint formatᴍ(Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     // Largest time is 2540400h10m10.000000000s
@@ -1137,16 +1137,16 @@ internal static nint fmtInt(slice<byte> buf, uint64 v) {
     return w;
 }
 
-} partial class timeᴛDuration {
+} partial class time_package {
 
 // Nanoseconds returns the duration as an integer nanosecond count.
-public static int64 Nanoseconds(this Duration d) { return (int64)d; }
+internal static int64 Nanosecondsᴍ(Duration d) { return (int64)d; }
 
 // Microseconds returns the duration as an integer microsecond count.
-public static int64 Microseconds(this Duration d) { return (int64)d / 1000; }
+internal static int64 Microsecondsᴍ(Duration d) { return (int64)d / 1000; }
 
 // Milliseconds returns the duration as an integer millisecond count.
-public static int64 Milliseconds(this Duration d) { return (int64)d / 1000000; }
+internal static int64 Millisecondsᴍ(Duration d) { return (int64)d / 1000000; }
 
 // These methods return float64 because the dominant
 // use case is for printing a floating point number like 1.5s, and
@@ -1158,21 +1158,21 @@ public static int64 Milliseconds(this Duration d) { return (int64)d / 1000000; }
 // differently.
 
 // Seconds returns the duration as a floating point number of seconds.
-public static float64 Seconds(this Duration d) {
+internal static float64 Secondsᴍ(Duration d) {
     var sec = d / Second;
     var nsec = d % Second;
     return (float64)sec + (float64)nsec / 1e9D;
 }
 
 // Minutes returns the duration as a floating point number of minutes.
-public static float64 Minutes(this Duration d) {
+internal static float64 Minutesᴍ(Duration d) {
     var min = d / Minute;
     var nsec = d % Minute;
     return (float64)min + (float64)nsec / (60D * 1e9D);
 }
 
 // Hours returns the duration as a floating point number of hours.
-public static float64 Hours(this Duration d) {
+internal static float64 Hoursᴍ(Duration d) {
     var hour = d / Hour;
     var nsec = d % Hour;
     return (float64)hour + (float64)nsec / (60D * 60D * 1e9D);
@@ -1180,7 +1180,7 @@ public static float64 Hours(this Duration d) {
 
 // Truncate returns the result of rounding d toward zero to a multiple of m.
 // If m <= 0, Truncate returns d unchanged.
-public static Duration Truncate(this Duration d, Duration m) {
+internal static Duration Truncateᴍ(Duration d, Duration m) {
     if (m <= 0) {
         return d;
     }
@@ -1195,7 +1195,7 @@ internal static bool lessThanHalf(Duration x, Duration y) {
     return (uint64)x + (uint64)x < (uint64)y;
 }
 
-} partial class timeᴛDuration {
+} partial class time_package {
 
 // Round returns the result of rounding d to the nearest multiple of m.
 // The rounding behavior for halfway values is to round away from zero.
@@ -1203,7 +1203,7 @@ internal static bool lessThanHalf(Duration x, Duration y) {
 // value that can be stored in a [Duration],
 // Round returns the maximum (or minimum) duration.
 // If m <= 0, Round returns d unchanged.
-public static Duration Round(this Duration d, Duration m) {
+internal static Duration Roundᴍ(Duration d, Duration m) {
     if (m <= 0) {
         return d;
     }
@@ -1232,7 +1232,7 @@ public static Duration Round(this Duration d, Duration m) {
 // Abs returns the absolute value of d.
 // As a special case, Duration([math.MinInt64]) is converted to Duration([math.MaxInt64]),
 // reducing its magnitude by 1 nanosecond.
-public static Duration Abs(this Duration d) {
+internal static Duration Absᴍ(Duration d) {
     switch (ᐧ) {
     case {} when d >= 0: {
         return d;
@@ -1245,10 +1245,10 @@ public static Duration Abs(this Duration d) {
     }}
 }
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // Add returns the time t+d.
-public static Time Add(this Time t, Duration d) {
+internal static Time Addᴍ(Time t, Duration d) {
     var dsec = (int64)(d / 1000000000);
     var nsec = t.nsec() + (int32)(d % 1000000000);
     if (nsec >= 1000000000) {
@@ -1276,7 +1276,7 @@ public static Time Add(this Time t, Duration d) {
 // value that can be stored in a [Duration], the maximum (or minimum) duration
 // will be returned.
 // To compute t-d for a duration d, use t.Add(-d).
-public static Duration Sub(this Time t, Time u) {
+internal static Duration Subᴍ(Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return subMono(t.ext, u.ext);
     }
@@ -1327,7 +1327,7 @@ public static Duration Until(Time t) {
     return t.Sub(Now());
 }
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // AddDate returns the time corresponding to adding the
 // given number of years, months, and days to t.
@@ -1346,7 +1346,7 @@ public static Duration Until(Time t) {
 // AddDate normalizes its result in the same way that Date does,
 // so, for example, adding one month to October 31 yields
 // December 1, the normalized form for November 31.
-public static Time AddDate(this Time t, nint years, nint months, nint days) {
+internal static Time AddDateᴍ(Time t, nint years, nint months, nint days) {
     var (year, month, day) = t.Date();
     var (hour, min, sec) = t.Clock();
     return time.Date(year + years, month + ((Month)months), day + days, hour, min, sec, (nint)t.nsec(), t.Location());
@@ -1453,16 +1453,16 @@ internal static Time unixTime(int64 sec, int32 nsec) {
     return new Time((uint64)nsec, sec + unixToInternal, Local);
 }
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // UTC returns t with the location set to UTC.
-public static Time UTC(this Time t) {
+internal static Time UTCᴍ(Time t) {
     t.setLoc(ᏑutcLoc);
     return t;
 }
 
 // Local returns t with the location set to local time.
-public static Time Local(this Time t) {
+internal static Time Localᴍ(Time t) {
     t.setLoc(time.Local);
     return t;
 }
@@ -1472,7 +1472,7 @@ public static Time Local(this Time t) {
 // purposes.
 //
 // In panics if loc is nil.
-public static Time In(this Time t, ж<Location> loc) {
+internal static Time Inᴍ(Time t, ж<Location> loc) {
     if (loc == nil) {
         throw panic("time: missing Location in call to Time.In");
     }
@@ -1481,7 +1481,7 @@ public static Time In(this Time t, ж<Location> loc) {
 }
 
 // Location returns the time zone information associated with t.
-public static ж<Location> Location(this Time t) {
+internal static ж<Location> Locationᴍ(Time t) {
     var l = t.loc;
     if (l == nil) {
         l = time.UTC;
@@ -1491,7 +1491,7 @@ public static ж<Location> Location(this Time t) {
 
 // Zone computes the time zone in effect at time t, returning the abbreviated
 // name of the zone (such as "CET") and its offset in seconds east of UTC.
-public static (@string name, nint offset) Zone(this Time t) {
+internal static (@string name, nint offset) Zoneᴍ(Time t) {
     @string name = default;
     nint offset = default;
 
@@ -1504,7 +1504,7 @@ public static (@string name, nint offset) Zone(this Time t) {
 // If the zone begins at the beginning of time, start will be returned as a zero Time.
 // If the zone goes on forever, end will be returned as a zero Time.
 // The Location of the returned times will be the same as t.
-public static (Time start, Time end) ZoneBounds(this Time t) {
+internal static (Time start, Time end) ZoneBoundsᴍ(Time t) {
     Time start = default;
     Time end = default;
 
@@ -1526,7 +1526,7 @@ public static (Time start, Time end) ZoneBounds(this Time t) {
 // Unix-like operating systems often record time as a 32-bit
 // count of seconds, but since the method here returns a 64-bit
 // value it is valid for billions of years into the past or future.
-public static int64 Unix(this Time t) {
+internal static int64 Unixᴍ(Time t) {
     return t.unixSec();
 }
 
@@ -1535,7 +1535,7 @@ public static int64 Unix(this Time t) {
 // milliseconds cannot be represented by an int64 (a date more than 292 million
 // years before or after 1970). The result does not depend on the
 // location associated with t.
-public static int64 UnixMilli(this Time t) {
+internal static int64 UnixMilliᴍ(Time t) {
     return t.unixSec() * 1000 + (int64)t.nsec() / 1000000;
 }
 
@@ -1544,7 +1544,7 @@ public static int64 UnixMilli(this Time t) {
 // microseconds cannot be represented by an int64 (a date before year -290307 or
 // after year 294246). The result does not depend on the location associated
 // with t.
-public static int64 UnixMicro(this Time t) {
+internal static int64 UnixMicroᴍ(Time t) {
     return t.unixSec() * 1000000 + (int64)t.nsec() / 1000;
 }
 
@@ -1554,7 +1554,7 @@ public static int64 UnixMicro(this Time t) {
 // 1678 or after 2262). Note that this means the result of calling UnixNano
 // on the zero Time is undefined. The result does not depend on the
 // location associated with t.
-public static int64 UnixNano(this Time t) {
+internal static int64 UnixNanoᴍ(Time t) {
     return (t.unixSec()) * 1000000000 + (int64)t.nsec();
 }
 
@@ -1563,14 +1563,14 @@ public static int64 UnixNano(this Time t) {
 internal const byte timeBinaryVersionV1 = /* iota + 1 */ 1; // For general situation
 internal const byte timeBinaryVersionV2 = 2;                // For LMT only
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string timeMarshalBinaryˢ => ref timeMarshalBinaryˢᵇ;
 private static readonly @string timeMarshalBinaryˢᵇ = "Time.MarshalBinary: unexpected zone offset"u8;
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(Time t, slice<byte> b) {
     int16 offsetMin = default; // minutes east of UTC. -1 is UTC.
     int8 offsetSec = default;
     var version = timeBinaryVersionV1;
@@ -1616,7 +1616,7 @@ public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) {
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
-public static (slice<byte>, error) MarshalBinary(this Time t) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(Time t) {
     var (b, err) = t.AppendBinary(new slice<byte>(0, 16));
     if (err != nil) {
         return (default, err);
@@ -1633,7 +1633,7 @@ internal static ref readonly @string timeUnmarshalBinaryˢ2 => ref timeUnmarshal
 private static readonly @string timeUnmarshalBinaryˢ2ᵇ = "Time.UnmarshalBinary: invalid length"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
-public static error UnmarshalBinary(this ref Time t, slice<byte> data) {
+internal static error UnmarshalBinaryᴍ(ref Time t, slice<byte> data) {
     var buf = data;
     if (len(buf) == 0) {
         return errors.New(timeUnmarshalBinaryNoˢ);
@@ -1685,12 +1685,12 @@ public static error UnmarshalBinary(this ref Time t, slice<byte> data) {
 // UnmarshalBinary, UnmarshalText.
 
 // GobEncode implements the gob.GobEncoder interface.
-public static (slice<byte>, error) GobEncode(this Time t) {
+internal static (slice<byte>, error) GobEncodeᴍ(Time t) {
     return t.MarshalBinary();
 }
 
 // GobDecode implements the gob.GobDecoder interface.
-public static error GobDecode(this ref Time t, slice<byte> data) {
+internal static error GobDecodeᴍ(ref Time t, slice<byte> data) {
     return t.UnmarshalBinary(data);
 }
 
@@ -1698,7 +1698,7 @@ public static error GobDecode(this ref Time t, slice<byte> data) {
 // The time is a quoted string in the RFC 3339 format with sub-second precision.
 // If the timestamp cannot be represented as valid RFC 3339
 // (e.g., the year is out of range), then an error is reported.
-public static (slice<byte>, error) MarshalJSON(this Time t) {
+internal static (slice<byte>, error) MarshalJSONᴍ(Time t) {
     var b = new slice<byte>(0, len(RFC3339Nano) + len(@""""""));
     b = append(b, (byte)'"');
     (b, var err) = t.appendStrictRFC3339(b);
@@ -1715,7 +1715,7 @@ private static readonly @string timeUnmarshalJSONInputIsˢᵇ = "Time.UnmarshalJ
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
 // The time must be a quoted string in the RFC 3339 format.
-public static error UnmarshalJSON(this ref Time t, slice<byte> data) {
+internal static error UnmarshalJSONᴍ(ref Time t, slice<byte> data) {
     if (((sstring)data) == "null"u8) {
         return default;
     }
@@ -1729,7 +1729,7 @@ public static error UnmarshalJSON(this ref Time t, slice<byte> data) {
     return err;
 }
 
-internal static (slice<byte>, error) appendTo(this Time t, slice<byte> b, @string errPrefix) {
+internal static (slice<byte>, error) appendToᴍ(Time t, slice<byte> b, @string errPrefix) {
     (b, var err) = t.appendStrictRFC3339(b);
     if (err != nil) {
         return (default, errors.New(errPrefix + err.Error()));
@@ -1745,7 +1745,7 @@ private static readonly @string timeAppendTextˢᵇ = "Time.AppendText: "u8;
 // The time is formatted in RFC 3339 format with sub-second precision.
 // If the timestamp cannot be represented as valid RFC 3339
 // (e.g., the year is out of range), then an error is returned.
-public static (slice<byte>, error) AppendText(this Time t, slice<byte> b) {
+internal static (slice<byte>, error) AppendTextᴍ(Time t, slice<byte> b) {
     return t.appendTo(b, timeAppendTextˢ);
 }
 
@@ -1757,13 +1757,13 @@ private static readonly @string timeMarshalTextˢᵇ = "Time.MarshalText: "u8;
 // matches that of calling the [Time.AppendText] method.
 //
 // See [Time.AppendText] for more information.
-public static (slice<byte>, error) MarshalText(this Time t) {
+internal static (slice<byte>, error) MarshalTextᴍ(Time t) {
     return t.appendTo(new slice<byte>(0, len(RFC3339Nano)), timeMarshalTextˢ);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 // The time must be in the RFC 3339 format.
-public static error UnmarshalText(this ref Time t, slice<byte> data) {
+internal static error UnmarshalTextᴍ(ref Time t, slice<byte> data) {
     error err = default;
     (t, err) = parseStrictRFC3339(data);
     return err;
@@ -1801,10 +1801,10 @@ public static Time UnixMicro(int64 usec) {
     return Unix(usec / 1000000, (usec % 1000000) * 1000);
 }
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // IsDST reports whether the time in the configured location is in Daylight Savings Time.
-public static bool IsDST(this Time t) {
+internal static bool IsDSTᴍ(Time t) {
     var (_, _, _, _, isDST) = t.loc.lookup(t.Unix());
     return isDST;
 }
@@ -1898,7 +1898,7 @@ public static Time Date(nint year, Month month, nint day, nint hour, nint min, n
     return t;
 }
 
-} partial class timeᴛTime {
+} partial class time_package {
 
 // Truncate returns the result of rounding t down to a multiple of d (since the zero time).
 // If d <= 0, Truncate returns t stripped of any monotonic clock reading but otherwise unchanged.
@@ -1907,7 +1907,7 @@ public static Time Date(nint year, Month month, nint day, nint hour, nint min, n
 // zero time; it does not operate on the presentation form of the
 // time. Thus, Truncate(Hour) may return a time with a non-zero
 // minute, depending on the time's Location.
-public static Time Truncate(this Time t, Duration d) {
+internal static Time Truncateᴍ(Time t, Duration d) {
     t.stripMono();
     if (d <= 0) {
         return t;
@@ -1924,7 +1924,7 @@ public static Time Truncate(this Time t, Duration d) {
 // zero time; it does not operate on the presentation form of the
 // time. Thus, Round(Hour) may return a time with a non-zero
 // minute, depending on the time's Location.
-public static Time Round(this Time t, Duration d) {
+internal static Time Roundᴍ(Time t, Duration d) {
     t.stripMono();
     if (d <= 0) {
         return t;
@@ -2089,3 +2089,103 @@ public static (nint year, Month month, nint day, nint yday) legacyAbsDate(uint64
 }
 
 } // end time_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class timeᴛTime {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 nsec(this ref Time t) => time_package.nsecᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 sec(this ref Time t) => time_package.secᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 unixSec(this ref Time t) => time_package.unixSecᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addSec(this ref Time t, int64 d) => time_package.addSecᴍ(ref t, d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setLoc(this ref Time t, ж<Location> Ꮡloc) => time_package.setLocᴍ(ref t, Ꮡloc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stripMono(this ref Time t) => time_package.stripMonoᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setMono(this ref Time t, int64 m) => time_package.setMonoᴍ(ref t, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 mono(this ref Time t) => time_package.monoᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsZero(this Time t) => time_package.IsZeroᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool After(this Time t, Time u) => time_package.Afterᴍ(t, u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Before(this Time t, Time u) => time_package.Beforeᴍ(t, u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Compare(this Time t, Time u) => time_package.Compareᴍ(t, u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this Time t, Time u) => time_package.Equalᴍ(t, u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static absSeconds absSec(this Time t) => time_package.absSecᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string name, nint offset, absSeconds abs) locabs(this Time t) => time_package.locabsᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint year, Month month, nint day) Date(this Time t) => time_package.Dateᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Year(this Time t) => time_package.Yearᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Month Month(this Time t) => time_package.Monthᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Day(this Time t) => time_package.Dayᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Weekday Weekday(this Time t) => time_package.Weekdayᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint year, nint week) ISOWeek(this Time t) => time_package.ISOWeekᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint hour, nint min, nint sec) Clock(this Time t) => time_package.Clockᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Hour(this Time t) => time_package.Hourᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Minute(this Time t) => time_package.Minuteᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Second(this Time t) => time_package.Secondᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Nanosecond(this Time t) => time_package.Nanosecondᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint YearDay(this Time t) => time_package.YearDayᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Add(this Time t, Duration d) => time_package.Addᴍ(t, d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Duration Sub(this Time t, Time u) => time_package.Subᴍ(t, u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time AddDate(this Time t, nint years, nint months, nint days) => time_package.AddDateᴍ(t, years, months, days);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time UTC(this Time t) => time_package.UTCᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Local(this Time t) => time_package.Localᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time In(this Time t, ж<Location> loc) => time_package.Inᴍ(t, loc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Location> Location(this Time t) => time_package.Locationᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string name, nint offset) Zone(this Time t) => time_package.Zoneᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Time start, Time end) ZoneBounds(this Time t) => time_package.ZoneBoundsᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Unix(this Time t) => time_package.Unixᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 UnixMilli(this Time t) => time_package.UnixMilliᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 UnixMicro(this Time t) => time_package.UnixMicroᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 UnixNano(this Time t) => time_package.UnixNanoᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) => time_package.AppendBinaryᴍ(t, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this Time t) => time_package.MarshalBinaryᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref Time t, slice<byte> data) => time_package.UnmarshalBinaryᴍ(ref t, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) GobEncode(this Time t) => time_package.GobEncodeᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error GobDecode(this ref Time t, slice<byte> data) => time_package.GobDecodeᴍ(ref t, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalJSON(this Time t) => time_package.MarshalJSONᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalJSON(this ref Time t, slice<byte> data) => time_package.UnmarshalJSONᴍ(ref t, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) appendTo(this Time t, slice<byte> b, @string errPrefix) => time_package.appendToᴍ(t, b, errPrefix);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this Time t, slice<byte> b) => time_package.AppendTextᴍ(t, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this Time t) => time_package.MarshalTextᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ref Time t, slice<byte> data) => time_package.UnmarshalTextᴍ(ref t, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsDST(this Time t) => time_package.IsDSTᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Truncate(this Time t, Duration d) => time_package.Truncateᴍ(t, d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Round(this Time t, Duration d) => time_package.Roundᴍ(t, d);
+}
+partial class timeᴛMonth {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Month m) => time_package.Stringᴍ(m);
+}
+partial class timeᴛWeekday {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Weekday d) => time_package.Stringᴍ(d);
+}
+partial class timeᴛabsSeconds {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static absDays days(this absSeconds abs) => time_package.daysᴍ(abs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint hour, nint min, nint sec) clock(this absSeconds abs) => time_package.clockᴍ(abs);
+}
+partial class timeᴛabsDays {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (absCentury century, absCyear cyear, absYday ayday) split(this absDays days) => time_package.splitᴍ(days);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint year, Month month, nint day) date(this absDays days) => time_package.dateᴍ(days);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint year, nint yday) yearYday(this absDays days) => time_package.yearYdayᴍ(days);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Weekday weekday(this absDays days) => time_package.weekdayᴍ(days);
+}
+partial class timeᴛabsYday {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (absMonth m, nint mday) split(this absYday ayday) => time_package.splitᴍ(ayday);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static absJanFeb janFeb(this absYday ayday) => time_package.janFebᴍ(ayday);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint yday(this absYday ayday, absJanFeb janFeb, absLeap leap) => time_package.ydayᴍ(ayday, janFeb, leap);
+}
+partial class timeᴛabsMonth {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Month month(this absMonth m, absJanFeb janFeb) => time_package.monthᴍ(m, janFeb);
+}
+partial class timeᴛabsCentury {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static absLeap leap(this absCentury century, absCyear cyear) => time_package.leapᴍ(century, cyear);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint year(this absCentury century, absCyear cyear, absJanFeb janFeb) => time_package.yearᴍ(century, cyear, janFeb);
+}
+partial class timeᴛDuration {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Duration d) => time_package.Stringᴍ(d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) => time_package.formatᴍ(d, Ꮡbuf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Nanoseconds(this Duration d) => time_package.Nanosecondsᴍ(d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Microseconds(this Duration d) => time_package.Microsecondsᴍ(d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Milliseconds(this Duration d) => time_package.Millisecondsᴍ(d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Seconds(this Duration d) => time_package.Secondsᴍ(d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Minutes(this Duration d) => time_package.Minutesᴍ(d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Hours(this Duration d) => time_package.Hoursᴍ(d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Duration Truncate(this Duration d, Duration m) => time_package.Truncateᴍ(d, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Duration Round(this Duration d, Duration m) => time_package.Roundᴍ(d, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Duration Abs(this Duration d) => time_package.Absᴍ(d);
+}
+// </GlyphForwarders>

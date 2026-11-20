@@ -17,7 +17,7 @@ partial struct Properties {
 
 internal static ж<bidiTrie> trie = newBidiTrie(0);
 
-} partial class bidiᴛProperties {
+} partial class bidi_package {
 
 // TODO: using this for bidirule reduces the running time by about 5%. Consider
 // if this is worth exposing or if we can find a way to speed up the Class
@@ -30,7 +30,7 @@ internal static ж<bidiTrie> trie = newBidiTrie(0);
 // }
 
 // Class returns the Bidi class for p.
-public static Class Class(this Properties p) {
+internal static Class Classᴍ(Properties p) {
     Class c = (Class)(nuint)((uint8)(p.entry & 0x0F));
     if (c == Control) {
         c = controlByteToClass[(uint8)(p.last & 0xF)];
@@ -39,14 +39,14 @@ public static Class Class(this Properties p) {
 }
 
 // IsBracket reports whether the rune is a bracket.
-public static bool IsBracket(this Properties p) { return (uint8)(p.entry & 0xF0) != 0; }
+internal static bool IsBracketᴍ(Properties p) { return (uint8)(p.entry & 0xF0) != 0; }
 
 // IsOpeningBracket reports whether the rune is an opening bracket.
 // IsBracket must return true.
-public static bool IsOpeningBracket(this Properties p) { return (uint8)(p.entry & (uint8)openMask) != 0; }
+internal static bool IsOpeningBracketᴍ(Properties p) { return (uint8)(p.entry & (uint8)openMask) != 0; }
 
 // TODO: find a better API and expose.
-internal static rune reverseBracket(this Properties p, rune r) {
+internal static rune reverseBracketᴍ(Properties p, rune r) {
     return xorMasks[(p.entry >> (int)(xorMaskShift))] ^ r;
 }
 
@@ -221,3 +221,12 @@ public static (Properties p, nint sz) LookupString(@string s) {
 }
 
 } // end bidi_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bidiᴛProperties {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Class Class(this Properties p) => bidi_package.Classᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsBracket(this Properties p) => bidi_package.IsBracketᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsOpeningBracket(this Properties p) => bidi_package.IsOpeningBracketᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune reverseBracket(this Properties p, rune r) => bidi_package.reverseBracketᴍ(p, r);
+}
+// </GlyphForwarders>

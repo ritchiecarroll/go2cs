@@ -54,10 +54,10 @@ internal static nint maxStackDepth = 10000;
     }
 }
 
-} partial class parseᴛTree {
+} partial class parse_package {
 
 // Copy returns a copy of the [Tree]. Any parsing state is discarded.
-public static ж<Tree> Copy(this ж<Tree> Ꮡt) {
+internal static ж<Tree> Copyᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -87,10 +87,10 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
     return (treeSet, err);
 }
 
-} partial class parseᴛTree {
+} partial class parse_package {
 
 // next returns the next token.
-internal static item next(this ref Tree t) {
+internal static item nextᴍ(ref Tree t) {
     if (t.peekCount > 0) {
         t.peekCount--;
     } else {
@@ -100,20 +100,20 @@ internal static item next(this ref Tree t) {
 }
 
 // backup backs the input stream up one token.
-internal static void backup(this ref Tree t) {
+internal static void backupᴍ(ref Tree t) {
     t.peekCount++;
 }
 
 // backup2 backs the input stream up two tokens.
 // The zeroth token is already there.
-internal static void backup2(this ref Tree t, item t1) {
+internal static void backup2ᴍ(ref Tree t, item t1) {
     t.token[1] = t1;
     t.peekCount = 2;
 }
 
 // backup3 backs the input stream up three tokens
 // The zeroth token is already there.
-internal static void backup3(this ref Tree t, item t2, item t1) {
+internal static void backup3ᴍ(ref Tree t, item t2, item t1) {
     // Reverse order: we're pushing back.
     t.token[1] = t1;
     t.token[2] = t2;
@@ -121,7 +121,7 @@ internal static void backup3(this ref Tree t, item t2, item t1) {
 }
 
 // peek returns but does not consume the next token.
-internal static item peek(this ref Tree t) {
+internal static item peekᴍ(ref Tree t) {
     if (t.peekCount > 0) {
         return t.token[t.peekCount - 1];
     }
@@ -131,7 +131,7 @@ internal static item peek(this ref Tree t) {
 }
 
 // nextNonSpace returns the next non-space token.
-internal static item /*token*/ nextNonSpace(this ref Tree t) {
+internal static item /*token*/ nextNonSpaceᴍ(ref Tree t) {
     item token = default;
 
     for (;;) {
@@ -144,7 +144,7 @@ internal static item /*token*/ nextNonSpace(this ref Tree t) {
 }
 
 // peekNonSpace returns but does not consume the next non-space token.
-internal static item peekNonSpace(this ref Tree t) {
+internal static item peekNonSpaceᴍ(ref Tree t) {
     var token = t.nextNonSpace();
     t.backup();
     return token;
@@ -164,12 +164,12 @@ public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp
     ));
 }
 
-} partial class parseᴛTree {
+} partial class parse_package {
 
 // ErrorContext returns a textual representation of the location of the node in the input text.
 // The receiver is only used when the node does not have a pointer to the tree inside,
 // which can occur in old code.
-public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡt, Node n) {
+internal static (@string location, @string context) ErrorContextᴍ(ж<Tree> Ꮡt, Node n) {
     @string context = default;
 
     nint pos = (nint)n.Position();
@@ -191,7 +191,7 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
 }
 
 // errorf formats the error and terminates processing.
-internal static void errorf(this ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorfᴍ(ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     t.Root = default;
@@ -200,12 +200,12 @@ internal static void errorf(this ref Tree t, @string format, params ꓸꓸꓸany
 }
 
 // error terminates processing.
-internal static void error(this ref Tree t, error err) {
+internal static void errorᴍ(ref Tree t, error err) {
     t.errorf("%s", err);
 }
 
 // expect consumes the next token and guarantees it has the required type.
-internal static item expect(this ref Tree t, itemType expected, @string context) {
+internal static item expectᴍ(ref Tree t, itemType expected, @string context) {
     var token = t.nextNonSpace();
     if (token.typ != expected) {
         t.unexpected(token, context);
@@ -214,7 +214,7 @@ internal static item expect(this ref Tree t, itemType expected, @string context)
 }
 
 // expectOneOf consumes the next token and guarantees it has one of the required types.
-internal static item expectOneOf(this ref Tree t, itemType expected1, itemType expected2, @string context) {
+internal static item expectOneOfᴍ(ref Tree t, itemType expected1, itemType expected2, @string context) {
     var token = t.nextNonSpace();
     if (token.typ != expected1 && token.typ != expected2) {
         t.unexpected(token, context);
@@ -227,7 +227,7 @@ internal static ref readonly @string actionˢ => ref actionˢᵇ;
 private static readonly @string actionˢᵇ = " action"u8;
 
 // unexpected complains about the token and terminates processing.
-internal static void unexpected(this ref Tree t, item token, @string context) {
+internal static void unexpectedᴍ(ref Tree t, item token, @string context) {
     if (token.typ == itemError) {
         @string extra = ""u8;
         if (t.actionLine != 0 && t.actionLine != token.line) {
@@ -242,7 +242,7 @@ internal static void unexpected(this ref Tree t, item token, @string context) {
 }
 
 // recover is the handler that turns panics into returns from the top level of Parse.
-internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
+internal static void recoverᴍ(ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -271,7 +271,7 @@ internal static ref readonly @string continueˢ2 => ref continueˢ2ᵇ;
 private static readonly @string continueˢ2ᵇ = "continue"u8;
 
 // startParse initializes the parser, using the lexer.
-internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
+internal static void startParseᴍ(ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
     ref var lex = ref Ꮡlex.DerefOrNull();
 
     t.Root = default;
@@ -288,7 +288,7 @@ internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs,
 }
 
 // stopParse terminates parsing.
-internal static void stopParse(this ref Tree t) {
+internal static void stopParseᴍ(ref Tree t) {
     t.lex = default;
     t.vars = default;
     t.funcs = default;
@@ -299,7 +299,7 @@ internal static void stopParse(this ref Tree t) {
 // the template for execution. If either action delimiter string is empty, the
 // default ("{{" or "}}") is used. Embedded template definitions are added to
 // the treeSet map.
-public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) {
+internal static (ж<Tree> tree, error err) Parseᴍ(ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) {
     ж<Tree> tree = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -324,7 +324,7 @@ public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text,
 }
 
 // add adds tree to t.treeSet.
-internal static void add(this ж<Tree> Ꮡt) {
+internal static void addᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tree = t.treeSet[t.Name];
@@ -382,7 +382,7 @@ public static bool IsEmptyTree(Node n) {
     return false;
 }
 
-} partial class parseᴛTree {
+} partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string definitionˢ => ref definitionˢᵇ;
@@ -391,7 +391,7 @@ private static readonly @string definitionˢᵇ = "definition"u8;
 // parse is the top-level parser for a template, essentially the same
 // as itemList except it also parses {{define}} actions.
 // It runs to EOF.
-internal static void parse(this ж<Tree> Ꮡt) {
+internal static void parseᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.Root = Ꮡt.newList(t.peek().pos);
@@ -429,7 +429,7 @@ private static readonly @string contextᶜᵇ = "define clause"u8;
 // parseDefinition parses a {{define}} ...  {{end}} template definition and
 // installs the definition in t.treeSet. The "define" keyword has already
 // been scanned.
-internal static void parseDefinition(this ж<Tree> Ꮡt) {
+internal static void parseDefinitionᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string context = contextᶜ;
@@ -454,7 +454,7 @@ internal static void parseDefinition(this ж<Tree> Ꮡt) {
 //	textOrAction*
 //
 // Terminates at {{end}} or {{else}}, returned separately.
-internal static (ж<ListNode> list, Node next) itemList(this ж<Tree> Ꮡt) {
+internal static (ж<ListNode> list, Node next) itemListᴍ(ж<Tree> Ꮡt) {
     ж<ListNode> list = default;
     Node next = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -479,7 +479,7 @@ private static readonly @string inputˢᵇ = "input"u8;
 // textOrAction:
 //
 //	text | comment | action
-internal static Node textOrAction(this ж<Tree> Ꮡt) {
+internal static Node textOrActionᴍ(ж<Tree> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -510,7 +510,7 @@ internal static Node textOrAction(this ж<Tree> Ꮡt) {
     finally { if (ᒐd1) Ꮡt.DerefOrNull().clearActionLine(); ᒐ.Run(); }
 }
 
-internal static void clearActionLine(this ref Tree t) {
+internal static void clearActionLineᴍ(ref Tree t) {
     t.actionLine = 0;
 }
 
@@ -525,7 +525,7 @@ private static readonly @string commandˢᵇ = "command"u8;
 //
 // Left delim is past. Now get actions.
 // First word could be a keyword such as range.
-internal static Node /*n*/ action(this ж<Tree> Ꮡt) {
+internal static Node /*n*/ actionᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tokenΔ1 = t.nextNonSpace();
@@ -572,7 +572,7 @@ private static readonly @string breakˢᵇ = "{{break}}"u8;
 //	{{break}}
 //
 // Break keyword is past.
-internal static Node breakControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static Node breakControlᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
@@ -593,7 +593,7 @@ private static readonly @string continueˢᵇ = "{{continue}}"u8;
 //	{{continue}}
 //
 // Continue keyword is past.
-internal static Node continueControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static Node continueControlᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
@@ -608,7 +608,7 @@ internal static Node continueControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
 // Pipeline:
 //
 //	declarations? command ('|' command)*
-internal static ж<PipeNode> /*pipe*/ pipeline(this ж<Tree> Ꮡt, @string context, itemType end) {
+internal static ж<PipeNode> /*pipe*/ pipelineᴍ(ж<Tree> Ꮡt, @string context, itemType end) {
     ж<PipeNode> pipe = default;
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -680,7 +680,7 @@ decls:
     }
 }
 
-internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @string context) {
+internal static void checkPipelineᴍ(ref Tree t, ж<PipeNode> Ꮡpipe, @string context) {
     ref var pipe = ref Ꮡpipe.DerefOrNull();
 
     // Reject empty pipelines
@@ -698,7 +698,7 @@ internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @strin
     }
 }
 
-internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) parseControl(this ж<Tree> Ꮡt, @string context) {
+internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) parseControlᴍ(ж<Tree> Ꮡt, @string context) {
     Pos pos = default;
     nint line = default;
     ж<PipeNode> pipe = default;
@@ -762,7 +762,7 @@ internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<Li
 //	{{if pipeline}} itemList {{else}} itemList {{end}}
 //
 // If keyword is past.
-internal static Node ifControl(this ж<Tree> Ꮡt) {
+internal static Node ifControlᴍ(ж<Tree> Ꮡt) {
     var (ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5) = Ꮡt.parseControl("if");
     return new IfNodeжNode(Ꮡt.newIf(ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5));
 }
@@ -777,7 +777,7 @@ private static readonly @string rangeˢᵇ = "range"u8;
 //	{{range pipeline}} itemList {{else}} itemList {{end}}
 //
 // Range keyword is past.
-internal static Node rangeControl(this ж<Tree> Ꮡt) {
+internal static Node rangeControlᴍ(ж<Tree> Ꮡt) {
     var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
     return new RangeNodeжNode(r);
@@ -793,7 +793,7 @@ private static readonly @string withˢᵇ = "with"u8;
 //	{{with pipeline}} itemList {{else}} itemList {{end}}
 //
 // If keyword is past.
-internal static Node withControl(this ж<Tree> Ꮡt) {
+internal static Node withControlᴍ(ж<Tree> Ꮡt) {
     var (ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15) = Ꮡt.parseControl(withˢ);
     return new WithNodeжNode(Ꮡt.newWith(ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15));
 }
@@ -807,7 +807,7 @@ private static readonly @string endˢ2ᵇ = "end"u8;
 //	{{end}}
 //
 // End keyword is past.
-internal static Node endControl(this ж<Tree> Ꮡt) {
+internal static Node endControlᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return new endNodeжNode(Ꮡt.newEnd(t.expect(itemRightDelim, endˢ2).pos));
@@ -822,7 +822,7 @@ private static readonly @string elseˢ2ᵇ = "else"u8;
 //	{{else}}
 //
 // Else keyword is past.
-internal static Node elseControl(this ж<Tree> Ꮡt) {
+internal static Node elseControlᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var peek = t.peekNonSpace();
@@ -847,7 +847,7 @@ private static readonly @string contextᶜ1ᵇ = "block clause"u8;
 // Block keyword is past.
 // The name must be something that can evaluate to a string.
 // The pipeline is mandatory.
-internal static Node blockControl(this ж<Tree> Ꮡt) {
+internal static Node blockControlᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string context = contextᶜ1;
@@ -882,7 +882,7 @@ private static readonly @string contextᶜ2ᵇ = "template clause"u8;
 //
 // Template keyword is past. The name must be something that can evaluate
 // to a string.
-internal static Node templateControl(this ж<Tree> Ꮡt) {
+internal static Node templateControlᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string context = contextᶜ2;
@@ -897,7 +897,7 @@ internal static Node templateControl(this ж<Tree> Ꮡt) {
     return new TemplateNodeжNode(Ꮡt.newTemplate(token.pos, token.line, name, pipe));
 }
 
-internal static @string /*name*/ parseTemplateName(this ref Tree t, item token, @string context) {
+internal static @string /*name*/ parseTemplateNameᴍ(ref Tree t, item token, @string context) {
     @string name = default;
 
     switch (token.typ) {
@@ -926,7 +926,7 @@ private static readonly @string operandˢᵇ = "operand"u8;
 //
 // space-separated arguments up to a pipeline character or right delimiter.
 // we consume the pipe character but leave the right delim to terminate the action.
-internal static ж<CommandNode> command(this ж<Tree> Ꮡt) {
+internal static ж<CommandNode> commandᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var cmd = Ꮡt.newCommand(t.peekNonSpace().pos);
@@ -969,7 +969,7 @@ internal static ж<CommandNode> command(this ж<Tree> Ꮡt) {
 // An operand is a space-separated component of a command,
 // a term possibly followed by field accesses.
 // A nil return means the next item is not an operand.
-internal static Node operand(this ж<Tree> Ꮡt) {
+internal static Node operandᴍ(ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var node = Ꮡt.term();
@@ -1022,7 +1022,7 @@ private static readonly @string parenthesizedPipelineˢᵇ = "parenthesized pipe
 //
 // A term is a simple "expression".
 // A nil return means the next item is not a term.
-internal static Node term(this ж<Tree> Ꮡt) {
+internal static Node termᴍ(ж<Tree> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1085,7 +1085,7 @@ internal static Node term(this ж<Tree> Ꮡt) {
 }
 
 // hasFunction reports if a function name exists in the Tree's maps.
-internal static bool hasFunction(this ref Tree t, @string name) {
+internal static bool hasFunctionᴍ(ref Tree t, @string name) {
     foreach (var (_, funcMap) in range(t.funcs)) {
         if (funcMap == nil) {
             continue;
@@ -1098,13 +1098,13 @@ internal static bool hasFunction(this ref Tree t, @string name) {
 }
 
 // popVars trims the variable list to the specified length
-internal static void popVars(this ref Tree t, nint n) {
+internal static void popVarsᴍ(ref Tree t, nint n) {
     t.vars = t.vars.slice(0, n);
 }
 
 // useVar returns a node for a variable reference. It errors if the
 // variable is not defined.
-internal static Node useVar(this ж<Tree> Ꮡt, Pos pos, @string name) {
+internal static Node useVarᴍ(ж<Tree> Ꮡt, Pos pos, @string name) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var v = Ꮡt.newVariable(pos, name);
@@ -1118,3 +1118,52 @@ internal static Node useVar(this ж<Tree> Ꮡt, Pos pos, @string name) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class parseᴛTree {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Tree> Copy(this ж<Tree> Ꮡt) => parse_package.Copyᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static item next(this ref Tree t) => parse_package.nextᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void backup(this ref Tree t) => parse_package.backupᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void backup2(this ref Tree t, item t1) => parse_package.backup2ᴍ(ref t, t1);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void backup3(this ref Tree t, item t2, item t1) => parse_package.backup3ᴍ(ref t, t2, t1);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static item peek(this ref Tree t) => parse_package.peekᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static item /*token*/ nextNonSpace(this ref Tree t) => parse_package.nextNonSpaceᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static item peekNonSpace(this ref Tree t) => parse_package.peekNonSpaceᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡt, Node n) => parse_package.ErrorContextᴍ(Ꮡt, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ref Tree t, @string format, params ꓸꓸꓸany argsʗp) => parse_package.errorfᴍ(ref t, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref Tree t, error err) => parse_package.errorᴍ(ref t, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static item expect(this ref Tree t, itemType expected, @string context) => parse_package.expectᴍ(ref t, expected, context);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static item expectOneOf(this ref Tree t, itemType expected1, itemType expected2, @string context) => parse_package.expectOneOfᴍ(ref t, expected1, expected2, context);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unexpected(this ref Tree t, item token, @string context) => parse_package.unexpectedᴍ(ref t, token, context);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) => parse_package.recoverᴍ(Ꮡt, Ꮡerrp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) => parse_package.startParseᴍ(ref t, funcs, Ꮡlex, treeSet);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stopParse(this ref Tree t) => parse_package.stopParseᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) => parse_package.Parseᴍ(Ꮡt, text, leftDelim, rightDelim, treeSet, funcsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ж<Tree> Ꮡt) => parse_package.addᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parse(this ж<Tree> Ꮡt) => parse_package.parseᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseDefinition(this ж<Tree> Ꮡt) => parse_package.parseDefinitionᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ListNode> list, Node next) itemList(this ж<Tree> Ꮡt) => parse_package.itemListᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node textOrAction(this ж<Tree> Ꮡt) => parse_package.textOrActionᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clearActionLine(this ref Tree t) => parse_package.clearActionLineᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node /*n*/ action(this ж<Tree> Ꮡt) => parse_package.actionᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node breakControl(this ж<Tree> Ꮡt, Pos pos, nint line) => parse_package.breakControlᴍ(Ꮡt, pos, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node continueControl(this ж<Tree> Ꮡt, Pos pos, nint line) => parse_package.continueControlᴍ(Ꮡt, pos, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<PipeNode> /*pipe*/ pipeline(this ж<Tree> Ꮡt, @string context, itemType end) => parse_package.pipelineᴍ(Ꮡt, context, end);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @string context) => parse_package.checkPipelineᴍ(ref t, Ꮡpipe, context);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) parseControl(this ж<Tree> Ꮡt, @string context) => parse_package.parseControlᴍ(Ꮡt, context);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node ifControl(this ж<Tree> Ꮡt) => parse_package.ifControlᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node rangeControl(this ж<Tree> Ꮡt) => parse_package.rangeControlᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node withControl(this ж<Tree> Ꮡt) => parse_package.withControlᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node endControl(this ж<Tree> Ꮡt) => parse_package.endControlᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node elseControl(this ж<Tree> Ꮡt) => parse_package.elseControlᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node blockControl(this ж<Tree> Ꮡt) => parse_package.blockControlᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node templateControl(this ж<Tree> Ꮡt) => parse_package.templateControlᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string /*name*/ parseTemplateName(this ref Tree t, item token, @string context) => parse_package.parseTemplateNameᴍ(ref t, token, context);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<CommandNode> command(this ж<Tree> Ꮡt) => parse_package.commandᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node operand(this ж<Tree> Ꮡt) => parse_package.operandᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node term(this ж<Tree> Ꮡt) => parse_package.termᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasFunction(this ref Tree t, @string name) => parse_package.hasFunctionᴍ(ref t, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void popVars(this ref Tree t, nint n) => parse_package.popVarsᴍ(ref t, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node useVar(this ж<Tree> Ꮡt, Pos pos, @string name) => parse_package.useVarᴍ(Ꮡt, pos, name);
+}
+// </GlyphForwarders>

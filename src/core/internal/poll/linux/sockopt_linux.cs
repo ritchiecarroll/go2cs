@@ -8,10 +8,10 @@ using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // SetsockoptIPMreqn wraps the setsockopt network call with an IPMreqn argument.
-public static error SetsockoptIPMreqn(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreqn> mreq) {
+internal static error SetsockoptIPMreqnᴍ(ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreqn> mreq) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -28,3 +28,9 @@ public static error SetsockoptIPMreqn(this ж<FD> Ꮡfd, nint level, nint name, 
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pollᴛFD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptIPMreqn(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreqn> mreq) => poll_package.SetsockoptIPMreqnᴍ(Ꮡfd, level, name, mreq);
+}
+// </GlyphForwarders>

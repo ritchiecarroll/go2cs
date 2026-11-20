@@ -75,7 +75,7 @@ partial struct CertificateInvalidError {
     public @string Detail;
 }
 
-} partial class x509ᴛCertificateInvalidError {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509CertificateIsNotˢ => ref x509CertificateIsNotˢᵇ;
@@ -93,7 +93,7 @@ private static readonly @string x509NoValidChainsBuiltˢᵇ = "x509: no valid ch
 internal static ref readonly @string x509UnknownErrorˢ => ref x509UnknownErrorˢᵇ;
 private static readonly @string x509UnknownErrorˢᵇ = "x509: unknown error"u8;
 
-public static @string Error(this CertificateInvalidError e) {
+internal static @string Errorᴍ(CertificateInvalidError e) {
     switch (e.Reason) {
     case var ᴛ when ᴛ == NotAuthorizedToSign: {
         return x509CertificateIsNotˢ;
@@ -141,13 +141,13 @@ partial struct HostnameError {
     public @string Host;
 }
 
-} partial class x509ᴛHostnameError {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509CertificateReliesOnˢ => ref x509CertificateReliesOnˢᵇ;
 private static readonly @string x509CertificateReliesOnˢᵇ = "x509: certificate relies on legacy Common Name field, use SANs instead"u8;
 
-public static @string Error(this HostnameError h) {
+internal static @string Errorᴍ(HostnameError h) {
     var c = h.Certificate;
     nint maxNamesIncluded = 100;
 
@@ -196,13 +196,13 @@ partial struct UnknownAuthorityError {
     internal ж<Certificate> hintCert;
 }
 
-} partial class x509ᴛUnknownAuthorityError {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509CertificateSignedByˢ => ref x509CertificateSignedByˢᵇ;
 private static readonly @string x509CertificateSignedByˢᵇ = "x509: certificate signed by unknown authority"u8;
 
-public static @string Error(this UnknownAuthorityError e) {
+internal static @string Errorᴍ(UnknownAuthorityError e) {
     @string s = x509CertificateSignedByˢ;
     if (e.hintErr != nil) {
         @string certName = e.hintCert.Subject.CommonName;
@@ -225,13 +225,13 @@ partial struct SystemRootsError {
     public error Err;
 }
 
-} partial class x509ᴛSystemRootsError {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509FailedToLoadSystemˢ => ref x509FailedToLoadSystemˢᵇ;
 private static readonly @string x509FailedToLoadSystemˢᵇ = "x509: failed to load system roots and no roots provided"u8;
 
-public static @string Error(this SystemRootsError se) {
+internal static @string Errorᴍ(SystemRootsError se) {
     @string msg = x509FailedToLoadSystemˢ;
     if (se.Err != nil) {
         return msg + "; "u8 + se.Err.Error();
@@ -239,7 +239,7 @@ public static @string Error(this SystemRootsError se) {
     return msg;
 }
 
-public static error Unwrap(this SystemRootsError se) { return se.Err; }
+internal static error Unwrapᴍ(SystemRootsError se) { return se.Err; }
 
 } partial class x509_package {
 
@@ -302,9 +302,9 @@ partial struct rfc2821Mailbox {
     internal @string local, domain;
 }
 
-} partial class x509ᴛrfc2821Mailbox {
+} partial class x509_package {
 
-internal static @string String(this rfc2821Mailbox s) {
+internal static @string Stringᴍ(rfc2821Mailbox s) {
     return fmt.Sprintf("%s@%s"u8, s.local, s.domain);
 }
 
@@ -484,7 +484,7 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
     return (reverseLabels, true);
 }
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509InternalErrorEmptyˢ => ref x509InternalErrorEmptyˢᵇ;
@@ -492,7 +492,7 @@ private static readonly @string x509InternalErrorEmptyˢᵇ = "x509: internal er
 
 // isValid performs validity checks on c given that it is a candidate to append
 // to the chain in currentChain.
-internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) {
+internal static error isValidᴍ(ж<Certificate> Ꮡc, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var opts = ref Ꮡopts.DerefOrNull();
 
@@ -594,7 +594,7 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
 // Certificates other than c in the returned chains should not be modified.
 //
 // WARNING: this function doesn't do any revocation checking.
-public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate> Ꮡc, VerifyOptions optsʗp) {
+internal static (slice<slice<ж<Certificate>>>, error) Verifyᴍ(ж<Certificate> Ꮡc, VerifyOptions optsʗp) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var opts = ref heap(optsʗp, out var Ꮡopts);
     var detailsᴷ = new stackAppend<@string>();
@@ -797,9 +797,9 @@ internal partial struct buildChains_type /*dyn*/ {
     internal slice<potentialParent> potentials;
 }
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
-internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(this ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> sigChecks, ж<VerifyOptions> Ꮡopts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) buildChainsᴍ(ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> sigChecks, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default;
     error err = default;
     ref var opts = ref Ꮡopts.DerefOrNull();
@@ -1008,7 +1008,7 @@ internal static @string toLowerCaseASCII(@string @in) {
     return (@string)@out;
 }
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
 // VerifyHostname returns nil if c is a valid certificate for the named host.
 // Otherwise it returns an error describing the mismatch.
@@ -1019,7 +1019,7 @@ internal static @string toLowerCaseASCII(@string @in) {
 // fields can have a wildcard as the complete left-most label (e.g. *.example.com).
 //
 // Note that the legacy Common Name field is ignored.
-public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) {
+internal static error VerifyHostnameᴍ(ж<Certificate> Ꮡc, @string h) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // IP addresses may be written in [ ].
@@ -1179,44 +1179,44 @@ internal static ж<policyGraph> newPolicyGraph() {
     ));
 }
 
-} partial class x509ᴛpolicyGraph {
+} partial class x509_package {
 
-internal static void insert(this ref policyGraph pg, ж<policyGraphNode> Ꮡn) {
+internal static void insertᴍ(ref policyGraph pg, ж<policyGraphNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     pg.strata[pg.depth].Set(((@string)n.validPolicy.der), Ꮡn);
 }
 
-internal static slice<ж<policyGraphNode>> parentsWithExpected(this ref policyGraph pg, OID expected) {
+internal static slice<ж<policyGraphNode>> parentsWithExpectedᴍ(ref policyGraph pg, OID expected) {
     if (pg.depth == 0) {
         return default;
     }
     return pg.parentIndex[tmpstring(expected.der)];
 }
 
-internal static ж<policyGraphNode> parentWithAnyPolicy(this ref policyGraph pg) {
+internal static ж<policyGraphNode> parentWithAnyPolicyᴍ(ref policyGraph pg) {
     if (pg.depth == 0) {
         return default;
     }
     return pg.strata[pg.depth - 1][tmpstring(anyPolicyOID.der)];
 }
 
-internal static iter.Seq<ж<policyGraphNode>> parents(this ref policyGraph pg) {
+internal static iter.Seq<ж<policyGraphNode>> parentsᴍ(ref policyGraph pg) {
     if (pg.depth == 0) {
         return default;
     }
     return maps.Values<map<@string, ж<policyGraphNode>>, @string, ж<policyGraphNode>>(pg.strata[pg.depth - 1]);
 }
 
-internal static map<@string, ж<policyGraphNode>> leaves(this ref policyGraph pg) {
+internal static map<@string, ж<policyGraphNode>> leavesᴍ(ref policyGraph pg) {
     return pg.strata[pg.depth];
 }
 
-internal static ж<policyGraphNode> leafWithPolicy(this ref policyGraph pg, OID policy) {
+internal static ж<policyGraphNode> leafWithPolicyᴍ(ref policyGraph pg, OID policy) {
     return pg.strata[pg.depth][tmpstring(policy.der)];
 }
 
-internal static void deleteLeaf(this ref policyGraph pg, OID policy) {
+internal static void deleteLeafᴍ(ref policyGraph pg, OID policy) {
     var n = pg.strata[pg.depth][tmpstring(policy.der)];
     if (n == nil) {
         return;
@@ -1230,7 +1230,7 @@ internal static void deleteLeaf(this ref policyGraph pg, OID policy) {
     delete(pg.strata[pg.depth], (@string)policy.der);
 }
 
-internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph pg) {
+internal static slice<ж<policyGraphNode>> validPolicyNodesᴍ(ref policyGraph pg) {
     var validNodesᴷ = new stackAppend<ж<policyGraphNode>>(moves: true);
 
     slice<ж<policyGraphNode>> validNodes = default;
@@ -1253,7 +1253,7 @@ internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph
     return validNodes;
 }
 
-internal static void prune(this ref policyGraph pg) {
+internal static void pruneᴍ(ref policyGraph pg) {
     for (nint i = pg.depth - 1; i > 0; i--) {
         foreach (var (_, n) in pg.strata[i]) {
             if (len(n.children) == 0) {
@@ -1266,7 +1266,7 @@ internal static void prune(this ref policyGraph pg) {
     }
 }
 
-internal static void incrDepth(this ref policyGraph pg) {
+internal static void incrDepthᴍ(ref policyGraph pg) {
     pg.parentIndex = new map<@string, slice<ж<policyGraphNode>>>{};
     foreach (var (_, n) in pg.strata[pg.depth]) {
         foreach (var (_, e) in range(n.expectedPolicySet)) {
@@ -1532,3 +1532,40 @@ internal static bool containsDistrustedSPKIHash(slice<ж<Certificate>> chain) {
 }
 
 } // end x509_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class x509ᴛCertificateInvalidError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this CertificateInvalidError e) => x509_package.Errorᴍ(e);
+}
+partial class x509ᴛHostnameError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this HostnameError h) => x509_package.Errorᴍ(h);
+}
+partial class x509ᴛUnknownAuthorityError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownAuthorityError e) => x509_package.Errorᴍ(e);
+}
+partial class x509ᴛSystemRootsError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this SystemRootsError se) => x509_package.Errorᴍ(se);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this SystemRootsError se) => x509_package.Unwrapᴍ(se);
+}
+partial class x509ᴛrfc2821Mailbox {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this rfc2821Mailbox s) => x509_package.Stringᴍ(s);
+}
+partial class x509ᴛCertificate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) => x509_package.isValidᴍ(Ꮡc, certType, currentChain, Ꮡopts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate> Ꮡc, VerifyOptions optsʗp) => x509_package.Verifyᴍ(Ꮡc, optsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(this ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> sigChecks, ж<VerifyOptions> Ꮡopts) => x509_package.buildChainsᴍ(Ꮡc, currentChain, sigChecks, Ꮡopts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) => x509_package.VerifyHostnameᴍ(Ꮡc, h);
+}
+partial class x509ᴛpolicyGraph {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insert(this ref policyGraph pg, ж<policyGraphNode> Ꮡn) => x509_package.insertᴍ(ref pg, Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<policyGraphNode>> parentsWithExpected(this ref policyGraph pg, OID expected) => x509_package.parentsWithExpectedᴍ(ref pg, expected);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<policyGraphNode> parentWithAnyPolicy(this ref policyGraph pg) => x509_package.parentWithAnyPolicyᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<ж<policyGraphNode>> parents(this ref policyGraph pg) => x509_package.parentsᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static map<@string, ж<policyGraphNode>> leaves(this ref policyGraph pg) => x509_package.leavesᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<policyGraphNode> leafWithPolicy(this ref policyGraph pg, OID policy) => x509_package.leafWithPolicyᴍ(ref pg, policy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deleteLeaf(this ref policyGraph pg, OID policy) => x509_package.deleteLeafᴍ(ref pg, policy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph pg) => x509_package.validPolicyNodesᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void prune(this ref policyGraph pg) => x509_package.pruneᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void incrDepth(this ref policyGraph pg) => x509_package.incrDepthᴍ(ref pg);
+}
+// </GlyphForwarders>

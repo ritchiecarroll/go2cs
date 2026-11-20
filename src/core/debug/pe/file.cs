@@ -57,12 +57,12 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
-} partial class peᴛFile {
+} partial class pe_package {
 
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-public static error Close(this ref File f) {
+internal static error Closeᴍ(ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -185,13 +185,13 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 partial struct nobitsSectionReader {
 }
 
-} partial class peᴛnobitsSectionReader {
+} partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedReadFromˢ => ref unexpectedReadFromˢᵇ;
 private static readonly @string unexpectedReadFromˢᵇ = "unexpected read from section with uninitialized data"u8;
 
-internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAtᴍ(ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromˢ));
 }
 
@@ -211,11 +211,11 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     return ("", false);
 }
 
-} partial class peᴛFile {
+} partial class pe_package {
 
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-public static ж<Section> Section(this ref File f, @string name) {
+internal static ж<Section> Sectionᴍ(ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -240,7 +240,7 @@ private static readonly @string rangesˢᵇ = "ranges"u8;
 internal static ref readonly @string strˢ => ref strˢᵇ;
 private static readonly @string strˢᵇ = "str"u8;
 
-public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
+internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
     @string dwarfSuffix(ж<Section> s) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(s.Name, debugˢ): {
@@ -349,7 +349,7 @@ partial struct ImportDirectory {
     internal @string dll;
 }
 
-} partial class peᴛFile {
+} partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string optionalHeaderDataˢ => ref optionalHeaderDataˢᵇ;
@@ -365,7 +365,7 @@ private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇ = "thunk parsing 
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-public static (slice<@string>, error) ImportedSymbols(this ref File f) {
+internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
     if (f.OptionalHeader == nil) {
         return (default, default);
     }
@@ -503,7 +503,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
     // TODO
     // cgo -dynimport don't use this for windows PE, so just return.
     return (default, default);
@@ -516,13 +516,13 @@ public static (slice<@string>, error) ImportedLibraries(this ref File f) {
 partial struct FormatError {
 }
 
-} partial class peᴛFormatError {
+} partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownErrorˢ => ref unknownErrorˢᵇ;
 private static readonly @string unknownErrorˢᵇ = "unknown error"u8;
 
-public static @string Error(this ref FormatError e) {
+internal static @string Errorᴍ(ref FormatError e) {
     return unknownErrorˢ;
 }
 
@@ -634,3 +634,19 @@ internal static (slice<DataDirectory>, error) readDataDirectories(io.ReadSeeker 
 }
 
 } // end pe_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class peᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref File f) => pe_package.Closeᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => pe_package.Sectionᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ref File f) => pe_package.DWARFᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedSymbols(this ref File f) => pe_package.ImportedSymbolsᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => pe_package.ImportedLibrariesᴍ(ref f);
+}
+partial class peᴛnobitsSectionReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) => pe_package.ReadAtᴍ(ref _, p, off);
+}
+partial class peᴛFormatError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref FormatError e) => pe_package.Errorᴍ(ref e);
+}
+// </GlyphForwarders>

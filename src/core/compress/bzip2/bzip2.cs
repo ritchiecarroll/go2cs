@@ -19,9 +19,9 @@ partial class bzip2_package {
 // syntactically invalid.
 partial struct StructuralError /*@string*/;
 
-} partial class bzip2ᴛStructuralError {
+} partial class bzip2_package {
 
-public static @string Error(this StructuralError s) {
+internal static @string Errorᴍ(StructuralError s) {
     return "bzip2 data invalid: "u8 + ((@string)s);
 }
 
@@ -59,7 +59,7 @@ internal static UntypedInt bzip2FileMagic => 0x425a; // "BZ"
 internal static UntypedInt bzip2BlockMagic => 0x314159265359;
 internal static UntypedInt bzip2FinalMagic => 0x177245385090;
 
-} partial class bzip2ᴛreader {
+} partial class bzip2_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badMagicValueˢ => ref badMagicValueˢᵇ;
@@ -70,7 +70,7 @@ internal static ref readonly @string invalidCompressionLevelˢ => ref invalidCom
 private static readonly @string invalidCompressionLevelˢᵇ = "invalid compression level"u8;
 
 // setup parses the bzip2 header.
-internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) {
+internal static error setupᴍ(ж<reader> Ꮡbz2, bool needMagic) {
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
     var br = Ꮡbz2.Ꮡbr;
@@ -100,7 +100,7 @@ internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) {
     return default;
 }
 
-internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf) {
+internal static (nint n, error err) Readᴍ(ж<reader> Ꮡbz2, slice<byte> buf) {
     nint n = default;
     error err = default;
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
@@ -129,7 +129,7 @@ internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf
     return (n, err);
 }
 
-internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
+internal static nint readFromBlockᴍ(ref reader bz2, slice<byte> buf) {
     // bzip2 is a block based compressor, except that it has a run-length
     // preprocessing step. The block based nature means that we can
     // preallocate fixed-size buffers and reuse them. However, the RLE
@@ -192,7 +192,7 @@ private static readonly @string fileChecksumMismatchˢᵇ = "file checksum misma
 internal static ref readonly @string badMagicValueInˢ => ref badMagicValueInˢᵇ;
 private static readonly @string badMagicValueInˢᵇ = "bad magic value in continuation file"u8;
 
-internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
+internal static (nint, error) readᴍ(ж<reader> Ꮡbz2, slice<byte> buf) {
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
     for (;;) {
@@ -295,7 +295,7 @@ internal static ref readonly @string origPtrOutOfBoundsˢ => ref origPtrOutOfBou
 private static readonly @string origPtrOutOfBoundsˢᵇ = "origPtr out of bounds"u8;
 
 // readBlock reads a bzip2 block. The magic number should already have been consumed.
-internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
+internal static error /*err*/ readBlockᴍ(ж<reader> Ꮡbz2) {
     error err = default;
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
@@ -566,3 +566,16 @@ internal static uint32 updateCRC(uint32 val, slice<byte> b) {
 }
 
 } // end bzip2_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bzip2ᴛStructuralError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this StructuralError s) => bzip2_package.Errorᴍ(s);
+}
+partial class bzip2ᴛreader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) => bzip2_package.setupᴍ(Ꮡbz2, needMagic);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf) => bzip2_package.Readᴍ(Ꮡbz2, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) => bzip2_package.readFromBlockᴍ(ref bz2, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) => bzip2_package.readᴍ(Ꮡbz2, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) => bzip2_package.readBlockᴍ(Ꮡbz2);
+}
+// </GlyphForwarders>

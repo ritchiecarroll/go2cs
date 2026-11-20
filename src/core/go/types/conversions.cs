@@ -17,11 +17,11 @@ using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // conversion type-checks the conversion T(x).
 // The result is in x.
-internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) {
+internal static void conversionᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var constArg = x.mode == constant_;
@@ -138,7 +138,7 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Typ
     x.typ = T;
 }
 
-} partial class typesᴛoperand {
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string conversionOfSliceToArrayˢ => ref conversionOfSliceToArrayˢᵇ;
@@ -160,7 +160,7 @@ private static readonly @string conversionOfSliceToArrayˢ2ᵇ = "conversion of 
 // may be set to the cause for the failure.
 // The check parameter may be nil if convertibleTo is invoked through an
 // exported API call, i.e., when all methods have been type-checked.
-internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) {
+internal static bool convertibleToᴍ(ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
@@ -365,3 +365,12 @@ internal static bool isBytesOrRunes(Type typ) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) => types_package.conversionᴍ(Ꮡcheck, Ꮡx, T);
+}
+partial class typesᴛoperand {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) => types_package.convertibleToᴍ(Ꮡx, Ꮡcheck, T, Ꮡcause);
+}
+// </GlyphForwarders>

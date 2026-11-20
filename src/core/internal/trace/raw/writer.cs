@@ -33,10 +33,10 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, version.Version v) {
     return (Ꮡ(new Writer(w: w, v: v, specs: v.Specs())), err);
 }
 
-} partial class rawᴛWriter {
+} partial class raw_package {
 
 // WriteEvent writes a single event to the trace wire format stream.
-public static error WriteEvent(this ref Writer w, Event e) {
+internal static error WriteEventᴍ(ref Writer w, Event e) {
     // Check version.
     if (e.Version != w.v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);
@@ -78,3 +78,9 @@ public static error WriteEvent(this ref Writer w, Event e) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class rawᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteEvent(this ref Writer w, Event e) => raw_package.WriteEventᴍ(ref w, e);
+}
+// </GlyphForwarders>

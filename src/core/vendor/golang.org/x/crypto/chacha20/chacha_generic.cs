@@ -146,7 +146,7 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     return (a, b, c, d);
 }
 
-} partial class chacha20ᴛCipher {
+} partial class chacha20_package {
 
 // SetCounter sets the Cipher counter. The next invocation of XORKeyStream will
 // behave as if (64 * counter) bytes had been encrypted so far.
@@ -156,7 +156,7 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
 //
 // Note that the execution time of XORKeyStream is not independent of the
 // counter value.
-public static void SetCounter(this ref Cipher s, uint32 counter) {
+internal static void SetCounterᴍ(ref Cipher s, uint32 counter) {
     // Internally, s may buffer multiple blocks, which complicates this
     // implementation slightly. When checking whether the counter has rolled
     // back, we must use both s.counter and s.len to determine how many blocks
@@ -188,7 +188,7 @@ public static void SetCounter(this ref Cipher s, uint32 counter) {
 // Multiple calls to XORKeyStream behave as if the concatenation of
 // the src buffers was passed in a single run. That is, Cipher
 // maintains state and does not reset at each XORKeyStream call.
-public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStreamᴍ(ref Cipher s, slice<byte> dst, slice<byte> src) {
     if (len(src) == 0) {
         return;
     }
@@ -260,7 +260,7 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
     }
 }
 
-internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> dst, slice<byte> src) {
+internal static void xorKeyStreamBlocksGenericᴍ(ref Cipher s, slice<byte> dst, slice<byte> src) {
     if (len(dst) != len(src) || len(dst) % (nint)blockSize != 0) {
         throw panic("chacha20: internal error: wrong dst and/or src length");
     }
@@ -423,3 +423,11 @@ internal static (slice<byte>, error) hChaCha20(slice<byte> @out, slice<byte> key
 }
 
 } // end chacha20_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class chacha20ᴛCipher {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetCounter(this ref Cipher s, uint32 counter) => chacha20_package.SetCounterᴍ(ref s, counter);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.XORKeyStreamᴍ(ref s, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.xorKeyStreamBlocksGenericᴍ(ref s, dst, src);
+}
+// </GlyphForwarders>

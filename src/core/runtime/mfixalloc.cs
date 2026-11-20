@@ -51,7 +51,7 @@ partial struct mlink {
     internal ж<mlink> next;
 }
 
-} partial class runtimeᴛfixalloc {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeFixallocSizeTooˢ => ref runtimeFixallocSizeTooˢᵇ;
@@ -59,7 +59,7 @@ private static readonly @string runtimeFixallocSizeTooˢᵇ = "runtime: fixalloc
 
 // Initialize f to allocate objects of the given size,
 // using the allocator to obtain chunks of memory.
-internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Pointer, @unsafe.Pointer> first, @unsafe.Pointer arg, ж<sysMemStat> Ꮡstat) {
+internal static void initᴍ(ref fixalloc f, uintptr size, Action<@unsafe.Pointer, @unsafe.Pointer> first, @unsafe.Pointer arg, ж<sysMemStat> Ꮡstat) {
     ref var stat = ref Ꮡstat.DerefOrNull();
 
     if (size > _FixAllocChunk) {
@@ -83,7 +83,7 @@ internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Poin
 internal static ref readonly @string runtimeInternalErrorˢ => ref runtimeInternalErrorˢᵇ;
 private static readonly @string runtimeInternalErrorˢᵇ = "runtime: internal error"u8;
 
-internal static @unsafe.Pointer alloc(this ref fixalloc f) {
+internal static @unsafe.Pointer allocᴍ(ref fixalloc f) {
     if (f.size == 0) {
         print((@string)"runtime: use of FixAlloc_Alloc before FixAlloc_Init\n");
         @throw(runtimeInternalErrorˢ);
@@ -113,7 +113,7 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
     return v;
 }
 
-internal static void free(this ref fixalloc f, @unsafe.Pointer p) {
+internal static void freeᴍ(ref fixalloc f, @unsafe.Pointer p) {
     f.inuse -= f.size;
     var v = @unsafe.Pointer.To<mlink>(p);
     v.next = f.list;
@@ -121,3 +121,11 @@ internal static void free(this ref fixalloc f, @unsafe.Pointer p) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛfixalloc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Pointer, @unsafe.Pointer> first, @unsafe.Pointer arg, ж<sysMemStat> Ꮡstat) => runtime_package.initᴍ(ref f, size, first, arg, Ꮡstat);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer alloc(this ref fixalloc f) => runtime_package.allocᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ref fixalloc f, @unsafe.Pointer p) => runtime_package.freeᴍ(ref f, p);
+}
+// </GlyphForwarders>

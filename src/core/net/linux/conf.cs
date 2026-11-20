@@ -208,12 +208,12 @@ internal static bool goosPrefersCgo() {
     }}
 }
 
-} partial class netᴛconf {
+} partial class net_package {
 
 // mustUseGoResolver reports whether a DNS lookup of any sort is
 // required to use the go resolver. The provided Resolver is optional.
 // This will report true if the cgo resolver is not available.
-internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
+internal static bool mustUseGoResolverᴍ(ref conf c, ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!cgoAvailable) {
@@ -239,7 +239,7 @@ internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
 // addrLookupOrder determines which strategy to use to resolve addresses.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrderᴍ(ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
     hostLookupOrder ret = default;
     ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
@@ -261,7 +261,7 @@ internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(thi
 // hostLookupOrder determines which strategy to use to resolve hostname.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrderᴍ(ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
     hostLookupOrder ret = default;
     ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
@@ -292,7 +292,7 @@ private static readonly @string etcMdnsAllowˢᵇ = "/etc/mdns.allow"u8;
 internal static ref readonly @string dnsˢ => ref dnsˢᵇ;
 private static readonly @string dnsˢᵇ = "dns"u8;
 
-internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> r, @string hostname) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrderᴍ(ref conf c, ж<Resolver> r, @string hostname) {
     ж<dnsConfig> dnsConf = default;
 
     // fallbackOrder is the order we return if we can't figure it out.
@@ -631,3 +631,12 @@ internal static bool isOutbound(@string h) {
 }
 
 } // end net_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛconf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) => net_package.mustUseGoResolverᴍ(ref c, Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string addr) => net_package.addrLookupOrderᴍ(Ꮡc, r, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string hostname) => net_package.hostLookupOrderᴍ(Ꮡc, r, hostname);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> r, @string hostname) => net_package.lookupOrderᴍ(ref c, r, hostname);
+}
+// </GlyphForwarders>

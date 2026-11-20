@@ -67,10 +67,10 @@ partial struct @file {
     internal bool inRoot;                     // whether file is opened in a Root
 }
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // fd is the Unix implementation of Fd.
-internal static uintptr fd(this ж<File> Ꮡf) {
+internal static uintptr fdᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -315,9 +315,9 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     return (f, default);
 }
 
-} partial class osᴛfile {
+} partial class os_package {
 
-internal static error close(this ж<@file> Ꮡfile) {
+internal static error closeᴍ(ж<@file> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {
@@ -339,13 +339,13 @@ internal static error close(this ж<@file> Ꮡfile) {
     return err;
 }
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // seek sets the offset for the next Read or Write on file to offset, interpreted
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
-internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, nint whence) {
+internal static (int64 ret, error err) seekᴍ(ж<File> Ꮡf, int64 offset, nint whence) {
     int64 ret = default;
     error err = default;
 
@@ -473,20 +473,20 @@ partial struct unixDirent {
     internal FileInfo info;
 }
 
-} partial class osᴛunixDirent {
+} partial class os_package {
 
-internal static @string Name(this ref unixDirent d) { return d.name; }
-internal static bool IsDir(this ref unixDirent d) { return d.typ.IsDir(); }
-internal static FileMode Type(this ref unixDirent d) { return d.typ; }
+internal static @string Nameᴍ(ref unixDirent d) { return d.name; }
+internal static bool IsDirᴍ(ref unixDirent d) { return d.typ.IsDir(); }
+internal static FileMode Typeᴍ(ref unixDirent d) { return d.typ; }
 
-internal static (FileInfo, error) Info(this ref unixDirent d) {
+internal static (FileInfo, error) Infoᴍ(ref unixDirent d) {
     if (d.info != nil) {
         return (d.info, default);
     }
     return Lstat(d.parent + "/"u8 + d.name);
 }
 
-internal static @string String(this ж<unixDirent> Ꮡd) {
+internal static @string Stringᴍ(ж<unixDirent> Ꮡd) {
     return fs.FormatDirEntry(new unixDirentжDirEntry(Ꮡd));
 }
 
@@ -518,3 +518,20 @@ internal static (DirEntry, error) newUnixDirent(ж<File> Ꮡparent, @string name
 }
 
 } // end os_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr fd(this ж<File> Ꮡf) => os_package.fdᴍ(Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, nint whence) => os_package.seekᴍ(Ꮡf, offset, whence);
+}
+partial class osᴛfile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ж<@file> Ꮡfile) => os_package.closeᴍ(Ꮡfile);
+}
+partial class osᴛunixDirent {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this ref unixDirent d) => os_package.Nameᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsDir(this ref unixDirent d) => os_package.IsDirᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static FileMode Type(this ref unixDirent d) => os_package.Typeᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (FileInfo, error) Info(this ref unixDirent d) => os_package.Infoᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<unixDirent> Ꮡd) => os_package.Stringᴍ(Ꮡd);
+}
+// </GlyphForwarders>

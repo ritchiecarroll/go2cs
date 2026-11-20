@@ -8,12 +8,12 @@ using static fiat_package;
 
 partial class fiat_package {
 
-} partial class fiatᴛP521Element {
+} partial class fiat_package {
 
 // Invert sets e = 1/x, and returns e.
 //
 // If x == 0, Invert returns e = 0.
-public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> x) {
+internal static ж<P521Element> Invertᴍ(ж<P521Element> Ꮡe, ж<P521Element> x) {
     // Inversion is implemented as exponentiation with exponent p − 2.
     // The sequence of 13 multiplications and 520 squarings is derived from the
     // following addition chain generated with github.com/mmcloughlin/addchain v0.4.0.
@@ -93,3 +93,9 @@ public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> 
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fiatᴛP521Element {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> x) => fiat_package.Invertᴍ(Ꮡe, x);
+}
+// </GlyphForwarders>

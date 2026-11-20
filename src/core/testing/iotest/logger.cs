@@ -14,9 +14,9 @@ partial struct writeLogger {
     internal io.Writer w;
 }
 
-} partial class iotestᴛwriteLogger {
+} partial class iotest_package {
 
-internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(ref writeLogger l, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -43,9 +43,9 @@ partial struct readLogger {
     internal io.Reader r;
 }
 
-} partial class iotestᴛreadLogger {
+} partial class iotest_package {
 
-internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref readLogger l, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -68,3 +68,12 @@ public static io.Reader NewReadLogger(@string prefix, io.Reader r) {
 }
 
 } // end iotest_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class iotestᴛwriteLogger {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) => iotest_package.Writeᴍ(ref l, p);
+}
+partial class iotestᴛreadLogger {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) => iotest_package.Readᴍ(ref l, p);
+}
+// </GlyphForwarders>

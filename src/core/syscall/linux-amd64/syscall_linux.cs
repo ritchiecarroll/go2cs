@@ -447,40 +447,40 @@ internal static UntypedInt exited => 0x00;
 internal static UntypedInt stopped => 0x7F;
 internal static UntypedInt shift => 8;
 
-} partial class syscallᴛWaitStatus {
+} partial class syscall_package {
 
-public static bool Exited(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
+internal static bool Exitedᴍ(WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
 
-public static bool Signaled(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited; }
+internal static bool Signaledᴍ(WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited; }
 
-public static bool Stopped(this WaitStatus w) { return (WaitStatus)(w & 0xFF) == stopped; }
+internal static bool Stoppedᴍ(WaitStatus w) { return (WaitStatus)(w & 0xFF) == stopped; }
 
-public static bool Continued(this WaitStatus w) { return w == 0xFFFF; }
+internal static bool Continuedᴍ(WaitStatus w) { return w == 0xFFFF; }
 
-public static bool CoreDump(this WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
+internal static bool CoreDumpᴍ(WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
 
-public static nint ExitStatus(this WaitStatus w) {
+internal static nint ExitStatusᴍ(WaitStatus w) {
     if (!w.Exited()) {
         return -1;
     }
     return (nint)(w >> (int)(shift)) & 0xFF;
 }
 
-public static Signal Signal(this WaitStatus w) {
+internal static Signal Signalᴍ(WaitStatus w) {
     if (!w.Signaled()) {
         return -1;
     }
     return (Signal)(nint)((WaitStatus)(w & (uint32)mask));
 }
 
-public static Signal StopSignal(this WaitStatus w) {
+internal static Signal StopSignalᴍ(WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
     return (Signal)(((Signal)(nint)((w >> (int)(shift)))) & 0xFF);
 }
 
-public static nint TrapCause(this WaitStatus w) {
+internal static nint TrapCauseᴍ(WaitStatus w) {
     if (w.StopSignal() != SIGTRAP) {
         return -1;
     }
@@ -507,17 +507,17 @@ public static error /*err*/ Mkfifo(@string path, uint32 mode) {
     return Mknod(path, mode | (uint32)S_IFIFO, 0);
 }
 
-} partial class syscallᴛSockaddrInet4 {
+} partial class syscall_package {
 
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class syscallᴛSockaddrInet6 {
+} partial class syscall_package {
 
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class syscallᴛSockaddrUnix {
+} partial class syscall_package {
 
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddrᴍ(ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     @string name = sa.Name;
@@ -565,9 +565,9 @@ partial struct SockaddrLinklayer {
     internal RawSockaddrLinklayer raw;
 }
 
-} partial class syscallᴛSockaddrLinklayer {
+} partial class syscall_package {
 
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLinklayer> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddrᴍ(ж<SockaddrLinklayer> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     if (sa.Ifindex < 0 || sa.Ifindex > 0x7fffffff) {
@@ -593,9 +593,9 @@ partial struct SockaddrNetlink {
     internal RawSockaddrNetlink raw;
 }
 
-} partial class syscallᴛSockaddrNetlink {
+} partial class syscall_package {
 
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrNetlink> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddrᴍ(ж<SockaddrNetlink> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     sa.raw.Family = AF_NETLINK;
@@ -1195,3 +1195,26 @@ public static error /*err*/ prlimit(nint pid, nint resource, ж<Rlimit> newlimit
 }
 
 } // end syscall_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class syscallᴛWaitStatus {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Exited(this WaitStatus w) => syscall_package.Exitedᴍ(w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Signaled(this WaitStatus w) => syscall_package.Signaledᴍ(w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Stopped(this WaitStatus w) => syscall_package.Stoppedᴍ(w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Continued(this WaitStatus w) => syscall_package.Continuedᴍ(w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CoreDump(this WaitStatus w) => syscall_package.CoreDumpᴍ(w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint ExitStatus(this WaitStatus w) => syscall_package.ExitStatusᴍ(w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Signal Signal(this WaitStatus w) => syscall_package.Signalᴍ(w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Signal StopSignal(this WaitStatus w) => syscall_package.StopSignalᴍ(w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint TrapCause(this WaitStatus w) => syscall_package.TrapCauseᴍ(w);
+}
+partial class syscallᴛSockaddrUnix {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) => syscall_package.sockaddrᴍ(Ꮡsa);
+}
+partial class syscallᴛSockaddrLinklayer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLinklayer> Ꮡsa) => syscall_package.sockaddrᴍ(Ꮡsa);
+}
+partial class syscallᴛSockaddrNetlink {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrNetlink> Ꮡsa) => syscall_package.sockaddrᴍ(Ꮡsa);
+}
+// </GlyphForwarders>

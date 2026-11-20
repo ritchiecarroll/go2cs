@@ -24,9 +24,9 @@ private static readonly @string _attr_nameᵇ = "attrNoneattrScriptattrScriptTyp
 
 internal static array<uint8> _attr_index = new uint8[]{0, 8, 18, 32, 41, 48, 58, 73}.array();
 
-} partial class templateᴛattr {
+} partial class template_package {
 
-internal static @string String(this attr i) {
+internal static @string Stringᴍ(attr i) {
     if (i >= ((attr)(uint8)(len(_attr_index) - 1))) {
         return "attr("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -34,3 +34,9 @@ internal static @string String(this attr i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class templateᴛattr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this attr i) => template_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

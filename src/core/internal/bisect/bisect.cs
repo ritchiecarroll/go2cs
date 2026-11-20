@@ -331,18 +331,18 @@ partial struct cond {
     internal bool result;
 }
 
-} partial class bisectᴛMatcher {
+} partial class bisect_package {
 
 // MarkerOnly reports whether it is okay to print only the marker for
 // a given change, omitting the identifying information.
 // MarkerOnly returns true when bisect is using the printed reports
 // only for an intermediate search step, not for showing to users.
-public static bool MarkerOnly(this ref Matcher m) {
+internal static bool MarkerOnlyᴍ(ref Matcher m) {
     return !m.verbose;
 }
 
 // ShouldEnable reports whether the change with the given id should be enabled.
-public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
+internal static bool ShouldEnableᴍ(ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
@@ -352,7 +352,7 @@ public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
 }
 
 // ShouldPrint reports whether to print identifying information about the change with the given id.
-public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
+internal static bool ShouldPrintᴍ(ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil || m.quiet) {
@@ -362,7 +362,7 @@ public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
 }
 
 // matchResult returns the result from the first condition that matches id.
-internal static bool matchResult(this ref Matcher m, uint64 id) {
+internal static bool matchResultᴍ(ref Matcher m, uint64 id) {
     for (nint i = len(m.list) - 1; i >= 0; i--) {
         var c = Ꮡ(m.list, i);
         if ((id & c.mask) == c.bits) {
@@ -374,7 +374,7 @@ internal static bool matchResult(this ref Matcher m, uint64 id) {
 
 // FileLine reports whether the change identified by file and line should be enabled.
 // If the change should be printed, FileLine prints a one-line report to w.
-public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
+internal static bool FileLineᴍ(ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
     if (Ꮡm == nil) {
         return true;
     }
@@ -383,7 +383,7 @@ public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint
 
 // fileLine does the real work for FileLine.
 // This lets FileLine's body handle m == nil and potentially be inlined.
-internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
+internal static bool fileLineᴍ(ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var h = Hash(@file, line);
@@ -430,12 +430,12 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
     return dst;
 }
 
-} partial class bisectᴛMatcher {
+} partial class bisect_package {
 
 // MatchStack assigns the current call stack a change ID.
 // If the stack should be printed, MatchStack prints it.
 // Then MatchStack reports whether a change at the current call stack should be enabled.
-public static partial bool Stack(this ж<Matcher> Ꮡm, Writer w) {
+internal static partial bool Stackᴍ(ж<Matcher> Ꮡm, Writer w) {
     if (Ꮡm == nil) {
         return true;
     }
@@ -444,7 +444,7 @@ public static partial bool Stack(this ж<Matcher> Ꮡm, Writer w) {
 
 // stack does the real work for Stack.
 // This lets stack's body handle m == nil and potentially be inlined.
-internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
+internal static partial bool stackᴍ(ж<Matcher> Ꮡm, Writer w) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     UntypedInt maxStack = 16;
@@ -772,9 +772,9 @@ partial struct parseError {
     internal @string text;
 }
 
-} partial class bisectᴛparseError {
+} partial class bisect_package {
 
-internal static @string Error(this ref parseError e) { return e.text; }
+internal static @string Errorᴍ(ref parseError e) { return e.text; }
 
 } partial class bisect_package {
 
@@ -831,11 +831,11 @@ partial struct dedup {
     internal map<uint64, bool> m;
 }
 
-} partial class bisectᴛdedup {
+} partial class bisect_package {
 
 // seen records that h has now been seen and reports whether it was seen before.
 // When seen returns false, the caller is expected to print a report for h.
-internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
+internal static bool seenᴍ(ж<dedup> Ꮡd, uint64 h) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.mu.Lock();
@@ -852,7 +852,7 @@ internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
 // Each cache entry is N-way set-associative: h can appear in any of the slots.
 // If h does not appear in any of them, then it is inserted into a random slot,
 // overwriting whatever was there before.
-internal static bool seenLossy(this ref dedup d, uint64 h) {
+internal static bool seenLossyᴍ(ref dedup d, uint64 h) {
     var cache = Ꮡ(d.recent, (nuint)h % (nuint)len(d.recent));
     for (nint i = 0; i < 4; i++) {
         if (atomic.LoadUint64(cache.at<uint64>(i)) == h) {
@@ -870,3 +870,23 @@ internal static bool seenLossy(this ref dedup d, uint64 h) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bisectᴛMatcher {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool MarkerOnly(this ref Matcher m) => bisect_package.MarkerOnlyᴍ(ref m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) => bisect_package.ShouldEnableᴍ(Ꮡm, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) => bisect_package.ShouldPrintᴍ(Ꮡm, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool matchResult(this ref Matcher m, uint64 id) => bisect_package.matchResultᴍ(ref m, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) => bisect_package.FileLineᴍ(Ꮡm, w, @file, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) => bisect_package.fileLineᴍ(Ꮡm, w, @file, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Stack(this ж<Matcher> Ꮡm, Writer w) => bisect_package.Stackᴍ(Ꮡm, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool stack(this ж<Matcher> Ꮡm, Writer w) => bisect_package.stackᴍ(Ꮡm, w);
+}
+partial class bisectᴛparseError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref parseError e) => bisect_package.Errorᴍ(ref e);
+}
+partial class bisectᴛdedup {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool seen(this ж<dedup> Ꮡd, uint64 h) => bisect_package.seenᴍ(Ꮡd, h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool seenLossy(this ref dedup d, uint64 h) => bisect_package.seenLossyᴍ(ref d, h);
+}
+// </GlyphForwarders>

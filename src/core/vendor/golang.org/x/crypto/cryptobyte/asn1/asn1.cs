@@ -21,13 +21,13 @@ partial struct Tag /*num:uint8*/;
 internal static UntypedInt classConstructed => 0x20;
 internal static UntypedInt classContextSpecific => 0x80;
 
-} partial class asn1ᴛTag {
+} partial class asn1_package {
 
 // Constructed returns t with the constructed class bit set.
-public static Tag Constructed(this Tag t) { return (Tag)(t | (uint8)classConstructed); }
+internal static Tag Constructedᴍ(Tag t) { return (Tag)(t | (uint8)classConstructed); }
 
 // ContextSpecific returns t with the context-specific class bit set.
-public static Tag ContextSpecific(this Tag t) { return (Tag)(t | (uint8)classContextSpecific); }
+internal static Tag ContextSpecificᴍ(Tag t) { return (Tag)(t | (uint8)classContextSpecific); }
 
 } partial class asn1_package {
 
@@ -50,3 +50,10 @@ public static Tag GeneralizedTime => /* Tag(24) */ 24;
 public static Tag GeneralString => /* Tag(27) */ 27;
 
 } // end asn1_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class asn1ᴛTag {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Tag Constructed(this Tag t) => asn1_package.Constructedᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Tag ContextSpecific(this Tag t) => asn1_package.ContextSpecificᴍ(t);
+}
+// </GlyphForwarders>

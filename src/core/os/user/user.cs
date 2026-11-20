@@ -65,9 +65,9 @@ partial struct Group {
 // UnknownUserIdError is returned by [LookupId] when a user cannot be found.
 partial struct UnknownUserIdError /*num:nint*/;
 
-} partial class userᴛUnknownUserIdError {
+} partial class user_package {
 
-public static @string Error(this UnknownUserIdError e) {
+internal static @string Errorᴍ(UnknownUserIdError e) {
     return "user: unknown userid "u8 + strconv.Itoa((nint)e);
 }
 
@@ -77,9 +77,9 @@ public static @string Error(this UnknownUserIdError e) {
 // a user cannot be found.
 partial struct UnknownUserError /*@string*/;
 
-} partial class userᴛUnknownUserError {
+} partial class user_package {
 
-public static @string Error(this UnknownUserError e) {
+internal static @string Errorᴍ(UnknownUserError e) {
     return "user: unknown user "u8 + ((@string)e);
 }
 
@@ -89,9 +89,9 @@ public static @string Error(this UnknownUserError e) {
 // a group cannot be found.
 partial struct UnknownGroupIdError /*@string*/;
 
-} partial class userᴛUnknownGroupIdError {
+} partial class user_package {
 
-public static @string Error(this UnknownGroupIdError e) {
+internal static @string Errorᴍ(UnknownGroupIdError e) {
     return "group: unknown groupid "u8 + ((@string)e);
 }
 
@@ -101,10 +101,25 @@ public static @string Error(this UnknownGroupIdError e) {
 // a group cannot be found.
 partial struct UnknownGroupError /*@string*/;
 
-} partial class userᴛUnknownGroupError {
+} partial class user_package {
 
-public static @string Error(this UnknownGroupError e) {
+internal static @string Errorᴍ(UnknownGroupError e) {
     return "group: unknown group "u8 + ((@string)e);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class userᴛUnknownUserIdError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownUserIdError e) => user_package.Errorᴍ(e);
+}
+partial class userᴛUnknownUserError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownUserError e) => user_package.Errorᴍ(e);
+}
+partial class userᴛUnknownGroupIdError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownGroupIdError e) => user_package.Errorᴍ(e);
+}
+partial class userᴛUnknownGroupError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownGroupError e) => user_package.Errorᴍ(e);
+}
+// </GlyphForwarders>

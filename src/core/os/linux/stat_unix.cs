@@ -11,7 +11,7 @@ using static os_package;
 
 partial class os_package {
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string statˢ => ref statˢᵇ;
@@ -19,7 +19,7 @@ private static readonly @string statˢᵇ = "stat"u8;
 
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
-public static (FileInfo, error) Stat(this ж<File> Ꮡf) {
+internal static (FileInfo, error) Statᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -59,3 +59,9 @@ internal static (FileInfo, error) lstatNolog(@string name) {
 }
 
 } // end os_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (FileInfo, error) Stat(this ж<File> Ꮡf) => os_package.Statᴍ(Ꮡf);
+}
+// </GlyphForwarders>

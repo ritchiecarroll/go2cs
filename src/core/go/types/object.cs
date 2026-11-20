@@ -101,53 +101,53 @@ partial struct @object {
     internal token.Pos scopePos_;
 }
 
-} partial class typesᴛobject {
+} partial class types_package {
 
 // Parent returns the scope in which the object is declared.
 // The result is nil for methods and struct fields.
-internal static ж<Scope> Parent(this ref @object obj) { return obj.parent; }
+internal static ж<Scope> Parentᴍ(ref @object obj) { return obj.parent; }
 
 // Pos returns the declaration position of the object's identifier.
-internal static token.Pos Pos(this ref @object obj) { return obj.pos; }
+internal static token.Pos Posᴍ(ref @object obj) { return obj.pos; }
 
 // Pkg returns the package to which the object belongs.
 // The result is nil for labels and objects in the Universe scope.
-internal static ж<Package> Pkg(this ref @object obj) { return obj.pkg; }
+internal static ж<Package> Pkgᴍ(ref @object obj) { return obj.pkg; }
 
 // Name returns the object's (package-local, unqualified) name.
-internal static @string Name(this ref @object obj) { return obj.name; }
+internal static @string Nameᴍ(ref @object obj) { return obj.name; }
 
 // Type returns the object's type.
-internal static Type Type(this ref @object obj) { return obj.typ; }
+internal static Type Typeᴍ(ref @object obj) { return obj.typ; }
 
 // Exported reports whether the object is exported (starts with a capital letter).
 // It doesn't take into account whether the object is in a local (function) scope
 // or not.
-internal static bool Exported(this ref @object obj) { return isExported(obj.name); }
+internal static bool Exportedᴍ(ref @object obj) { return isExported(obj.name); }
 
 // Id is a wrapper for Id(obj.Pkg(), obj.Name()).
-internal static @string Id(this ref @object obj) { return types.Id(obj.pkg, obj.name); }
+internal static @string Idᴍ(ref @object obj) { return types.Id(obj.pkg, obj.name); }
 
-internal static @string String(this ref @object obj) { throw panic("abstract"); }
-internal static uint32 order(this ref @object obj) { return obj.order_; }
-internal static token.Pos scopePos(this ref @object obj) { return obj.scopePos_; }
+internal static @string Stringᴍ(ref @object obj) { throw panic("abstract"); }
+internal static uint32 orderᴍ(ref @object obj) { return obj.order_; }
+internal static token.Pos scopePosᴍ(ref @object obj) { return obj.scopePos_; }
 
-internal static void setParent(this ref @object obj, ж<Scope> Ꮡparent) {
+internal static void setParentᴍ(ref @object obj, ж<Scope> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     obj.parent = Ꮡparent;
 }
 
-internal static void setType(this ref @object obj, Type typ) { obj.typ = typ; }
+internal static void setTypeᴍ(ref @object obj, Type typ) { obj.typ = typ; }
 
-internal static void setOrder(this ref @object obj, uint32 order) {
+internal static void setOrderᴍ(ref @object obj, uint32 order) {
     assert(order > 0);
     obj.order_ = order;
 }
 
-internal static void setScopePos(this ref @object obj, token.Pos pos) { obj.scopePos_ = pos; }
+internal static void setScopePosᴍ(ref @object obj, token.Pos pos) { obj.scopePos_ = pos; }
 
-internal static bool sameId(this ref @object obj, ж<Package> Ꮡpkg, @string name, bool foldCase) {
+internal static bool sameIdᴍ(ref @object obj, ж<Package> Ꮡpkg, @string name, bool foldCase) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     // If we don't care about capitalization, we also ignore packages.
@@ -179,7 +179,7 @@ internal static bool sameId(this ref @object obj, ж<Package> Ꮡpkg, @string na
 // Objects are ordered nil before non-nil, exported before
 // non-exported, then by name, and finally (for non-exported
 // functions) by package path.
-internal static nint cmp(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
+internal static nint cmpᴍ(ж<@object> Ꮡa, ж<@object> Ꮡb) {
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -231,11 +231,11 @@ public static ж<PkgName> NewPkgName(token.Pos pos, ж<Package> pkg, @string nam
     return Ꮡ(new PkgName(new @object(nil, pos, pkg, name, new BasicжType(Typ[Invalid]), 0, nopos), imported));
 }
 
-} partial class typesᴛPkgName {
+} partial class types_package {
 
 // Imported returns the package that was imported.
 // It is distinct from Pkg(), which is the package containing the import statement.
-public static ж<Package> Imported(this ref PkgName obj) { return obj.imported; }
+internal static ж<Package> Importedᴍ(ref PkgName obj) { return obj.imported; }
 
 } partial class types_package {
 
@@ -251,12 +251,12 @@ public static ж<Const> NewConst(token.Pos pos, ж<Package> pkg, @string name, T
     return Ꮡ(new Const(new @object(nil, pos, pkg, name, typ, 0, nopos), val));
 }
 
-} partial class typesᴛConst {
+} partial class types_package {
 
 // Val returns the constant's value.
-public static constant.Value Val(this ref Const obj) { return obj.val; }
+internal static constant.Value Valᴍ(ref Const obj) { return obj.val; }
 
-internal static void isDependency(this ref Const _) { }
+internal static void isDependencyᴍ(ref Const _) { }
 
 } partial class types_package {
 
@@ -291,10 +291,10 @@ internal static ж<TypeName> _NewTypeNameLazy(token.Pos pos, ж<Package> pkg, @s
     return obj;
 }
 
-} partial class typesᴛTypeName {
+} partial class types_package {
 
 // IsAlias reports whether obj is an alias name for a type.
-public static bool IsAlias(this ж<TypeName> Ꮡobj) {
+internal static bool IsAliasᴍ(ж<TypeName> Ꮡobj) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     switch (obj.typ.type()) {
@@ -359,23 +359,23 @@ public static VarKind FieldVar => 6;          // a struct field
     [FieldVar] = "FieldVar"
 }.array(); }
 
-} partial class typesᴛVarKind {
+} partial class types_package {
 
-public static @string String(this VarKind kind) {
+internal static @string Stringᴍ(VarKind kind) {
     if (0 <= kind && (nint)kind < len(varKindNames)) {
         return varKindNames[kind];
     }
     return fmt.Sprintf("VarKind(%d)"u8, kind);
 }
 
-} partial class typesᴛVar {
+} partial class types_package {
 
 // Kind reports what kind of variable v is.
-public static VarKind Kind(this ref Var v) { return v.kind; }
+internal static VarKind Kindᴍ(ref Var v) { return v.kind; }
 
 // SetKind sets the kind of the variable.
 // It should be used only immediately after [NewVar] or [NewParam].
-public static void SetKind(this ref Var v, VarKind kind) { v.kind = kind; }
+internal static void SetKindᴍ(ref Var v, VarKind kind) { v.kind = kind; }
 
 } partial class types_package {
 
@@ -411,17 +411,17 @@ internal static ж<Var> newVar(VarKind kind, token.Pos pos, ж<Package> pkg, @st
     return Ꮡ(new Var(@object: new @object(nil, pos, pkg, name, typ, 0, nopos), kind: kind));
 }
 
-} partial class typesᴛVar {
+} partial class types_package {
 
 // Anonymous reports whether the variable is an embedded field.
 // Same as Embedded; only present for backward-compatibility.
-public static bool Anonymous(this ref Var obj) { return obj.embedded; }
+internal static bool Anonymousᴍ(ref Var obj) { return obj.embedded; }
 
 // Embedded reports whether the variable is an embedded field.
-public static bool Embedded(this ref Var obj) { return obj.embedded; }
+internal static bool Embeddedᴍ(ref Var obj) { return obj.embedded; }
 
 // IsField reports whether the variable is a struct field.
-public static bool IsField(this ref Var obj) { return obj.kind == FieldVar; }
+internal static bool IsFieldᴍ(ref Var obj) { return obj.kind == FieldVar; }
 
 // Origin returns the canonical Var for its receiver, i.e. the Var object
 // recorded in Info.Defs.
@@ -430,7 +430,7 @@ public static bool IsField(this ref Var obj) { return obj.kind == FieldVar; }
 // function parameters that depend on type arguments), this will be the
 // corresponding Var on the generic (uninstantiated) type. For all other Vars
 // Origin returns the receiver.
-public static ж<Var> Origin(this ж<Var> Ꮡobj) {
+internal static ж<Var> Originᴍ(ж<Var> Ꮡobj) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     if (obj.origin != nil) {
@@ -439,7 +439,7 @@ public static ж<Var> Origin(this ж<Var> Ꮡobj) {
     return Ꮡobj;
 }
 
-internal static void isDependency(this ref Var _) { }
+internal static void isDependencyᴍ(ref Var _) { }
 
 } partial class types_package {
 
@@ -469,10 +469,10 @@ public static ж<Func> NewFunc(token.Pos pos, ж<Package> pkg, @string name, ж<
     return Ꮡ(new Func(new @object(nil, pos, pkg, name, typ, 0, nopos), false, nil));
 }
 
-} partial class typesᴛFunc {
+} partial class types_package {
 
 // Signature returns the signature (type) of the function or method.
-public static ж<Signature> Signature(this ref Func obj) {
+internal static ж<Signature> Signatureᴍ(ref Func obj) {
     if (obj.typ != nil) {
         return obj.typ._<ж<Signature>>(); // normal case
     }
@@ -489,7 +489,7 @@ public static ж<Signature> Signature(this ref Func obj) {
 
 // FullName returns the package- or receiver-type-qualified name of
 // function or method obj.
-public static @string FullName(this ж<Func> Ꮡobj) {
+internal static @string FullNameᴍ(ж<Func> Ꮡobj) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     writeFuncName(Ꮡbuf, ref (Ꮡobj).DerefOrNull(), default);
     return Ꮡbuf.String();
@@ -498,7 +498,7 @@ public static @string FullName(this ж<Func> Ꮡobj) {
 // Scope returns the scope of the function's body block.
 // The result is nil for imported or instantiated functions and methods
 // (but there is also no mechanism to get to an instantiated function).
-public static ж<Scope> Scope(this ref Func obj) { return obj.typ._<ж<Signature>>().scope; }
+internal static ж<Scope> Scopeᴍ(ref Func obj) { return obj.typ._<ж<Signature>>().scope; }
 
 // Origin returns the canonical Func for its receiver, i.e. the Func object
 // recorded in Info.Defs.
@@ -507,7 +507,7 @@ public static ж<Scope> Scope(this ref Func obj) { return obj.typ._<ж<Signature
 // instantiated Named type or interface methods that depend on type arguments),
 // this will be the corresponding Func on the generic (uninstantiated) type.
 // For all other Funcs Origin returns the receiver.
-public static ж<Func> Origin(this ж<Func> Ꮡobj) {
+internal static ж<Func> Originᴍ(ж<Func> Ꮡobj) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     if (obj.origin != nil) {
@@ -520,10 +520,10 @@ public static ж<Func> Origin(this ж<Func> Ꮡobj) {
 //
 // The result is nil for methods of types in the Universe scope,
 // like method Error of the error built-in interface type.
-public static ж<Package> Pkg(this ref Func obj) { return obj.@object.Pkg(); }
+internal static ж<Package> Pkgᴍ(ref Func obj) { return obj.@object.Pkg(); }
 
 // hasPtrRecv reports whether the receiver is of the form *T for the given method obj.
-internal static bool hasPtrRecv(this ref Func obj) {
+internal static bool hasPtrRecvᴍ(ref Func obj) {
     // If a method's receiver type is set, use that as the source of truth for the receiver.
     // Caution: Checker.funcDecl (decl.go) marks a function by setting its type to an empty
     // signature. We may reach here before the signature is fully set up: we must explicitly
@@ -541,7 +541,7 @@ internal static bool hasPtrRecv(this ref Func obj) {
     return obj.hasPtrRecv_;
 }
 
-internal static void isDependency(this ref Func _) { }
+internal static void isDependencyᴍ(ref Func _) { }
 
 } partial class types_package {
 
@@ -735,37 +735,37 @@ public static @string ObjectString(Object obj, Func<ж<Package>, @string> qf) {
     return Ꮡbuf.String();
 }
 
-} partial class typesᴛPkgName {
+} partial class types_package {
 
-public static @string String(this ж<PkgName> Ꮡobj) { return ObjectString(new PkgNameжObject(Ꮡobj), default); }
+internal static @string Stringᴍ(ж<PkgName> Ꮡobj) { return ObjectString(new PkgNameжObject(Ꮡobj), default); }
 
-} partial class typesᴛConst {
+} partial class types_package {
 
-public static @string String(this ж<Const> Ꮡobj) { return ObjectString(new ConstжObject(Ꮡobj), default); }
+internal static @string Stringᴍ(ж<Const> Ꮡobj) { return ObjectString(new ConstжObject(Ꮡobj), default); }
 
-} partial class typesᴛTypeName {
+} partial class types_package {
 
-public static @string String(this ж<TypeName> Ꮡobj) { return ObjectString(new TypeNameжObject(Ꮡobj), default); }
+internal static @string Stringᴍ(ж<TypeName> Ꮡobj) { return ObjectString(new TypeNameжObject(Ꮡobj), default); }
 
-} partial class typesᴛVar {
+} partial class types_package {
 
-public static @string String(this ж<Var> Ꮡobj) { return ObjectString(new VarжObject(Ꮡobj), default); }
+internal static @string Stringᴍ(ж<Var> Ꮡobj) { return ObjectString(new VarжObject(Ꮡobj), default); }
 
-} partial class typesᴛFunc {
+} partial class types_package {
 
-public static @string String(this ж<Func> Ꮡobj) { return ObjectString(new FuncжObject(Ꮡobj), default); }
+internal static @string Stringᴍ(ж<Func> Ꮡobj) { return ObjectString(new FuncжObject(Ꮡobj), default); }
 
-} partial class typesᴛLabel {
+} partial class types_package {
 
-public static @string String(this ж<Label> Ꮡobj) { return ObjectString(new LabelжObject(Ꮡobj), default); }
+internal static @string Stringᴍ(ж<Label> Ꮡobj) { return ObjectString(new LabelжObject(Ꮡobj), default); }
 
-} partial class typesᴛBuiltin {
+} partial class types_package {
 
-public static @string String(this ж<Builtin> Ꮡobj) { return ObjectString(new BuiltinжObject(Ꮡobj), default); }
+internal static @string Stringᴍ(ж<Builtin> Ꮡobj) { return ObjectString(new BuiltinжObject(Ꮡobj), default); }
 
-} partial class typesᴛNil {
+} partial class types_package {
 
-public static @string String(this ж<Nil> Ꮡobj) { return ObjectString(new NilжObject(Ꮡobj), default); }
+internal static @string Stringᴍ(ж<Nil> Ꮡobj) { return ObjectString(new NilжObject(Ꮡobj), default); }
 
 } partial class types_package {
 
@@ -897,3 +897,69 @@ internal static @string objectKind(Object obj) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛobject {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Scope> Parent(this ref @object obj) => types_package.Parentᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos Pos(this ref @object obj) => types_package.Posᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Package> Pkg(this ref @object obj) => types_package.Pkgᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this ref @object obj) => types_package.Nameᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type Type(this ref @object obj) => types_package.Typeᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Exported(this ref @object obj) => types_package.Exportedᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Id(this ref @object obj) => types_package.Idᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref @object obj) => types_package.Stringᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 order(this ref @object obj) => types_package.orderᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos scopePos(this ref @object obj) => types_package.scopePosᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setParent(this ref @object obj, ж<Scope> Ꮡparent) => types_package.setParentᴍ(ref obj, Ꮡparent);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setType(this ref @object obj, Type typ) => types_package.setTypeᴍ(ref obj, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setOrder(this ref @object obj, uint32 order) => types_package.setOrderᴍ(ref obj, order);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setScopePos(this ref @object obj, token.Pos pos) => types_package.setScopePosᴍ(ref obj, pos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool sameId(this ref @object obj, ж<Package> Ꮡpkg, @string name, bool foldCase) => types_package.sameIdᴍ(ref obj, Ꮡpkg, name, foldCase);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint cmp(this ж<@object> Ꮡa, ж<@object> Ꮡb) => types_package.cmpᴍ(Ꮡa, Ꮡb);
+}
+partial class typesᴛPkgName {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Package> Imported(this ref PkgName obj) => types_package.Importedᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<PkgName> Ꮡobj) => types_package.Stringᴍ(Ꮡobj);
+}
+partial class typesᴛConst {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static constant.Value Val(this ref Const obj) => types_package.Valᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isDependency(this ref Const _) => types_package.isDependencyᴍ(ref _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Const> Ꮡobj) => types_package.Stringᴍ(Ꮡobj);
+}
+partial class typesᴛTypeName {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsAlias(this ж<TypeName> Ꮡobj) => types_package.IsAliasᴍ(Ꮡobj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<TypeName> Ꮡobj) => types_package.Stringᴍ(Ꮡobj);
+}
+partial class typesᴛVarKind {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this VarKind kind) => types_package.Stringᴍ(kind);
+}
+partial class typesᴛVar {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static VarKind Kind(this ref Var v) => types_package.Kindᴍ(ref v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetKind(this ref Var v, VarKind kind) => types_package.SetKindᴍ(ref v, kind);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Anonymous(this ref Var obj) => types_package.Anonymousᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Embedded(this ref Var obj) => types_package.Embeddedᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsField(this ref Var obj) => types_package.IsFieldᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Var> Origin(this ж<Var> Ꮡobj) => types_package.Originᴍ(Ꮡobj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isDependency(this ref Var _) => types_package.isDependencyᴍ(ref _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Var> Ꮡobj) => types_package.Stringᴍ(Ꮡobj);
+}
+partial class typesᴛFunc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Signature> Signature(this ref Func obj) => types_package.Signatureᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FullName(this ж<Func> Ꮡobj) => types_package.FullNameᴍ(Ꮡobj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scope> Scope(this ref Func obj) => types_package.Scopeᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> Origin(this ж<Func> Ꮡobj) => types_package.Originᴍ(Ꮡobj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Package> Pkg(this ref Func obj) => types_package.Pkgᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasPtrRecv(this ref Func obj) => types_package.hasPtrRecvᴍ(ref obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isDependency(this ref Func _) => types_package.isDependencyᴍ(ref _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Func> Ꮡobj) => types_package.Stringᴍ(Ꮡobj);
+}
+partial class typesᴛLabel {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Label> Ꮡobj) => types_package.Stringᴍ(Ꮡobj);
+}
+partial class typesᴛBuiltin {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Builtin> Ꮡobj) => types_package.Stringᴍ(Ꮡobj);
+}
+partial class typesᴛNil {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Nil> Ꮡobj) => types_package.Stringᴍ(Ꮡobj);
+}
+// </GlyphForwarders>

@@ -115,24 +115,24 @@ internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<big.Int> n) 
     return dst;
 }
 
-} partial class x509ᴛOID {
+} partial class x509_package {
 
 // AppendText implements [encoding.TextAppender]
-public static (slice<byte>, error) AppendText(this OID o, slice<byte> b) {
+internal static (slice<byte>, error) AppendTextᴍ(OID o, slice<byte> b) {
     return (append(b, o.String().ꓸꓸꓸ), default);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
-public static (slice<byte>, error) MarshalText(this OID o) {
+internal static (slice<byte>, error) MarshalTextᴍ(OID o) {
     return o.AppendText(default);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
-public static error UnmarshalText(this ref OID o, slice<byte> text) {
+internal static error UnmarshalTextᴍ(ref OID o, slice<byte> text) {
     return o.unmarshalOIDText((@string)text);
 }
 
-internal static error unmarshalOIDText(this ref OID o, @string oid) {
+internal static error unmarshalOIDTextᴍ(ref OID o, @string oid) {
     // (*big.Int).SetString allows +/- signs, but we don't want
     // to allow them in the string representation of Object Identifier, so
     // reject such encodings.
@@ -191,17 +191,17 @@ internal static error unmarshalOIDText(this ref OID o, @string oid) {
 }
 
 // AppendBinary implements [encoding.BinaryAppender]
-public static (slice<byte>, error) AppendBinary(this OID o, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(OID o, slice<byte> b) {
     return (appendꓸꓸꓸ(b, o.der), default);
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler]
-public static (slice<byte>, error) MarshalBinary(this OID o) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(OID o) {
     return o.AppendBinary(default);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler]
-public static error UnmarshalBinary(this ref OID o, slice<byte> b) {
+internal static error UnmarshalBinaryᴍ(ref OID o, slice<byte> b) {
     var (oid, ok) = newOIDFromDER(bytes.Clone(b));
     if (!ok) {
         return errInvalidOID;
@@ -211,7 +211,7 @@ public static error UnmarshalBinary(this ref OID o, slice<byte> b) {
 }
 
 // Equal returns true when oid and other represents the same Object Identifier.
-public static bool Equal(this OID oid, OID other) {
+internal static bool Equalᴍ(OID oid, OID other) {
     // There is only one possible DER encoding of
     // each unique Object Identifier.
     return bytes.Equal(oid.der, other.der);
@@ -256,12 +256,12 @@ internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte>
     return (ret, offset, failed);
 }
 
-} partial class x509ᴛOID {
+} partial class x509_package {
 
 // EqualASN1OID returns whether an OID equals an asn1.ObjectIdentifier. If
 // asn1.ObjectIdentifier cannot represent the OID specified by oid, because
 // a component of OID requires more than 31 bits, it returns false.
-public static bool EqualASN1OID(this OID oid, asn1.ObjectIdentifier other) {
+internal static bool EqualASN1OIDᴍ(OID oid, asn1.ObjectIdentifier other) {
     if (len(other) < 2) {
         return false;
     }
@@ -302,7 +302,7 @@ public static bool EqualASN1OID(this OID oid, asn1.ObjectIdentifier other) {
 }
 
 // String returns the string representation of the Object Identifier.
-public static @string String(this OID oid) {
+internal static @string Stringᴍ(OID oid) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     Ꮡb.Grow(32);
     UntypedInt valSize = 64; // size in bits of val.
@@ -366,7 +366,7 @@ public static @string String(this OID oid) {
     return b.String();
 }
 
-internal static (asn1.ObjectIdentifier, bool) toASN1OID(this OID oid) {
+internal static (asn1.ObjectIdentifier, bool) toASN1OIDᴍ(OID oid) {
     var @out = new slice<nint>(0, len(oid.der) + 1);
 
     UntypedInt valSize = 31; // amount of usable bits of val for OIDs.
@@ -424,3 +424,19 @@ public static (OID, error) OIDFromASN1OID(asn1.ObjectIdentifier asn1OID) {
 }
 
 } // end x509_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class x509ᴛOID {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this OID o, slice<byte> b) => x509_package.AppendTextᴍ(o, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this OID o) => x509_package.MarshalTextᴍ(o);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ref OID o, slice<byte> text) => x509_package.UnmarshalTextᴍ(ref o, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshalOIDText(this ref OID o, @string oid) => x509_package.unmarshalOIDTextᴍ(ref o, oid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this OID o, slice<byte> b) => x509_package.AppendBinaryᴍ(o, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this OID o) => x509_package.MarshalBinaryᴍ(o);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref OID o, slice<byte> b) => x509_package.UnmarshalBinaryᴍ(ref o, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this OID oid, OID other) => x509_package.Equalᴍ(oid, other);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool EqualASN1OID(this OID oid, asn1.ObjectIdentifier other) => x509_package.EqualASN1OIDᴍ(oid, other);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this OID oid) => x509_package.Stringᴍ(oid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (asn1.ObjectIdentifier, bool) toASN1OID(this OID oid) => x509_package.toASN1OIDᴍ(oid);
+}
+// </GlyphForwarders>

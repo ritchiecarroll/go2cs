@@ -1137,9 +1137,9 @@ internal static partial slice<uintptr> makeProfStack() { return new slice<uintpt
 //go:linkname pprof_makeProfStack
 public static partial slice<uintptr> pprof_makeProfStack() { return makeProfStack(); }
 
-} partial class runtimeᴛm {
+} partial class runtime_package {
 
-internal static void becomeSpinning(this ref m mp) {
+internal static void becomeSpinningᴍ(ref m mp) {
     mp.spinning = true;
     Ꮡsched.of(schedt.Ꮡnmspinning).Add(1);
     Ꮡsched.of(schedt.Ꮡneedspinning).Store(0);
@@ -1152,7 +1152,7 @@ internal static void becomeSpinning(this ref m mp) {
 // alive.
 //
 //go:yeswritebarrierrec
-internal static slice<ж<p>> snapshotAllp(this ref m mp) {
+internal static slice<ж<p>> snapshotAllpᴍ(ref m mp) {
     mp.allpSnapshot = allp;
     return mp.allpSnapshot;
 }
@@ -1163,11 +1163,11 @@ internal static slice<ж<p>> snapshotAllp(this ref m mp) {
 // Must be called after reacquiring a P, as it requires a write barrier.
 //
 //go:yeswritebarrierrec
-internal static void clearAllpSnapshot(this ref m mp) {
+internal static void clearAllpSnapshotᴍ(ref m mp) {
     mp.allpSnapshot = default;
 }
 
-internal static bool hasCgoOnStack(this ref m mp) {
+internal static bool hasCgoOnStackᴍ(ref m mp) {
     return mp.ncgo > 0 || mp.isextra;
 }
 
@@ -1545,13 +1545,13 @@ internal static stwReason stwForTestReadMemStatsSlow => 14;     // "ReadMemStats
 internal static stwReason stwForTestPageCachePagesLeaked => 15; // "PageCachePagesLeaked (test)"
 internal static stwReason stwForTestResetDebugLog => 16;        // "ResetDebugLog (test)"
 
-} partial class runtimeᴛstwReason {
+} partial class runtime_package {
 
-internal static @string String(this stwReason r) {
+internal static @string Stringᴍ(stwReason r) {
     return stwReasonStrings[r];
 }
 
-internal static bool isGC(this stwReason r) {
+internal static bool isGCᴍ(stwReason r) {
     return r == stwGCMarkTerm || r == stwGCSweepTerm;
 }
 
@@ -5600,7 +5600,7 @@ internal static void setcpuprofilerate(int32 hz) {
     gp.Value.m.Value.locks--;
 }
 
-} partial class runtimeᴛp {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string missingMcacheˢ => ref missingMcacheˢᵇ;
@@ -5608,7 +5608,7 @@ private static readonly @string missingMcacheˢᵇ = "missing mcache?"u8;
 
 // init initializes pp, which may be a freshly allocated p or a
 // previously destroyed p, and transitions it to status _Pgcstop.
-internal static void init(this ж<p> Ꮡpp, int32 id) {
+internal static void initᴍ(ж<p> Ꮡpp, int32 id) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     pp.id = id;
@@ -5655,7 +5655,7 @@ private static readonly @string pDestroyedWhileGcIsˢᵇ = "P destroyed while GC
 // transitions it to status _Pdead.
 //
 // sched.lock must be held and the world must be stopped.
-internal static void destroy(this ж<p> Ꮡpp) {
+internal static void destroyᴍ(ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
@@ -6546,13 +6546,13 @@ internal static (syscallingThread, bool) setBlockOnExitSyscall(ж<p> Ꮡpp) {
     return (new syscallingThread(gp, mp, Ꮡpp, status), true);
 }
 
-} partial class runtimeᴛsyscallingThread {
+} partial class runtime_package {
 
 // gcstopP unwires the P attached to the syscalling thread
 // and moves it into the _Pgcstop state.
 //
 // The caller must be stopping the world.
-internal static void gcstopP(this syscallingThread s) {
+internal static void gcstopPᴍ(syscallingThread s) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
 
     s.releaseP(_Pgcstop);
@@ -6562,7 +6562,7 @@ internal static void gcstopP(this syscallingThread s) {
 
 // takeP unwires the P attached to the syscalling thread
 // and moves it into the _Pidle state.
-internal static void takeP(this syscallingThread s) {
+internal static void takePᴍ(syscallingThread s) {
     s.releaseP(_Pidle);
 }
 
@@ -6573,7 +6573,7 @@ private static readonly @string attemptedToReleasePIntoAˢᵇ = "attempted to re
 // releaseP unwires the P from the syscalling thread, moving
 // it to the provided state. Callers should prefer to use
 // takeP and gcstopP.
-internal static void releaseP(this syscallingThread s, uint32 state) {
+internal static void releasePᴍ(syscallingThread s, uint32 state) {
     if (state != _Pidle && state != _Pgcstop) {
         @throw(attemptedToReleasePIntoAˢ);
     }
@@ -6590,7 +6590,7 @@ internal static void releaseP(this syscallingThread s, uint32 state) {
 }
 
 // resume allows a syscalling thread to advance beyond exitsyscall.
-internal static void resume(this syscallingThread s) {
+internal static void resumeᴍ(syscallingThread s) {
     casfrom_Gscanstatus(s.gp, s.status | (uint32)_Gscan, s.status);
 }
 
@@ -7081,31 +7081,31 @@ internal static (ж<g> gp, gQueue q) globrunqgetbatch(int32 n) {
 // pMask is an atomic bitstring with one bit per P.
 partial struct pMask /*[]uint32*/;
 
-} partial class runtimeᴛpMask {
+} partial class runtime_package {
 
 // read returns true if P id's bit is set.
-internal static bool read(this pMask p, uint32 id) {
+internal static bool readᴍ(pMask p, uint32 id) {
     var word = id / 32;
     var mask = (uint32)1 << (int)(id % 32);
     return (atomic.Load(Ꮡ(p, word)) & mask) != 0;
 }
 
 // set sets P id's bit.
-internal static void set(this pMask p, int32 id) {
+internal static void setᴍ(pMask p, int32 id) {
     var word = id / 32;
     var mask = ((uint32)1).Lsh((int64)(id % 32));
     atomic.Or(Ꮡ(p, word), mask);
 }
 
 // clear clears P id's bit.
-internal static void clear(this pMask p, int32 id) {
+internal static void clearᴍ(pMask p, int32 id) {
     var word = id / 32;
     var mask = ((uint32)1).Lsh((int64)(id % 32));
     atomic.And(Ꮡ(p, word), ~mask);
 }
 
 // any returns true if any bit in p is set.
-internal static bool any(this pMask p) {
+internal static bool anyᴍ(pMask p) {
     foreach (var i in range(len(p))) {
         if (atomic.Load(Ꮡ(p, i)) != 0) {
             return true;
@@ -7118,7 +7118,7 @@ internal static bool any(this pMask p) {
 //
 // The result may alias p, so callers are encouraged to
 // discard p. Not safe for concurrent use.
-internal static pMask resize(this pMask p, int32 nprocs) {
+internal static pMask resizeᴍ(pMask p, int32 nprocs) {
     var maskWords = (nprocs + 31) / 32;
 
     if (maskWords <= (int32)cap(p)) {
@@ -7544,15 +7544,15 @@ partial struct gQueue {
     internal int32 size;
 }
 
-} partial class runtimeᴛgQueue {
+} partial class runtime_package {
 
 // empty reports whether q is empty.
-internal static bool empty(this ref gQueue q) {
+internal static bool emptyᴍ(ref gQueue q) {
     return q.head == 0;
 }
 
 // push adds gp to the head of q.
-internal static void push(this ref gQueue q, ж<g> Ꮡgp) {
+internal static void pushᴍ(ref gQueue q, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = q.head;
@@ -7564,7 +7564,7 @@ internal static void push(this ref gQueue q, ж<g> Ꮡgp) {
 }
 
 // pushBack adds gp to the tail of q.
-internal static void pushBack(this ref gQueue q, ж<g> Ꮡgp) {
+internal static void pushBackᴍ(ref gQueue q, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = 0;
@@ -7579,7 +7579,7 @@ internal static void pushBack(this ref gQueue q, ж<g> Ꮡgp) {
 
 // pushBackAll adds all Gs in q2 to the tail of q. After this q2 must
 // not be used.
-internal static void pushBackAll(this ref gQueue q, gQueue q2) {
+internal static void pushBackAllᴍ(ref gQueue q, gQueue q2) {
     if (q2.tail == 0) {
         return;
     }
@@ -7595,7 +7595,7 @@ internal static void pushBackAll(this ref gQueue q, gQueue q2) {
 
 // pop removes and returns the head of queue q. It returns nil if
 // q is empty.
-internal static ж<g> pop(this ref gQueue q) {
+internal static ж<g> popᴍ(ref gQueue q) {
     var gp = q.head.ptr();
     if (gp != nil) {
         q.head = gp.Value.schedlink;
@@ -7608,7 +7608,7 @@ internal static ж<g> pop(this ref gQueue q) {
 }
 
 // popList takes all Gs in q and returns them as a gList.
-internal static gList popList(this ref gQueue q) {
+internal static gList popListᴍ(ref gQueue q) {
     var stack = new gList(q.head, q.size);
     q = new gQueue();
     return stack;
@@ -7623,15 +7623,15 @@ partial struct gList {
     internal int32 size;
 }
 
-} partial class runtimeᴛgList {
+} partial class runtime_package {
 
 // empty reports whether l is empty.
-internal static bool empty(this ref gList l) {
+internal static bool emptyᴍ(ref gList l) {
     return l.head == 0;
 }
 
 // push adds gp to the head of l.
-internal static void push(this ref gList l, ж<g> Ꮡgp) {
+internal static void pushᴍ(ref gList l, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = l.head;
@@ -7640,7 +7640,7 @@ internal static void push(this ref gList l, ж<g> Ꮡgp) {
 }
 
 // pushAll prepends all Gs in q to l. After this q must not be used.
-internal static void pushAll(this ref gList l, gQueue q) {
+internal static void pushAllᴍ(ref gList l, gQueue q) {
     if (!q.empty()) {
         q.tail.ptr().Value.schedlink = l.head;
         l.head = q.head;
@@ -7649,7 +7649,7 @@ internal static void pushAll(this ref gList l, gQueue q) {
 }
 
 // pop removes and returns the head of l. If l is empty, it returns nil.
-internal static ж<g> pop(this ref gList l) {
+internal static ж<g> popᴍ(ref gList l) {
     var gp = l.head.ptr();
     if (gp != nil) {
         l.head = gp.Value.schedlink;
@@ -7815,9 +7815,9 @@ partial struct randomEnum {
     internal uint32 inc;
 }
 
-} partial class runtimeᴛrandomOrder {
+} partial class runtime_package {
 
-internal static void reset(this ref randomOrder ord, uint32 count) {
+internal static void resetᴍ(ref randomOrder ord, uint32 count) {
     ord.count = count;
     ord.coprimes = ord.coprimes[..0];
     for (var i = (uint32)1; i <= count; i++) {
@@ -7827,7 +7827,7 @@ internal static void reset(this ref randomOrder ord, uint32 count) {
     }
 }
 
-internal static randomEnum start(this ref randomOrder ord, uint32 i) {
+internal static randomEnum startᴍ(ref randomOrder ord, uint32 i) {
     return new randomEnum(
         count: ord.count,
         pos: i % ord.count,
@@ -7835,18 +7835,18 @@ internal static randomEnum start(this ref randomOrder ord, uint32 i) {
     );
 }
 
-} partial class runtimeᴛrandomEnum {
+} partial class runtime_package {
 
-internal static bool done(this ref randomEnum @enum) {
+internal static bool doneᴍ(ref randomEnum @enum) {
     return @enum.i == @enum.count;
 }
 
-internal static void next(this ref randomEnum @enum) {
+internal static void nextᴍ(ref randomEnum @enum) {
     @enum.i++;
     @enum.pos = (@enum.pos + @enum.inc) % @enum.count;
 }
 
-internal static uint32 position(this ref randomEnum @enum) {
+internal static uint32 positionᴍ(ref randomEnum @enum) {
     return @enum.pos;
 }
 
@@ -7949,3 +7949,56 @@ internal static void doInit1(ж<initTask> Ꮡt) {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void becomeSpinning(this ref m mp) => runtime_package.becomeSpinningᴍ(ref mp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<p>> snapshotAllp(this ref m mp) => runtime_package.snapshotAllpᴍ(ref mp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clearAllpSnapshot(this ref m mp) => runtime_package.clearAllpSnapshotᴍ(ref mp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasCgoOnStack(this ref m mp) => runtime_package.hasCgoOnStackᴍ(ref mp);
+}
+partial class runtimeᴛstwReason {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this stwReason r) => runtime_package.Stringᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isGC(this stwReason r) => runtime_package.isGCᴍ(r);
+}
+partial class runtimeᴛp {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<p> Ꮡpp, int32 id) => runtime_package.initᴍ(Ꮡpp, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void destroy(this ж<p> Ꮡpp) => runtime_package.destroyᴍ(Ꮡpp);
+}
+partial class runtimeᴛsyscallingThread {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void gcstopP(this syscallingThread s) => runtime_package.gcstopPᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void takeP(this syscallingThread s) => runtime_package.takePᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void releaseP(this syscallingThread s, uint32 state) => runtime_package.releasePᴍ(s, state);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resume(this syscallingThread s) => runtime_package.resumeᴍ(s);
+}
+partial class runtimeᴛpMask {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool read(this pMask p, uint32 id) => runtime_package.readᴍ(p, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this pMask p, int32 id) => runtime_package.setᴍ(p, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this pMask p, int32 id) => runtime_package.clearᴍ(p, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool any(this pMask p) => runtime_package.anyᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static pMask resize(this pMask p, int32 nprocs) => runtime_package.resizeᴍ(p, nprocs);
+}
+partial class runtimeᴛgQueue {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref gQueue q) => runtime_package.emptyᴍ(ref q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ref gQueue q, ж<g> Ꮡgp) => runtime_package.pushᴍ(ref q, Ꮡgp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushBack(this ref gQueue q, ж<g> Ꮡgp) => runtime_package.pushBackᴍ(ref q, Ꮡgp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushBackAll(this ref gQueue q, gQueue q2) => runtime_package.pushBackAllᴍ(ref q, q2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<g> pop(this ref gQueue q) => runtime_package.popᴍ(ref q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static gList popList(this ref gQueue q) => runtime_package.popListᴍ(ref q);
+}
+partial class runtimeᴛgList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref gList l) => runtime_package.emptyᴍ(ref l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ref gList l, ж<g> Ꮡgp) => runtime_package.pushᴍ(ref l, Ꮡgp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushAll(this ref gList l, gQueue q) => runtime_package.pushAllᴍ(ref l, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<g> pop(this ref gList l) => runtime_package.popᴍ(ref l);
+}
+partial class runtimeᴛrandomOrder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref randomOrder ord, uint32 count) => runtime_package.resetᴍ(ref ord, count);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static randomEnum start(this ref randomOrder ord, uint32 i) => runtime_package.startᴍ(ref ord, i);
+}
+partial class runtimeᴛrandomEnum {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool done(this ref randomEnum @enum) => runtime_package.doneᴍ(ref @enum);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ref randomEnum @enum) => runtime_package.nextᴍ(ref @enum);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 position(this ref randomEnum @enum) => runtime_package.positionᴍ(ref @enum);
+}
+// </GlyphForwarders>

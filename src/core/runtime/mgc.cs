@@ -612,12 +612,12 @@ internal static gcTriggerKind gcTriggerTime => 1;
 // to work.cycles).
 internal static gcTriggerKind gcTriggerCycle => 2;
 
-} partial class runtimeᴛgcTrigger {
+} partial class runtime_package {
 
 // test reports whether the trigger condition is satisfied, meaning
 // that the exit condition for the _GCoff phase has been met. The exit
 // condition should be tested when allocating.
-internal static bool test(this gcTrigger t) {
+internal static bool testᴍ(gcTrigger t) {
     if (!memstats.enablegc || Ꮡpanicking.Load() != 0 || gcphase != _GCoff) {
         return false;
     }
@@ -1112,13 +1112,13 @@ top:
     gcMarkTermination(stw);
 }
 
-} partial class runtimeᴛg {
+} partial class runtime_package {
 
 // isMaybeRunnable checks whether a goroutine may still be semantically runnable.
 // For goroutines which are semantically runnable, this will eventually return true
 // as the GC marking phase progresses. It returns false for leaked goroutines, or for
 // goroutines which are not yet computed as possibly runnable by the GC.
-internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
+internal static bool isMaybeRunnableᴍ(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Check whether the goroutine is actually in a waiting state first.
@@ -2288,3 +2288,12 @@ internal static @string gcTestPointerClass(@unsafe.Pointer p) {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛgcTrigger {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool test(this gcTrigger t) => runtime_package.testᴍ(t);
+}
+partial class runtimeᴛg {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isMaybeRunnable(this ж<g> Ꮡgp) => runtime_package.isMaybeRunnableᴍ(Ꮡgp);
+}
+// </GlyphForwarders>

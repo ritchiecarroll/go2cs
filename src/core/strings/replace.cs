@@ -39,14 +39,14 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸstring oldnewʗp) {
     return Ꮡ(new Replacer(oldnew: appendꓸꓸꓸ(slice<@string>(default), oldnew)));
 }
 
-} partial class stringsᴛReplacer {
+} partial class strings_package {
 
-internal static void buildOnce(this ref Replacer r) {
+internal static void buildOnceᴍ(ref Replacer r) {
     r.r = r.build();
     r.oldnew = default;
 }
 
-internal static replacer build(this ref Replacer b) {
+internal static replacer buildᴍ(ref Replacer b) {
     var oldnew = b.oldnew;
     if (len(oldnew) == 2 && len(oldnew[0]) > 1) {
         return new singleStringReplacerжreplacer(makeSingleStringReplacer(oldnew[0], oldnew[1]));
@@ -96,7 +96,7 @@ internal static replacer build(this ref Replacer b) {
 }
 
 // Replace returns a copy of s with all replacements performed.
-public static @string Replace(this ж<Replacer> Ꮡr, @string s) {
+internal static @string Replaceᴍ(ж<Replacer> Ꮡr, @string s) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
@@ -104,7 +104,7 @@ public static @string Replace(this ж<Replacer> Ꮡr, @string s) {
 }
 
 // WriteString writes s to w with all replacements performed.
-public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer w, @string s) {
+internal static (nint n, error err) WriteStringᴍ(ж<Replacer> Ꮡr, io.Writer w, @string s) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
@@ -163,9 +163,9 @@ partial struct trieNode {
     internal slice<ж<trieNode>> table;
 }
 
-} partial class stringsᴛtrieNode {
+} partial class strings_package {
 
-internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
+internal static void addᴍ(ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (key == ""u8) {
@@ -230,9 +230,9 @@ internal static void add(this ref trieNode t, @string key, @string val, nint pri
     }
 }
 
-} partial class stringsᴛgenericReplacer {
+} partial class strings_package {
 
-internal static (@string val, nint keylen, bool found) lookup(this ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) {
+internal static (@string val, nint keylen, bool found) lookupᴍ(ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) {
     @string val = default;
     nint keylen = default;
     bool found = default;
@@ -320,16 +320,16 @@ internal static ж<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
 
 partial struct appendSliceWriter /*[]byte*/;
 
-} partial class stringsᴛappendSliceWriter {
+} partial class strings_package {
 
 // Write writes to the buffer to satisfy [io.Writer].
-internal static (nint, error) Write(this ref appendSliceWriter w, slice<byte> p) {
+internal static (nint, error) Writeᴍ(ref appendSliceWriter w, slice<byte> p) {
     w = appendꓸꓸꓸ(w, p);
     return (len(p), default);
 }
 
 // WriteString writes to the buffer without string->[]byte->string allocations.
-internal static (nint, error) WriteString(this ref appendSliceWriter w, @string s) {
+internal static (nint, error) WriteStringᴍ(ref appendSliceWriter w, @string s) {
     w = append(w, s.ꓸꓸꓸ);
     return (len(s), default);
 }
@@ -340,9 +340,9 @@ partial struct stringWriter {
     internal io.Writer w;
 }
 
-} partial class stringsᴛstringWriter {
+} partial class strings_package {
 
-internal static (nint, error) WriteString(this stringWriter w, @string s) {
+internal static (nint, error) WriteStringᴍ(stringWriter w, @string s) {
     return w.w.Write(slice<byte>(s));
 }
 
@@ -356,15 +356,15 @@ internal static io.StringWriter getStringWriter(io.Writer w) {
     return sw;
 }
 
-} partial class stringsᴛgenericReplacer {
+} partial class strings_package {
 
-internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) {
+internal static @string Replaceᴍ(ж<genericReplacer> Ꮡr, @string s) {
     ref var buf = ref heap<appendSliceWriter>(new appendSliceWriter(0, len(s)), out var Ꮡbuf);
     Ꮡr.WriteString(new appendSliceWriterжWriter(Ꮡbuf), s);
     return (@string)(slice<byte>)buf;
 }
 
-internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
+internal static (nint n, error err) WriteStringᴍ(ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
     nint n = default;
     error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
@@ -424,9 +424,9 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     return Ꮡ(new singleStringReplacer(finder: makeStringFinder(pattern), value: value));
 }
 
-} partial class stringsᴛsingleStringReplacer {
+} partial class strings_package {
 
-internal static @string Replace(this ref singleStringReplacer r, @string s) {
+internal static @string Replaceᴍ(ref singleStringReplacer r, @string s) {
     ref var buf = ref heap(new Builder(), out var Ꮡbuf);
     nint i = 0;
     var matched = false;
@@ -448,7 +448,7 @@ internal static @string Replace(this ref singleStringReplacer r, @string s) {
     return buf.String();
 }
 
-internal static (nint n, error err) WriteString(this ref singleStringReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteStringᴍ(ref singleStringReplacer r, io.Writer w, @string s) {
     nint n = default;
     error err = default;
 
@@ -484,9 +484,9 @@ internal static (nint n, error err) WriteString(this ref singleStringReplacer r,
 // The array contains replacement bytes indexed by old byte.
 partial struct byteReplacer /*[256]byte*/;
 
-} partial class stringsᴛbyteReplacer {
+} partial class strings_package {
 
-internal static @string Replace(this ref byteReplacer r, @string s) {
+internal static @string Replaceᴍ(ref byteReplacer r, @string s) {
     slice<byte> buf = default; // lazily allocated
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
@@ -503,7 +503,7 @@ internal static @string Replace(this ref byteReplacer r, @string s) {
     return (@string)buf;
 }
 
-internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteStringᴍ(ref byteReplacer r, io.Writer w, @string s) {
     nint n = default;
 
     var sw = getStringWriter(w);
@@ -560,9 +560,9 @@ partial struct byteStringReplacer {
 // TODO(tocarip) revisit once we have register-based abi/mid-stack inlining.
 internal static UntypedInt countCutOff => 8;
 
-} partial class stringsᴛbyteStringReplacer {
+} partial class strings_package {
 
-internal static @string Replace(this ref byteStringReplacer r, @string s) {
+internal static @string Replaceᴍ(ref byteStringReplacer r, @string s) {
     nint newSize = len(s);
     var anyChanges = false;
     // Is it faster to use Count?
@@ -601,7 +601,7 @@ internal static @string Replace(this ref byteStringReplacer r, @string s) {
     return (@string)buf;
 }
 
-internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteStringᴍ(ref byteStringReplacer r, io.Writer w, @string s) {
     nint n = default;
     error err = default;
 
@@ -635,3 +635,39 @@ internal static (nint n, error err) WriteString(this ref byteStringReplacer r, i
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class stringsᴛReplacer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void buildOnce(this ref Replacer r) => strings_package.buildOnceᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static replacer build(this ref Replacer b) => strings_package.buildᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Replace(this ж<Replacer> Ꮡr, @string s) => strings_package.Replaceᴍ(Ꮡr, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer w, @string s) => strings_package.WriteStringᴍ(Ꮡr, w, s);
+}
+partial class stringsᴛtrieNode {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) => strings_package.addᴍ(ref t, key, val, priority, Ꮡr);
+}
+partial class stringsᴛgenericReplacer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string val, nint keylen, bool found) lookup(this ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) => strings_package.lookupᴍ(Ꮡr, s, ignoreRoot);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) => strings_package.Replaceᴍ(Ꮡr, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) => strings_package.WriteStringᴍ(Ꮡr, w, s);
+}
+partial class stringsᴛappendSliceWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref appendSliceWriter w, slice<byte> p) => strings_package.Writeᴍ(ref w, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) WriteString(this ref appendSliceWriter w, @string s) => strings_package.WriteStringᴍ(ref w, s);
+}
+partial class stringsᴛstringWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) WriteString(this stringWriter w, @string s) => strings_package.WriteStringᴍ(w, s);
+}
+partial class stringsᴛsingleStringReplacer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Replace(this ref singleStringReplacer r, @string s) => strings_package.Replaceᴍ(ref r, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref singleStringReplacer r, io.Writer w, @string s) => strings_package.WriteStringᴍ(ref r, w, s);
+}
+partial class stringsᴛbyteReplacer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Replace(this ref byteReplacer r, @string s) => strings_package.Replaceᴍ(ref r, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) => strings_package.WriteStringᴍ(ref r, w, s);
+}
+partial class stringsᴛbyteStringReplacer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Replace(this ref byteStringReplacer r, @string s) => strings_package.Replaceᴍ(ref r, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) => strings_package.WriteStringᴍ(ref r, w, s);
+}
+// </GlyphForwarders>

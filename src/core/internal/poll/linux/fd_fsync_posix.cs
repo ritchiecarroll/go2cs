@@ -9,10 +9,10 @@ using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // Fsync wraps syscall.Fsync.
-public static error Fsync(this ж<FD> Ꮡfd) {
+internal static error Fsyncᴍ(ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -27,3 +27,9 @@ public static error Fsync(this ж<FD> Ꮡfd) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pollᴛFD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fsync(this ж<FD> Ꮡfd) => poll_package.Fsyncᴍ(Ꮡfd);
+}
+// </GlyphForwarders>

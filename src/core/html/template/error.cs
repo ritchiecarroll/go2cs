@@ -231,9 +231,9 @@ public static ErrorCode ErrPredefinedEscaper => 11;
 // escaped as expected.
 public static ErrorCode ErrJSTemplate => 12;
 
-} partial class templateᴛError {
+} partial class template_package {
 
-public static @string Error(this ref Error e) {
+internal static @string Errorᴍ(ref Error e) {
     switch (ᐧ) {
     case {} when e.Node != nil: {
         var (loc, _) = (((ж<parse.Tree>)nil)).ErrorContext(e.Node);
@@ -259,3 +259,9 @@ internal static ж<Error> errorf(ErrorCode k, parse.Node node, nint line, @strin
 }
 
 } // end template_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class templateᴛError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref Error e) => template_package.Errorᴍ(ref e);
+}
+// </GlyphForwarders>

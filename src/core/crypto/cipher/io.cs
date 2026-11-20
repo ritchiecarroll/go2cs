@@ -18,9 +18,9 @@ partial struct StreamReader {
     public io.Reader R;
 }
 
-} partial class cipherᴛStreamReader {
+} partial class cipher_package {
 
-public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
+internal static (nint n, error err) Readᴍ(StreamReader r, slice<byte> dst) {
     nint n = default;
     error err = default;
 
@@ -42,9 +42,9 @@ partial struct StreamWriter {
     public error Err; // unused
 }
 
-} partial class cipherᴛStreamWriter {
+} partial class cipher_package {
 
-public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) {
+internal static (nint n, error err) Writeᴍ(StreamWriter w, slice<byte> src) {
     nint n = default;
     error err = default;
 
@@ -59,7 +59,7 @@ public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) {
 
 // Close closes the underlying Writer and returns its Close return value, if the Writer
 // is also an io.Closer. Otherwise it returns nil.
-public static error Close(this StreamWriter w) {
+internal static error Closeᴍ(StreamWriter w) {
     var (c, ok) = w.W._<io.Closer>(ᐧ); if (ok) {
         return c.Close();
     }
@@ -67,3 +67,13 @@ public static error Close(this StreamWriter w) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class cipherᴛStreamReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) => cipher_package.Readᴍ(r, dst);
+}
+partial class cipherᴛStreamWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) => cipher_package.Writeᴍ(w, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this StreamWriter w) => cipher_package.Closeᴍ(w);
+}
+// </GlyphForwarders>

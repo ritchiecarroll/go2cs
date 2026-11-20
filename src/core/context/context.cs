@@ -175,15 +175,15 @@ public static error DeadlineExceeded = new deadlineExceededError();
 partial struct deadlineExceededError {
 }
 
-} partial class contextᴛdeadlineExceededError {
+} partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contextDeadlineExceededˢ => ref contextDeadlineExceededˢᵇ;
 private static readonly @string contextDeadlineExceededˢᵇ = "context deadline exceeded"u8;
 
-internal static @string Error(this deadlineExceededError _) { return contextDeadlineExceededˢ; }
-internal static bool Timeout(this deadlineExceededError _) { return true; }
-internal static bool Temporary(this deadlineExceededError _) { return true; }
+internal static @string Errorᴍ(deadlineExceededError _) { return contextDeadlineExceededˢ; }
+internal static bool Timeoutᴍ(deadlineExceededError _) { return true; }
+internal static bool Temporaryᴍ(deadlineExceededError _) { return true; }
 
 } partial class context_package {
 
@@ -192,24 +192,24 @@ internal static bool Temporary(this deadlineExceededError _) { return true; }
 partial struct emptyCtx {
 }
 
-} partial class contextᴛemptyCtx {
+} partial class context_package {
 
-internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) {
+internal static (time.Time deadline, bool ok) Deadlineᴍ(emptyCtx _) {
     time.Time deadline = default;
     bool ok = default;
 
     return (deadline, ok);
 }
 
-internal static /*<-*/channel<EmptyStruct> Done(this emptyCtx _) {
+internal static /*<-*/channel<EmptyStruct> Doneᴍ(emptyCtx _) {
     return default;
 }
 
-internal static error Err(this emptyCtx _) {
+internal static error Errᴍ(emptyCtx _) {
     return default;
 }
 
-internal static any Value(this emptyCtx _, any key) {
+internal static any Valueᴍ(emptyCtx _, any key) {
     return default;
 }
 
@@ -219,13 +219,13 @@ partial struct backgroundCtx {
     /*embed*/ internal emptyCtx emptyCtx;
 }
 
-} partial class contextᴛbackgroundCtx {
+} partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contextBackgroundˢ => ref contextBackgroundˢᵇ;
 private static readonly @string contextBackgroundˢᵇ = "context.Background"u8;
 
-internal static @string String(this backgroundCtx _) {
+internal static @string Stringᴍ(backgroundCtx _) {
     return contextBackgroundˢ;
 }
 
@@ -235,13 +235,13 @@ partial struct todoCtx {
     /*embed*/ internal emptyCtx emptyCtx;
 }
 
-} partial class contextᴛtodoCtx {
+} partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contextTodoˢ => ref contextTodoˢᵇ;
 private static readonly @string contextTodoˢᵇ = "context.TODO"u8;
 
-internal static @string String(this todoCtx _) {
+internal static @string Stringᴍ(todoCtx _) {
     return contextTodoˢ;
 }
 
@@ -395,9 +395,9 @@ partial struct afterFuncCtx {
     internal Action f;
 }
 
-} partial class contextᴛafterFuncCtx {
+} partial class context_package {
 
-internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) {
+internal static void cancelᴍ(ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.ᏑcancelCtx.cancel(false, err, cause);
@@ -491,13 +491,13 @@ partial struct cancelCtx {
     internal error cause;                         // set to non-nil by the first cancel call
 }
 
-} partial class contextᴛcancelCtx {
+} partial class context_package {
 
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *cancelCtx's method set; see the pointer-only satisfaction record.
-internal static (time.Time, bool) Deadline(this cancelCtx recvᴛ) => recvᴛ.Context.Deadline();
+internal static (time.Time, bool) Deadlineᴍ(cancelCtx recvᴛ) => recvᴛ.Context.Deadline();
 
-internal static any Value(this ж<cancelCtx> Ꮡc, any key) {
+internal static any Valueᴍ(ж<cancelCtx> Ꮡc, any key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (AreEqual(key, ᏑcancelCtxKey)) {
@@ -506,7 +506,7 @@ internal static any Value(this ж<cancelCtx> Ꮡc, any key) {
     return value(c.Context, key);
 }
 
-internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) {
+internal static /*<-*/channel<EmptyStruct> Doneᴍ(ж<cancelCtx> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -529,7 +529,7 @@ internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static error Err(this ж<cancelCtx> Ꮡc) {
+internal static error Errᴍ(ж<cancelCtx> Ꮡc) {
     // An atomic load is ~5x faster than a mutex, which can matter in tight loops.
     var err = Ꮡc.Ꮡerr.Load(); if (err != nil) {
         // Ensure the done channel has been closed before returning a non-nil error.
@@ -541,7 +541,7 @@ internal static error Err(this ж<cancelCtx> Ꮡc) {
 
 // propagateCancel arranges for child to be canceled when parent is.
 // It sets the parent context of cancelCtx.
-internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) {
+internal static partial void propagateCancelᴍ(ж<cancelCtx> Ꮡc, Context parent, canceler child) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.Context = parent;
@@ -624,16 +624,16 @@ internal static @string contextName(Context c) {
     return reflectlite.TypeOf(c).String();
 }
 
-} partial class contextᴛcancelCtx {
+} partial class context_package {
 
-internal static @string String(this ref cancelCtx c) {
+internal static @string Stringᴍ(ref cancelCtx c) {
     return contextName(c.Context) + ".WithCancel"u8;
 }
 
 // cancel closes c.done, cancels each of c's children, and, if
 // removeFromParent is true, removes c from its parent's children.
 // cancel sets c.cause to cause if this is the first time c is canceled.
-internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) {
+internal static void cancelᴍ(ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (err == nil) {
@@ -684,28 +684,28 @@ partial struct withoutCancelCtx {
     internal Context c;
 }
 
-} partial class contextᴛwithoutCancelCtx {
+} partial class context_package {
 
-internal static (time.Time deadline, bool ok) Deadline(this withoutCancelCtx _) {
+internal static (time.Time deadline, bool ok) Deadlineᴍ(withoutCancelCtx _) {
     time.Time deadline = default;
     bool ok = default;
 
     return (deadline, ok);
 }
 
-internal static /*<-*/channel<EmptyStruct> Done(this withoutCancelCtx _) {
+internal static /*<-*/channel<EmptyStruct> Doneᴍ(withoutCancelCtx _) {
     return default;
 }
 
-internal static error Err(this withoutCancelCtx _) {
+internal static error Errᴍ(withoutCancelCtx _) {
     return default;
 }
 
-internal static any Value(this withoutCancelCtx c, any key) {
+internal static any Valueᴍ(withoutCancelCtx c, any key) {
     return value(c, key);
 }
 
-internal static @string String(this withoutCancelCtx c) {
+internal static @string Stringᴍ(withoutCancelCtx c) {
     return contextName(c.c) + ".WithoutCancel"u8;
 }
 
@@ -776,17 +776,17 @@ partial struct timerCtx {
     internal time.Time deadline;
 }
 
-} partial class contextᴛtimerCtx {
+} partial class context_package {
 
-internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) {
+internal static (time.Time deadline, bool ok) Deadlineᴍ(ref timerCtx c) {
     return (c.deadline, true);
 }
 
-internal static @string String(this ref timerCtx c) {
+internal static @string Stringᴍ(ref timerCtx c) {
     return contextName(c.cancelCtx.Context) + ".WithDeadline("u8 + c.deadline.String() + " ["u8 + time.Until(c.deadline).String() + "])"u8;
 }
 
-internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) {
+internal static void cancelᴍ(ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.ᏑcancelCtx.cancel(false, err, cause);
@@ -858,19 +858,19 @@ partial struct valueCtx {
     internal any key, val;
 }
 
-} partial class contextᴛvalueCtx {
+} partial class context_package {
 
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-internal static (time.Time, bool) Deadline(this valueCtx recvᴛ) => recvᴛ.Context.Deadline();
+internal static (time.Time, bool) Deadlineᴍ(valueCtx recvᴛ) => recvᴛ.Context.Deadline();
 
 // Go method set entry for the promoted 'Context.Done()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-internal static /*<-*/channel<EmptyStruct> Done(this valueCtx recvᴛ) => recvᴛ.Context.Done();
+internal static /*<-*/channel<EmptyStruct> Doneᴍ(valueCtx recvᴛ) => recvᴛ.Context.Done();
 
 // Go method set entry for the promoted 'Context.Err()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-internal static error Err(this valueCtx recvᴛ) => recvᴛ.Context.Err();
+internal static error Errᴍ(valueCtx recvᴛ) => recvᴛ.Context.Err();
 
 } partial class context_package {
 
@@ -895,13 +895,13 @@ internal static @string stringify(any v) {
     return reflectlite.TypeOf(v).String();
 }
 
-} partial class contextᴛvalueCtx {
+} partial class context_package {
 
-internal static @string String(this ref valueCtx c) {
+internal static @string Stringᴍ(ref valueCtx c) {
     return contextName(c.Context) + ".WithValue("u8 + stringify(c.key) + ", "u8 + stringify(c.val) + ")"u8;
 }
 
-internal static any Value(this ref valueCtx c, any key) {
+internal static any Valueᴍ(ref valueCtx c, any key) {
     if (AreEqual(c.key, key)) {
         return c.val;
     }
@@ -956,3 +956,54 @@ internal static any value(Context c, any key) {
 }
 
 } // end context_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class contextᴛdeadlineExceededError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this deadlineExceededError _) => context_package.Errorᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this deadlineExceededError _) => context_package.Timeoutᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this deadlineExceededError _) => context_package.Temporaryᴍ(_);
+}
+partial class contextᴛemptyCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) => context_package.Deadlineᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this emptyCtx _) => context_package.Doneᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this emptyCtx _) => context_package.Errᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Value(this emptyCtx _, any key) => context_package.Valueᴍ(_, key);
+}
+partial class contextᴛbackgroundCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this backgroundCtx _) => context_package.Stringᴍ(_);
+}
+partial class contextᴛtodoCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this todoCtx _) => context_package.Stringᴍ(_);
+}
+partial class contextᴛafterFuncCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) => context_package.cancelᴍ(Ꮡa, removeFromParent, err, cause);
+}
+partial class contextᴛcancelCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time, bool) Deadline(this cancelCtx recvᴛ) => context_package.Deadlineᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Value(this ж<cancelCtx> Ꮡc, any key) => context_package.Valueᴍ(Ꮡc, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) => context_package.Doneᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this ж<cancelCtx> Ꮡc) => context_package.Errᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) => context_package.propagateCancelᴍ(Ꮡc, parent, child);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref cancelCtx c) => context_package.Stringᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) => context_package.cancelᴍ(Ꮡc, removeFromParent, err, cause);
+}
+partial class contextᴛwithoutCancelCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this withoutCancelCtx _) => context_package.Deadlineᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this withoutCancelCtx _) => context_package.Doneᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this withoutCancelCtx _) => context_package.Errᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Value(this withoutCancelCtx c, any key) => context_package.Valueᴍ(c, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this withoutCancelCtx c) => context_package.Stringᴍ(c);
+}
+partial class contextᴛtimerCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) => context_package.Deadlineᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref timerCtx c) => context_package.Stringᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) => context_package.cancelᴍ(Ꮡc, removeFromParent, err, cause);
+}
+partial class contextᴛvalueCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time, bool) Deadline(this valueCtx recvᴛ) => context_package.Deadlineᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this valueCtx recvᴛ) => context_package.Doneᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this valueCtx recvᴛ) => context_package.Errᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref valueCtx c) => context_package.Stringᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Value(this ref valueCtx c, any key) => context_package.Valueᴍ(ref c, key);
+}
+// </GlyphForwarders>

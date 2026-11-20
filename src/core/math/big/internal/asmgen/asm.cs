@@ -61,7 +61,7 @@ internal static @string asmHeader = """
 
 """u8.Raw();
 
-} partial class asmgenᴛAsm {
+} partial class asmgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string textˢ => ref textˢᵇ;
@@ -70,7 +70,7 @@ private static readonly @string textˢᵇ = "\nTEXT"u8;
 // Fatalf reports a fatal error by panicking.
 // Panicking is appropriate because there is a bug in the generator,
 // and panicking will show the exact source lines leading to that bug.
-public static void Fatalf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Fatalfᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -81,7 +81,7 @@ public static void Fatalf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany
 }
 
 // hint returns the register name for the given hint.
-internal static @string hint(this ж<Asm> Ꮡa, Hint h) {
+internal static @string hintᴍ(ж<Asm> Ꮡa, Hint h) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (h == HintCarry && a.Arch.regCarry != ""u8) {
@@ -98,7 +98,7 @@ internal static @string hint(this ж<Asm> Ꮡa, Hint h) {
 
 // ZR returns the zero register (the specific register guaranteed to hold the integer 0),
 // or else the zero Reg (Reg{}, which has r.Valid() == false).
-public static Reg ZR(this ref Asm a) {
+internal static Reg ZRᴍ(ref Asm a) {
     return new Reg(a.Arch.reg0);
 }
 
@@ -111,22 +111,22 @@ public static Reg ZR(this ref Asm a) {
 // a live value. In general it is the architecture implementation's responsibility
 // not to suggest the use of any such pseudo-instructions in situations
 // where they would cause problems.
-internal static Reg tmp(this ref Asm a) {
+internal static Reg tmpᴍ(ref Asm a) {
     return new Reg(a.Arch.regTmp);
 }
 
 // Carry returns the carry register, or else the zero Reg.
-public static Reg Carry(this ref Asm a) {
+internal static Reg Carryᴍ(ref Asm a) {
     return new Reg(a.Arch.regCarry);
 }
 
 // AltCarry returns the secondary carry register, or else the zero Reg.
-public static Reg AltCarry(this ref Asm a) {
+internal static Reg AltCarryᴍ(ref Asm a) {
     return new Reg(a.Arch.regAltCarry);
 }
 
 // Imm returns a Reg representing an immediate (constant) value.
-public static Reg Imm(this ref Asm a, nint x) {
+internal static Reg Immᴍ(ref Asm a, nint x) {
     if (x == 0 && a.Arch.reg0 != ""u8) {
         return new Reg(a.Arch.reg0);
     }
@@ -134,12 +134,12 @@ public static Reg Imm(this ref Asm a, nint x) {
 }
 
 // IsZero reports whether r is a zero immediate or the zero register.
-public static bool IsZero(this ref Asm a, Reg r) {
+internal static bool IsZeroᴍ(ref Asm a, Reg r) {
     return r.name == "$0"u8 || a.Arch.reg0 != ""u8 && r.name == a.Arch.reg0;
 }
 
 // Reg allocates a new register.
-public static Reg Reg(this ж<Asm> Ꮡa) {
+internal static Reg Regᴍ(ж<Asm> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = bits.TrailingZeros64(a.regavail);
@@ -151,7 +151,7 @@ public static Reg Reg(this ж<Asm> Ꮡa) {
 }
 
 // RegHint allocates a new register, with a hint as to its purpose.
-public static Reg RegHint(this ж<Asm> Ꮡa, Hint hint) {
+internal static Reg RegHintᴍ(ж<Asm> Ꮡa, Hint hint) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string name = Ꮡa.hint(hint); if (name != ""u8) {
@@ -170,7 +170,7 @@ public static Reg RegHint(this ж<Asm> Ꮡa, Hint hint) {
 
 // Free frees a previously allocated register.
 // If r is not a register (if it's an immediate or a memory reference), Free is a no-op.
-public static void Free(this ж<Asm> Ꮡa, Reg r) {
+internal static void Freeᴍ(ж<Asm> Ꮡa, Reg r) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = slices.Index(a.Arch.regs, r.name);
@@ -188,7 +188,7 @@ public static void Free(this ж<Asm> Ꮡa, Reg r) {
 // If r is not free for allocation, Unfree panics.
 // A Free paired with Unfree can release a register for use temporarily
 // but then reclaim it, such as at the end of a loop body when it must be restored.
-public static void Unfree(this ж<Asm> Ꮡa, Reg r) {
+internal static void Unfreeᴍ(ж<Asm> Ꮡa, Reg r) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = slices.Index(a.Arch.regs, r.name);
@@ -208,28 +208,28 @@ partial struct RegsUsed {
     internal uint64 avail;
 }
 
-} partial class asmgenᴛAsm {
+} partial class asmgen_package {
 
 // RegsUsed returns a snapshot of which registers are currently allocated,
 // which can be passed to a future call to [Asm.SetRegsUsed].
-public static RegsUsed RegsUsed(this ref Asm a) {
+internal static RegsUsed RegsUsedᴍ(ref Asm a) {
     return new RegsUsed(a.regavail);
 }
 
 // SetRegsUsed sets which registers are currently allocated.
 // The argument should have been returned from a previous
 // call to [Asm.RegsUsed].
-public static void SetRegsUsed(this ref Asm a, RegsUsed used) {
+internal static void SetRegsUsedᴍ(ref Asm a, RegsUsed used) {
     a.regavail = used.avail;
 }
 
 // FreeAll frees all known registers.
-public static void FreeAll(this ref Asm a) {
+internal static void FreeAllᴍ(ref Asm a) {
     a.regavail = ((uint64)1).Lsh((int64)(len(a.Arch.regs))) - 1;
 }
 
 // Printf emits to the assembly output.
-public static void Printf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Printfᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -241,14 +241,14 @@ public static void Printf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany
 }
 
 // Comment emits a line comment to the assembly output.
-public static void Comment(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Commentᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡa.Ꮡout), "\t// %s\n"u8, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
 // EOL appends an end-of-line comment to the previous line.
-public static void EOL(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void EOLᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -261,7 +261,7 @@ public static void EOL(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany ar
 
 // JmpEnable emits a test for the optional CPU feature that jumps to label if the feature is present.
 // If JmpEnable returns false, the feature is not available on this architecture and no code was emitted.
-public static bool JmpEnable(this ж<Asm> Ꮡa, Option option, @string label) {
+internal static bool JmpEnableᴍ(ж<Asm> Ꮡa, Option option, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var jmpEnable = a.Arch.options[option];
@@ -274,20 +274,20 @@ public static bool JmpEnable(this ж<Asm> Ꮡa, Option option, @string label) {
 
 // Enabled reports whether the optional CPU feature is considered
 // to be enabled at this point in the assembly output.
-public static bool Enabled(this ref Asm a, Option option) {
+internal static bool Enabledᴍ(ref Asm a, Option option) {
     return a.enabled[option];
 }
 
 // SetOption changes whether the optional CPU feature should be
 // considered to be enabled.
-public static void SetOption(this ref Asm a, Option option, bool on) {
+internal static void SetOptionᴍ(ref Asm a, Option option, bool on) {
     a.enabled[option] = on;
 }
 
 // op3 emits a 3-operand instruction op src1, src2, dst,
 // taking care to handle 2-operand machines and also
 // to simplify the printout when src2==dst.
-internal static void op3(this ж<Asm> Ꮡa, @string op, Reg src1, Reg src2, Reg dst) {
+internal static void op3ᴍ(ж<Asm> Ꮡa, @string op, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (op == ""u8) {
@@ -310,7 +310,7 @@ internal static void op3(this ж<Asm> Ꮡa, @string op, Reg src1, Reg src2, Reg 
 }
 
 // Mov emits dst = src.
-public static void Mov(this ж<Asm> Ꮡa, Reg src, Reg dst) {
+internal static void Movᴍ(ж<Asm> Ꮡa, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (src != dst) {
@@ -320,7 +320,7 @@ public static void Mov(this ж<Asm> Ꮡa, Reg src, Reg dst) {
 
 // AddWords emits dst = src1*WordBytes + src2.
 // It does not set or use the carry flag.
-public static void AddWords(this ж<Asm> Ꮡa, Reg src1, RegPtr src2, RegPtr dst) {
+internal static void AddWordsᴍ(ж<Asm> Ꮡa, Reg src1, RegPtr src2, RegPtr dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.addWords == ""u8) {
@@ -337,7 +337,7 @@ public static void AddWords(this ж<Asm> Ꮡa, Reg src1, RegPtr src2, RegPtr dst
 
 // And emits dst = src1 & src2
 // It may modify the carry flag.
-public static void And(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+internal static void Andᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.and, src1, src2, dst);
@@ -345,7 +345,7 @@ public static void And(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
 
 // Or emits dst = src1 | src2
 // It may modify the carry flag.
-public static void Or(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+internal static void Orᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.or, src1, src2, dst);
@@ -353,7 +353,7 @@ public static void Or(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
 
 // Xor emits dst = src1 ^ src2
 // It may modify the carry flag.
-public static void Xor(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+internal static void Xorᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.xor, src1, src2, dst);
@@ -361,7 +361,7 @@ public static void Xor(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
 
 // Neg emits dst = -src.
 // It may modify the carry flag.
-public static void Neg(this ж<Asm> Ꮡa, Reg src, Reg dst) {
+internal static void Negᴍ(ж<Asm> Ꮡa, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.neg == ""u8) {
@@ -383,13 +383,13 @@ public static void Neg(this ж<Asm> Ꮡa, Reg src, Reg dst) {
 }
 
 // HasRegShift reports whether the architecture can use shift expressions as operands.
-public static bool HasRegShift(this ref Asm a) {
+internal static bool HasRegShiftᴍ(ref Asm a) {
     return a.Arch.regShift;
 }
 
 // LshReg returns a shift-expression operand src<<shift.
 // If a.HasRegShift() == false, LshReg panics.
-public static Reg LshReg(this ж<Asm> Ꮡa, Reg shift, Reg src) {
+internal static Reg LshRegᴍ(ж<Asm> Ꮡa, Reg shift, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (!a.HasRegShift()) {
@@ -400,7 +400,7 @@ public static Reg LshReg(this ж<Asm> Ꮡa, Reg shift, Reg src) {
 
 // Lsh emits dst = src << shift.
 // It may modify the carry flag.
-public static void Lsh(this ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
+internal static void Lshᴍ(ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
@@ -415,7 +415,7 @@ public static void Lsh(this ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
 
 // LshWide emits dst = src << shift with low bits shifted from adj.
 // It may modify the carry flag.
-public static void LshWide(this ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
+internal static void LshWideᴍ(ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.lshd == ""u8) {
@@ -429,7 +429,7 @@ public static void LshWide(this ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg d
 
 // RshReg returns a shift-expression operand src>>shift.
 // If a.HasRegShift() == false, RshReg panics.
-public static Reg RshReg(this ж<Asm> Ꮡa, Reg shift, Reg src) {
+internal static Reg RshRegᴍ(ж<Asm> Ꮡa, Reg shift, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (!a.HasRegShift()) {
@@ -440,7 +440,7 @@ public static Reg RshReg(this ж<Asm> Ꮡa, Reg shift, Reg src) {
 
 // Rsh emits dst = src >> shift.
 // It may modify the carry flag.
-public static void Rsh(this ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
+internal static void Rshᴍ(ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
@@ -455,7 +455,7 @@ public static void Rsh(this ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
 
 // RshWide emits dst = src >> shift with high bits shifted from adj.
 // It may modify the carry flag.
-public static void RshWide(this ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
+internal static void RshWideᴍ(ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.lshd == ""u8) {
@@ -468,7 +468,7 @@ public static void RshWide(this ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg d
 }
 
 // SLTU emits dst = src2 < src1 (0 or 1), using an unsigned comparison.
-public static void SLTU(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+internal static void SLTUᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -503,7 +503,7 @@ internal static ref readonly @string adcsSSSCrSˢ => ref adcsSSSCrSˢᵇ;
 private static readonly @string adcsSSSCrSˢᵇ = "ADCS %s, %s, %s (cr=%s)"u8;
 
 // Add emits dst = src1+src2, with the specified carry behavior.
-public static void Add(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
+internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -679,7 +679,7 @@ internal static ref readonly @string sbcsSSSˢ => ref sbcsSSSˢᵇ;
 private static readonly @string sbcsSSSˢᵇ = "SBCS %s, %s, %s"u8;
 
 // Sub emits dst = src2-src1, with the specified carry behavior.
-public static void Sub(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
+internal static void Subᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -817,7 +817,7 @@ private static readonly @string clearCarryˢᵇ = "clear carry"u8;
 // ClearCarry clears the carry flag.
 // The ‘which’ parameter must be AddCarry or SubCarry to specify how the flag will be used.
 // (On some systems, the sub carry's actual processor bit is inverted from its usual value.)
-public static void ClearCarry(this ж<Asm> Ꮡa, Carry which) {
+internal static void ClearCarryᴍ(ж<Asm> Ꮡa, Carry which) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var dst = new Reg(a.Arch.regs[0]); // not actually modified
@@ -844,7 +844,7 @@ private static readonly @string saveCarryˢᵇ = "save carry"u8;
 // SaveCarry saves the carry flag into dst.
 // The meaning of the bits in dst is architecture-dependent.
 // The carry flag is left in an undefined state.
-public static void SaveCarry(this ж<Asm> Ꮡa, Reg dst) {
+internal static void SaveCarryᴍ(ж<Asm> Ꮡa, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     // Note: As implemented here, the carry flag is actually left unmodified,
@@ -867,7 +867,7 @@ private static readonly @string restoreCarryˢᵇ = "restore carry"u8;
 
 // RestoreCarry restores the carry flag from src.
 // src is left in an undefined state.
-public static void RestoreCarry(this ж<Asm> Ꮡa, Reg src) {
+internal static void RestoreCarryᴍ(ж<Asm> Ꮡa, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var cr = a.Carry(); if (cr.Valid()) {
@@ -895,7 +895,7 @@ private static readonly @string convertSubCarryˢᵇ = "convert sub carry"u8;
 
 // ConvertCarry converts the carry flag in dst from the internal format to a 0 or 1.
 // The carry flag is left in an undefined state.
-public static void ConvertCarry(this ж<Asm> Ꮡa, Carry which, Reg dst) {
+internal static void ConvertCarryᴍ(ж<Asm> Ꮡa, Carry which, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Carry().Valid()) { // already 0 or 1
@@ -924,7 +924,7 @@ private static readonly @string saveConvertAddCarryˢᵇ = "save & convert add c
 
 // SaveConvertCarry saves and converts the carry flag into dst: 0 unset, 1 set.
 // The carry flag is left in an undefined state.
-public static void SaveConvertCarry(this ж<Asm> Ꮡa, Carry which, Reg dst) {
+internal static void SaveConvertCarryᴍ(ж<Asm> Ꮡa, Carry which, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (which) {
@@ -951,7 +951,7 @@ public static void SaveConvertCarry(this ж<Asm> Ꮡa, Carry which, Reg dst) {
 // MulWide emits dstlo = src1 * src2 and dsthi = (src1 * src2) >> WordBits.
 // The carry flag is left in an undefined state.
 // If dstlo or dsthi is the zero Reg, then those outputs are discarded.
-public static void MulWide(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
+internal static void MulWideᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -984,14 +984,14 @@ public static void MulWide(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg
 }
 
 // Jmp jumps to the label.
-public static void Jmp(this ж<Asm> Ꮡa, @string label) {
+internal static void Jmpᴍ(ж<Asm> Ꮡa, @string label) {
     // Note: Some systems prefer the spelling B or BR, but all accept JMP.
     Ꮡa.Printf("\tJMP %s\n", label);
 }
 
 // JmpZero jumps to the label if src is zero.
 // It may modify the carry flag unless a.Arch.CarrySafeLoop is true.
-public static void JmpZero(this ж<Asm> Ꮡa, Reg src, @string label) {
+internal static void JmpZeroᴍ(ж<Asm> Ꮡa, Reg src, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.Printf("\t"u8 + a.Arch.jmpZero + "\n"u8, src, label);
@@ -999,20 +999,74 @@ public static void JmpZero(this ж<Asm> Ꮡa, Reg src, @string label) {
 
 // JmpNonZero jumps to the label if src is non-zero.
 // It may modify the carry flag unless a.Arch,CarrySafeLoop is true.
-public static void JmpNonZero(this ж<Asm> Ꮡa, Reg src, @string label) {
+internal static void JmpNonZeroᴍ(ж<Asm> Ꮡa, Reg src, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.Printf("\t"u8 + a.Arch.jmpNonZero + "\n"u8, src, label);
 }
 
 // Label emits a label with the given name.
-public static void Label(this ж<Asm> Ꮡa, @string name) {
+internal static void Labelᴍ(ж<Asm> Ꮡa, @string name) {
     Ꮡa.Printf("%s:\n", name);
 }
 
 // Ret returns.
-public static void Ret(this ж<Asm> Ꮡa) {
+internal static void Retᴍ(ж<Asm> Ꮡa) {
     Ꮡa.Printf("\tRET\n");
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class asmgenᴛAsm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Fatalf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) => asmgen_package.Fatalfᴍ(Ꮡa, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string hint(this ж<Asm> Ꮡa, Hint h) => asmgen_package.hintᴍ(Ꮡa, h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg ZR(this ref Asm a) => asmgen_package.ZRᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Reg tmp(this ref Asm a) => asmgen_package.tmpᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg Carry(this ref Asm a) => asmgen_package.Carryᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg AltCarry(this ref Asm a) => asmgen_package.AltCarryᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg Imm(this ref Asm a, nint x) => asmgen_package.Immᴍ(ref a, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsZero(this ref Asm a, Reg r) => asmgen_package.IsZeroᴍ(ref a, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg Reg(this ж<Asm> Ꮡa) => asmgen_package.Regᴍ(Ꮡa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg RegHint(this ж<Asm> Ꮡa, Hint hint) => asmgen_package.RegHintᴍ(Ꮡa, hint);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Free(this ж<Asm> Ꮡa, Reg r) => asmgen_package.Freeᴍ(Ꮡa, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Unfree(this ж<Asm> Ꮡa, Reg r) => asmgen_package.Unfreeᴍ(Ꮡa, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static RegsUsed RegsUsed(this ref Asm a) => asmgen_package.RegsUsedᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetRegsUsed(this ref Asm a, RegsUsed used) => asmgen_package.SetRegsUsedᴍ(ref a, used);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void FreeAll(this ref Asm a) => asmgen_package.FreeAllᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Printf(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) => asmgen_package.Printfᴍ(Ꮡa, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Comment(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) => asmgen_package.Commentᴍ(Ꮡa, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void EOL(this ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) => asmgen_package.EOLᴍ(Ꮡa, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool JmpEnable(this ж<Asm> Ꮡa, Option option, @string label) => asmgen_package.JmpEnableᴍ(Ꮡa, option, label);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Enabled(this ref Asm a, Option option) => asmgen_package.Enabledᴍ(ref a, option);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetOption(this ref Asm a, Option option, bool on) => asmgen_package.SetOptionᴍ(ref a, option, on);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void op3(this ж<Asm> Ꮡa, @string op, Reg src1, Reg src2, Reg dst) => asmgen_package.op3ᴍ(Ꮡa, op, src1, src2, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Mov(this ж<Asm> Ꮡa, Reg src, Reg dst) => asmgen_package.Movᴍ(Ꮡa, src, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddWords(this ж<Asm> Ꮡa, Reg src1, RegPtr src2, RegPtr dst) => asmgen_package.AddWordsᴍ(Ꮡa, src1, src2, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void And(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) => asmgen_package.Andᴍ(Ꮡa, src1, src2, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Or(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) => asmgen_package.Orᴍ(Ꮡa, src1, src2, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Xor(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) => asmgen_package.Xorᴍ(Ꮡa, src1, src2, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Neg(this ж<Asm> Ꮡa, Reg src, Reg dst) => asmgen_package.Negᴍ(Ꮡa, src, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasRegShift(this ref Asm a) => asmgen_package.HasRegShiftᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg LshReg(this ж<Asm> Ꮡa, Reg shift, Reg src) => asmgen_package.LshRegᴍ(Ꮡa, shift, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Lsh(this ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) => asmgen_package.Lshᴍ(Ꮡa, shift, src, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void LshWide(this ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) => asmgen_package.LshWideᴍ(Ꮡa, shift, adj, src, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg RshReg(this ж<Asm> Ꮡa, Reg shift, Reg src) => asmgen_package.RshRegᴍ(Ꮡa, shift, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Rsh(this ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) => asmgen_package.Rshᴍ(Ꮡa, shift, src, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RshWide(this ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) => asmgen_package.RshWideᴍ(Ꮡa, shift, adj, src, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SLTU(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) => asmgen_package.SLTUᴍ(Ꮡa, src1, src2, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) => asmgen_package.Addᴍ(Ꮡa, src1, src2, dst, carry);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sub(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) => asmgen_package.Subᴍ(Ꮡa, src1, src2, dst, carry);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ClearCarry(this ж<Asm> Ꮡa, Carry which) => asmgen_package.ClearCarryᴍ(Ꮡa, which);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SaveCarry(this ж<Asm> Ꮡa, Reg dst) => asmgen_package.SaveCarryᴍ(Ꮡa, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RestoreCarry(this ж<Asm> Ꮡa, Reg src) => asmgen_package.RestoreCarryᴍ(Ꮡa, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ConvertCarry(this ж<Asm> Ꮡa, Carry which, Reg dst) => asmgen_package.ConvertCarryᴍ(Ꮡa, which, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SaveConvertCarry(this ж<Asm> Ꮡa, Carry which, Reg dst) => asmgen_package.SaveConvertCarryᴍ(Ꮡa, which, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MulWide(this ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg dsthi) => asmgen_package.MulWideᴍ(Ꮡa, src1, src2, dstlo, dsthi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Jmp(this ж<Asm> Ꮡa, @string label) => asmgen_package.Jmpᴍ(Ꮡa, label);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void JmpZero(this ж<Asm> Ꮡa, Reg src, @string label) => asmgen_package.JmpZeroᴍ(Ꮡa, src, label);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void JmpNonZero(this ж<Asm> Ꮡa, Reg src, @string label) => asmgen_package.JmpNonZeroᴍ(Ꮡa, src, label);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Label(this ж<Asm> Ꮡa, @string name) => asmgen_package.Labelᴍ(Ꮡa, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Ret(this ж<Asm> Ꮡa) => asmgen_package.Retᴍ(Ꮡa);
+}
+// </GlyphForwarders>

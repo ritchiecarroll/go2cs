@@ -84,13 +84,13 @@ partial struct wrapError {
     internal error err;
 }
 
-} partial class fmtᴛwrapError {
+} partial class fmt_package {
 
-internal static @string Error(this ref wrapError e) {
+internal static @string Errorᴍ(ref wrapError e) {
     return e.msg;
 }
 
-internal static error Unwrap(this ref wrapError e) {
+internal static error Unwrapᴍ(ref wrapError e) {
     return e.err;
 }
 
@@ -101,14 +101,25 @@ partial struct wrapErrors {
     internal slice<error> errs;
 }
 
-} partial class fmtᴛwrapErrors {
+} partial class fmt_package {
 
-internal static @string Error(this ref wrapErrors e) {
+internal static @string Errorᴍ(ref wrapErrors e) {
     return e.msg;
 }
 
-internal static slice<error> Unwrap(this ref wrapErrors e) {
+internal static slice<error> Unwrapᴍ(ref wrapErrors e) {
     return e.errs;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fmtᴛwrapError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref wrapError e) => fmt_package.Errorᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this ref wrapError e) => fmt_package.Unwrapᴍ(ref e);
+}
+partial class fmtᴛwrapErrors {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref wrapErrors e) => fmt_package.Errorᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<error> Unwrap(this ref wrapErrors e) => fmt_package.Unwrapᴍ(ref e);
+}
+// </GlyphForwarders>

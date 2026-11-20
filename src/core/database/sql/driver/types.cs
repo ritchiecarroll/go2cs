@@ -64,15 +64,15 @@ public partial struct boolType {
 
 internal static ValueConverter _ᴛ3ʗ = new boolType();
 
-} partial class driverᴛboolType {
+} partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string boolˢ => ref boolˢᵇ;
 private static readonly @string boolˢᵇ = "Bool"u8;
 
-public static @string String(this boolType _) { return boolˢ; }
+internal static @string Stringᴍ(boolType _) { return boolˢ; }
 
-public static (Value, error) ConvertValue(this boolType _, any src) {
+internal static (Value, error) ConvertValueᴍ(boolType _, any src) {
     switch (src.type()) {
     case bool s: {
         return (s, default);
@@ -124,9 +124,9 @@ public partial struct int32Type {
 
 internal static ValueConverter _ᴛ4ʗ = new int32Type();
 
-} partial class driverᴛint32Type {
+} partial class driver_package {
 
-public static (Value, error) ConvertValue(this int32Type _, any v) {
+internal static (Value, error) ConvertValueᴍ(int32Type _, any v) {
     var rv = reflect.ValueOf(v);
     switch (rv.Kind()) {
     case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
@@ -165,9 +165,9 @@ public static ref stringType String => ref ((StaticBox<stringType>)ᏑString).Va
 public partial struct stringType {
 }
 
-} partial class driverᴛstringType {
+} partial class driver_package {
 
-public static (Value, error) ConvertValue(this stringType _, any v) {
+internal static (Value, error) ConvertValueᴍ(stringType _, any v) {
     switch (v.type()) {
     case @string _:
     case slice<byte> _: {
@@ -184,9 +184,9 @@ partial struct Null {
     public ValueConverter Converter;
 }
 
-} partial class driverᴛNull {
+} partial class driver_package {
 
-public static (Value, error) ConvertValue(this Null n, any v) {
+internal static (Value, error) ConvertValueᴍ(Null n, any v) {
     if (v == nil) {
         return (default, default);
     }
@@ -201,9 +201,9 @@ partial struct NotNull {
     public ValueConverter Converter;
 }
 
-} partial class driverᴛNotNull {
+} partial class driver_package {
 
-public static (Value, error) ConvertValue(this NotNull n, any v) {
+internal static (Value, error) ConvertValueᴍ(NotNull n, any v) {
     if (v == nil) {
         return (default, fmt.Errorf("nil value not allowed"u8));
     }
@@ -280,9 +280,9 @@ internal static (Value v, error err) callValuerValue(Valuer vr) {
     return vr.Value();
 }
 
-} partial class driverᴛdefaultConverter {
+} partial class driver_package {
 
-public static (Value, error) ConvertValue(this defaultConverter _, any v) {
+internal static (Value, error) ConvertValueᴍ(defaultConverter _, any v) {
     if (IsValue(v)) {
         return (v, default);
     }
@@ -356,3 +356,25 @@ partial interface decimalDecompose {
 }
 
 } // end driver_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class driverᴛboolType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this boolType _) => driver_package.Stringᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this boolType _, any src) => driver_package.ConvertValueᴍ(_, src);
+}
+partial class driverᴛint32Type {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this int32Type _, any v) => driver_package.ConvertValueᴍ(_, v);
+}
+partial class driverᴛstringType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this stringType _, any v) => driver_package.ConvertValueᴍ(_, v);
+}
+partial class driverᴛNull {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this Null n, any v) => driver_package.ConvertValueᴍ(n, v);
+}
+partial class driverᴛNotNull {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this NotNull n, any v) => driver_package.ConvertValueᴍ(n, v);
+}
+partial class driverᴛdefaultConverter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this defaultConverter _, any v) => driver_package.ConvertValueᴍ(_, v);
+}
+// </GlyphForwarders>

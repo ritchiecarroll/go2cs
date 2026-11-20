@@ -111,9 +111,9 @@ partial struct compressor {
     internal array<uint32> hashMatch = new(maxMatchLength - 1);
 }
 
-} partial class flateᴛcompressor {
+} partial class flate_package {
 
-internal static nint fillDeflate(this ref compressor d, slice<byte> b) {
+internal static nint fillDeflateᴍ(ref compressor d, slice<byte> b) {
     if (d.index >= (nint)(2 * windowSize - (minMatchLength + maxMatchLength))) {
         // shift the window by windowSize
         copy(d.window, d.window[(int)(windowSize)..(int)(2 * windowSize)]);
@@ -153,7 +153,7 @@ internal static nint fillDeflate(this ref compressor d, slice<byte> b) {
     return n;
 }
 
-internal static error writeBlock(this ref compressor d, slice<token> tokens, nint index) {
+internal static error writeBlockᴍ(ref compressor d, slice<token> tokens, nint index) {
     if (index > 0) {
         slice<byte> window = default;
         if (d.blockStart <= index) {
@@ -170,7 +170,7 @@ internal static error writeBlock(this ref compressor d, slice<token> tokens, nin
 // dictionary and calculate all hashes.
 // This is much faster than doing a full encode.
 // Should only be used after a reset.
-internal static void fillWindow(this ref compressor d, slice<byte> b) {
+internal static void fillWindowᴍ(ref compressor d, slice<byte> b) {
     // Do not fill window if we are in store-only mode.
     if (d.compressionLevel.level < 2) {
         return;
@@ -220,7 +220,7 @@ internal static void fillWindow(this ref compressor d, slice<byte> b) {
 
 // Try to find a match starting at index whose length is greater than prevSize.
 // We only look at chainCount possibilities before giving up.
-internal static (nint length, nint offset, bool ok) findMatch(this ref compressor d, nint pos, nint prevHead, nint prevLength, nint lookahead) {
+internal static (nint length, nint offset, bool ok) findMatchᴍ(ref compressor d, nint pos, nint prevHead, nint prevLength, nint lookahead) {
     nint length = default;
     nint offset = default;
     bool ok = default;
@@ -276,7 +276,7 @@ internal static (nint length, nint offset, bool ok) findMatch(this ref compresso
     return (length, offset, ok);
 }
 
-internal static error writeStoredBlock(this ref compressor d, slice<byte> buf) {
+internal static error writeStoredBlockᴍ(ref compressor d, slice<byte> buf) {
     d.w.writeStoredHeader(len(buf), false); if (d.w.err != nil) {
         return d.w.err;
     }
@@ -324,12 +324,12 @@ internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
     return max;
 }
 
-} partial class flateᴛcompressor {
+} partial class flate_package {
 
 // encSpeed will compress and store the currently added data,
 // if enough has been accumulated or we at the end of the stream.
 // Any error that occurred will be in d.err
-internal static void encSpeed(this ref compressor d) {
+internal static void encSpeedᴍ(ref compressor d) {
     // We only compress if we have maxStoreBlockSize.
     if (d.windowEnd < maxStoreBlockSize) {
         if (!d.sync) {
@@ -369,7 +369,7 @@ internal static void encSpeed(this ref compressor d) {
     d.windowEnd = 0;
 }
 
-internal static void initDeflate(this ref compressor d) {
+internal static void initDeflateᴍ(ref compressor d) {
     d.window = new slice<byte>(2 * windowSize);
     d.hashOffset = 1;
     d.tokens = new slice<token>(0, maxFlateBlockTokens + 1);
@@ -381,7 +381,7 @@ internal static void initDeflate(this ref compressor d) {
     d.bulkHasher = bulkHash4;
 }
 
-internal static void deflate(this ref compressor d) {
+internal static void deflateᴍ(ref compressor d) {
     if (d.windowEnd - d.index < (nint)(minMatchLength + maxMatchLength) && !d.sync) {
         return;
     }
@@ -513,13 +513,13 @@ continue_Loop:;
 break_Loop:;
 }
 
-internal static nint fillStore(this ref compressor d, slice<byte> b) {
+internal static nint fillStoreᴍ(ref compressor d, slice<byte> b) {
     nint n = copy(d.window.slice(d.windowEnd), b);
     d.windowEnd += n;
     return n;
 }
 
-internal static void store(this ref compressor d) {
+internal static void storeᴍ(ref compressor d) {
     if (d.windowEnd > 0 && (d.windowEnd == maxStoreBlockSize || d.sync)) {
         d.err = d.writeStoredBlock(d.window.slice(0, d.windowEnd));
         d.windowEnd = 0;
@@ -529,7 +529,7 @@ internal static void store(this ref compressor d) {
 // storeHuff compresses and stores the currently added data
 // when the d.window is full or we are at the end of the stream.
 // Any error that occurred will be in d.err
-internal static void storeHuff(this ref compressor d) {
+internal static void storeHuffᴍ(ref compressor d) {
     if (d.windowEnd < len(d.window) && !d.sync || d.windowEnd == 0) {
         return;
     }
@@ -538,7 +538,7 @@ internal static void storeHuff(this ref compressor d) {
     d.windowEnd = 0;
 }
 
-internal static (nint n, error err) write(this ж<compressor> Ꮡd, slice<byte> b) {
+internal static (nint n, error err) writeᴍ(ж<compressor> Ꮡd, slice<byte> b) {
     nint n = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -556,7 +556,7 @@ internal static (nint n, error err) write(this ж<compressor> Ꮡd, slice<byte> 
     return (n, default);
 }
 
-internal static error syncFlush(this ж<compressor> Ꮡd) {
+internal static error syncFlushᴍ(ж<compressor> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (d.err != nil) {
@@ -573,7 +573,7 @@ internal static error syncFlush(this ж<compressor> Ꮡd) {
     return d.err;
 }
 
-internal static error /*err*/ init(this ref compressor d, io.Writer w, nint level) {
+internal static error /*err*/ initᴍ(ref compressor d, io.Writer w, nint level) {
     d.w = newHuffmanBitWriter(w);
 
     var matchᴛ1 = false;
@@ -611,7 +611,7 @@ internal static error /*err*/ init(this ref compressor d, io.Writer w, nint leve
     return default;
 }
 
-internal static void reset(this ref compressor d, io.Writer w) {
+internal static void resetᴍ(ref compressor d, io.Writer w) {
     d.w.reset(w);
     d.sync = false;
     d.err = default;
@@ -641,7 +641,7 @@ internal static void reset(this ref compressor d, io.Writer w) {
     }}
 }
 
-internal static error close(this ж<compressor> Ꮡd) {
+internal static error closeᴍ(ж<compressor> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (AreEqual(d.err, errWriterClosed)) {
@@ -709,9 +709,9 @@ partial struct dictWriter {
     internal io.Writer w;
 }
 
-} partial class flateᴛdictWriter {
+} partial class flate_package {
 
-internal static (nint n, error err) Write(this ref dictWriter w, slice<byte> b) {
+internal static (nint n, error err) Writeᴍ(ref dictWriter w, slice<byte> b) {
     return w.w.Write(b);
 }
 
@@ -726,11 +726,11 @@ partial struct Writer {
     internal slice<byte> dict;
 }
 
-} partial class flateᴛWriter {
+} partial class flate_package {
 
 // Write writes data to w, which will eventually write the
 // compressed form of data to its underlying writer.
-public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> data) {
+internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡw, slice<byte> data) {
     return Ꮡw.Ꮡd.write(data);
 }
 
@@ -743,21 +743,21 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> data) 
 // If the underlying writer returns an error, Flush returns that error.
 //
 // In the terminology of the zlib library, Flush is equivalent to Z_SYNC_FLUSH.
-public static error Flush(this ж<Writer> Ꮡw) {
+internal static error Flushᴍ(ж<Writer> Ꮡw) {
     // For more about flushing:
     // https://www.bolet.org/~pornin/deflate-flush.html
     return Ꮡw.Ꮡd.syncFlush();
 }
 
 // Close flushes and closes the writer.
-public static error Close(this ж<Writer> Ꮡw) {
+internal static error Closeᴍ(ж<Writer> Ꮡw) {
     return Ꮡw.Ꮡd.close();
 }
 
 // Reset discards the writer's state and makes it equivalent to
 // the result of [NewWriter] or [NewWriterDict] called with dst
 // and w's level and dictionary.
-public static void Reset(this ref Writer w, io.Writer dst) {
+internal static void Resetᴍ(ref Writer w, io.Writer dst) {
     var (dw, ok) = w.d.w.writer._<ж<dictWriter>>(ᐧ); if (ok) {
         // w was created with NewWriterDict
         dw.w = dst;
@@ -770,3 +770,33 @@ public static void Reset(this ref Writer w, io.Writer dst) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class flateᴛcompressor {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint fillDeflate(this ref compressor d, slice<byte> b) => flate_package.fillDeflateᴍ(ref d, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeBlock(this ref compressor d, slice<token> tokens, nint index) => flate_package.writeBlockᴍ(ref d, tokens, index);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fillWindow(this ref compressor d, slice<byte> b) => flate_package.fillWindowᴍ(ref d, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint length, nint offset, bool ok) findMatch(this ref compressor d, nint pos, nint prevHead, nint prevLength, nint lookahead) => flate_package.findMatchᴍ(ref d, pos, prevHead, prevLength, lookahead);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeStoredBlock(this ref compressor d, slice<byte> buf) => flate_package.writeStoredBlockᴍ(ref d, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encSpeed(this ref compressor d) => flate_package.encSpeedᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initDeflate(this ref compressor d) => flate_package.initDeflateᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deflate(this ref compressor d) => flate_package.deflateᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint fillStore(this ref compressor d, slice<byte> b) => flate_package.fillStoreᴍ(ref d, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void store(this ref compressor d) => flate_package.storeᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void storeHuff(this ref compressor d) => flate_package.storeHuffᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) write(this ж<compressor> Ꮡd, slice<byte> b) => flate_package.writeᴍ(Ꮡd, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error syncFlush(this ж<compressor> Ꮡd) => flate_package.syncFlushᴍ(Ꮡd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ init(this ref compressor d, io.Writer w, nint level) => flate_package.initᴍ(ref d, w, level);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref compressor d, io.Writer w) => flate_package.resetᴍ(ref d, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ж<compressor> Ꮡd) => flate_package.closeᴍ(Ꮡd);
+}
+partial class flateᴛdictWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref dictWriter w, slice<byte> b) => flate_package.Writeᴍ(ref w, b);
+}
+partial class flateᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> data) => flate_package.Writeᴍ(Ꮡw, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ж<Writer> Ꮡw) => flate_package.Flushᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Writer> Ꮡw) => flate_package.Closeᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Writer w, io.Writer dst) => flate_package.Resetᴍ(ref w, dst);
+}
+// </GlyphForwarders>

@@ -260,9 +260,9 @@ private static readonly @string _Attr_nameᵇ = "SiblingLocationNameOrderingByte
     [140] = _Attr_name[1171..1183]
 }; }
 
-} partial class dwarfᴛAttr {
+} partial class dwarf_package {
 
-public static @string String(this Attr i) {
+internal static @string Stringᴍ(Attr i) {
     var (str, ok) = _Attr_map[i, ꟷ]; if (ok) {
         return str;
     }
@@ -270,3 +270,9 @@ public static @string String(this Attr i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class dwarfᴛAttr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Attr i) => dwarf_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

@@ -19,7 +19,7 @@ partial class poll_package {
 public partial struct errNetClosing {
 }
 
-} partial class pollᴛerrNetClosing {
+} partial class poll_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string useOfClosedNetworkˢ => ref useOfClosedNetworkˢᵇ;
@@ -29,10 +29,10 @@ private static readonly @string useOfClosedNetworkˢᵇ = "use of closed network
 // Keep this string consistent because of issue #4373:
 // since historically programs have not been able to detect
 // this error, they look for the string.
-public static @string Error(this errNetClosing e) { return useOfClosedNetworkˢ; }
+internal static @string Errorᴍ(errNetClosing e) { return useOfClosedNetworkˢ; }
 
-public static bool Timeout(this errNetClosing e) { return false; }
-public static bool Temporary(this errNetClosing e) { return false; }
+internal static bool Timeoutᴍ(errNetClosing e) { return false; }
+internal static bool Temporaryᴍ(errNetClosing e) { return false; }
 
 } partial class poll_package {
 
@@ -65,7 +65,7 @@ public static error ErrDeadlineExceeded = new DeadlineExceededErrorжerror(Ꮡ(n
 partial struct DeadlineExceededError {
 }
 
-} partial class pollᴛDeadlineExceededError {
+} partial class poll_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iOTimeoutˢ => ref iOTimeoutˢᵇ;
@@ -75,9 +75,9 @@ private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
 // The string is "i/o timeout" because that is what was returned
 // by earlier Go versions. Changing it may break programs that
 // match on error strings.
-public static @string Error(this ref DeadlineExceededError e) { return iOTimeoutˢ; }
-public static bool Timeout(this ref DeadlineExceededError e) { return true; }
-public static bool Temporary(this ref DeadlineExceededError e) { return true; }
+internal static @string Errorᴍ(ref DeadlineExceededError e) { return iOTimeoutˢ; }
+internal static bool Timeoutᴍ(ref DeadlineExceededError e) { return true; }
+internal static bool Temporaryᴍ(ref DeadlineExceededError e) { return true; }
 
 } partial class poll_package {
 
@@ -116,3 +116,16 @@ public static ref Action<nint> TestHookDidWritev => ref ((StaticBox<Action<nint>
 partial struct String /*@string*/;
 
 } // end poll_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pollᴛerrNetClosing {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this errNetClosing e) => poll_package.Errorᴍ(e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this errNetClosing e) => poll_package.Timeoutᴍ(e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this errNetClosing e) => poll_package.Temporaryᴍ(e);
+}
+partial class pollᴛDeadlineExceededError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref DeadlineExceededError e) => poll_package.Errorᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref DeadlineExceededError e) => poll_package.Timeoutᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this ref DeadlineExceededError e) => poll_package.Temporaryᴍ(ref e);
+}
+// </GlyphForwarders>

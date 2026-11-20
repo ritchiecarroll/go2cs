@@ -171,9 +171,9 @@ partial struct YCbCr {
     public uint8 Y, Cb, Cr;
 }
 
-} partial class colorᴛYCbCr {
+} partial class color_package {
 
-public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
+internal static (uint32, uint32, uint32, uint32) RGBAᴍ(YCbCr c) {
     // This code is a copy of the YCbCrToRGB function above, except that it
     // returns values in the range [0, 0xffff] instead of [0, 0xff]. There is a
     // subtle difference between doing this and having YCbCr satisfy the Color
@@ -251,9 +251,9 @@ partial struct NYCbCrA {
     public uint8 A;
 }
 
-} partial class colorᴛNYCbCrA {
+} partial class color_package {
 
-public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) {
+internal static (uint32, uint32, uint32, uint32) RGBAᴍ(NYCbCrA c) {
     // The first part of this method is the same as YCbCr.RGBA.
     var yy1 = (int32)c.Y * 0x10101;
     var cb1 = (int32)c.Cb - 128;
@@ -361,9 +361,9 @@ partial struct CMYK {
     public uint8 C, M, Y, K;
 }
 
-} partial class colorᴛCMYK {
+} partial class color_package {
 
-public static (uint32, uint32, uint32, uint32) RGBA(this CMYK c) {
+internal static (uint32, uint32, uint32, uint32) RGBAᴍ(CMYK c) {
     // This code is a copy of the CMYKToRGB function above, except that it
     // returns values in the range [0, 0xffff] instead of [0, 0xff].
 
@@ -389,3 +389,15 @@ internal static Color cmykModel(Color c) {
 }
 
 } // end color_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class colorᴛYCbCr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) => color_package.RGBAᴍ(c);
+}
+partial class colorᴛNYCbCrA {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) => color_package.RGBAᴍ(c);
+}
+partial class colorᴛCMYK {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (uint32, uint32, uint32, uint32) RGBA(this CMYK c) => color_package.RGBAᴍ(c);
+}
+// </GlyphForwarders>

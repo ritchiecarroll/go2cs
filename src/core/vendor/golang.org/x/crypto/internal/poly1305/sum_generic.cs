@@ -58,11 +58,11 @@ partial struct macGeneric {
     internal nint offset;
 }
 
-} partial class poly1305ᴛmacGeneric {
+} partial class poly1305_package {
 
 // Write splits the incoming message into TagSize chunks, and passes them to
 // update. It buffers incomplete chunks.
-internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
+internal static (nint, error) Writeᴍ(ж<macGeneric> Ꮡh, slice<byte> p) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint nn = len(p);
@@ -91,7 +91,7 @@ internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
 // Sum flushes the last incomplete chunk from the buffer, if any, and generates
 // the MAC output. It does not modify its state, in order to allow for multiple
 // calls to Sum, even if no Write is allowed after Sum.
-internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> @out) {
+internal static void Sumᴍ(ref macGeneric h, /*[16]*/ ж<array<byte>> @out) {
     var state = h.macState.ΔClone();
     if (h.offset > 0) {
         updateGeneric(ref state, h.buffer.slice(0, h.offset));
@@ -317,3 +317,10 @@ internal static void finalize(/*[16]*/ ж<array<byte>> Ꮡout, ref array<uint64>
 }
 
 } // end poly1305_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class poly1305ᴛmacGeneric {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) => poly1305_package.Writeᴍ(Ꮡh, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> @out) => poly1305_package.Sumᴍ(ref h, @out);
+}
+// </GlyphForwarders>

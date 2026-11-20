@@ -19,16 +19,25 @@ partial struct Array {
 // A negative length indicates an unknown length.
 public static ж<Array> NewArray(Type elem, int64 len) { return Ꮡ(new Array(len: len, elem: elem)); }
 
-} partial class typesᴛArray {
+} partial class types_package {
 
 // Len returns the length of array a.
 // A negative result indicates an unknown length.
-public static int64 Len(this ref Array a) { return a.len; }
+internal static int64 Lenᴍ(ref Array a) { return a.len; }
 
 // Elem returns element type of array a.
-public static Type Elem(this ref Array a) { return a.elem; }
+internal static Type Elemᴍ(ref Array a) { return a.elem; }
 
-public static Type Underlying(this ж<Array> Ꮡa) { return new ArrayжType(Ꮡa); }
-public static @string String(this ж<Array> Ꮡa) { return TypeString(new ArrayжType(Ꮡa), default); }
+internal static Type Underlyingᴍ(ж<Array> Ꮡa) { return new ArrayжType(Ꮡa); }
+internal static @string Stringᴍ(ж<Array> Ꮡa) { return TypeString(new ArrayжType(Ꮡa), default); }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛArray {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Len(this ref Array a) => types_package.Lenᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Elem(this ref Array a) => types_package.Elemᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Array> Ꮡa) => types_package.Underlyingᴍ(Ꮡa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Array> Ꮡa) => types_package.Stringᴍ(Ꮡa);
+}
+// </GlyphForwarders>

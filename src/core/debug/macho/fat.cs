@@ -145,9 +145,9 @@ public static (ж<FatFile>, error) OpenFat(@string name) {
     return (ff, default);
 }
 
-} partial class machoᴛFatFile {
+} partial class macho_package {
 
-public static error Close(this ref FatFile ff) {
+internal static error Closeᴍ(ref FatFile ff) {
     error err = default;
     if (ff.closer != nil) {
         err = ff.closer.Close();
@@ -157,3 +157,9 @@ public static error Close(this ref FatFile ff) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class machoᴛFatFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref FatFile ff) => macho_package.Closeᴍ(ref ff);
+}
+// </GlyphForwarders>

@@ -39,9 +39,9 @@ internal static moveToFrontDecoder newMTFDecoderWithRange(nint n) {
     return (moveToFrontDecoder)m;
 }
 
-} partial class bzip2ᴛmoveToFrontDecoder {
+} partial class bzip2_package {
 
-internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) {
+internal static byte /*b*/ Decodeᴍ(moveToFrontDecoder m, nint n) {
     byte b = default;
 
     // Implement move-to-front with a simple copy. This approach
@@ -55,8 +55,15 @@ internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) {
 }
 
 // First returns the symbol at the front of the list.
-internal static byte First(this moveToFrontDecoder m) {
+internal static byte Firstᴍ(moveToFrontDecoder m) {
     return m[0];
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bzip2ᴛmoveToFrontDecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) => bzip2_package.Decodeᴍ(m, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte First(this moveToFrontDecoder m) => bzip2_package.Firstᴍ(m);
+}
+// </GlyphForwarders>

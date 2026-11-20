@@ -70,11 +70,17 @@ public static (ж<Group>, error) LookupGroupId(@string gid) {
     return lookupGroupId(gid);
 }
 
-} partial class userᴛUser {
+} partial class user_package {
 
 // GroupIds returns the list of group IDs that the user is a member of.
-public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) {
+internal static (slice<@string>, error) GroupIdsᴍ(ж<User> Ꮡu) {
     return listGroups(ref (Ꮡu).DerefOrNull());
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class userᴛUser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) => user_package.GroupIdsᴍ(Ꮡu);
+}
+// </GlyphForwarders>

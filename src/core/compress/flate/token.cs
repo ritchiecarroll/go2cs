@@ -76,15 +76,15 @@ internal static token matchToken(uint32 xlength, uint32 xoffset) {
     return (token)((uint32)matchType + (xlength << (int)(lengthShift)) + xoffset);
 }
 
-} partial class flateᴛtoken {
+} partial class flate_package {
 
 // Returns the literal of a literal token.
-internal static uint32 literal(this token t) { return (uint32)(t - (uint32)literalType); }
+internal static uint32 literalᴍ(token t) { return (uint32)(t - (uint32)literalType); }
 
 // Returns the extra offset of a match token.
-internal static uint32 offset(this token t) { return (uint32)t & (uint32)offsetMask; }
+internal static uint32 offsetᴍ(token t) { return (uint32)t & (uint32)offsetMask; }
 
-internal static uint32 length(this token t) { return (uint32)((t - (uint32)matchType) >> (int)(lengthShift)); }
+internal static uint32 lengthᴍ(token t) { return (uint32)((t - (uint32)matchType) >> (int)(lengthShift)); }
 
 } partial class flate_package {
 
@@ -102,3 +102,11 @@ internal static uint32 offsetCode(uint32 off) {
 }
 
 } // end flate_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class flateᴛtoken {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 literal(this token t) => flate_package.literalᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 offset(this token t) => flate_package.offsetᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 length(this token t) => flate_package.lengthᴍ(t);
+}
+// </GlyphForwarders>

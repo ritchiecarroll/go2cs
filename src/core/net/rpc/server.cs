@@ -216,7 +216,7 @@ internal static bool isExportedOrBuiltinType(reflect.Type t) {
     return token.IsExported(t.Name()) || t.PkgPath() == ""u8;
 }
 
-} partial class rpcᴛServer {
+} partial class rpc_package {
 
 // Register publishes in the server the set of methods of the
 // receiver value that satisfy the following conditions:
@@ -229,13 +229,13 @@ internal static bool isExportedOrBuiltinType(reflect.Type t) {
 // no suitable methods. It also logs the error using package log.
 // The client accesses each method using a string of the form "Type.Method",
 // where Type is the receiver's concrete type.
-public static error Register(this ж<Server> Ꮡserver, any rcvr) {
+internal static error Registerᴍ(ж<Server> Ꮡserver, any rcvr) {
     return Ꮡserver.register(rcvr, ""u8, false);
 }
 
 // RegisterName is like [Register] but uses the provided name for the type
 // instead of the receiver's concrete type.
-public static error RegisterName(this ж<Server> Ꮡserver, @string name, any rcvr) {
+internal static error RegisterNameᴍ(ж<Server> Ꮡserver, @string name, any rcvr) {
     return Ꮡserver.register(rcvr, name, true);
 }
 
@@ -245,9 +245,9 @@ public static error RegisterName(this ж<Server> Ꮡserver, @string name, any rc
 // To debug registration, recompile the package with this set to true.
 internal const bool logRegisterError = false;
 
-} partial class rpcᴛServer {
+} partial class rpc_package {
 
-internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name, bool useName) {
+internal static error registerᴍ(ж<Server> Ꮡserver, any rcvr, @string name, bool useName) {
     var s = @new<service>();
     s.typ = reflect.TypeOf(rcvr);
     s.rcvr = reflect.ValueOf(rcvr);
@@ -358,12 +358,12 @@ internal static map<@string, ж<methodType>> suitableMethods(reflect.Type typ, b
 // contains an error when it is used.
 internal static EmptyStruct invalidRequest = new EmptyStruct();
 
-} partial class rpcᴛServer {
+} partial class rpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object rpcWritingResponseˢ = (@string)"rpc: writing response:"u8;
 
-internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> sending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) {
+internal static void sendResponseᴍ(ж<Server> Ꮡserver, ж<sync.Mutex> sending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var resp = Ꮡserver.getResponse();
@@ -383,9 +383,9 @@ internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> send
     Ꮡserver.freeResponse(resp);
 }
 
-} partial class rpcᴛmethodType {
+} partial class rpc_package {
 
-public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) {
+internal static nuint /*n*/ NumCallsᴍ(ж<methodType> Ꮡm) {
     nuint n = default;
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -395,9 +395,9 @@ public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) {
     return n;
 }
 
-} partial class rpcᴛservice {
+} partial class rpc_package {
 
-internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mutex> sending, ж<sync.WaitGroup> wg, ж<methodType> Ꮡmtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, ServerCodec codec) {
+internal static void callᴍ(ж<service> Ꮡs, ж<Server> server, ж<sync.Mutex> sending, ж<sync.WaitGroup> wg, ж<methodType> Ꮡmtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, ServerCodec codec) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -435,13 +435,13 @@ partial struct gobServerCodec {
     internal bool closed;
 }
 
-} partial class rpcᴛgobServerCodec {
+} partial class rpc_package {
 
-internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> r) {
+internal static error ReadRequestHeaderᴍ(ref gobServerCodec c, ж<Request> r) {
     return c.dec.Decode(r.OrTypedNil());
 }
 
-internal static error ReadRequestBody(this ref gobServerCodec c, any body) {
+internal static error ReadRequestBodyᴍ(ref gobServerCodec c, any body) {
     return c.dec.Decode(body);
 }
 
@@ -449,7 +449,7 @@ internal static error ReadRequestBody(this ref gobServerCodec c, any body) {
 internal static readonly object rpcGobErrorEncodingˢ = (@string)"rpc: gob error encoding response:"u8;
 internal static readonly object rpcGobErrorEncodingBodyˢ = (@string)"rpc: gob error encoding body:"u8;
 
-internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> r, any body) {
+internal static error /*err*/ WriteResponseᴍ(ref gobServerCodec c, ж<Response> r, any body) {
     error err = default;
 
     err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
@@ -473,7 +473,7 @@ internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Respon
     return c.encBuf.Flush();
 }
 
-internal static error Close(this ref gobServerCodec c) {
+internal static error Closeᴍ(ref gobServerCodec c) {
     if (c.closed) {
         // Only call c.rwc.Close once; otherwise the semantics are undefined.
         return default;
@@ -482,7 +482,7 @@ internal static error Close(this ref gobServerCodec c) {
     return c.rwc.Close();
 }
 
-} partial class rpcᴛServer {
+} partial class rpc_package {
 
 // ServeConn runs the server on a single connection.
 // ServeConn blocks, serving the connection until the client hangs up.
@@ -490,7 +490,7 @@ internal static error Close(this ref gobServerCodec c) {
 // ServeConn uses the gob wire format (see package gob) on the
 // connection. To use an alternate codec, use [ServeCodec].
 // See [NewClient]'s comment for information about concurrent access.
-public static void ServeConn(this ж<Server> Ꮡserver, io.ReadWriteCloser conn) {
+internal static void ServeConnᴍ(ж<Server> Ꮡserver, io.ReadWriteCloser conn) {
     var buf = bufio.NewWriter(conn);
     var srv = Ꮡ(new gobServerCodec(
         rwc: conn,
@@ -506,7 +506,7 @@ internal static readonly object rpcˢ = (@string)"rpc:"u8;
 
 // ServeCodec is like [ServeConn] but uses the specified codec to
 // decode requests and encode responses.
-public static partial void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) {
+internal static partial void ServeCodecᴍ(ж<Server> Ꮡserver, ServerCodec codec) {
     var sending = @new<sync.Mutex>();
     var wg = @new<sync.WaitGroup>();
     for (;;) {
@@ -539,7 +539,7 @@ public static partial void ServeCodec(this ж<Server> Ꮡserver, ServerCodec cod
 
 // ServeRequest is like [ServeCodec] but synchronously serves a single request.
 // It does not close the codec upon completion.
-public static error ServeRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
+internal static error ServeRequestᴍ(ж<Server> Ꮡserver, ServerCodec codec) {
     var sending = @new<sync.Mutex>();
     var (service, mtype, req, argv, replyv, keepReading, err) = Ꮡserver.readRequest(codec);
     if (err != nil) {
@@ -557,7 +557,7 @@ public static error ServeRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
     return default;
 }
 
-internal static ж<Request> getRequest(this ж<Server> Ꮡserver) {
+internal static ж<Request> getRequestᴍ(ж<Server> Ꮡserver) {
     ref var server = ref Ꮡserver.DerefOrNull();
 
     server.reqLock.Lock();
@@ -572,7 +572,7 @@ internal static ж<Request> getRequest(this ж<Server> Ꮡserver) {
     return req;
 }
 
-internal static void freeRequest(this ж<Server> Ꮡserver, ж<Request> Ꮡreq) {
+internal static void freeRequestᴍ(ж<Server> Ꮡserver, ж<Request> Ꮡreq) {
     ref var server = ref Ꮡserver.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -582,7 +582,7 @@ internal static void freeRequest(this ж<Server> Ꮡserver, ж<Request> Ꮡreq) 
     server.reqLock.Unlock();
 }
 
-internal static ж<Response> getResponse(this ж<Server> Ꮡserver) {
+internal static ж<Response> getResponseᴍ(ж<Server> Ꮡserver) {
     ref var server = ref Ꮡserver.DerefOrNull();
 
     server.respLock.Lock();
@@ -597,7 +597,7 @@ internal static ж<Response> getResponse(this ж<Server> Ꮡserver) {
     return resp;
 }
 
-internal static void freeResponse(this ж<Server> Ꮡserver, ж<Response> Ꮡresp) {
+internal static void freeResponseᴍ(ж<Server> Ꮡserver, ж<Response> Ꮡresp) {
     ref var server = ref Ꮡserver.DerefOrNull();
     ref var resp = ref Ꮡresp.DerefOrNull();
 
@@ -607,7 +607,7 @@ internal static void freeResponse(this ж<Server> Ꮡserver, ж<Response> Ꮡres
     server.respLock.Unlock();
 }
 
-internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, bool keepReading, error err) readRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
+internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, bool keepReading, error err) readRequestᴍ(ж<Server> Ꮡserver, ServerCodec codec) {
     ж<service> service = default;
     ж<methodType> mtype = default;
     ж<Request> req = default;
@@ -656,7 +656,7 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
     return (service, mtype, req, argv, replyv, keepReading, err);
 }
 
-internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool keepReading, error err) readRequestHeader(this ж<Server> Ꮡserver, ServerCodec codec) {
+internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool keepReading, error err) readRequestHeaderᴍ(ж<Server> Ꮡserver, ServerCodec codec) {
     ж<service> svc = default;
     ж<methodType> mtype = default;
     ж<Request> req = default;
@@ -708,7 +708,7 @@ internal static readonly object rpcServeAcceptˢ = (@string)"rpc.Serve: accept:"
 // for each incoming connection. Accept blocks until the listener
 // returns a non-nil error. The caller typically invokes Accept in a
 // go statement.
-public static partial void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
+internal static partial void Acceptᴍ(ж<Server> Ꮡserver, net.Listener lis) {
     for (;;) {
         var (conn, err) = lis.Accept();
         if (err != nil) {
@@ -778,7 +778,7 @@ public static void Accept(net.Listener lis) { DefaultServer.Accept(lis); }
 // Can connect to RPC service using HTTP CONNECT to rpcPath.
 internal static @string connected = "200 Connected to Go RPC";
 
-} partial class rpcᴛServer {
+} partial class rpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
@@ -790,7 +790,7 @@ private static readonly @string mustConnectˢᵇ = "405 must CONNECT\n"u8;
 internal static readonly object rpcHijackingˢ = (@string)"rpc hijacking "u8;
 
 // ServeHTTP implements an [http.Handler] that answers RPC requests.
-public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) {
+internal static void ServeHTTPᴍ(ж<Server> Ꮡserver, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (req.Method != "CONNECT"u8) {
@@ -811,7 +811,7 @@ public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w,
 // HandleHTTP registers an HTTP handler for RPC messages on rpcPath,
 // and a debugging handler on debugPath.
 // It is still necessary to invoke [http.Serve](), typically in a go statement.
-public static void HandleHTTP(this ж<Server> Ꮡserver, @string rpcPath, @string debugPath) {
+internal static void HandleHTTPᴍ(ж<Server> Ꮡserver, @string rpcPath, @string debugPath) {
     Δhttp.Handle(rpcPath, new ServerжHandler(Ꮡserver));
     Δhttp.Handle(debugPath, new debugHTTP(Ꮡserver));
 }
@@ -826,3 +826,36 @@ public static void HandleHTTP() {
 }
 
 } // end rpc_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class rpcᴛServer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Register(this ж<Server> Ꮡserver, any rcvr) => rpc_package.Registerᴍ(Ꮡserver, rcvr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RegisterName(this ж<Server> Ꮡserver, @string name, any rcvr) => rpc_package.RegisterNameᴍ(Ꮡserver, name, rcvr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name, bool useName) => rpc_package.registerᴍ(Ꮡserver, rcvr, name, useName);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> sending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) => rpc_package.sendResponseᴍ(Ꮡserver, sending, Ꮡreq, reply, codec, errmsg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeConn(this ж<Server> Ꮡserver, io.ReadWriteCloser conn) => rpc_package.ServeConnᴍ(Ꮡserver, conn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.ServeCodecᴍ(Ꮡserver, codec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ServeRequest(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.ServeRequestᴍ(Ꮡserver, codec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Request> getRequest(this ж<Server> Ꮡserver) => rpc_package.getRequestᴍ(Ꮡserver);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeRequest(this ж<Server> Ꮡserver, ж<Request> Ꮡreq) => rpc_package.freeRequestᴍ(Ꮡserver, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Response> getResponse(this ж<Server> Ꮡserver) => rpc_package.getResponseᴍ(Ꮡserver);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeResponse(this ж<Server> Ꮡserver, ж<Response> Ꮡresp) => rpc_package.freeResponseᴍ(Ꮡserver, Ꮡresp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, bool keepReading, error err) readRequest(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.readRequestᴍ(Ꮡserver, codec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool keepReading, error err) readRequestHeader(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.readRequestHeaderᴍ(Ꮡserver, codec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Accept(this ж<Server> Ꮡserver, net.Listener lis) => rpc_package.Acceptᴍ(Ꮡserver, lis);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) => rpc_package.ServeHTTPᴍ(Ꮡserver, w, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void HandleHTTP(this ж<Server> Ꮡserver, @string rpcPath, @string debugPath) => rpc_package.HandleHTTPᴍ(Ꮡserver, rpcPath, debugPath);
+}
+partial class rpcᴛmethodType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) => rpc_package.NumCallsᴍ(Ꮡm);
+}
+partial class rpcᴛservice {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mutex> sending, ж<sync.WaitGroup> wg, ж<methodType> Ꮡmtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, ServerCodec codec) => rpc_package.callᴍ(Ꮡs, server, sending, wg, Ꮡmtype, req, argv, replyv, codec);
+}
+partial class rpcᴛgobServerCodec {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> r) => rpc_package.ReadRequestHeaderᴍ(ref c, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadRequestBody(this ref gobServerCodec c, any body) => rpc_package.ReadRequestBodyᴍ(ref c, body);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> r, any body) => rpc_package.WriteResponseᴍ(ref c, r, body);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref gobServerCodec c) => rpc_package.Closeᴍ(ref c);
+}
+// </GlyphForwarders>

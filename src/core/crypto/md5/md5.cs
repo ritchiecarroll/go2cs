@@ -49,9 +49,9 @@ partial struct digest {
     internal uint64 len;
 }
 
-} partial class md5ᴛdigest {
+} partial class md5_package {
 
-internal static void Reset(this ref digest d) {
+internal static void Resetᴍ(ref digest d) {
     d.s[0] = init0;
     d.s[1] = init1;
     d.s[2] = init2;
@@ -66,13 +66,13 @@ internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "md5\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4*4 + BlockSize + 8 */ 92;
 
-} partial class md5ᴛdigest {
+} partial class md5_package {
 
-internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, d.s[0]);
     b = byteorder.BEAppendUint32(b, d.s[1]);
@@ -90,7 +90,7 @@ private static readonly @string cryptoMd5InvalidHashˢᵇ = "crypto/md5: invalid
 internal static ref readonly @string cryptoMd5InvalidHashˢ2 => ref cryptoMd5InvalidHashˢ2ᵇ;
 private static readonly @string cryptoMd5InvalidHashˢ2ᵇ = "crypto/md5: invalid hash state size"u8;
 
-internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(cryptoMd5InvalidHashˢ);
     }
@@ -118,9 +118,9 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b[0..4]));
 }
 
-} partial class md5ᴛdigest {
+} partial class md5_package {
 
-internal static (hash.Cloner, error) Clone(this ref digest d) {
+internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
     ref var r = ref heap<digest>(d.ΔClone(), out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
@@ -137,17 +137,17 @@ public static hash.Hash New() {
     return new digestжHash(d);
 }
 
-} partial class md5ᴛdigest {
+} partial class md5_package {
 
-internal static nint Size(this ref digest d) { return md5.Size; }
+internal static nint Sizeᴍ(ref digest d) { return md5.Size; }
 
-internal static nint BlockSize(this ref digest d) { return md5.BlockSize; }
+internal static nint BlockSizeᴍ(ref digest d) { return md5.BlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoMd5UseOfMd5IsNotˢ => ref cryptoMd5UseOfMd5IsNotˢᵇ;
 private static readonly @string cryptoMd5UseOfMd5IsNotˢᵇ = "crypto/md5: use of MD5 is not allowed in FIPS 140-only mode"u8;
 
-internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
+internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -193,14 +193,14 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     return (nn, err);
 }
 
-internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
     // Make a copy of d so that caller can keep writing and summing.
     ref var d0 = ref heap<digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.checkSum();
     return appendꓸꓸꓸ(@in, hash[..]);
 }
 
-internal static array<byte> checkSum(this ж<digest> Ꮡd) {
+internal static array<byte> checkSumᴍ(ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
@@ -242,3 +242,18 @@ public static array<byte> Sum(slice<byte> data) {
 }
 
 } // end md5_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class md5ᴛdigest {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this ref digest d) => md5_package.Resetᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref digest d) => md5_package.MarshalBinaryᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) => md5_package.AppendBinaryᴍ(ref d, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) => md5_package.UnmarshalBinaryᴍ(ref d, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref digest d) => md5_package.Cloneᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Size(this ref digest d) => md5_package.Sizeᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref digest d) => md5_package.BlockSizeᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) => md5_package.Writeᴍ(Ꮡd, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) => md5_package.Sumᴍ(ref d, @in);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<byte> checkSum(this ж<digest> Ꮡd) => md5_package.checkSumᴍ(Ꮡd);
+}
+// </GlyphForwarders>

@@ -92,9 +92,9 @@ partial struct printer {
 
 internal static slice<byte> indent = slice<byte>(".  "u8);
 
-} partial class astᴛprinter {
+} partial class ast_package {
 
-internal static (nint n, error err) Write(this ref printer p, slice<byte> data) {
+internal static (nint n, error err) Writeᴍ(ref printer p, slice<byte> data) {
     nint n = default;
     error err = default;
 
@@ -137,10 +137,10 @@ partial struct localError {
     internal error err;
 }
 
-} partial class astᴛprinter {
+} partial class ast_package {
 
 // printf is a convenience wrapper that takes care of print errors.
-internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void printfᴍ(ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (_, err) = fmt.Fprintf(new printerжWriter(Ꮡp), format, args.ꓸꓸꓸ); if (err != nil) {
@@ -156,7 +156,7 @@ internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸ
 // not cycles that are created via slices or maps containing the
 // same slice or map. Code for general data structures probably
 // should catch those as well.
-internal static void print(this ж<printer> Ꮡp, reflect.Value x) {
+internal static void printᴍ(ж<printer> Ꮡp, reflect.Value x) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (!NotNilFilter(""u8, x)) {
@@ -281,3 +281,11 @@ internal static void print(this ж<printer> Ꮡp, reflect.Value x) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class astᴛprinter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref printer p, slice<byte> data) => ast_package.Writeᴍ(ref p, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) => ast_package.printfᴍ(Ꮡp, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void print(this ж<printer> Ꮡp, reflect.Value x) => ast_package.printᴍ(Ꮡp, x);
+}
+// </GlyphForwarders>

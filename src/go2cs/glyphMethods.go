@@ -42,9 +42,9 @@ const glyphForwarderAttributes = "global::System.Runtime.CompilerServices.Method
 var glyphHolderSwitch = regexp.MustCompile(`^\} partial class (\S+) \{\s*$`)
 
 type glyphForwarder struct {
-	holder        string // the holder class that receives it ("" for a method that was in the package class)
-	receiverType  string // the C# receiver type as the parameter spells it, for a holder this transform declares
-	text          string
+	holder       string // the holder class that receives it ("" for a method that was in the package class)
+	receiverType string // the C# receiver type as the parameter spells it, for a holder this transform declares
+	text         string
 }
 
 // applyGlyphMethods rewrites one converted file's text (see the file header). packageClass is the class the file
@@ -232,6 +232,7 @@ func glyphRewriteHeader(line string, packageClass string) (string, glyphForwarde
 	words := strings.Fields(head)
 	var mods []string
 	isStatic := false
+	isPartial := false
 
 	for len(words) > 0 {
 		switch words[0] {
@@ -240,7 +241,11 @@ func glyphRewriteHeader(line string, packageClass string) (string, glyphForwarde
 		case "static":
 			isStatic = true
 			mods = append(mods, words[0])
-		case "partial", "extern", "abstract", "virtual", "override":
+		case "partial":
+			// A no-inline carrier's implementing part (NoInliningPartialGenerator writes its declaring part from this
+			// signature, so the rename follows): the body stays partial, the forwarder is an ordinary method.
+			isPartial = true
+		case "extern", "abstract", "virtual", "override":
 			return "", glyphForwarderText{}, false
 		default:
 			goto done
@@ -310,6 +315,10 @@ done:
 
 	if containsWord(mods, "unsafe") {
 		bodyMods += " unsafe"
+	}
+
+	if isPartial {
+		bodyMods += " partial"
 	}
 
 	var body strings.Builder

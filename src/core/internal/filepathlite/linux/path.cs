@@ -33,16 +33,16 @@ partial struct lazybuf {
     internal nint volLen;
 }
 
-} partial class filepathliteᴛlazybuf {
+} partial class filepathlite_package {
 
-internal static byte index(this ref lazybuf b, nint i) {
+internal static byte indexᴍ(ref lazybuf b, nint i) {
     if (b.buf != nil) {
         return b.buf[i];
     }
     return b.path[i];
 }
 
-internal static void append(this ref lazybuf b, byte c) {
+internal static void appendᴍ(ref lazybuf b, byte c) {
     if (b.buf == nil) {
         if (b.w < len(b.path) && b.path[b.w] == c) {
             b.w++;
@@ -55,14 +55,14 @@ internal static void append(this ref lazybuf b, byte c) {
     b.w++;
 }
 
-internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
+internal static void prependᴍ(ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
     var prefix = prefixʗp.sslice();
 
     b.buf = slices.Insert(b.buf, 0, prefix.ꓸꓸꓸ);
     b.w += len(prefix);
 }
 
-internal static @string @string(this ref lazybuf b) {
+internal static @string @stringᴍ(ref lazybuf b) {
     if (b.buf == nil) {
         return b.volAndPath.slice(0, b.volLen + b.w);
     }
@@ -295,3 +295,12 @@ public static nint VolumeNameLen(@string path) {
 }
 
 } // end filepathlite_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class filepathliteᴛlazybuf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte index(this ref lazybuf b, nint i) => filepathlite_package.indexᴍ(ref b, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref lazybuf b, byte c) => filepathlite_package.appendᴍ(ref b, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) => filepathlite_package.prependᴍ(ref b, prefixʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref lazybuf b) => filepathlite_package.@stringᴍ(ref b);
+}
+// </GlyphForwarders>

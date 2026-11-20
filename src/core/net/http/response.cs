@@ -114,10 +114,10 @@ partial struct Response {
     public ж<tls.ConnectionState> TLS;
 }
 
-} partial class httpᴛResponse {
+} partial class http_package {
 
 // Cookies parses and returns the cookies set in the Set-Cookie headers.
-public static slice<ж<Cookie>> Cookies(this ref Response r) {
+internal static slice<ж<Cookie>> Cookiesᴍ(ref Response r) {
     return readSetCookies(r.Header);
 }
 
@@ -127,7 +127,7 @@ public static slice<ж<Cookie>> Cookies(this ref Response r) {
 // when no Location header is present.
 public static error ErrNoLocation = errors.New("http: no Location header in response");
 
-} partial class httpᴛResponse {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string locationˢ => ref locationˢᵇ;
@@ -137,7 +137,7 @@ private static readonly @string locationˢᵇ = "Location"u8;
 // if present. Relative redirects are resolved relative to
 // [Response.Request]. [ErrNoLocation] is returned if no
 // Location header is present.
-public static (ж<url.URL>, error) Location(this ref Response r) {
+internal static (ж<url.URL>, error) Locationᴍ(ref Response r) {
     @string lv = r.Header.Get(locationˢ);
     if (lv == ""u8) {
         return (default, ErrNoLocation);
@@ -236,11 +236,11 @@ internal static void fixPragmaCacheControl(Header header) {
     }
 }
 
-} partial class httpᴛResponse {
+} partial class http_package {
 
 // ProtoAtLeast reports whether the HTTP protocol used
 // in the response is at least major.minor.
-public static bool ProtoAtLeast(this ref Response r, nint major, nint minor) {
+internal static bool ProtoAtLeastᴍ(ref Response r, nint major, nint minor) {
     return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
 }
 
@@ -251,7 +251,7 @@ internal partial struct Write_r1 /*dyn*/ {
     /*embed*/ public io_package.Closer Closer;
 }
 
-} partial class httpᴛResponse {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentLength0ˢ => ref contentLength0ˢᵇ;
@@ -273,7 +273,7 @@ private static readonly @string contentLength0ˢᵇ = "Content-Length: 0\r\n"u8;
 //	Header, values for non-canonical keys will have unpredictable behavior
 //
 // The Response Body is closed after it is sent.
-public static error Write(this ref Response r, io.Writer w) {
+internal static error Writeᴍ(ref Response r, io.Writer w) {
     // Status line
     @string text = r.Status;
     if (text == ""u8) {
@@ -361,7 +361,7 @@ public static error Write(this ref Response r, io.Writer w) {
     return default;
 }
 
-internal static void closeBody(this ref Response r) {
+internal static void closeBodyᴍ(ref Response r) {
     if (r.Body != nil) {
         r.Body.Close();
     }
@@ -374,14 +374,14 @@ internal static void closeBody(this ref Response r) {
 // connection is done being managed from its perspective. Once we
 // return a writable response body to a user, the net/http package is
 // done managing that connection.
-internal static bool bodyIsWritable(this ref Response r) {
+internal static bool bodyIsWritableᴍ(ref Response r) {
     var (_, ok) = r.Body._<io.Writer>(ᐧ);
     return ok;
 }
 
 // isProtocolSwitch reports whether the response code and header
 // indicate a successful protocol upgrade response.
-internal static bool isProtocolSwitch(this ref Response r) {
+internal static bool isProtocolSwitchᴍ(ref Response r) {
     return isProtocolSwitchResponse(r.StatusCode, r.Header);
 }
 
@@ -404,3 +404,15 @@ internal static bool isProtocolSwitchHeader(Header h) {
 }
 
 } // end http_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛResponse {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<Cookie>> Cookies(this ref Response r) => http_package.Cookiesᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<url.URL>, error) Location(this ref Response r) => http_package.Locationᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ProtoAtLeast(this ref Response r, nint major, nint minor) => http_package.ProtoAtLeastᴍ(ref r, major, minor);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ref Response r, io.Writer w) => http_package.Writeᴍ(ref r, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeBody(this ref Response r) => http_package.closeBodyᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool bodyIsWritable(this ref Response r) => http_package.bodyIsWritableᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isProtocolSwitch(this ref Response r) => http_package.isProtocolSwitchᴍ(ref r);
+}
+// </GlyphForwarders>

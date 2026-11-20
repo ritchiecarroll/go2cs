@@ -21,9 +21,9 @@ public partial struct @decimal {
     internal bool trunc;               // discarded nonzero digits beyond d[:nd]
 }
 
-} partial class strconvᴛdecimal {
+} partial class strconv_package {
 
-public static @string String(this ref @decimal a) {
+internal static @string Stringᴍ(ref @decimal a) {
     nint n = 10 + a.nd;
     if (a.dp > 0) {
         n += a.dp;
@@ -86,10 +86,10 @@ internal static void trim(ref @decimal a) {
     }
 }
 
-} partial class strconvᴛdecimal {
+} partial class strconv_package {
 
 // Assign v to a.
-public static void Assign(this ж<@decimal> Ꮡa, uint64 v) {
+internal static void Assignᴍ(ж<@decimal> Ꮡa, uint64 v) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     array<byte> buf = new(24);
@@ -325,10 +325,10 @@ internal static void leftShift(ref @decimal a, nuint k) {
     trim(ref a);
 }
 
-} partial class strconvᴛdecimal {
+} partial class strconv_package {
 
 // Binary shift left (k > 0) or right (k < 0).
-public static void Shift(this ж<@decimal> Ꮡa, nint k) {
+internal static void Shiftᴍ(ж<@decimal> Ꮡa, nint k) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -372,13 +372,13 @@ internal static bool shouldRoundUp(ref @decimal a, nint nd) {
     return a.d[nd] >= '5';
 }
 
-} partial class strconvᴛdecimal {
+} partial class strconv_package {
 
 // Round a to nd digits (or fewer).
 // If nd is zero, it means we're rounding
 // just to the left of the digits, as in
 // 0.09 -> 0.1.
-public static void Round(this ж<@decimal> Ꮡa, nint nd) {
+internal static void Roundᴍ(ж<@decimal> Ꮡa, nint nd) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (nd < 0 || nd >= a.nd) {
@@ -392,7 +392,7 @@ public static void Round(this ж<@decimal> Ꮡa, nint nd) {
 }
 
 // Round a down to nd digits (or fewer).
-public static void RoundDown(this ж<@decimal> Ꮡa, nint nd) {
+internal static void RoundDownᴍ(ж<@decimal> Ꮡa, nint nd) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (nd < 0 || nd >= a.nd) {
@@ -403,7 +403,7 @@ public static void RoundDown(this ж<@decimal> Ꮡa, nint nd) {
 }
 
 // Round a up to nd digits (or fewer).
-public static void RoundUp(this ref @decimal a, nint nd) {
+internal static void RoundUpᴍ(ref @decimal a, nint nd) {
     if (nd < 0 || nd >= a.nd) {
         return;
     }
@@ -427,7 +427,7 @@ public static void RoundUp(this ref @decimal a, nint nd) {
 
 // Extract integer part, rounded appropriately.
 // No guarantees about overflow.
-public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) {
+internal static uint64 RoundedIntegerᴍ(ж<@decimal> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.dp > 20) {
@@ -448,3 +448,15 @@ public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class strconvᴛdecimal {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref @decimal a) => strconv_package.Stringᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Assign(this ж<@decimal> Ꮡa, uint64 v) => strconv_package.Assignᴍ(Ꮡa, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Shift(this ж<@decimal> Ꮡa, nint k) => strconv_package.Shiftᴍ(Ꮡa, k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Round(this ж<@decimal> Ꮡa, nint nd) => strconv_package.Roundᴍ(Ꮡa, nd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RoundDown(this ж<@decimal> Ꮡa, nint nd) => strconv_package.RoundDownᴍ(Ꮡa, nd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RoundUp(this ref @decimal a, nint nd) => strconv_package.RoundUpᴍ(ref a, nd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) => strconv_package.RoundedIntegerᴍ(Ꮡa);
+}
+// </GlyphForwarders>

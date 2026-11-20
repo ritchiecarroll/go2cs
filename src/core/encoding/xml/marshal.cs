@@ -161,12 +161,12 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
     return e;
 }
 
-} partial class xmlᴛEncoder {
+} partial class xml_package {
 
 // Indent sets the encoder to generate XML in which each element
 // begins on a new indented line that starts with prefix and is followed by
 // one or more copies of indent according to the nesting depth.
-public static void Indent(this ref Encoder enc, @string prefix, @string indent) {
+internal static void Indentᴍ(ref Encoder enc, @string prefix, @string indent) {
     enc.p.prefix = prefix;
     enc.p.indent = indent;
 }
@@ -177,7 +177,7 @@ public static void Indent(this ref Encoder enc, @string prefix, @string indent) 
 // of Go values to XML.
 //
 // Encode calls [Encoder.Flush] before returning.
-public static error Encode(this ж<Encoder> Ꮡenc, any v) {
+internal static error Encodeᴍ(ж<Encoder> Ꮡenc, any v) {
     ref var enc = ref Ꮡenc.DerefOrNull();
 
     var err = Ꮡenc.Ꮡp.marshalValue(reflect.ValueOf(v), nil, nil);
@@ -194,7 +194,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
 // of Go values to XML.
 //
 // EncodeElement calls [Encoder.Flush] before returning.
-public static error EncodeElement(this ж<Encoder> Ꮡenc, any v, StartElement startʗp) {
+internal static error EncodeElementᴍ(ж<Encoder> Ꮡenc, any v, StartElement startʗp) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
@@ -211,7 +211,7 @@ internal static slice<byte> begComment = slice<byte>("<!--"u8);
 internal static slice<byte> endComment = slice<byte>("-->"u8);
 internal static slice<byte> endProcInst = slice<byte>("?>"u8);
 
-} partial class xmlᴛEncoder {
+} partial class xml_package {
 
 // EncodeToken writes the given XML token to the stream.
 // It returns an error if [StartElement] and [EndElement] tokens are not properly matched.
@@ -225,7 +225,7 @@ internal static slice<byte> endProcInst = slice<byte>("?>"u8);
 //
 // EncodeToken allows writing a [ProcInst] with Target set to "xml" only as the first token
 // in the stream.
-public static error EncodeToken(this ж<Encoder> Ꮡenc, Token t) {
+internal static error EncodeTokenᴍ(ж<Encoder> Ꮡenc, Token t) {
     var p = Ꮡenc.Ꮡp;
     switch (t.type()) {
     case StartElement tΔ1ᴛ1: {
@@ -344,18 +344,18 @@ internal static bool isValidDirective(Directive dir) {
     return depth == 0 && inquote == 0 && !incomment;
 }
 
-} partial class xmlᴛEncoder {
+} partial class xml_package {
 
 // Flush flushes any buffered XML to the underlying writer.
 // See the [Encoder.EncodeToken] documentation for details about when it is necessary.
-public static error Flush(this ref Encoder enc) {
+internal static error Flushᴍ(ref Encoder enc) {
     return enc.p.w.Flush();
 }
 
 // Close the Encoder, indicating that no more data will be written. It flushes
 // any buffered XML to the underlying writer and returns an error if the
 // written XML is invalid (e.g. by containing unclosed elements).
-public static error Close(this ref Encoder enc) {
+internal static error Closeᴍ(ref Encoder enc) {
     return enc.p.Close();
 }
 
@@ -378,7 +378,7 @@ partial struct printer {
     internal error err;
 }
 
-} partial class xmlᴛprinter {
+} partial class xml_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string xmlˢ => ref xmlˢᵇ;
@@ -388,7 +388,7 @@ private static readonly @string xmlnsˢᵇ = @"xmlns:"u8;
 
 // createAttrPrefix finds the name space prefix attribute to use for the given name space,
 // defining a new prefix if necessary. It returns the prefix.
-internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) {
+internal static @string createAttrPrefixᴍ(ж<printer> Ꮡp, @string url) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string prefixΔ1 = p.attrPrefix[url]; if (prefixΔ1 != ""u8) {
@@ -450,16 +450,16 @@ internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) {
 }
 
 // deleteAttrPrefix removes an attribute name space prefix.
-internal static void deleteAttrPrefix(this ref printer p, @string prefix) {
+internal static void deleteAttrPrefixᴍ(ref printer p, @string prefix) {
     delete(p.attrPrefix, p.attrNS[prefix]);
     delete(p.attrNS, prefix);
 }
 
-internal static void markPrefix(this ref printer p) {
+internal static void markPrefixᴍ(ref printer p) {
     p.prefixes = append(p.prefixes, ""u8);
 }
 
-internal static void popPrefix(this ref printer p) {
+internal static void popPrefixᴍ(ref printer p) {
     while (len(p.prefixes) > 0) {
         @string prefix = p.prefixes[len(p.prefixes) - 1];
         p.prefixes = p.prefixes.slice(0, len(p.prefixes) - 1);
@@ -472,7 +472,7 @@ internal static void popPrefix(this ref printer p) {
 
 // marshalValue writes one or more XML elements representing val.
 // If val was obtained from a struct field, finfo must have its details.
-internal static error marshalValue(this ж<printer> Ꮡp, reflect.Value val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
+internal static error marshalValueᴍ(ж<printer> Ꮡp, reflect.Value val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var finfo = ref Ꮡfinfo.DerefOrNull();
     ref var startTemplate = ref ᏑstartTemplate.DerefOrNull();
@@ -637,7 +637,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflect.Value val, ж<
 }
 
 // marshalAttr marshals an attribute with the given name and value, adding to start.Attr.
-internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflect.Value val) {
+internal static error marshalAttrᴍ(ref printer p, ж<StartElement> Ꮡstart, Name name, reflect.Value val) {
     ref var start = ref Ꮡstart.DerefOrNull();
 
     if (val.CanInterface()) {
@@ -759,10 +759,10 @@ internal static StartElement defaultStart(reflect.Type typ, ж<fieldInfo> Ꮡfin
     return start;
 }
 
-} partial class xmlᴛprinter {
+} partial class xml_package {
 
 // marshalInterface marshals a Marshaler interface value.
-internal static error marshalInterface(this ref printer p, Marshaler val, StartElement start) {
+internal static error marshalInterfaceᴍ(ref printer p, Marshaler val, StartElement start) {
     // Push a marker onto the tag stack so that MarshalXML
     // cannot close the XML tags that it did not open.
     p.tags = append(p.tags, new Name());
@@ -782,7 +782,7 @@ internal static error marshalInterface(this ref printer p, Marshaler val, StartE
 }
 
 // marshalTextInterface marshals a TextMarshaler interface value.
-internal static error marshalTextInterface(this ж<printer> Ꮡp, encoding.TextMarshaler val, StartElement startʗp) {
+internal static error marshalTextInterfaceᴍ(ж<printer> Ꮡp, encoding.TextMarshaler val, StartElement startʗp) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
@@ -802,7 +802,7 @@ internal static ref readonly @string xmlnsˢ2 => ref xmlnsˢ2ᵇ;
 private static readonly @string xmlnsˢ2ᵇ = @" xmlns="""u8;
 
 // writeStart writes the given start element.
-internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstart) {
+internal static error writeStartᴍ(ж<printer> Ꮡp, ж<StartElement> Ꮡstart) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var start = ref Ꮡstart.DerefOrNull();
 
@@ -843,7 +843,7 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
     return default;
 }
 
-internal static error writeEnd(this ref printer p, Name name) {
+internal static error writeEndᴍ(ref printer p, Name name) {
     if (name.Local == ""u8) {
         return fmt.Errorf("xml: end tag with no name"u8);
     }
@@ -867,7 +867,7 @@ internal static error writeEnd(this ref printer p, Name name) {
     return default;
 }
 
-internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflect.Type typ, reflect.Value val) {
+internal static (@string, slice<byte>, error) marshalSimpleᴍ(ref printer p, reflect.Type typ, reflect.Value val) {
     switch (val.Kind()) {
     case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (strconv.FormatInt(val.Int(), 10), default, default);
@@ -926,9 +926,9 @@ internal static reflect.Value indirect(reflect.Value vf) {
     return vf;
 }
 
-} partial class xmlᴛprinter {
+} partial class xml_package {
 
-internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflect.Value val) {
+internal static error marshalStructᴍ(ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflect.Value val) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
 
@@ -1136,7 +1136,7 @@ internal static ref readonly @string useOfClosedEncoderˢ => ref useOfClosedEnco
 private static readonly @string useOfClosedEncoderˢᵇ = "use of closed Encoder"u8;
 
 // Write implements io.Writer
-internal static (nint n, error err) Write(this ref printer p, slice<byte> b) {
+internal static (nint n, error err) Writeᴍ(ref printer p, slice<byte> b) {
     nint n = default;
 
     if (p.closed && p.err == nil) {
@@ -1149,7 +1149,7 @@ internal static (nint n, error err) Write(this ref printer p, slice<byte> b) {
 }
 
 // WriteString implements io.StringWriter
-internal static (nint n, error err) WriteString(this ref printer p, @string s) {
+internal static (nint n, error err) WriteStringᴍ(ref printer p, @string s) {
     nint n = default;
 
     if (p.closed && p.err == nil) {
@@ -1162,7 +1162,7 @@ internal static (nint n, error err) WriteString(this ref printer p, @string s) {
 }
 
 // WriteByte implements io.ByteWriter
-internal static error WriteByte(this ref printer p, byte c) {
+internal static error WriteByteᴍ(ref printer p, byte c) {
     if (p.closed && p.err == nil) {
         p.err = errors.New(useOfClosedEncoderˢ);
     }
@@ -1175,7 +1175,7 @@ internal static error WriteByte(this ref printer p, byte c) {
 // Close the Encoder, indicating that no more data will be written. It flushes
 // any buffered XML to the underlying writer and returns an error if the
 // written XML is invalid (e.g. by containing unclosed elements).
-internal static error Close(this ref printer p) {
+internal static error Closeᴍ(ref printer p) {
     if (p.closed) {
         return default;
     }
@@ -1190,12 +1190,12 @@ internal static error Close(this ref printer p) {
 }
 
 // return the bufio Writer's cached write error
-internal static error cachedWriteError(this ref printer p) {
+internal static error cachedWriteErrorᴍ(ref printer p) {
     var (_, err) = p.Write(default);
     return err;
 }
 
-internal static void writeIndent(this ref printer p, nint depthDelta) {
+internal static void writeIndentᴍ(ref printer p, nint depthDelta) {
     if (len(p.prefix) == 0 && len(p.indent) == 0) {
         return;
     }
@@ -1233,12 +1233,12 @@ partial struct parentStack {
     internal slice<@string> stack;
 }
 
-} partial class xmlᴛparentStack {
+} partial class xml_package {
 
 // trim updates the XML context to match the longest common prefix of the stack
 // and the given parents. A closing tag will be written for every parent
 // popped. Passing a zero slice or nil will close all the elements.
-internal static error trim(this ref parentStack s, slice<@string> parents) {
+internal static error trimᴍ(ref parentStack s, slice<@string> parents) {
     nint split = 0;
     for (; split < len(parents) && split < len(s.stack); split++) {
         if (parents[split] != s.stack[split]) {
@@ -1255,7 +1255,7 @@ internal static error trim(this ref parentStack s, slice<@string> parents) {
 }
 
 // push adds parent elements to the stack and writes open tags.
-internal static error push(this ref parentStack s, slice<@string> parents) {
+internal static error pushᴍ(ref parentStack s, slice<@string> parents) {
     for (nint i = 0; i < len(parents); i++) {
         var err = s.p.writeStart(Ꮡ(new StartElement(Name: new Name(Local: parents[i])))); if (err != nil) {
             return err;
@@ -1273,9 +1273,9 @@ partial struct UnsupportedTypeError {
     public reflect.Type Type;
 }
 
-} partial class xmlᴛUnsupportedTypeError {
+} partial class xml_package {
 
-public static @string Error(this ref UnsupportedTypeError e) {
+internal static @string Errorᴍ(ref UnsupportedTypeError e) {
     return "xml: unsupported type: "u8 + e.Type.String();
 }
 
@@ -1293,3 +1293,41 @@ internal static bool isEmptyValue(reflect.Value v) {
 }
 
 } // end xml_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class xmlᴛEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Indent(this ref Encoder enc, @string prefix, @string indent) => xml_package.Indentᴍ(ref enc, prefix, indent);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, any v) => xml_package.Encodeᴍ(Ꮡenc, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EncodeElement(this ж<Encoder> Ꮡenc, any v, StartElement startʗp) => xml_package.EncodeElementᴍ(Ꮡenc, v, startʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EncodeToken(this ж<Encoder> Ꮡenc, Token t) => xml_package.EncodeTokenᴍ(Ꮡenc, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ref Encoder enc) => xml_package.Flushᴍ(ref enc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Encoder enc) => xml_package.Closeᴍ(ref enc);
+}
+partial class xmlᴛprinter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) => xml_package.createAttrPrefixᴍ(Ꮡp, url);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deleteAttrPrefix(this ref printer p, @string prefix) => xml_package.deleteAttrPrefixᴍ(ref p, prefix);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void markPrefix(this ref printer p) => xml_package.markPrefixᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void popPrefix(this ref printer p) => xml_package.popPrefixᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalValue(this ж<printer> Ꮡp, reflect.Value val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) => xml_package.marshalValueᴍ(Ꮡp, val, Ꮡfinfo, ᏑstartTemplate);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflect.Value val) => xml_package.marshalAttrᴍ(ref p, Ꮡstart, name, val);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalInterface(this ref printer p, Marshaler val, StartElement start) => xml_package.marshalInterfaceᴍ(ref p, val, start);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalTextInterface(this ж<printer> Ꮡp, encoding.TextMarshaler val, StartElement startʗp) => xml_package.marshalTextInterfaceᴍ(Ꮡp, val, startʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstart) => xml_package.writeStartᴍ(Ꮡp, Ꮡstart);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeEnd(this ref printer p, Name name) => xml_package.writeEndᴍ(ref p, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflect.Type typ, reflect.Value val) => xml_package.marshalSimpleᴍ(ref p, typ, val);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflect.Value val) => xml_package.marshalStructᴍ(Ꮡp, Ꮡtinfo, val);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref printer p, slice<byte> b) => xml_package.Writeᴍ(ref p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref printer p, @string s) => xml_package.WriteStringᴍ(ref p, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteByte(this ref printer p, byte c) => xml_package.WriteByteᴍ(ref p, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref printer p) => xml_package.Closeᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error cachedWriteError(this ref printer p) => xml_package.cachedWriteErrorᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeIndent(this ref printer p, nint depthDelta) => xml_package.writeIndentᴍ(ref p, depthDelta);
+}
+partial class xmlᴛparentStack {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error trim(this ref parentStack s, slice<@string> parents) => xml_package.trimᴍ(ref s, parents);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error push(this ref parentStack s, slice<@string> parents) => xml_package.pushᴍ(ref s, parents);
+}
+partial class xmlᴛUnsupportedTypeError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnsupportedTypeError e) => xml_package.Errorᴍ(ref e);
+}
+// </GlyphForwarders>

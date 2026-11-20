@@ -418,9 +418,9 @@ public static void Walk(Visitor v, Node node) {
 
 internal delegate bool inspector(Node _);
 
-} partial class astᴛinspector {
+} partial class ast_package {
 
-internal static Visitor Visit(this inspector f, Node node) {
+internal static Visitor Visitᴍ(inspector f, Node node) {
     if (f(node)) {
         return new inspectorᴠVisitor(f);
     }
@@ -493,3 +493,9 @@ public static void PreorderStack(Node root, slice<Node> stack, Func<Node, slice<
 }
 
 } // end ast_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class astᴛinspector {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Visitor Visit(this inspector f, Node node) => ast_package.Visitᴍ(f, node);
+}
+// </GlyphForwarders>

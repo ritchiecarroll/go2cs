@@ -23,7 +23,7 @@ partial struct Cache<K, V> {
     internal sync.Map m;
 }
 
-} partial class fips140cacheᴛCache {
+} partial class fips140cache_package {
 
 // Get returns the result of new, for an associated key k.
 //
@@ -32,7 +32,7 @@ partial struct Cache<K, V> {
 // it. If check returns false, Get will call new again and return the result.
 //
 // The cache is evicted some time after k becomes unreachable.
-public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) {
+internal static (ж<V>, error) Getᴍ<K, V>(ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) {
     var p = weak.Make<K>(k);
     var (cached, ok) = Ꮡc.Ꮡm.Load(p); if (ok) {
         var vΔ1 = cached._<ж<V>>();
@@ -52,8 +52,15 @@ public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> k, Func<
     return (v, default);
 }
 
-internal static void evict<K, V>(this ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) {
+internal static void evictᴍ<K, V>(ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) {
     Ꮡc.Ꮡm.Delete(p);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fips140cacheᴛCache {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) => fips140cache_package.Getᴍ<K, V>(Ꮡc, k, @new, check);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void evict<K, V>(this ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) => fips140cache_package.evictᴍ<K, V>(Ꮡc, p);
+}
+// </GlyphForwarders>

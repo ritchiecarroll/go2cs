@@ -379,21 +379,21 @@ partial struct wrapper {
     internal Action<ж<slog.Record>> mod;
 }
 
-} partial class slogtestᴛwrapper {
+} partial class slogtest_package {
 
 // Go method set entry for the promoted 'Handler.Enabled()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static bool Enabled(this wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
+internal static bool Enabledᴍ(wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
 
 // Go method set entry for the promoted 'Handler.WithAttrs()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static slog.Handler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
+internal static slog.Handler WithAttrsᴍ(wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
 
 // Go method set entry for the promoted 'Handler.WithGroup()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static slog.Handler WithGroup(this wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
+internal static slog.Handler WithGroupᴍ(wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
 
-internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) {
+internal static error Handleᴍ(ref wrapper h, context.Context ctx, slog.Record rʗp) {
     ref var r = ref heap(rʗp.ΔClone(), out var Ꮡr);
 
     h.mod(Ꮡr);
@@ -414,12 +414,25 @@ partial struct replace {
     internal any v;
 }
 
-} partial class slogtestᴛreplace {
+} partial class slogtest_package {
 
-internal static slog.Value LogValue(this ref replace r) { return slog.AnyValue(r.v); }
+internal static slog.Value LogValueᴍ(ref replace r) { return slog.AnyValue(r.v); }
 
-internal static @string String(this ref replace r) {
+internal static @string Stringᴍ(ref replace r) {
     return fmt.Sprintf("<replace(%v)>"u8, r.v);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class slogtestᴛwrapper {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => slogtest_package.Enabledᴍ(recvᴛ, arg1ᴛ, arg2ᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> attrs) => slogtest_package.WithAttrsᴍ(recvᴛ, attrs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithGroup(this wrapper recvᴛ, @string name) => slogtest_package.WithGroupᴍ(recvᴛ, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) => slogtest_package.Handleᴍ(ref h, ctx, rʗp);
+}
+partial class slogtestᴛreplace {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Value LogValue(this ref replace r) => slogtest_package.LogValueᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref replace r) => slogtest_package.Stringᴍ(ref r);
+}
+// </GlyphForwarders>

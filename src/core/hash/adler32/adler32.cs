@@ -36,9 +36,9 @@ public static UntypedInt Size => 4;
 // The low 16 bits are s1, the high 16 bits are s2.
 partial struct digest /*num:uint32*/;
 
-} partial class adler32ᴛdigest {
+} partial class adler32_package {
 
-internal static void Reset(this ref digest d) { d = 1; }
+internal static void Resetᴍ(ref digest d) { d = 1; }
 
 } partial class adler32_package {
 
@@ -53,11 +53,11 @@ public static hash.Hash32 New() {
     return new digestжHash32(d);
 }
 
-} partial class adler32ᴛdigest {
+} partial class adler32_package {
 
-internal static nint Size(this ref digest d) { return adler32.Size; }
+internal static nint Sizeᴍ(ref digest d) { return adler32.Size; }
 
-internal static nint BlockSize(this ref digest d) { return 4; }
+internal static nint BlockSizeᴍ(ref digest d) { return 4; }
 
 } partial class adler32_package {
 
@@ -65,15 +65,15 @@ internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "adl\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4 */ 8;
 
-} partial class adler32ᴛdigest {
+} partial class adler32_package {
 
-internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, (uint32)(d));
     return (b, default);
 }
 
-internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
@@ -83,7 +83,7 @@ private static readonly @string hashAdler32InvalidHashˢᵇ = "hash/adler32: inv
 internal static ref readonly @string hashAdler32InvalidHashˢ2 => ref hashAdler32InvalidHashˢ2ᵇ;
 private static readonly @string hashAdler32InvalidHashˢ2ᵇ = "hash/adler32: invalid hash state size"u8;
 
-internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(hashAdler32InvalidHashˢ);
     }
@@ -94,7 +94,7 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default;
 }
 
-internal static (hash.Cloner, error) Clone(this ref digest d) {
+internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
     ref var r = ref heap<digest>(d, out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
@@ -131,16 +131,16 @@ internal static digest update(digest d, slice<byte> p) {
     return (digest)(s2 << 16 | s1);
 }
 
-} partial class adler32ᴛdigest {
+} partial class adler32_package {
 
-internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint nn, error err) Writeᴍ(ref digest d, slice<byte> p) {
     d = update(d, p);
     return (len(p), default);
 }
 
-internal static uint32 Sum32(this ref digest d) { return (uint32)(d); }
+internal static uint32 Sum32ᴍ(ref digest d) { return (uint32)(d); }
 
-internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
     var s = (uint32)(d);
     return append(@in, (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
@@ -151,3 +151,18 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 public static uint32 Checksum(slice<byte> data) { return (uint32)update(1, data); }
 
 } // end adler32_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class adler32ᴛdigest {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this ref digest d) => adler32_package.Resetᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Size(this ref digest d) => adler32_package.Sizeᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref digest d) => adler32_package.BlockSizeᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) => adler32_package.AppendBinaryᴍ(ref d, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref digest d) => adler32_package.MarshalBinaryᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) => adler32_package.UnmarshalBinaryᴍ(ref d, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref digest d) => adler32_package.Cloneᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) => adler32_package.Writeᴍ(ref d, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 Sum32(this ref digest d) => adler32_package.Sum32ᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) => adler32_package.Sumᴍ(ref d, @in);
+}
+// </GlyphForwarders>

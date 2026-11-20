@@ -27,7 +27,7 @@ partial struct traceEventWriter {
     internal traceLocker tl;
 }
 
-} partial class runtimeᴛtraceLocker {
+} partial class runtime_package {
 
 // eventWriter creates a new traceEventWriter. It is the main entrypoint for writing trace events.
 //
@@ -42,7 +42,7 @@ partial struct traceEventWriter {
 // or P and pass the appropriate status.
 //
 // In this case, the default status should be tracev2.GoBad or tracev2.ProcBad to help identify bugs sooner.
-internal static traceEventWriter eventWriter(this traceLocker tl, tracev2.GoStatus goStatus, tracev2.ProcStatus procStatus) {
+internal static traceEventWriter eventWriterᴍ(traceLocker tl, tracev2.GoStatus goStatus, tracev2.ProcStatus procStatus) {
     var pp = (~tl.mp).p.ptr(); if (pp != nil && !pp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && pp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
         tl.writer().writeProcStatus((uint64)(~pp).id, procStatus, (~pp).trace.inSweep).end();
     }
@@ -55,25 +55,25 @@ internal static traceEventWriter eventWriter(this traceLocker tl, tracev2.GoStat
 // rawEventWriter creates a new traceEventWriter without emitting any status events.
 //
 // It is the caller's responsibility to emit any status events, if necessary.
-internal static traceEventWriter rawEventWriter(this traceLocker tl) {
+internal static traceEventWriter rawEventWriterᴍ(traceLocker tl) {
     return new traceEventWriter(tl);
 }
 
-} partial class runtimeᴛtraceEventWriter {
+} partial class runtime_package {
 
 // event writes out a trace event.
-internal static void @event(this traceEventWriter e, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
+internal static void @eventᴍ(traceEventWriter e, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
     var args = argsʗp.sslice();
 
     e.tl.writer().@event(ev, args.ꓸꓸꓸ).end();
 }
 
-} partial class runtimeᴛtraceLocker {
+} partial class runtime_package {
 
 // stack takes a stack trace skipping the provided number of frames.
 // It then returns a traceArg representing that stack which may be
 // passed to write.
-internal static traceArg stack(this traceLocker tl, nint skip) {
+internal static traceArg stackᴍ(traceLocker tl, nint skip) {
     return (traceArg)traceStack(skip, nil, Ꮡtrace.at(traceᴛ1.ᏑstackTab, (ulong)(tl.gen % 2)));
 }
 
@@ -82,7 +82,7 @@ internal static traceArg stack(this traceLocker tl, nint skip) {
 //
 // It then returns a traceArg representing that stack which may be
 // passed to write.
-internal static traceArg startPC(this traceLocker tl, uintptr pc) {
+internal static traceArg startPCᴍ(traceLocker tl, uintptr pc) {
     // +PCQuantum because makeTraceFrame expects return PCs and subtracts PCQuantum.
     return (traceArg)Ꮡtrace.at(traceᴛ1.ᏑstackTab, (ulong)(tl.gen % 2)).put(slice<uintptr>([
         logicalStackSentinel,
@@ -93,20 +93,35 @@ internal static traceArg startPC(this traceLocker tl, uintptr pc) {
 // string returns a traceArg representing s which may be passed to write.
 // The string is assumed to be relatively short and popular, so it may be
 // stored for a while in the string dictionary.
-internal static traceArg @string(this traceLocker tl, @string s) {
+internal static traceArg @stringᴍ(traceLocker tl, @string s) {
     return (traceArg)Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(tl.gen % 2)).put(tl.gen, s);
 }
 
 // uniqueString returns a traceArg representing s which may be passed to write.
 // The string is assumed to be unique or long, so it will be written out to
 // the trace eagerly.
-internal static traceArg uniqueString(this traceLocker tl, @string s) {
+internal static traceArg uniqueStringᴍ(traceLocker tl, @string s) {
     return (traceArg)Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(tl.gen % 2)).emit(tl.gen, s);
 }
 
 // rtype returns a traceArg representing typ which may be passed to write.
-internal static traceArg rtype(this traceLocker tl, ж<abi.Type> typ) {
+internal static traceArg rtypeᴍ(traceLocker tl, ж<abi.Type> typ) {
     return (traceArg)Ꮡtrace.at(traceᴛ1.ᏑtypeTab, (ulong)(tl.gen % 2)).put(typ);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛtraceLocker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceEventWriter eventWriter(this traceLocker tl, tracev2.GoStatus goStatus, tracev2.ProcStatus procStatus) => runtime_package.eventWriterᴍ(tl, goStatus, procStatus);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceEventWriter rawEventWriter(this traceLocker tl) => runtime_package.rawEventWriterᴍ(tl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceArg stack(this traceLocker tl, nint skip) => runtime_package.stackᴍ(tl, skip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceArg startPC(this traceLocker tl, uintptr pc) => runtime_package.startPCᴍ(tl, pc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceArg @string(this traceLocker tl, @string s) => runtime_package.@stringᴍ(tl, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceArg uniqueString(this traceLocker tl, @string s) => runtime_package.uniqueStringᴍ(tl, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceArg rtype(this traceLocker tl, ж<abi.Type> typ) => runtime_package.rtypeᴍ(tl, typ);
+}
+partial class runtimeᴛtraceEventWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @event(this traceEventWriter e, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) => runtime_package.@eventᴍ(e, ev, argsʗp);
+}
+// </GlyphForwarders>

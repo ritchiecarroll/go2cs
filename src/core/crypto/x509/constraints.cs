@@ -70,12 +70,12 @@ partial struct nameConstraintsSet<T, V>
     internal slice<T> set;
 }
 
-} partial class x509ᴛnameConstraintsSet {
+} partial class x509_package {
 
 // sortAndPrune sorts the constraints using the provided comparison function, and then
 // prunes any constraints that are subsets of preceding constraints using the
 // provided subset function.
-internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Func<T, T, nint> cmp, Func<T, T, bool> subset)
+internal static void sortAndPruneᴍ<T, V>(ref nameConstraintsSet<T, V> nc, Func<T, T, nint> cmp, Func<T, T, bool> subset)
     where V : /* net.IP | string */ new()
 {
     if (len(nc.set) < 2) {
@@ -102,7 +102,7 @@ internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Fu
 // the match function to determine if the found constraint is a prefix of s. If
 // a matching constraint is found, it is returned along with true. If no
 // matching constraint is found, the zero value of T and false are returned.
-internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match)
+internal static (T lowerBound, bool exactMatch) searchᴍ<T, V>(ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match)
     where V : /* net.IP | string */ new()
 {
     T lowerBound = GoZero<T>();
@@ -213,9 +213,9 @@ internal static newIPNetConstraints_R0 newIPNetConstraints(slice<ж<net.IPNet>> 
     return new ipConstraintsжnewIPNetConstraints_R0(Ꮡ(new ipConstraints(ipv4: v4c, ipv6: v6c)));
 }
 
-} partial class x509ᴛipConstraints {
+} partial class x509_package {
 
-internal static (ж<net.IPNet>, bool) query(this ref ipConstraints ipc, net.IP ip) {
+internal static (ж<net.IPNet>, bool) queryᴍ(ref ipConstraints ipc, net.IP ip) {
     ж<nameConstraintsSet<ж<net.IPNet>, net.IP>> c = default;
     if (len(ip) == net.IPv4len) {
         c = ipc.ipv4;
@@ -395,9 +395,9 @@ internal static newDNSConstraints_R0 newDNSConstraints(slice<@string> l, bool pe
     return new dnsConstraintsжnewDNSConstraints_R0(nc);
 }
 
-} partial class x509ᴛdnsConstraints {
+} partial class x509_package {
 
-internal static (@string, bool) query(this ref dnsConstraints dnc, @string s) {
+internal static (@string, bool) queryᴍ(ref dnsConstraints dnc, @string s) {
     if (dnc.all) {
         return ("", true);
     }
@@ -468,9 +468,9 @@ internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, boo
     return new emailConstraintsжnewEmailConstraints_R0(ec);
 }
 
-} partial class x509ᴛemailConstraints {
+} partial class x509_package {
 
-internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailbox s) {
+internal static (@string, bool) queryᴍ(ref emailConstraints ec, rfc2821Mailbox s) {
     if (len(ec.fullEmails) > 0) {
         var (_, ok) = ec.fullEmails[s, ꟷ]; if (ok) {
             return (fmt.Sprintf("%s@%s"u8, s.local, s.domain), true);
@@ -524,9 +524,9 @@ partial struct chainConstraints {
     internal ж<chainConstraints> next;
 }
 
-} partial class x509ᴛchainConstraints {
+} partial class x509_package {
 
-internal static error check(this ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) {
+internal static error checkᴍ(ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) {
     foreach (var (_, ip) in range(ips)) {
         var err = checkConstraints(cc.ip, ip, ip); if (err != nil) {
             return err;
@@ -627,9 +627,9 @@ partial struct parsedURI {
     internal @string domain;
 }
 
-} partial class x509ᴛparsedURI {
+} partial class x509_package {
 
-internal static @string String(this parsedURI u) {
+internal static @string Stringᴍ(parsedURI u) {
     return u.uri.String();
 }
 
@@ -687,3 +687,25 @@ internal static @string trimFirstLabel(@string dnsName) {
 }
 
 } // end x509_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class x509ᴛnameConstraintsSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Func<T, T, nint> cmp, Func<T, T, bool> subset) => x509_package.sortAndPruneᴍ<T, V>(ref nc, cmp, subset);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match) => x509_package.searchᴍ<T, V>(ref nc, s, cmp, match);
+}
+partial class x509ᴛipConstraints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<net.IPNet>, bool) query(this ref ipConstraints ipc, net.IP ip) => x509_package.queryᴍ(ref ipc, ip);
+}
+partial class x509ᴛdnsConstraints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool) query(this ref dnsConstraints dnc, @string s) => x509_package.queryᴍ(ref dnc, s);
+}
+partial class x509ᴛemailConstraints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailbox s) => x509_package.queryᴍ(ref ec, s);
+}
+partial class x509ᴛchainConstraints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error check(this ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) => x509_package.checkᴍ(ref cc, dns, uris, emails, ips);
+}
+partial class x509ᴛparsedURI {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this parsedURI u) => x509_package.Stringᴍ(u);
+}
+// </GlyphForwarders>

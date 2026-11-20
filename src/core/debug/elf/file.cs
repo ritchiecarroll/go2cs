@@ -103,20 +103,20 @@ partial struct Section {
     internal int64 compressionOffset;
 }
 
-} partial class elfᴛSection {
+} partial class elf_package {
 
 // Data reads and returns the contents of the ELF section.
 // Even if the section is stored compressed in the ELF file,
 // Data returns uncompressed data.
 //
 // For an [SHT_NOBITS] section, Data always returns a non-nil error.
-public static (slice<byte>, error) Data(this ж<Section> Ꮡs) {
+internal static (slice<byte>, error) Dataᴍ(ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     return saferio.ReadData(new io_ReadSeekerᴠReader(Ꮡs.Open()), s.Size);
 }
 
-} partial class elfᴛFile {
+} partial class elf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sectionHasInvalidStringˢ => ref sectionHasInvalidStringˢᵇ;
@@ -124,14 +124,14 @@ private static readonly @string sectionHasInvalidStringˢᵇ = "section has inva
 
 // stringTable reads and returns the string table given by the
 // specified link value.
-internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) {
+internal static (slice<byte>, error) stringTableᴍ(ref File f, uint32 link) {
     if (link <= 0 || link >= (uint32)len(f.Sections)) {
         return (default, errors.New(sectionHasInvalidStringˢ));
     }
     return f.Sections[link].Data();
 }
 
-} partial class elfᴛSection {
+} partial class elf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string zdebugˢ => ref zdebugˢᵇ;
@@ -143,7 +143,7 @@ private static readonly @string zdebugˢᵇ = ".zdebug"u8;
 //
 // For an [SHT_NOBITS] section, all calls to the opened reader
 // will return a non-nil error.
-public static io.ReadSeeker Open(this ж<Section> Ꮡs) {
+internal static io.ReadSeeker Openᴍ(ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.Type == SHT_NOBITS) {
@@ -223,10 +223,10 @@ partial struct Prog {
     internal ж<io.SectionReader> sr;
 }
 
-} partial class elfᴛProg {
+} partial class elf_package {
 
 // Open returns a new ReadSeeker reading the ELF program body.
-public static io.ReadSeeker Open(this ref Prog p) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L)); }
+internal static io.ReadSeeker Openᴍ(ref Prog p) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L)); }
 
 } partial class elf_package {
 
@@ -257,9 +257,9 @@ partial struct FormatError {
     internal any val;
 }
 
-} partial class elfᴛFormatError {
+} partial class elf_package {
 
-public static @string Error(this ref FormatError e) {
+internal static @string Errorᴍ(ref FormatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v' "u8, e.val);
@@ -285,12 +285,12 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
-} partial class elfᴛFile {
+} partial class elf_package {
 
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-public static error Close(this ref File f) {
+internal static error Closeᴍ(ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -301,7 +301,7 @@ public static error Close(this ref File f) {
 
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
-public static ж<Section> SectionByType(this ref File f, SectionType typ) {
+internal static ж<Section> SectionByTypeᴍ(ref File f, SectionType typ) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Type == typ) {
             return s;
@@ -678,7 +678,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     return (f, default);
 }
 
-} partial class elfᴛFile {
+} partial class elf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string notImplementedˢ => ref notImplementedˢᵇ;
@@ -686,7 +686,7 @@ private static readonly @string notImplementedˢᵇ = "not implemented"u8;
 
 // getSymbols returns a slice of Symbols from parsing the symbol table
 // with the given type, along with the associated string table.
-internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbolsᴍ(ref File f, SectionType typ) {
     switch (f.Class) {
     case var ᴛ when ᴛ == ELFCLASS64: {
         return f.getSymbols64(typ);
@@ -704,13 +704,13 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, 
 // if there is no such section in the File.
 public static error ErrNoSymbols = errors.New("no symbol section");
 
-} partial class elfᴛFile {
+} partial class elf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lengthOfSymbolSectionIsˢ => ref lengthOfSymbolSectionIsˢᵇ;
 private static readonly @string lengthOfSymbolSectionIsˢᵇ = "length of symbol section is not a multiple of SymSize"u8;
 
-internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbols32ᴍ(ref File f, SectionType typ) {
     var symtabSection = f.SectionByType(typ);
     if (symtabSection == nil) {
         return (default, default, ErrNoSymbols);
@@ -764,7 +764,7 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f
 internal static ref readonly @string lengthOfSymbolSectionIsˢ2 => ref lengthOfSymbolSectionIsˢ2ᵇ;
 private static readonly @string lengthOfSymbolSectionIsˢ2ᵇ = "length of symbol section is not a multiple of Sym64Size"u8;
 
-internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbols64ᴍ(ref File f, SectionType typ) {
     var symtabSection = f.SectionByType(typ);
     if (symtabSection == nil) {
         return (default, default, ErrNoSymbols);
@@ -830,11 +830,11 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     return ("", false);
 }
 
-} partial class elfᴛFile {
+} partial class elf_package {
 
 // Section returns a section with the given name, or nil if no such
 // section exists.
-public static ж<Section> Section(this ref File f, @string name) {
+internal static ж<Section> Sectionᴍ(ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -849,7 +849,7 @@ private static readonly @string applyRelocationsNotˢᵇ = "applyRelocations: no
 
 // applyRelocations applies relocations to dst. rels is a relocations section
 // in REL or RELA format.
-internal static error applyRelocations(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     switch (ᐧ) {
     case {} when f.Class == ELFCLASS64 && f.Machine == EM_X86_64: {
         return f.applyRelocationsAMD64(dst, rels);
@@ -904,13 +904,13 @@ internal static bool canApplyRelocation(ref Symbol sym) {
     return sym.Section != SHN_UNDEF && sym.Section < SHN_LORESERVE;
 }
 
-} partial class elfᴛFile {
+} partial class elf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lengthOfRelocationˢ => ref lengthOfRelocationˢᵇ;
 private static readonly @string lengthOfRelocationˢᵇ = "length of relocation section is not a multiple of 24"u8;
 
-internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsAMD64ᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -959,7 +959,7 @@ internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, sl
 internal static ref readonly @string lengthOfRelocationˢ2 => ref lengthOfRelocationˢ2ᵇ;
 private static readonly @string lengthOfRelocationˢ2ᵇ = "length of relocation section is not a multiple of 8"u8;
 
-internal static error applyRelocations386(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocations386ᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -991,7 +991,7 @@ internal static error applyRelocations386(this ref File f, slice<byte> dst, slic
     return default;
 }
 
-internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsARMᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -1025,7 +1025,7 @@ internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slic
     return default;
 }
 
-internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsARM64ᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1074,7 +1074,7 @@ internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, sl
 internal static ref readonly @string lengthOfRelocationˢ3 => ref lengthOfRelocationˢ3ᵇ;
 private static readonly @string lengthOfRelocationˢ3ᵇ = "length of relocation section is not a multiple of 12"u8;
 
-internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsPPCᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 12 is the size of Rela32.
     if (len(rels) % 12 != 0) {
         return errors.New(lengthOfRelocationˢ3);
@@ -1111,7 +1111,7 @@ internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slic
     return default;
 }
 
-internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsPPC64ᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1152,7 +1152,7 @@ internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, sl
     return default;
 }
 
-internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsMIPSᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -1186,7 +1186,7 @@ internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, sli
     return default;
 }
 
-internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsMIPS64ᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1234,7 +1234,7 @@ internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, s
     return default;
 }
 
-internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsLOONG64ᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1277,7 +1277,7 @@ internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, 
     return default;
 }
 
-internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsRISCV64ᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1318,7 +1318,7 @@ internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, 
     return default;
 }
 
-internal static error applyRelocationss390x(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationss390xᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1359,7 +1359,7 @@ internal static error applyRelocationss390x(this ref File f, slice<byte> dst, sl
     return default;
 }
 
-internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsSPARC64ᴍ(ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1416,7 +1416,7 @@ private static readonly @string rangesˢᵇ = "ranges"u8;
 internal static ref readonly @string strˢ => ref strˢᵇ;
 private static readonly @string strˢᵇ = "str"u8;
 
-public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
+internal static (ж<dwarf.Data>, error) DWARFᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     @string dwarfSuffix(ж<Section> s) {
@@ -1524,7 +1524,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
 // For compatibility with Go 1.0, Symbols omits the null symbol at index 0.
 // After retrieving the symbols as symtab, an externally supplied index x
 // corresponds to symtab[x-1], not symtab[x].
-public static (slice<Symbol>, error) Symbols(this ref File f) {
+internal static (slice<Symbol>, error) Symbolsᴍ(ref File f) {
     var (sym, _, err) = f.getSymbols(SHT_SYMTAB);
     return (sym, err);
 }
@@ -1538,7 +1538,7 @@ public static (slice<Symbol>, error) Symbols(this ref File f) {
 // For compatibility with [File.Symbols], [File.DynamicSymbols] omits the null symbol at index 0.
 // After retrieving the symbols as symtab, an externally supplied index x
 // corresponds to symtab[x-1], not symtab[x].
-public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
+internal static (slice<Symbol>, error) DynamicSymbolsᴍ(ref File f) {
     var (sym, str, err) = f.getSymbols(SHT_DYNSYM);
     if (err != nil) {
         return (default, err);
@@ -1563,13 +1563,13 @@ partial struct ImportedSymbol {
     public @string Library;
 }
 
-} partial class elfᴛFile {
+} partial class elf_package {
 
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
+internal static (slice<ImportedSymbol>, error) ImportedSymbolsᴍ(ref File f) {
     var (sym, str, err) = f.getSymbols(SHT_DYNSYM);
     if (err != nil) {
         return (default, err);
@@ -1593,11 +1593,11 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
 // VersionIndex is the type of a [Symbol] version index.
 partial struct VersionIndex /*num:uint16*/;
 
-} partial class elfᴛVersionIndex {
+} partial class elf_package {
 
 // IsHidden reports whether the symbol is hidden within the version.
 // This means that the symbol can only be seen by specifying the exact version.
-public static bool IsHidden(this VersionIndex vi) {
+internal static bool IsHiddenᴍ(VersionIndex vi) {
     return (VersionIndex)(vi & 0x8000) != 0;
 }
 
@@ -1614,7 +1614,7 @@ public static bool IsHidden(this VersionIndex vi) {
 // In general, a defined symbol will have an index referring
 // to DynamicVersions, and an undefined symbol will have an index
 // referring to some version in DynamicVersionNeeds.
-public static uint16 Index(this VersionIndex vi) {
+internal static uint16 Indexᴍ(VersionIndex vi) {
     return (uint16)((VersionIndex)(vi & 0x7fff));
 }
 
@@ -1648,10 +1648,10 @@ partial struct DynamicVersionDep {
     public @string Dep;  // Name of required version.
 }
 
-} partial class elfᴛFile {
+} partial class elf_package {
 
 // dynamicVersions returns version information for a dynamic object.
-internal static error dynamicVersions(this ref File f, slice<byte> str) {
+internal static error dynamicVersionsᴍ(ref File f, slice<byte> str) {
     if (f.dynVers != nil) {
         // Already initialized.
         return default;
@@ -1728,7 +1728,7 @@ internal static ref readonly @string dynamicVersionsMissingˢ => ref dynamicVers
 private static readonly @string dynamicVersionsMissingˢᵇ = "DynamicVersions: missing version table"u8;
 
 // DynamicVersions returns version information for a dynamic object.
-public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) {
+internal static (slice<DynamicVersion>, error) DynamicVersionsᴍ(ref File f) {
     if (f.dynVers == nil) {
         var (_, str, err) = f.getSymbols(SHT_DYNSYM);
         if (err != nil) {
@@ -1747,7 +1747,7 @@ public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) {
 }
 
 // dynamicVersionNeeds returns version dependencies for a dynamic object.
-internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) {
+internal static error dynamicVersionNeedsᴍ(ref File f, slice<byte> str) {
     if (f.dynVerNeeds != nil) {
         // Already initialized.
         return default;
@@ -1821,7 +1821,7 @@ internal static ref readonly @string dynamicVersionNeedsˢ => ref dynamicVersion
 private static readonly @string dynamicVersionNeedsˢᵇ = "DynamicVersionNeeds: missing version table"u8;
 
 // DynamicVersionNeeds returns version dependencies for a dynamic object.
-public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref File f) {
+internal static (slice<DynamicVersionNeed>, error) DynamicVersionNeedsᴍ(ref File f) {
     if (f.dynVerNeeds == nil) {
         var (_, str, err) = f.getSymbols(SHT_DYNSYM);
         if (err != nil) {
@@ -1842,7 +1842,7 @@ public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref Fi
 // gnuVersionInit parses the GNU version tables
 // for use by calls to gnuVersion.
 // It reports whether any version tables were found.
-internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) {
+internal static (bool, error) gnuVersionInitᴍ(ref File f, slice<byte> str) {
     // Versym parallels symbol table, indexing into verneed.
     var vs = f.SectionByType(SHT_GNU_VERSYM);
     if (vs == nil) {
@@ -1866,7 +1866,7 @@ internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) {
 
 // gnuVersion adds Library and Version information to sym,
 // which came from offset i of the symbol table.
-internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersion(this ref File f, nint i) {
+internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersionᴍ(ref File f, nint i) {
     // Each entry is two bytes; skip undef entry at beginning.
     i = (i + 1) * 2;
     if (i >= len(f.gnuVersym)) {
@@ -1903,7 +1903,7 @@ internal static (bool hasVersion, VersionIndex versionIndex, @string version, @s
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
     return f.DynString(DT_NEEDED);
 }
 
@@ -1916,7 +1916,7 @@ private static readonly @string lengthOfDynamicSectionIsˢᵇ = "length of dynam
 //
 // The tag must be one that takes string values: [DT_NEEDED], [DT_SONAME], [DT_RPATH], or
 // [DT_RUNPATH].
-public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
+internal static (slice<@string>, error) DynStringᴍ(ref File f, DynTag tag) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     switch (tag) {
@@ -1978,7 +1978,7 @@ public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
 
 // DynValue returns the values listed for the given tag in the file's dynamic
 // section.
-public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
+internal static (slice<uint64>, error) DynValueᴍ(ref File f, DynTag tag) {
     var valsᴷ = new stackAppend<uint64>(moves: true);
 
     var ds = f.SectionByType(SHT_DYNAMIC);
@@ -2029,13 +2029,13 @@ public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
 partial struct nobitsSectionReader {
 }
 
-} partial class elfᴛnobitsSectionReader {
+} partial class elf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedReadFromShtˢ => ref unexpectedReadFromShtˢᵇ;
 private static readonly @string unexpectedReadFromShtˢᵇ = "unexpected read from SHT_NOBITS section"u8;
 
-internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAtᴍ(ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromShtˢ));
 }
 
@@ -2082,3 +2082,58 @@ internal static void putUint(binary.ByteOrder byteOrder, slice<byte> Δslice, ui
 }
 
 } // end elf_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class elfᴛSection {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ж<Section> Ꮡs) => elf_package.Dataᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ж<Section> Ꮡs) => elf_package.Openᴍ(Ꮡs);
+}
+partial class elfᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) => elf_package.stringTableᴍ(ref f, link);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref File f) => elf_package.Closeᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> SectionByType(this ref File f, SectionType typ) => elf_package.SectionByTypeᴍ(ref f, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, SectionType typ) => elf_package.getSymbolsᴍ(ref f, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f, SectionType typ) => elf_package.getSymbols32ᴍ(ref f, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f, SectionType typ) => elf_package.getSymbols64ᴍ(ref f, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => elf_package.Sectionᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocations(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsAMD64ᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocations386(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocations386ᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsARMᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsARM64ᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsPPCᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsPPC64ᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsMIPSᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsMIPS64ᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsLOONG64ᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsRISCV64ᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationss390x(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationss390xᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsSPARC64ᴍ(ref f, dst, rels);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) => elf_package.DWARFᴍ(Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<Symbol>, error) Symbols(this ref File f) => elf_package.Symbolsᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<Symbol>, error) DynamicSymbols(this ref File f) => elf_package.DynamicSymbolsᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) => elf_package.ImportedSymbolsᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error dynamicVersions(this ref File f, slice<byte> str) => elf_package.dynamicVersionsᴍ(ref f, str);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) => elf_package.DynamicVersionsᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) => elf_package.dynamicVersionNeedsᴍ(ref f, str);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref File f) => elf_package.DynamicVersionNeedsᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) => elf_package.gnuVersionInitᴍ(ref f, str);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersion(this ref File f, nint i) => elf_package.gnuVersionᴍ(ref f, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => elf_package.ImportedLibrariesᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) DynString(this ref File f, DynTag tag) => elf_package.DynStringᴍ(ref f, tag);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) => elf_package.DynValueᴍ(ref f, tag);
+}
+partial class elfᴛProg {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ref Prog p) => elf_package.Openᴍ(ref p);
+}
+partial class elfᴛFormatError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref FormatError e) => elf_package.Errorᴍ(ref e);
+}
+partial class elfᴛVersionIndex {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsHidden(this VersionIndex vi) => elf_package.IsHiddenᴍ(vi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint16 Index(this VersionIndex vi) => elf_package.Indexᴍ(vi);
+}
+partial class elfᴛnobitsSectionReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) => elf_package.ReadAtᴍ(ref _, p, off);
+}
+// </GlyphForwarders>

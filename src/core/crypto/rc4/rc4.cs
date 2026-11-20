@@ -27,9 +27,9 @@ partial struct Cipher {
 
 partial struct KeySizeError /*num:nint*/;
 
-} partial class rc4ᴛKeySizeError {
+} partial class rc4_package {
 
-public static @string Error(this KeySizeError k) {
+internal static @string Errorᴍ(KeySizeError k) {
     return "crypto/rc4: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
@@ -61,20 +61,20 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
     return (Ꮡc, default);
 }
 
-} partial class rc4ᴛCipher {
+} partial class rc4_package {
 
 // Reset zeros the key data and makes the [Cipher] unusable.
 //
 // Deprecated: Reset can't guarantee that the key will be entirely removed from
 // the process's memory.
-public static void Reset(this ref Cipher c) {
+internal static void Resetᴍ(ref Cipher c) {
     clear(c.s[..]);
     (c.i, c.j) = (0, 0);
 }
 
 // XORKeyStream sets dst to the result of XORing src with the key stream.
 // Dst and src must overlap entirely or not at all.
-public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStreamᴍ(ref Cipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) == 0) {
         return;
     }
@@ -96,3 +96,13 @@ public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> 
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class rc4ᴛKeySizeError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => rc4_package.Errorᴍ(k);
+}
+partial class rc4ᴛCipher {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Cipher c) => rc4_package.Resetᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> src) => rc4_package.XORKeyStreamᴍ(ref c, dst, src);
+}
+// </GlyphForwarders>

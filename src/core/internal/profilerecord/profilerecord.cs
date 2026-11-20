@@ -22,10 +22,10 @@ partial struct MemProfileRecord {
     public slice<uintptr> Stack;
 }
 
-} partial class profilerecordᴛMemProfileRecord {
+} partial class profilerecord_package {
 
-public static int64 InUseBytes(this ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
-public static int64 InUseObjects(this ref MemProfileRecord r) { return r.AllocObjects - r.FreeObjects; }
+internal static int64 InUseBytesᴍ(ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
+internal static int64 InUseObjectsᴍ(ref MemProfileRecord r) { return r.AllocObjects - r.FreeObjects; }
 
 } partial class profilerecord_package {
 
@@ -36,3 +36,10 @@ partial struct BlockProfileRecord {
 }
 
 } // end profilerecord_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class profilerecordᴛMemProfileRecord {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InUseBytes(this ref MemProfileRecord r) => profilerecord_package.InUseBytesᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InUseObjects(this ref MemProfileRecord r) => profilerecord_package.InUseObjectsᴍ(ref r);
+}
+// </GlyphForwarders>

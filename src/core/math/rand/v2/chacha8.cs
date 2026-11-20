@@ -29,10 +29,10 @@ public static ж<ChaCha8> NewChaCha8(/*[32]*/ array<byte> seed) {
     return c;
 }
 
-} partial class randᴛChaCha8 {
+} partial class rand_package {
 
 // Seed resets the ChaCha8 to behave the same way as NewChaCha8(seed).
-public static void Seed(this ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
+internal static void Seedᴍ(ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
     seed = seed.Clone();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -42,7 +42,7 @@ public static void Seed(this ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
 }
 
 // Uint64 returns a uniformly distributed random uint64 value.
-public static uint64 Uint64(this ж<ChaCha8> Ꮡc) {
+internal static uint64 Uint64ᴍ(ж<ChaCha8> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     for (;;) {
@@ -60,7 +60,7 @@ public static uint64 Uint64(this ж<ChaCha8> Ꮡc) {
 // If calls to Read and Uint64 are interleaved, the order in which bits are
 // returned by the two is undefined, and Read may return bits generated before
 // the last call to Uint64.
-public static (nint n, error err) Read(this ж<ChaCha8> Ꮡc, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ж<ChaCha8> Ꮡc, slice<byte> p) {
     nint n = default;
     error err = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -88,7 +88,7 @@ internal static ref readonly @string invalidChaCha8ReadBufferˢ => ref invalidCh
 private static readonly @string invalidChaCha8ReadBufferˢᵇ = "invalid ChaCha8 Read buffer encoding"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
-public static error UnmarshalBinary(this ж<ChaCha8> Ꮡc, slice<byte> data) {
+internal static error UnmarshalBinaryᴍ(ж<ChaCha8> Ꮡc, slice<byte> data) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     (data, var ok) = cutPrefix(data, slice<byte>("readbuf:"u8));
@@ -119,10 +119,10 @@ internal static (slice<byte> buf, slice<byte> rest, bool ok) readUint8LengthPref
     return (b.slice(1, (byte)(1 + b[0])), b.slice((byte)(1 + b[0])), true);
 }
 
-} partial class randᴛChaCha8 {
+} partial class rand_package {
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-public static (slice<byte>, error) AppendBinary(this ж<ChaCha8> Ꮡc, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(ж<ChaCha8> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.readLen > 0) {
@@ -134,9 +134,20 @@ public static (slice<byte>, error) AppendBinary(this ж<ChaCha8> Ꮡc, slice<byt
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
-public static (slice<byte>, error) MarshalBinary(this ж<ChaCha8> Ꮡc) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(ж<ChaCha8> Ꮡc) {
     // the maximum length of (chacha8rand.Marshal + c.readBuf + "readbuf:") is 64
     return Ꮡc.AppendBinary(new slice<byte>(0, 64));
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class randᴛChaCha8 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Seed(this ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) => rand_package.Seedᴍ(Ꮡc, seed);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this ж<ChaCha8> Ꮡc) => rand_package.Uint64ᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ж<ChaCha8> Ꮡc, slice<byte> p) => rand_package.Readᴍ(Ꮡc, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ж<ChaCha8> Ꮡc, slice<byte> data) => rand_package.UnmarshalBinaryᴍ(Ꮡc, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ж<ChaCha8> Ꮡc, slice<byte> b) => rand_package.AppendBinaryᴍ(Ꮡc, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ж<ChaCha8> Ꮡc) => rand_package.MarshalBinaryᴍ(Ꮡc);
+}
+// </GlyphForwarders>

@@ -25,22 +25,22 @@ partial struct Template {
     internal ж<template.Template> tmpl;
 }
 
-} partial class lazytemplateᴛTemplate {
+} partial class lazytemplate_package {
 
-internal static ж<template.Template> tp(this ж<Template> Ꮡr) {
+internal static ж<template.Template> tpᴍ(ж<Template> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.build);
     return r.tmpl;
 }
 
-internal static void build(this ref Template r) {
+internal static void buildᴍ(ref Template r) {
     var (ᴛ1, ᴛ2) = template.New(r.name).Parse(r.text);
     r.tmpl = template.Must(ᴛ1, ᴛ2);
     (r.name, r.text) = ("", "");
 }
 
-public static error Execute(this ж<Template> Ꮡr, io.Writer w, any data) {
+internal static error Executeᴍ(ж<Template> Ꮡr, io.Writer w, any data) {
     return Ꮡr.tp().Execute(w, data);
 }
 
@@ -61,3 +61,11 @@ public static ж<Template> New(@string name, @string text) {
 }
 
 } // end lazytemplate_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class lazytemplateᴛTemplate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<template.Template> tp(this ж<Template> Ꮡr) => lazytemplate_package.tpᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void build(this ref Template r) => lazytemplate_package.buildᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Execute(this ж<Template> Ꮡr, io.Writer w, any data) => lazytemplate_package.Executeᴍ(Ꮡr, w, data);
+}
+// </GlyphForwarders>

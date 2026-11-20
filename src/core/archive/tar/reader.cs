@@ -41,7 +41,7 @@ public static ж<Reader> NewReader(io.Reader r) {
     return Ꮡ(new Reader(r: r, curr: new regFileReaderжfileReader(Ꮡ(new regFileReader(r, 0)))));
 }
 
-} partial class tarᴛReader {
+} partial class tar_package {
 
 // Next advances to the next entry in the tar archive.
 // The Header.Size determines how many bytes can be read for the next file.
@@ -54,7 +54,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 // A future version of Go may introduce this behavior by default.
 // Programs that want to accept non-local names can ignore
 // the [ErrInsecurePath] error and use the returned header.
-public static (ж<Header>, error) Next(this ж<Reader> Ꮡtr) {
+internal static (ж<Header>, error) Nextᴍ(ж<Reader> Ꮡtr) {
     ref var tr = ref Ꮡtr.DerefOrNull();
 
     if (tr.err != nil) {
@@ -71,7 +71,7 @@ public static (ж<Header>, error) Next(this ж<Reader> Ꮡtr) {
     return (hdr, err);
 }
 
-internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
+internal static (ж<Header>, error) nextᴍ(ж<Reader> Ꮡtr) {
     ref var tr = ref Ꮡtr.DerefOrNull();
 
     map<@string, @string> paxHdrs = default;
@@ -194,7 +194,7 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
 // handleRegularFile sets up the current file reader and padding such that it
 // can only read the following logical data section. It will properly handle
 // special headers that contain no data section.
-internal static error handleRegularFile(this ref Reader tr, ж<Header> Ꮡhdr) {
+internal static error handleRegularFileᴍ(ref Reader tr, ж<Header> Ꮡhdr) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     ref var nb = ref heap<int64>(hdr.Size, out var Ꮡnb);
@@ -212,7 +212,7 @@ internal static error handleRegularFile(this ref Reader tr, ж<Header> Ꮡhdr) {
 
 // handleSparseFile checks if the current file is a sparse format of any type
 // and sets the curr reader appropriately.
-internal static error handleSparseFile(this ref Reader tr, ж<Header> Ꮡhdr, ж<block> rawHdr) {
+internal static error handleSparseFileᴍ(ref Reader tr, ж<Header> Ꮡhdr, ж<block> rawHdr) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     sparseDatas spd = default;
@@ -239,7 +239,7 @@ internal static error handleSparseFile(this ref Reader tr, ж<Header> Ꮡhdr, ж
 // If they are found, then this function reads the sparse map and returns it.
 // This assumes that 0.0 headers have already been converted to 0.1 headers
 // by the PAX header parsing logic.
-internal static (sparseDatas, error) readGNUSparsePAXHeaders(this ref Reader tr, ж<Header> Ꮡhdr) {
+internal static (sparseDatas, error) readGNUSparsePAXHeadersᴍ(ref Reader tr, ж<Header> Ꮡhdr) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     // Identify the version of GNU headers.
@@ -405,7 +405,7 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
     return (paxHdrs, default);
 }
 
-} partial class tarᴛReader {
+} partial class tar_package {
 
 // readHeader reads the next block header and assumes that the underlying reader
 // is already aligned to a block boundary. It returns the raw block of the
@@ -415,7 +415,7 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
 //   - Exactly 0 bytes are read and EOF is hit.
 //   - Exactly 1 block of zeros is read and EOF is hit.
 //   - At least 2 blocks of zeros are read.
-internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr) {
+internal static (ж<Header>, ж<block>, error) readHeaderᴍ(ж<Reader> Ꮡtr) {
     ref var tr = ref Ꮡtr.DerefOrNull();
 
     // Two blocks of zero bytes marks the end of the archive.
@@ -549,7 +549,7 @@ internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr)
 // The Header.Size does not reflect the size of any extended headers used.
 // Thus, this function will read from the raw io.Reader to fetch extra headers.
 // This method mutates blk in the process.
-internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<Header> Ꮡhdr, ж<block> Ꮡblk) {
+internal static (sparseDatas, error) readOldGNUSparseMapᴍ(ref Reader tr, ж<Header> Ꮡhdr, ж<block> Ꮡblk) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
     ref var blk = ref Ꮡblk.DerefOrNull();
 
@@ -725,7 +725,7 @@ internal static (sparseDatas, error) appendSparseEntry(sparseDatas spd, sparseEn
     return (append(spd, ent), default);
 }
 
-} partial class tarᴛReader {
+} partial class tar_package {
 
 // Read reads from the current file in the tar archive.
 // It returns (0, io.EOF) when it reaches the end of that file,
@@ -737,7 +737,7 @@ internal static (sparseDatas, error) appendSparseEntry(sparseDatas spd, sparseEn
 // Calling Read on special types like [TypeLink], [TypeSymlink], [TypeChar],
 // [TypeBlock], [TypeDir], and [TypeFifo] returns (0, [io.EOF]) regardless of what
 // the [Header.Size] claims.
-public static (nint, error) Read(this ref Reader tr, slice<byte> b) {
+internal static (nint, error) Readᴍ(ref Reader tr, slice<byte> b) {
     if (tr.err != nil) {
         return (0, tr.err);
     }
@@ -758,7 +758,7 @@ public static (nint, error) Read(this ref Reader tr, slice<byte> b) {
 //
 // TODO(dsnet): Re-export this when adding sparse file support.
 // See https://golang.org/issue/22735
-internal static (int64, error) writeTo(this ref Reader tr, io.Writer w) {
+internal static (int64, error) writeToᴍ(ref Reader tr, io.Writer w) {
     if (tr.err != nil) {
         return (0, tr.err);
     }
@@ -777,9 +777,9 @@ partial struct regFileReader {
     internal int64 nb;    // Number of remaining bytes to read
 }
 
-} partial class tarᴛregFileReader {
+} partial class tar_package {
 
-internal static (nint n, error err) Read(this ref regFileReader fr, slice<byte> b) {
+internal static (nint n, error err) Readᴍ(ref regFileReader fr, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -808,19 +808,19 @@ internal partial struct WriteTo_src /*dyn*/ {
     /*embed*/ public io_package.Reader Reader;
 }
 
-} partial class tarᴛregFileReader {
+} partial class tar_package {
 
-internal static (int64, error) WriteTo(this ж<regFileReader> Ꮡfr, io.Writer w) {
+internal static (int64, error) WriteToᴍ(ж<regFileReader> Ꮡfr, io.Writer w) {
     return io.Copy(w, new WriteTo_src(new regFileReaderжReader(Ꮡfr)));
 }
 
 // logicalRemaining implements fileState.logicalRemaining.
-internal static int64 logicalRemaining(this regFileReader fr) {
+internal static int64 logicalRemainingᴍ(regFileReader fr) {
     return fr.nb;
 }
 
 // physicalRemaining implements fileState.physicalRemaining.
-internal static int64 physicalRemaining(this regFileReader fr) {
+internal static int64 physicalRemainingᴍ(regFileReader fr) {
     return fr.nb;
 }
 
@@ -833,9 +833,9 @@ partial struct sparseFileReader {
     internal int64 pos;      // Current position in sparse file
 }
 
-} partial class tarᴛsparseFileReader {
+} partial class tar_package {
 
-internal static (nint n, error err) Read(this ж<sparseFileReader> Ꮡsr, slice<byte> b) {
+internal static (nint n, error err) Readᴍ(ж<sparseFileReader> Ꮡsr, slice<byte> b) {
     nint n = default;
     error err = default;
     ref var sr = ref Ꮡsr.DerefOrNull();
@@ -883,7 +883,7 @@ internal static (nint n, error err) Read(this ж<sparseFileReader> Ꮡsr, slice<
     }}
 }
 
-internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io.Writer w) {
+internal static (int64 n, error err) WriteToᴍ(ж<sparseFileReader> Ꮡsr, io.Writer w) {
     int64 n = default;
     error err = default;
     ref var sr = ref Ꮡsr.DerefOrNull();
@@ -943,10 +943,10 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
     }}
 }
 
-internal static int64 logicalRemaining(this sparseFileReader sr) {
+internal static int64 logicalRemainingᴍ(sparseFileReader sr) {
     return sr.sp[len(sr.sp) - 1].endOffset() - sr.pos;
 }
-internal static int64 physicalRemaining(this sparseFileReader sr) {
+internal static int64 physicalRemainingᴍ(sparseFileReader sr) {
     return sr.fr.physicalRemaining();
 }
 
@@ -955,9 +955,9 @@ internal static int64 physicalRemaining(this sparseFileReader sr) {
 partial struct zeroReader {
 }
 
-} partial class tarᴛzeroReader {
+} partial class tar_package {
 
-internal static (nint, error) Read(this zeroReader _, slice<byte> b) {
+internal static (nint, error) Readᴍ(zeroReader _, slice<byte> b) {
     clear(b);
     return (len(b), default);
 }
@@ -1032,3 +1032,32 @@ internal static error discard(io.Reader r, int64 n) {
 }
 
 } // end tar_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tarᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Header>, error) Next(this ж<Reader> Ꮡtr) => tar_package.Nextᴍ(Ꮡtr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) => tar_package.nextᴍ(Ꮡtr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handleRegularFile(this ref Reader tr, ж<Header> Ꮡhdr) => tar_package.handleRegularFileᴍ(ref tr, Ꮡhdr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handleSparseFile(this ref Reader tr, ж<Header> Ꮡhdr, ж<block> rawHdr) => tar_package.handleSparseFileᴍ(ref tr, Ꮡhdr, rawHdr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (sparseDatas, error) readGNUSparsePAXHeaders(this ref Reader tr, ж<Header> Ꮡhdr) => tar_package.readGNUSparsePAXHeadersᴍ(ref tr, Ꮡhdr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr) => tar_package.readHeaderᴍ(Ꮡtr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<Header> Ꮡhdr, ж<block> Ꮡblk) => tar_package.readOldGNUSparseMapᴍ(ref tr, Ꮡhdr, Ꮡblk);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ref Reader tr, slice<byte> b) => tar_package.Readᴍ(ref tr, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) writeTo(this ref Reader tr, io.Writer w) => tar_package.writeToᴍ(ref tr, w);
+}
+partial class tarᴛregFileReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref regFileReader fr, slice<byte> b) => tar_package.Readᴍ(ref fr, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) WriteTo(this ж<regFileReader> Ꮡfr, io.Writer w) => tar_package.WriteToᴍ(Ꮡfr, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 logicalRemaining(this regFileReader fr) => tar_package.logicalRemainingᴍ(fr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 physicalRemaining(this regFileReader fr) => tar_package.physicalRemainingᴍ(fr);
+}
+partial class tarᴛsparseFileReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<sparseFileReader> Ꮡsr, slice<byte> b) => tar_package.Readᴍ(Ꮡsr, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io.Writer w) => tar_package.WriteToᴍ(Ꮡsr, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 logicalRemaining(this sparseFileReader sr) => tar_package.logicalRemainingᴍ(sr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 physicalRemaining(this sparseFileReader sr) => tar_package.physicalRemainingᴍ(sr);
+}
+partial class tarᴛzeroReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this zeroReader _, slice<byte> b) => tar_package.Readᴍ(_, b);
+}
+// </GlyphForwarders>

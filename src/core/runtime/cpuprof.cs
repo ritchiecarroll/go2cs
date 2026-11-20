@@ -95,7 +95,7 @@ public static void SetCPUProfileRate(nint hz) {
     unlock(Ꮡcpuprof.Ꮡlock);
 }
 
-} partial class runtimeᴛcpuProfile {
+} partial class runtime_package {
 
 // add adds the stack trace to the profile.
 // It is called from signal handlers and other limited environments
@@ -104,7 +104,7 @@ public static void SetCPUProfileRate(nint hz) {
 // of stack.
 //
 //go:nowritebarrierrec
-internal static void add(this ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
+internal static void addᴍ(ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with setcpuprofilerate.
     while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
@@ -136,7 +136,7 @@ internal static void add(this ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slic
 //
 //go:nosplit
 //go:nowritebarrierrec
-internal static void addNonGo(this ref cpuProfile p, slice<uintptr> stk) {
+internal static void addNonGoᴍ(ref cpuProfile p, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with SetCPUProfileRate.
     // (Other calls to add or addNonGo should be blocked out
     // by the fact that only one SIGPROF can be handled by the
@@ -165,7 +165,7 @@ internal static void addNonGo(this ref cpuProfile p, slice<uintptr> stk) {
 // addExtra is called either from a signal handler on a Go thread
 // or from an ordinary goroutine; either way it can use stack
 // and has a g. The world may be stopped, though.
-internal static void addExtra(this ref cpuProfile p) {
+internal static void addExtraᴍ(ref cpuProfile p) {
     // Copy accumulated non-Go profile events.
     var hdr = new uint64[]{1}.array();
     for (nint i = 0; i < p.numExtra; ) {
@@ -260,3 +260,11 @@ public static (slice<uint64>, slice<@unsafe.Pointer>, bool) runtime_pprof_readPr
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛcpuProfile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) => runtime_package.addᴍ(ref p, tagPtr, stk);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addNonGo(this ref cpuProfile p, slice<uintptr> stk) => runtime_package.addNonGoᴍ(ref p, stk);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addExtra(this ref cpuProfile p) => runtime_package.addExtraᴍ(ref p);
+}
+// </GlyphForwarders>

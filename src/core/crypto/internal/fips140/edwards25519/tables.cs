@@ -29,12 +29,12 @@ partial struct nafLookupTable8 {
     internal array<affineCached> points = new(64);
 }
 
-} partial class edwards25519ᴛprojLookupTable {
+} partial class edwards25519_package {
 
 // Constructors.
 
 // Builds a lookup table at runtime. Fast.
-internal static void FromP3(this ref projLookupTable v, ж<Point> q) {
+internal static void FromP3ᴍ(ref projLookupTable v, ж<Point> q) {
     // Goal: v.points[i] = (i+1)*Q, i.e., Q, 2Q, ..., 8Q
     // This allows lookup of -8Q, ..., -Q, 0, Q, ..., 8Q
     Ꮡ(v.points, 0).FromP3(q);
@@ -48,10 +48,10 @@ internal static void FromP3(this ref projLookupTable v, ж<Point> q) {
     }
 }
 
-} partial class edwards25519ᴛaffineLookupTable {
+} partial class edwards25519_package {
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
-internal static void FromP3(this ref affineLookupTable v, ж<Point> q) {
+internal static void FromP3ᴍ(ref affineLookupTable v, ж<Point> q) {
     // Goal: v.points[i] = (i+1)*Q, i.e., Q, 2Q, ..., 8Q
     // This allows lookup of -8Q, ..., -Q, 0, Q, ..., 8Q
     Ꮡ(v.points, 0).FromP3(q);
@@ -63,10 +63,10 @@ internal static void FromP3(this ref affineLookupTable v, ж<Point> q) {
     }
 }
 
-} partial class edwards25519ᴛnafLookupTable5 {
+} partial class edwards25519_package {
 
 // Builds a lookup table at runtime. Fast.
-internal static void FromP3(this ref nafLookupTable5 v, ж<Point> q) {
+internal static void FromP3ᴍ(ref nafLookupTable5 v, ж<Point> q) {
     // Goal: v.points[i] = (2*i+1)*Q, i.e., Q, 3Q, 5Q, ..., 15Q
     // This allows lookup of -15Q, ..., -3Q, -Q, 0, Q, 3Q, ..., 15Q
     Ꮡ(v.points, 0).FromP3(q);
@@ -79,10 +79,10 @@ internal static void FromP3(this ref nafLookupTable5 v, ж<Point> q) {
     }
 }
 
-} partial class edwards25519ᴛnafLookupTable8 {
+} partial class edwards25519_package {
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
-internal static void FromP3(this ref nafLookupTable8 v, ж<Point> q) {
+internal static void FromP3ᴍ(ref nafLookupTable8 v, ж<Point> q) {
     Ꮡ(v.points, 0).FromP3(q);
     ref var q2 = ref heap<Point>(new Point(), out var Ꮡq2);
     Ꮡq2.Add(q, q);
@@ -93,12 +93,12 @@ internal static void FromP3(this ref nafLookupTable8 v, ж<Point> q) {
     }
 }
 
-} partial class edwards25519ᴛprojLookupTable {
+} partial class edwards25519_package {
 
 // Selectors.
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
-internal static void SelectInto(this ref projLookupTable v, ж<projCached> dest, int8 x) {
+internal static void SelectIntoᴍ(ref projLookupTable v, ж<projCached> dest, int8 x) {
     // Compute xabs = |x|
     var xmask = (int8)((x >> 7));
     var xabs = (uint8)((int8)((x + xmask) ^ xmask));
@@ -113,10 +113,10 @@ internal static void SelectInto(this ref projLookupTable v, ж<projCached> dest,
     dest.CondNeg((nint)((int8)(xmask & 1)));
 }
 
-} partial class edwards25519ᴛaffineLookupTable {
+} partial class edwards25519_package {
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
-internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> dest, int8 x) {
+internal static void SelectIntoᴍ(ref affineLookupTable v, ж<affineCached> dest, int8 x) {
     // Compute xabs = |x|
     var xmask = (int8)((x >> 7));
     var xabs = (uint8)((int8)((x + xmask) ^ xmask));
@@ -131,22 +131,41 @@ internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> d
     dest.CondNeg((nint)((int8)(xmask & 1)));
 }
 
-} partial class edwards25519ᴛnafLookupTable5 {
+} partial class edwards25519_package {
 
 // Given odd x with 0 < x < 2^4, return x*Q (in variable time).
-internal static void SelectInto(this ref nafLookupTable5 v, ж<projCached> Ꮡdest, int8 x) {
+internal static void SelectIntoᴍ(ref nafLookupTable5 v, ж<projCached> Ꮡdest, int8 x) {
     ref var dest = ref Ꮡdest.DerefOrNull();
 
     dest = v.points[(int8)(x / 2)];
 }
 
-} partial class edwards25519ᴛnafLookupTable8 {
+} partial class edwards25519_package {
 
 // Given odd x with 0 < x < 2^7, return x*Q (in variable time).
-internal static void SelectInto(this ref nafLookupTable8 v, ж<affineCached> Ꮡdest, int8 x) {
+internal static void SelectIntoᴍ(ref nafLookupTable8 v, ж<affineCached> Ꮡdest, int8 x) {
     ref var dest = ref Ꮡdest.DerefOrNull();
 
     dest = v.points[(int8)(x / 2)];
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class edwards25519ᴛprojLookupTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void FromP3(this ref projLookupTable v, ж<Point> q) => edwards25519_package.FromP3ᴍ(ref v, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SelectInto(this ref projLookupTable v, ж<projCached> dest, int8 x) => edwards25519_package.SelectIntoᴍ(ref v, dest, x);
+}
+partial class edwards25519ᴛaffineLookupTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void FromP3(this ref affineLookupTable v, ж<Point> q) => edwards25519_package.FromP3ᴍ(ref v, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> dest, int8 x) => edwards25519_package.SelectIntoᴍ(ref v, dest, x);
+}
+partial class edwards25519ᴛnafLookupTable5 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void FromP3(this ref nafLookupTable5 v, ж<Point> q) => edwards25519_package.FromP3ᴍ(ref v, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SelectInto(this ref nafLookupTable5 v, ж<projCached> Ꮡdest, int8 x) => edwards25519_package.SelectIntoᴍ(ref v, Ꮡdest, x);
+}
+partial class edwards25519ᴛnafLookupTable8 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void FromP3(this ref nafLookupTable8 v, ж<Point> q) => edwards25519_package.FromP3ᴍ(ref v, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SelectInto(this ref nafLookupTable8 v, ж<affineCached> Ꮡdest, int8 x) => edwards25519_package.SelectIntoᴍ(ref v, Ꮡdest, x);
+}
+// </GlyphForwarders>

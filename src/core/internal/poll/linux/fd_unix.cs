@@ -41,14 +41,14 @@ partial struct FD {
     internal bool isFile;
 }
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // Init initializes the FD. The Sysfd field should already be set.
 // This can be called multiple times on a single FD.
 // The net argument is a network name from the net package (e.g., "tcp"),
 // or "file".
 // Set pollable to true if fd should be managed by runtime netpoll.
-public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
+internal static error Initᴍ(ж<FD> Ꮡfd, @string net, bool pollable) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.SysFile.init();
@@ -72,7 +72,7 @@ public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
 
 // Destroy closes the file descriptor. This is called when there are
 // no remaining references.
-internal static error destroy(this ж<FD> Ꮡfd) {
+internal static error destroyᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     // Poller may want to unregister fd in readiness notification mechanism,
@@ -88,7 +88,7 @@ internal static error destroy(this ж<FD> Ꮡfd) {
 
 // Close closes the FD. The underlying file descriptor is closed by the
 // destroy method when there are no remaining references.
-public static error Close(this ж<FD> Ꮡfd) {
+internal static error Closeᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.increfAndClose()) {
@@ -120,7 +120,7 @@ public static error Close(this ж<FD> Ꮡfd) {
 }
 
 // SetBlocking puts the file into blocking mode.
-public static error SetBlocking(this ж<FD> Ꮡfd) {
+internal static error SetBlockingᴍ(ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -149,10 +149,10 @@ public static error SetBlocking(this ж<FD> Ꮡfd) {
 // Use 1GB instead of, say, 2GB-1, to keep subsequent reads aligned.
 internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // Read implements io.Reader.
-public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> p) {
+internal static (nint, error) Readᴍ(ж<FD> Ꮡfd, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -199,7 +199,7 @@ public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> p) {
 }
 
 // Pread wraps the pread system call.
-public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> p, int64 off) {
+internal static (nint, error) Preadᴍ(ж<FD> Ꮡfd, slice<byte> p, int64 off) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     // Call incref, not readLock, because since pread specifies the
@@ -222,7 +222,7 @@ public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> p, int64 off) {
 }
 
 // ReadFrom wraps the recvfrom network call.
-public static (nint, Δsyscall.Sockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slice<byte> p) {
+internal static (nint, Δsyscall.Sockaddr, error) ReadFromᴍ(ж<FD> Ꮡfd, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -261,7 +261,7 @@ public static (nint, Δsyscall.Sockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slic
 }
 
 // ReadFromInet4 wraps the recvfrom network call for IPv4.
-public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> from) {
+internal static (nint, error) ReadFromInet4ᴍ(ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> from) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -300,7 +300,7 @@ public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<�
 }
 
 // ReadFromInet6 wraps the recvfrom network call for IPv6.
-public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> from) {
+internal static (nint, error) ReadFromInet6ᴍ(ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> from) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -339,7 +339,7 @@ public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<�
 }
 
 // ReadMsg wraps the recvmsg network call.
-public static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
+internal static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsgᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -378,7 +378,7 @@ public static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg(this ж<FD> 
 }
 
 // ReadMsgInet4 is ReadMsg, but specialized for syscall.SockaddrInet4.
-public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> sa4) {
+internal static (nint, nint, nint, error) ReadMsgInet4ᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> sa4) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -417,7 +417,7 @@ public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<by
 }
 
 // ReadMsgInet6 is ReadMsg, but specialized for syscall.SockaddrInet6.
-public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> sa6) {
+internal static (nint, nint, nint, error) ReadMsgInet6ᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> sa6) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -456,7 +456,7 @@ public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<by
 }
 
 // Write implements io.Writer.
-public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) {
+internal static (nint, error) Writeᴍ(ж<FD> Ꮡfd, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -512,7 +512,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) {
 }
 
 // Pwrite wraps the pwrite system call.
-public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> p, int64 off) {
+internal static (nint, error) Pwriteᴍ(ж<FD> Ꮡfd, slice<byte> p, int64 off) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -556,7 +556,7 @@ public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> p, int64 off) 
 }
 
 // WriteToInet4 wraps the sendto network call for IPv4 addresses.
-public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> sa) {
+internal static (nint, error) WriteToInet4ᴍ(ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -594,7 +594,7 @@ public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δ
 }
 
 // WriteToInet6 wraps the sendto network call for IPv6 addresses.
-public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> sa) {
+internal static (nint, error) WriteToInet6ᴍ(ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -632,7 +632,7 @@ public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δ
 }
 
 // WriteTo wraps the sendto network call.
-public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> p, Δsyscall.Sockaddr sa) {
+internal static (nint, error) WriteToᴍ(ж<FD> Ꮡfd, slice<byte> p, Δsyscall.Sockaddr sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -670,7 +670,7 @@ public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> p, Δsyscall.
 }
 
 // WriteMsg wraps the sendmsg network call.
-public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, Δsyscall.Sockaddr sa) {
+internal static (nint, nint, error) WriteMsgᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, Δsyscall.Sockaddr sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -708,7 +708,7 @@ public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, sli
 }
 
 // WriteMsgInet4 is WriteMsg specialized for syscall.SockaddrInet4.
-public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> sa) {
+internal static (nint, nint, error) WriteMsgInet4ᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -746,7 +746,7 @@ public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p
 }
 
 // WriteMsgInet6 is WriteMsg specialized for syscall.SockaddrInet6.
-public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> sa) {
+internal static (nint, nint, error) WriteMsgInet6ᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -784,7 +784,7 @@ public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p
 }
 
 // Accept wraps the accept network call.
-public static (nint, Δsyscall.Sockaddr, @string, error) Accept(this ж<FD> Ꮡfd) {
+internal static (nint, Δsyscall.Sockaddr, @string, error) Acceptᴍ(ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -835,7 +835,7 @@ public static (nint, Δsyscall.Sockaddr, @string, error) Accept(this ж<FD> Ꮡf
 }
 
 // Fchmod wraps syscall.Fchmod.
-public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) {
+internal static error Fchmodᴍ(ж<FD> Ꮡfd, uint32 mode) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -850,7 +850,7 @@ public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) {
 }
 
 // Fstat wraps syscall.Fstat
-public static error Fstat(this ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) {
+internal static error Fstatᴍ(ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -896,10 +896,10 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
     return dupCloseOnExecOld(fd);
 }
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // Dup duplicates the file descriptor.
-public static (nint, @string, error) Dup(this ж<FD> Ꮡfd) {
+internal static (nint, @string, error) Dupᴍ(ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -918,12 +918,12 @@ public static (nint, @string, error) Dup(this ж<FD> Ꮡfd) {
 // On Unix variants only, expose the IO event for the net code.
 
 // WaitWrite waits until data can be written to fd.
-public static error WaitWrite(this ref FD fd) {
+internal static error WaitWriteᴍ(ref FD fd) {
     return fd.pd.waitWrite(fd.isFile);
 }
 
 // WriteOnce is for testing only. It makes a single write call.
-public static (nint, error) WriteOnce(this ж<FD> Ꮡfd, slice<byte> p) {
+internal static (nint, error) WriteOnceᴍ(ж<FD> Ꮡfd, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -940,7 +940,7 @@ public static (nint, error) WriteOnce(this ж<FD> Ꮡfd, slice<byte> p) {
 }
 
 // RawRead invokes the user-defined function f for a read operation.
-public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
+internal static error RawReadᴍ(ж<FD> Ꮡfd, Func<uintptr, bool> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -971,7 +971,7 @@ public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
 }
 
 // RawWrite invokes the user-defined function f for a write operation.
-public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
+internal static error RawWriteᴍ(ж<FD> Ꮡfd, Func<uintptr, bool> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1014,3 +1014,36 @@ internal static (nint, error) ignoringEINTRIO(Func<nint, slice<byte>, (nint, err
 }
 
 } // end poll_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pollᴛFD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) => poll_package.Initᴍ(Ꮡfd, net, pollable);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error destroy(this ж<FD> Ꮡfd) => poll_package.destroyᴍ(Ꮡfd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<FD> Ꮡfd) => poll_package.Closeᴍ(Ꮡfd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetBlocking(this ж<FD> Ꮡfd) => poll_package.SetBlockingᴍ(Ꮡfd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.Readᴍ(Ꮡfd, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> p, int64 off) => poll_package.Preadᴍ(Ꮡfd, p, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, Δsyscall.Sockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.ReadFromᴍ(Ꮡfd, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> from) => poll_package.ReadFromInet4ᴍ(Ꮡfd, p, from);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> from) => poll_package.ReadFromInet6ᴍ(Ꮡfd, p, from);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) => poll_package.ReadMsgᴍ(Ꮡfd, p, oob, flags);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> sa4) => poll_package.ReadMsgInet4ᴍ(Ꮡfd, p, oob, flags, sa4);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> sa6) => poll_package.ReadMsgInet6ᴍ(Ꮡfd, p, oob, flags, sa6);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.Writeᴍ(Ꮡfd, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> p, int64 off) => poll_package.Pwriteᴍ(Ꮡfd, p, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> sa) => poll_package.WriteToInet4ᴍ(Ꮡfd, p, sa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> sa) => poll_package.WriteToInet6ᴍ(Ꮡfd, p, sa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> p, Δsyscall.Sockaddr sa) => poll_package.WriteToᴍ(Ꮡfd, p, sa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, Δsyscall.Sockaddr sa) => poll_package.WriteMsgᴍ(Ꮡfd, p, oob, sa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> sa) => poll_package.WriteMsgInet4ᴍ(Ꮡfd, p, oob, sa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> sa) => poll_package.WriteMsgInet6ᴍ(Ꮡfd, p, oob, sa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, Δsyscall.Sockaddr, @string, error) Accept(this ж<FD> Ꮡfd) => poll_package.Acceptᴍ(Ꮡfd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) => poll_package.Fchmodᴍ(Ꮡfd, mode);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fstat(this ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) => poll_package.Fstatᴍ(Ꮡfd, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, @string, error) Dup(this ж<FD> Ꮡfd) => poll_package.Dupᴍ(Ꮡfd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WaitWrite(this ref FD fd) => poll_package.WaitWriteᴍ(ref fd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteOnce(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.WriteOnceᴍ(Ꮡfd, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) => poll_package.RawReadᴍ(Ꮡfd, f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) => poll_package.RawWriteᴍ(Ꮡfd, f);
+}
+// </GlyphForwarders>

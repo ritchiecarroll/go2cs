@@ -29,9 +29,9 @@ public static ж<Buffer> New() {
     return ᏑbufPool.Get()._<ж<Buffer>>();
 }
 
-} partial class bufferᴛBuffer {
+} partial class buffer_package {
 
-public static void Free(this ж<Buffer> Ꮡb) {
+internal static void Freeᴍ(ж<Buffer> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // To reduce peak allocation, return only smaller buffers to the pool.
@@ -42,35 +42,48 @@ public static void Free(this ж<Buffer> Ꮡb) {
     }
 }
 
-public static void Reset(this ref Buffer b) {
+internal static void Resetᴍ(ref Buffer b) {
     b.SetLen(0);
 }
 
-public static (nint, error) Write(this ref Buffer b, slice<byte> p) {
+internal static (nint, error) Writeᴍ(ref Buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
     return (len(p), default);
 }
 
-public static (nint, error) WriteString(this ref Buffer b, @string s) {
+internal static (nint, error) WriteStringᴍ(ref Buffer b, @string s) {
     b = append(b, s.ꓸꓸꓸ);
     return (len(s), default);
 }
 
-public static error WriteByte(this ref Buffer b, byte c) {
+internal static error WriteByteᴍ(ref Buffer b, byte c) {
     b = append(b, c);
     return default;
 }
 
-public static @string String(this ref Buffer b) {
+internal static @string Stringᴍ(ref Buffer b) {
     return (@string)(slice<byte>)b;
 }
 
-public static nint Len(this ref Buffer b) {
+internal static nint Lenᴍ(ref Buffer b) {
     return len(b);
 }
 
-public static void SetLen(this ref Buffer b, nint n) {
+internal static void SetLenᴍ(ref Buffer b, nint n) {
     b = (b).slice(0, n);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bufferᴛBuffer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Free(this ж<Buffer> Ꮡb) => buffer_package.Freeᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Buffer b) => buffer_package.Resetᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ref Buffer b, slice<byte> p) => buffer_package.Writeᴍ(ref b, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteString(this ref Buffer b, @string s) => buffer_package.WriteStringᴍ(ref b, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteByte(this ref Buffer b, byte c) => buffer_package.WriteByteᴍ(ref b, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Buffer b) => buffer_package.Stringᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref Buffer b) => buffer_package.Lenᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetLen(this ref Buffer b, nint n) => buffer_package.SetLenᴍ(ref b, n);
+}
+// </GlyphForwarders>

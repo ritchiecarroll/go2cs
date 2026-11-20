@@ -24,10 +24,10 @@ partial struct entry<K, V> {
 // It is a variable for benchmarking.
 internal static nint maxSlice = 8;
 
-} partial class httpᴛmapping {
+} partial class http_package {
 
 // add adds a key-value pair to the mapping.
-internal static void add<K, V>(this ref mapping<K, V> h, K k, V v) {
+internal static void addᴍ<K, V>(ref mapping<K, V> h, K k, V v) {
     if (h.m == nil && len(h.s) < maxSlice) {
         h.s = append(h.s, new entry<K, V>(k, v));
     } else {
@@ -45,7 +45,7 @@ internal static void add<K, V>(this ref mapping<K, V> h, K k, V v) {
 // find returns the value corresponding to the given key.
 // The second return value is false if there is no value
 // with that key.
-internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k) {
+internal static (V v, bool found) findᴍ<K, V>(ж<mapping<K, V>> Ꮡh, K k) {
     V v = GoZero<V>();
     bool found = default;
     ref var h = ref Ꮡh.DerefOrNull();
@@ -67,7 +67,7 @@ internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k) {
 
 // eachPair calls f for each pair in the mapping.
 // If f returns false, pairs returns immediately.
-internal static void eachPair<K, V>(this ж<mapping<K, V>> Ꮡh, Func<K, V, bool> f) {
+internal static void eachPairᴍ<K, V>(ж<mapping<K, V>> Ꮡh, Func<K, V, bool> f) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (Ꮡh == nil) {
@@ -89,3 +89,11 @@ internal static void eachPair<K, V>(this ж<mapping<K, V>> Ꮡh, Func<K, V, bool
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛmapping {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add<K, V>(this ref mapping<K, V> h, K k, V v) => http_package.addᴍ<K, V>(ref h, k, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k) => http_package.findᴍ<K, V>(Ꮡh, k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void eachPair<K, V>(this ж<mapping<K, V>> Ꮡh, Func<K, V, bool> f) => http_package.eachPairᴍ<K, V>(Ꮡh, f);
+}
+// </GlyphForwarders>

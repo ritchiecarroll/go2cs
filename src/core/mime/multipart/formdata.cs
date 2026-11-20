@@ -21,7 +21,7 @@ partial class multipart_package {
 // data is too large to be processed.
 public static error ErrMessageTooLarge = errors.New("multipart: message too large");
 
-} partial class multipartᴛReader {
+} partial class multipart_package {
 
 // TODO(adg,bradfitz): find a way to unify the DoS-prevention strategy here
 // with that of the http package's ParseForm.
@@ -33,7 +33,7 @@ public static error ErrMessageTooLarge = errors.New("multipart: message too larg
 // disk in temporary files.
 // It returns [ErrMessageTooLarge] if all non-file parts can't be stored in
 // memory.
-public static (ж<Form>, error) ReadForm(this ж<Reader> Ꮡr, int64 maxMemory) {
+internal static (ж<Form>, error) ReadFormᴍ(ж<Reader> Ꮡr, int64 maxMemory) {
     return Ꮡr.readForm(maxMemory);
 }
 
@@ -47,13 +47,13 @@ internal partial struct readForm_writerOnly /*dyn*/ {
     /*embed*/ public io_package.Writer Writer;
 }
 
-} partial class multipartᴛReader {
+} partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string multipartˢ => ref multipartˢᵇ;
 private static readonly @string multipartˢᵇ = "multipart-"u8;
 
-internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) {
+internal static (ж<Form>, error err) readFormᴍ(ж<Reader> Ꮡr, int64 maxMemory) {
     ж<Form> _ᴛ1 = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -261,10 +261,10 @@ partial struct Form {
     public map<@string, slice<ж<FileHeader>>> File;
 }
 
-} partial class multipartᴛForm {
+} partial class multipart_package {
 
 // RemoveAll removes any temporary files associated with a [Form].
-public static error RemoveAll(this ref Form f) {
+internal static error RemoveAllᴍ(ref Form f) {
     error err = default;
     foreach (var (_, fhs) in f.File) {
         foreach (var (_, fh) in range(fhs)) {
@@ -292,10 +292,10 @@ partial struct FileHeader {
     internal bool tmpshared;
 }
 
-} partial class multipartᴛFileHeader {
+} partial class multipart_package {
 
 // Open opens and returns the [FileHeader]'s associated File.
-public static (File, error) Open(this ref FileHeader fh) {
+internal static (File, error) Openᴍ(ref FileHeader fh) {
     var b = fh.content; if (b != nil) {
         var r = io.NewSectionReader(new bytes_ReaderжReaderAt(bytes.NewReader(b)), 0, (int64)len(b));
         return (new sectionReadCloser(r, default), default);
@@ -332,9 +332,9 @@ partial struct sectionReadCloser {
     /*embed*/ public io_package.Closer Closer;
 }
 
-} partial class multipartᴛsectionReadCloser {
+} partial class multipart_package {
 
-internal static error Close(this sectionReadCloser rc) {
+internal static error Closeᴍ(sectionReadCloser rc) {
     if (rc.Closer != nil) {
         return rc.Closer.Close();
     }
@@ -342,3 +342,19 @@ internal static error Close(this sectionReadCloser rc) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class multipartᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Form>, error) ReadForm(this ж<Reader> Ꮡr, int64 maxMemory) => multipart_package.ReadFormᴍ(Ꮡr, maxMemory);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) => multipart_package.readFormᴍ(Ꮡr, maxMemory);
+}
+partial class multipartᴛForm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RemoveAll(this ref Form f) => multipart_package.RemoveAllᴍ(ref f);
+}
+partial class multipartᴛFileHeader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (File, error) Open(this ref FileHeader fh) => multipart_package.Openᴍ(ref fh);
+}
+partial class multipartᴛsectionReadCloser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this sectionReadCloser rc) => multipart_package.Closeᴍ(rc);
+}
+// </GlyphForwarders>

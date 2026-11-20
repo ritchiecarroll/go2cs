@@ -11,16 +11,16 @@ using static norm_package;
 
 partial class norm_package {
 
-} partial class normᴛForm {
+} partial class norm_package {
 
 // Reset implements the Reset method of the transform.Transformer interface.
-public static void Reset(this Form _) { }
+internal static void Resetᴍ(Form _) { }
 
 // Transform implements the Transform method of the transform.Transformer
 // interface. It may need to write segments of up to MaxSegmentSize at once.
 // Users should either catch ErrShortDst and allow dst to grow or have dst be at
 // least of size MaxTransformChunkSize to be guaranteed of progress.
-public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
+internal static (nint nDst, nint nSrc, error err) Transformᴍ(Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
     nint nDst = default;
     nint nSrc = default;
     error err = default;
@@ -61,11 +61,11 @@ internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
 
 internal static slice<error> errs = [default, transform.ErrShortDst, transform.ErrShortSrc];
 
-} partial class normᴛForm {
+} partial class norm_package {
 
 // transform implements the transform.Transformer interface. It is only called
 // when quickSpan does not pass for a given string.
-internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
+internal static (nint nDst, nint nSrc, error err) transformᴍ(Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
     nint nDst = default;
     nint nSrc = default;
     error err = default;
@@ -105,3 +105,11 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class normᴛForm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this Form _) => norm_package.Resetᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) => norm_package.Transformᴍ(f, dst, src, atEOF);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) => norm_package.transformᴍ(f, dst, src, atEOF);
+}
+// </GlyphForwarders>

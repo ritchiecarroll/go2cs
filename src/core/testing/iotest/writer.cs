@@ -19,9 +19,9 @@ partial struct truncateWriter {
     internal int64 n;
 }
 
-} partial class iotestᴛtruncateWriter {
+} partial class iotest_package {
 
-internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(ref truncateWriter t, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -42,3 +42,9 @@ internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte>
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class iotestᴛtruncateWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) => iotest_package.Writeᴍ(ref t, p);
+}
+// </GlyphForwarders>

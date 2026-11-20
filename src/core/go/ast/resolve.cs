@@ -19,19 +19,19 @@ partial struct pkgBuilder {
     internal scanner.ErrorList errors;
 }
 
-} partial class astᴛpkgBuilder {
+} partial class ast_package {
 
-internal static void error(this ref pkgBuilder p, token.Pos pos, @string msg) {
+internal static void errorᴍ(ref pkgBuilder p, token.Pos pos, @string msg) {
     p.errors.Add(p.fset.Position(pos), msg);
 }
 
-internal static void errorf(this ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorfᴍ(ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     p.error(pos, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
-internal static void declare(this ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) {
+internal static void declareᴍ(ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) {
     ref var scope = ref Ꮡscope.DerefOrNull();
     ref var altScope = ref ᏑaltScope.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
@@ -195,3 +195,11 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
 }
 
 } // end ast_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class astᴛpkgBuilder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref pkgBuilder p, token.Pos pos, @string msg) => ast_package.errorᴍ(ref p, pos, msg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) => ast_package.errorfᴍ(ref p, pos, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declare(this ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) => ast_package.declareᴍ(ref p, Ꮡscope, ᏑaltScope, Ꮡobj);
+}
+// </GlyphForwarders>

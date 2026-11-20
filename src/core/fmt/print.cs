@@ -123,21 +123,21 @@ public static @string FormatString(State state, rune verb) {
 // Use simple []byte instead of bytes.Buffer to avoid large dependency.
 partial struct buffer /*[]byte*/;
 
-} partial class fmtᴛbuffer {
+} partial class fmt_package {
 
-internal static void write(this ref buffer b, slice<byte> p) {
+internal static void writeᴍ(ref buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
 }
 
-internal static void writeString(this ref buffer b, sstring s) {
+internal static void writeStringᴍ(ref buffer b, sstring s) {
     b = append(b, s.ꓸꓸꓸ);
 }
 
-internal static void writeByte(this ref buffer b, byte c) {
+internal static void writeByteᴍ(ref buffer b, byte c) {
     b = append(b, c);
 }
 
-internal static void writeRune(this ref buffer b, rune r) {
+internal static void writeRuneᴍ(ref buffer b, rune r) {
     b = utf8.AppendRune(b, r);
 }
 
@@ -181,10 +181,10 @@ internal static ж<pp> newPrinter() {
     return p;
 }
 
-} partial class fmtᴛpp {
+} partial class fmt_package {
 
 // free saves used pp structs in ppFree; avoids an allocation per invocation.
-internal static void free(this ж<pp> Ꮡp) {
+internal static void freeᴍ(ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Proper usage of a sync.Pool requires each entry to have approximately
@@ -209,11 +209,11 @@ internal static void free(this ж<pp> Ꮡp) {
     ᏑppFree.Put(Ꮡp.OrTypedNil());
 }
 
-internal static (nint wid, bool ok) Width(this ref pp p) { return (p.fmt.wid, p.fmt.widPresent); }
+internal static (nint wid, bool ok) Widthᴍ(ref pp p) { return (p.fmt.wid, p.fmt.widPresent); }
 
-internal static (nint prec, bool ok) Precision(this ref pp p) { return (p.fmt.prec, p.fmt.precPresent); }
+internal static (nint prec, bool ok) Precisionᴍ(ref pp p) { return (p.fmt.prec, p.fmt.precPresent); }
 
-internal static bool Flag(this ref pp p, nint b) {
+internal static bool Flagᴍ(ref pp p, nint b) {
     switch (b) {
     case '-': {
         return p.fmt.minus;
@@ -235,14 +235,14 @@ internal static bool Flag(this ref pp p, nint b) {
 
 // Write implements [io.Writer] so we can call [Fprintf] on a pp (through [State]), for
 // recursive use in custom verbs.
-internal static (nint ret, error err) Write(this ref pp p, slice<byte> b) {
+internal static (nint ret, error err) Writeᴍ(ref pp p, slice<byte> b) {
     p.buf.write(b);
     return (len(b), default);
 }
 
 // WriteString implements [io.StringWriter] so that we can call [io.WriteString]
 // on a pp (through state), for efficiency.
-internal static (nint ret, error err) WriteString(this ref pp p, @string s) {
+internal static (nint ret, error err) WriteStringᴍ(ref pp p, @string s) {
     p.buf.writeString(s);
     return (len(s), default);
 }
@@ -437,9 +437,9 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
     return (num, isnum, newi);
 }
 
-} partial class fmtᴛpp {
+} partial class fmt_package {
 
-internal static void unknownType(this ref pp p, reflect.Value v) {
+internal static void unknownTypeᴍ(ref pp p, reflect.Value v) {
     if (!v.IsValid()) {
         p.buf.writeString(nilAngleString);
         return;
@@ -449,7 +449,7 @@ internal static void unknownType(this ref pp p, reflect.Value v) {
     p.buf.writeByte((byte)'?');
 }
 
-internal static void badVerb(this ж<pp> Ꮡp, rune verb) {
+internal static void badVerbᴍ(ж<pp> Ꮡp, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.erroring = true;
@@ -477,7 +477,7 @@ internal static void badVerb(this ж<pp> Ꮡp, rune verb) {
     p.erroring = false;
 }
 
-internal static void fmtBool(this ж<pp> Ꮡp, bool v, rune verb) {
+internal static void fmtBoolᴍ(ж<pp> Ꮡp, bool v, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -493,7 +493,7 @@ internal static void fmtBool(this ж<pp> Ꮡp, bool v, rune verb) {
 
 // fmt0x64 formats a uint64 in hexadecimal and prefixes it with 0x or
 // not, as requested, by temporarily setting the sharp flag.
-internal static void fmt0x64(this ref pp p, uint64 v, bool leading0x) {
+internal static void fmt0x64ᴍ(ref pp p, uint64 v, bool leading0x) {
     var sharp = p.fmt.sharp;
     p.fmt.sharp = leading0x;
     p.fmt.fmtInteger(v, 16, unsigned, 'v', ldigits);
@@ -501,7 +501,7 @@ internal static void fmt0x64(this ref pp p, uint64 v, bool leading0x) {
 }
 
 // fmtInteger formats a signed or unsigned integer.
-internal static void fmtInteger(this ж<pp> Ꮡp, uint64 v, bool isSigned, rune verb) {
+internal static void fmtIntegerᴍ(ж<pp> Ꮡp, uint64 v, bool isSigned, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -553,7 +553,7 @@ internal static void fmtInteger(this ж<pp> Ꮡp, uint64 v, bool isSigned, rune 
 
 // fmtFloat formats a float. The default precision for each verb
 // is specified as last argument in the call to fmt_float.
-internal static void fmtFloat(this ж<pp> Ꮡp, float64 v, nint size, rune verb) {
+internal static void fmtFloatᴍ(ж<pp> Ꮡp, float64 v, nint size, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -582,7 +582,7 @@ internal static void fmtFloat(this ж<pp> Ꮡp, float64 v, nint size, rune verb)
 // fmtComplex formats a complex number v with
 // r = real(v) and j = imag(v) as (r+ji) using
 // fmtFloat for r and j formatting.
-internal static void fmtComplex(this ж<pp> Ꮡp, complex128 v, nint size, rune verb) {
+internal static void fmtComplexᴍ(ж<pp> Ꮡp, complex128 v, nint size, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Make sure any unsupported verbs are found before the
@@ -605,7 +605,7 @@ internal static void fmtComplex(this ж<pp> Ꮡp, complex128 v, nint size, rune 
     }}
 }
 
-internal static void fmtString(this ж<pp> Ꮡp, @string v, rune verb) {
+internal static void fmtStringᴍ(ж<pp> Ꮡp, @string v, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -639,7 +639,7 @@ internal static void fmtString(this ж<pp> Ꮡp, @string v, rune verb) {
     }}
 }
 
-internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstring typeString) {
+internal static void fmtBytesᴍ(ж<pp> Ꮡp, slice<byte> v, rune verb, sstring typeString) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -692,7 +692,7 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
     }}
 }
 
-internal static void fmtPointer(this ж<pp> Ꮡp, reflect.Value value, rune verb) {
+internal static void fmtPointerᴍ(ж<pp> Ꮡp, reflect.Value value, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     uintptr u = default;
@@ -745,7 +745,7 @@ internal static void fmtPointer(this ж<pp> Ꮡp, reflect.Value value, rune verb
 internal static ref readonly @string methodˢ => ref methodˢᵇ;
 private static readonly @string methodˢᵇ = " method: "u8;
 
-internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string method) {
+internal static void catchPanicᴍ(ж<pp> Ꮡp, any arg, rune verb, @string method) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -797,7 +797,7 @@ private static readonly @string errorˢᵇ = "Error"u8;
 internal static ref readonly @string stringˢ => ref stringˢᵇ;
 private static readonly @string stringˢᵇ = "String"u8;
 
-internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
+internal static bool /*handled*/ handleMethodsᴍ(ж<pp> Ꮡp, rune verb) {
     bool handled = default;
     GoFrame ᒐ = default;
     try {
@@ -875,7 +875,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
 internal static ref readonly @string byteˢ => ref byteˢᵇ;
 private static readonly @string byteˢᵇ = "[]byte"u8;
 
-internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) {
+internal static void printArgᴍ(ж<pp> Ꮡp, any arg, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.arg = arg;
@@ -1006,7 +1006,7 @@ internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) {
 
 // printValue is similar to printArg but starts with a reflect value, not an interface{} value.
 // It does not handle 'p' and 'T' verbs because these should have been already handled by printArg.
-internal static void printValue(this ж<pp> Ꮡp, reflect.Value value, rune verb, nint depth) {
+internal static void printValueᴍ(ж<pp> Ꮡp, reflect.Value value, rune verb, nint depth) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Handle values with special methods if not already handled by printArg (depth == 0).
@@ -1267,12 +1267,12 @@ internal static (nint index, nint wid, bool ok) parseArgNumber(sstring format) {
     return (0, 1, false);
 }
 
-} partial class fmtᴛpp {
+} partial class fmt_package {
 
 // argNumber returns the next argument to evaluate, which is either the value of the passed-in
 // argNum or the value of the bracketed integer that begins format[i:]. It also returns
 // the new value of i, that is, the index of the next byte of the format to process.
-internal static (nint newArgNum, nint newi, bool found) argNumber(this ref pp p, nint argNum, sstring format, nint i, nint numArgs) {
+internal static (nint newArgNum, nint newi, bool found) argNumberᴍ(ref pp p, nint argNum, sstring format, nint i, nint numArgs) {
     if (len(format) <= i || format[i] != '[') {
         return (argNum, i, false);
     }
@@ -1285,19 +1285,19 @@ internal static (nint newArgNum, nint newi, bool found) argNumber(this ref pp p,
     return (argNum, i + wid, ok);
 }
 
-internal static void badArgNum(this ref pp p, rune verb) {
+internal static void badArgNumᴍ(ref pp p, rune verb) {
     p.buf.writeString(percentBangString);
     p.buf.writeRune(verb);
     p.buf.writeString(badIndexString);
 }
 
-internal static void missingArg(this ref pp p, rune verb) {
+internal static void missingArgᴍ(ref pp p, rune verb) {
     p.buf.writeString(percentBangString);
     p.buf.writeRune(verb);
     p.buf.writeString(missingString);
 }
 
-internal static void doPrintf(this ж<pp> Ꮡp, sstring format, slice<any> a) {
+internal static void doPrintfᴍ(ж<pp> Ꮡp, sstring format, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     nint end = len(format);
@@ -1498,7 +1498,7 @@ break_formatLoop:;
     }
 }
 
-internal static void doPrint(this ж<pp> Ꮡp, slice<any> a) {
+internal static void doPrintᴍ(ж<pp> Ꮡp, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var prevString = false;
@@ -1515,7 +1515,7 @@ internal static void doPrint(this ж<pp> Ꮡp, slice<any> a) {
 
 // doPrintln is like doPrint but always adds a space between arguments
 // and a newline after the last argument.
-internal static void doPrintln(this ж<pp> Ꮡp, slice<any> a) {
+internal static void doPrintlnᴍ(ж<pp> Ꮡp, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     foreach (var (argNum, arg) in range(a)) {
@@ -1528,3 +1528,40 @@ internal static void doPrintln(this ж<pp> Ꮡp, slice<any> a) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fmtᴛbuffer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ref buffer b, slice<byte> p) => fmt_package.writeᴍ(ref b, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeString(this ref buffer b, sstring s) => fmt_package.writeStringᴍ(ref b, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeByte(this ref buffer b, byte c) => fmt_package.writeByteᴍ(ref b, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeRune(this ref buffer b, rune r) => fmt_package.writeRuneᴍ(ref b, r);
+}
+partial class fmtᴛpp {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ж<pp> Ꮡp) => fmt_package.freeᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint wid, bool ok) Width(this ref pp p) => fmt_package.Widthᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint prec, bool ok) Precision(this ref pp p) => fmt_package.Precisionᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Flag(this ref pp p, nint b) => fmt_package.Flagᴍ(ref p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint ret, error err) Write(this ref pp p, slice<byte> b) => fmt_package.Writeᴍ(ref p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint ret, error err) WriteString(this ref pp p, @string s) => fmt_package.WriteStringᴍ(ref p, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unknownType(this ref pp p, reflect.Value v) => fmt_package.unknownTypeᴍ(ref p, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void badVerb(this ж<pp> Ꮡp, rune verb) => fmt_package.badVerbᴍ(Ꮡp, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmtBool(this ж<pp> Ꮡp, bool v, rune verb) => fmt_package.fmtBoolᴍ(Ꮡp, v, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmt0x64(this ref pp p, uint64 v, bool leading0x) => fmt_package.fmt0x64ᴍ(ref p, v, leading0x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmtInteger(this ж<pp> Ꮡp, uint64 v, bool isSigned, rune verb) => fmt_package.fmtIntegerᴍ(Ꮡp, v, isSigned, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmtFloat(this ж<pp> Ꮡp, float64 v, nint size, rune verb) => fmt_package.fmtFloatᴍ(Ꮡp, v, size, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmtComplex(this ж<pp> Ꮡp, complex128 v, nint size, rune verb) => fmt_package.fmtComplexᴍ(Ꮡp, v, size, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmtString(this ж<pp> Ꮡp, @string v, rune verb) => fmt_package.fmtStringᴍ(Ꮡp, v, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstring typeString) => fmt_package.fmtBytesᴍ(Ꮡp, v, verb, typeString);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmtPointer(this ж<pp> Ꮡp, reflect.Value value, rune verb) => fmt_package.fmtPointerᴍ(Ꮡp, value, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string method) => fmt_package.catchPanicᴍ(Ꮡp, arg, verb, method);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) => fmt_package.handleMethodsᴍ(Ꮡp, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) => fmt_package.printArgᴍ(Ꮡp, arg, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void printValue(this ж<pp> Ꮡp, reflect.Value value, rune verb, nint depth) => fmt_package.printValueᴍ(Ꮡp, value, verb, depth);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint newArgNum, nint newi, bool found) argNumber(this ref pp p, nint argNum, sstring format, nint i, nint numArgs) => fmt_package.argNumberᴍ(ref p, argNum, format, i, numArgs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void badArgNum(this ref pp p, rune verb) => fmt_package.badArgNumᴍ(ref p, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void missingArg(this ref pp p, rune verb) => fmt_package.missingArgᴍ(ref p, verb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void doPrintf(this ж<pp> Ꮡp, sstring format, slice<any> a) => fmt_package.doPrintfᴍ(Ꮡp, format, a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void doPrint(this ж<pp> Ꮡp, slice<any> a) => fmt_package.doPrintᴍ(Ꮡp, a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void doPrintln(this ж<pp> Ꮡp, slice<any> a) => fmt_package.doPrintlnᴍ(Ꮡp, a);
+}
+// </GlyphForwarders>

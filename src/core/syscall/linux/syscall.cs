@@ -81,31 +81,31 @@ public static (ж<byte>, error) BytePtrFromString(@string s) {
 internal static readonly ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(uintptr));
 internal static ref uintptr _zero => ref ((StaticBox<uintptr>)Ꮡ_zero).ValueSlot;
 
-} partial class syscallᴛTimespec {
+} partial class syscall_package {
 
 // Unix returns the time stored in ts as seconds plus nanoseconds.
-public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) {
+internal static (int64 sec, int64 nsec) Unixᴍ(ref Timespec ts) {
     return ((int64)ts.Sec, (int64)ts.Nsec);
 }
 
-} partial class syscallᴛTimeval {
+} partial class syscall_package {
 
 // Unix returns the time stored in tv as seconds plus nanoseconds.
-public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) {
+internal static (int64 sec, int64 nsec) Unixᴍ(ref Timeval tv) {
     return ((int64)tv.Sec, (int64)tv.Usec * 1000);
 }
 
-} partial class syscallᴛTimespec {
+} partial class syscall_package {
 
 // Nano returns the time stored in ts as nanoseconds.
-public static int64 Nano(this ref Timespec ts) {
+internal static int64 Nanoᴍ(ref Timespec ts) {
     return (int64)ts.Sec * 1000000000 + (int64)ts.Nsec;
 }
 
-} partial class syscallᴛTimeval {
+} partial class syscall_package {
 
 // Nano returns the time stored in tv as nanoseconds.
-public static int64 Nano(this ref Timeval tv) {
+internal static int64 Nanoᴍ(ref Timeval tv) {
     return (int64)tv.Sec * 1000000000 + (int64)tv.Usec * 1000;
 }
 
@@ -124,3 +124,14 @@ internal static partial void runtimeUnsetenv(@string k);
 internal static partial void runtimeClearenv(map<@string, nint> env);
 
 } // end syscall_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class syscallᴛTimespec {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) => syscall_package.Unixᴍ(ref ts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Nano(this ref Timespec ts) => syscall_package.Nanoᴍ(ref ts);
+}
+partial class syscallᴛTimeval {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) => syscall_package.Unixᴍ(ref tv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Nano(this ref Timeval tv) => syscall_package.Nanoᴍ(ref tv);
+}
+// </GlyphForwarders>

@@ -25,13 +25,13 @@ partial struct Zipf {
     internal float64 hx0minusHxm;
 }
 
-} partial class randᴛZipf {
+} partial class rand_package {
 
-internal static float64 h(this ref Zipf z, float64 x) {
+internal static float64 hᴍ(ref Zipf z, float64 x) {
     return math.Exp(z.oneminusQ * math.Log(z.v + x)) * z.oneminusQinv;
 }
 
-internal static float64 hinv(this ref Zipf z, float64 x) {
+internal static float64 hinvᴍ(ref Zipf z, float64 x) {
     return math.Exp(z.oneminusQinv * math.Log(z.oneminusQ * x)) - z.v;
 }
 
@@ -60,11 +60,11 @@ public static ж<Zipf> NewZipf(ж<Rand> Ꮡr, float64 s, float64 v, uint64 imax)
     return z;
 }
 
-} partial class randᴛZipf {
+} partial class rand_package {
 
 // Uint64 returns a value drawn from the [Zipf] distribution described
 // by the [Zipf] object.
-public static uint64 Uint64(this ж<Zipf> Ꮡz) {
+internal static uint64 Uint64ᴍ(ж<Zipf> Ꮡz) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (Ꮡz == nil) {
@@ -88,3 +88,11 @@ public static uint64 Uint64(this ж<Zipf> Ꮡz) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class randᴛZipf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static float64 h(this ref Zipf z, float64 x) => rand_package.hᴍ(ref z, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static float64 hinv(this ref Zipf z, float64 x) => rand_package.hinvᴍ(ref z, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this ж<Zipf> Ꮡz) => rand_package.Uint64ᴍ(Ꮡz);
+}
+// </GlyphForwarders>

@@ -78,13 +78,13 @@ partial struct gcCPULimiterState {
     internal int32 nprocs;
 }
 
-} partial class runtimeᴛgcCPULimiterState {
+} partial class runtime_package {
 
 // limiting returns true if the CPU limiter is currently enabled, meaning the Go GC
 // should take action to limit CPU utilization.
 //
 // It is safe to call concurrently with other operations.
-internal static bool limiting(this ж<gcCPULimiterState> Ꮡl) {
+internal static bool limitingᴍ(ж<gcCPULimiterState> Ꮡl) {
     return Ꮡl.Ꮡenabled.Load();
 }
 
@@ -100,7 +100,7 @@ private static readonly @string transitioningGcToTheSameˢᵇ = "transitioning G
 // updating the limiter. Release ownership by calling finishGCTransition.
 //
 // It is safe to call concurrently with other operations.
-internal static void startGCTransition(this ж<gcCPULimiterState> Ꮡl, bool enableGC, int64 now) {
+internal static void startGCTransitionᴍ(ж<gcCPULimiterState> Ꮡl, bool enableGC, int64 now) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.tryLock()) {
@@ -128,7 +128,7 @@ private static readonly @string finishGCTransitionCalledˢᵇ = "finishGCTransit
 // finishGCTransition notifies the limiter that the GC transition is complete
 // and releases ownership of it. It also accumulates STW time in the bucket.
 // now must be the timestamp from the end of the STW pause.
-internal static void finishGCTransition(this ж<gcCPULimiterState> Ꮡl, int64 now) {
+internal static void finishGCTransitionᴍ(ж<gcCPULimiterState> Ꮡl, int64 now) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!l.transitioning) {
@@ -152,23 +152,23 @@ internal static void finishGCTransition(this ж<gcCPULimiterState> Ꮡl, int64 n
 // we can go before updating the limiter.
 internal static UntypedFloat gcCPULimiterUpdatePeriod => 10e6; // 10ms
 
-} partial class runtimeᴛgcCPULimiterState {
+} partial class runtime_package {
 
 // needUpdate returns true if the limiter's maximum update period has been
 // exceeded, and so would benefit from an update.
-internal static bool needUpdate(this ж<gcCPULimiterState> Ꮡl, int64 now) {
+internal static bool needUpdateᴍ(ж<gcCPULimiterState> Ꮡl, int64 now) {
     return now - Ꮡl.ᏑlastUpdate.Load() > (int64)gcCPULimiterUpdatePeriod;
 }
 
 // addAssistTime notifies the limiter of additional assist time. It will be
 // included in the next update.
-internal static void addAssistTime(this ж<gcCPULimiterState> Ꮡl, int64 t) {
+internal static void addAssistTimeᴍ(ж<gcCPULimiterState> Ꮡl, int64 t) {
     Ꮡl.ᏑassistTimePool.Add(t);
 }
 
 // addIdleTime notifies the limiter of additional time a P spent on the idle list. It will be
 // subtracted from the total CPU time in the next update.
-internal static void addIdleTime(this ж<gcCPULimiterState> Ꮡl, int64 t) {
+internal static void addIdleTimeᴍ(ж<gcCPULimiterState> Ꮡl, int64 t) {
     Ꮡl.ᏑidleTimePool.Add(t);
 }
 
@@ -180,7 +180,7 @@ private static readonly @string updateDuringTransitionˢᵇ = "update during tra
 // current monotonic time in nanoseconds.
 //
 // This is safe to call concurrently with other operations, except *GCTransition.
-internal static void update(this ж<gcCPULimiterState> Ꮡl, int64 now) {
+internal static void updateᴍ(ж<gcCPULimiterState> Ꮡl, int64 now) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.tryLock()) {
@@ -201,7 +201,7 @@ internal static ref readonly @string invalidLimiterEventTypeˢ => ref invalidLim
 private static readonly @string invalidLimiterEventTypeˢᵇ = "invalid limiter event type found"u8;
 
 // updateLocked is the implementation of update. l.lock must be held.
-internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) {
+internal static void updateLockedᴍ(ж<gcCPULimiterState> Ꮡl, int64 now) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     var lastUpdate = Ꮡl.ᏑlastUpdate.Load();
@@ -297,7 +297,7 @@ internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) {
 //
 // This is an internal function that deals just with the bucket. Prefer update.
 // l.lock must be held.
-internal static void accumulate(this ж<gcCPULimiterState> Ꮡl, int64 mutatorTime, int64 gcTime) {
+internal static void accumulateᴍ(ж<gcCPULimiterState> Ꮡl, int64 mutatorTime, int64 gcTime) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     var headroom = l.bucket.capacity - l.bucket.fill;
@@ -335,7 +335,7 @@ internal static void accumulate(this ж<gcCPULimiterState> Ꮡl, int64 mutatorTi
 }
 
 // tryLock attempts to lock l. Returns true on success.
-internal static bool tryLock(this ж<gcCPULimiterState> Ꮡl) {
+internal static bool tryLockᴍ(ж<gcCPULimiterState> Ꮡl) {
     return Ꮡl.Ꮡlock.CompareAndSwap(0, 1);
 }
 
@@ -344,7 +344,7 @@ internal static ref readonly @string doubleUnlockˢ => ref doubleUnlockˢᵇ;
 private static readonly @string doubleUnlockˢᵇ = "double unlock"u8;
 
 // unlock releases the lock on l. Must be called if tryLock returns true.
-internal static void unlock(this ж<gcCPULimiterState> Ꮡl) {
+internal static void unlockᴍ(ж<gcCPULimiterState> Ꮡl) {
     var old = Ꮡl.Ꮡlock.Swap(0);
     if (old != 1) {
         @throw(doubleUnlockˢ);
@@ -356,7 +356,7 @@ internal static void unlock(this ж<gcCPULimiterState> Ꮡl) {
 // capacityPerProc is the limiter's bucket capacity for each P in GOMAXPROCS.
 internal static UntypedFloat capacityPerProc => 1e9; // 1 second in nanoseconds
 
-} partial class runtimeᴛgcCPULimiterState {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string failedToAcquireLockToˢ2 => ref failedToAcquireLockToˢ2ᵇ;
@@ -366,7 +366,7 @@ private static readonly @string failedToAcquireLockToˢ2ᵇ = "failed to acquire
 // while the GC is enabled.
 //
 // It is safe to call concurrently with other operations.
-internal static void resetCapacity(this ж<gcCPULimiterState> Ꮡl, int64 now, int32 nprocs) {
+internal static void resetCapacityᴍ(ж<gcCPULimiterState> Ꮡl, int64 now, int32 nprocs) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.tryLock()) {
@@ -420,13 +420,13 @@ internal static limiterEventStamp makeLimiterEventStamp(limiterEventType typ, in
     return (limiterEventStamp)((uint64)typ << (int)(64 - limiterEventBits) | ((uint64)now & ~limiterEventTypeMask));
 }
 
-} partial class runtimeᴛlimiterEventStamp {
+} partial class runtime_package {
 
 // duration computes the difference between now and the start time stored in the stamp.
 //
 // Returns 0 if the difference is negative, which may happen if now is stale or if the
 // before and after timestamps cross a 2^(64-limiterEventBits) boundary.
-internal static int64 duration(this limiterEventStamp s, int64 now) {
+internal static int64 durationᴍ(limiterEventStamp s, int64 now) {
     // The top limiterEventBits bits of the timestamp are derived from the current time
     // when computing a duration.
     var start = (int64)(((uint64)now & limiterEventTypeMask) | ((uint64)s & ~limiterEventTypeMask));
@@ -437,7 +437,7 @@ internal static int64 duration(this limiterEventStamp s, int64 now) {
 }
 
 // type extracts the event type from the stamp.
-internal static limiterEventType typ(this limiterEventStamp s) {
+internal static limiterEventType typᴍ(limiterEventStamp s) {
     return (limiterEventType)(uint8)((s >> (int)(64 - limiterEventBits)));
 }
 
@@ -448,7 +448,7 @@ partial struct limiterEvent {
     internal atomic.Uint64 stamp; // Stores a limiterEventStamp.
 }
 
-} partial class runtimeᴛlimiterEvent {
+} partial class runtime_package {
 
 // start begins tracking a new limiter event of the current type. If an event
 // is already in flight, then a new event cannot begin because the current time is
@@ -460,7 +460,7 @@ partial struct limiterEvent {
 // scheduled away during it can mean that whatever we're measuring isn't a reflection
 // of "on-CPU" time. The OS could deschedule us at any time, but we want to maintain as
 // close of an approximation as we can.
-internal static bool start(this ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) {
+internal static bool startᴍ(ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) {
     if (((limiterEventStamp)Ꮡe.Ꮡstamp.Load()).typ() != limiterEventNone) {
         return false;
     }
@@ -473,7 +473,7 @@ internal static bool start(this ж<limiterEvent> Ꮡe, limiterEventType typ, int
 //
 // Returns the type of the in-flight event, as well as how long it's currently been
 // executing for. Returns limiterEventNone if no event is active.
-internal static (limiterEventType typ, int64 duration) consume(this ж<limiterEvent> Ꮡe, int64 now) {
+internal static (limiterEventType typ, int64 duration) consumeᴍ(ж<limiterEvent> Ꮡe, int64 now) {
     limiterEventType typ = default;
     int64 duration = default;
 
@@ -509,7 +509,7 @@ private static readonly @string limiterEventStopInvalidˢᵇ = "limiterEvent.sto
 // stop stops the active limiter event. Throws if the
 //
 // The caller must be non-preemptible across the event. See start as to why.
-internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) {
+internal static void stopᴍ(ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) {
     limiterEventStamp stamp = default;
     for (;;) {
         stamp = (limiterEventStamp)Ꮡe.Ꮡstamp.Load();
@@ -553,3 +553,29 @@ internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int6
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛgcCPULimiterState {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool limiting(this ж<gcCPULimiterState> Ꮡl) => runtime_package.limitingᴍ(Ꮡl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startGCTransition(this ж<gcCPULimiterState> Ꮡl, bool enableGC, int64 now) => runtime_package.startGCTransitionᴍ(Ꮡl, enableGC, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void finishGCTransition(this ж<gcCPULimiterState> Ꮡl, int64 now) => runtime_package.finishGCTransitionᴍ(Ꮡl, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool needUpdate(this ж<gcCPULimiterState> Ꮡl, int64 now) => runtime_package.needUpdateᴍ(Ꮡl, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addAssistTime(this ж<gcCPULimiterState> Ꮡl, int64 t) => runtime_package.addAssistTimeᴍ(Ꮡl, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addIdleTime(this ж<gcCPULimiterState> Ꮡl, int64 t) => runtime_package.addIdleTimeᴍ(Ꮡl, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ж<gcCPULimiterState> Ꮡl, int64 now) => runtime_package.updateᴍ(Ꮡl, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) => runtime_package.updateLockedᴍ(Ꮡl, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void accumulate(this ж<gcCPULimiterState> Ꮡl, int64 mutatorTime, int64 gcTime) => runtime_package.accumulateᴍ(Ꮡl, mutatorTime, gcTime);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tryLock(this ж<gcCPULimiterState> Ꮡl) => runtime_package.tryLockᴍ(Ꮡl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unlock(this ж<gcCPULimiterState> Ꮡl) => runtime_package.unlockᴍ(Ꮡl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resetCapacity(this ж<gcCPULimiterState> Ꮡl, int64 now, int32 nprocs) => runtime_package.resetCapacityᴍ(Ꮡl, now, nprocs);
+}
+partial class runtimeᴛlimiterEventStamp {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 duration(this limiterEventStamp s, int64 now) => runtime_package.durationᴍ(s, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static limiterEventType typ(this limiterEventStamp s) => runtime_package.typᴍ(s);
+}
+partial class runtimeᴛlimiterEvent {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool start(this ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) => runtime_package.startᴍ(Ꮡe, typ, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (limiterEventType typ, int64 duration) consume(this ж<limiterEvent> Ꮡe, int64 now) => runtime_package.consumeᴍ(Ꮡe, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) => runtime_package.stopᴍ(Ꮡe, typ, now);
+}
+// </GlyphForwarders>

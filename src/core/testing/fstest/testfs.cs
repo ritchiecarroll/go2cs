@@ -115,16 +115,16 @@ partial struct fsTester {
     internal slice<@string> files;
 }
 
-} partial class fstestᴛfsTester {
+} partial class fstest_package {
 
 // errorf adds an error to the list of errors.
-internal static void errorf(this ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorfᴍ(ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     t.errors = append(t.errors, fmt.Errorf(format, args.ꓸꓸꓸ));
 }
 
-internal static fs.ReadDirFile openDir(this ref fsTester t, @string dir) {
+internal static fs.ReadDirFile openDirᴍ(ref fsTester t, @string dir) {
     var (f, err) = t.fsys.Open(dir);
     if (err != nil) {
         t.errorf("%s: Open: %w", dir, err);
@@ -151,7 +151,7 @@ private static readonly @string firstOpenReadDir1VsFsˢᵇ = "first Open+ReadDir
 
 // checkDir checks the directory dir, which is expected to exist
 // (it is either the root or was found in a directory listing with IsDir true).
-internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
+internal static void checkDirᴍ(ж<fsTester> Ꮡt, @string dir) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -337,10 +337,10 @@ internal static @string formatInfo(fs.FileInfo info) {
     return fmt.Sprintf("%s IsDir=%v Mode=%v Size=%d ModTime=%v"u8, info.Name(), info.IsDir(), info.Mode(), info.Size(), info.ModTime());
 }
 
-} partial class fstestᴛfsTester {
+} partial class fstest_package {
 
 // checkGlob checks that various glob patterns work if the file system implements GlobFS.
-internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) {
+internal static void checkGlobᴍ(ref fsTester t, @string dir, slice<fs.DirEntry> list) {
     var patternᴷ = new stackAppend<rune>();
     var wantᴷ = new stackAppend<@string>();
     var problemsᴷ = new stackAppend<@string>();
@@ -457,7 +457,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
 
 // checkStat checks that a direct stat of path matches entry,
 // which was found in the parent's directory listing.
-internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry entry) {
+internal static void checkStatᴍ(ref fsTester t, @string path, fs.DirEntry entry) {
     var (@file, err) = t.fsys.Open(path);
     if (err != nil) {
         t.errorf("%s: Open: %w", path, err);
@@ -543,7 +543,7 @@ internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry en
 
 // checkDirList checks that two directory lists contain the same files and file info.
 // The order of the lists need not match.
-internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
+internal static void checkDirListᴍ(ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
     ref var t = ref Ꮡt.DerefOrNull();
     var diffsᴷ = new stackAppend<@string>();
 
@@ -605,7 +605,7 @@ internal static ref readonly @string readAllVsFsReadFileˢ => ref readAllVsFsRea
 private static readonly @string readAllVsFsReadFileˢᵇ = "ReadAll vs fs.ReadFile"u8;
 
 // checkFile checks that basic file reading works correctly.
-internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
+internal static void checkFileᴍ(ж<fsTester> Ꮡt, @string @file) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -689,7 +689,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
     finally { ᒐ.Run(); }
 }
 
-internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
+internal static void checkFileReadᴍ(ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
     if (((sstring)data1) != ((sstring)data2)) {
         t.errorf("%s: %s: different data returned\n\t%q\n\t%q", @file, desc, data1, data2);
         return;
@@ -701,7 +701,7 @@ internal static ref readonly @string openˢ => ref openˢᵇ;
 private static readonly @string openˢᵇ = "Open"u8;
 
 // checkOpen validates file opening behavior by attempting to open and then close the given file path.
-internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) {
+internal static void checkOpenᴍ(ж<fsTester> Ꮡt, @string @file) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.checkBadPath(@file, openˢ, (@string fileΔ1) => {
@@ -714,7 +714,7 @@ internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) {
 }
 
 // checkBadPath checks that various invalid forms of file's name cannot be opened using open.
-internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
+internal static void checkBadPathᴍ(ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
     var badᴷ = new stackAppend<@string>();
 
     var bad = slice<@string>([
@@ -751,3 +751,18 @@ internal static void checkBadPath(this ref fsTester t, @string @file, @string de
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fstestᴛfsTester {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) => fstest_package.errorfᴍ(ref t, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.ReadDirFile openDir(this ref fsTester t, @string dir) => fstest_package.openDirᴍ(ref t, dir);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) => fstest_package.checkDirᴍ(Ꮡt, dir);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) => fstest_package.checkGlobᴍ(ref t, dir, list);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry entry) => fstest_package.checkStatᴍ(ref t, path, entry);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) => fstest_package.checkDirListᴍ(Ꮡt, dir, desc, list1, list2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) => fstest_package.checkFileᴍ(Ꮡt, @file);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) => fstest_package.checkFileReadᴍ(ref t, @file, desc, data1, data2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) => fstest_package.checkOpenᴍ(Ꮡt, @file);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) => fstest_package.checkBadPathᴍ(ref t, @file, desc, open);
+}
+// </GlyphForwarders>

@@ -135,21 +135,21 @@ partial struct name {
     internal ж<byte> bytes;
 }
 
-} partial class reflectliteᴛname {
+} partial class reflectlite_package {
 
-internal static ж<byte> data(this name n, nint off, @string whySafe) {
+internal static ж<byte> dataᴍ(name n, nint off, @string whySafe) {
     return @unsafe.Pointer.To<byte>(add(@unsafe.Pointer.FromPinnedBox(n.bytes), (uintptr)off, whySafe));
 }
 
-internal static bool isExported(this name n) {
+internal static bool isExportedᴍ(name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
-internal static bool hasTag(this name n) {
+internal static bool hasTagᴍ(name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
-internal static bool embedded(this name n) {
+internal static bool embeddedᴍ(name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
@@ -159,7 +159,7 @@ private static readonly @string readVarintˢᵇ = "read varint"u8;
 
 // readVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
-internal static (nint, nint) readVarint(this name n, nint off) {
+internal static (nint, nint) readVarintᴍ(name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
         var x = n.data(off + i, readVarintˢ).Value;
@@ -174,7 +174,7 @@ internal static (nint, nint) readVarint(this name n, nint off) {
 internal static ref readonly @string nonEmptyStringˢ => ref nonEmptyStringˢᵇ;
 private static readonly @string nonEmptyStringˢᵇ = "non-empty string"u8;
 
-internal static @string name(this name n) {
+internal static @string nameᴍ(name n) {
     if (n.bytes == nil) {
         return ""u8;
     }
@@ -182,7 +182,7 @@ internal static @string name(this name n) {
     return @unsafe.String(n.data(1 + i, nonEmptyStringˢ), l);
 }
 
-internal static @string tag(this name n) {
+internal static @string tagᴍ(name n) {
     if (!n.hasTag()) {
         return ""u8;
     }
@@ -236,25 +236,25 @@ internal static partial @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModu
 //go:noescape
 internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off);
 
-} partial class reflectliteᴛrtype {
+} partial class reflectlite_package {
 
-internal static abi.Name nameOff(this rtype t, nameOff off) {
+internal static abi.Name nameOffᴍ(rtype t, nameOff off) {
     return new abi.Name(Bytes: @unsafe.Pointer.To<byte>(resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off)));
 }
 
-internal static ж<abi.Type> typeOff(this rtype t, typeOff off) {
+internal static ж<abi.Type> typeOffᴍ(rtype t, typeOff off) {
     return @unsafe.Pointer.To<abi.Type>(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off));
 }
 
-internal static ж<uncommonType> uncommon(this rtype t) {
+internal static ж<uncommonType> uncommonᴍ(rtype t) {
     return t.Type.Uncommon();
 }
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static ж<abi.Type> common(this rtype t) { return t.Type; }
+internal static ж<abi.Type> commonᴍ(rtype t) { return t.Type; }
 
-internal static slice<abi.Method> exportedMethods(this rtype t) {
+internal static slice<abi.Method> exportedMethodsᴍ(rtype t) {
     var ut = t.uncommon();
     if (ut == nil) {
         return default;
@@ -262,7 +262,7 @@ internal static slice<abi.Method> exportedMethods(this rtype t) {
     return ut.ExportedMethods();
 }
 
-internal static nint NumMethod(this rtype t) {
+internal static nint NumMethodᴍ(rtype t) {
     var tt = t.Type.InterfaceType();
     if (tt != nil) {
         return tt.NumMethod();
@@ -272,7 +272,7 @@ internal static nint NumMethod(this rtype t) {
 
 // go2cs generated this placeholder — func PkgPath is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static @string Name(this rtype t) {
+internal static @string Nameᴍ(rtype t) {
     if (!t.Type.Value.HasName()) {
         return ""u8;
     }
@@ -308,11 +308,11 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     throw panic("reflect: Elem of invalid type " + toRType(t).String());
 }
 
-} partial class reflectliteᴛrtype {
+} partial class reflectlite_package {
 
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static Type In(this rtype t, nint i) {
+internal static Type Inᴍ(rtype t, nint i) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: In of non-func type");
@@ -320,7 +320,7 @@ internal static Type In(this rtype t, nint i) {
     return toType(tt.InSlice()[i]);
 }
 
-internal static Type Key(this rtype t) {
+internal static Type Keyᴍ(rtype t) {
     var tt = t.Type.MapType();
     if (tt == nil) {
         throw panic("reflect: Key of non-map type");
@@ -328,7 +328,7 @@ internal static Type Key(this rtype t) {
     return toType((~tt).Key);
 }
 
-internal static nint Len(this rtype t) {
+internal static nint Lenᴍ(rtype t) {
     var tt = t.Type.ArrayType();
     if (tt == nil) {
         throw panic("reflect: Len of non-array type");
@@ -336,7 +336,7 @@ internal static nint Len(this rtype t) {
     return (nint)(~tt).Len;
 }
 
-internal static nint NumField(this rtype t) {
+internal static nint NumFieldᴍ(rtype t) {
     var tt = t.Type.StructType();
     if (tt == nil) {
         throw panic("reflect: NumField of non-struct type");
@@ -344,7 +344,7 @@ internal static nint NumField(this rtype t) {
     return len(tt.Fields);
 }
 
-internal static nint NumIn(this rtype t) {
+internal static nint NumInᴍ(rtype t) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: NumIn of non-func type");
@@ -352,7 +352,7 @@ internal static nint NumIn(this rtype t) {
     return (nint)tt.InCount;
 }
 
-internal static nint NumOut(this rtype t) {
+internal static nint NumOutᴍ(rtype t) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: NumOut of non-func type");
@@ -360,7 +360,7 @@ internal static nint NumOut(this rtype t) {
     return tt.NumOut();
 }
 
-internal static Type Out(this rtype t, nint i) {
+internal static Type Outᴍ(rtype t, nint i) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: Out of non-func type");
@@ -387,11 +387,11 @@ public static Type TypeOf(any i) {
     return toType(abi.TypeOf(i));
 }
 
-} partial class reflectliteᴛrtype {
+} partial class reflectlite_package {
 
 // go2cs generated this placeholder — func Implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool AssignableTo(this rtype t, Type u) {
+internal static bool AssignableToᴍ(rtype t, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.AssignableTo");
     }
@@ -400,7 +400,7 @@ internal static bool AssignableTo(this rtype t, Type u) {
     return directlyAssignable(uu, tt) || implements(uu, tt);
 }
 
-internal static bool Comparable(this rtype t) {
+internal static bool Comparableᴍ(rtype t) {
     return t.Equal != nil;
 }
 
@@ -462,3 +462,33 @@ internal static Type toType(ж<abi.Type> t) {
 }
 
 } // end reflectlite_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class reflectliteᴛname {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<byte> data(this name n, nint off, @string whySafe) => reflectlite_package.dataᴍ(n, off, whySafe);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isExported(this name n) => reflectlite_package.isExportedᴍ(n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasTag(this name n) => reflectlite_package.hasTagᴍ(n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool embedded(this name n) => reflectlite_package.embeddedᴍ(n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, nint) readVarint(this name n, nint off) => reflectlite_package.readVarintᴍ(n, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string name(this name n) => reflectlite_package.nameᴍ(n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string tag(this name n) => reflectlite_package.tagᴍ(n);
+}
+partial class reflectliteᴛrtype {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static abi.Name nameOff(this rtype t, nameOff off) => reflectlite_package.nameOffᴍ(t, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> typeOff(this rtype t, typeOff off) => reflectlite_package.typeOffᴍ(t, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<uncommonType> uncommon(this rtype t) => reflectlite_package.uncommonᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> common(this rtype t) => reflectlite_package.commonᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<abi.Method> exportedMethods(this rtype t) => reflectlite_package.exportedMethodsᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NumMethod(this rtype t) => reflectlite_package.NumMethodᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this rtype t) => reflectlite_package.Nameᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type In(this rtype t, nint i) => reflectlite_package.Inᴍ(t, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type Key(this rtype t) => reflectlite_package.Keyᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this rtype t) => reflectlite_package.Lenᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NumField(this rtype t) => reflectlite_package.NumFieldᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NumIn(this rtype t) => reflectlite_package.NumInᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NumOut(this rtype t) => reflectlite_package.NumOutᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type Out(this rtype t, nint i) => reflectlite_package.Outᴍ(t, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool AssignableTo(this rtype t, Type u) => reflectlite_package.AssignableToᴍ(t, u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Comparable(this rtype t) => reflectlite_package.Comparableᴍ(t);
+}
+// </GlyphForwarders>

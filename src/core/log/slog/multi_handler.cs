@@ -26,9 +26,9 @@ partial struct MultiHandler {
     internal slice<Handler> multi;
 }
 
-} partial class slogᴛMultiHandler {
+} partial class slog_package {
 
-public static bool Enabled(this ref MultiHandler h, context.Context ctx, Level l) {
+internal static bool Enabledᴍ(ref MultiHandler h, context.Context ctx, Level l) {
     foreach (var i in range(len(h.multi))) {
         if (h.multi[i].Enabled(ctx, l)) {
             return true;
@@ -37,7 +37,7 @@ public static bool Enabled(this ref MultiHandler h, context.Context ctx, Level l
     return false;
 }
 
-public static error Handle(this ref MultiHandler h, context.Context ctx, Record r) {
+internal static error Handleᴍ(ref MultiHandler h, context.Context ctx, Record r) {
     r = r.ΔClone();
     var errsᴷ = new stackAppend<error>();
 
@@ -52,7 +52,7 @@ public static error Handle(this ref MultiHandler h, context.Context ctx, Record 
     return errors.Join(errs.ꓸꓸꓸ);
 }
 
-public static Handler WithAttrs(this ref MultiHandler h, slice<Attr> attrs) {
+internal static Handler WithAttrsᴍ(ref MultiHandler h, slice<Attr> attrs) {
     var handlers = new slice<Handler>(0, len(h.multi));
     foreach (var i in range(len(h.multi))) {
         handlers = append(handlers, h.multi[i].WithAttrs(attrs));
@@ -60,7 +60,7 @@ public static Handler WithAttrs(this ref MultiHandler h, slice<Attr> attrs) {
     return new MultiHandlerжHandler(Ꮡ(new MultiHandler(multi: handlers)));
 }
 
-public static Handler WithGroup(this ref MultiHandler h, @string name) {
+internal static Handler WithGroupᴍ(ref MultiHandler h, @string name) {
     var handlers = new slice<Handler>(0, len(h.multi));
     foreach (var i in range(len(h.multi))) {
         handlers = append(handlers, h.multi[i].WithGroup(name));
@@ -69,3 +69,12 @@ public static Handler WithGroup(this ref MultiHandler h, @string name) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class slogᴛMultiHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Enabled(this ref MultiHandler h, context.Context ctx, Level l) => slog_package.Enabledᴍ(ref h, ctx, l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Handle(this ref MultiHandler h, context.Context ctx, Record r) => slog_package.Handleᴍ(ref h, ctx, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Handler WithAttrs(this ref MultiHandler h, slice<Attr> attrs) => slog_package.WithAttrsᴍ(ref h, attrs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Handler WithGroup(this ref MultiHandler h, @string name) => slog_package.WithGroupᴍ(ref h, name);
+}
+// </GlyphForwarders>

@@ -21,11 +21,11 @@ partial struct Reader {
     internal nint prevRune; // index of previous rune; or < 0
 }
 
-} partial class stringsᴛReader {
+} partial class strings_package {
 
 // Len returns the number of bytes of the unread portion of the
 // string.
-public static nint Len(this ref Reader r) {
+internal static nint Lenᴍ(ref Reader r) {
     if (r.i >= (int64)len(r.s)) {
         return 0;
     }
@@ -36,10 +36,10 @@ public static nint Len(this ref Reader r) {
 // Size is the number of bytes available for reading via [Reader.ReadAt].
 // The returned value is always the same and is not affected by calls
 // to any other method.
-public static int64 Size(this ref Reader r) { return (int64)len(r.s); }
+internal static int64 Sizeᴍ(ref Reader r) { return (int64)len(r.s); }
 
 // Read implements the [io.Reader] interface.
-public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
+internal static (nint n, error err) Readᴍ(ref Reader r, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -57,7 +57,7 @@ internal static ref readonly @string stringsReaderReadAtˢ => ref stringsReaderR
 private static readonly @string stringsReaderReadAtˢᵇ = "strings.Reader.ReadAt: negative offset"u8;
 
 // ReadAt implements the [io.ReaderAt] interface.
-public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) {
+internal static (nint n, error err) ReadAtᴍ(ref Reader r, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
 
@@ -76,7 +76,7 @@ public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64
 }
 
 // ReadByte implements the [io.ByteReader] interface.
-public static (byte, error) ReadByte(this ref Reader r) {
+internal static (byte, error) ReadByteᴍ(ref Reader r) {
     r.prevRune = -1;
     if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -91,7 +91,7 @@ internal static ref readonly @string stringsReaderUnreadByteˢ => ref stringsRea
 private static readonly @string stringsReaderUnreadByteˢᵇ = "strings.Reader.UnreadByte: at beginning of string"u8;
 
 // UnreadByte implements the [io.ByteScanner] interface.
-public static error UnreadByte(this ref Reader r) {
+internal static error UnreadByteᴍ(ref Reader r) {
     if (r.i <= 0) {
         return errors.New(stringsReaderUnreadByteˢ);
     }
@@ -101,7 +101,7 @@ public static error UnreadByte(this ref Reader r) {
 }
 
 // ReadRune implements the [io.RuneReader] interface.
-public static (rune ch, nint size, error err) ReadRune(this ref Reader r) {
+internal static (rune ch, nint size, error err) ReadRuneᴍ(ref Reader r) {
     rune ch = default;
     nint size = default;
     error err = default;
@@ -123,7 +123,7 @@ internal static ref readonly @string stringsReaderUnreadRuneˢ2 => ref stringsRe
 private static readonly @string stringsReaderUnreadRuneˢ2ᵇ = "strings.Reader.UnreadRune: previous operation was not ReadRune"u8;
 
 // UnreadRune implements the [io.RuneScanner] interface.
-public static error UnreadRune(this ref Reader r) {
+internal static error UnreadRuneᴍ(ref Reader r) {
     if (r.i <= 0) {
         return errors.New(stringsReaderUnreadRuneˢ);
     }
@@ -142,7 +142,7 @@ internal static ref readonly @string stringsReaderSeekˢ => ref stringsReaderSee
 private static readonly @string stringsReaderSeekˢᵇ = "strings.Reader.Seek: negative position"u8;
 
 // Seek implements the [io.Seeker] interface.
-public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) {
+internal static (int64, error) Seekᴍ(ref Reader r, int64 offset, nint whence) {
     r.prevRune = -1;
     int64 abs = default;
     switch (whence) {
@@ -169,7 +169,7 @@ public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) 
 }
 
 // WriteTo implements the [io.WriterTo] interface.
-public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
+internal static (int64 n, error err) WriteToᴍ(ref Reader r, io.Writer w) {
     int64 n = default;
     error err = default;
 
@@ -191,7 +191,7 @@ public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
 }
 
 // Reset resets the [Reader] to be reading from s.
-public static void Reset(this ref Reader r, @string s) { r = new Reader(s, 0, -1); }
+internal static void Resetᴍ(ref Reader r, @string s) { r = new Reader(s, 0, -1); }
 
 } partial class strings_package {
 
@@ -200,3 +200,19 @@ public static void Reset(this ref Reader r, @string s) { r = new Reader(s, 0, -1
 public static ж<Reader> NewReader(@string s) { return Ꮡ(new Reader(s, 0, -1)); }
 
 } // end strings_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class stringsᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref Reader r) => strings_package.Lenᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Size(this ref Reader r) => strings_package.Sizeᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader r, slice<byte> b) => strings_package.Readᴍ(ref r, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) => strings_package.ReadAtᴍ(ref r, b, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (byte, error) ReadByte(this ref Reader r) => strings_package.ReadByteᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnreadByte(this ref Reader r) => strings_package.UnreadByteᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (rune ch, nint size, error err) ReadRune(this ref Reader r) => strings_package.ReadRuneᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnreadRune(this ref Reader r) => strings_package.UnreadRuneᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) => strings_package.Seekᴍ(ref r, offset, whence);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) => strings_package.WriteToᴍ(ref r, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Reader r, @string s) => strings_package.Resetᴍ(ref r, s);
+}
+// </GlyphForwarders>

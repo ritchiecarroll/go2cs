@@ -17,9 +17,9 @@ partial struct onceError {
     internal error err;
 }
 
-} partial class ioᴛonceError {
+} partial class io_package {
 
-internal static void Store(this ж<onceError> Ꮡa, error err) {
+internal static void Storeᴍ(ж<onceError> Ꮡa, error err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -35,7 +35,7 @@ internal static void Store(this ж<onceError> Ꮡa, error err) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡa.of(onceError.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
-internal static error Load(this ж<onceError> Ꮡa) {
+internal static error Loadᴍ(ж<onceError> Ꮡa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -65,9 +65,9 @@ partial struct pipe {
     internal onceError werr;
 }
 
-} partial class ioᴛpipe {
+} partial class io_package {
 
-internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
+internal static (nint n, error err) readᴍ(ж<pipe> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var selᴛ1 = p.done;
@@ -93,7 +93,7 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     return default;
 }
 
-internal static error closeRead(this ж<pipe> Ꮡp, error err) {
+internal static error closeReadᴍ(ж<pipe> Ꮡp, error err) {
     if (err == nil) {
         err = ErrClosedPipe;
     }
@@ -104,7 +104,7 @@ internal static error closeRead(this ж<pipe> Ꮡp, error err) {
     return default;
 }
 
-internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
+internal static (nint n, error err) writeᴍ(ж<pipe> Ꮡp, slice<byte> b) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -143,7 +143,7 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
     ᒐdone: return (n, err);
 }
 
-internal static error closeWrite(this ж<pipe> Ꮡp, error err) {
+internal static error closeWriteᴍ(ж<pipe> Ꮡp, error err) {
     if (err == nil) {
         err = EOF;
     }
@@ -155,7 +155,7 @@ internal static error closeWrite(this ж<pipe> Ꮡp, error err) {
 }
 
 // readCloseError is considered internal to the pipe type.
-internal static error readCloseError(this ж<pipe> Ꮡp) {
+internal static error readCloseErrorᴍ(ж<pipe> Ꮡp) {
     var rerr = Ꮡp.Ꮡrerr.Load();
     var werr = Ꮡp.Ꮡwerr.Load(); if (rerr == nil && werr != nil) {
         return werr;
@@ -164,7 +164,7 @@ internal static error readCloseError(this ж<pipe> Ꮡp) {
 }
 
 // writeCloseError is considered internal to the pipe type.
-internal static error writeCloseError(this ж<pipe> Ꮡp) {
+internal static error writeCloseErrorᴍ(ж<pipe> Ꮡp) {
     var werr = Ꮡp.Ꮡwerr.Load();
     var rerr = Ꮡp.Ꮡrerr.Load(); if (werr == nil && rerr != nil) {
         return rerr;
@@ -179,20 +179,20 @@ partial struct PipeReader {
     /*embed*/ internal pipe pipe;
 }
 
-} partial class ioᴛPipeReader {
+} partial class io_package {
 
 // Read implements the standard Read interface:
 // it reads data from the pipe, blocking until a writer
 // arrives or the write end is closed.
 // If the write end is closed with an error, that error is
 // returned as err; otherwise err is EOF.
-public static (nint n, error err) Read(this ж<PipeReader> Ꮡr, slice<byte> data) {
+internal static (nint n, error err) Readᴍ(ж<PipeReader> Ꮡr, slice<byte> data) {
     return Ꮡr.Ꮡpipe.read(data);
 }
 
 // Close closes the reader; subsequent writes to the
 // write half of the pipe will return the error [ErrClosedPipe].
-public static error Close(this ж<PipeReader> Ꮡr) {
+internal static error Closeᴍ(ж<PipeReader> Ꮡr) {
     return Ꮡr.CloseWithError(default);
 }
 
@@ -201,7 +201,7 @@ public static error Close(this ж<PipeReader> Ꮡr) {
 //
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
-public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) {
+internal static error CloseWithErrorᴍ(ж<PipeReader> Ꮡr, error err) {
     return Ꮡr.Ꮡpipe.closeRead(err);
 }
 
@@ -212,20 +212,20 @@ partial struct PipeWriter {
     internal PipeReader r;
 }
 
-} partial class ioᴛPipeWriter {
+} partial class io_package {
 
 // Write implements the standard Write interface:
 // it writes data to the pipe, blocking until one or more readers
 // have consumed all the data or the read end is closed.
 // If the read end is closed with an error, that err is
 // returned as err; otherwise err is [ErrClosedPipe].
-public static (nint n, error err) Write(this ж<PipeWriter> Ꮡw, slice<byte> data) {
+internal static (nint n, error err) Writeᴍ(ж<PipeWriter> Ꮡw, slice<byte> data) {
     return Ꮡw.Ꮡr.Ꮡpipe.write(data);
 }
 
 // Close closes the writer; subsequent reads from the
 // read half of the pipe will return no bytes and EOF.
-public static error Close(this ж<PipeWriter> Ꮡw) {
+internal static error Closeᴍ(ж<PipeWriter> Ꮡw) {
     return Ꮡw.CloseWithError(default);
 }
 
@@ -235,7 +235,7 @@ public static error Close(this ж<PipeWriter> Ꮡw) {
 //
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
-public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) {
+internal static error CloseWithErrorᴍ(ж<PipeWriter> Ꮡw, error err) {
     return Ꮡw.Ꮡr.Ꮡpipe.closeWrite(err);
 }
 
@@ -268,3 +268,28 @@ public static (ж<PipeReader>, ж<PipeWriter>) Pipe() {
 }
 
 } // end io_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class ioᴛonceError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Store(this ж<onceError> Ꮡa, error err) => io_package.Storeᴍ(Ꮡa, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Load(this ж<onceError> Ꮡa) => io_package.Loadᴍ(Ꮡa);
+}
+partial class ioᴛpipe {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) => io_package.readᴍ(Ꮡp, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error closeRead(this ж<pipe> Ꮡp, error err) => io_package.closeReadᴍ(Ꮡp, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) => io_package.writeᴍ(Ꮡp, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error closeWrite(this ж<pipe> Ꮡp, error err) => io_package.closeWriteᴍ(Ꮡp, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readCloseError(this ж<pipe> Ꮡp) => io_package.readCloseErrorᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeCloseError(this ж<pipe> Ꮡp) => io_package.writeCloseErrorᴍ(Ꮡp);
+}
+partial class ioᴛPipeReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ж<PipeReader> Ꮡr, slice<byte> data) => io_package.Readᴍ(Ꮡr, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<PipeReader> Ꮡr) => io_package.Closeᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) => io_package.CloseWithErrorᴍ(Ꮡr, err);
+}
+partial class ioᴛPipeWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<PipeWriter> Ꮡw, slice<byte> data) => io_package.Writeᴍ(Ꮡw, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<PipeWriter> Ꮡw) => io_package.Closeᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) => io_package.CloseWithErrorᴍ(Ꮡw, err);
+}
+// </GlyphForwarders>

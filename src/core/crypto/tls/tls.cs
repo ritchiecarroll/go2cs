@@ -78,19 +78,19 @@ partial struct listener {
     internal ж<Config> config;
 }
 
-} partial class tlsᴛlistener {
+} partial class tls_package {
 
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *listener's method set; see the pointer-only satisfaction record.
-internal static net.Addr Addr(this listener recvᴛ) => recvᴛ.Listener.Addr();
+internal static net.Addr Addrᴍ(listener recvᴛ) => recvᴛ.Listener.Addr();
 
 // Go method set entry for the promoted 'Listener.Close()' - provided ONLY by the embedded
 // interface field in *listener's method set; see the pointer-only satisfaction record.
-internal static error Close(this listener recvᴛ) => recvᴛ.Listener.Close();
+internal static error Closeᴍ(listener recvᴛ) => recvᴛ.Listener.Close();
 
 // Accept waits for and returns the next incoming TLS connection.
 // The returned connection is of type *Conn.
-internal static (net.Conn, error) Accept(this ref listener l) {
+internal static (net.Conn, error) Acceptᴍ(ref listener l) {
     var (c, err) = l.Listener.Accept();
     if (err != nil) {
         return (default, err);
@@ -138,15 +138,15 @@ public static (net.Listener, error) Listen(@string network, @string laddr, ж<Co
 partial struct timeoutError {
 }
 
-} partial class tlsᴛtimeoutError {
+} partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsDialWithDialerTimedˢ => ref tlsDialWithDialerTimedˢᵇ;
 private static readonly @string tlsDialWithDialerTimedˢᵇ = "tls: DialWithDialer timed out"u8;
 
-internal static @string Error(this timeoutError _) { return tlsDialWithDialerTimedˢ; }
-internal static bool Timeout(this timeoutError _) { return true; }
-internal static bool Temporary(this timeoutError _) { return true; }
+internal static @string Errorᴍ(timeoutError _) { return tlsDialWithDialerTimedˢ; }
+internal static bool Timeoutᴍ(timeoutError _) { return true; }
+internal static bool Temporaryᴍ(timeoutError _) { return true; }
 
 } partial class tls_package {
 
@@ -242,7 +242,7 @@ partial struct Dialer {
     public ж<Config> Config;
 }
 
-} partial class tlsᴛDialer {
+} partial class tls_package {
 
 // Dial connects to the given network address and initiates a TLS
 // handshake, returning the resulting TLS connection.
@@ -251,11 +251,11 @@ partial struct Dialer {
 //
 // Dial uses context.Background internally; to specify the context,
 // use [Dialer.DialContext].
-public static (net.Conn, error) Dial(this ref Dialer d, @string network, @string addr) {
+internal static (net.Conn, error) Dialᴍ(ref Dialer d, @string network, @string addr) {
     return d.DialContext(context.Background(), network, addr);
 }
 
-internal static ж<net.Dialer> netDialer(this ref Dialer d) {
+internal static ж<net.Dialer> netDialerᴍ(ref Dialer d) {
     if (d.NetDialer != nil) {
         return d.NetDialer;
     }
@@ -271,7 +271,7 @@ internal static ж<net.Dialer> netDialer(this ref Dialer d) {
 // connection.
 //
 // The returned [Conn], if any, will always be of type *[Conn].
-public static (net.Conn, error) DialContext(this ref Dialer d, context.Context ctx, @string network, @string addr) {
+internal static (net.Conn, error) DialContextᴍ(ref Dialer d, context.Context ctx, @string network, @string addr) {
     var (c, err) = dial(ctx, d.netDialer(), network, addr, d.Config);
     if (err != nil) {
         // Don't return c (a typed nil) in an interface.
@@ -474,3 +474,21 @@ internal static (cryptoꓸPrivateKey, error) parsePrivateKey(slice<byte> der) {
 }
 
 } // end tls_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tlsᴛlistener {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr Addr(this listener recvᴛ) => tls_package.Addrᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this listener recvᴛ) => tls_package.Closeᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn, error) Accept(this ref listener l) => tls_package.Acceptᴍ(ref l);
+}
+partial class tlsᴛtimeoutError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this timeoutError _) => tls_package.Errorᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this timeoutError _) => tls_package.Timeoutᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this timeoutError _) => tls_package.Temporaryᴍ(_);
+}
+partial class tlsᴛDialer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (net.Conn, error) Dial(this ref Dialer d, @string network, @string addr) => tls_package.Dialᴍ(ref d, network, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<net.Dialer> netDialer(this ref Dialer d) => tls_package.netDialerᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (net.Conn, error) DialContext(this ref Dialer d, context.Context ctx, @string network, @string addr) => tls_package.DialContextᴍ(ref d, ctx, network, addr);
+}
+// </GlyphForwarders>

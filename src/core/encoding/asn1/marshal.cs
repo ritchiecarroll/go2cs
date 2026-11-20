@@ -30,13 +30,13 @@ partial interface encoder {
 
 partial struct byteEncoder /*num:byte*/;
 
-} partial class asn1ᴛbyteEncoder {
+} partial class asn1_package {
 
-internal static nint Len(this byteEncoder c) {
+internal static nint Lenᴍ(byteEncoder c) {
     return 1;
 }
 
-internal static void Encode(this byteEncoder c, slice<byte> dst) {
+internal static void Encodeᴍ(byteEncoder c, slice<byte> dst) {
     dst[0] = (byte)c;
 }
 
@@ -44,13 +44,13 @@ internal static void Encode(this byteEncoder c, slice<byte> dst) {
 
 partial struct bytesEncoder /*[]byte*/;
 
-} partial class asn1ᴛbytesEncoder {
+} partial class asn1_package {
 
-internal static nint Len(this bytesEncoder b) {
+internal static nint Lenᴍ(bytesEncoder b) {
     return len(b);
 }
 
-internal static void Encode(this bytesEncoder b, slice<byte> dst) {
+internal static void Encodeᴍ(bytesEncoder b, slice<byte> dst) {
     if (copy(dst, b) != len(b)) {
         throw panic("internal error");
     }
@@ -60,13 +60,13 @@ internal static void Encode(this bytesEncoder b, slice<byte> dst) {
 
 partial struct stringEncoder /*@string*/;
 
-} partial class asn1ᴛstringEncoder {
+} partial class asn1_package {
 
-internal static nint Len(this stringEncoder s) {
+internal static nint Lenᴍ(stringEncoder s) {
     return len(s);
 }
 
-internal static void Encode(this stringEncoder s, slice<byte> dst) {
+internal static void Encodeᴍ(stringEncoder s, slice<byte> dst) {
     if (copy(dst, s) != len(s)) {
         throw panic("internal error");
     }
@@ -76,9 +76,9 @@ internal static void Encode(this stringEncoder s, slice<byte> dst) {
 
 partial struct multiEncoder /*[]encoder*/;
 
-} partial class asn1ᴛmultiEncoder {
+} partial class asn1_package {
 
-internal static nint Len(this multiEncoder m) {
+internal static nint Lenᴍ(multiEncoder m) {
     nint size = default;
     foreach (var (_, e) in range<encoder>(m)) {
         size += e.Len();
@@ -86,7 +86,7 @@ internal static nint Len(this multiEncoder m) {
     return size;
 }
 
-internal static void Encode(this multiEncoder m, slice<byte> dst) {
+internal static void Encodeᴍ(multiEncoder m, slice<byte> dst) {
     nint off = default;
     foreach (var (_, e) in range<encoder>(m)) {
         e.Encode(dst.slice(off));
@@ -98,9 +98,9 @@ internal static void Encode(this multiEncoder m, slice<byte> dst) {
 
 partial struct setEncoder /*[]encoder*/;
 
-} partial class asn1ᴛsetEncoder {
+} partial class asn1_package {
 
-internal static nint Len(this setEncoder s) {
+internal static nint Lenᴍ(setEncoder s) {
     nint size = default;
     foreach (var (_, e) in range<encoder>(s)) {
         size += e.Len();
@@ -108,7 +108,7 @@ internal static nint Len(this setEncoder s) {
     return size;
 }
 
-internal static void Encode(this setEncoder s, slice<byte> dst) {
+internal static void Encodeᴍ(setEncoder s, slice<byte> dst) {
     // Per X690 Section 11.6: The encodings of the component values of a
     // set-of value shall appear in ascending order, the encodings being
     // compared as octet strings with the shorter components being padded
@@ -148,13 +148,13 @@ partial struct taggedEncoder {
     internal encoder body;
 }
 
-} partial class asn1ᴛtaggedEncoder {
+} partial class asn1_package {
 
-internal static nint Len(this ref taggedEncoder t) {
+internal static nint Lenᴍ(ref taggedEncoder t) {
     return t.tag.Len() + t.body.Len();
 }
 
-internal static void Encode(this ref taggedEncoder t, slice<byte> dst) {
+internal static void Encodeᴍ(ref taggedEncoder t, slice<byte> dst) {
     t.tag.Encode(dst);
     t.body.Encode(dst.slice(t.tag.Len()));
 }
@@ -163,9 +163,9 @@ internal static void Encode(this ref taggedEncoder t, slice<byte> dst) {
 
 partial struct int64Encoder /*num:int64*/;
 
-} partial class asn1ᴛint64Encoder {
+} partial class asn1_package {
 
-internal static nint Len(this int64Encoder i) {
+internal static nint Lenᴍ(int64Encoder i) {
     nint n = 1;
 
     while (i > 127) {
@@ -181,7 +181,7 @@ internal static nint Len(this int64Encoder i) {
     return n;
 }
 
-internal static void Encode(this int64Encoder i, slice<byte> dst) {
+internal static void Encodeᴍ(int64Encoder i, slice<byte> dst) {
     nint n = i.Len();
 
     for (nint j = 0; j < n; j++) {
@@ -304,13 +304,13 @@ internal static slice<byte> appendTagAndLength(slice<byte> dst, tagAndLength t) 
 
 partial struct bitStringEncoder /*BitString*/;
 
-} partial class asn1ᴛbitStringEncoder {
+} partial class asn1_package {
 
-internal static nint Len(this bitStringEncoder b) {
+internal static nint Lenᴍ(bitStringEncoder b) {
     return len(b.Bytes) + 1;
 }
 
-internal static void Encode(this bitStringEncoder b, slice<byte> dst) {
+internal static void Encodeᴍ(bitStringEncoder b, slice<byte> dst) {
     dst[0] = (byte)((8 - b.BitLength % 8) % 8);
     if (copy(dst[1..], b.Bytes) != len(b.Bytes)) {
         throw panic("internal error");
@@ -321,9 +321,9 @@ internal static void Encode(this bitStringEncoder b, slice<byte> dst) {
 
 partial struct oidEncoder /*[]nint*/;
 
-} partial class asn1ᴛoidEncoder {
+} partial class asn1_package {
 
-internal static nint Len(this oidEncoder oid) {
+internal static nint Lenᴍ(oidEncoder oid) {
     nint l = base128IntLength((int64)(oid[0] * 40 + oid[1]));
     for (nint i = 2; i < len(oid); i++) {
         l += base128IntLength((int64)oid[i]);
@@ -331,7 +331,7 @@ internal static nint Len(this oidEncoder oid) {
     return l;
 }
 
-internal static void Encode(this oidEncoder oid, slice<byte> dst) {
+internal static void Encodeᴍ(oidEncoder oid, slice<byte> dst) {
     dst = appendBase128Int(dst[..0], (int64)(oid[0] * 40 + oid[1]));
     for (nint i = 2; i < len(oid); i++) {
         dst = appendBase128Int(dst, (int64)oid[i]);
@@ -835,3 +835,42 @@ public static (slice<byte>, error) MarshalWithParams(any val, @string @params) {
 }
 
 } // end asn1_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class asn1ᴛbyteEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this byteEncoder c) => asn1_package.Lenᴍ(c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this byteEncoder c, slice<byte> dst) => asn1_package.Encodeᴍ(c, dst);
+}
+partial class asn1ᴛbytesEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this bytesEncoder b) => asn1_package.Lenᴍ(b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this bytesEncoder b, slice<byte> dst) => asn1_package.Encodeᴍ(b, dst);
+}
+partial class asn1ᴛstringEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this stringEncoder s) => asn1_package.Lenᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this stringEncoder s, slice<byte> dst) => asn1_package.Encodeᴍ(s, dst);
+}
+partial class asn1ᴛmultiEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this multiEncoder m) => asn1_package.Lenᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this multiEncoder m, slice<byte> dst) => asn1_package.Encodeᴍ(m, dst);
+}
+partial class asn1ᴛsetEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this setEncoder s) => asn1_package.Lenᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this setEncoder s, slice<byte> dst) => asn1_package.Encodeᴍ(s, dst);
+}
+partial class asn1ᴛtaggedEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this ref taggedEncoder t) => asn1_package.Lenᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this ref taggedEncoder t, slice<byte> dst) => asn1_package.Encodeᴍ(ref t, dst);
+}
+partial class asn1ᴛint64Encoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this int64Encoder i) => asn1_package.Lenᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this int64Encoder i, slice<byte> dst) => asn1_package.Encodeᴍ(i, dst);
+}
+partial class asn1ᴛbitStringEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this bitStringEncoder b) => asn1_package.Lenᴍ(b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this bitStringEncoder b, slice<byte> dst) => asn1_package.Encodeᴍ(b, dst);
+}
+partial class asn1ᴛoidEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this oidEncoder oid) => asn1_package.Lenᴍ(oid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this oidEncoder oid, slice<byte> dst) => asn1_package.Encodeᴍ(oid, dst);
+}
+// </GlyphForwarders>

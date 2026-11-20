@@ -105,12 +105,12 @@ internal static Format formatSTAR => 16;
 
 internal static Format formatMax => 32;
 
-} partial class tarᴛFormat {
+} partial class tar_package {
 
-internal static bool has(this Format f, Format f2) { return (Format)(f & f2) != 0; }
-internal static void mayBe(this ref Format f, Format f2) { f |= (Format)(f2); }
-internal static void mayOnlyBe(this ref Format f, Format f2) { f &= (Format)(f2); }
-internal static void mustNotBe(this ref Format f, Format f2) { f &= ~(Format)(f2); }
+internal static bool hasᴍ(Format f, Format f2) { return (Format)(f & f2) != 0; }
+internal static void mayBeᴍ(ref Format f, Format f2) { f |= (Format)(f2); }
+internal static void mayOnlyBeᴍ(ref Format f, Format f2) { f &= (Format)(f2); }
+internal static void mustNotBeᴍ(ref Format f, Format f2) { f &= ~(Format)(f2); }
 
 } partial class tar_package {
 
@@ -118,13 +118,13 @@ internal static map<Format, @string> formatNames = new map<Format, @string>{
     [formatV7] = "V7", [FormatUSTAR] = "USTAR", [FormatPAX] = "PAX", [FormatGNU] = "GNU", [formatSTAR] = "STAR"
 };
 
-} partial class tarᴛFormat {
+} partial class tar_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
 private static readonly @string unknownˢᵇ = "<unknown>"u8;
 
-public static @string String(this Format f) {
+internal static @string Stringᴍ(Format f) {
     var ssᴷ = new stackAppend<@string>();
 
     slice<@string> ss = default;
@@ -185,39 +185,39 @@ internal static block zeroBlock;
 /* [blockSize]byte */
 partial struct block /*[512]byte*/;
 
-} partial class tarᴛblock {
+} partial class tar_package {
 
 // Convert block to any number of formats.
-internal static ж<headerV7> toV7(this ж<block> Ꮡb) {
+internal static ж<headerV7> toV7ᴍ(ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     return Ꮡ((headerV7)(b.Value));
 }
 
-internal static ж<headerGNU> toGNU(this ж<block> Ꮡb) {
+internal static ж<headerGNU> toGNUᴍ(ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     return Ꮡ((headerGNU)(b.Value));
 }
 
-internal static ж<headerSTAR> toSTAR(this ж<block> Ꮡb) {
+internal static ж<headerSTAR> toSTARᴍ(ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     return Ꮡ((headerSTAR)(b.Value));
 }
 
-internal static ж<headerUSTAR> toUSTAR(this ж<block> Ꮡb) {
+internal static ж<headerUSTAR> toUSTARᴍ(ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     return Ꮡ((headerUSTAR)(b.Value));
 }
 
-internal static sparseArray toSparse(this ref block b) { return (sparseArray)(b.Value[..]); }
+internal static sparseArray toSparseᴍ(ref block b) { return (sparseArray)(b.Value[..]); }
 
 // getFormat checks that the block is a valid tar header based on the checksum.
 // It then attempts to guess the specific format based on magic values.
 // If the checksum fails, then FormatUnknown is returned.
-internal static Format getFormat(this ж<block> Ꮡb) {
+internal static Format getFormatᴍ(ж<block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Verify checksum.
@@ -249,7 +249,7 @@ internal static Format getFormat(this ж<block> Ꮡb) {
 
 // setFormat writes the magic values necessary for specified format
 // and then updates the checksum accordingly.
-internal static void setFormat(this ж<block> Ꮡb, Format format) {
+internal static void setFormatᴍ(ж<block> Ꮡb, Format format) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Set the magic values.
@@ -292,7 +292,7 @@ internal static void setFormat(this ж<block> Ꮡb, Format format) {
 // POSIX specifies a sum of the unsigned byte values, but the Sun tar used
 // signed byte values.
 // We compute and return both.
-internal static (int64 unsigned, int64 signed) computeChecksum(this ref block b) {
+internal static (int64 unsigned, int64 signed) computeChecksumᴍ(ref block b) {
     int64 unsigned = default;
     int64 signed = default;
 
@@ -309,7 +309,7 @@ internal static (int64 unsigned, int64 signed) computeChecksum(this ref block b)
 }
 
 // reset clears the block with all zeros.
-internal static void reset(this ref block b) {
+internal static void resetᴍ(ref block b) {
     b.Assign(new block(new byte[512].array()));
 }
 
@@ -318,104 +318,181 @@ internal static void reset(this ref block b) {
 /* [blockSize]byte */
 partial struct headerV7 /*[512]byte*/;
 
-} partial class tarᴛheaderV7 {
+} partial class tar_package {
 
-internal static slice<byte> name(this ref headerV7 h) { return h.Value[0..][..100]; }
-internal static slice<byte> mode(this ref headerV7 h) { return h.Value[100..][..8]; }
-internal static slice<byte> uid(this ref headerV7 h) { return h.Value[108..][..8]; }
-internal static slice<byte> gid(this ref headerV7 h) { return h.Value[116..][..8]; }
-internal static slice<byte> size(this ref headerV7 h) { return h.Value[124..][..12]; }
-internal static slice<byte> modTime(this ref headerV7 h) { return h.Value[136..][..12]; }
-internal static slice<byte> chksum(this ref headerV7 h) { return h.Value[148..][..8]; }
-internal static slice<byte> typeFlag(this ref headerV7 h) { return h.Value[156..][..1]; }
-internal static slice<byte> linkName(this ref headerV7 h) { return h.Value[157..][..100]; }
+internal static slice<byte> nameᴍ(ref headerV7 h) { return h.Value[0..][..100]; }
+internal static slice<byte> modeᴍ(ref headerV7 h) { return h.Value[100..][..8]; }
+internal static slice<byte> uidᴍ(ref headerV7 h) { return h.Value[108..][..8]; }
+internal static slice<byte> gidᴍ(ref headerV7 h) { return h.Value[116..][..8]; }
+internal static slice<byte> sizeᴍ(ref headerV7 h) { return h.Value[124..][..12]; }
+internal static slice<byte> modTimeᴍ(ref headerV7 h) { return h.Value[136..][..12]; }
+internal static slice<byte> chksumᴍ(ref headerV7 h) { return h.Value[148..][..8]; }
+internal static slice<byte> typeFlagᴍ(ref headerV7 h) { return h.Value[156..][..1]; }
+internal static slice<byte> linkNameᴍ(ref headerV7 h) { return h.Value[157..][..100]; }
 
 } partial class tar_package {
 
 /* [blockSize]byte */
 partial struct headerGNU /*[512]byte*/;
 
-} partial class tarᴛheaderGNU {
+} partial class tar_package {
 
-internal static ж<headerV7> v7(this ж<headerGNU> Ꮡh) {
+internal static ж<headerV7> v7ᴍ(ж<headerGNU> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return Ꮡ((headerV7)(h.Value));
 }
 
-internal static slice<byte> magic(this ref headerGNU h) { return h.Value[257..][..6]; }
-internal static slice<byte> version(this ref headerGNU h) { return h.Value[263..][..2]; }
-internal static slice<byte> userName(this ref headerGNU h) { return h.Value[265..][..32]; }
-internal static slice<byte> groupName(this ref headerGNU h) { return h.Value[297..][..32]; }
-internal static slice<byte> devMajor(this ref headerGNU h) { return h.Value[329..][..8]; }
-internal static slice<byte> devMinor(this ref headerGNU h) { return h.Value[337..][..8]; }
-internal static slice<byte> accessTime(this ref headerGNU h) { return h.Value[345..][..12]; }
-internal static slice<byte> changeTime(this ref headerGNU h) { return h.Value[357..][..12]; }
-internal static sparseArray sparse(this ref headerGNU h) { return (sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]); }
-internal static slice<byte> realSize(this ref headerGNU h) { return h.Value[483..][..12]; }
+internal static slice<byte> magicᴍ(ref headerGNU h) { return h.Value[257..][..6]; }
+internal static slice<byte> versionᴍ(ref headerGNU h) { return h.Value[263..][..2]; }
+internal static slice<byte> userNameᴍ(ref headerGNU h) { return h.Value[265..][..32]; }
+internal static slice<byte> groupNameᴍ(ref headerGNU h) { return h.Value[297..][..32]; }
+internal static slice<byte> devMajorᴍ(ref headerGNU h) { return h.Value[329..][..8]; }
+internal static slice<byte> devMinorᴍ(ref headerGNU h) { return h.Value[337..][..8]; }
+internal static slice<byte> accessTimeᴍ(ref headerGNU h) { return h.Value[345..][..12]; }
+internal static slice<byte> changeTimeᴍ(ref headerGNU h) { return h.Value[357..][..12]; }
+internal static sparseArray sparseᴍ(ref headerGNU h) { return (sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]); }
+internal static slice<byte> realSizeᴍ(ref headerGNU h) { return h.Value[483..][..12]; }
 
 } partial class tar_package {
 
 /* [blockSize]byte */
 partial struct headerSTAR /*[512]byte*/;
 
-} partial class tarᴛheaderSTAR {
+} partial class tar_package {
 
-internal static ж<headerV7> v7(this ж<headerSTAR> Ꮡh) {
+internal static ж<headerV7> v7ᴍ(ж<headerSTAR> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return Ꮡ((headerV7)(h.Value));
 }
 
-internal static slice<byte> magic(this ref headerSTAR h) { return h.Value[257..][..6]; }
-internal static slice<byte> version(this ref headerSTAR h) { return h.Value[263..][..2]; }
-internal static slice<byte> userName(this ref headerSTAR h) { return h.Value[265..][..32]; }
-internal static slice<byte> groupName(this ref headerSTAR h) { return h.Value[297..][..32]; }
-internal static slice<byte> devMajor(this ref headerSTAR h) { return h.Value[329..][..8]; }
-internal static slice<byte> devMinor(this ref headerSTAR h) { return h.Value[337..][..8]; }
-internal static slice<byte> prefix(this ref headerSTAR h) { return h.Value[345..][..131]; }
-internal static slice<byte> accessTime(this ref headerSTAR h) { return h.Value[476..][..12]; }
-internal static slice<byte> changeTime(this ref headerSTAR h) { return h.Value[488..][..12]; }
-internal static slice<byte> trailer(this ref headerSTAR h) { return h.Value[508..][..4]; }
+internal static slice<byte> magicᴍ(ref headerSTAR h) { return h.Value[257..][..6]; }
+internal static slice<byte> versionᴍ(ref headerSTAR h) { return h.Value[263..][..2]; }
+internal static slice<byte> userNameᴍ(ref headerSTAR h) { return h.Value[265..][..32]; }
+internal static slice<byte> groupNameᴍ(ref headerSTAR h) { return h.Value[297..][..32]; }
+internal static slice<byte> devMajorᴍ(ref headerSTAR h) { return h.Value[329..][..8]; }
+internal static slice<byte> devMinorᴍ(ref headerSTAR h) { return h.Value[337..][..8]; }
+internal static slice<byte> prefixᴍ(ref headerSTAR h) { return h.Value[345..][..131]; }
+internal static slice<byte> accessTimeᴍ(ref headerSTAR h) { return h.Value[476..][..12]; }
+internal static slice<byte> changeTimeᴍ(ref headerSTAR h) { return h.Value[488..][..12]; }
+internal static slice<byte> trailerᴍ(ref headerSTAR h) { return h.Value[508..][..4]; }
 
 } partial class tar_package {
 
 /* [blockSize]byte */
 partial struct headerUSTAR /*[512]byte*/;
 
-} partial class tarᴛheaderUSTAR {
+} partial class tar_package {
 
-internal static ж<headerV7> v7(this ж<headerUSTAR> Ꮡh) {
+internal static ж<headerV7> v7ᴍ(ж<headerUSTAR> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return Ꮡ((headerV7)(h.Value));
 }
 
-internal static slice<byte> magic(this ref headerUSTAR h) { return h.Value[257..][..6]; }
-internal static slice<byte> version(this ref headerUSTAR h) { return h.Value[263..][..2]; }
-internal static slice<byte> userName(this ref headerUSTAR h) { return h.Value[265..][..32]; }
-internal static slice<byte> groupName(this ref headerUSTAR h) { return h.Value[297..][..32]; }
-internal static slice<byte> devMajor(this ref headerUSTAR h) { return h.Value[329..][..8]; }
-internal static slice<byte> devMinor(this ref headerUSTAR h) { return h.Value[337..][..8]; }
-internal static slice<byte> prefix(this ref headerUSTAR h) { return h.Value[345..][..155]; }
+internal static slice<byte> magicᴍ(ref headerUSTAR h) { return h.Value[257..][..6]; }
+internal static slice<byte> versionᴍ(ref headerUSTAR h) { return h.Value[263..][..2]; }
+internal static slice<byte> userNameᴍ(ref headerUSTAR h) { return h.Value[265..][..32]; }
+internal static slice<byte> groupNameᴍ(ref headerUSTAR h) { return h.Value[297..][..32]; }
+internal static slice<byte> devMajorᴍ(ref headerUSTAR h) { return h.Value[329..][..8]; }
+internal static slice<byte> devMinorᴍ(ref headerUSTAR h) { return h.Value[337..][..8]; }
+internal static slice<byte> prefixᴍ(ref headerUSTAR h) { return h.Value[345..][..155]; }
 
 } partial class tar_package {
 
 partial struct sparseArray /*[]byte*/;
 
-} partial class tarᴛsparseArray {
+} partial class tar_package {
 
-internal static sparseElem entry(this sparseArray s, nint i) { return (sparseElem)(slice<byte>)(s.slice(i * 24)); }
-internal static slice<byte> isExtended(this sparseArray s) { return s.slice(24 * s.maxEntries())[..1]; }
-internal static nint maxEntries(this sparseArray s) { return len(s) / 24; }
+internal static sparseElem entryᴍ(sparseArray s, nint i) { return (sparseElem)(slice<byte>)(s.slice(i * 24)); }
+internal static slice<byte> isExtendedᴍ(sparseArray s) { return s.slice(24 * s.maxEntries())[..1]; }
+internal static nint maxEntriesᴍ(sparseArray s) { return len(s) / 24; }
 
 } partial class tar_package {
 
 partial struct sparseElem /*[]byte*/;
 
-} partial class tarᴛsparseElem {
+} partial class tar_package {
 
-internal static slice<byte> offset(this sparseElem s) { return s[0..][..12]; }
-internal static slice<byte> length(this sparseElem s) { return s[12..][..12]; }
+internal static slice<byte> offsetᴍ(sparseElem s) { return s[0..][..12]; }
+internal static slice<byte> lengthᴍ(sparseElem s) { return s[12..][..12]; }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tarᴛFormat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool has(this Format f, Format f2) => tar_package.hasᴍ(f, f2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void mayBe(this ref Format f, Format f2) => tar_package.mayBeᴍ(ref f, f2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void mayOnlyBe(this ref Format f, Format f2) => tar_package.mayOnlyBeᴍ(ref f, f2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void mustNotBe(this ref Format f, Format f2) => tar_package.mustNotBeᴍ(ref f, f2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Format f) => tar_package.Stringᴍ(f);
+}
+partial class tarᴛblock {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<headerV7> toV7(this ж<block> Ꮡb) => tar_package.toV7ᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<headerGNU> toGNU(this ж<block> Ꮡb) => tar_package.toGNUᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<headerSTAR> toSTAR(this ж<block> Ꮡb) => tar_package.toSTARᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<headerUSTAR> toUSTAR(this ж<block> Ꮡb) => tar_package.toUSTARᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sparseArray toSparse(this ref block b) => tar_package.toSparseᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Format getFormat(this ж<block> Ꮡb) => tar_package.getFormatᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setFormat(this ж<block> Ꮡb, Format format) => tar_package.setFormatᴍ(Ꮡb, format);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 unsigned, int64 signed) computeChecksum(this ref block b) => tar_package.computeChecksumᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref block b) => tar_package.resetᴍ(ref b);
+}
+partial class tarᴛheaderV7 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> name(this ref headerV7 h) => tar_package.nameᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> mode(this ref headerV7 h) => tar_package.modeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> uid(this ref headerV7 h) => tar_package.uidᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> gid(this ref headerV7 h) => tar_package.gidᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> size(this ref headerV7 h) => tar_package.sizeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> modTime(this ref headerV7 h) => tar_package.modTimeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> chksum(this ref headerV7 h) => tar_package.chksumᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> typeFlag(this ref headerV7 h) => tar_package.typeFlagᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> linkName(this ref headerV7 h) => tar_package.linkNameᴍ(ref h);
+}
+partial class tarᴛheaderGNU {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<headerV7> v7(this ж<headerGNU> Ꮡh) => tar_package.v7ᴍ(Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> magic(this ref headerGNU h) => tar_package.magicᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> version(this ref headerGNU h) => tar_package.versionᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> userName(this ref headerGNU h) => tar_package.userNameᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> groupName(this ref headerGNU h) => tar_package.groupNameᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> devMajor(this ref headerGNU h) => tar_package.devMajorᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> devMinor(this ref headerGNU h) => tar_package.devMinorᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> accessTime(this ref headerGNU h) => tar_package.accessTimeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> changeTime(this ref headerGNU h) => tar_package.changeTimeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sparseArray sparse(this ref headerGNU h) => tar_package.sparseᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> realSize(this ref headerGNU h) => tar_package.realSizeᴍ(ref h);
+}
+partial class tarᴛheaderSTAR {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<headerV7> v7(this ж<headerSTAR> Ꮡh) => tar_package.v7ᴍ(Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> magic(this ref headerSTAR h) => tar_package.magicᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> version(this ref headerSTAR h) => tar_package.versionᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> userName(this ref headerSTAR h) => tar_package.userNameᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> groupName(this ref headerSTAR h) => tar_package.groupNameᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> devMajor(this ref headerSTAR h) => tar_package.devMajorᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> devMinor(this ref headerSTAR h) => tar_package.devMinorᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> prefix(this ref headerSTAR h) => tar_package.prefixᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> accessTime(this ref headerSTAR h) => tar_package.accessTimeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> changeTime(this ref headerSTAR h) => tar_package.changeTimeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> trailer(this ref headerSTAR h) => tar_package.trailerᴍ(ref h);
+}
+partial class tarᴛheaderUSTAR {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<headerV7> v7(this ж<headerUSTAR> Ꮡh) => tar_package.v7ᴍ(Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> magic(this ref headerUSTAR h) => tar_package.magicᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> version(this ref headerUSTAR h) => tar_package.versionᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> userName(this ref headerUSTAR h) => tar_package.userNameᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> groupName(this ref headerUSTAR h) => tar_package.groupNameᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> devMajor(this ref headerUSTAR h) => tar_package.devMajorᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> devMinor(this ref headerUSTAR h) => tar_package.devMinorᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> prefix(this ref headerUSTAR h) => tar_package.prefixᴍ(ref h);
+}
+partial class tarᴛsparseArray {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sparseElem entry(this sparseArray s, nint i) => tar_package.entryᴍ(s, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> isExtended(this sparseArray s) => tar_package.isExtendedᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint maxEntries(this sparseArray s) => tar_package.maxEntriesᴍ(s);
+}
+partial class tarᴛsparseElem {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> offset(this sparseElem s) => tar_package.offsetᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> length(this sparseElem s) => tar_package.lengthᴍ(s);
+}
+// </GlyphForwarders>

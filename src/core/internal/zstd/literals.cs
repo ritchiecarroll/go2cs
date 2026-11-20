@@ -9,12 +9,12 @@ using static zstd_package;
 
 partial class zstd_package {
 
-} partial class zstdᴛReader {
+} partial class zstd_package {
 
 // readLiterals reads and decompresses the literals from data at off.
 // The literals are appended to outbuf, which is returned.
 // Also returns the new input offset. RFC 3.1.1.3.1.
-internal static (nint, slice<byte>, error) readLiterals(this ж<Reader> Ꮡr, block data, nint off, slice<byte> outbuf) {
+internal static (nint, slice<byte>, error) readLiteralsᴍ(ж<Reader> Ꮡr, block data, nint off, slice<byte> outbuf) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (off >= len(data)) {
@@ -42,7 +42,7 @@ private static readonly @string rleLiteralMissingˢᵇ = "RLE literal missing"u8
 
 // readRawRLELiterals reads and decompresses a Raw_Literals_Block or
 // a RLE_Literals_Block. RFC 3.1.1.3.1.1.
-internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r, block data, nint off, byte hdr, slice<byte> outbuf) {
+internal static (nint, slice<byte>, error) readRawRLELiteralsᴍ(ref Reader r, block data, nint off, byte hdr, slice<byte> outbuf) {
     var outbufᴷ = new stackAppend<byte>(moves: true);
 
     var raw = ((byte)(hdr & 3)) == 0;
@@ -108,7 +108,7 @@ private static readonly @string missingLiteralsHuffmanˢᵇ = "missing literals 
 
 // readHuffLiterals reads and decompresses a Compressed_Literals_Block or
 // a Treeless_Literals_Block. RFC 3.1.1.3.1.4.
-internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr, block data, nint off, byte hdr, slice<byte> outbuf) {
+internal static (nint, slice<byte>, error) readHuffLiteralsᴍ(ж<Reader> Ꮡr, block data, nint off, byte hdr, slice<byte> outbuf) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     nint regeneratedSize = default;
@@ -212,7 +212,7 @@ internal static ref readonly @string literalsHuffmanStreamOutˢ => ref literalsH
 private static readonly @string literalsHuffmanStreamOutˢᵇ = "literals Huffman stream out of bits"u8;
 
 // readLiteralsOneStream reads a single stream of compressed literals.
-internal static (slice<byte>, error) readLiteralsOneStream(this ж<Reader> Ꮡr, block data, nint off, nint compressedSize, nint regeneratedSize, slice<byte> outbuf) {
+internal static (slice<byte>, error) readLiteralsOneStreamᴍ(ж<Reader> Ꮡr, block data, nint off, nint compressedSize, nint regeneratedSize, slice<byte> outbuf) {
     ref var r = ref Ꮡr.DerefOrNull();
     var outbufᴷ = new stackAppend<byte>(moves: true);
 
@@ -251,7 +251,7 @@ private static readonly @string regeneratedSizeTooSmallˢᵇ = "regenerated size
 
 // readLiteralsFourStreams reads four interleaved streams of
 // compressed literals.
-internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡr, block data, nint off, nint totalStreamsSize, nint regeneratedSize, slice<byte> outbuf) {
+internal static (slice<byte>, error) readLiteralsFourStreamsᴍ(ж<Reader> Ꮡr, block data, nint off, nint totalStreamsSize, nint regeneratedSize, slice<byte> outbuf) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Read the jump table to find out where the streams are.
@@ -389,3 +389,13 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class zstdᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, slice<byte>, error) readLiterals(this ж<Reader> Ꮡr, block data, nint off, slice<byte> outbuf) => zstd_package.readLiteralsᴍ(Ꮡr, data, off, outbuf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r, block data, nint off, byte hdr, slice<byte> outbuf) => zstd_package.readRawRLELiteralsᴍ(ref r, data, off, hdr, outbuf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr, block data, nint off, byte hdr, slice<byte> outbuf) => zstd_package.readHuffLiteralsᴍ(Ꮡr, data, off, hdr, outbuf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readLiteralsOneStream(this ж<Reader> Ꮡr, block data, nint off, nint compressedSize, nint regeneratedSize, slice<byte> outbuf) => zstd_package.readLiteralsOneStreamᴍ(Ꮡr, data, off, compressedSize, regeneratedSize, outbuf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡr, block data, nint off, nint totalStreamsSize, nint regeneratedSize, slice<byte> outbuf) => zstd_package.readLiteralsFourStreamsᴍ(Ꮡr, data, off, totalStreamsSize, regeneratedSize, outbuf);
+}
+// </GlyphForwarders>

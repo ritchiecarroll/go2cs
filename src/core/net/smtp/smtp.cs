@@ -83,15 +83,15 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
     return (c, default);
 }
 
-} partial class smtpᴛClient {
+} partial class smtp_package {
 
 // Close closes the connection.
-public static error Close(this ref Client c) {
+internal static error Closeᴍ(ref Client c) {
     return c.Text.Close();
 }
 
 // hello runs a hello exchange if needed.
-internal static error hello(this ж<Client> Ꮡc) {
+internal static error helloᴍ(ж<Client> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!c.didHello) {
@@ -113,7 +113,7 @@ private static readonly @string smtpHelloCalledAfterˢᵇ = "smtp: Hello called 
 // over the host name used. The client will introduce itself as "localhost"
 // automatically otherwise. If Hello is called, it must be called before
 // any of the other methods.
-public static error Hello(this ж<Client> Ꮡc, @string localName) {
+internal static error Helloᴍ(ж<Client> Ꮡc, @string localName) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var err = validateLine(localName); if (err != nil) {
@@ -127,7 +127,7 @@ public static error Hello(this ж<Client> Ꮡc, @string localName) {
 }
 
 // cmd is a convenience function that sends a command and returns the response
-internal static (nint, @string, error) cmd(this ж<Client> Ꮡc, nint expectCode, @string format, params ꓸꓸꓸany argsʗp) {
+internal static (nint, @string, error) cmdᴍ(ж<Client> Ꮡc, nint expectCode, @string format, params ꓸꓸꓸany argsʗp) {
     GoFrame ᒐ = default;
     try {
         var args = argsʗp.sslice();
@@ -152,7 +152,7 @@ private static readonly @string heloSˢᵇ = "HELO %s"u8;
 
 // helo sends the HELO greeting to the server. It should be used only when the
 // server does not support ehlo.
-internal static error helo(this ж<Client> Ꮡc) {
+internal static error heloᴍ(ж<Client> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.ext = default;
@@ -168,7 +168,7 @@ private static readonly @string authˢᵇ = "AUTH"u8;
 
 // ehlo sends the EHLO (extended hello) greeting to the server. It
 // should be the preferred greeting for servers that support it.
-internal static error ehlo(this ж<Client> Ꮡc) {
+internal static error ehloᴍ(ж<Client> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (_, msg, err) = Ꮡc.cmd(250, ehloSˢ, c.localName);
@@ -197,7 +197,7 @@ private static readonly @string starttlsˢᵇ = "STARTTLS"u8;
 
 // StartTLS sends the STARTTLS command and encrypts all further communication.
 // Only servers that advertise the STARTTLS extension support this function.
-public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> config) {
+internal static error StartTLSᴍ(ж<Client> Ꮡc, ж<tls.Config> config) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
@@ -216,7 +216,7 @@ public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> config) {
 // TLSConnectionState returns the client's TLS connection state.
 // The return values are their zero values if [Client.StartTLS] did
 // not succeed.
-public static (tls.ConnectionState state, bool ok) TLSConnectionState(this ref Client c) {
+internal static (tls.ConnectionState state, bool ok) TLSConnectionStateᴍ(ref Client c) {
     tls.ConnectionState state = default;
     bool ok = default;
 
@@ -235,7 +235,7 @@ private static readonly @string vrfySˢᵇ = "VRFY %s"u8;
 // If Verify returns nil, the address is valid. A non-nil return
 // does not necessarily indicate an invalid address. Many servers
 // will not verify addresses for security reasons.
-public static error Verify(this ж<Client> Ꮡc, @string addr) {
+internal static error Verifyᴍ(ж<Client> Ꮡc, @string addr) {
     var errΔ1 = validateLine(addr); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -249,7 +249,7 @@ public static error Verify(this ж<Client> Ꮡc, @string addr) {
 // Auth authenticates a client using the provided authentication mechanism.
 // A failed authentication closes the connection.
 // Only servers that advertise the AUTH extension support this function.
-public static error Auth(this ж<Client> Ꮡc, Auth a) {
+internal static error Authᴍ(ж<Client> Ꮡc, Auth a) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
@@ -312,7 +312,7 @@ private static readonly @string smtputf8ˢᵇ = "SMTPUTF8"u8;
 // parameter. If the server supports the SMTPUTF8 extension, Mail adds the
 // SMTPUTF8 parameter.
 // This initiates a mail transaction and is followed by one or more [Client.Rcpt] calls.
-public static error Mail(this ж<Client> Ꮡc, @string from) {
+internal static error Mailᴍ(ж<Client> Ꮡc, @string from) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var errΔ1 = validateLine(from); if (errΔ1 != nil) {
@@ -341,7 +341,7 @@ private static readonly @string rcptToSˢᵇ = "RCPT TO:<%s>"u8;
 // Rcpt issues a RCPT command to the server using the provided email address.
 // A call to Rcpt must be preceded by a call to [Client.Mail] and may be followed by
 // a [Client.Data] call or another Rcpt call.
-public static error Rcpt(this ж<Client> Ꮡc, @string to) {
+internal static error Rcptᴍ(ж<Client> Ꮡc, @string to) {
     var errΔ1 = validateLine(to); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -356,19 +356,19 @@ partial struct dataCloser {
     /*embed*/ public io_package.WriteCloser WriteCloser;
 }
 
-} partial class smtpᴛdataCloser {
+} partial class smtp_package {
 
 // Go method set entry for the promoted 'WriteCloser.Write()' - provided ONLY by the embedded
 // interface field in *dataCloser's method set; see the pointer-only satisfaction record.
-internal static (nint, error) Write(this dataCloser recvᴛ, slice<byte> p) => recvᴛ.WriteCloser.Write(p);
+internal static (nint, error) Writeᴍ(dataCloser recvᴛ, slice<byte> p) => recvᴛ.WriteCloser.Write(p);
 
-internal static error Close(this ref dataCloser d) {
+internal static error Closeᴍ(ref dataCloser d) {
     d.WriteCloser.Close();
     var (_, _, err) = d.c.Text.of(textproto.Conn.ᏑReader).ReadResponse(250);
     return err;
 }
 
-} partial class smtpᴛClient {
+} partial class smtp_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dataˢ => ref dataˢᵇ;
@@ -378,7 +378,7 @@ private static readonly @string dataˢᵇ = "DATA"u8;
 // can be used to write the mail headers and body. The caller should
 // close the writer before calling any more methods on c. A call to
 // Data must be preceded by one or more calls to [Client.Rcpt].
-public static (io.WriteCloser, error) Data(this ж<Client> Ꮡc) {
+internal static (io.WriteCloser, error) Dataᴍ(ж<Client> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (_, _, err) = Ꮡc.cmd(354, dataˢ);
@@ -485,13 +485,13 @@ public static error SendMail(@string addr, Auth a, @string from, slice<@string> 
     finally { ᒐ.Run(); }
 }
 
-} partial class smtpᴛClient {
+} partial class smtp_package {
 
 // Extension reports whether an extension is support by the server.
 // The extension name is case-insensitive. If the extension is supported,
 // Extension also returns a string that contains any parameters the
 // server specifies for the extension.
-public static (bool, @string) Extension(this ж<Client> Ꮡc, @string ext) {
+internal static (bool, @string) Extensionᴍ(ж<Client> Ꮡc, @string ext) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var err = Ꮡc.hello(); if (err != nil) {
@@ -511,7 +511,7 @@ private static readonly @string rsetˢᵇ = "RSET"u8;
 
 // Reset sends the RSET command to the server, aborting the current mail
 // transaction.
-public static error Reset(this ж<Client> Ꮡc) {
+internal static error Resetᴍ(ж<Client> Ꮡc) {
     var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -525,7 +525,7 @@ private static readonly @string noopˢᵇ = "NOOP"u8;
 
 // Noop sends the NOOP command to the server. It does nothing but check
 // that the connection to the server is okay.
-public static error Noop(this ж<Client> Ꮡc) {
+internal static error Noopᴍ(ж<Client> Ꮡc) {
     var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -538,7 +538,7 @@ internal static ref readonly @string quitˢ => ref quitˢᵇ;
 private static readonly @string quitˢᵇ = "QUIT"u8;
 
 // Quit sends the QUIT command and closes the connection to the server.
-public static error Quit(this ж<Client> Ꮡc) {
+internal static error Quitᴍ(ж<Client> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.hello(); // ignore error; we're quitting anyhow
@@ -564,3 +564,29 @@ internal static error validateLine(@string line) {
 }
 
 } // end smtp_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class smtpᴛClient {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Client c) => smtp_package.Closeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error hello(this ж<Client> Ꮡc) => smtp_package.helloᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Hello(this ж<Client> Ꮡc, @string localName) => smtp_package.Helloᴍ(Ꮡc, localName);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, @string, error) cmd(this ж<Client> Ꮡc, nint expectCode, @string format, params ꓸꓸꓸany argsʗp) => smtp_package.cmdᴍ(Ꮡc, expectCode, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error helo(this ж<Client> Ꮡc) => smtp_package.heloᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ehlo(this ж<Client> Ꮡc) => smtp_package.ehloᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> config) => smtp_package.StartTLSᴍ(Ꮡc, config);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (tls.ConnectionState state, bool ok) TLSConnectionState(this ref Client c) => smtp_package.TLSConnectionStateᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Verify(this ж<Client> Ꮡc, @string addr) => smtp_package.Verifyᴍ(Ꮡc, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Auth(this ж<Client> Ꮡc, Auth a) => smtp_package.Authᴍ(Ꮡc, a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Mail(this ж<Client> Ꮡc, @string from) => smtp_package.Mailᴍ(Ꮡc, from);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Rcpt(this ж<Client> Ꮡc, @string to) => smtp_package.Rcptᴍ(Ꮡc, to);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.WriteCloser, error) Data(this ж<Client> Ꮡc) => smtp_package.Dataᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (bool, @string) Extension(this ж<Client> Ꮡc, @string ext) => smtp_package.Extensionᴍ(Ꮡc, ext);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Reset(this ж<Client> Ꮡc) => smtp_package.Resetᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Noop(this ж<Client> Ꮡc) => smtp_package.Noopᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Quit(this ж<Client> Ꮡc) => smtp_package.Quitᴍ(Ꮡc);
+}
+partial class smtpᴛdataCloser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this dataCloser recvᴛ, slice<byte> p) => smtp_package.Writeᴍ(recvᴛ, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref dataCloser d) => smtp_package.Closeᴍ(ref d);
+}
+// </GlyphForwarders>

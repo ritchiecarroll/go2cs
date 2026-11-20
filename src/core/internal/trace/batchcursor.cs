@@ -21,9 +21,9 @@ partial struct batchCursor {
     internal baseEvent ev; // last read event
 }
 
-} partial class traceᴛbatchCursor {
+} partial class trace_package {
 
-internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
+internal static (bool ok, error err) nextEventᴍ(ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
     error err = default;
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -58,7 +58,7 @@ internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<
     return (true, default);
 }
 
-internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
+internal static nint compareᴍ(ref batchCursor b, ж<batchCursor> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     return cmp.Compare(b.ev.time, a.ev.time);
@@ -183,3 +183,10 @@ internal static nint min3(slice<ж<batchCursor>> b, nint i0, nint i1, nint i2) {
 }
 
 } // end trace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛbatchCursor {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) => trace_package.nextEventᴍ(Ꮡb, batches, freq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) => trace_package.compareᴍ(ref b, Ꮡa);
+}
+// </GlyphForwarders>

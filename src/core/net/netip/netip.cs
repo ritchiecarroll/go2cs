@@ -148,9 +148,9 @@ partial struct parseAddrError {
     internal @string at;  // optionally, the unparsed portion of in at which the error occurred.
 }
 
-} partial class netipᴛparseAddrError {
+} partial class netip_package {
 
-internal static @string Error(this parseAddrError err) {
+internal static @string Errorᴍ(parseAddrError err) {
     var q = strconv.Quote;
     if (err.at != ""u8) {
         return "ParseAddr("u8 + q(err.@in) + "): "u8 + err.msg + " (at "u8 + q(err.at) + ")"u8;
@@ -368,17 +368,17 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
     return (new Addr(), false);
 }
 
-} partial class netipᴛAddr {
+} partial class netip_package {
 
 // v4 returns the i'th byte of ip. If ip is not an IPv4, v4 returns
 // unspecified garbage.
-internal static uint8 v4(this Addr ip, uint8 i) {
+internal static uint8 v4ᴍ(Addr ip, uint8 i) {
     return (uint8)(ip.addr.lo.Rsh((uint64)((uint8)((3 - i) * 8))));
 }
 
 // v6 returns the i'th byte of ip. If ip is an IPv4 address, this
 // accesses the IPv4-mapped IPv6 address form of the IP.
-internal static uint8 v6(this Addr ipʗp, uint8 i) {
+internal static uint8 v6ᴍ(Addr ipʗp, uint8 i) {
     ref var ip = ref heap(ipʗp, out var Ꮡip);
 
     return (uint8)(((Ꮡip.Ꮡaddr.halves()[(i / 8) % 2]).Value).Rsh((uint64)((uint8)((7 - i % 8) * 8))));
@@ -386,7 +386,7 @@ internal static uint8 v6(this Addr ipʗp, uint8 i) {
 
 // v6u16 returns the i'th 16-bit word of ip. If ip is an IPv4 address,
 // this accesses the IPv4-mapped IPv6 address form of the IP.
-internal static uint16 v6u16(this Addr ipʗp, uint8 i) {
+internal static uint16 v6u16ᴍ(Addr ipʗp, uint8 i) {
     ref var ip = ref heap(ipʗp, out var Ꮡip);
 
     return (uint16)(((Ꮡip.Ꮡaddr.halves()[(i / 4) % 2]).Value).Rsh((uint64)((uint8)((3 - i % 4) * 16))));
@@ -397,7 +397,7 @@ internal static uint16 v6u16(this Addr ipʗp, uint8 i) {
 //
 // Note that "0.0.0.0" and "::" are not the zero value. Use IsUnspecified to
 // check for these values instead.
-internal static bool isZero(this Addr ip) {
+internal static bool isZeroᴍ(Addr ip) {
     // Faster than comparing ip == Addr{}, but effectively equivalent,
     // as there's no way to make an IP with a nil z from this package.
     return ip.z == z0;
@@ -406,14 +406,14 @@ internal static bool isZero(this Addr ip) {
 // IsValid reports whether the [Addr] is an initialized address (not the zero Addr).
 //
 // Note that "0.0.0.0" and "::" are both valid values.
-public static bool IsValid(this Addr ip) { return ip.z != z0; }
+internal static bool IsValidᴍ(Addr ip) { return ip.z != z0; }
 
 // BitLen returns the number of bits in the IP address:
 // 128 for IPv6, 32 for IPv4, and 0 for the zero [Addr].
 //
 // Note that IPv4-mapped IPv6 addresses are considered IPv6 addresses
 // and therefore have bit length 128.
-public static nint BitLen(this Addr ip) {
+internal static nint BitLenᴍ(Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return 0;
@@ -425,7 +425,7 @@ public static nint BitLen(this Addr ip) {
 }
 
 // Zone returns ip's IPv6 scoped addressing zone, if any.
-public static @string Zone(this Addr ip) {
+internal static @string Zoneᴍ(Addr ip) {
     if (ip.z == z0) {
         return ""u8;
     }
@@ -435,7 +435,7 @@ public static @string Zone(this Addr ip) {
 // Compare returns an integer comparing two IPs.
 // The result will be 0 if ip == ip2, -1 if ip < ip2, and +1 if ip > ip2.
 // The definition of "less than" is the same as the [Addr.Less] method.
-public static nint Compare(this Addr ip, Addr ip2) {
+internal static nint Compareᴍ(Addr ip, Addr ip2) {
     nint f1 = ip.BitLen();
     nint f2 = ip2.BitLen();
     if (f1 < f2) {
@@ -474,25 +474,25 @@ public static nint Compare(this Addr ip, Addr ip2) {
 // Less reports whether ip sorts before ip2.
 // IP addresses sort first by length, then their address.
 // IPv6 addresses with zones sort just after the same address without a zone.
-public static bool Less(this Addr ip, Addr ip2) { return ip.Compare(ip2) == -1; }
+internal static bool Lessᴍ(Addr ip, Addr ip2) { return ip.Compare(ip2) == -1; }
 
 // Is4 reports whether ip is an IPv4 address.
 //
 // It returns false for IPv4-mapped IPv6 addresses. See [Addr.Unmap].
-public static bool Is4(this Addr ip) {
+internal static bool Is4ᴍ(Addr ip) {
     return ip.z == z4;
 }
 
 // Is4In6 reports whether ip is an "IPv4-mapped IPv6 address"
 // as defined by RFC 4291.
 // That is, it reports whether ip is in ::ffff:0:0/96.
-public static bool Is4In6(this Addr ip) {
+internal static bool Is4In6ᴍ(Addr ip) {
     return ip.Is6() && ip.addr.hi == 0 && ip.addr.lo >> 32 == 0xffff;
 }
 
 // Is6 reports whether ip is an IPv6 address, including IPv4-mapped
 // IPv6 addresses.
-public static bool Is6(this Addr ip) {
+internal static bool Is6ᴍ(Addr ip) {
     return ip.z != z0 && ip.z != z4;
 }
 
@@ -500,7 +500,7 @@ public static bool Is6(this Addr ip) {
 //
 // That is, if ip is an IPv6 address wrapping an IPv4 address, it
 // returns the wrapped IPv4 address. Otherwise it returns ip unmodified.
-public static Addr Unmap(this Addr ip) {
+internal static Addr Unmapᴍ(Addr ip) {
     if (ip.Is4In6()) {
         ip.z = z4;
     }
@@ -510,7 +510,7 @@ public static Addr Unmap(this Addr ip) {
 // WithZone returns an IP that's the same as ip but with the provided
 // zone. If zone is empty, the zone is removed. If ip is an IPv4
 // address, WithZone is a no-op and returns ip unchanged.
-public static Addr WithZone(this Addr ip, @string zone) {
+internal static Addr WithZoneᴍ(Addr ip, @string zone) {
     if (!ip.Is6()) {
         return ip;
     }
@@ -524,7 +524,7 @@ public static Addr WithZone(this Addr ip, @string zone) {
 
 // withoutZone unconditionally strips the zone from ip.
 // It's similar to WithZone, but small enough to be inlinable.
-internal static Addr withoutZone(this Addr ip) {
+internal static Addr withoutZoneᴍ(Addr ip) {
     if (!ip.Is6()) {
         return ip;
     }
@@ -533,12 +533,12 @@ internal static Addr withoutZone(this Addr ip) {
 }
 
 // hasZone reports whether ip has an IPv6 zone.
-internal static bool hasZone(this Addr ip) {
+internal static bool hasZoneᴍ(Addr ip) {
     return ip.z != z0 && ip.z != z4 && ip.z != z6noz;
 }
 
 // IsLinkLocalUnicast reports whether ip is a link-local unicast address.
-public static bool IsLinkLocalUnicast(this Addr ip) {
+internal static bool IsLinkLocalUnicastᴍ(Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -557,7 +557,7 @@ public static bool IsLinkLocalUnicast(this Addr ip) {
 }
 
 // IsLoopback reports whether ip is a loopback address.
-public static bool IsLoopback(this Addr ip) {
+internal static bool IsLoopbackᴍ(Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -576,7 +576,7 @@ public static bool IsLoopback(this Addr ip) {
 }
 
 // IsMulticast reports whether ip is a multicast address.
-public static bool IsMulticast(this Addr ip) {
+internal static bool IsMulticastᴍ(Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -596,7 +596,7 @@ public static bool IsMulticast(this Addr ip) {
 
 // IsInterfaceLocalMulticast reports whether ip is an IPv6 interface-local
 // multicast address.
-public static bool IsInterfaceLocalMulticast(this Addr ip) {
+internal static bool IsInterfaceLocalMulticastᴍ(Addr ip) {
     // IPv6 Addressing Architecture (2.7.1. Pre-Defined Multicast Addresses)
     // https://datatracker.ietf.org/doc/html/rfc4291#section-2.7.1
     if (ip.Is6() && !ip.Is4In6()) {
@@ -606,7 +606,7 @@ public static bool IsInterfaceLocalMulticast(this Addr ip) {
 }
 
 // IsLinkLocalMulticast reports whether ip is a link-local multicast address.
-public static bool IsLinkLocalMulticast(this Addr ip) {
+internal static bool IsLinkLocalMulticastᴍ(Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -633,7 +633,7 @@ public static bool IsLinkLocalMulticast(this Addr ip) {
 // It returns false for the zero [Addr].
 //
 // For reference, see RFC 1122, RFC 4291, and RFC 4632.
-public static bool IsGlobalUnicast(this Addr ip) {
+internal static bool IsGlobalUnicastᴍ(Addr ip) {
     if (ip.z == z0) {
         // Invalid or zero-value.
         return false;
@@ -656,7 +656,7 @@ public static bool IsGlobalUnicast(this Addr ip) {
 // (IPv4 addresses) and RFC 4193 (IPv6 addresses). That is, it reports whether
 // ip is in 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, or fc00::/7. This is the
 // same as [net.IP.IsPrivate].
-public static bool IsPrivate(this Addr ip) {
+internal static bool IsPrivateᴍ(Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -681,7 +681,7 @@ public static bool IsPrivate(this Addr ip) {
 // address "0.0.0.0" or the IPv6 address "::".
 //
 // Note that the zero [Addr] is not an unspecified address.
-public static bool IsUnspecified(this Addr ip) {
+internal static bool IsUnspecifiedᴍ(Addr ip) {
     return ip == IPv4Unspecified() || ip == IPv6Unspecified();
 }
 
@@ -694,7 +694,7 @@ private static readonly @string negativePrefixBitsˢᵇ = "negative Prefix bits"
 // If ip is a zero [Addr], Prefix always returns a zero Prefix and a nil error.
 // Otherwise, if bits is less than zero or greater than ip.BitLen(),
 // Prefix returns an error.
-public static (Prefix, error) Prefix(this Addr ip, nint b) {
+internal static (Prefix, error) Prefixᴍ(Addr ip, nint b) {
     if (b < 0) {
         return (new Prefix(), errors.New(negativePrefixBitsˢ));
     }
@@ -725,7 +725,7 @@ public static (Prefix, error) Prefix(this Addr ip, nint b) {
 // IPv6 addresses with zones are returned without their zone (use the
 // [Addr.Zone] method to get it).
 // The ip zero value returns all zeroes.
-public static array<byte> /*a16*/ As16(this Addr ip) {
+internal static array<byte> /*a16*/ As16ᴍ(Addr ip) {
     array<byte> a16 = new(16);
 
     byteorder.BEPutUint64(a16[..8], ip.addr.hi);
@@ -736,7 +736,7 @@ public static array<byte> /*a16*/ As16(this Addr ip) {
 // As4 returns an IPv4 or IPv4-in-IPv6 address in its 4-byte representation.
 // If ip is the zero [Addr] or an IPv6 address, As4 panics.
 // Note that 0.0.0.0 is not the zero Addr.
-public static array<byte> /*a4*/ As4(this Addr ip) {
+internal static array<byte> /*a4*/ As4ᴍ(Addr ip) {
     array<byte> a4 = new(4);
 
     if (ip.z == z4 || ip.Is4In6()) {
@@ -750,7 +750,7 @@ public static array<byte> /*a4*/ As4(this Addr ip) {
 }
 
 // AsSlice returns an IPv4 or IPv6 address in its respective 4-byte or 16-byte representation.
-public static slice<byte> AsSlice(this Addr ip) {
+internal static slice<byte> AsSliceᴍ(Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return default;
@@ -770,7 +770,7 @@ public static slice<byte> AsSlice(this Addr ip) {
 
 // Next returns the address following ip.
 // If there is none, it returns the zero [Addr].
-public static Addr Next(this Addr ip) {
+internal static Addr Nextᴍ(Addr ip) {
     ip.addr = ip.addr.addOne();
     if (ip.Is4()) {
         if ((uint32)ip.addr.lo == 0) {
@@ -788,7 +788,7 @@ public static Addr Next(this Addr ip) {
 
 // Prev returns the IP before ip.
 // If there is none, it returns the IP zero value.
-public static Addr Prev(this Addr ip) {
+internal static Addr Prevᴍ(Addr ip) {
     if (ip.Is4()) {
         if ((uint32)ip.addr.lo == 0) {
             return new Addr();
@@ -816,7 +816,7 @@ private static readonly @string invalidIpˢᵇ = "invalid IP"u8;
 // Note that unlike package net's IP.String method,
 // IPv4-mapped IPv6 addresses format with a "::ffff:"
 // prefix before the dotted quad.
-public static @string String(this Addr ip) {
+internal static @string Stringᴍ(Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return invalidIpˢ;
@@ -835,7 +835,7 @@ public static @string String(this Addr ip) {
 // AppendTo appends a text encoding of ip,
 // as generated by [Addr.MarshalText],
 // to b and returns the extended buffer.
-public static slice<byte> AppendTo(this Addr ip, slice<byte> b) {
+internal static slice<byte> AppendToᴍ(Addr ip, slice<byte> b) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return b;
@@ -894,16 +894,16 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
     return append(b, digits[(x >> 12)], digits[(uint16)(x >> 8 & 0xf)], digits[(uint16)(x >> 4 & 0xf)], digits[(uint16)(x & 0xf)]);
 }
 
-} partial class netipᴛAddr {
+} partial class netip_package {
 
-internal static @string string4(this Addr ip) {
+internal static @string string4ᴍ(Addr ip) {
     const nint max = /* len("255.255.255.255") */ 15;
     var ret = new slice<byte>(0, max);
     ret = ip.appendTo4(ret);
     return (@string)ret;
 }
 
-internal static slice<byte> appendTo4(this Addr ip, slice<byte> ret) {
+internal static slice<byte> appendTo4ᴍ(Addr ip, slice<byte> ret) {
     ret = appendDecimal(ret, ip.v4(0));
     ret = append(ret, (byte)'.');
     ret = appendDecimal(ret, ip.v4(1));
@@ -914,14 +914,14 @@ internal static slice<byte> appendTo4(this Addr ip, slice<byte> ret) {
     return ret;
 }
 
-internal static @string string4In6(this Addr ip) {
+internal static @string string4In6ᴍ(Addr ip) {
     const nint max = /* len("::ffff:255.255.255.255%enp5s0") */ 29;
     var ret = new slice<byte>(0, max);
     ret = ip.appendTo4In6(ret);
     return (@string)ret;
 }
 
-internal static slice<byte> appendTo4In6(this Addr ip, slice<byte> ret) {
+internal static slice<byte> appendTo4In6ᴍ(Addr ip, slice<byte> ret) {
     ret = append(ret, ((@string)"::ffff:").ꓸꓸꓸ);
     ret = ip.Unmap().appendTo4(ret);
     if (ip.z != z6noz) {
@@ -936,7 +936,7 @@ internal static slice<byte> appendTo4In6(this Addr ip, slice<byte> ret) {
 // (https://tools.ietf.org/html/rfc5952#section-4): no unnecessary
 // zeros, use :: to elide the longest run of zeros, and don't use ::
 // to compact a single zero field.
-internal static @string string6(this Addr ip) {
+internal static @string string6ᴍ(Addr ip) {
     // Use a zone with a "plausibly long" name, so that most zone-ful
     // IP addresses won't require additional allocation.
     //
@@ -950,7 +950,7 @@ internal static @string string6(this Addr ip) {
     return (@string)ret;
 }
 
-internal static slice<byte> appendTo6(this Addr ip, slice<byte> ret) {
+internal static slice<byte> appendTo6ᴍ(Addr ip, slice<byte> ret) {
     var (zeroStart, zeroEnd) = ((uint8)255, (uint8)255);
     for (var i = (uint8)0; i < 8; i++) {
         var j = i;
@@ -986,7 +986,7 @@ internal static slice<byte> appendTo6(this Addr ip, slice<byte> ret) {
 // StringExpanded is like [Addr.String] but IPv6 addresses are expanded with leading
 // zeroes and no "::" compression. For example, "2001:db8::1" becomes
 // "2001:0db8:0000:0000:0000:0000:0000:0001".
-public static @string StringExpanded(this Addr ip) {
+internal static @string StringExpandedᴍ(Addr ip) {
     var retᴷ = new stackAppend<byte>();
 
     switch (ip.z) {
@@ -1015,14 +1015,14 @@ public static @string StringExpanded(this Addr ip) {
 
 // AppendText implements the [encoding.TextAppender] interface,
 // It is the same as [Addr.AppendTo].
-public static (slice<byte>, error) AppendText(this Addr ip, slice<byte> b) {
+internal static (slice<byte>, error) AppendTextᴍ(Addr ip, slice<byte> b) {
     return (ip.AppendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface,
 // The encoding is the same as returned by [Addr.String], with one exception:
 // If ip is the zero [Addr], the encoding is the empty string.
-public static (slice<byte>, error) MarshalText(this Addr ip) {
+internal static (slice<byte>, error) MarshalTextᴍ(Addr ip) {
     var buf = slice<byte>([]);
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
@@ -1051,7 +1051,7 @@ public static (slice<byte>, error) MarshalText(this Addr ip) {
 //
 // If text is empty, UnmarshalText sets *ip to the zero [Addr] and
 // returns no error.
-public static error UnmarshalText(this ref Addr ip, slice<byte> text) {
+internal static error UnmarshalTextᴍ(ref Addr ip, slice<byte> text) {
     if (len(text) == 0) {
         ip = new Addr();
         return default;
@@ -1062,7 +1062,7 @@ public static error UnmarshalText(this ref Addr ip, slice<byte> text) {
 }
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-public static (slice<byte>, error) AppendBinary(this Addr ip, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(Addr ip, slice<byte> b) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         break;
@@ -1080,7 +1080,7 @@ public static (slice<byte>, error) AppendBinary(this Addr ip, slice<byte> b) {
     return (b, default);
 }
 
-internal static nint marshalBinarySize(this Addr ip) {
+internal static nint marshalBinarySizeᴍ(Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return 0;
@@ -1097,7 +1097,7 @@ internal static nint marshalBinarySize(this Addr ip) {
 // It returns a zero-length slice for the zero [Addr],
 // the 4-byte form for an IPv4 address,
 // and the 16-byte form with zone appended for an IPv6 address.
-public static (slice<byte>, error) MarshalBinary(this Addr ip) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(Addr ip) {
     return ip.AppendBinary(new slice<byte>(0, ip.marshalBinarySize()));
 }
 
@@ -1107,7 +1107,7 @@ private static readonly @string unexpectedSliceSizeˢᵇ = "unexpected slice siz
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by MarshalBinary.
-public static error UnmarshalBinary(this ref Addr ip, slice<byte> b) {
+internal static error UnmarshalBinaryᴍ(ref Addr ip, slice<byte> b) {
     nint n = len(b);
     switch (ᐧ) {
     case {} when n is 0: {
@@ -1141,13 +1141,13 @@ partial struct AddrPort {
 // It does not allocate.
 public static AddrPort AddrPortFrom(Addr ip, uint16 port) { return new AddrPort(ip: ip, port: port); }
 
-} partial class netipᴛAddrPort {
+} partial class netip_package {
 
 // Addr returns p's IP address.
-public static Addr Addr(this AddrPort p) { return p.ip; }
+internal static Addr Addrᴍ(AddrPort p) { return p.ip; }
 
 // Port returns p's port.
-public static uint16 Port(this AddrPort p) { return p.port; }
+internal static uint16 Portᴍ(AddrPort p) { return p.port; }
 
 } partial class netip_package {
 
@@ -1231,16 +1231,16 @@ public static AddrPort MustParseAddrPort(@string s) {
     return ip;
 }
 
-} partial class netipᴛAddrPort {
+} partial class netip_package {
 
 // IsValid reports whether p.Addr() is valid.
 // All ports are valid, including zero.
-public static bool IsValid(this AddrPort p) { return p.ip.IsValid(); }
+internal static bool IsValidᴍ(AddrPort p) { return p.ip.IsValid(); }
 
 // Compare returns an integer comparing two AddrPorts.
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.
 // AddrPorts sort first by IP address, then port.
-public static nint Compare(this AddrPort p, AddrPort p2) {
+internal static nint Compareᴍ(AddrPort p, AddrPort p2) {
     nint c = p.Addr().Compare(p2.Addr()); if (c != 0) {
         return c;
     }
@@ -1251,7 +1251,7 @@ public static nint Compare(this AddrPort p, AddrPort p2) {
 internal static ref readonly @string invalidAddrPortˢ => ref invalidAddrPortˢᵇ;
 private static readonly @string invalidAddrPortˢᵇ = "invalid AddrPort"u8;
 
-public static @string String(this AddrPort p) {
+internal static @string Stringᴍ(AddrPort p) {
     var bᴷ = new stackAppend<byte>();
 
     slice<byte> b = default;
@@ -1288,7 +1288,7 @@ public static @string String(this AddrPort p) {
 // AppendTo appends a text encoding of p,
 // as generated by [AddrPort.MarshalText],
 // to b and returns the extended buffer.
-public static slice<byte> AppendTo(this AddrPort p, slice<byte> b) {
+internal static slice<byte> AppendToᴍ(AddrPort p, slice<byte> b) {
     switch (p.ip.z) {
     case var ᴛ when ᴛ == z0: {
         return b;
@@ -1314,14 +1314,14 @@ public static slice<byte> AppendTo(this AddrPort p, slice<byte> b) {
 
 // AppendText implements the [encoding.TextAppender] interface. The
 // encoding is the same as returned by [AddrPort.AppendTo].
-public static (slice<byte>, error) AppendText(this AddrPort p, slice<byte> b) {
+internal static (slice<byte>, error) AppendTextᴍ(AddrPort p, slice<byte> b) {
     return (p.AppendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface. The
 // encoding is the same as returned by [AddrPort.String], with one exception: if
 // p.Addr() is the zero [Addr], the encoding is the empty string.
-public static (slice<byte>, error) MarshalText(this AddrPort p) {
+internal static (slice<byte>, error) MarshalTextᴍ(AddrPort p) {
     var buf = slice<byte>([]);
     switch (p.ip.z) {
     case var ᴛ when ᴛ == z0: {
@@ -1343,7 +1343,7 @@ public static (slice<byte>, error) MarshalText(this AddrPort p) {
 // UnmarshalText implements the encoding.TextUnmarshaler
 // interface. The [AddrPort] is expected in a form
 // generated by [AddrPort.MarshalText] or accepted by [ParseAddrPort].
-public static error UnmarshalText(this ref AddrPort p, slice<byte> text) {
+internal static error UnmarshalTextᴍ(ref AddrPort p, slice<byte> text) {
     if (len(text) == 0) {
         p = new AddrPort();
         return default;
@@ -1356,7 +1356,7 @@ public static error UnmarshalText(this ref AddrPort p, slice<byte> text) {
 // AppendBinary implements the [encoding.BinaryAppendler] interface.
 // It returns [Addr.AppendBinary] with an additional two bytes appended
 // containing the port in little-endian.
-public static (slice<byte>, error) AppendBinary(this AddrPort p, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(AddrPort p, slice<byte> b) {
     (b, var err) = p.Addr().AppendBinary(b);
     if (err != nil) {
         return (default, err);
@@ -1367,7 +1367,7 @@ public static (slice<byte>, error) AppendBinary(this AddrPort p, slice<byte> b) 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
 // It returns [Addr.MarshalBinary] with an additional two bytes appended
 // containing the port in little-endian.
-public static (slice<byte>, error) MarshalBinary(this AddrPort p) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(AddrPort p) {
     return p.AppendBinary(new slice<byte>(0, p.Addr().marshalBinarySize() + 2));
 }
 
@@ -1377,7 +1377,7 @@ private static readonly @string unexpectedSliceSizeˢᵇ = "unexpected slice siz
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by [AddrPort.MarshalBinary].
-public static error UnmarshalBinary(this ref AddrPort p, slice<byte> b) {
+internal static error UnmarshalBinaryᴍ(ref AddrPort p, slice<byte> b) {
     if (len(b) < 2) {
         return errors.New(unexpectedSliceSizeˢ);
     }
@@ -1422,32 +1422,32 @@ public static Prefix PrefixFrom(Addr ip, nint bits) {
     );
 }
 
-} partial class netipᴛPrefix {
+} partial class netip_package {
 
 // Addr returns p's IP address.
-public static Addr Addr(this Prefix p) { return p.ip; }
+internal static Addr Addrᴍ(Prefix p) { return p.ip; }
 
 // Bits returns p's prefix length.
 //
 // It reports -1 if invalid.
-public static nint Bits(this Prefix p) { return (nint)p.bitsPlusOne - 1; }
+internal static nint Bitsᴍ(Prefix p) { return (nint)p.bitsPlusOne - 1; }
 
 // IsValid reports whether p.Bits() has a valid range for p.Addr().
 // If p.Addr() is the zero [Addr], IsValid returns false.
 // Note that if p is the zero [Prefix], then p.IsValid() == false.
-public static bool IsValid(this Prefix p) { return p.bitsPlusOne > 0; }
+internal static bool IsValidᴍ(Prefix p) { return p.bitsPlusOne > 0; }
 
-internal static bool isZero(this Prefix p) { return p == new Prefix(); }
+internal static bool isZeroᴍ(Prefix p) { return p == new Prefix(); }
 
 // IsSingleIP reports whether p contains exactly one IP.
-public static bool IsSingleIP(this Prefix p) { return p.IsValid() && p.Bits() == p.ip.BitLen(); }
+internal static bool IsSingleIPᴍ(Prefix p) { return p.IsValid() && p.Bits() == p.ip.BitLen(); }
 
 // Compare returns an integer comparing two prefixes.
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.
 // Prefixes sort first by validity (invalid before valid), then
 // address family (IPv4 before IPv6), then masked prefix address, then
 // prefix length, then unmasked address.
-public static nint Compare(this Prefix p, Prefix p2) {
+internal static nint Compareᴍ(Prefix p, Prefix p2) {
     // Aside from sorting based on the masked address, this use of
     // Addr.Compare also enforces the valid vs. invalid and address
     // family ordering for the prefix.
@@ -1473,9 +1473,9 @@ partial struct parsePrefixError {
     internal @string msg; // an explanation of the parse failure
 }
 
-} partial class netipᴛparsePrefixError {
+} partial class netip_package {
 
-internal static @string Error(this parsePrefixError err) {
+internal static @string Errorᴍ(parsePrefixError err) {
     return "netip.ParsePrefix("u8 + strconv.Quote(err.@in) + "): "u8 + err.msg;
 }
 
@@ -1533,13 +1533,13 @@ public static Prefix MustParsePrefix(@string s) {
     return ip;
 }
 
-} partial class netipᴛPrefix {
+} partial class netip_package {
 
 // Masked returns p in its canonical form, with all but the high
 // p.Bits() bits of p.Addr() masked off.
 //
 // If p is zero or otherwise invalid, Masked returns the zero [Prefix].
-public static Prefix Masked(this Prefix p) {
+internal static Prefix Maskedᴍ(Prefix p) {
     var (m, _) = p.ip.Prefix(p.Bits());
     return m;
 }
@@ -1551,7 +1551,7 @@ public static Prefix Masked(this Prefix p) {
 // A zero-value IP will not match any prefix.
 // If ip has an IPv6 zone, Contains returns false,
 // because Prefixes strip zones.
-public static bool Contains(this Prefix p, Addr ip) {
+internal static bool Containsᴍ(Prefix p, Addr ip) {
     if (!p.IsValid() || ip.hasZone()) {
         return false;
     }
@@ -1582,7 +1582,7 @@ public static bool Contains(this Prefix p, Addr ip) {
 // If p and o are of different address families or either have a zero
 // IP, it reports false. Like the Contains method, a prefix with an
 // IPv4-mapped IPv6 address is still treated as an IPv6 mask.
-public static bool Overlaps(this Prefix p, Prefix o) {
+internal static bool Overlapsᴍ(Prefix p, Prefix o) {
     if (!p.IsValid() || !o.IsValid()) {
         return false;
     }
@@ -1619,7 +1619,7 @@ public static bool Overlaps(this Prefix p, Prefix o) {
 // AppendTo appends a text encoding of p,
 // as generated by [Prefix.MarshalText],
 // to b and returns the extended buffer.
-public static slice<byte> AppendTo(this Prefix p, slice<byte> b) {
+internal static slice<byte> AppendToᴍ(Prefix p, slice<byte> b) {
     if (p.isZero()) {
         return b;
     }
@@ -1646,14 +1646,14 @@ public static slice<byte> AppendTo(this Prefix p, slice<byte> b) {
 
 // AppendText implements the [encoding.TextAppender] interface.
 // It is the same as [Prefix.AppendTo].
-public static (slice<byte>, error) AppendText(this Prefix p, slice<byte> b) {
+internal static (slice<byte>, error) AppendTextᴍ(Prefix p, slice<byte> b) {
     return (p.AppendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface,
 // The encoding is the same as returned by [Prefix.String], with one exception:
 // If p is the zero value, the encoding is the empty string.
-public static (slice<byte>, error) MarshalText(this Prefix p) {
+internal static (slice<byte>, error) MarshalTextᴍ(Prefix p) {
     var buf = slice<byte>([]);
     switch (p.ip.z) {
     case var ᴛ when ᴛ == z0: {
@@ -1675,7 +1675,7 @@ public static (slice<byte>, error) MarshalText(this Prefix p) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
 // The IP address is expected in a form accepted by [ParsePrefix]
 // or generated by [Prefix.MarshalText].
-public static error UnmarshalText(this ref Prefix p, slice<byte> text) {
+internal static error UnmarshalTextᴍ(ref Prefix p, slice<byte> text) {
     if (len(text) == 0) {
         p = new Prefix();
         return default;
@@ -1688,7 +1688,7 @@ public static error UnmarshalText(this ref Prefix p, slice<byte> text) {
 // AppendBinary implements the [encoding.AppendMarshaler] interface.
 // It returns [Addr.AppendBinary] with an additional byte appended
 // containing the prefix bits.
-public static (slice<byte>, error) AppendBinary(this Prefix p, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(Prefix p, slice<byte> b) {
     (b, var err) = p.Addr().withoutZone().AppendBinary(b);
     if (err != nil) {
         return (default, err);
@@ -1699,7 +1699,7 @@ public static (slice<byte>, error) AppendBinary(this Prefix p, slice<byte> b) {
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
 // It returns [Addr.MarshalBinary] with an additional byte appended
 // containing the prefix bits.
-public static (slice<byte>, error) MarshalBinary(this Prefix p) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(Prefix p) {
     // without the zone the max length is 16, plus an additional byte is 17
     return p.AppendBinary(new slice<byte>(0, p.Addr().withoutZone().marshalBinarySize() + 1));
 }
@@ -1710,7 +1710,7 @@ private static readonly @string unexpectedSliceSizeˢᵇ = "unexpected slice siz
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by [Prefix.MarshalBinary].
-public static error UnmarshalBinary(this ref Prefix p, slice<byte> b) {
+internal static error UnmarshalBinaryᴍ(ref Prefix p, slice<byte> b) {
     if (len(b) < 1) {
         return errors.New(unexpectedSliceSizeˢ);
     }
@@ -1728,7 +1728,7 @@ internal static ref readonly @string invalidPrefixˢ => ref invalidPrefixˢᵇ;
 private static readonly @string invalidPrefixˢᵇ = "invalid Prefix"u8;
 
 // String returns the CIDR notation of p: "<ip>/<bits>".
-public static @string String(this Prefix p) {
+internal static @string Stringᴍ(Prefix p) {
     if (!p.IsValid()) {
         return invalidPrefixˢ;
     }
@@ -1736,3 +1736,93 @@ public static @string String(this Prefix p) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netipᴛparseAddrError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this parseAddrError err) => netip_package.Errorᴍ(err);
+}
+partial class netipᴛAddr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 v4(this Addr ip, uint8 i) => netip_package.v4ᴍ(ip, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 v6(this Addr ipʗp, uint8 i) => netip_package.v6ᴍ(ipʗp, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 v6u16(this Addr ipʗp, uint8 i) => netip_package.v6u16ᴍ(ipʗp, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isZero(this Addr ip) => netip_package.isZeroᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsValid(this Addr ip) => netip_package.IsValidᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BitLen(this Addr ip) => netip_package.BitLenᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Zone(this Addr ip) => netip_package.Zoneᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Compare(this Addr ip, Addr ip2) => netip_package.Compareᴍ(ip, ip2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Less(this Addr ip, Addr ip2) => netip_package.Lessᴍ(ip, ip2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Is4(this Addr ip) => netip_package.Is4ᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Is4In6(this Addr ip) => netip_package.Is4In6ᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Is6(this Addr ip) => netip_package.Is6ᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Addr Unmap(this Addr ip) => netip_package.Unmapᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Addr WithZone(this Addr ip, @string zone) => netip_package.WithZoneᴍ(ip, zone);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Addr withoutZone(this Addr ip) => netip_package.withoutZoneᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasZone(this Addr ip) => netip_package.hasZoneᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsLinkLocalUnicast(this Addr ip) => netip_package.IsLinkLocalUnicastᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsLoopback(this Addr ip) => netip_package.IsLoopbackᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsMulticast(this Addr ip) => netip_package.IsMulticastᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsInterfaceLocalMulticast(this Addr ip) => netip_package.IsInterfaceLocalMulticastᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsLinkLocalMulticast(this Addr ip) => netip_package.IsLinkLocalMulticastᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsGlobalUnicast(this Addr ip) => netip_package.IsGlobalUnicastᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsPrivate(this Addr ip) => netip_package.IsPrivateᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsUnspecified(this Addr ip) => netip_package.IsUnspecifiedᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Prefix, error) Prefix(this Addr ip, nint b) => netip_package.Prefixᴍ(ip, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> /*a16*/ As16(this Addr ip) => netip_package.As16ᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> /*a4*/ As4(this Addr ip) => netip_package.As4ᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AsSlice(this Addr ip) => netip_package.AsSliceᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Addr Next(this Addr ip) => netip_package.Nextᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Addr Prev(this Addr ip) => netip_package.Prevᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Addr ip) => netip_package.Stringᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AppendTo(this Addr ip, slice<byte> b) => netip_package.AppendToᴍ(ip, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string string4(this Addr ip) => netip_package.string4ᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendTo4(this Addr ip, slice<byte> ret) => netip_package.appendTo4ᴍ(ip, ret);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string string4In6(this Addr ip) => netip_package.string4In6ᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendTo4In6(this Addr ip, slice<byte> ret) => netip_package.appendTo4In6ᴍ(ip, ret);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string string6(this Addr ip) => netip_package.string6ᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendTo6(this Addr ip, slice<byte> ret) => netip_package.appendTo6ᴍ(ip, ret);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string StringExpanded(this Addr ip) => netip_package.StringExpandedᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this Addr ip, slice<byte> b) => netip_package.AppendTextᴍ(ip, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this Addr ip) => netip_package.MarshalTextᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ref Addr ip, slice<byte> text) => netip_package.UnmarshalTextᴍ(ref ip, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this Addr ip, slice<byte> b) => netip_package.AppendBinaryᴍ(ip, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint marshalBinarySize(this Addr ip) => netip_package.marshalBinarySizeᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this Addr ip) => netip_package.MarshalBinaryᴍ(ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref Addr ip, slice<byte> b) => netip_package.UnmarshalBinaryᴍ(ref ip, b);
+}
+partial class netipᴛAddrPort {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Addr Addr(this AddrPort p) => netip_package.Addrᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint16 Port(this AddrPort p) => netip_package.Portᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsValid(this AddrPort p) => netip_package.IsValidᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Compare(this AddrPort p, AddrPort p2) => netip_package.Compareᴍ(p, p2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this AddrPort p) => netip_package.Stringᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AppendTo(this AddrPort p, slice<byte> b) => netip_package.AppendToᴍ(p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this AddrPort p, slice<byte> b) => netip_package.AppendTextᴍ(p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this AddrPort p) => netip_package.MarshalTextᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ref AddrPort p, slice<byte> text) => netip_package.UnmarshalTextᴍ(ref p, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this AddrPort p, slice<byte> b) => netip_package.AppendBinaryᴍ(p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this AddrPort p) => netip_package.MarshalBinaryᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref AddrPort p, slice<byte> b) => netip_package.UnmarshalBinaryᴍ(ref p, b);
+}
+partial class netipᴛPrefix {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Addr Addr(this Prefix p) => netip_package.Addrᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Bits(this Prefix p) => netip_package.Bitsᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsValid(this Prefix p) => netip_package.IsValidᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isZero(this Prefix p) => netip_package.isZeroᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsSingleIP(this Prefix p) => netip_package.IsSingleIPᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Compare(this Prefix p, Prefix p2) => netip_package.Compareᴍ(p, p2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Prefix Masked(this Prefix p) => netip_package.Maskedᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Contains(this Prefix p, Addr ip) => netip_package.Containsᴍ(p, ip);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Overlaps(this Prefix p, Prefix o) => netip_package.Overlapsᴍ(p, o);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AppendTo(this Prefix p, slice<byte> b) => netip_package.AppendToᴍ(p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this Prefix p, slice<byte> b) => netip_package.AppendTextᴍ(p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this Prefix p) => netip_package.MarshalTextᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ref Prefix p, slice<byte> text) => netip_package.UnmarshalTextᴍ(ref p, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this Prefix p, slice<byte> b) => netip_package.AppendBinaryᴍ(p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this Prefix p) => netip_package.MarshalBinaryᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref Prefix p, slice<byte> b) => netip_package.UnmarshalBinaryᴍ(ref p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Prefix p) => netip_package.Stringᴍ(p);
+}
+partial class netipᴛparsePrefixError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this parsePrefixError err) => netip_package.Errorᴍ(err);
+}
+// </GlyphForwarders>

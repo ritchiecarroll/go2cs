@@ -16,12 +16,12 @@ internal static slice<int32> xorMasks = [ // 8 elements
     0, 1, 6, 7, 3, 15, 29, 63
 ]; // Size: 56 bytes
 
-} partial class bidiᴛbidiTrie {
+} partial class bidi_package {
 
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint8 v, nint sz) lookup(this ref bidiTrie t, slice<byte> s) {
+internal static (uint8 v, nint sz) lookupᴍ(ref bidiTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -87,7 +87,7 @@ internal static (uint8 v, nint sz) lookup(this ref bidiTrie t, slice<byte> s) {
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint8 lookupUnsafe(this ref bidiTrie t, slice<byte> s) {
+internal static uint8 lookupUnsafeᴍ(ref bidiTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return bidiValues[c0];
@@ -110,7 +110,7 @@ internal static uint8 lookupUnsafe(this ref bidiTrie t, slice<byte> s) {
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint8 v, nint sz) lookupString(this ref bidiTrie t, @string s) {
+internal static (uint8 v, nint sz) lookupStringᴍ(ref bidiTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -176,7 +176,7 @@ internal static (uint8 v, nint sz) lookupString(this ref bidiTrie t, @string s) 
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint8 lookupStringUnsafe(this ref bidiTrie t, @string s) {
+internal static uint8 lookupStringUnsafeᴍ(ref bidiTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return bidiValues[c0];
@@ -206,10 +206,10 @@ internal static ж<bidiTrie> newBidiTrie(nint i) {
     return Ꮡ(new bidiTrie());
 }
 
-} partial class bidiᴛbidiTrie {
+} partial class bidi_package {
 
 // lookupValue determines the type of block n and looks up the value for b.
-internal static uint8 lookupValue(this ref bidiTrie t, uint32 n, byte b) {
+internal static uint8 lookupValueᴍ(ref bidiTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     default: {
         return (uint8)bidiValues[(n << 6) + (uint32)b];
@@ -2062,3 +2062,13 @@ internal static uint8 lookupValue(this ref bidiTrie t, uint32 n, byte b) {
 // Total table size 19960 bytes (19KiB); checksum: F50EF68C
 
 } // end bidi_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bidiᴛbidiTrie {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint8 v, nint sz) lookup(this ref bidiTrie t, slice<byte> s) => bidi_package.lookupᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 lookupUnsafe(this ref bidiTrie t, slice<byte> s) => bidi_package.lookupUnsafeᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint8 v, nint sz) lookupString(this ref bidiTrie t, @string s) => bidi_package.lookupStringᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 lookupStringUnsafe(this ref bidiTrie t, @string s) => bidi_package.lookupStringUnsafeᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 lookupValue(this ref bidiTrie t, uint32 n, byte b) => bidi_package.lookupValueᴍ(ref t, n, b);
+}
+// </GlyphForwarders>

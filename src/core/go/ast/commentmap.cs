@@ -25,9 +25,9 @@ internal static void sortComments(slice<ж<CommentGroup>> list) {
 // the association.
 partial struct CommentMap /*map[Node, slice<ж<CommentGroup>>]*/;
 
-} partial class astᴛCommentMap {
+} partial class ast_package {
 
-internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> c) {
+internal static void addCommentᴍ(CommentMap cmap, Node n, ж<CommentGroup> c) {
     var list = cmap[n];
     if (len(list) == 0) {
         list = [c];
@@ -78,13 +78,13 @@ partial struct commentListReader {
     internal token.Position pos, end; // source interval of comment group at current index
 }
 
-} partial class astᴛcommentListReader {
+} partial class ast_package {
 
-internal static bool eol(this ref commentListReader r) {
+internal static bool eolᴍ(ref commentListReader r) {
     return r.index >= len(r.list);
 }
 
-internal static void next(this ref commentListReader r) {
+internal static void nextᴍ(ref commentListReader r) {
     if (!r.eol()) {
         r.comment = r.list[r.index];
         r.pos = r.fset.Position(r.comment.Pos());
@@ -99,11 +99,11 @@ internal static void next(this ref commentListReader r) {
 // A node lower on the stack lexically contains the nodes higher on the stack.
 partial struct nodeStack /*[]Node*/;
 
-} partial class astᴛnodeStack {
+} partial class ast_package {
 
 // push pops all nodes that appear lexically before n
 // and then pushes n on the stack.
-internal static void push(this ref nodeStack s, Node n) {
+internal static void pushᴍ(ref nodeStack s, Node n) {
     s.pop(n.Pos());
     s = append((s), n);
 }
@@ -111,7 +111,7 @@ internal static void push(this ref nodeStack s, Node n) {
 // pop pops all nodes that appear lexically before pos
 // (i.e., whose lexical extent has ended before or at pos).
 // It returns the last node popped.
-internal static Node /*top*/ pop(this ref nodeStack s, token.Pos pos) {
+internal static Node /*top*/ popᴍ(ref nodeStack s, token.Pos pos) {
     Node top = default;
 
     nint i = len(s);
@@ -244,12 +244,12 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
     return cmap;
 }
 
-} partial class astᴛCommentMap {
+} partial class ast_package {
 
 // Update replaces an old node in the comment map with the new node
 // and returns the new node. Comments that were associated with the
 // old node are associated with the new node.
-public static Node Update(this CommentMap cmap, Node old, Node @new) {
+internal static Node Updateᴍ(CommentMap cmap, Node old, Node @new) {
     var list = cmap[old]; if (len(list) > 0) {
         delete(cmap, old);
         cmap[@new] = appendꓸꓸꓸ(cmap[@new], list);
@@ -260,7 +260,7 @@ public static Node Update(this CommentMap cmap, Node old, Node @new) {
 // Filter returns a new comment map consisting of only those
 // entries of cmap for which a corresponding node exists in
 // the AST specified by node.
-public static CommentMap Filter(this CommentMap cmap, Node node) {
+internal static CommentMap Filterᴍ(CommentMap cmap, Node node) {
     var umap = new CommentMap(0);
     var cmapʗ1 = cmap;
     var umapʗ1 = umap;
@@ -275,7 +275,7 @@ public static CommentMap Filter(this CommentMap cmap, Node node) {
 
 // Comments returns the list of comment groups in the comment map.
 // The result is sorted in source order.
-public static slice<ж<CommentGroup>> Comments(this CommentMap cmap) {
+internal static slice<ж<CommentGroup>> Commentsᴍ(CommentMap cmap) {
     var list = new slice<ж<CommentGroup>>(0, len(cmap));
     foreach (var (_, e) in cmap) {
         list = appendꓸꓸꓸ(list, e);
@@ -325,12 +325,12 @@ break_loop:;
     return (@string)bytesΔ1;
 }
 
-} partial class astᴛCommentMap {
+} partial class ast_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object commentMapˢ = (@string)"CommentMap {"u8;
 
-public static @string String(this CommentMap cmap) {
+internal static @string Stringᴍ(CommentMap cmap) {
     var nodesᴷ = new stackAppend<Node>();
 
     // print map entries in sorted order
@@ -364,3 +364,21 @@ public static @string String(this CommentMap cmap) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class astᴛCommentMap {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> c) => ast_package.addCommentᴍ(cmap, n, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Node Update(this CommentMap cmap, Node old, Node @new) => ast_package.Updateᴍ(cmap, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static CommentMap Filter(this CommentMap cmap, Node node) => ast_package.Filterᴍ(cmap, node);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<CommentGroup>> Comments(this CommentMap cmap) => ast_package.Commentsᴍ(cmap);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CommentMap cmap) => ast_package.Stringᴍ(cmap);
+}
+partial class astᴛcommentListReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool eol(this ref commentListReader r) => ast_package.eolᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ref commentListReader r) => ast_package.nextᴍ(ref r);
+}
+partial class astᴛnodeStack {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ref nodeStack s, Node n) => ast_package.pushᴍ(ref s, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Node /*top*/ pop(this ref nodeStack s, token.Pos pos) => ast_package.popᴍ(ref s, pos);
+}
+// </GlyphForwarders>

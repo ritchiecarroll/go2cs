@@ -45,10 +45,10 @@ partial struct levelInfo {
     internal int32 needed;
 }
 
-} partial class flateᴛhcode {
+} partial class flate_package {
 
 // set sets the code and length of an hcode.
-internal static void set(this ref hcode h, uint16 code, uint16 length) {
+internal static void setᴍ(ref hcode h, uint16 code, uint16 length) {
     h.len = length;
     h.code = code;
 }
@@ -111,9 +111,9 @@ internal static ж<huffmanEncoder> generateFixedOffsetEncoding() {
 internal static ж<huffmanEncoder> fixedLiteralEncoding = generateFixedLiteralEncoding();
 internal static ж<huffmanEncoder> fixedOffsetEncoding = generateFixedOffsetEncoding();
 
-} partial class flateᴛhuffmanEncoder {
+} partial class flate_package {
 
-internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) {
+internal static nint bitLengthᴍ(ref huffmanEncoder h, slice<int32> freq) {
     nint total = default;
     foreach (var (i, f) in range(freq)) {
         if (f != 0) {
@@ -127,7 +127,7 @@ internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) {
 
 internal static UntypedInt maxBitsLimit => 16;
 
-} partial class flateᴛhuffmanEncoder {
+} partial class flate_package {
 
 // bitCounts computes the number of literals assigned to each bit size in the Huffman encoding.
 // It is only called when list.length >= 3.
@@ -143,7 +143,7 @@ internal static UntypedInt maxBitsLimit => 16;
 //
 // bitCounts returns an integer slice in which slice[i] indicates the number of literals
 // that should be encoded in i bits.
-internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalNode> list, int32 maxBits) {
+internal static slice<int32> bitCountsᴍ(ref huffmanEncoder h, slice<literalNode> list, int32 maxBits) {
     if (maxBits >= maxBitsLimit) {
         throw panic("flate: maxBits too large");
     }
@@ -257,7 +257,7 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
 
 // Look at the leaves and assign them a bit count and an encoding as specified
 // in RFC 1951 3.2.2
-internal static void assignEncodingAndSize(this ж<huffmanEncoder> Ꮡh, slice<int32> bitCount, slice<literalNode> list) {
+internal static void assignEncodingAndSizeᴍ(ж<huffmanEncoder> Ꮡh, slice<int32> bitCount, slice<literalNode> list) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var code = (uint16)0;
@@ -285,7 +285,7 @@ internal static void assignEncodingAndSize(this ж<huffmanEncoder> Ꮡh, slice<i
 //
 // freq is an array of frequencies, in which freq[i] gives the frequency of literal i.
 // maxBits  The maximum number of bits to use for any literal.
-internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, int32 maxBits) {
+internal static void generateᴍ(ж<huffmanEncoder> Ꮡh, slice<int32> freq, int32 maxBits) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (h.freqcache == nil) {
@@ -329,46 +329,46 @@ internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, i
 
 partial struct byLiteral /*[]literalNode*/;
 
-} partial class flateᴛbyLiteral {
+} partial class flate_package {
 
-internal static void sort(this ж<byLiteral> Ꮡs, slice<literalNode> a) {
+internal static void sortᴍ(ж<byLiteral> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s = (byLiteral)a;
     sort_package.Sort(new byLiteralжInterface(Ꮡs));
 }
 
-internal static nint Len(this byLiteral s) { return len(s); }
+internal static nint Lenᴍ(byLiteral s) { return len(s); }
 
-internal static bool Less(this byLiteral s, nint i, nint j) {
+internal static bool Lessᴍ(byLiteral s, nint i, nint j) {
     return s[i].literal < s[j].literal;
 }
 
-internal static void Swap(this byLiteral s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+internal static void Swapᴍ(byLiteral s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 } partial class flate_package {
 
 partial struct byFreq /*[]literalNode*/;
 
-} partial class flateᴛbyFreq {
+} partial class flate_package {
 
-internal static void sort(this ж<byFreq> Ꮡs, slice<literalNode> a) {
+internal static void sortᴍ(ж<byFreq> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s = (byFreq)a;
     sort_package.Sort(new byFreqжInterface(Ꮡs));
 }
 
-internal static nint Len(this byFreq s) { return len(s); }
+internal static nint Lenᴍ(byFreq s) { return len(s); }
 
-internal static bool Less(this byFreq s, nint i, nint j) {
+internal static bool Lessᴍ(byFreq s, nint i, nint j) {
     if (s[i].freq == s[j].freq) {
         return s[i].literal < s[j].literal;
     }
     return s[i].freq < s[j].freq;
 }
 
-internal static void Swap(this byFreq s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+internal static void Swapᴍ(byFreq s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 } partial class flate_package {
 
@@ -377,3 +377,27 @@ internal static uint16 reverseBits(uint16 number, byte bitLength) {
 }
 
 } // end flate_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class flateᴛhcode {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref hcode h, uint16 code, uint16 length) => flate_package.setᴍ(ref h, code, length);
+}
+partial class flateᴛhuffmanEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) => flate_package.bitLengthᴍ(ref h, freq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalNode> list, int32 maxBits) => flate_package.bitCountsᴍ(ref h, list, maxBits);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void assignEncodingAndSize(this ж<huffmanEncoder> Ꮡh, slice<int32> bitCount, slice<literalNode> list) => flate_package.assignEncodingAndSizeᴍ(Ꮡh, bitCount, list);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, int32 maxBits) => flate_package.generateᴍ(Ꮡh, freq, maxBits);
+}
+partial class flateᴛbyLiteral {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sort(this ж<byLiteral> Ꮡs, slice<literalNode> a) => flate_package.sortᴍ(Ꮡs, a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this byLiteral s) => flate_package.Lenᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this byLiteral s, nint i, nint j) => flate_package.Lessᴍ(s, i, j);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this byLiteral s, nint i, nint j) => flate_package.Swapᴍ(s, i, j);
+}
+partial class flateᴛbyFreq {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sort(this ж<byFreq> Ꮡs, slice<literalNode> a) => flate_package.sortᴍ(Ꮡs, a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this byFreq s) => flate_package.Lenᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this byFreq s, nint i, nint j) => flate_package.Lessᴍ(s, i, j);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this byFreq s, nint i, nint j) => flate_package.Swapᴍ(s, i, j);
+}
+// </GlyphForwarders>

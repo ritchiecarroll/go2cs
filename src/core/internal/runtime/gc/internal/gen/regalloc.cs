@@ -30,9 +30,9 @@ partial struct locReg {
     internal nint reg;
 }
 
-} partial class genᴛlocReg {
+} partial class gen_package {
 
-internal static @string LocString(this locReg l) {
+internal static @string LocStringᴍ(locReg l) {
     switch (l.cls) {
     case var ᴛ when ᴛ == regClassFixed: {
         return fixedRegs[l.reg];
@@ -49,11 +49,11 @@ internal static @string LocString(this locReg l) {
     throw panic("bad register class");
 }
 
-internal static (loc, error) Deref(this locReg l, nint off) {
+internal static (loc, error) Derefᴍ(locReg l, nint off) {
     return (new locMem(l, off, ""), default);
 }
 
-internal static (locReg, bool) Reg(this locReg l) {
+internal static (locReg, bool) Regᴍ(locReg l) {
     return (l, true);
 }
 
@@ -65,9 +65,9 @@ partial struct locMem {
     internal @string name;
 }
 
-} partial class genᴛlocMem {
+} partial class gen_package {
 
-internal static @string LocString(this locMem l) {
+internal static @string LocStringᴍ(locMem l) {
     if (l.@base.cls == regClassFixed && l.@base.reg == regSB && l.off == 0) {
         return l.name + "(SB)"u8;
     }
@@ -80,11 +80,11 @@ internal static @string LocString(this locMem l) {
     return "("u8 + l.@base.LocString() + ")"u8;
 }
 
-internal static (loc, error) Deref(this locMem l, nint off) {
+internal static (loc, error) Derefᴍ(locMem l, nint off) {
     return (default, fmt.Errorf("cannot dereference already memory address %s"u8, l.LocString()));
 }
 
-internal static (locReg, bool) Reg(this locMem l) {
+internal static (locReg, bool) Regᴍ(locMem l) {
     if (l.@base.cls == regClassFixed) {
         return (new locReg(), false);
     }
@@ -119,9 +119,9 @@ partial struct regSet {
     internal array<uint32> inUse = new(numRegClasses);
 }
 
-} partial class genᴛregSet {
+} partial class gen_package {
 
-internal static void used(this ref regSet s, ж<op> Ꮡo, loc l) {
+internal static void usedᴍ(ref regSet s, ж<op> Ꮡo, loc l) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     if (l == nil) {
@@ -140,7 +140,7 @@ internal static void used(this ref regSet s, ж<op> Ꮡo, loc l) {
     s.inUse[reg.cls] |= (uint32)(((uint32)1).Lsh((int64)(reg.reg)));
 }
 
-internal static void free(this ref regSet s, loc l) {
+internal static void freeᴍ(ref regSet s, loc l) {
     if (l == nil) {
         return;
     }
@@ -157,9 +157,9 @@ internal static void free(this ref regSet s, loc l) {
     s.inUse[reg.cls] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((int64)(reg.reg))));
 }
 
-} partial class genᴛFunc {
+} partial class gen_package {
 
-internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
+internal static map<ж<op>, loc> assignLocsᴍ(ж<Func> Ꮡfn) {
     ref var fn = ref Ꮡfn.DerefOrNull();
 
     // Remove static indicator on name, if any. We'll add it back.
@@ -379,3 +379,23 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class genᴛlocReg {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string LocString(this locReg l) => gen_package.LocStringᴍ(l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (loc, error) Deref(this locReg l, nint off) => gen_package.Derefᴍ(l, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (locReg, bool) Reg(this locReg l) => gen_package.Regᴍ(l);
+}
+partial class genᴛlocMem {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string LocString(this locMem l) => gen_package.LocStringᴍ(l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (loc, error) Deref(this locMem l, nint off) => gen_package.Derefᴍ(l, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (locReg, bool) Reg(this locMem l) => gen_package.Regᴍ(l);
+}
+partial class genᴛregSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void used(this ref regSet s, ж<op> Ꮡo, loc l) => gen_package.usedᴍ(ref s, Ꮡo, l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ref regSet s, loc l) => gen_package.freeᴍ(ref s, l);
+}
+partial class genᴛFunc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) => gen_package.assignLocsᴍ(Ꮡfn);
+}
+// </GlyphForwarders>

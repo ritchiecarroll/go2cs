@@ -124,10 +124,10 @@ internal static nuint chunkPageIndex(uintptr p) {
     return (nuint)(p % (uintptr)pallocChunkBytes / (uintptr)pageSize);
 }
 
-} partial class runtimeᴛchunkIdx {
+} partial class runtime_package {
 
 // l1 returns the index into the first level of (*pageAlloc).chunks.
-internal static nuint l1(this chunkIdx i) {
+internal static nuint l1ᴍ(chunkIdx i) {
     if (pallocChunksL1Bits == 0) {
         // Let the compiler optimize this away if there's no
         // L1 map.
@@ -138,7 +138,7 @@ internal static nuint l1(this chunkIdx i) {
 }
 
 // l2 returns the index into the second level of (*pageAlloc).chunks.
-internal static nuint l2(this chunkIdx i) {
+internal static nuint l2ᴍ(chunkIdx i) {
     if (pallocChunksL1Bits == 0) {
         return (nuint)i;
     } else {
@@ -306,13 +306,13 @@ partial struct pageAlloc {
     internal bool test;
 }
 
-} partial class runtimeᴛpageAlloc {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rootLevelMaxPagesDoesnTˢ => ref rootLevelMaxPagesDoesnTˢᵇ;
 private static readonly @string rootLevelMaxPagesDoesnTˢᵇ = "root level max pages doesn't fit in summary"u8;
 
-internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
+internal static void initᴍ(ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var mheapLock = ref ᏑmheapLock.DerefOrNull();
     ref var sysStat = ref ᏑsysStat.DerefOrNull();
@@ -349,7 +349,7 @@ internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sy
 // tryChunkOf returns the bitmap data for the given chunk.
 //
 // Returns nil if the chunk data has not been mapped.
-internal static ж<pallocData> tryChunkOf(this ref pageAlloc p, chunkIdx ci) {
+internal static ж<pallocData> tryChunkOfᴍ(ref pageAlloc p, chunkIdx ci) {
     var l2 = p.chunks[ci.l1()];
     if (l2 == nil) {
         return default;
@@ -360,7 +360,7 @@ internal static ж<pallocData> tryChunkOf(this ref pageAlloc p, chunkIdx ci) {
 // chunkOf returns the chunk at the given chunk index.
 //
 // The chunk index must be valid or this method may throw.
-internal static ж<pallocData> chunkOf(this ref pageAlloc p, chunkIdx ci) {
+internal static ж<pallocData> chunkOfᴍ(ref pageAlloc p, chunkIdx ci) {
     return p.chunks[ci.l1()].at<pallocData>((ulong)(ci.l2()));
 }
 
@@ -372,7 +372,7 @@ private static readonly @string pageAllocOutOfMemoryˢᵇ = "pageAlloc: out of m
 // It may allocate metadata, in which case *p.sysStat will be updated.
 //
 // p.mheapLock must be held.
-internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) {
+internal static void growᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(p.mheapLock);
@@ -462,7 +462,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
 // Must be called on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-internal static void enableChunkHugePages(this ref pageAlloc p) {
+internal static void enableChunkHugePagesᴍ(ref pageAlloc p) {
     // Grab the heap lock to turn on huge pages for new chunks and clone the current
     // heap address space ranges.
     //
@@ -503,7 +503,7 @@ internal static void enableChunkHugePages(this ref pageAlloc p) {
 // whether the operation performed was an allocation or a free.
 //
 // p.mheapLock must be held.
-internal static void update(this ref pageAlloc p, uintptr @base, uintptr npages, bool contig, bool alloc) {
+internal static void updateᴍ(ref pageAlloc p, uintptr @base, uintptr npages, bool contig, bool alloc) {
     assertLockHeld(p.mheapLock);
 
     // base, limit, start, and end are inclusive.
@@ -589,7 +589,7 @@ internal static void update(this ref pageAlloc p, uintptr @base, uintptr npages,
 // allocated range.
 //
 // p.mheapLock must be held.
-internal static uintptr allocRange(this ref pageAlloc p, uintptr @base, uintptr npages) {
+internal static uintptr allocRangeᴍ(ref pageAlloc p, uintptr @base, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     var limit = @base + npages * (uintptr)pageSize - 1;
@@ -632,7 +632,7 @@ internal static uintptr allocRange(this ref pageAlloc p, uintptr @base, uintptr 
 // it returns maxOffAddr.
 //
 // p.mheapLock must be held.
-internal static offAddr findMappedAddr(this ref pageAlloc p, offAddr addr) {
+internal static offAddr findMappedAddrᴍ(ref pageAlloc p, offAddr addr) {
     assertLockHeld(p.mheapLock);
 
     // If we're not in a test, validate first by checking mheap_.arenas.
@@ -658,7 +658,7 @@ internal partial struct find_firstFree /*dyn*/ {
     internal offAddr @base, bound;
 }
 
-} partial class runtimeᴛpageAlloc {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rangePartiallyOverlapsˢ => ref rangePartiallyOverlapsˢᵇ;
@@ -682,7 +682,7 @@ private static readonly @string badSummaryDataˢᵇ = "bad summary data"u8;
 // searchAddr returned is invalid and must be ignored.
 //
 // p.mheapLock must be held.
-internal static (uintptr, offAddr) find(this ref pageAlloc p, uintptr npages) {
+internal static (uintptr, offAddr) findᴍ(ref pageAlloc p, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     // Search algorithm.
@@ -908,7 +908,7 @@ break_nextLevel:;
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-internal static (uintptr addr, uintptr scav) alloc(this ref pageAlloc p, uintptr npages) {
+internal static (uintptr addr, uintptr scav) allocᴍ(ref pageAlloc p, uintptr npages) {
     uintptr addr = default;
     uintptr scav = default;
 
@@ -972,7 +972,7 @@ Found:
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages) {
+internal static void freeᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(p.mheapLock);
@@ -1024,7 +1024,7 @@ internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages
 // newly-updated bitmap.
 //
 // p.mheapLock must be held.
-internal static void markRandomPaddingPages(this ref pageAlloc p, uintptr @base, uintptr npages) {
+internal static void markRandomPaddingPagesᴍ(ref pageAlloc p, uintptr @base, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     var limit = @base + npages * (uintptr)pageSize - 1;
@@ -1084,10 +1084,10 @@ internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
     return (pallocSum)(((uint64)start & (uint64)(maxPackedValue - 1)) | (((uint64)max & (uint64)(maxPackedValue - 1)) << (int)(logMaxPackedValue)) | (((uint64)end & (uint64)(maxPackedValue - 1)) << (int)(2 * logMaxPackedValue)));
 }
 
-} partial class runtimeᴛpallocSum {
+} partial class runtime_package {
 
 // start extracts the start value from a packed sum.
-internal static nuint start(this pallocSum p) {
+internal static nuint startᴍ(pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1095,7 +1095,7 @@ internal static nuint start(this pallocSum p) {
 }
 
 // max extracts the max value from a packed sum.
-internal static nuint max(this pallocSum p) {
+internal static nuint maxᴍ(pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1103,7 +1103,7 @@ internal static nuint max(this pallocSum p) {
 }
 
 // end extracts the end value from a packed sum.
-internal static nuint end(this pallocSum p) {
+internal static nuint endᴍ(pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1111,7 +1111,7 @@ internal static nuint end(this pallocSum p) {
 }
 
 // unpack unpacks all three values from the summary.
-internal static (nuint, nuint, nuint) unpack(this pallocSum p) {
+internal static (nuint, nuint, nuint) unpackᴍ(pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return (maxPackedValue, maxPackedValue, maxPackedValue);
     }
@@ -1160,3 +1160,30 @@ internal static pallocSum mergeSummaries(slice<pallocSum> sums, nuint logMaxPage
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛchunkIdx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint l1(this chunkIdx i) => runtime_package.l1ᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint l2(this chunkIdx i) => runtime_package.l2ᴍ(i);
+}
+partial class runtimeᴛpageAlloc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) => runtime_package.initᴍ(Ꮡp, ᏑmheapLock, ᏑsysStat, test);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<pallocData> tryChunkOf(this ref pageAlloc p, chunkIdx ci) => runtime_package.tryChunkOfᴍ(ref p, ci);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<pallocData> chunkOf(this ref pageAlloc p, chunkIdx ci) => runtime_package.chunkOfᴍ(ref p, ci);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) => runtime_package.growᴍ(Ꮡp, @base, size);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void enableChunkHugePages(this ref pageAlloc p) => runtime_package.enableChunkHugePagesᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ref pageAlloc p, uintptr @base, uintptr npages, bool contig, bool alloc) => runtime_package.updateᴍ(ref p, @base, npages, contig, alloc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr allocRange(this ref pageAlloc p, uintptr @base, uintptr npages) => runtime_package.allocRangeᴍ(ref p, @base, npages);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static offAddr findMappedAddr(this ref pageAlloc p, offAddr addr) => runtime_package.findMappedAddrᴍ(ref p, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, offAddr) find(this ref pageAlloc p, uintptr npages) => runtime_package.findᴍ(ref p, npages);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr addr, uintptr scav) alloc(this ref pageAlloc p, uintptr npages) => runtime_package.allocᴍ(ref p, npages);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages) => runtime_package.freeᴍ(Ꮡp, @base, npages);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void markRandomPaddingPages(this ref pageAlloc p, uintptr @base, uintptr npages) => runtime_package.markRandomPaddingPagesᴍ(ref p, @base, npages);
+}
+partial class runtimeᴛpallocSum {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint start(this pallocSum p) => runtime_package.startᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint max(this pallocSum p) => runtime_package.maxᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint end(this pallocSum p) => runtime_package.endᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nuint, nuint, nuint) unpack(this pallocSum p) => runtime_package.unpackᴍ(p);
+}
+// </GlyphForwarders>

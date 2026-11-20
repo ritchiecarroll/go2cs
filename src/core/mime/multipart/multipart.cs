@@ -72,7 +72,7 @@ partial struct Part {
     internal error readErr; // read error observed from mr.bufReader
 }
 
-} partial class multipartᴛPart {
+} partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nameˢ => ref nameˢᵇ;
@@ -80,7 +80,7 @@ private static readonly @string nameˢᵇ = "name"u8;
 
 // FormName returns the name parameter if p has a Content-Disposition
 // of type "form-data".  Otherwise it returns the empty string.
-public static @string FormName(this ref Part p) {
+internal static @string FormNameᴍ(ref Part p) {
     // See https://tools.ietf.org/html/rfc2183 section 2 for EBNF
     // of Content-Disposition value format.
     if (p.dispositionParams == nil) {
@@ -99,7 +99,7 @@ private static readonly @string filenameˢᵇ = "filename"u8;
 // FileName returns the filename parameter of the [Part]'s Content-Disposition
 // header. If not empty, the filename is passed through filepath.Base (which is
 // platform dependent) before being returned.
-public static @string FileName(this ref Part p) {
+internal static @string FileNameᴍ(ref Part p) {
     if (p.dispositionParams == nil) {
         p.parseContentDisposition();
     }
@@ -116,7 +116,7 @@ public static @string FileName(this ref Part p) {
 internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
 private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
 
-internal static void parseContentDisposition(this ref Part p) {
+internal static void parseContentDispositionᴍ(ref Part p) {
     @string v = p.Header.Get(contentDispositionˢ);
     error err = default;
     (p.disposition, p.dispositionParams, err) = mime.ParseMediaType(v);
@@ -154,9 +154,9 @@ partial struct stickyErrorReader {
     internal error err;
 }
 
-} partial class multipartᴛstickyErrorReader {
+} partial class multipart_package {
 
-internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) {
+internal static (nint n, error) Readᴍ(ref stickyErrorReader r, slice<byte> p) {
     nint n = default;
 
     if (r.err != nil) {
@@ -197,9 +197,9 @@ internal static (ж<Part>, error) newPart(ж<Reader> mr, bool rawPart, int64 max
     return (bp, default);
 }
 
-} partial class multipartᴛPart {
+} partial class multipart_package {
 
-internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static error populateHeadersᴍ(ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     var r = textproto.NewReader(p.mr.bufReader);
     var (header, err) = readMIMEHeader(r, maxMIMEHeaderSize, maxMIMEHeaders);
     if (err == nil) {
@@ -214,7 +214,7 @@ internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, 
 
 // Read reads the body of a part, after its headers and before the
 // next part (if any) begins.
-public static (nint n, error err) Read(this ref Part p, slice<byte> d) {
+internal static (nint n, error err) Readᴍ(ref Part p, slice<byte> d) {
     return p.r.Read(d);
 }
 
@@ -226,9 +226,9 @@ partial struct partReader {
     internal ж<Part> p;
 }
 
-} partial class multipartᴛpartReader {
+} partial class multipart_package {
 
-internal static (nint, error) Read(this partReader pr, slice<byte> d) {
+internal static (nint, error) Readᴍ(partReader pr, slice<byte> d) {
     var p = pr.p;
     var br = p.mr.bufReader;
 
@@ -365,9 +365,9 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
     return -1;
 }
 
-} partial class multipartᴛPart {
+} partial class multipart_package {
 
-public static error Close(this ж<Part> Ꮡp) {
+internal static error Closeᴍ(ж<Part> Ꮡp) {
     io.Copy(io.Discard, new PartжReader(Ꮡp));
     return default;
 }
@@ -407,7 +407,7 @@ internal static int64 maxMIMEHeaders() {
     return 10000;
 }
 
-} partial class multipartᴛReader {
+} partial class multipart_package {
 
 // NextPart returns the next part in the multipart or an error.
 // When there are no more parts, the error [io.EOF] is returned.
@@ -415,7 +415,7 @@ internal static int64 maxMIMEHeaders() {
 // As a special case, if the "Content-Transfer-Encoding" header
 // has a value of "quoted-printable", that header is instead
 // hidden and the body is transparently decoded during Read calls.
-public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) {
+internal static (ж<Part>, error) NextPartᴍ(ж<Reader> Ꮡr) {
     return Ꮡr.nextPart(false, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
@@ -424,11 +424,11 @@ public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) {
 //
 // Unlike [Reader.NextPart], it does not have special handling for
 // "Content-Transfer-Encoding: quoted-printable".
-public static (ж<Part>, error) NextRawPart(this ж<Reader> Ꮡr) {
+internal static (ж<Part>, error) NextRawPartᴍ(ж<Reader> Ꮡr) {
     return Ꮡr.nextPart(true, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
-internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static (ж<Part>, error) nextPartᴍ(ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.currentPart != nil) {
@@ -493,7 +493,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
 // isFinalBoundary reports whether line is the final boundary line
 // indicating that all parts are over.
 // It matches `^--boundary--[ \t]*(\r\n)?$`
-internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) {
+internal static bool isFinalBoundaryᴍ(ref Reader r, slice<byte> line) {
     if (!bytes.HasPrefix(line, r.dashBoundaryDash)) {
         return false;
     }
@@ -502,7 +502,7 @@ internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) {
     return len(rest) == 0 || bytes.Equal(rest, r.nl);
 }
 
-internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<byte> line) {
+internal static bool /*ret*/ isBoundaryDelimiterLineᴍ(ref Reader r, slice<byte> line) {
     // https://tools.ietf.org/html/rfc2046#section-5.1
     //   The boundary delimiter line is then defined as a line
     //   consisting entirely of two hyphen characters ("-",
@@ -539,3 +539,27 @@ internal static slice<byte> skipLWSPChar(slice<byte> b) {
 }
 
 } // end multipart_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class multipartᴛPart {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FormName(this ref Part p) => multipart_package.FormNameᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FileName(this ref Part p) => multipart_package.FileNameᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseContentDisposition(this ref Part p) => multipart_package.parseContentDispositionᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) => multipart_package.populateHeadersᴍ(ref p, maxMIMEHeaderSize, maxMIMEHeaders);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref Part p, slice<byte> d) => multipart_package.Readᴍ(ref p, d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Part> Ꮡp) => multipart_package.Closeᴍ(Ꮡp);
+}
+partial class multipartᴛstickyErrorReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) => multipart_package.Readᴍ(ref r, p);
+}
+partial class multipartᴛpartReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this partReader pr, slice<byte> d) => multipart_package.Readᴍ(pr, d);
+}
+partial class multipartᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) => multipart_package.NextPartᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Part>, error) NextRawPart(this ж<Reader> Ꮡr) => multipart_package.NextRawPartᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) => multipart_package.nextPartᴍ(Ꮡr, rawPart, maxMIMEHeaderSize, maxMIMEHeaders);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) => multipart_package.isFinalBoundaryᴍ(ref r, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<byte> line) => multipart_package.isBoundaryDelimiterLineᴍ(ref r, line);
+}
+// </GlyphForwarders>

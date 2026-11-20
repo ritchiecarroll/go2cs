@@ -2773,12 +2773,12 @@ internal static UntypedInt maxDecomp => 0x8000;
     0x00, 0x01
 }.array(); }
 
-} partial class normᴛnfcTrie {
+} partial class norm_package {
 
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookup(this ref nfcTrie t, slice<byte> s) {
+internal static (uint16 v, nint sz) lookupᴍ(ref nfcTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -2844,7 +2844,7 @@ internal static (uint16 v, nint sz) lookup(this ref nfcTrie t, slice<byte> s) {
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupUnsafe(this ref nfcTrie t, slice<byte> s) {
+internal static uint16 lookupUnsafeᴍ(ref nfcTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfcValues[c0];
@@ -2867,7 +2867,7 @@ internal static uint16 lookupUnsafe(this ref nfcTrie t, slice<byte> s) {
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookupString(this ref nfcTrie t, @string s) {
+internal static (uint16 v, nint sz) lookupStringᴍ(ref nfcTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -2933,7 +2933,7 @@ internal static (uint16 v, nint sz) lookupString(this ref nfcTrie t, @string s) 
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupStringUnsafe(this ref nfcTrie t, @string s) {
+internal static uint16 lookupStringUnsafeᴍ(ref nfcTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfcValues[c0];
@@ -2963,10 +2963,10 @@ internal static ж<nfcTrie> newNfcTrie(nint i) {
     return Ꮡ(new nfcTrie());
 }
 
-} partial class normᴛnfcTrie {
+} partial class norm_package {
 
 // lookupValue determines the type of block n and looks up the value for b.
-internal static uint16 lookupValue(this ref nfcTrie t, uint32 n, byte b) {
+internal static uint16 lookupValueᴍ(ref nfcTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 46: {
         return (uint16)nfcValues[(n << 6) + (uint32)b];
@@ -4506,12 +4506,12 @@ internal static uint16 lookupValue(this ref nfcTrie t, uint32 n, byte b) {
     new(value: 0x8100, lo: 0x93, hi: 0x93)
 }.array(); }
 
-} partial class normᴛnfkcTrie {
+} partial class norm_package {
 
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookup(this ref nfkcTrie t, slice<byte> s) {
+internal static (uint16 v, nint sz) lookupᴍ(ref nfkcTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -4577,7 +4577,7 @@ internal static (uint16 v, nint sz) lookup(this ref nfkcTrie t, slice<byte> s) {
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupUnsafe(this ref nfkcTrie t, slice<byte> s) {
+internal static uint16 lookupUnsafeᴍ(ref nfkcTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfkcValues[c0];
@@ -4600,7 +4600,7 @@ internal static uint16 lookupUnsafe(this ref nfkcTrie t, slice<byte> s) {
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookupString(this ref nfkcTrie t, @string s) {
+internal static (uint16 v, nint sz) lookupStringᴍ(ref nfkcTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -4666,7 +4666,7 @@ internal static (uint16 v, nint sz) lookupString(this ref nfkcTrie t, @string s)
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupStringUnsafe(this ref nfkcTrie t, @string s) {
+internal static uint16 lookupStringUnsafeᴍ(ref nfkcTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfkcValues[c0];
@@ -4696,10 +4696,10 @@ internal static ж<nfkcTrie> newNfkcTrie(nint i) {
     return Ꮡ(new nfkcTrie());
 }
 
-} partial class normᴛnfkcTrie {
+} partial class norm_package {
 
 // lookupValue determines the type of block n and looks up the value for b.
-internal static uint16 lookupValue(this ref nfkcTrie t, uint32 n, byte b) {
+internal static uint16 lookupValueᴍ(ref nfkcTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 95: {
         return (uint16)nfkcValues[(n << 6) + (uint32)b];
@@ -7944,3 +7944,20 @@ private static readonly @string recompMapPackedᵇ = ((@string)(new byte[]{
 // Total size of tables: 56KB (57068 bytes)
 
 } // end norm_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class normᴛnfcTrie {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16 v, nint sz) lookup(this ref nfcTrie t, slice<byte> s) => norm_package.lookupᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupUnsafe(this ref nfcTrie t, slice<byte> s) => norm_package.lookupUnsafeᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16 v, nint sz) lookupString(this ref nfcTrie t, @string s) => norm_package.lookupStringᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupStringUnsafe(this ref nfcTrie t, @string s) => norm_package.lookupStringUnsafeᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupValue(this ref nfcTrie t, uint32 n, byte b) => norm_package.lookupValueᴍ(ref t, n, b);
+}
+partial class normᴛnfkcTrie {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16 v, nint sz) lookup(this ref nfkcTrie t, slice<byte> s) => norm_package.lookupᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupUnsafe(this ref nfkcTrie t, slice<byte> s) => norm_package.lookupUnsafeᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16 v, nint sz) lookupString(this ref nfkcTrie t, @string s) => norm_package.lookupStringᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupStringUnsafe(this ref nfkcTrie t, @string s) => norm_package.lookupStringUnsafeᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupValue(this ref nfkcTrie t, uint32 n, byte b) => norm_package.lookupValueᴍ(ref t, n, b);
+}
+// </GlyphForwarders>

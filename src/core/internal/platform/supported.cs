@@ -13,9 +13,9 @@ partial struct OSArch {
     public @string GOOS, GOARCH;
 }
 
-} partial class platformᴛOSArch {
+} partial class platform_package {
 
-public static @string String(this OSArch p) {
+internal static @string Stringᴍ(OSArch p) {
     return p.GOOS + "/"u8 + p.GOARCH;
 }
 
@@ -305,3 +305,9 @@ public static bool Broken(@string goos, @string goarch) {
 }
 
 } // end platform_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class platformᴛOSArch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this OSArch p) => platform_package.Stringᴍ(p);
+}
+// </GlyphForwarders>

@@ -206,7 +206,7 @@ public static FileMode ModeType => /* ModeDir | ModeSymlink | ModeNamedPipe | Mo
 
 public static FileMode ModePerm => /* 0777 */ 511; // Unix permission bits
 
-} partial class fsᴛFileMode {
+} partial class fs_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static ref readonly @string strᶜ => ref strᶜᵇ;
@@ -216,7 +216,7 @@ private static readonly @string strᶜᵇ = "dalTLDpSugct?"u8;
 private static ref readonly @string rwxᶜ => ref rwxᶜᵇ;
 private static readonly @string rwxᶜᵇ = "rwxrwxrwx"u8;
 
-public static @string String(this FileMode m) {
+internal static @string Stringᴍ(FileMode m) {
     @string str = strᶜ;
     array<byte> buf = new(32); // Mode is uint32.
     nint w = 0;
@@ -244,23 +244,23 @@ public static @string String(this FileMode m) {
 
 // IsDir reports whether m describes a directory.
 // That is, it tests for the [ModeDir] bit being set in m.
-public static bool IsDir(this FileMode m) {
+internal static bool IsDirᴍ(FileMode m) {
     return (FileMode)(m & ModeDir) != 0;
 }
 
 // IsRegular reports whether m describes a regular file.
 // That is, it tests that no mode type bits are set.
-public static bool IsRegular(this FileMode m) {
+internal static bool IsRegularᴍ(FileMode m) {
     return (FileMode)(m & ModeType) == 0;
 }
 
 // Perm returns the Unix permission bits in m (m & [ModePerm]).
-public static FileMode Perm(this FileMode m) {
+internal static FileMode Permᴍ(FileMode m) {
     return (FileMode)(m & ModePerm);
 }
 
 // Type returns type bits in m (m & [ModeType]).
-public static FileMode Type(this FileMode m) {
+internal static FileMode Typeᴍ(FileMode m) {
     return (FileMode)(m & ModeType);
 }
 
@@ -273,11 +273,11 @@ partial struct PathError {
     public error Err;
 }
 
-} partial class fsᴛPathError {
+} partial class fs_package {
 
-public static @string Error(this ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
+internal static @string Errorᴍ(ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
 
-public static error Unwrap(this ref PathError e) { return e.Err; }
+internal static error Unwrapᴍ(ref PathError e) { return e.Err; }
 
 } partial class fs_package {
 
@@ -285,12 +285,27 @@ internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();
 }
 
-} partial class fsᴛPathError {
+} partial class fs_package {
 
 // Timeout reports whether this error represents a timeout.
-public static bool Timeout(this ref PathError e) {
+internal static bool Timeoutᴍ(ref PathError e) {
     var (t, ok) = e.Err._<Timeout_type>(ᐧ);
     return ok && t.Timeout();
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fsᴛFileMode {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this FileMode m) => fs_package.Stringᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsDir(this FileMode m) => fs_package.IsDirᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsRegular(this FileMode m) => fs_package.IsRegularᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static FileMode Perm(this FileMode m) => fs_package.Permᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static FileMode Type(this FileMode m) => fs_package.Typeᴍ(m);
+}
+partial class fsᴛPathError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref PathError e) => fs_package.Errorᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref PathError e) => fs_package.Unwrapᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref PathError e) => fs_package.Timeoutᴍ(ref e);
+}
+// </GlyphForwarders>

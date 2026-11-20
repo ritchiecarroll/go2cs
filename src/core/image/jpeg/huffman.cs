@@ -42,12 +42,12 @@ partial struct huffman {
 // Huffman data.
 internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short Huffman data");
 
-} partial class jpegᴛdecoder {
+} partial class jpeg_package {
 
 // ensureNBits reads bytes from the byte buffer to ensure that d.bits.n is at
 // least n. For best performance (avoiding function calls inside hot loops),
 // the caller is the one responsible for first checking that d.bits.n < n.
-internal static error ensureNBits(this ref decoder d, int32 n) {
+internal static error ensureNBitsᴍ(ref decoder d, int32 n) {
     for (;;) {
         var (c, err) = d.readByteStuffedByte();
         if (err != nil) {
@@ -72,7 +72,7 @@ internal static error ensureNBits(this ref decoder d, int32 n) {
 
 // receiveExtend is the composition of RECEIVE and EXTEND, specified in section
 // F.2.2.1.
-internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) {
+internal static (int32, error) receiveExtendᴍ(ref decoder d, uint8 t) {
     if (d.bits.n < (int32)t) {
         var err = d.ensureNBits((int32)t); if (err != nil) {
             return (0, err);
@@ -102,7 +102,7 @@ private static readonly @string huffmanTableHasExcessiveˢᵇ = "Huffman table h
 
 // processDHT processes a Define Huffman Table marker, and initializes a huffman
 // struct from its contents. Specified in section B.2.4.2.
-internal static error processDHT(this ref decoder d, nint n) {
+internal static error processDHTᴍ(ref decoder d, nint n) {
     while (n > 0) {
         if (n < 17) {
             return ((FormatError)(@string)dhtHasWrongLengthˢ);
@@ -199,7 +199,7 @@ private static readonly @string badHuffmanCodeˢᵇ = "bad Huffman code"u8;
 
 // decodeHuffman returns the next Huffman-coded value from the bit-stream,
 // decoded according to h.
-internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡh) {
+internal static (uint8, error) decodeHuffmanᴍ(ref decoder d, ж<huffman> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (h.nCodes == 0) {
@@ -249,7 +249,7 @@ break_slowPath:;
     return (0, ((FormatError)(@string)badHuffmanCodeˢ));
 }
 
-internal static (bool, error) decodeBit(this ref decoder d) {
+internal static (bool, error) decodeBitᴍ(ref decoder d) {
     if (d.bits.n == 0) {
         var err = d.ensureNBits(1); if (err != nil) {
             return (false, err);
@@ -261,7 +261,7 @@ internal static (bool, error) decodeBit(this ref decoder d) {
     return (ret, default);
 }
 
-internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
+internal static (uint32, error) decodeBitsᴍ(ref decoder d, int32 n) {
     if (d.bits.n < n) {
         var err = d.ensureNBits(n); if (err != nil) {
             return (0, err);
@@ -275,3 +275,14 @@ internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class jpegᴛdecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ensureNBits(this ref decoder d, int32 n) => jpeg_package.ensureNBitsᴍ(ref d, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) => jpeg_package.receiveExtendᴍ(ref d, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processDHT(this ref decoder d, nint n) => jpeg_package.processDHTᴍ(ref d, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡh) => jpeg_package.decodeHuffmanᴍ(ref d, Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, error) decodeBit(this ref decoder d) => jpeg_package.decodeBitᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32, error) decodeBits(this ref decoder d, int32 n) => jpeg_package.decodeBitsᴍ(ref d, n);
+}
+// </GlyphForwarders>

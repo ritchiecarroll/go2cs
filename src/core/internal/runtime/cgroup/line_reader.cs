@@ -13,9 +13,9 @@ partial class cgroup_package {
 // which cannot be imported from a runtime package.
 partial struct stringError /*@string*/;
 
-} partial class cgroupᴛstringError {
+} partial class cgroup_package {
 
-internal static @string Error(this stringError e) {
+internal static @string Errorᴍ(stringError e) {
     return (@string)e;
 }
 
@@ -68,7 +68,7 @@ internal static ж<lineReader> newLineReader(nint fd, slice<byte> scratch, Func<
     ));
 }
 
-} partial class cgroupᴛlineReader {
+} partial class cgroup_package {
 
 // next advances to the next line.
 //
@@ -82,7 +82,7 @@ internal static ж<lineReader> newLineReader(nint fd, slice<byte> scratch, Func<
 // the line.
 //
 // Returns errEOF when there are no more lines.
-internal static error next(this ref lineReader r) {
+internal static error nextᴍ(ref lineReader r) {
     // Three cases:
     //
     // 1. First call, no data read.
@@ -172,7 +172,7 @@ internal static error next(this ref lineReader r) {
 // Preconditions: [r.next] is called prior to the first call to line.
 //
 // Postconditions: The caller must not keep a reference to the returned slice.
-internal static slice<byte> line(this ref lineReader r) {
+internal static slice<byte> lineᴍ(ref lineReader r) {
     if (r.newline < 0) {
         // Incomplete line
         return r.scratch.slice(0, r.n);
@@ -182,3 +182,13 @@ internal static slice<byte> line(this ref lineReader r) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class cgroupᴛstringError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this stringError e) => cgroup_package.Errorᴍ(e);
+}
+partial class cgroupᴛlineReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error next(this ref lineReader r) => cgroup_package.nextᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> line(this ref lineReader r) => cgroup_package.lineᴍ(ref r);
+}
+// </GlyphForwarders>

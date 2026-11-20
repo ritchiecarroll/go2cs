@@ -11,9 +11,9 @@ partial class socktest_package {
 // Sockets maps a socket descriptor to the status of socket.
 partial struct Sockets /*map[nint, Status]*/;
 
-} partial class socktestᴛSwitch {
+} partial class socktest_package {
 
-internal static ж<Status> sockso(this ж<Switch> Ꮡsw, nint s) {
+internal static ж<Status> socksoᴍ(ж<Switch> Ꮡsw, nint s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -34,7 +34,7 @@ internal static ж<Status> sockso(this ж<Switch> Ꮡsw, nint s) {
 
 // addLocked returns a new Status without locking.
 // sw.smu must be held before call.
-internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, nint s, nint family, nint sotype, nint proto) {
+internal static ж<Status> addLockedᴍ(ж<Switch> Ꮡsw, nint s, nint family, nint sotype, nint proto) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.Ꮡonce.Do(Ꮡsw.init);
@@ -44,3 +44,10 @@ internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, nint s, nint family,
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class socktestᴛSwitch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Status> sockso(this ж<Switch> Ꮡsw, nint s) => socktest_package.socksoᴍ(Ꮡsw, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, nint s, nint family, nint sotype, nint proto) => socktest_package.addLockedᴍ(Ꮡsw, s, family, sotype, proto);
+}
+// </GlyphForwarders>

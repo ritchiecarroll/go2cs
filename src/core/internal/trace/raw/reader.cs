@@ -34,15 +34,15 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     return (Ꮡ(new Reader(r: br, v: v, specs: v.Specs())), default);
 }
 
-} partial class rawᴛReader {
+} partial class raw_package {
 
 // Version returns the version of the trace that we're reading.
-public static version.Version Version(this ref Reader r) {
+internal static version.Version Versionᴍ(ref Reader r) {
     return r.v;
 }
 
 // ReadEvent reads and returns the next trace event in the byte stream.
-public static (Event, error) ReadEvent(this ref Reader r) {
+internal static (Event, error) ReadEventᴍ(ref Reader r) {
     var (evb, err) = r.r.ReadByte();
     if (AreEqual(err, io.EOF)) {
         return (new Event(), io.EOF);
@@ -85,7 +85,7 @@ public static (Event, error) ReadEvent(this ref Reader r) {
     ), default);
 }
 
-internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) {
+internal static (slice<uint64>, error) readArgsᴍ(ref Reader r, nint n) {
     var argsᴷ = new stackAppend<uint64>(moves: true);
 
     slice<uint64> args = default;
@@ -100,7 +100,7 @@ internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) {
     return (args, default);
 }
 
-internal static (slice<byte>, error) readData(this ref Reader r) {
+internal static (slice<byte>, error) readDataᴍ(ref Reader r) {
     var dataᴷ = new stackAppend<byte>(moves: true);
 
     var (len, err) = binary.ReadUvarint(new bufio_ReaderжByteReader(r.r));
@@ -120,3 +120,12 @@ internal static (slice<byte>, error) readData(this ref Reader r) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class rawᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static version.Version Version(this ref Reader r) => raw_package.Versionᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Event, error) ReadEvent(this ref Reader r) => raw_package.ReadEventᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) => raw_package.readArgsᴍ(ref r, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readData(this ref Reader r) => raw_package.readDataᴍ(ref r);
+}
+// </GlyphForwarders>

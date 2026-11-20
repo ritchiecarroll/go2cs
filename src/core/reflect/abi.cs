@@ -83,9 +83,9 @@ partial struct abiSeq {
     internal nint iregs, fregs;  // registers used
 }
 
-} partial class reflectᴛabiSeq {
+} partial class reflect_package {
 
-internal static void dump(this ref abiSeq a) {
+internal static void dumpᴍ(ref abiSeq a) {
     foreach (var (i, p) in range(a.steps)) {
         println((@string)"part", i, p.kind, p.offset, p.size, p.stkOff, p.ireg, p.freg);
     }
@@ -102,7 +102,7 @@ internal static void dump(this ref abiSeq a) {
 // stepsForValue returns the ABI instructions for translating
 // the i'th Go argument or return value represented by this
 // abiSeq to the Go ABI.
-internal static slice<abiStep> stepsForValue(this ref abiSeq a, nint i) {
+internal static slice<abiStep> stepsForValueᴍ(ref abiSeq a, nint i) {
     nint s = a.valueStart[i];
     nint e = default;
     if (i == len(a.valueStart) - 1) {
@@ -117,7 +117,7 @@ internal static slice<abiStep> stepsForValue(this ref abiSeq a, nint i) {
 //
 // If the value was stack-assigned, returns the single
 // abiStep describing that translation, and nil otherwise.
-internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
+internal static ж<abiStep> addArgᴍ(ref abiSeq a, ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // We'll always be adding a new value, so do that first.
@@ -160,7 +160,7 @@ internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
 // If the receiver was stack-assigned, returns the single
 // abiStep describing that translation, and nil otherwise.
 // Returns true if the receiver is a pointer.
-internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡrcvr) {
+internal static (ж<abiStep>, bool) addRcvrᴍ(ref abiSeq a, ж<abi.Type> Ꮡrcvr) {
     ref var rcvr = ref Ꮡrcvr.DerefOrNull();
 
     // The receiver is always one word.
@@ -198,7 +198,7 @@ internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡr
 // n must be <= 8.
 //
 // Returns whether assignment succeeded.
-internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) {
+internal static bool assignIntNᴍ(ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) {
     if (n > 8 || n < 0) {
         throw panic("invalid n");
     }
@@ -230,7 +230,7 @@ internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size,
 // next n floating-point registers.
 //
 // Returns whether assignment succeeded.
-internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr size, nint n) {
+internal static bool assignFloatNᴍ(ref abiSeq a, uintptr offset, uintptr size, nint n) {
     if (n < 0) {
         throw panic("invalid n");
     }
@@ -253,7 +253,7 @@ internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr siz
 // large with alignment "alignment" to the stack.
 //
 // Should not be called directly; use addArg instead.
-internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) {
+internal static void stackAssignᴍ(ref abiSeq a, uintptr size, uintptr alignment) {
     a.stackBytes = align(a.stackBytes, alignment);
     a.steps = append(a.steps, new abiStep(
         kind: abiStepStack,
@@ -296,9 +296,9 @@ partial struct abiDesc {
     internal abi.IntArgRegBitmap inRegPtrs, outRegPtrs;
 }
 
-} partial class reflectᴛabiDesc {
+} partial class reflect_package {
 
-internal static void dump(this ref abiDesc a) {
+internal static void dumpᴍ(ref abiDesc a) {
     println((@string)"ABI");
     println((@string)"call");
     a.call.dump();
@@ -471,3 +471,18 @@ internal static void floatToReg(ref abi.RegArgs r, nint reg, uintptr argSize, @u
 }
 
 } // end reflect_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class reflectᴛabiSeq {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dump(this ref abiSeq a) => reflect_package.dumpᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<abiStep> stepsForValue(this ref abiSeq a, nint i) => reflect_package.stepsForValueᴍ(ref a, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) => reflect_package.addArgᴍ(ref a, Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡrcvr) => reflect_package.addRcvrᴍ(ref a, Ꮡrcvr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) => reflect_package.assignIntNᴍ(ref a, offset, size, n, ptrMap);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr size, nint n) => reflect_package.assignFloatNᴍ(ref a, offset, size, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) => reflect_package.stackAssignᴍ(ref a, size, alignment);
+}
+partial class reflectᴛabiDesc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dump(this ref abiDesc a) => reflect_package.dumpᴍ(ref a);
+}
+// </GlyphForwarders>

@@ -63,22 +63,22 @@ internal static UntypedInt gcmTagSize => 16;
 internal static UntypedInt gcmMinimumTagSize => 12; // NIST SP 800-38D recommends tags with 12 or more bytes.
 internal static UntypedInt gcmStandardNonceSize => 12;
 
-} partial class gcmᴛGCM {
+} partial class gcm_package {
 
-public static nint NonceSize(this ref GCM g) {
+internal static nint NonceSizeᴍ(ref GCM g) {
     return g.nonceSize;
 }
 
-public static nint Overhead(this ref GCM g) {
+internal static nint Overheadᴍ(ref GCM g) {
     return g.tagSize;
 }
 
-public static slice<byte> Seal(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+internal static slice<byte> Sealᴍ(ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     fips140.RecordNonApproved();
     return Ꮡg.sealAfterIndicator(dst, nonce, plaintext, data);
 }
 
-internal static slice<byte> sealAfterIndicator(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+internal static slice<byte> sealAfterIndicatorᴍ(ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     if (len(nonce) != g.nonceSize) {
@@ -107,9 +107,9 @@ internal static slice<byte> sealAfterIndicator(this ж<GCM> Ꮡg, slice<byte> ds
 
 internal static error errOpen = errors.New("cipher: message authentication failed");
 
-} partial class gcmᴛGCM {
+} partial class gcm_package {
 
-public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
+internal static (slice<byte>, error) Openᴍ(ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     if (len(nonce) != g.nonceSize) {
@@ -169,3 +169,13 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 }
 
 } // end gcm_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gcmᴛGCM {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NonceSize(this ref GCM g) => gcm_package.NonceSizeᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Overhead(this ref GCM g) => gcm_package.Overheadᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seal(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Sealᴍ(Ꮡg, dst, nonce, plaintext, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> sealAfterIndicator(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.sealAfterIndicatorᴍ(Ꮡg, dst, nonce, plaintext, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Openᴍ(Ꮡg, dst, nonce, ciphertext, data);
+}
+// </GlyphForwarders>

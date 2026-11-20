@@ -19,15 +19,24 @@ public static ж<Map> NewMap(Type key, Type elem) {
     return Ꮡ(new Map(key: key, elem: elem));
 }
 
-} partial class typesᴛMap {
+} partial class types_package {
 
 // Key returns the key type of map m.
-public static Type Key(this ref Map m) { return m.key; }
+internal static Type Keyᴍ(ref Map m) { return m.key; }
 
 // Elem returns the element type of map m.
-public static Type Elem(this ref Map m) { return m.elem; }
+internal static Type Elemᴍ(ref Map m) { return m.elem; }
 
-public static Type Underlying(this ж<Map> Ꮡt) { return new MapжType(Ꮡt); }
-public static @string String(this ж<Map> Ꮡt) { return TypeString(new MapжType(Ꮡt), default); }
+internal static Type Underlyingᴍ(ж<Map> Ꮡt) { return new MapжType(Ꮡt); }
+internal static @string Stringᴍ(ж<Map> Ꮡt) { return TypeString(new MapжType(Ꮡt), default); }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛMap {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Key(this ref Map m) => types_package.Keyᴍ(ref m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Elem(this ref Map m) => types_package.Elemᴍ(ref m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Map> Ꮡt) => types_package.Underlyingᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Map> Ꮡt) => types_package.Stringᴍ(Ꮡt);
+}
+// </GlyphForwarders>

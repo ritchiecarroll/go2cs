@@ -255,9 +255,9 @@ public static SignatureAlgorithm SHA384WithRSAPSS => 14;
 public static SignatureAlgorithm SHA512WithRSAPSS => 15;
 public static SignatureAlgorithm PureEd25519 => 16;
 
-} partial class x509ᴛSignatureAlgorithm {
+} partial class x509_package {
 
-internal static bool isRSAPSS(this SignatureAlgorithm algo) {
+internal static bool isRSAPSSᴍ(SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.isRSAPSS;
@@ -266,7 +266,7 @@ internal static bool isRSAPSS(this SignatureAlgorithm algo) {
     return false;
 }
 
-internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) {
+internal static crypto.Hash hashFuncᴍ(SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.hash;
@@ -275,7 +275,7 @@ internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) {
     return (crypto.Hash)0;
 }
 
-public static @string String(this SignatureAlgorithm algo) {
+internal static @string Stringᴍ(SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.name;
@@ -301,9 +301,9 @@ internal static array<@string> publicKeyAlgoName = new golib.SparseArray<@string
     [(int)Ed25519] = "Ed25519"
 }.array(5);
 
-} partial class x509ᴛPublicKeyAlgorithm {
+} partial class x509_package {
 
-public static @string String(this PublicKeyAlgorithm algo) {
+internal static @string Stringᴍ(PublicKeyAlgorithm algo) {
     if (0 < algo && (nint)algo < len(publicKeyAlgoName)) {
         return publicKeyAlgoName[algo];
     }
@@ -723,10 +723,10 @@ internal static (asn1.ObjectIdentifier oid, bool ok) oidFromExtKeyUsage(ExtKeyUs
     return (oid, ok);
 }
 
-} partial class x509ᴛExtKeyUsage {
+} partial class x509_package {
 
 // OID returns the ASN.1 object identifier of the EKU.
-public static OID OID(this ExtKeyUsage eku) {
+internal static OID OIDᴍ(ExtKeyUsage eku) {
     var (asn1OID, ok) = oidFromExtKeyUsage(eku);
     if (!ok) {
         throw panic("x509: internal error: known ExtKeyUsage has no OID");
@@ -917,9 +917,9 @@ public static error ErrUnsupportedAlgorithm = errors.New("x509: cannot verify si
 // generate the signature is not secure, and the signature has been rejected.
 partial struct InsecureAlgorithmError /*num:nint*/;
 
-} partial class x509ᴛInsecureAlgorithmError {
+} partial class x509_package {
 
-public static @string Error(this InsecureAlgorithmError e) {
+internal static @string Errorᴍ(InsecureAlgorithmError e) {
     return fmt.Sprintf("x509: cannot verify signature: insecure algorithm %v"u8, (SignatureAlgorithm)(nint)e);
 }
 
@@ -931,19 +931,19 @@ public static @string Error(this InsecureAlgorithmError e) {
 partial struct ConstraintViolationError {
 }
 
-} partial class x509ᴛConstraintViolationError {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509InvalidSignatureˢ => ref x509InvalidSignatureˢᵇ;
 private static readonly @string x509InvalidSignatureˢᵇ = "x509: invalid signature: parent certificate cannot sign this kind of certificate"u8;
 
-public static @string Error(this ConstraintViolationError _) {
+internal static @string Errorᴍ(ConstraintViolationError _) {
     return x509InvalidSignatureˢ;
 }
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
-public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
+internal static bool Equalᴍ(ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
@@ -953,7 +953,7 @@ public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
     return bytes.Equal(c.Raw, other.Raw);
 }
 
-internal static bool hasSANExtension(this ref Certificate c) {
+internal static bool hasSANExtensionᴍ(ref Certificate c) {
     return oidInExtensions(oidExtensionSubjectAltName, c.Extensions);
 }
 
@@ -961,7 +961,7 @@ internal static bool hasSANExtension(this ref Certificate c) {
 //
 // This is a low-level API that performs very limited checks, and not a full
 // path verifier. Most users should use [Certificate.Verify] instead.
-public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> Ꮡparent) {
+internal static error CheckSignatureFromᴍ(ref Certificate c, ж<Certificate> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     // RFC 5280, 4.2.1.9:
@@ -991,15 +991,15 @@ public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> �
 //
 // [MD5WithRSA] signatures are rejected, while [SHA1WithRSA] and [ECDSAWithSHA1]
 // signatures are currently accepted.
-public static error CheckSignature(this ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) {
+internal static error CheckSignatureᴍ(ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) {
     return checkSignature(algo, signed, signature, c.PublicKey, true);
 }
 
-internal static bool hasNameConstraints(this ref Certificate c) {
+internal static bool hasNameConstraintsᴍ(ref Certificate c) {
     return oidInExtensions(oidExtensionNameConstraints, c.Extensions);
 }
 
-internal static slice<byte> getSANExtension(this ref Certificate c) {
+internal static slice<byte> getSANExtensionᴍ(ref Certificate c) {
     foreach (var (_, e) in range(c.Extensions)) {
         if (e.Id.Equal(oidExtensionSubjectAltName)) {
             return e.Value;
@@ -1094,12 +1094,12 @@ internal static error /*err*/ checkSignature(SignatureAlgorithm algo, slice<byte
     return ErrUnsupportedAlgorithm;
 }
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
 // CheckCRLSignature checks that the signature in crl is from c.
 //
 // Deprecated: Use [RevocationList.CheckSignatureFrom] instead.
-public static error CheckCRLSignature(this ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) {
+internal static error CheckCRLSignatureᴍ(ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) {
     ref var crl = ref Ꮡcrl.DerefOrNull();
 
     SignatureAlgorithm algo = getSignatureAlgorithmFromAI(crl.SignatureAlgorithm);
@@ -1111,13 +1111,13 @@ public static error CheckCRLSignature(this ref Certificate c, ж<pkix.Certificat
 partial struct UnhandledCriticalExtension {
 }
 
-} partial class x509ᴛUnhandledCriticalExtension {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509UnhandledCriticalˢ => ref x509UnhandledCriticalˢᵇ;
 private static readonly @string x509UnhandledCriticalˢᵇ = "x509: unhandled critical extension"u8;
 
-public static @string Error(this UnhandledCriticalExtension h) {
+internal static @string Errorᴍ(UnhandledCriticalExtension h) {
     return x509UnhandledCriticalˢ;
 }
 
@@ -1965,7 +1965,7 @@ public static (ж<pkix.CertificateList>, error) ParseDERCRL(slice<byte> derBytes
     return (certList, default);
 }
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509CertificatePrivateˢ => ref x509CertificatePrivateˢᵇ;
@@ -1976,7 +1976,7 @@ private static readonly @string x509CertificatePrivateˢᵇ = "x509: certificate
 //
 // Deprecated: this method does not generate an RFC 5280 conformant X.509 v2 CRL.
 // To generate a standards compliant CRL, use [CreateRevocationList] instead.
-public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) {
+internal static (slice<byte> crlBytes, error err) CreateCRLᴍ(ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) {
     error err = default;
 
     var (key, ok) = priv._<crypto.Signer>(ᐧ);
@@ -2418,10 +2418,10 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
     return (@out, default);
 }
 
-} partial class x509ᴛCertificateRequest {
+} partial class x509_package {
 
 // CheckSignature reports whether the signature on c is valid.
-public static error CheckSignature(this ref CertificateRequest c) {
+internal static error CheckSignatureᴍ(ref CertificateRequest c) {
     return checkSignature(c.SignatureAlgorithm, c.RawTBSCertificateRequest, c.Signature, c.PublicKey, true);
 }
 
@@ -2727,11 +2727,11 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
     ));
 }
 
-} partial class x509ᴛRevocationList {
+} partial class x509_package {
 
 // CheckSignatureFrom verifies that the signature on rl is a valid signature
 // from issuer.
-public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificate> Ꮡparent) {
+internal static error CheckSignatureFromᴍ(ref RevocationList rl, ж<Certificate> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     if (parent.Version == 3 && !parent.BasicConstraintsValid || parent.BasicConstraintsValid && !parent.IsCA) {
@@ -2750,3 +2750,42 @@ public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificat
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class x509ᴛSignatureAlgorithm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isRSAPSS(this SignatureAlgorithm algo) => x509_package.isRSAPSSᴍ(algo);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) => x509_package.hashFuncᴍ(algo);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SignatureAlgorithm algo) => x509_package.Stringᴍ(algo);
+}
+partial class x509ᴛPublicKeyAlgorithm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this PublicKeyAlgorithm algo) => x509_package.Stringᴍ(algo);
+}
+partial class x509ᴛExtKeyUsage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static OID OID(this ExtKeyUsage eku) => x509_package.OIDᴍ(eku);
+}
+partial class x509ᴛInsecureAlgorithmError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InsecureAlgorithmError e) => x509_package.Errorᴍ(e);
+}
+partial class x509ᴛConstraintViolationError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ConstraintViolationError _) => x509_package.Errorᴍ(_);
+}
+partial class x509ᴛCertificate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) => x509_package.Equalᴍ(Ꮡc, Ꮡother);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasSANExtension(this ref Certificate c) => x509_package.hasSANExtensionᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> Ꮡparent) => x509_package.CheckSignatureFromᴍ(ref c, Ꮡparent);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckSignature(this ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) => x509_package.CheckSignatureᴍ(ref c, algo, signed, signature);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasNameConstraints(this ref Certificate c) => x509_package.hasNameConstraintsᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> getSANExtension(this ref Certificate c) => x509_package.getSANExtensionᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckCRLSignature(this ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) => x509_package.CheckCRLSignatureᴍ(ref c, Ꮡcrl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) => x509_package.CreateCRLᴍ(ref c, rand, priv, revokedCerts, now, expiry);
+}
+partial class x509ᴛUnhandledCriticalExtension {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnhandledCriticalExtension h) => x509_package.Errorᴍ(h);
+}
+partial class x509ᴛCertificateRequest {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckSignature(this ref CertificateRequest c) => x509_package.CheckSignatureᴍ(ref c);
+}
+partial class x509ᴛRevocationList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificate> Ꮡparent) => x509_package.CheckSignatureFromᴍ(ref rl, Ꮡparent);
+}
+// </GlyphForwarders>

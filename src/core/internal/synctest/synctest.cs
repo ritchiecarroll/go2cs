@@ -84,11 +84,11 @@ public static ж<Bubble> Acquire() {
     return default;
 }
 
-} partial class synctestᴛBubble {
+} partial class synctest_package {
 
 // Release releases the reference to the bubble,
 // allowing it to become idle again.
-public static void Release(this ж<Bubble> Ꮡb) {
+internal static void Releaseᴍ(ж<Bubble> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
@@ -100,7 +100,7 @@ public static void Release(this ж<Bubble> Ꮡb) {
 
 // Run executes f in the bubble.
 // The current goroutine must not be part of a bubble.
-public static void Run(this ж<Bubble> Ꮡb, Action f) {
+internal static void Runᴍ(ж<Bubble> Ꮡb, Action f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
@@ -111,3 +111,10 @@ public static void Run(this ж<Bubble> Ꮡb, Action f) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class synctestᴛBubble {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Release(this ж<Bubble> Ꮡb) => synctest_package.Releaseᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Run(this ж<Bubble> Ꮡb, Action f) => synctest_package.Runᴍ(Ꮡb, f);
+}
+// </GlyphForwarders>

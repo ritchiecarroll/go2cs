@@ -53,23 +53,23 @@ partial struct inputs {
     internal inputReader reader;
 }
 
-} partial class regexpᴛinputs {
+} partial class regexp_package {
 
-internal static input newBytes(this ж<inputs> Ꮡi, slice<byte> b) {
+internal static input newBytesᴍ(ж<inputs> Ꮡi, slice<byte> b) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     i.bytes.str = b;
     return new inputBytesжinput(Ꮡi.Ꮡbytes);
 }
 
-internal static input newString(this ж<inputs> Ꮡi, @string s) {
+internal static input newStringᴍ(ж<inputs> Ꮡi, @string s) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     i.@string.str = s;
     return new inputStringжinput(Ꮡi.Ꮡstring);
 }
 
-internal static input newReader(this ж<inputs> Ꮡi, io.RuneReader r) {
+internal static input newReaderᴍ(ж<inputs> Ꮡi, io.RuneReader r) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     i.reader.r = r;
@@ -78,7 +78,7 @@ internal static input newReader(this ж<inputs> Ꮡi, io.RuneReader r) {
     return new inputReaderжinput(Ꮡi.Ꮡreader);
 }
 
-internal static void clear(this ref inputs i) {
+internal static void clearᴍ(ref inputs i) {
     // We need to clear 1 of these.
     // Avoid the expense of clearing the others (pointer write barrier).
     if (i.bytes.str != nil) {
@@ -90,7 +90,7 @@ internal static void clear(this ref inputs i) {
     }
 }
 
-internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<byte> b, @string s) {
+internal static (input, nint) initᴍ(ж<inputs> Ꮡi, io.RuneReader r, slice<byte> b, @string s) {
     if (r != nil) {
         return (Ꮡi.newReader(r), 0);
     }
@@ -100,9 +100,9 @@ internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<
     return (Ꮡi.newString(s), len(s));
 }
 
-} partial class regexpᴛmachine {
+} partial class regexp_package {
 
-internal static void init(this ref machine m, nint ncap) {
+internal static void initᴍ(ref machine m, nint ncap) {
     foreach (var (_, t) in range(m.pool)) {
         t.cap = t.cap.slice(0, ncap);
     }
@@ -111,7 +111,7 @@ internal static void init(this ref machine m, nint ncap) {
 
 // alloc allocates a new thread with the given instruction.
 // It uses the free pool if possible.
-internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> i) {
+internal static ж<thread> allocᴍ(ref machine m, ж<syntax.Inst> i) {
     ж<thread> t = default;
     nint n = len(m.pool); if (n > 0) {
         t = m.pool[n - 1];
@@ -137,9 +137,9 @@ internal static lazyFlag newLazyFlag(rune r1, rune r2) {
     return (lazyFlag)((uint64)r1 << 32 | (uint64)(uint32)r2);
 }
 
-} partial class regexpᴛlazyFlag {
+} partial class regexp_package {
 
-internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
+internal static bool matchᴍ(lazyFlag f, syntax.EmptyOp op) {
     if (op == 0) {
         return true;
     }
@@ -183,12 +183,12 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
     return op == 0;
 }
 
-} partial class regexpᴛmachine {
+} partial class regexp_package {
 
 // match runs the machine over the input starting at pos.
 // It reports whether a match was found.
 // If so, m.matchcap holds the submatch information.
-internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
+internal static bool matchᴍ(ж<machine> Ꮡm, input i, nint pos) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var startCond = m.re.cond;
@@ -262,7 +262,7 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
 }
 
 // clear frees all threads on the thread queue.
-internal static void clear(this ref machine m, ж<queue> Ꮡq) {
+internal static void clearᴍ(ref machine m, ж<queue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     foreach (var (_, d) in range(q.dense)) {
@@ -278,7 +278,7 @@ internal static void clear(this ref machine m, ж<queue> Ꮡq) {
 // The step processes the rune c (which may be endOfText),
 // which starts at position pos and ends at nextPos.
 // nextCond gives the setting for the empty-width flags after c.
-internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq, nint pos, nint nextPos, rune c, ж<lazyFlag> nextCond) {
+internal static void stepᴍ(ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq, nint pos, nint nextPos, rune c, ж<lazyFlag> nextCond) {
     ref var runq = ref Ꮡrunq.DerefOrNull();
 
     var longest = m.re.longest;
@@ -346,7 +346,7 @@ internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq
 // It also recursively adds an entry for all instructions reachable from pc by following
 // empty-width conditions satisfied by cond.  pos gives the current position
 // in the input.
-internal static ж<thread> add(this ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> cond, ж<thread> Ꮡt) {
+internal static ж<thread> addᴍ(ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> cond, ж<thread> Ꮡt) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -446,10 +446,10 @@ internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
     ᏑonePassPool.Put(Ꮡm.OrTypedNil());
 }
 
-} partial class regexpᴛRegexp {
+} partial class regexp_package {
 
 // doOnePass implements r.doExecute using the one-pass execution engine.
-internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> doOnePassᴍ(ж<Regexp> Ꮡre, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     var startCond = re.cond;
@@ -588,7 +588,7 @@ Return:
 }
 
 // doMatch reports whether either r, b or s match the regexp.
-internal static bool doMatch(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s) {
+internal static bool doMatchᴍ(ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s) {
     return Ꮡre.doExecute(r, b, s, 0, 0, default) != nil;
 }
 
@@ -596,7 +596,7 @@ internal static bool doMatch(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte>
 // of its subexpressions to dstCap and returns dstCap.
 //
 // nil is returned if no matches are found and non-nil if matches are found.
-internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> doExecuteᴍ(ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s, nint pos, nint ncap, slice<nint> dstCap) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (dstCap == nil) {
@@ -636,3 +636,29 @@ internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, sl
 internal static array<nint> arrayNoInts = new(0);
 
 } // end regexp_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class regexpᴛinputs {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static input newBytes(this ж<inputs> Ꮡi, slice<byte> b) => regexp_package.newBytesᴍ(Ꮡi, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static input newString(this ж<inputs> Ꮡi, @string s) => regexp_package.newStringᴍ(Ꮡi, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static input newReader(this ж<inputs> Ꮡi, io.RuneReader r) => regexp_package.newReaderᴍ(Ꮡi, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ref inputs i) => regexp_package.clearᴍ(ref i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<byte> b, @string s) => regexp_package.initᴍ(Ꮡi, r, b, s);
+}
+partial class regexpᴛmachine {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref machine m, nint ncap) => regexp_package.initᴍ(ref m, ncap);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> i) => regexp_package.allocᴍ(ref m, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this ж<machine> Ꮡm, input i, nint pos) => regexp_package.matchᴍ(Ꮡm, i, pos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ref machine m, ж<queue> Ꮡq) => regexp_package.clearᴍ(ref m, Ꮡq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> nextq, nint pos, nint nextPos, rune c, ж<lazyFlag> nextCond) => regexp_package.stepᴍ(ref m, Ꮡrunq, nextq, pos, nextPos, c, nextCond);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<thread> add(this ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> cond, ж<thread> Ꮡt) => regexp_package.addᴍ(ref m, Ꮡq, pc, pos, cap, cond, Ꮡt);
+}
+partial class regexpᴛlazyFlag {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this lazyFlag f, syntax.EmptyOp op) => regexp_package.matchᴍ(f, op);
+}
+partial class regexpᴛRegexp {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) => regexp_package.doOnePassᴍ(Ꮡre, ir, ib, @is, pos, ncap, dstCap);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool doMatch(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s) => regexp_package.doMatchᴍ(Ꮡre, r, b, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s, nint pos, nint ncap, slice<nint> dstCap) => regexp_package.doExecuteᴍ(Ꮡre, r, b, s, pos, ncap, dstCap);
+}
+// </GlyphForwarders>

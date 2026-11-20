@@ -57,17 +57,17 @@ partial struct UserTaskSummary {
     public map<GoID, ж<GoroutineSummary>> Goroutines;
 }
 
-} partial class traceᴛUserTaskSummary {
+} partial class trace_package {
 
 // Complete returns true if we have complete information about the task
 // from the trace: both a start and an end.
-public static bool Complete(this ref UserTaskSummary s) {
+internal static bool Completeᴍ(ref UserTaskSummary s) {
     return s.Start != nil && s.End != nil;
 }
 
 // Descendents returns a slice consisting of itself (always the first task returned),
 // and the transitive closure of all of its children.
-public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> Ꮡs) {
+internal static slice<ж<UserTaskSummary>> Descendentsᴍ(ж<UserTaskSummary> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var descendents = slice<ж<UserTaskSummary>>([Ꮡs]);
@@ -113,9 +113,9 @@ partial struct GoroutineExecStats {
     public map<@string, time.Duration> RangeTime;
 }
 
-} partial class traceᴛGoroutineExecStats {
+} partial class trace_package {
 
-public static map<@string, time.Duration> NonOverlappingStats(this GoroutineExecStats s) {
+internal static map<@string, time.Duration> NonOverlappingStatsᴍ(GoroutineExecStats s) {
     var stats = new map<@string, time.Duration>{
         ["Execution time"] = s.ExecTime,
         ["Sched wait time"] = s.SchedWaitTime,
@@ -132,7 +132,7 @@ public static map<@string, time.Duration> NonOverlappingStats(this GoroutineExec
 }
 
 // UnknownTime returns whatever isn't accounted for in TotalTime.
-public static time.Duration UnknownTime(this GoroutineExecStats s) {
+internal static time.Duration UnknownTimeᴍ(GoroutineExecStats s) {
     var sum = s.ExecTime + s.SchedWaitTime + s.SyscallTime + s.SyscallBlockTime;
     foreach (var (_, dt) in s.BlockTimeByReason) {
         sum += dt;
@@ -146,7 +146,7 @@ public static time.Duration UnknownTime(this GoroutineExecStats s) {
 }
 
 // sub returns the stats v-s.
-internal static GoroutineExecStats /*r*/ sub(this GoroutineExecStats s, GoroutineExecStats v) {
+internal static GoroutineExecStats /*r*/ subᴍ(GoroutineExecStats s, GoroutineExecStats v) {
     GoroutineExecStats r = default;
 
     r = s.clone();
@@ -164,7 +164,7 @@ internal static GoroutineExecStats /*r*/ sub(this GoroutineExecStats s, Goroutin
     return r;
 }
 
-internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
+internal static GoroutineExecStats /*r*/ cloneᴍ(GoroutineExecStats s) {
     GoroutineExecStats r = default;
 
     r = s;
@@ -179,12 +179,12 @@ internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
     return r;
 }
 
-} partial class traceᴛGoroutineSummary {
+} partial class trace_package {
 
 // snapshotStat returns the snapshot of the goroutine execution statistics.
 // This is called as we process the ordered trace event stream. lastTs is used
 // to process pending statistics if this is called before any goroutine end event.
-internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummary g, Time lastTs) {
+internal static GoroutineExecStats /*ret*/ snapshotStatᴍ(ref GoroutineSummary g, Time lastTs) {
     GoroutineExecStats ret = default;
 
     ret = g.GoroutineExecStats.clone();
@@ -223,7 +223,7 @@ internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummar
 // finalize is called when processing a goroutine end event or at
 // the end of trace processing. This finalizes the execution stat
 // and any active regions in the goroutine, in which case trigger is nil.
-internal static void finalize(this ref GoroutineSummary g, Time lastTs, ж<Event> trigger) {
+internal static void finalizeᴍ(ref GoroutineSummary g, Time lastTs, ж<Event> trigger) {
     if (trigger != nil) {
         g.EndTime = trigger.Time();
     }
@@ -294,10 +294,10 @@ partial struct rangeP {
     internal @string name;
 }
 
-} partial class traceᴛSummarizer {
+} partial class trace_package {
 
 // Event feeds a single event into the stats summarizer.
-public static void Event(this ref Summarizer s, ж<Event> ev) {
+internal static void Eventᴍ(ref Summarizer s, ж<Event> ev) {
     if (s.syncTs == 0) {
         s.syncTs = ev.Time();
     }
@@ -645,7 +645,7 @@ public static void Event(this ref Summarizer s, ж<Event> ev) {
     }}
 }
 
-internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID id) {
+internal static ж<UserTaskSummary> getOrAddTaskᴍ(ref Summarizer s, TaskID id) {
     var task = s.tasks[id];
     if (task == nil) {
         task = Ꮡ(new UserTaskSummary(ID: id, Goroutines: new map<GoID, ж<GoroutineSummary>>()));
@@ -656,7 +656,7 @@ internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID i
 
 // Finalize indicates to the summarizer that we're done processing the trace.
 // It cleans up any remaining state and returns the full summary.
-public static ж<Summary> ΔFinalize(this ref Summarizer s) {
+internal static ж<Summary> ΔFinalizeᴍ(ref Summarizer s) {
     foreach (var (_, g) in s.gs) {
         g.finalize(s.lastTs, nil);
 
@@ -756,3 +756,25 @@ public static bool IsSystemGoroutine(@string entryFn) {
 }
 
 } // end trace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛUserTaskSummary {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Complete(this ref UserTaskSummary s) => trace_package.Completeᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> Ꮡs) => trace_package.Descendentsᴍ(Ꮡs);
+}
+partial class traceᴛGoroutineExecStats {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static map<@string, time.Duration> NonOverlappingStats(this GoroutineExecStats s) => trace_package.NonOverlappingStatsᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Duration UnknownTime(this GoroutineExecStats s) => trace_package.UnknownTimeᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static GoroutineExecStats /*r*/ sub(this GoroutineExecStats s, GoroutineExecStats v) => trace_package.subᴍ(s, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) => trace_package.cloneᴍ(s);
+}
+partial class traceᴛGoroutineSummary {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummary g, Time lastTs) => trace_package.snapshotStatᴍ(ref g, lastTs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void finalize(this ref GoroutineSummary g, Time lastTs, ж<Event> trigger) => trace_package.finalizeᴍ(ref g, lastTs, trigger);
+}
+partial class traceᴛSummarizer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Event(this ref Summarizer s, ж<Event> ev) => trace_package.Eventᴍ(ref s, ev);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID id) => trace_package.getOrAddTaskᴍ(ref s, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Summary> ΔFinalize(this ref Summarizer s) => trace_package.ΔFinalizeᴍ(ref s);
+}
+// </GlyphForwarders>

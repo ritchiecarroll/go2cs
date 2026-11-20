@@ -522,17 +522,17 @@ partial struct RowsAffected /*num:int64*/;
 
 internal static Result _ᴛ1ʗ = ((RowsAffected)0);
 
-} partial class driverᴛRowsAffected {
+} partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lastInsertIdIsNotˢ => ref lastInsertIdIsNotˢᵇ;
 private static readonly @string lastInsertIdIsNotˢᵇ = "LastInsertId is not supported by this driver"u8;
 
-public static (int64, error) LastInsertId(this RowsAffected _) {
+internal static (int64, error) LastInsertIdᴍ(RowsAffected _) {
     return (0, errors.New(lastInsertIdIsNotˢ));
 }
 
-public static (int64, error) RowsAffected(this RowsAffected v) {
+internal static (int64, error) RowsAffectedᴍ(RowsAffected v) {
     return ((int64)v, default);
 }
 
@@ -549,13 +549,13 @@ public partial struct noRows {
 
 internal static Result _ᴛ2ʗ = new noRows();
 
-} partial class driverᴛnoRows {
+} partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noLastInsertIdAvailableˢ => ref noLastInsertIdAvailableˢᵇ;
 private static readonly @string noLastInsertIdAvailableˢᵇ = "no LastInsertId available after DDL statement"u8;
 
-public static (int64, error) LastInsertId(this noRows _) {
+internal static (int64, error) LastInsertIdᴍ(noRows _) {
     return (0, errors.New(noLastInsertIdAvailableˢ));
 }
 
@@ -563,8 +563,19 @@ public static (int64, error) LastInsertId(this noRows _) {
 internal static ref readonly @string noRowsAffectedAvailableˢ => ref noRowsAffectedAvailableˢᵇ;
 private static readonly @string noRowsAffectedAvailableˢᵇ = "no RowsAffected available after DDL statement"u8;
 
-public static (int64, error) RowsAffected(this noRows _) {
+internal static (int64, error) RowsAffectedᴍ(noRows _) {
     return (0, errors.New(noRowsAffectedAvailableˢ));
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class driverᴛRowsAffected {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) LastInsertId(this RowsAffected _) => driver_package.LastInsertIdᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) RowsAffected(this RowsAffected v) => driver_package.RowsAffectedᴍ(v);
+}
+partial class driverᴛnoRows {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) LastInsertId(this noRows _) => driver_package.LastInsertIdᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) RowsAffected(this noRows _) => driver_package.RowsAffectedᴍ(_);
+}
+// </GlyphForwarders>

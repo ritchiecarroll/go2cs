@@ -16,13 +16,13 @@ internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> 
 internal static readonly ж<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>> ᏑpollSplice = new StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>(poll.Splice);
 internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> pollSplice => ref ((StaticBox<Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)>>)ᏑpollSplice).ValueSlot;
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sendfileˢ => ref sendfileˢᵇ;
 private static readonly @string sendfileˢᵇ = "sendfile"u8;
 
-internal static (int64 written, bool handled, error err) writeTo(this ж<File> Ꮡf, Δio.Writer w) {
+internal static (int64 written, bool handled, error err) writeToᴍ(ж<File> Ꮡf, Δio.Writer w) {
     int64 written = default;
     bool handled = default;
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -51,7 +51,7 @@ internal static (int64 written, bool handled, error err) writeTo(this ж<File> �
     return (written, handled, wrapSyscallError(sendfileˢ, err));
 }
 
-internal static (int64 written, bool handled, error err) readFrom(this ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) readFromᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -77,7 +77,7 @@ internal static (int64 written, bool handled, error err) readFrom(this ж<File> 
 internal static ref readonly @string spliceˢ => ref spliceˢᵇ;
 private static readonly @string spliceˢᵇ = "splice"u8;
 
-internal static (int64 written, bool handled, error err) spliceToFile(this ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) spliceToFileᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -115,7 +115,7 @@ private static readonly @string readFromˢᵇ = "ReadFrom"u8;
 internal static ref readonly @string copyFileRangeˢ => ref copyFileRangeˢᵇ;
 private static readonly @string copyFileRangeˢᵇ = "copy_file_range"u8;
 
-internal static (int64 written, bool handled, error err) copyFileRange(this ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) copyFileRangeᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -191,3 +191,12 @@ internal static bool isUnixOrTCP(@string network) {
 }
 
 } // end os_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 written, bool handled, error err) writeTo(this ж<File> Ꮡf, Δio.Writer w) => os_package.writeToᴍ(Ꮡf, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 written, bool handled, error err) readFrom(this ж<File> Ꮡf, Δio.Reader r) => os_package.readFromᴍ(Ꮡf, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 written, bool handled, error err) spliceToFile(this ж<File> Ꮡf, Δio.Reader r) => os_package.spliceToFileᴍ(Ꮡf, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 written, bool handled, error err) copyFileRange(this ж<File> Ꮡf, Δio.Reader r) => os_package.copyFileRangeᴍ(Ꮡf, r);
+}
+// </GlyphForwarders>

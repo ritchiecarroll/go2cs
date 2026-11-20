@@ -28,16 +28,16 @@ partial struct lazybuf {
     internal nint w;
 }
 
-} partial class pathᴛlazybuf {
+} partial class path_package {
 
-internal static byte index(this ref lazybuf b, nint i) {
+internal static byte indexᴍ(ref lazybuf b, nint i) {
     if (b.buf != nil) {
         return b.buf[i];
     }
     return b.s[i];
 }
 
-internal static void append(this ref lazybuf b, byte c) {
+internal static void appendᴍ(ref lazybuf b, byte c) {
     if (b.buf == nil) {
         if (b.w < len(b.s) && b.s[b.w] == c) {
             b.w++;
@@ -50,7 +50,7 @@ internal static void append(this ref lazybuf b, byte c) {
     b.w++;
 }
 
-internal static @string @string(this ref lazybuf b) {
+internal static @string @stringᴍ(ref lazybuf b) {
     if (b.buf == nil) {
         return b.s.slice(0, b.w);
     }
@@ -249,3 +249,11 @@ public static @string Dir(@string path) {
 }
 
 } // end path_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pathᴛlazybuf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte index(this ref lazybuf b, nint i) => path_package.indexᴍ(ref b, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref lazybuf b, byte c) => path_package.appendᴍ(ref b, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref lazybuf b) => path_package.@stringᴍ(ref b);
+}
+// </GlyphForwarders>

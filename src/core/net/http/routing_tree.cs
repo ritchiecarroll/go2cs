@@ -37,11 +37,11 @@ partial struct routingNode {
     internal ж<routingNode> emptyChild; // optimization: child with key ""
 }
 
-} partial class httpᴛroutingNode {
+} partial class http_package {
 
 // addPattern adds a pattern and its associated Handler to the tree
 // at root.
-internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, Handler h) {
+internal static void addPatternᴍ(ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, Handler h) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // First level of tree is host.
@@ -55,7 +55,7 @@ internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, 
 // addSegments adds the given segments to the tree rooted at n.
 // If there are no segments, then n is a leaf node that holds
 // the given pattern and handler.
-internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> p, Handler h) {
+internal static void addSegmentsᴍ(ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> p, Handler h) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (len(segs) == 0) {
@@ -79,7 +79,7 @@ internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs,
 
 // set sets the pattern and handler for n, which
 // must be a leaf node.
-internal static void set(this ref routingNode n, ж<pattern> p, Handler h) {
+internal static void setᴍ(ref routingNode n, ж<pattern> p, Handler h) {
     if (n.pattern != nil || n.handler != nil) {
         throw panic("non-nil leaf fields");
     }
@@ -89,7 +89,7 @@ internal static void set(this ref routingNode n, ж<pattern> p, Handler h) {
 
 // addChild adds a child node with the given key to n
 // if one does not exist, and returns the child.
-internal static ж<routingNode> addChild(this ж<routingNode> Ꮡn, @string key) {
+internal static ж<routingNode> addChildᴍ(ж<routingNode> Ꮡn, @string key) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (key == ""u8) {
@@ -108,7 +108,7 @@ internal static ж<routingNode> addChild(this ж<routingNode> Ꮡn, @string key)
 
 // findChild returns the child of n with the given key, or nil
 // if there is no child with that key.
-internal static ж<routingNode> findChild(this ж<routingNode> Ꮡn, @string key) {
+internal static ж<routingNode> findChildᴍ(ж<routingNode> Ꮡn, @string key) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (key == ""u8) {
@@ -122,7 +122,7 @@ internal static ж<routingNode> findChild(this ж<routingNode> Ꮡn, @string key
 // of values for pattern wildcards in the order that the wildcards appear.
 // For example, if the request path is "/a/b/c" and the pattern is "/{x}/b/{y}",
 // then the second return value will be []string{"a", "c"}.
-internal static (ж<routingNode>, slice<@string>) match(this ж<routingNode> Ꮡroot, @string host, @string method, @string path) {
+internal static (ж<routingNode>, slice<@string>) matchᴍ(ж<routingNode> Ꮡroot, @string host, @string method, @string path) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
     if (host != ""u8) {
@@ -143,7 +143,7 @@ private static readonly @string getˢᵇ = "GET"u8;
 // matchMethodAndPath matches the method and path.
 // Its return values are the same as [routingNode.match].
 // The receiver should be a child of the root.
-internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<routingNode> Ꮡn, @string method, @string path) {
+internal static (ж<routingNode>, slice<@string>) matchMethodAndPathᴍ(ж<routingNode> Ꮡn, @string method, @string path) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -169,7 +169,7 @@ internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<rou
 // Its return values are the same as [routingNode.match].
 // matchPath calls itself recursively. The matches argument holds the wildcard matches
 // found so far.
-internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode> Ꮡn, @string path, slice<@string> matches) {
+internal static (ж<routingNode>, slice<@string>) matchPathᴍ(ж<routingNode> Ꮡn, @string path, slice<@string> matches) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -238,7 +238,7 @@ internal static (@string seg, @string rest) firstSegment(@string path) {
     return (pathUnescape(path.slice(0, i)), path.slice(i));
 }
 
-} partial class httpᴛroutingNode {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string headˢ => ref headˢᵇ;
@@ -246,7 +246,7 @@ private static readonly @string headˢᵇ = "HEAD"u8;
 
 // matchingMethods adds to methodSet all the methods that would result in a
 // match if passed to routingNode.match with the given host and path.
-internal static void matchingMethods(this ж<routingNode> Ꮡroot, @string host, @string path, map<@string, bool> methodSet) {
+internal static void matchingMethodsᴍ(ж<routingNode> Ꮡroot, @string host, @string path, map<@string, bool> methodSet) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
     if (host != ""u8) {
@@ -258,7 +258,7 @@ internal static void matchingMethods(this ж<routingNode> Ꮡroot, @string host,
     }
 }
 
-internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path, map<@string, bool> set) {
+internal static void matchingMethodsPathᴍ(ж<routingNode> Ꮡn, @string path, map<@string, bool> set) {
     if (Ꮡn == nil) {
         return;
     }
@@ -275,3 +275,18 @@ internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛroutingNode {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, Handler h) => http_package.addPatternᴍ(Ꮡroot, Ꮡp, h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> p, Handler h) => http_package.addSegmentsᴍ(Ꮡn, segs, p, h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref routingNode n, ж<pattern> p, Handler h) => http_package.setᴍ(ref n, p, h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<routingNode> addChild(this ж<routingNode> Ꮡn, @string key) => http_package.addChildᴍ(Ꮡn, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<routingNode> findChild(this ж<routingNode> Ꮡn, @string key) => http_package.findChildᴍ(Ꮡn, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<routingNode>, slice<@string>) match(this ж<routingNode> Ꮡroot, @string host, @string method, @string path) => http_package.matchᴍ(Ꮡroot, host, method, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<routingNode> Ꮡn, @string method, @string path) => http_package.matchMethodAndPathᴍ(Ꮡn, method, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode> Ꮡn, @string path, slice<@string> matches) => http_package.matchPathᴍ(Ꮡn, path, matches);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void matchingMethods(this ж<routingNode> Ꮡroot, @string host, @string path, map<@string, bool> methodSet) => http_package.matchingMethodsᴍ(Ꮡroot, host, path, methodSet);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path, map<@string, bool> set) => http_package.matchingMethodsPathᴍ(Ꮡn, path, set);
+}
+// </GlyphForwarders>

@@ -20,16 +20,23 @@ public static Uint64 /*y*/ ConstUint64(uint64 c, @string name) {
     return y;
 }
 
-} partial class genᴛUint64 {
+} partial class gen_package {
 
-internal static ж<kind> kind(this Uint64 _) {
+internal static ж<kind> kindᴍ(Uint64 _) {
     return kindUint64;
 }
 
-internal static Uint64 wrap(this Uint64 _, ж<op> x) {
+internal static Uint64 wrapᴍ(Uint64 _, ж<op> x) {
     Uint64 y = new(nil);
     y.valGP.valAny.initOp(x);
     return y;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class genᴛUint64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind(this Uint64 _) => gen_package.kindᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Uint64 wrap(this Uint64 _, ж<op> x) => gen_package.wrapᴍ(_, x);
+}
+// </GlyphForwarders>

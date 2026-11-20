@@ -21,7 +21,7 @@ partial struct option {
     internal missingKeyAction missingKey;
 }
 
-} partial class templateᴛTemplate {
+} partial class template_package {
 
 // Option sets options for the template. Options are described by
 // strings, either a simple string or "key=value". There can be at
@@ -41,7 +41,7 @@ partial struct option {
 //		The operation returns the zero value for the map type's element.
 //	"missingkey=error"
 //		Execution stops immediately with an error.
-public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
+internal static ж<Template> Optionᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
     var opt = optʗp.sslice();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -52,7 +52,7 @@ public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring
     return Ꮡt;
 }
 
-internal static void setOption(this ref Template t, @string opt) {
+internal static void setOptionᴍ(ref Template t, @string opt) {
     if (opt == ""u8) {
         throw panic("empty option string");
     }
@@ -80,3 +80,10 @@ internal static void setOption(this ref Template t, @string opt) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class templateᴛTemplate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) => template_package.Optionᴍ(Ꮡt, optʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setOption(this ref Template t, @string opt) => template_package.setOptionᴍ(ref t, opt);
+}
+// </GlyphForwarders>

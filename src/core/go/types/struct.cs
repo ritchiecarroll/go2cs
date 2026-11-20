@@ -41,34 +41,34 @@ public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
     return s;
 }
 
-} partial class typesᴛStruct {
+} partial class types_package {
 
 // NumFields returns the number of fields in the struct (including blank and embedded fields).
-public static nint NumFields(this ref Struct s) { return len(s.fields); }
+internal static nint NumFieldsᴍ(ref Struct s) { return len(s.fields); }
 
 // Field returns the i'th field for 0 <= i < NumFields().
-public static ж<Var> Field(this ref Struct s, nint i) { return s.fields[i]; }
+internal static ж<Var> Fieldᴍ(ref Struct s, nint i) { return s.fields[i]; }
 
 // Tag returns the i'th field tag for 0 <= i < NumFields().
-public static @string Tag(this ref Struct s, nint i) {
+internal static @string Tagᴍ(ref Struct s, nint i) {
     if (i < len(s.tags)) {
         return s.tags[i];
     }
     return ""u8;
 }
 
-public static Type Underlying(this ж<Struct> Ꮡt) { return new StructжType(Ꮡt); }
-public static @string String(this ж<Struct> Ꮡt) { return TypeString(new StructжType(Ꮡt), default); }
+internal static Type Underlyingᴍ(ж<Struct> Ꮡt) { return new StructжType(Ꮡt); }
+internal static @string Stringᴍ(ж<Struct> Ꮡt) { return TypeString(new StructжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
-internal static void markComplete(this ref Struct s) {
+internal static void markCompleteᴍ(ref Struct s) {
     if (s.fields == nil) {
         s.fields = new slice<ж<Var>>(0);
     }
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string embeddedFieldTypeCannotˢ => ref embeddedFieldTypeCannotˢᵇ;
@@ -80,7 +80,7 @@ private static readonly @string embeddedFieldTypeCannotˢ3ᵇ = "embedded field 
 internal static ref readonly @string embeddedFieldTypeCannotˢ4 => ref embeddedFieldTypeCannotˢ4ᵇ;
 private static readonly @string embeddedFieldTypeCannotˢ4ᵇ = "embedded field type cannot be a pointer to an interface"u8;
 
-internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) {
+internal static void structTypeᴍ(ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var styp = ref Ꮡstyp.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -231,9 +231,9 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
     return default; // invalid embedded field
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
-internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, token.Pos pos, Object obj) {
+internal static bool declareInSetᴍ(ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, token.Pos pos, Object obj) {
     ref var oset = ref Ꮡoset.DerefOrNull();
 
     var alt = oset.insert(obj); if (alt != nil) {
@@ -246,7 +246,7 @@ internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset,
     return true;
 }
 
-internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
+internal static @string tagᴍ(ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt != nil) {
@@ -261,3 +261,19 @@ internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛStruct {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumFields(this ref Struct s) => types_package.NumFieldsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Var> Field(this ref Struct s, nint i) => types_package.Fieldᴍ(ref s, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Tag(this ref Struct s, nint i) => types_package.Tagᴍ(ref s, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Struct> Ꮡt) => types_package.Underlyingᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Struct> Ꮡt) => types_package.Stringᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void markComplete(this ref Struct s) => types_package.markCompleteᴍ(ref s);
+}
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) => types_package.structTypeᴍ(Ꮡcheck, Ꮡstyp, Ꮡe);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, token.Pos pos, Object obj) => types_package.declareInSetᴍ(Ꮡcheck, Ꮡoset, pos, obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) => types_package.tagᴍ(Ꮡcheck, Ꮡt);
+}
+// </GlyphForwarders>

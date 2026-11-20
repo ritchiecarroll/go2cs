@@ -45,9 +45,9 @@ partial struct joinError {
     internal slice<error> errs;
 }
 
-} partial class errorsᴛjoinError {
+} partial class errors_package {
 
-internal static @string Error(this ref joinError e) {
+internal static @string Errorᴍ(ref joinError e) {
     // Since Join returns nil if every value in errs is nil,
     // e.errs cannot be empty.
     if (len(e.errs) == 1) {
@@ -63,8 +63,15 @@ internal static @string Error(this ref joinError e) {
     return @unsafe.String(Ꮡ(b, 0), len(b));
 }
 
-internal static slice<error> Unwrap(this ref joinError e) {
+internal static slice<error> Unwrapᴍ(ref joinError e) {
     return e.errs;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class errorsᴛjoinError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref joinError e) => errors_package.Errorᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<error> Unwrap(this ref joinError e) => errors_package.Unwrapᴍ(ref e);
+}
+// </GlyphForwarders>

@@ -102,7 +102,7 @@ partial struct typePointers {
     internal ж<_type> typ;
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // typePointersOf returns an iterator over all heap pointers in the range [addr, addr+size).
 //
@@ -115,7 +115,7 @@ partial struct typePointers {
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static typePointers typePointersOf(this ж<mspan> Ꮡspan, uintptr addr, uintptr size) {
+internal static typePointers typePointersOfᴍ(ж<mspan> Ꮡspan, uintptr addr, uintptr size) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
     var @base = span.objBase(addr);
@@ -138,7 +138,7 @@ private static readonly @string typePointersOfUncheckedˢᵇ = "typePointersOfUn
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static typePointers typePointersOfUnchecked(this ж<mspan> Ꮡspan, uintptr addr) {
+internal static typePointers typePointersOfUncheckedᴍ(ж<mspan> Ꮡspan, uintptr addr) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
     const bool doubleCheck = false;
@@ -188,7 +188,7 @@ private static readonly @string badTypePassedToˢᵇ = "bad type passed to typeP
 // nosplit because its callers are nosplit and require all their callees to be nosplit.
 //
 //go:nosplit
-internal static typePointers typePointersOfType(this ref mspan span, ж<abi.Type> typ, uintptr addr) {
+internal static typePointers typePointersOfTypeᴍ(ref mspan span, ж<abi.Type> typ, uintptr addr) {
     const bool doubleCheck = false;
     if (doubleCheck && typ == nil) {
         @throw(badTypePassedToˢ);
@@ -201,7 +201,7 @@ internal static typePointers typePointersOfType(this ref mspan span, ж<abi.Type
     return new typePointers(elem: addr, addr: addr, mask: readUintptr(gcmask), typ: typ);
 }
 
-} partial class runtimeᴛtypePointers {
+} partial class runtime_package {
 
 // nextFast is the fast path of next. nextFast is written to be inlineable and,
 // as the name implies, fast.
@@ -223,7 +223,7 @@ internal static typePointers typePointersOfType(this ref mspan span, ж<abi.Type
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static (typePointers, uintptr) nextFast(this typePointers tp) {
+internal static (typePointers, uintptr) nextFastᴍ(typePointers tp) {
     // TESTQ/JEQ
     if (tp.mask == 0) {
         return (tp, 0);
@@ -254,7 +254,7 @@ internal static (typePointers, uintptr) nextFast(this typePointers tp) {
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static (typePointers, uintptr) next(this typePointers tp, uintptr limit) {
+internal static (typePointers, uintptr) nextᴍ(typePointers tp, uintptr limit) {
     for (;;) {
         if (tp.mask != 0) {
             return tp.nextFast();
@@ -294,7 +294,7 @@ internal static (typePointers, uintptr) next(this typePointers tp, uintptr limit
 // nosplit because it is used during write barriers and must not be preempted.
 //
 //go:nosplit
-internal static typePointers fastForward(this typePointers tp, uintptr n, uintptr limit) {
+internal static typePointers fastForwardᴍ(typePointers tp, uintptr n, uintptr limit) {
     // Basic bounds check.
     var target = tp.addr + n;
     if (target >= limit) {
@@ -348,14 +348,14 @@ internal static typePointers fastForward(this typePointers tp, uintptr n, uintpt
     return tp;
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // objBase returns the base pointer for the object containing addr in span.
 //
 // Assumes that addr points into a valid part of span (span.base() <= addr < span.limit).
 //
 //go:nosplit
-internal static uintptr objBase(this ref mspan span, uintptr addr) {
+internal static uintptr objBaseᴍ(ref mspan span, uintptr addr) {
     return span.@base() + span.objIndex(addr) * span.elemsize;
 }
 
@@ -526,10 +526,10 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
     }
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // initHeapBits initializes the heap bitmap for a span.
-internal static void initHeapBits(this ref mspan s) {
+internal static void initHeapBitsᴍ(ref mspan s) {
     if (goarch.PtrSize == 8 && !s.spanclass.noscan() && s.spanclass.sizeclass() == 1) {
         var b = s.heapBits();
         foreach (var i in range(len(b))) {
@@ -564,7 +564,7 @@ private static readonly @string heapBitsCalledForSpanˢᵇ = "heapBits called fo
 // heapBitsInSpan(span.elemsize) or span.isUserArenaChunk must be true.
 //
 //go:nosplit
-internal static slice<uintptr> heapBits(this ref mspan span) {
+internal static slice<uintptr> heapBitsᴍ(ref mspan span) {
     const bool doubleCheck = false;
 
     if (doubleCheck && !span.isUserArenaChunk) {
@@ -611,7 +611,7 @@ internal static (uintptr @base, uintptr size) spanHeapBitsRange(uintptr spanBase
     return (@base, size);
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // heapBitsSmallForAddr loads the heap bits for the object stored at addr from span.heapBits.
 //
@@ -619,7 +619,7 @@ internal static (uintptr @base, uintptr size) spanHeapBitsRange(uintptr spanBase
 // must be true.
 //
 //go:nosplit
-internal static uintptr heapBitsSmallForAddr(this ref mspan span, uintptr addr) {
+internal static uintptr heapBitsSmallForAddrᴍ(ref mspan span, uintptr addr) {
     var (hbitsBase, _) = spanHeapBitsRange(span.@base(), span.npages * (uintptr)pageSize, span.elemsize);
     var hbits = @unsafe.Pointer.To<byte>((@unsafe.Pointer)hbitsBase);
 
@@ -664,7 +664,7 @@ private static readonly @string badPointerBitsWrittenForˢᵇ = "bad pointer bit
 // heapBitsInSpan(dataSize) must be true. dataSize must be >= typ.Size_.
 //
 //go:nosplit
-internal static uintptr /*scanSize*/ writeHeapBitsSmall(this ref mspan span, uintptr x, uintptr dataSize, ж<_type> Ꮡtyp) {
+internal static uintptr /*scanSize*/ writeHeapBitsSmallᴍ(ref mspan span, uintptr x, uintptr dataSize, ж<_type> Ꮡtyp) {
     uintptr scanSize = default;
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -1166,10 +1166,10 @@ partial struct markBits {
     internal uintptr index;
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 //go:nosplit
-internal static markBits allocBitsForIndex(this ref mspan s, uintptr allocBitIndex) {
+internal static markBits allocBitsForIndexᴍ(ref mspan s, uintptr allocBitIndex) {
     var (bytep, mask) = s.allocBits.bitp(allocBitIndex);
     return new markBits(bytep, mask, allocBitIndex);
 }
@@ -1178,7 +1178,7 @@ internal static markBits allocBitsForIndex(this ref mspan s, uintptr allocBitInd
 // and negates them so that ctz (count trailing zeros) instructions
 // can be used. It then places these 8 bytes into the cached 64 bit
 // s.allocCache.
-internal static void refillAllocCache(this ref mspan s, uint16 whichByte) {
+internal static void refillAllocCacheᴍ(ref mspan s, uint16 whichByte) {
     var bytes = array<uint8>.AliasPointer(s.allocBits.bytep((uintptr)whichByte), 8);
     var aCache = (uint64)0;
     aCache |= (uint64)((uint64)bytes.Value[0]);
@@ -1200,7 +1200,7 @@ private static readonly @string sFreeindexSNelemsˢᵇ = "s.freeindex > s.nelems
 // or after s.freeindex.
 // There are hardware instructions that can be used to make this
 // faster if profiling warrants it.
-internal static uint16 nextFreeIndex(this ref mspan s) {
+internal static uint16 nextFreeIndexᴍ(ref mspan s) {
     var sfreeindex = s.freeindex;
     var snelems = s.nelems;
     if (sfreeindex == snelems) {
@@ -1259,7 +1259,7 @@ internal static uint16 nextFreeIndex(this ref mspan s) {
 // Callers must ensure that the index passed here must not have been
 // produced from a pointer that came from 'thin air', as might happen
 // with conservative scanning.
-internal static bool isFree(this ref mspan s, uintptr index) {
+internal static bool isFreeᴍ(ref mspan s, uintptr index) {
     if (index < (uintptr)s.freeindex) {
         return false;
     }
@@ -1280,7 +1280,7 @@ internal static bool isFree(this ref mspan s, uintptr index) {
 // with conservative scanning, unless the GC is currently in the mark
 // phase. If the GC is currently in the mark phase, this function is
 // safe to call for out-of-thin-air pointers.
-internal static bool isFreeOrNewlyAllocated(this ref mspan s, uintptr index) {
+internal static bool isFreeOrNewlyAllocatedᴍ(ref mspan s, uintptr index) {
     if (index < (uintptr)s.freeIndexForScan) {
         return false;
     }
@@ -1300,7 +1300,7 @@ private static readonly @string badMagicDivisionˢᵇ = "bad magic division"u8;
 // nosplit, because it is called by objIndex, which is nosplit
 //
 //go:nosplit
-internal static uintptr divideByElemSize(this ref mspan s, uintptr n) {
+internal static uintptr divideByElemSizeᴍ(ref mspan s, uintptr n) {
     const bool doubleCheck = false;
 
     // See explanation in mksizeclasses.go's computeDivMagic.
@@ -1316,7 +1316,7 @@ internal static uintptr divideByElemSize(this ref mspan s, uintptr n) {
 // nosplit, because it is called by other nosplit code like findObject
 //
 //go:nosplit
-internal static uintptr objIndex(this ref mspan s, uintptr p) {
+internal static uintptr objIndexᴍ(ref mspan s, uintptr p) {
     return s.divideByElemSize(p - s.@base());
 }
 
@@ -1328,15 +1328,15 @@ internal static markBits markBitsForAddr(uintptr p) {
     return s.markBitsForIndex(objIndex);
 }
 
-} partial class runtimeᴛmarkBits {
+} partial class runtime_package {
 
 // isMarked reports whether mark bit m is set.
-internal static bool isMarked(this markBits m) {
+internal static bool isMarkedᴍ(markBits m) {
     return (uint8)(m.bytep.Value & m.mask) != 0;
 }
 
 // setMarked sets the marked bit in the markbits, atomically.
-internal static void setMarked(this markBits m) {
+internal static void setMarkedᴍ(markBits m) {
     // Might be racing with other updates, so use atomic update always.
     // We used to be clever here and use a non-atomic update in certain
     // cases, but it's not worth the risk.
@@ -1344,12 +1344,12 @@ internal static void setMarked(this markBits m) {
 }
 
 // setMarkedNonAtomic sets the marked bit in the markbits, non-atomically.
-internal static void setMarkedNonAtomic(this markBits m) {
+internal static void setMarkedNonAtomicᴍ(markBits m) {
     m.bytep.Value |= (uint8)(m.mask);
 }
 
 // clearMarked clears the marked bit in the markbits, atomically.
-internal static void clearMarked(this markBits m) {
+internal static void clearMarkedᴍ(markBits m) {
     // Might be racing with other updates, so use atomic update always.
     // We used to be clever here and use a non-atomic update in certain
     // cases, but it's not worth the risk.
@@ -1395,10 +1395,10 @@ internal static bool isMarkedOrNotInHeap(@unsafe.Pointer p) {
     return true;
 }
 
-} partial class runtimeᴛmarkBits {
+} partial class runtime_package {
 
 // advance advances the markBits to the next object in the span.
-internal static void advance(this ref markBits m) {
+internal static void advanceᴍ(ref markBits m) {
     if (m.mask == (uint8)(1 << 7)) {
         m.bytep = @unsafe.Pointer.To<uint8>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(m.bytep), 1));
         m.mask = 1;
@@ -1622,11 +1622,11 @@ internal static void typeBitsBulkBarrier(ж<_type> Ꮡtyp, uintptr dst, uintptr 
     }
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // countAlloc returns the number of objects allocated in span s by
 // scanning the mark bitmap.
-internal static nint countAlloc(this ref mspan s) {
+internal static nint countAllocᴍ(ref mspan s) {
     nint count = 0;
     var bytes = divRoundUp((uintptr)s.nelems, 8);
     // Iterate over each 8-byte chunk and count allocations
@@ -1959,3 +1959,36 @@ internal static slice<byte> reflect_gcbits(any x) {
 // go2cs generated this placeholder — func pointerMask is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛmspan {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typePointers typePointersOf(this ж<mspan> Ꮡspan, uintptr addr, uintptr size) => runtime_package.typePointersOfᴍ(Ꮡspan, addr, size);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typePointers typePointersOfUnchecked(this ж<mspan> Ꮡspan, uintptr addr) => runtime_package.typePointersOfUncheckedᴍ(Ꮡspan, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typePointers typePointersOfType(this ref mspan span, ж<abi.Type> typ, uintptr addr) => runtime_package.typePointersOfTypeᴍ(ref span, typ, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr objBase(this ref mspan span, uintptr addr) => runtime_package.objBaseᴍ(ref span, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initHeapBits(this ref mspan s) => runtime_package.initHeapBitsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<uintptr> heapBits(this ref mspan span) => runtime_package.heapBitsᴍ(ref span);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr heapBitsSmallForAddr(this ref mspan span, uintptr addr) => runtime_package.heapBitsSmallForAddrᴍ(ref span, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr /*scanSize*/ writeHeapBitsSmall(this ref mspan span, uintptr x, uintptr dataSize, ж<_type> Ꮡtyp) => runtime_package.writeHeapBitsSmallᴍ(ref span, x, dataSize, Ꮡtyp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static markBits allocBitsForIndex(this ref mspan s, uintptr allocBitIndex) => runtime_package.allocBitsForIndexᴍ(ref s, allocBitIndex);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refillAllocCache(this ref mspan s, uint16 whichByte) => runtime_package.refillAllocCacheᴍ(ref s, whichByte);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 nextFreeIndex(this ref mspan s) => runtime_package.nextFreeIndexᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isFree(this ref mspan s, uintptr index) => runtime_package.isFreeᴍ(ref s, index);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isFreeOrNewlyAllocated(this ref mspan s, uintptr index) => runtime_package.isFreeOrNewlyAllocatedᴍ(ref s, index);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr divideByElemSize(this ref mspan s, uintptr n) => runtime_package.divideByElemSizeᴍ(ref s, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr objIndex(this ref mspan s, uintptr p) => runtime_package.objIndexᴍ(ref s, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint countAlloc(this ref mspan s) => runtime_package.countAllocᴍ(ref s);
+}
+partial class runtimeᴛtypePointers {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (typePointers, uintptr) nextFast(this typePointers tp) => runtime_package.nextFastᴍ(tp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (typePointers, uintptr) next(this typePointers tp, uintptr limit) => runtime_package.nextᴍ(tp, limit);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typePointers fastForward(this typePointers tp, uintptr n, uintptr limit) => runtime_package.fastForwardᴍ(tp, n, limit);
+}
+partial class runtimeᴛmarkBits {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isMarked(this markBits m) => runtime_package.isMarkedᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setMarked(this markBits m) => runtime_package.setMarkedᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setMarkedNonAtomic(this markBits m) => runtime_package.setMarkedNonAtomicᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clearMarked(this markBits m) => runtime_package.clearMarkedᴍ(m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void advance(this ref markBits m) => runtime_package.advanceᴍ(ref m);
+}
+// </GlyphForwarders>

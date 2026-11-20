@@ -28,9 +28,9 @@ partial struct CgroupV2 {
     internal @string path;
 }
 
-} partial class cgrouptestᴛCgroupV2 {
+} partial class cgrouptest_package {
 
-public static @string Path(this ref CgroupV2 c) {
+internal static @string Pathᴍ(ref CgroupV2 c) {
     return c.path;
 }
 
@@ -39,7 +39,7 @@ internal static ref readonly @string cpuMaxˢ => ref cpuMaxˢᵇ;
 private static readonly @string cpuMaxˢᵇ = "cpu.max"u8;
 
 // Path to cpu.max.
-public static @string CPUMaxPath(this ref CgroupV2 c) {
+internal static @string CPUMaxPathᴍ(ref CgroupV2 c) {
     return filepath.Join(c.path, cpuMaxˢ);
 }
 
@@ -48,7 +48,7 @@ internal static ref readonly @string maxˢ => ref maxˢᵇ;
 private static readonly @string maxˢᵇ = "max"u8;
 
 // Set cpu.max. Pass -1 for quota to disable the limit.
-public static error SetCPUMax(this ref CgroupV2 c, int64 quota, int64 period) {
+internal static error SetCPUMaxᴍ(ref CgroupV2 c, int64 quota, int64 period) {
     @string q = maxˢ;
     if (quota >= 0) {
         q = strconv.FormatInt(quota, 10);
@@ -234,3 +234,11 @@ internal static void migrateTo(ж<testing.T> t, @string dst) {
 }
 
 } // end cgrouptest_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class cgrouptestᴛCgroupV2 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Path(this ref CgroupV2 c) => cgrouptest_package.Pathᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string CPUMaxPath(this ref CgroupV2 c) => cgrouptest_package.CPUMaxPathᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetCPUMax(this ref CgroupV2 c, int64 quota, int64 period) => cgrouptest_package.SetCPUMaxᴍ(ref c, quota, period);
+}
+// </GlyphForwarders>

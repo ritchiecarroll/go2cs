@@ -993,10 +993,10 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
     return (@as.Clone(), true);
 }
 
-} partial class stringsᴛasciiSet {
+} partial class strings_package {
 
 // contains reports whether c is inside the set.
-internal static bool contains(this ref asciiSet @as, byte c) {
+internal static bool containsᴍ(ref asciiSet @as, byte c) {
     return (@as.Value[c / 32] & ((uint32)1 << (int)(c % 32))) != 0;
 }
 
@@ -1326,3 +1326,9 @@ public static (@string before, bool found) CutSuffix(@string s, @string suffix) 
 }
 
 } // end strings_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class stringsᴛasciiSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool contains(this ref asciiSet @as, byte c) => strings_package.containsᴍ(ref @as, c);
+}
+// </GlyphForwarders>

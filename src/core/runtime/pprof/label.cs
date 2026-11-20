@@ -38,11 +38,11 @@ partial struct labelMap {
     /*embed*/ public @internal.runtime.pprof.label_package.Set Set;
 }
 
-} partial class pprofᴛlabelMap {
+} partial class pprof_package {
 
 // String satisfies Stringer and returns key, value pairs in a consistent
 // order.
-internal static @string String(this ж<labelMap> Ꮡl) {
+internal static @string Stringᴍ(ж<labelMap> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
     var keyValsᴷ = new stackAppend<@string>();
 
@@ -164,3 +164,9 @@ public static void ForLabels(context.Context ctx, Func<@string, @string, bool> f
 }
 
 } // end pprof_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pprofᴛlabelMap {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<labelMap> Ꮡl) => pprof_package.Stringᴍ(Ꮡl);
+}
+// </GlyphForwarders>

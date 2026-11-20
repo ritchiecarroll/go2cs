@@ -42,9 +42,9 @@ internal static CTR newCTR(ref Block b, slice<byte> iv) {
     );
 }
 
-} partial class aesᴛCTR {
+} partial class aes_package {
 
-public static void XORKeyStream(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStreamᴍ(ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.XORKeyStreamAt(dst, src, c.offset);
@@ -72,13 +72,13 @@ public static void RoundToBlock(ж<CTR> Ꮡc) {
     }
 }
 
-} partial class aesᴛCTR {
+} partial class aes_package {
 
 // XORKeyStreamAt behaves like XORKeyStream but keeps no state, and instead
 // seeks into the keystream by the given bytes offset from the start (ignoring
 // any XORKetStream calls). This allows for random access into the keystream, up
 // to 16 EiB from the start.
-public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src, uint64 offset) {
+internal static void XORKeyStreamAtᴍ(ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src, uint64 offset) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(dst) < len(src)) {
@@ -167,3 +167,10 @@ internal static (uint64, uint64) add128(uint64 lo, uint64 hi, uint64 x) {
 }
 
 } // end aes_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class aesᴛCTR {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStream(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.XORKeyStreamᴍ(Ꮡc, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src, uint64 offset) => aes_package.XORKeyStreamAtᴍ(Ꮡc, dst, src, offset);
+}
+// </GlyphForwarders>

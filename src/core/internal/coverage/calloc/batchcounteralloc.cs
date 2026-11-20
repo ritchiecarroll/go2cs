@@ -16,9 +16,9 @@ partial struct BatchCounterAlloc {
     internal slice<uint32> pool;
 }
 
-} partial class callocᴛBatchCounterAlloc {
+} partial class calloc_package {
 
-public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) {
+internal static slice<uint32> AllocateCountersᴍ(ref BatchCounterAlloc ca, nint n) {
     const nint chunk = 8192;
     if (n > cap(ca.pool)) {
         nint siz = chunk;
@@ -33,3 +33,9 @@ public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class callocᴛBatchCounterAlloc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) => calloc_package.AllocateCountersᴍ(ref ca, n);
+}
+// </GlyphForwarders>

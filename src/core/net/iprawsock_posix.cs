@@ -21,9 +21,9 @@ internal static Addr sockaddrToIP(syscall.Sockaddr sa) {
     return default;
 }
 
-} partial class netᴛIPAddr {
+} partial class net_package {
 
-internal static nint family(this ж<IPAddr> Ꮡa) {
+internal static nint familyᴍ(ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
@@ -35,7 +35,7 @@ internal static nint family(this ж<IPAddr> Ꮡa) {
     return syscall.AF_INET6;
 }
 
-internal static (syscall.Sockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<IPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -44,13 +44,13 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint fa
     return ipToSockaddr(family, a.IP, 0, a.Zone);
 }
 
-internal static sockaddr toLocal(this ref IPAddr a, @string net) {
+internal static sockaddr toLocalᴍ(ref IPAddr a, @string net) {
     return new IPAddrжsockaddr(Ꮡ(new IPAddr(loopbackIP(net), a.Zone)));
 }
 
-} partial class netᴛIPConn {
+} partial class net_package {
 
-internal static (nint, ж<IPAddr>, error) readFrom(this ref IPConn c, slice<byte> b) {
+internal static (nint, ж<IPAddr>, error) readFromᴍ(ref IPConn c, slice<byte> b) {
     // TODO(cw,rsc): consider using readv if we know the family
     // type to avoid the header trim/copy
     ж<IPAddr> addr = default;
@@ -85,9 +85,9 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     return n - l;
 }
 
-} partial class netᴛIPConn {
+} partial class net_package {
 
-internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsg(this ref IPConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsgᴍ(ref IPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -108,7 +108,7 @@ internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) read
     return (n, oobn, flags, addr, err);
 }
 
-internal static (nint, error) writeTo(this ref IPConn c, slice<byte> b, ж<IPAddr> addr) {
+internal static (nint, error) writeToᴍ(ref IPConn c, slice<byte> b, ж<IPAddr> addr) {
     if (c.fd.isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -122,7 +122,7 @@ internal static (nint, error) writeTo(this ref IPConn c, slice<byte> b, ж<IPAdd
     return c.fd.writeTo(b, sa);
 }
 
-internal static (nint n, nint oobn, error err) writeMsg(this ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
+internal static (nint n, nint oobn, error err) writeMsgᴍ(ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
     error err = default;
 
     if (c.fd.isConnected) {
@@ -138,13 +138,13 @@ internal static (nint n, nint oobn, error err) writeMsg(this ref IPConn c, slice
     return c.fd.writeMsg(b, oob, sa);
 }
 
-} partial class netᴛsysDialer {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dialˢ => ref dialˢᵇ;
 private static readonly @string dialˢᵇ = "dial"u8;
 
-internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) {
+internal static (ж<IPConn>, error) dialIPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     var (network, proto, err) = parseNetwork(ctx, sd.network, true);
@@ -169,13 +169,13 @@ internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Con
     return (newIPConn(fd), default);
 }
 
-} partial class netᴛsysListener {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string listenˢ => ref listenˢᵇ;
 private static readonly @string listenˢᵇ = "listen"u8;
 
-internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) {
+internal static (ж<IPConn>, error) listenIPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     var (network, proto, err) = parseNetwork(ctx, sl.network, true);
@@ -201,3 +201,23 @@ internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛIPAddr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint family(this ж<IPAddr> Ꮡa) => net_package.familyᴍ(Ꮡa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (syscall.Sockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint family) => net_package.sockaddrᴍ(Ꮡa, family);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sockaddr toLocal(this ref IPAddr a, @string net) => net_package.toLocalᴍ(ref a, net);
+}
+partial class netᴛIPConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, ж<IPAddr>, error) readFrom(this ref IPConn c, slice<byte> b) => net_package.readFromᴍ(ref c, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsg(this ref IPConn c, slice<byte> b, slice<byte> oob) => net_package.readMsgᴍ(ref c, b, oob);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) writeTo(this ref IPConn c, slice<byte> b, ж<IPAddr> addr) => net_package.writeToᴍ(ref c, b, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, nint oobn, error err) writeMsg(this ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) => net_package.writeMsgᴍ(ref c, b, oob, addr);
+}
+partial class netᴛsysDialer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) => net_package.dialIPᴍ(Ꮡsd, ctx, laddr, raddr);
+}
+partial class netᴛsysListener {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) => net_package.listenIPᴍ(Ꮡsl, ctx, laddr);
+}
+// </GlyphForwarders>

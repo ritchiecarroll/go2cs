@@ -44,10 +44,10 @@ partial struct mcentral {
     internal array<spanSet> full = new(2, () => new());    // list of spans with no free objects
 }
 
-} partial class runtimeᴛmcentral {
+} partial class runtime_package {
 
 // Initialize a single central free list.
-internal static void init(this ref mcentral c, spanClass spc) {
+internal static void initᴍ(ref mcentral c, spanClass spc) {
     c.spanclass = spc;
     lockInit(ref nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
     lockInit(ref nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
@@ -57,25 +57,25 @@ internal static void init(this ref mcentral c, spanClass spc) {
 
 // partialUnswept returns the spanSet which holds partially-filled
 // unswept spans for this sweepgen.
-internal static ж<spanSet> partialUnswept(this ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> partialUnsweptᴍ(ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.partial, 1 - sweepgen / 2 % 2);
 }
 
 // partialSwept returns the spanSet which holds partially-filled
 // swept spans for this sweepgen.
-internal static ж<spanSet> partialSwept(this ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> partialSweptᴍ(ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.partial, sweepgen / 2 % 2);
 }
 
 // fullUnswept returns the spanSet which holds unswept spans without any
 // free slots for this sweepgen.
-internal static ж<spanSet> fullUnswept(this ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> fullUnsweptᴍ(ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.full, 1 - sweepgen / 2 % 2);
 }
 
 // fullSwept returns the spanSet which holds swept spans without any
 // free slots for this sweepgen.
-internal static ж<spanSet> fullSwept(this ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> fullSweptᴍ(ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.full, sweepgen / 2 % 2);
 }
 
@@ -84,7 +84,7 @@ internal static ref readonly @string spanHasNoFreeObjectsˢ => ref spanHasNoFree
 private static readonly @string spanHasNoFreeObjectsˢᵇ = "span has no free objects"u8;
 
 // Allocate a span to use in an mcache.
-internal static ж<mspan> cacheSpan(this ref mcentral c) {
+internal static ж<mspan> cacheSpanᴍ(ref mcentral c) {
     // Deduct credit for this span allocation and sweep if necessary.
     var spanBytes = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()] * (uintptr)pageSize;
     deductSweepCredit(spanBytes, 0);
@@ -211,7 +211,7 @@ private static readonly @string uncachingSpanButSˢᵇ = "uncaching span but s.a
 //
 // s must have a span class corresponding to this
 // mcentral and it must not be empty.
-internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
+internal static void uncacheSpanᴍ(ref mcentral c, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.allocCount == 0) {
@@ -259,7 +259,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
 }
 
 // grow allocates a new empty span from the heap and initializes it for c's size class.
-internal static ж<mspan> grow(this ref mcentral c) {
+internal static ж<mspan> growᴍ(ref mcentral c) {
     var npages = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()];
     var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {
@@ -270,3 +270,16 @@ internal static ж<mspan> grow(this ref mcentral c) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛmcentral {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref mcentral c, spanClass spc) => runtime_package.initᴍ(ref c, spc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<spanSet> partialUnswept(this ref mcentral c, uint32 sweepgen) => runtime_package.partialUnsweptᴍ(ref c, sweepgen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<spanSet> partialSwept(this ref mcentral c, uint32 sweepgen) => runtime_package.partialSweptᴍ(ref c, sweepgen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<spanSet> fullUnswept(this ref mcentral c, uint32 sweepgen) => runtime_package.fullUnsweptᴍ(ref c, sweepgen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<spanSet> fullSwept(this ref mcentral c, uint32 sweepgen) => runtime_package.fullSweptᴍ(ref c, sweepgen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> cacheSpan(this ref mcentral c) => runtime_package.cacheSpanᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) => runtime_package.uncacheSpanᴍ(ref c, Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> grow(this ref mcentral c) => runtime_package.growᴍ(ref c);
+}
+// </GlyphForwarders>

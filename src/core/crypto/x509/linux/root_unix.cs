@@ -26,9 +26,9 @@ private static readonly @string certFileEnvᵇ = "SSL_CERT_FILE"u8;
 internal static ref readonly @string certDirEnv => ref certDirEnvᵇ;
 private static readonly @string certDirEnvᵇ = "SSL_CERT_DIR"u8;
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
-internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> opts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerifyᴍ(ref Certificate c, ж<VerifyOptions> opts) {
     return (default, default);
 }
 
@@ -113,3 +113,9 @@ internal static bool isSameDirSymlink(fs.DirEntry f, @string dir) {
 }
 
 } // end x509_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class x509ᴛCertificate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> opts) => x509_package.systemVerifyᴍ(ref c, opts);
+}
+// </GlyphForwarders>

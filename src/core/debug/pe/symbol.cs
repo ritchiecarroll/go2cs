@@ -44,12 +44,12 @@ internal static (bool, uint32) isSymNameOffset(/*[8]*/ array<byte> name) {
     return (false, 0);
 }
 
-} partial class peᴛCOFFSymbol {
+} partial class pe_package {
 
 // FullName finds real name of symbol sym. Normally name is stored
 // in sym.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
-public static (@string, error) FullName(this ref COFFSymbol sym, StringTable st) {
+internal static (@string, error) FullNameᴍ(ref COFFSymbol sym, StringTable st) {
     var (ok, offset) = isSymNameOffset(sym.Name); if (ok) {
         return st.String(offset);
     }
@@ -126,8 +126,14 @@ public static UntypedInt IMAGE_COMDAT_SELECT_EXACT_MATCH => 4;
 public static UntypedInt IMAGE_COMDAT_SELECT_ASSOCIATIVE => 5;
 public static UntypedInt IMAGE_COMDAT_SELECT_LARGEST => 6;
 
-} partial class peᴛFile {
+} partial class pe_package {
 
 // go2cs generated this placeholder — func COFFSymbolReadSectionDefAux is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class peᴛCOFFSymbol {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) FullName(this ref COFFSymbol sym, StringTable st) => pe_package.FullNameᴍ(ref sym, st);
+}
+// </GlyphForwarders>

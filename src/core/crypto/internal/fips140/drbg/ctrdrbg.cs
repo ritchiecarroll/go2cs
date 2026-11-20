@@ -67,9 +67,9 @@ public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> entropy) {
     return c;
 }
 
-} partial class drbgᴛCounter {
+} partial class drbg_package {
 
-internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) {
+internal static void updateᴍ(ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var seed = ref Ꮡseed.DerefOrNull();
 
@@ -103,9 +103,9 @@ internal static void increment(/*[16]*/ ж<array<byte>> Ꮡv) {
     byteorder.BEPutUint64(v[8..], lo);
 }
 
-} partial class drbgᴛCounter {
+} partial class drbg_package {
 
-public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
+internal static void Reseedᴍ(ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var entropy = ref Ꮡentropy.DerefOrNull();
     ref var additionalInput = ref ᏑadditionalInput.DerefOrNull();
@@ -120,7 +120,7 @@ public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡent
 }
 
 // Generate produces at most maxRequestSize bytes of random data in out.
-public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
+internal static bool /*reseedRequired*/ Generateᴍ(ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var additionalInput = ref ᏑadditionalInput.DerefOrNull();
 
@@ -162,3 +162,11 @@ public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class drbgᴛCounter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) => drbg_package.updateᴍ(Ꮡc, Ꮡseed);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Reseedᴍ(Ꮡc, Ꮡentropy, ᏑadditionalInput);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Generateᴍ(Ꮡc, @out, ᏑadditionalInput);
+}
+// </GlyphForwarders>

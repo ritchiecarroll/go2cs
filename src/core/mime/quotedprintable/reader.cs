@@ -73,10 +73,10 @@ internal static slice<byte> lf = slice<byte>("\n"u8);
 internal static slice<byte> softSuffix = slice<byte>("="u8);
 internal static @string lwspChar = " \t";
 
-} partial class quotedprintableᴛReader {
+} partial class quotedprintable_package {
 
 // Read reads and decodes quoted-printable data from the underlying reader.
-public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref Reader r, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -154,3 +154,9 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class quotedprintableᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader r, slice<byte> p) => quotedprintable_package.Readᴍ(ref r, p);
+}
+// </GlyphForwarders>

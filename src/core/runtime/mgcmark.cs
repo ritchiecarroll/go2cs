@@ -52,14 +52,14 @@ internal static UntypedInt drainCheckThreshold => 100000;
 // must also evenly divide pagesPerArena.
 internal static UntypedInt pagesPerSpanRoot => /* min(512, pagesPerArena) */ 512;
 
-} partial class runtimeᴛg {
+} partial class runtime_package {
 
 // internalBlocked returns true if the goroutine is blocked due to an
 // internal (non-leaking) waitReason, e.g. waiting for the netpoller or garbage collector.
 // Such goroutines are never leak detection candidates according to the GC.
 //
 //go:nosplit
-internal static bool internalBlocked(this ref g gp) {
+internal static bool internalBlockedᴍ(ref g gp) {
     var reason = gp.waitreason;
     return reason < waitReasonChanReceiveNilChan || waitReasonSyncWaitGroupWait < reason;
 }
@@ -1914,3 +1914,9 @@ internal static void gcMarkTinyAllocs() {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛg {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool internalBlocked(this ref g gp) => runtime_package.internalBlockedᴍ(ref gp);
+}
+// </GlyphForwarders>

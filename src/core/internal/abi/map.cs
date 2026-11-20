@@ -46,23 +46,32 @@ public static UntypedInt MapHashMightPanic => 2;
 public static UntypedInt MapIndirectKey => 4;
 public static UntypedInt MapIndirectElem => 8;
 
-} partial class abiᴛMapType {
+} partial class abi_package {
 
-public static bool NeedKeyUpdate(this ref MapType mt) {
+internal static bool NeedKeyUpdateᴍ(ref MapType mt) {
     // true if we need to update key on an overwrite
     return (mt.Flags & (uint32)MapNeedKeyUpdate) != 0;
 }
-public static bool HashMightPanic(this ref MapType mt) {
+internal static bool HashMightPanicᴍ(ref MapType mt) {
     // true if hash function might panic
     return (mt.Flags & (uint32)MapHashMightPanic) != 0;
 }
-public static bool IndirectKey(this ref MapType mt) {
+internal static bool IndirectKeyᴍ(ref MapType mt) {
     // store ptr to key instead of key itself
     return (mt.Flags & (uint32)MapIndirectKey) != 0;
 }
-public static bool IndirectElem(this ref MapType mt) {
+internal static bool IndirectElemᴍ(ref MapType mt) {
     // store ptr to elem instead of elem itself
     return (mt.Flags & (uint32)MapIndirectElem) != 0;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class abiᴛMapType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool NeedKeyUpdate(this ref MapType mt) => abi_package.NeedKeyUpdateᴍ(ref mt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HashMightPanic(this ref MapType mt) => abi_package.HashMightPanicᴍ(ref mt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IndirectKey(this ref MapType mt) => abi_package.IndirectKeyᴍ(ref mt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IndirectElem(this ref MapType mt) => abi_package.IndirectElemᴍ(ref mt);
+}
+// </GlyphForwarders>

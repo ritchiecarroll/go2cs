@@ -104,9 +104,9 @@ partial struct mmu {
     internal slice<Range> ranges;
 }
 
-} partial class traceviewerᴛmmu {
+} partial class traceviewer_package {
 
-internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get(this ж<mmu> Ꮡm, trace.UtilFlags flags) {
+internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) getᴍ(ж<mmu> Ꮡm, trace.UtilFlags flags) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m.mu.Lock();
@@ -135,7 +135,7 @@ private static ref readonly @string flagsˢ => ref flagsˢᵇ;
 private static readonly @string flagsˢᵇ = "flags"u8;
 
 // HandlePlot serves the JSON data for the MMU plot.
-internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
+internal static void HandlePlotᴍ(ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
     var (mu, mmuCurve, err) = Ꮡm.get(requestUtilFlags(r));
     if (err != nil) {
         http.Error(w, fmt.Sprintf("failed to produce MMU data: %v"u8, err), http.StatusInternalServerError);
@@ -396,14 +396,14 @@ internal static @string templMMU = """
 
 """u8.Raw();
 
-} partial class traceviewerᴛmmu {
+} partial class traceviewer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string windowˢ => ref windowˢᵇ;
 private static readonly @string windowˢᵇ = "window"u8;
 
 // HandleDetails serves details of an MMU graph at a particular window.
-internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
+internal static void HandleDetailsᴍ(ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var (_, mmuCurve, err) = Ꮡm.get(requestUtilFlags(r));
@@ -440,9 +440,9 @@ partial struct linkedUtilWindow {
     public @string URL;
 }
 
-} partial class traceviewerᴛmmu {
+} partial class traceviewer_package {
 
-internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilWindow ui, time.Duration window) {
+internal static linkedUtilWindow newLinkedUtilWindowᴍ(ref mmu m, trace.UtilWindow ui, time.Duration window) {
     // Find the range containing this window.
     Range r = default;
     foreach (var (_, vᴛ1) in range(m.ranges)) {
@@ -456,3 +456,12 @@ internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilW
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceviewerᴛmmu {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get(this ж<mmu> Ꮡm, trace.UtilFlags flags) => traceviewer_package.getᴍ(Ꮡm, flags);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) => traceviewer_package.HandlePlotᴍ(Ꮡm, w, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) => traceviewer_package.HandleDetailsᴍ(Ꮡm, w, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilWindow ui, time.Duration window) => traceviewer_package.newLinkedUtilWindowᴍ(ref m, ui, window);
+}
+// </GlyphForwarders>

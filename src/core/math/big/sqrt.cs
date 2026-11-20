@@ -23,7 +23,7 @@ internal static ж<Float> three() {
     return threeOnce.v;
 }
 
-} partial class bigᴛFloat {
+} partial class big_package {
 
 // Sqrt sets z to the rounded square root of x, and returns it.
 //
@@ -34,7 +34,7 @@ internal static ж<Float> three() {
 //
 // The function panics if z < 0. The value of z is undefined in that
 // case.
-public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
+internal static ж<Float> Sqrtᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -98,7 +98,7 @@ public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
 //	1/t² - x = 0
 //
 // for t (using Newton's method), and then inverting.
-internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> x) {
+internal static void sqrtInverseᴍ(ж<Float> Ꮡz, ж<Float> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     // let
@@ -149,3 +149,10 @@ internal static ж<Float> newFloat(uint32 prec2) {
 }
 
 } // end big_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bigᴛFloat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) => big_package.Sqrtᴍ(Ꮡz, Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> x) => big_package.sqrtInverseᴍ(Ꮡz, x);
+}
+// </GlyphForwarders>

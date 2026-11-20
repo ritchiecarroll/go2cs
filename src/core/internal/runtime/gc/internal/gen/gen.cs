@@ -39,9 +39,9 @@ public static ж<File> NewFile(io.Writer w) {
     return Ꮡ(new File(w: w));
 }
 
-} partial class genᴛFile {
+} partial class gen_package {
 
-public static void AddFunc(this ref File f, ж<Func> fn) {
+internal static void AddFuncᴍ(ref File f, ж<Func> fn) {
     f.funcs = append(f.funcs, fn);
 }
 
@@ -52,9 +52,9 @@ partial struct fileConst {
     internal any data;
 }
 
-} partial class genᴛFile {
+} partial class gen_package {
 
-public static void AddConst(this ref File f, @string name, any data) {
+internal static void AddConstᴍ(ref File f, @string name, any data) {
     // TODO: It would be nice if this were unified with "const" ops, but the
     // reason I added this was for []*Func consts, which would take an overhaul
     // to represent in "const" ops.
@@ -75,11 +75,11 @@ public static ж<Func> NewFunc(@string name) {
     return fn;
 }
 
-} partial class genᴛFunc {
+} partial class gen_package {
 
 // attach adds x to fn's op list. If x has any unattached arguments, this adds
 // those first (recursively).
-internal static void attach(this ж<Func> Ꮡfn, ж<op> Ꮡx) {
+internal static void attachᴍ(ж<Func> Ꮡfn, ж<op> Ꮡx) {
     ref var fn = ref Ꮡfn.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -141,9 +141,9 @@ public partial struct op {
     internal @string name;
 }
 
-} partial class genᴛop {
+} partial class gen_package {
 
-public static @string String(this ref op o) {
+internal static @string Stringᴍ(ref op o) {
     return fmt.Sprintf("v%02d"u8, o.id);
 }
 
@@ -153,9 +153,9 @@ internal static ж<op> imm(any val) {
     return Ꮡ(new op(Δop: "imm", c: val));
 }
 
-} partial class genᴛop {
+} partial class gen_package {
 
-internal static bool equalNoName(this ref op o, ж<op> Ꮡo2) {
+internal static bool equalNoNameᴍ(ref op o, ж<op> Ꮡo2) {
     ref var o2 = ref Ꮡo2.DerefOrNull();
 
     if (o.Δop != o2.Δop || !AreEqual(o.c, o2.c) || len(o.args) != len(o2.args)) {
@@ -169,7 +169,7 @@ internal static bool equalNoName(this ref op o, ж<op> Ꮡo2) {
     return true;
 }
 
-internal static void write(this ref op o, io.Writer w) {
+internal static void writeᴍ(ref op o, io.Writer w) {
     fmt.Fprintf(w, "v%02d = %s"u8, o.id, o.Δop);
     foreach (var (_, arg) in range(o.args)) {
         fmt.Fprintf(w, " v%02d"u8, arg.id);
@@ -186,16 +186,16 @@ internal static void write(this ref op o, io.Writer w) {
     fmt.Fprintf(w, "\n"u8);
 }
 
-} partial class genᴛFunc {
+} partial class gen_package {
 
-internal static void write(this ref Func fn, io.Writer w) {
+internal static void writeᴍ(ref Func fn, io.Writer w) {
     fmt.Fprintf(w, "FUNC %s\n"u8, fn.name);
     foreach (var (_, op) in range(fn.ops)) {
         op.write(w);
     }
 }
 
-} partial class genᴛFile {
+} partial class gen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string initialˢ => ref initialˢᵇ;
@@ -209,7 +209,7 @@ private static readonly @string postAddLoadsˢᵇ = "post addLoads"u8;
 private static ref readonly @string postScheduleˢ => ref postScheduleˢᵇ;
 private static readonly @string postScheduleˢᵇ = "post schedule"u8;
 
-public static void Compile(this ж<File> Ꮡf) {
+internal static void Compileᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // TODO: CSE constants across the whole file
@@ -260,10 +260,10 @@ public static void Compile(this ж<File> Ꮡf) {
     }
 }
 
-} partial class genᴛFunc {
+} partial class gen_package {
 
 // cse performs common subexpression elimination.
-internal static bool cse(this ref Func fn) {
+internal static bool cseᴍ(ref Func fn) {
     // Compute structural hashes
     var hashes = new map<ж<op>, uint64>();
     maphash.Hash h = new();
@@ -312,7 +312,7 @@ internal static bool cse(this ref Func fn) {
 }
 
 // deadcode eliminates unused ops.
-internal static bool deadcode(this ref Func fn) {
+internal static bool deadcodeᴍ(ref Func fn) {
     var marks = new map<ж<op>, bool>();
     ref var mark = ref heap<Action<ж<op>>>(out var Ꮡmark);
     var marksʗ1 = marks;
@@ -362,10 +362,10 @@ internal static bool deadcode(this ref Func fn) {
     ["VPSHUFBITQMB"] = ((uint64)1 << 0)
 }; }
 
-} partial class genᴛFunc {
+} partial class gen_package {
 
 // addLoads inserts load ops for ops that can't take memory inputs directly.
-internal static void addLoads(this ж<Func> Ꮡfn) {
+internal static void addLoadsᴍ(ж<Func> Ꮡfn) {
     ref var fn = ref Ꮡfn.DerefOrNull();
 
     // A lot of operations can directly take memory locations. If there's only a
@@ -399,7 +399,7 @@ internal static void addLoads(this ж<Func> Ꮡfn) {
     }
 }
 
-internal static map<ж<op>, nint> opRefs(this ref Func fn) {
+internal static map<ж<op>, nint> opRefsᴍ(ref Func fn) {
     var refs = new map<ж<op>, nint>();
     foreach (var (_, o1) in range(fn.ops)) {
         foreach (var (_, arg) in range(o1.args)) {
@@ -443,11 +443,11 @@ internal static ж<op> makeLoad(ж<op> Ꮡderef) {
 
 partial struct opHeap /*[]ж<op>*/;
 
-} partial class genᴛopHeap {
+} partial class gen_package {
 
-internal static nint Len(this opHeap h) { return len(h); }
-internal static void Swap(this opHeap h, nint i, nint j) { (h[i], h[j]) = (h[j], h[i]); }
-internal static bool Less(this opHeap h, nint i, nint j) {
+internal static nint Lenᴍ(opHeap h) { return len(h); }
+internal static void Swapᴍ(opHeap h, nint i, nint j) { (h[i], h[j]) = (h[j], h[i]); }
+internal static bool Lessᴍ(opHeap h, nint i, nint j) {
     nint priority(ж<op> o) {
         if (o.Δop == "deref"u8 || o.Δop == "const"u8) {
             // Input to memory load
@@ -466,11 +466,11 @@ internal static bool Less(this opHeap h, nint i, nint j) {
     return h[i].id < h[j].id;
 }
 
-internal static void Push(this ref opHeap h, any x) {
+internal static void Pushᴍ(ref opHeap h, any x) {
     h = append(h, x._<ж<op>>());
 }
 
-internal static any Pop(this ref opHeap h) {
+internal static any Popᴍ(ref opHeap h) {
     var old = h;
     nint n = len(old);
     var x = old[n - 1];
@@ -478,7 +478,7 @@ internal static any Pop(this ref opHeap h) {
     return x.OrTypedNil();
 }
 
-} partial class genᴛFunc {
+} partial class gen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object scheduleDidnTScheduleAllˢ = (@string)"schedule didn't schedule all ops"u8;
@@ -487,7 +487,7 @@ private static readonly object afterˢ = (@string)"after:"u8;
 private static readonly object badScheduleˢ = (@string)"bad schedule"u8;
 
 // schedule ensures fn's ops are in dependency order.
-internal static void schedule(this ref Func fn) {
+internal static void scheduleᴍ(ref Func fn) {
     // TODO: This tends to generate a huge amount of register pressure, mostly
     // because it floats loads as early as possible and partly because it has no
     // concept of rematerialization and CSE can make rematerializable values
@@ -541,7 +541,7 @@ internal static void schedule(this ref Func fn) {
 private static ref readonly @string maskˢ => ref maskˢᵇ;
 private static readonly @string maskˢᵇ = ".mask"u8;
 
-internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs) {
+internal static void emitᴍ(ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var w = f.w;
@@ -608,9 +608,9 @@ internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs
     fmt.Fprintf(w, "\n"u8);
 }
 
-} partial class genᴛFile {
+} partial class gen_package {
 
-internal static void emitConst(this ref File f, @string name, any data) {
+internal static void emitConstᴍ(ref File f, @string name, any data) {
     switch (data.type()) {
     case slice<ж<Func>> dataΔ1: {
         fmt.Fprintf(f.w, "GLOBL %s(SB), RODATA, $%#x\n"u8, name, len(dataΔ1) * 8);
@@ -643,3 +643,34 @@ internal static void emitConst(this ref File f, @string name, any data) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class genᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddFunc(this ref File f, ж<Func> fn) => gen_package.AddFuncᴍ(ref f, fn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddConst(this ref File f, @string name, any data) => gen_package.AddConstᴍ(ref f, name, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Compile(this ж<File> Ꮡf) => gen_package.Compileᴍ(Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void emitConst(this ref File f, @string name, any data) => gen_package.emitConstᴍ(ref f, name, data);
+}
+partial class genᴛFunc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void attach(this ж<Func> Ꮡfn, ж<op> Ꮡx) => gen_package.attachᴍ(Ꮡfn, Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ref Func fn, io.Writer w) => gen_package.writeᴍ(ref fn, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool cse(this ref Func fn) => gen_package.cseᴍ(ref fn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool deadcode(this ref Func fn) => gen_package.deadcodeᴍ(ref fn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addLoads(this ж<Func> Ꮡfn) => gen_package.addLoadsᴍ(Ꮡfn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static map<ж<op>, nint> opRefs(this ref Func fn) => gen_package.opRefsᴍ(ref fn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void schedule(this ref Func fn) => gen_package.scheduleᴍ(ref fn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs) => gen_package.emitᴍ(ref fn, Ꮡf, locs);
+}
+partial class genᴛop {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref op o) => gen_package.Stringᴍ(ref o);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool equalNoName(this ref op o, ж<op> Ꮡo2) => gen_package.equalNoNameᴍ(ref o, Ꮡo2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ref op o, io.Writer w) => gen_package.writeᴍ(ref o, w);
+}
+partial class genᴛopHeap {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this opHeap h) => gen_package.Lenᴍ(h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this opHeap h, nint i, nint j) => gen_package.Swapᴍ(h, i, j);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this opHeap h, nint i, nint j) => gen_package.Lessᴍ(h, i, j);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Push(this ref opHeap h, any x) => gen_package.Pushᴍ(ref h, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Pop(this ref opHeap h) => gen_package.Popᴍ(ref h);
+}
+// </GlyphForwarders>

@@ -70,18 +70,28 @@ partial struct Basic {
     internal @string name;
 }
 
-} partial class typesᴛBasic {
+} partial class types_package {
 
 // Kind returns the kind of basic type b.
-public static BasicKind Kind(this ref Basic b) { return b.kind; }
+internal static BasicKind Kindᴍ(ref Basic b) { return b.kind; }
 
 // Info returns information about properties of basic type b.
-public static BasicInfo Info(this ref Basic b) { return b.info; }
+internal static BasicInfo Infoᴍ(ref Basic b) { return b.info; }
 
 // Name returns the name of basic type b.
-public static @string Name(this ref Basic b) { return b.name; }
+internal static @string Nameᴍ(ref Basic b) { return b.name; }
 
-public static Type Underlying(this ж<Basic> Ꮡb) { return new BasicжType(Ꮡb); }
-public static @string String(this ж<Basic> Ꮡb) { return TypeString(new BasicжType(Ꮡb), default); }
+internal static Type Underlyingᴍ(ж<Basic> Ꮡb) { return new BasicжType(Ꮡb); }
+internal static @string Stringᴍ(ж<Basic> Ꮡb) { return TypeString(new BasicжType(Ꮡb), default); }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛBasic {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static BasicKind Kind(this ref Basic b) => types_package.Kindᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static BasicInfo Info(this ref Basic b) => types_package.Infoᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Name(this ref Basic b) => types_package.Nameᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Basic> Ꮡb) => types_package.Underlyingᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Basic> Ꮡb) => types_package.Stringᴍ(Ꮡb);
+}
+// </GlyphForwarders>

@@ -63,25 +63,25 @@ partial struct dirInfo {
     internal FileInfo fileInfo;
 }
 
-} partial class fsᴛdirInfo {
+} partial class fs_package {
 
-internal static bool IsDir(this dirInfo di) {
+internal static bool IsDirᴍ(dirInfo di) {
     return di.fileInfo.IsDir();
 }
 
-internal static FileMode Type(this dirInfo di) {
+internal static FileMode Typeᴍ(dirInfo di) {
     return di.fileInfo.Mode().Type();
 }
 
-internal static (FileInfo, error) Info(this dirInfo di) {
+internal static (FileInfo, error) Infoᴍ(dirInfo di) {
     return (di.fileInfo, default);
 }
 
-internal static @string Name(this dirInfo di) {
+internal static @string Nameᴍ(dirInfo di) {
     return di.fileInfo.Name();
 }
 
-internal static @string String(this dirInfo di) {
+internal static @string Stringᴍ(dirInfo di) {
     return FormatDirEntry(di);
 }
 
@@ -97,3 +97,13 @@ public static DirEntry FileInfoToDirEntry(FileInfo info) {
 }
 
 } // end fs_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fsᴛdirInfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsDir(this dirInfo di) => fs_package.IsDirᴍ(di);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static FileMode Type(this dirInfo di) => fs_package.Typeᴍ(di);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (FileInfo, error) Info(this dirInfo di) => fs_package.Infoᴍ(di);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this dirInfo di) => fs_package.Nameᴍ(di);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this dirInfo di) => fs_package.Stringᴍ(di);
+}
+// </GlyphForwarders>

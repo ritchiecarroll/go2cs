@@ -28,9 +28,9 @@ partial struct traceMultiplexer {
     internal ж<recorder> flightRecorder;
 }
 
-} partial class traceᴛtraceMultiplexer {
+} partial class trace_package {
 
-internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> r) {
+internal static error subscribeFlightRecorderᴍ(ж<traceMultiplexer> Ꮡt, ж<recorder> r) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -59,7 +59,7 @@ internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) {
+internal static error unsubscribeFlightRecorderᴍ(ж<traceMultiplexer> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -85,7 +85,7 @@ internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) 
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, io.Writer w) {
+internal static error subscribeTraceStartWriterᴍ(ж<traceMultiplexer> Ꮡt, io.Writer w) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -114,7 +114,7 @@ internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, 
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt) {
+internal static void unsubscribeTraceStartWriterᴍ(ж<traceMultiplexer> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -140,7 +140,7 @@ internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt)
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) {
+internal static error addedSubscriberᴍ(ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt.Ꮡenabled.Load()) {
@@ -155,7 +155,7 @@ internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) {
     return default;
 }
 
-internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) {
+internal static void removingSubscriberᴍ(ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.subscribers == 0) {
@@ -171,14 +171,14 @@ internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) {
     }
 }
 
-internal static void removedSubscriber(this ref traceMultiplexer t) {
+internal static void removedSubscriberᴍ(ref traceMultiplexer t) {
     if (t.subscribers > 0) {
         // This is necessary for the trace reader goroutine to pick up on the new subscriber.
         runtime_traceAdvance(false);
     }
 }
 
-internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
+internal static partial error startLockedᴍ(ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var err = runtime.StartTrace(); if (err != nil) {
@@ -248,3 +248,16 @@ internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
 internal static partial slice<byte> /*buf*/ runtime_readTrace();
 
 } // end trace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛtraceMultiplexer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> r) => trace_package.subscribeFlightRecorderᴍ(Ꮡt, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) => trace_package.unsubscribeFlightRecorderᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, io.Writer w) => trace_package.subscribeTraceStartWriterᴍ(Ꮡt, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt) => trace_package.unsubscribeTraceStartWriterᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) => trace_package.addedSubscriberᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) => trace_package.removingSubscriberᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void removedSubscriber(this ref traceMultiplexer t) => trace_package.removedSubscriberᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error startLocked(this ж<traceMultiplexer> Ꮡt) => trace_package.startLockedᴍ(Ꮡt);
+}
+// </GlyphForwarders>

@@ -34,11 +34,11 @@ partial struct pattern {
     internal @string loc; // source location of registering call, for helpful messages
 }
 
-} partial class httpᴛpattern {
+} partial class http_package {
 
-internal static @string String(this ref pattern p) { return p.str; }
+internal static @string Stringᴍ(ref pattern p) { return p.str; }
 
-internal static segment lastSegment(this ref pattern p) {
+internal static segment lastSegmentᴍ(ref pattern p) {
     return p.segments[len(p.segments) - 1];
 }
 
@@ -254,7 +254,7 @@ private static readonly relationship disjointᵇ = "disjoint"u8;         // ther
 internal static ref readonly relationship overlaps => ref overlapsᵇ;
 private static readonly relationship overlapsᵇ = "overlaps"u8;         // there is a request that both match, but neither is more specific
 
-} partial class httpᴛpattern {
+} partial class http_package {
 
 // conflictsWith reports whether p1 conflicts with p2, that is, whether
 // there is a request that both match but where neither is higher precedence
@@ -269,7 +269,7 @@ private static readonly relationship overlapsᵇ = "overlaps"u8;         // ther
 // If rule 1 doesn't apply, then two patterns conflict if their relationship
 // is either equivalence (they match the same set of requests) or overlap
 // (they both match some requests, but neither is more specific than the other).
-internal static bool conflictsWith(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static bool conflictsWithᴍ(ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     if (p1.host != p2.host) {
@@ -282,7 +282,7 @@ internal static bool conflictsWith(this ref pattern p1, ж<pattern> Ꮡp2) {
     return rel == equivalent || rel == overlaps;
 }
 
-internal static relationship comparePathsAndMethods(this ref pattern p1, ж<pattern> p2) {
+internal static relationship comparePathsAndMethodsᴍ(ref pattern p1, ж<pattern> p2) {
     relationship mrel = p1.compareMethods(p2);
     // Optimization: avoid a call to comparePaths.
     if (mrel == disjoint) {
@@ -299,7 +299,7 @@ internal static relationship comparePathsAndMethods(this ref pattern p1, ж<patt
 // The empty string matches any method, so it is the most general.
 // "GET" matches both GET and HEAD.
 // Anything else matches only itself.
-internal static relationship compareMethods(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship compareMethodsᴍ(ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     if (p1.method == p2.method) {
@@ -324,7 +324,7 @@ internal static relationship compareMethods(this ref pattern p1, ж<pattern> Ꮡ
 
 // comparePaths determines the relationship between the path
 // part of two patterns.
-internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship comparePathsᴍ(ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     // Optimization: if a path pattern doesn't end in a multi ("...") wildcard, then it
@@ -589,3 +589,14 @@ internal static @string differencePath(ref pattern p1, ref pattern p2) {
 }
 
 } // end http_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛpattern {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref pattern p) => http_package.Stringᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static segment lastSegment(this ref pattern p) => http_package.lastSegmentᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool conflictsWith(this ref pattern p1, ж<pattern> Ꮡp2) => http_package.conflictsWithᴍ(ref p1, Ꮡp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static relationship comparePathsAndMethods(this ref pattern p1, ж<pattern> p2) => http_package.comparePathsAndMethodsᴍ(ref p1, p2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static relationship compareMethods(this ref pattern p1, ж<pattern> Ꮡp2) => http_package.compareMethodsᴍ(ref p1, Ꮡp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2) => http_package.comparePathsᴍ(ref p1, Ꮡp2);
+}
+// </GlyphForwarders>

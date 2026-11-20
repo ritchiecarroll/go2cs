@@ -23,9 +23,9 @@ private static readonly @string _RelocTypeGeneric_nameᵇ = "GENERIC_RELOC_VANIL
 
 internal static array<uint8> _RelocTypeGeneric_index = new uint8[]{0, 21, 39, 61, 84, 112, 129}.array();
 
-} partial class machoᴛRelocTypeGeneric {
+} partial class macho_package {
 
-public static @string String(this RelocTypeGeneric i) {
+internal static @string Stringᴍ(RelocTypeGeneric i) {
     if (i < 0 || i >= ((RelocTypeGeneric)(len(_RelocTypeGeneric_index) - 1))) {
         return "RelocTypeGeneric("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -55,9 +55,9 @@ private static readonly @string _RelocTypeX86_64_nameᵇ = "X86_64_RELOC_UNSIGNE
 
 internal static array<uint8> _RelocTypeX86_64_index = new uint8[]{0, 21, 40, 59, 80, 96, 119, 140, 161, 182, 198}.array();
 
-} partial class machoᴛRelocTypeX86_64 {
+} partial class macho_package {
 
-public static @string String(this RelocTypeX86_64 i) {
+internal static @string Stringᴍ(RelocTypeX86_64 i) {
     if (i < 0 || i >= ((RelocTypeX86_64)(len(_RelocTypeX86_64_index) - 1))) {
         return "RelocTypeX86_64("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -87,9 +87,9 @@ private static readonly @string _RelocTypeARM_nameᵇ = "ARM_RELOC_VANILLAARM_RE
 
 internal static array<uint8> _RelocTypeARM_index = new uint8[]{0, 17, 31, 49, 73, 92, 106, 126, 148, 162, 185}.array();
 
-} partial class machoᴛRelocTypeARM {
+} partial class macho_package {
 
-public static @string String(this RelocTypeARM i) {
+internal static @string Stringᴍ(RelocTypeARM i) {
     if (i < 0 || i >= ((RelocTypeARM)(len(_RelocTypeARM_index) - 1))) {
         return "RelocTypeARM("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -120,9 +120,9 @@ private static readonly @string _RelocTypeARM64_nameᵇ = "ARM64_RELOC_UNSIGNEDA
 
 internal static array<uint16> _RelocTypeARM64_index = new uint16[]{0, 20, 42, 62, 80, 101, 128, 158, 184, 212, 243, 261}.array();
 
-} partial class machoᴛRelocTypeARM64 {
+} partial class macho_package {
 
-public static @string String(this RelocTypeARM64 i) {
+internal static @string Stringᴍ(RelocTypeARM64 i) {
     if (i < 0 || i >= ((RelocTypeARM64)(len(_RelocTypeARM64_index) - 1))) {
         return "RelocTypeARM64("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -130,3 +130,18 @@ public static @string String(this RelocTypeARM64 i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class machoᴛRelocTypeGeneric {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RelocTypeGeneric i) => macho_package.Stringᴍ(i);
+}
+partial class machoᴛRelocTypeX86_64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RelocTypeX86_64 i) => macho_package.Stringᴍ(i);
+}
+partial class machoᴛRelocTypeARM {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RelocTypeARM i) => macho_package.Stringᴍ(i);
+}
+partial class machoᴛRelocTypeARM64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RelocTypeARM64 i) => macho_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

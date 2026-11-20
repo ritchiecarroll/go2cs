@@ -41,10 +41,10 @@ internal const uint64 maskLow51Bits = /* (1 << 51) - 1 */ 2251799813685247;
 
 internal static ж<Element> feZero = Ꮡ(new Element(0, 0, 0, 0, 0));
 
-} partial class fieldᴛElement {
+} partial class field_package {
 
 // Zero sets v = 0, and returns v.
-public static ж<Element> Zero(this ж<Element> Ꮡv) {
+internal static ж<Element> Zeroᴍ(ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     v = feZero.Value;
@@ -55,10 +55,10 @@ public static ж<Element> Zero(this ж<Element> Ꮡv) {
 
 internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 
-} partial class fieldᴛElement {
+} partial class field_package {
 
 // One sets v = 1, and returns v.
-public static ж<Element> One(this ж<Element> Ꮡv) {
+internal static ж<Element> Oneᴍ(ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     v = feOne.Value;
@@ -66,7 +66,7 @@ public static ж<Element> One(this ж<Element> Ꮡv) {
 }
 
 // reduce reduces v modulo 2^255 - 19 and returns it.
-internal static ж<Element> reduce(this ж<Element> Ꮡv) {
+internal static ж<Element> reduceᴍ(ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     Ꮡv.carryPropagate();
@@ -101,7 +101,7 @@ internal static ж<Element> reduce(this ж<Element> Ꮡv) {
 }
 
 // Add sets v = a + b, and returns v.
-public static ж<Element> Add(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) {
+internal static ж<Element> Addᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -115,7 +115,7 @@ public static ж<Element> Add(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Elemen
 }
 
 // Subtract sets v = a - b, and returns v.
-public static ж<Element> Subtract(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) {
+internal static ж<Element> Subtractᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -131,14 +131,14 @@ public static ж<Element> Subtract(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<E
 }
 
 // Negate sets v = -a, and returns v.
-public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> a) {
+internal static ж<Element> Negateᴍ(ж<Element> Ꮡv, ж<Element> a) {
     return Ꮡv.Subtract(feZero, a);
 }
 
 // Invert sets v = 1/z mod p, and returns v.
 //
 // If z == 0, Invert returns v = 0.
-public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> z) {
+internal static ж<Element> Invertᴍ(ж<Element> Ꮡv, ж<Element> z) {
     // Inversion is implemented as exponentiation with exponent p − 2. It uses the
     // same sequence of 255 squarings and 11 multiplications as [Curve25519].
     ref var z2 = ref heap(new Element(), out var Ꮡz2);
@@ -211,7 +211,7 @@ public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> z) {
 }
 
 // Set sets v = a, and returns v.
-public static ж<Element> Set(this ж<Element> Ꮡv, ж<Element> Ꮡa) {
+internal static ж<Element> Setᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -231,7 +231,7 @@ private static readonly @string edwards25519InvalidFieldˢᵇ = "edwards25519: i
 // last byte) is ignored, and non-canonical values (2^255-19 through 2^255-1)
 // are accepted. Note that this is laxer than specified by RFC 8032, but
 // consistent with most Ed25519 implementations.
-public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x) {
+internal static (ж<Element>, error) SetBytesᴍ(ж<Element> Ꮡv, slice<byte> x) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     if (len(x) != 32) {
@@ -259,14 +259,14 @@ public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x
 }
 
 // Bytes returns the canonical 32-byte little-endian encoding of v.
-public static slice<byte> Bytes(this ref Element v) {
+internal static slice<byte> Bytesᴍ(ref Element v) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(32), out var Ꮡout);
     return v.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesᴍ(ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var t = ref heap<Element>(v, out var Ꮡt);
@@ -293,7 +293,7 @@ internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> �
 }
 
 // Equal returns 1 if v and u are equal, and 0 otherwise.
-public static nint Equal(this ref Element v, ж<Element> Ꮡu) {
+internal static nint Equalᴍ(ref Element v, ж<Element> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var (sa, sv) = (u.Bytes(), v.Bytes());
@@ -305,10 +305,10 @@ public static nint Equal(this ref Element v, ж<Element> Ꮡu) {
 // mask64Bits returns 0xffffffff if cond is 1, and 0 otherwise.
 internal static uint64 mask64Bits(nint cond) { return ~((uint64)cond - 1); }
 
-} partial class fieldᴛElement {
+} partial class field_package {
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
-public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) {
+internal static ж<Element> Selectᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -323,7 +323,7 @@ public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Ele
 }
 
 // Swap swaps v and u if cond == 1 or leaves them unchanged if cond == 0, and returns v.
-public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) {
+internal static void Swapᴍ(ref Element v, ж<Element> Ꮡu, nint cond) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var m = mask64Bits(cond);
@@ -345,31 +345,31 @@ public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) {
 }
 
 // IsNegative returns 1 if v is negative, and 0 otherwise.
-public static nint IsNegative(this ref Element v) {
+internal static nint IsNegativeᴍ(ref Element v) {
     return (nint)((byte)(v.Bytes()[0] & 1));
 }
 
 // Absolute sets v to |u|, and returns v.
-public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) {
+internal static ж<Element> Absoluteᴍ(ж<Element> Ꮡv, ж<Element> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     return Ꮡv.Select(@new<Element>().Negate(Ꮡu), Ꮡu, u.IsNegative());
 }
 
 // Multiply sets v = x * y, and returns v.
-public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> x, ж<Element> y) {
+internal static ж<Element> Multiplyᴍ(ж<Element> Ꮡv, ж<Element> x, ж<Element> y) {
     feMul(ref (Ꮡv).DerefOrNull(), ref (x).DerefOrNull(), ref (y).DerefOrNull());
     return Ꮡv;
 }
 
 // Square sets v = x * x, and returns v.
-public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> x) {
+internal static ж<Element> Squareᴍ(ж<Element> Ꮡv, ж<Element> x) {
     feSquare(ref (Ꮡv).DerefOrNull(), ref (x).DerefOrNull());
     return Ꮡv;
 }
 
 // Mult32 sets v = x * y, and returns v.
-public static ж<Element> Mult32(this ж<Element> Ꮡv, ж<Element> Ꮡx, uint32 y) {
+internal static ж<Element> Mult32ᴍ(ж<Element> Ꮡv, ж<Element> Ꮡx, uint32 y) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -401,10 +401,10 @@ internal static (uint64 lo, uint64 hi) mul51(uint64 a, uint32 b) {
     return (lo, hi);
 }
 
-} partial class fieldᴛElement {
+} partial class field_package {
 
 // Pow22523 set v = x^((p-5)/8), and returns v. (p-5)/8 is 2^252-3.
-public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> x) {
+internal static ж<Element> Pow22523ᴍ(ж<Element> Ꮡv, ж<Element> x) {
     ref var t0 = ref heap(new Element(), out var Ꮡt0);
     ref var t1 = ref heap(new Element(), out var Ꮡt1);
     ref var t2 = ref heap(new Element(), out var Ꮡt2);
@@ -462,14 +462,14 @@ public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> x) {
 internal static ж<Element> sqrtM1 = Ꮡ(new Element(1718705420411056UL, 234908883556509UL,
     2233514472574048UL, 2117202627021982UL, 765476049583133UL));
 
-} partial class fieldᴛElement {
+} partial class field_package {
 
 // SqrtRatio sets r to the non-negative square root of the ratio of u and v.
 //
 // If u/v is square, SqrtRatio returns r and 1. If u/v is not square, SqrtRatio
 // sets r according to Section 4.3 of draft-irtf-cfrg-ristretto255-decaf448-00,
 // and returns r and 0.
-public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, ж<Element> u, ж<Element> v) {
+internal static (ж<Element> R, nint wasSquare) SqrtRatioᴍ(ж<Element> Ꮡr, ж<Element> u, ж<Element> v) {
     var t0 = @new<Element>();
 
     // r = (u * v3) * (u * v7)^((p-5)/8)
@@ -494,3 +494,29 @@ public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, �
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fieldᴛElement {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Zero(this ж<Element> Ꮡv) => field_package.Zeroᴍ(Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> One(this ж<Element> Ꮡv) => field_package.Oneᴍ(Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Element> reduce(this ж<Element> Ꮡv) => field_package.reduceᴍ(Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Add(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) => field_package.Addᴍ(Ꮡv, Ꮡa, Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Subtract(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) => field_package.Subtractᴍ(Ꮡv, Ꮡa, Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> a) => field_package.Negateᴍ(Ꮡv, a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> z) => field_package.Invertᴍ(Ꮡv, z);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Set(this ж<Element> Ꮡv, ж<Element> Ꮡa) => field_package.Setᴍ(Ꮡv, Ꮡa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x) => field_package.SetBytesᴍ(Ꮡv, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref Element v) => field_package.Bytesᴍ(ref v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) => field_package.bytesᴍ(ref v, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Equal(this ref Element v, ж<Element> Ꮡu) => field_package.Equalᴍ(ref v, Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) => field_package.Selectᴍ(Ꮡv, Ꮡa, Ꮡb, cond);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) => field_package.Swapᴍ(ref v, Ꮡu, cond);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint IsNegative(this ref Element v) => field_package.IsNegativeᴍ(ref v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) => field_package.Absoluteᴍ(Ꮡv, Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> x, ж<Element> y) => field_package.Multiplyᴍ(Ꮡv, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> x) => field_package.Squareᴍ(Ꮡv, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Mult32(this ж<Element> Ꮡv, ж<Element> Ꮡx, uint32 y) => field_package.Mult32ᴍ(Ꮡv, Ꮡx, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> x) => field_package.Pow22523ᴍ(Ꮡv, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, ж<Element> u, ж<Element> v) => field_package.SqrtRatioᴍ(Ꮡr, u, v);
+}
+// </GlyphForwarders>

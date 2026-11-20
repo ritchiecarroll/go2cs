@@ -15,11 +15,11 @@ partial struct SysFile {
     internal ж<slice<Δsyscall.Iovec>> iovecs;
 }
 
-} partial class pollᴛSysFile {
+} partial class poll_package {
 
-internal static void init(this ref SysFile s) { }
+internal static void initᴍ(ref SysFile s) { }
 
-internal static error destroy(this ref SysFile s, nint fd) {
+internal static error destroyᴍ(ref SysFile s, nint fd) {
     // We don't use ignoringEINTR here because POSIX does not define
     // whether the descriptor is closed if close returns EINTR.
     // If the descriptor is indeed closed, using a loop would race
@@ -52,10 +52,10 @@ internal static (nint, @string, error) dupCloseOnExecOld(nint fd) {
     finally { ᒐ.Run(); }
 }
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // Fchdir wraps syscall.Fchdir.
-public static error Fchdir(this ж<FD> Ꮡfd) {
+internal static error Fchdirᴍ(ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -74,7 +74,7 @@ public static error Fchdir(this ж<FD> Ꮡfd) {
 // ReadDirent wraps syscall.ReadDirent.
 // We treat this like an ordinary system call rather than a call
 // that tries to fill the buffer.
-public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) {
+internal static (nint, error) ReadDirentᴍ(ж<FD> Ꮡfd, slice<byte> buf) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -105,7 +105,7 @@ public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) {
 }
 
 // Seek wraps syscall.Seek.
-public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) {
+internal static (int64, error) Seekᴍ(ж<FD> Ꮡfd, int64 offset, nint whence) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -122,3 +122,15 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pollᴛSysFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref SysFile s) => poll_package.initᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error destroy(this ref SysFile s, nint fd) => poll_package.destroyᴍ(ref s, fd);
+}
+partial class pollᴛFD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fchdir(this ж<FD> Ꮡfd) => poll_package.Fchdirᴍ(Ꮡfd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) => poll_package.ReadDirentᴍ(Ꮡfd, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) => poll_package.Seekᴍ(Ꮡfd, offset, whence);
+}
+// </GlyphForwarders>

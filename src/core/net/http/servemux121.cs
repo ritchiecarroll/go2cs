@@ -48,10 +48,10 @@ partial struct muxEntry {
     internal @string pattern;
 }
 
-} partial class httpᴛserveMux121 {
+} partial class http_package {
 
 // Formerly ServeMux.Handle.
-internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, Handler handler) {
+internal static void handleᴍ(ж<serveMux121> Ꮡmux, @string pattern, Handler handler) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -103,10 +103,10 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     return es;
 }
 
-} partial class httpᴛserveMux121 {
+} partial class http_package {
 
 // Formerly ServeMux.HandleFunc.
-internal static void handleFunc(this ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+internal static void handleFuncᴍ(ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (handler == nil) {
         throw panic("http: nil handler");
     }
@@ -114,7 +114,7 @@ internal static void handleFunc(this ж<serveMux121> Ꮡmux, @string pattern, Ac
 }
 
 // Formerly ServeMux.Handler.
-internal static (Handler h, @string pattern) findHandler(this ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
+internal static (Handler h, @string pattern) findHandlerᴍ(ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
     @string pattern = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -154,7 +154,7 @@ internal static (Handler h, @string pattern) findHandler(this ж<serveMux121> �
 
 // handler is the main implementation of findHandler.
 // The path is known to be in canonical form, except for CONNECT methods.
-internal static (Handler h, @string pattern) handler(this ж<serveMux121> Ꮡmux, @string host, @string path) {
+internal static (Handler h, @string pattern) handlerᴍ(ж<serveMux121> Ꮡmux, @string host, @string path) {
     Handler h = default;
     @string pattern = default;
     GoFrame ᒐ = default;
@@ -182,7 +182,7 @@ internal static (Handler h, @string pattern) handler(this ж<serveMux121> Ꮡmux
 
 // Find a handler on a handler map given a path string.
 // Most-specific (longest) pattern wins.
-internal static (Handler h, @string pattern) match(this ref serveMux121 mux, @string path) {
+internal static (Handler h, @string pattern) matchᴍ(ref serveMux121 mux, @string path) {
     // Check for exact match first.
     var (v, ok) = mux.m[path, ꟷ];
     if (ok) {
@@ -203,7 +203,7 @@ internal static (Handler h, @string pattern) match(this ref serveMux121 mux, @st
 // This occurs when a handler for path + "/" was already registered, but
 // not for path itself. If the path needs appending to, it creates a new
 // URL, setting the path to u.Path + "/" and returning true to indicate so.
-internal static (ж<url.URL>, bool) redirectToPathSlash(this ж<serveMux121> Ꮡmux, @string host, @string path, ж<url.URL> Ꮡu) {
+internal static (ж<url.URL>, bool) redirectToPathSlashᴍ(ж<serveMux121> Ꮡmux, @string host, @string path, ж<url.URL> Ꮡu) {
     ref var mux = ref Ꮡmux.DerefOrNull();
     ref var u = ref Ꮡu.DerefOrNull();
 
@@ -221,7 +221,7 @@ internal static (ж<url.URL>, bool) redirectToPathSlash(this ж<serveMux121> Ꮡ
 // shouldRedirectRLocked reports whether the given path and host should be redirected to
 // path+"/". This should happen if a handler is registered for path+"/" but
 // not path -- see comments at ServeMux.
-internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string host, @string path) {
+internal static bool shouldRedirectRLockedᴍ(ref serveMux121 mux, @string host, @string path) {
     var p = slice<@string>([path, host + path]);
 
     foreach (var (_, c) in range(p)) {
@@ -244,3 +244,15 @@ internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string hos
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛserveMux121 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, Handler handler) => http_package.handleᴍ(Ꮡmux, pattern, handler);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleFunc(this ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) => http_package.handleFuncᴍ(Ꮡmux, pattern, handler);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Handler h, @string pattern) findHandler(this ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) => http_package.findHandlerᴍ(Ꮡmux, Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Handler h, @string pattern) handler(this ж<serveMux121> Ꮡmux, @string host, @string path) => http_package.handlerᴍ(Ꮡmux, host, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Handler h, @string pattern) match(this ref serveMux121 mux, @string path) => http_package.matchᴍ(ref mux, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<url.URL>, bool) redirectToPathSlash(this ж<serveMux121> Ꮡmux, @string host, @string path, ж<url.URL> Ꮡu) => http_package.redirectToPathSlashᴍ(Ꮡmux, host, path, Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string host, @string path) => http_package.shouldRedirectRLockedᴍ(ref mux, host, path);
+}
+// </GlyphForwarders>

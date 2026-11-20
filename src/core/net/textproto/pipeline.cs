@@ -32,10 +32,10 @@ partial struct Pipeline {
     internal sequencer response;
 }
 
-} partial class textprotoᴛPipeline {
+} partial class textproto_package {
 
 // Next returns the next id for a request/response pair.
-public static nuint Next(this ж<Pipeline> Ꮡp) {
+internal static nuint Nextᴍ(ж<Pipeline> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.mu.Lock();
@@ -47,25 +47,25 @@ public static nuint Next(this ж<Pipeline> Ꮡp) {
 
 // StartRequest blocks until it is time to send (or, if this is a server, receive)
 // the request with the given id.
-public static void StartRequest(this ж<Pipeline> Ꮡp, nuint id) {
+internal static void StartRequestᴍ(ж<Pipeline> Ꮡp, nuint id) {
     Ꮡp.Ꮡrequest.Start(id);
 }
 
 // EndRequest notifies p that the request with the given id has been sent
 // (or, if this is a server, received).
-public static void EndRequest(this ж<Pipeline> Ꮡp, nuint id) {
+internal static void EndRequestᴍ(ж<Pipeline> Ꮡp, nuint id) {
     Ꮡp.Ꮡrequest.End(id);
 }
 
 // StartResponse blocks until it is time to receive (or, if this is a server, send)
 // the request with the given id.
-public static void StartResponse(this ж<Pipeline> Ꮡp, nuint id) {
+internal static void StartResponseᴍ(ж<Pipeline> Ꮡp, nuint id) {
     Ꮡp.Ꮡresponse.Start(id);
 }
 
 // EndResponse notifies p that the response with the given id has been received
 // (or, if this is a server, sent).
-public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) {
+internal static void EndResponseᴍ(ж<Pipeline> Ꮡp, nuint id) {
     Ꮡp.Ꮡresponse.End(id);
 }
 
@@ -81,12 +81,12 @@ partial struct sequencer {
     internal map<nuint, channel<EmptyStruct>> wait;
 }
 
-} partial class textprotoᴛsequencer {
+} partial class textproto_package {
 
 // Start waits until it is time for the event numbered id to begin.
 // That is, except for the first event, it waits until End(id-1) has
 // been called.
-internal static void Start(this ж<sequencer> Ꮡs, nuint id) {
+internal static void Startᴍ(ж<sequencer> Ꮡs, nuint id) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.mu.Lock();
@@ -106,7 +106,7 @@ internal static void Start(this ж<sequencer> Ꮡs, nuint id) {
 // End notifies the sequencer that the event numbered id has completed,
 // allowing it to schedule the event numbered id+1.  It is a run-time error
 // to call End with an id that is not the number of the active event.
-internal static void End(this ж<sequencer> Ꮡs, nuint id) {
+internal static void Endᴍ(ж<sequencer> Ꮡs, nuint id) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.mu.Lock();
@@ -130,3 +130,17 @@ internal static void End(this ж<sequencer> Ꮡs, nuint id) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class textprotoᴛPipeline {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nuint Next(this ж<Pipeline> Ꮡp) => textproto_package.Nextᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StartRequest(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.StartRequestᴍ(Ꮡp, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void EndRequest(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.EndRequestᴍ(Ꮡp, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StartResponse(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.StartResponseᴍ(Ꮡp, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.EndResponseᴍ(Ꮡp, id);
+}
+partial class textprotoᴛsequencer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Start(this ж<sequencer> Ꮡs, nuint id) => textproto_package.Startᴍ(Ꮡs, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void End(this ж<sequencer> Ꮡs, nuint id) => textproto_package.Endᴍ(Ꮡs, id);
+}
+// </GlyphForwarders>

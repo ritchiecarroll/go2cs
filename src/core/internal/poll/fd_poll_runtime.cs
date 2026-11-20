@@ -36,9 +36,9 @@ partial struct pollDesc {
 internal static readonly ж<sync.Once> ᏑserverInit = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once serverInit => ref ((StaticBox<sync.Once>)ᏑserverInit).ValueSlot;
 
-} partial class pollᴛpollDesc {
+} partial class poll_package {
 
-internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
+internal static error initᴍ(ref pollDesc pd, ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     ᏑserverInit.Do(runtime_pollServerInit);
@@ -50,7 +50,7 @@ internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
     return default;
 }
 
-internal static void close(this ref pollDesc pd) {
+internal static void closeᴍ(ref pollDesc pd) {
     if (pd.runtimeCtx == 0) {
         return;
     }
@@ -59,14 +59,14 @@ internal static void close(this ref pollDesc pd) {
 }
 
 // Evict evicts fd from the pending list, unblocking any I/O running on fd.
-internal static void evict(this ref pollDesc pd) {
+internal static void evictᴍ(ref pollDesc pd) {
     if (pd.runtimeCtx == 0) {
         return;
     }
     runtime_pollUnblock(pd.runtimeCtx);
 }
 
-internal static error prepare(this ref pollDesc pd, nint mode, bool isFile) {
+internal static error prepareᴍ(ref pollDesc pd, nint mode, bool isFile) {
     if (pd.runtimeCtx == 0) {
         return default;
     }
@@ -74,11 +74,11 @@ internal static error prepare(this ref pollDesc pd, nint mode, bool isFile) {
     return convertErr(res, isFile);
 }
 
-internal static error prepareRead(this ref pollDesc pd, bool isFile) {
+internal static error prepareReadᴍ(ref pollDesc pd, bool isFile) {
     return pd.prepare('r', isFile);
 }
 
-internal static error prepareWrite(this ref pollDesc pd, bool isFile) {
+internal static error prepareWriteᴍ(ref pollDesc pd, bool isFile) {
     return pd.prepare('w', isFile);
 }
 
@@ -86,7 +86,7 @@ internal static error prepareWrite(this ref pollDesc pd, bool isFile) {
 internal static ref readonly @string waitingForUnsupportedˢ => ref waitingForUnsupportedˢᵇ;
 private static readonly @string waitingForUnsupportedˢᵇ = "waiting for unsupported file type"u8;
 
-internal static error wait(this ref pollDesc pd, nint mode, bool isFile) {
+internal static error waitᴍ(ref pollDesc pd, nint mode, bool isFile) {
     if (pd.runtimeCtx == 0) {
         return errors.New(waitingForUnsupportedˢ);
     }
@@ -94,22 +94,22 @@ internal static error wait(this ref pollDesc pd, nint mode, bool isFile) {
     return convertErr(res, isFile);
 }
 
-internal static error waitRead(this ref pollDesc pd, bool isFile) {
+internal static error waitReadᴍ(ref pollDesc pd, bool isFile) {
     return pd.wait('r', isFile);
 }
 
-internal static error waitWrite(this ref pollDesc pd, bool isFile) {
+internal static error waitWriteᴍ(ref pollDesc pd, bool isFile) {
     return pd.wait('w', isFile);
 }
 
-internal static void waitCanceled(this ref pollDesc pd, nint mode) {
+internal static void waitCanceledᴍ(ref pollDesc pd, nint mode) {
     if (pd.runtimeCtx == 0) {
         return;
     }
     runtime_pollWaitCanceled(pd.runtimeCtx, mode);
 }
 
-internal static bool pollable(this ref pollDesc pd) {
+internal static bool pollableᴍ(ref pollDesc pd) {
     return pd.runtimeCtx != 0;
 }
 
@@ -140,20 +140,20 @@ internal static error convertErr(nint res, bool isFile) {
     throw panic("unreachable");
 }
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // SetDeadline sets the read and write deadlines associated with fd.
-public static error SetDeadline(this ж<FD> Ꮡfd, time.Time t) {
+internal static error SetDeadlineᴍ(ж<FD> Ꮡfd, time.Time t) {
     return setDeadlineImpl(Ꮡfd, t, (rune)'r' + (rune)'w');
 }
 
 // SetReadDeadline sets the read deadline associated with fd.
-public static error SetReadDeadline(this ж<FD> Ꮡfd, time.Time t) {
+internal static error SetReadDeadlineᴍ(ж<FD> Ꮡfd, time.Time t) {
     return setDeadlineImpl(Ꮡfd, t, 'r');
 }
 
 // SetWriteDeadline sets the write deadline associated with fd.
-public static error SetWriteDeadline(this ж<FD> Ꮡfd, time.Time t) {
+internal static error SetWriteDeadlineᴍ(ж<FD> Ꮡfd, time.Time t) {
     return setDeadlineImpl(Ꮡfd, t, 'w');
 }
 
@@ -203,3 +203,24 @@ public static bool IsPollDescriptor(uintptr fd) {
 }
 
 } // end poll_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pollᴛpollDesc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) => poll_package.initᴍ(ref pd, Ꮡfd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ref pollDesc pd) => poll_package.closeᴍ(ref pd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void evict(this ref pollDesc pd) => poll_package.evictᴍ(ref pd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error prepare(this ref pollDesc pd, nint mode, bool isFile) => poll_package.prepareᴍ(ref pd, mode, isFile);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error prepareRead(this ref pollDesc pd, bool isFile) => poll_package.prepareReadᴍ(ref pd, isFile);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error prepareWrite(this ref pollDesc pd, bool isFile) => poll_package.prepareWriteᴍ(ref pd, isFile);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error wait(this ref pollDesc pd, nint mode, bool isFile) => poll_package.waitᴍ(ref pd, mode, isFile);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error waitRead(this ref pollDesc pd, bool isFile) => poll_package.waitReadᴍ(ref pd, isFile);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error waitWrite(this ref pollDesc pd, bool isFile) => poll_package.waitWriteᴍ(ref pd, isFile);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void waitCanceled(this ref pollDesc pd, nint mode) => poll_package.waitCanceledᴍ(ref pd, mode);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool pollable(this ref pollDesc pd) => poll_package.pollableᴍ(ref pd);
+}
+partial class pollᴛFD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetDeadlineᴍ(Ꮡfd, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetReadDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetReadDeadlineᴍ(Ꮡfd, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetWriteDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetWriteDeadlineᴍ(Ꮡfd, t);
+}
+// </GlyphForwarders>

@@ -26,13 +26,13 @@ partial struct PrivateKey {
     internal slice<byte> d; // bigmod.(*Nat).Bytes output (same length as the curve order)
 }
 
-} partial class ecdsaᴛPrivateKey {
+} partial class ecdsa_package {
 
-public static slice<byte> Bytes(this ref PrivateKey priv) {
+internal static slice<byte> Bytesᴍ(ref PrivateKey priv) {
     return priv.d;
 }
 
-public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
 
@@ -43,9 +43,9 @@ partial struct PublicKey {
     internal slice<byte> q; // uncompressed nistec Point.Bytes output
 }
 
-} partial class ecdsaᴛPublicKey {
+} partial class ecdsa_package {
 
-public static slice<byte> Bytes(this ref PublicKey pub) {
+internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
     return pub.q;
 }
 
@@ -605,3 +605,13 @@ internal static error verifyGeneric<P>(ref Curve<P> c, ref PublicKey pub, slice<
 }
 
 } // end ecdsa_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class ecdsaᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdsa_package.Bytesᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.PublicKeyᴍ(Ꮡpriv);
+}
+partial class ecdsaᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdsa_package.Bytesᴍ(ref pub);
+}
+// </GlyphForwarders>

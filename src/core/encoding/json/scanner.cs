@@ -56,9 +56,9 @@ partial struct SyntaxError {
     public int64 Offset;  // error occurred after reading Offset bytes
 }
 
-} partial class jsonᴛSyntaxError {
+} partial class json_package {
 
-public static @string Error(this ref SyntaxError e) { return e.msg; }
+internal static @string Errorᴍ(ref SyntaxError e) { return e.msg; }
 
 } partial class json_package {
 
@@ -149,11 +149,11 @@ internal static UntypedInt parseArrayValue => 2;   // parsing array value
 // This is permitted by https://tools.ietf.org/html/rfc7159#section-9
 internal static UntypedInt maxNestingDepth => 10000;
 
-} partial class jsonᴛscanner {
+} partial class json_package {
 
 // reset prepares the scanner for use.
 // It must be called before calling s.step.
-internal static void reset(this ref scanner s) {
+internal static void resetᴍ(ref scanner s) {
     s.step = stateBeginValue;
     s.parseState = s.parseState[0..0];
     s.err = default;
@@ -162,7 +162,7 @@ internal static void reset(this ref scanner s) {
 
 // eof tells the scanner that the end of input has been reached.
 // It returns a scan status just as s.step does.
-internal static nint eof(this ж<scanner> Ꮡs) {
+internal static nint eofᴍ(ж<scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.err != nil) {
@@ -187,7 +187,7 @@ private static readonly @string exceededMaxDepthˢᵇ = "exceeded max depth"u8;
 
 // pushParseState pushes a new parse state newParseState onto the parse stack.
 // an error state is returned if maxNestingDepth was exceeded, otherwise successState is returned.
-internal static nint pushParseState(this ref scanner s, byte c, nint newParseState, nint successState) {
+internal static nint pushParseStateᴍ(ref scanner s, byte c, nint newParseState, nint successState) {
     s.parseState = append(s.parseState, newParseState);
     if (len(s.parseState) <= maxNestingDepth) {
         return successState;
@@ -197,7 +197,7 @@ internal static nint pushParseState(this ref scanner s, byte c, nint newParseSta
 
 // popParseState pops a parse state (already obtained) off the stack
 // and updates s.step accordingly.
-internal static void popParseState(this ref scanner s) {
+internal static void popParseStateᴍ(ref scanner s) {
     nint n = len(s.parseState) - 1;
     s.parseState = s.parseState.slice(0, n);
     if (n == 0) {
@@ -747,10 +747,10 @@ internal static nint stateError(ж<scanner> s, byte c) {
     return scanError;
 }
 
-} partial class jsonᴛscanner {
+} partial class json_package {
 
 // error records an error and switches to the error state.
-internal static nint error(this ref scanner s, byte c, @string context) {
+internal static nint errorᴍ(ref scanner s, byte c, @string context) {
     s.step = stateError;
     s.err = new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + " "u8 + context, s.bytes)));
     return scanError;
@@ -774,3 +774,16 @@ internal static @string quoteChar(byte c) {
 }
 
 } // end json_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class jsonᴛSyntaxError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => json_package.Errorᴍ(ref e);
+}
+partial class jsonᴛscanner {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref scanner s) => json_package.resetᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint eof(this ж<scanner> Ꮡs) => json_package.eofᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint pushParseState(this ref scanner s, byte c, nint newParseState, nint successState) => json_package.pushParseStateᴍ(ref s, c, newParseState, successState);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void popParseState(this ref scanner s) => json_package.popParseStateᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint error(this ref scanner s, byte c, @string context) => json_package.errorᴍ(ref s, c, context);
+}
+// </GlyphForwarders>

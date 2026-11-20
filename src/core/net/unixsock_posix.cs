@@ -104,13 +104,13 @@ internal static @string sotypeToNet(nint sotype) {
     }}
 }
 
-} partial class netᴛUnixAddr {
+} partial class net_package {
 
-internal static nint family(this ref UnixAddr a) {
+internal static nint familyᴍ(ref UnixAddr a) {
     return syscall.AF_UNIX;
 }
 
-internal static (syscall.Sockaddr, error) sockaddr(this ж<UnixAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<UnixAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -119,13 +119,13 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UnixAddr> Ꮡa, nint 
     return (new syscall.SockaddrUnixжSockaddr(Ꮡ(new syscall.SockaddrUnix(Name: a.Name))), default);
 }
 
-internal static sockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
+internal static sockaddr toLocalᴍ(ж<UnixAddr> Ꮡa, @string net) {
     return new UnixAddrжsockaddr(Ꮡa);
 }
 
-} partial class netᴛUnixConn {
+} partial class net_package {
 
-internal static (nint, ж<UnixAddr>, error) readFrom(this ref UnixConn c, slice<byte> b) {
+internal static (nint, ж<UnixAddr>, error) readFromᴍ(ref UnixConn c, slice<byte> b) {
     ж<UnixAddr> addr = default;
     var (n, sa, err) = c.fd.readFrom(b);
     switch (sa.type()) {
@@ -138,7 +138,7 @@ internal static (nint, ж<UnixAddr>, error) readFrom(this ref UnixConn c, slice<
     return (n, addr, err);
 }
 
-internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) readMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) readMsgᴍ(ref UnixConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -161,7 +161,7 @@ internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) re
     return (n, oobn, flags, addr, err);
 }
 
-internal static (nint, error) writeTo(this ref UnixConn c, slice<byte> b, ж<UnixAddr> Ꮡaddr) {
+internal static (nint, error) writeToᴍ(ref UnixConn c, slice<byte> b, ж<UnixAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if (c.fd.isConnected) {
@@ -177,7 +177,7 @@ internal static (nint, error) writeTo(this ref UnixConn c, slice<byte> b, ж<Uni
     return c.fd.writeTo(b, new syscall.SockaddrUnixжSockaddr(sa));
 }
 
-internal static (nint n, nint oobn, error err) writeMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob, ж<UnixAddr> Ꮡaddr) {
+internal static (nint n, nint oobn, error err) writeMsgᴍ(ref UnixConn c, slice<byte> b, slice<byte> oob, ж<UnixAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if (c.fd.sotype == syscall.SOCK_DGRAM && c.fd.isConnected) {
@@ -193,9 +193,9 @@ internal static (nint n, nint oobn, error err) writeMsg(this ref UnixConn c, sli
     return c.fd.writeMsg(b, oob, sa);
 }
 
-} partial class netᴛsysDialer {
+} partial class net_package {
 
-internal static (ж<UnixConn>, error) dialUnix(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
+internal static (ж<UnixConn>, error) dialUnixᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
@@ -209,9 +209,9 @@ internal static (ж<UnixConn>, error) dialUnix(this ж<sysDialer> Ꮡsd, context
     return (newUnixConn(fd), default);
 }
 
-} partial class netᴛUnixListener {
+} partial class net_package {
 
-internal static (ж<UnixConn>, error) accept(this ref UnixListener ln) {
+internal static (ж<UnixConn>, error) acceptᴍ(ref UnixListener ln) {
     var (fd, err) = ln.fd.accept();
     if (err != nil) {
         return (default, err);
@@ -219,7 +219,7 @@ internal static (ж<UnixConn>, error) accept(this ref UnixListener ln) {
     return (newUnixConn(fd), default);
 }
 
-internal static error close(this ж<UnixListener> Ꮡln) {
+internal static error closeᴍ(ж<UnixListener> Ꮡln) {
     ref var ln = ref Ꮡln.DerefOrNull();
 
     // The operating system doesn't clean up
@@ -241,7 +241,7 @@ internal static error close(this ж<UnixListener> Ꮡln) {
     return ln.fd.Close();
 }
 
-internal static (ж<os.File>, error) @file(this ref UnixListener ln) {
+internal static (ж<os.File>, error) @fileᴍ(ref UnixListener ln) {
     var (f, err) = ln.fd.dup();
     if (err != nil) {
         return (default, err);
@@ -257,13 +257,13 @@ internal static (ж<os.File>, error) @file(this ref UnixListener ln) {
 // Listen or ListenUnix, then by default closing the listener will remove the socket file.
 // but if the listener was created by a call to FileListener to use an already existing
 // socket file, then by default closing the listener will not remove the socket file.
-public static void SetUnlinkOnClose(this ref UnixListener l, bool unlink) {
+internal static void SetUnlinkOnCloseᴍ(ref UnixListener l, bool unlink) {
     l.unlink = unlink;
 }
 
-} partial class netᴛsysListener {
+} partial class net_package {
 
-internal static (ж<UnixListener>, error) listenUnix(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> Ꮡladdr) {
+internal static (ж<UnixListener>, error) listenUnixᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> Ꮡladdr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
@@ -278,7 +278,7 @@ internal static (ж<UnixListener>, error) listenUnix(this ж<sysListener> Ꮡsl,
     return (Ꮡ(new UnixListener(fd: fd, path: fd.laddr.String(), unlink: true)), default);
 }
 
-internal static (ж<UnixConn>, error) listenUnixgram(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> laddr) {
+internal static (ж<UnixConn>, error) listenUnixgramᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
@@ -293,3 +293,30 @@ internal static (ж<UnixConn>, error) listenUnixgram(this ж<sysListener> Ꮡsl,
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛUnixAddr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint family(this ref UnixAddr a) => net_package.familyᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (syscall.Sockaddr, error) sockaddr(this ж<UnixAddr> Ꮡa, nint family) => net_package.sockaddrᴍ(Ꮡa, family);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) => net_package.toLocalᴍ(Ꮡa, net);
+}
+partial class netᴛUnixConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, ж<UnixAddr>, error) readFrom(this ref UnixConn c, slice<byte> b) => net_package.readFromᴍ(ref c, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) readMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob) => net_package.readMsgᴍ(ref c, b, oob);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) writeTo(this ref UnixConn c, slice<byte> b, ж<UnixAddr> Ꮡaddr) => net_package.writeToᴍ(ref c, b, Ꮡaddr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, nint oobn, error err) writeMsg(this ref UnixConn c, slice<byte> b, slice<byte> oob, ж<UnixAddr> Ꮡaddr) => net_package.writeMsgᴍ(ref c, b, oob, Ꮡaddr);
+}
+partial class netᴛsysDialer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<UnixConn>, error) dialUnix(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UnixAddr> laddr, ж<UnixAddr> raddr) => net_package.dialUnixᴍ(Ꮡsd, ctx, laddr, raddr);
+}
+partial class netᴛUnixListener {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<UnixConn>, error) accept(this ref UnixListener ln) => net_package.acceptᴍ(ref ln);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ж<UnixListener> Ꮡln) => net_package.closeᴍ(Ꮡln);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<os.File>, error) @file(this ref UnixListener ln) => net_package.@fileᴍ(ref ln);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetUnlinkOnClose(this ref UnixListener l, bool unlink) => net_package.SetUnlinkOnCloseᴍ(ref l, unlink);
+}
+partial class netᴛsysListener {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<UnixListener>, error) listenUnix(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> Ꮡladdr) => net_package.listenUnixᴍ(Ꮡsl, ctx, Ꮡladdr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<UnixConn>, error) listenUnixgram(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> laddr) => net_package.listenUnixgramᴍ(Ꮡsl, ctx, laddr);
+}
+// </GlyphForwarders>

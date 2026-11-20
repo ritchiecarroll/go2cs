@@ -82,7 +82,7 @@ partial struct Paragraph {
     internal options options;
 }
 
-} partial class bidiᴛParagraph {
+} partial class bidi_package {
 
 // Initialize the p.pairTypes, p.pairValues and p.types from the input previously
 // set by p.SetBytes() or p.SetString(). Also limit the input up to (and including) a paragraph
@@ -93,7 +93,7 @@ partial struct Paragraph {
 // separator, the whole input needs to be processed anyway and should not be done twice.
 //
 // The function has the same return values as SetBytes() / SetString()
-internal static (nint n, error err) prepareInput(this ref Paragraph p) {
+internal static (nint n, error err) prepareInputᴍ(ref Paragraph p) {
     p.runes = bytes.Runes(p.p);
     nint bytecount = 0;
     // clear slices from previous SetString or SetBytes
@@ -130,7 +130,7 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
 // it will only process the first paragraph and report the number of bytes
 // consumed from b including this separator. Error may be non-nil if options are
 // given.
-public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) {
+internal static (nint n, error err) SetBytesᴍ(ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     p.p = b;
@@ -143,7 +143,7 @@ public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, 
 // it will only process the first paragraph and report the number of bytes
 // consumed from s including this separator. Error may be non-nil if options are
 // given.
-public static (nint n, error err) SetString(this ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) {
+internal static (nint n, error err) SetStringᴍ(ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     p.p = slice<byte>(s);
@@ -154,14 +154,14 @@ public static (nint n, error err) SetString(this ref Paragraph p, @string s, par
 // IsLeftToRight reports whether the principle direction of rendering for this
 // paragraphs is left-to-right. If this returns false, the principle direction
 // of rendering is right-to-left.
-public static bool IsLeftToRight(this ref Paragraph p) {
+internal static bool IsLeftToRightᴍ(ref Paragraph p) {
     return p.Direction() == LeftToRight;
 }
 
 // Direction returns the direction of the text of this paragraph.
 //
 // The direction may be LeftToRight, RightToLeft, Mixed, or Neutral.
-public static Direction Direction(this ref Paragraph p) {
+internal static Direction Directionᴍ(ref Paragraph p) {
     return p.o.Direction();
 }
 
@@ -170,7 +170,7 @@ public static Direction Direction(this ref Paragraph p) {
 // RunAt reports the Run at the given position of the input text.
 //
 // This method can be used for computing line breaks on paragraphs.
-public static Run RunAt(this ref Paragraph p, nint pos) {
+internal static Run RunAtᴍ(ref Paragraph p, nint pos) {
     nint c = 0;
     nint runNumber = 0;
     foreach (var (i, r) in range(p.o.runes)) {
@@ -215,10 +215,10 @@ internal static Ordering calculateOrdering(slice<level> levels, slice<rune> rune
     return o;
 }
 
-} partial class bidiᴛParagraph {
+} partial class bidi_package {
 
 // Order computes the visual ordering of all the runs in a Paragraph.
-public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
+internal static (Ordering, error) Orderᴍ(ж<Paragraph> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(p.types) == 0) {
@@ -245,7 +245,7 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
 
 // Line computes the visual ordering of runs for a single line starting and
 // ending at the given positions in the original text.
-public static (Ordering, error) Line(this ref Paragraph p, nint start, nint end) {
+internal static (Ordering, error) Lineᴍ(ref Paragraph p, nint start, nint end) {
     var lineTypes = p.types.slice(start, end);
     var (para, err) = newParagraph(lineTypes, p.pairTypes.slice(start, end), p.pairValues.slice(start, end), (level)(-1));
     if (err != nil) {
@@ -267,22 +267,22 @@ partial struct Ordering {
     internal slice<nint> startpos;
 }
 
-} partial class bidiᴛOrdering {
+} partial class bidi_package {
 
 // Direction reports the directionality of the runs.
 //
 // The direction may be LeftToRight, RightToLeft, Mixed, or Neutral.
-public static Direction Direction(this ref Ordering o) {
+internal static Direction Directionᴍ(ref Ordering o) {
     return o.directions[0];
 }
 
 // NumRuns returns the number of runs.
-public static nint NumRuns(this ref Ordering o) {
+internal static nint NumRunsᴍ(ref Ordering o) {
     return len(o.runes);
 }
 
 // Run returns the ith run within the ordering.
-public static Run Run(this ref Ordering o, nint i) {
+internal static Run Runᴍ(ref Ordering o, nint i) {
     var r = new Run(
         runes: o.runes[i],
         direction: o.directions[i],
@@ -307,15 +307,15 @@ partial struct Run {
     internal nint startpos;
 }
 
-} partial class bidiᴛRun {
+} partial class bidi_package {
 
 // String returns the text of the run in its original order.
-public static @string String(this ref Run r) {
+internal static @string Stringᴍ(ref Run r) {
     return (@string)r.runes;
 }
 
 // Bytes returns the text of the run in its original order.
-public static slice<byte> Bytes(this ref Run r) {
+internal static slice<byte> Bytesᴍ(ref Run r) {
     return slice<byte>(r.String());
 }
 
@@ -325,13 +325,13 @@ public static slice<byte> Bytes(this ref Run r) {
 // - bracket replacement.
 
 // Direction reports the direction of the run.
-public static Direction Direction(this ref Run r) {
+internal static Direction Directionᴍ(ref Run r) {
     return r.direction;
 }
 
 // Pos returns the position of the Run within the text passed to SetBytes or SetString of the
 // originating Paragraph value.
-public static (nint start, nint end) Pos(this ref Run r) {
+internal static (nint start, nint end) Posᴍ(ref Run r) {
     return (r.startpos, r.startpos + len(r.runes) - 1);
 }
 
@@ -379,3 +379,27 @@ public static @string ReverseString(@string s) {
 }
 
 } // end bidi_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bidiᴛParagraph {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) prepareInput(this ref Paragraph p) => bidi_package.prepareInputᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) => bidi_package.SetBytesᴍ(ref p, b, optsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) SetString(this ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) => bidi_package.SetStringᴍ(ref p, s, optsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsLeftToRight(this ref Paragraph p) => bidi_package.IsLeftToRightᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Direction Direction(this ref Paragraph p) => bidi_package.Directionᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Run RunAt(this ref Paragraph p, nint pos) => bidi_package.RunAtᴍ(ref p, pos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) => bidi_package.Orderᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Ordering, error) Line(this ref Paragraph p, nint start, nint end) => bidi_package.Lineᴍ(ref p, start, end);
+}
+partial class bidiᴛOrdering {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Direction Direction(this ref Ordering o) => bidi_package.Directionᴍ(ref o);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumRuns(this ref Ordering o) => bidi_package.NumRunsᴍ(ref o);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Run Run(this ref Ordering o, nint i) => bidi_package.Runᴍ(ref o, i);
+}
+partial class bidiᴛRun {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Run r) => bidi_package.Stringᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref Run r) => bidi_package.Bytesᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Direction Direction(this ref Run r) => bidi_package.Directionᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint start, nint end) Pos(this ref Run r) => bidi_package.Posᴍ(ref r);
+}
+// </GlyphForwarders>

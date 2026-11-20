@@ -85,12 +85,12 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     }}
 }
 
-} partial class traceᴛReader {
+} partial class trace_package {
 
 // ReadEvent reads a single event from the stream.
 //
 // If the stream has been exhausted, it returns an invalid event and io.EOF.
-public static (Event e, error err) ReadEvent(this ж<Reader> Ꮡr) {
+internal static (Event e, error err) ReadEventᴍ(ж<Reader> Ꮡr) {
     Event e = new();
     error err = default;
     GoFrame ᒐ = default;
@@ -256,7 +256,7 @@ private static readonly @string internalErrorˢ4ᵇ = "internal error: nextGenWi
 
 // nextGenWithSpill reads the generation and calls nextGen while
 // also handling any spilled batches.
-internal static (Event, error) nextGenWithSpill(this ref Reader r) {
+internal static (Event, error) nextGenWithSpillᴍ(ref Reader r) {
     if (r.version >= version.Go126) {
         return (new Event(), errors.New(internalErrorˢ4));
     }
@@ -293,7 +293,7 @@ internal static (Event, error) nextGenWithSpill(this ref Reader r) {
 
 // installGen installs the new generation into the Reader and returns
 // a Sync event for the new generation.
-internal static (Event, error) installGen(this ref Reader r, ж<generation> Ꮡgen) {
+internal static (Event, error) installGenᴍ(ref Reader r, ж<generation> Ꮡgen) {
     ref var gen = ref Ꮡgen.DerefOrNull();
 
     if (Ꮡgen == nil) {
@@ -347,3 +347,11 @@ internal static @string dumpFrontier(slice<ж<batchCursor>> frontier) {
 }
 
 } // end trace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Event e, error err) ReadEvent(this ж<Reader> Ꮡr) => trace_package.ReadEventᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Event, error) nextGenWithSpill(this ref Reader r) => trace_package.nextGenWithSpillᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Event, error) installGen(this ref Reader r, ж<generation> Ꮡgen) => trace_package.installGenᴍ(ref r, Ꮡgen);
+}
+// </GlyphForwarders>

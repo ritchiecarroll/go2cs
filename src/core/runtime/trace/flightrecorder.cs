@@ -57,13 +57,13 @@ public static ж<FlightRecorder> NewFlightRecorder(FlightRecorderConfig cfg) {
     return fr;
 }
 
-} partial class traceᴛFlightRecorder {
+} partial class trace_package {
 
 // Start activates the flight recorder and begins recording trace data.
 // Only one call to trace.Start may be active at any given time.
 // In addition, currently only one flight recorder may be active in the program.
 // Returns an error if the flight recorder cannot be started or is already started.
-public static error Start(this ж<FlightRecorder> Ꮡfr) {
+internal static error Startᴍ(ж<FlightRecorder> Ꮡfr) {
     ref var fr = ref Ꮡfr.DerefOrNull();
 
     if (fr.enabled) {
@@ -85,7 +85,7 @@ public static error Start(this ж<FlightRecorder> Ꮡfr) {
 }
 
 // Stop ends recording of trace data. It blocks until any concurrent WriteTo calls complete.
-public static void Stop(this ref FlightRecorder fr) {
+internal static void Stopᴍ(ref FlightRecorder fr) {
     if (!fr.enabled) {
         return;
     }
@@ -100,7 +100,7 @@ public static void Stop(this ref FlightRecorder fr) {
 // Enabled returns true if the flight recorder is active.
 // Specifically, it will return true if Start did not return an error, and Stop has not yet been called.
 // It is safe to call from multiple goroutines simultaneously.
-public static bool Enabled(this ref FlightRecorder fr) { return fr.enabled; }
+internal static bool Enabledᴍ(ref FlightRecorder fr) { return fr.enabled; }
 
 // WriteTo snapshots the moving window tracked by the flight recorder.
 // The snapshot is expected to contain data that is up-to-date as of when WriteTo is called,
@@ -108,7 +108,7 @@ public static bool Enabled(this ref FlightRecorder fr) { return fr.enabled; }
 // Only one goroutine may execute WriteTo at a time.
 // An error is returned upon failure to write to w, if another WriteTo call is already in-progress,
 // or if the flight recorder is inactive.
-public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Writer w) {
+internal static (int64 n, error err) WriteToᴍ(ж<FlightRecorder> Ꮡfr, io.Writer w) {
     int64 n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -195,3 +195,12 @@ partial struct FlightRecorderConfig {
 internal static partial void runtime_traceAdvance(bool stopTrace);
 
 } // end trace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛFlightRecorder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Start(this ж<FlightRecorder> Ꮡfr) => trace_package.Startᴍ(Ꮡfr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Stop(this ref FlightRecorder fr) => trace_package.Stopᴍ(ref fr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Enabled(this ref FlightRecorder fr) => trace_package.Enabledᴍ(ref fr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Writer w) => trace_package.WriteToᴍ(Ꮡfr, w);
+}
+// </GlyphForwarders>

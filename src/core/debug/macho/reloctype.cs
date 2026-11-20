@@ -17,9 +17,9 @@ public static RelocTypeGeneric GENERIC_RELOC_PB_LA_PTR => 3;
 public static RelocTypeGeneric GENERIC_RELOC_LOCAL_SECTDIFF => 4;
 public static RelocTypeGeneric GENERIC_RELOC_TLV => 5;
 
-} partial class machoᴛRelocTypeGeneric {
+} partial class macho_package {
 
-public static @string GoString(this RelocTypeGeneric r) { return "macho."u8 + r.String(); }
+internal static @string GoStringᴍ(RelocTypeGeneric r) { return "macho."u8 + r.String(); }
 
 } partial class macho_package {
 
@@ -36,9 +36,9 @@ public static RelocTypeX86_64 X86_64_RELOC_SIGNED_2 => 7;
 public static RelocTypeX86_64 X86_64_RELOC_SIGNED_4 => 8;
 public static RelocTypeX86_64 X86_64_RELOC_TLV => 9;
 
-} partial class machoᴛRelocTypeX86_64 {
+} partial class macho_package {
 
-public static @string GoString(this RelocTypeX86_64 r) { return "macho."u8 + r.String(); }
+internal static @string GoStringᴍ(RelocTypeX86_64 r) { return "macho."u8 + r.String(); }
 
 } partial class macho_package {
 
@@ -55,9 +55,9 @@ public static RelocTypeARM ARM_THUMB_32BIT_BRANCH => 7;
 public static RelocTypeARM ARM_RELOC_HALF => 8;
 public static RelocTypeARM ARM_RELOC_HALF_SECTDIFF => 9;
 
-} partial class machoᴛRelocTypeARM {
+} partial class macho_package {
 
-public static @string GoString(this RelocTypeARM r) { return "macho."u8 + r.String(); }
+internal static @string GoStringᴍ(RelocTypeARM r) { return "macho."u8 + r.String(); }
 
 } partial class macho_package {
 
@@ -75,8 +75,23 @@ public static RelocTypeARM64 ARM64_RELOC_TLVP_LOAD_PAGE21 => 8;
 public static RelocTypeARM64 ARM64_RELOC_TLVP_LOAD_PAGEOFF12 => 9;
 public static RelocTypeARM64 ARM64_RELOC_ADDEND => 10;
 
-} partial class machoᴛRelocTypeARM64 {
+} partial class macho_package {
 
-public static @string GoString(this RelocTypeARM64 r) { return "macho."u8 + r.String(); }
+internal static @string GoStringᴍ(RelocTypeARM64 r) { return "macho."u8 + r.String(); }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class machoᴛRelocTypeGeneric {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this RelocTypeGeneric r) => macho_package.GoStringᴍ(r);
+}
+partial class machoᴛRelocTypeX86_64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this RelocTypeX86_64 r) => macho_package.GoStringᴍ(r);
+}
+partial class machoᴛRelocTypeARM {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this RelocTypeARM r) => macho_package.GoStringᴍ(r);
+}
+partial class machoᴛRelocTypeARM64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this RelocTypeARM64 r) => macho_package.GoStringᴍ(r);
+}
+// </GlyphForwarders>

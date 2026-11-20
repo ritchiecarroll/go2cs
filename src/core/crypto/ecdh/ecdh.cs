@@ -65,10 +65,10 @@ partial struct PublicKey {
     internal ж<ecdh.PublicKey> fips;
 }
 
-} partial class ecdhᴛPublicKey {
+} partial class ecdh_package {
 
 // Bytes returns a copy of the encoding of the public key.
-public static slice<byte> Bytes(this ref PublicKey k) {
+internal static slice<byte> Bytesᴍ(ref PublicKey k) {
     // Copy the public key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(133);
@@ -82,7 +82,7 @@ public static slice<byte> Bytes(this ref PublicKey k) {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-public static bool Equal(this ref PublicKey k, cryptoꓸPublicKey x) {
+internal static bool Equalᴍ(ref PublicKey k, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -90,7 +90,7 @@ public static bool Equal(this ref PublicKey k, cryptoꓸPublicKey x) {
     return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.publicKey, xx.publicKey) == 1;
 }
 
-public static Curve Curve(this ref PublicKey k) {
+internal static Curve Curveᴍ(ref PublicKey k) {
     return k.curve;
 }
 
@@ -121,7 +121,7 @@ partial struct PrivateKey {
     internal ж<ecdh.PrivateKey> fips;
 }
 
-} partial class ecdhᴛPrivateKey {
+} partial class ecdh_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoEcdhPrivateKeyAndˢ => ref cryptoEcdhPrivateKeyAndˢᵇ;
@@ -138,7 +138,7 @@ private static readonly @string cryptoEcdhPrivateKeyAndˢᵇ = "crypto/ecdh: pri
 //
 // For [X25519], this performs ECDH as specified in RFC 7748, Section 6.1. If
 // the result is the all-zero value, ECDH returns an error.
-public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) {
+internal static (slice<byte>, error) ECDHᴍ(ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) {
     ref var k = ref Ꮡk.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
@@ -149,7 +149,7 @@ public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<PublicKey> 
 }
 
 // Bytes returns a copy of the encoding of the private key.
-public static slice<byte> Bytes(this ref PrivateKey k) {
+internal static slice<byte> Bytesᴍ(ref PrivateKey k) {
     // Copy the private key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(66);
@@ -163,7 +163,7 @@ public static slice<byte> Bytes(this ref PrivateKey k) {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
+internal static bool Equalᴍ(ref PrivateKey k, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -171,18 +171,34 @@ public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
     return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.privateKey, xx.privateKey) == 1;
 }
 
-public static Curve Curve(this ref PrivateKey k) {
+internal static Curve Curveᴍ(ref PrivateKey k) {
     return k.curve;
 }
 
-public static ж<PublicKey> PublicKey(this ref PrivateKey k) {
+internal static ж<PublicKey> PublicKeyᴍ(ref PrivateKey k) {
     return k.publicKey;
 }
 
 // Public implements the implicit interface of all standard library private
 // keys. See the docs of [crypto.PrivateKey].
-public static cryptoꓸPublicKey Public(this ref PrivateKey k) {
+internal static cryptoꓸPublicKey Publicᴍ(ref PrivateKey k) {
     return k.PublicKey().OrTypedNil();
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class ecdhᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey k) => ecdh_package.Bytesᴍ(ref k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PublicKey k, cryptoꓸPublicKey x) => ecdh_package.Equalᴍ(ref k, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Curve Curve(this ref PublicKey k) => ecdh_package.Curveᴍ(ref k);
+}
+partial class ecdhᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) => ecdh_package.ECDHᴍ(Ꮡk, Ꮡremote);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey k) => ecdh_package.Bytesᴍ(ref k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) => ecdh_package.Equalᴍ(ref k, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Curve Curve(this ref PrivateKey k) => ecdh_package.Curveᴍ(ref k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ref PrivateKey k) => ecdh_package.PublicKeyᴍ(ref k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ref PrivateKey k) => ecdh_package.Publicᴍ(ref k);
+}
+// </GlyphForwarders>

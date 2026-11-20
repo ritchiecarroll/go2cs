@@ -87,9 +87,9 @@ private static readonly @string _SyncMarker_nameᵇ = "EOFBoolInt64Uint64StringV
 
 [GoLazy] partial class lazyᴛ_SyncMarker_index { internal static array<uint16> _SyncMarker_index = new uint16[]{0, 3, 7, 12, 18, 24, 29, 32, 38, 43, 51, 57, 60, 67, 73, 80, 83, 89, 95, 99, 106, 120, 129, 135, 140, 147, 150, 160, 168, 175, 182, 188, 195, 201, 209, 214, 218, 226, 232, 234, 241, 248, 252, 260, 269, 279, 296, 305, 313, 318, 327, 333, 340, 350, 359, 369, 379, 389, 394, 405, 416, 424, 432, 437, 445, 450, 458, 467, 472, 480}.array(); }
 
-} partial class pkgbitsᴛSyncMarker {
+} partial class pkgbits_package {
 
-public static @string String(this SyncMarker i) {
+internal static @string Stringᴍ(SyncMarker i) {
     i -= 1;
     if (i < 0 || i >= ((SyncMarker)(len(_SyncMarker_index) - 1))) {
         return "SyncMarker("u8 + strconv.FormatInt((int64)(i + 1), 10) + ")"u8;
@@ -98,3 +98,9 @@ public static @string String(this SyncMarker i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pkgbitsᴛSyncMarker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SyncMarker i) => pkgbits_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

@@ -49,9 +49,9 @@ partial struct serverRequest {
     public ж<json.RawMessage> Id; /*`json:"id"`*/
 }
 
-} partial class jsonrpcᴛserverRequest {
+} partial class jsonrpc_package {
 
-internal static void reset(this ref serverRequest r) {
+internal static void resetᴍ(ref serverRequest r) {
     r.Method = ""u8;
     r.Params = default;
     r.Id = default;
@@ -65,9 +65,9 @@ partial struct serverResponse {
     public any Error; /*`json:"error"`*/
 }
 
-} partial class jsonrpcᴛserverCodec {
+} partial class jsonrpc_package {
 
-internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) {
+internal static error ReadRequestHeaderᴍ(ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -90,7 +90,7 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
     return default;
 }
 
-internal static error ReadRequestBody(this ref serverCodec c, any x) {
+internal static error ReadRequestBodyᴍ(ref serverCodec c, any x) {
     if (x == nil) {
         return default;
     }
@@ -111,13 +111,13 @@ internal static error ReadRequestBody(this ref serverCodec c, any x) {
 internal static readonly ж<json.RawMessage> Ꮡnull = new StaticBox<json.RawMessage>(((json.RawMessage)slice<byte>("null"u8)));
 internal static ref json.RawMessage @null => ref ((StaticBox<json.RawMessage>)Ꮡnull).ValueSlot;
 
-} partial class jsonrpcᴛserverCodec {
+} partial class jsonrpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidSequenceNumberInˢ => ref invalidSequenceNumberInˢᵇ;
 private static readonly @string invalidSequenceNumberInˢᵇ = "invalid sequence number in response"u8;
 
-internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
+internal static error WriteResponseᴍ(ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -143,7 +143,7 @@ internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> 
     return c.enc.Encode(resp);
 }
 
-internal static error Close(this ref serverCodec c) {
+internal static error Closeᴍ(ref serverCodec c) {
     return c.c.Close();
 }
 
@@ -157,3 +157,15 @@ public static void ServeConn(io.ReadWriteCloser conn) {
 }
 
 } // end jsonrpc_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class jsonrpcᴛserverRequest {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref serverRequest r) => jsonrpc_package.resetᴍ(ref r);
+}
+partial class jsonrpcᴛserverCodec {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) => jsonrpc_package.ReadRequestHeaderᴍ(Ꮡc, Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadRequestBody(this ref serverCodec c, any x) => jsonrpc_package.ReadRequestBodyᴍ(ref c, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) => jsonrpc_package.WriteResponseᴍ(Ꮡc, Ꮡr, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref serverCodec c) => jsonrpc_package.Closeᴍ(ref c);
+}
+// </GlyphForwarders>

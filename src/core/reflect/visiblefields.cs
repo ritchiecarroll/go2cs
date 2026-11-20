@@ -56,14 +56,14 @@ partial struct visibleFieldsWalker {
     internal slice<nint> index;
 }
 
-} partial class reflectᴛvisibleFieldsWalker {
+} partial class reflect_package {
 
 // walk walks all the fields in the struct type t, visiting
 // fields in index preorder and appending them to w.fields
 // (this maintains the required ordering).
 // Fields that have been overridden have their
 // Name field cleared.
-internal static void walk(this ref visibleFieldsWalker w, Type t) {
+internal static void walkᴍ(ref visibleFieldsWalker w, Type t) {
     if (w.visiting[t]) {
         return;
     }
@@ -110,3 +110,9 @@ internal static void walk(this ref visibleFieldsWalker w, Type t) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class reflectᴛvisibleFieldsWalker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walk(this ref visibleFieldsWalker w, Type t) => reflect_package.walkᴍ(ref w, t);
+}
+// </GlyphForwarders>

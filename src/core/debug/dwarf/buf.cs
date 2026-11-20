@@ -38,17 +38,17 @@ partial interface dataFormat {
 partial struct unknownFormat {
 }
 
-} partial class dwarfᴛunknownFormat {
+} partial class dwarf_package {
 
-internal static nint version(this unknownFormat u) {
+internal static nint versionᴍ(unknownFormat u) {
     return 0;
 }
 
-internal static (bool, bool) dwarf64(this unknownFormat u) {
+internal static (bool, bool) dwarf64ᴍ(unknownFormat u) {
     return (false, false);
 }
 
-internal static nint addrsize(this unknownFormat u) {
+internal static nint addrsizeᴍ(unknownFormat u) {
     return 0;
 }
 
@@ -60,13 +60,13 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
     return new buf(Ꮡd, d.order, format, name, off, data, default);
 }
 
-} partial class dwarfᴛbuf {
+} partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string underflowˢ => ref underflowˢᵇ;
 private static readonly @string underflowˢᵇ = "underflow"u8;
 
-internal static uint8 uint8(this ref buf b) {
+internal static uint8 uint8ᴍ(ref buf b) {
     if (len(b.data) < 1) {
         b.error(underflowˢ);
         return 0;
@@ -77,7 +77,7 @@ internal static uint8 uint8(this ref buf b) {
     return val;
 }
 
-internal static slice<byte> bytes(this ref buf b, nint n) {
+internal static slice<byte> bytesᴍ(ref buf b, nint n) {
     if (n < 0 || len(b.data) < n) {
         b.error(underflowˢ);
         return default;
@@ -88,9 +88,9 @@ internal static slice<byte> bytes(this ref buf b, nint n) {
     return data;
 }
 
-internal static void skip(this ref buf b, nint n) { b.bytes(n); }
+internal static void skipᴍ(ref buf b, nint n) { b.bytes(n); }
 
-internal static @string @string(this ref buf b) {
+internal static @string @stringᴍ(ref buf b) {
     nint i = bytes_package.IndexByte(b.data, 0);
     if (i < 0) {
         b.error(underflowˢ);
@@ -103,7 +103,7 @@ internal static @string @string(this ref buf b) {
     return s;
 }
 
-internal static uint16 uint16(this ref buf b) {
+internal static uint16 uint16ᴍ(ref buf b) {
     var a = b.bytes(2);
     if (a == nil) {
         return 0;
@@ -111,7 +111,7 @@ internal static uint16 uint16(this ref buf b) {
     return b.order.Uint16(a);
 }
 
-internal static uint32 uint24(this ref buf b) {
+internal static uint32 uint24ᴍ(ref buf b) {
     var a = b.bytes(3);
     if (a == nil) {
         return 0;
@@ -123,7 +123,7 @@ internal static uint32 uint24(this ref buf b) {
     }
 }
 
-internal static uint32 uint32(this ref buf b) {
+internal static uint32 uint32ᴍ(ref buf b) {
     var a = b.bytes(4);
     if (a == nil) {
         return 0;
@@ -131,7 +131,7 @@ internal static uint32 uint32(this ref buf b) {
     return b.order.Uint32(a);
 }
 
-internal static uint64 uint64(this ref buf b) {
+internal static uint64 uint64ᴍ(ref buf b) {
     var a = b.bytes(8);
     if (a == nil) {
         return 0;
@@ -141,7 +141,7 @@ internal static uint64 uint64(this ref buf b) {
 
 // Read a varint, which is 7 bits per byte, little endian.
 // the 0x80 bit means read another byte.
-internal static (uint64 c, nuint bits) varint(this ref buf b) {
+internal static (uint64 c, nuint bits) varintᴍ(ref buf b) {
     uint64 c = default;
     nuint bits = default;
 
@@ -159,13 +159,13 @@ internal static (uint64 c, nuint bits) varint(this ref buf b) {
 }
 
 // Unsigned int is just a varint.
-internal static uint64 @uint(this ref buf b) {
+internal static uint64 @uintᴍ(ref buf b) {
     var (x, _) = b.varint();
     return x;
 }
 
 // Signed int is a sign-extended varint.
-internal static int64 @int(this ref buf b) {
+internal static int64 @intᴍ(ref buf b) {
     var (ux, bits) = b.varint();
     var x = (int64)ux;
     if ((x & (((int64)1).Lsh((bits - 1)))) != 0) {
@@ -179,7 +179,7 @@ internal static ref readonly @string unknownAddressSizeˢ => ref unknownAddressS
 private static readonly @string unknownAddressSizeˢᵇ = "unknown address size"u8;
 
 // Address-sized uint.
-internal static uint64 addr(this ref buf b) {
+internal static uint64 addrᴍ(ref buf b) {
     switch (b.format.addrsize()) {
     case 1: {
         return (uint64)b.uint8();
@@ -201,7 +201,7 @@ internal static uint64 addr(this ref buf b) {
 internal static ref readonly @string unitLengthHasReservedˢ => ref unitLengthHasReservedˢᵇ;
 private static readonly @string unitLengthHasReservedˢᵇ = "unit length has reserved value"u8;
 
-internal static (Offset length, bool dwarf64) unitLength(this ref buf b) {
+internal static (Offset length, bool dwarf64) unitLengthᴍ(ref buf b) {
     Offset length = default;
     bool dwarf64 = default;
 
@@ -215,7 +215,7 @@ internal static (Offset length, bool dwarf64) unitLength(this ref buf b) {
     return (length, dwarf64);
 }
 
-internal static void error(this ref buf b, @string s) {
+internal static void errorᴍ(ref buf b, @string s) {
     if (b.err == nil) {
         b.data = default;
         b.err = new DecodeError(b.name, b.off, s);
@@ -230,10 +230,37 @@ partial struct DecodeError {
     public @string Err;
 }
 
-} partial class dwarfᴛDecodeError {
+} partial class dwarf_package {
 
-public static @string Error(this DecodeError e) {
+internal static @string Errorᴍ(DecodeError e) {
     return "decoding dwarf section "u8 + e.Name + " at offset 0x"u8 + strconv.FormatInt((int64)e.Offset, 16) + ": "u8 + e.Err;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class dwarfᴛunknownFormat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint version(this unknownFormat u) => dwarf_package.versionᴍ(u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, bool) dwarf64(this unknownFormat u) => dwarf_package.dwarf64ᴍ(u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint addrsize(this unknownFormat u) => dwarf_package.addrsizeᴍ(u);
+}
+partial class dwarfᴛbuf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 uint8(this ref buf b) => dwarf_package.uint8ᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ref buf b, nint n) => dwarf_package.bytesᴍ(ref b, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void skip(this ref buf b, nint n) => dwarf_package.skipᴍ(ref b, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref buf b) => dwarf_package.@stringᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 uint16(this ref buf b) => dwarf_package.uint16ᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 uint24(this ref buf b) => dwarf_package.uint24ᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 uint32(this ref buf b) => dwarf_package.uint32ᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 uint64(this ref buf b) => dwarf_package.uint64ᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 c, nuint bits) varint(this ref buf b) => dwarf_package.varintᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 @uint(this ref buf b) => dwarf_package.@uintᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 @int(this ref buf b) => dwarf_package.@intᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 addr(this ref buf b) => dwarf_package.addrᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Offset length, bool dwarf64) unitLength(this ref buf b) => dwarf_package.unitLengthᴍ(ref b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref buf b, @string s) => dwarf_package.errorᴍ(ref b, s);
+}
+partial class dwarfᴛDecodeError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this DecodeError e) => dwarf_package.Errorᴍ(e);
+}
+// </GlyphForwarders>

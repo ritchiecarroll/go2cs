@@ -74,11 +74,11 @@ partial struct spanSetBlock {
     internal array<atomicMSpanPointer> spans = new(spanSetBlockEntries);
 }
 
-} partial class runtimeᴛspanSet {
+} partial class runtime_package {
 
 // push adds span s to buffer b. push is safe to call concurrently
 // with other push and pop operations.
-internal static void push(this ж<spanSet> Ꮡb, ж<mspan> s) {
+internal static void pushᴍ(ж<spanSet> Ꮡb, ж<mspan> s) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Obtain our slot.
@@ -147,7 +147,7 @@ retry:
 
 // pop removes and returns a span from buffer b, or nil if b is empty.
 // pop is safe to call concurrently with other pop and push operations.
-internal static ж<mspan> pop(this ж<spanSet> Ꮡb) {
+internal static ж<mspan> popᴍ(ж<spanSet> Ꮡb) {
     uint32 head = default;
     uint32 tail = default;
     uint32 backoff = default;
@@ -260,7 +260,7 @@ private static readonly @string fullyEmptyUnfreedSpanSetˢᵇ = "fully empty unf
 //
 // reset may not be called concurrently with any other operations
 // on the span set.
-internal static void reset(this ж<spanSet> Ꮡb) {
+internal static void resetᴍ(ж<spanSet> Ꮡb) {
     var (head, tail) = Ꮡb.Ꮡindex.load().split();
     if (head < tail) {
         print((@string)"head = ", head, (@string)", tail = ", tail, (@string)"\n");
@@ -310,19 +310,19 @@ partial struct atomicSpanSetSpinePointer {
     internal atomic.UnsafePointer a;
 }
 
-} partial class runtimeᴛatomicSpanSetSpinePointer {
+} partial class runtime_package {
 
 // Loads the spanSetSpinePointer and returns it.
 //
 // It has the same semantics as atomic.UnsafePointer.
-internal static spanSetSpinePointer Load(this ж<atomicSpanSetSpinePointer> Ꮡs) {
+internal static spanSetSpinePointer Loadᴍ(ж<atomicSpanSetSpinePointer> Ꮡs) {
     return new spanSetSpinePointer(Ꮡs.Ꮡa.Load());
 }
 
 // Stores the spanSetSpinePointer.
 //
 // It has the same semantics as [atomic.UnsafePointer].
-internal static void StoreNoWB(this ж<atomicSpanSetSpinePointer> Ꮡs, spanSetSpinePointer p) {
+internal static void StoreNoWBᴍ(ж<atomicSpanSetSpinePointer> Ꮡs, spanSetSpinePointer p) {
     Ꮡs.Ꮡa.StoreNoWB(p.p);
 }
 
@@ -333,10 +333,10 @@ partial struct spanSetSpinePointer {
     internal @unsafe.Pointer p;
 }
 
-} partial class runtimeᴛspanSetSpinePointer {
+} partial class runtime_package {
 
 // lookup returns &s[idx].
-internal static ж<atomic.Pointer<spanSetBlock>> lookup(this spanSetSpinePointer s, uintptr idx) {
+internal static ж<atomic.Pointer<spanSetBlock>> lookupᴍ(spanSetSpinePointer s, uintptr idx) {
     return @unsafe.Pointer.To<atomic.Pointer<spanSetBlock>>(add(s.p, (uintptr)goarch.PtrSize * idx));
 }
 
@@ -351,11 +351,11 @@ partial struct spanSetBlockAlloc {
     internal lfstack stack;
 }
 
-} partial class runtimeᴛspanSetBlockAlloc {
+} partial class runtime_package {
 
 // alloc tries to grab a spanSetBlock out of the pool, and if it fails
 // persistentallocs a new one and returns it.
-internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
+internal static ж<spanSetBlock> allocᴍ(ж<spanSetBlockAlloc> Ꮡp) {
     var s = @unsafe.Pointer.To<spanSetBlock>(Ꮡp.Ꮡstack.pop()); if (s != nil) {
         return s;
     }
@@ -363,7 +363,7 @@ internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
 }
 
 // free returns a spanSetBlock back to the pool.
-internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> block) {
+internal static void freeᴍ(ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> block) {
     block.of(spanSetBlock.Ꮡpopped).Store(0);
     Ꮡp.Ꮡstack.push(block.of(spanSetBlock.Ꮡlfnode));
 }
@@ -380,20 +380,20 @@ internal static headTailIndex makeHeadTailIndex(uint32 head, uint32 tail) {
     return (headTailIndex)((uint64)head << 32 | (uint64)tail);
 }
 
-} partial class runtimeᴛheadTailIndex {
+} partial class runtime_package {
 
 // head returns the head of a headTailIndex value.
-internal static uint32 head(this headTailIndex h) {
+internal static uint32 headᴍ(headTailIndex h) {
     return (uint32)(h >> 32);
 }
 
 // tail returns the tail of a headTailIndex value.
-internal static uint32 tail(this headTailIndex h) {
+internal static uint32 tailᴍ(headTailIndex h) {
     return (uint32)h;
 }
 
 // split splits the headTailIndex value into its parts.
-internal static (uint32 head, uint32 tail) split(this headTailIndex h) {
+internal static (uint32 head, uint32 tail) splitᴍ(headTailIndex h) {
     return (h.head(), h.tail());
 }
 
@@ -404,25 +404,25 @@ partial struct atomicHeadTailIndex {
     internal atomic.Uint64 u;
 }
 
-} partial class runtimeᴛatomicHeadTailIndex {
+} partial class runtime_package {
 
 // load atomically reads a headTailIndex value.
-internal static headTailIndex load(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static headTailIndex loadᴍ(ж<atomicHeadTailIndex> Ꮡh) {
     return (headTailIndex)Ꮡh.Ꮡu.Load();
 }
 
 // cas atomically compares-and-swaps a headTailIndex value.
-internal static bool cas(this ж<atomicHeadTailIndex> Ꮡh, headTailIndex old, headTailIndex @new) {
+internal static bool casᴍ(ж<atomicHeadTailIndex> Ꮡh, headTailIndex old, headTailIndex @new) {
     return Ꮡh.Ꮡu.CompareAndSwap((uint64)old, (uint64)@new);
 }
 
 // incHead atomically increments the head of a headTailIndex.
-internal static headTailIndex incHead(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static headTailIndex incHeadᴍ(ж<atomicHeadTailIndex> Ꮡh) {
     return (headTailIndex)Ꮡh.Ꮡu.Add(4294967296L);
 }
 
 // decHead atomically decrements the head of a headTailIndex.
-internal static headTailIndex decHead(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static headTailIndex decHeadᴍ(ж<atomicHeadTailIndex> Ꮡh) {
     return (headTailIndex)Ꮡh.Ꮡu.Add(-(4294967296L));
 }
 
@@ -431,7 +431,7 @@ internal static ref readonly @string headTailIndexOverflowˢ => ref headTailInde
 private static readonly @string headTailIndexOverflowˢᵇ = "headTailIndex overflow"u8;
 
 // incTail atomically increments the tail of a headTailIndex.
-internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static headTailIndex incTailᴍ(ж<atomicHeadTailIndex> Ꮡh) {
     var ht = (headTailIndex)Ꮡh.Ꮡu.Add(1);
     // Check for overflow.
     if (ht.tail() == 0) {
@@ -442,7 +442,7 @@ internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
 }
 
 // reset clears the headTailIndex to (0, 0).
-internal static void reset(this ж<atomicHeadTailIndex> Ꮡh) {
+internal static void resetᴍ(ж<atomicHeadTailIndex> Ꮡh) {
     Ꮡh.Ꮡu.Store(0);
 }
 
@@ -453,16 +453,52 @@ partial struct atomicMSpanPointer {
     internal atomic.UnsafePointer p;
 }
 
-} partial class runtimeᴛatomicMSpanPointer {
+} partial class runtime_package {
 
 // Load returns the *mspan.
-internal static ж<mspan> Load(this ж<atomicMSpanPointer> Ꮡp) {
+internal static ж<mspan> Loadᴍ(ж<atomicMSpanPointer> Ꮡp) {
     return @unsafe.Pointer.To<mspan>(Ꮡp.Ꮡp.Load());
 }
 
 // StoreNoWB stores an *mspan.
-internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> s) {
+internal static void StoreNoWBᴍ(ж<atomicMSpanPointer> Ꮡp, ж<mspan> s) {
     Ꮡp.Ꮡp.StoreNoWB(@unsafe.Pointer.FromPinnedBox(s));
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛspanSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ж<spanSet> Ꮡb, ж<mspan> s) => runtime_package.pushᴍ(Ꮡb, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> pop(this ж<spanSet> Ꮡb) => runtime_package.popᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ж<spanSet> Ꮡb) => runtime_package.resetᴍ(Ꮡb);
+}
+partial class runtimeᴛatomicSpanSetSpinePointer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static spanSetSpinePointer Load(this ж<atomicSpanSetSpinePointer> Ꮡs) => runtime_package.Loadᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void StoreNoWB(this ж<atomicSpanSetSpinePointer> Ꮡs, spanSetSpinePointer p) => runtime_package.StoreNoWBᴍ(Ꮡs, p);
+}
+partial class runtimeᴛspanSetSpinePointer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<atomic.Pointer<spanSetBlock>> lookup(this spanSetSpinePointer s, uintptr idx) => runtime_package.lookupᴍ(s, idx);
+}
+partial class runtimeᴛspanSetBlockAlloc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) => runtime_package.allocᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> block) => runtime_package.freeᴍ(Ꮡp, block);
+}
+partial class runtimeᴛheadTailIndex {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 head(this headTailIndex h) => runtime_package.headᴍ(h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 tail(this headTailIndex h) => runtime_package.tailᴍ(h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32 head, uint32 tail) split(this headTailIndex h) => runtime_package.splitᴍ(h);
+}
+partial class runtimeᴛatomicHeadTailIndex {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static headTailIndex load(this ж<atomicHeadTailIndex> Ꮡh) => runtime_package.loadᴍ(Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool cas(this ж<atomicHeadTailIndex> Ꮡh, headTailIndex old, headTailIndex @new) => runtime_package.casᴍ(Ꮡh, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static headTailIndex incHead(this ж<atomicHeadTailIndex> Ꮡh) => runtime_package.incHeadᴍ(Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static headTailIndex decHead(this ж<atomicHeadTailIndex> Ꮡh) => runtime_package.decHeadᴍ(Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) => runtime_package.incTailᴍ(Ꮡh);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ж<atomicHeadTailIndex> Ꮡh) => runtime_package.resetᴍ(Ꮡh);
+}
+partial class runtimeᴛatomicMSpanPointer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> Load(this ж<atomicMSpanPointer> Ꮡp) => runtime_package.Loadᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> s) => runtime_package.StoreNoWBᴍ(Ꮡp, s);
+}
+// </GlyphForwarders>

@@ -198,7 +198,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
     return n;
 }
 
-} partial class typesᴛNamed {
+} partial class types_package {
 
 // unpack populates the type parameters, methods, and RHS of n.
 //
@@ -219,7 +219,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 //
 // All others:
 // Effectively, nothing happens.
-internal static ж<Named> unpack(this ж<Named> Ꮡn) {
+internal static ж<Named> unpackᴍ(ж<Named> Ꮡn) {
     GoFrame ᒐ = default;
     try {
         ref var n = ref Ꮡn.DerefOrNull();
@@ -294,13 +294,13 @@ internal static ж<Named> unpack(this ж<Named> Ꮡn) {
 }
 
 // stateHas atomically determines whether the current state includes any active bit in sm.
-internal static bool stateHas(this ж<Named> Ꮡn, stateMask m) {
+internal static bool stateHasᴍ(ж<Named> Ꮡn, stateMask m) {
     return (stateMask)(((stateMask)atomic.LoadUint32(Ꮡn.Ꮡstate_)) & m) != 0;
 }
 
 // setState atomically sets the current state to include each active bit in sm.
 // Must only be called while holding n.mu.
-internal static void setState(this ж<Named> Ꮡn, stateMask m) {
+internal static void setStateᴍ(ж<Named> Ꮡn, stateMask m) {
     atomic.OrUint32(Ꮡn.Ꮡstate_, (uint32)m);
     // verify state transitions
     if (debug) {
@@ -325,10 +325,10 @@ internal static void setState(this ж<Named> Ꮡn, stateMask m) {
     }
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // newNamed is like NewNamed but with a *Checker receiver.
-internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type fromRHS, slice<ж<Func>> methods) {
+internal static ж<Named> newNamedᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type fromRHS, slice<ж<Func>> methods) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -349,7 +349,7 @@ internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
 //
 // If set, expanding is the named type instance currently being expanded, that
 // led to the creation of this instance.
-internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, token.Pos pos, ж<Named> Ꮡorig, slice<Type> targs, ж<Named> Ꮡexpanding) {
+internal static ж<Named> newNamedInstanceᴍ(ж<Checker> Ꮡcheck, token.Pos pos, ж<Named> Ꮡorig, slice<Type> targs, ж<Named> Ꮡexpanding) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var orig = ref Ꮡorig.DerefOrNull();
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
@@ -376,9 +376,9 @@ internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, token.Pos 
     return typ;
 }
 
-} partial class typesᴛNamed {
+} partial class types_package {
 
-internal static void cleanup(this ж<Named> Ꮡn) {
+internal static void cleanupᴍ(ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     // Instances can have a nil underlying at the end of type checking — they
@@ -391,7 +391,7 @@ internal static void cleanup(this ж<Named> Ꮡn) {
 
 // Obj returns the type name for the declaration defining the named type t. For
 // instantiated types, this is same as the type name of the origin type.
-public static ж<TypeName> Obj(this ref Named t) {
+internal static ж<TypeName> Objᴍ(ref Named t) {
     if (t.inst == nil) {
         return t.obj;
     }
@@ -400,7 +400,7 @@ public static ж<TypeName> Obj(this ref Named t) {
 
 // Origin returns the generic type from which the named type t is
 // instantiated. If t is not an instantiated type, the result is t.
-public static ж<Named> Origin(this ж<Named> Ꮡt) {
+internal static ж<Named> Originᴍ(ж<Named> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.inst == nil) {
@@ -411,11 +411,11 @@ public static ж<Named> Origin(this ж<Named> Ꮡt) {
 
 // TypeParams returns the type parameters of the named type t, or nil.
 // The result is non-nil for an (originally) generic type even if it is instantiated.
-public static ж<TypeParamList> TypeParams(this ж<Named> Ꮡt) { return Ꮡt.unpack().tparams; }
+internal static ж<TypeParamList> TypeParamsᴍ(ж<Named> Ꮡt) { return Ꮡt.unpack().tparams; }
 
 // SetTypeParams sets the type parameters of the named type t.
 // t must not have type arguments.
-public static void SetTypeParams(this ж<Named> Ꮡt, slice<ж<TypeParam>> tparams) {
+internal static void SetTypeParamsᴍ(ж<Named> Ꮡt, slice<ж<TypeParam>> tparams) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assert(t.inst == nil);
@@ -423,7 +423,7 @@ public static void SetTypeParams(this ж<Named> Ꮡt, slice<ж<TypeParam>> tpara
 }
 
 // TypeArgs returns the type arguments used to instantiate the named type t.
-public static ж<TypeList> TypeArgs(this ref Named t) {
+internal static ж<TypeList> TypeArgsᴍ(ref Named t) {
     if (t.inst == nil) {
         return default;
     }
@@ -431,7 +431,7 @@ public static ж<TypeList> TypeArgs(this ref Named t) {
 }
 
 // NumMethods returns the number of explicit methods defined for t.
-public static nint NumMethods(this ж<Named> Ꮡt) {
+internal static nint NumMethodsᴍ(ж<Named> Ꮡt) {
     return len(Ꮡt.Origin().unpack().methods);
 }
 
@@ -446,7 +446,7 @@ public static nint NumMethods(this ж<Named> Ꮡt) {
 // calls, the mapping from method index to corresponding method remains the same.
 // But the specific ordering is not specified and must not be relied on as it may
 // change in the future.
-public static ж<Func> Method(this ж<Named> Ꮡt, nint i) {
+internal static ж<Func> Methodᴍ(ж<Named> Ꮡt, nint i) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -490,7 +490,7 @@ public static ж<Func> Method(this ж<Named> Ꮡt, nint i) {
 
 // expandMethod substitutes type arguments in the i'th method for an
 // instantiated receiver.
-internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) {
+internal static ж<Func> expandMethodᴍ(ж<Named> Ꮡt, nint i) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // t.orig.methods is not lazy. origm is the method instantiated with its
@@ -551,7 +551,7 @@ internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) {
 
 // SetUnderlying sets the underlying type and marks t as complete.
 // t must not have type arguments.
-public static void SetUnderlying(this ж<Named> Ꮡt, Type u) {
+internal static void SetUnderlyingᴍ(ж<Named> Ꮡt, Type u) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -583,7 +583,7 @@ public static void SetUnderlying(this ж<Named> Ꮡt, Type u) {
 // AddMethod adds method m unless it is already in the method list.
 // The method must be in the same package as t, and t must not have
 // type arguments.
-public static void AddMethod(this ж<Named> Ꮡt, ж<Func> Ꮡm) {
+internal static void AddMethodᴍ(ж<Named> Ꮡt, ж<Func> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -598,7 +598,7 @@ public static void AddMethod(this ж<Named> Ꮡt, ж<Func> Ꮡm) {
 // methodIndex returns the index of the method with the given name.
 // If foldCase is set, capitalization in the name is ignored.
 // The result is negative if no such method exists.
-internal static nint methodIndex(this ref Named t, @string name, bool foldCase) {
+internal static nint methodIndexᴍ(ref Named t, @string name, bool foldCase) {
     if (name == "_"u8) {
         return -1;
     }
@@ -621,7 +621,7 @@ internal static nint methodIndex(this ref Named t, @string name, bool foldCase) 
 // rhs returns [Named.fromRHS].
 //
 // In debug mode, it also asserts that n is in an appropriate state.
-internal static Type rhs(this ж<Named> Ꮡn) {
+internal static Type rhsᴍ(ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (debug) {
@@ -635,7 +635,7 @@ internal static Type rhs(this ж<Named> Ꮡn) {
 // Alias types.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-public static Type Underlying(this ж<Named> Ꮡn) {
+internal static Type Underlyingᴍ(ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     Ꮡn.unpack();
@@ -657,7 +657,7 @@ public static Type Underlying(this ж<Named> Ꮡn) {
     return n.underlying;
 }
 
-public static @string String(this ж<Named> Ꮡt) { return TypeString(new NamedжType(Ꮡt), default); }
+internal static @string Stringᴍ(ж<Named> Ꮡt) { return TypeString(new NamedжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -676,7 +676,7 @@ public static @string String(this ж<Named> Ꮡt) { return TypeString(new Named�
 // resolveUnderlying assumes that there are no direct cycles; if there were
 // any, they were broken (by setting the respective types to invalid) during
 // the directCycles check phase.
-internal static void resolveUnderlying(this ж<Named> Ꮡn) {
+internal static void resolveUnderlyingᴍ(ж<Named> Ꮡn) {
     var pathᴷ = new stackAppend<ж<Named>>(moves: true);
 
     assert(Ꮡn.stateHas(unpacked));
@@ -751,7 +751,7 @@ internal static void resolveUnderlying(this ж<Named> Ꮡn) {
     }
 }
 
-internal static (nint, ж<Func>) lookupMethod(this ж<Named> Ꮡn, ж<Package> Ꮡpkg, @string name, bool foldCase) {
+internal static (nint, ж<Func>) lookupMethodᴍ(ж<Named> Ꮡn, ж<Package> Ꮡpkg, @string name, bool foldCase) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
@@ -768,17 +768,17 @@ internal static (nint, ж<Func>) lookupMethod(this ж<Named> Ꮡn, ж<Package> �
     return (-1, default);
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // context returns the type-checker context.
-internal static ж<Context> context(this ref Checker check) {
+internal static ж<Context> contextᴍ(ref Checker check) {
     if (check.ctxt == nil) {
         check.ctxt = NewContext();
     }
     return check.ctxt;
 }
 
-} partial class typesᴛNamed {
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string namedExpandRHSSˢ => ref namedExpandRHSSˢᵇ;
@@ -817,7 +817,7 @@ private static readonly @string sRhsSˢᵇ = "=> %s (rhs = %s)"u8;
 //	type T[U] U
 //
 // Whereas the underlying of V is int, not U.
-internal static Type /*rhs*/ expandRHS(this ж<Named> Ꮡn) {
+internal static Type /*rhs*/ expandRHSᴍ(ж<Named> Ꮡn) {
     Type rhs = default;
     GoFrame ᒐ = default;
     try {
@@ -910,3 +910,34 @@ internal static Type safeUnderlying(Type typ) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛNamed {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Named> unpack(this ж<Named> Ꮡn) => types_package.unpackᴍ(Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool stateHas(this ж<Named> Ꮡn, stateMask m) => types_package.stateHasᴍ(Ꮡn, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setState(this ж<Named> Ꮡn, stateMask m) => types_package.setStateᴍ(Ꮡn, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanup(this ж<Named> Ꮡn) => types_package.cleanupᴍ(Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<TypeName> Obj(this ref Named t) => types_package.Objᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Named> Origin(this ж<Named> Ꮡt) => types_package.Originᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<TypeParamList> TypeParams(this ж<Named> Ꮡt) => types_package.TypeParamsᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetTypeParams(this ж<Named> Ꮡt, slice<ж<TypeParam>> tparams) => types_package.SetTypeParamsᴍ(Ꮡt, tparams);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<TypeList> TypeArgs(this ref Named t) => types_package.TypeArgsᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumMethods(this ж<Named> Ꮡt) => types_package.NumMethodsᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> Method(this ж<Named> Ꮡt, nint i) => types_package.Methodᴍ(Ꮡt, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) => types_package.expandMethodᴍ(Ꮡt, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetUnderlying(this ж<Named> Ꮡt, Type u) => types_package.SetUnderlyingᴍ(Ꮡt, u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddMethod(this ж<Named> Ꮡt, ж<Func> Ꮡm) => types_package.AddMethodᴍ(Ꮡt, Ꮡm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint methodIndex(this ref Named t, @string name, bool foldCase) => types_package.methodIndexᴍ(ref t, name, foldCase);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type rhs(this ж<Named> Ꮡn) => types_package.rhsᴍ(Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Named> Ꮡn) => types_package.Underlyingᴍ(Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Named> Ꮡt) => types_package.Stringᴍ(Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resolveUnderlying(this ж<Named> Ꮡn) => types_package.resolveUnderlyingᴍ(Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, ж<Func>) lookupMethod(this ж<Named> Ꮡn, ж<Package> Ꮡpkg, @string name, bool foldCase) => types_package.lookupMethodᴍ(Ꮡn, Ꮡpkg, name, foldCase);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type /*rhs*/ expandRHS(this ж<Named> Ꮡn) => types_package.expandRHSᴍ(Ꮡn);
+}
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type fromRHS, slice<ж<Func>> methods) => types_package.newNamedᴍ(Ꮡcheck, Ꮡobj, fromRHS, methods);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, token.Pos pos, ж<Named> Ꮡorig, slice<Type> targs, ж<Named> Ꮡexpanding) => types_package.newNamedInstanceᴍ(Ꮡcheck, pos, Ꮡorig, targs, Ꮡexpanding);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Context> context(this ref Checker check) => types_package.contextᴍ(ref check);
+}
+// </GlyphForwarders>

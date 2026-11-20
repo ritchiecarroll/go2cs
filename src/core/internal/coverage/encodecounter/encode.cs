@@ -63,12 +63,12 @@ partial interface CounterVisitor {
 // coverage counter data.
 // type CounterVisitorFn is a methodless func type — rendered inline as its base delegate
 
-} partial class encodecounterᴛCoverageDataWriter {
+} partial class encodecounter_package {
 
 // Write writes the contents of the count-data file to the writer
 // previously supplied to NewCoverageDataWriter. Returns an error
 // if something went wrong somewhere with the write.
-public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) {
+internal static error Writeᴍ(ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) {
     metaFileHash = metaFileHash.Clone();
     ref var cfw = ref Ꮡcfw.DerefOrNull();
 
@@ -97,9 +97,9 @@ internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     return default;
 }
 
-} partial class encodecounterᴛCoverageDataWriter {
+} partial class encodecounter_package {
 
-internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) {
+internal static error patchSegmentHeaderᴍ(ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     // record position
@@ -124,7 +124,7 @@ internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<sli
     return default;
 }
 
-internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, ж<slicewriter.WriteSeeker> Ꮡws) {
+internal static error writeSegmentPreambleᴍ(ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, ж<slicewriter.WriteSeeker> Ꮡws) {
     ref var cfw = ref Ꮡcfw.DerefOrNull();
     ref var ws = ref Ꮡws.DerefOrNull();
 
@@ -191,7 +191,7 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
 
 // AppendSegment appends a new segment to a counter data, with a new
 // args section followed by a payload of counter data clauses.
-public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, CounterVisitor visitor) {
+internal static error AppendSegmentᴍ(ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, CounterVisitor visitor) {
     ref var cfw = ref Ꮡcfw.DerefOrNull();
 
     cfw.stab = Ꮡ(new stringtab.Writer());
@@ -227,7 +227,7 @@ public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@strin
     return default;
 }
 
-internal static error writeHeader(this ref CoverageDataWriter cfw, /*[16]*/ array<byte> metaFileHash) {
+internal static error writeHeaderᴍ(ref CoverageDataWriter cfw, /*[16]*/ array<byte> metaFileHash) {
     metaFileHash = metaFileHash.Clone();
 
     // Emit file header.
@@ -244,7 +244,7 @@ internal static error writeHeader(this ref CoverageDataWriter cfw, /*[16]*/ arra
     return default;
 }
 
-internal static error writeBytes(this ref CoverageDataWriter cfw, slice<byte> b) {
+internal static error writeBytesᴍ(ref CoverageDataWriter cfw, slice<byte> b) {
     if (len(b) == 0) {
         return default;
     }
@@ -258,7 +258,7 @@ internal static error writeBytes(this ref CoverageDataWriter cfw, slice<byte> b)
     return default;
 }
 
-internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterVisitor visitor, ж<slicewriter.WriteSeeker> ws) {
+internal static error writeCountersᴍ(ж<CoverageDataWriter> Ꮡcfw, CounterVisitor visitor, ж<slicewriter.WriteSeeker> ws) {
     // Notes:
     // - this version writes everything little-endian, which means
     //   a call is needed to encode every value (expensive)
@@ -326,7 +326,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
     return default;
 }
 
-internal static error writeFooter(this ref CoverageDataWriter cfw) {
+internal static error writeFooterᴍ(ref CoverageDataWriter cfw) {
     cfw.segs++;
     var cf = new coverage.CounterFileFooter(
         Magic: coverage.CovCounterMagic.Clone(),
@@ -339,3 +339,16 @@ internal static error writeFooter(this ref CoverageDataWriter cfw) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class encodecounterᴛCoverageDataWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) => encodecounter_package.Writeᴍ(Ꮡcfw, metaFileHash, args, visitor);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) => encodecounter_package.patchSegmentHeaderᴍ(ref cfw, Ꮡws);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, ж<slicewriter.WriteSeeker> Ꮡws) => encodecounter_package.writeSegmentPreambleᴍ(Ꮡcfw, args, Ꮡws);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@string, @string> args, CounterVisitor visitor) => encodecounter_package.AppendSegmentᴍ(Ꮡcfw, args, visitor);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeHeader(this ref CoverageDataWriter cfw, /*[16]*/ array<byte> metaFileHash) => encodecounter_package.writeHeaderᴍ(ref cfw, metaFileHash);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeBytes(this ref CoverageDataWriter cfw, slice<byte> b) => encodecounter_package.writeBytesᴍ(ref cfw, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterVisitor visitor, ж<slicewriter.WriteSeeker> ws) => encodecounter_package.writeCountersᴍ(Ꮡcfw, visitor, ws);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFooter(this ref CoverageDataWriter cfw) => encodecounter_package.writeFooterᴍ(ref cfw);
+}
+// </GlyphForwarders>

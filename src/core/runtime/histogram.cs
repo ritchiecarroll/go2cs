@@ -93,7 +93,7 @@ partial struct timeHistogram {
     internal atomic.Uint64 overflow;
 }
 
-} partial class runtimeᴛtimeHistogram {
+} partial class runtime_package {
 
 // record adds the given duration to the distribution.
 //
@@ -101,7 +101,7 @@ partial struct timeHistogram {
 // may run in sensitive locations.
 //
 //go:nosplit
-internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) {
+internal static void recordᴍ(ж<timeHistogram> Ꮡh, int64 duration) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // If the duration is negative, capture that in underflow.
@@ -137,7 +137,7 @@ internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) {
 }
 
 // write dumps the histogram to the passed metricValue as a float64 histogram.
-internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) {
+internal static void writeᴍ(ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) {
     ref var h = ref Ꮡh.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -208,3 +208,10 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛtimeHistogram {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) => runtime_package.recordᴍ(Ꮡh, duration);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) => runtime_package.writeᴍ(Ꮡh, Ꮡout);
+}
+// </GlyphForwarders>

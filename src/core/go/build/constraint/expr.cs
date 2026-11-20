@@ -44,15 +44,15 @@ partial struct TagExpr {
     public @string Tag; // for example, “linux” or “cgo”
 }
 
-} partial class constraintᴛTagExpr {
+} partial class constraint_package {
 
-internal static void isExpr(this ref TagExpr x) { }
+internal static void isExprᴍ(ref TagExpr x) { }
 
-public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) {
+internal static bool Evalᴍ(ref TagExpr x, Func<@string, bool> ok) {
     return ok(x.Tag);
 }
 
-public static @string String(this ref TagExpr x) {
+internal static @string Stringᴍ(ref TagExpr x) {
     return x.Tag;
 }
 
@@ -65,15 +65,15 @@ partial struct NotExpr {
     public Expr X;
 }
 
-} partial class constraintᴛNotExpr {
+} partial class constraint_package {
 
-internal static void isExpr(this ref NotExpr x) { }
+internal static void isExprᴍ(ref NotExpr x) { }
 
-public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) {
+internal static bool Evalᴍ(ref NotExpr x, Func<@string, bool> ok) {
     return !x.X.Eval(ok);
 }
 
-public static @string String(this ref NotExpr x) {
+internal static @string Stringᴍ(ref NotExpr x) {
     @string s = x.X.String();
     switch (x.X.type()) {
     case ж<AndExpr> _:
@@ -93,18 +93,18 @@ partial struct AndExpr {
     public Expr X, Y;
 }
 
-} partial class constraintᴛAndExpr {
+} partial class constraint_package {
 
-internal static void isExpr(this ref AndExpr x) { }
+internal static void isExprᴍ(ref AndExpr x) { }
 
-public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) {
+internal static bool Evalᴍ(ref AndExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok && yok;
 }
 
-public static @string String(this ref AndExpr x) {
+internal static @string Stringᴍ(ref AndExpr x) {
     return andArg(x.X) + " && "u8 + andArg(x.Y);
 }
 
@@ -127,18 +127,18 @@ partial struct OrExpr {
     public Expr X, Y;
 }
 
-} partial class constraintᴛOrExpr {
+} partial class constraint_package {
 
-internal static void isExpr(this ref OrExpr x) { }
+internal static void isExprᴍ(ref OrExpr x) { }
 
-public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) {
+internal static bool Evalᴍ(ref OrExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok || yok;
 }
 
-public static @string String(this ref OrExpr x) {
+internal static @string Stringᴍ(ref OrExpr x) {
     return orArg(x.X) + " || "u8 + orArg(x.Y);
 }
 
@@ -162,9 +162,9 @@ partial struct SyntaxError {
     public @string Err; // description of error
 }
 
-} partial class constraintᴛSyntaxError {
+} partial class constraint_package {
 
-public static @string Error(this ref SyntaxError e) {
+internal static @string Errorᴍ(ref SyntaxError e) {
     return e.Err;
 }
 
@@ -267,12 +267,12 @@ internal static (Expr x, error err) parseExpr(@string text) {
     return (x, err);
 }
 
-} partial class constraintᴛexprParser {
+} partial class constraint_package {
 
 // or parses a sequence of || expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-internal static Expr or(this ж<exprParser> Ꮡp) {
+internal static Expr orᴍ(ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var x = Ꮡp.and();
@@ -285,7 +285,7 @@ internal static Expr or(this ж<exprParser> Ꮡp) {
 // and parses a sequence of && expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-internal static Expr and(this ж<exprParser> Ꮡp) {
+internal static Expr andᴍ(ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var x = Ꮡp.not();
@@ -298,7 +298,7 @@ internal static Expr and(this ж<exprParser> Ꮡp) {
 // not parses a ! expression.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-internal static Expr not(this ж<exprParser> Ꮡp) {
+internal static Expr notᴍ(ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.size++;
@@ -323,7 +323,7 @@ private static readonly @string missingCloseParenˢᵇ = "missing close paren"u8
 // atom parses a tag or a parenthesized expression.
 // On entry, the next input token HAS been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-internal static Expr atom(this ж<exprParser> Ꮡp) {
+internal static Expr atomᴍ(ж<exprParser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -367,7 +367,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
 // and p.pos records the byte offset of the start of the token in the input stream.
 // If lex reaches the end of the input, p.tok is set to the empty string.
 // For any other syntax error, lex panics with a SyntaxError.
-internal static void lex(this ref exprParser p) {
+internal static void lexᴍ(ref exprParser p) {
     p.isTag = false;
     while (p.i < len(p.s) && (p.s[p.i] == ' ' || p.s[p.i] == '\t')) {
         p.i++;
@@ -680,3 +680,36 @@ internal static slice<Expr> appendSplitOr(slice<Expr> list, Expr x) {
 }
 
 } // end constraint_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class constraintᴛTagExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isExpr(this ref TagExpr x) => constraint_package.isExprᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) => constraint_package.Evalᴍ(ref x, ok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref TagExpr x) => constraint_package.Stringᴍ(ref x);
+}
+partial class constraintᴛNotExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isExpr(this ref NotExpr x) => constraint_package.isExprᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) => constraint_package.Evalᴍ(ref x, ok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref NotExpr x) => constraint_package.Stringᴍ(ref x);
+}
+partial class constraintᴛAndExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isExpr(this ref AndExpr x) => constraint_package.isExprᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) => constraint_package.Evalᴍ(ref x, ok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref AndExpr x) => constraint_package.Stringᴍ(ref x);
+}
+partial class constraintᴛOrExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isExpr(this ref OrExpr x) => constraint_package.isExprᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) => constraint_package.Evalᴍ(ref x, ok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref OrExpr x) => constraint_package.Stringᴍ(ref x);
+}
+partial class constraintᴛSyntaxError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => constraint_package.Errorᴍ(ref e);
+}
+partial class constraintᴛexprParser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Expr or(this ж<exprParser> Ꮡp) => constraint_package.orᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Expr and(this ж<exprParser> Ꮡp) => constraint_package.andᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Expr not(this ж<exprParser> Ꮡp) => constraint_package.notᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Expr atom(this ж<exprParser> Ꮡp) => constraint_package.atomᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void lex(this ref exprParser p) => constraint_package.lexᴍ(ref p);
+}
+// </GlyphForwarders>

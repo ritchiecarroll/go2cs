@@ -42,16 +42,16 @@ partial struct IPAddr {
     public @string Zone; // IPv6 scoped addressing zone
 }
 
-} partial class netᴛIPAddr {
+} partial class net_package {
 
 // Network returns the address's network name, "ip".
-public static @string Network(this ref IPAddr a) { return "ip"; }
+internal static @string Networkᴍ(ref IPAddr a) { return "ip"; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
-public static @string String(this ж<IPAddr> Ꮡa) {
+internal static @string Stringᴍ(ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -64,7 +64,7 @@ public static @string String(this ж<IPAddr> Ꮡa) {
     return ip;
 }
 
-internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
+internal static bool isWildcardᴍ(ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || a.IP == nil) {
@@ -73,7 +73,7 @@ internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
     return a.IP.IsUnspecified();
 }
 
-internal static Addr opAddr(this ж<IPAddr> Ꮡa) {
+internal static Addr opAddrᴍ(ж<IPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
@@ -123,11 +123,11 @@ partial struct IPConn {
     /*embed*/ internal conn conn;
 }
 
-} partial class netᴛIPConn {
+} partial class net_package {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-public static (syscall.RawConn, error) SyscallConn(this ж<IPConn> Ꮡc) {
+internal static (syscall.RawConn, error) SyscallConnᴍ(ж<IPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -137,7 +137,7 @@ public static (syscall.RawConn, error) SyscallConn(this ж<IPConn> Ꮡc) {
 }
 
 // ReadFromIP acts like ReadFrom but returns an IPAddr.
-public static (nint, ж<IPAddr>, error) ReadFromIP(this ж<IPConn> Ꮡc, slice<byte> b) {
+internal static (nint, ж<IPAddr>, error) ReadFromIPᴍ(ж<IPConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -151,7 +151,7 @@ public static (nint, ж<IPAddr>, error) ReadFromIP(this ж<IPConn> Ꮡc, slice<b
 }
 
 // ReadFrom implements the [PacketConn] ReadFrom method.
-public static (nint, Addr, error) ReadFrom(this ж<IPConn> Ꮡc, slice<byte> b) {
+internal static (nint, Addr, error) ReadFromᴍ(ж<IPConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -174,7 +174,7 @@ public static (nint, Addr, error) ReadFrom(this ж<IPConn> Ꮡc, slice<byte> b) 
 //
 // The packages golang.org/x/net/ipv4 and golang.org/x/net/ipv6 can be
 // used to manipulate IP-level socket options in oob.
-public static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMsgIP(this ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMsgIPᴍ(ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -193,7 +193,7 @@ public static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMs
 }
 
 // WriteToIP acts like [IPConn.WriteTo] but takes an [IPAddr].
-public static (nint, error) WriteToIP(this ж<IPConn> Ꮡc, slice<byte> b, ж<IPAddr> addr) {
+internal static (nint, error) WriteToIPᴍ(ж<IPConn> Ꮡc, slice<byte> b, ж<IPAddr> addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -207,7 +207,7 @@ public static (nint, error) WriteToIP(this ж<IPConn> Ꮡc, slice<byte> b, ж<IP
 }
 
 // WriteTo implements the [PacketConn] WriteTo method.
-public static (nint, error) WriteTo(this ж<IPConn> Ꮡc, slice<byte> b, Addr addr) {
+internal static (nint, error) WriteToᴍ(ж<IPConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -230,7 +230,7 @@ public static (nint, error) WriteTo(this ж<IPConn> Ꮡc, slice<byte> b, Addr ad
 //
 // The packages golang.org/x/net/ipv4 and golang.org/x/net/ipv6 can be
 // used to manipulate IP-level socket options in oob.
-public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
+internal static (nint n, nint oobn, error err) WriteMsgIPᴍ(ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -300,3 +300,21 @@ public static (ж<IPConn>, error) ListenIP(@string network, ж<IPAddr> Ꮡladdr)
 }
 
 } // end net_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛIPAddr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Network(this ref IPAddr a) => net_package.Networkᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<IPAddr> Ꮡa) => net_package.Stringᴍ(Ꮡa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isWildcard(this ж<IPAddr> Ꮡa) => net_package.isWildcardᴍ(Ꮡa);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Addr opAddr(this ж<IPAddr> Ꮡa) => net_package.opAddrᴍ(Ꮡa);
+}
+partial class netᴛIPConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (syscall.RawConn, error) SyscallConn(this ж<IPConn> Ꮡc) => net_package.SyscallConnᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, ж<IPAddr>, error) ReadFromIP(this ж<IPConn> Ꮡc, slice<byte> b) => net_package.ReadFromIPᴍ(Ꮡc, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, Addr, error) ReadFrom(this ж<IPConn> Ꮡc, slice<byte> b) => net_package.ReadFromᴍ(Ꮡc, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMsgIP(this ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob) => net_package.ReadMsgIPᴍ(Ꮡc, b, oob);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteToIP(this ж<IPConn> Ꮡc, slice<byte> b, ж<IPAddr> addr) => net_package.WriteToIPᴍ(Ꮡc, b, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteTo(this ж<IPConn> Ꮡc, slice<byte> b, Addr addr) => net_package.WriteToᴍ(Ꮡc, b, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) => net_package.WriteMsgIPᴍ(Ꮡc, b, oob, addr);
+}
+// </GlyphForwarders>

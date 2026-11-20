@@ -60,9 +60,9 @@ internal static ж<Graph> newGraph() {
     return Ꮡ(new Graph(byLabel: new map<@string, nint>{}, edges: new map<@string, map<@string, bool>>{}));
 }
 
-} partial class dagᴛGraph {
+} partial class dag_package {
 
-internal static bool addNode(this ref Graph g, @string label) {
+internal static bool addNodeᴍ(ref Graph g, @string label) {
     var (_, ok) = g.byLabel[label, ꟷ]; if (ok) {
         return false;
     }
@@ -72,19 +72,19 @@ internal static bool addNode(this ref Graph g, @string label) {
     return true;
 }
 
-public static void AddEdge(this ref Graph g, @string from, @string to) {
+internal static void AddEdgeᴍ(ref Graph g, @string from, @string to) {
     g.edges[from].Set(to, true);
 }
 
-public static void DelEdge(this ref Graph g, @string from, @string to) {
+internal static void DelEdgeᴍ(ref Graph g, @string from, @string to) {
     delete(g.edges[from], to);
 }
 
-public static bool HasEdge(this ref Graph g, @string from, @string to) {
+internal static bool HasEdgeᴍ(ref Graph g, @string from, @string to) {
     return g.edges[from] != nil && g.edges[from][to];
 }
 
-public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) {
+internal static slice<@string> Edgesᴍ(ж<Graph> Ꮡg, @string from) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var edges = new slice<@string>(0, 16);
@@ -194,9 +194,9 @@ partial struct rule {
 
 partial struct syntaxError /*@string*/;
 
-} partial class dagᴛsyntaxError {
+} partial class dag_package {
 
-internal static @string Error(this syntaxError e) {
+internal static @string Errorᴍ(syntaxError e) {
     return (@string)e;
 }
 
@@ -269,10 +269,10 @@ partial struct rulesParser {
     internal @string text;
 }
 
-} partial class dagᴛrulesParser {
+} partial class dag_package {
 
 // syntaxError reports a parsing error.
-internal static void syntaxError(this ref rulesParser p, @string msg) {
+internal static void syntaxErrorᴍ(ref rulesParser p, @string msg) {
     throw panic(((syntaxError)fmt.Sprintf("parsing graph: line %d: syntax error: %s near %s"u8, p.lineno, msg, p.lastWord)));
 }
 
@@ -281,7 +281,7 @@ internal static ref readonly @string badListSyntaxˢ => ref badListSyntaxˢᵇ;
 private static readonly @string badListSyntaxˢᵇ = "bad list syntax"u8;
 
 // nextList parses and returns a comma-separated list of names.
-internal static (slice<@string> list, @string token) nextList(this ref rulesParser p) {
+internal static (slice<@string> list, @string token) nextListᴍ(ref rulesParser p) {
     slice<@string> list = default;
 
     for (;;) {
@@ -311,7 +311,7 @@ private static readonly @string unexpectedTokenˢᵇ = "unexpected token !"u8;
 
 // nextToken returns the next token in the deps rules,
 // one of ";" "," "<" "!<" or a name.
-internal static @string nextToken(this ref rulesParser p) {
+internal static @string nextTokenᴍ(ref rulesParser p) {
     for (;;) {
         if (p.text == ""u8) {
             return ""u8;
@@ -360,3 +360,21 @@ internal static @string nextToken(this ref rulesParser p) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class dagᴛGraph {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool addNode(this ref Graph g, @string label) => dag_package.addNodeᴍ(ref g, label);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddEdge(this ref Graph g, @string from, @string to) => dag_package.AddEdgeᴍ(ref g, from, to);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void DelEdge(this ref Graph g, @string from, @string to) => dag_package.DelEdgeᴍ(ref g, from, to);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasEdge(this ref Graph g, @string from, @string to) => dag_package.HasEdgeᴍ(ref g, from, to);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) => dag_package.Edgesᴍ(Ꮡg, from);
+}
+partial class dagᴛsyntaxError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this syntaxError e) => dag_package.Errorᴍ(e);
+}
+partial class dagᴛrulesParser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void syntaxError(this ref rulesParser p, @string msg) => dag_package.syntaxErrorᴍ(ref p, msg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<@string> list, @string token) nextList(this ref rulesParser p) => dag_package.nextListᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string nextToken(this ref rulesParser p) => dag_package.nextTokenᴍ(ref p);
+}
+// </GlyphForwarders>

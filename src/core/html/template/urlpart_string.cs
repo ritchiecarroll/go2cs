@@ -21,9 +21,9 @@ private static readonly @string _urlPart_nameᵇ = "urlPartNoneurlPartPreQueryur
 
 internal static array<uint8> _urlPart_index = new uint8[]{0, 11, 26, 44, 58}.array();
 
-} partial class templateᴛurlPart {
+} partial class template_package {
 
-internal static @string String(this urlPart i) {
+internal static @string Stringᴍ(urlPart i) {
     if (i >= ((urlPart)(uint8)(len(_urlPart_index) - 1))) {
         return "urlPart("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -31,3 +31,9 @@ internal static @string String(this urlPart i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class templateᴛurlPart {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this urlPart i) => template_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

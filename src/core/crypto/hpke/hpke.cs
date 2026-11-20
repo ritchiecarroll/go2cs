@@ -182,7 +182,7 @@ public static (ж<Recipient>, error) NewRecipient(slice<byte> enc, PrivateKey k,
     return (Ꮡ(new Recipient(context)), default);
 }
 
-} partial class hpkeᴛSender {
+} partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exportOnlyInstantiationˢ => ref exportOnlyInstantiationˢᵇ;
@@ -193,7 +193,7 @@ private static readonly @string exportOnlyInstantiationˢᵇ = "export-only inst
 //
 // Seal uses incrementing counters for each call, and Open on the receiving side
 // must be called in the same order as Seal.
-public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slice<byte> plaintext) {
+internal static (slice<byte>, error) Sealᴍ(ref Sender s, slice<byte> aad, slice<byte> plaintext) {
     if (s.aead == nil) {
         return (default, errors.New(exportOnlyInstantiationˢ));
     }
@@ -219,7 +219,7 @@ public static (slice<byte>, error) Seal(PublicKey pk, KDF kdf, AEAD aead, slice<
     return (appendꓸꓸꓸ(enc, ct), default);
 }
 
-} partial class hpkeᴛSender {
+} partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidLengthˢ => ref invalidLengthˢᵇ;
@@ -227,14 +227,14 @@ private static readonly @string invalidLengthˢᵇ = "invalid length"u8;
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
-public static (slice<byte>, error) Export(this ref Sender s, @string exporterContext, nint length) {
+internal static (slice<byte>, error) Exportᴍ(ref Sender s, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
         return (default, errors.New(invalidLengthˢ));
     }
     return s.export(exporterContext, (uint16)length);
 }
 
-} partial class hpkeᴛRecipient {
+} partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exportOnlyInstantiationˢ => ref exportOnlyInstantiationˢᵇ;
@@ -245,7 +245,7 @@ private static readonly @string exportOnlyInstantiationˢᵇ = "export-only inst
 //
 // Open uses incrementing counters for each successful call, and must be called
 // in the same order as Seal on the sending side.
-public static (slice<byte>, error) Open(this ref Recipient r, slice<byte> aad, slice<byte> ciphertext) {
+internal static (slice<byte>, error) Openᴍ(ref Recipient r, slice<byte> aad, slice<byte> ciphertext) {
     if (r.aead == nil) {
         return (default, errors.New(exportOnlyInstantiationˢ));
     }
@@ -280,7 +280,7 @@ public static (slice<byte>, error) Open(PrivateKey k, KDF kdf, AEAD aead, slice<
     return r.Open(default, ciphertext);
 }
 
-} partial class hpkeᴛRecipient {
+} partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidLengthˢ => ref invalidLengthˢᵇ;
@@ -288,16 +288,16 @@ private static readonly @string invalidLengthˢᵇ = "invalid length"u8;
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
-public static (slice<byte>, error) Export(this ref Recipient r, @string exporterContext, nint length) {
+internal static (slice<byte>, error) Exportᴍ(ref Recipient r, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
         return (default, errors.New(invalidLengthˢ));
     }
     return r.export(exporterContext, (uint16)length);
 }
 
-} partial class hpkeᴛcontext {
+} partial class hpke_package {
 
-internal static slice<byte> nextNonce(this ref context ctx) {
+internal static slice<byte> nextNonceᴍ(ref context ctx) {
     var nonce = new slice<byte>(ctx.aead.NonceSize());
     byteorder.BEPutUint64(nonce.slice(len(nonce) - 8), ctx.seqNum);
     foreach (var i in range(len(ctx.baseNonce))) {
@@ -318,3 +318,17 @@ internal static slice<byte> suiteID(uint16 kemID, uint16 kdfID, uint16 aeadID) {
 }
 
 } // end hpke_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class hpkeᴛSender {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slice<byte> plaintext) => hpke_package.Sealᴍ(ref s, aad, plaintext);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Export(this ref Sender s, @string exporterContext, nint length) => hpke_package.Exportᴍ(ref s, exporterContext, length);
+}
+partial class hpkeᴛRecipient {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Open(this ref Recipient r, slice<byte> aad, slice<byte> ciphertext) => hpke_package.Openᴍ(ref r, aad, ciphertext);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Export(this ref Recipient r, @string exporterContext, nint length) => hpke_package.Exportᴍ(ref r, exporterContext, length);
+}
+partial class hpkeᴛcontext {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> nextNonce(this ref context ctx) => hpke_package.nextNonceᴍ(ref ctx);
+}
+// </GlyphForwarders>

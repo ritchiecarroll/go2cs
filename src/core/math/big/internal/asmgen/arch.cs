@@ -134,11 +134,11 @@ partial struct Arch {
     internal map<Option, Action<ж<Asm>, @string>> options;
 }
 
-} partial class asmgenᴛArch {
+} partial class asmgen_package {
 
 // HasShiftWide reports whether the Arch has working LshWide/RshWide instructions.
 // If not, calling them will panic.
-public static bool HasShiftWide(this ref Arch a) {
+internal static bool HasShiftWideᴍ(ref Arch a) {
     return a.lshd != ""u8;
 }
 
@@ -163,19 +163,19 @@ partial struct Reg {
     internal @string name;
 }
 
-} partial class asmgenᴛReg {
+} partial class asmgen_package {
 
 // IsImm reports whether r is an immediate value.
-public static bool IsImm(this Reg r) { return strings.HasPrefix(r.name, "$"); }
+internal static bool IsImmᴍ(Reg r) { return strings.HasPrefix(r.name, "$"); }
 
 // IsMem reports whether r is a memory value.
-public static bool IsMem(this Reg r) { return strings.HasSuffix(r.name, ")"); }
+internal static bool IsMemᴍ(Reg r) { return strings.HasSuffix(r.name, ")"); }
 
 // String returns the assembly syntax for r.
-public static @string String(this Reg r) { return r.name; }
+internal static @string Stringᴍ(Reg r) { return r.name; }
 
 // Valid reports whether is valid, meaning r is not the zero value of Reg (a register with no name).
-public static bool Valid(this Reg r) { return r.name != ""u8; }
+internal static bool Validᴍ(Reg r) { return r.name != ""u8; }
 
 } partial class asmgen_package {
 
@@ -186,16 +186,16 @@ partial struct RegPtr {
     internal @string name;
 }
 
-} partial class asmgenᴛRegPtr {
+} partial class asmgen_package {
 
 // String returns the assembly syntax for r.
-public static @string String(this RegPtr r) { return r.name; }
+internal static @string Stringᴍ(RegPtr r) { return r.name; }
 
 // Valid reports whether is valid, meaning r is not the zero value of RegPtr (a register with no name).
-public static bool Valid(this RegPtr r) { return r.name != ""u8; }
+internal static bool Validᴍ(RegPtr r) { return r.name != ""u8; }
 
 // mem returns a memory reference to off bytes from the pointer r.
-internal static Reg mem(this ж<RegPtr> Ꮡr, nint off) { return new Reg(fmt.Sprintf("%d(%s)"u8, off, Ꮡr.OrTypedNil())); }
+internal static Reg memᴍ(ж<RegPtr> Ꮡr, nint off) { return new Reg(fmt.Sprintf("%d(%s)"u8, off, Ꮡr.OrTypedNil())); }
 
 } partial class asmgen_package {
 
@@ -227,3 +227,20 @@ internal static Option _ᴛ1ʗ => /* iota */ 0;
 public static Option OptionAltCarry => 1;
 
 } // end asmgen_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class asmgenᴛArch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasShiftWide(this ref Arch a) => asmgen_package.HasShiftWideᴍ(ref a);
+}
+partial class asmgenᴛReg {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsImm(this Reg r) => asmgen_package.IsImmᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsMem(this Reg r) => asmgen_package.IsMemᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Reg r) => asmgen_package.Stringᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Valid(this Reg r) => asmgen_package.Validᴍ(r);
+}
+partial class asmgenᴛRegPtr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RegPtr r) => asmgen_package.Stringᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Valid(this RegPtr r) => asmgen_package.Validᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Reg mem(this ж<RegPtr> Ꮡr, nint off) => asmgen_package.memᴍ(Ꮡr, off);
+}
+// </GlyphForwarders>

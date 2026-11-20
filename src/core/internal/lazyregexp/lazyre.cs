@@ -23,49 +23,49 @@ partial struct Regexp {
     internal ж<regexp.Regexp> rx;
 }
 
-} partial class lazyregexpᴛRegexp {
+} partial class lazyregexp_package {
 
-internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) {
+internal static ж<regexp.Regexp> reᴍ(ж<Regexp> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.build);
     return r.rx;
 }
 
-internal static void build(this ref Regexp r) {
+internal static void buildᴍ(ref Regexp r) {
     r.rx = regexp.MustCompile(r.str);
     r.str = ""u8;
 }
 
-public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡr, slice<byte> s) {
+internal static slice<slice<byte>> FindSubmatchᴍ(ж<Regexp> Ꮡr, slice<byte> s) {
     return Ꮡr.re().FindSubmatch(s);
 }
 
-public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡr, @string s) {
+internal static slice<@string> FindStringSubmatchᴍ(ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindStringSubmatch(s);
 }
 
-public static slice<nint> FindStringSubmatchIndex(this ж<Regexp> Ꮡr, @string s) {
+internal static slice<nint> FindStringSubmatchIndexᴍ(ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindStringSubmatchIndex(s);
 }
 
-public static @string ReplaceAllString(this ж<Regexp> Ꮡr, @string src, @string repl) {
+internal static @string ReplaceAllStringᴍ(ж<Regexp> Ꮡr, @string src, @string repl) {
     return Ꮡr.re().ReplaceAllString(src, repl);
 }
 
-public static @string FindString(this ж<Regexp> Ꮡr, @string s) {
+internal static @string FindStringᴍ(ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindString(s);
 }
 
-public static slice<@string> FindAllString(this ж<Regexp> Ꮡr, @string s, nint n) {
+internal static slice<@string> FindAllStringᴍ(ж<Regexp> Ꮡr, @string s, nint n) {
     return Ꮡr.re().FindAllString(s, n);
 }
 
-public static bool MatchString(this ж<Regexp> Ꮡr, @string s) {
+internal static bool MatchStringᴍ(ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().MatchString(s);
 }
 
-public static slice<@string> SubexpNames(this ж<Regexp> Ꮡr) {
+internal static slice<@string> SubexpNamesᴍ(ж<Regexp> Ꮡr) {
     return Ꮡr.re().SubexpNames();
 }
 
@@ -86,3 +86,18 @@ public static ж<Regexp> New(@string str) {
 }
 
 } // end lazyregexp_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class lazyregexpᴛRegexp {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) => lazyregexp_package.reᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void build(this ref Regexp r) => lazyregexp_package.buildᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡr, slice<byte> s) => lazyregexp_package.FindSubmatchᴍ(Ꮡr, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡr, @string s) => lazyregexp_package.FindStringSubmatchᴍ(Ꮡr, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<nint> FindStringSubmatchIndex(this ж<Regexp> Ꮡr, @string s) => lazyregexp_package.FindStringSubmatchIndexᴍ(Ꮡr, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string ReplaceAllString(this ж<Regexp> Ꮡr, @string src, @string repl) => lazyregexp_package.ReplaceAllStringᴍ(Ꮡr, src, repl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FindString(this ж<Regexp> Ꮡr, @string s) => lazyregexp_package.FindStringᴍ(Ꮡr, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> FindAllString(this ж<Regexp> Ꮡr, @string s, nint n) => lazyregexp_package.FindAllStringᴍ(Ꮡr, s, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool MatchString(this ж<Regexp> Ꮡr, @string s) => lazyregexp_package.MatchStringᴍ(Ꮡr, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> SubexpNames(this ж<Regexp> Ꮡr) => lazyregexp_package.SubexpNamesᴍ(Ꮡr);
+}
+// </GlyphForwarders>

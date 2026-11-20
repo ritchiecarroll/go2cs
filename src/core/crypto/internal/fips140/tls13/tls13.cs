@@ -97,15 +97,15 @@ public static ж<EarlySecret> NewEarlySecret<H>(Func<H> h, slice<byte> psk)
     ));
 }
 
-} partial class tls13ᴛEarlySecret {
+} partial class tls13_package {
 
-public static slice<byte> ResumptionBinderKey(this ref EarlySecret s) {
+internal static slice<byte> ResumptionBinderKeyᴍ(ref EarlySecret s) {
     return deriveSecret(s.hash, s.secret, resumptionBinderLabel, default);
 }
 
 // ClientEarlyTrafficSecret derives the client_early_traffic_secret from the
 // early secret and the transcript up to the ClientHello.
-public static slice<byte> ClientEarlyTrafficSecret(this ref EarlySecret s, hash.Hash transcript) {
+internal static slice<byte> ClientEarlyTrafficSecretᴍ(ref EarlySecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientEarlyTrafficLabel, transcript);
 }
 
@@ -116,13 +116,13 @@ partial struct HandshakeSecret {
     internal Func<hash.Hash> hash;
 }
 
-} partial class tls13ᴛEarlySecret {
+} partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string derivedˢ => ref derivedˢᵇ;
 private static readonly @string derivedˢᵇ = "derived"u8;
 
-public static ж<HandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<byte> sharedSecret) {
+internal static ж<HandshakeSecret> HandshakeSecretᴍ(ref EarlySecret s, slice<byte> sharedSecret) {
     var derived = deriveSecret(s.hash, s.secret, derivedˢ, default);
     return Ꮡ(new HandshakeSecret(
         secret: extract(s.hash, sharedSecret, derived),
@@ -130,17 +130,17 @@ public static ж<HandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<
     ));
 }
 
-} partial class tls13ᴛHandshakeSecret {
+} partial class tls13_package {
 
 // ClientHandshakeTrafficSecret derives the client_handshake_traffic_secret from
 // the handshake secret and the transcript up to the ServerHello.
-public static slice<byte> ClientHandshakeTrafficSecret(this ref HandshakeSecret s, hash.Hash transcript) {
+internal static slice<byte> ClientHandshakeTrafficSecretᴍ(ref HandshakeSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientHandshakeTrafficLabel, transcript);
 }
 
 // ServerHandshakeTrafficSecret derives the server_handshake_traffic_secret from
 // the handshake secret and the transcript up to the ServerHello.
-public static slice<byte> ServerHandshakeTrafficSecret(this ref HandshakeSecret s, hash.Hash transcript) {
+internal static slice<byte> ServerHandshakeTrafficSecretᴍ(ref HandshakeSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, serverHandshakeTrafficLabel, transcript);
 }
 
@@ -151,13 +151,13 @@ partial struct MasterSecret {
     internal Func<hash.Hash> hash;
 }
 
-} partial class tls13ᴛHandshakeSecret {
+} partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string derivedˢ => ref derivedˢᵇ;
 private static readonly @string derivedˢᵇ = "derived"u8;
 
-public static ж<MasterSecret> MasterSecret(this ref HandshakeSecret s) {
+internal static ж<MasterSecret> MasterSecretᴍ(ref HandshakeSecret s) {
     var derived = deriveSecret(s.hash, s.secret, derivedˢ, default);
     return Ꮡ(new MasterSecret(
         secret: extract(s.hash, default, derived),
@@ -165,23 +165,23 @@ public static ж<MasterSecret> MasterSecret(this ref HandshakeSecret s) {
     ));
 }
 
-} partial class tls13ᴛMasterSecret {
+} partial class tls13_package {
 
 // ClientApplicationTrafficSecret derives the client_application_traffic_secret_0
 // from the master secret and the transcript up to the server Finished.
-public static slice<byte> ClientApplicationTrafficSecret(this ref MasterSecret s, hash.Hash transcript) {
+internal static slice<byte> ClientApplicationTrafficSecretᴍ(ref MasterSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientApplicationTrafficLabel, transcript);
 }
 
 // ServerApplicationTrafficSecret derives the server_application_traffic_secret_0
 // from the master secret and the transcript up to the server Finished.
-public static slice<byte> ServerApplicationTrafficSecret(this ref MasterSecret s, hash.Hash transcript) {
+internal static slice<byte> ServerApplicationTrafficSecretᴍ(ref MasterSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, serverApplicationTrafficLabel, transcript);
 }
 
 // ResumptionMasterSecret derives the resumption_master_secret from the master secret
 // and the transcript up to the client Finished.
-public static slice<byte> ResumptionMasterSecret(this ref MasterSecret s, hash.Hash transcript) {
+internal static slice<byte> ResumptionMasterSecretᴍ(ref MasterSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, resumptionLabel, transcript);
 }
 
@@ -192,35 +192,35 @@ partial struct ExporterMasterSecret {
     internal Func<hash.Hash> hash;
 }
 
-} partial class tls13ᴛMasterSecret {
+} partial class tls13_package {
 
 // ExporterMasterSecret derives the exporter_master_secret from the master secret
 // and the transcript up to the server Finished.
-public static ж<ExporterMasterSecret> ExporterMasterSecret(this ref MasterSecret s, hash.Hash transcript) {
+internal static ж<ExporterMasterSecret> ExporterMasterSecretᴍ(ref MasterSecret s, hash.Hash transcript) {
     return Ꮡ(new ExporterMasterSecret(
         secret: deriveSecret(s.hash, s.secret, exporterLabel, transcript),
         hash: s.hash
     ));
 }
 
-} partial class tls13ᴛEarlySecret {
+} partial class tls13_package {
 
 // EarlyExporterMasterSecret derives the exporter_master_secret from the early secret
 // and the transcript up to the ClientHello.
-public static ж<ExporterMasterSecret> EarlyExporterMasterSecret(this ref EarlySecret s, hash.Hash transcript) {
+internal static ж<ExporterMasterSecret> EarlyExporterMasterSecretᴍ(ref EarlySecret s, hash.Hash transcript) {
     return Ꮡ(new ExporterMasterSecret(
         secret: deriveSecret(s.hash, s.secret, earlyExporterLabel, transcript),
         hash: s.hash
     ));
 }
 
-} partial class tls13ᴛExporterMasterSecret {
+} partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string exporterˢ => ref exporterˢᵇ;
 private static readonly @string exporterˢᵇ = "exporter"u8;
 
-public static slice<byte> Exporter(this ref ExporterMasterSecret s, @string label, slice<byte> context, nint length) {
+internal static slice<byte> Exporterᴍ(ref ExporterMasterSecret s, @string label, slice<byte> context, nint length) {
     var secret = deriveSecret(s.hash, s.secret, label, default);
     var h = s.hash();
     h.Write(context);
@@ -236,3 +236,26 @@ public static slice<byte> TestingOnlyExporterSecret(ж<ExporterMasterSecret> Ꮡ
 }
 
 } // end tls13_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tls13ᴛEarlySecret {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ResumptionBinderKey(this ref EarlySecret s) => tls13_package.ResumptionBinderKeyᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ClientEarlyTrafficSecret(this ref EarlySecret s, hash.Hash transcript) => tls13_package.ClientEarlyTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<HandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<byte> sharedSecret) => tls13_package.HandshakeSecretᴍ(ref s, sharedSecret);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<ExporterMasterSecret> EarlyExporterMasterSecret(this ref EarlySecret s, hash.Hash transcript) => tls13_package.EarlyExporterMasterSecretᴍ(ref s, transcript);
+}
+partial class tls13ᴛHandshakeSecret {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ClientHandshakeTrafficSecret(this ref HandshakeSecret s, hash.Hash transcript) => tls13_package.ClientHandshakeTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ServerHandshakeTrafficSecret(this ref HandshakeSecret s, hash.Hash transcript) => tls13_package.ServerHandshakeTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<MasterSecret> MasterSecret(this ref HandshakeSecret s) => tls13_package.MasterSecretᴍ(ref s);
+}
+partial class tls13ᴛMasterSecret {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ClientApplicationTrafficSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ClientApplicationTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ServerApplicationTrafficSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ServerApplicationTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ResumptionMasterSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ResumptionMasterSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<ExporterMasterSecret> ExporterMasterSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ExporterMasterSecretᴍ(ref s, transcript);
+}
+partial class tls13ᴛExporterMasterSecret {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Exporter(this ref ExporterMasterSecret s, @string label, slice<byte> context, nint length) => tls13_package.Exporterᴍ(ref s, label, context, length);
+}
+// </GlyphForwarders>

@@ -66,15 +66,15 @@ partial struct Section {
     internal ж<io.SectionReader> sr;
 }
 
-} partial class plan9objᴛSection {
+} partial class plan9obj_package {
 
 // Data reads and returns the contents of the Plan 9 a.out section.
-public static (slice<byte>, error) Data(this ref Section s) {
+internal static (slice<byte>, error) Dataᴍ(ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Plan 9 a.out section.
-public static io.ReadSeeker Open(this ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
+internal static io.ReadSeeker Openᴍ(ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 } partial class plan9obj_package {
 
@@ -97,9 +97,9 @@ partial struct formatError {
     internal any val;
 }
 
-} partial class plan9objᴛformatError {
+} partial class plan9obj_package {
 
-internal static @string Error(this ref formatError e) {
+internal static @string Errorᴍ(ref formatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -125,12 +125,12 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
-} partial class plan9objᴛFile {
+} partial class plan9obj_package {
 
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-public static error Close(this ref File f) {
+internal static error Closeᴍ(ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -336,7 +336,7 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
 // in the File.
 public static error ErrNoSymbols = errors.New("no symbol section");
 
-} partial class plan9objᴛFile {
+} partial class plan9obj_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string symsˢ => ref symsˢᵇ;
@@ -345,7 +345,7 @@ internal static ref readonly @string cannotLoadSymbolSectionˢ => ref cannotLoad
 private static readonly @string cannotLoadSymbolSectionˢᵇ = "cannot load symbol section"u8;
 
 // Symbols returns the symbol table for f.
-public static (slice<Sym>, error) Symbols(this ref File f) {
+internal static (slice<Sym>, error) Symbolsᴍ(ref File f) {
     var symtabSection = f.Section(symsˢ);
     if (symtabSection == nil) {
         return (default, ErrNoSymbols);
@@ -361,7 +361,7 @@ public static (slice<Sym>, error) Symbols(this ref File f) {
 
 // Section returns a section with the given name, or nil if no such
 // section exists.
-public static ж<Section> Section(this ref File f, @string name) {
+internal static ж<Section> Sectionᴍ(ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -371,3 +371,18 @@ public static ж<Section> Section(this ref File f, @string name) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class plan9objᴛSection {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => plan9obj_package.Dataᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ref Section s) => plan9obj_package.Openᴍ(ref s);
+}
+partial class plan9objᴛformatError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref formatError e) => plan9obj_package.Errorᴍ(ref e);
+}
+partial class plan9objᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref File f) => plan9obj_package.Closeᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<Sym>, error) Symbols(this ref File f) => plan9obj_package.Symbolsᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => plan9obj_package.Sectionᴍ(ref f, name);
+}
+// </GlyphForwarders>

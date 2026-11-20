@@ -66,20 +66,20 @@ partial struct PrivateKey {
     internal array<byte> k = new(32);
 }
 
-} partial class mldsaᴛPrivateKey {
+} partial class mldsa_package {
 
-public static bool Equal(this ref PrivateKey priv, ж<PrivateKey> Ꮡx) {
+internal static bool Equalᴍ(ref PrivateKey priv, ж<PrivateKey> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     return priv.pub.p == x.pub.p && subtle.ConstantTimeCompare(priv.seed[..], x.seed[..]) == 1;
 }
 
-public static slice<byte> Bytes(this ref PrivateKey priv) {
+internal static slice<byte> Bytesᴍ(ref PrivateKey priv) {
     var seed = priv.seed.Clone();
     return seed[..];
 }
 
-public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
     // Note that this is likely to keep the entire PrivateKey reachable for
     // the lifetime of the PublicKey, which may be undesirable.
     return Ꮡpriv.Ꮡpub;
@@ -95,16 +95,16 @@ partial struct PublicKey {
     internal array<byte> tr = new(64);         // public key hash
 }
 
-} partial class mldsaᴛPublicKey {
+} partial class mldsa_package {
 
-public static bool Equal(this ref PublicKey pub, ж<PublicKey> Ꮡx) {
+internal static bool Equalᴍ(ref PublicKey pub, ж<PublicKey> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     nint size = pubKeySize(pub.p);
     return pub.p == x.p && subtle.ConstantTimeCompare(pub.raw.slice(0, size), x.raw.slice(0, size)) == 1;
 }
 
-public static slice<byte> Bytes(this ref PublicKey pub) {
+internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
     nint size = pubKeySize(pub.p);
     return bytes.Clone(pub.raw.slice(0, size));
 }
@@ -117,7 +117,7 @@ private static readonly @string mlDsa65ˢᵇ = "ML-DSA-65"u8;
 internal static ref readonly @string mlDsa87ˢ => ref mlDsa87ˢᵇ;
 private static readonly @string mlDsa87ˢᵇ = "ML-DSA-87"u8;
 
-public static @string Parameters(this ref PublicKey pub) {
+internal static @string Parametersᴍ(ref PublicKey pub) {
     switch (pub.p) {
     case var ᴛ when ᴛ == params44: {
         return mlDsa44ˢ;
@@ -866,3 +866,16 @@ internal static error hintDecode(slice<byte> y, slice<array<byte>> h, parameters
 }
 
 } // end mldsa_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class mldsaᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, ж<PrivateKey> Ꮡx) => mldsa_package.Equalᴍ(ref priv, Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => mldsa_package.Bytesᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => mldsa_package.PublicKeyᴍ(Ꮡpriv);
+}
+partial class mldsaᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, ж<PublicKey> Ꮡx) => mldsa_package.Equalᴍ(ref pub, Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => mldsa_package.Bytesᴍ(ref pub);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Parameters(this ref PublicKey pub) => mldsa_package.Parametersᴍ(ref pub);
+}
+// </GlyphForwarders>

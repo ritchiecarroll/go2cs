@@ -83,18 +83,18 @@ internal static spanScanOwnership spanScanUnowned => 0;          // Indicates th
 internal static UntypedInt spanScanOneMark => /* 1 << iota */ 2; // Indicates that only one mark bit is set relative to the scan bits.
 internal static UntypedInt spanScanManyMark => 4;                // Indicates one or more scan bits may be set relative to the mark bits.
 
-} partial class runtimeᴛspanScanOwnership {
+} partial class runtime_package {
 
 // "ManyMark" need not be exactly the value it has. In practice we just
 // want to distinguish "none" from "one" from "many," so a comparison is
 // sufficient (as opposed to a bit test) to check between these cases.
 
 // load atomically loads from a pointer to a spanScanOwnership.
-internal static spanScanOwnership load(this ж<spanScanOwnership> Ꮡo) {
+internal static spanScanOwnership loadᴍ(ж<spanScanOwnership> Ꮡo) {
     return (spanScanOwnership)atomic.Load8(Ꮡo.Reinterpret<spanScanOwnership, uint8>());
 }
 
-internal static spanScanOwnership or(this ж<spanScanOwnership> Ꮡo, spanScanOwnership v) {
+internal static spanScanOwnership orᴍ(ж<spanScanOwnership> Ꮡo, spanScanOwnership v) {
     // N.B. We round down the address and use Or32 because Or8 doesn't
     // return a result, and it's strictly necessary for this protocol.
     //
@@ -112,13 +112,13 @@ internal static spanScanOwnership or(this ж<spanScanOwnership> Ꮡo, spanScanOw
     return (spanScanOwnership)(uint8)(atomic.Or32(o32, ((uint32)v).Lsh((uint64)(off))).Rsh((uint64)(off)));
 }
 
-} partial class runtimeᴛspanInlineMarkBits {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeSpanInlineMarkˢ => ref runtimeSpanInlineMarkˢᵇ;
 private static readonly @string runtimeSpanInlineMarkˢᵇ = "runtime: span inline mark bits nil?"u8;
 
-internal static void init(this ж<spanInlineMarkBits> Ꮡimb, spanClass @class, bool needzero) {
+internal static void initᴍ(ж<spanInlineMarkBits> Ꮡimb, spanClass @class, bool needzero) {
     ref var imb = ref Ꮡimb.DerefOrNull();
 
     if (Ꮡimb == nil) {
@@ -153,7 +153,7 @@ internal static void init(this ж<spanInlineMarkBits> Ꮡimb, spanClass @class, 
 
 // tryAcquire attempts to acquire the span for scanning. On success, the caller
 // must queue the span for scanning or scan the span immediately.
-internal static bool tryAcquire(this ж<spanInlineMarkBits> Ꮡimb) {
+internal static bool tryAcquireᴍ(ж<spanInlineMarkBits> Ꮡimb) {
     var exprᴛ1 = Ꮡimb.Ꮡowned.load();
     var matchᴛ1 = false;
     if (exprᴛ1 == spanScanUnowned) {
@@ -182,7 +182,7 @@ internal static bool tryAcquire(this ж<spanInlineMarkBits> Ꮡimb) {
 // caller can be certain that it was the same mark bit that caused the span to get queued.
 // Take note of the fact that this is *only* an upper-bound. In particular, it may still
 // turn out that only one mark bit was set, even if the return value indicates "many".
-internal static spanScanOwnership release(this ж<spanInlineMarkBits> Ꮡimb) {
+internal static spanScanOwnership releaseᴍ(ж<spanInlineMarkBits> Ꮡimb) {
     return (spanScanOwnership)atomic.Xchg8(Ꮡimb.Ꮡowned.Reinterpret<spanScanOwnership, uint8>(), (uint8)spanScanUnowned);
 }
 
@@ -195,14 +195,14 @@ internal static ж<spanInlineMarkBits> spanInlineMarkBitsFromBase(uintptr @base)
     return @unsafe.Pointer.To<spanInlineMarkBits>((@unsafe.Pointer)(@base + (uintptr)gc.PageSize - /* unsafe.Sizeof(spanInlineMarkBits{}) */ (uintptr)128));
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string expectedSpanWithInlineˢ => ref expectedSpanWithInlineˢᵇ;
 private static readonly @string expectedSpanWithInlineˢᵇ = "expected span with inline mark bits"u8;
 
 // initInlineMarkBits initializes the inlineMarkBits stored at the end of the span.
-internal static void initInlineMarkBits(this ref mspan s) {
+internal static void initInlineMarkBitsᴍ(ref mspan s) {
     if (doubleCheckGreenTea && !gcUsesSpanInlineMarkBits(s.elemsize)) {
         @throw(expectedSpanWithInlineˢ);
     }
@@ -217,7 +217,7 @@ private static readonly @string marksDonTMatchScansForˢᵇ = "marks don't match
 // moveInlineMarks merges the span's inline mark bits into dst and clears them.
 //
 // gcUsesSpanInlineMarkBits(s.elemsize) must be true.
-internal static void moveInlineMarks(this ref mspan s, ж<gcBits> dst) {
+internal static void moveInlineMarksᴍ(ref mspan s, ж<gcBits> dst) {
     if (doubleCheckGreenTea && !gcUsesSpanInlineMarkBits(s.elemsize)) {
         @throw(expectedSpanWithInlineˢ);
     }
@@ -242,14 +242,14 @@ internal static void moveInlineMarks(this ref mspan s, ж<gcBits> dst) {
 // inlineMarkBits returns the inline mark bits for the span.
 //
 // gcUsesSpanInlineMarkBits(s.elemsize) must be true.
-internal static ж<spanInlineMarkBits> inlineMarkBits(this ref mspan s) {
+internal static ж<spanInlineMarkBits> inlineMarkBitsᴍ(ref mspan s) {
     if (doubleCheckGreenTea && !gcUsesSpanInlineMarkBits(s.elemsize)) {
         @throw(expectedSpanWithInlineˢ);
     }
     return spanInlineMarkBitsFromBase(s.@base());
 }
 
-internal static markBits /*bits*/ markBitsForIndex(this ref mspan s, uintptr objIndex) {
+internal static markBits /*bits*/ markBitsForIndexᴍ(ref mspan s, uintptr objIndex) {
     markBits bits = default;
 
     if (gcUsesSpanInlineMarkBits(s.elemsize)) {
@@ -262,7 +262,7 @@ internal static markBits /*bits*/ markBitsForIndex(this ref mspan s, uintptr obj
     return bits;
 }
 
-internal static markBits markBitsForBase(this ref mspan s) {
+internal static markBits markBitsForBaseᴍ(ref mspan s) {
     if (gcUsesSpanInlineMarkBits(s.elemsize)) {
         return new markBits(s.inlineMarkBits().at(spanInlineMarkBits.Ꮡmarks, 0), (uint8)1, 0);
     }
@@ -271,7 +271,7 @@ internal static markBits markBitsForBase(this ref mspan s) {
 
 // scannedBitsForIndex returns a markBits representing the scanned bit
 // for objIndex in the inline mark bits.
-internal static markBits scannedBitsForIndex(this ref mspan s, uintptr objIndex) {
+internal static markBits scannedBitsForIndexᴍ(ref mspan s, uintptr objIndex) {
     return new markBits(s.inlineMarkBits().at(spanInlineMarkBits.Ꮡscans, (ulong)(objIndex / 8)), (uint8)((uint8)1 << (int)(objIndex % 8)), objIndex);
 }
 
@@ -343,15 +343,15 @@ internal static bool tryDeferToSpanScan(uintptr p, ж<gcWork> Ꮡgcw) {
     return true;
 }
 
-} partial class runtimeᴛgcWork {
+} partial class runtime_package {
 
 // tryGetSpanFast attempts to get an entire span to scan.
-internal static objptr tryGetSpanFast(this ref gcWork w) {
+internal static objptr tryGetSpanFastᴍ(ref gcWork w) {
     return w.spanq.tryGetFast();
 }
 
 // tryGetSpan attempts to get an entire span to scan.
-internal static objptr tryGetSpan(this ж<gcWork> Ꮡw) {
+internal static objptr tryGetSpanᴍ(ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     {
@@ -400,10 +400,10 @@ partial struct spanQueue {
     internal spanQueue_chain chain;
 }
 
-} partial class runtimeᴛspanQueue {
+} partial class runtime_package {
 
 // putFast tries to put s onto the queue, but may fail if it's full.
-internal static bool /*ok*/ putFast(this ref spanQueue q, objptr s) {
+internal static bool /*ok*/ putFastᴍ(ref spanQueue q, objptr s) {
     if (q.tail - q.head == (uint32)len(q.ring)) {
         return false;
     }
@@ -419,7 +419,7 @@ private static readonly @string failedPutFastAfterDrainˢᵇ = "failed putFast a
 // put puts s onto the queue.
 //
 // Returns whether the caller should spin up a new worker.
-internal static bool put(this ж<spanQueue> Ꮡq, objptr s) {
+internal static bool putᴍ(ж<spanQueue> Ꮡq, objptr s) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     // The constants below define the period of and volume of
@@ -467,7 +467,7 @@ internal static bool put(this ж<spanQueue> Ꮡq, objptr s) {
 }
 
 // flush publishes all spans in the local queue to the spmc chain.
-internal static void flush(this ж<spanQueue> Ꮡq) {
+internal static void flushᴍ(ж<spanQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     var n = q.tail - q.head;
@@ -480,7 +480,7 @@ internal static void flush(this ж<spanQueue> Ꮡq) {
 // empty returns true if there's no more work on the queue.
 //
 // Not thread-safe. Must only be called by the owner of q.
-internal static bool empty(this ж<spanQueue> Ꮡq) {
+internal static bool emptyᴍ(ж<spanQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     // Check the local queue for work.
@@ -493,7 +493,7 @@ internal static bool empty(this ж<spanQueue> Ꮡq) {
 // chainEmpty returns true if the spmc chain is empty.
 //
 // Thread-safe.
-internal static bool chainEmpty(this ж<spanQueue> Ꮡq) {
+internal static bool chainEmptyᴍ(ж<spanQueue> Ꮡq) {
     // Check the rest of the rings for work.
     var r = @unsafe.Pointer.To<spanSPMC>(Ꮡq.Ꮡchain.of(spanQueue_chain.Ꮡtail).Load());
     while (r != nil) {
@@ -510,7 +510,7 @@ internal static ref readonly @string failedToPutSpanOnNewlyˢ => ref failedToPut
 private static readonly @string failedToPutSpanOnNewlyˢᵇ = "failed to put span on newly-allocated spanSPMC"u8;
 
 // drain publishes n spans from the local queue to the spmc chain.
-internal static void drain(this ж<spanQueue> Ꮡq, uint32 n) {
+internal static void drainᴍ(ж<spanQueue> Ꮡq, uint32 n) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     q.putsSinceDrain = 0;
@@ -567,7 +567,7 @@ private static readonly @string attemptToDrainTooManyˢᵇ = "attempt to drain t
 // tryDrain attempts to drain n spans from q's local queue to the chain.
 //
 // Returns whether it succeeded.
-internal static bool tryDrain(this ref spanQueue q, ж<spanSPMC> Ꮡr, uint32 n) {
+internal static bool tryDrainᴍ(ref spanQueue q, ж<spanSPMC> Ꮡr, uint32 n) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (q.head + n > q.tail) {
@@ -589,7 +589,7 @@ internal static bool tryDrain(this ref spanQueue q, ж<spanSPMC> Ꮡr, uint32 n)
 
 // tryGetFast attempts to get a span from the local queue, but may fail if it's empty,
 // returning false.
-internal static objptr tryGetFast(this ref spanQueue q) {
+internal static objptr tryGetFastᴍ(ref spanQueue q) {
     if (q.tail - q.head == 0) {
         return 0;
     }
@@ -601,7 +601,7 @@ internal static objptr tryGetFast(this ref spanQueue q) {
 // steal takes some spans from the ring chain of another span queue.
 //
 // q == q2 is OK.
-internal static objptr steal(this ref spanQueue q, ж<spanQueue> q2) {
+internal static objptr stealᴍ(ref spanQueue q, ж<spanQueue> q2) {
     var r = @unsafe.Pointer.To<spanSPMC>(q2.Ꮡchain.of(spanQueue_chain.Ꮡtail).Load());
     if (r == nil) {
         return 0;
@@ -648,7 +648,7 @@ private static readonly @string stealWithLocalWorkˢᵇ = "steal with local work
 // Failure to steal returns a zero objptr.
 //
 // steal is thread-safe with respect to r.
-internal static objptr refill(this ref spanQueue q, ж<spanSPMC> Ꮡr) {
+internal static objptr refillᴍ(ref spanQueue q, ж<spanSPMC> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (q.tail - q.head != 0) {
@@ -697,7 +697,7 @@ private static readonly @string spanQueueDestroyOnNonˢᵇ = "spanQueue.destroy 
 // - World is stopped.
 // - GC is outside of the mark phase.
 // - (Therefore) the queue is empty.
-internal static void destroy(this ж<spanQueue> Ꮡq) {
+internal static void destroyᴍ(ж<spanQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     assertWorldStopped();
@@ -805,19 +805,19 @@ internal static ж<spanSPMC> newSpanSPMC(uint32 cap) {
     return r;
 }
 
-} partial class runtimeᴛspanSPMC {
+} partial class runtime_package {
 
 // empty returns true if the spmc is empty.
 //
 // empty is thread-safe.
-internal static bool empty(this ж<spanSPMC> Ꮡr) {
+internal static bool emptyᴍ(ж<spanSPMC> Ꮡr) {
     var h = Ꮡr.Ꮡhead.Load();
     var t = Ꮡr.Ꮡtail.Load();
     return t == h;
 }
 
 // deinit frees any resources the spanSPMC is holding onto and zeroes it.
-internal static void deinit(this ж<spanSPMC> Ꮡr) {
+internal static void deinitᴍ(ж<spanSPMC> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     sysFree(@unsafe.Pointer.FromBox(r.ring), (uintptr)r.cap * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8, Ꮡmemstats.ᏑgcMiscSys);
@@ -831,7 +831,7 @@ internal static void deinit(this ж<spanSPMC> Ꮡr) {
 }
 
 // slot returns a pointer to slot i%r.cap.
-internal static ж<objptr> slot(this ref spanSPMC r, uint32 i) {
+internal static ж<objptr> slotᴍ(ref spanSPMC r, uint32 i) {
     var idx = (uintptr)(i & (r.cap - 1));
     return @unsafe.Pointer.To<objptr>(@unsafe.Add(@unsafe.Pointer.FromBox(r.ring), idx * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8));
 }
@@ -876,12 +876,12 @@ internal static void freeDeadSpanSPMCs() {
     unlock(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlock));
 }
 
-} partial class runtimeᴛgcWork {
+} partial class runtime_package {
 
 // tryStealSpan attempts to steal a span from another P's local queue.
 //
 // Returns a non-zero objptr on success.
-internal static objptr tryStealSpan(this ref gcWork w) {
+internal static objptr tryStealSpanᴍ(ref gcWork w) {
     var pp = (~(~getg()).m).p.ptr();
 
     for (var @enum = stealOrder.start(cheaprand()); !@enum.done(); @enum.next()) {
@@ -924,13 +924,13 @@ internal static objptr makeObjPtr(uintptr spanBase, uint16 objIndex) {
     return (objptr)((uintptr)(spanBase | (uintptr)objIndex));
 }
 
-} partial class runtimeᴛobjptr {
+} partial class runtime_package {
 
-internal static uintptr spanBase(this objptr p) {
+internal static uintptr spanBaseᴍ(objptr p) {
     return (uintptr)((uintptr)p & ~(uintptr)((1 << (int)(gc.PageShift)) - 1));
 }
 
-internal static uint16 objIndex(this objptr p) {
+internal static uint16 objIndexᴍ(objptr p) {
     return (uint16)((uint16)p & (uint16)((1 << (int)(gc.PageShift)) - 1));
 }
 
@@ -1259,9 +1259,9 @@ internal static void dumpScanStats() {
     }
 }
 
-} partial class runtimeᴛgcWork {
+} partial class runtime_package {
 
-internal static void flushScanStats(this ref gcWork w, /*[68]*/ ж<array<sizeClassScanStats>> Ꮡdst) {
+internal static void flushScanStatsᴍ(ref gcWork w, /*[68]*/ ж<array<sizeClassScanStats>> Ꮡdst) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     foreach (var i in range(len(w.stats))) {
@@ -1406,3 +1406,51 @@ internal static void scanObject(uintptr b, ж<gcWork> Ꮡgcw) {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛspanScanOwnership {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static spanScanOwnership load(this ж<spanScanOwnership> Ꮡo) => runtime_package.loadᴍ(Ꮡo);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static spanScanOwnership or(this ж<spanScanOwnership> Ꮡo, spanScanOwnership v) => runtime_package.orᴍ(Ꮡo, v);
+}
+partial class runtimeᴛspanInlineMarkBits {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<spanInlineMarkBits> Ꮡimb, spanClass @class, bool needzero) => runtime_package.initᴍ(Ꮡimb, @class, needzero);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tryAcquire(this ж<spanInlineMarkBits> Ꮡimb) => runtime_package.tryAcquireᴍ(Ꮡimb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static spanScanOwnership release(this ж<spanInlineMarkBits> Ꮡimb) => runtime_package.releaseᴍ(Ꮡimb);
+}
+partial class runtimeᴛmspan {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initInlineMarkBits(this ref mspan s) => runtime_package.initInlineMarkBitsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void moveInlineMarks(this ref mspan s, ж<gcBits> dst) => runtime_package.moveInlineMarksᴍ(ref s, dst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<spanInlineMarkBits> inlineMarkBits(this ref mspan s) => runtime_package.inlineMarkBitsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static markBits /*bits*/ markBitsForIndex(this ref mspan s, uintptr objIndex) => runtime_package.markBitsForIndexᴍ(ref s, objIndex);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static markBits markBitsForBase(this ref mspan s) => runtime_package.markBitsForBaseᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static markBits scannedBitsForIndex(this ref mspan s, uintptr objIndex) => runtime_package.scannedBitsForIndexᴍ(ref s, objIndex);
+}
+partial class runtimeᴛgcWork {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static objptr tryGetSpanFast(this ref gcWork w) => runtime_package.tryGetSpanFastᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static objptr tryGetSpan(this ж<gcWork> Ꮡw) => runtime_package.tryGetSpanᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static objptr tryStealSpan(this ref gcWork w) => runtime_package.tryStealSpanᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flushScanStats(this ref gcWork w, /*[68]*/ ж<array<sizeClassScanStats>> Ꮡdst) => runtime_package.flushScanStatsᴍ(ref w, Ꮡdst);
+}
+partial class runtimeᴛspanQueue {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*ok*/ putFast(this ref spanQueue q, objptr s) => runtime_package.putFastᴍ(ref q, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool put(this ж<spanQueue> Ꮡq, objptr s) => runtime_package.putᴍ(Ꮡq, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flush(this ж<spanQueue> Ꮡq) => runtime_package.flushᴍ(Ꮡq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ж<spanQueue> Ꮡq) => runtime_package.emptyᴍ(Ꮡq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool chainEmpty(this ж<spanQueue> Ꮡq) => runtime_package.chainEmptyᴍ(Ꮡq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void drain(this ж<spanQueue> Ꮡq, uint32 n) => runtime_package.drainᴍ(Ꮡq, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tryDrain(this ref spanQueue q, ж<spanSPMC> Ꮡr, uint32 n) => runtime_package.tryDrainᴍ(ref q, Ꮡr, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static objptr tryGetFast(this ref spanQueue q) => runtime_package.tryGetFastᴍ(ref q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static objptr steal(this ref spanQueue q, ж<spanQueue> q2) => runtime_package.stealᴍ(ref q, q2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static objptr refill(this ref spanQueue q, ж<spanSPMC> Ꮡr) => runtime_package.refillᴍ(ref q, Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void destroy(this ж<spanQueue> Ꮡq) => runtime_package.destroyᴍ(Ꮡq);
+}
+partial class runtimeᴛspanSPMC {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ж<spanSPMC> Ꮡr) => runtime_package.emptyᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deinit(this ж<spanSPMC> Ꮡr) => runtime_package.deinitᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<objptr> slot(this ref spanSPMC r, uint32 i) => runtime_package.slotᴍ(ref r, i);
+}
+partial class runtimeᴛobjptr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr spanBase(this objptr p) => runtime_package.spanBaseᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 objIndex(this objptr p) => runtime_package.objIndexᴍ(p);
+}
+// </GlyphForwarders>

@@ -23,9 +23,9 @@ public static nint CmsgSpace(nint datalen) {
     return cmsgAlignOf(SizeofCmsghdr) + cmsgAlignOf(datalen);
 }
 
-} partial class syscallᴛCmsghdr {
+} partial class syscall_package {
 
-internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) {
+internal static @unsafe.Pointer dataᴍ(ж<Cmsghdr> Ꮡh, uintptr offset) {
     return @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡh), (uintptr)cmsgAlignOf(SizeofCmsghdr) + offset);
 }
 
@@ -99,3 +99,9 @@ public static (slice<nint>, error) ParseUnixRights(ж<SocketControlMessage> Ꮡm
 }
 
 } // end syscall_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class syscallᴛCmsghdr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) => syscall_package.dataᴍ(Ꮡh, offset);
+}
+// </GlyphForwarders>

@@ -45,7 +45,7 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
     return parseFiles(nil, readFileOS, filenames.ꓸꓸꓸ);
 }
 
-} partial class templateᴛTemplate {
+} partial class template_package {
 
 // ParseFiles parses the named files and associates the resulting templates with
 // t. If an error occurs, parsing stops and the returned template is nil;
@@ -58,7 +58,7 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
 //
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
-public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
+internal static (ж<Template>, error) ParseFilesᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.sslice();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -120,7 +120,7 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
     return parseGlob(nil, pattern);
 }
 
-} partial class templateᴛTemplate {
+} partial class template_package {
 
 // ParseGlob parses the template definitions in the files identified by the
 // pattern and associates the resulting templates with t. The files are matched
@@ -130,7 +130,7 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 //
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
-public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) {
+internal static (ж<Template>, error) ParseGlobᴍ(ж<Template> Ꮡt, @string pattern) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();
@@ -161,13 +161,13 @@ public static (ж<Template>, error) ParseFS(fs.FS fsys, params ꓸꓸꓸstring p
     return parseFS(nil, fsys, patterns);
 }
 
-} partial class templateᴛTemplate {
+} partial class template_package {
 
 // ParseFS is like [Template.ParseFiles] or [Template.ParseGlob] but reads from the file system fsys
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns (see [path.Match]).
 // (Note that most file names serve as glob patterns matching only themselves.)
-public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
+internal static (ж<Template>, error) ParseFSᴍ(ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -214,3 +214,11 @@ internal static Func<@string, (@string, slice<byte>, error)> readFileFS(fs.FS fs
 }
 
 } // end template_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class templateᴛTemplate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) => template_package.ParseFilesᴍ(Ꮡt, filenamesʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) => template_package.ParseGlobᴍ(Ꮡt, pattern);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) => template_package.ParseFSᴍ(Ꮡt, fsys, patternsʗp);
+}
+// </GlyphForwarders>

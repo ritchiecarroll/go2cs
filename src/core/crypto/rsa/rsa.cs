@@ -78,19 +78,19 @@ partial struct PublicKey {
     public nint E;       // public exponent
 }
 
-} partial class rsaᴛPublicKey {
+} partial class rsa_package {
 
 // Any methods implemented on PublicKey might need to also be implemented on
 // PrivateKey, as the latter embeds the former and will expose its methods.
 
 // Size returns the modulus size in bytes. Raw signatures and ciphertexts
 // for or by this public key will have the same size.
-public static nint Size(this ref PublicKey pub) {
+internal static nint Sizeᴍ(ref PublicKey pub) {
     return (pub.N.BitLen() + 7) / 8;
 }
 
 // Equal reports whether pub and x have the same value.
-public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
+internal static bool Equalᴍ(ref PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -127,16 +127,16 @@ partial struct PrivateKey {
     public PrecomputedValues Precomputed;
 }
 
-} partial class rsaᴛPrivateKey {
+} partial class rsa_package {
 
 // Public returns the public key corresponding to priv.
-public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) {
+internal static cryptoꓸPublicKey Publicᴍ(ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.ᏑPublicKey;
 }
 
 // Equal reports whether priv and x have equivalent values. It ignores
 // Precomputed values.
-public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
+internal static bool Equalᴍ(ref PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -166,7 +166,7 @@ internal static bool bigIntEqual(ж<big.Int> Ꮡa, ж<big.Int> Ꮡb) {
     return subtle.ConstantTimeCompare(a.Bytes(), b.Bytes()) == 1;
 }
 
-} partial class rsaᴛPrivateKey {
+} partial class rsa_package {
 
 // Sign signs digest with priv, reading randomness from rand. If opts is a
 // *[PSSOptions] then the PSS algorithm will be used, otherwise PKCS #1 v1.5 will
@@ -176,7 +176,7 @@ internal static bool bigIntEqual(ж<big.Int> Ꮡa, ж<big.Int> Ꮡb) {
 // This method implements [crypto.Signer], which is an interface to support keys
 // where the private part is kept in, for example, a hardware module. Common
 // uses should use the Sign* functions in this package directly.
-public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
+internal static (slice<byte>, error) Signᴍ(ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
     var (pssOpts, ok) = opts._<ж<PSSOptions>>(ᐧ); if (ok) {
         return SignPSS(rand, Ꮡpriv, pssOpts.Hash, digest, pssOpts);
     }
@@ -191,7 +191,7 @@ private static readonly @string cryptoRsaInvalidOptionsˢᵇ = "crypto/rsa: inva
 // Decrypt decrypts ciphertext with priv. If opts is nil or of type
 // *[PKCS1v15DecryptOptions] then PKCS #1 v1.5 decryption is performed. Otherwise
 // opts must have type *[OAEPOptions] and OAEP decryption is done.
-public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> ciphertext, cryptoꓸDecrypterOpts opts) {
+internal static (slice<byte> plaintext, error err) Decryptᴍ(ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> ciphertext, cryptoꓸDecrypterOpts opts) {
     slice<byte> plaintext = default;
 
     if (opts == nil) {
@@ -253,7 +253,7 @@ partial struct CRTValue {
     public ж<big.Int> R;     // product of primes prior to this (inc p and q).
 }
 
-} partial class rsaᴛPrivateKey {
+} partial class rsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoRsaMissingPrimesˢ => ref cryptoRsaMissingPrimesˢᵇ;
@@ -265,7 +265,7 @@ private static readonly @string cryptoRsaPrecomputedˢᵇ = "crypto/rsa: precomp
 // It returns nil if the key is valid, or else an error describing a problem.
 //
 // It runs faster on valid keys if run after [PrivateKey.Precompute].
-public static error Validate(this ref PrivateKey priv) {
+internal static error Validateᴍ(ref PrivateKey priv) {
     // We can operate on keys based on d alone, but they can't be encoded with
     // [crypto/x509.MarshalPKCS1PrivateKey], which unfortunately doesn't return
     // an error, so we need to reject them here.
@@ -284,7 +284,7 @@ public static error Validate(this ref PrivateKey priv) {
     return err;
 }
 
-internal static bool precomputedIsConsistent(this ref PrivateKey priv) {
+internal static bool precomputedIsConsistentᴍ(ref PrivateKey priv) {
     if (priv.Precomputed.fips == nil) {
         return false;
     }
@@ -596,11 +596,11 @@ public static error ErrDecryption = errors.New("crypto/rsa: decryption error");
 // It is deliberately vague to avoid adaptive attacks.
 public static error ErrVerification = errors.New("crypto/rsa: verification error");
 
-} partial class rsaᴛPrivateKey {
+} partial class rsa_package {
 
 // Precompute performs some calculations that speed up private key operations
 // in the future. It is safe to run on non-validated private keys.
-public static void Precompute(this ref PrivateKey priv) {
+internal static void Precomputeᴍ(ref PrivateKey priv) {
     if (priv.precomputedIsConsistent()) {
         return;
     }
@@ -625,7 +625,7 @@ private static readonly @string cryptoRsaPrimePIsNilˢᵇ = "crypto/rsa: prime P
 internal static ref readonly @string cryptoRsaPrimeQIsNilˢ => ref cryptoRsaPrimeQIsNilˢᵇ;
 private static readonly @string cryptoRsaPrimeQIsNilˢᵇ = "crypto/rsa: prime Q is nil"u8;
 
-internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) {
+internal static (PrecomputedValues, error) precomputeᴍ(ref PrivateKey priv) {
     PrecomputedValues precomputed = default;
 
     if (priv.N == nil) {
@@ -681,7 +681,7 @@ private static readonly @string cryptoRsaPrimeFactorIs1ˢᵇ = "crypto/rsa: prim
 internal static ref readonly @string cryptoRsaPrimeFactorsAreˢ => ref cryptoRsaPrimeFactorsAreˢᵇ;
 private static readonly @string cryptoRsaPrimeFactorsAreˢᵇ = "crypto/rsa: prime factors are not relatively prime"u8;
 
-internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) {
+internal static (PrecomputedValues, error) precomputeLegacyᴍ(ref PrivateKey priv) {
     PrecomputedValues precomputed = default;
 
     var (k, err) = rsa.NewPrivateKeyWithoutCRT(priv.N.Bytes(), priv.E, priv.D.Bytes());
@@ -760,3 +760,21 @@ internal static (ж<rsa.PrivateKey>, error) fipsPrivateKey(ж<PrivateKey> Ꮡpri
 }
 
 } // end rsa_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class rsaᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref PublicKey pub) => rsa_package.Sizeᴍ(ref pub);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) => rsa_package.Equalᴍ(ref pub, x);
+}
+partial class rsaᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) => rsa_package.Publicᴍ(Ꮡpriv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) => rsa_package.Equalᴍ(ref priv, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) => rsa_package.Signᴍ(Ꮡpriv, rand, digest, opts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> ciphertext, cryptoꓸDecrypterOpts opts) => rsa_package.Decryptᴍ(Ꮡpriv, rand, ciphertext, opts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Validate(this ref PrivateKey priv) => rsa_package.Validateᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool precomputedIsConsistent(this ref PrivateKey priv) => rsa_package.precomputedIsConsistentᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Precompute(this ref PrivateKey priv) => rsa_package.Precomputeᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) => rsa_package.precomputeᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) => rsa_package.precomputeLegacyᴍ(ref priv);
+}
+// </GlyphForwarders>

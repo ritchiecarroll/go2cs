@@ -17,41 +17,41 @@ partial struct Point {
     public nint X, Y;
 }
 
-} partial class imageᴛPoint {
+} partial class image_package {
 
 // String returns a string representation of p like "(3,4)".
-public static @string String(this Point p) {
+internal static @string Stringᴍ(Point p) {
     return "("u8 + strconv.Itoa(p.X) + ","u8 + strconv.Itoa(p.Y) + ")"u8;
 }
 
 // Add returns the vector p+q.
-public static Point Add(this Point p, Point q) {
+internal static Point Addᴍ(Point p, Point q) {
     return new Point(p.X + q.X, p.Y + q.Y);
 }
 
 // Sub returns the vector p-q.
-public static Point Sub(this Point p, Point q) {
+internal static Point Subᴍ(Point p, Point q) {
     return new Point(p.X - q.X, p.Y - q.Y);
 }
 
 // Mul returns the vector p*k.
-public static Point Mul(this Point p, nint k) {
+internal static Point Mulᴍ(Point p, nint k) {
     return new Point(p.X * k, p.Y * k);
 }
 
 // Div returns the vector p/k.
-public static Point Div(this Point p, nint k) {
+internal static Point Divᴍ(Point p, nint k) {
     return new Point(quo(p.X, k), quo(p.Y, k));
 }
 
 // In reports whether p is in r.
-public static bool In(this Point p, Rectangle r) {
+internal static bool Inᴍ(Point p, Rectangle r) {
     return r.Min.X <= p.X && p.X < r.Max.X && r.Min.Y <= p.Y && p.Y < r.Max.Y;
 }
 
 // Mod returns the point q in r such that p.X-q.X is a multiple of r's width
 // and p.Y-q.Y is a multiple of r's height.
-public static Point Mod(this Point p, Rectangle r) {
+internal static Point Modᴍ(Point p, Rectangle r) {
     nint w = r.Dx();
     nint h = r.Dy();
     p = p.Sub(r.Min);
@@ -67,7 +67,7 @@ public static Point Mod(this Point p, Rectangle r) {
 }
 
 // Eq reports whether p and q are equal.
-public static bool Eq(this Point p, Point q) {
+internal static bool Eqᴍ(Point p, Point q) {
     return p == q;
 }
 
@@ -96,25 +96,25 @@ partial struct Rectangle {
     public Point Min, Max;
 }
 
-} partial class imageᴛRectangle {
+} partial class image_package {
 
 // String returns a string representation of r like "(3,4)-(6,5)".
-public static @string String(this Rectangle r) {
+internal static @string Stringᴍ(Rectangle r) {
     return r.Min.String() + "-"u8 + r.Max.String();
 }
 
 // Dx returns r's width.
-public static nint Dx(this Rectangle r) {
+internal static nint Dxᴍ(Rectangle r) {
     return r.Max.X - r.Min.X;
 }
 
 // Dy returns r's height.
-public static nint Dy(this Rectangle r) {
+internal static nint Dyᴍ(Rectangle r) {
     return r.Max.Y - r.Min.Y;
 }
 
 // Size returns r's width and height.
-public static Point Size(this Rectangle r) {
+internal static Point Sizeᴍ(Rectangle r) {
     return new Point(
         r.Max.X - r.Min.X,
         r.Max.Y - r.Min.Y
@@ -122,7 +122,7 @@ public static Point Size(this Rectangle r) {
 }
 
 // Add returns the rectangle r translated by p.
-public static Rectangle Add(this Rectangle r, Point p) {
+internal static Rectangle Addᴍ(Rectangle r, Point p) {
     return new Rectangle(
         new Point(r.Min.X + p.X, r.Min.Y + p.Y),
         new Point(r.Max.X + p.X, r.Max.Y + p.Y)
@@ -130,7 +130,7 @@ public static Rectangle Add(this Rectangle r, Point p) {
 }
 
 // Sub returns the rectangle r translated by -p.
-public static Rectangle Sub(this Rectangle r, Point p) {
+internal static Rectangle Subᴍ(Rectangle r, Point p) {
     return new Rectangle(
         new Point(r.Min.X - p.X, r.Min.Y - p.Y),
         new Point(r.Max.X - p.X, r.Max.Y - p.Y)
@@ -140,7 +140,7 @@ public static Rectangle Sub(this Rectangle r, Point p) {
 // Inset returns the rectangle r inset by n, which may be negative. If either
 // of r's dimensions is less than 2*n then an empty rectangle near the center
 // of r will be returned.
-public static Rectangle Inset(this Rectangle r, nint n) {
+internal static Rectangle Insetᴍ(Rectangle r, nint n) {
     if (r.Dx() < 2 * n) {
         r.Min.X = (r.Min.X + r.Max.X) / 2;
         r.Max.X = r.Min.X;
@@ -160,7 +160,7 @@ public static Rectangle Inset(this Rectangle r, nint n) {
 
 // Intersect returns the largest rectangle contained by both r and s. If the
 // two rectangles do not overlap then the zero rectangle will be returned.
-public static Rectangle Intersect(this Rectangle r, Rectangle s) {
+internal static Rectangle Intersectᴍ(Rectangle r, Rectangle s) {
     if (r.Min.X < s.Min.X) {
         r.Min.X = s.Min.X;
     }
@@ -184,7 +184,7 @@ public static Rectangle Intersect(this Rectangle r, Rectangle s) {
 }
 
 // Union returns the smallest rectangle that contains both r and s.
-public static Rectangle Union(this Rectangle r, Rectangle s) {
+internal static Rectangle Unionᴍ(Rectangle r, Rectangle s) {
     if (r.Empty()) {
         return s;
     }
@@ -207,23 +207,23 @@ public static Rectangle Union(this Rectangle r, Rectangle s) {
 }
 
 // Empty reports whether the rectangle contains no points.
-public static bool Empty(this Rectangle r) {
+internal static bool Emptyᴍ(Rectangle r) {
     return r.Min.X >= r.Max.X || r.Min.Y >= r.Max.Y;
 }
 
 // Eq reports whether r and s contain the same set of points. All empty
 // rectangles are considered equal.
-public static bool Eq(this Rectangle r, Rectangle s) {
+internal static bool Eqᴍ(Rectangle r, Rectangle s) {
     return r == s || r.Empty() && s.Empty();
 }
 
 // Overlaps reports whether r and s have a non-empty intersection.
-public static bool Overlaps(this Rectangle r, Rectangle s) {
+internal static bool Overlapsᴍ(Rectangle r, Rectangle s) {
     return !r.Empty() && !s.Empty() && r.Min.X < s.Max.X && s.Min.X < r.Max.X && r.Min.Y < s.Max.Y && s.Min.Y < r.Max.Y;
 }
 
 // In reports whether every point in r is in s.
-public static bool In(this Rectangle r, Rectangle s) {
+internal static bool Inᴍ(Rectangle r, Rectangle s) {
     if (r.Empty()) {
         return true;
     }
@@ -234,7 +234,7 @@ public static bool In(this Rectangle r, Rectangle s) {
 
 // Canon returns the canonical version of r. The returned rectangle has minimum
 // and maximum coordinates swapped if necessary so that it is well-formed.
-public static Rectangle Canon(this Rectangle r) {
+internal static Rectangle Canonᴍ(Rectangle r) {
     if (r.Max.X < r.Min.X) {
         (r.Min.X, r.Max.X) = (r.Max.X, r.Min.X);
     }
@@ -245,7 +245,7 @@ public static Rectangle Canon(this Rectangle r) {
 }
 
 // At implements the [Image] interface.
-public static color.Color At(this Rectangle r, nint x, nint y) {
+internal static color.Color Atᴍ(Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
         return color.Opaque;
     }
@@ -253,7 +253,7 @@ public static color.Color At(this Rectangle r, nint x, nint y) {
 }
 
 // RGBA64At implements the [RGBA64Image] interface.
-public static color.RGBA64 RGBA64At(this Rectangle r, nint x, nint y) {
+internal static color.RGBA64 RGBA64Atᴍ(Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
         return new color.RGBA64(0xffff, 0xffff, 0xffff, 0xffff);
     }
@@ -261,12 +261,12 @@ public static color.RGBA64 RGBA64At(this Rectangle r, nint x, nint y) {
 }
 
 // Bounds implements the [Image] interface.
-public static Rectangle Bounds(this Rectangle r) {
+internal static Rectangle Boundsᴍ(Rectangle r) {
     return r;
 }
 
 // ColorModel implements the [Image] interface.
-public static color.Model ColorModel(this Rectangle r) {
+internal static color.Model ColorModelᴍ(Rectangle r) {
     return color.Alpha16Model;
 }
 
@@ -326,3 +326,36 @@ internal static nint add2NonNeg(nint x, nint y) {
 }
 
 } // end image_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class imageᴛPoint {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Point p) => image_package.Stringᴍ(p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Point Add(this Point p, Point q) => image_package.Addᴍ(p, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Point Sub(this Point p, Point q) => image_package.Subᴍ(p, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Point Mul(this Point p, nint k) => image_package.Mulᴍ(p, k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Point Div(this Point p, nint k) => image_package.Divᴍ(p, k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool In(this Point p, Rectangle r) => image_package.Inᴍ(p, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Point Mod(this Point p, Rectangle r) => image_package.Modᴍ(p, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eq(this Point p, Point q) => image_package.Eqᴍ(p, q);
+}
+partial class imageᴛRectangle {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Rectangle r) => image_package.Stringᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Dx(this Rectangle r) => image_package.Dxᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Dy(this Rectangle r) => image_package.Dyᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Point Size(this Rectangle r) => image_package.Sizeᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Rectangle Add(this Rectangle r, Point p) => image_package.Addᴍ(r, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Rectangle Sub(this Rectangle r, Point p) => image_package.Subᴍ(r, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Rectangle Inset(this Rectangle r, nint n) => image_package.Insetᴍ(r, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Rectangle Intersect(this Rectangle r, Rectangle s) => image_package.Intersectᴍ(r, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Rectangle Union(this Rectangle r, Rectangle s) => image_package.Unionᴍ(r, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Empty(this Rectangle r) => image_package.Emptyᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eq(this Rectangle r, Rectangle s) => image_package.Eqᴍ(r, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Overlaps(this Rectangle r, Rectangle s) => image_package.Overlapsᴍ(r, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool In(this Rectangle r, Rectangle s) => image_package.Inᴍ(r, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Rectangle Canon(this Rectangle r) => image_package.Canonᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.Color At(this Rectangle r, nint x, nint y) => image_package.Atᴍ(r, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.RGBA64 RGBA64At(this Rectangle r, nint x, nint y) => image_package.RGBA64Atᴍ(r, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Rectangle Bounds(this Rectangle r) => image_package.Boundsᴍ(r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.Model ColorModel(this Rectangle r) => image_package.ColorModelᴍ(r);
+}
+// </GlyphForwarders>

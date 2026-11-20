@@ -66,17 +66,17 @@ partial struct blockWriter {
     internal ж<encoder> e;
 }
 
-} partial class gifᴛblockWriter {
+} partial class gif_package {
 
-internal static void setup(this blockWriter b) {
+internal static void setupᴍ(blockWriter b) {
     b.e.buf[0] = 0;
 }
 
-internal static error Flush(this blockWriter b) {
+internal static error Flushᴍ(blockWriter b) {
     return b.e.err;
 }
 
-internal static error WriteByte(this blockWriter b, byte c) {
+internal static error WriteByteᴍ(blockWriter b, byte c) {
     if (b.e.err != nil) {
         return b.e.err;
     }
@@ -96,7 +96,7 @@ internal static error WriteByte(this blockWriter b, byte c) {
 
 // blockWriter must be an io.Writer for lzw.NewWriter, but this is never
 // actually called.
-internal static (nint, error) Write(this blockWriter b, slice<byte> data) {
+internal static (nint, error) Writeᴍ(blockWriter b, slice<byte> data) {
     foreach (var (i, c) in range(data)) {
         var err = b.WriteByte(c); if (err != nil) {
             return (i, err);
@@ -105,7 +105,7 @@ internal static (nint, error) Write(this blockWriter b, slice<byte> data) {
     return (len(data), default);
 }
 
-internal static void close(this blockWriter b) {
+internal static void closeᴍ(blockWriter b) {
     // Write the block terminator (0x00), either by itself, or along with a
     // pending sub-block.
     if (b.e.buf[0] == 0) {
@@ -118,23 +118,23 @@ internal static void close(this blockWriter b) {
     b.e.flush();
 }
 
-} partial class gifᴛencoder {
+} partial class gif_package {
 
-internal static void flush(this ref encoder e) {
+internal static void flushᴍ(ref encoder e) {
     if (e.err != nil) {
         return;
     }
     e.err = e.w.Flush();
 }
 
-internal static void write(this ref encoder e, slice<byte> p) {
+internal static void writeᴍ(ref encoder e, slice<byte> p) {
     if (e.err != nil) {
         return;
     }
     (_, e.err) = e.w.Write(p);
 }
 
-internal static void writeByte(this ref encoder e, byte b) {
+internal static void writeByteᴍ(ref encoder e, byte b) {
     if (e.err != nil) {
         return;
     }
@@ -147,7 +147,7 @@ private static readonly @string gif89aˢᵇ = "GIF89a"u8;
 internal static ref readonly @string netscape20ˢ => ref netscape20ˢᵇ;
 private static readonly @string netscape20ˢᵇ = "NETSCAPE2.0"u8;
 
-internal static void writeHeader(this ref encoder e) {
+internal static void writeHeaderᴍ(ref encoder e) {
     if (e.err != nil) {
         return;
     }
@@ -241,9 +241,9 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
     return (3 * n, default);
 }
 
-} partial class gifᴛencoder {
+} partial class gif_package {
 
-internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) {
+internal static bool colorTablesMatchᴍ(ref encoder e, nint localLen, nint transparentIndex) {
     nint localSize = 3 * localLen;
     if (transparentIndex >= 0) {
         nint trOff = 3 * transparentIndex;
@@ -262,7 +262,7 @@ private static readonly @string gifImageBlockIsOutOfˢᵇ = "gif: image block is
 internal static ref readonly @string gifCannotEncodeColorˢ2 => ref gifCannotEncodeColorˢ2ᵇ;
 private static readonly @string gifCannotEncodeColorˢ2ᵇ = "gif: cannot encode color table with nil entries"u8;
 
-internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) {
+internal static void writeImageBlockᴍ(ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var pm = ref Ꮡpm.DerefOrNull();
 
@@ -522,3 +522,21 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
 }
 
 } // end gif_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gifᴛblockWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setup(this blockWriter b) => gif_package.setupᴍ(b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Flush(this blockWriter b) => gif_package.Flushᴍ(b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteByte(this blockWriter b, byte c) => gif_package.WriteByteᴍ(b, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this blockWriter b, slice<byte> data) => gif_package.Writeᴍ(b, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this blockWriter b) => gif_package.closeᴍ(b);
+}
+partial class gifᴛencoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flush(this ref encoder e) => gif_package.flushᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ref encoder e, slice<byte> p) => gif_package.writeᴍ(ref e, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeByte(this ref encoder e, byte b) => gif_package.writeByteᴍ(ref e, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeHeader(this ref encoder e) => gif_package.writeHeaderᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) => gif_package.colorTablesMatchᴍ(ref e, localLen, transparentIndex);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) => gif_package.writeImageBlockᴍ(Ꮡe, Ꮡpm, delay, disposal);
+}
+// </GlyphForwarders>

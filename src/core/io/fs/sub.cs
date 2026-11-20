@@ -57,10 +57,10 @@ partial struct subFS {
     internal @string dir;
 }
 
-} partial class fsᴛsubFS {
+} partial class fs_package {
 
 // fullName maps name to the fully-qualified name dir/name.
-internal static (@string, error) fullName(this ref subFS f, @string op, @string name) {
+internal static (@string, error) fullNameᴍ(ref subFS f, @string op, @string name) {
     if (!ValidPath(name)) {
         return ("", new PathErrorжerror(Ꮡ(new PathError(Op: op, Path: name, Err: ErrInvalid))));
     }
@@ -68,7 +68,7 @@ internal static (@string, error) fullName(this ref subFS f, @string op, @string 
 }
 
 // shorten maps name, which should start with f.dir, back to the suffix after f.dir.
-internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) {
+internal static (@string rel, bool ok) shortenᴍ(ref subFS f, @string name) {
     if (name == f.dir) {
         return (".", true);
     }
@@ -79,7 +79,7 @@ internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) {
 }
 
 // fixErr shortens any reported names in PathErrors by stripping f.dir.
-internal static error fixErr(this ref subFS f, error err) {
+internal static error fixErrᴍ(ref subFS f, error err) {
     var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
         var (@short, okΔ1) = f.shorten(e.Path); if (okΔ1) {
             e.Path = @short;
@@ -92,7 +92,7 @@ internal static error fixErr(this ref subFS f, error err) {
 private static ref readonly @string openˢ => ref openˢᵇ;
 private static readonly @string openˢᵇ = "open"u8;
 
-internal static (File, error) Open(this ref subFS f, @string name) {
+internal static (File, error) Openᴍ(ref subFS f, @string name) {
     var (full, err) = f.fullName(openˢ, name);
     if (err != nil) {
         return (default, err);
@@ -105,7 +105,7 @@ internal static (File, error) Open(this ref subFS f, @string name) {
 private static ref readonly @string readˢ => ref readˢᵇ;
 private static readonly @string readˢᵇ = "read"u8;
 
-internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name) {
+internal static (slice<DirEntry>, error) ReadDirᴍ(ref subFS f, @string name) {
     var (full, err) = f.fullName(readˢ, name);
     if (err != nil) {
         return (default, err);
@@ -114,7 +114,7 @@ internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name)
     return (dir, f.fixErr(err));
 }
 
-internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
+internal static (slice<byte>, error) ReadFileᴍ(ref subFS f, @string name) {
     var (full, err) = f.fullName(readˢ, name);
     if (err != nil) {
         return (default, err);
@@ -127,7 +127,7 @@ internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
 private static ref readonly @string readlinkˢ => ref readlinkˢᵇ;
 private static readonly @string readlinkˢᵇ = "readlink"u8;
 
-internal static (@string, error) ReadLink(this ref subFS f, @string name) {
+internal static (@string, error) ReadLinkᴍ(ref subFS f, @string name) {
     var (full, err) = f.fullName(readlinkˢ, name);
     if (err != nil) {
         return ("", err);
@@ -143,7 +143,7 @@ internal static (@string, error) ReadLink(this ref subFS f, @string name) {
 private static ref readonly @string lstatˢ => ref lstatˢᵇ;
 private static readonly @string lstatˢᵇ = "lstat"u8;
 
-internal static (FileInfo, error) Lstat(this ref subFS f, @string name) {
+internal static (FileInfo, error) Lstatᴍ(ref subFS f, @string name) {
     var (full, err) = f.fullName(lstatˢ, name);
     if (err != nil) {
         return (default, err);
@@ -155,7 +155,7 @@ internal static (FileInfo, error) Lstat(this ref subFS f, @string name) {
     return (info, default);
 }
 
-internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) {
+internal static (slice<@string>, error) Globᴍ(ref subFS f, @string pattern) {
     // Check pattern is well-formed.
     var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != nil) {
         return (default, errΔ1);
@@ -180,7 +180,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
 private static ref readonly @string subˢ => ref subˢᵇ;
 private static readonly @string subˢᵇ = "sub"u8;
 
-internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) {
+internal static (FS, error) Subᴍ(ж<subFS> Ꮡf, @string dir) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (dir == "."u8) {
@@ -195,3 +195,18 @@ internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class fsᴛsubFS {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) fullName(this ref subFS f, @string op, @string name) => fs_package.fullNameᴍ(ref f, op, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) => fs_package.shortenᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error fixErr(this ref subFS f, error err) => fs_package.fixErrᴍ(ref f, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (File, error) Open(this ref subFS f, @string name) => fs_package.Openᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name) => fs_package.ReadDirᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) => fs_package.ReadFileᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) ReadLink(this ref subFS f, @string name) => fs_package.ReadLinkᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (FileInfo, error) Lstat(this ref subFS f, @string name) => fs_package.Lstatᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) => fs_package.Globᴍ(ref f, pattern);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) => fs_package.Subᴍ(Ꮡf, dir);
+}
+// </GlyphForwarders>

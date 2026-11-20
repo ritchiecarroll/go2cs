@@ -27,16 +27,16 @@ public static ж<PCG> NewPCG(uint64 seed1, uint64 seed2) {
     return Ꮡ(new PCG(seed1, seed2));
 }
 
-} partial class randᴛPCG {
+} partial class rand_package {
 
 // Seed resets the PCG to behave the same way as NewPCG(seed1, seed2).
-public static void Seed(this ref PCG p, uint64 seed1, uint64 seed2) {
+internal static void Seedᴍ(ref PCG p, uint64 seed1, uint64 seed2) {
     p.hi = seed1;
     p.lo = seed2;
 }
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-public static (slice<byte>, error) AppendBinary(this ref PCG p, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinaryᴍ(ref PCG p, slice<byte> b) {
     b = append(b, ((@string)"pcg:").ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, p.hi);
     b = byteorder.BEAppendUint64(b, p.lo);
@@ -44,7 +44,7 @@ public static (slice<byte>, error) AppendBinary(this ref PCG p, slice<byte> b) {
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
-public static (slice<byte>, error) MarshalBinary(this ref PCG p) {
+internal static (slice<byte>, error) MarshalBinaryᴍ(ref PCG p) {
     return p.AppendBinary(new slice<byte>(0, 20));
 }
 
@@ -52,10 +52,10 @@ public static (slice<byte>, error) MarshalBinary(this ref PCG p) {
 
 internal static error errUnmarshalPCG = errors.New("invalid PCG encoding");
 
-} partial class randᴛPCG {
+} partial class rand_package {
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
-public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
+internal static error UnmarshalBinaryᴍ(ref PCG p, slice<byte> data) {
     if (len(data) != 20 || ((sstring)(data[..4])) != "pcg:"u8) {
         return errUnmarshalPCG;
     }
@@ -64,7 +64,7 @@ public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
     return default;
 }
 
-internal static (uint64 hi, uint64 lo) next(this ref PCG p) {
+internal static (uint64 hi, uint64 lo) nextᴍ(ref PCG p) {
     uint64 hi = default;
     uint64 lo = default;
 
@@ -92,7 +92,7 @@ internal static (uint64 hi, uint64 lo) next(this ref PCG p) {
 }
 
 // Uint64 return a uniformly-distributed random uint64 value.
-public static uint64 Uint64(this ref PCG p) {
+internal static uint64 Uint64ᴍ(ref PCG p) {
     var (hi, lo) = p.next();
 
     // XSL-RR would be
@@ -115,3 +115,14 @@ public static uint64 Uint64(this ref PCG p) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class randᴛPCG {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Seed(this ref PCG p, uint64 seed1, uint64 seed2) => rand_package.Seedᴍ(ref p, seed1, seed2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref PCG p, slice<byte> b) => rand_package.AppendBinaryᴍ(ref p, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ref PCG p) => rand_package.MarshalBinaryᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref PCG p, slice<byte> data) => rand_package.UnmarshalBinaryᴍ(ref p, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 hi, uint64 lo) next(this ref PCG p) => rand_package.nextᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this ref PCG p) => rand_package.Uint64ᴍ(ref p);
+}
+// </GlyphForwarders>

@@ -12,9 +12,9 @@ partial class io_package {
 partial struct eofReader {
 }
 
-} partial class ioᴛeofReader {
+} partial class io_package {
 
-internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) {
+internal static (nint, error) Readᴍ(eofReader _Δp0, slice<byte> _Δp1) {
     return (0, EOF);
 }
 
@@ -24,9 +24,9 @@ partial struct multiReader {
     internal slice<Reader> readers;
 }
 
-} partial class ioᴛmultiReader {
+} partial class io_package {
 
-internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref multiReader mr, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -56,11 +56,11 @@ internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p)
     return (0, EOF);
 }
 
-internal static (int64 sum, error err) WriteTo(this ref multiReader mr, Writer w) {
+internal static (int64 sum, error err) WriteToᴍ(ref multiReader mr, Writer w) {
     return mr.writeToWithBuffer(w, new slice<byte>(1024 * 32));
 }
 
-internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr, Writer w, slice<byte> buf) {
+internal static (int64 sum, error err) writeToWithBufferᴍ(ref multiReader mr, Writer w, slice<byte> buf) {
     int64 sum = default;
     error err = default;
 
@@ -102,9 +102,9 @@ partial struct multiWriter {
     internal slice<Writer> writers;
 }
 
-} partial class ioᴛmultiWriter {
+} partial class io_package {
 
-internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(ref multiWriter t, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -125,9 +125,9 @@ internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p)
 
 internal static StringWriter _ᴛ3ʗ = new multiWriterжStringWriter(((ж<multiWriter>)nil));
 
-} partial class ioᴛmultiWriter {
+} partial class io_package {
 
-internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) {
+internal static (nint n, error err) WriteStringᴍ(ref multiWriter t, @string s) {
     nint n = default;
     error err = default;
 
@@ -175,3 +175,18 @@ public static Writer MultiWriter(params ꓸꓸꓸWriter writersʗp) {
 }
 
 } // end io_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class ioᴛeofReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) => io_package.Readᴍ(_Δp0, _Δp1);
+}
+partial class ioᴛmultiReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p) => io_package.Readᴍ(ref mr, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 sum, error err) WriteTo(this ref multiReader mr, Writer w) => io_package.WriteToᴍ(ref mr, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr, Writer w, slice<byte> buf) => io_package.writeToWithBufferᴍ(ref mr, w, buf);
+}
+partial class ioᴛmultiWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p) => io_package.Writeᴍ(ref t, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) => io_package.WriteStringᴍ(ref t, s);
+}
+// </GlyphForwarders>

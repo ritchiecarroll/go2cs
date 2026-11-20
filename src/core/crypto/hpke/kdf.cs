@@ -73,17 +73,17 @@ internal static ж<hkdfKDF> hkdfSHA256 = Ꮡ(new hkdfKDF(hash: sha256.New, id: 0
 internal static ж<hkdfKDF> hkdfSHA384 = Ꮡ(new hkdfKDF(hash: sha512.New384, id: 0x0002, nH: sha512.Size384));
 internal static ж<hkdfKDF> hkdfSHA512 = Ꮡ(new hkdfKDF(hash: sha512.New, id: 0x0003, nH: sha512.Size));
 
-} partial class hpkeᴛhkdfKDF {
+} partial class hpke_package {
 
-internal static uint16 ID(this ref hkdfKDF kdf) {
+internal static uint16 IDᴍ(ref hkdfKDF kdf) {
     return kdf.id;
 }
 
-internal static nint size(this ref hkdfKDF kdf) {
+internal static nint sizeᴍ(ref hkdfKDF kdf) {
     return kdf.nH;
 }
 
-internal static bool oneStage(this ref hkdfKDF kdf) {
+internal static bool oneStageᴍ(ref hkdfKDF kdf) {
     return false;
 }
 
@@ -91,11 +91,11 @@ internal static bool oneStage(this ref hkdfKDF kdf) {
 internal static ref readonly @string hpkeInternalErrorˢ => ref hpkeInternalErrorˢᵇ;
 private static readonly @string hpkeInternalErrorˢᵇ = "hpke: internal error: labeledDerive called on two-stage KDF"u8;
 
-internal static (slice<byte>, error) labeledDerive(this ref hkdfKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
+internal static (slice<byte>, error) labeledDeriveᴍ(ref hkdfKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
     return (default, errors.New(hpkeInternalErrorˢ));
 }
 
-internal static (slice<byte>, error) labeledExtract(this ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) {
+internal static (slice<byte>, error) labeledExtractᴍ(ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) {
     var labeledIKM = new slice<byte>(0, 7 + len(suiteID) + len(label) + len(inputKey));
     labeledIKM = appendꓸꓸꓸ(labeledIKM, slice<byte>("HPKE-v1"u8));
     labeledIKM = appendꓸꓸꓸ(labeledIKM, suiteID);
@@ -104,7 +104,7 @@ internal static (slice<byte>, error) labeledExtract(this ref hkdfKDF kdf, slice<
     return hkdf.Extract(kdf.hash, labeledIKM, salt);
 }
 
-internal static (slice<byte>, error) labeledExpand(this ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> randomKey, @string label, slice<byte> info, uint16 length) {
+internal static (slice<byte>, error) labeledExpandᴍ(ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> randomKey, @string label, slice<byte> info, uint16 length) {
     var labeledInfo = new slice<byte>(0, 2 + 7 + len(suiteID) + len(label) + len(info));
     labeledInfo = byteorder.BEAppendUint16(labeledInfo, length);
     labeledInfo = appendꓸꓸꓸ(labeledInfo, slice<byte>("HPKE-v1"u8));
@@ -135,21 +135,21 @@ partial struct shakeKDF {
 internal static ж<shakeKDF> shake128KDF = Ꮡ(new shakeKDF(hash: sha3.NewSHAKE128, id: 0x0010, nH: 32));
 internal static ж<shakeKDF> shake256KDF = Ꮡ(new shakeKDF(hash: sha3.NewSHAKE256, id: 0x0011, nH: 64));
 
-} partial class hpkeᴛshakeKDF {
+} partial class hpke_package {
 
-internal static uint16 ID(this ref shakeKDF kdf) {
+internal static uint16 IDᴍ(ref shakeKDF kdf) {
     return kdf.id;
 }
 
-internal static nint size(this ref shakeKDF kdf) {
+internal static nint sizeᴍ(ref shakeKDF kdf) {
     return kdf.nH;
 }
 
-internal static bool oneStage(this ref shakeKDF kdf) {
+internal static bool oneStageᴍ(ref shakeKDF kdf) {
     return true;
 }
 
-internal static (slice<byte>, error) labeledDerive(this ref shakeKDF kdf, slice<byte> suiteID, slice<byte> inputKey, @string label, slice<byte> context, uint16 length) {
+internal static (slice<byte>, error) labeledDeriveᴍ(ref shakeKDF kdf, slice<byte> suiteID, slice<byte> inputKey, @string label, slice<byte> context, uint16 length) {
     var H = kdf.hash();
     H.Write(inputKey);
     H.Write(slice<byte>("HPKE-v1"u8));
@@ -167,7 +167,7 @@ internal static (slice<byte>, error) labeledDerive(this ref shakeKDF kdf, slice<
 internal static ref readonly @string hpkeInternalErrorˢ2 => ref hpkeInternalErrorˢ2ᵇ;
 private static readonly @string hpkeInternalErrorˢ2ᵇ = "hpke: internal error: labeledExtract called on one-stage KDF"u8;
 
-internal static (slice<byte>, error) labeledExtract(this ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4) {
+internal static (slice<byte>, error) labeledExtractᴍ(ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4) {
     return (default, errors.New(hpkeInternalErrorˢ2));
 }
 
@@ -175,8 +175,27 @@ internal static (slice<byte>, error) labeledExtract(this ref shakeKDF kdf, slice
 internal static ref readonly @string hpkeInternalErrorˢ3 => ref hpkeInternalErrorˢ3ᵇ;
 private static readonly @string hpkeInternalErrorˢ3ᵇ = "hpke: internal error: labeledExpand called on one-stage KDF"u8;
 
-internal static (slice<byte>, error) labeledExpand(this ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
+internal static (slice<byte>, error) labeledExpandᴍ(ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) {
     return (default, errors.New(hpkeInternalErrorˢ3));
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class hpkeᴛhkdfKDF {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 ID(this ref hkdfKDF kdf) => hpke_package.IDᴍ(ref kdf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint size(this ref hkdfKDF kdf) => hpke_package.sizeᴍ(ref kdf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool oneStage(this ref hkdfKDF kdf) => hpke_package.oneStageᴍ(ref kdf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) labeledDerive(this ref hkdfKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) => hpke_package.labeledDeriveᴍ(ref kdf, _Δp1, _Δp2, _Δp3, _Δp4, _Δp5);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) labeledExtract(this ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) => hpke_package.labeledExtractᴍ(ref kdf, suiteID, salt, label, inputKey);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) labeledExpand(this ref hkdfKDF kdf, slice<byte> suiteID, slice<byte> randomKey, @string label, slice<byte> info, uint16 length) => hpke_package.labeledExpandᴍ(ref kdf, suiteID, randomKey, label, info, length);
+}
+partial class hpkeᴛshakeKDF {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 ID(this ref shakeKDF kdf) => hpke_package.IDᴍ(ref kdf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint size(this ref shakeKDF kdf) => hpke_package.sizeᴍ(ref kdf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool oneStage(this ref shakeKDF kdf) => hpke_package.oneStageᴍ(ref kdf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) labeledDerive(this ref shakeKDF kdf, slice<byte> suiteID, slice<byte> inputKey, @string label, slice<byte> context, uint16 length) => hpke_package.labeledDeriveᴍ(ref kdf, suiteID, inputKey, label, context, length);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) labeledExtract(this ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4) => hpke_package.labeledExtractᴍ(ref kdf, _Δp1, _Δp2, _Δp3, _Δp4);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) labeledExpand(this ref shakeKDF kdf, slice<byte> _Δp1, slice<byte> _Δp2, @string _Δp3, slice<byte> _Δp4, uint16 _Δp5) => hpke_package.labeledExpandᴍ(ref kdf, _Δp1, _Δp2, _Δp3, _Δp4, _Δp5);
+}
+// </GlyphForwarders>

@@ -38,19 +38,19 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
     print((@string)"gs     ", (hex)c.gs(), (@string)"\n");
 }
 
-} partial class runtimeᴛsigctxt {
+} partial class runtime_package {
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static uintptr sigpc(this ref sigctxt c) { return (uintptr)c.rip(); }
+internal static uintptr sigpcᴍ(ref sigctxt c) { return (uintptr)c.rip(); }
 
-internal static void setsigpc(this ref sigctxt c, uint64 x) { c.set_rip(x); }
-internal static uintptr sigsp(this ref sigctxt c) { return (uintptr)c.rsp(); }
-internal static uintptr siglr(this ref sigctxt c) { return 0; }
-internal static uintptr fault(this ref sigctxt c) { return (uintptr)c.sigaddr(); }
+internal static void setsigpcᴍ(ref sigctxt c, uint64 x) { c.set_rip(x); }
+internal static uintptr sigspᴍ(ref sigctxt c) { return (uintptr)c.rsp(); }
+internal static uintptr siglrᴍ(ref sigctxt c) { return 0; }
+internal static uintptr faultᴍ(ref sigctxt c) { return (uintptr)c.sigaddr(); }
 
 // preparePanic sets up the stack to look like a call to sigpanic.
-internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
+internal static void preparePanicᴍ(ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Work around Leopard bug that doesn't set FPE_INTDIV.
@@ -83,7 +83,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     }
 }
 
-internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resumePC) {
+internal static void pushCallᴍ(ref sigctxt c, uintptr targetPC, uintptr resumePC) {
     // Make it look like we called target at resumePC.
     var sp = (uintptr)c.rsp();
     sp -= goarch.PtrSize;
@@ -93,3 +93,15 @@ internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resu
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛsigctxt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr sigpc(this ref sigctxt c) => runtime_package.sigpcᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setsigpc(this ref sigctxt c, uint64 x) => runtime_package.setsigpcᴍ(ref c, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr sigsp(this ref sigctxt c) => runtime_package.sigspᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr siglr(this ref sigctxt c) => runtime_package.siglrᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr fault(this ref sigctxt c) => runtime_package.faultᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) => runtime_package.preparePanicᴍ(ref c, sig, Ꮡgp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resumePC) => runtime_package.pushCallᴍ(ref c, targetPC, resumePC);
+}
+// </GlyphForwarders>

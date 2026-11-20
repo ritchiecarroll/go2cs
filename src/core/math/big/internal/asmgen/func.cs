@@ -24,14 +24,14 @@ partial struct Func {
     internal map<@string, nint> args; // offsets of args, results on stack
 }
 
-} partial class asmgenᴛAsm {
+} partial class asmgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string funcˢ => ref funcˢᵇ;
 private static readonly @string funcˢᵇ = "func "u8;
 
 // Func starts a new function in the assembly output.
-public static ж<Func> Func(this ж<Asm> Ꮡa, @string decl) {
+internal static ж<Func> Funcᴍ(ж<Asm> Ꮡa, @string decl) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var (d, ok) = strings.CutPrefix(decl, funcˢ);
@@ -109,16 +109,16 @@ public static ж<Func> Func(this ж<Asm> Ꮡa, @string decl) {
     return f;
 }
 
-} partial class asmgenᴛFunc {
+} partial class asmgen_package {
 
 // Arg allocates a new register, copies the named argument (or result) into it,
 // and returns that register.
-public static Reg Arg(this ref Func f, @string name) {
+internal static Reg Argᴍ(ref Func f, @string name) {
     return f.ArgHint(name, HintNone);
 }
 
 // ArgHint is like Arg but uses a register allocation hint.
-public static Reg ArgHint(this ref Func f, @string name, Hint hint) {
+internal static Reg ArgHintᴍ(ref Func f, @string name, Hint hint) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
         f.Asm.Fatalf("unknown argument %s", name);
@@ -133,12 +133,12 @@ public static Reg ArgHint(this ref Func f, @string name, Hint hint) {
 }
 
 // ArgPtr is like Arg but returns a RegPtr.
-public static RegPtr ArgPtr(this ref Func f, @string name) {
+internal static RegPtr ArgPtrᴍ(ref Func f, @string name) {
     return (RegPtr)f.Arg(name);
 }
 
 // StoreArg stores src into the named argument (or result).
-public static void StoreArg(this ref Func f, Reg src, @string name) {
+internal static void StoreArgᴍ(ref Func f, Reg src, @string name) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
         f.Asm.Fatalf("unknown argument %s", name);
@@ -156,3 +156,15 @@ public static void StoreArg(this ref Func f, Reg src, @string name) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class asmgenᴛAsm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> Func(this ж<Asm> Ꮡa, @string decl) => asmgen_package.Funcᴍ(Ꮡa, decl);
+}
+partial class asmgenᴛFunc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg Arg(this ref Func f, @string name) => asmgen_package.Argᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Reg ArgHint(this ref Func f, @string name, Hint hint) => asmgen_package.ArgHintᴍ(ref f, name, hint);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static RegPtr ArgPtr(this ref Func f, @string name) => asmgen_package.ArgPtrᴍ(ref f, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreArg(this ref Func f, Reg src, @string name) => asmgen_package.StoreArgᴍ(ref f, src, name);
+}
+// </GlyphForwarders>

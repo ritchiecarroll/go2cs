@@ -27,9 +27,9 @@ partial struct profMapEntry {
     internal int64 count;
 }
 
-} partial class pprofᴛprofMap {
+} partial class pprof_package {
 
-internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
+internal static ж<profMapEntry> lookupᴍ(ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
     // Compute hash of (stk, tag).
     var h = (uintptr)0;
     foreach (var (_, x) in range(stk)) {
@@ -96,3 +96,9 @@ break_Search:;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pprofᴛprofMap {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) => pprof_package.lookupᴍ(ref m, stk, tag);
+}
+// </GlyphForwarders>

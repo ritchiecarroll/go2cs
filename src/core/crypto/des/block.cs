@@ -207,10 +207,10 @@ internal static slice<uint32> /*out*/ ksRotate(uint32 @in) {
     return @out;
 }
 
-} partial class desᴛdesCipher {
+} partial class des_package {
 
 // creates 16 56-bit subkeys from the original key.
-internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes) {
+internal static void generateSubkeysᴍ(ref desCipher c, slice<byte> keyBytes) {
     ᏑfeistelBoxOnce.Do(initFeistelBox);
 
     // apply PC1 permutation to key
@@ -240,3 +240,9 @@ internal static uint64 unpack(uint64 x) {
 }
 
 } // end des_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class desᴛdesCipher {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes) => des_package.generateSubkeysᴍ(ref c, keyBytes);
+}
+// </GlyphForwarders>

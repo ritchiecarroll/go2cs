@@ -96,24 +96,24 @@ internal static traceArg traceSpanTypeAndClass(ж<mspan> Ꮡs) {
     return (traceArg)1;
 }
 
-} partial class runtimeᴛtraceLocker {
+} partial class runtime_package {
 
 // SpanExists records an event indicating that the span exists.
-internal static void SpanExists(this traceLocker tl, ж<mspan> Ꮡs) {
+internal static void SpanExistsᴍ(traceLocker tl, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpan, traceSpanID(Ꮡs), (traceArg)(uint64)s.npages, traceSpanTypeAndClass(Ꮡs));
 }
 
 // SpanAlloc records an event indicating that the span has just been allocated.
-internal static void SpanAlloc(this traceLocker tl, ж<mspan> Ꮡs) {
+internal static void SpanAllocᴍ(traceLocker tl, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpanAlloc, traceSpanID(Ꮡs), (traceArg)(uint64)s.npages, traceSpanTypeAndClass(Ꮡs));
 }
 
 // SpanFree records an event indicating that the span is about to be freed.
-internal static void SpanFree(this traceLocker tl, ж<mspan> s) {
+internal static void SpanFreeᴍ(traceLocker tl, ж<mspan> s) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpanFree, traceSpanID(s));
 }
 
@@ -126,24 +126,24 @@ internal static traceArg traceSpanID(ж<mspan> Ꮡs) {
     return ((traceArg)((uint64)s.@base() - trace.minPageHeapAddr)) / (uint64)pageSize;
 }
 
-} partial class runtimeᴛtraceLocker {
+} partial class runtime_package {
 
 // HeapObjectExists records that an object already exists at addr with the provided type.
 // The type is optional, and the size of the slot occupied the object is inferred from the
 // span containing it.
-internal static void HeapObjectExists(this traceLocker tl, uintptr addr, ж<abi.Type> typ) {
+internal static void HeapObjectExistsᴍ(traceLocker tl, uintptr addr, ж<abi.Type> typ) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapObject, traceHeapObjectID(addr), tl.rtype(typ));
 }
 
 // HeapObjectAlloc records that an object was newly allocated at addr with the provided type.
 // The type is optional, and the size of the slot occupied the object is inferred from the
 // span containing it.
-internal static void HeapObjectAlloc(this traceLocker tl, uintptr addr, ж<abi.Type> typ) {
+internal static void HeapObjectAllocᴍ(traceLocker tl, uintptr addr, ж<abi.Type> typ) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapObjectAlloc, traceHeapObjectID(addr), tl.rtype(typ));
 }
 
 // HeapObjectFree records that an object at addr is about to be freed.
-internal static void HeapObjectFree(this traceLocker tl, uintptr addr) {
+internal static void HeapObjectFreeᴍ(traceLocker tl, uintptr addr) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapObjectFree, traceHeapObjectID(addr));
 }
 
@@ -154,22 +154,22 @@ internal static traceArg traceHeapObjectID(uintptr addr) {
     return ((traceArg)((uint64)addr - trace.minPageHeapAddr)) / (uint64)gc.MinHeapAlign;
 }
 
-} partial class runtimeᴛtraceLocker {
+} partial class runtime_package {
 
 // GoroutineStackExists records that a goroutine stack already exists at address base with the provided size.
-internal static void GoroutineStackExists(this traceLocker tl, uintptr @base, uintptr size) {
+internal static void GoroutineStackExistsᴍ(traceLocker tl, uintptr @base, uintptr size) {
     var order = traceCompressStackSize(size);
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoroutineStack, traceGoroutineStackID(@base), order);
 }
 
 // GoroutineStackAlloc records that a goroutine stack was newly allocated at address base with the provided size..
-internal static void GoroutineStackAlloc(this traceLocker tl, uintptr @base, uintptr size) {
+internal static void GoroutineStackAllocᴍ(traceLocker tl, uintptr @base, uintptr size) {
     var order = traceCompressStackSize(size);
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoroutineStackAlloc, traceGoroutineStackID(@base), order);
 }
 
 // GoroutineStackFree records that a goroutine stack at address base is about to be freed.
-internal static void GoroutineStackFree(this traceLocker tl, uintptr @base) {
+internal static void GoroutineStackFreeᴍ(traceLocker tl, uintptr @base) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoroutineStackFree, traceGoroutineStackID(@base));
 }
 
@@ -193,3 +193,17 @@ internal static traceArg traceCompressStackSize(uintptr size) {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛtraceLocker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SpanExists(this traceLocker tl, ж<mspan> Ꮡs) => runtime_package.SpanExistsᴍ(tl, Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SpanAlloc(this traceLocker tl, ж<mspan> Ꮡs) => runtime_package.SpanAllocᴍ(tl, Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SpanFree(this traceLocker tl, ж<mspan> s) => runtime_package.SpanFreeᴍ(tl, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HeapObjectExists(this traceLocker tl, uintptr addr, ж<abi.Type> typ) => runtime_package.HeapObjectExistsᴍ(tl, addr, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HeapObjectAlloc(this traceLocker tl, uintptr addr, ж<abi.Type> typ) => runtime_package.HeapObjectAllocᴍ(tl, addr, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HeapObjectFree(this traceLocker tl, uintptr addr) => runtime_package.HeapObjectFreeᴍ(tl, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoroutineStackExists(this traceLocker tl, uintptr @base, uintptr size) => runtime_package.GoroutineStackExistsᴍ(tl, @base, size);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoroutineStackAlloc(this traceLocker tl, uintptr @base, uintptr size) => runtime_package.GoroutineStackAllocᴍ(tl, @base, size);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoroutineStackFree(this traceLocker tl, uintptr @base) => runtime_package.GoroutineStackFreeᴍ(tl, @base);
+}
+// </GlyphForwarders>

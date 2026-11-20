@@ -48,9 +48,9 @@ private static readonly @string _state_nameᵇ = "stateTextstateTagstateAttrName
 
 [GoLazy] partial class lazyᴛ_state_index { internal static array<uint16> _state_index = new uint16[]{0, 9, 17, 30, 44, 60, 72, 83, 92, 100, 111, 118, 130, 142, 156, 169, 184, 198, 216, 235, 243, 256, 269, 282, 295, 306, 322, 337, 347, 363, 382, 391}.array(); }
 
-} partial class templateᴛstate {
+} partial class template_package {
 
-internal static @string String(this state i) {
+internal static @string Stringᴍ(state i) {
     if (i >= ((state)(uint8)(len(_state_index) - 1))) {
         return "state("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -58,3 +58,9 @@ internal static @string String(this state i) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class templateᴛstate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this state i) => template_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

@@ -46,7 +46,7 @@ partial struct clientHandshakeState {
     internal slice<byte> ticket;      // a fresh ticket received during this handshake
 }
 
-} partial class tlsᴛConn {
+} partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsEitherServerNameOrˢ => ref tlsEitherServerNameOrˢᵇ;
@@ -68,7 +68,7 @@ private static readonly @string tlsMaxVersionMustBeˢᵇ = "tls: MaxVersion must
 internal static ref readonly @string tlsˢ => ref tlsˢᵇ;
 private static readonly @string tlsˢᵇ = "tls: EncryptedClientHelloConfigList contains no valid configs"u8;
 
-internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContext>, error) makeClientHello(this ж<Conn> Ꮡc) {
+internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContext>, error) makeClientHelloᴍ(ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var config = c.config;
@@ -248,13 +248,13 @@ partial struct echClientContext {
     internal slice<byte> retryConfigs;
 }
 
-} partial class tlsᴛConn {
+} partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsDowngradeAttemptˢ => ref tlsDowngradeAttemptˢᵇ;
 private static readonly @string tlsDowngradeAttemptˢᵇ = "tls: downgrade attempt detected, possibly due to a MitM attack or a broken middlebox"u8;
 
-internal static error /*err*/ clientHandshake(this ж<Conn> Ꮡc, context.Context ctx) {
+internal static error /*err*/ clientHandshakeᴍ(ж<Conn> Ꮡc, context.Context ctx) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -400,9 +400,9 @@ internal static error /*err*/ clientHandshake(this ж<Conn> Ꮡc, context.Contex
 // enforcement of Extended Master Secret in FIPS 140-3 mode.
 internal static ж<godebug.Setting> fips140ems = godebug.New("fips140ems");
 
-} partial class tlsᴛConn {
+} partial class tls_package {
 
-internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, slice<byte> binderKey, error err) loadSession(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡhello) {
+internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, slice<byte> binderKey, error err) loadSessionᴍ(ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡhello) {
     ж<SessionState> session = default;
     ж<tls13.EarlySecret> earlySecret = default;
     slice<byte> binderKey = default;
@@ -565,7 +565,7 @@ internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, sl
     return (session, earlySecret, binderKey, err);
 }
 
-internal static error pickTLSVersion(this ж<Conn> Ꮡc, ж<serverHelloMsg> ᏑserverHello) {
+internal static error pickTLSVersionᴍ(ж<Conn> Ꮡc, ж<serverHelloMsg> ᏑserverHello) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var serverHello = ref ᏑserverHello.DerefOrNull();
 
@@ -588,7 +588,7 @@ internal static error pickTLSVersion(this ж<Conn> Ꮡc, ж<serverHelloMsg> Ꮡs
     return default;
 }
 
-} partial class tlsᴛclientHandshakeState {
+} partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerEchoedTls13ˢ => ref tlsServerEchoedTls13ˢᵇ;
@@ -596,7 +596,7 @@ private static readonly @string tlsServerEchoedTls13ˢᵇ = "tls: server echoed 
 
 // Does the handshake, either a full one or resumes old session. Requires hs.c,
 // hs.hello, hs.serverHello, and, optionally, hs.session to be set.
-internal static error handshake(this ж<clientHandshakeState> Ꮡhs) {
+internal static error handshakeᴍ(ж<clientHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -699,7 +699,7 @@ internal static error handshake(this ж<clientHandshakeState> Ꮡhs) {
 internal static ref readonly @string tlsServerChoseAnˢ => ref tlsServerChoseAnˢᵇ;
 private static readonly @string tlsServerChoseAnˢᵇ = "tls: server chose an unconfigured cipher suite"u8;
 
-internal static error pickCipherSuite(this ref clientHandshakeState hs) {
+internal static error pickCipherSuiteᴍ(ref clientHandshakeState hs) {
     hs.suite = mutualCipherSuite(hs.hello.cipherSuites, hs.serverHello.cipherSuite); if (hs.suite == nil) {
         hs.c.sendAlert(alertHandshakeFailure);
         return errors.New(tlsServerChoseAnˢ);
@@ -728,7 +728,7 @@ private static readonly @string tlsFips1403RequiresTheˢᵇ = "tls: FIPS 140-3 r
 internal static ref readonly @string tlsInternalErrorDidNotˢ => ref tlsInternalErrorDidNotˢᵇ;
 private static readonly @string tlsInternalErrorDidNotˢᵇ = "tls: internal error: did not keep handshake transcript for TLS 1.2"u8;
 
-internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) {
+internal static error doFullHandshakeᴍ(ж<clientHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -938,7 +938,7 @@ internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) {
     return default;
 }
 
-internal static error establishKeys(this ref clientHandshakeState hs) {
+internal static error establishKeysᴍ(ref clientHandshakeState hs) {
     var c = hs.c;
 
     var (clientMAC, serverMAC, clientKey, serverKey, clientIV, serverIV) = keysFromMasterSecret(c.vers, ref (hs.suite).DerefOrNull(), hs.masterSecret, hs.hello.random, hs.serverHello.random, hs.suite.macLen, hs.suite.keyLen, hs.suite.ivLen);
@@ -961,7 +961,7 @@ internal static error establishKeys(this ref clientHandshakeState hs) {
     return default;
 }
 
-internal static bool serverResumedSession(this ref clientHandshakeState hs) {
+internal static bool serverResumedSessionᴍ(ref clientHandshakeState hs) {
     // If the server responded with the same sessionId then it means the
     // sessionTicket is being used to resume a TLS session.
     return hs.session != nil && hs.hello.sessionId != nil && bytes.Equal(hs.serverHello.sessionId, hs.hello.sessionId);
@@ -983,7 +983,7 @@ private static readonly @string tlsServerResumedASessionˢ2ᵇ = "tls: server re
 internal static ref readonly @string tlsServerResumedASessionˢ3 => ref tlsServerResumedASessionˢ3ᵇ;
 private static readonly @string tlsServerResumedASessionˢ3ᵇ = "tls: server resumed a session with a different EMS extension"u8;
 
-internal static (bool, error) processServerHello(this ref clientHandshakeState hs) {
+internal static (bool, error) processServerHelloᴍ(ref clientHandshakeState hs) {
     var c = hs.c;
 
     {
@@ -1105,13 +1105,13 @@ internal static error checkALPN(slice<@string> clientProtos, @string serverProto
     return errors.New(tlsServerSelectedˢ2);
 }
 
-} partial class tlsᴛclientHandshakeState {
+} partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerSFinishedˢ => ref tlsServerSFinishedˢᵇ;
 private static readonly @string tlsServerSFinishedˢᵇ = "tls: server's Finished message was incorrect"u8;
 
-internal static error readFinished(this ж<clientHandshakeState> Ꮡhs, slice<byte> @out) {
+internal static error readFinishedᴍ(ж<clientHandshakeState> Ꮡhs, slice<byte> @out) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -1151,7 +1151,7 @@ internal static error readFinished(this ж<clientHandshakeState> Ꮡhs, slice<by
 internal static ref readonly @string tlsServerSentUnrequestedˢ => ref tlsServerSentUnrequestedˢᵇ;
 private static readonly @string tlsServerSentUnrequestedˢᵇ = "tls: server sent unrequested session ticket"u8;
 
-internal static error readSessionTicket(this ж<clientHandshakeState> Ꮡhs) {
+internal static error readSessionTicketᴍ(ж<clientHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     if (!hs.serverHello.ticketSupported) {
@@ -1178,7 +1178,7 @@ internal static error readSessionTicket(this ж<clientHandshakeState> Ꮡhs) {
     return default;
 }
 
-internal static error saveSessionTicket(this ref clientHandshakeState hs) {
+internal static error saveSessionTicketᴍ(ref clientHandshakeState hs) {
     if (hs.ticket == nil) {
         return default;
     }
@@ -1198,7 +1198,7 @@ internal static error saveSessionTicket(this ref clientHandshakeState hs) {
     return default;
 }
 
-internal static error sendFinished(this ж<clientHandshakeState> Ꮡhs, slice<byte> @out) {
+internal static error sendFinishedᴍ(ж<clientHandshakeState> Ꮡhs, slice<byte> @out) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -1240,11 +1240,11 @@ internal static (nint max, bool ok) checkKeySize(nint n) {
     return (defaultMaxRSAKeySize, n <= defaultMaxRSAKeySize);
 }
 
-} partial class tlsᴛConn {
+} partial class tls_package {
 
 // verifyServerCertificate parses and verifies the provided chain, setting
 // c.verifiedChains and c.peerCertificates or sending the appropriate alert.
-internal static error verifyServerCertificate(this ж<Conn> Ꮡc, slice<slice<byte>> certificates) {
+internal static error verifyServerCertificateᴍ(ж<Conn> Ꮡc, slice<slice<byte>> certificates) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var certs = new slice<ж<Δx509.Certificate>>(len(certificates));
@@ -1429,9 +1429,9 @@ internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context
     return cri;
 }
 
-} partial class tlsᴛConn {
+} partial class tls_package {
 
-internal static (ж<Certificate>, error) getClientCertificate(this ref Conn c, ж<CertificateRequestInfo> Ꮡcri) {
+internal static (ж<Certificate>, error) getClientCertificateᴍ(ref Conn c, ж<CertificateRequestInfo> Ꮡcri) {
     ref var cri = ref Ꮡcri.DerefOrNull();
 
     if (c.config.GetClientCertificate != nil) {
@@ -1454,7 +1454,7 @@ internal static (ж<Certificate>, error) getClientCertificate(this ref Conn c, �
 
 // clientSessionCacheKey returns a key used to cache sessionTickets that could
 // be used to resume previously negotiated TLS sessions with a server.
-internal static @string clientSessionCacheKey(this ref Conn c) {
+internal static @string clientSessionCacheKeyᴍ(ref Conn c) {
     if (len(c.config.ServerName) > 0) {
         return c.config.ServerName;
     }
@@ -1499,3 +1499,27 @@ internal static error computeAndUpdatePSK(ж<clientHelloMsg> Ꮡm, slice<byte> b
 }
 
 } // end tls_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tlsᴛConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContext>, error) makeClientHello(this ж<Conn> Ꮡc) => tls_package.makeClientHelloᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ clientHandshake(this ж<Conn> Ꮡc, context.Context ctx) => tls_package.clientHandshakeᴍ(Ꮡc, ctx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<SessionState> session, ж<tls13.EarlySecret> earlySecret, slice<byte> binderKey, error err) loadSession(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡhello) => tls_package.loadSessionᴍ(Ꮡc, Ꮡhello);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error pickTLSVersion(this ж<Conn> Ꮡc, ж<serverHelloMsg> ᏑserverHello) => tls_package.pickTLSVersionᴍ(Ꮡc, ᏑserverHello);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error verifyServerCertificate(this ж<Conn> Ꮡc, slice<slice<byte>> certificates) => tls_package.verifyServerCertificateᴍ(Ꮡc, certificates);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Certificate>, error) getClientCertificate(this ref Conn c, ж<CertificateRequestInfo> Ꮡcri) => tls_package.getClientCertificateᴍ(ref c, Ꮡcri);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string clientSessionCacheKey(this ref Conn c) => tls_package.clientSessionCacheKeyᴍ(ref c);
+}
+partial class tlsᴛclientHandshakeState {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handshake(this ж<clientHandshakeState> Ꮡhs) => tls_package.handshakeᴍ(Ꮡhs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error pickCipherSuite(this ref clientHandshakeState hs) => tls_package.pickCipherSuiteᴍ(ref hs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) => tls_package.doFullHandshakeᴍ(Ꮡhs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error establishKeys(this ref clientHandshakeState hs) => tls_package.establishKeysᴍ(ref hs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool serverResumedSession(this ref clientHandshakeState hs) => tls_package.serverResumedSessionᴍ(ref hs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, error) processServerHello(this ref clientHandshakeState hs) => tls_package.processServerHelloᴍ(ref hs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readFinished(this ж<clientHandshakeState> Ꮡhs, slice<byte> @out) => tls_package.readFinishedᴍ(Ꮡhs, @out);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readSessionTicket(this ж<clientHandshakeState> Ꮡhs) => tls_package.readSessionTicketᴍ(Ꮡhs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error saveSessionTicket(this ref clientHandshakeState hs) => tls_package.saveSessionTicketᴍ(ref hs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error sendFinished(this ж<clientHandshakeState> Ꮡhs, slice<byte> @out) => tls_package.sendFinishedᴍ(Ꮡhs, @out);
+}
+// </GlyphForwarders>

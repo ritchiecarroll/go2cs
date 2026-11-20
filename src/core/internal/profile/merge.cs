@@ -68,12 +68,12 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
     return (p, default);
 }
 
-} partial class profileᴛProfile {
+} partial class profile_package {
 
 // Normalize normalizes the source profile by multiplying each value in profile by the
 // ratio of the sum of the base profile's values of that sample type to the sum of the
 // source profile's value of that sample type.
-public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
+internal static error Normalizeᴍ(ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     var err = p.compatible(Ꮡpb); if (err != nil) {
@@ -135,9 +135,9 @@ partial struct mapInfo {
     internal int64 offset;
 }
 
-} partial class profileᴛprofileMerger {
+} partial class profile_package {
 
-internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsrc) {
+internal static ж<Sample> mapSampleᴍ(ref profileMerger pm, ж<Sample> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     var s = Ꮡ(new Sample(
@@ -180,10 +180,10 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
     return s;
 }
 
-} partial class profileᴛSample {
+} partial class profile_package {
 
 // key generates sampleKey to be used as a key for maps.
-internal static sampleKey key(this ref Sample sample) {
+internal static sampleKey keyᴍ(ref Sample sample) {
     var labelsᴷ = new stackAppend<@string>();
     var numlabelsᴷ = new stackAppend<@string>();
 
@@ -219,9 +219,9 @@ partial struct sampleKey {
     internal @string numlabels;
 }
 
-} partial class profileᴛprofileMerger {
+} partial class profile_package {
 
-internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location> Ꮡsrc) {
+internal static ж<Location> mapLocationᴍ(ref profileMerger pm, ж<Location> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -257,10 +257,10 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
     return l;
 }
 
-} partial class profileᴛLocation {
+} partial class profile_package {
 
 // key generates locationKey to be used as a key for maps.
-internal static locationKey key(this ref Location l) {
+internal static locationKey keyᴍ(ref Location l) {
     var key = new locationKey(
         addr: l.Address,
         isFolded: l.IsFolded
@@ -289,9 +289,9 @@ partial struct locationKey {
     internal bool isFolded;
 }
 
-} partial class profileᴛprofileMerger {
+} partial class profile_package {
 
-internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc) {
+internal static mapInfo mapMappingᴍ(ref profileMerger pm, ж<Mapping> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -330,11 +330,11 @@ internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc
     return mi;
 }
 
-} partial class profileᴛMapping {
+} partial class profile_package {
 
 // key generates encoded strings of Mapping to be used as a key for
 // maps.
-internal static mappingKey key(this ref Mapping m) {
+internal static mappingKey keyᴍ(ref Mapping m) {
     // Normalize addresses to handle address space randomization.
     // Round up to next 4K boundary to avoid minor discrepancies.
     const uint64 mapsizeRounding = 0x1000;
@@ -372,9 +372,9 @@ partial struct mappingKey {
     internal @string buildIDOrFile;
 }
 
-} partial class profileᴛprofileMerger {
+} partial class profile_package {
 
-internal static Line mapLine(this ref profileMerger pm, Line src) {
+internal static Line mapLineᴍ(ref profileMerger pm, Line src) {
     var ln = new Line(
         Function: pm.mapFunction(src.Function),
         ΔLine: src.ΔLine
@@ -382,7 +382,7 @@ internal static Line mapLine(this ref profileMerger pm, Line src) {
     return ln;
 }
 
-internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function> Ꮡsrc) {
+internal static ж<Function> mapFunctionᴍ(ref profileMerger pm, ж<Function> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -409,10 +409,10 @@ internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function>
     return f;
 }
 
-} partial class profileᴛFunction {
+} partial class profile_package {
 
 // key generates a struct to be used as a key for maps.
-internal static functionKey key(this ref Function f) {
+internal static functionKey keyᴍ(ref Function f) {
     return new functionKey(
         f.StartLine,
         f.Name,
@@ -480,12 +480,12 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
     return (p, default);
 }
 
-} partial class profileᴛProfile {
+} partial class profile_package {
 
 // compatible determines if two profiles can be compared/merged.
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
-internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
+internal static error compatibleᴍ(ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     if (!equalValueType(ref (p.PeriodType).DerefOrNull(), ref (pb.PeriodType).DerefOrNull())) {
@@ -513,3 +513,29 @@ internal static bool equalValueType(ref ValueType st1, ref ValueType st2) {
 }
 
 } // end profile_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class profileᴛProfile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) => profile_package.Normalizeᴍ(ref p, Ꮡpb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) => profile_package.compatibleᴍ(ref p, Ꮡpb);
+}
+partial class profileᴛprofileMerger {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsrc) => profile_package.mapSampleᴍ(ref pm, Ꮡsrc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location> Ꮡsrc) => profile_package.mapLocationᴍ(ref pm, Ꮡsrc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc) => profile_package.mapMappingᴍ(ref pm, Ꮡsrc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Line mapLine(this ref profileMerger pm, Line src) => profile_package.mapLineᴍ(ref pm, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function> Ꮡsrc) => profile_package.mapFunctionᴍ(ref pm, Ꮡsrc);
+}
+partial class profileᴛSample {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sampleKey key(this ref Sample sample) => profile_package.keyᴍ(ref sample);
+}
+partial class profileᴛLocation {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static locationKey key(this ref Location l) => profile_package.keyᴍ(ref l);
+}
+partial class profileᴛMapping {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static mappingKey key(this ref Mapping m) => profile_package.keyᴍ(ref m);
+}
+partial class profileᴛFunction {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static functionKey key(this ref Function f) => profile_package.keyᴍ(ref f);
+}
+// </GlyphForwarders>

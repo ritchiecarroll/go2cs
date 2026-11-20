@@ -144,7 +144,7 @@ internal static escaper makeEscaper(ж<nameSpace> n) {
 internal static ref readonly @string filterFailsafe => ref filterFailsafeᵇ;
 private static readonly @string filterFailsafeᵇ = "ZgotmplZ"u8;
 
-} partial class templateᴛescaper {
+} partial class template_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
@@ -153,7 +153,7 @@ internal static ref readonly @string withˢ => ref withˢᵇ;
 private static readonly @string withˢᵇ = "with"u8;
 
 // escape escapes a template node.
-internal static context escape(this ref escaper e, context c, parse.Node n) {
+internal static context escapeᴍ(ref escaper e, context c, parse.Node n) {
     switch (n.type()) {
     case ж<parse.ActionNode> nΔ1: {
         return e.escapeAction(c, nΔ1);
@@ -198,10 +198,10 @@ internal static ж<godebug.Setting> debugAllowActionJSTmpl = godebug.New("jstmpl
 
 internal static ж<godebug.Setting> htmlmetacontenturlescape = godebug.New("htmlmetacontenturlescape");
 
-} partial class templateᴛescaper {
+} partial class template_package {
 
 // escapeAction escapes an action template node.
-internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) {
+internal static context escapeActionᴍ(ref escaper e, context c, ж<parse.ActionNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (len(n.Pipe.Decl) != 0) {
@@ -601,10 +601,10 @@ internal static context join(context a, context b, parse.Node node, @string node
     );
 }
 
-} partial class templateᴛescaper {
+} partial class template_package {
 
 // escapeBranch escapes a branch template node: "if", "range" and "with".
-internal static context escapeBranch(this ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) {
+internal static context escapeBranchᴍ(ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (nodeName == "range"u8) {
@@ -674,10 +674,10 @@ internal static context joinRange(context c0, ref rangeContext rc) {
     return c0;
 }
 
-} partial class templateᴛescaper {
+} partial class template_package {
 
 // escapeList escapes a list template node.
-internal static context escapeList(this ref escaper e, context c, ж<parse.ListNode> Ꮡn) {
+internal static context escapeListᴍ(ref escaper e, context c, ж<parse.ListNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -696,7 +696,7 @@ internal static context escapeList(this ref escaper e, context c, ж<parse.ListN
 // inferences in e if the inferences and output context satisfy filter.
 // It returns the best guess at an output context, and the result of the filter
 // which is the same as whether e was updated.
-internal static (context, bool) escapeListConditionally(this ref escaper e, context c, ж<parse.ListNode> n, Func<ж<escaper>, context, bool> filter) {
+internal static (context, bool) escapeListConditionallyᴍ(ref escaper e, context c, ж<parse.ListNode> n, Func<ж<escaper>, context, bool> filter) {
     ref var e1 = ref heap<escaper>(makeEscaper(e.ns), out var Ꮡe1);
     e1.rangeContext = e.rangeContext;
     // Make type inferences available to f.
@@ -722,7 +722,7 @@ internal static (context, bool) escapeListConditionally(this ref escaper e, cont
 }
 
 // escapeTemplate escapes a {{template}} call node.
-internal static context escapeTemplate(this ref escaper e, context c, ж<parse.TemplateNode> Ꮡn) {
+internal static context escapeTemplateᴍ(ref escaper e, context c, ж<parse.TemplateNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     (c, var name) = e.escapeTree(c, new parse.TemplateNodeжNode(Ꮡn), n.Name, n.Line);
@@ -734,7 +734,7 @@ internal static context escapeTemplate(this ref escaper e, context c, ж<parse.T
 
 // escapeTree escapes the named template starting in the given context as
 // necessary and returns its output context.
-internal static (context, @string) escapeTree(this ref escaper e, context c, parse.Node node, @string name, nint line) {
+internal static (context, @string) escapeTreeᴍ(ref escaper e, context c, parse.Node node, @string name, nint line) {
     // Mangle the template name with the input context to produce a reliable
     // identifier.
     ref var dname = ref heap<@string>(c.mangle(name), out var Ꮡdname);
@@ -774,7 +774,7 @@ internal static (context, @string) escapeTree(this ref escaper e, context c, par
 
 // computeOutCtx takes a template and its start context and computes the output
 // context while storing any inferences in e.
-internal static context computeOutCtx(this ref escaper e, context c, ж<template.Template> Ꮡt) {
+internal static context computeOutCtxᴍ(ref escaper e, context c, ж<template.Template> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Propagate context over the body.
@@ -798,7 +798,7 @@ internal static context computeOutCtx(this ref escaper e, context c, ж<template
 // escapeTemplateBody escapes the given template assuming the given output
 // context, and returns the best guess at the output context and whether the
 // assumption was correct.
-internal static (context, bool) escapeTemplateBody(this ref escaper e, context c, ж<template.Template> Ꮡt) {
+internal static (context, bool) escapeTemplateBodyᴍ(ref escaper e, context c, ж<template.Template> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var cʗ1 = c;
@@ -859,10 +859,10 @@ internal static slice<byte> escapeSpecialScriptTags(slice<byte> s) {
 
 internal static slice<byte> doctypeBytes = slice<byte>("<!DOCTYPE"u8);
 
-} partial class templateᴛescaper {
+} partial class template_package {
 
 // escapeText escapes a text template node.
-internal static context escapeText(this ref escaper e, context c, ж<parse.TextNode> Ꮡn) {
+internal static context escapeTextᴍ(ref escaper e, context c, ж<parse.TextNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     var s = n.Text;
@@ -1010,10 +1010,10 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
     return (new context(state: stateTag, element: element), i);
 }
 
-} partial class templateᴛescaper {
+} partial class template_package {
 
 // editActionNode records a change to an action pipeline for later commit.
-internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) {
+internal static void editActionNodeᴍ(ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) {
     var (_, ok) = e.actionNodeEdits[n, ꟷ]; if (ok) {
         throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
@@ -1021,7 +1021,7 @@ internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> n, 
 }
 
 // editTemplateNode records a change to a {{template}} callee for later commit.
-internal static void editTemplateNode(this ref escaper e, ж<parse.TemplateNode> n, @string callee) {
+internal static void editTemplateNodeᴍ(ref escaper e, ж<parse.TemplateNode> n, @string callee) {
     var (_, ok) = e.templateNodeEdits[n, ꟷ]; if (ok) {
         throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
@@ -1029,7 +1029,7 @@ internal static void editTemplateNode(this ref escaper e, ж<parse.TemplateNode>
 }
 
 // editTextNode records a change to a text node for later commit.
-internal static void editTextNode(this ref escaper e, ж<parse.TextNode> n, slice<byte> text) {
+internal static void editTextNodeᴍ(ref escaper e, ж<parse.TextNode> n, slice<byte> text) {
     var (_, ok) = e.textNodeEdits[n, ꟷ]; if (ok) {
         throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
@@ -1038,7 +1038,7 @@ internal static void editTextNode(this ref escaper e, ж<parse.TextNode> n, slic
 
 // commit applies changes to actions and template calls needed to contextually
 // autoescape content and adds any derived templates to the set.
-internal static void commit(this ref escaper e) {
+internal static void commitᴍ(ref escaper e) {
     foreach (var (name, _) in e.output) {
         e.template(name).Funcs(funcMap);
     }
@@ -1068,7 +1068,7 @@ internal static void commit(this ref escaper e) {
 }
 
 // template returns the named template given a mangled template name.
-internal static ж<template.Template> template(this ref escaper e, @string name) {
+internal static ж<template.Template> templateᴍ(ref escaper e, @string name) {
     // Any template from the name space associated with this escaper can be used
     // to look up templates in the underlying text/template name space.
     var t = e.arbitraryTemplate().text.Lookup(name);
@@ -1080,7 +1080,7 @@ internal static ж<template.Template> template(this ref escaper e, @string name)
 
 // arbitraryTemplate returns an arbitrary template from the name space
 // associated with e and panics if no templates are found.
-internal static ж<Template> arbitraryTemplate(this ref escaper e) {
+internal static ж<Template> arbitraryTemplateᴍ(ref escaper e) {
     foreach (var (_, t) in e.ns.set) {
         return t;
     }
@@ -1137,3 +1137,24 @@ public static @string URLQueryEscaper(params ꓸꓸꓸany argsʗp) {
 }
 
 } // end template_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class templateᴛescaper {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escape(this ref escaper e, context c, parse.Node n) => template_package.escapeᴍ(ref e, c, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) => template_package.escapeActionᴍ(ref e, c, Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeBranch(this ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) => template_package.escapeBranchᴍ(ref e, c, Ꮡn, nodeName);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeList(this ref escaper e, context c, ж<parse.ListNode> Ꮡn) => template_package.escapeListᴍ(ref e, c, Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (context, bool) escapeListConditionally(this ref escaper e, context c, ж<parse.ListNode> n, Func<ж<escaper>, context, bool> filter) => template_package.escapeListConditionallyᴍ(ref e, c, n, filter);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeTemplate(this ref escaper e, context c, ж<parse.TemplateNode> Ꮡn) => template_package.escapeTemplateᴍ(ref e, c, Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (context, @string) escapeTree(this ref escaper e, context c, parse.Node node, @string name, nint line) => template_package.escapeTreeᴍ(ref e, c, node, name, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context computeOutCtx(this ref escaper e, context c, ж<template.Template> Ꮡt) => template_package.computeOutCtxᴍ(ref e, c, Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (context, bool) escapeTemplateBody(this ref escaper e, context c, ж<template.Template> Ꮡt) => template_package.escapeTemplateBodyᴍ(ref e, c, Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeText(this ref escaper e, context c, ж<parse.TextNode> Ꮡn) => template_package.escapeTextᴍ(ref e, c, Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) => template_package.editActionNodeᴍ(ref e, n, cmds);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void editTemplateNode(this ref escaper e, ж<parse.TemplateNode> n, @string callee) => template_package.editTemplateNodeᴍ(ref e, n, callee);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void editTextNode(this ref escaper e, ж<parse.TextNode> n, slice<byte> text) => template_package.editTextNodeᴍ(ref e, n, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void commit(this ref escaper e) => template_package.commitᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<template.Template> template(this ref escaper e, @string name) => template_package.templateᴍ(ref e, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Template> arbitraryTemplate(this ref escaper e) => template_package.arbitraryTemplateᴍ(ref e);
+}
+// </GlyphForwarders>

@@ -31,9 +31,9 @@ public static ж<CMAC> NewCMAC(ж<aes.Block> Ꮡb) {
     return c;
 }
 
-} partial class gcmᴛCMAC {
+} partial class gcm_package {
 
-internal static void deriveSubkeys(this ж<CMAC> Ꮡc) {
+internal static void deriveSubkeysᴍ(ж<CMAC> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     aes.EncryptBlockInternal(Ꮡc.Ꮡb, c.k1[..], c.k1[..]);
@@ -45,7 +45,7 @@ internal static void deriveSubkeys(this ж<CMAC> Ꮡc) {
     c.k2[len(c.k2) - 1] ^= (byte)(msb * 0b10000111);
 }
 
-public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) {
+internal static array<byte> MACᴍ(ж<CMAC> Ꮡc, slice<byte> m) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     fips140.RecordApproved();
@@ -91,3 +91,10 @@ internal static byte shiftLeft(/*[16]*/ ж<array<byte>> Ꮡx) {
 }
 
 } // end gcm_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gcmᴛCMAC {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deriveSubkeys(this ж<CMAC> Ꮡc) => gcm_package.deriveSubkeysᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) => gcm_package.MACᴍ(Ꮡc, m);
+}
+// </GlyphForwarders>

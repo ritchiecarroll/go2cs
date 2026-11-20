@@ -86,13 +86,13 @@ internal static UntypedInt joinZWNJ => 6;
 internal static UntypedInt joinVirama => 7;
 internal static UntypedInt numJoinTypes => 8;
 
-} partial class idnaᴛinfo {
+} partial class idna_package {
 
-internal static bool isMapped(this info c) {
+internal static bool isMappedᴍ(info c) {
     return (info)(c & 0x3) != 0;
 }
 
-internal static category category(this info c) {
+internal static category categoryᴍ(info c) {
     var small = (info)(c & (uint16)catSmallMask);
     if (small != 0) {
         return (category)(uint16)small;
@@ -100,19 +100,29 @@ internal static category category(this info c) {
     return (category)(uint16)((info)(c & (uint16)catBigMask));
 }
 
-internal static info joinType(this info c) {
+internal static info joinTypeᴍ(info c) {
     if (c.isMapped()) {
         return 0;
     }
     return (info)((c >> (int)(joinShift)) & (uint16)joinMask);
 }
 
-internal static bool isModifier(this info c) {
+internal static bool isModifierᴍ(info c) {
     return (info)(c & ((info)((uint16)modifier | (uint16)catSmallMask))) == modifier;
 }
 
-internal static bool isViramaModifier(this info c) {
+internal static bool isViramaModifierᴍ(info c) {
     return (info)(c & ((info)((uint16)attributesMask | (uint16)catSmallMask))) == viramaModifier;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class idnaᴛinfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isMapped(this info c) => idna_package.isMappedᴍ(c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static category category(this info c) => idna_package.categoryᴍ(c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static info joinType(this info c) => idna_package.joinTypeᴍ(c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isModifier(this info c) => idna_package.isModifierᴍ(c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isViramaModifier(this info c) => idna_package.isViramaModifierᴍ(c);
+}
+// </GlyphForwarders>

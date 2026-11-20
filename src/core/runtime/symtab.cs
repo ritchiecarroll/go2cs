@@ -77,7 +77,7 @@ public static ж<Frames> CallersFrames(slice<uintptr> callers) {
     return f;
 }
 
-} partial class runtimeᴛFrames {
+} partial class runtime_package {
 
 // go2cs generated this placeholder — func Next is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -228,19 +228,19 @@ partial struct Func {
     internal EmptyStruct opaque; // unexported field to disallow conversions
 }
 
-} partial class runtimeᴛFunc {
+} partial class runtime_package {
 
-internal static ж<_func> raw(this ж<Func> Ꮡf) {
+internal static ж<_func> rawᴍ(ж<Func> Ꮡf) {
     return Ꮡf.Reinterpret<Func, _func>();
 }
 
-internal static funcInfo funcInfo(this ж<Func> Ꮡf) {
+internal static funcInfo funcInfoᴍ(ж<Func> Ꮡf) {
     return Ꮡf.raw().funcInfo();
 }
 
-} partial class runtimeᴛ_func {
+} partial class runtime_package {
 
-internal static funcInfo funcInfo(this ж<_func> Ꮡf) {
+internal static funcInfo funcInfoᴍ(ж<_func> Ꮡf) {
     // Find the module containing fn. fn is located in the pclntable.
     // The unsafe.Pointer to uintptr conversions and arithmetic
     // are safe because we are working with module addresses.
@@ -565,7 +565,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
     }
 }
 
-} partial class runtimeᴛmoduledata {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeTextOffsetOutOfˢ => ref runtimeTextOffsetOutOfˢᵇ;
@@ -589,7 +589,7 @@ private static readonly @string runtimeTextOffsetOutOfˢᵇ = "runtime: text off
 // It is nosplit because it is part of the findfunc implementation.
 //
 //go:nosplit
-internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
+internal static uintptr textAddrᴍ(ref moduledata md, uint32 off32) {
     var off = (uintptr)off32;
     var res = md.text + off;
     if (len(md.textsectmap) > 1) {
@@ -623,7 +623,7 @@ private static readonly @string unexpectedMultipleTextˢᵇ = "unexpected multip
 // It is nosplit because it is part of the findfunc implementation.
 //
 //go:nosplit
-internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) {
+internal static (uint32, bool) textOffᴍ(ref moduledata md, uintptr pc) {
     var off = pc - md.text;
     if (GOARCH == "wasm"u8) {
         // On Wasm, the func table contains the function index, whereas
@@ -655,7 +655,7 @@ internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) {
 }
 
 // funcName returns the string at nameOff in the function name table.
-internal static @string funcName(this ref moduledata md, int32 nameOff) {
+internal static @string funcNameᴍ(ref moduledata md, int32 nameOff) {
     if (nameOff == 0) {
         return ""u8;
     }
@@ -677,7 +677,7 @@ internal static @string funcName(this ref moduledata md, int32 nameOff) {
 //go:linkname FuncForPC
 // go2cs generated this placeholder — func FuncForPC is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class runtimeᴛFunc {
+} partial class runtime_package {
 
 // go2cs generated this placeholder — func Name is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -687,7 +687,7 @@ internal static @string funcName(this ref moduledata md, int32 nameOff) {
 
 // startLine returns the starting line number of the function. i.e., the line
 // number of the func keyword.
-internal static int32 startLine(this ж<Func> Ꮡf) {
+internal static int32 startLineᴍ(ж<Func> Ꮡf) {
     var fn = Ꮡf.raw();
     if (fn.isInlined()) { // inlined version
         var fi = fn.Reinterpret<_func, funcinl>();
@@ -718,24 +718,24 @@ partial struct funcInfo {
     internal ж<moduledata> datap;
 }
 
-} partial class runtimeᴛfuncInfo {
+} partial class runtime_package {
 
-internal static bool valid(this funcInfo f) {
+internal static bool validᴍ(funcInfo f) {
     return f._func != nil;
 }
 
-internal static ж<Func> _Func(this funcInfo f) {
+internal static ж<Func> _Funcᴍ(funcInfo f) {
     return f._func.Reinterpret<_func, Func>();
 }
 
-} partial class runtimeᴛ_func {
+} partial class runtime_package {
 
 // isInlined reports whether f should be re-interpreted as a *funcinl.
-internal static bool isInlined(this ref _func f) {
+internal static bool isInlinedᴍ(ref _func f) {
     return f.entryOff == ~(uint32)0; // see comment for funcinl.ones
 }
 
-} partial class runtimeᴛfuncInfo {
+} partial class runtime_package {
 
 // entry returns the entry PC for f.
 //
@@ -746,7 +746,7 @@ internal static bool isInlined(this ref _func f) {
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.
-internal static uintptr entry(this funcInfo f) {
+internal static uintptr entryᴍ(funcInfo f) {
     return f.datap.textAddr(f.entryOff);
 }
 
@@ -813,16 +813,16 @@ partial struct srcFunc {
     internal abi.FuncID funcID;
 }
 
-} partial class runtimeᴛfuncInfo {
+} partial class runtime_package {
 
-internal static srcFunc srcFunc(this funcInfo f) {
+internal static srcFunc srcFuncᴍ(funcInfo f) {
     if (!f.valid()) {
         return new srcFunc();
     }
     return new srcFunc(f.datap, f.nameOff, f.startLine, f.funcID);
 }
 
-} partial class runtimeᴛsrcFunc {
+} partial class runtime_package {
 
 // name should be an internal detail,
 // but widely used packages access it using linkname.
@@ -831,7 +831,7 @@ internal static srcFunc srcFunc(this funcInfo f) {
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.
-internal static @string name(this srcFunc s) {
+internal static @string nameᴍ(srcFunc s) {
     if (s.datap == nil) {
         return ""u8;
     }
@@ -1217,3 +1217,29 @@ internal static bitvector stackmapdata(ж<stackmap> Ꮡstkmap, int32 n) {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛFunc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<_func> raw(this ж<Func> Ꮡf) => runtime_package.rawᴍ(Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static funcInfo funcInfo(this ж<Func> Ꮡf) => runtime_package.funcInfoᴍ(Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 startLine(this ж<Func> Ꮡf) => runtime_package.startLineᴍ(Ꮡf);
+}
+partial class runtimeᴛ_func {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static funcInfo funcInfo(this ж<_func> Ꮡf) => runtime_package.funcInfoᴍ(Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isInlined(this ref _func f) => runtime_package.isInlinedᴍ(ref f);
+}
+partial class runtimeᴛmoduledata {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr textAddr(this ref moduledata md, uint32 off32) => runtime_package.textAddrᴍ(ref md, off32);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) => runtime_package.textOffᴍ(ref md, pc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string funcName(this ref moduledata md, int32 nameOff) => runtime_package.funcNameᴍ(ref md, nameOff);
+}
+partial class runtimeᴛfuncInfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool valid(this funcInfo f) => runtime_package.validᴍ(f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Func> _Func(this funcInfo f) => runtime_package._Funcᴍ(f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr entry(this funcInfo f) => runtime_package.entryᴍ(f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static srcFunc srcFunc(this funcInfo f) => runtime_package.srcFuncᴍ(f);
+}
+partial class runtimeᴛsrcFunc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string name(this srcFunc s) => runtime_package.nameᴍ(s);
+}
+// </GlyphForwarders>

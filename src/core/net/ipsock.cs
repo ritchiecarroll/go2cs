@@ -80,12 +80,12 @@ internal static bool isIPv4(Addr addr) {
 // isNotIPv4 reports whether addr does not contain an IPv4 address.
 internal static bool isNotIPv4(Addr addr) { return !isIPv4(addr); }
 
-} partial class netᴛaddrList {
+} partial class net_package {
 
 // forResolve returns the most appropriate address in address for
 // a call to ResolveTCPAddr, ResolveUDPAddr, or ResolveIPAddr.
 // IPv4 is preferred, unless addr contains an IPv6 literal.
-internal static Addr forResolve(this addrList addrs, @string network, @string addr) {
+internal static Addr forResolveᴍ(addrList addrs, @string network, @string addr) {
     bool want6 = default;
     switch (ᐧ) {
     case {} when network == "ip"u8: {
@@ -106,7 +106,7 @@ internal static Addr forResolve(this addrList addrs, @string network, @string ad
 
 // first returns the first address which satisfies strategy, or if
 // none do, then the first address of any kind.
-internal static Addr first(this addrList addrs, Func<Addr, bool> strategy) {
+internal static Addr firstᴍ(addrList addrs, Func<Addr, bool> strategy) {
     foreach (var (_, addr) in range<Addr>(addrs)) {
         if (strategy(addr)) {
             return addr;
@@ -121,7 +121,7 @@ internal static Addr first(this addrList addrs, Func<Addr, bool> strategy) {
 // primaries, while addresses with the opposite label are returned
 // as fallbacks. For non-empty inputs, primaries is guaranteed to be
 // non-empty.
-internal static (addrList primaries, addrList fallbacks) partition(this addrList addrs, Func<Addr, bool> strategy) {
+internal static (addrList primaries, addrList fallbacks) partitionᴍ(addrList addrs, Func<Addr, bool> strategy) {
     addrList primaries = default;
     addrList fallbacks = default;
 
@@ -283,13 +283,13 @@ public static @string JoinHostPort(@string host, @string port) {
     return host + ":"u8 + port;
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // internetAddrList resolves addr, which may be a literal IP
 // address or a DNS name, and returns a list of internet protocol
 // family addresses. The result contains at least one address when
 // error is nil.
-internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) {
+internal static (addrList, error) internetAddrListᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) {
     error err = default;
     @string host = default;
     @string port = default;
@@ -382,3 +382,14 @@ internal static IP loopbackIP(@string net) {
 }
 
 } // end net_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class netᴛaddrList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Addr forResolve(this addrList addrs, @string network, @string addr) => net_package.forResolveᴍ(addrs, network, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Addr first(this addrList addrs, Func<Addr, bool> strategy) => net_package.firstᴍ(addrs, strategy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (addrList primaries, addrList fallbacks) partition(this addrList addrs, Func<Addr, bool> strategy) => net_package.partitionᴍ(addrs, strategy);
+}
+partial class netᴛResolver {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) => net_package.internetAddrListᴍ(Ꮡr, ctx, net, addr);
+}
+// </GlyphForwarders>

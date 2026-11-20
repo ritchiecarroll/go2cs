@@ -14,7 +14,7 @@ using static reflect_package;
 
 partial class reflect_package {
 
-} partial class reflectᴛrtype {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -66,7 +66,7 @@ internal static (Type, Type) groupAndSlotOf(Type ktyp, Type etyp) {
 
 internal static ж<abi.Type> stringType = rtypeOf("");
 
-} partial class reflectᴛValue {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func MapIndex is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -101,7 +101,7 @@ internal static partial void mapIterNext(ж<maps.Iter> Ꮡit) {
     it.Next();
 }
 
-} partial class reflectᴛValue {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func MapKeys is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -114,43 +114,49 @@ partial struct MapIter {
     internal maps.Iter hiter;
 }
 
-} partial class reflectᴛMapIter {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛValue {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func SetIterKey is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛMapIter {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func Value is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛValue {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func SetIterValue is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛMapIter {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func Next is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Reset is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛValue {
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func MapRange is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func SetMapIndex is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛflag {
+} partial class reflect_package {
 
 // Force slow panicking path not inlined, so it won't add to the
 // inlining budget of the caller.
 // TODO: undo when the inliner is no longer bottom-up only.
 //
 //go:noinline
-internal static partial void panicNotMap(this flag f) {
+internal static partial void panicNotMapᴍ(flag f) {
     f.mustBe(Map);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class reflectᴛflag {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void panicNotMap(this flag f) => reflect_package.panicNotMapᴍ(f);
+}
+// </GlyphForwarders>

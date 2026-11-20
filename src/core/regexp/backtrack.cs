@@ -75,12 +75,12 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
     return len(prog.Inst) <= maxBacktrackProg;
 }
 
-} partial class regexpᴛbitState {
+} partial class regexp_package {
 
 // reset resets the state of the backtracker.
 // end is the end position in the input.
 // ncap is the number of captures.
-internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) {
+internal static void resetᴍ(ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) {
     ref var prog = ref Ꮡprog.DerefOrNull();
 
     b.end = end;
@@ -120,7 +120,7 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
 
 // shouldVisit reports whether the combination of (pc, pos) has not
 // been visited yet.
-internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) {
+internal static bool shouldVisitᴍ(ref bitState b, uint32 pc, nint pos) {
     nuint n = (nuint)((nint)pc * (b.end + 1) + pos);
     if ((b.visited[n / (nuint)visitedBits] & ((uint32)1 << (int)(n & (nuint)(visitedBits - 1)))) != 0) {
         return false;
@@ -131,7 +131,7 @@ internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) {
 
 // push pushes (pc, pos, arg) onto the job stack if it should be
 // visited.
-internal static void push(this ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) {
+internal static void pushᴍ(ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     // Only check shouldVisit when arg is false.
@@ -141,10 +141,10 @@ internal static void push(this ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint
     }
 }
 
-} partial class regexpᴛRegexp {
+} partial class regexp_package {
 
 // tryBacktrack runs a backtracking search starting at pos.
-internal static bool tryBacktrack(this ж<Regexp> Ꮡre, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) {
+internal static bool tryBacktrackᴍ(ж<Regexp> Ꮡre, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) {
     ref var re = ref Ꮡre.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -328,7 +328,7 @@ Skip:
 }
 
 // backtrack runs a backtracking search of prog on the input starting at pos.
-internal static slice<nint> backtrack(this ж<Regexp> Ꮡre, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> backtrackᴍ(ж<Regexp> Ꮡre, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     var startCond = re.cond;
@@ -392,3 +392,15 @@ Match:
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class regexpᴛbitState {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) => regexp_package.resetᴍ(ref b, Ꮡprog, end, ncap);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) => regexp_package.shouldVisitᴍ(ref b, pc, pos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) => regexp_package.pushᴍ(ref b, Ꮡre, pc, pos, arg);
+}
+partial class regexpᴛRegexp {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tryBacktrack(this ж<Regexp> Ꮡre, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) => regexp_package.tryBacktrackᴍ(Ꮡre, Ꮡb, i, pc, pos);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<nint> backtrack(this ж<Regexp> Ꮡre, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) => regexp_package.backtrackᴍ(Ꮡre, ib, @is, pos, ncap, dstCap);
+}
+// </GlyphForwarders>

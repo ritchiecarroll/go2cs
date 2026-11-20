@@ -22,9 +22,9 @@ partial struct cfb {
     internal bool decrypt;
 }
 
-} partial class cipherᴛcfb {
+} partial class cipher_package {
 
-internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStreamᴍ(ref cfb x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
@@ -107,3 +107,9 @@ internal static Stream newCFB(Block block, slice<byte> iv, bool decrypt) {
 }
 
 } // end cipher_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class cipherᴛcfb {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStreamᴍ(ref x, dst, src);
+}
+// </GlyphForwarders>

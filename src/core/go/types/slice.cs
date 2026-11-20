@@ -17,12 +17,20 @@ partial struct Slice {
 // NewSlice returns a new slice type for the given element type.
 public static ж<Slice> NewSlice(Type elem) { return Ꮡ(new Slice(elem: elem)); }
 
-} partial class typesᴛSlice {
+} partial class types_package {
 
 // Elem returns the element type of slice s.
-public static Type Elem(this ref Slice s) { return s.elem; }
+internal static Type Elemᴍ(ref Slice s) { return s.elem; }
 
-public static Type Underlying(this ж<Slice> Ꮡs) { return new SliceжType(Ꮡs); }
-public static @string String(this ж<Slice> Ꮡs) { return TypeString(new SliceжType(Ꮡs), default); }
+internal static Type Underlyingᴍ(ж<Slice> Ꮡs) { return new SliceжType(Ꮡs); }
+internal static @string Stringᴍ(ж<Slice> Ꮡs) { return TypeString(new SliceжType(Ꮡs), default); }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛSlice {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Elem(this ref Slice s) => types_package.Elemᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Slice> Ꮡs) => types_package.Underlyingᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Slice> Ꮡs) => types_package.Stringᴍ(Ꮡs);
+}
+// </GlyphForwarders>

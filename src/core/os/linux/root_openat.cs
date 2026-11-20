@@ -28,9 +28,9 @@ partial struct root {
     internal bool closed; // set when closed
 }
 
-} partial class osᴛroot {
+} partial class os_package {
 
-internal static error Close(this ж<root> Ꮡr) {
+internal static error Closeᴍ(ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -49,7 +49,7 @@ internal static error Close(this ж<root> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static error incref(this ж<root> Ꮡr) {
+internal static error increfᴍ(ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -67,7 +67,7 @@ internal static error incref(this ж<root> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void decref(this ж<root> Ꮡr) {
+internal static void decrefᴍ(ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -87,7 +87,7 @@ internal static void decref(this ж<root> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static @string Name(this ref root r) {
+internal static @string Nameᴍ(ref root r) {
     return r.name;
 }
 
@@ -549,8 +549,20 @@ internal static (FileMode, error) modeAt(sysfdType parent, @string name) {
 // and the target of that symlink.
 partial struct errSymlink /*@string*/;
 
-} partial class osᴛerrSymlink {
+} partial class os_package {
 
-internal static @string Error(this errSymlink _) { throw panic("errSymlink is not user-visible"); }
+internal static @string Errorᴍ(errSymlink _) { throw panic("errSymlink is not user-visible"); }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛroot {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<root> Ꮡr) => os_package.Closeᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error incref(this ж<root> Ꮡr) => os_package.increfᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void decref(this ж<root> Ꮡr) => os_package.decrefᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this ref root r) => os_package.Nameᴍ(ref r);
+}
+partial class osᴛerrSymlink {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this errSymlink _) => os_package.Errorᴍ(_);
+}
+// </GlyphForwarders>

@@ -17,11 +17,11 @@ partial struct htmlPrinter {
     internal bool tight;
 }
 
-} partial class commentᴛPrinter {
+} partial class comment_package {
 
 // HTML returns an HTML formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the HTML output.
-public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> HTMLᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var hp = Ꮡ(new htmlPrinter(Printer: Ꮡp));
@@ -32,7 +32,7 @@ public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     return @out.Bytes();
 }
 
-} partial class commentᴛhtmlPrinter {
+} partial class comment_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string preˢ => ref preˢᵇ;
@@ -43,7 +43,7 @@ internal static ref readonly @string valueˢ => ref valueˢᵇ;
 private static readonly @string valueˢᵇ = @" value="""u8;
 
 // block prints the block x to out.
-internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void blockᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     switch (x.type()) {
@@ -130,14 +130,14 @@ internal static @string inc(@string s) {
     return "1"u8 + ((sstring)b);
 }
 
-} partial class commentᴛhtmlPrinter {
+} partial class comment_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string aHrefˢ => ref aHrefˢᵇ;
 private static readonly @string aHrefˢᵇ = @"<a href="""u8;
 
 // text prints the text sequence x to out.
-internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+internal static void textᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -187,7 +187,7 @@ private static readonly @string aposˢᵇ = "&apos;"u8;
 // escape prints s to out as plain text,
 // escaping < & " ' and > to avoid being misinterpreted
 // in larger HTML constructs.
-internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
+internal static void escapeᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint start = 0;
@@ -228,3 +228,14 @@ internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @st
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class commentᴛPrinter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.HTMLᴍ(Ꮡp, Ꮡd);
+}
+partial class commentᴛhtmlPrinter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.blockᴍ(ref p, Ꮡout, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.textᴍ(ref p, Ꮡout, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) => comment_package.escapeᴍ(ref p, Ꮡout, s);
+}
+// </GlyphForwarders>

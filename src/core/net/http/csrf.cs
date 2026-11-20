@@ -47,7 +47,7 @@ public static ж<CrossOriginProtection> NewCrossOriginProtection() {
     return Ꮡ(new CrossOriginProtection());
 }
 
-} partial class httpᴛCrossOriginProtection {
+} partial class http_package {
 
 // AddTrustedOrigin allows all requests with an [Origin] header
 // which exactly matches the given value.
@@ -58,7 +58,7 @@ public static ж<CrossOriginProtection> NewCrossOriginProtection() {
 // or request handling, and applies to future requests.
 //
 // [Origin]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin
-public static error AddTrustedOrigin(this ж<CrossOriginProtection> Ꮡc, @string origin) {
+internal static error AddTrustedOriginᴍ(ж<CrossOriginProtection> Ꮡc, @string origin) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -94,15 +94,15 @@ public static error AddTrustedOrigin(this ж<CrossOriginProtection> Ꮡc, @strin
 partial struct noopHandler {
 }
 
-} partial class httpᴛnoopHandler {
+} partial class http_package {
 
-internal static void ServeHTTP(this noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) { }
+internal static void ServeHTTPᴍ(noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) { }
 
 } partial class http_package {
 
 internal static Handler sentinelHandler = new noopHandlerжHandler(Ꮡ(new noopHandler()));
 
-} partial class httpᴛCrossOriginProtection {
+} partial class http_package {
 
 // AddInsecureBypassPattern permits all requests that match the given pattern.
 //
@@ -117,7 +117,7 @@ internal static Handler sentinelHandler = new noopHandlerжHandler(Ꮡ(new noopH
 //
 // AddInsecureBypassPattern can be called concurrently with other methods or
 // request handling, and applies to future requests.
-public static void AddInsecureBypassPattern(this ж<CrossOriginProtection> Ꮡc, @string pattern) {
+internal static void AddInsecureBypassPatternᴍ(ж<CrossOriginProtection> Ꮡc, @string pattern) {
     ж<ServeMux> bypass = default;
 
     // Lazily initialize c.bypass
@@ -142,7 +142,7 @@ public static void AddInsecureBypassPattern(this ж<CrossOriginProtection> Ꮡc,
 // or request handling, and applies to future requests.
 //
 // Check does not call the error handler.
-public static void SetDenyHandler(this ж<CrossOriginProtection> Ꮡc, Handler hʗp) {
+internal static void SetDenyHandlerᴍ(ж<CrossOriginProtection> Ꮡc, Handler hʗp) {
     ref var h = ref heap(hʗp, out var Ꮡh);
 
     if (h == nil) {
@@ -160,7 +160,7 @@ private static readonly @string originˢᵇ = "Origin"u8;
 
 // Check applies cross-origin checks to a request.
 // It returns an error if the request should be rejected.
-public static error Check(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) {
+internal static error Checkᴍ(ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var exprᴛ1 = req.Method;
@@ -215,11 +215,11 @@ public static error Check(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡre
 internal static error errCrossOriginRequest = errors.New("cross-origin request detected from Sec-Fetch-Site header");
 internal static error errCrossOriginRequestFromOldBrowser = errors.New("cross-origin request detected, and/or browser is out of date: "u8 + "Sec-Fetch-Site is missing, and Origin does not match Host"u8);
 
-} partial class httpᴛCrossOriginProtection {
+} partial class http_package {
 
 // isRequestExempt checks the bypasses which require taking a lock, and should
 // be deferred until the last moment.
-internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) {
+internal static bool isRequestExemptᴍ(ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -249,7 +249,7 @@ internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Req
 // If a request fails cross-origin checks, the request is rejected
 // with a 403 Forbidden status or handled with the handler passed
 // to [CrossOriginProtection.SetDenyHandler].
-public static Handler Handler(this ж<CrossOriginProtection> Ꮡc, Handler h) {
+internal static Handler Handlerᴍ(ж<CrossOriginProtection> Ꮡc, Handler h) {
     return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
         var err = Ꮡc.Check(r); if (err != nil) {
             var deny = Ꮡc.Ꮡdeny.Load(); if (deny != nil) {
@@ -264,3 +264,17 @@ public static Handler Handler(this ж<CrossOriginProtection> Ꮡc, Handler h) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛCrossOriginProtection {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error AddTrustedOrigin(this ж<CrossOriginProtection> Ꮡc, @string origin) => http_package.AddTrustedOriginᴍ(Ꮡc, origin);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddInsecureBypassPattern(this ж<CrossOriginProtection> Ꮡc, @string pattern) => http_package.AddInsecureBypassPatternᴍ(Ꮡc, pattern);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetDenyHandler(this ж<CrossOriginProtection> Ꮡc, Handler hʗp) => http_package.SetDenyHandlerᴍ(Ꮡc, hʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Check(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) => http_package.Checkᴍ(Ꮡc, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡreq) => http_package.isRequestExemptᴍ(Ꮡc, Ꮡreq);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Handler Handler(this ж<CrossOriginProtection> Ꮡc, Handler h) => http_package.Handlerᴍ(Ꮡc, h);
+}
+partial class httpᴛnoopHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) => http_package.ServeHTTPᴍ(_Δp0, _Δp1, _Δp2);
+}
+// </GlyphForwarders>

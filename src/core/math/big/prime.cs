@@ -9,7 +9,7 @@ using static big_package;
 
 partial class big_package {
 
-} partial class bigᴛInt {
+} partial class big_package {
 
 // ProbablyPrime reports whether x is probably prime,
 // applying the Miller-Rabin test with n pseudorandomly chosen bases
@@ -28,7 +28,7 @@ partial class big_package {
 //
 // As of Go 1.8, ProbablyPrime(0) is allowed and applies only a Baillie-PSW test.
 // Before Go 1.8, ProbablyPrime applied only the Miller-Rabin tests, and ProbablyPrime(0) panicked.
-public static bool ProbablyPrime(this ж<Int> Ꮡx, nint n) {
+internal static bool ProbablyPrimeᴍ(ж<Int> Ꮡx, nint n) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -98,14 +98,14 @@ public static bool ProbablyPrime(this ж<Int> Ꮡx, nint n) {
     finally { ᒐ.Run(); }
 }
 
-} partial class bigᴛnat {
+} partial class big_package {
 
 // probablyPrimeMillerRabin reports whether n passes reps rounds of the
 // Miller-Rabin primality test, using pseudo-randomly chosen bases.
 // If force2 is true, one of the rounds is forced to use base 2.
 // See Handbook of Applied Cryptography, p. 139, Algorithm 4.24.
 // The number n is known to be non-zero.
-internal static bool probablyPrimeMillerRabin(this nat n, ж<stack> stk, nint reps, bool force2) {
+internal static bool probablyPrimeMillerRabinᴍ(nat n, ж<stack> stk, nint reps, bool force2) {
     var nm1 = ((nat)default).sub(n, natOne);
     // determine q, k such that nm1 = q << k
     nuint k = nm1.trailingZeroBits();
@@ -173,7 +173,7 @@ break_NextRandom:;
 //
 // Crandall and Pomerance, Prime Numbers: A Computational Perspective, 2nd ed.
 // Springer, 2005.
-internal static bool probablyPrimeLucas(this nat n, ж<stack> stk) {
+internal static bool probablyPrimeLucasᴍ(nat n, ж<stack> stk) {
     // Discard 0, 1.
     if (len(n) == 0 || n.cmp(natOne) == 0) {
         return false;
@@ -346,3 +346,13 @@ internal static bool probablyPrimeLucas(this nat n, ж<stack> stk) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bigᴛInt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ProbablyPrime(this ж<Int> Ꮡx, nint n) => big_package.ProbablyPrimeᴍ(Ꮡx, n);
+}
+partial class bigᴛnat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool probablyPrimeMillerRabin(this nat n, ж<stack> stk, nint reps, bool force2) => big_package.probablyPrimeMillerRabinᴍ(n, stk, reps, force2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool probablyPrimeLucas(this nat n, ж<stack> stk) => big_package.probablyPrimeLucasᴍ(n, stk);
+}
+// </GlyphForwarders>

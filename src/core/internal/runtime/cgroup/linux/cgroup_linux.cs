@@ -28,13 +28,13 @@ partial struct CPU {
     internal nint periodFD;
 }
 
-} partial class cgroupᴛCPU {
+} partial class cgroup_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string impossibleCgroupVersionˢ => ref impossibleCgroupVersionˢᵇ;
 private static readonly @string impossibleCgroupVersionˢᵇ = "impossible cgroup version"u8;
 
-public static void Close(this CPU c) {
+internal static void Closeᴍ(CPU c) {
     switch (c.version) {
     case var ᴛ when ᴛ == V1: {
         linux.Close(c.quotaFD);
@@ -307,3 +307,9 @@ public static (nint, error) FindCPUMountPoint(slice<byte> @out, slice<byte> cgro
 }
 
 } // end cgroup_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class cgroupᴛCPU {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Close(this CPU c) => cgroup_package.Closeᴍ(c);
+}
+// </GlyphForwarders>

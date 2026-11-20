@@ -76,10 +76,10 @@ internal static slice<intName> versionStrings = [
     new(1, "EV_CURRENT")
 ];
 
-} partial class elfᴛVersion {
+} partial class elf_package {
 
-public static @string String(this Version i) { return stringName((uint32)i, versionStrings, false); }
-public static @string GoString(this Version i) { return stringName((uint32)i, versionStrings, true); }
+internal static @string Stringᴍ(Version i) { return stringName((uint32)i, versionStrings, false); }
+internal static @string GoStringᴍ(Version i) { return stringName((uint32)i, versionStrings, true); }
 
 } partial class elf_package {
 
@@ -96,10 +96,10 @@ internal static slice<intName> classStrings = [
     new(2, "ELFCLASS64")
 ];
 
-} partial class elfᴛClass {
+} partial class elf_package {
 
-public static @string String(this Class i) { return stringName((uint32)i, classStrings, false); }
-public static @string GoString(this Class i) { return stringName((uint32)i, classStrings, true); }
+internal static @string Stringᴍ(Class i) { return stringName((uint32)i, classStrings, false); }
+internal static @string GoStringᴍ(Class i) { return stringName((uint32)i, classStrings, true); }
 
 } partial class elf_package {
 
@@ -116,10 +116,10 @@ internal static slice<intName> dataStrings = [
     new(2, "ELFDATA2MSB")
 ];
 
-} partial class elfᴛData {
+} partial class elf_package {
 
-public static @string String(this Data i) { return stringName((uint32)i, dataStrings, false); }
-public static @string GoString(this Data i) { return stringName((uint32)i, dataStrings, true); }
+internal static @string Stringᴍ(Data i) { return stringName((uint32)i, dataStrings, false); }
+internal static @string GoStringᴍ(Data i) { return stringName((uint32)i, dataStrings, true); }
 
 } partial class elf_package {
 
@@ -170,10 +170,10 @@ public static OSABI ELFOSABI_STANDALONE => 255; /* Standalone (embedded) applica
     new(255, "ELFOSABI_STANDALONE")
 ]; }
 
-} partial class elfᴛOSABI {
+} partial class elf_package {
 
-public static @string String(this OSABI i) { return stringName((uint32)i, osabiStrings, false); }
-public static @string GoString(this OSABI i) { return stringName((uint32)i, osabiStrings, true); }
+internal static @string Stringᴍ(OSABI i) { return stringName((uint32)i, osabiStrings, false); }
+internal static @string GoStringᴍ(OSABI i) { return stringName((uint32)i, osabiStrings, true); }
 
 } partial class elf_package {
 
@@ -202,10 +202,10 @@ public static Type ET_HIPROC => 0xffff;    /* Last processor-specific. */
     new(0xffff, "ET_HIPROC")
 ]; }
 
-} partial class elfᴛType {
+} partial class elf_package {
 
-public static @string String(this Type i) { return stringName((uint32)i, typeStrings, false); }
-public static @string GoString(this Type i) { return stringName((uint32)i, typeStrings, true); }
+internal static @string Stringᴍ(Type i) { return stringName((uint32)i, typeStrings, false); }
+internal static @string GoStringᴍ(Type i) { return stringName((uint32)i, typeStrings, true); }
 
 } partial class elf_package {
 
@@ -594,10 +594,10 @@ public static Machine EM_ALPHA => 0x9026;          /* Alpha (written in the abse
     new(0x9026, "EM_ALPHA")
 ]; }
 
-} partial class elfᴛMachine {
+} partial class elf_package {
 
-public static @string String(this Machine i) { return stringName((uint32)i, machineStrings, false); }
-public static @string GoString(this Machine i) { return stringName((uint32)i, machineStrings, true); }
+internal static @string Stringᴍ(Machine i) { return stringName((uint32)i, machineStrings, false); }
+internal static @string GoStringᴍ(Machine i) { return stringName((uint32)i, machineStrings, true); }
 
 } partial class elf_package {
 
@@ -624,10 +624,10 @@ public static SectionIndex SHN_HIRESERVE => 0xffff;    /* Last of reserved range
     new(0xffff, "SHN_XINDEX")
 ]; }
 
-} partial class elfᴛSectionIndex {
+} partial class elf_package {
 
-public static @string String(this SectionIndex i) { return stringName((uint32)i, shnStrings, false); }
-public static @string GoString(this SectionIndex i) { return stringName((uint32)i, shnStrings, true); }
+internal static @string Stringᴍ(SectionIndex i) { return stringName((uint32)i, shnStrings, false); }
+internal static @string GoStringᴍ(SectionIndex i) { return stringName((uint32)i, shnStrings, true); }
 
 } partial class elf_package {
 
@@ -700,10 +700,10 @@ public static SectionType SHT_HIUSER => 0xffffffff;                  /* specific
     new(0xffffffffU, "SHT_HIUSER")
 ]; }
 
-} partial class elfᴛSectionType {
+} partial class elf_package {
 
-public static @string String(this SectionType i) { return stringName((uint32)i, shtStrings, false); }
-public static @string GoString(this SectionType i) { return stringName((uint32)i, shtStrings, true); }
+internal static @string Stringᴍ(SectionType i) { return stringName((uint32)i, shtStrings, false); }
+internal static @string GoStringᴍ(SectionType i) { return stringName((uint32)i, shtStrings, true); }
 
 } partial class elf_package {
 
@@ -738,10 +738,10 @@ public static SectionFlag SHF_MASKPROC => 0xf0000000;                /* Processo
     new(0x800, "SHF_COMPRESSED")
 ]; }
 
-} partial class elfᴛSectionFlag {
+} partial class elf_package {
 
-public static @string String(this SectionFlag i) { return flagName((uint32)i, shfStrings, false); }
-public static @string GoString(this SectionFlag i) { return flagName((uint32)i, shfStrings, true); }
+internal static @string Stringᴍ(SectionFlag i) { return flagName((uint32)i, shfStrings, false); }
+internal static @string GoStringᴍ(SectionFlag i) { return flagName((uint32)i, shfStrings, true); }
 
 } partial class elf_package {
 
@@ -764,10 +764,10 @@ public static CompressionType COMPRESS_HIPROC => 0x7fffffff;        /* Last proc
     new(0x7fffffff, "COMPRESS_HIPROC")
 ]; }
 
-} partial class elfᴛCompressionType {
+} partial class elf_package {
 
-public static @string String(this CompressionType i) { return stringName((uint32)i, compressionStrings, false); }
-public static @string GoString(this CompressionType i) { return stringName((uint32)i, compressionStrings, true); }
+internal static @string Stringᴍ(CompressionType i) { return stringName((uint32)i, compressionStrings, false); }
+internal static @string GoStringᴍ(CompressionType i) { return stringName((uint32)i, compressionStrings, true); }
 
 } partial class elf_package {
 
@@ -849,10 +849,10 @@ public static ProgType PT_HIPROC => 0x7fffffff;        /* Last processor-specifi
     new(0x7fffffff, "PT_HIPROC")
 ]; }
 
-} partial class elfᴛProgType {
+} partial class elf_package {
 
-public static @string String(this ProgType i) { return stringName((uint32)i, ptStrings, false); }
-public static @string GoString(this ProgType i) { return stringName((uint32)i, ptStrings, true); }
+internal static @string Stringᴍ(ProgType i) { return stringName((uint32)i, ptStrings, false); }
+internal static @string GoStringᴍ(ProgType i) { return stringName((uint32)i, ptStrings, true); }
 
 } partial class elf_package {
 
@@ -871,10 +871,10 @@ internal static slice<intName> pfStrings = [
     new(0x4, "PF_R")
 ];
 
-} partial class elfᴛProgFlag {
+} partial class elf_package {
 
-public static @string String(this ProgFlag i) { return flagName((uint32)i, pfStrings, false); }
-public static @string GoString(this ProgFlag i) { return flagName((uint32)i, pfStrings, true); }
+internal static @string Stringᴍ(ProgFlag i) { return flagName((uint32)i, pfStrings, false); }
+internal static @string GoStringᴍ(ProgFlag i) { return flagName((uint32)i, pfStrings, true); }
 
 } partial class elf_package {
 
@@ -1106,10 +1106,10 @@ public static DynTag DT_HIPROC => 0x7fffffff;        /* Last processor-specific 
     new(0x7fffffff, "DT_FILTER")
 ]; }
 
-} partial class elfᴛDynTag {
+} partial class elf_package {
 
-public static @string String(this DynTag i) { return stringName((uint32)i, dtStrings, false); }
-public static @string GoString(this DynTag i) { return stringName((uint32)i, dtStrings, true); }
+internal static @string Stringᴍ(DynTag i) { return stringName((uint32)i, dtStrings, false); }
+internal static @string GoStringᴍ(DynTag i) { return stringName((uint32)i, dtStrings, true); }
 
 } partial class elf_package {
 
@@ -1137,10 +1137,10 @@ internal static slice<intName> dflagStrings = [
     new(0x0010, "DF_STATIC_TLS")
 ];
 
-} partial class elfᴛDynFlag {
+} partial class elf_package {
 
-public static @string String(this DynFlag i) { return flagName((uint32)i, dflagStrings, false); }
-public static @string GoString(this DynFlag i) { return flagName((uint32)i, dflagStrings, true); }
+internal static @string Stringᴍ(DynFlag i) { return flagName((uint32)i, dflagStrings, false); }
+internal static @string GoStringᴍ(DynFlag i) { return flagName((uint32)i, dflagStrings, true); }
 
 } partial class elf_package {
 
@@ -1257,10 +1257,10 @@ public static DynFlag1 DF_1_NOCOMMON => 0x40000000;
     new(0x40000000, "DF_1_NOCOMMON")
 ]; }
 
-} partial class elfᴛDynFlag1 {
+} partial class elf_package {
 
-public static @string String(this DynFlag1 i) { return flagName((uint32)i, dflag1Strings, false); }
-public static @string GoString(this DynFlag1 i) { return flagName((uint32)i, dflag1Strings, true); }
+internal static @string Stringᴍ(DynFlag1 i) { return flagName((uint32)i, dflag1Strings, false); }
+internal static @string GoStringᴍ(DynFlag1 i) { return flagName((uint32)i, dflag1Strings, true); }
 
 } partial class elf_package {
 
@@ -1277,10 +1277,10 @@ internal static slice<intName> ntypeStrings = [
     new(3, "NT_PRPSINFO")
 ];
 
-} partial class elfᴛNType {
+} partial class elf_package {
 
-public static @string String(this NType i) { return stringName((uint32)i, ntypeStrings, false); }
-public static @string GoString(this NType i) { return stringName((uint32)i, ntypeStrings, true); }
+internal static @string Stringᴍ(NType i) { return stringName((uint32)i, ntypeStrings, false); }
+internal static @string GoStringᴍ(NType i) { return stringName((uint32)i, ntypeStrings, true); }
 
 } partial class elf_package {
 
@@ -1305,10 +1305,10 @@ public static SymBind STB_HIPROC => 15; /*   specific semantics. */
     new(15, "STB_HIPROC")
 ]; }
 
-} partial class elfᴛSymBind {
+} partial class elf_package {
 
-public static @string String(this SymBind i) { return stringName((uint32)i, stbStrings, false); }
-public static @string GoString(this SymBind i) { return stringName((uint32)i, stbStrings, true); }
+internal static @string Stringᴍ(SymBind i) { return stringName((uint32)i, stbStrings, false); }
+internal static @string GoStringᴍ(SymBind i) { return stringName((uint32)i, stbStrings, true); }
 
 } partial class elf_package {
 
@@ -1348,10 +1348,10 @@ public static SymType STT_GNU_IFUNC => 10; /* Indirect code object. */
     new(15, "STT_HIPROC")
 ]; }
 
-} partial class elfᴛSymType {
+} partial class elf_package {
 
-public static @string String(this SymType i) { return stringName((uint32)i, sttStrings, false); }
-public static @string GoString(this SymType i) { return stringName((uint32)i, sttStrings, true); }
+internal static @string Stringᴍ(SymType i) { return stringName((uint32)i, sttStrings, false); }
+internal static @string GoStringᴍ(SymType i) { return stringName((uint32)i, sttStrings, true); }
 
 } partial class elf_package {
 
@@ -1370,10 +1370,10 @@ internal static slice<intName> stvStrings = [
     new(0x3, "STV_PROTECTED")
 ];
 
-} partial class elfᴛSymVis {
+} partial class elf_package {
 
-public static @string String(this SymVis i) { return stringName((uint32)i, stvStrings, false); }
-public static @string GoString(this SymVis i) { return stringName((uint32)i, stvStrings, true); }
+internal static @string Stringᴍ(SymVis i) { return stringName((uint32)i, stvStrings, false); }
+internal static @string GoStringᴍ(SymVis i) { return stringName((uint32)i, stvStrings, true); }
 
 } partial class elf_package {
 
@@ -1474,10 +1474,10 @@ public static R_X86_64 R_X86_64_REX_GOTPCRELX => 42;
     new(42, "R_X86_64_REX_GOTPCRELX")
 ]; }
 
-} partial class elfᴛR_X86_64 {
+} partial class elf_package {
 
-public static @string String(this R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, false); }
-public static @string GoString(this R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, true); }
+internal static @string Stringᴍ(R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, false); }
+internal static @string GoStringᴍ(R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, true); }
 
 } partial class elf_package {
 
@@ -1748,10 +1748,10 @@ public static R_AARCH64 R_AARCH64_IRELATIVE => 1032;
     new(1032, "R_AARCH64_IRELATIVE")
 ]; }
 
-} partial class elfᴛR_AARCH64 {
+} partial class elf_package {
 
-public static @string String(this R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, false); }
-public static @string GoString(this R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, true); }
+internal static @string Stringᴍ(R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, false); }
+internal static @string GoStringᴍ(R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, true); }
 
 } partial class elf_package {
 
@@ -1818,10 +1818,10 @@ public static R_ALPHA R_ALPHA_RELATIVE => 27;      /* Adjust by program base */
     new(27, "R_ALPHA_RELATIVE")
 ]; }
 
-} partial class elfᴛR_ALPHA {
+} partial class elf_package {
 
-public static @string String(this R_ALPHA i) { return stringName((uint32)i, ralphaStrings, false); }
-public static @string GoString(this R_ALPHA i) { return stringName((uint32)i, ralphaStrings, true); }
+internal static @string Stringᴍ(R_ALPHA i) { return stringName((uint32)i, ralphaStrings, false); }
+internal static @string GoStringᴍ(R_ALPHA i) { return stringName((uint32)i, ralphaStrings, true); }
 
 } partial class elf_package {
 
@@ -2120,10 +2120,10 @@ public static R_ARM R_ARM_RBASE => 255;
     new(255, "R_ARM_RBASE")
 ]; }
 
-} partial class elfᴛR_ARM {
+} partial class elf_package {
 
-public static @string String(this R_ARM i) { return stringName((uint32)i, rarmStrings, false); }
-public static @string GoString(this R_ARM i) { return stringName((uint32)i, rarmStrings, true); }
+internal static @string Stringᴍ(R_ARM i) { return stringName((uint32)i, rarmStrings, false); }
+internal static @string GoStringᴍ(R_ARM i) { return stringName((uint32)i, rarmStrings, true); }
 
 } partial class elf_package {
 
@@ -2218,10 +2218,10 @@ public static R_386 R_386_GOT32X => 43;
     new(43, "R_386_GOT32X")
 ]; }
 
-} partial class elfᴛR_386 {
+} partial class elf_package {
 
-public static @string String(this R_386 i) { return stringName((uint32)i, r386Strings, false); }
-public static @string GoString(this R_386 i) { return stringName((uint32)i, r386Strings, true); }
+internal static @string Stringᴍ(R_386 i) { return stringName((uint32)i, r386Strings, false); }
+internal static @string GoStringᴍ(R_386 i) { return stringName((uint32)i, r386Strings, true); }
 
 } partial class elf_package {
 
@@ -2332,10 +2332,10 @@ public static R_MIPS R_MIPS_PC32 => 248; /* 32 bit PC relative reference */
     new(248, "R_MIPS_PC32")
 ]; }
 
-} partial class elfᴛR_MIPS {
+} partial class elf_package {
 
-public static @string String(this R_MIPS i) { return stringName((uint32)i, rmipsStrings, false); }
-public static @string GoString(this R_MIPS i) { return stringName((uint32)i, rmipsStrings, true); }
+internal static @string Stringᴍ(R_MIPS i) { return stringName((uint32)i, rmipsStrings, false); }
+internal static @string GoStringᴍ(R_MIPS i) { return stringName((uint32)i, rmipsStrings, true); }
 
 } partial class elf_package {
 
@@ -2580,10 +2580,10 @@ public static R_LARCH R_LARCH_TLS_DESC_PCREL20_S2 => 126;
     new(126, "R_LARCH_TLS_DESC_PCREL20_S2")
 ]; }
 
-} partial class elfᴛR_LARCH {
+} partial class elf_package {
 
-public static @string String(this R_LARCH i) { return stringName((uint32)i, rlarchStrings, false); }
-public static @string GoString(this R_LARCH i) { return stringName((uint32)i, rlarchStrings, true); }
+internal static @string Stringᴍ(R_LARCH i) { return stringName((uint32)i, rlarchStrings, false); }
+internal static @string GoStringᴍ(R_LARCH i) { return stringName((uint32)i, rlarchStrings, true); }
 
 } partial class elf_package {
 
@@ -2753,10 +2753,10 @@ public static R_PPC R_PPC_EMB_RELSDA => 116;
     new(116, "R_PPC_EMB_RELSDA")
 ]; }
 
-} partial class elfᴛR_PPC {
+} partial class elf_package {
 
-public static @string String(this R_PPC i) { return stringName((uint32)i, rppcStrings, false); }
-public static @string GoString(this R_PPC i) { return stringName((uint32)i, rppcStrings, true); }
+internal static @string Stringᴍ(R_PPC i) { return stringName((uint32)i, rppcStrings, false); }
+internal static @string GoStringᴍ(R_PPC i) { return stringName((uint32)i, rppcStrings, true); }
 
 } partial class elf_package {
 
@@ -3094,10 +3094,10 @@ public static R_PPC64 R_PPC64_GNU_VTENTRY => 254;
     new(254, "R_PPC64_GNU_VTENTRY")
 ]; }
 
-} partial class elfᴛR_PPC64 {
+} partial class elf_package {
 
-public static @string String(this R_PPC64 i) { return stringName((uint32)i, rppc64Strings, false); }
-public static @string GoString(this R_PPC64 i) { return stringName((uint32)i, rppc64Strings, true); }
+internal static @string Stringᴍ(R_PPC64 i) { return stringName((uint32)i, rppc64Strings, false); }
+internal static @string GoStringᴍ(R_PPC64 i) { return stringName((uint32)i, rppc64Strings, true); }
 
 } partial class elf_package {
 
@@ -3216,10 +3216,10 @@ public static R_RISCV R_RISCV_32_PCREL => 57;     /* 32-bit PC relative */
     new(57, "R_RISCV_32_PCREL")
 ]; }
 
-} partial class elfᴛR_RISCV {
+} partial class elf_package {
 
-public static @string String(this R_RISCV i) { return stringName((uint32)i, rriscvStrings, false); }
-public static @string GoString(this R_RISCV i) { return stringName((uint32)i, rriscvStrings, true); }
+internal static @string Stringᴍ(R_RISCV i) { return stringName((uint32)i, rriscvStrings, false); }
+internal static @string GoStringᴍ(R_RISCV i) { return stringName((uint32)i, rriscvStrings, true); }
 
 } partial class elf_package {
 
@@ -3352,10 +3352,10 @@ public static R_390 R_390_TLS_GOTIE20 => 60;
     new(60, "R_390_TLS_GOTIE20")
 ]; }
 
-} partial class elfᴛR_390 {
+} partial class elf_package {
 
-public static @string String(this R_390 i) { return stringName((uint32)i, r390Strings, false); }
-public static @string GoString(this R_390 i) { return stringName((uint32)i, r390Strings, true); }
+internal static @string Stringᴍ(R_390 i) { return stringName((uint32)i, r390Strings, false); }
+internal static @string GoStringᴍ(R_390 i) { return stringName((uint32)i, r390Strings, true); }
 
 } partial class elf_package {
 
@@ -3478,10 +3478,10 @@ public static R_SPARC R_SPARC_UA16 => 55;
     new(55, "R_SPARC_UA16")
 ]; }
 
-} partial class elfᴛR_SPARC {
+} partial class elf_package {
 
-public static @string String(this R_SPARC i) { return stringName((uint32)i, rsparcStrings, false); }
-public static @string GoString(this R_SPARC i) { return stringName((uint32)i, rsparcStrings, true); }
+internal static @string Stringᴍ(R_SPARC i) { return stringName((uint32)i, rsparcStrings, false); }
+internal static @string GoStringᴍ(R_SPARC i) { return stringName((uint32)i, rsparcStrings, true); }
 
 } partial class elf_package {
 
@@ -3742,3 +3742,130 @@ internal static @string flagName(uint32 i, slice<intName> names, bool goSyntax) 
 }
 
 } // end elf_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class elfᴛVersion {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Version i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Version i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛClass {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Class i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Class i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛData {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Data i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Data i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛOSABI {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this OSABI i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this OSABI i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Type i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Type i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛMachine {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Machine i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Machine i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛSectionIndex {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SectionIndex i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SectionIndex i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛSectionType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SectionType i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SectionType i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛSectionFlag {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SectionFlag i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SectionFlag i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛCompressionType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CompressionType i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this CompressionType i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛProgType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ProgType i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this ProgType i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛProgFlag {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ProgFlag i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this ProgFlag i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛDynTag {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this DynTag i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this DynTag i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛDynFlag {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this DynFlag i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this DynFlag i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛDynFlag1 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this DynFlag1 i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this DynFlag1 i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛNType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this NType i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this NType i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛSymBind {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SymBind i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SymBind i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛSymType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SymType i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SymType i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛSymVis {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SymVis i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SymVis i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_X86_64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_X86_64 i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_X86_64 i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_AARCH64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_AARCH64 i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_AARCH64 i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_ALPHA {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_ALPHA i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_ALPHA i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_ARM {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_ARM i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_ARM i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_386 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_386 i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_386 i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_MIPS {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_MIPS i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_MIPS i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_LARCH {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_LARCH i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_LARCH i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_PPC {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_PPC i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_PPC i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_PPC64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_PPC64 i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_PPC64 i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_RISCV {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_RISCV i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_RISCV i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_390 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_390 i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_390 i) => elf_package.GoStringᴍ(i);
+}
+partial class elfᴛR_SPARC {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_SPARC i) => elf_package.Stringᴍ(i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_SPARC i) => elf_package.GoStringᴍ(i);
+}
+// </GlyphForwarders>

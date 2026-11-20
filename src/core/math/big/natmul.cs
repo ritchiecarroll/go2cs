@@ -14,11 +14,11 @@ partial class big_package {
 internal static readonly ж<nint> ᏑkaratsubaThreshold = new StaticBox<nint>(40);
 internal static ref nint karatsubaThreshold => ref ((StaticBox<nint>)ᏑkaratsubaThreshold).ValueSlot; // see calibrate_test.go
 
-} partial class bigᴛnat {
+} partial class big_package {
 
 // mul sets z = x*y, using stk for temporary storage.
 // The caller may pass stk == nil to request that mul obtain and release one itself.
-internal static nat mul(this nat z, ж<stack> Ꮡstk, nat x, nat y) {
+internal static nat mulᴍ(nat z, ж<stack> Ꮡstk, nat x, nat y) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -86,11 +86,11 @@ internal static ref nint basicSqrThreshold => ref ((StaticBox<nint>)ᏑbasicSqrT
 internal static readonly ж<nint> ᏑkaratsubaSqrThreshold = new StaticBox<nint>(80);
 internal static ref nint karatsubaSqrThreshold => ref ((StaticBox<nint>)ᏑkaratsubaSqrThreshold).ValueSlot; // see calibrate_test.go
 
-} partial class bigᴛnat {
+} partial class big_package {
 
 // sqr sets z = x*x, using stk for temporary storage.
 // The caller may pass stk == nil to request that sqr obtain and release one itself.
-internal static nat sqr(this nat z, ж<stack> Ꮡstk, nat x) {
+internal static nat sqrᴍ(nat z, ж<stack> Ꮡstk, nat x) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -169,10 +169,10 @@ internal static void basicSqr(ж<stack> Ꮡstk, nat z, nat x) {
     finally { ᒐ.Run(); }
 }
 
-} partial class bigᴛnat {
+} partial class big_package {
 
 // mulAddWW returns z = x*y + r.
-internal static nat mulAddWW(this nat z, nat x, Word y, Word r) {
+internal static nat mulAddWWᴍ(nat z, nat x, Word y, Word r) {
     nint m = len(x);
     if (m == 0 || y == 0) {
         return z.setWord(r); // result is r
@@ -411,3 +411,11 @@ internal static void trace(@string name, ж<Int> x) {
 }
 
 } // end big_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bigᴛnat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat mul(this nat z, ж<stack> Ꮡstk, nat x, nat y) => big_package.mulᴍ(z, Ꮡstk, x, y);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat sqr(this nat z, ж<stack> Ꮡstk, nat x) => big_package.sqrᴍ(z, Ꮡstk, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat mulAddWW(this nat z, nat x, Word y, Word r) => big_package.mulAddWWᴍ(z, x, y, r);
+}
+// </GlyphForwarders>

@@ -14,21 +14,21 @@ partial struct errorReader {
     /*embed*/ internal error error;
 }
 
-} partial class elfᴛerrorReader {
+} partial class elf_package {
 
-internal static (nint n, error err) Read(this errorReader r, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(errorReader r, slice<byte> p) {
     return (0, r.error);
 }
 
-internal static (nint n, error err) ReadAt(this errorReader r, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAtᴍ(errorReader r, slice<byte> p, int64 off) {
     return (0, r.error);
 }
 
-internal static (int64, error) Seek(this errorReader r, int64 offset, nint whence) {
+internal static (int64, error) Seekᴍ(errorReader r, int64 offset, nint whence) {
     return (0, r.error);
 }
 
-internal static error Close(this errorReader r) {
+internal static error Closeᴍ(errorReader r) {
     return r.error;
 }
 
@@ -45,9 +45,9 @@ partial struct readSeekerFromReader {
     internal int64 offset;
 }
 
-} partial class elfᴛreadSeekerFromReader {
+} partial class elf_package {
 
-internal static void start(this ref readSeekerFromReader r) {
+internal static void startᴍ(ref readSeekerFromReader r) {
     var (x, err) = r.reset();
     if (err != nil) {
         r.r = new errorReader(err);
@@ -57,7 +57,7 @@ internal static void start(this ref readSeekerFromReader r) {
     r.offset = 0;
 }
 
-internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref readSeekerFromReader r, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -69,7 +69,7 @@ internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<
     return (n, err);
 }
 
-internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) {
+internal static (int64, error) Seekᴍ(ref readSeekerFromReader r, int64 offset, nint whence) {
     int64 newOffset = default;
     switch (whence) {
     case var ᴛ when ᴛ == io.SeekStart: {
@@ -126,3 +126,17 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class elfᴛerrorReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this errorReader r, slice<byte> p) => elf_package.Readᴍ(r, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) ReadAt(this errorReader r, slice<byte> p, int64 off) => elf_package.ReadAtᴍ(r, p, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) Seek(this errorReader r, int64 offset, nint whence) => elf_package.Seekᴍ(r, offset, whence);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this errorReader r) => elf_package.Closeᴍ(r);
+}
+partial class elfᴛreadSeekerFromReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void start(this ref readSeekerFromReader r) => elf_package.startᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<byte> p) => elf_package.Readᴍ(ref r, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) => elf_package.Seekᴍ(ref r, offset, whence);
+}
+// </GlyphForwarders>

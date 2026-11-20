@@ -30,12 +30,12 @@ internal static bitReader newBitReader(io.Reader r) {
     return new bitReader(r: byter);
 }
 
-} partial class bzip2ᴛbitReader {
+} partial class bzip2_package {
 
 // ReadBits64 reads the given number of bits and returns them in the
 // least-significant part of a uint64. In the event of an error, it returns 0
 // and the error can be obtained by calling bitReader.Err().
-internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) {
+internal static uint64 /*n*/ ReadBits64ᴍ(ref bitReader br, nuint bits) {
     uint64 n = default;
 
     while (bits > br.bits) {
@@ -71,18 +71,27 @@ internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) {
     return n;
 }
 
-internal static nint /*n*/ ReadBits(this ref bitReader br, nuint bits) {
+internal static nint /*n*/ ReadBitsᴍ(ref bitReader br, nuint bits) {
     var n64 = br.ReadBits64(bits);
     return (nint)n64;
 }
 
-internal static bool ReadBit(this ref bitReader br) {
+internal static bool ReadBitᴍ(ref bitReader br) {
     nint n = br.ReadBits(1);
     return n != 0;
 }
 
-internal static error Err(this ref bitReader br) {
+internal static error Errᴍ(ref bitReader br) {
     return br.err;
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class bzip2ᴛbitReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) => bzip2_package.ReadBits64ᴍ(ref br, bits);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*n*/ ReadBits(this ref bitReader br, nuint bits) => bzip2_package.ReadBitsᴍ(ref br, bits);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool ReadBit(this ref bitReader br) => bzip2_package.ReadBitᴍ(ref br);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this ref bitReader br) => bzip2_package.Errᴍ(ref br);
+}
+// </GlyphForwarders>

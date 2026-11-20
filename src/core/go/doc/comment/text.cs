@@ -23,11 +23,11 @@ partial struct textPrinter {
     internal nint width;
 }
 
-} partial class commentᴛPrinter {
+} partial class comment_package {
 
 // Text returns a textual formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the text output.
-public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> Textᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -89,14 +89,14 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
     @out.WriteByte((byte)'\n');
 }
 
-} partial class commentᴛtextPrinter {
+} partial class comment_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string fourSpaceᶜ2 => ref fourSpaceᶜ2ᵇ;
 private static readonly @string fourSpaceᶜ2ᵇ = "    "u8;
 
 // block prints the block x to out.
-internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void blockᴍ(ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -160,7 +160,7 @@ internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, B
 }
 
 // text prints the text sequence x to out.
-internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
+internal static void textᴍ(ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -192,7 +192,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
 // oneLongLine prints the text sequence x to out as one long line,
 // without worrying about line wrapping.
 // Explicit links have the [ ] dropped to improve readability.
-internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @out, slice<Text> x) {
+internal static void oneLongLineᴍ(ref textPrinter p, ж<strings.Builder> @out, slice<Text> x) {
     foreach (var (_, t) in range(x)) {
         switch (t.type()) {
         case Plain tΔ1: {
@@ -392,3 +392,14 @@ internal static int64 wrapPenalty(@string s) {
 }
 
 } // end comment_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class commentᴛPrinter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Textᴍ(Ꮡp, Ꮡd);
+}
+partial class commentᴛtextPrinter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.blockᴍ(Ꮡp, Ꮡout, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) => comment_package.textᴍ(Ꮡp, Ꮡout, indent, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @out, slice<Text> x) => comment_package.oneLongLineᴍ(ref p, @out, x);
+}
+// </GlyphForwarders>

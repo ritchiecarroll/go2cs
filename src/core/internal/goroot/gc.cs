@@ -59,7 +59,7 @@ partial struct gccgoDirs {
 internal static readonly ж<gccgoDirs> ᏑgccgoSearch = new StaticBox<gccgoDirs>(default(gccgoDirs));
 internal static ref gccgoDirs gccgoSearch => ref ((StaticBox<gccgoDirs>)ᏑgccgoSearch).ValueSlot;
 
-} partial class gorootᴛgccgoDirs {
+} partial class goroot_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string gccgoˢ => ref gccgoˢᵇ;
@@ -78,7 +78,7 @@ private static ref readonly @string prefixᶜ => ref prefixᶜᵇ;
 private static readonly @string prefixᶜᵇ = "libraries: ="u8;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
-internal static void init(this ref gccgoDirs gd) {
+internal static void initᴍ(ref gccgoDirs gd) {
     var lastDirsᴷ = new stackAppend<@string>();
 
     @string gccgo = os.Getenv(gccgoˢ);
@@ -140,7 +140,7 @@ internal static void init(this ref gccgoDirs gd) {
 }
 
 // isStandard reports whether path is a standard library for gccgo.
-internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
+internal static bool isStandardᴍ(ж<gccgoDirs> Ꮡgd, @string path) {
     ref var gd = ref Ꮡgd.DerefOrNull();
 
     // Quick check: if the first path component has a '.', it's not
@@ -177,3 +177,10 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gorootᴛgccgoDirs {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref gccgoDirs gd) => goroot_package.initᴍ(ref gd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) => goroot_package.isStandardᴍ(Ꮡgd, path);
+}
+// </GlyphForwarders>

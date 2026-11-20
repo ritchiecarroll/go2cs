@@ -50,17 +50,17 @@ partial struct error_ {
     internal bool soft; // TODO(gri) eventually determine this from an error code
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // newError returns a new error_ with the given error code.
-internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code) {
+internal static ж<error_> newErrorᴍ(ж<Checker> Ꮡcheck, errors.Code code) {
     if (code == 0) {
         throw panic("error code must not be 0");
     }
     return Ꮡ(new error_(check: Ꮡcheck, code: code));
 }
 
-} partial class typesᴛerror_ {
+} partial class types_package {
 
 // addf adds formatted error information to err.
 // It may be called multiple times to provide additional information.
@@ -68,14 +68,14 @@ internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code)
 // Subsequent calls to addf provide additional information in the form of additional lines
 // in the error message (types2) or continuation errors identified by a tab-indented error
 // message (go/types).
-internal static void addf(this ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void addfᴍ(ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     err.desc = append(err.desc, new errorDesc(at, err.check.sprintf(format, args.ꓸꓸꓸ)));
 }
 
 // addAltDecl is a specialized form of addf reporting another declaration of obj.
-internal static void addAltDecl(this ref error_ err, Object obj) {
+internal static void addAltDeclᴍ(ref error_ err, Object obj) {
     token.Pos pos = obj.Pos(); if (pos.IsValid()) {
         // We use "other" rather than "previous" here because
         // the first declaration seen may not be textually
@@ -84,11 +84,11 @@ internal static void addAltDecl(this ref error_ err, Object obj) {
     }
 }
 
-internal static bool empty(this ref error_ err) {
+internal static bool emptyᴍ(ref error_ err) {
     return err.desc == nil;
 }
 
-internal static positioner posn(this ref error_ err) {
+internal static positioner posnᴍ(ref error_ err) {
     if (err.empty()) {
         return noposn;
     }
@@ -100,7 +100,7 @@ internal static ref readonly @string noErrorˢ => ref noErrorˢᵇ;
 private static readonly @string noErrorˢᵇ = "no error"u8;
 
 // msg returns the formatted error message without the primary error position pos().
-internal static @string msg(this ref error_ err) {
+internal static @string msgᴍ(ref error_ err) {
     if (err.empty()) {
         return noErrorˢ;
     }
@@ -128,7 +128,7 @@ internal static ref readonly @string errorSCodeDˢ => ref errorSCodeDˢᵇ;
 private static readonly @string errorSCodeDˢᵇ = "ERROR: %s (code = %d)"u8;
 
 // report reports the error err, setting check.firstError if necessary.
-internal static void report(this ref error_ err) {
+internal static void reportᴍ(ref error_ err) {
     if (err.empty()) {
         throw panic("no error");
     }
@@ -177,10 +177,10 @@ internal static void report(this ref error_ err) {
     err.desc = default;
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // handleError should only be called by error_.report.
-internal static void handleError(this ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
+internal static void handleErrorᴍ(ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
     assert(code != 0);
 
     if (index == 0) {
@@ -260,15 +260,15 @@ partial interface positioner {
     token.Pos Pos();
 }
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
-internal static void error(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
+internal static void errorᴍ(ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
     var err = Ꮡcheck.newError(code);
     err.addf(at, "%s", msg);
     err.report();
 }
 
-internal static void errorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorfᴍ(ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var err = Ꮡcheck.newError(code);
@@ -276,7 +276,7 @@ internal static void errorf(this ж<Checker> Ꮡcheck, positioner at, errors.Cod
     err.report();
 }
 
-internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void softErrorfᴍ(ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var err = Ꮡcheck.newError(code);
@@ -285,7 +285,7 @@ internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors
     err.report();
 }
 
-internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void versionErrorfᴍ(ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
@@ -299,9 +299,9 @@ internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goV
 // atPos wraps a token.Pos to implement the positioner interface.
 partial struct atPos /*global::go.go.token_package.Pos*/;
 
-} partial class typesᴛatPos {
+} partial class types_package {
 
-internal static token.Pos Pos(this atPos s) {
+internal static token.Pos Posᴍ(atPos s) {
     return (token.Pos)s;
 }
 
@@ -316,9 +316,9 @@ partial struct posSpan {
     internal token.Pos start, pos, end;
 }
 
-} partial class typesᴛposSpan {
+} partial class types_package {
 
-internal static token.Pos Pos(this posSpan e) {
+internal static token.Pos Posᴍ(posSpan e) {
     return e.pos;
 }
 
@@ -367,3 +367,28 @@ internal static posSpan spanOf(positioner at) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code) => types_package.newErrorᴍ(Ꮡcheck, code);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleError(this ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) => types_package.handleErrorᴍ(ref check, index, posn, code, msg, soft);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) => types_package.errorᴍ(Ꮡcheck, at, code, msg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) => types_package.errorfᴍ(Ꮡcheck, at, code, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) => types_package.softErrorfᴍ(Ꮡcheck, at, code, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) => types_package.versionErrorfᴍ(Ꮡcheck, at, v, format, argsʗp);
+}
+partial class typesᴛerror_ {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addf(this ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) => types_package.addfᴍ(ref err, at, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addAltDecl(this ref error_ err, Object obj) => types_package.addAltDeclᴍ(ref err, obj);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref error_ err) => types_package.emptyᴍ(ref err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static positioner posn(this ref error_ err) => types_package.posnᴍ(ref err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string msg(this ref error_ err) => types_package.msgᴍ(ref err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void report(this ref error_ err) => types_package.reportᴍ(ref err);
+}
+partial class typesᴛatPos {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos Pos(this atPos s) => types_package.Posᴍ(s);
+}
+partial class typesᴛposSpan {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos Pos(this posSpan e) => types_package.Posᴍ(e);
+}
+// </GlyphForwarders>

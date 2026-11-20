@@ -51,9 +51,9 @@ partial struct StdSizes {
     public int64 MaxAlign; // maximum alignment in bytes - must be >= 1
 }
 
-} partial class typesᴛStdSizes {
+} partial class types_package {
 
-public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, Type T) {
+internal static int64 /*result*/ Alignofᴍ(ж<StdSizes> Ꮡs, Type T) {
     int64 result = default;
     GoFrame ᒐ = default;
     try {
@@ -148,9 +148,9 @@ internal static bool _IsSyncAtomicAlign64(Type T) {
     return obj.of(TypeName.Ꮡobject).Name() == "align64"u8 && obj.of(TypeName.Ꮡobject).Pkg() != nil && (obj.of(TypeName.Ꮡobject).Pkg().Path() == "sync/atomic"u8 || obj.of(TypeName.Ꮡobject).Pkg().Path() == "internal/runtime/atomic"u8);
 }
 
-} partial class typesᴛStdSizes {
+} partial class types_package {
 
-public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
+internal static slice<int64> Offsetsofᴍ(ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
     int64 offs = default;
     foreach (var (i, f) in range(fields)) {
@@ -190,9 +190,9 @@ public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fiel
     [(int)Complex128] = 16
 }.array(17); }
 
-} partial class typesᴛStdSizes {
+} partial class types_package {
 
-public static int64 Sizeof(this ж<StdSizes> Ꮡs, Type T) {
+internal static int64 Sizeofᴍ(ж<StdSizes> Ꮡs, Type T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var switchᴛ14 = T.Underlying();
@@ -324,9 +324,9 @@ public static Sizes SizesFor(@string compiler, @string arch) {
 internal static Sizes stdSizes;
 internal static void initᴛstdSizes() { stdSizes = SizesFor("gc", "amd64"); }
 
-} partial class typesᴛConfig {
+} partial class types_package {
 
-internal static int64 alignof(this ref Config conf, Type T) {
+internal static int64 alignofᴍ(ref Config conf, Type T) {
     var f = stdSizes.Alignof;
     if (conf.Sizes != nil) {
         f = conf.Sizes.Alignof;
@@ -337,7 +337,7 @@ internal static int64 alignof(this ref Config conf, Type T) {
     throw panic("implementation of alignof returned an alignment < 1");
 }
 
-internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
+internal static slice<int64> offsetsofᴍ(ref Config conf, ж<Struct> ᏑT) {
     ref var T = ref ᏑT.DerefOrNull();
 
     slice<int64> offsets = default;
@@ -361,7 +361,7 @@ internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
 // must be structs (rather than pointers to structs).
 // If the offset is too large (because T is too large),
 // the result is negative.
-internal static int64 offsetof(this ref Config conf, Type T, slice<nint> index) {
+internal static int64 offsetofᴍ(ref Config conf, Type T, slice<nint> index) {
     int64 offs = default;
     foreach (var (_, i) in range(index)) {
         var s = T.Underlying()._<ж<Struct>>();
@@ -380,7 +380,7 @@ internal static int64 offsetof(this ref Config conf, Type T, slice<nint> index) 
 
 // sizeof returns the size of T.
 // If T is too large, the result is negative.
-internal static int64 @sizeof(this ref Config conf, Type T) {
+internal static int64 @sizeofᴍ(ref Config conf, Type T) {
     var f = stdSizes.Sizeof;
     if (conf.Sizes != nil) {
         f = conf.Sizes.Sizeof;
@@ -399,3 +399,17 @@ internal static int64 align(int64 x, int64 a) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛStdSizes {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, Type T) => types_package.Alignofᴍ(Ꮡs, T);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fields) => types_package.Offsetsofᴍ(Ꮡs, fields);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Sizeof(this ж<StdSizes> Ꮡs, Type T) => types_package.Sizeofᴍ(Ꮡs, T);
+}
+partial class typesᴛConfig {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 alignof(this ref Config conf, Type T) => types_package.alignofᴍ(ref conf, T);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) => types_package.offsetsofᴍ(ref conf, ᏑT);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 offsetof(this ref Config conf, Type T, slice<nint> index) => types_package.offsetofᴍ(ref conf, T, index);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 @sizeof(this ref Config conf, Type T) => types_package.@sizeofᴍ(ref conf, T);
+}
+// </GlyphForwarders>

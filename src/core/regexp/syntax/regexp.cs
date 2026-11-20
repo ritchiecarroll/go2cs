@@ -56,10 +56,10 @@ public static Op OpAlternate => 19;             // matches alternation of Subs
 
 internal static Op opPseudo => 128; // where pseudo-ops start
 
-} partial class syntaxᴛRegexp {
+} partial class syntax_package {
 
 // Equal reports whether x and y have identical structure.
-public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
+internal static bool Equalᴍ(ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -441,9 +441,9 @@ internal static void writeRegexp(ж<strings.Builder> b, ж<Regexp> Ꮡre, printF
     finally { ᒐ.Run(); }
 }
 
-} partial class syntaxᴛRegexp {
+} partial class syntax_package {
 
-public static @string String(this ж<Regexp> Ꮡre) {
+internal static @string Stringᴍ(ж<Regexp> Ꮡre) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     ref var flags = ref heap<map<ж<Regexp>, printFlags>>(out var Ꮡflags);
     var (must, cant) = calcFlags(ref (Ꮡre).DerefOrNull(), ref flags);
@@ -511,10 +511,10 @@ internal static void escape(ж<strings.Builder> b, rune r, bool force) {
     }}
 }
 
-} partial class syntaxᴛRegexp {
+} partial class syntax_package {
 
 // MaxCap walks the regexp to find the maximum capture index.
-public static nint MaxCap(this ref Regexp re) {
+internal static nint MaxCapᴍ(ref Regexp re) {
     nint m = 0;
     if (re.Op == OpCapture) {
         m = re.Cap;
@@ -528,13 +528,13 @@ public static nint MaxCap(this ref Regexp re) {
 }
 
 // CapNames walks the regexp to find the names of capturing groups.
-public static slice<@string> CapNames(this ref Regexp re) {
+internal static slice<@string> CapNamesᴍ(ref Regexp re) {
     var names = new slice<@string>(re.MaxCap() + 1);
     re.capNames(names);
     return names;
 }
 
-internal static void capNames(this ref Regexp re, slice<@string> names) {
+internal static void capNamesᴍ(ref Regexp re, slice<@string> names) {
     if (re.Op == OpCapture) {
         names[re.Cap] = re.Name;
     }
@@ -544,3 +544,13 @@ internal static void capNames(this ref Regexp re, slice<@string> names) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class syntaxᴛRegexp {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) => syntax_package.Equalᴍ(Ꮡx, Ꮡy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Regexp> Ꮡre) => syntax_package.Stringᴍ(Ꮡre);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint MaxCap(this ref Regexp re) => syntax_package.MaxCapᴍ(ref re);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> CapNames(this ref Regexp re) => syntax_package.CapNamesᴍ(ref re);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void capNames(this ref Regexp re, slice<@string> names) => syntax_package.capNamesᴍ(ref re, names);
+}
+// </GlyphForwarders>

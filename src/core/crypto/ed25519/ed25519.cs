@@ -46,13 +46,13 @@ public static UntypedInt SeedSize => 32;
 // PublicKey is the type of Ed25519 public keys.
 partial struct PublicKey /*[]byte*/;
 
-} partial class ed25519ᴛPublicKey {
+} partial class ed25519_package {
 
 // Any methods implemented on PublicKey might need to also be implemented on
 // PrivateKey, as the latter embeds the former and will expose its methods.
 
 // Equal reports whether pub and x have the same value.
-public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) {
+internal static bool Equalᴍ(PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<PublicKey>(ᐧ);
     if (!ok) {
         return false;
@@ -65,17 +65,17 @@ public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) {
 // PrivateKey is the type of Ed25519 private keys. It implements [crypto.Signer].
 partial struct PrivateKey /*[]byte*/;
 
-} partial class ed25519ᴛPrivateKey {
+} partial class ed25519_package {
 
 // Public returns the [PublicKey] corresponding to priv.
-public static cryptoꓸPublicKey Public(this PrivateKey priv) {
+internal static cryptoꓸPublicKey Publicᴍ(PrivateKey priv) {
     var publicKey = new slice<byte>(PublicKeySize);
     copy(publicKey, priv[32..]);
     return (PublicKey)publicKey;
 }
 
 // Equal reports whether priv and x have the same value.
-public static bool Equal(this PrivateKey priv, cryptoꓸPrivateKey x) {
+internal static bool Equalᴍ(PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<PrivateKey>(ᐧ);
     if (!ok) {
         return false;
@@ -86,7 +86,7 @@ public static bool Equal(this PrivateKey priv, cryptoꓸPrivateKey x) {
 // Seed returns the private key seed corresponding to priv. It is provided for
 // interoperability with RFC 8032. RFC 8032's private keys correspond to seeds
 // in this package.
-public static slice<byte> Seed(this PrivateKey priv) {
+internal static slice<byte> Seedᴍ(PrivateKey priv) {
     return appendꓸꓸꓸ(new slice<byte>(0, SeedSize), priv[..(int)(SeedSize)]);
 }
 
@@ -97,7 +97,7 @@ public static slice<byte> Seed(this PrivateKey priv) {
 internal static readonly ж<fips140cache.Cache<byte, ed25519.PrivateKey>> ᏑprivateKeyCache = new StaticBox<fips140cache.Cache<byte, ed25519.PrivateKey>>(default(fips140cache.Cache<byte, ed25519.PrivateKey>));
 internal static ref fips140cache.Cache<byte, ed25519.PrivateKey> privateKeyCache => ref ((StaticBox<fips140cache.Cache<byte, ed25519.PrivateKey>>)ᏑprivateKeyCache).ValueSlot;
 
-} partial class ed25519ᴛPrivateKey {
+} partial class ed25519_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoEd25519UseOfˢ => ref cryptoEd25519UseOfˢᵇ;
@@ -114,7 +114,7 @@ private static readonly @string ed25519ExpectedOptsˢᵇ = "ed25519: expected op
 //
 // A value of type [Options] can be used as opts, or crypto.Hash(0) or
 // crypto.SHA512 directly to select plain Ed25519 or Ed25519ph, respectively.
-public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) {
+internal static (slice<byte> signature, error err) Signᴍ(PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) {
     error err = default;
 
     var privʗ1 = priv;
@@ -159,10 +159,10 @@ partial struct Options {
     public @string Context;
 }
 
-} partial class ed25519ᴛOptions {
+} partial class ed25519_package {
 
 // HashFunc returns o.Hash.
-public static crypto.Hash HashFunc(this ref Options o) { return o.Hash; }
+internal static crypto.Hash HashFuncᴍ(ref Options o) { return o.Hash; }
 
 } partial class ed25519_package {
 
@@ -296,3 +296,18 @@ public static error VerifyWithOptions(PublicKey publicKey, slice<byte> message, 
 }
 
 } // end ed25519_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class ed25519ᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) => ed25519_package.Equalᴍ(pub, x);
+}
+partial class ed25519ᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static cryptoꓸPublicKey Public(this PrivateKey priv) => ed25519_package.Publicᴍ(priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this PrivateKey priv, cryptoꓸPrivateKey x) => ed25519_package.Equalᴍ(priv, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seed(this PrivateKey priv) => ed25519_package.Seedᴍ(priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) => ed25519_package.Signᴍ(priv, rand, message, opts);
+}
+partial class ed25519ᴛOptions {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static crypto.Hash HashFunc(this ref Options o) => ed25519_package.HashFuncᴍ(ref o);
+}
+// </GlyphForwarders>

@@ -67,10 +67,10 @@ partial struct reflectMethodValue {
     internal uintptr argLen;     // just args
 }
 
-} partial class runtimeᴛstkframe {
+} partial class runtime_package {
 
 // argBytes returns the argument frame size for a call to frame.fn.
-internal static uintptr argBytes(this ref stkframe frame) {
+internal static uintptr argBytesᴍ(ref stkframe frame) {
     if (frame.fn.args != abi.ArgsSizeUnknown) {
         return (uintptr)frame.fn.args;
     }
@@ -96,7 +96,7 @@ private static readonly @string reflectMismatchˢᵇ = "reflect mismatch"u8;
 //
 // hasReflectStackObj indicates that this frame also has a reflect
 // function stack object, which the caller must synthesize.
-internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this ref stkframe frame) {
+internal static (bitvector argMap, bool hasReflectStackObj) argMapInternalᴍ(ref stkframe frame) {
     bitvector argMap = default;
     bool hasReflectStackObj = default;
 
@@ -170,7 +170,7 @@ private static readonly @string badSymbolTableˢᵇ = "bad symbol table"u8;
 
 // getStackMap returns the locals and arguments live pointer maps, and
 // stack object list for frame.
-internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMap(this ref stkframe frame, bool debug) {
+internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMapᴍ(ref stkframe frame, bool debug) {
     bitvector locals = default;
     bitvector args = default;
     slice<stackObjectRecord> objs = default;
@@ -317,3 +317,11 @@ internal static void stkobjinit() {
 }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛstkframe {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr argBytes(this ref stkframe frame) => runtime_package.argBytesᴍ(ref frame);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this ref stkframe frame) => runtime_package.argMapInternalᴍ(ref frame);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMap(this ref stkframe frame, bool debug) => runtime_package.getStackMapᴍ(ref frame, debug);
+}
+// </GlyphForwarders>

@@ -20,18 +20,18 @@ partial class jpeg_package {
 // A FormatError reports that the input is not a valid JPEG.
 partial struct FormatError /*@string*/;
 
-} partial class jpegᴛFormatError {
+} partial class jpeg_package {
 
-public static @string Error(this FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
+internal static @string Errorᴍ(FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
 
 } partial class jpeg_package {
 
 // An UnsupportedError reports that the input uses a valid but unimplemented JPEG feature.
 partial struct UnsupportedError /*@string*/;
 
-} partial class jpegᴛUnsupportedError {
+} partial class jpeg_package {
 
-public static @string Error(this UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
+internal static @string Errorᴍ(UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
 
 } partial class jpeg_package {
 
@@ -150,11 +150,11 @@ partial struct decoder {
     internal array<byte> tmp = new(2 * blockSize);
 }
 
-} partial class jpegᴛdecoder {
+} partial class jpeg_package {
 
 // fill fills up the d.bytes.buf buffer from the underlying io.Reader. It
 // should only be called when there are no unread bytes in d.bytes.
-internal static error fill(this ref decoder d) {
+internal static error fillᴍ(ref decoder d) {
     if (d.bytes.i != d.bytes.j) {
         throw panic("jpeg: fill called when unread bytes exist");
     }
@@ -182,7 +182,7 @@ internal static error fill(this ref decoder d) {
 // requires at least 8 bits for look-up, which means that Huffman decoding can
 // sometimes overshoot and read one or two too many bytes. Two-byte overshoot
 // can happen when expecting to read a 0xff 0x00 byte-stuffed byte.
-internal static void unreadByteStuffedByte(this ref decoder d) {
+internal static void unreadByteStuffedByteᴍ(ref decoder d) {
     d.bytes.i -= d.bytes.nUnreadable;
     d.bytes.nUnreadable = 0;
     if (d.bits.n >= 8) {
@@ -194,7 +194,7 @@ internal static void unreadByteStuffedByte(this ref decoder d) {
 
 // readByte returns the next byte, whether buffered or not buffered. It does
 // not care about byte stuffing.
-internal static (byte x, error err) readByte(this ref decoder d) {
+internal static (byte x, error err) readByteᴍ(ref decoder d) {
     byte x = default;
     error err = default;
 
@@ -215,10 +215,10 @@ internal static (byte x, error err) readByte(this ref decoder d) {
 // marker byte) that wasn't the expected byte-stuffed sequence 0xff, 0x00.
 internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xff00 sequence");
 
-} partial class jpegᴛdecoder {
+} partial class jpeg_package {
 
 // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
-internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
+internal static (byte x, error err) readByteStuffedByteᴍ(ref decoder d) {
     byte x = default;
     error err = default;
 
@@ -262,7 +262,7 @@ internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
 
 // readFull reads exactly len(p) bytes into p. It does not care about byte
 // stuffing.
-internal static error readFull(this ref decoder d, slice<byte> p) {
+internal static error readFullᴍ(ref decoder d, slice<byte> p) {
     // Unread the overshot bytes, if any.
     if (d.bytes.nUnreadable != 0) {
         if (d.bits.n >= 8) {
@@ -286,7 +286,7 @@ internal static error readFull(this ref decoder d, slice<byte> p) {
 }
 
 // ignore ignores the next n bytes.
-internal static error ignore(this ref decoder d, nint n) {
+internal static error ignoreᴍ(ref decoder d, nint n) {
     // Unread the overshot bytes, if any.
     if (d.bytes.nUnreadable != 0) {
         if (d.bits.n >= 8) {
@@ -329,7 +329,7 @@ internal static ref readonly @string lumaChromaSubsamplingˢ => ref lumaChromaSu
 private static readonly @string lumaChromaSubsamplingˢᵇ = "luma/chroma subsampling ratio"u8;
 
 // Specified in section B.2.2.
-internal static error processSOF(this ref decoder d, nint n) {
+internal static error processSOFᴍ(ref decoder d, nint n) {
     if (d.nComp != 0) {
         return ((FormatError)(@string)multipleSofMarkersˢ);
     }
@@ -479,7 +479,7 @@ internal static ref readonly @string dqtHasWrongLengthˢ => ref dqtHasWrongLengt
 private static readonly @string dqtHasWrongLengthˢᵇ = "DQT has wrong length"u8;
 
 // Specified in section B.2.4.1.
-internal static error processDQT(this ref decoder d, nint n) {
+internal static error processDQTᴍ(ref decoder d, nint n) {
 loop:
     while (n > 0) {
         n--;
@@ -535,7 +535,7 @@ internal static ref readonly @string driHasWrongLengthˢ => ref driHasWrongLengt
 private static readonly @string driHasWrongLengthˢᵇ = "DRI has wrong length"u8;
 
 // Specified in section B.2.4.4.
-internal static error processDRI(this ref decoder d, nint n) {
+internal static error processDRIᴍ(ref decoder d, nint n) {
     if (n != 2) {
         return ((FormatError)(@string)driHasWrongLengthˢ);
     }
@@ -546,7 +546,7 @@ internal static error processDRI(this ref decoder d, nint n) {
     return default;
 }
 
-internal static error processApp0Marker(this ref decoder d, nint n) {
+internal static error processApp0Markerᴍ(ref decoder d, nint n) {
     if (n < 5) {
         return d.ignore(n);
     }
@@ -563,7 +563,7 @@ internal static error processApp0Marker(this ref decoder d, nint n) {
     return default;
 }
 
-internal static error processApp14Marker(this ref decoder d, nint n) {
+internal static error processApp14Markerᴍ(ref decoder d, nint n) {
     if (n < 12) {
         return d.ignore(n);
     }
@@ -594,7 +594,7 @@ internal static ref readonly @string missingSosMarkerˢ => ref missingSosMarker�
 private static readonly @string missingSosMarkerˢᵇ = "missing SOS marker"u8;
 
 // decode reads a JPEG image from r and returns it as an image.Image.
-internal static (image.Image, error) decode(this ref decoder d, io.Reader r, bool configOnly) {
+internal static (image.Image, error) decodeᴍ(ref decoder d, io.Reader r, bool configOnly) {
     d.r = r;
 
     // Check for the Start Of Image marker.
@@ -766,7 +766,7 @@ internal partial struct applyBlack_translations /*dyn*/ {
     internal nint stride;
 }
 
-} partial class jpegᴛdecoder {
+} partial class jpeg_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownColorModel4ˢ => ref unknownColorModel4ˢᵇ;
@@ -779,7 +779,7 @@ private static readonly @string unknownColorModel4ˢᵇ = "unknown color model: 
 // Adobe CMYK JPEG images are inverted, where 255 means no ink instead of full
 // ink, so we apply "v = 255 - v" at various points. Note that a double
 // inversion is a no-op, so inversions might be implicit in the code below.
-internal static (image.Image, error) applyBlack(this ref decoder d) {
+internal static (image.Image, error) applyBlackᴍ(ref decoder d) {
     if (!d.adobeTransformValid) {
         return (default, ((UnsupportedError)(@string)unknownColorModel4ˢ));
     }
@@ -841,7 +841,7 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
     return (new image.CMYKжImage(img), default);
 }
 
-internal static bool isRGB(this ref decoder d) {
+internal static bool isRGBᴍ(ref decoder d) {
     if (d.jfif) {
         return false;
     }
@@ -853,7 +853,7 @@ internal static bool isRGB(this ref decoder d) {
     return d.comp[0].c == 'R' && d.comp[1].c == 'G' && d.comp[2].c == 'B';
 }
 
-internal static (image.Image, error) convertToRGB(this ref decoder d) {
+internal static (image.Image, error) convertToRGBᴍ(ref decoder d) {
     nint cScale = quo(d.comp[0].h, d.comp[1].h);
     var bounds = d.img3.Bounds();
     var img = image.NewRGBA(bounds);
@@ -924,3 +924,29 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
 }
 
 } // end jpeg_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class jpegᴛFormatError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this FormatError e) => jpeg_package.Errorᴍ(e);
+}
+partial class jpegᴛUnsupportedError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnsupportedError e) => jpeg_package.Errorᴍ(e);
+}
+partial class jpegᴛdecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error fill(this ref decoder d) => jpeg_package.fillᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unreadByteStuffedByte(this ref decoder d) => jpeg_package.unreadByteStuffedByteᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte x, error err) readByte(this ref decoder d) => jpeg_package.readByteᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte x, error err) readByteStuffedByte(this ref decoder d) => jpeg_package.readByteStuffedByteᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readFull(this ref decoder d, slice<byte> p) => jpeg_package.readFullᴍ(ref d, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ignore(this ref decoder d, nint n) => jpeg_package.ignoreᴍ(ref d, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processSOF(this ref decoder d, nint n) => jpeg_package.processSOFᴍ(ref d, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processDQT(this ref decoder d, nint n) => jpeg_package.processDQTᴍ(ref d, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processDRI(this ref decoder d, nint n) => jpeg_package.processDRIᴍ(ref d, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processApp0Marker(this ref decoder d, nint n) => jpeg_package.processApp0Markerᴍ(ref d, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processApp14Marker(this ref decoder d, nint n) => jpeg_package.processApp14Markerᴍ(ref d, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (image.Image, error) decode(this ref decoder d, io.Reader r, bool configOnly) => jpeg_package.decodeᴍ(ref d, r, configOnly);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (image.Image, error) applyBlack(this ref decoder d) => jpeg_package.applyBlackᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isRGB(this ref decoder d) => jpeg_package.isRGBᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (image.Image, error) convertToRGB(this ref decoder d) => jpeg_package.convertToRGBᴍ(ref d);
+}
+// </GlyphForwarders>

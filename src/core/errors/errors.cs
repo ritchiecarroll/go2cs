@@ -74,9 +74,9 @@ partial struct errorString {
     internal @string s;
 }
 
-} partial class errorsᴛerrorString {
+} partial class errors_package {
 
-internal static @string Error(this ref errorString e) {
+internal static @string Errorᴍ(ref errorString e) {
     return e.s;
 }
 
@@ -98,3 +98,9 @@ internal static @string Error(this ref errorString e) {
 public static error ErrUnsupported = New("unsupported operation");
 
 } // end errors_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class errorsᴛerrorString {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref errorString e) => errors_package.Errorᴍ(ref e);
+}
+// </GlyphForwarders>

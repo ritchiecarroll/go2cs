@@ -26,12 +26,12 @@ public static ж<Writer> NewWriter(io.Writer w) {
     return Ꮡ(new Writer(w: w));
 }
 
-} partial class quotedprintableᴛWriter {
+} partial class quotedprintable_package {
 
 // Write encodes p using quoted-printable encoding and writes it to the
 // underlying [io.Writer]. It limits line length to 76 characters. The encoded
 // bytes are not necessarily flushed until the [Writer] is closed.
-public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(ref Writer w, slice<byte> p) {
     nint n = default;
 
     foreach (var (i, b) in range(p)) {
@@ -72,7 +72,7 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
 
 // Close closes the [Writer], flushing any unwritten data to the underlying
 // [io.Writer], but does not close the underlying io.Writer.
-public static error Close(this ref Writer w) {
+internal static error Closeᴍ(ref Writer w) {
     var err = w.checkLastByte(); if (err != nil) {
         return err;
     }
@@ -81,7 +81,7 @@ public static error Close(this ref Writer w) {
 }
 
 // write limits text encoded in quoted-printable to 76 characters per line.
-internal static error write(this ref Writer w, slice<byte> p) {
+internal static error writeᴍ(ref Writer w, slice<byte> p) {
     foreach (var (_, b) in range(p)) {
         if (b == '\n' || b == '\r') {
             // If the previous byte was \r, the CRLF has already been inserted.
@@ -121,7 +121,7 @@ internal static error write(this ref Writer w, slice<byte> p) {
     return default;
 }
 
-internal static error encode(this ref Writer w, byte b) {
+internal static error encodeᴍ(ref Writer w, byte b) {
     if ((nint)(lineMaxLen - 1) - w.i < 3) {
         var err = w.insertSoftLineBreak(); if (err != nil) {
             return err;
@@ -141,10 +141,10 @@ internal static error encode(this ref Writer w, byte b) {
 internal static ref readonly @string upperhex => ref upperhexᵇ;
 private static readonly @string upperhexᵇ = "0123456789ABCDEF"u8;
 
-} partial class quotedprintableᴛWriter {
+} partial class quotedprintable_package {
 
 // checkLastByte encodes the last buffered byte if it is a space or a tab.
-internal static error checkLastByte(this ref Writer w) {
+internal static error checkLastByteᴍ(ref Writer w) {
     if (w.i == 0) {
         return default;
     }
@@ -160,14 +160,14 @@ internal static error checkLastByte(this ref Writer w) {
     return default;
 }
 
-internal static error insertSoftLineBreak(this ref Writer w) {
+internal static error insertSoftLineBreakᴍ(ref Writer w) {
     w.line[w.i] = (byte)'=';
     w.i++;
 
     return w.insertCRLF();
 }
 
-internal static error insertCRLF(this ref Writer w) {
+internal static error insertCRLFᴍ(ref Writer w) {
     w.line[w.i] = (byte)'\r';
     w.line[w.i + 1] = (byte)'\n';
     w.i += 2;
@@ -175,7 +175,7 @@ internal static error insertCRLF(this ref Writer w) {
     return w.flush();
 }
 
-internal static error flush(this ref Writer w) {
+internal static error flushᴍ(ref Writer w) {
     var (_, err) = w.w.Write(w.line.slice(0, w.i)); if (err != nil) {
         return err;
     }
@@ -191,3 +191,16 @@ internal static bool isWhitespace(byte b) {
 }
 
 } // end quotedprintable_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class quotedprintableᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer w, slice<byte> p) => quotedprintable_package.Writeᴍ(ref w, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer w) => quotedprintable_package.Closeᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error write(this ref Writer w, slice<byte> p) => quotedprintable_package.writeᴍ(ref w, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error encode(this ref Writer w, byte b) => quotedprintable_package.encodeᴍ(ref w, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkLastByte(this ref Writer w) => quotedprintable_package.checkLastByteᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error insertSoftLineBreak(this ref Writer w) => quotedprintable_package.insertSoftLineBreakᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error insertCRLF(this ref Writer w) => quotedprintable_package.insertCRLFᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error flush(this ref Writer w) => quotedprintable_package.flushᴍ(ref w);
+}
+// </GlyphForwarders>

@@ -300,9 +300,9 @@ partial struct conn {
     internal bool hijackedv;
 }
 
-} partial class httpᴛconn {
+} partial class http_package {
 
-internal static bool hijacked(this ж<conn> Ꮡc) {
+internal static bool hijackedᴍ(ж<conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -317,7 +317,7 @@ internal static bool hijacked(this ж<conn> Ꮡc) {
 }
 
 // c.mu must be held.
-internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLocked(this ж<conn> Ꮡc) {
+internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLockedᴍ(ж<conn> Ꮡc) {
     net.Conn rwc = default;
     ж<bufio.ReadWriter> buf = default;
     error err = default;
@@ -378,9 +378,9 @@ partial struct chunkWriter {
 internal static slice<byte> crlf = slice<byte>("\r\n"u8);
 internal static slice<byte> colonSpace = slice<byte>(": "u8);
 
-} partial class httpᴛchunkWriter {
+} partial class http_package {
 
-internal static (nint n, error err) Write(this ref chunkWriter cw, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(ref chunkWriter cw, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -408,14 +408,14 @@ internal static (nint n, error err) Write(this ref chunkWriter cw, slice<byte> p
     return (n, err);
 }
 
-internal static error flush(this ref chunkWriter cw) {
+internal static error flushᴍ(ref chunkWriter cw) {
     if (!cw.wroteHeader) {
         cw.writeHeader(default);
     }
     return cw.res.conn.bufw.Flush();
 }
 
-internal static void close(this ref chunkWriter cw) {
+internal static void closeᴍ(ref chunkWriter cw) {
     if (!cw.wroteHeader) {
         cw.writeHeader(default);
     }
@@ -498,17 +498,17 @@ partial struct response {
     internal bool closeNotifyTriggered;
 }
 
-} partial class httpᴛresponse {
+} partial class http_package {
 
-internal static error SetReadDeadline(this ref response c, time.Time deadline) {
+internal static error SetReadDeadlineᴍ(ref response c, time.Time deadline) {
     return c.conn.rwc.SetReadDeadline(deadline);
 }
 
-internal static error SetWriteDeadline(this ref response c, time.Time deadline) {
+internal static error SetWriteDeadlineᴍ(ref response c, time.Time deadline) {
     return c.conn.rwc.SetWriteDeadline(deadline);
 }
 
-internal static error EnableFullDuplex(this ref response c) {
+internal static error EnableFullDuplexᴍ(ref response c) {
     c.fullDuplex = true;
     return default;
 }
@@ -531,11 +531,11 @@ internal static error EnableFullDuplex(this ref response c) {
 public static ref readonly @string TrailerPrefix => ref TrailerPrefixᵇ;
 private static readonly @string TrailerPrefixᵇ = "Trailer:"u8;
 
-} partial class httpᴛresponse {
+} partial class http_package {
 
 // finalTrailers is called after the Handler exits and returns a non-nil
 // value if the Handler set any trailers.
-internal static Header finalTrailers(this ref response w) {
+internal static Header finalTrailersᴍ(ref response w) {
     Header t = default;
     foreach (var (k, vv) in w.handlerHeader) {
         var (kk, found) = strings.CutPrefix(k, TrailerPrefix); if (found) {
@@ -559,7 +559,7 @@ internal static Header finalTrailers(this ref response w) {
 // declareTrailer is called for each Trailer header when the
 // response header is written. It notes that a header will need to be
 // written in the trailers at the end of the response.
-internal static void declareTrailer(this ref response w, @string k) {
+internal static void declareTrailerᴍ(ref response w, @string k) {
     k = CanonicalHeaderKey(k);
     if (!httpguts.ValidTrailerHeader(k)) {
         // Forbidden by RFC 7230, section 4.1.2
@@ -570,13 +570,13 @@ internal static void declareTrailer(this ref response w, @string k) {
 
 // requestTooLarge is called by maxBytesReader when too much input has
 // been read from the client.
-internal static void requestTooLarge(this ж<response> Ꮡw) {
+internal static void requestTooLargeᴍ(ж<response> Ꮡw) {
     Ꮡw.ᏑrequestBodyLimitHit.Store(true);
 }
 
 // disableWriteContinue stops Request.Body.Read from sending an automatic 100-Continue.
 // If a 100-Continue is being written, it waits for it to complete before continuing.
-internal static void disableWriteContinue(this ж<response> Ꮡw) {
+internal static void disableWriteContinueᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.writeContinueMu.Lock();
@@ -592,12 +592,12 @@ partial struct writerOnly {
     /*embed*/ public io_package.Writer Writer;
 }
 
-} partial class httpᴛresponse {
+} partial class http_package {
 
 // ReadFrom is here to optimize copying from an [*os.File] regular file
 // to a [*net.TCPConn] with sendfile, or from a supported src type such
 // as a *net.TCPConn on Linux with splice.
-internal static (int64 n, error err) ReadFrom(this ж<response> Ꮡw, io.Reader src) {
+internal static (int64 n, error err) ReadFromᴍ(ж<response> Ꮡw, io.Reader src) {
     int64 n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -652,14 +652,14 @@ internal static (int64 n, error err) ReadFrom(this ж<response> Ꮡw, io.Reader 
 // with a verbose logging wrapper.
 internal const bool debugServerConnections = false;
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string serverˢ => ref serverˢᵇ;
 private static readonly @string serverˢᵇ = "server"u8;
 
 // Create new connection from rwc.
-internal static ж<conn> newConn(this ж<Server> Ꮡs, net.Conn rwc) {
+internal static ж<conn> newConnᴍ(ж<Server> Ꮡs, net.Conn rwc) {
     var c = Ꮡ(new conn(
         server: Ꮡs,
         rwc: rwc
@@ -698,9 +698,9 @@ partial struct connReader {
     internal int64 remain; // bytes remaining
 }
 
-} partial class httpᴛconnReader {
+} partial class http_package {
 
-internal static void @lock(this ж<connReader> Ꮡcr) {
+internal static void @lockᴍ(ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     cr.mu.Lock();
@@ -709,13 +709,13 @@ internal static void @lock(this ж<connReader> Ꮡcr) {
     }
 }
 
-internal static void unlock(this ж<connReader> Ꮡcr) {
+internal static void unlockᴍ(ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     cr.mu.Unlock();
 }
 
-internal static void releaseConn(this ж<connReader> Ꮡcr) {
+internal static void releaseConnᴍ(ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -729,7 +729,7 @@ internal static void releaseConn(this ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static partial void startBackgroundRead(this ж<connReader> Ꮡcr) {
+internal static partial void startBackgroundReadᴍ(ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -751,7 +751,7 @@ internal static partial void startBackgroundRead(this ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static void backgroundRead(this ж<connReader> Ꮡcr) {
+internal static void backgroundReadᴍ(ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     var (n, err) = cr.rwc.Read(cr.byteBuf[..]);
@@ -793,7 +793,7 @@ internal static void backgroundRead(this ж<connReader> Ꮡcr) {
     cr.cond.Broadcast();
 }
 
-internal static void abortPendingRead(this ж<connReader> Ꮡcr) {
+internal static void abortPendingReadᴍ(ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -815,9 +815,9 @@ internal static void abortPendingRead(this ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static void setReadLimit(this ref connReader cr, int64 remain) { cr.remain = remain; }
-internal static void setInfiniteReadLimit(this ref connReader cr) { cr.remain = maxInt64; }
-internal static bool hitReadLimit(this ref connReader cr) { return cr.remain <= 0; }
+internal static void setReadLimitᴍ(ref connReader cr, int64 remain) { cr.remain = remain; }
+internal static void setInfiniteReadLimitᴍ(ref connReader cr) { cr.remain = maxInt64; }
+internal static bool hitReadLimitᴍ(ref connReader cr) { return cr.remain <= 0; }
 
 // handleReadErrorLocked is called whenever a Read from the client returns a
 // non-nil error.
@@ -829,7 +829,7 @@ internal static bool hitReadLimit(this ref connReader cr) { return cr.remain <= 
 // down its context.
 //
 // The caller must hold connReader.mu.
-internal static void handleReadErrorLocked(this ref connReader cr, error _) {
+internal static void handleReadErrorLockedᴍ(ref connReader cr, error _) {
     if (cr.conn == nil) {
         return;
     }
@@ -839,7 +839,7 @@ internal static void handleReadErrorLocked(this ref connReader cr, error _) {
     }
 }
 
-internal static (nint n, error err) Read(this ж<connReader> Ꮡcr, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ж<connReader> Ꮡcr, slice<byte> p) {
     nint n = default;
     error err = default;
     ref var cr = ref Ꮡcr.DerefOrNull();
@@ -968,16 +968,16 @@ internal static void putBufioWriter(ж<bufio.Writer> Ꮡbw) {
 // This can be overridden by setting [Server.MaxHeaderBytes].
 public static UntypedInt DefaultMaxHeaderBytes => /* 1 << 20 */ 1048576; // 1 MB
 
-} partial class httpᴛServer {
+} partial class http_package {
 
-internal static nint maxHeaderBytes(this ref Server s) {
+internal static nint maxHeaderBytesᴍ(ref Server s) {
     if (s.MaxHeaderBytes > 0) {
         return s.MaxHeaderBytes;
     }
     return DefaultMaxHeaderBytes;
 }
 
-internal static int64 initialReadLimitSize(this ref Server s) {
+internal static int64 initialReadLimitSizeᴍ(ref Server s) {
     return (int64)s.maxHeaderBytes() + 4096; // bufio slop
 }
 
@@ -986,7 +986,7 @@ internal static int64 initialReadLimitSize(this ref Server s) {
 //
 // It returns the minimum of any positive ReadHeaderTimeout,
 // ReadTimeout, or WriteTimeout.
-internal static time.Duration tlsHandshakeTimeout(this ref Server s) {
+internal static time.Duration tlsHandshakeTimeoutᴍ(ref Server s) {
     time.Duration ret = default;
     foreach (var (_, v) in range(new time.Duration[]{
         s.ReadHeaderTimeout,
@@ -1013,13 +1013,13 @@ partial struct expectContinueReader {
     internal atomic.Bool closed;
 }
 
-} partial class httpᴛexpectContinueReader {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http11100Continueˢ => ref http11100Continueˢᵇ;
 private static readonly @string http11100Continueˢᵇ = "HTTP/1.1 100 Continue\r\n\r\n"u8;
 
-internal static (nint n, error err) Read(this ж<expectContinueReader> Ꮡecr, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ж<expectContinueReader> Ꮡecr, slice<byte> p) {
     ref var ecr = ref Ꮡecr.DerefOrNull();
 
     if (Ꮡecr.Ꮡclosed.Load()) {
@@ -1038,7 +1038,7 @@ internal static (nint n, error err) Read(this ж<expectContinueReader> Ꮡecr, s
     return ecr.readCloser.Read(p);
 }
 
-internal static error Close(this ж<expectContinueReader> Ꮡecr) {
+internal static error Closeᴍ(ж<expectContinueReader> Ꮡecr) {
     ref var ecr = ref Ꮡecr.DerefOrNull();
 
     Ꮡecr.Ꮡclosed.Store(true);
@@ -1058,7 +1058,7 @@ private static readonly @string TimeFormatᵇ = "Mon, 02 Jan 2006 15:04:05 GMT"u
 
 internal static error errTooLarge = errors.New("http: request too large");
 
-} partial class httpᴛconn {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string hostˢ => ref hostˢᵇ;
@@ -1073,7 +1073,7 @@ internal static ref readonly @string invalidHeaderValueˢ => ref invalidHeaderVa
 private static readonly @string invalidHeaderValueˢᵇ = "invalid header value"u8;
 
 // Read next request from connection.
-internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, context.Context ctx) {
+internal static (ж<response> w, error err) readRequestᴍ(ж<conn> Ꮡc, context.Context ctx) {
     ж<response> w = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -1206,9 +1206,9 @@ internal static bool http1ServerSupportsRequest(ref Request req) {
     return false;
 }
 
-} partial class httpᴛresponse {
+} partial class http_package {
 
-internal static Header Header(this ref response w) {
+internal static Header Headerᴍ(ref response w) {
     if (w.cw.header == nil && w.wroteHeader && !w.cw.wroteHeader) {
         // Accessing the header between logically writing it
         // and physically writing it means we need to allocate
@@ -1271,13 +1271,13 @@ internal static partial runtime.Frame relevantCaller() {
     return frame;
 }
 
-} partial class httpᴛresponse {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
 private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
 
-internal static void WriteHeader(this ж<response> Ꮡw, nint code) {
+internal static void WriteHeaderᴍ(ж<response> Ꮡw, nint code) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.conn.hijacked()) {
@@ -1354,14 +1354,14 @@ internal static slice<slice<byte>> extraHeaderKeys = [
 internal static slice<byte> headerContentLength = slice<byte>("Content-Length: "u8);
 internal static slice<byte> headerDate = slice<byte>("Date: "u8);
 
-} partial class httpᴛextraHeader {
+} partial class http_package {
 
 // Write writes the headers described in h to w.
 //
 // This method has a value receiver, despite the somewhat large size
 // of h, because it prevents an allocation. The escape analysis isn't
 // smart enough to realize this function doesn't mutate h.
-internal static void Write(this extraHeader h, ж<bufio.Writer> Ꮡw) {
+internal static void Writeᴍ(extraHeader h, ж<bufio.Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (h.date != nil) {
@@ -1384,7 +1384,7 @@ internal static void Write(this extraHeader h, ж<bufio.Writer> Ꮡw) {
     }
 }
 
-} partial class httpᴛchunkWriter {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string trailerˢ => ref trailerˢᵇ;
@@ -1416,7 +1416,7 @@ private static readonly @string chunkedˢᵇ = "chunked"u8;
 // set explicitly. It's also used to set the Content-Length, if the
 // total body size was small and the handler has already finished
 // running.
-internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
+internal static void writeHeaderᴍ(ref chunkWriter cw, slice<byte> p) {
     if (cw.wroteHeader) {
         return;
     }
@@ -1752,11 +1752,11 @@ internal static void writeStatusLine(ж<bufio.Writer> Ꮡbw, bool is11, nint cod
     }
 }
 
-} partial class httpᴛresponse {
+} partial class http_package {
 
 // bodyAllowed reports whether a Write is allowed for this response type.
 // It's illegal to call this before the header has been flushed.
-internal static bool bodyAllowed(this ref response w) {
+internal static bool bodyAllowedᴍ(ref response w) {
     if (!w.wroteHeader) {
         throw panic("net/http: bodyAllowed called before the header was written");
     }
@@ -1797,16 +1797,16 @@ internal static bool bodyAllowed(this ref response w) {
 // threshold and nothing is in (2).  The answer might be mostly making
 // bufferBeforeChunkingSize smaller and having bufio's fast-paths deal
 // with this instead.
-internal static (nint n, error err) Write(this ж<response> Ꮡw, slice<byte> data) {
+internal static (nint n, error err) Writeᴍ(ж<response> Ꮡw, slice<byte> data) {
     return Ꮡw.write(len(data), data, ""u8);
 }
 
-internal static (nint n, error err) WriteString(this ж<response> Ꮡw, @string data) {
+internal static (nint n, error err) WriteStringᴍ(ж<response> Ꮡw, @string data) {
     return Ꮡw.write(len(data), default, data);
 }
 
 // either dataB or dataS is non-zero.
-internal static (nint n, error err) write(this ж<response> Ꮡw, nint lenData, slice<byte> dataB, @string dataS) {
+internal static (nint n, error err) writeᴍ(ж<response> Ꮡw, nint lenData, slice<byte> dataB, @string dataS) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.conn.hijacked()) {
@@ -1843,7 +1843,7 @@ internal static (nint n, error err) write(this ж<response> Ꮡw, nint lenData, 
     }
 }
 
-internal static void finishRequest(this ж<response> Ꮡw) {
+internal static void finishRequestᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     Ꮡw.ᏑhandlerDone.Store(true);
@@ -1873,7 +1873,7 @@ internal static void finishRequest(this ж<response> Ꮡw) {
 
 // shouldReuseConnection reports whether the underlying TCP connection can be reused.
 // It must only be called after the handler is done executing.
-internal static bool shouldReuseConnection(this ж<response> Ꮡw) {
+internal static bool shouldReuseConnectionᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.closeAfterReply || Ꮡw.ᏑrequestBodyLimitHit.Load()) {
@@ -1901,15 +1901,15 @@ internal static bool shouldReuseConnection(this ж<response> Ꮡw) {
     return true;
 }
 
-internal static bool closedRequestBodyEarly(this ref response w) {
+internal static bool closedRequestBodyEarlyᴍ(ref response w) {
     return w.reqBody != nil && w.reqBody.didEarlyClose();
 }
 
-internal static void Flush(this ж<response> Ꮡw) {
+internal static void Flushᴍ(ж<response> Ꮡw) {
     Ꮡw.FlushError();
 }
 
-internal static error FlushError(this ж<response> Ꮡw) {
+internal static error FlushErrorᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (!w.wroteHeader) {
@@ -1923,9 +1923,9 @@ internal static error FlushError(this ж<response> Ꮡw) {
     return err;
 }
 
-} partial class httpᴛconn {
+} partial class http_package {
 
-internal static void finalFlush(this ref conn c) {
+internal static void finalFlushᴍ(ref conn c) {
     if (c.bufr != nil) {
         // Steal the bufio.Reader (~4KB worth of memory) and its associated
         // reader for a future connection.
@@ -1943,7 +1943,7 @@ internal static void finalFlush(this ref conn c) {
 }
 
 // Close the connection.
-internal static void close(this ref conn c) {
+internal static void closeᴍ(ref conn c) {
     c.finalFlush();
     c.rwc.Close();
 }
@@ -1969,7 +1969,7 @@ partial interface closeWriter {
 
 internal static closeWriter _ᴛ9ʗ = new net_TCPConnжcloseWriter(((ж<net.TCPConn>)nil));
 
-} partial class httpᴛconn {
+} partial class http_package {
 
 // closeWriteAndWait flushes any outstanding data and sends a FIN packet (if
 // client is connected via TCP), signaling that we're done. We then
@@ -1977,7 +1977,7 @@ internal static closeWriter _ᴛ9ʗ = new net_TCPConnжcloseWriter(((ж<net.TCPC
 // subsequent RST.
 //
 // See https://golang.org/issue/3595
-internal static void closeWriteAndWait(this ref conn c) {
+internal static void closeWriteAndWaitᴍ(ref conn c) {
     c.finalFlush();
     var (tcp, ok) = c.rwc._<closeWriter>(ᐧ); if (ok) {
         tcp.CloseWrite();
@@ -2022,9 +2022,9 @@ internal static bool validNextProto(@string proto) {
 internal const bool runHooks = true;
 internal const bool skipHooks = false;
 
-} partial class httpᴛconn {
+} partial class http_package {
 
-internal static void setState(this ж<conn> Ꮡc, net.Conn nc, ConnState state, bool runHook) {
+internal static void setStateᴍ(ж<conn> Ꮡc, net.Conn nc, ConnState state, bool runHook) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var srv = c.server;
@@ -2050,7 +2050,7 @@ internal static void setState(this ж<conn> Ꮡc, net.Conn nc, ConnState state, 
     }
 }
 
-internal static (ConnState state, int64 unixSec) getState(this ж<conn> Ꮡc) {
+internal static (ConnState state, int64 unixSec) getStateᴍ(ж<conn> Ꮡc) {
     var packedState = Ꮡc.ᏑcurState.Load();
     return ((ConnState)(nint)((packedState & 0xff)), (int64)(packedState >> 8));
 }
@@ -2069,9 +2069,9 @@ partial struct statusError {
     internal @string text;
 }
 
-} partial class httpᴛstatusError {
+} partial class http_package {
 
-internal static @string Error(this statusError e) { return StatusText(e.code) + ": "u8 + e.text; }
+internal static @string Errorᴍ(statusError e) { return StatusText(e.code) + ": "u8 + e.text; }
 
 } partial class http_package {
 
@@ -2106,7 +2106,7 @@ partial interface connectionStater {
     tls.ConnectionState ConnectionState();
 }
 
-} partial class httpᴛconn {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http10400BadRequestˢ => ref http10400BadRequestˢᵇ;
@@ -2129,7 +2129,7 @@ internal static ref readonly @string publicErrᶜ1 => ref publicErrᶜ1ᵇ;
 private static readonly @string publicErrᶜ1ᵇ = "400 Bad Request"u8;
 
 // Serve a new connection.
-internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
+internal static void serveᴍ(ж<conn> Ꮡc, context.Context ctx) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -2387,11 +2387,11 @@ partial struct unencryptedHTTP2Request {
     internal serverHandler h;
 }
 
-} partial class httpᴛunencryptedHTTP2Request {
+} partial class http_package {
 
-internal static context.Context BaseContext(this unencryptedHTTP2Request h) { return h.ctx; }
+internal static context.Context BaseContextᴍ(unencryptedHTTP2Request h) { return h.ctx; }
 
-internal static void ServeHTTP(this unencryptedHTTP2Request h, ResponseWriter rw, ж<Request> Ꮡreq) {
+internal static void ServeHTTPᴍ(unencryptedHTTP2Request h, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (req.Body == nil) {
@@ -2412,9 +2412,9 @@ partial struct unencryptedNetConnInTLSConn {
     internal net.Conn conn;
 }
 
-} partial class httpᴛunencryptedNetConnInTLSConn {
+} partial class http_package {
 
-internal static net.Conn UnencryptedNetConn(this unencryptedNetConnInTLSConn c) {
+internal static net.Conn UnencryptedNetConnᴍ(unencryptedNetConnInTLSConn c) {
     return c.conn;
 }
 
@@ -2429,9 +2429,9 @@ internal static ж<tls.Conn> unencryptedTLSConn(net.Conn c) {
 internal static ref readonly @string nextProtoUnencryptedHTTP2 => ref nextProtoUnencryptedHTTP2ᵇ;
 private static readonly @string nextProtoUnencryptedHTTP2ᵇ = "unencrypted_http2"u8;
 
-} partial class httpᴛconn {
+} partial class http_package {
 
-internal static bool maybeServeUnencryptedHTTP2(this ж<conn> Ꮡc, context.Context ctx) {
+internal static bool maybeServeUnencryptedHTTP2ᴍ(ж<conn> Ꮡc, context.Context ctx) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (fn, ok) = c.server.TLSNextProto[nextProtoUnencryptedHTTP2, ꟷ];
@@ -2458,7 +2458,7 @@ internal static bool maybeServeUnencryptedHTTP2(this ж<conn> Ꮡc, context.Cont
     return true;
 }
 
-} partial class httpᴛresponse {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
@@ -2466,7 +2466,7 @@ private static readonly @string connectionˢᵇ = "Connection"u8;
 internal static ref readonly @string closeˢ => ref closeˢᵇ;
 private static readonly @string closeˢᵇ = "close"u8;
 
-internal static void sendExpectationFailed(this ж<response> Ꮡw) {
+internal static void sendExpectationFailedᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     // TODO(bradfitz): let ServeHTTP handlers handle
@@ -2488,7 +2488,7 @@ internal static void sendExpectationFailed(this ж<response> Ꮡw) {
 
 // Hijack implements the [Hijacker.Hijack] method. Our response is both a [ResponseWriter]
 // and a [Hijacker].
-internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijack(this ж<response> Ꮡw) {
+internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijackᴍ(ж<response> Ꮡw) {
     net.Conn rwc = default;
     ж<bufio.ReadWriter> buf = default;
     error err = default;
@@ -2522,7 +2522,7 @@ internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijack(this 
     return (rwc, buf, err);
 }
 
-internal static /*<-*/channel<bool> CloseNotify(this ж<response> Ꮡw) {
+internal static /*<-*/channel<bool> CloseNotifyᴍ(ж<response> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2545,7 +2545,7 @@ internal static /*<-*/channel<bool> CloseNotify(this ж<response> Ꮡw) {
     finally { if (ᒐd1) Ꮡw.DerefOrNull().lazyCloseNotifyMu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void closeNotify(this ж<response> Ꮡw) {
+internal static void closeNotifyᴍ(ж<response> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2573,10 +2573,10 @@ internal static void closeNotify(this ж<response> Ꮡw) {
 // [Handler] that calls f.
 public delegate void HandlerFunc(ResponseWriter _Δp0, ж<Request> _Δp1);
 
-} partial class httpᴛHandlerFunc {
+} partial class http_package {
 
 // ServeHTTP calls f(w, r).
-public static partial void ServeHTTP(this HandlerFunc f, ResponseWriter w, ж<Request> r) {
+internal static partial void ServeHTTPᴍ(HandlerFunc f, ResponseWriter w, ж<Request> r) {
     f(w, r);
 }
 
@@ -2744,9 +2744,9 @@ partial struct redirectHandler {
     internal nint code;
 }
 
-} partial class httpᴛredirectHandler {
+} partial class http_package {
 
-internal static void ServeHTTP(this ref redirectHandler rh, ResponseWriter w, ж<Request> r) {
+internal static void ServeHTTPᴍ(ref redirectHandler rh, ResponseWriter w, ж<Request> r) {
     Redirect(w, r, rh.url, rh.code);
 }
 
@@ -2935,7 +2935,7 @@ internal static @string stripHostPort(@string h) {
     return host;
 }
 
-} partial class httpᴛServeMux {
+} partial class http_package {
 
 // Handler returns the handler to use for the given request,
 // consulting r.Method, r.Host, and r.URL.Path. It always returns
@@ -2957,7 +2957,7 @@ internal static @string stripHostPort(@string h) {
 // Handler does not modify its argument. In particular, it does not
 // populate named path wildcards, so r.PathValue will always return
 // the empty string.
-public static (Handler h, @string pattern) Handler(this ж<ServeMux> Ꮡmux, ж<Request> r) {
+internal static (Handler h, @string pattern) Handlerᴍ(ж<ServeMux> Ꮡmux, ж<Request> r) {
     Handler h = default;
 
     if (use121) {
@@ -2975,7 +2975,7 @@ private static readonly @string allowˢᵇ = "Allow"u8;
 // If there is a matching handler, it returns it and the pattern that matched.
 // Otherwise it returns a Redirect or NotFound handler with the path that would match
 // after the redirect.
-internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches) findHandler(this ж<ServeMux> Ꮡmux, ж<Request> Ꮡr) {
+internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches) findHandlerᴍ(ж<ServeMux> Ꮡmux, ж<Request> Ꮡr) {
     slice<@string> matches = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -3041,7 +3041,7 @@ internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches)
 // redirection: when a path doesn't match exactly, the match is tried again
 // after appending "/" to the path. If that second match succeeds, the last
 // return value is the URL to redirect to.
-internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirectTo) matchOrRedirect(this ж<ServeMux> Ꮡmux, @string host, @string method, @string path, ж<urlpkg.URL> Ꮡu) {
+internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirectTo) matchOrRedirectᴍ(ж<ServeMux> Ꮡmux, @string host, @string method, @string path, ж<urlpkg.URL> Ꮡu) {
     ж<routingNode> _ᴛ1 = default;
     slice<@string> matches = default;
     ж<urlpkg.URL> redirectTo = default;
@@ -3132,10 +3132,10 @@ internal static bool exactMatch(ж<routingNode> Ꮡn, @string path) {
     return len(n.pattern.segments) == strings.Count(path, "/");
 }
 
-} partial class httpᴛServeMux {
+} partial class http_package {
 
 // matchingMethods return a sorted list of all methods that would match with the given host and path.
-internal static slice<@string> matchingMethods(this ж<ServeMux> Ꮡmux, @string host, @string path) {
+internal static slice<@string> matchingMethodsᴍ(ж<ServeMux> Ꮡmux, @string host, @string path) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3163,7 +3163,7 @@ private static readonly @string closeˢᵇ = "close"u8;
 
 // ServeHTTP dispatches the request to the handler whose
 // pattern most closely matches the request URL.
-public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Request> Ꮡr) {
+internal static void ServeHTTPᴍ(ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.RequestURI == "*"u8) {
@@ -3190,7 +3190,7 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 // or if the pattern is invalid, Handle panics.
 //
 // See [ServeMux] for details on valid patterns and conflict rules.
-public static partial void Handle(this ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
+internal static partial void Handleᴍ(ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
     if (use121) {
         Ꮡmux.Ꮡmux121.handle(pattern, handler);
     } else {
@@ -3203,7 +3203,7 @@ public static partial void Handle(this ж<ServeMux> Ꮡmux, @string pattern, Han
 // or if the pattern is invalid, HandleFunc panics.
 //
 // See [ServeMux] for details on valid patterns and conflict rules.
-public static partial void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+internal static partial void HandleFuncᴍ(ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (use121) {
         Ꮡmux.Ꮡmux121.handleFunc(pattern, handler);
     } else {
@@ -3233,9 +3233,9 @@ public static partial void HandleFunc(@string pattern, Action<ResponseWriter, ж
     }
 }
 
-} partial class httpᴛServeMux {
+} partial class http_package {
 
-internal static partial void register(this ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
+internal static partial void registerᴍ(ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
     var err = Ꮡmux.registerErr(pattern, handler); if (err != nil) {
         throw panic(err);
     }
@@ -3249,7 +3249,7 @@ private static readonly @string httpNilHandlerˢᵇ = "http: nil handler"u8;
 internal static ref readonly @string unknownLocationˢ => ref unknownLocationˢᵇ;
 private static readonly @string unknownLocationˢᵇ = "unknown location"u8;
 
-internal static partial error registerErr(this ж<ServeMux> Ꮡmux, @string patstr, Handler handler) {
+internal static partial error registerErrᴍ(ж<ServeMux> Ꮡmux, @string patstr, Handler handler) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3448,7 +3448,7 @@ partial struct Server {
     internal sync.WaitGroup listenerGroup;
 }
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // Close immediately closes all active net.Listeners and any
 // connections in state [StateNew], [StateActive], or [StateIdle]. For a
@@ -3459,7 +3459,7 @@ partial struct Server {
 //
 // Close returns any error returned from closing the [Server]'s
 // underlying Listener(s).
-public static error Close(this ж<Server> Ꮡs) {
+internal static error Closeᴍ(ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3499,7 +3499,7 @@ public static error Close(this ж<Server> Ꮡs) {
 // exercise for the reader.
 internal static time.Duration shutdownPollIntervalMax => /* 500 * time.Millisecond */ 500000000;
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // Shutdown gracefully shuts down the server without interrupting any
 // active connections. Shutdown works by first closing all open
@@ -3521,7 +3521,7 @@ internal static time.Duration shutdownPollIntervalMax => /* 500 * time.Milliseco
 //
 // Once Shutdown has been called on a server, it may not be reused;
 // future calls to methods such as Serve will return ErrServerClosed.
-public static partial error Shutdown(this ж<Server> Ꮡs, context.Context ctx) {
+internal static partial error Shutdownᴍ(ж<Server> Ꮡs, context.Context ctx) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3577,7 +3577,7 @@ public static partial error Shutdown(this ж<Server> Ꮡs, context.Context ctx) 
 // undergone ALPN protocol upgrade or that have been hijacked.
 // This function should start protocol-specific graceful shutdown,
 // but should not wait for shutdown to complete.
-public static void RegisterOnShutdown(this ж<Server> Ꮡs, Action f) {
+internal static void RegisterOnShutdownᴍ(ж<Server> Ꮡs, Action f) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.mu.Lock();
@@ -3587,7 +3587,7 @@ public static void RegisterOnShutdown(this ж<Server> Ꮡs, Action f) {
 
 // closeIdleConns closes all idle connections and reports whether the
 // server is quiescent.
-internal static bool closeIdleConns(this ж<Server> Ꮡs) {
+internal static bool closeIdleConnsᴍ(ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3619,7 +3619,7 @@ internal static bool closeIdleConns(this ж<Server> Ꮡs) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static error closeListenersLocked(this ref Server s) {
+internal static error closeListenersLockedᴍ(ref Server s) {
     error err = default;
     foreach (var (ln, _) in s.listeners) {
         var cerr = (ln.ValueSlot).Close(); if (cerr != nil && err == nil) {
@@ -3677,9 +3677,9 @@ internal static map<ConnState, @string> stateName = new map<ConnState, @string>{
     [StateClosed] = "closed"
 };
 
-} partial class httpᴛConnState {
+} partial class http_package {
 
-public static @string String(this ConnState c) {
+internal static @string Stringᴍ(ConnState c) {
     return stateName[c];
 }
 
@@ -3691,7 +3691,7 @@ partial struct serverHandler {
     internal ж<Server> srv;
 }
 
-} partial class httpᴛserverHandler {
+} partial class http_package {
 
 // ServeHTTP should be an internal detail,
 // but widely used packages access it using linkname.
@@ -3702,7 +3702,7 @@ partial struct serverHandler {
 // See go.dev/issue/67401.
 //
 //go:linkname badServeHTTP net/http.serverHandler.ServeHTTP
-internal static void ServeHTTP(this serverHandler sh, ResponseWriter rw, ж<Request> Ꮡreq) {
+internal static void ServeHTTPᴍ(serverHandler sh, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var handler = sh.srv.Handler;
@@ -3744,7 +3744,7 @@ public static Handler AllowQuerySemicolons(Handler h) {
     }));
 }
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpˢ3 => ref httpˢ3ᵇ;
@@ -3760,7 +3760,7 @@ private static readonly @string tcpˢᵇ = "tcp"u8;
 //
 // ListenAndServe always returns a non-nil error. After [Server.Shutdown] or [Server.Close],
 // the returned error is [ErrServerClosed].
-public static error ListenAndServe(this ж<Server> Ꮡs) {
+internal static error ListenAndServeᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs.shuttingDown()) {
@@ -3781,11 +3781,11 @@ public static error ListenAndServe(this ж<Server> Ꮡs) {
 
 internal static Action<ж<Server>, net.Listener> testHookServerServe; // used if non-nil
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // shouldConfigureHTTP2ForServe reports whether Server.Serve should configure
 // automatic HTTP/2. (which sets up the s.TLSNextProto map)
-internal static bool shouldConfigureHTTP2ForServe(this ref Server s) {
+internal static bool shouldConfigureHTTP2ForServeᴍ(ref Server s) {
     if (s.TLSConfig == nil) {
         // Compatibility with Go 1.6:
         // If there's no TLSConfig, it's possible that the user just
@@ -3814,7 +3814,7 @@ internal static bool shouldConfigureHTTP2ForServe(this ref Server s) {
 // and [ListenAndServeTLS] methods after a call to [Server.Shutdown] or [Server.Close].
 public static error ErrServerClosed = errors.New("http: Server closed");
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // Serve accepts incoming connections on the Listener l, creating a
 // new service goroutine for each. The service goroutines read requests and
@@ -3826,7 +3826,7 @@ public static error ErrServerClosed = errors.New("http: Server closed");
 //
 // Serve always returns a non-nil error and closes l.
 // After [Server.Shutdown] or [Server.Close], the returned error is [ErrServerClosed].
-public static partial error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
+internal static partial error Serveᴍ(ж<Server> Ꮡs, net.Listener lʗp) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3915,7 +3915,7 @@ public static partial error Serve(this ж<Server> Ꮡs, net.Listener lʗp) {
 //
 // ServeTLS always returns a non-nil error. After [Server.Shutdown] or [Server.Close], the
 // returned error is [ErrServerClosed].
-public static error ServeTLS(this ж<Server> Ꮡs, net.Listener l, @string certFile, @string keyFile) {
+internal static error ServeTLSᴍ(ж<Server> Ꮡs, net.Listener l, @string certFile, @string keyFile) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Setup HTTP/2 before s.Serve, to initialize s.TLSConfig
@@ -3943,7 +3943,7 @@ public static error ServeTLS(this ж<Server> Ꮡs, net.Listener l, @string certF
     return Ꮡs.Serve(tlsListener);
 }
 
-internal static Protocols protocols(this ref Server s) {
+internal static Protocols protocolsᴍ(ref Server s) {
     if (s.Protocols != nil) {
         return s.Protocols.Value; // user-configured set
     }
@@ -4008,7 +4008,7 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
     return nextProtos;
 }
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // trackListener adds or removes a net.Listener to the set of tracked
 // listeners.
@@ -4020,7 +4020,7 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
 // Listener from another caller.
 //
 // It reports whether the server is still up (not Shutdown or Closed).
-internal static bool trackListener(this ж<Server> Ꮡs, ж<net.Listener> ln, bool add) {
+internal static bool trackListenerᴍ(ж<Server> Ꮡs, ж<net.Listener> ln, bool add) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4047,7 +4047,7 @@ internal static bool trackListener(this ж<Server> Ꮡs, ж<net.Listener> ln, bo
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void trackConn(this ж<Server> Ꮡs, ж<conn> c, bool add) {
+internal static void trackConnᴍ(ж<Server> Ꮡs, ж<conn> c, bool add) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4068,25 +4068,25 @@ internal static void trackConn(this ж<Server> Ꮡs, ж<conn> c, bool add) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static time.Duration idleTimeout(this ref Server s) {
+internal static time.Duration idleTimeoutᴍ(ref Server s) {
     if (s.IdleTimeout != 0) {
         return s.IdleTimeout;
     }
     return s.ReadTimeout;
 }
 
-internal static time.Duration readHeaderTimeout(this ref Server s) {
+internal static time.Duration readHeaderTimeoutᴍ(ref Server s) {
     if (s.ReadHeaderTimeout != 0) {
         return s.ReadHeaderTimeout;
     }
     return s.ReadTimeout;
 }
 
-internal static bool doKeepAlives(this ж<Server> Ꮡs) {
+internal static bool doKeepAlivesᴍ(ж<Server> Ꮡs) {
     return !Ꮡs.ᏑdisableKeepAlives.Load() && !Ꮡs.shuttingDown();
 }
 
-internal static bool shuttingDown(this ж<Server> Ꮡs) {
+internal static bool shuttingDownᴍ(ж<Server> Ꮡs) {
     return Ꮡs.ᏑinShutdown.Load();
 }
 
@@ -4094,7 +4094,7 @@ internal static bool shuttingDown(this ж<Server> Ꮡs) {
 // By default, keep-alives are always enabled. Only very
 // resource-constrained environments or servers in the process of
 // shutting down should disable them.
-public static void SetKeepAlivesEnabled(this ж<Server> Ꮡs, bool v) {
+internal static void SetKeepAlivesEnabledᴍ(ж<Server> Ꮡs, bool v) {
     if (v) {
         Ꮡs.ᏑdisableKeepAlives.Store(false);
         return;
@@ -4107,7 +4107,7 @@ public static void SetKeepAlivesEnabled(this ж<Server> Ꮡs, bool v) {
     // TODO: Issue 26303: close HTTP/2 conns as soon as they become idle.
 }
 
-internal static void logf(this ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void logfᴍ(ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (s.ErrorLog != nil) {
@@ -4156,7 +4156,7 @@ public static error ListenAndServeTLS(@string addr, @string certFile, @string ke
     return server.ListenAndServeTLS(certFile, keyFile);
 }
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpsˢ2 => ref httpsˢ2ᵇ;
@@ -4177,7 +4177,7 @@ private static readonly @string httpsˢ2ᵇ = ":https"u8;
 //
 // ListenAndServeTLS always returns a non-nil error. After [Server.Shutdown] or
 // [Server.Close], the returned error is [ErrServerClosed].
-public static error ListenAndServeTLS(this ж<Server> Ꮡs, @string certFile, @string keyFile) {
+internal static error ListenAndServeTLSᴍ(ж<Server> Ꮡs, @string certFile, @string keyFile) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -4207,7 +4207,7 @@ public static error ListenAndServeTLS(this ж<Server> Ꮡs, @string certFile, @s
 // setupHTTP2_ServeTLS conditionally configures HTTP/2 on
 // s and reports whether there was an error setting it up. If it is
 // not configured for policy reasons, nil is returned.
-internal static error setupHTTP2_ServeTLS(this ж<Server> Ꮡs) {
+internal static error setupHTTP2_ServeTLSᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.ᏑnextProtoOnce.Do(Ꮡs.onceSetNextProtoDefaults);
@@ -4222,14 +4222,14 @@ internal static error setupHTTP2_ServeTLS(this ж<Server> Ꮡs) {
 // The tests named TestTransportAutomaticHTTP2* and
 // TestConcurrentServerServe in server_test.go demonstrate some
 // of the supported use cases and motivations.
-internal static error setupHTTP2_Serve(this ж<Server> Ꮡs) {
+internal static error setupHTTP2_Serveᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.ᏑnextProtoOnce.Do(Ꮡs.onceSetNextProtoDefaults_Serve);
     return s.nextProtoErr;
 }
 
-internal static void onceSetNextProtoDefaults_Serve(this ж<Server> Ꮡs) {
+internal static void onceSetNextProtoDefaults_Serveᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.shouldConfigureHTTP2ForServe()) {
@@ -4241,12 +4241,12 @@ internal static void onceSetNextProtoDefaults_Serve(this ж<Server> Ꮡs) {
 
 internal static ж<godebug.Setting> http2server = godebug.New("http2server");
 
-} partial class httpᴛServer {
+} partial class http_package {
 
 // onceSetNextProtoDefaults configures HTTP/2, if the user hasn't
 // configured otherwise. (by setting s.TLSNextProto non-nil)
 // It must only be called via s.nextProtoOnce (use s.setupHTTP2_*).
-internal static void onceSetNextProtoDefaults(this ж<Server> Ꮡs) {
+internal static void onceSetNextProtoDefaultsᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (omitBundledHTTP2) {
@@ -4304,20 +4304,20 @@ partial struct timeoutHandler {
     internal context.Context testContext;
 }
 
-} partial class httpᴛtimeoutHandler {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string htmlHeadTitleTimeoutˢ => ref htmlHeadTitleTimeoutˢᵇ;
 private static readonly @string htmlHeadTitleTimeoutˢᵇ = "<html><head><title>Timeout</title></head><body><h1>Timeout</h1></body></html>"u8;
 
-internal static @string errorBody(this ref timeoutHandler h) {
+internal static @string errorBodyᴍ(ref timeoutHandler h) {
     if (h.body != ""u8) {
         return h.body;
     }
     return htmlHeadTitleTimeoutˢ;
 }
 
-internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
+internal static partial void ServeHTTPᴍ(ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
@@ -4416,19 +4416,19 @@ partial struct timeoutWriter {
 
 internal static Pusher _ᴛ10ʗ = new timeoutWriterжPusher(((ж<timeoutWriter>)nil));
 
-} partial class httpᴛtimeoutWriter {
+} partial class http_package {
 
 // Push implements the [Pusher] interface.
-internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOptions> opts) {
+internal static error Pushᴍ(ref timeoutWriter tw, @string target, ж<PushOptions> opts) {
     var (pusher, ok) = tw.w._<Pusher>(ᐧ); if (ok) {
         return pusher.Push(target, opts);
     }
     return new ProtocolErrorжerror(ErrNotSupported);
 }
 
-internal static Header Header(this ref timeoutWriter tw) { return tw.h; }
+internal static Header Headerᴍ(ref timeoutWriter tw) { return tw.h; }
 
-internal static (nint, error) Write(this ж<timeoutWriter> Ꮡtw, slice<byte> p) {
+internal static (nint, error) Writeᴍ(ж<timeoutWriter> Ꮡtw, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4448,7 +4448,7 @@ internal static (nint, error) Write(this ж<timeoutWriter> Ꮡtw, slice<byte> p)
     finally { if (ᒐd1) Ꮡtw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void writeHeaderLocked(this ref timeoutWriter tw, nint code) {
+internal static void writeHeaderLockedᴍ(ref timeoutWriter tw, nint code) {
     checkWriteHeaderCode(code);
 
     switch (ᐧ) {
@@ -4469,7 +4469,7 @@ internal static void writeHeaderLocked(this ref timeoutWriter tw, nint code) {
     }}
 }
 
-internal static void WriteHeader(this ж<timeoutWriter> Ꮡtw, nint code) {
+internal static void WriteHeaderᴍ(ж<timeoutWriter> Ꮡtw, nint code) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4493,24 +4493,24 @@ partial struct onceCloseListener {
     internal error closeErr;
 }
 
-} partial class httpᴛonceCloseListener {
+} partial class http_package {
 
 // Go method set entry for the promoted 'Listener.Accept()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
-internal static (net.Conn, error) Accept(this onceCloseListener recvᴛ) => recvᴛ.Listener.Accept();
+internal static (net.Conn, error) Acceptᴍ(onceCloseListener recvᴛ) => recvᴛ.Listener.Accept();
 
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
-internal static net.Addr Addr(this onceCloseListener recvᴛ) => recvᴛ.Listener.Addr();
+internal static net.Addr Addrᴍ(onceCloseListener recvᴛ) => recvᴛ.Listener.Addr();
 
-internal static error Close(this ж<onceCloseListener> Ꮡoc) {
+internal static error Closeᴍ(ж<onceCloseListener> Ꮡoc) {
     ref var oc = ref Ꮡoc.DerefOrNull();
 
     Ꮡoc.Ꮡonce.Do(Ꮡoc.close);
     return oc.closeErr;
 }
 
-internal static void close(this ref onceCloseListener oc) { oc.closeErr = oc.Listener.Close(); }
+internal static void closeᴍ(ref onceCloseListener oc) { oc.closeErr = oc.Listener.Close(); }
 
 } partial class http_package {
 
@@ -4518,13 +4518,13 @@ internal static void close(this ref onceCloseListener oc) { oc.closeErr = oc.Lis
 partial struct globalOptionsHandler {
 }
 
-} partial class httpᴛglobalOptionsHandler {
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentLengthˢ => ref contentLengthˢᵇ;
 private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
 
-internal static void ServeHTTP(this globalOptionsHandler _, ResponseWriter w, ж<Request> Ꮡr) {
+internal static void ServeHTTPᴍ(globalOptionsHandler _, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     w.Header().Set(contentLengthˢ, "0");
@@ -4550,15 +4550,15 @@ partial struct initALPNRequest {
     internal serverHandler h;
 }
 
-} partial class httpᴛinitALPNRequest {
+} partial class http_package {
 
 // BaseContext is an exported but unadvertised [http.Handler] method
 // recognized by x/net/http2 to pass down a context; the TLSNextProto
 // API predates context support so we shoehorn through the only
 // interface we have available.
-internal static context.Context BaseContext(this initALPNRequest h) { return h.ctx; }
+internal static context.Context BaseContextᴍ(initALPNRequest h) { return h.ctx; }
 
-internal static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ж<Request> Ꮡreq) {
+internal static void ServeHTTPᴍ(initALPNRequest h, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (req.TLS == nil) {
@@ -4582,27 +4582,27 @@ partial struct loggingConn {
     /*embed*/ public net_package.Conn Conn;
 }
 
-} partial class httpᴛloggingConn {
+} partial class http_package {
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static net.Addr LocalAddr(this loggingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddrᴍ(loggingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static net.Addr RemoteAddr(this loggingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddrᴍ(loggingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetDeadline(t);
+internal static error SetDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetDeadline(t);
 
 // Go method set entry for the promoted 'Conn.SetReadDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetReadDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetReadDeadline(t);
+internal static error SetReadDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetReadDeadline(t);
 
 // Go method set entry for the promoted 'Conn.SetWriteDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetWriteDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
+internal static error SetWriteDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
 } partial class http_package {
 
@@ -4625,9 +4625,9 @@ internal static net.Conn newLoggingConn(@string baseName, net.Conn c) {
     finally { ᒐ.Run(); }
 }
 
-} partial class httpᴛloggingConn {
+} partial class http_package {
 
-internal static (nint n, error err) Write(this ref loggingConn c, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(ref loggingConn c, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4637,7 +4637,7 @@ internal static (nint n, error err) Write(this ref loggingConn c, slice<byte> p)
     return (n, err);
 }
 
-internal static (nint n, error err) Read(this ref loggingConn c, slice<byte> p) {
+internal static (nint n, error err) Readᴍ(ref loggingConn c, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4647,7 +4647,7 @@ internal static (nint n, error err) Read(this ref loggingConn c, slice<byte> p) 
     return (n, err);
 }
 
-internal static error /*err*/ Close(this ref loggingConn c) {
+internal static error /*err*/ Closeᴍ(ref loggingConn c) {
     error err = default;
 
     log.Printf("%s.Close() = ...", c.name);
@@ -4665,9 +4665,9 @@ partial struct checkConnErrorWriter {
     internal ж<conn> c;
 }
 
-} partial class httpᴛcheckConnErrorWriter {
+} partial class http_package {
 
-internal static (nint n, error err) Write(this checkConnErrorWriter w, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(checkConnErrorWriter w, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4717,3 +4717,168 @@ public static Handler MaxBytesHandler(Handler h, int64 n) {
 }
 
 } // end http_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class httpᴛconn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hijacked(this ж<conn> Ꮡc) => http_package.hijackedᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLocked(this ж<conn> Ꮡc) => http_package.hijackLockedᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<response> w, error err) readRequest(this ж<conn> Ꮡc, context.Context ctx) => http_package.readRequestᴍ(Ꮡc, ctx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void finalFlush(this ref conn c) => http_package.finalFlushᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ref conn c) => http_package.closeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeWriteAndWait(this ref conn c) => http_package.closeWriteAndWaitᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setState(this ж<conn> Ꮡc, net.Conn nc, ConnState state, bool runHook) => http_package.setStateᴍ(Ꮡc, nc, state, runHook);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ConnState state, int64 unixSec) getState(this ж<conn> Ꮡc) => http_package.getStateᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void serve(this ж<conn> Ꮡc, context.Context ctx) => http_package.serveᴍ(Ꮡc, ctx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool maybeServeUnencryptedHTTP2(this ж<conn> Ꮡc, context.Context ctx) => http_package.maybeServeUnencryptedHTTP2ᴍ(Ꮡc, ctx);
+}
+partial class httpᴛchunkWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref chunkWriter cw, slice<byte> p) => http_package.Writeᴍ(ref cw, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error flush(this ref chunkWriter cw) => http_package.flushᴍ(ref cw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ref chunkWriter cw) => http_package.closeᴍ(ref cw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) => http_package.writeHeaderᴍ(ref cw, p);
+}
+partial class httpᴛresponse {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetReadDeadline(this ref response c, time.Time deadline) => http_package.SetReadDeadlineᴍ(ref c, deadline);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetWriteDeadline(this ref response c, time.Time deadline) => http_package.SetWriteDeadlineᴍ(ref c, deadline);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error EnableFullDuplex(this ref response c) => http_package.EnableFullDuplexᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Header finalTrailers(this ref response w) => http_package.finalTrailersᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declareTrailer(this ref response w, @string k) => http_package.declareTrailerᴍ(ref w, k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void requestTooLarge(this ж<response> Ꮡw) => http_package.requestTooLargeᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void disableWriteContinue(this ж<response> Ꮡw) => http_package.disableWriteContinueᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 n, error err) ReadFrom(this ж<response> Ꮡw, io.Reader src) => http_package.ReadFromᴍ(Ꮡw, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Header Header(this ref response w) => http_package.Headerᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void WriteHeader(this ж<response> Ꮡw, nint code) => http_package.WriteHeaderᴍ(Ꮡw, code);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool bodyAllowed(this ref response w) => http_package.bodyAllowedᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<response> Ꮡw, slice<byte> data) => http_package.Writeᴍ(Ꮡw, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ж<response> Ꮡw, @string data) => http_package.WriteStringᴍ(Ꮡw, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) write(this ж<response> Ꮡw, nint lenData, slice<byte> dataB, @string dataS) => http_package.writeᴍ(Ꮡw, lenData, dataB, dataS);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void finishRequest(this ж<response> Ꮡw) => http_package.finishRequestᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldReuseConnection(this ж<response> Ꮡw) => http_package.shouldReuseConnectionᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool closedRequestBodyEarly(this ref response w) => http_package.closedRequestBodyEarlyᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Flush(this ж<response> Ꮡw) => http_package.Flushᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error FlushError(this ж<response> Ꮡw) => http_package.FlushErrorᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendExpectationFailed(this ж<response> Ꮡw) => http_package.sendExpectationFailedᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijack(this ж<response> Ꮡw) => http_package.Hijackᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<bool> CloseNotify(this ж<response> Ꮡw) => http_package.CloseNotifyᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeNotify(this ж<response> Ꮡw) => http_package.closeNotifyᴍ(Ꮡw);
+}
+partial class httpᴛServer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<conn> newConn(this ж<Server> Ꮡs, net.Conn rwc) => http_package.newConnᴍ(Ꮡs, rwc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint maxHeaderBytes(this ref Server s) => http_package.maxHeaderBytesᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 initialReadLimitSize(this ref Server s) => http_package.initialReadLimitSizeᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration tlsHandshakeTimeout(this ref Server s) => http_package.tlsHandshakeTimeoutᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Server> Ꮡs) => http_package.Closeᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Shutdown(this ж<Server> Ꮡs, context.Context ctx) => http_package.Shutdownᴍ(Ꮡs, ctx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RegisterOnShutdown(this ж<Server> Ꮡs, Action f) => http_package.RegisterOnShutdownᴍ(Ꮡs, f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool closeIdleConns(this ж<Server> Ꮡs) => http_package.closeIdleConnsᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error closeListenersLocked(this ref Server s) => http_package.closeListenersLockedᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ListenAndServe(this ж<Server> Ꮡs) => http_package.ListenAndServeᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldConfigureHTTP2ForServe(this ref Server s) => http_package.shouldConfigureHTTP2ForServeᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Serve(this ж<Server> Ꮡs, net.Listener lʗp) => http_package.Serveᴍ(Ꮡs, lʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ServeTLS(this ж<Server> Ꮡs, net.Listener l, @string certFile, @string keyFile) => http_package.ServeTLSᴍ(Ꮡs, l, certFile, keyFile);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Protocols protocols(this ref Server s) => http_package.protocolsᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool trackListener(this ж<Server> Ꮡs, ж<net.Listener> ln, bool add) => http_package.trackListenerᴍ(Ꮡs, ln, add);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void trackConn(this ж<Server> Ꮡs, ж<conn> c, bool add) => http_package.trackConnᴍ(Ꮡs, c, add);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration idleTimeout(this ref Server s) => http_package.idleTimeoutᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration readHeaderTimeout(this ref Server s) => http_package.readHeaderTimeoutᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool doKeepAlives(this ж<Server> Ꮡs) => http_package.doKeepAlivesᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shuttingDown(this ж<Server> Ꮡs) => http_package.shuttingDownᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetKeepAlivesEnabled(this ж<Server> Ꮡs, bool v) => http_package.SetKeepAlivesEnabledᴍ(Ꮡs, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logf(this ref Server s, @string format, params ꓸꓸꓸany argsʗp) => http_package.logfᴍ(ref s, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ListenAndServeTLS(this ж<Server> Ꮡs, @string certFile, @string keyFile) => http_package.ListenAndServeTLSᴍ(Ꮡs, certFile, keyFile);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setupHTTP2_ServeTLS(this ж<Server> Ꮡs) => http_package.setupHTTP2_ServeTLSᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setupHTTP2_Serve(this ж<Server> Ꮡs) => http_package.setupHTTP2_Serveᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onceSetNextProtoDefaults_Serve(this ж<Server> Ꮡs) => http_package.onceSetNextProtoDefaults_Serveᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onceSetNextProtoDefaults(this ж<Server> Ꮡs) => http_package.onceSetNextProtoDefaultsᴍ(Ꮡs);
+}
+partial class httpᴛconnReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @lock(this ж<connReader> Ꮡcr) => http_package.@lockᴍ(Ꮡcr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unlock(this ж<connReader> Ꮡcr) => http_package.unlockᴍ(Ꮡcr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void releaseConn(this ж<connReader> Ꮡcr) => http_package.releaseConnᴍ(Ꮡcr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startBackgroundRead(this ж<connReader> Ꮡcr) => http_package.startBackgroundReadᴍ(Ꮡcr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void backgroundRead(this ж<connReader> Ꮡcr) => http_package.backgroundReadᴍ(Ꮡcr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void abortPendingRead(this ж<connReader> Ꮡcr) => http_package.abortPendingReadᴍ(Ꮡcr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setReadLimit(this ref connReader cr, int64 remain) => http_package.setReadLimitᴍ(ref cr, remain);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setInfiniteReadLimit(this ref connReader cr) => http_package.setInfiniteReadLimitᴍ(ref cr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hitReadLimit(this ref connReader cr) => http_package.hitReadLimitᴍ(ref cr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleReadErrorLocked(this ref connReader cr, error _) => http_package.handleReadErrorLockedᴍ(ref cr, _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<connReader> Ꮡcr, slice<byte> p) => http_package.Readᴍ(Ꮡcr, p);
+}
+partial class httpᴛexpectContinueReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<expectContinueReader> Ꮡecr, slice<byte> p) => http_package.Readᴍ(Ꮡecr, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<expectContinueReader> Ꮡecr) => http_package.Closeᴍ(Ꮡecr);
+}
+partial class httpᴛextraHeader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Write(this extraHeader h, ж<bufio.Writer> Ꮡw) => http_package.Writeᴍ(h, Ꮡw);
+}
+partial class httpᴛstatusError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this statusError e) => http_package.Errorᴍ(e);
+}
+partial class httpᴛunencryptedHTTP2Request {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context.Context BaseContext(this unencryptedHTTP2Request h) => http_package.BaseContextᴍ(h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this unencryptedHTTP2Request h, ResponseWriter rw, ж<Request> Ꮡreq) => http_package.ServeHTTPᴍ(h, rw, Ꮡreq);
+}
+partial class httpᴛunencryptedNetConnInTLSConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Conn UnencryptedNetConn(this unencryptedNetConnInTLSConn c) => http_package.UnencryptedNetConnᴍ(c);
+}
+partial class httpᴛHandlerFunc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeHTTP(this HandlerFunc f, ResponseWriter w, ж<Request> r) => http_package.ServeHTTPᴍ(f, w, r);
+}
+partial class httpᴛredirectHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this ref redirectHandler rh, ResponseWriter w, ж<Request> r) => http_package.ServeHTTPᴍ(ref rh, w, r);
+}
+partial class httpᴛServeMux {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Handler h, @string pattern) Handler(this ж<ServeMux> Ꮡmux, ж<Request> r) => http_package.Handlerᴍ(Ꮡmux, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches) findHandler(this ж<ServeMux> Ꮡmux, ж<Request> Ꮡr) => http_package.findHandlerᴍ(Ꮡmux, Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirectTo) matchOrRedirect(this ж<ServeMux> Ꮡmux, @string host, @string method, @string path, ж<urlpkg.URL> Ꮡu) => http_package.matchOrRedirectᴍ(Ꮡmux, host, method, path, Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@string> matchingMethods(this ж<ServeMux> Ꮡmux, @string host, @string path) => http_package.matchingMethodsᴍ(Ꮡmux, host, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Request> Ꮡr) => http_package.ServeHTTPᴍ(Ꮡmux, w, Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Handle(this ж<ServeMux> Ꮡmux, @string pattern, Handler handler) => http_package.Handleᴍ(Ꮡmux, pattern, handler);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) => http_package.HandleFuncᴍ(Ꮡmux, pattern, handler);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void register(this ж<ServeMux> Ꮡmux, @string pattern, Handler handler) => http_package.registerᴍ(Ꮡmux, pattern, handler);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error registerErr(this ж<ServeMux> Ꮡmux, @string patstr, Handler handler) => http_package.registerErrᴍ(Ꮡmux, patstr, handler);
+}
+partial class httpᴛConnState {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ConnState c) => http_package.Stringᴍ(c);
+}
+partial class httpᴛserverHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this serverHandler sh, ResponseWriter rw, ж<Request> Ꮡreq) => http_package.ServeHTTPᴍ(sh, rw, Ꮡreq);
+}
+partial class httpᴛtimeoutHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string errorBody(this ref timeoutHandler h) => http_package.errorBodyᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) => http_package.ServeHTTPᴍ(Ꮡh, w, Ꮡr);
+}
+partial class httpᴛtimeoutWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOptions> opts) => http_package.Pushᴍ(ref tw, target, opts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Header Header(this ref timeoutWriter tw) => http_package.Headerᴍ(ref tw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ж<timeoutWriter> Ꮡtw, slice<byte> p) => http_package.Writeᴍ(Ꮡtw, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeHeaderLocked(this ref timeoutWriter tw, nint code) => http_package.writeHeaderLockedᴍ(ref tw, code);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void WriteHeader(this ж<timeoutWriter> Ꮡtw, nint code) => http_package.WriteHeaderᴍ(Ꮡtw, code);
+}
+partial class httpᴛonceCloseListener {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn, error) Accept(this onceCloseListener recvᴛ) => http_package.Acceptᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr Addr(this onceCloseListener recvᴛ) => http_package.Addrᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<onceCloseListener> Ꮡoc) => http_package.Closeᴍ(Ꮡoc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ref onceCloseListener oc) => http_package.closeᴍ(ref oc);
+}
+partial class httpᴛglobalOptionsHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this globalOptionsHandler _, ResponseWriter w, ж<Request> Ꮡr) => http_package.ServeHTTPᴍ(_, w, Ꮡr);
+}
+partial class httpᴛinitALPNRequest {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context.Context BaseContext(this initALPNRequest h) => http_package.BaseContextᴍ(h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ж<Request> Ꮡreq) => http_package.ServeHTTPᴍ(h, rw, Ꮡreq);
+}
+partial class httpᴛloggingConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr LocalAddr(this loggingConn recvᴛ) => http_package.LocalAddrᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr RemoteAddr(this loggingConn recvᴛ) => http_package.RemoteAddrᴍ(recvᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetDeadline(this loggingConn recvᴛ, time.Time t) => http_package.SetDeadlineᴍ(recvᴛ, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetReadDeadline(this loggingConn recvᴛ, time.Time t) => http_package.SetReadDeadlineᴍ(recvᴛ, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetWriteDeadline(this loggingConn recvᴛ, time.Time t) => http_package.SetWriteDeadlineᴍ(recvᴛ, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref loggingConn c, slice<byte> p) => http_package.Writeᴍ(ref c, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref loggingConn c, slice<byte> p) => http_package.Readᴍ(ref c, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ Close(this ref loggingConn c) => http_package.Closeᴍ(ref c);
+}
+partial class httpᴛcheckConnErrorWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this checkConnErrorWriter w, slice<byte> p) => http_package.Writeᴍ(w, p);
+}
+// </GlyphForwarders>

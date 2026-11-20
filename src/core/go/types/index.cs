@@ -15,7 +15,7 @@ using static types_package;
 
 partial class types_package {
 
-} partial class typesᴛChecker {
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mapIndexˢ => ref mapIndexˢᵇ;
@@ -24,7 +24,7 @@ private static readonly @string mapIndexˢᵇ = "map index"u8;
 // If e is a valid function instantiation, indexExpr returns true.
 // In that case x represents the uninstantiated function value and
 // it is the caller's responsibility to instantiate the function.
-internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<indexedExpr> Ꮡe) {
+internal static bool /*isFuncInst*/ indexExprᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<indexedExpr> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -240,7 +240,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
 internal static ref readonly @string and3rdIndexRequiredIn3ˢ => ref and3rdIndexRequiredIn3ˢᵇ;
 private static readonly @string and3rdIndexRequiredIn3ˢᵇ = "2nd and 3rd index required in 3-index slice"u8;
 
-internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SliceExpr> Ꮡe) {
+internal static void sliceExprᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SliceExpr> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -418,7 +418,7 @@ break_L:;
 // singleIndex returns the (single) index from the index expression e.
 // If the index is missing, or if there are multiple indices, an error
 // is reported and the result is nil.
-internal static ast.Expr singleIndex(this ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡexpr) {
+internal static ast.Expr singleIndexᴍ(ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡexpr) {
     ref var expr = ref Ꮡexpr.DerefOrNull();
 
     if (len(expr.indices) == 0) {
@@ -440,7 +440,7 @@ private static readonly @string indexˢᵇ = "index"u8;
 // If max >= 0, it is the upper bound for index.
 // If the result typ is != Typ[Invalid], index is valid and typ is its (possibly named) integer type.
 // If the result val >= 0, index is valid and val is its constant int value.
-internal static (Type typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
+internal static (Type typ, int64 val) indexᴍ(ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
     Type typ = default;
     int64 val = default;
 
@@ -472,7 +472,7 @@ internal static (Type typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Expr 
     return (x.typ, v);
 }
 
-internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, errors.Code code, @string what, bool allowNegative) {
+internal static bool isValidIndexᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, errors.Code code, @string what, bool allowNegative) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid) {
@@ -527,9 +527,9 @@ partial struct indexedExpr {
     internal token.Pos rbrack;        // position of "]"
 }
 
-} partial class typesᴛindexedExpr {
+} partial class types_package {
 
-internal static token.Pos Pos(this ref indexedExpr x) {
+internal static token.Pos Posᴍ(ref indexedExpr x) {
     return x.orig.Pos();
 }
 
@@ -559,3 +559,16 @@ internal static ж<indexedExpr> unpackIndexedExpr(ast.Node n) {
 }
 
 } // end types_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class typesᴛChecker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<indexedExpr> Ꮡe) => types_package.indexExprᴍ(Ꮡcheck, Ꮡx, Ꮡe);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SliceExpr> Ꮡe) => types_package.sliceExprᴍ(Ꮡcheck, Ꮡx, Ꮡe);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr singleIndex(this ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡexpr) => types_package.singleIndexᴍ(Ꮡcheck, Ꮡexpr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Type typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Expr index, int64 max) => types_package.indexᴍ(Ꮡcheck, index, max);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, errors.Code code, @string what, bool allowNegative) => types_package.isValidIndexᴍ(Ꮡcheck, Ꮡx, code, what, allowNegative);
+}
+partial class typesᴛindexedExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos Pos(this ref indexedExpr x) => types_package.Posᴍ(ref x);
+}
+// </GlyphForwarders>

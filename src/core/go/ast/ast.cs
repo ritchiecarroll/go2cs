@@ -76,10 +76,10 @@ partial struct Comment {
     public @string Text;    // comment text (excluding '\n' for //-style comments)
 }
 
-} partial class astᴛComment {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref Comment c) { return c.Slash; }
-public static token.Pos End(this ref Comment c) { return (token.Pos)((nint)c.Slash + len(c.Text)); }
+internal static token.Pos Posᴍ(ref Comment c) { return c.Slash; }
+internal static token.Pos Endᴍ(ref Comment c) { return (token.Pos)((nint)c.Slash + len(c.Text)); }
 
 } partial class ast_package {
 
@@ -89,10 +89,10 @@ partial struct CommentGroup {
     public slice<ж<Comment>> List; // len(List) > 0
 }
 
-} partial class astᴛCommentGroup {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref CommentGroup g) { return g.List[0].Pos(); }
-public static token.Pos End(this ref CommentGroup g) { return g.List[len(g.List) - 1].End(); }
+internal static token.Pos Posᴍ(ref CommentGroup g) { return g.List[0].Pos(); }
+internal static token.Pos Endᴍ(ref CommentGroup g) { return g.List[len(g.List) - 1].End(); }
 
 } partial class ast_package {
 
@@ -106,7 +106,7 @@ internal static @string stripTrailingWhitespace(@string s) {
     return s.slice(0, i);
 }
 
-} partial class astᴛCommentGroup {
+} partial class ast_package {
 
 // Text returns the text of the comment.
 // Comment markers (//, /*, and */), the first space of a line comment, and
@@ -114,7 +114,7 @@ internal static @string stripTrailingWhitespace(@string s) {
 // Comment directives like "//line" and "//go:noinline" are also removed.
 // Multiple empty lines are reduced to one, and trailing space on lines is trimmed.
 // Unless the result is empty, it is newline-terminated.
-public static @string Text(this ж<CommentGroup> Ꮡg) {
+internal static @string Textᴍ(ж<CommentGroup> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
     var linesᴷ = new stackAppend<@string>();
 
@@ -240,9 +240,9 @@ partial struct Field {
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
-} partial class astᴛField {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref Field f) {
+internal static token.Pos Posᴍ(ref Field f) {
     if (len(f.Names) > 0) {
         return f.Names[0].Pos();
     }
@@ -252,7 +252,7 @@ public static token.Pos Pos(this ref Field f) {
     return token.NoPos;
 }
 
-public static token.Pos End(this ref Field f) {
+internal static token.Pos Endᴍ(ref Field f) {
     if (f.Tag != nil) {
         return f.Tag.End();
     }
@@ -275,9 +275,9 @@ partial struct FieldList {
     public token.Pos Closing;    // position of closing parenthesis/brace/bracket, if any
 }
 
-} partial class astᴛFieldList {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref FieldList f) {
+internal static token.Pos Posᴍ(ref FieldList f) {
     if (f.Opening.IsValid()) {
         return f.Opening;
     }
@@ -289,7 +289,7 @@ public static token.Pos Pos(this ref FieldList f) {
     return token.NoPos;
 }
 
-public static token.Pos End(this ref FieldList f) {
+internal static token.Pos Endᴍ(ref FieldList f) {
     if (f.Closing.IsValid()) {
         return f.Closing + 1;
     }
@@ -302,7 +302,7 @@ public static token.Pos End(this ref FieldList f) {
 }
 
 // NumFields returns the number of parameters or struct fields represented by a [FieldList].
-public static nint NumFields(this ж<FieldList> Ꮡf) {
+internal static nint NumFieldsᴍ(ж<FieldList> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     nint n = 0;
@@ -528,129 +528,129 @@ partial struct ChanType {
     public Expr Value;      // value type
 }
 
-} partial class astᴛBadExpr {
+} partial class ast_package {
 
 // Pos and End implementations for expression/type nodes.
-public static token.Pos Pos(this ref BadExpr x) { return x.From; }
+internal static token.Pos Posᴍ(ref BadExpr x) { return x.From; }
 
-} partial class astᴛIdent {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref Ident x) { return x.NamePos; }
+internal static token.Pos Posᴍ(ref Ident x) { return x.NamePos; }
 
-} partial class astᴛEllipsis {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref Ellipsis x) { return x.ΔEllipsis; }
+internal static token.Pos Posᴍ(ref Ellipsis x) { return x.ΔEllipsis; }
 
-} partial class astᴛBasicLit {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref BasicLit x) { return x.ValuePos; }
+internal static token.Pos Posᴍ(ref BasicLit x) { return x.ValuePos; }
 
-} partial class astᴛFuncLit {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref FuncLit x) { return x.Type.Pos(); }
+internal static token.Pos Posᴍ(ref FuncLit x) { return x.Type.Pos(); }
 
-} partial class astᴛCompositeLit {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref CompositeLit x) {
+internal static token.Pos Posᴍ(ref CompositeLit x) {
     if (x.Type != nil) {
         return x.Type.Pos();
     }
     return x.Lbrace;
 }
 
-} partial class astᴛParenExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref ParenExpr x) { return x.Lparen; }
+internal static token.Pos Posᴍ(ref ParenExpr x) { return x.Lparen; }
 
-} partial class astᴛSelectorExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref SelectorExpr x) { return x.X.Pos(); }
+internal static token.Pos Posᴍ(ref SelectorExpr x) { return x.X.Pos(); }
 
-} partial class astᴛIndexExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref IndexExpr x) { return x.X.Pos(); }
+internal static token.Pos Posᴍ(ref IndexExpr x) { return x.X.Pos(); }
 
-} partial class astᴛIndexListExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref IndexListExpr x) { return x.X.Pos(); }
+internal static token.Pos Posᴍ(ref IndexListExpr x) { return x.X.Pos(); }
 
-} partial class astᴛSliceExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref SliceExpr x) { return x.X.Pos(); }
+internal static token.Pos Posᴍ(ref SliceExpr x) { return x.X.Pos(); }
 
-} partial class astᴛTypeAssertExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref TypeAssertExpr x) { return x.X.Pos(); }
+internal static token.Pos Posᴍ(ref TypeAssertExpr x) { return x.X.Pos(); }
 
-} partial class astᴛCallExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref CallExpr x) { return x.Fun.Pos(); }
+internal static token.Pos Posᴍ(ref CallExpr x) { return x.Fun.Pos(); }
 
-} partial class astᴛStarExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref StarExpr x) { return x.Star; }
+internal static token.Pos Posᴍ(ref StarExpr x) { return x.Star; }
 
-} partial class astᴛUnaryExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref UnaryExpr x) { return x.OpPos; }
+internal static token.Pos Posᴍ(ref UnaryExpr x) { return x.OpPos; }
 
-} partial class astᴛBinaryExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref BinaryExpr x) { return x.X.Pos(); }
+internal static token.Pos Posᴍ(ref BinaryExpr x) { return x.X.Pos(); }
 
-} partial class astᴛKeyValueExpr {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref KeyValueExpr x) { return x.Key.Pos(); }
+internal static token.Pos Posᴍ(ref KeyValueExpr x) { return x.Key.Pos(); }
 
-} partial class astᴛArrayType {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref ArrayType x) { return x.Lbrack; }
+internal static token.Pos Posᴍ(ref ArrayType x) { return x.Lbrack; }
 
-} partial class astᴛStructType {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref StructType x) { return x.Struct; }
+internal static token.Pos Posᴍ(ref StructType x) { return x.Struct; }
 
-} partial class astᴛFuncType {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref FuncType x) {
+internal static token.Pos Posᴍ(ref FuncType x) {
     if (x.Func.IsValid() || x.Params == nil) { // see issue 3870
         return x.Func;
     }
     return x.Params.Pos(); // interface method declarations have no "func" keyword
 }
 
-} partial class astᴛInterfaceType {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref InterfaceType x) { return x.Interface; }
+internal static token.Pos Posᴍ(ref InterfaceType x) { return x.Interface; }
 
-} partial class astᴛMapType {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref MapType x) { return x.Map; }
+internal static token.Pos Posᴍ(ref MapType x) { return x.Map; }
 
-} partial class astᴛChanType {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref ChanType x) { return x.Begin; }
+internal static token.Pos Posᴍ(ref ChanType x) { return x.Begin; }
 
-} partial class astᴛBadExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref BadExpr x) { return x.To; }
+internal static token.Pos Endᴍ(ref BadExpr x) { return x.To; }
 
-} partial class astᴛIdent {
+} partial class ast_package {
 
-public static token.Pos End(this ref Ident x) { return (token.Pos)((nint)x.NamePos + len(x.Name)); }
+internal static token.Pos Endᴍ(ref Ident x) { return (token.Pos)((nint)x.NamePos + len(x.Name)); }
 
-} partial class astᴛEllipsis {
+} partial class ast_package {
 
-public static token.Pos End(this ref Ellipsis x) {
+internal static token.Pos Endᴍ(ref Ellipsis x) {
     if (x.Elt != nil) {
         return x.Elt.End();
     }
     return x.ΔEllipsis + 3; // len("...")
 }
 
-} partial class astᴛBasicLit {
+} partial class ast_package {
 
-public static token.Pos End(this ref BasicLit x) {
+internal static token.Pos Endᴍ(ref BasicLit x) {
     if (!x.ValueEnd.IsValid()) {
         // Not from parser; use a heuristic.
         // (Incorrect for `...` containing \r\n;
@@ -660,180 +660,180 @@ public static token.Pos End(this ref BasicLit x) {
     return x.ValueEnd;
 }
 
-} partial class astᴛFuncLit {
+} partial class ast_package {
 
-public static token.Pos End(this ref FuncLit x) { return x.Body.End(); }
+internal static token.Pos Endᴍ(ref FuncLit x) { return x.Body.End(); }
 
-} partial class astᴛCompositeLit {
+} partial class ast_package {
 
-public static token.Pos End(this ref CompositeLit x) { return x.Rbrace + 1; }
+internal static token.Pos Endᴍ(ref CompositeLit x) { return x.Rbrace + 1; }
 
-} partial class astᴛParenExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref ParenExpr x) { return x.Rparen + 1; }
+internal static token.Pos Endᴍ(ref ParenExpr x) { return x.Rparen + 1; }
 
-} partial class astᴛSelectorExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref SelectorExpr x) { return x.Sel.End(); }
+internal static token.Pos Endᴍ(ref SelectorExpr x) { return x.Sel.End(); }
 
-} partial class astᴛIndexExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref IndexExpr x) { return x.Rbrack + 1; }
+internal static token.Pos Endᴍ(ref IndexExpr x) { return x.Rbrack + 1; }
 
-} partial class astᴛIndexListExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref IndexListExpr x) { return x.Rbrack + 1; }
+internal static token.Pos Endᴍ(ref IndexListExpr x) { return x.Rbrack + 1; }
 
-} partial class astᴛSliceExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref SliceExpr x) { return x.Rbrack + 1; }
+internal static token.Pos Endᴍ(ref SliceExpr x) { return x.Rbrack + 1; }
 
-} partial class astᴛTypeAssertExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref TypeAssertExpr x) { return x.Rparen + 1; }
+internal static token.Pos Endᴍ(ref TypeAssertExpr x) { return x.Rparen + 1; }
 
-} partial class astᴛCallExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref CallExpr x) { return x.Rparen + 1; }
+internal static token.Pos Endᴍ(ref CallExpr x) { return x.Rparen + 1; }
 
-} partial class astᴛStarExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref StarExpr x) { return x.X.End(); }
+internal static token.Pos Endᴍ(ref StarExpr x) { return x.X.End(); }
 
-} partial class astᴛUnaryExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref UnaryExpr x) { return x.X.End(); }
+internal static token.Pos Endᴍ(ref UnaryExpr x) { return x.X.End(); }
 
-} partial class astᴛBinaryExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref BinaryExpr x) { return x.Y.End(); }
+internal static token.Pos Endᴍ(ref BinaryExpr x) { return x.Y.End(); }
 
-} partial class astᴛKeyValueExpr {
+} partial class ast_package {
 
-public static token.Pos End(this ref KeyValueExpr x) { return x.Value.End(); }
+internal static token.Pos Endᴍ(ref KeyValueExpr x) { return x.Value.End(); }
 
-} partial class astᴛArrayType {
+} partial class ast_package {
 
-public static token.Pos End(this ref ArrayType x) { return x.Elt.End(); }
+internal static token.Pos Endᴍ(ref ArrayType x) { return x.Elt.End(); }
 
-} partial class astᴛStructType {
+} partial class ast_package {
 
-public static token.Pos End(this ref StructType x) { return x.Fields.End(); }
+internal static token.Pos Endᴍ(ref StructType x) { return x.Fields.End(); }
 
-} partial class astᴛFuncType {
+} partial class ast_package {
 
-public static token.Pos End(this ref FuncType x) {
+internal static token.Pos Endᴍ(ref FuncType x) {
     if (x.Results != nil) {
         return x.Results.End();
     }
     return x.Params.End();
 }
 
-} partial class astᴛInterfaceType {
+} partial class ast_package {
 
-public static token.Pos End(this ref InterfaceType x) { return x.Methods.End(); }
+internal static token.Pos Endᴍ(ref InterfaceType x) { return x.Methods.End(); }
 
-} partial class astᴛMapType {
+} partial class ast_package {
 
-public static token.Pos End(this ref MapType x) { return x.Value.End(); }
+internal static token.Pos Endᴍ(ref MapType x) { return x.Value.End(); }
 
-} partial class astᴛChanType {
+} partial class ast_package {
 
-public static token.Pos End(this ref ChanType x) { return x.Value.End(); }
+internal static token.Pos Endᴍ(ref ChanType x) { return x.Value.End(); }
 
-} partial class astᴛBadExpr {
+} partial class ast_package {
 
 // exprNode() ensures that only expression/type nodes can be
 // assigned to an Expr.
-internal static void exprNode(this ref BadExpr _) { }
+internal static void exprNodeᴍ(ref BadExpr _) { }
 
-} partial class astᴛIdent {
+} partial class ast_package {
 
-internal static void exprNode(this ref Ident _) { }
+internal static void exprNodeᴍ(ref Ident _) { }
 
-} partial class astᴛEllipsis {
+} partial class ast_package {
 
-internal static void exprNode(this ref Ellipsis _) { }
+internal static void exprNodeᴍ(ref Ellipsis _) { }
 
-} partial class astᴛBasicLit {
+} partial class ast_package {
 
-internal static void exprNode(this ref BasicLit _) { }
+internal static void exprNodeᴍ(ref BasicLit _) { }
 
-} partial class astᴛFuncLit {
+} partial class ast_package {
 
-internal static void exprNode(this ref FuncLit _) { }
+internal static void exprNodeᴍ(ref FuncLit _) { }
 
-} partial class astᴛCompositeLit {
+} partial class ast_package {
 
-internal static void exprNode(this ref CompositeLit _) { }
+internal static void exprNodeᴍ(ref CompositeLit _) { }
 
-} partial class astᴛParenExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref ParenExpr _) { }
+internal static void exprNodeᴍ(ref ParenExpr _) { }
 
-} partial class astᴛSelectorExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref SelectorExpr _) { }
+internal static void exprNodeᴍ(ref SelectorExpr _) { }
 
-} partial class astᴛIndexExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref IndexExpr _) { }
+internal static void exprNodeᴍ(ref IndexExpr _) { }
 
-} partial class astᴛIndexListExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref IndexListExpr _) { }
+internal static void exprNodeᴍ(ref IndexListExpr _) { }
 
-} partial class astᴛSliceExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref SliceExpr _) { }
+internal static void exprNodeᴍ(ref SliceExpr _) { }
 
-} partial class astᴛTypeAssertExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref TypeAssertExpr _) { }
+internal static void exprNodeᴍ(ref TypeAssertExpr _) { }
 
-} partial class astᴛCallExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref CallExpr _) { }
+internal static void exprNodeᴍ(ref CallExpr _) { }
 
-} partial class astᴛStarExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref StarExpr _) { }
+internal static void exprNodeᴍ(ref StarExpr _) { }
 
-} partial class astᴛUnaryExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref UnaryExpr _) { }
+internal static void exprNodeᴍ(ref UnaryExpr _) { }
 
-} partial class astᴛBinaryExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref BinaryExpr _) { }
+internal static void exprNodeᴍ(ref BinaryExpr _) { }
 
-} partial class astᴛKeyValueExpr {
+} partial class ast_package {
 
-internal static void exprNode(this ref KeyValueExpr _) { }
+internal static void exprNodeᴍ(ref KeyValueExpr _) { }
 
-} partial class astᴛArrayType {
+} partial class ast_package {
 
-internal static void exprNode(this ref ArrayType _) { }
+internal static void exprNodeᴍ(ref ArrayType _) { }
 
-} partial class astᴛStructType {
+} partial class ast_package {
 
-internal static void exprNode(this ref StructType _) { }
+internal static void exprNodeᴍ(ref StructType _) { }
 
-} partial class astᴛFuncType {
+} partial class ast_package {
 
-internal static void exprNode(this ref FuncType _) { }
+internal static void exprNodeᴍ(ref FuncType _) { }
 
-} partial class astᴛInterfaceType {
+} partial class ast_package {
 
-internal static void exprNode(this ref InterfaceType _) { }
+internal static void exprNodeᴍ(ref InterfaceType _) { }
 
-} partial class astᴛMapType {
+} partial class ast_package {
 
-internal static void exprNode(this ref MapType _) { }
+internal static void exprNodeᴍ(ref MapType _) { }
 
-} partial class astᴛChanType {
+} partial class ast_package {
 
-internal static void exprNode(this ref ChanType _) { }
+internal static void exprNodeᴍ(ref ChanType _) { }
 
 } partial class ast_package {
 
@@ -847,16 +847,16 @@ public static ж<Ident> NewIdent(@string name) { return Ꮡ(new Ident(token.NoPo
 // IsExported reports whether name starts with an upper-case letter.
 public static bool IsExported(@string name) { return token.IsExported(name); }
 
-} partial class astᴛIdent {
+} partial class ast_package {
 
 // IsExported reports whether id starts with an upper-case letter.
-public static bool IsExported(this ref Ident id) { return token.IsExported(id.Name); }
+internal static bool IsExportedᴍ(ref Ident id) { return token.IsExported(id.Name); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
-public static @string String(this ж<Ident> Ꮡid) {
+internal static @string Stringᴍ(ж<Ident> Ꮡid) {
     ref var id = ref Ꮡid.DerefOrNull();
 
     if (Ꮡid != nil) {
@@ -1033,159 +1033,159 @@ partial struct RangeStmt {
     public ж<BlockStmt> Body;
 }
 
-} partial class astᴛBadStmt {
+} partial class ast_package {
 
 // Pos and End implementations for statement nodes.
-public static token.Pos Pos(this ref BadStmt s) { return s.From; }
+internal static token.Pos Posᴍ(ref BadStmt s) { return s.From; }
 
-} partial class astᴛDeclStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref DeclStmt s) { return s.Decl.Pos(); }
+internal static token.Pos Posᴍ(ref DeclStmt s) { return s.Decl.Pos(); }
 
-} partial class astᴛEmptyStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref EmptyStmt s) { return s.Semicolon; }
+internal static token.Pos Posᴍ(ref EmptyStmt s) { return s.Semicolon; }
 
-} partial class astᴛLabeledStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref LabeledStmt s) { return s.Label.Pos(); }
+internal static token.Pos Posᴍ(ref LabeledStmt s) { return s.Label.Pos(); }
 
-} partial class astᴛExprStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref ExprStmt s) { return s.X.Pos(); }
+internal static token.Pos Posᴍ(ref ExprStmt s) { return s.X.Pos(); }
 
-} partial class astᴛSendStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref SendStmt s) { return s.Chan.Pos(); }
+internal static token.Pos Posᴍ(ref SendStmt s) { return s.Chan.Pos(); }
 
-} partial class astᴛIncDecStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref IncDecStmt s) { return s.X.Pos(); }
+internal static token.Pos Posᴍ(ref IncDecStmt s) { return s.X.Pos(); }
 
-} partial class astᴛAssignStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref AssignStmt s) { return s.Lhs[0].Pos(); }
+internal static token.Pos Posᴍ(ref AssignStmt s) { return s.Lhs[0].Pos(); }
 
-} partial class astᴛGoStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref GoStmt s) { return s.Go; }
+internal static token.Pos Posᴍ(ref GoStmt s) { return s.Go; }
 
-} partial class astᴛDeferStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref DeferStmt s) { return s.Defer; }
+internal static token.Pos Posᴍ(ref DeferStmt s) { return s.Defer; }
 
-} partial class astᴛReturnStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref ReturnStmt s) { return s.Return; }
+internal static token.Pos Posᴍ(ref ReturnStmt s) { return s.Return; }
 
-} partial class astᴛBranchStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref BranchStmt s) { return s.TokPos; }
+internal static token.Pos Posᴍ(ref BranchStmt s) { return s.TokPos; }
 
-} partial class astᴛBlockStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref BlockStmt s) { return s.Lbrace; }
+internal static token.Pos Posᴍ(ref BlockStmt s) { return s.Lbrace; }
 
-} partial class astᴛIfStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref IfStmt s) { return s.If; }
+internal static token.Pos Posᴍ(ref IfStmt s) { return s.If; }
 
-} partial class astᴛCaseClause {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref CaseClause s) { return s.Case; }
+internal static token.Pos Posᴍ(ref CaseClause s) { return s.Case; }
 
-} partial class astᴛSwitchStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref SwitchStmt s) { return s.Switch; }
+internal static token.Pos Posᴍ(ref SwitchStmt s) { return s.Switch; }
 
-} partial class astᴛTypeSwitchStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref TypeSwitchStmt s) { return s.Switch; }
+internal static token.Pos Posᴍ(ref TypeSwitchStmt s) { return s.Switch; }
 
-} partial class astᴛCommClause {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref CommClause s) { return s.Case; }
+internal static token.Pos Posᴍ(ref CommClause s) { return s.Case; }
 
-} partial class astᴛSelectStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref SelectStmt s) { return s.Select; }
+internal static token.Pos Posᴍ(ref SelectStmt s) { return s.Select; }
 
-} partial class astᴛForStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref ForStmt s) { return s.For; }
+internal static token.Pos Posᴍ(ref ForStmt s) { return s.For; }
 
-} partial class astᴛRangeStmt {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref RangeStmt s) { return s.For; }
+internal static token.Pos Posᴍ(ref RangeStmt s) { return s.For; }
 
-} partial class astᴛBadStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref BadStmt s) { return s.To; }
+internal static token.Pos Endᴍ(ref BadStmt s) { return s.To; }
 
-} partial class astᴛDeclStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref DeclStmt s) { return s.Decl.End(); }
+internal static token.Pos Endᴍ(ref DeclStmt s) { return s.Decl.End(); }
 
-} partial class astᴛEmptyStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref EmptyStmt s) {
+internal static token.Pos Endᴍ(ref EmptyStmt s) {
     if (s.Implicit) {
         return s.Semicolon;
     }
     return s.Semicolon + 1; /* len(";") */
 }
 
-} partial class astᴛLabeledStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref LabeledStmt s) { return s.Stmt.End(); }
+internal static token.Pos Endᴍ(ref LabeledStmt s) { return s.Stmt.End(); }
 
-} partial class astᴛExprStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref ExprStmt s) { return s.X.End(); }
+internal static token.Pos Endᴍ(ref ExprStmt s) { return s.X.End(); }
 
-} partial class astᴛSendStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref SendStmt s) { return s.Value.End(); }
+internal static token.Pos Endᴍ(ref SendStmt s) { return s.Value.End(); }
 
-} partial class astᴛIncDecStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref IncDecStmt s) {
+internal static token.Pos Endᴍ(ref IncDecStmt s) {
     return s.TokPos + 2; /* len("++") */
 }
 
-} partial class astᴛAssignStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref AssignStmt s) { return s.Rhs[len(s.Rhs) - 1].End(); }
+internal static token.Pos Endᴍ(ref AssignStmt s) { return s.Rhs[len(s.Rhs) - 1].End(); }
 
-} partial class astᴛGoStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref GoStmt s) { return s.Call.End(); }
+internal static token.Pos Endᴍ(ref GoStmt s) { return s.Call.End(); }
 
-} partial class astᴛDeferStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref DeferStmt s) { return s.Call.End(); }
+internal static token.Pos Endᴍ(ref DeferStmt s) { return s.Call.End(); }
 
-} partial class astᴛReturnStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref ReturnStmt s) {
+internal static token.Pos Endᴍ(ref ReturnStmt s) {
     nint n = len(s.Results); if (n > 0) {
         return s.Results[n - 1].End();
     }
     return s.Return + 6; // len("return")
 }
 
-} partial class astᴛBranchStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref BranchStmt s) {
+internal static token.Pos Endᴍ(ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
     return (token.Pos)((nint)s.TokPos + len(s.Tok.String()));
 }
 
-} partial class astᴛBlockStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref BlockStmt s) {
+internal static token.Pos Endᴍ(ref BlockStmt s) {
     if (s.Rbrace.IsValid()) {
         return s.Rbrace + 1;
     }
@@ -1195,138 +1195,138 @@ public static token.Pos End(this ref BlockStmt s) {
     return s.Lbrace + 1;
 }
 
-} partial class astᴛIfStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref IfStmt s) {
+internal static token.Pos Endᴍ(ref IfStmt s) {
     if (s.Else != nil) {
         return s.Else.End();
     }
     return s.Body.End();
 }
 
-} partial class astᴛCaseClause {
+} partial class ast_package {
 
-public static token.Pos End(this ref CaseClause s) {
+internal static token.Pos Endᴍ(ref CaseClause s) {
     nint n = len(s.Body); if (n > 0) {
         return s.Body[n - 1].End();
     }
     return s.Colon + 1;
 }
 
-} partial class astᴛSwitchStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref SwitchStmt s) { return s.Body.End(); }
+internal static token.Pos Endᴍ(ref SwitchStmt s) { return s.Body.End(); }
 
-} partial class astᴛTypeSwitchStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref TypeSwitchStmt s) { return s.Body.End(); }
+internal static token.Pos Endᴍ(ref TypeSwitchStmt s) { return s.Body.End(); }
 
-} partial class astᴛCommClause {
+} partial class ast_package {
 
-public static token.Pos End(this ref CommClause s) {
+internal static token.Pos Endᴍ(ref CommClause s) {
     nint n = len(s.Body); if (n > 0) {
         return s.Body[n - 1].End();
     }
     return s.Colon + 1;
 }
 
-} partial class astᴛSelectStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref SelectStmt s) { return s.Body.End(); }
+internal static token.Pos Endᴍ(ref SelectStmt s) { return s.Body.End(); }
 
-} partial class astᴛForStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref ForStmt s) { return s.Body.End(); }
+internal static token.Pos Endᴍ(ref ForStmt s) { return s.Body.End(); }
 
-} partial class astᴛRangeStmt {
+} partial class ast_package {
 
-public static token.Pos End(this ref RangeStmt s) { return s.Body.End(); }
+internal static token.Pos Endᴍ(ref RangeStmt s) { return s.Body.End(); }
 
-} partial class astᴛBadStmt {
+} partial class ast_package {
 
 // stmtNode() ensures that only statement nodes can be
 // assigned to a Stmt.
-internal static void stmtNode(this ref BadStmt _) { }
+internal static void stmtNodeᴍ(ref BadStmt _) { }
 
-} partial class astᴛDeclStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref DeclStmt _) { }
+internal static void stmtNodeᴍ(ref DeclStmt _) { }
 
-} partial class astᴛEmptyStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref EmptyStmt _) { }
+internal static void stmtNodeᴍ(ref EmptyStmt _) { }
 
-} partial class astᴛLabeledStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref LabeledStmt _) { }
+internal static void stmtNodeᴍ(ref LabeledStmt _) { }
 
-} partial class astᴛExprStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref ExprStmt _) { }
+internal static void stmtNodeᴍ(ref ExprStmt _) { }
 
-} partial class astᴛSendStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref SendStmt _) { }
+internal static void stmtNodeᴍ(ref SendStmt _) { }
 
-} partial class astᴛIncDecStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref IncDecStmt _) { }
+internal static void stmtNodeᴍ(ref IncDecStmt _) { }
 
-} partial class astᴛAssignStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref AssignStmt _) { }
+internal static void stmtNodeᴍ(ref AssignStmt _) { }
 
-} partial class astᴛGoStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref GoStmt _) { }
+internal static void stmtNodeᴍ(ref GoStmt _) { }
 
-} partial class astᴛDeferStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref DeferStmt _) { }
+internal static void stmtNodeᴍ(ref DeferStmt _) { }
 
-} partial class astᴛReturnStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref ReturnStmt _) { }
+internal static void stmtNodeᴍ(ref ReturnStmt _) { }
 
-} partial class astᴛBranchStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref BranchStmt _) { }
+internal static void stmtNodeᴍ(ref BranchStmt _) { }
 
-} partial class astᴛBlockStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref BlockStmt _) { }
+internal static void stmtNodeᴍ(ref BlockStmt _) { }
 
-} partial class astᴛIfStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref IfStmt _) { }
+internal static void stmtNodeᴍ(ref IfStmt _) { }
 
-} partial class astᴛCaseClause {
+} partial class ast_package {
 
-internal static void stmtNode(this ref CaseClause _) { }
+internal static void stmtNodeᴍ(ref CaseClause _) { }
 
-} partial class astᴛSwitchStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref SwitchStmt _) { }
+internal static void stmtNodeᴍ(ref SwitchStmt _) { }
 
-} partial class astᴛTypeSwitchStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref TypeSwitchStmt _) { }
+internal static void stmtNodeᴍ(ref TypeSwitchStmt _) { }
 
-} partial class astᴛCommClause {
+} partial class ast_package {
 
-internal static void stmtNode(this ref CommClause _) { }
+internal static void stmtNodeᴍ(ref CommClause _) { }
 
-} partial class astᴛSelectStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref SelectStmt _) { }
+internal static void stmtNodeᴍ(ref SelectStmt _) { }
 
-} partial class astᴛForStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref ForStmt _) { }
+internal static void stmtNodeᴍ(ref ForStmt _) { }
 
-} partial class astᴛRangeStmt {
+} partial class ast_package {
 
-internal static void stmtNode(this ref RangeStmt _) { }
+internal static void stmtNodeᴍ(ref RangeStmt _) { }
 
 } partial class ast_package {
 
@@ -1372,36 +1372,36 @@ partial struct TypeSpec {
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
-} partial class astᴛImportSpec {
+} partial class ast_package {
 
 // Pos and End implementations for spec nodes.
-public static token.Pos Pos(this ref ImportSpec s) {
+internal static token.Pos Posᴍ(ref ImportSpec s) {
     if (s.Name != nil) {
         return s.Name.Pos();
     }
     return s.Path.Pos();
 }
 
-} partial class astᴛValueSpec {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref ValueSpec s) { return s.Names[0].Pos(); }
+internal static token.Pos Posᴍ(ref ValueSpec s) { return s.Names[0].Pos(); }
 
-} partial class astᴛTypeSpec {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref TypeSpec s) { return s.Name.Pos(); }
+internal static token.Pos Posᴍ(ref TypeSpec s) { return s.Name.Pos(); }
 
-} partial class astᴛImportSpec {
+} partial class ast_package {
 
-public static token.Pos End(this ref ImportSpec s) {
+internal static token.Pos Endᴍ(ref ImportSpec s) {
     if (s.EndPos != 0) {
         return s.EndPos;
     }
     return s.Path.End();
 }
 
-} partial class astᴛValueSpec {
+} partial class ast_package {
 
-public static token.Pos End(this ref ValueSpec s) {
+internal static token.Pos Endᴍ(ref ValueSpec s) {
     nint n = len(s.Values); if (n > 0) {
         return s.Values[n - 1].End();
     }
@@ -1411,23 +1411,23 @@ public static token.Pos End(this ref ValueSpec s) {
     return s.Names[len(s.Names) - 1].End();
 }
 
-} partial class astᴛTypeSpec {
+} partial class ast_package {
 
-public static token.Pos End(this ref TypeSpec s) { return s.Type.End(); }
+internal static token.Pos Endᴍ(ref TypeSpec s) { return s.Type.End(); }
 
-} partial class astᴛImportSpec {
+} partial class ast_package {
 
 // specNode() ensures that only spec nodes can be
 // assigned to a Spec.
-internal static void specNode(this ref ImportSpec _) { }
+internal static void specNodeᴍ(ref ImportSpec _) { }
 
-} partial class astᴛValueSpec {
+} partial class ast_package {
 
-internal static void specNode(this ref ValueSpec _) { }
+internal static void specNodeᴍ(ref ValueSpec _) { }
 
-} partial class astᴛTypeSpec {
+} partial class ast_package {
 
-internal static void specNode(this ref TypeSpec _) { }
+internal static void specNodeᴍ(ref TypeSpec _) { }
 
 } partial class ast_package {
 
@@ -1469,54 +1469,54 @@ partial struct FuncDecl {
     public ж<BlockStmt> Body;   // function body; or nil for external (non-Go) function
 }
 
-} partial class astᴛBadDecl {
+} partial class ast_package {
 
 // Pos and End implementations for declaration nodes.
-public static token.Pos Pos(this ref BadDecl d) { return d.From; }
+internal static token.Pos Posᴍ(ref BadDecl d) { return d.From; }
 
-} partial class astᴛGenDecl {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref GenDecl d) { return d.TokPos; }
+internal static token.Pos Posᴍ(ref GenDecl d) { return d.TokPos; }
 
-} partial class astᴛFuncDecl {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref FuncDecl d) { return d.Type.Pos(); }
+internal static token.Pos Posᴍ(ref FuncDecl d) { return d.Type.Pos(); }
 
-} partial class astᴛBadDecl {
+} partial class ast_package {
 
-public static token.Pos End(this ref BadDecl d) { return d.To; }
+internal static token.Pos Endᴍ(ref BadDecl d) { return d.To; }
 
-} partial class astᴛGenDecl {
+} partial class ast_package {
 
-public static token.Pos End(this ref GenDecl d) {
+internal static token.Pos Endᴍ(ref GenDecl d) {
     if (d.Rparen.IsValid()) {
         return d.Rparen + 1;
     }
     return d.Specs[0].End();
 }
 
-} partial class astᴛFuncDecl {
+} partial class ast_package {
 
-public static token.Pos End(this ref FuncDecl d) {
+internal static token.Pos Endᴍ(ref FuncDecl d) {
     if (d.Body != nil) {
         return d.Body.End();
     }
     return d.Type.End();
 }
 
-} partial class astᴛBadDecl {
+} partial class ast_package {
 
 // declNode() ensures that only declaration nodes can be
 // assigned to a Decl.
-internal static void declNode(this ref BadDecl _) { }
+internal static void declNodeᴍ(ref BadDecl _) { }
 
-} partial class astᴛGenDecl {
+} partial class ast_package {
 
-internal static void declNode(this ref GenDecl _) { }
+internal static void declNodeᴍ(ref GenDecl _) { }
 
-} partial class astᴛFuncDecl {
+} partial class ast_package {
 
-internal static void declNode(this ref FuncDecl _) { }
+internal static void declNodeᴍ(ref FuncDecl _) { }
 
 } partial class ast_package {
 
@@ -1557,19 +1557,19 @@ partial struct File {
     public @string GoVersion;               // minimum Go version required by //go:build or // +build directives
 }
 
-} partial class astᴛFile {
+} partial class ast_package {
 
 // Pos returns the position of the package declaration.
 // It may be invalid, for example in an empty file.
 //
 // (Use FileStart for the start of the entire file. It is always valid.)
-public static token.Pos Pos(this ref File f) { return f.Package; }
+internal static token.Pos Posᴍ(ref File f) { return f.Package; }
 
 // End returns the end of the last declaration in the file.
 // It may be invalid, for example in an empty file.
 //
 // (Use FileEnd for the end of the entire file. It is always valid.)
-public static token.Pos End(this ref File f) {
+internal static token.Pos Endᴍ(ref File f) {
     nint n = len(f.Decls); if (n > 0) {
         return f.Decls[n - 1].End();
     }
@@ -1589,10 +1589,10 @@ partial struct Package {
     public map<@string, ж<File>> Files;     // Go source files by filename
 }
 
-} partial class astᴛPackage {
+} partial class ast_package {
 
-public static token.Pos Pos(this ref Package p) { return token.NoPos; }
-public static token.Pos End(this ref Package p) { return token.NoPos; }
+internal static token.Pos Posᴍ(ref Package p) { return token.NoPos; }
+internal static token.Pos Endᴍ(ref Package p) { return token.NoPos; }
 
 } partial class ast_package {
 
@@ -1653,3 +1653,284 @@ public static Expr Unparen(Expr e) {
 }
 
 } // end ast_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class astᴛComment {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref Comment c) => ast_package.Posᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref Comment c) => ast_package.Endᴍ(ref c);
+}
+partial class astᴛCommentGroup {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref CommentGroup g) => ast_package.Posᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref CommentGroup g) => ast_package.Endᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Text(this ж<CommentGroup> Ꮡg) => ast_package.Textᴍ(Ꮡg);
+}
+partial class astᴛField {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref Field f) => ast_package.Posᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref Field f) => ast_package.Endᴍ(ref f);
+}
+partial class astᴛFieldList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref FieldList f) => ast_package.Posᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref FieldList f) => ast_package.Endᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumFields(this ж<FieldList> Ꮡf) => ast_package.NumFieldsᴍ(Ꮡf);
+}
+partial class astᴛBadExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref BadExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref BadExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref BadExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛIdent {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref Ident x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref Ident x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref Ident _) => ast_package.exprNodeᴍ(ref _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsExported(this ref Ident id) => ast_package.IsExportedᴍ(ref id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Ident> Ꮡid) => ast_package.Stringᴍ(Ꮡid);
+}
+partial class astᴛEllipsis {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref Ellipsis x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref Ellipsis x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref Ellipsis _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛBasicLit {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref BasicLit x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref BasicLit x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref BasicLit _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛFuncLit {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref FuncLit x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref FuncLit x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref FuncLit _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛCompositeLit {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref CompositeLit x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref CompositeLit x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref CompositeLit _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛParenExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref ParenExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref ParenExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref ParenExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛSelectorExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref SelectorExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref SelectorExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref SelectorExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛIndexExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref IndexExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref IndexExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref IndexExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛIndexListExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref IndexListExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref IndexListExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref IndexListExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛSliceExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref SliceExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref SliceExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref SliceExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛTypeAssertExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref TypeAssertExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref TypeAssertExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref TypeAssertExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛCallExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref CallExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref CallExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref CallExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛStarExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref StarExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref StarExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref StarExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛUnaryExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref UnaryExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref UnaryExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref UnaryExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛBinaryExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref BinaryExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref BinaryExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref BinaryExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛKeyValueExpr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref KeyValueExpr x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref KeyValueExpr x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref KeyValueExpr _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛArrayType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref ArrayType x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref ArrayType x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref ArrayType _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛStructType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref StructType x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref StructType x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref StructType _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛFuncType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref FuncType x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref FuncType x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref FuncType _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛInterfaceType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref InterfaceType x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref InterfaceType x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref InterfaceType _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛMapType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref MapType x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref MapType x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref MapType _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛChanType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref ChanType x) => ast_package.Posᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref ChanType x) => ast_package.Endᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprNode(this ref ChanType _) => ast_package.exprNodeᴍ(ref _);
+}
+partial class astᴛBadStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref BadStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref BadStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref BadStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛDeclStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref DeclStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref DeclStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref DeclStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛEmptyStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref EmptyStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref EmptyStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref EmptyStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛLabeledStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref LabeledStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref LabeledStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref LabeledStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛExprStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref ExprStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref ExprStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref ExprStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛSendStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref SendStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref SendStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref SendStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛIncDecStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref IncDecStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref IncDecStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref IncDecStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛAssignStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref AssignStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref AssignStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref AssignStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛGoStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref GoStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref GoStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref GoStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛDeferStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref DeferStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref DeferStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref DeferStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛReturnStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref ReturnStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref ReturnStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref ReturnStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛBranchStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref BranchStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref BranchStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref BranchStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛBlockStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref BlockStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref BlockStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref BlockStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛIfStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref IfStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref IfStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref IfStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛCaseClause {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref CaseClause s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref CaseClause s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref CaseClause _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛSwitchStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref SwitchStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref SwitchStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref SwitchStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛTypeSwitchStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref TypeSwitchStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref TypeSwitchStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref TypeSwitchStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛCommClause {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref CommClause s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref CommClause s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref CommClause _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛSelectStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref SelectStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref SelectStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref SelectStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛForStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref ForStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref ForStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref ForStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛRangeStmt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref RangeStmt s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref RangeStmt s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtNode(this ref RangeStmt _) => ast_package.stmtNodeᴍ(ref _);
+}
+partial class astᴛImportSpec {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref ImportSpec s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref ImportSpec s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void specNode(this ref ImportSpec _) => ast_package.specNodeᴍ(ref _);
+}
+partial class astᴛValueSpec {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref ValueSpec s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref ValueSpec s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void specNode(this ref ValueSpec _) => ast_package.specNodeᴍ(ref _);
+}
+partial class astᴛTypeSpec {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref TypeSpec s) => ast_package.Posᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref TypeSpec s) => ast_package.Endᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void specNode(this ref TypeSpec _) => ast_package.specNodeᴍ(ref _);
+}
+partial class astᴛBadDecl {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref BadDecl d) => ast_package.Posᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref BadDecl d) => ast_package.Endᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declNode(this ref BadDecl _) => ast_package.declNodeᴍ(ref _);
+}
+partial class astᴛGenDecl {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref GenDecl d) => ast_package.Posᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref GenDecl d) => ast_package.Endᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declNode(this ref GenDecl _) => ast_package.declNodeᴍ(ref _);
+}
+partial class astᴛFuncDecl {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref FuncDecl d) => ast_package.Posᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref FuncDecl d) => ast_package.Endᴍ(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declNode(this ref FuncDecl _) => ast_package.declNodeᴍ(ref _);
+}
+partial class astᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref File f) => ast_package.Posᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref File f) => ast_package.Endᴍ(ref f);
+}
+partial class astᴛPackage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref Package p) => ast_package.Posᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref Package p) => ast_package.Endᴍ(ref p);
+}
+// </GlyphForwarders>

@@ -351,10 +351,10 @@ internal static error emitCounterDataToDirectory(@string outdir) {
     return default;
 }
 
-} partial class cfileᴛemitState {
+} partial class cfile_package {
 
 // emitCounterDataToWriter emits counter data for this coverage run to an io.Writer.
-internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) {
+internal static error emitCounterDataToWriterᴍ(ж<emitState> Ꮡs, io.Writer w) {
     var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != nil) {
         return err;
     }
@@ -366,7 +366,7 @@ internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer
 // dir. It updates mfname/mftmp/mf fields in 's', returning an error
 // if something went wrong. See the comment on the emitState type
 // definition above for more on how file opening is managed.
-internal static error openMetaFile(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen) {
+internal static error openMetaFileᴍ(ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen) {
     metaHash = metaHash.Clone();
 
     // Open meta-outfile for reading to see if it exists.
@@ -388,7 +388,7 @@ internal static error openMetaFile(this ref emitState s, /*[16]*/ array<byte> me
 // openCounterFile opens an output file for the counter data portion
 // of a test coverage run. If updates the 'cfname' and 'cf' fields in
 // 's', returning an error if something went wrong.
-internal static error openCounterFile(this ref emitState s, /*[16]*/ array<byte> metaHash) {
+internal static error openCounterFileᴍ(ref emitState s, /*[16]*/ array<byte> metaHash) {
     metaHash = metaHash.Clone();
 
     nint processID = os.Getpid();
@@ -414,7 +414,7 @@ internal static error openCounterFile(this ref emitState s, /*[16]*/ array<byte>
 // 'mf', close it, and then rename 'mftmp' to 'mfname'. This function
 // also opens the counter data output file, setting 'cf' and 'cfname'
 // in the state struct.
-internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) {
+internal static error openOutputFilesᴍ(ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) {
     metaHash = metaHash.Clone();
 
     var (fi, err) = os.Stat(s.outdir);
@@ -441,7 +441,7 @@ internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte>
 // emitMetaDataFile emits coverage meta-data to a previously opened
 // temporary file (s.mftmp), then renames the generated file to the
 // final path (s.mfname).
-internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) {
+internal static error emitMetaDataFileᴍ(ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) {
     finalHash = finalHash.Clone();
 
     {
@@ -469,7 +469,7 @@ internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte
 // needMetaDataFile returns TRUE if we need to emit a meta-data file
 // for this program run. It should be used only after
 // openOutputFiles() has been invoked.
-internal static bool needMetaDataFile(this ref emitState s) {
+internal static bool needMetaDataFileᴍ(ref emitState s) {
     return s.mf != nil;
 }
 
@@ -495,9 +495,9 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
     return mfw.Write(finalHash, blobs, cmode, gran);
 }
 
-} partial class cfileᴛemitState {
+} partial class cfile_package {
 
-internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) {
+internal static error VisitFuncsᴍ(ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) {
     slice<uint32> tcounters = default;
 
     slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {
@@ -617,11 +617,11 @@ internal static map<@string, @string> captureOsArgs() {
     return m;
 }
 
-} partial class cfileᴛemitState {
+} partial class cfile_package {
 
 // emitCounterDataFile emits the counter data portion of a
 // coverage output file (to the file 's.cf').
-internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) {
+internal static error emitCounterDataFileᴍ(ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) {
     finalHash = finalHash.Clone();
 
     var cfw = encodecounter.NewCoverageDataWriter(w, coverage.CtrULeb128);
@@ -669,3 +669,16 @@ internal static void reportErrorInHardcodedList(int32 slot, int32 pkgID, uint32 
 }
 
 } // end cfile_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class cfileᴛemitState {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) => cfile_package.emitCounterDataToWriterᴍ(Ꮡs, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error openMetaFile(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen) => cfile_package.openMetaFileᴍ(ref s, metaHash, metaLen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error openCounterFile(this ref emitState s, /*[16]*/ array<byte> metaHash) => cfile_package.openCounterFileᴍ(ref s, metaHash);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) => cfile_package.openOutputFilesᴍ(ref s, metaHash, metaLen, which);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) => cfile_package.emitMetaDataFileᴍ(ref s, finalHash, tlen);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool needMetaDataFile(this ref emitState s) => cfile_package.needMetaDataFileᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) => cfile_package.VisitFuncsᴍ(ref s, f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) => cfile_package.emitCounterDataFileᴍ(Ꮡs, finalHash, w);
+}
+// </GlyphForwarders>

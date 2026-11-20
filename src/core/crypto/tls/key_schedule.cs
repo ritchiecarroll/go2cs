@@ -18,7 +18,7 @@ using static tls_package;
 
 partial class tls_package {
 
-} partial class tlsᴛcipherSuiteTLS13 {
+} partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string trafficUpdˢ => ref trafficUpdˢᵇ;
@@ -29,7 +29,7 @@ private static readonly @string trafficUpdˢᵇ = "traffic upd"u8;
 
 // nextTrafficSecret generates the next traffic secret, given the current one,
 // according to RFC 8446, Section 7.2.
-internal static slice<byte> nextTrafficSecret(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) {
+internal static slice<byte> nextTrafficSecretᴍ(ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var recvʗ1 = c.hash;
@@ -41,7 +41,7 @@ internal static ref readonly @string keyˢ => ref keyˢᵇ;
 private static readonly @string keyˢᵇ = "key"u8;
 
 // trafficKey generates traffic keys according to RFC 8446, Section 7.3.
-internal static (slice<byte> key, slice<byte> iv) trafficKey(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) {
+internal static (slice<byte> key, slice<byte> iv) trafficKeyᴍ(ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) {
     slice<byte> key = default;
     slice<byte> iv = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -60,7 +60,7 @@ private static readonly @string finishedˢᵇ = "finished"u8;
 // finishedHash generates the Finished verify_data or PskBinderEntry according
 // to RFC 8446, Section 4.4.4. See sections 4.4 and 4.2.11.2 for the baseKey
 // selection.
-internal static slice<byte> finishedHash(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> baseKey, hash.Hash transcript) {
+internal static slice<byte> finishedHashᴍ(ж<cipherSuiteTLS13> Ꮡc, slice<byte> baseKey, hash.Hash transcript) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var recvʗ1 = c.hash;
@@ -73,7 +73,7 @@ internal static slice<byte> finishedHash(this ж<cipherSuiteTLS13> Ꮡc, slice<b
 
 // exportKeyingMaterial implements RFC5705 exporters for TLS 1.3 according to
 // RFC 8446, Section 7.5.
-internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKeyingMaterial(this ref cipherSuiteTLS13 c, ж<tls13.MasterSecret> Ꮡs, hash.Hash transcript) {
+internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKeyingMaterialᴍ(ref cipherSuiteTLS13 c, ж<tls13.MasterSecret> Ꮡs, hash.Hash transcript) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var expMasterSecret = s.ExporterMasterSecret(transcript);
@@ -162,9 +162,9 @@ partial struct ecdhKeyExchange {
     internal ecdh.Curve curve;
 }
 
-} partial class tlsᴛecdhKeyExchange {
+} partial class tls_package {
 
-internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this ref ecdhKeyExchange ke, io.Reader rand) {
+internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keySharesᴍ(ref ecdhKeyExchange ke, io.Reader rand) {
     var (priv, err) = ke.curve.GenerateKey(rand);
     if (err != nil) {
         return (default, default, err);
@@ -172,7 +172,7 @@ internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this
     return (Ꮡ(new keySharePrivateKeys(ecdhe: priv)), slice<keyShare>([new(ke.id, priv.PublicKey().Bytes())]), default);
 }
 
-internal static (slice<byte>, keyShare, error) serverSharedSecret(this ref ecdhKeyExchange ke, io.Reader rand, slice<byte> clientKeyShare) {
+internal static (slice<byte>, keyShare, error) serverSharedSecretᴍ(ref ecdhKeyExchange ke, io.Reader rand, slice<byte> clientKeyShare) {
     var (key, err) = ke.curve.GenerateKey(rand);
     if (err != nil) {
         return (default, new keyShare(), err);
@@ -188,7 +188,7 @@ internal static (slice<byte>, keyShare, error) serverSharedSecret(this ref ecdhK
     return (sharedKey, new keyShare(ke.id, key.PublicKey().Bytes()), default);
 }
 
-internal static (slice<byte>, error) clientSharedSecret(this ref ecdhKeyExchange ke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) {
+internal static (slice<byte>, error) clientSharedSecretᴍ(ref ecdhKeyExchange ke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     var (peerKey, err) = ke.curve.NewPublicKey(serverKeyShare);
@@ -214,9 +214,9 @@ partial struct hybridKeyExchange {
     internal Func<slice<byte>, (crypto.Encapsulator, error)> newMLKEMPublicKey;
 }
 
-} partial class tlsᴛhybridKeyExchange {
+} partial class tls_package {
 
-internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this ж<hybridKeyExchange> Ꮡke, io.Reader rand) {
+internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keySharesᴍ(ж<hybridKeyExchange> Ꮡke, io.Reader rand) {
     ref var ke = ref Ꮡke.DerefOrNull();
 
     ref var priv = ref heap<ж<keySharePrivateKeys>>(out var Ꮡpriv);
@@ -252,7 +252,7 @@ internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this
 internal static ref readonly @string tlsInvalidClientKeyShareˢ2 => ref tlsInvalidClientKeyShareˢ2ᵇ;
 private static readonly @string tlsInvalidClientKeyShareˢ2ᵇ = "tls: invalid client key share length for hybrid key exchange"u8;
 
-internal static (slice<byte>, keyShare, error) serverSharedSecret(this ж<hybridKeyExchange> Ꮡke, io.Reader rand, slice<byte> clientKeyShare) {
+internal static (slice<byte>, keyShare, error) serverSharedSecretᴍ(ж<hybridKeyExchange> Ꮡke, io.Reader rand, slice<byte> clientKeyShare) {
     ref var ke = ref Ꮡke.DerefOrNull();
 
     if (len(clientKeyShare) != ke.ecdhElementSize + ke.mlkemPublicKeySize) {
@@ -298,7 +298,7 @@ internal static (slice<byte>, keyShare, error) serverSharedSecret(this ж<hybrid
 internal static ref readonly @string tlsInvalidServerKeyShareˢ2 => ref tlsInvalidServerKeyShareˢ2ᵇ;
 private static readonly @string tlsInvalidServerKeyShareˢ2ᵇ = "tls: invalid server key share length for hybrid key exchange"u8;
 
-internal static (slice<byte>, error) clientSharedSecret(this ж<hybridKeyExchange> Ꮡke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) {
+internal static (slice<byte>, error) clientSharedSecretᴍ(ж<hybridKeyExchange> Ꮡke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) {
     ref var ke = ref Ꮡke.DerefOrNull();
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
@@ -337,3 +337,22 @@ internal static (slice<byte>, error) clientSharedSecret(this ж<hybridKeyExchang
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tlsᴛcipherSuiteTLS13 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> nextTrafficSecret(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) => tls_package.nextTrafficSecretᴍ(Ꮡc, trafficSecret);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte> key, slice<byte> iv) trafficKey(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) => tls_package.trafficKeyᴍ(Ꮡc, trafficSecret);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> finishedHash(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> baseKey, hash.Hash transcript) => tls_package.finishedHashᴍ(Ꮡc, baseKey, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKeyingMaterial(this ref cipherSuiteTLS13 c, ж<tls13.MasterSecret> Ꮡs, hash.Hash transcript) => tls_package.exportKeyingMaterialᴍ(ref c, Ꮡs, transcript);
+}
+partial class tlsᴛecdhKeyExchange {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this ref ecdhKeyExchange ke, io.Reader rand) => tls_package.keySharesᴍ(ref ke, rand);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, keyShare, error) serverSharedSecret(this ref ecdhKeyExchange ke, io.Reader rand, slice<byte> clientKeyShare) => tls_package.serverSharedSecretᴍ(ref ke, rand, clientKeyShare);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) clientSharedSecret(this ref ecdhKeyExchange ke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) => tls_package.clientSharedSecretᴍ(ref ke, Ꮡpriv, serverKeyShare);
+}
+partial class tlsᴛhybridKeyExchange {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this ж<hybridKeyExchange> Ꮡke, io.Reader rand) => tls_package.keySharesᴍ(Ꮡke, rand);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, keyShare, error) serverSharedSecret(this ж<hybridKeyExchange> Ꮡke, io.Reader rand, slice<byte> clientKeyShare) => tls_package.serverSharedSecretᴍ(Ꮡke, rand, clientKeyShare);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) clientSharedSecret(this ж<hybridKeyExchange> Ꮡke, ж<keySharePrivateKeys> Ꮡpriv, slice<byte> serverKeyShare) => tls_package.clientSharedSecretᴍ(Ꮡke, Ꮡpriv, serverKeyShare);
+}
+// </GlyphForwarders>

@@ -28,9 +28,9 @@ partial struct NetlinkRouteRequest {
     public RtGenmsg Data;
 }
 
-} partial class syscallᴛNetlinkRouteRequest {
+} partial class syscall_package {
 
-internal static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr) {
+internal static slice<byte> toWireFormatᴍ(ref NetlinkRouteRequest rr) {
     var b = new slice<byte>((nint)(rr.Header.Len));
     (Ꮡ(b[0..4], 0).Reinterpret<byte, uint32>()).Value = rr.Header.Len;
     (Ꮡ(b[4..6], 0).Reinterpret<byte, uint16>()).Value = rr.Header.Type;
@@ -209,3 +209,9 @@ internal static (ж<RtAttr>, slice<byte>, nint, error) netlinkRouteAttrAndValue(
 }
 
 } // end syscall_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class syscallᴛNetlinkRouteRequest {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr) => syscall_package.toWireFormatᴍ(ref rr);
+}
+// </GlyphForwarders>

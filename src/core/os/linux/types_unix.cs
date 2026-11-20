@@ -19,12 +19,12 @@ partial struct fileStat {
     internal syscall.Stat_t sys;
 }
 
-} partial class osᴛfileStat {
+} partial class os_package {
 
-internal static int64 Size(this ref fileStat fs) { return fs.size; }
-internal static FileMode Mode(this ref fileStat fs) { return fs.mode; }
-internal static time.Time ModTime(this ref fileStat fs) { return fs.modTime; }
-internal static any Sys(this ж<fileStat> Ꮡfs) { return Ꮡfs.Ꮡsys; }
+internal static int64 Sizeᴍ(ref fileStat fs) { return fs.size; }
+internal static FileMode Modeᴍ(ref fileStat fs) { return fs.mode; }
+internal static time.Time ModTimeᴍ(ref fileStat fs) { return fs.modTime; }
+internal static any Sysᴍ(ж<fileStat> Ꮡfs) { return Ꮡfs.Ꮡsys; }
 
 } partial class os_package {
 
@@ -33,3 +33,12 @@ internal static bool sameFile(ref fileStat fs1, ref fileStat fs2) {
 }
 
 } // end os_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛfileStat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Size(this ref fileStat fs) => os_package.Sizeᴍ(ref fs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static FileMode Mode(this ref fileStat fs) => os_package.Modeᴍ(ref fs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time ModTime(this ref fileStat fs) => os_package.ModTimeᴍ(ref fs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Sys(this ж<fileStat> Ꮡfs) => os_package.Sysᴍ(Ꮡfs);
+}
+// </GlyphForwarders>

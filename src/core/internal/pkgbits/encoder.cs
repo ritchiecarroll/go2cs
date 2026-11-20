@@ -36,10 +36,10 @@ partial struct PkgEncoder {
     internal nint syncFrames;
 }
 
-} partial class pkgbitsᴛPkgEncoder {
+} partial class pkgbits_package {
 
 // SyncMarkers reports whether pw uses sync markers.
-public static bool SyncMarkers(this ref PkgEncoder pw) { return pw.syncFrames >= 0; }
+internal static bool SyncMarkersᴍ(ref PkgEncoder pw) { return pw.syncFrames >= 0; }
 
 } partial class pkgbits_package {
 
@@ -58,11 +58,11 @@ public static PkgEncoder NewPkgEncoder(Version version, nint syncFrames) {
     );
 }
 
-} partial class pkgbitsᴛPkgEncoder {
+} partial class pkgbits_package {
 
 // DumpTo writes the package's encoded data to out0 and returns the
 // package fingerprint.
-public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.Writer out0) {
+internal static array<byte> /*fingerprint*/ DumpToᴍ(ж<PkgEncoder> Ꮡpw, io.Writer out0) {
     array<byte> fingerprint = new(8);
     ref var pw = ref Ꮡpw.DerefOrNull();
 
@@ -121,7 +121,7 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
 
 // StringIdx adds a string value to the strings section, if not
 // already present, and returns its index.
-public static RelElemIdx StringIdx(this ref PkgEncoder pw, @string s) {
+internal static RelElemIdx StringIdxᴍ(ref PkgEncoder pw, @string s) {
     var (idxΔ1, ok) = pw.stringsIdx[s, ꟷ]; if (ok) {
         assert(pw.elems[SectionString][idxΔ1] == s);
         return idxΔ1;
@@ -136,7 +136,7 @@ public static RelElemIdx StringIdx(this ref PkgEncoder pw, @string s) {
 // NewEncoder returns an Encoder for a new element within the given
 // section, and encodes the given SyncMarker as the start of the
 // element bitstream.
-public static ж<Encoder> NewEncoder(this ж<PkgEncoder> Ꮡpw, SectionKind k, SyncMarker marker) {
+internal static ж<Encoder> NewEncoderᴍ(ж<PkgEncoder> Ꮡpw, SectionKind k, SyncMarker marker) {
     var e = Ꮡpw.NewEncoderRaw(k);
     e.Sync(marker);
     return e;
@@ -146,7 +146,7 @@ public static ж<Encoder> NewEncoder(this ж<PkgEncoder> Ꮡpw, SectionKind k, S
 // section.
 //
 // Most callers should use NewEncoder instead.
-public static ж<Encoder> NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, SectionKind k) {
+internal static ж<Encoder> NewEncoderRawᴍ(ж<PkgEncoder> Ꮡpw, SectionKind k) {
     ref var pw = ref Ꮡpw.DerefOrNull();
 
     ref var idx = ref heap<RelElemIdx>((RelElemIdx)(int32)len(pw.elems[k]), out var Ꮡidx);
@@ -173,10 +173,10 @@ partial struct Encoder {
     public RelElemIdx Idx; // index within relocation section
 }
 
-} partial class pkgbitsᴛEncoder {
+} partial class pkgbits_package {
 
 // Flush finalizes the element's bitstream and returns its [RelElemIdx].
-public static RelElemIdx Flush(this ж<Encoder> Ꮡw) {
+internal static RelElemIdx Flushᴍ(ж<Encoder> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
@@ -207,20 +207,20 @@ public static RelElemIdx Flush(this ж<Encoder> Ꮡw) {
     return w.Idx;
 }
 
-internal static void checkErr(this ref Encoder w, error err) {
+internal static void checkErrᴍ(ref Encoder w, error err) {
     if (err != nil) {
         panicf("unexpected encoding error: %v", err);
     }
 }
 
-internal static void rawUvarint(this ref Encoder w, uint64 x) {
+internal static void rawUvarintᴍ(ref Encoder w, uint64 x) {
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     nint n = binary.PutUvarint(buf[..], x);
     var (_, err) = w.Data.Write(buf.slice(0, n));
     w.checkErr(err);
 }
 
-internal static void rawVarint(this ref Encoder w, int64 x) {
+internal static void rawVarintᴍ(ref Encoder w, int64 x) {
     // Zig-zag encode.
     var ux = (uint64)x << 1;
     if (x < 0) {
@@ -230,7 +230,7 @@ internal static void rawVarint(this ref Encoder w, int64 x) {
     w.rawUvarint(ux);
 }
 
-internal static nint rawReloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
+internal static nint rawRelocᴍ(ref Encoder w, SectionKind k, RelElemIdx idx) {
     var e = new RefTableEntry(k, idx);
     if (w.RelocMap != nil) {
         var (iΔ1, ok) = w.RelocMap[e, ꟷ]; if (ok) {
@@ -246,7 +246,7 @@ internal static nint rawReloc(this ref Encoder w, SectionKind k, RelElemIdx idx)
     return i;
 }
 
-public static partial void Sync(this ref Encoder w, SyncMarker m) {
+internal static partial void Syncᴍ(ref Encoder w, SyncMarker m) {
     if (!w.p.SyncMarkers()) {
         return;
     }
@@ -284,7 +284,7 @@ public static partial void Sync(this ref Encoder w, SyncMarker m) {
 //	}
 //
 // For multi-alternative encodings, use Code instead.
-public static bool Bool(this ref Encoder w, bool b) {
+internal static bool Boolᴍ(ref Encoder w, bool b) {
     w.Sync(SyncBool);
     byte x = default;
     if (b) {
@@ -296,28 +296,28 @@ public static bool Bool(this ref Encoder w, bool b) {
 }
 
 // Int64 encodes and writes an int64 value into the element bitstream.
-public static void Int64(this ref Encoder w, int64 x) {
+internal static void Int64ᴍ(ref Encoder w, int64 x) {
     w.Sync(SyncInt64);
     w.rawVarint(x);
 }
 
 // Uint64 encodes and writes a uint64 value into the element bitstream.
-public static void Uint64(this ref Encoder w, uint64 x) {
+internal static void Uint64ᴍ(ref Encoder w, uint64 x) {
     w.Sync(SyncUint64);
     w.rawUvarint(x);
 }
 
 // Len encodes and writes a non-negative int value into the element bitstream.
-public static void Len(this ref Encoder w, nint x) {
+internal static void Lenᴍ(ref Encoder w, nint x) {
     assert(x >= 0);
     w.Uint64((uint64)x);
 }
 
 // Int encodes and writes an int value into the element bitstream.
-public static void Int(this ref Encoder w, nint x) { w.Int64((int64)x); }
+internal static void Intᴍ(ref Encoder w, nint x) { w.Int64((int64)x); }
 
 // Uint encodes and writes a uint value into the element bitstream.
-public static void Uint(this ref Encoder w, nuint x) { w.Uint64((uint64)x); }
+internal static void Uintᴍ(ref Encoder w, nuint x) { w.Uint64((uint64)x); }
 
 // Reloc encodes and writes a relocation for the given (section,
 // index) pair into the element bitstream.
@@ -325,13 +325,13 @@ public static void Uint(this ref Encoder w, nuint x) { w.Uint64((uint64)x); }
 // Note: Only the index is formally written into the element
 // bitstream, so bitstream decoders must know from context which
 // section an encoded relocation refers to.
-public static void Reloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
+internal static void Relocᴍ(ref Encoder w, SectionKind k, RelElemIdx idx) {
     w.Sync(SyncUseReloc);
     w.Len(w.rawReloc(k, idx));
 }
 
 // Code encodes and writes a Code value into the element bitstream.
-public static void Code(this ref Encoder w, Code c) {
+internal static void Codeᴍ(ref Encoder w, Code c) {
     w.Sync(c.Marker());
     w.Len(c.Value());
 }
@@ -342,20 +342,20 @@ public static void Code(this ref Encoder w, Code c) {
 // Internally, strings are deduplicated by adding them to the strings
 // section (if not already present), and then writing a relocation
 // into the element bitstream.
-public static void String(this ref Encoder w, @string s) {
+internal static void Stringᴍ(ref Encoder w, @string s) {
     w.StringRef(w.p.StringIdx(s));
 }
 
 // StringRef writes a reference to the given index, which must be a
 // previously encoded string value.
-public static void StringRef(this ref Encoder w, RelElemIdx idx) {
+internal static void StringRefᴍ(ref Encoder w, RelElemIdx idx) {
     w.Sync(SyncString);
     w.Reloc(SectionString, idx);
 }
 
 // Strings encodes and writes a variable-length slice of strings into
 // the element bitstream.
-public static void Strings(this ref Encoder w, slice<@string> ss) {
+internal static void Stringsᴍ(ref Encoder w, slice<@string> ss) {
     w.Len(len(ss));
     foreach (var (_, s) in range(ss)) {
         w.String(s);
@@ -364,7 +364,7 @@ public static void Strings(this ref Encoder w, slice<@string> ss) {
 
 // Value encodes and writes a constant.Value into the element
 // bitstream.
-public static void Value(this ref Encoder w, constant.Value val) {
+internal static void Valueᴍ(ref Encoder w, constant.Value val) {
     w.Sync(SyncValue);
     if (w.Bool(val.Kind() == constant.Complex)) {
         w.scalar(constant.Real(val));
@@ -374,7 +374,7 @@ public static void Value(this ref Encoder w, constant.Value val) {
     }
 }
 
-internal static void scalar(this ref Encoder w, constant.Value val) {
+internal static void scalarᴍ(ref Encoder w, constant.Value val) {
     var switchᴛ1 = constant.Val(val);
     switch (switchᴛ1.type()) {
     default: {
@@ -415,7 +415,7 @@ internal static void scalar(this ref Encoder w, constant.Value val) {
     }}
 }
 
-internal static void bigInt(this ref Encoder w, ж<big.Int> Ꮡv) {
+internal static void bigIntᴍ(ref Encoder w, ж<big.Int> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     var b = v.Bytes();
@@ -423,12 +423,46 @@ internal static void bigInt(this ref Encoder w, ж<big.Int> Ꮡv) {
     w.Bool(v.Sign() < 0);
 }
 
-internal static void bigFloat(this ref Encoder w, ж<big.Float> v) {
+internal static void bigFloatᴍ(ref Encoder w, ж<big.Float> v) {
     var b = v.Append(default, (byte)'p', -1);
     w.String((@string)b); // TODO: More efficient encoding.
 }
 
 // Version reports the version of the bitstream.
-public static Version Version(this ref Encoder w) { return w.p.version; }
+internal static Version Versionᴍ(ref Encoder w) { return w.p.version; }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class pkgbitsᴛPkgEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool SyncMarkers(this ref PkgEncoder pw) => pkgbits_package.SyncMarkersᴍ(ref pw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.Writer out0) => pkgbits_package.DumpToᴍ(Ꮡpw, out0);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static RelElemIdx StringIdx(this ref PkgEncoder pw, @string s) => pkgbits_package.StringIdxᴍ(ref pw, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Encoder> NewEncoder(this ж<PkgEncoder> Ꮡpw, SectionKind k, SyncMarker marker) => pkgbits_package.NewEncoderᴍ(Ꮡpw, k, marker);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Encoder> NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, SectionKind k) => pkgbits_package.NewEncoderRawᴍ(Ꮡpw, k);
+}
+partial class pkgbitsᴛEncoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static RelElemIdx Flush(this ж<Encoder> Ꮡw) => pkgbits_package.Flushᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkErr(this ref Encoder w, error err) => pkgbits_package.checkErrᴍ(ref w, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rawUvarint(this ref Encoder w, uint64 x) => pkgbits_package.rawUvarintᴍ(ref w, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rawVarint(this ref Encoder w, int64 x) => pkgbits_package.rawVarintᴍ(ref w, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint rawReloc(this ref Encoder w, SectionKind k, RelElemIdx idx) => pkgbits_package.rawRelocᴍ(ref w, k, idx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sync(this ref Encoder w, SyncMarker m) => pkgbits_package.Syncᴍ(ref w, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Bool(this ref Encoder w, bool b) => pkgbits_package.Boolᴍ(ref w, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Int64(this ref Encoder w, int64 x) => pkgbits_package.Int64ᴍ(ref w, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Uint64(this ref Encoder w, uint64 x) => pkgbits_package.Uint64ᴍ(ref w, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Len(this ref Encoder w, nint x) => pkgbits_package.Lenᴍ(ref w, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Int(this ref Encoder w, nint x) => pkgbits_package.Intᴍ(ref w, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Uint(this ref Encoder w, nuint x) => pkgbits_package.Uintᴍ(ref w, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reloc(this ref Encoder w, SectionKind k, RelElemIdx idx) => pkgbits_package.Relocᴍ(ref w, k, idx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Code(this ref Encoder w, Code c) => pkgbits_package.Codeᴍ(ref w, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void String(this ref Encoder w, @string s) => pkgbits_package.Stringᴍ(ref w, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StringRef(this ref Encoder w, RelElemIdx idx) => pkgbits_package.StringRefᴍ(ref w, idx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Strings(this ref Encoder w, slice<@string> ss) => pkgbits_package.Stringsᴍ(ref w, ss);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Value(this ref Encoder w, constant.Value val) => pkgbits_package.Valueᴍ(ref w, val);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scalar(this ref Encoder w, constant.Value val) => pkgbits_package.scalarᴍ(ref w, val);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void bigInt(this ref Encoder w, ж<big.Int> Ꮡv) => pkgbits_package.bigIntᴍ(ref w, Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void bigFloat(this ref Encoder w, ж<big.Float> v) => pkgbits_package.bigFloatᴍ(ref w, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Version Version(this ref Encoder w) => pkgbits_package.Versionᴍ(ref w);
+}
+// </GlyphForwarders>

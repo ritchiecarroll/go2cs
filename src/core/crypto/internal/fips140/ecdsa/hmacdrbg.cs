@@ -34,9 +34,9 @@ internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 // plainPersonalizationString is used by HMAC_DRBG as-is.
 partial struct plainPersonalizationString /*[]byte*/;
 
-} partial class ecdsaᴛplainPersonalizationString {
+} partial class ecdsa_package {
 
-internal static void isPersonalizationString(this plainPersonalizationString _) { }
+internal static void isPersonalizationStringᴍ(plainPersonalizationString _) { }
 
 } partial class ecdsa_package {
 
@@ -45,9 +45,9 @@ internal static void isPersonalizationString(this plainPersonalizationString _) 
 // Section 4.
 partial struct blockAlignedPersonalizationString /*[]slice<byte>*/;
 
-} partial class ecdsaᴛblockAlignedPersonalizationString {
+} partial class ecdsa_package {
 
-internal static void isPersonalizationString(this blockAlignedPersonalizationString _) { }
+internal static void isPersonalizationStringᴍ(blockAlignedPersonalizationString _) { }
 
 } partial class ecdsa_package {
 
@@ -149,10 +149,10 @@ internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
     }
 }
 
-} partial class ecdsaᴛhmacDRBG {
+} partial class ecdsa_package {
 
 // Generate produces at most maxRequestSize bytes of random data in out.
-public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
+internal static void Generateᴍ(ref hmacDRBG d, slice<byte> @out) {
     // HMAC_DRBG_Generate_algorithm, per Section 10.1.2.5.
     fips140.RecordApproved();
 
@@ -193,3 +193,15 @@ public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class ecdsaᴛplainPersonalizationString {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isPersonalizationString(this plainPersonalizationString _) => ecdsa_package.isPersonalizationStringᴍ(_);
+}
+partial class ecdsaᴛblockAlignedPersonalizationString {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isPersonalizationString(this blockAlignedPersonalizationString _) => ecdsa_package.isPersonalizationStringᴍ(_);
+}
+partial class ecdsaᴛhmacDRBG {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Generate(this ref hmacDRBG d, slice<byte> @out) => ecdsa_package.Generateᴍ(ref d, @out);
+}
+// </GlyphForwarders>

@@ -161,7 +161,7 @@ internal static lockRank lockRankLeafRank => 1000;
     [(int)lockRankTestRInternal] = "testRInternal"
 }.slice(); }
 
-} partial class runtimeᴛlockRank {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownˢ2 => ref unknownˢ2ᵇ;
@@ -171,7 +171,7 @@ private static readonly @string leafˢᵇ = "LEAF"u8;
 internal static ref readonly @string badRankˢ => ref badRankˢᵇ;
 private static readonly @string badRankˢᵇ = "BAD RANK"u8;
 
-internal static @string String(this lockRank rank) {
+internal static @string Stringᴍ(lockRank rank) {
     if (rank == 0) {
         return unknownˢ2;
     }
@@ -261,3 +261,9 @@ internal static @string String(this lockRank rank) {
 }.slice(); }
 
 } // end runtime_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛlockRank {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this lockRank rank) => runtime_package.Stringᴍ(rank);
+}
+// </GlyphForwarders>

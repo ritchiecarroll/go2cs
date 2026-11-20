@@ -29,11 +29,11 @@ partial struct baseEvent {
     internal timedEventArgs args;
 }
 
-} partial class traceᴛbaseEvent {
+} partial class trace_package {
 
 // extra returns a slice representing extra available space in args
 // that the parser can use to pass data up into Event.
-internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
+internal static slice<uint64> extraᴍ(ref baseEvent e, version.Version v) {
     switch (v) {
     case var ᴛ when ᴛ == version.Go122: {
         return e.args.slice(len(tracev2.Specs()[e.typ].Args) - 1);
@@ -60,11 +60,11 @@ partial struct evTable {
     internal map<tracev2.Experiment, slice<ExperimentalBatch>> expBatches;
 }
 
-} partial class traceᴛevTable {
+} partial class trace_package {
 
 // addExtraString adds an extra string to the evTable and returns
 // a unique ID for the string in the table.
-internal static extraStringID addExtraString(this ref evTable t, @string s) {
+internal static extraStringID addExtraStringᴍ(ref evTable t, @string s) {
     if (s == ""u8) {
         return 0;
     }
@@ -83,7 +83,7 @@ internal static extraStringID addExtraString(this ref evTable t, @string s) {
 
 // getExtraString returns the extra string for the provided ID.
 // The ID must have been produced by addExtraString for this evTable.
-internal static @string getExtraString(this ref evTable t, extraStringID id) {
+internal static @string getExtraStringᴍ(ref evTable t, extraStringID id) {
     if (id == 0) {
         return ""u8;
     }
@@ -101,14 +101,14 @@ partial struct dataTable<EI, E>
     internal map<EI, E> sparse;
 }
 
-} partial class traceᴛdataTable {
+} partial class trace_package {
 
 // insert tries to add a mapping from id to s.
 //
 // Returns an error if a mapping for id already exists, regardless
 // of whether or not s is the same in content. This should be used
 // for validation during parsing.
-internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
+internal static error insertᴍ<EI, E>(ref dataTable<EI, E> d, EI id, E data)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == nil) {
@@ -122,7 +122,7 @@ internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
 }
 
 // append adds a new element to the data table and returns its ID.
-internal static EI append<EI, E>(this ref dataTable<EI, E> d, E data)
+internal static EI appendᴍ<EI, E>(ref dataTable<EI, E> d, E data)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == nil) {
@@ -136,7 +136,7 @@ internal static EI append<EI, E>(this ref dataTable<EI, E> d, E data)
 // compactify attempts to compact sparse into dense.
 //
 // This is intended to be called only once after insertions are done.
-internal static void compactify<EI, E>(this ref dataTable<EI, E> d)
+internal static void compactifyᴍ<EI, E>(ref dataTable<EI, E> d)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == nil || len(d.dense) != 0) {
@@ -177,7 +177,7 @@ internal static void compactify<EI, E>(this ref dataTable<EI, E> d)
 
 // get returns the E for id or false if it doesn't
 // exist. This should be used for validation during parsing.
-internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id)
+internal static (E, bool) getᴍ<EI, E>(ref dataTable<EI, E> d, EI id)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (AreEqual(id, ConvertToType<EI>(0))) {
@@ -196,7 +196,7 @@ internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id)
 }
 
 // forEach iterates over all ID/value pairs in the data table.
-internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, bool> yield)
+internal static bool forEachᴍ<EI, E>(ref dataTable<EI, E> d, Func<EI, E, bool> yield)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     foreach (var (id, value) in range(d.dense)) {
@@ -221,7 +221,7 @@ internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, boo
 // mustGet returns the E for id or panics if it fails.
 //
 // This should only be used if id has already been validated.
-internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
+internal static E mustGetᴍ<EI, E>(ref dataTable<EI, E> d, EI id)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     var (data, ok) = d.get(id);
@@ -236,10 +236,10 @@ internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
 // frequency is nanoseconds per timestamp unit.
 partial struct frequency /*num:float64*/;
 
-} partial class traceᴛfrequency {
+} partial class trace_package {
 
 // mul multiplies an unprocessed to produce a time in nanoseconds.
-internal static Time mul(this frequency f, timestamp t) {
+internal static Time mulᴍ(frequency f, timestamp t) {
     return (Time)(int64)((float64)t * (float64)f);
 }
 
@@ -261,14 +261,14 @@ partial struct cpuSample {
     internal stackID stack;
 }
 
-} partial class traceᴛcpuSample {
+} partial class trace_package {
 
 // asEvent produces a complete Event from a cpuSample. It needs
 // the evTable from the generation that created it.
 //
 // We don't just store it as an Event in generation to minimize
 // the amount of pointer data floating around.
-internal static Event asEvent(this cpuSample s, ж<evTable> table) {
+internal static Event asEventᴍ(cpuSample s, ж<evTable> table) {
     // TODO(mknyszek): This is go122-specific, but shouldn't be.
     // Generalize this in the future.
     var e = new Event(
@@ -290,9 +290,9 @@ partial struct stack {
     internal slice<uint64> pcs;
 }
 
-} partial class traceᴛstack {
+} partial class trace_package {
 
-internal static @string String(this stack s) {
+internal static @string Stringᴍ(stack s) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     foreach (var (_, frame) in range(s.pcs)) {
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "\t%#v\n"u8, frame);
@@ -311,3 +311,30 @@ partial struct frame {
 }
 
 } // end trace_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class traceᴛbaseEvent {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<uint64> extra(this ref baseEvent e, version.Version v) => trace_package.extraᴍ(ref e, v);
+}
+partial class traceᴛevTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static extraStringID addExtraString(this ref evTable t, @string s) => trace_package.addExtraStringᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string getExtraString(this ref evTable t, extraStringID id) => trace_package.getExtraStringᴍ(ref t, id);
+}
+partial class traceᴛdataTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data) => trace_package.insertᴍ<EI, E>(ref d, id, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static EI append<EI, E>(this ref dataTable<EI, E> d, E data) => trace_package.appendᴍ<EI, E>(ref d, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compactify<EI, E>(this ref dataTable<EI, E> d) => trace_package.compactifyᴍ<EI, E>(ref d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id) => trace_package.getᴍ<EI, E>(ref d, id);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, bool> yield) => trace_package.forEachᴍ<EI, E>(ref d, yield);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id) => trace_package.mustGetᴍ<EI, E>(ref d, id);
+}
+partial class traceᴛfrequency {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Time mul(this frequency f, timestamp t) => trace_package.mulᴍ(f, t);
+}
+partial class traceᴛcpuSample {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Event asEvent(this cpuSample s, ж<evTable> table) => trace_package.asEventᴍ(s, table);
+}
+partial class traceᴛstack {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this stack s) => trace_package.Stringᴍ(s);
+}
+// </GlyphForwarders>

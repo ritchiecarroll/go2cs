@@ -97,17 +97,17 @@ partial struct GCMWithCounterNonce {
     internal uint64 next;
 }
 
-} partial class gcmᴛGCMWithCounterNonce {
+} partial class gcm_package {
 
-public static nint NonceSize(this ref GCMWithCounterNonce g) { return gcmStandardNonceSize; }
+internal static nint NonceSizeᴍ(ref GCMWithCounterNonce g) { return gcmStandardNonceSize; }
 
-public static nint Overhead(this ref GCMWithCounterNonce g) { return gcmTagSize; }
+internal static nint Overheadᴍ(ref GCMWithCounterNonce g) { return gcmTagSize; }
 
 // Seal implements the [cipher.AEAD] interface, checking that the nonce prefix
 // is stable and that the counter is strictly increasing.
 //
 // It is not safe for concurrent use.
-public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+internal static slice<byte> Sealᴍ(ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     if (len(nonce) != gcmStandardNonceSize) {
@@ -146,7 +146,7 @@ public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> ds
     return Ꮡg.Ꮡg.sealAfterIndicator(dst, nonce, plaintext, data);
 }
 
-public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
+internal static (slice<byte>, error) Openᴍ(ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     fips140.RecordApproved();
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
@@ -226,7 +226,7 @@ partial struct GCMWithXORCounterNonce {
     internal uint64 next;
 }
 
-} partial class gcmᴛGCMWithXORCounterNonce {
+} partial class gcm_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoCipherIncorrectˢ => ref cryptoCipherIncorrectˢᵇ;
@@ -243,7 +243,7 @@ private static readonly @string cryptoCipherˢᵇ = "crypto/cipher: SetNoncePref
 // Note that Seal expects the nonce to be already XOR'd with the mask. The mask
 // is provided here only to allow Seal to enforce that the counter is strictly
 // increasing.
-public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, slice<byte> nonce) {
+internal static error SetNoncePrefixAndMaskᴍ(ref GCMWithXORCounterNonce g, slice<byte> nonce) {
     if (len(nonce) != gcmStandardNonceSize) {
         return errors.New(cryptoCipherIncorrectˢ);
     }
@@ -256,15 +256,15 @@ public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, sli
     return default;
 }
 
-public static nint NonceSize(this ref GCMWithXORCounterNonce g) { return gcmStandardNonceSize; }
+internal static nint NonceSizeᴍ(ref GCMWithXORCounterNonce g) { return gcmStandardNonceSize; }
 
-public static nint Overhead(this ref GCMWithXORCounterNonce g) { return gcmTagSize; }
+internal static nint Overheadᴍ(ref GCMWithXORCounterNonce g) { return gcmTagSize; }
 
 // Seal implements the [cipher.AEAD] interface, checking that the nonce prefix
 // is stable and that the counter is strictly increasing.
 //
 // It is not safe for concurrent use.
-public static slice<byte> Seal(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+internal static slice<byte> Sealᴍ(ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     if (len(nonce) != gcmStandardNonceSize) {
@@ -300,9 +300,25 @@ public static slice<byte> Seal(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte>
     return Ꮡg.Ꮡg.sealAfterIndicator(dst, nonce, plaintext, data);
 }
 
-public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
+internal static (slice<byte>, error) Openᴍ(ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     fips140.RecordApproved();
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class gcmᴛGCMWithCounterNonce {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NonceSize(this ref GCMWithCounterNonce g) => gcm_package.NonceSizeᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Overhead(this ref GCMWithCounterNonce g) => gcm_package.Overheadᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Sealᴍ(Ꮡg, dst, nonce, plaintext, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Openᴍ(Ꮡg, dst, nonce, ciphertext, data);
+}
+partial class gcmᴛGCMWithXORCounterNonce {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, slice<byte> nonce) => gcm_package.SetNoncePrefixAndMaskᴍ(ref g, nonce);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NonceSize(this ref GCMWithXORCounterNonce g) => gcm_package.NonceSizeᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Overhead(this ref GCMWithXORCounterNonce g) => gcm_package.Overheadᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seal(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Sealᴍ(Ꮡg, dst, nonce, plaintext, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Openᴍ(Ꮡg, dst, nonce, ciphertext, data);
+}
+// </GlyphForwarders>

@@ -464,18 +464,18 @@ partial struct prefixNonceAEAD {
     internal cipher.AEAD aead;
 }
 
-} partial class tlsᴛprefixNonceAEAD {
+} partial class tls_package {
 
-internal static nint NonceSize(this ref prefixNonceAEAD f) { return aeadNonceLength - noncePrefixLength; }
-internal static nint Overhead(this ref prefixNonceAEAD f) { return f.aead.Overhead(); }
-internal static nint explicitNonceLen(this ref prefixNonceAEAD f) { return f.NonceSize(); }
+internal static nint NonceSizeᴍ(ref prefixNonceAEAD f) { return aeadNonceLength - noncePrefixLength; }
+internal static nint Overheadᴍ(ref prefixNonceAEAD f) { return f.aead.Overhead(); }
+internal static nint explicitNonceLenᴍ(ref prefixNonceAEAD f) { return f.NonceSize(); }
 
-internal static slice<byte> Seal(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Sealᴍ(ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     copy(f.nonce[4..], nonce);
     return f.aead.Seal(@out, f.nonce[..], plaintext, additionalData);
 }
 
-internal static (slice<byte>, error) Open(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Openᴍ(ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     copy(f.nonce[4..], nonce);
     return f.aead.Open(@out, f.nonce[..], ciphertext, additionalData);
 }
@@ -489,13 +489,13 @@ partial struct xorNonceAEAD {
     internal cipher.AEAD aead;
 }
 
-} partial class tlsᴛxorNonceAEAD {
+} partial class tls_package {
 
-internal static nint NonceSize(this ref xorNonceAEAD f) { return 8; } // 64-bit sequence number
-internal static nint Overhead(this ref xorNonceAEAD f) { return f.aead.Overhead(); }
-internal static nint explicitNonceLen(this ref xorNonceAEAD f) { return 0; }
+internal static nint NonceSizeᴍ(ref xorNonceAEAD f) { return 8; } // 64-bit sequence number
+internal static nint Overheadᴍ(ref xorNonceAEAD f) { return f.aead.Overhead(); }
+internal static nint explicitNonceLenᴍ(ref xorNonceAEAD f) { return 0; }
 
-internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Sealᴍ(ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     foreach (var (i, b) in range(nonce)) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
@@ -507,7 +507,7 @@ internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slic
     return result;
 }
 
-internal static (slice<byte>, error) Open(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Openᴍ(ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     foreach (var (i, b) in range(nonce)) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
@@ -607,13 +607,13 @@ partial struct cthWrapper {
     internal constantTimeHash h;
 }
 
-} partial class tlsᴛcthWrapper {
+} partial class tls_package {
 
-internal static nint Size(this ref cthWrapper c) { return c.h.Size(); }
-internal static nint BlockSize(this ref cthWrapper c) { return c.h.BlockSize(); }
-internal static void Reset(this ref cthWrapper c) { c.h.Reset(); }
-internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) { return c.h.Write(p); }
-internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) { return c.h.ConstantTimeSum(b); }
+internal static nint Sizeᴍ(ref cthWrapper c) { return c.h.Size(); }
+internal static nint BlockSizeᴍ(ref cthWrapper c) { return c.h.BlockSize(); }
+internal static void Resetᴍ(ref cthWrapper c) { c.h.Reset(); }
+internal static (nint, error) Writeᴍ(ref cthWrapper c, slice<byte> p) { return c.h.Write(p); }
+internal static slice<byte> Sumᴍ(ref cthWrapper c, slice<byte> b) { return c.h.ConstantTimeSum(b); }
 
 } partial class tls_package {
 
@@ -734,3 +734,27 @@ public const uint16 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305 = /* TLS_ECDHE_RSA_WITH
 public const uint16 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305 = /* TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 */ 52393;
 
 } // end tls_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class tlsᴛprefixNonceAEAD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NonceSize(this ref prefixNonceAEAD f) => tls_package.NonceSizeᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Overhead(this ref prefixNonceAEAD f) => tls_package.Overheadᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint explicitNonceLen(this ref prefixNonceAEAD f) => tls_package.explicitNonceLenᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Seal(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => tls_package.Sealᴍ(ref f, @out, nonce, plaintext, additionalData);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => tls_package.Openᴍ(ref f, @out, nonce, ciphertext, additionalData);
+}
+partial class tlsᴛxorNonceAEAD {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NonceSize(this ref xorNonceAEAD f) => tls_package.NonceSizeᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Overhead(this ref xorNonceAEAD f) => tls_package.Overheadᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint explicitNonceLen(this ref xorNonceAEAD f) => tls_package.explicitNonceLenᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => tls_package.Sealᴍ(ref f, @out, nonce, plaintext, additionalData);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => tls_package.Openᴍ(ref f, @out, nonce, ciphertext, additionalData);
+}
+partial class tlsᴛcthWrapper {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Size(this ref cthWrapper c) => tls_package.Sizeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref cthWrapper c) => tls_package.BlockSizeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this ref cthWrapper c) => tls_package.Resetᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) => tls_package.Writeᴍ(ref c, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) => tls_package.Sumᴍ(ref c, b);
+}
+// </GlyphForwarders>

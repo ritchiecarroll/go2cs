@@ -25,10 +25,10 @@ partial struct traceStringTable {
     internal traceMap tab;
 }
 
-} partial class runtimeᴛtraceStringTable {
+} partial class runtime_package {
 
 // put adds a string to the table, emits it, and returns a unique ID for it.
-internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string sʗp) {
+internal static uint64 putᴍ(ж<traceStringTable> Ꮡt, uintptr gen, @string sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
     // Put the string in the table.
@@ -44,7 +44,7 @@ internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string 
 }
 
 // emit emits a string and creates an ID for it, but doesn't add it to the table. Returns the ID.
-internal static uint64 emit(this ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
+internal static uint64 emitᴍ(ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
     if (len(s) == 0) {
         return 0; // Empty strings are implicitly assigned ID 0 already.
     }
@@ -61,7 +61,7 @@ internal static uint64 emit(this ж<traceStringTable> Ꮡt, uintptr gen, @string
 // Must run on the systemstack because it acquires t.lock.
 //
 //go:systemstack
-internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, uint64 id, @string s) {
+internal static void writeStringᴍ(ж<traceStringTable> Ꮡt, uintptr gen, uint64 id, @string s) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Truncate the string if necessary.
@@ -95,7 +95,7 @@ internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, ui
 //
 // Must be called only once the caller is certain nothing else will be
 // added to this table.
-internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
+internal static void resetᴍ(ж<traceStringTable> Ꮡt, uintptr gen) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.buf != nil) {
@@ -112,3 +112,12 @@ internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class runtimeᴛtraceStringTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string sʗp) => runtime_package.putᴍ(Ꮡt, gen, sʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 emit(this ж<traceStringTable> Ꮡt, uintptr gen, @string s) => runtime_package.emitᴍ(Ꮡt, gen, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, uint64 id, @string s) => runtime_package.writeStringᴍ(Ꮡt, gen, id, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) => runtime_package.resetᴍ(Ꮡt, gen);
+}
+// </GlyphForwarders>

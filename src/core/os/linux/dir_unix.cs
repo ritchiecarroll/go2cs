@@ -38,18 +38,18 @@ internal static UntypedInt blockSize => 8192;
 )); }
 internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)ᏑdirBufPool).ValueSlot;
 
-} partial class osᴛdirInfo {
+} partial class os_package {
 
-internal static void close(this ref dirInfo d) {
+internal static void closeᴍ(ref dirInfo d) {
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
         d.buf = default;
     }
 }
 
-} partial class osᴛFile {
+} partial class os_package {
 
-internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdir(this ж<File> Ꮡf, nint n, readdirMode mode) {
+internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdirᴍ(ж<File> Ꮡf, nint n, readdirMode mode) {
     slice<@string> names = default;
     slice<DirEntry> dirents = default;
     slice<FileInfo> infos = default;
@@ -240,3 +240,12 @@ internal static uint64 readIntLE(slice<byte> b, uintptr size) {
 }
 
 } // end os_package
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class osᴛdirInfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ref dirInfo d) => os_package.closeᴍ(ref d);
+}
+partial class osᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdir(this ж<File> Ꮡf, nint n, readdirMode mode) => os_package.readdirᴍ(Ꮡf, n, mode);
+}
+// </GlyphForwarders>

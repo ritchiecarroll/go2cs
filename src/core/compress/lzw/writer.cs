@@ -60,10 +60,10 @@ partial struct Writer {
     internal array<uint32> table = new(tableSize);
 }
 
-} partial class lzwᴛWriter {
+} partial class lzw_package {
 
 // writeLSB writes the code c for "Least Significant Bits first" data.
-internal static error writeLSB(this ref Writer w, uint32 c) {
+internal static error writeLSBᴍ(ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh(w.nBits));
     w.nBits += w.width;
     while (w.nBits >= 8) {
@@ -77,7 +77,7 @@ internal static error writeLSB(this ref Writer w, uint32 c) {
 }
 
 // writeMSB writes the code c for "Most Significant Bits first" data.
-internal static error writeMSB(this ref Writer w, uint32 c) {
+internal static error writeMSBᴍ(ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh((32 - w.width - w.nBits)));
     w.nBits += w.width;
     while (w.nBits >= 8) {
@@ -96,12 +96,12 @@ internal static error writeMSB(this ref Writer w, uint32 c) {
 // of unused codes and a clear code needs to be sent next.
 internal static error errOutOfCodes = errors.New("lzw: out of codes");
 
-} partial class lzwᴛWriter {
+} partial class lzw_package {
 
 // incHi increments e.hi and checks for both overflow and running out of
 // unused codes. In the latter case, incHi sends a clear code, resets the
 // writer state and returns errOutOfCodes.
-internal static error incHi(this ж<Writer> Ꮡw) {
+internal static error incHiᴍ(ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.hi++;
@@ -130,7 +130,7 @@ internal static ref readonly @string lzwInputByteTooLargeForˢ => ref lzwInputBy
 private static readonly @string lzwInputByteTooLargeForˢᵇ = "lzw: input byte too large for the litWidth"u8;
 
 // Write writes a compressed representation of p to w's underlying writer.
-public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
+internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡw, slice<byte> p) {
     nint n = default;
     ref var w = ref Ꮡw.DerefOrNull();
 
@@ -213,7 +213,7 @@ break_loop:;
 
 // Close closes the [Writer], flushing any pending output. It does not close
 // w's underlying writer.
-public static error Close(this ж<Writer> Ꮡw) {
+internal static error Closeᴍ(ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.err != nil) {
@@ -264,7 +264,7 @@ public static error Close(this ж<Writer> Ꮡw) {
 
 // Reset clears the [Writer]'s state and allows it to be reused again
 // as a new [Writer].
-public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
+internal static void Resetᴍ(ref Writer w, io.Writer dst, Order order, nint litWidth) {
     w.AssignFrom(new Writer());
     w.init(dst, order, litWidth);
 }
@@ -290,13 +290,13 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
     return w;
 }
 
-} partial class lzwᴛWriter {
+} partial class lzw_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lzwUnknownOrderˢ => ref lzwUnknownOrderˢᵇ;
 private static readonly @string lzwUnknownOrderˢᵇ = "lzw: unknown order"u8;
 
-internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
+internal static void initᴍ(ref Writer w, io.Writer dst, Order order, nint litWidth) {
     switch (order) {
     case var ᴛ when ᴛ == LSB: {
         w.write = ((Func<ж<Writer>, uint32, error>)(lzwᴛWriter.writeLSB));
@@ -329,3 +329,15 @@ internal static void init(this ref Writer w, io.Writer dst, Order order, nint li
 }
 
 }
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+partial class lzwᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeLSB(this ref Writer w, uint32 c) => lzw_package.writeLSBᴍ(ref w, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeMSB(this ref Writer w, uint32 c) => lzw_package.writeMSBᴍ(ref w, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error incHi(this ж<Writer> Ꮡw) => lzw_package.incHiᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) => lzw_package.Writeᴍ(Ꮡw, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Writer> Ꮡw) => lzw_package.Closeᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) => lzw_package.Resetᴍ(ref w, dst, order, litWidth);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) => lzw_package.initᴍ(ref w, dst, order, litWidth);
+}
+// </GlyphForwarders>
