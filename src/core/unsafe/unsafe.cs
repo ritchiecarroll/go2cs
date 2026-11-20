@@ -890,6 +890,44 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         GC.KeepAlive(p);
     }
 
+    // ---- Go's `(*[N]E)(p)` kept, passed or returned, E an unnamed array's element: door C, the unnamed form ----
+    //
+    // docs/phase4/DESIGN-array-pointer-doors.md, section 20 (decision D5, taken for the unnamed form only). The
+    // conversion bound to a local, passed or returned was the pointer conversion `To<array<E>>(p)`, which has no N:
+    // array<E> does not carry it, so over an address no Go value owns the conversion can build no window and refuses
+    // by name (ж<T>.FromNumber; DESIGN-native-array-view.md 1.1 is why it must). The converter hands N here from the
+    // type, so that case has an answer.
+    //
+    // This is To<array<E>>(p) with a length, and nothing else decides: the same preamble (nil, and a pointer whose
+    // source is itself the array pointer), then the number conversion's own arm order (ж<T>.FromNumber's length
+    // variant). Its arms answer as they do for To: the same-type alias, the order token through the interior-alias
+    // step, the reinterpret, and token arithmetic, which still refuses by name. Only what stood at arm 5 changes: a
+    // number no Go value owns (C memory), and a pinned real address of another pointee, open a native array pointer
+    // of N elements (builtin.NativeArrayPointer) that keeps the root the native box would have kept. Its Value refuses
+    // by name as before; its elements are read and written in place through ElementRef, which the converter emits for
+    // an index through a local bound by this door, and `*p = v` stores through it (array<T>.Assign).
+    //
+    // An E that holds a reference passes no opener, so it answers exactly what To<array<E>>(p) answers; the converter
+    // keeps such an E, a named array and a FromRef operand off this door.
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static ж<array<E>> ToArray<E>(Pointer? p, long length)
+    {
+        if (p is null || p.IsNull)
+            return ж<array<E>>.FromNumber(default, carried: null);
+
+        if (p.m_retainedSource is ж<array<E>> itself && NamesAManagedSourceByAddress(p, out _))
+            return itself;
+
+        return ж<array<E>>.FromNumber(BaseOf(p), p.m_retainedSource, (nint)length, KeptArrayOpener<E>.Open);
+    }
+
+    // The window door for E, or null for an E that holds a reference (whose window is not this door's to open).
+    private static class KeptArrayOpener<E>
+    {
+        internal static readonly global::System.Func<nuint, nint, object?, ж<array<E>>>? Open =
+            RuntimeHelpers.IsReferenceOrContainsReferences<E>() ? null : static (address, length, root) => builtin.NativeArrayPointer<E>(address, length, root);
+    }
+
     // ---- Go's `(*[N]E)(unsafe.Pointer(&p.f))`, f not an E, over a root that is not native: the FIELD VIEW ----
     //
     // docs/phase4/DESIGN-array-pointer-doors.md, section 18. ArrayPointer<E>.Of answers this where golib's native

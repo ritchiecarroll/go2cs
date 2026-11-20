@@ -375,7 +375,7 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	}
 
 	// `(*p)[i]`, p a local bound by the field view, is the same element, in place.
-	if star, ok := ast.Unparen(indexExpr.X).(*ast.StarExpr); ok && ptrDeref == "" && v.isNativeFieldArrayViewLocal(star.X) {
+	if star, ok := ast.Unparen(indexExpr.X).(*ast.StarExpr); ok && ptrDeref == "" && (v.isNativeFieldArrayViewLocal(star.X) || v.isKeptArrayDoorLocal(star.X)) {
 		return fmt.Sprintf("%s.ElementRef(%s)", v.convExpr(star.X, xContexts), index)
 	}
 
@@ -407,6 +407,11 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	// A local bound by the native field-view door reads through ElementRef: a native array pointer has
 	// no array<T> for Value to return (see nativeFieldArrayView.go).
 	if ptrDeref == ".Value" && v.isNativeFieldArrayViewLocal(indexExpr.X) {
+		return fmt.Sprintf("%s.ElementRef(%s)", baseExpr, index)
+	}
+
+	// So does a local bound by door C's unnamed form, `f := (*[N]E)(p)` (keptArrayDoor.go).
+	if ptrDeref == ".Value" && v.isKeptArrayDoorLocal(indexExpr.X) {
 		return fmt.Sprintf("%s.ElementRef(%s)", baseExpr, index)
 	}
 

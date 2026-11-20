@@ -462,6 +462,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\stdlibmeta\generate.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestDynamicTypeLifts.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestDynamicTypeLifts_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)keptArrayDoor.go" />
     <None Include="$(MSBuildThisFileDirectory)layoutDuplicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)layoutKeyFoldReaders_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateWindows_test.go" />

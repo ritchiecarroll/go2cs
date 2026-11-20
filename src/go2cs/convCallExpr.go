@@ -5521,6 +5521,10 @@ func (v *Visitor) typedPointerDoorEmission(callExpr *ast.CallExpr, arg ast.Expr,
 
 	pointee := targetTypeName[len(prefix) : len(targetTypeName)-1]
 
+	if door, ok := v.keptArrayDoorEmission(callExpr, arg, pointee, expr); ok {
+		return door, true
+	}
+
 	return fmt.Sprintf("%s<%s>(%s)", typedPointerDoor, pointee, expr), true
 }
 
