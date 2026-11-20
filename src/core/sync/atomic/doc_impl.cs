@@ -103,6 +103,17 @@ partial class atomic_package
         // compared addresses, so an old naming the stored address through another object reported swapped=true and
         // swapped nothing.) The structural slot (ValueSlot), as internal/runtime/atomic's casPointerLatched reads it:
         // a never-stored slot holds null, an ordinary Go nil, which `.Value` would refuse as a nil dereference.
+        //
+        // ValueSlot has no nil test, and a nil *unsafe.Pointer is the process-wide ж<unsafe.Pointer>.NilBox: without the
+        // test below, CompareAndSwapPointer(nil, nil, p) would swap p into that shared slot and return true, where Go
+        // panics. casPointerLatched makes the same test through its structural read (`~ptr`).
+        //
+        // One slot reached through BOTH this package and internal/runtime/atomic is not atomic across the two: that one
+        // guards its pointer store and CAS with a latch (s_wideLatch), this one uses Interlocked. No caller is known to
+        // mix them; the split predates this arm.
+        if (addr.IsNilPointer)
+            throw global::go.golib.RuntimeErrorPanic.NilPointerDereference();
+
         ref @unsafe.Pointer slot = ref addr.ValueSlot;
         uintptr expected = addressOf(old);
 
