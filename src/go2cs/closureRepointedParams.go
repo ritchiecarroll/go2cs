@@ -26,7 +26,7 @@ import (
 // return true }) }`. Go has one variable, so the parameter keeps its box and every value read goes
 // through it, in the body and in the literal alike: the box is the variable. With no alias the box
 // takes the Go name, as for a parameter whose alias is dead (visitFuncDecl), so the emission reads
-// `ж<node> n`, `n.Value.kids` and `n = k`.
+// `ж<node> n`, `n.DerefOrNull().kids` and `n = k`.
 //
 // A rebinding in the body itself is not in this set. The body's own assignment re-aliases in the
 // same statement (`Ꮡn = n.kids[0]; n = ref Ꮡn.DerefOrNull();`, see visitAssignStmt), which keeps the
@@ -125,13 +125,16 @@ func closureRepointedPointerParams(funcDecl *ast.FuncDecl, info *types.Info) map
 
 // paramReadsThroughBox reports whether obj is a pointer parameter of the current declaration that a
 // func literal repoints (see closureRepointedPointerParams): it has no entry alias, and every value
-// read renders through its box (`Ꮡn.Value`, Go-named `n.Value` once the function is complete).
+// read renders through its box (`Ꮡn.DerefOrNull()`, Go-named `n.DerefOrNull()` once the function is
+// complete).
 func (v *Visitor) paramReadsThroughBox(obj types.Object) bool {
 	return obj != nil && v.closureRepointedParams[obj]
 }
 
 // boxNameReadsThroughBox is paramReadsThroughBox keyed by the rendered box name (`Ꮡn`), for the
-// assignment emitter, which holds only the rendered left-hand side.
+// assignment emitter, which holds only the rendered left-hand side. The name is unique only because
+// two parameters of one declaration cannot share a name: any other box spelled the same within the
+// declaration would also lose its re-alias here.
 func (v *Visitor) boxNameReadsThroughBox(boxName string) bool {
 	for obj := range v.closureRepointedParams {
 		if AddressPrefix+obj.Name() == boxName {
