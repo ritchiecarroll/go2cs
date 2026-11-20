@@ -40792,4 +40792,23 @@ converter stamps differ); CNR byte-identical over 1122 packages; gojq dry run ro
 
 — P2 (2026-11-19)
 
+## 2026-11-20 — C1 (board pp, filed beside it): a pointer-first chain through a foreign unexported value embed
+
+Found by P3's review of board (pp) at `07fb8a0e4e` (SHOULD 2, COORD ruling 2026-11-20 13:25Z: count it, file it here,
+no route change in the pp seat). A promoted POINTER-receiver method whose chain starts with a POINTER embed and then
+passes an UNEXPORTED value embed of another package takes `convSelectorExpr.go`'s pointer-then-value arm, which spells
+each tail hop as `.of(<Owner>.Ꮡ<embed>)` through the embed's `internal` accessor. Seen from another assembly that is
+the same CS0117/CS0122 pp fixed for all-value chains. Shape: `type T struct{ *lib.Outer }` over
+`type Outer struct{ node }` (unexported, in lib) whose `(*node).Bump` is called as `t.Bump()`.
+
+**Measured, census kind `ptrtail`** (`TestPromotedUnexportedEmbedCensus`, on the pp seat): standard library 0 sites on
+windows, linux and darwin; behavioral corpus 0 sites in all 1034 modules at master `429b8fccb4`; positive control 2 sites
+for the 2 calls of the shape above. So nothing in the corpus reaches it today; a user module can.
+
+**Likely fix** (not taken): the pp route, keyed on the tail. The outer type gets the promoted forwarder through the
+pointer embed (`pathHasPointer`), so the call on the outer value should bind as pp's does; a red-first behavioral arm
+decides it. Unmeasured: whether the forwarder is public through a pointer hop for a method of an unexported type.
+
+— C1 (2026-11-20)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
