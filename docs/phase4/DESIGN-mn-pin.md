@@ -5,6 +5,9 @@
 > rules it. It answers item 2 of the re-sized M:N plan: what `runtime.LockOSThread` means on the scheduler, what a
 > pinned goroutine costs a carrier, and how the pin meets N5. Predictions and stop lines are in §6 and §7, written
 > before any arm runs. Amended by dated blocks, never rewritten.
+>
+> **Revision 1 (section 10, 2026-11-20): P3's review folded in; COORD approved the asks of section 9 on it.** The
+> build waits on the owner's M:N landing shape.
 
 ## 1. The gap
 
@@ -200,3 +203,89 @@ change which signatures admit a twin.
 2. Accept §7's stop lines as written, in particular that a P2/P3 miss stops the seat for a ruling rather than for
    tuning.
 3. Confirm L2 (goroutine 1 locked after start ends on the startup thread) is named, not built.
+
+## 10. Revision 1, after P3's review (dated block, 2026-11-20)
+
+P3 reviewed `b3dc12ddbb` read-only against `GoScheduler.cs` at that commit: BLOCK on one point, four SHOULDs, one
+nit. COORD ruled all five into this document; on this revision the three asks of section 9 are approved
+(section 3 with L1-L5 as the pin to build, the stop lines with finding 4's change, L2 named only). Building still
+waits on the owner's M:N landing shape. Where this block and sections 3, 6 or 7 differ, this block holds.
+
+### 10.1 BLOCK: the idle retire rule counted pinned carriers (amends 3.2)
+
+A surplus shared carrier retires after 100 ms idle when `s_carriers.Count > s_procs`. A pinned carrier stays in
+`s_carriers`, so with K >= P pinned and parked every shared carrier can retire, while `EnsureCarrier` (room is
+`Count - s_blocked < s_procs`) adds none: a step enqueued in that window strands until some later `Enqueue`. P3's
+case: P = 2, K = 2. A plain block shares the path today, but its thread comes back; a pin does not.
+
+**Rule.** A shared carrier retires idle only when the UNBLOCKED count exceeds P: `Count - s_blocked > s_procs`, read
+under `s_carriersLock`. Retiring and adding then read the same quantity. The read is a snapshot of an interlocked
+counter. If a block ends just after it, a surplus carrier lives one more idle period. If a block begins just after
+it, that carrier's own `EnterBlocked` (or the pinned wait's step 1) calls `EnsureCarrier` while work is queued.
+Neither strands a step.
+
+**Arm M3b.** K = 2P pinned parked goroutines and one unlocked ticker doing a short piece of work every 100 ms (run 1)
+and every 250 ms (run 2), 30 s each. Predicted: every tick runs, each within 5 ms of its timer; carriers started
+after the first second: at most 2. Stop: any tick later than 100 ms, or carriers started rising with the tick count
+(a retire/add churn). Made to fail first: with the old rule restored, M3b must show the strand (a late tick).
+
+### 10.2 The fourth step-end case (amends 3.1)
+
+A step can end with the goroutine locked, no park pending and the goroutine not ended: the twin awaited something
+that is neither a twin nor a park slot (L5's case), and its continuation went to that awaiter. If the carrier
+pinned and waited, the resume would run off-carrier and the carrier would wait forever.
+
+**Route it, in the builder.** Every await in a twin passes through golib's own builder (A1). When the awaiting
+goroutine is locked and the awaiter is not golib's, the builder makes the await a park: it commits a park slot,
+and the foreign awaiter's continuation wakes that slot instead of running the twin. The step then ends in case 1
+(locked and parking), and the resume runs on the pinned carrier. Cost: one slot per foreign await under a lock.
+
+**Backstop.** A step end that still reaches the fourth case is a golib defect: it throws by name ("golib: a locked
+goroutine's step ended with no park pending"), as `ParkPending` does for a twin that parks twice in one step.
+Made to fail: a unit that awaits `Task.Delay` under a lock must resume on the pinned thread; with the builder's
+route neutered, the unit fails on the thread id, and with the backstop also removed it hangs and hits its deadline.
+
+### 10.3 The order on pin and unpin, as an invariant (amends 3.4)
+
+**Invariant: `m_pin` is written before `slot.Commit`, on pin AND on unpin.** On unpin it is cleared before the
+commit. Cleared after, a wake between the two would go to a carrier that has left its private wait, and the
+goroutine would never run. Made to fail deterministically: a unit whose slot is woken BEFORE the park commits
+(Commit's "already woken" branch then calls `Ready` at once). With the clear moved after the commit, that unit must
+hit its deadline and name the unpin. The same unit with the pin order reversed covers 3.1.
+
+### 10.4 The bands (replaces P2 and P3 of section 7)
+
+The mechanism estimates are built from spike-2 §3.6's parts (twin round trip 1,422-1,550 ns, thread path
+1,677-1,715 ns, mount and unmount 38 ns, an uncontended P acquire of tens of ns):
+
+| # | prediction (mechanism) | stop line |
+|---|---|---|
+| P2 | one side locked: one twin wake, one thread wake, one P acquire: **1.6-2.1 µs** | over 2x the thread path (about 3.4 µs) |
+| P3 | both locked: the thread path plus two P acquires and two state swaps: **1.8-2.4 µs** | over 2.5x the thread path |
+
+A reading inside the stop line but outside the band is a MISS to explain, not a stop.
+
+### 10.5 The pinned wake under a saturated P set (new: P10 and arm M7)
+
+Go hands the waker's P to the locked thread (`startlockedm`). Here the pinned carrier waits in `s_p.Wait` with every
+other waiter. Reading `Monitor` for this revision shows the gap is wider than a wait for the next step end.
+Injection runs only when the RUN QUEUE holds work (`queued = !s_runq.IsEmpty && s_idle == 0`). A pinned carrier
+waiting for a P is not in the run queue, so with every P inside long CPU-bound steps nothing injects for it. Its
+wake waits for one of those steps to end, however long that is. Go bounds the same case with its 10 ms preemption.
+
+**Fix (part of the pin).** Injection counts a carrier waiting for a P as queued work, as the retake already does
+(`s_pWaiters > 0`). A pinned wake then waits at most about the preemption threshold (10 ms) plus a monitor tick
+(2 ms), Go's own order of bound. The injection cap (`s_maxInject`, P by default) still applies.
+
+**Arm M7.** P unlocked twins in CPU-bound steps of 200 ms each (no parks), and one locked goroutine woken by a timer
+every 10 ms for 10 s; wake-to-run latency per wake, p50 and p99. The same with the woken goroutine unlocked
+(control). A run with the fix switched off is the made-to-fail check: its p99 must reach the step length.
+
+| # | prediction | stop line |
+|---|---|---|
+| P10 | pinned p99 10-15 ms, within 1.5x of the unlocked control's p99; unsaturated (no CPU twins) p99 under 0.1 ms | pinned p99 over 25 ms, or over 2x the control's |
+
+### 10.6 Nit: size
+
+With 10.1-10.5 the golib change is about 130-180 lines (P3's estimate), not 80-120. The lane-days of section 8
+stand: 2-3, the M3b and M7 arms inside the 0.5-1 for arms.
