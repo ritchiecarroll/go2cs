@@ -275,6 +275,54 @@ public class GoFrameRuleTests
         """);
 
     [TestMethod]
+    public void AcceptsARefArgumentInACallThatDoesNotBindYet()
+    {
+        // A generator binds the compilation WITHOUT the other generators' output. Converted code names generated members
+        // (FieldAccessGenerator's field boxes, `g.ᏑcgoCtxt` in runtime's cgocallbackg1), so in the rule's view such a
+        // call does not bind, and the frame's `ref` argument must still be read as the allowed shape it is. The input's
+        // own error stands for the member a generator would have added.
+        Result result = Run(Usings +
+            """
+            public sealed class g { }
+
+            public static class pkg
+            {
+                public static void f(g gp)
+                {
+                    GoFrame ᒐ = default;
+                    try
+                    {
+                        defer((g gpΔ1) => { var p = gpΔ1.ᏑnotYetGenerated; }, gp, ref ᒐ);
+                    }
+                    finally { ᒐ.Run(); }
+                }
+            }
+            """);
+
+        Assert.IsTrue(result.CompileErrors.Any(error => error.Id == "CS1061"), "the input must stand for a call that does not bind:\n" +
+            string.Join("\n", result.CompileErrors));
+        Assert.AreEqual(0, result.Refusals.Length, "a ref argument in a call that does not bind was refused:\n" + string.Join("\n", result.Refusals));
+    }
+
+    [TestMethod]
+    public void RefusesAByValueExtensionReceiver() => AssertRefused("is passed by value",
+        """
+        public static class frames
+        {
+            public static int Ext(this GoFrame frame) => frame.Count;
+        }
+
+        public static class pkg
+        {
+            public static int f()
+            {
+                GoFrame ᒐ = default;
+                return ᒐ.Ext(); // <- GO2CS0016
+            }
+        }
+        """);
+
+    [TestMethod]
     public void RefusesAGlobalUsingAlias()
     {
         // A global alias lets every file of the project name the type without the word GoFrame in it.
