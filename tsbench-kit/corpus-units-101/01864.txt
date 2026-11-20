@@ -1,0 +1,8 @@
+function test(arg: string | number) {
+  if (typeof arg === "string") {
+    fn();
+    const fn: () => typeof arg = () => arg;
+    return fn;
+  }
+  return undefined;
+}

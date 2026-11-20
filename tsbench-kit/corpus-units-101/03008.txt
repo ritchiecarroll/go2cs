@@ -1,0 +1,2 @@
+import { x as xa } from "a";
+import { x as xb } from "b";

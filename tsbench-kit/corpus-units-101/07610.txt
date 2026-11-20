@@ -1,0 +1,2 @@
+import self = require("./recursiveExportAssignmentAndFindAliasedType6_moduleC");
+export = self;

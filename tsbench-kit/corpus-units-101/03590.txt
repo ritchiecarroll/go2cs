@@ -1,0 +1,5 @@
+import a = require("./a");
+const c1 = a.a;
+const c2 = a.b;
+let v1: a.Foo = { x: "test" };
+let v2: a.Bar.Baz = { y: 42 };

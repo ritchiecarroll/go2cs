@@ -1,0 +1,6 @@
+import * as asserts from "./asserts";
+
+function test(obj: string | null): void {
+    asserts.isNonNullable(obj);
+    obj.trim();
+}

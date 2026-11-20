@@ -1,0 +1,1 @@
+if (kind === "a") payload.toFixed();

@@ -1,0 +1,2 @@
+/** Literal comment */
+export default 42;

@@ -1,0 +1,5 @@
+export interface Named {}
+
+export function createNamed(): Named {
+  return {};
+}

@@ -1,0 +1,4 @@
+export class Bar {}
+export default function Example() {}
+
+Example.Bar = Bar

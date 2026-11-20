@@ -1,0 +1,3 @@
+check-101	go	C:/go2cs/ts/native/checkdemo-go.exe	C:/go2cs/ts/min		@C:/go2cs/ts/units-101.args
+check-101	jit	C:/go2cs/ts/typescript-go-cs/.artifacts/bin/538abe619327/Release/net10.0/checkdemo.exe	C:/go2cs/ts/min		@C:/go2cs/ts/units-101.args
+check-101	jit-wks	C:/go2cs/ts/typescript-go-cs/.artifacts/bin/538abe619327/Release/net10.0/checkdemo.exe	C:/go2cs/ts/min	DOTNET_gcServer=0	@C:/go2cs/ts/units-101.args
