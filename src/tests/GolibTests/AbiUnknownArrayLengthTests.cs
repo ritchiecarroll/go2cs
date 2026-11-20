@@ -1,3 +1,4 @@
+using go.@internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using abi = go.@internal.abi_package;
@@ -35,8 +36,8 @@ public class AbiUnknownArrayLengthTests
             "runtime error: the size of [?]string is not known (the length of [?]string is not carried for an unnamed array type argument)",
             Assert.ThrowsException<PanicException>(() => descriptor.Size()).Message, "the refusal's text");
         Assert.AreEqual(~(uintptr)0, descriptor.Value.Size_, "a direct reader of the Size_ FIELD must not see a plausible 0");
-        AssertRefusesByName(() => abi.Len(descriptor), "Len()");
-        AssertRefusesByName(() => abi.ArrayType(descriptor), "ArrayType()");
+        AssertRefusesByName(() => descriptor.Len(), "Len()");
+        AssertRefusesByName(() => descriptor.ArrayType(), "ArrayType()");
     }
 
     [TestMethod]
@@ -56,8 +57,8 @@ public class AbiUnknownArrayLengthTests
         ж<abi.Type> descriptor = abi.TypeOf(new array<@string>(new @string[] { "a", "b" }));
 
         Assert.AreEqual((uintptr)32, descriptor.Size(), "a live [2]string's descriptor lost its size");
-        Assert.AreEqual((nint)2, abi.Len(descriptor), "a live [2]string's descriptor lost its length");
-        Assert.IsNotNull(abi.ArrayType(descriptor), "a live [2]string's descriptor lost its ArrayType");
+        Assert.AreEqual((nint)2, descriptor.Len(), "a live [2]string's descriptor lost its length");
+        Assert.IsNotNull(descriptor.ArrayType(), "a live [2]string's descriptor lost its ArrayType");
         Assert.AreEqual((uintptr)8, abi.TypeFor<int64>().Size(), "a scalar's size moved");
     }
 }

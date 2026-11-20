@@ -41,11 +41,22 @@ func anon(p unsafe.Pointer) *struct{ X [2]int32 } { return (*struct{ X [2]int32 
 `
 
 // The records name each admitted NAMED type and, only when it is not the default, the rule. The anonymous struct is
-// admitted (it is in keyOrder) and not recorded.
+// admitted (it is in keyOrder) and recorded by the digest of its key alone (ruling C, COORD 2026-11-17 12:14Z: an
+// importer must be able to tell WHICH anonymous struct is admitted), never by its spelling.
 func TestInlineArrayStampRecords(t *testing.T) {
 	typeRecord := func(name string) string { return `[assembly: go.golib.GoInlineArrayType("` + name + `")]` }
 	keysRecord := func(a *inlineArrayAdmission) string {
 		return fmt.Sprintf(`[assembly: go.golib.GoInlineArrayKeys(%d, "%s")]`, len(a.keyOrder), inlineArrayKeyDigest(a.keyOrder))
+	}
+	anonRecord := func(a *inlineArrayAdmission) string {
+		for _, key := range a.keyOrder {
+			if strings.HasPrefix(key, "anon:") {
+				return `[assembly: go.golib.GoInlineArrayAnonymous("` + inlineArrayKeyDigest([]string{key}) + `")]`
+			}
+		}
+
+		t.Fatalf("no anonymous key admitted (%q)", admittedKeys(a))
+		return ""
 	}
 
 	auto, _ := admitFixture(t, "", Options{}, [2]string{"lib.go", stampFixture})
@@ -54,12 +65,12 @@ func TestInlineArrayStampRecords(t *testing.T) {
 		t.Fatalf("the fixture's anonymous struct is not admitted (%q); the test would not prove it goes unrecorded", admittedKeys(auto))
 	}
 
-	if got, want := inlineArrayStampRecords(auto, inlineArraysModeAuto), []string{keysRecord(auto), typeRecord("Holder"), typeRecord("Plain")}; !slices.Equal(got, want) {
+	if got, want := inlineArrayStampRecords(auto, inlineArraysModeAuto), []string{keysRecord(auto), typeRecord("Holder"), typeRecord("Plain"), anonRecord(auto)}; !slices.Equal(got, want) {
 		t.Fatalf("auto records:\n got %q\nwant %q", got, want)
 	}
 
 	forced, _ := admitFixture(t, "", Options{inlineArrays: inlineArrayOverride{force: []string{"example.com/lib"}}}, [2]string{"lib.go", stampFixture})
-	want := []string{`[assembly: go.golib.GoInlineArrays("forced")]`, keysRecord(forced), typeRecord("Holder"), typeRecord("Loose"), typeRecord("Plain")}
+	want := []string{`[assembly: go.golib.GoInlineArrays("forced")]`, keysRecord(forced), typeRecord("Holder"), typeRecord("Loose"), typeRecord("Plain"), anonRecord(forced)}
 
 	if got := inlineArrayStampRecords(forced, inlineArraysModeForced); !slices.Equal(got, want) {
 		t.Fatalf("forced records:\n got %q\nwant %q", got, want)

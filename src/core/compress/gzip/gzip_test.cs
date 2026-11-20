@@ -10,6 +10,7 @@ using reflect = reflect_package;
 using testing = testing_package;
 using time = time_package;
 using static go.compress.gzip_package;
+using static gzip_internal_test_package;
 
 partial class gzip_internal_test_package {
 
@@ -272,6 +273,8 @@ internal partial struct limitedWriter {
     public nint N;
 }
 
+} partial class gzip_internal_testᴛlimitedWriter {
+
 internal static (nint n, error err) Write(this ref limitedWriter l, slice<byte> p) {
     nint nΔ1 = l.N; if (nΔ1 < len(p)) {
         l.N = 0;
@@ -280,6 +283,8 @@ internal static (nint n, error err) Write(this ref limitedWriter l, slice<byte> 
     l.N -= len(p);
     return (len(p), default);
 }
+
+} partial class gzip_internal_test_package {
 
 // Write should never return more bytes than the input slice.
 public static void TestLimitedWrite(ж<testing.T> t) {

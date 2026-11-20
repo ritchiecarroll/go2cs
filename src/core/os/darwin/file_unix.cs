@@ -15,6 +15,7 @@ using @internal;
 using @internal.syscall;
 using go.io;
 using go.sync;
+using static os_package;
 
 partial class os_package {
 
@@ -66,6 +67,8 @@ partial struct @file {
     internal bool inRoot;                     // whether file is opened in a Root
 }
 
+} partial class osᴛFile {
+
 // fd is the Unix implementation of Fd.
 internal static uintptr fd(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
@@ -85,6 +88,8 @@ internal static uintptr fd(this ж<File> Ꮡf) {
 
     return (uintptr)f.pfd.Sysfd;
 }
+
+} partial class os_package {
 
 // newFileFromNewFile is called by [NewFile].
 internal static ж<File> newFileFromNewFile(uintptr fd, @string name) {
@@ -227,7 +232,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
         }
     }
 
-    runtime.SetFinalizer(f.@file.OrTypedNil(), ((Func<ж<@file>, error>)(close)));
+    runtime.SetFinalizer(f.@file.OrTypedNil(), ((Func<ж<@file>, error>)(osᴛfile.close)));
     return f;
 }
 
@@ -310,6 +315,8 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     return (f, default);
 }
 
+} partial class osᴛfile {
+
 internal static error close(this ж<@file> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
@@ -332,6 +339,8 @@ internal static error close(this ж<@file> Ꮡfile) {
     return err;
 }
 
+} partial class osᴛFile {
+
 // seek sets the offset for the next Read or Write on file to offset, interpreted
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
@@ -349,6 +358,8 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
     runtime.KeepAlive(Ꮡf.OrTypedNil());
     return (ret, err);
 }
+
+} partial class os_package {
 
 // Truncate changes the size of the named file.
 // If the file is a symbolic link, it changes the size of the link's target.
@@ -462,6 +473,8 @@ partial struct unixDirent {
     internal FileInfo info;
 }
 
+} partial class osᴛunixDirent {
+
 internal static @string Name(this ref unixDirent d) { return d.name; }
 internal static bool IsDir(this ref unixDirent d) { return d.typ.IsDir(); }
 internal static FileMode Type(this ref unixDirent d) { return d.typ; }
@@ -476,6 +489,8 @@ internal static (FileInfo, error) Info(this ref unixDirent d) {
 internal static @string String(this ж<unixDirent> Ꮡd) {
     return fs.FormatDirEntry(new unixDirentжDirEntry(Ꮡd));
 }
+
+} partial class os_package {
 
 internal static (DirEntry, error) newUnixDirent(ж<File> Ꮡparent, @string name, FileMode typ) {
     ref var parent = ref Ꮡparent.DerefOrNull();

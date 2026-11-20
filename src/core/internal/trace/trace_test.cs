@@ -164,10 +164,10 @@ public static void TestTraceCPUProfile(ж<testing.T> t) {
         if (err != nil) {
             tΔ1.Error(err);
         }
-        ж<traceꓸEvent> hogRegion = default;
+        ж<Δtrace.Event> hogRegion = default;
         bool hogRegionClosed = default;
         for (;;) {
-            ref var ev = ref heap<traceꓸEvent>(out var Ꮡev);
+            ref var ev = ref heap<Δtrace.Event>(out var Ꮡev);
             (ev, var errΔ1) = r.ReadEvent();
             if (AreEqual(errΔ1, io.EOF)) {
                 break;
@@ -515,7 +515,7 @@ public static void TestTraceStacks(ж<testing.T> t) {
                 want[len(want) - 1].frames = appendꓸꓸꓸ(slice<TestTraceStacks_frame>([new("syscall.syscall", 0)]), want[len(want) - 1].frames);
             }
         }
-        bool stackMatches(traceꓸStack stk, slice<TestTraceStacks_frame> frames) {
+        bool stackMatches(Δtrace.Stack stk, slice<TestTraceStacks_frame> frames) {
             foreach (var (i, f) in range(slices.Collect(stk.Frames()))) {
                 if (f.Func != frames[i].fn) {
                     return false;
@@ -642,8 +642,8 @@ public static void TestTraceIterPull(ж<testing.T> t) {
 
 internal static void checkReaderDeterminism(ж<testing.T> t, slice<byte> tb, slice<byte> _Δp2, @string _Δp3) {
     var tbʗ1 = tb;
-    slice<traceꓸEvent> events() {
-        slice<traceꓸEvent> evs = default;
+    slice<Δtrace.Event> events() {
+        slice<Δtrace.Event> evs = default;
 
         var (r, err) = Δtrace.NewReader(new trace_test_package.bytes_ReaderжReader(bytes.NewReader(tbʗ1)));
         if (err != nil) {

@@ -277,7 +277,7 @@ public static void TestResponse(ж<testing.T> t) {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             var resp = new response(
                 req: httptest.NewRequest(getˢ, "/", default),
-                header: new httpꓸHeader(new map<@string, slice<@string>>{}),
+                header: new http.Header(new map<@string, slice<@string>>{}),
                 bufw: bufio.NewWriter(new cgi_internal_test_package.bytes_BufferжWriter(Ꮡbuf))
             );
             var (n, err) = resp.Write(slice<byte>(ttʗ1.body));

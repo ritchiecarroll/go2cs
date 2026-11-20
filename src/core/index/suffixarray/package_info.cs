@@ -61,7 +61,7 @@ using static go.index.suffixarray_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("index/suffixarray/sais.go", "sais.cs", "AHmAArKClAACFgAIAoK4gpSCggACEOKCgpTugqaCgoKCgoKCAAgSlJSCpgACFgAIAoKUgqaCgoKUqqKCgoKCgoIAAxDCgoKCgoKCAAMyABUClIKCABo2goKCgoKCpoKCgoIADh6ClAACHAAMBIIAGDKCgoIACBKCgoKUgoKUlJSClNyCgoKmgoKClIIAAyAADQSCABUsgpSCgoKUlIKUgoLugoKCgqaCgoKUggADMAAUAgASJriCgoKCgoKCuIKCgpSCgqaCggAEHgAKAoKCgpSCgpSUlJSCgoKCgqaUgoKCgoKUAAIcAAsCgoKCgoIABBLCAChSgoKUlIKClNyCAAIWAAgCgqaCgoKCgoKmgsqCggADEMKC3IKCgoKUgoKClKaCgoKCggAEFvSCAAsYgoKCuIKCgpSCgpQACxiCgoKCuIKCgpSCuJSClIKUgoKmuIIACBKCgoKCuIKCgpSC")]
 [assembly: GoPositionMap("index/suffixarray/sais2.go", "sais2.cs", "AAgSgoKUpoKCuIKUgoIAAhDigoKU7oKmgoKCgoKCggAIEpSUgqamgoK4gpSCggACEOKCgpTugqaCgoKCgoKCAAgSlJSCpqaCgriClIKCAAIQ4oKClO6CpoKCgoKCgoIACBKUlIKmpoKClIKmgoKClKaCgpSCpoKClKaCgpSCpoKClKaCgoKCgoKCuIKCgoKCuIKCgoKCuIKCgoKCgoK4goKCgoK4goKCgoK4gpSCggAaNoKCgoKCgqaCgoKCAA4egpSmgpSCABo2goKCgoKCpoKCgoIADh6ClKaClIIAGjaCgoKCgoKmgoKCggAOHoKUppSCABgygoKCAAgSgoKClIKClJSUgpTcgoKCpoKCgpSCuJQAGDKCgoIACBKCgoKUgoKUlJSClNyCgoKmgoKClIK4lAAYMoKCggAIEoKCgpSCgpSUlIKU3IKCgqaCgoKUgriUggAVLIKUgoKClJSClIKC7oKCgoKmgoKClIK4lAAVLIKUgoKClJSClIKC7oKCgoKmgoKClIK4lAAVLIKUgoKClJSClIKC7oKCgoKmgoKClIK4ggASJriCgoKCgoKCuIKCgpSCgqaCgsqCABUsgoKCgoKCuIKCgpSUgsqCABUsgoKCgoKCuIKCgpSUgsqCgoKClIKClJSUlIKCgoKCppSCgoKCgpSmgoKCgpSCgpSUlJSCgoKCgqaUgoKCgoKUpoKCgoKUgoKUlJSUgoKCgoKmlIKCgoKClKaCgoKCgoLKggAoUoKClJSCgpTcgqaCgqaCgoKCgoKmgsqCgriCgqaCgoKCgoKmgsqCgriCgqaCgoKCgoKmgsqCgriCgtyCgoKClIKCgpSmgoKCgoLKgtyCgoKClIKCgpSmgoKCgoLKgtyCgoKClIKCgpSmgoKCgoLKlIIACxiCgoK4goKClIKClAALGIKCgoK4goKClIK4lAALGIKCgriCgoKUgoKUAAsYgoKCgriCgoKUgriUAAsYgoKCuIKCgpSCgpQACxiCgoKCuIKCgpSCuJSClIKUgoKmuIIACBKCgoKCuIKCgpSCuJSUgpSCgqa4ggAIEoKCgoK4goKClIK4lJSClIKCpriCAAgSgoKCgriCgoKUgg==")]
-[assembly: GoPositionMap("index/suffixarray/suffixarray.go", "suffixarray.cs", "ADBggqaCgpSmgoKUuIKClKqigoKClIKUqJKCgqiSgoKq5IKCgrimgqaY1JKCgpSUlKaCuIKCgqbMpKaCgpSClKamgoKCgpS4griCuIKCgoKUlKikpoCCyICCyIKCgoKUlKqipoKq5qSSAAIQ8oKCgoKmgoKCgqaCygACEgAMBoKmgsrukoKClIKCgoKCgoKmgoKCgoKCpoKmpoKU7qaSgoKUgoKCgoKUlIKCgoKmpqaClA==", "246-246:1;248-248:2")]
+[assembly: GoPositionMap("index/suffixarray/suffixarray.go", "suffixarray.cs", "ADNggqaCgpSmgoKUuIKClMqigoKClIKUqJKCgqiSgoKq5IKCgrimgqaY1JKCgpSUlKaCuIKCgqbspKaCgpSClKamgoKCgpS4griCuIKCgoKUlKikpoCCyICCyIKCgoKUlKqipoKq5qSSAAIQ8oKCgoKmgoKCgqaCygACEgAMBoKmgsrukoKClIKCgoKCgoKmgoKCgoKCpoKmpoKU7qaSgoKUgoKCgoKUlIKCgoKmpqaClA==", "246-246:1;248-248:2")]
 // </GoSourcePositionMaps>
 
 namespace go.index;
@@ -97,3 +97,14 @@ public static partial class suffixarray_package
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(suffixarray_package.Index)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class suffixarrayᴛIndex;
+[GoMethodHost(typeof(suffixarray_package.ints)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class suffixarrayᴛints;
+// </MethodHolders>

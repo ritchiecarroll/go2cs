@@ -7,8 +7,6 @@
 global using static global::go.crypto.@internal.fips140.edwards25519_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,7 +42,7 @@ using static global::go.crypto.@internal.fips140.edwards25519_internal_test_pack
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519_test.go", "edwards25519_test.cs", "ABAckpSigoKygoKCitKCgoKmgoKCyqaCgoCCpICCpIKmAAgGgpSCgoKCgpSUgoKCgpSClIKU1oKCAAgIlIKCgoKCgoKU9oIAjwGoArKSgoKUgoKUgpSClMqCgoKUpqKCgoKCgg==", "259-275:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar_alias_test.go", "scalar_alias_test.cs", "AAwYgqLGgILIgILIprLWgILIgoCCtoKAgsiAgsiCgIK2goCCtoKAgsimABAE1tbW5urqqoKC", "13-28:1;30-72:2;75-77:3;78-80:4;81-83:5;84-86:6;87-91:7;88-90:7.1;92-96:8;93-95:8.1;97-101:9;98-100:9.1")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar_test.go", "scalar_test.cs", "ABQmooKClKaikpjCgoLGtMaCxoKC6oK2gpKkpoKSlIK4grSCgpSClICCtqKClJSAgraCgoKCgoKCgriCgpSCgpSCgqaCgoKygoKClIKClIK4poKCgoKAgraCgoKCgIK2goKCgoCCyIKCgpSmgrSSgpaSgoKClJSmgriCpJKWkoKUpoK4gu4AChaUgoLugoKCgoKkpoKClII=", "67-69:1;76-84:1;89-94:2;99-109:3;127-136:1;179-195:1;203-214:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar_test.go", "scalar_test.cs", "ABUmooKClKaikrjCgoLGtMaCxoKC6oK2gpKkxoKSlIK4grSCgpSClICCtqKClJSAgraCgoKCgoKCgriCgpSCgpSCgqaCgoKygoKClIKClIK4poKCgoKAgraCgoKCgIK2goKCgoCCyIKCgpSmgrSSgpaSgoKClJSmgriCpJKWkoKUpoK4gu4AChaUgoIACA6CgoKCgqTGgoKUgg==", "67-69:1;76-84:1;89-94:2;99-109:3;127-136:1;179-195:1;203-214:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult_test.go", "scalarmult_test.cs", "AA8ctJaCgoKCgpSUgoKClNaCgoKClKaCgoKClKaCgoKCgpSCgoKUpoKigoKygoKCgoKmgri4kpKClIKUlKaCuKaUgoKCgoKUlIK4goKClIKCuIKSkoKCgqaC6IKClIK4gqLElIKClIKmgryylIK4opSCuKKUgg==", "70-80:1;91-102:1;140-146:1;163-174:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/tables_test.go", "tables_test.cs", "AAoWgoKUooKCpoKUgoKCgoKUgriCgpSigoKmgpSCgoKCgpSCuIKClLKCgoKmgoKUgoKClIKCgpSCuIKClLKCgoKmgoKUgoKClIKCgpSC")]
 // </GoSourcePositionMaps>
@@ -89,3 +87,14 @@ public static partial class edwards25519_internal_test_package
         builtin.initPackage(typeof(global::go.crypto.@internal.fips140.edwards25519_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(global::go.crypto.@internal.fips140.edwards25519_package.Scalar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519_internal_testᴛScalar;
+[GoMethodHost(typeof(edwards25519_internal_test_package.notZeroScalar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519_internal_testᴛnotZeroScalar;
+// </MethodHolders>

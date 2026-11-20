@@ -5,6 +5,8 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using static types_package;
+
 partial class types_package {
 
 // BasicKind describes the kind of basic type.
@@ -29,7 +31,7 @@ public static BasicKind Float32 => 13;
 public static BasicKind Float64 => 14;
 public static BasicKind Complex64 => 15;
 public static BasicKind Complex128 => 16;
-public static BasicKind ΔString => 17;
+public static BasicKind String => 17;
 public static BasicKind UnsafePointer => 18;
 
 // types for untyped values
@@ -68,6 +70,8 @@ partial struct Basic {
     internal @string name;
 }
 
+} partial class typesᴛBasic {
+
 // Kind returns the kind of basic type b.
 public static BasicKind Kind(this ref Basic b) { return b.kind; }
 
@@ -77,7 +81,7 @@ public static BasicInfo Info(this ref Basic b) { return b.info; }
 // Name returns the name of basic type b.
 public static @string Name(this ref Basic b) { return b.name; }
 
-public static ΔType Underlying(this ж<Basic> Ꮡb) { return new BasicжΔType(Ꮡb); }
-public static @string String(this ж<Basic> Ꮡb) { return TypeString(new BasicжΔType(Ꮡb), default); }
+public static Type Underlying(this ж<Basic> Ꮡb) { return new BasicжType(Ꮡb); }
+public static @string String(this ж<Basic> Ꮡb) { return TypeString(new BasicжType(Ꮡb), default); }
 
-} // end types_package
+} // end typesᴛBasic

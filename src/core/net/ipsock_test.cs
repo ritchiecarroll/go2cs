@@ -9,13 +9,13 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-internal static Func<global::go.net_package.IPAddr, global::go.net_package.ΔAddr> testInetaddr = (global::go.net_package.IPAddr ip) => new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ip.IP, Port: 5682, Zone: ip.Zone)));
+internal static Func<global::go.net_package.IPAddr, global::go.net_package.Addr> testInetaddr = (global::go.net_package.IPAddr ip) => new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ip.IP, Port: 5682, Zone: ip.Zone)));
 
 partial struct addrListTestsᴛ1 /*dyn*/ {
     internal Func<global::go.net_package.IPAddr, bool> filter;
     internal slice<global::go.net_package.IPAddr> ips;
-    internal Func<global::go.net_package.IPAddr, global::go.net_package.ΔAddr> inetaddr;
-    internal global::go.net_package.ΔAddr first;
+    internal Func<global::go.net_package.IPAddr, global::go.net_package.Addr> inetaddr;
+    internal global::go.net_package.Addr first;
     internal global::go.net_package.addrList primaries;
     internal global::go.net_package.addrList fallbacks;
     internal error err;
@@ -29,9 +29,9 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv6loopback)
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682)))}.slice()),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682)))}.slice()),
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682)))}.slice()),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682)))}.slice()),
         default
     ),
     new(
@@ -41,9 +41,9 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv4(127, 0, 0, 1))
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682)))}.slice()),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682)))}.slice()),
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682)))}.slice()),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682)))}.slice()),
         default
     ),
     new(
@@ -53,8 +53,8 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv4(192, 168, 0, 1))
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
         }.slice()),
         default,
         default
@@ -66,8 +66,8 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: ParseIP("fe80::1"), Zone: "eth0")
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
         }.slice()),
         default,
         default
@@ -81,10 +81,10 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: ParseIP("fe80::1"), Zone: "eth0")
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
         }.slice()),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
         }.slice()),
         default
     ),
@@ -97,10 +97,10 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv4(192, 168, 0, 1))
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
         }.slice()),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
         }.slice()),
         default
     ),
@@ -113,10 +113,10 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: ParseIP("fe80::1"), Zone: "eth0")
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
         }.slice()),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
         }.slice()),
         default
     ),
@@ -129,10 +129,10 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv4(192, 168, 0, 1))
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: ParseIP("fe80::1"), Port: 5682, Zone: "eth0")))
         }.slice()),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))), new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(192, 168, 0, 1), Port: 5682)))
         }.slice()),
         default
     ),
@@ -144,8 +144,8 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv6loopback)
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682)))}.slice()),
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682)))}.slice()),
         default,
         default
     ),
@@ -156,8 +156,8 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv4(127, 0, 0, 1))
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682)))}.slice()),
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 5682)))}.slice()),
         default,
         default
     ),
@@ -169,8 +169,8 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv6loopback)
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682)))}.slice()),
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682)))}.slice()),
         default,
         default
     ),
@@ -181,8 +181,8 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
             new(IP: IPv4(127, 0, 0, 1))
         ]),
         testInetaddr,
-        new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))),
-        new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682)))}.slice()),
+        new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682))),
+        new addrList(new global::go.net_package.Addr[]{new global::go.net_package.TCPAddrжAddr(Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 5682)))}.slice()),
         default,
         default
     ),
@@ -249,13 +249,13 @@ internal partial struct TestAddrListPartition_cases /*dyn*/ {
 }
 
 public static void TestAddrListPartition(ж<testing.T> t) {
-    var addrs = new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.IPAddrжΔAddr(Ꮡ(new IPAddr(IP: ParseIP(fe80ˢ), Zone: "eth0"))), new global::go.net_package.IPAddrжΔAddr(Ꮡ(new IPAddr(IP: ParseIP(fe801ˢ), Zone: "eth0"))), new global::go.net_package.IPAddrжΔAddr(Ꮡ(new IPAddr(IP: ParseIP(fe802ˢ), Zone: "eth0")))
+    var addrs = new addrList(new global::go.net_package.Addr[]{new global::go.net_package.IPAddrжAddr(Ꮡ(new IPAddr(IP: ParseIP(fe80ˢ), Zone: "eth0"))), new global::go.net_package.IPAddrжAddr(Ꮡ(new IPAddr(IP: ParseIP(fe801ˢ), Zone: "eth0"))), new global::go.net_package.IPAddrжAddr(Ꮡ(new IPAddr(IP: ParseIP(fe802ˢ), Zone: "eth0")))
     }.slice());
     var cases = slice<TestAddrListPartition_cases>([
-        new(0, new addrList(new global::go.net_package.ΔAddr[]{addrs[0]}.slice()), new addrList(new global::go.net_package.ΔAddr[]{addrs[1], addrs[2]}.slice())),
-        new(1, new addrList(new global::go.net_package.ΔAddr[]{addrs[0], addrs[2]}.slice()), new addrList(new global::go.net_package.ΔAddr[]{addrs[1]}.slice())),
-        new(2, new addrList(new global::go.net_package.ΔAddr[]{addrs[0], addrs[1]}.slice()), new addrList(new global::go.net_package.ΔAddr[]{addrs[2]}.slice())),
-        new(3, new addrList(new global::go.net_package.ΔAddr[]{addrs[0], addrs[1], addrs[2]}.slice()), default)
+        new(0, new addrList(new global::go.net_package.Addr[]{addrs[0]}.slice()), new addrList(new global::go.net_package.Addr[]{addrs[1], addrs[2]}.slice())),
+        new(1, new addrList(new global::go.net_package.Addr[]{addrs[0], addrs[2]}.slice()), new addrList(new global::go.net_package.Addr[]{addrs[1]}.slice())),
+        new(2, new addrList(new global::go.net_package.Addr[]{addrs[0], addrs[1]}.slice()), new addrList(new global::go.net_package.Addr[]{addrs[2]}.slice())),
+        new(3, new addrList(new global::go.net_package.Addr[]{addrs[0], addrs[1], addrs[2]}.slice()), default)
     ]);
     foreach (var (i, vᴛ1) in range(cases)) {
         ref var tt = ref heap(new TestAddrListPartition_cases(), out var Ꮡtt);
@@ -264,7 +264,7 @@ public static void TestAddrListPartition(ж<testing.T> t) {
         // Inverting the function's output should not affect the outcome.
         foreach (var (_, invert) in range(slice<bool>([false, true]))) {
             var ttʗ1 = tt;
-            var (primaries, fallbacks) = addrs.partition((global::go.net_package.ΔAddr a) => {
+            var (primaries, fallbacks) = addrs.partition((global::go.net_package.Addr a) => {
                 var ip = a._<ж<global::go.net_package.IPAddr>>().IP;
                 return (ip[len(ip) - 1] == ttʗ1.lastByte) != invert;
             });

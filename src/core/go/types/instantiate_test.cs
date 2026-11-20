@@ -19,9 +19,9 @@ partial class types_test_package {
 internal partial struct TestInstantiateEquality_tests /*dyn*/ {
     internal @string src;
     internal @string name1;
-    internal slice<typesꓸType> targs1;
+    internal slice<types.Type> targs1;
     internal @string name2;
-    internal slice<typesꓸType> targs2;
+    internal slice<types.Type> targs2;
     internal bool wantEqual;
 }
 
@@ -30,30 +30,30 @@ public static void TestInstantiateEquality(ж<testing.T> t) {
     var tests = slice<TestInstantiateEquality_tests>([
         new(
             "package basictype; type T[P any] int",
-            "T", [new types.BasicжΔType(Typ[Int])],
-            "T", [new types.BasicжΔType(Typ[Int])],
+            "T", [new types.BasicжType(Typ[Int])],
+            "T", [new types.BasicжType(Typ[Int])],
             true
         ),
         new(
             "package differenttypeargs; type T[P any] int",
-            "T", [new types.BasicжΔType(Typ[Int])],
-            "T", [new types.BasicжΔType(Typ[ΔString])],
+            "T", [new types.BasicжType(Typ[Int])],
+            "T", [new types.BasicжType(Typ[String])],
             false
         ),
         new(
             "package typeslice; type T[P any] int",
-            "T", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]),
-            "T", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]),
+            "T", slice<types.Type>([new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int])))]),
+            "T", slice<types.Type>([new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int])))]),
             true
         ),
         new(
             // interface{interface{...}} is equivalent to interface{...}
             "package equivalentinterfaces; type T[P any] int",
-            "T", slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(slice<ж<types.Func>>([NewFunc(nopos, nil, "M", emptySignature)]), default))
+            "T", slice<types.Type>([new types.InterfaceжType(NewInterfaceType(slice<ж<types.Func>>([NewFunc(nopos, nil, "M", emptySignature)]), default))
         ]),
-            "T", slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(
+            "T", slice<types.Type>([new types.InterfaceжType(NewInterfaceType(
             default,
-            slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(slice<ж<types.Func>>([NewFunc(nopos, nil, "M", emptySignature)]), default))
+            slice<types.Type>([new types.InterfaceжType(NewInterfaceType(slice<ж<types.Func>>([NewFunc(nopos, nil, "M", emptySignature)]), default))
             ])))
         ]),
             true
@@ -61,48 +61,48 @@ public static void TestInstantiateEquality(ж<testing.T> t) {
         new(
             // int|string is equivalent to string|int
             "package equivalenttypesets; type T[P any] int",
-            "T", slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.UnionжΔType(NewUnion(slice<ж<typesꓸTerm>>([NewTerm(false, new types.BasicжΔType(Typ[Int])), NewTerm(false, new types.BasicжΔType(Typ[ΔString]))])))
+            "T", slice<types.Type>([new types.InterfaceжType(NewInterfaceType(default, slice<types.Type>([new types.UnionжType(NewUnion(slice<ж<types.Term>>([NewTerm(false, new types.BasicжType(Typ[Int])), NewTerm(false, new types.BasicжType(Typ[String]))])))
         ])))
         ]),
-            "T", slice<typesꓸType>([new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.UnionжΔType(NewUnion(slice<ж<typesꓸTerm>>([NewTerm(false, new types.BasicжΔType(Typ[ΔString])), NewTerm(false, new types.BasicжΔType(Typ[Int]))])))
+            "T", slice<types.Type>([new types.InterfaceжType(NewInterfaceType(default, slice<types.Type>([new types.UnionжType(NewUnion(slice<ж<types.Term>>([NewTerm(false, new types.BasicжType(Typ[String])), NewTerm(false, new types.BasicжType(Typ[Int]))])))
         ])))
         ]),
             true
         ),
         new(
             "package basicfunc; func F[P any]() {}",
-            "F", [new types.BasicжΔType(Typ[Int])],
-            "F", [new types.BasicжΔType(Typ[Int])],
+            "F", [new types.BasicжType(Typ[Int])],
+            "F", [new types.BasicжType(Typ[Int])],
             true
         ),
         new(
             "package funcslice; func F[P any]() {}",
-            "F", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]),
-            "F", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]),
+            "F", slice<types.Type>([new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int])))]),
+            "F", slice<types.Type>([new types.SliceжType(NewSlice(new types.BasicжType(Typ[Int])))]),
             true
         ),
         new(
             "package funcwithparams; func F[P any](x string) float64 { return 0 }",
-            "F", [new types.BasicжΔType(Typ[Int])],
-            "F", [new types.BasicжΔType(Typ[Int])],
+            "F", [new types.BasicжType(Typ[Int])],
+            "F", [new types.BasicжType(Typ[Int])],
             true
         ),
         new(
             "package differentfuncargs; func F[P any](x string) float64 { return 0 }",
-            "F", [new types.BasicжΔType(Typ[Int])],
-            "F", [new types.BasicжΔType(Typ[ΔString])],
+            "F", [new types.BasicжType(Typ[Int])],
+            "F", [new types.BasicжType(Typ[String])],
             false
         ),
         new(
             "package funcequality; func F1[P any](x int) {}; func F2[Q any](x int) {}",
-            "F1", [new types.BasicжΔType(Typ[Int])],
-            "F2", [new types.BasicжΔType(Typ[Int])],
+            "F1", [new types.BasicжType(Typ[Int])],
+            "F2", [new types.BasicжType(Typ[Int])],
             false
         ),
         new(
             "package funcsymmetry; func F1[P any](x P) {}; func F2[Q any](x Q) {}",
-            "F1", [new types.BasicжΔType(Typ[Int])],
-            "F2", [new types.BasicжΔType(Typ[Int])],
+            "F1", [new types.BasicжType(Typ[Int])],
+            "F2", [new types.BasicжType(Typ[Int])],
             false
         )
     ]);
@@ -150,11 +150,11 @@ public static void TestInstantiateNonEquality(ж<testing.T> t) {
     var T1 = pkg1.Scope().Lookup("T").Type()._<ж<types.Named>>();
     var T2 = pkg2.Scope().Lookup("T").Type()._<ж<types.Named>>();
     var ctxt = NewContext();
-    var (res1, err) = Instantiate(ctxt, new types.NamedжΔType(T1), [new types.BasicжΔType(Typ[Int])], false);
+    var (res1, err) = Instantiate(ctxt, new types.NamedжType(T1), [new types.BasicжType(Typ[Int])], false);
     if (err != nil) {
         t.Fatal(err);
     }
-    (var res2, err) = Instantiate(ctxt, new types.NamedжΔType(T2), [new types.BasicжΔType(Typ[Int])], false);
+    (var res2, err) = Instantiate(ctxt, new types.NamedжType(T2), [new types.BasicжType(Typ[Int])], false);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -199,7 +199,7 @@ public static void TestMethodInstantiation(ж<testing.T> t) {
         @string src = prefix + test.decl;
         var pkg = mustTypecheck(src, nil, nil);
         var typ = NewPointer(pkg.Scope().Lookup("X").Type());
-        var (sel, ok) = LookupSelection(new types.PointerжΔType(typ), false, pkg, "m");
+        var (sel, ok) = LookupSelection(new types.PointerжType(typ), false, pkg, "m");
         if (!ok) {
             t.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m", typ.OrTypedNil());
         }
@@ -230,7 +230,7 @@ public static void TestImmutableSignatures(ж<testing.T> t) {
     @string src = srcᶜ19;
     var pkg = mustTypecheck(src, nil, nil);
     var typ = pkg.Scope().Lookup("T").Type()._<ж<types.Named>>();
-    var (sel, ok) = LookupSelection(new types.NamedжΔType(typ), false, pkg, "m");
+    var (sel, ok) = LookupSelection(new types.NamedжType(typ), false, pkg, "m");
     if (!ok) {
         t.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m", typ.OrTypedNil());
     }

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -10,6 +11,8 @@ partial struct Box<T> {
 
 internal static void setT<T>(ref T p, T val) { p = val; }
 internal static T getT<T>(ref T p) { return p; }
+
+} partial class mainᴛBox {
 
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -22,6 +25,8 @@ public static T Get<T>(this ж<Box<T>> Ꮡb) {
 
     return getT(ref nonnil(ref b).v);
 }
+
+} partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string helloˢ = "hello"u8;

@@ -136,7 +136,7 @@ using static go.reflect_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokraeABICgoKClKaCgqaCuIKClJSCgriCgoKCgqbmooKCgoKCgqa2AAgM3JSClIKClIKCgpQACRyC7oKmwoKCgoKCgoKmpKSkgoI=", "51-56:1")]
+[assembly: GoPositionMap("reflect/export_test.go", "export_test.cs", "AA8ekoKokraeABICgoKCpLaCgqaCuIKClJSCgriCgoKCgqbmooKCgoKCgqa2AAoM/JSClIKClIKCgpQACRyC7oKmwoKCgoKCgoKmpKSkgoI=", "51-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -189,3 +189,13 @@ public static partial class reflect_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(reflect_internal_test_package.EmbedWithUnexpMeth)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflect_internal_testᴛEmbedWithUnexpMeth;
+// </MethodHolders>

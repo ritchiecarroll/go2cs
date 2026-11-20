@@ -13,9 +13,9 @@ using static go.math.big_package;
 partial class big_internal_test_package {
 
 // randInt returns a pseudo-random Int in the range [1<<(size-1), (1<<size) - 1]
-internal static ж<global::go.math.big_package.ΔInt> randInt(ж<Δrand.Rand> r, nuint size) {
-    var n = @new<global::go.math.big_package.ΔInt>().Lsh(intOne, size - 1);
-    var x = @new<global::go.math.big_package.ΔInt>().Rand(r, n);
+internal static ж<global::go.math.big_package.Int> randInt(ж<Δrand.Rand> r, nuint size) {
+    var n = @new<global::go.math.big_package.Int>().Lsh(intOne, size - 1);
+    var x = @new<global::go.math.big_package.Int>().Rand(r, n);
     return x.Add(x, n); // make sure result > 1<<(size-1)
 }
 
@@ -45,15 +45,15 @@ internal static void runGCDExt(ж<testing.B> Ꮡb, nuint aSize, nuint bSize, boo
     ж<Δrand.Rand> r = Δrand.New(Δrand.NewSource(1234));
     var aa = randInt(r, aSize);
     var bb = randInt(r, bSize);
-    ж<global::go.math.big_package.ΔInt> x = default;
-    ж<global::go.math.big_package.ΔInt> y = default;
+    ж<global::go.math.big_package.Int> x = default;
+    ж<global::go.math.big_package.Int> y = default;
     if (calcXY) {
-        x = @new<global::go.math.big_package.ΔInt>();
-        y = @new<global::go.math.big_package.ΔInt>();
+        x = @new<global::go.math.big_package.Int>();
+        y = @new<global::go.math.big_package.Int>();
     }
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
-        @new<global::go.math.big_package.ΔInt>().GCD(x, y, aa, bb);
+        @new<global::go.math.big_package.Int>().GCD(x, y, aa, bb);
     }
 }
 

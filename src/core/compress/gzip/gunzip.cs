@@ -16,6 +16,7 @@ using time = time_package;
 using encoding;
 using go.compress;
 using hash;
+using static gzip_package;
 
 partial class gzip_package {
 
@@ -96,14 +97,16 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     return (z, default);
 }
 
+} partial class gzipᴛReader {
+
 // Reset discards the [Reader] z's state and makes it equivalent to the
 // result of its original state from [NewReader], but reading from r instead.
 // This permits reusing a [Reader] rather than allocating a new one.
 public static error Reset(this ref Reader z, io.Reader r) {
-    z = new Reader(
+    z.AssignFrom(new Reader(
         decompressor: z.decompressor,
         multistream: true
-    );
+    ));
     var (rr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
         z.r = rr;
     } else {
@@ -295,4 +298,4 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
 // fully consumed until the [io.EOF].
 public static error Close(this ref Reader z) { return z.decompressor.Close(); }
 
-} // end gzip_package
+} // end gzipᴛReader

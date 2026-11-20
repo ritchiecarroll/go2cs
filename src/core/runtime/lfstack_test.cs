@@ -23,7 +23,7 @@ partial struct MyNode {
 // We require lfstack objects to live outside the heap so that
 // checkptr passes on the unsafe shenanigans used.
 internal static ж<MyNode> allocMyNode(nint data) {
-    var n = (ж<MyNode>)(uintptr)(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(MyNode{}) */ (uintptr)24, runtime_internal_test_package.TagAlign));
+    var n = @unsafe.Pointer.To<MyNode>(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(MyNode{}) */ (uintptr)24, runtime_internal_test_package.TagAlign));
     runtime_internal_test_package.LFNodeValidate(n.ᏑLFNode);
     n.data = data;
     return n;

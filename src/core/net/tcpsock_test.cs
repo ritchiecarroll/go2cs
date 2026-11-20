@@ -140,7 +140,7 @@ internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, b
                             ᐸꟷ(serverSemʗ3);
                         }, ref ᒐ);
                         if (timeout) {
-                            cΔ1.SetDeadline(time.Now().Add(time.ΔHour)); // Not intended to fire.
+                            cΔ1.SetDeadline(time.Now().Add(time.Hour)); // Not intended to fire.
                         }
                         ref var buf = ref heap(new array<byte>(512), out var Ꮡbuf);
                         for (nint m = 0; m < msgs; m++) {
@@ -177,7 +177,7 @@ internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, b
                     var cʗ1 = c;
                     defer(() => cʗ1.Close(), ref ᒐ);
                     if (timeout) {
-                        c.SetDeadline(time.Now().Add(time.ΔHour)); // Not intended to fire.
+                        c.SetDeadline(time.Now().Add(time.Hour)); // Not intended to fire.
                     }
                     ref var buf = ref heap(new array<byte>(512), out var Ꮡbuf);
                     for (nint m = 0; m < msgs; m++) {
@@ -638,7 +638,7 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> t) {
 
         ref var bufwrt = ref heap(new array<byte>(128), out var Ꮡbufwrt);
         var ch = new channel<bool>(0);
-        defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
         var bufwrtʗ1 = bufwrt;
         var chʗ1 = ch;
         var errcʗ2 = errc;
@@ -805,7 +805,7 @@ public static void TestTCPBig(ж<testing.T> t) {
                 goǃ(() => {
                     GoFrame ᒐ = default;
                     try {
-                        defer(ᴛ1 => builtin.close(ᴛ1), doneʗ1, ref ᒐ);
+                        defer(ᴛ1 => close(ᴛ1), doneʗ1, ref ᒐ);
                         var (cΔ1, errΔ1) = lnʗ2.Accept();
                         if (errΔ1 != nil) {
                             tΔ1.Error(errΔ1);
@@ -972,7 +972,7 @@ public static partial void BenchmarkSetReadDeadline(ж<testing.B> Ꮡb) {
         }
         defer(() => Ꮡserv.ValueSlot.Close(), ref ᒐ);
         c.SetWriteDeadline(time.Now().Add((time.Duration)(7200000000000L)));
-        var deadline = time.Now().Add(time.ΔHour);
+        var deadline = time.Now().Add(time.Hour);
         b.ResetTimer();
         for (nint i = 0; i < b.N; i++) {
             c.SetReadDeadline(deadline);

@@ -46,14 +46,14 @@ internal static (ж<PrivateKey>, error) generateLegacy(elliptic.Curve c, io.Read
 // hashToInt converts a hash value to an integer. Per FIPS 186-4, Section 6.4,
 // we use the left-most bits of the hash to match the bit-length of the order of
 // the curve. This also performs Step 5 of SEC 1, Version 2.0, Section 4.1.3.
-internal static ж<bigꓸInt> hashToInt(slice<byte> hash, elliptic.Curve c) {
+internal static ж<big.Int> hashToInt(slice<byte> hash, elliptic.Curve c) {
     nint orderBits = c.Params().N.BitLen();
     nint orderBytes = (orderBits + 7) / 8;
     if (len(hash) > orderBytes) {
         hash = hash.slice(0, orderBytes);
     }
 
-    var ret = @new<bigꓸInt>().SetBytes(hash);
+    var ret = @new<big.Int>().SetBytes(hash);
     nint excess = len(hash) * 8 - orderBits;
     if (excess > 0) {
         ret.Rsh(ret, (nuint)excess);
@@ -77,9 +77,9 @@ private static readonly @string invalidAsn1FromSignASN1ˢᵇ = "invalid ASN.1 fr
 // is always used, and the Reader is ignored unless GODEBUG=cryptocustomrand=1
 // is set. This setting will be removed in a future Go release. Instead, use
 // [testing/cryptotest.SetGlobalRandom].
-public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand, ж<PrivateKey> priv, slice<byte> hash) {
-    ж<bigꓸInt> r = default;
-    ж<bigꓸInt> s = default;
+public static (ж<big.Int> r, ж<big.Int> s, error err) Sign(io.Reader rand, ж<PrivateKey> priv, slice<byte> hash) {
+    ж<big.Int> r = default;
+    ж<big.Int> s = default;
     error err = default;
 
     (var sig, err) = SignASN1(rand, priv, hash);
@@ -87,7 +87,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
         return (default, default, err);
     }
 
-    (r, s) = (@new<bigꓸInt>(), @new<bigꓸInt>());
+    (r, s) = (@new<big.Int>(), @new<big.Int>());
     ref var inner = ref heap<cryptobyte.String>(out var Ꮡinner);
     var input = (cryptobyte.String)sig;
     if (!input.ReadASN1(Ꮡinner, asn1.SEQUENCE) || !input.Empty() || !inner.ReadASN1Integer(r.OrTypedNil()) || !inner.ReadASN1Integer(s.OrTypedNil()) || !inner.Empty()) {
@@ -123,10 +123,10 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
     if (N.Sign() == 0) {
         return (default, errZeroParam);
     }
-    ж<bigꓸInt> k = default;
-    ж<bigꓸInt> kInv = default;
-    ж<bigꓸInt> r = default;
-    ж<bigꓸInt> s = default;
+    ж<big.Int> k = default;
+    ж<big.Int> kInv = default;
+    ж<big.Int> r = default;
+    ж<big.Int> s = default;
     for (;;) {
         for (;;) {
             (k, err) = randFieldElement(c, csprng);
@@ -134,7 +134,7 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
                 return (default, err);
             }
 
-            kInv = @new<bigꓸInt>().ModInverse(k, N);
+            kInv = @new<big.Int>().ModInverse(k, N);
 
             (r, _) = c.ScalarBaseMult(k.Bytes());
             r.Mod(r, N);
@@ -144,7 +144,7 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
         }
 
         var e = hashToInt(hash, c);
-        s = @new<bigꓸInt>().Mul(priv.D, r);
+        s = @new<big.Int>().Mul(priv.D, r);
         s.Add(s, e);
         s.Mul(s, kInv);
         s.Mod(s, N); // N != 0
@@ -162,7 +162,7 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
 //
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
-public static bool Verify(ж<PublicKey> pub, slice<byte> hash, ж<bigꓸInt> Ꮡr, ж<bigꓸInt> Ꮡs) {
+public static bool Verify(ж<PublicKey> pub, slice<byte> hash, ж<big.Int> Ꮡr, ж<big.Int> Ꮡs) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -185,7 +185,7 @@ internal static bool verifyLegacy(ref PublicKey pub, slice<byte> hash, slice<byt
     if (err != nil) {
         return false;
     }
-    var (r, s) = (@new<bigꓸInt>().SetBytes(rBytes), @new<bigꓸInt>().SetBytes(sBytes));
+    var (r, s) = (@new<big.Int>().SetBytes(rBytes), @new<big.Int>().SetBytes(sBytes));
 
     var c = pub.Curve;
     var N = c.Params().N;
@@ -199,7 +199,7 @@ internal static bool verifyLegacy(ref PublicKey pub, slice<byte> hash, slice<byt
 
     // SEC 1, Version 2.0, Section 4.1.4
     var e = hashToInt(hash, c);
-    var w = @new<bigꓸInt>().ModInverse(s, N);
+    var w = @new<big.Int>().ModInverse(s, N);
 
     var u1 = e.Mul(e, w);
     u1.Mod(u1, N);
@@ -217,12 +217,12 @@ internal static bool verifyLegacy(ref PublicKey pub, slice<byte> hash, slice<byt
     return x.Cmp(r) == 0;
 }
 
-internal static ж<bigꓸInt> one = @new<bigꓸInt>().SetInt64(1);
+internal static ж<big.Int> one = @new<big.Int>().SetInt64(1);
 
 // randFieldElement returns a random element of the order of the given
 // curve using the procedure given in FIPS 186-4, Appendix B.5.2.
-internal static (ж<bigꓸInt> k, error err) randFieldElement(elliptic.Curve c, io.Reader rand) {
-    ж<bigꓸInt> k = default;
+internal static (ж<big.Int> k, error err) randFieldElement(elliptic.Curve c, io.Reader rand) {
+    ж<big.Int> k = default;
     error err = default;
 
     for (;;) {
@@ -234,7 +234,7 @@ internal static (ж<bigꓸInt> k, error err) randFieldElement(elliptic.Curve c, 
         nint excess = len(b) * 8 - N.BitLen(); if (excess > 0) {
             b[0].RshAssign((int64)(excess));
         }
-        k = @new<bigꓸInt>().SetBytes(b);
+        k = @new<big.Int>().SetBytes(b);
         if (k.Sign() != 0 && k.Cmp(N) < 0) {
             return (k, err);
         }

@@ -5,15 +5,14 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static partial @string classify(nint n) {
-    var exprᴛ1 = n;
     var matchᴛ1 = false;
-    if (exprᴛ1 is 0) { matchᴛ1 = true;
+    if (n is 0) { matchᴛ1 = true;
         return "zero";
     }
-    if (exprᴛ1 is 1) { matchᴛ1 = true;
+    if (n is 1) { matchᴛ1 = true;
         return "one";
     }
-    if (exprᴛ1 is 2) { matchᴛ1 = true;
+    if (n is 2) { matchᴛ1 = true;
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
@@ -25,12 +24,11 @@ internal static partial @string classify(nint n) {
 
 internal static partial nint nonTerminal(nint n) {
     nint acc = 0;
-    var exprᴛ1 = n;
     var matchᴛ1 = false;
-    if (exprᴛ1 is 0) { matchᴛ1 = true;
+    if (n is 0) { matchᴛ1 = true;
         acc = 10;
     }
-    else if (exprᴛ1 is 1) { matchᴛ1 = true;
+    else if (n is 1) { matchᴛ1 = true;
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
@@ -41,14 +39,13 @@ internal static partial nint nonTerminal(nint n) {
 }
 
 internal static partial nint conditionalReturn(nint n) {
-    var exprᴛ1 = n;
     var matchᴛ1 = false;
-    if (exprᴛ1 is 0) { matchᴛ1 = true;
+    if (n is 0) { matchᴛ1 = true;
         if (n < 0) {
             return 111;
         }
     }
-    else if (exprᴛ1 is 1) { matchᴛ1 = true;
+    else if (n is 1) { matchᴛ1 = true;
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
@@ -68,12 +65,11 @@ internal static partial (nint r, bool ok) namedDefer(nint n) {
                 (r, ok) = (-1, false);
             }
         }, ref ᒐ);
-        var exprᴛ1 = n;
         var matchᴛ1 = false;
-        if (exprᴛ1 is 0) { matchᴛ1 = true;
+        if (n is 0) { matchᴛ1 = true;
             (r, ok) = (100, true); goto ᒐdone;
         }
-        if (exprᴛ1 is 1) { matchᴛ1 = true;
+        if (n is 1) { matchᴛ1 = true;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1) { /* default: */
@@ -103,22 +99,21 @@ internal static @string keepAlive(nint idle, nint interval) {
 
 internal static partial nint leadingDefault(nint n) {
     nint v = 0;
-    var exprᴛ1 = n;
     var matchᴛ1 = false;
-    var matchᴛ2 = exprᴛ1 is 3 || exprᴛ1 is 2 || exprᴛ1 is 1;
+    var matchᴛ2 = n is 3 || n is 2 || n is 1;
     if (!matchᴛ2) { /* default: */
         v |= (nint)(8);
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && n is 3) { matchᴛ1 = true;
         v |= (nint)(4);
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
+    if (fallthrough || !matchᴛ1 && n is 2) {
         v |= (nint)(2);
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && n is 1) { matchᴛ1 = true;
         v |= (nint)(1);
     }
 

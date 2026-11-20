@@ -11,23 +11,27 @@ using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using global::go.go;
 using token = global::go.go.token_package;
+using types = types_package;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 internal static void record(this ref Checker check, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // convert x into a user-friendly set of values
     // TODO(gri) this code can be simplified
-    ΔType typ = default;
+    Type typ = default;
     constant.Value val = default;
     switch (x.mode) {
     case var ᴛ when ᴛ == invalid: {
-        typ = new BasicжΔType(Typ[Invalid]);
+        typ = new BasicжType(Typ[Invalid]);
         break;
     }
     case var ᴛ when ᴛ == novalue: {
-        typ = new TupleжΔType(((ж<Tuple>)nil));
+        typ = new TupleжType(((ж<Tuple>)nil));
         break;
     }
     case var ᴛ when ᴛ == constant_: {
@@ -62,15 +66,15 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     }
 
     foreach (var (x, info) in check.untyped) {
-        if (debug && isTyped(new BasicжΔType(info.typ))) {
+        if (debug && isTyped(new BasicжType(info.typ))) {
             Ꮡcheck.dump(vSTypeSIsTypedˢ, x.Pos(), x, info.typ.OrTypedNil());
             throw panic("unreachable");
         }
-        check.recordTypeAndValue(x, info.mode, new BasicжΔType(info.typ), info.val);
+        check.recordTypeAndValue(x, info.mode, new BasicжType(info.typ), info.val);
     }
 }
 
-internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, operandMode mode, ΔType typ, constant.Value val) {
+internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
     assert(x != nil);
     assert(typ != nil);
     if (mode == invalid) {
@@ -88,13 +92,13 @@ internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, oper
     check.recordTypeAndValueInSyntax(x, mode, typ, val);
 }
 
-internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<ΔSignature> sig) {
+internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<Signature> sig) {
     // f must be a (possibly parenthesized, possibly qualified)
     // identifier denoting a built-in (including unsafe's non-constant
     // functions Add and Slice): record the signature for f and possible
     // children.
     for (;;) {
-        check.recordTypeAndValue(f, Δbuiltinᴛ, new ΔSignatureжΔType(sig), default);
+        check.recordTypeAndValue(f, types.Δbuiltin, new SignatureжType(sig), default);
         switch (f.type()) {
         case ж<ast.Ident> _:
         case ж<ast.SelectorExpr> _: {
@@ -127,8 +131,8 @@ internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slic
         for (;;) {
             var tv = m[x];
             assert(tv.Type != nil); // should have been recorded already
-            tokenꓸPos pos = x.Pos();
-            tv.Type = new TupleжΔType(NewTuple(
+            token.Pos pos = x.Pos();
+            tv.Type = new TupleжType(NewTuple(
                 newVar(LocalVar, pos, check.pkg, ""u8, t0),
                 newVar(LocalVar, pos, check.pkg, ""u8, t1)));
             m[x] = tv;
@@ -149,7 +153,7 @@ internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slic
 //
 // TODO(rfindley): the expr parameter is fragile. See if we can access the
 // instantiated identifier in some other way.
-internal static void recordInstance(this ref Checker check, ast.Expr expr, slice<ΔType> targs, ΔType typ) {
+internal static void recordInstance(this ref Checker check, ast.Expr expr, slice<Type> targs, Type typ) {
     var ident = instantiatedIdent(expr);
     assert(ident != nil);
     assert(typ != nil);
@@ -181,7 +185,7 @@ internal static void recordImplicit(this ref Checker check, ast.Node node, Objec
     }
 }
 
-internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, ΔType recv, Object obj, slice<nint> index, bool indirect) {
+internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     assert(obj != nil && (recv == nil || len(index) > 0));
@@ -191,7 +195,7 @@ internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr
     }
 }
 
-internal static void recordScope(this ref Checker check, ast.Node node, ж<ΔScope> scope) {
+internal static void recordScope(this ref Checker check, ast.Node node, ж<Scope> scope) {
     assert(node != nil);
     assert(scope != nil);
     var m = check.Scopes; if (m != nil) {
@@ -199,4 +203,4 @@ internal static void recordScope(this ref Checker check, ast.Node node, ж<ΔSco
     }
 }
 
-} // end types_package
+} // end typesᴛChecker

@@ -340,6 +340,37 @@ function Invoke-GoApiCompatAsset([string]$RepoRoot, [string]$Left, [string]$Righ
 }
 
 <#
+    THE ASSEMBLY RENAME (see $script:AssemblyRenameRelease), as one rule for every reader of a comparison: the guard
+    and New-GoApiCompatMoveSuppressions.ps1, whose entries must name the asset the guard compares. Returns:
+      Successors  each baseline asset the current package lacks, mapped to its successor <dir>/<id>.dll, when the
+                  current package has that and the baseline does not
+      Declared    whether this comparison crosses the declared rename ($ReleaseVersion, prerelease label ignored, is
+                  $script:AssemblyRenameRelease); a caller follows Successors only then
+    go.lib and go.gen kept their assembly names, and an id outside go.* is no standard-library package: neither has a
+    successor.
+#>
+function Get-GoApiCompatRenameSuccessors {
+    param(
+        [Parameter(Mandatory)][string]$Id,
+        [AllowEmptyCollection()][string[]]$Assets = @(),
+        [AllowEmptyCollection()][string[]]$CurrentAssets = @(),
+        [string]$ReleaseVersion
+    )
+
+    $renameable = $Id -like 'go.*' -and @('go.lib', 'go.gen') -notcontains $Id
+    $declared = [bool]($renameable -and $ReleaseVersion -and (($ReleaseVersion -split '[-+]', 2)[0] -ceq $script:AssemblyRenameRelease))
+    $successors = @{}
+    if ($renameable) {
+        foreach ($asset in $Assets) {
+            if ($CurrentAssets -contains $asset) { continue }
+            $successor = ($asset -replace '[^/]+$', '') + "$Id.dll"
+            if ($CurrentAssets -ccontains $successor -and $Assets -notcontains $successor) { $successors[$asset] = $successor }
+        }
+    }
+    [pscustomobject]@{ Successors = $successors; Declared = $declared }
+}
+
+<#
     Compares one package with its baseline, asset by asset. Returns:
       Compared   the number of assets the tool reported a verdict for
       Assets     the baseline's assets
@@ -371,18 +402,10 @@ function Test-GoApiCompatPackage {
     $assets = @(Get-GoApiCompatAssets $Baseline)
     $currentAssets = @(Get-GoApiCompatAssets $Current)
 
-    # THE ASSEMBLY RENAME (see $script:AssemblyRenameRelease): each missing baseline asset's successor, <dir>/<id>.dll,
-    # when the current package has it and the baseline does not. Followed only under the declaration.
-    $renameable = $Id -like 'go.*' -and @('go.lib', 'go.gen') -notcontains $Id
-    $declared = $renameable -and $ReleaseVersion -and (($ReleaseVersion -split '[-+]', 2)[0] -ceq $script:AssemblyRenameRelease)
-    $successors = @{}
-    if ($renameable) {
-        foreach ($asset in $assets) {
-            if ($currentAssets -contains $asset) { continue }
-            $successor = ($asset -replace '[^/]+$', '') + "$Id.dll"
-            if ($currentAssets -ccontains $successor -and $assets -notcontains $successor) { $successors[$asset] = $successor }
-        }
-    }
+    # THE ASSEMBLY RENAME (see $script:AssemblyRenameRelease). Followed only under the declaration.
+    $rename = Get-GoApiCompatRenameSuccessors -Id $Id -Assets $assets -CurrentAssets $currentAssets -ReleaseVersion $ReleaseVersion
+    $declared = $rename.Declared
+    $successors = $rename.Successors
     $extractAs = @{}
     if ($declared) { foreach ($asset in $successors.Keys) { $extractAs[$successors[$asset]] = $asset } }
 
@@ -756,6 +779,6 @@ function Get-GoBreakFloor([AllowEmptyString()][string]$TargetsText) {
 }
 
 Export-ModuleMember -Function Initialize-GoApiCompatTool, Get-GoApiCompatAssets, Get-GoApiCompatSuppressionMap,
-    Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Get-GoApiCompatPublishedVersions,
+    Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatRenameSuccessors, Get-GoApiCompatBaselineVersion, Get-GoApiCompatPublishedVersions,
     Save-GoApiCompatBaseline, Invoke-GoApiCompatGuard, Test-GoApiCompatBaselineCoverage,
     Test-GoBreakFloor, Test-GoBreakFloorShape, Test-GoBreakFloorReachable, Get-GoBreakFloor, Get-GoBreakFloorFromPackage

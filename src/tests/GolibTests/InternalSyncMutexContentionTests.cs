@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.@internal;
 using isync = go.@internal.sync_package;
 
 namespace GolibTests;
@@ -41,7 +42,7 @@ public class InternalSyncMutexContentionTests
     public void AContendedLockParksUntilTheHolderUnlocks()
     {
         heap<isync.Mutex>(out var Ꮡmu);
-        isync.Lock(Ꮡmu);
+        Ꮡmu.Lock();
 
         Exception? failure = null;
         // NOT disposed: if an arm times out (a lost wakeup), the waiter may still Set it after this
@@ -54,9 +55,9 @@ public class InternalSyncMutexContentionTests
         {
             try
             {
-                isync.Lock(Ꮡmu); // the CAS fails: the test thread holds it, so lockSlow runs
+                Ꮡmu.Lock(); // the CAS fails: the test thread holds it, so lockSlow runs
                 Volatile.Write(ref acquired, true);
-                isync.Unlock(Ꮡmu);
+                Ꮡmu.Unlock();
             }
             catch (Exception e)
             {
@@ -80,7 +81,7 @@ public class InternalSyncMutexContentionTests
         Assert.IsFalse(finishedEarly, "the waiter acquired an internal/sync.Mutex another thread holds");
         Assert.IsFalse(Volatile.Read(ref acquired), "the waiter acquired an internal/sync.Mutex another thread holds");
 
-        isync.Unlock(Ꮡmu); // unlockSlow: runtime_Semrelease must wake the parked waiter
+        Ꮡmu.Unlock(); // unlockSlow: runtime_Semrelease must wake the parked waiter
 
         Assert.IsTrue(done.Wait(TimeoutMs), "Unlock did not wake the parked waiter (a lost wakeup)");
         Assert.IsNull(failure, $"the woken waiter threw: {failure}");
@@ -114,7 +115,7 @@ public class InternalSyncMutexContentionTests
 
                     for (int i = 0; i < Rounds; i++)
                     {
-                        isync.Lock(Ꮡmu);
+                        Ꮡmu.Lock();
 
                         if (Interlocked.Exchange(ref inside, 1) != 0)
                             Interlocked.Increment(ref overlaps);
@@ -128,7 +129,7 @@ public class InternalSyncMutexContentionTests
                             Thread.Sleep(2);
 
                         Volatile.Write(ref inside, 0);
-                        isync.Unlock(Ꮡmu);
+                        Ꮡmu.Unlock();
                     }
                 }
                 catch (Exception e)

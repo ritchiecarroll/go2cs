@@ -11,8 +11,6 @@
 
 // <ImportedTypeAliases>
 global using driverꓸValue = object;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 using driver = go.database.sql.driver_package;
 // </ImportedTypeAliases>
 
@@ -32,8 +30,6 @@ using static go.database.sql_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b73796e632e4d757465783b2076205b5d2a64617461626173652f73716c2e53746d747d", "Tx_stmts")]
-[assembly: GoTypeAlias("Conn", "ΔConn")]
-[assembly: GoTypeAlias("Stmt", "ΔStmt")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -43,6 +39,7 @@ using static go.database.sql_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Conn, stmtConnGrabber>(Pointer = true)]
 [assembly: GoImplement<IsolationLevel, fmt_package.Stringer>]
 [assembly: GoImplement<NullBool, Scanner>(Pointer = true)]
 [assembly: GoImplement<NullByte, Scanner>(Pointer = true)]
@@ -52,6 +49,7 @@ using static go.database.sql_package;
 [assembly: GoImplement<NullInt64, Scanner>(Pointer = true)]
 [assembly: GoImplement<NullString, Scanner>(Pointer = true)]
 [assembly: GoImplement<NullTime, Scanner>(Pointer = true)]
+[assembly: GoImplement<Stmt, finalCloser>(Pointer = true)]
 [assembly: GoImplement<Tx, stmtConnGrabber>(Pointer = true)]
 [assembly: GoImplement<driverConn, finalCloser>(Pointer = true)]
 [assembly: GoImplement<driverConn, sync_package.Locker>(Pointer = true)]
@@ -59,8 +57,6 @@ using static go.database.sql_package;
 [assembly: GoImplement<driverResult, sync_package.Locker>(Promoted = true)]
 [assembly: GoImplement<driverStmt, sync_package.Locker>(Promoted = true)]
 [assembly: GoImplement<dsnConnector, go.database.sql.driver_package.Connector>]
-[assembly: GoImplement<ΔConn, stmtConnGrabber>(Pointer = true)]
-[assembly: GoImplement<ΔStmt, finalCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -76,6 +72,7 @@ using static go.database.sql_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(ColumnType))]
+[assembly: GoFieldAccess(typeof(Conn))]
 [assembly: GoFieldAccess(typeof(DB))]
 [assembly: GoFieldAccess(typeof(Null<>))]
 [assembly: GoFieldAccess(typeof(NullBool))]
@@ -87,14 +84,13 @@ using static go.database.sql_package;
 [assembly: GoFieldAccess(typeof(NullString))]
 [assembly: GoFieldAccess(typeof(NullTime))]
 [assembly: GoFieldAccess(typeof(Rows))]
+[assembly: GoFieldAccess(typeof(Stmt))]
 [assembly: GoFieldAccess(typeof(Tx))]
 [assembly: GoFieldAccess(typeof(driverConn))]
 [assembly: GoFieldAccess(typeof(driverStmt))]
 [assembly: GoFieldAccess(typeof(go.database.sql.driver_package.NamedValue))]
 [assembly: GoFieldAccess(typeof(strconv_package.NumError))]
 [assembly: GoFieldAccess(typeof(time_package.Timer))]
-[assembly: GoFieldAccess(typeof(ΔConn))]
-[assembly: GoFieldAccess(typeof(ΔStmt))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -104,9 +100,9 @@ using static go.database.sql_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("database/sql/convert.go", "convert.cs", "ABUslIKClKaCgpSCgpQAChaigsqCgtyCgoKUgpQAAhTygoKClIKUrOKCAAISAAgCypSCgoKCgu6CgpSCggACENKCooKCgpSClIIADBqCgpSCxMaCgpSCtIK0goKklLTcgqYAAh4ADAIACBAACASUlIKUgqSClIKkgpSCxpSClIKkgpSCpIKUgqSClILGlIKkgqSClIKkgpSCxpTWlIKUgqSClIKkgpSC2JSClIKU7IK2goKmyJSUgpqCxoKAgoLWgoCCgtaCgpSkgqaCpoKClIKmgqaCgpTEpKaCggAHEJSCgpSCpIKUgoKCgpSCpIKUgoKCgpSCpIKUgoKCgpSCpIKUlIKkgsimgoKUpoKUpJSClKSkpKSUprKUpKSkpKSClKYAARoACwKGlA==", "340-340:1;345-352:2", "175=database/sql.ccChecker.CheckNamedValue;190=database/sql.ccChecker.CheckNamedValue")]
+[assembly: GoPositionMap("database/sql/convert.go", "convert.cs", "ABYslIKClKaCgpSCgpQADBaigsqCgtyCgoKUgpQAAhTygoKClIKUzOKCAAISAAgCypSCgoKCgu6CgpSCggACENKCooKCgpSClIIADBqCgpSCxMaCgpSCtIK0goKklLTcgqYAAh4ADAIACBAACASUlIKUgqSClIKkgpSCxpSClIKkgpSCpIKUgqSClILGlIKkgqSClIKkgpSCxpTWlIKUgqSClIKkgpSC2JSClIKU7IK2goKmyJSUgpqCxoKAgoLWgoCCgtaCgpSkgqaCpoKClIKmgqaCgpTEpKaCggAHEJSCgpSCpIKUgoKCgpSCpIKUgoKCgpSCpIKUgoKCgpSCpIKUlIKkgsimgoKUpoKUpJSClKSkpKSUprKUpKSkpKSClKYAARoACwKGlA==", "340-340:1;345-352:2", "175=database/sql.ccChecker.CheckNamedValue;190=database/sql.ccChecker.CheckNamedValue")]
 [assembly: GoPositionMap("database/sql/ctxutil.go", "ctxutil.cs", "AAwagoKUgoKmgtamgoKUgoKmpsSmgoKUgoKmpsSmgoKUgoKmpsSmgoKUgoKmpsQACAaigoKCgpSmpoLKgriCpoKCpoLW5oKCgoKUlA==")]
-[assembly: GoPositionMap("database/sql/sql.go", "sql.cs", "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", "654-654:1;683-689:1;693-697:2;792-792:1;885-887:1;899-902:1;1462-1464:1;1598-1601:1;1638-1640:1;1641-1643:2;1671-1674:1;1697-1699:1;1708-1714:2;1724-1726:3;1741-1744:1;1781-1787:1;1807-1809:2;1873-1876:1;1902-1907:1;1949-1952:1;2004-2006:1;2083-2093:1;2312-2314:1;2344-2346:1;2438-2440:1;2459-2461:2;2648-2657:1;2758-2760:1;2792-2827:1;2813-2816:1.1;3040-3042:1;3102-3106:1;3455-3457:1", "", "1473=Invoke/1/2/2,Invoke/2/2/3;1638=Invoke/1/2/2,Invoke/2/2/3", "1969:21,4004:21", "1855:21,1856:13,1931:21,1932:13,2367:21,2368:13,3531:21,3532:13")]
+[assembly: GoPositionMap("database/sql/sql.go", "sql.cs", "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", "654-654:1;683-689:1;693-697:2;792-792:1;885-887:1;899-902:1;1462-1464:1;1598-1601:1;1638-1640:1;1641-1643:2;1671-1674:1;1697-1699:1;1708-1714:2;1724-1726:3;1741-1744:1;1781-1787:1;1807-1809:2;1873-1876:1;1902-1907:1;1949-1952:1;2004-2006:1;2083-2093:1;2312-2314:1;2344-2346:1;2438-2440:1;2459-2461:2;2648-2657:1;2758-2760:1;2792-2827:1;2813-2816:1.1;3040-3042:1;3102-3106:1;3455-3457:1", "", "1540=Invoke/1/2/2,Invoke/2/2/3;1709=Invoke/1/2/2,Invoke/2/2/3", "2052:21,4151:21", "1938:21,1939:13,2014:21,2015:13,2458:21,2459:13,3658:21,3659:13")]
 // </GoSourcePositionMaps>
 
 namespace go.database;
@@ -132,15 +128,16 @@ public static partial class sql_package
     internal partial struct connRequestDelHandle {}
     internal partial struct connRequestSet {}
     internal partial struct connReuseStrategy {}
+    internal partial struct connStmt {}
     internal partial struct depSet {}
     internal partial struct driverConn {}
     internal partial struct driverResult {}
     internal partial struct driverStmt {}
     internal partial struct dsnConnector {}
-    internal partial struct ΔconnStmt {}
     public partial interface Result {}
     public partial interface Scanner {}
     public partial struct ColumnType {}
+    public partial struct Conn {}
     public partial struct DB {}
     public partial struct DBStats {}
     public partial struct IsolationLevel {}
@@ -158,11 +155,10 @@ public static partial class sql_package
     public partial struct RawBytes {}
     public partial struct Row {}
     public partial struct Rows {}
+    public partial struct Stmt {}
     public partial struct Tx {}
     public partial struct TxOptions {}
     public partial struct Tx_stmts {}
-    public partial struct ΔConn {}
-    public partial struct ΔStmt {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -191,3 +187,35 @@ public static partial class sql_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sql_package.ColumnType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛColumnType;
+[GoMethodHost(typeof(sql_package.Conn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛConn;
+[GoMethodHost(typeof(sql_package.DB)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛDB;
+[GoMethodHost(typeof(sql_package.IsolationLevel)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛIsolationLevel;
+[GoMethodHost(typeof(sql_package.Null<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNull;
+[GoMethodHost(typeof(sql_package.NullBool)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNullBool;
+[GoMethodHost(typeof(sql_package.NullByte)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNullByte;
+[GoMethodHost(typeof(sql_package.NullFloat64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNullFloat64;
+[GoMethodHost(typeof(sql_package.NullInt16)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNullInt16;
+[GoMethodHost(typeof(sql_package.NullInt32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNullInt32;
+[GoMethodHost(typeof(sql_package.NullInt64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNullInt64;
+[GoMethodHost(typeof(sql_package.NullString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNullString;
+[GoMethodHost(typeof(sql_package.NullTime)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛNullTime;
+[GoMethodHost(typeof(sql_package.Row)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛRow;
+[GoMethodHost(typeof(sql_package.Rows)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛRows;
+[GoMethodHost(typeof(sql_package.Stmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛStmt;
+[GoMethodHost(typeof(sql_package.Tx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛTx;
+[GoMethodHost(typeof(sql_package.ccChecker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛccChecker;
+[GoMethodHost(typeof(sql_package.connRequestSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛconnRequestSet;
+[GoMethodHost(typeof(sql_package.driverConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛdriverConn;
+[GoMethodHost(typeof(sql_package.driverResult)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛdriverResult;
+[GoMethodHost(typeof(sql_package.driverStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛdriverStmt;
+[GoMethodHost(typeof(sql_package.dsnConnector)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sqlᴛdsnConnector;
+// </MethodHolders>

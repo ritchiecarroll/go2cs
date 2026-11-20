@@ -12,6 +12,7 @@ using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -24,6 +25,8 @@ partial struct TCPAddr {
     public nint Port;
     public @string Zone; // IPv6 scoped addressing zone
 }
+
+} partial class netᴛTCPAddr {
 
 // AddrPort returns the [TCPAddr] a as a [netip.AddrPort].
 //
@@ -41,8 +44,16 @@ public static netip.AddrPort AddrPort(this ж<TCPAddr> Ꮡa) {
     return netip.AddrPortFrom(na, (uint16)a.Port);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
+
 // Network returns the address's network name, "tcp".
 public static @string Network(this ref TCPAddr a) { return tcpˢ; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 public static @string String(this ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -66,12 +77,14 @@ internal static bool isWildcard(this ж<TCPAddr> Ꮡa) {
     return a.IP.IsUnspecified();
 }
 
-internal static ΔAddr opAddr(this ж<TCPAddr> Ꮡa) {
+internal static Addr opAddr(this ж<TCPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
-    return new TCPAddrжΔAddr(Ꮡa);
+    return new TCPAddrжAddr(Ꮡa);
 }
+
+} partial class net_package {
 
 // ResolveTCPAddr returns an address of TCP end point.
 //
@@ -89,12 +102,11 @@ internal static ΔAddr opAddr(this ж<TCPAddr> Ꮡa) {
 // See func [Dial] for a description of the network and address
 // parameters.
 public static (ж<TCPAddr>, error) ResolveTCPAddr(@string network, @string address) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         break;
     }
-    case {} when exprᴛ1 == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
+    case {} when network == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
         network = tcpˢ;
         break;
     }
@@ -156,6 +168,8 @@ partial struct KeepAliveConfig {
     // If zero, a default value of 9 is used.
     public nint Count;
 }
+
+} partial class netᴛTCPConn {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
@@ -315,6 +329,8 @@ public static (bool, error) MultipathTCP(this ж<TCPConn> Ꮡc) {
     return (isUsingMultipathTCP(c.fd), default);
 }
 
+} partial class net_package {
+
 internal static ж<TCPConn> newTCPConn(ж<netFD> fd, time.Duration keepAliveIdle, KeepAliveConfig keepAliveCfg, Action<ж<netFD>> preKeepAliveHook, Action<KeepAliveConfig> keepAliveHook) {
     setNoDelay(fd, true);
     if (!keepAliveCfg.Enable && keepAliveIdle >= 0) {
@@ -350,9 +366,8 @@ public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> laddr, �
 internal static (ж<TCPConn>, error) dialTCP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     ref var dialer = ref Ꮡdialer.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         break;
     }
     default: {
@@ -384,6 +399,8 @@ partial struct TCPListener {
     internal ж<netFD> fd;
     internal ListenConfig lc;
 }
+
+} partial class netᴛTCPListener {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
@@ -446,7 +463,7 @@ public static error Close(this ж<TCPListener> Ꮡl) {
 // Addr returns the listener's network address, a [*TCPAddr].
 // The Addr returned is shared by all invocations of Addr, so
 // do not modify it.
-public static ΔAddr Addr(this ref TCPListener l) { return l.fd.laddr; }
+public static Addr Addr(this ref TCPListener l) { return l.fd.laddr; }
 
 // SetDeadline sets the deadline associated with the listener.
 // A zero time value disables the deadline.
@@ -484,6 +501,8 @@ public static (ж<os.File> f, error err) File(this ж<TCPListener> Ꮡl) {
     return (f, err);
 }
 
+} partial class net_package {
+
 // ListenTCP acts like [Listen] for TCP networks.
 //
 // The network must be a TCP network name; see func Dial for details.
@@ -496,9 +515,8 @@ public static (ж<os.File> f, error err) File(this ж<TCPListener> Ꮡl) {
 public static (ж<TCPListener>, error) ListenTCP(@string network, ж<TCPAddr> Ꮡladdr) {
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         break;
     }
     default: {

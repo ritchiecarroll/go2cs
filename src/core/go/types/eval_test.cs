@@ -20,7 +20,7 @@ using static global::go.go.types_internal_test_package;
 
 partial class types_test_package {
 
-internal static void testEval(ж<testing.T> t, ж<token.FileSet> fset, ж<types.Package> pkg, tokenꓸPos pos, @string expr, typesꓸType typ, @string typStr, @string valStr) {
+internal static void testEval(ж<testing.T> t, ж<token.FileSet> fset, ж<types.Package> pkg, token.Pos pos, @string expr, types.Type typ, @string typStr, @string valStr) {
     var (gotTv, err) = Eval(fset, pkg, pos, expr);
     if (err != nil) {
         t.Errorf("Eval(%q) failed: %s", expr, err);
@@ -59,8 +59,8 @@ internal static void testEval(ж<testing.T> t, ж<token.FileSet> fset, ж<types.
 
 public static void TestEvalBasic(ж<testing.T> t) {
     var fset = token.NewFileSet();
-    foreach (var (_, typ) in range(Typ[(int)(Bool)..(int)(ΔString + 1)])) {
-        testEval(t, fset, nil, nopos, typ.Name(), new types.BasicжΔType(typ), ""u8, ""u8);
+    foreach (var (_, typ) in range(Typ[(int)(Bool)..(int)(String + 1)])) {
+        testEval(t, fset, nil, nopos, typ.Name(), new types.BasicжType(typ), ""u8, ""u8);
     }
 }
 
@@ -88,7 +88,7 @@ public static void TestEvalArith(ж<testing.T> t) {
     ]);
     var fset = token.NewFileSet();
     foreach (var (_, test) in range(tests)) {
-        testEval(t, fset, nil, nopos, test, new types.BasicжΔType(Typ[UntypedBool]), ""u8, trueˢ);
+        testEval(t, fset, nil, nopos, test, new types.BasicжType(Typ[UntypedBool]), ""u8, trueˢ);
     }
 }
 
@@ -294,13 +294,13 @@ public static void TestCheckExpr(ж<testing.T> t) {
 
     var fsetʗ1 = fset;
     var pkgʗ1 = pkg;
-    (types.Object, error) checkExpr(tokenꓸPos pos, @string str) {
+    (types.Object, error) checkExpr(token.Pos pos, @string str) {
         var (expr, errΔ1) = parser.ParseExprFrom(fsetʗ1, evalˢ, str, 0);
         if (errΔ1 != nil) {
             return (default, errΔ1);
         }
 
-        var info = Ꮡ(new typesꓸInfo(
+        var info = Ꮡ(new Info(
             Uses: new map<ж<ast.Ident>, types.Object>(),
             Selections: new map<ж<ast.SelectorExpr>, ж<types.Selection>>()
         ));
@@ -334,7 +334,7 @@ public static void TestCheckExpr(ж<testing.T> t) {
         foreach (var (_, comment) in range(group.List)) {
             @string s = comment.Text;
             if (len(s) >= 4 && strings.HasPrefix(s, "/*") && strings.HasSuffix(s, "*/")) {
-                tokenꓸPos pos = comment.Pos();
+                token.Pos pos = comment.Pos();
                 var (expr, wantObj) = split(s.slice(2, len(s) - 2), "=>");
                 var (obj, errΔ3) = checkExpr(pos, expr);
                 if (errΔ3 != nil) {

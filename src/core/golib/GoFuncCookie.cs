@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace go;
 
@@ -210,7 +211,7 @@ namespace go;
             return fn;
 
         Delegate rebound = Delegate.CreateDelegate(type, fn.Target, fn.Method, throwOnBindFailure: false) ??
-            throw new PanicException("go2cs: func cookie 0x" + word.ToString("x") + " holds a " + fn.GetType().Name + ", which cannot be read as " + type.Name);
+            throw new PanicException("go2cs: func cookie 0x" + word.ToString("x") + " holds a " + FullTypeName(fn.GetType()) + ", which cannot be read as " + FullTypeName(type));
 
         if (row is not null)
         {
@@ -226,6 +227,53 @@ namespace go;
         }
 
         return rebound;
+    }
+
+    /// <summary>
+    /// The name a refusal prints for a type: its full name, with each generic argument by ITS full name.
+    /// </summary>
+    /// <remarks>
+    /// <c>Type.Name</c> prints only the arity (<c>Func`6</c>), so a rebind refused because one argument is a struct
+    /// lifted twice read the same on both sides (W18: sqlite's TLARGE_INTEGER and libc's largeInteger). This names
+    /// <c>System.Func&lt;lib_package.TLARGE_INTEGERᴛ1, ...&gt;</c> against <c>System.Func&lt;libc_package.largeIntegerᴛ1, ...&gt;</c>.
+    /// </remarks>
+    internal static string FullTypeName(Type type)
+    {
+        if (type.IsArray)
+            return FullTypeName(type.GetElementType()!) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
+
+        if (!type.IsGenericType)
+            return type.FullName ?? type.Name;
+
+        // Every arity mark goes, not only the first: a nested type of a generic type reads Outer`1+Inner. Built in a
+        // StringBuilder, with no raw array of its own (NoUncountedBackingAllocations).
+        string definition = type.GetGenericTypeDefinition().FullName ?? type.GetGenericTypeDefinition().Name;
+        StringBuilder name = new(definition.Length + 32);
+
+        for (int i = 0; i < definition.Length; i++)
+        {
+            if (definition[i] == '`')
+            {
+                while (i + 1 < definition.Length && char.IsAsciiDigit(definition[i + 1]))
+                    i++;
+
+                continue;
+            }
+
+            name.Append(definition[i]);
+        }
+
+        name.Append('<');
+
+        foreach (Type argument in type.GetGenericArguments())
+        {
+            if (name[^1] != '<')
+                name.Append(", ");
+
+            name.Append(FullTypeName(argument));
+        }
+
+        return name.Append('>').ToString();
     }
 
     /// <summary>

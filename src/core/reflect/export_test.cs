@@ -9,17 +9,18 @@ using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
 using static global::go.reflect_package;
+using static reflect_internal_test_package;
 
 partial class reflect_internal_test_package {
 
 // MakeRO returns a copy of v with the read-only flag set.
-public static global::go.reflect_package.ΔValue MakeRO(global::go.reflect_package.ΔValue v) {
+public static global::go.reflect_package.Value MakeRO(global::go.reflect_package.Value v) {
     v.flag |= (global::go.reflect_package.flag)(flagStickyRO);
     return v;
 }
 
 // IsRO reports whether v's read-only flag is set.
-public static bool IsRO(global::go.reflect_package.ΔValue v) {
+public static bool IsRO(global::go.reflect_package.Value v) {
     return (global::go.reflect_package.flag)(v.flag & flagStickyRO) != 0;
 }
 
@@ -31,8 +32,8 @@ internal static void initᴛCallGC() { CallGC = ᏑcallGC; }
 // Bitmaps like stack, gc, inReg, and outReg are expanded such that each bit
 // takes up one byte, so that writing out test cases is a little clearer.
 // If ptrs is false, gc will be nil.
-public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uintptr retOffset, slice<byte> stack, slice<byte> gc, slice<byte> inReg, slice<byte> outReg, bool ptrs) FuncLayout(global::go.reflect_package.ΔType t, global::go.reflect_package.ΔType rcvr) {
-    global::go.reflect_package.ΔType frametype = default;
+public static (global::go.reflect_package.Type frametype, uintptr argSize, uintptr retOffset, slice<byte> stack, slice<byte> gc, slice<byte> inReg, slice<byte> outReg, bool ptrs) FuncLayout(global::go.reflect_package.Type t, global::go.reflect_package.Type rcvr) {
+    global::go.reflect_package.Type frametype = default;
     uintptr argSize = default;
     uintptr retOffset = default;
     slice<byte> stack = default;
@@ -48,9 +49,11 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
     ж<abi.Type> ft = default;
     ref var abid = ref heap(new global::go.reflect_package.abiDesc(), out var Ꮡabid);
     if (rcvr != nil) {
-        (ft, _, abid) = funcLayout(t.common().FuncType(), rcvr.common());
+        (ft, _, var abidᴛ1) = funcLayout(t.common().FuncType(), rcvr.common());
+        abid.AssignFrom(abidᴛ1);
     } else {
-        (ft, _, abid) = funcLayout(t._<ж<global::go.reflect_package.rtype>>().Reinterpret<global::go.reflect_package.rtype, abi.Type>().FuncType(), nil);
+        (ft, _, var abidᴛ2) = funcLayout(t._<ж<global::go.reflect_package.rtype>>().Reinterpret<global::go.reflect_package.rtype, abi.Type>().FuncType(), nil);
+        abid.AssignFrom(abidᴛ2);
     }
     // Extract size information.
     argSize = abid.stackCallArgsSize;
@@ -59,7 +62,7 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
 
     // Expand stack pointer bitmap into byte-map.
     for (var i = (uint32)0; i < abid.stackPtrs.n; i++) {
-        stack = builtin.append(stackᴷ, stack, (byte)(abid.stackPtrs.data[i / 8] >> (int)(i % 8) & 1));
+        stack = append(stackᴷ, stack, (byte)(abid.stackPtrs.data[i / 8] >> (int)(i % 8) & 1));
     }
 
     // Expand register pointer bitmaps into byte-maps.
@@ -70,8 +73,8 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
         return 0;
     }
     for (nint i = 0; i < intArgRegs; i++) {
-        inReg = builtin.append(inRegᴷ, inReg, bool2byte(Ꮡabid.ᏑinRegPtrs.Get(i)));
-        outReg = builtin.append(outRegᴷ, outReg, bool2byte(Ꮡabid.ᏑoutRegPtrs.Get(i)));
+        inReg = append(inRegᴷ, inReg, bool2byte(Ꮡabid.ᏑinRegPtrs.Get(i)));
+        outReg = append(outRegᴷ, outReg, bool2byte(Ꮡabid.ᏑoutRegPtrs.Get(i)));
     }
 
     // Expand frame type's GC bitmap into byte-map.
@@ -80,7 +83,7 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
         var nptrs = ft.PtrBytes / (uintptr)goarch.PtrSize;
         var gcdata = ft.GcSlice(0, (nptrs + 7) / 8);
         for (var i = (uintptr)0; i < nptrs; i++) {
-            gc = builtin.append(gcᴷ, gc, (byte)(gcdata[i / 8] >> (int)(i % 8) & 1));
+            gc = append(gcᴷ, gc, (byte)(gcdata[i / 8] >> (int)(i % 8) & 1));
         }
     }
     stack = move2heap(stackᴷ, stack);
@@ -98,8 +101,8 @@ public static slice<@string> TypeLinks() {
     foreach (var (i, offs) in range(offset)) {
         @unsafe.Pointer rodata = sections[i];
         foreach (var (_, off) in range(offs)) {
-            var typ = (ж<global::go.reflect_package.rtype>)(uintptr)(resolveTypeOff(rodata, off));
-            r = builtin.append(rᴷ, r, typ.String());
+            var typ = @unsafe.Pointer.To<global::go.reflect_package.rtype>(resolveTypeOff(rodata, off));
+            r = append(rᴷ, r, typ.String());
         }
     }
     r = move2heap(rᴷ, r);
@@ -115,7 +118,11 @@ public static ref Func<any, slice<byte>> GCBits => ref ((StaticBox<Func<any, sli
 public partial struct EmbedWithUnexpMeth {
 }
 
+} partial class reflect_internal_testᴛEmbedWithUnexpMeth {
+
 internal static void f(this EmbedWithUnexpMeth _) { }
+
+} partial class reflect_internal_test_package {
 
 internal partial interface pinUnexpMeth {
     void f();
@@ -123,7 +130,7 @@ internal partial interface pinUnexpMeth {
 
 internal static pinUnexpMeth pinUnexpMethI = ((pinUnexpMeth)new EmbedWithUnexpMeth());
 
-public static ж<byte> FirstMethodNameBytes(global::go.reflect_package.ΔType t) {
+public static ж<byte> FirstMethodNameBytes(global::go.reflect_package.Type t) {
     _ = pinUnexpMethI;
 
     var ut = t.uncommon();
@@ -178,10 +185,10 @@ public static ref Func<uintptr> MethodValueCallCodePtr => ref ((StaticBox<Func<u
 public static readonly ж<Func<slice<byte>, bool>> ᏑInternalIsZero = new StaticBox<Func<slice<byte>, bool>>(isZero);
 public static ref Func<slice<byte>, bool> InternalIsZero => ref ((StaticBox<Func<slice<byte>, bool>>)ᏑInternalIsZero).ValueSlot;
 
-public static readonly ж<Func<global::go.reflect_package.ΔType, bool>> ᏑIsRegularMemory = new StaticBox<Func<global::go.reflect_package.ΔType, bool>>(isRegularMemory);
-public static ref Func<global::go.reflect_package.ΔType, bool> IsRegularMemory => ref ((StaticBox<Func<global::go.reflect_package.ΔType, bool>>)ᏑIsRegularMemory).ValueSlot;
+public static readonly ж<Func<global::go.reflect_package.Type, bool>> ᏑIsRegularMemory = new StaticBox<Func<global::go.reflect_package.Type, bool>>(isRegularMemory);
+public static ref Func<global::go.reflect_package.Type, bool> IsRegularMemory => ref ((StaticBox<Func<global::go.reflect_package.Type, bool>>)ᏑIsRegularMemory).ValueSlot;
 
-public static global::go.reflect_package.ΔType MapGroupOf(global::go.reflect_package.ΔType x, global::go.reflect_package.ΔType y) {
+public static global::go.reflect_package.Type MapGroupOf(global::go.reflect_package.Type x, global::go.reflect_package.Type y) {
     var (grp, _) = groupAndSlotOf(x, y);
     return grp;
 }

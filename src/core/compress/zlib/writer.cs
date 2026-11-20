@@ -12,6 +12,7 @@ using io = io_package;
 using encoding;
 using go.compress;
 using go.hash;
+using static zlib_package;
 
 partial class zlib_package {
 
@@ -72,6 +73,8 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
     )), default);
 }
 
+} partial class zlibᴛWriter {
+
 // Reset clears the state of the [Writer] z such that it is equivalent to its
 // initial state from [NewWriterLevel] or [NewWriterLevelDict], but instead writing
 // to w.
@@ -85,7 +88,7 @@ public static void Reset(this ref Writer z, io.Writer w) {
         z.digest.Reset();
     }
     z.err = default;
-    z.scratch = new byte[]{}.array(4);
+    z.scratch.Assign(new byte[]{}.array(4));
     z.wroteHeader = false;
 }
 
@@ -206,4 +209,4 @@ public static error Close(this ref Writer z) {
     return z.err;
 }
 
-} // end zlib_package
+} // end zlibᴛWriter

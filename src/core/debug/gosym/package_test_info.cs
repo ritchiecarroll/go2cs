@@ -37,7 +37,7 @@ using static global::go.debug.gosym_internal_test_package;
 [assembly: GoFieldAccess(typeof(global::go.debug.gosym_package.LineTable))]
 [assembly: GoFieldAccess(typeof(global::go.debug.gosym_package.Obj))]
 [assembly: GoFieldAccess(typeof(global::go.debug.gosym_package.Table))]
-[assembly: GoFieldAccess(typeof(go.debug.elf_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.debug.elf_package.Section))]
 [assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -14,18 +14,19 @@ using go.@internal.trace;
 using iter = iter_package;
 using time = time_package;
 using ꓸꓸꓸany = Span<any>;
+using static testtrace_package;
 
 partial class testtrace_package {
 
 // Validator is a type used for validating a stream of trace.Events.
 partial struct Validator {
-    internal traceꓸTime lastTs;
+    internal trace.Time lastTs;
     internal map<trace.GoID, ж<goState>> gs;
     internal map<trace.ProcID, ж<procState>> ps;
     internal map<trace.ThreadID, ж<schedContext>> ms;
     internal map<trace.ResourceID, slice<@string>> ranges;
     internal map<trace.TaskID, @string> tasks;
-    internal traceꓸSync lastSync;
+    internal trace.Sync lastSync;
     public version.Version GoVersion;
     // Flags to modify validation behavior.
     internal bool skipClockSnapshotChecks; // Some platforms can't guarantee a monotonically increasing clock reading.
@@ -59,6 +60,8 @@ public static ж<Validator> NewValidator() {
     ));
 }
 
+} partial class testtraceᴛValidator {
+
 // SkipClockSnapshotChecks causes the validator to skip checks on the clock snapshots.
 //
 // Some platforms like Windows, with a small enough trace period, are unable to produce
@@ -70,7 +73,7 @@ public static void SkipClockSnapshotChecks(this ref Validator v) {
 // Event validates ev as the next event in a stream of trace.Events.
 //
 // Returns an error if validation fails.
-public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
+public static error Event(this ж<Validator> Ꮡv, trace.Event ev) {
     ev = ev.ΔClone();
     ref var v = ref Ꮡv.DerefOrNull();
 
@@ -152,8 +155,8 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         var l = ev.Label();
 
         // Check label.
-        if (l.ΔΔLabel == ""u8) {
-            e.Errorf("invalid label %q", l.ΔΔLabel);
+        if (l.ΔLabel == ""u8) {
+            e.Errorf("invalid label %q", l.ΔLabel);
         }
 
         // Check label resource.
@@ -403,7 +406,7 @@ internal static void deleteRange(this ref Validator v, trace.ResourceID r, @stri
     v.ranges[r] = slices.Delete<slice<@string>, @string>(ranges, i, i + 1);
 }
 
-internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, traceꓸEvent ev, trace.ThreadID m) {
+internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, trace.Event ev, trace.ThreadID m) {
     ev = ev.ΔClone();
     ref var v = ref Ꮡv.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -439,7 +442,9 @@ internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<e
     return s;
 }
 
-internal static void checkStack(ж<errAccumulator> Ꮡe, traceꓸStack stk) {
+} partial class testtrace_package {
+
+internal static void checkStack(ж<errAccumulator> Ꮡe, trace.Stack stk) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     // Check for non-empty values, but we also check for crashes due to incorrect validation.
@@ -460,6 +465,8 @@ partial struct errAccumulator {
     internal slice<error> errs;
 }
 
+} partial class testtraceᴛerrAccumulator {
+
 internal static void Errorf(this ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
@@ -470,4 +477,4 @@ internal static error Errors(this ref errAccumulator e) {
     return errors.Join(e.errs.ꓸꓸꓸ);
 }
 
-} // end testtrace_package
+} // end testtraceᴛerrAccumulator

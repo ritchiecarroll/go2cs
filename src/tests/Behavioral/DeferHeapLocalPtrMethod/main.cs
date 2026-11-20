@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct state {
     internal @string label;
 }
 
+} partial class mainᴛstate {
+
 internal static void free(this ref state s) {
     fmt.Printf("free: %s n=%d\n"u8, s.label, s.n);
 }
@@ -16,6 +19,8 @@ internal static void free(this ref state s) {
 internal static void add(this ref state s, nint d) {
     s.n += d;
 }
+
+} partial class main_package {
 
 internal static void run() {
     GoFrame ᒐ = default;

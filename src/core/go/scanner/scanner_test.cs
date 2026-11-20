@@ -212,7 +212,7 @@ internal static nint newlineCount(@string s) {
     return n;
 }
 
-internal static void checkPos(ж<testing.T> t, @string lit, tokenꓸPos p, tokenꓸPosition expected) {
+internal static void checkPos(ж<testing.T> t, @string lit, token.Pos p, token.Position expected) {
     var pos = fset.Position(p);
     // Check cleaned filenames so that we don't have to worry about
     // different os.PathSeparator values.
@@ -235,16 +235,16 @@ public static void TestScan(ж<testing.T> t) {
     nint whitespace_linecount = newlineCount(whitespace);
 
     // error handler
-    var eh = (tokenꓸPosition _, @string msg) => {
+    var eh = (token.Position _, @string msg) => {
         t.Errorf("error handler called (msg = %s)", msg);
     };
 
     // verify scan
     global::go.go.scanner_package.Scanner s = default;
-    s.Init(fset.AddFile(""u8, fset.Base(), len(source)), source, new Action<tokenꓸPosition, @string>(eh), (global::go.go.scanner_package.Mode)(ScanComments | dontInsertSemis));
+    s.Init(fset.AddFile(""u8, fset.Base(), len(source)), source, eh, (global::go.go.scanner_package.Mode)(ScanComments | dontInsertSemis));
 
     // set up expected position
-    var epos = new tokenꓸPosition(
+    var epos = new token.Position(
         Filename: "",
         Offset: 0,
         Line: 1,
@@ -615,13 +615,13 @@ internal static void testSegments(ж<testing.T> t, slice<segment> segments, @str
     // verify scan
     global::go.go.scanner_package.Scanner S = default;
     var @file = fset.AddFile(filename, fset.Base(), len(src));
-    S.Init(@file, slice<byte>(src), (tokenꓸPosition pos, @string msg) => {
-        t.Error(new ΔError(pos, msg));
+    S.Init(@file, slice<byte>(src), (token.Position pos, @string msg) => {
+        t.Error(new Error(pos, msg));
     }, dontInsertSemis);
     foreach (var (_, s) in range(segments)) {
         var (p, _, lit) = S.Scan();
         var pos = @file.Position(p);
-        checkPos(t, lit, p, new tokenꓸPosition(
+        checkPos(t, lit, p, new token.Position(
             Filename: s.filename,
             Offset: pos.Offset,
             Line: s.line,
@@ -660,7 +660,7 @@ public static void TestInvalidLineDirectives(ж<testing.T> t) {
     global::go.go.scanner_package.Scanner S = default;
     ref var s = ref heap(new segment(), out var Ꮡs); // current segment
     var @file = fset.AddFile(filepath.Join(dirˢ, "TestInvalidLineDirectives"), fset.Base(), len(src));
-    S.Init(@file, slice<byte>(src), (tokenꓸPosition pos, @string msg) => {
+    S.Init(@file, slice<byte>(src), (token.Position pos, @string msg) => {
         if (msg != Ꮡs.Value.filename) {
             t.Errorf("got error %q; want %q", msg, Ꮡs.Value.filename);
         }
@@ -740,12 +740,12 @@ public static void TestStdErrorHandler(ж<testing.T> t) {
     @string src = srcᶜ; // original file, line 1 again
 
     ref var list = ref heap<global::go.go.scanner_package.ErrorList>(out var Ꮡlist);
-    var eh = (tokenꓸPosition pos, @string msg) => {
+    var eh = (token.Position pos, @string msg) => {
         Ꮡlist.ValueSlot.Add(pos, msg);
     };
 
     global::go.go.scanner_package.Scanner s = default;
-    s.Init(fset.AddFile(file1ˢ, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), dontInsertSemis);
+    s.Init(fset.AddFile(file1ˢ, fset.Base(), len(src)), slice<byte>(src), eh, dontInsertSemis);
     for (;;) {
         var (_, tok, _) = s.Scan(); if (tok == token.EOF) {
             break;
@@ -777,18 +777,18 @@ public static void TestStdErrorHandler(ж<testing.T> t) {
 internal partial struct errorCollector {
     internal nint cnt;           // number of errors encountered
     internal @string msg;        // last error message encountered
-    internal tokenꓸPosition pos; // last error position encountered
+    internal token.Position pos; // last error position encountered
 }
 
 internal static void checkError(ж<testing.T> t, @string src, token.Token tok, nint pos, @string lit, @string err) {
     global::go.go.scanner_package.Scanner s = default;
     ref var h = ref heap(new errorCollector(), out var Ꮡh);
-    var eh = (tokenꓸPosition posΔ1, @string msg) => {
+    var eh = (token.Position posΔ1, @string msg) => {
         Ꮡh.Value.cnt++;
         Ꮡh.Value.msg = msg;
         Ꮡh.Value.pos = posΔ1;
     };
-    s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), (global::go.go.scanner_package.Mode)(ScanComments | dontInsertSemis));
+    s.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), eh, (global::go.go.scanner_package.Mode)(ScanComments | dontInsertSemis));
     var (_, tok0, lit0) = s.Scan();
     if (tok0 != tok) {
         t.Errorf("%q: got %s, expected %s", src, tok0, tok);
@@ -896,11 +896,11 @@ public static void TestUTF16(ж<testing.T> t) {
         ((@string)(new byte[]{0xff, 0xfe, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x70, 0x00}))  // BOM + "package p" encoded as UTF-16 LE
     ]))) {
         ref var got = ref heap<slice<@string>>(out var Ꮡgot);
-        var eh = (tokenꓸPosition posn, @string msg) => {
+        var eh = (token.Position posn, @string msg) => {
             Ꮡgot.ValueSlot = append(Ꮡgot.ValueSlot, fmt.Sprintf("#%d: %s"u8, posn.Offset, msg));
         };
         global::go.go.scanner_package.Scanner sc = default;
-        sc.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), 0);
+        sc.Init(fset.AddFile(""u8, fset.Base(), len(src)), slice<byte>(src), eh, 0);
         sc.Scan();
 
         // We expect two errors:
@@ -1188,7 +1188,7 @@ public static void TestNumbers(ж<testing.T> t) {
     ]))) {
         global::go.go.scanner_package.Scanner s = default;
         @string err = default;
-        s.Init(fset.AddFile(""u8, fset.Base(), len(test.src)), slice<byte>(test.src), (tokenꓸPosition _Δp0, @string msg) => {
+        s.Init(fset.AddFile(""u8, fset.Base(), len(test.src)), slice<byte>(test.src), (token.Position _Δp0, @string msg) => {
             if (err == ""u8) {
                 err = msg;
             }

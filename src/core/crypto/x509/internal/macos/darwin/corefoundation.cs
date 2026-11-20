@@ -49,7 +49,7 @@ public static @string CFStringToString(CFRef @ref) {
 
 // TimeToCFDateRef converts a time.Time into an apple CFDateRef.
 public static CFRef TimeToCFDateRef(time.Time t) {
-    var secs = t.Sub(time.Date(2001, 1, 1, 0, 0, 0, 0, time.ΔUTC)).Seconds();
+    var secs = t.Sub(time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)).Seconds();
     var @ref = CFDateCreate(secs);
     return @ref;
 }

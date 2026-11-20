@@ -7,15 +7,12 @@
 global using static global::go.crypto.@internal.fips140.bigmod_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.crypto.@internal.fips140.bigmod_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Nat", "ΔNat")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -33,7 +30,7 @@ using static global::go.crypto.@internal.fips140.bigmod_internal_test_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: GoFieldAccess(typeof(global::go.crypto.@internal.fips140.bigmod_package.ΔNat))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.@internal.fips140.bigmod_package.Nat))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -43,7 +40,7 @@ using static global::go.crypto.@internal.fips140.bigmod_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/bigmod/nat_test.go", "nat_test.cs", "ABs48oKCgpSmgoKClKaigoKUqsKCgpSmooKCgoKCpoKCgriigoKCgqaCgoK4goKCgoKCgoKCgoKCgpSUggALCIKClAAWMoKCgoLKyqaUgvaCACpagoKCgoKUlIKClIK4goKCgpSmgoIACQiCggAOJIKCgsqCgoKCgoKCuIKCgoKCgoKUgoKCuIKCgoKCgoKUgoKCuIKCgoKCgoK4goKCgoKCgv7EgoKUgoKUgqaCgoKClIL4goCSgJKAkoC2goKCgqaClIKmgoKUgoKUgoKmgpSCgoKCgoKUggAtCIKCgoKmgoKCuIKCgpSCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKUgriCgoKCgoKClIK4goKClIKSgoKCgpSCgqaQkpCSkMiippSCpoKCgqiSgoKCgqaCpoKCgpSmgoKClKaigoKUgoK4ooKClIKCuKKClIKCuKKCgoKUgoK4ooKClIKCuKKCgoKCgoKUgoK4ooKCgpSCgriCgoKClIKClIKClIKClIKCuIKCgoKU9rgABBCykoKCgoKCgoKCAAsMgoKCpqKCgoKCgoKmgqS0tJSCgoKUgoKmgoKUgoKUgti2griCgoKUgoKU", "95-110:1;232-239:1;369-369:1;370-370:2;371-371:3;372-372:4;419-424:1;425-430:2;492-503:1;504-504:2;505-505:3;506-506:4;683-694:1;723-744:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/bigmod/nat_test.go", "nat_test.cs", "AB448oKCgpSmgoKClKaigoKUqsKCgpTGooKCgoKCpoKCgriigoKCgqaCgoK4goKCgoKCgoKCgoKCgpSUggALCIKClAAWMoKCgoLKyqaUgvaCACpagoKCgoKUlIKClIK4goKCgpSmgoIACQiCggAOJIKCgsqCgoKCgoKCuIKCgoKCgoKUgoKCuIKCgoKCgoKUgoKCuIKCgoKCgoK4goKCgoKCgv7EgoKUgoKUgqaCgoKClIL4goCSgJKAkoC2goKCgqaClIKmgoKUgoKUgoKmgpSCgoKCgoKUggAtCIKCgoKmgoKCuIKCgpSCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSCgoKUgriCgoKCgoKClIK4goKClIKSgoKCgpSCgqaQkpCSkMiippSCpoKCgqiSgoKCgqaCpoKCgpSmgoKClKaigoKUgoK4ooKClIKCuKKClIKCuKKCgoKUgoK4ooKClIKCuKKCgoKCgoKUgoK4ooKCgpSCgriCgoKClIKClIKClIKClIKCuIKCgoKU9rgABBCykoKCgoKCgoKCAAsMgoKCpqKCgoKCgoKmgpS0tJSCgoKUgoKmgoKUgoKUgti2griCgoKUgoKU", "95-110:1;232-239:1;369-369:1;370-370:2;371-371:3;372-372:4;419-424:1;425-430:2;492-503:1;504-504:2;505-505:3;506-506:4;683-694:1;723-744:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -90,3 +87,13 @@ public static partial class bigmod_internal_test_package
         builtin.initPackage(typeof(global::go.crypto.@internal.fips140.bigmod_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(global::go.crypto.@internal.fips140.bigmod_package.Nat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bigmod_internal_testᴛNat;
+// </MethodHolders>

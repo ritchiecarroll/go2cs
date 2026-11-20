@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct V {
     public nint X;
 }
+
+} partial class mainᴛV {
 
 public static @string Show(this V v, nint n) { return fmt.Sprint(v.X, " ", n); }
 
@@ -15,11 +18,17 @@ public static nint Bump(this V v) {
     return v.X;
 }
 
+} partial class main_package {
+
 partial struct Box<T> {
     public T Item;
 }
 
+} partial class mainᴛBox {
+
 public static @string Get<T>(this Box<T> b, @string tag) { return fmt.Sprint((b.Item).OrTypedNilOf(), " ", tag); }
+
+} partial class main_package {
 
 internal static ж<V> shared = Ꮡ(new V(X: 1));
 

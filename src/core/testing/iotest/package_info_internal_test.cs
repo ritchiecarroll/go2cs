@@ -30,7 +30,7 @@ using static go.testing.iotest_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/iotest/logger_test.go", "logger_test.cs", "ABQoggAIBqKCgqaSgoKmgoKClIKCgqaAkqSCgJLE5KKCgqaSgoKmgoKClIKCgqaCkrTkooKCppKCgqaCgoKUgoKClIKCpoCCtoKAksQACASigoKmkoKCpoKCgpSClIKCgoKmgpK0", "30-34:1;62-66:1;91-95:1;128-132:1", "", "", "", "40:21,41:13,88:21,89:13,128:21,129:13,182:21,183:13")]
+[assembly: GoPositionMap("testing/iotest/logger_test.go", "logger_test.cs", "ABcoggAKBqKCgqaSgoKmgoKClIKCgqaAkqSCgJLE5KKCgqaSgoKmgoKClIKCgqaCkrTkooKCppKCgqaCgoKUgoKClIKCpoCCtoKAksQACASigoKmkoKCpoKCgpSClIKCgoKmgpK0", "30-34:1;62-66:1;91-95:1;128-132:1", "", "", "", "45:21,46:13,93:21,94:13,133:21,134:13,187:21,188:13")]
 [assembly: GoPositionMap("testing/iotest/reader_test.go", "reader_test.cs", "AA4egoKClIKCgoKmlIKCgoKUkpSUgIKkgJLIgpSCgoKmgoKAgqSAksiCgoKUgoKCgqaCgoKCgpSSlJSAgqSAksiClIKCgqaCgoCCpICSyIKCgpSCgoKCpoKAgqSAkraCgoKmgoCCpICSyIKUgoKCpoKAgqSAkraCgoKmgoCCpICSyIKCgpSUgoKCgoKCgoKmgpSSuIKUgoKCpoKCgIKkgJIACQiCAAUSspKCgpSCAAkMgpSCgg==", "241-249:1", "", "284=New/1/1/5")]
 [assembly: GoPositionMap("testing/iotest/writer_test.go", "writer_test.cs", "ABIYAAYYgoKCgoKClICSpICS")]
 // </GoSourcePositionMaps>
@@ -65,3 +65,13 @@ public static partial class iotest_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(iotest_internal_test_package.errWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotest_internal_testᴛerrWriter;
+// </MethodHolders>

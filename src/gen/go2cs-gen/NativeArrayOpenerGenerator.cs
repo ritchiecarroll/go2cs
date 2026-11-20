@@ -182,7 +182,8 @@ public class NativeArrayOpenerGenerator : ISourceGenerator
         if (type is null)
             return null;
 
-        INamedTypeSymbol package = Outermost(type);
+        // A method's body stands in the holder of its receiver type; the package keeps one registry.
+        INamedTypeSymbol package = GoMethodHosts.PackageClassOf(Outermost(type));
 
         return Reopenable(package) ? package : null;
     }

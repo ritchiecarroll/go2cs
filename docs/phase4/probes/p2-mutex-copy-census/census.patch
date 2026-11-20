@@ -1,0 +1,123 @@
+diff --git a/src/core/sync/mutex.cs b/src/core/sync/mutex.cs
+index 114d627aca..47a6647e51 100644
+--- a/src/core/sync/mutex.cs
++++ b/src/core/sync/mutex.cs
+@@ -85,20 +85,117 @@ private static SemaphoreSlim gateOf(ref Mutex m) {
+     SemaphoreSlim? g = Volatile.Read(ref m.gate);
+ 
+     if (g is not null) {
++        CopyCensus.Use(ref m, g);
+         return g;
+     }
+ 
+-    var created = new SemaphoreSlim(1, 1);
++    var created = new CensusGate();
+     g = Interlocked.CompareExchange(ref m.gate, created, null);
+ 
+     if (g is not null) {
+         created.Dispose(); // lost the race; another thread installed the gate
++        CopyCensus.Use(ref m, g);
+         return g;
+     }
+ 
++    CopyCensus.Use(ref m, created);
+     return created;
+ }
+ 
++// COPY CENSUS (a probe on master's Mutex, sqlite-cs W9a; never seated). Master's Mutex is one reference to
++// its gate, so a COPY of a used mutex shares the gate and stays one lock with the original. Under the Go
++// layout a copy is its own lock, as in Go. A copy the CONVERTER makes where Go has none was therefore
++// harmless on master and is two locks after W9a. This census finds such copies in use: one gate reached
++// through two struct addresses with no collection between the uses (a collection is the only thing that
++// moves a struct). ALTERNATING is a gate used at A, then B, then A again: both copies are live.
++// SECOND-ADDRESS is a gate used at A and then at B only: the struct was copied and the original left
++// behind (slice growth, a value boxed on its way to the heap), which is one lock on both layouts.
++private sealed class CensusGate : SemaphoreSlim {
++    internal nint cur, prev;
++    internal int epoch = -1;
++    internal bool alternating, second;
++
++    internal CensusGate() : base(1, 1) { }
++}
++
++private static class CopyCensus {
++    private static readonly string? s_dir = System.Environment.GetEnvironmentVariable("GO2CS_MUTEX_COPY_CENSUS");
++    private static readonly object s_out = new();
++    private static long s_uses, s_gates, s_second, s_alternating;
++    private static int s_reports;
++
++    static CopyCensus() {
++        if (s_dir is not null) {
++            System.AppDomain.CurrentDomain.ProcessExit += static (_, _) => write($"SUMMARY uses={Interlocked.Read(ref s_uses)} gates={Interlocked.Read(ref s_gates)} second-address={Interlocked.Read(ref s_second)} alternating={Interlocked.Read(ref s_alternating)}");
++        }
++    }
++
++    internal static void Use(ref Mutex m, SemaphoreSlim g) {
++        if (s_dir is null || g is not CensusGate gate) {
++            return;
++        }
++
++        int epoch = System.GC.CollectionCount(0);
++        nint at = Unsafe.ByteOffset(ref Unsafe.NullRef<Mutex>(), ref m);
++        Interlocked.Increment(ref s_uses);
++        string? kind = null;
++
++        lock (gate) {
++            // A collection between the two reads may have moved the struct after its address was taken.
++            if (System.GC.CollectionCount(0) != epoch) {
++                return;
++            }
++
++            if (gate.epoch != epoch) {
++                if (gate.epoch == -1) {
++                    Interlocked.Increment(ref s_gates);
++                }
++
++                gate.epoch = epoch;
++                gate.cur = at;
++                gate.prev = 0;
++                return;
++            }
++
++            if (at == gate.cur) {
++                return;
++            }
++
++            if (at == gate.prev) {
++                if (!gate.alternating) {
++                    gate.alternating = true;
++                    kind = "ALTERNATING";
++                    Interlocked.Increment(ref s_alternating);
++                }
++            } else if (!gate.second) {
++                gate.second = true;
++                kind = "SECOND-ADDRESS";
++                Interlocked.Increment(ref s_second);
++            }
++
++            gate.prev = gate.cur;
++            gate.cur = at;
++        }
++
++        if (kind is not null && Interlocked.Increment(ref s_reports) <= 40) {
++            write($"{kind} gate={System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(g):x8}\n{System.Environment.StackTrace}");
++        }
++    }
++
++    private static void write(string text) {
++        try {
++            lock (s_out) {
++                System.IO.Directory.CreateDirectory(s_dir!);
++                using var process = System.Diagnostics.Process.GetCurrentProcess();
++                string entry = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name ?? "?";
++                System.IO.File.AppendAllText(System.IO.Path.Combine(s_dir!, $"{entry}-{process.Id}.txt"), $"[{entry} {System.Environment.CommandLine}]\n{text}\n\n");
++            }
++        } catch (System.Exception) {
++            // The census never changes what the program does.
++        }
++    }
++}
++
+ // Lock locks m.
+ // If the lock is already in use, the calling goroutine blocks until the mutex is available.
+ //

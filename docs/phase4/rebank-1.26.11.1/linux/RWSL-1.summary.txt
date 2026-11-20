@@ -1,0 +1,67 @@
+2026-11-19 03:42:16Z HOST uid=0 TMPDIR=/tmp(4 bytes) GOROOT=/root/sdk/go1.26.11 test/=3460 files toolchain: go1.26.11 linux/amd64 go=/root/sdk/go1.26.11/bin/go VERSION=go1.26.11 .NET sdk=10.0.400 runtime=10.0.11 nslookup=NXDOMAIN free=893G nproc=10 mem=19G
+2026-11-19 03:42:18Z PRE lane=R shard=RWSL-1 head=280a01952c clean: tracked 0, untracked-under-tracked 0; residue=0
+2026-11-19 03:42:18Z rows: 15 from /root/rebank-kit-12611/RWSL-1.txt: internal/runtime/gc/scan crypto/mlkem archive/zip crypto/dsa crypto/internal/fips140/mlkem net index/suffixarray net/http hash/maphash go/parser time sync/atomic crypto/tls internal/poll runtime 
+2026-11-19 03:42:31Z converter built: /root/go2cs/src/go2cs/go2cs mtime=1795059751
+internal/runtime/gc/scan: floor=- timeout=30m test-deadline=15m pin=- inRoster=True
+crypto/mlkem: floor=30m timeout=30m test-deadline=15m pin=- inRoster=True
+archive/zip: floor=60m timeout=60m test-deadline=15m pin=- inRoster=True
+crypto/dsa: floor=120m timeout=120m test-deadline=120m pin=- inRoster=True
+crypto/internal/fips140/mlkem: floor=30m timeout=30m test-deadline=15m pin=- inRoster=True
+net: floor=120m timeout=120m test-deadline=15m pin=- inRoster=True
+index/suffixarray: floor=120m timeout=120m test-deadline=15m pin=- inRoster=True
+net/http: floor=60m timeout=60m test-deadline=15m pin=- inRoster=True
+hash/maphash: floor=60m timeout=60m test-deadline=15m pin=- inRoster=True
+go/parser: floor=90m timeout=90m test-deadline=90m pin=- inRoster=True
+time: floor=40m timeout=40m test-deadline=15m pin=- inRoster=True
+sync/atomic: floor=150m timeout=150m test-deadline=150m pin=- inRoster=True
+crypto/tls: floor=60m timeout=60m test-deadline=30m pin=- inRoster=True
+internal/poll: floor=30m timeout=30m test-deadline=30m pin=- inRoster=True
+runtime: floor=120m timeout=120m test-deadline=60m pin=- inRoster=True
+derived 15 row(s); roster rows 238; package floors 14; per-test floors 6
+2026-11-19 03:42:35Z row 1 internal/runtime/gc/scan: start (timeout 30m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 30m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/internal/runtime/gc/scan /root/go2cs/src/core/internal/runtime/gc/scan
+2026-11-19 03:48:32Z row 1 internal/runtime/gc/scan: rc=0 word=PASS wall=357s (3095	True	0	0)
+2026-11-19 03:48:33Z row 1 internal/runtime/gc/scan: restored moved=4 untracked=1 tracked-dirty=0 deleted=0 free=892G
+2026-11-19 03:48:33Z row 2 crypto/mlkem: start (timeout 30m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 30m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/crypto/mlkem /root/go2cs/src/core/crypto/mlkem
+2026-11-19 03:54:15Z row 2 crypto/mlkem: rc=0 word=PASS wall=342s (8	True	0	0)
+2026-11-19 03:54:16Z row 2 crypto/mlkem: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=891G
+2026-11-19 03:54:16Z row 3 archive/zip: start (timeout 60m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 60m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/archive/zip /root/go2cs/src/core/archive/zip
+2026-11-19 03:55:45Z row 3 archive/zip: rc=0 word=PASS wall=89s (101	True	0	0)
+2026-11-19 03:55:46Z row 3 archive/zip: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=890G
+2026-11-19 03:55:46Z row 4 crypto/dsa: start (timeout 120m, deadline 120m) argv: -tests -test-action all -test-config Release -test-deadline 120m -test-timeout 120m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/crypto/dsa /root/go2cs/src/core/crypto/dsa
+2026-11-19 03:57:26Z row 4 crypto/dsa: rc=0 word=PASS wall=100s (4	True	0	0)
+2026-11-19 03:57:27Z row 4 crypto/dsa: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=890G
+2026-11-19 03:57:27Z row 5 crypto/internal/fips140/mlkem: start (timeout 30m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 30m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/crypto/internal/fips140/mlkem /root/go2cs/src/core/crypto/internal/fips140/mlkem
+2026-11-19 03:58:02Z row 5 crypto/internal/fips140/mlkem: rc=0 word=PASS wall=35s (11	True	0	0)
+2026-11-19 03:58:03Z row 5 crypto/internal/fips140/mlkem: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=890G
+2026-11-19 03:58:03Z row 6 net: start (timeout 120m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 120m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/net /root/go2cs/src/core/net
+2026-11-19 04:04:07Z row 6 net: rc=1 word=DIVERGED wall=364s (597	False	3	1)
+2026-11-19 04:04:08Z row 6 net: restored moved=17 untracked=23 tracked-dirty=0 deleted=0 free=890G
+2026-11-19 04:04:08Z row 7 index/suffixarray: start (timeout 120m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 120m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/index/suffixarray /root/go2cs/src/core/index/suffixarray
+2026-11-19 04:10:16Z row 7 index/suffixarray: rc=0 word=PASS wall=368s (12	True	0	0)
+2026-11-19 04:10:17Z row 7 index/suffixarray: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=890G
+2026-11-19 04:10:17Z row 8 net/http: start (timeout 60m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 60m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/net/http /root/go2cs/src/core/net/http
+2026-11-19 04:17:33Z row 8 net/http: rc=0 word=PASS wall=436s (1538	True	0	0)
+2026-11-19 04:17:34Z row 8 net/http: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=888G
+2026-11-19 04:17:34Z row 9 hash/maphash: start (timeout 60m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 60m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/hash/maphash /root/go2cs/src/core/hash/maphash
+2026-11-19 04:25:09Z row 9 hash/maphash: rc=0 word=PASS wall=455s (66	True	0	0)
+2026-11-19 04:25:10Z row 9 hash/maphash: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=887G
+2026-11-19 04:25:10Z row 10 go/parser: start (timeout 90m, deadline 90m) argv: -tests -test-action all -test-config Release -test-deadline 90m -test-timeout 90m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/go/parser /root/go2cs/src/core/go/parser
+2026-11-19 04:35:03Z row 10 go/parser: rc=0 word=PASS wall=592s (183	True	0	0)
+2026-11-19 04:35:04Z row 10 go/parser: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=887G
+2026-11-19 04:35:04Z row 11 time: start (timeout 40m, deadline 15m) argv: -tests -test-action all -test-config Release -test-deadline 15m -test-timeout 40m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/time /root/go2cs/src/core/time
+2026-11-19 04:45:22Z row 11 time: rc=0 word=PASS wall=618s (176	True	0	0)
+2026-11-19 04:45:23Z row 11 time: restored moved=6 untracked=1 tracked-dirty=0 deleted=0 free=887G
+2026-11-19 04:45:23Z row 12 sync/atomic: start (timeout 150m, deadline 150m) argv: -tests -test-action all -test-config Release -test-deadline 150m -test-timeout 150m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/sync/atomic /root/go2cs/src/core/sync/atomic
+2026-11-19 04:55:47Z row 12 sync/atomic: rc=0 word=PASS wall=624s (108	True	0	0)
+2026-11-19 04:55:48Z row 12 sync/atomic: restored moved=1 untracked=0 tracked-dirty=0 deleted=0 free=887G
+2026-11-19 04:55:48Z row 13 crypto/tls: start (timeout 60m, deadline 30m) argv: -tests -test-action all -test-config Release -test-deadline 30m -test-timeout 60m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/crypto/tls /root/go2cs/src/core/crypto/tls
+2026-11-19 05:13:51Z row 13 crypto/tls: rc=0 word=PASS wall=1082s (4921	True	0	0)
+2026-11-19 05:13:52Z row 13 crypto/tls: restored moved=5 untracked=2 tracked-dirty=0 deleted=0 free=887G
+2026-11-19 05:13:52Z row 14 internal/poll: start (timeout 30m, deadline 30m) argv: -tests -test-action all -test-config Release -test-deadline 30m -test-timeout 30m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/internal/poll /root/go2cs/src/core/internal/poll
+2026-11-19 05:41:36Z row 14 internal/poll: rc=0 word=PASS wall=1664s (12	True	1	0)
+2026-11-19 05:41:37Z row 14 internal/poll: restored moved=7 untracked=3 tracked-dirty=0 deleted=0 free=887G
+2026-11-19 05:41:37Z row 15 runtime: start (timeout 120m, deadline 60m) argv: -tests -test-action all -test-config Release -test-deadline 60m -test-timeout 120m -go2cspath /root/go2cs/src /root/sdk/go1.26.11/src/runtime /root/go2cs/src/core/runtime
+2026-11-19 06:47:48Z row 15 runtime: rc=0 word=PASS wall=3971s (11094	True	73	0)
+2026-11-19 06:47:51Z row 15 runtime: restored moved=21 untracked=23 tracked-dirty=0 deleted=0 free=886G
+2026-11-19 06:48:05Z END rows=15 of 15 residue-before-purge=10129 residue-after=0 tracked-deleted=0
+RWSL-1-DONE rc=0

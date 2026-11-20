@@ -40,6 +40,7 @@ using global::go.os;
 using global::go.path;
 using global::go.testing;
 using static global::go.net.http_internal_test_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -98,7 +99,7 @@ internal static ref readonly @string boundaryˢ => ref boundaryˢᵇ;
 private static readonly @string boundaryˢᵇ = "boundary"u8;
 
 internal static void testServeFile(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         ServeFile(w, r, testdataFileˢ);
     }))).ts;
     var c = ts.Client();
@@ -112,7 +113,7 @@ internal static void testServeFile(ж<testing.T> t, testMode mode) {
 
     // set up the Request (re-used for all tests)
     Δhttp.Request req = default;
-    req.Header = new httpꓸHeader(0);
+    req.Header = new Δhttp.Header(0);
     (req.URL, err) = url.Parse(ts.URL); if (err != nil) {
         t.Fatal(parseURLˢ, err);
     }
@@ -341,9 +342,13 @@ partial struct testFileSystem {
     internal Func<@string, (Δhttp.File, error)> open;
 }
 
+} partial class http_testᴛtestFileSystem {
+
 internal static (Δhttp.File, error) Open(this ref testFileSystem fs, @string name) {
     return fs.open(name);
 }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fileDoesNotExistˢ => ref fileDoesNotExistˢᵇ;
@@ -643,7 +648,7 @@ private static readonly @string ctypeᶜᵇ = "icecream/chocolate"u8;
 
 internal static void testServeFileContentType(ж<testing.T> t, testMode mode) {
     @string ctype = ctypeᶜ;
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var exprᴛ1 = r.FormValue(overrideˢ);
         switch (ᐧ) {
         case {} when exprᴛ1 == "1"u8: {
@@ -681,7 +686,7 @@ internal static ref readonly @string textCssCharsetUtf8ˢ => ref textCssCharsetU
 private static readonly @string textCssCharsetUtf8ˢᵇ = "text/css; charset=utf-8"u8;
 
 internal static void testServeFileMimeType(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         ServeFile(w, r, testdataStyleCssˢ);
     }))).ts;
     var (resp, err) = ts.Client().Get(ts.URL);
@@ -697,7 +702,7 @@ internal static void testServeFileMimeType(ж<testing.T> t, testMode mode) {
 
 public static void TestServeFileFromCWD(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeFileFromCWD(Δp0, Δp1)); }
 internal static void testServeFileFromCWD(ж<testing.T> t, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
         ServeFile(w, rΔ1, fsTestGoˢ);
     }))).ts;
     var (r, err) = ts.Client().Get(ts.URL);
@@ -718,7 +723,7 @@ private static readonly @string testdataˢ2ᵇ = "/testdata/"u8;
 
 internal static void testServeDirWithoutTrailingSlash(ж<testing.T> t, testMode mode) {
     @string e = testdataˢ2;
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
         ServeFile(w, rΔ1, ".");
     }))).ts;
     var (r, err) = ts.Client().Get(ts.URL + "/testdata"u8);
@@ -735,7 +740,7 @@ internal static void testServeDirWithoutTrailingSlash(ж<testing.T> t, testMode 
 // specified.
 public static void TestServeFileWithContentEncoding(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServeFileWithContentEncoding(Δp0, Δp1)); }
 internal static void testServeFileWithContentEncoding(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(contentEncodingˢ, fooˢ);
         ServeFile(w, r, testdataFileˢ);
 
@@ -769,7 +774,7 @@ private static readonly @string ifNoneMatchˢᵇ = "If-None-Match"u8;
 internal static readonly object readingBodyˢ = (@string)"reading Body:"u8;
 
 internal static void testServeFileNotModified(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(contentTypeˢ, applicationJsonˢ);
         w.Header().Set(contentEncodingˢ, fooˢ);
         w.Header().Set(etagˢ, @"""123""");
@@ -834,7 +839,7 @@ private static readonly @string wantᶜᵇ = "index.html says hello\n"u8;
 
 internal static void testServeIndexHtml(ж<testing.T> t, testMode mode) {
     for (nint i = 0; i < 2; i++) {
-        ref var h = ref heap<httpꓸHandler>(out var Ꮡh);
+        ref var h = ref heap<Δhttp.Handler>(out var Ꮡh);
         @string name = default;
         switch (i) {
         case 0: {
@@ -981,6 +986,8 @@ partial struct fakeFileInfo {
     internal error err;
 }
 
+} partial class http_testᴛfakeFileInfo {
+
 internal static @string Name(this ref fakeFileInfo f) { return f.basename; }
 internal static any Sys(this ref fakeFileInfo f) { return default; }
 internal static time.Time ModTime(this ref fakeFileInfo f) { return f.modtime; }
@@ -997,12 +1004,16 @@ internal static @string String(this ж<fakeFileInfo> Ꮡf) {
     return fs.FormatFileInfo(new http_test_package.fakeFileInfoжFileInfo(Ꮡf));
 }
 
+} partial class http_test_package {
+
 partial struct fakeFile {
     /*embed*/ public io_package.ReadSeeker ReadSeeker;
     internal ж<fakeFileInfo> fi;
     internal @string path; // as opened
     internal nint entpos;
 }
+
+} partial class http_testᴛfakeFile {
 
 internal static error Close(this ref fakeFile f) { return default; }
 internal static (fs.FileInfo, error) Stat(this ref fakeFile f) { return (new http_test_package.fakeFileInfoжFileInfo(f.fi), default); }
@@ -1027,7 +1038,11 @@ internal static (slice<fs.FileInfo>, error) Readdir(this ref fakeFile f, nint co
     }
 }
 
+} partial class http_test_package {
+
 partial struct fakeFS /*map[@string, ж<fakeFileInfo>]*/;
+
+} partial class http_testᴛfakeFS {
 
 internal static (Δhttp.File, error) Open(this fakeFS fsys, @string name) {
     name = path.Clean(name);
@@ -1040,6 +1055,8 @@ internal static (Δhttp.File, error) Open(this fakeFS fsys, @string name) {
     }
     return (new http_test_package.fakeFileжFile(Ꮡ(new fakeFile(ReadSeeker: new http_test_package.strings_ReaderжReadSeeker(strings.NewReader(f.contents)), fi: f, path: name))), default);
 }
+
+} partial class http_test_package {
 
 public static void TestDirectoryIfNotModified(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testDirectoryIfNotModified(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1159,7 +1176,7 @@ internal static void testServeContent(ж<testing.T> t, testMode mode) {
     try {
         var servec = new channel<testServeContent_serveParam>(1);
         var servecʗ1 = servec;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var p = ᐸꟷ(servecʗ1);
             if (p.etag != ""u8) {
                 w.Header().Set(eTagˢ, p.etag);
@@ -1291,7 +1308,7 @@ internal static void testServeContent(ж<testing.T> t, testMode mode) {
             ),
             ["range_with_modtime"] = new(
                 @file: "testdata/style.css",
-                modtime: time.Date(2014, 6, 25, 17, 12, 18, 0, /* nanos */ time.ΔUTC),
+                modtime: time.Date(2014, 6, 25, 17, 12, 18, 0, /* nanos */ time.UTC),
                 reqHeader: new map<@string, @string>{
                     ["Range"] = "bytes=0-4",
                     ["If-Range"] = "Wed, 25 Jun 2014 17:12:18 GMT"
@@ -1303,7 +1320,7 @@ internal static void testServeContent(ж<testing.T> t, testMode mode) {
             ),
             ["range_with_modtime_mismatch"] = new(
                 @file: "testdata/style.css",
-                modtime: time.Date(2014, 6, 25, 17, 12, 18, 0, /* nanos */ time.ΔUTC),
+                modtime: time.Date(2014, 6, 25, 17, 12, 18, 0, /* nanos */ time.UTC),
                 reqHeader: new map<@string, @string>{
                     ["Range"] = "bytes=0-4",
                     ["If-Range"] = "Wed, 25 Jun 2014 17:12:19 GMT"
@@ -1314,7 +1331,7 @@ internal static void testServeContent(ж<testing.T> t, testMode mode) {
             ),
             ["range_with_modtime_nanos"] = new(
                 @file: "testdata/style.css",
-                modtime: time.Date(2014, 6, 25, 17, 12, 18, 123, /* nanos */ time.ΔUTC),
+                modtime: time.Date(2014, 6, 25, 17, 12, 18, 123, /* nanos */ time.UTC),
                 reqHeader: new map<@string, @string>{
                     ["Range"] = "bytes=0-4",
                     ["If-Range"] = "Wed, 25 Jun 2014 17:12:18 GMT"
@@ -1378,7 +1395,7 @@ internal static void testServeContent(ж<testing.T> t, testMode mode) {
                 @file: "testdata/style.css",
                 modtime: htmlModTime,
                 reqHeader: new map<@string, @string>{
-                    ["If-Unmodified-Since"] = htmlModTime.Add(-2 * time.ΔSecond).UTC().Format(TimeFormat)
+                    ["If-Unmodified-Since"] = htmlModTime.Add(-2 * time.Second).UTC().Format(TimeFormat)
                 },
                 wantStatus: 412,
                 wantLastMod: htmlModTime.UTC().Format(TimeFormat)
@@ -1477,14 +1494,22 @@ public static void TestServerFileStatError(ж<testing.T> t) {
 partial struct issue12991FS {
 }
 
+} partial class http_testᴛissue12991FS {
+
 internal static (Δhttp.File, error) Open(this issue12991FS _Δp0, @string _Δp1) { return (new issue12991File(), default); }
+
+} partial class http_test_package {
 
 partial struct issue12991File {
     /*embed*/ public global::go.net.http_package.File File;
 }
 
+} partial class http_testᴛissue12991File {
+
 internal static (fs.FileInfo, error) Stat(this issue12991File _) { return (default, fs.ErrPermission); }
 internal static error Close(this issue12991File _) { return default; }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string keepheaders0ˢ => ref keepheaders0ˢᵇ;
@@ -1542,7 +1567,7 @@ internal static void testFileServerErrorMessages(ж<testing.T> t, testMode mode,
         w.Header().Set(lastModifiedˢ, yesterdayˢ);
         serverʗ1.ServeHTTP(w, r);
     };
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(h))).ts;
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(h))).ts;
     var c = ts.Client();
     foreach (var (_, code) in range(slice<nint>([403, 404, 500]))) {
         var (res, err) = c.Get(fmt.Sprintf("%s/%d"u8, ts.URL, code));
@@ -1690,7 +1715,7 @@ public static void TestLinuxSendfileChild(ж<testing.T> _) {
         mux.HandleFunc(quitˢ, (Δhttp.ResponseWriter _Δp0, ж<Δhttp.Request> _Δp1) => {
             os.Exit(0);
         });
-        var s = Ꮡ(new Server(Handler: new Δhttp.ServeMuxжΔHandler(mux)));
+        var s = Ꮡ(new Server(Handler: new Δhttp.ServeMuxжHandler(mux)));
         err = s.Serve(ln);
         if (err != nil) {
             throw panic(err);
@@ -1799,6 +1824,8 @@ partial struct fileServerCleanPathDir {
     internal ж<slice<@string>> log;
 }
 
+} partial class http_testᴛfileServerCleanPathDir {
+
 internal static (Δhttp.File, error) Open(this fileServerCleanPathDir d, @string path) {
     (d.log).ValueSlot = append((d.log).ValueSlot, path);
     if (path == "/"u8 || path == "/dir"u8 || path == "/dir/"u8) {
@@ -1807,6 +1834,8 @@ internal static (Δhttp.File, error) Open(this fileServerCleanPathDir d, @string
     }
     return (default, fs.ErrNotExist);
 }
+
+} partial class http_test_package {
 
 partial struct panicOnSeek {
     /*embed*/ public io_package.ReadSeeker ReadSeeker;
@@ -1991,7 +2020,7 @@ public static void TestServeFileFS(ж<testing.T> t) {
             [filename] = Ꮡ(new fstest.MapFile(Data: contents))
         });
         var fsysʗ1 = fsys;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             ServeFileFS(w, r, new http_test_package.fstest_MapFSᴠFS(fsysʗ1), filename);
         }))).ts;
         var tsʗ1 = ts;
@@ -2036,7 +2065,7 @@ public static void TestServeFileZippingResponseWriter(ж<testing.T> t) {
             [filename] = Ꮡ(new fstest.MapFile(Data: contents))
         });
         var fsysʗ1 = fsys;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             GoFrame ᒐ = default;
             try {
                 w.Header().Set(contentEncodingˢ, gzipˢ);
@@ -2073,6 +2102,8 @@ partial struct gzipResponseWriter {
     internal ж<gzip.Writer> w;
 }
 
+} partial class http_testᴛgzipResponseWriter {
+
 internal static (nint, error) Write(this gzipResponseWriter grw, slice<byte> b) {
     return grw.w.Write(b);
 }
@@ -2084,6 +2115,8 @@ internal static void Flush(this gzipResponseWriter grw) {
     }
 }
 
+} partial class http_test_package {
+
 // Issue 63769
 public static void TestFileServerDirWithRootFile(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testFileServerDirWithRootFile(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2093,7 +2126,7 @@ internal static ref readonly @string fileServerFSˢ => ref fileServerFSˢᵇ;
 private static readonly @string fileServerFSˢᵇ = "FileServerFS"u8;
 
 internal static void testFileServerDirWithRootFile(ж<testing.T> t, testMode mode) {
-    void testDirFile(ж<testing.T> tΔ1, httpꓸHandler h) {
+    void testDirFile(ж<testing.T> tΔ1, Δhttp.Handler h) {
         GoFrame ᒐ = default;
         try {
             var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, h).ts;
@@ -2161,7 +2194,7 @@ internal static void testServeContentHeadersWithError(ж<testing.T> t, bool keep
         }
         var contents = slice<byte>("content"u8);
         var contentsʗ1 = contents;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(t), http1Mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
             w.Header().Set(contentLengthˢ, strconv.Itoa(len(contentsʗ1)));
             w.Header().Set(contentEncodingˢ, gzipˢ);

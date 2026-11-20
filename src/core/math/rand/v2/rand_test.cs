@@ -18,6 +18,7 @@ using global::go.math.rand;
 using global::go.sync;
 using rand = global::go.math.rand.rand_package;
 using static global::go.math.rand.rand_internal_test_package;
+using static rand_test_package;
 
 partial class rand_test_package {
 
@@ -51,6 +52,8 @@ internal static bool nearEqual(float64 a, float64 b, float64 closeEnough, float6
 
 internal static slice<uint64> testSeeds = [1, 1754801282, 1698661970, 1550503961];
 
+} partial class rand_testᴛstatsResults {
+
 // checkSimilarDistribution returns success if the mean and stddev of the
 // two statsResults are similar.
 internal static error checkSimilarDistribution(this ref statsResults sr, ж<statsResults> Ꮡexpected) {
@@ -68,6 +71,8 @@ internal static error checkSimilarDistribution(this ref statsResults sr, ж<stat
     }
     return default;
 }
+
+} partial class rand_test_package {
 
 internal static ж<statsResults> getStatsResults(slice<float64> samples) {
     var res = @new<statsResults>();

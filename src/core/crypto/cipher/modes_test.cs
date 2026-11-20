@@ -7,6 +7,7 @@ using static go.crypto.cipher_package;
 using reflect = reflect_package;
 using testing = testing_package;
 using cipher = go.crypto.cipher_package;
+using static cipher_test_package;
 
 partial class cipher_test_package {
 
@@ -18,17 +19,25 @@ partial struct block {
     /*embed*/ public go.crypto.cipher_package.Block Block;
 }
 
+} partial class cipher_testᴛblock {
+
 internal static nint BlockSize(this block _) {
     return 16;
 }
+
+} partial class cipher_test_package {
 
 partial struct specialCTR {
     /*embed*/ public go.crypto.cipher_package.Stream Stream;
 }
 
-internal static cipher.Stream ΔNewCTR(this block _, slice<byte> iv) {
+} partial class cipher_testᴛblock {
+
+internal static cipher.Stream NewCTR(this block _, slice<byte> iv) {
     return new specialCTR();
 }
+
+} partial class cipher_test_package {
 
 public static void TestCTRAble(ж<testing.T> t) {
     var b = new block();
@@ -42,13 +51,17 @@ partial struct specialCBC {
     /*embed*/ public go.crypto.cipher_package.BlockMode BlockMode;
 }
 
-internal static cipher.BlockMode ΔNewCBCEncrypter(this block _, slice<byte> iv) {
+} partial class cipher_testᴛblock {
+
+internal static cipher.BlockMode NewCBCEncrypter(this block _, slice<byte> iv) {
     return new specialCBC();
 }
 
-internal static cipher.BlockMode ΔNewCBCDecrypter(this block _, slice<byte> iv) {
+internal static cipher.BlockMode NewCBCDecrypter(this block _, slice<byte> iv) {
     return new specialCBC();
 }
+
+} partial class cipher_test_package {
 
 public static void TestCBCAble(ж<testing.T> t) {
     var b = new block();
@@ -66,9 +79,13 @@ partial struct specialGCM {
     /*embed*/ public go.crypto.cipher_package.AEAD AEAD;
 }
 
-internal static (cipher.AEAD, error) ΔNewGCM(this block _, nint nonceSize, nint tagSize) {
+} partial class cipher_testᴛblock {
+
+internal static (cipher.AEAD, error) NewGCM(this block _, nint nonceSize, nint tagSize) {
     return (new specialGCM(), default);
 }
+
+} partial class cipher_test_package {
 
 public static void TestGCM(ж<testing.T> t) {
     var b = new block();

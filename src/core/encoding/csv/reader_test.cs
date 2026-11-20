@@ -13,6 +13,7 @@ using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using static go.encoding.csv_package;
+using static csv_internal_test_package;
 
 partial class csv_internal_test_package {
 
@@ -595,6 +596,8 @@ internal partial struct nTimes {
     internal nint off;
 }
 
+} partial class csv_internal_testᴛnTimes {
+
 internal static (nint n, error err) Read(this ref nTimes r, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -616,6 +619,8 @@ internal static (nint n, error err) Read(this ref nTimes r, slice<byte> p) {
         }
     }
 }
+
+} partial class csv_internal_test_package {
 
 // benchmarkRead measures reading the provided CSV rows data.
 // initReader, if non-nil, modifies the Reader before it's used.

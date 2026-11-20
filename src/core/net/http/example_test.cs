@@ -16,6 +16,7 @@ using global::go.net;
 using global::go.os;
 using net = net_package;
 using static global::go.net.http_internal_test_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -111,7 +112,11 @@ public static void ExampleStripPrefix() {
 partial struct apiHandler {
 }
 
+} partial class http_testᴛapiHandler {
+
 internal static void ServeHTTP(this apiHandler _Δp0, Δhttp.ResponseWriter _Δp1, ж<Δhttp.Request> _Δp2) { }
+
+} partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string apiˢ => ref apiˢᵇ;
@@ -181,16 +186,16 @@ public static partial void ExampleServer_Shutdown() {
     var idleConnsClosed = new channel<EmptyStruct>(0);
     var idleConnsClosedʗ1 = idleConnsClosed;
     goǃ(() => {
-        var sigint = new channel<osꓸSignal>(1);
+        var sigint = new channel<os.Signal>(1);
         signal.Notify(sigint.AsSendOnly(), os.Interrupt);
         ᐸꟷ(sigint);
 
         // We received an interrupt signal, shut down.
-        var err = Ꮡsrv.Shutdown(context_package.Background()); if (err != nil) {
+        var err = Ꮡsrv.Shutdown(context.Background()); if (err != nil) {
             // Error from closing listeners, or context timeout:
             log.Printf("HTTP server Shutdown: %v", err);
         }
-        builtin.close(idleConnsClosedʗ1);
+        close(idleConnsClosedʗ1);
     });
 
     {
@@ -264,8 +269,8 @@ public static void ExampleHandleFunc() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object thisIsThePeopleHandlerˢ = (@string)"This is the people handler."u8;
 
-internal static httpꓸHandler newPeopleHandler() {
-    return new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+internal static Δhttp.Handler newPeopleHandler() {
+    return new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         fmt.Fprintln(new http_test_package.http_ResponseWriterᴠWriter(w), thisIsThePeopleHandlerˢ);
     }));
 }
@@ -285,7 +290,7 @@ public static void ExampleNotFoundHandler() {
     // Create sample handler that returns 200
     mux.Handle(resourcesPeopleˢ, newPeopleHandler());
 
-    log.Fatal(Δhttp.ListenAndServe(":8080", new Δhttp.ServeMuxжΔHandler(mux)));
+    log.Fatal(Δhttp.ListenAndServe(":8080", new Δhttp.ServeMuxжHandler(mux)));
 }
 
 public static void ExampleProtocols_http1() {
@@ -333,7 +338,7 @@ public static void ExampleCrossOriginProtection() {
         WriteTimeout: (time.Duration)(15000000000L),
         // Use CrossOriginProtection.Handler to block all non-safe cross-origin
         // browser requests to mux.
-        Handler: Δhttp.NewCrossOriginProtection().Handler(new Δhttp.ServeMuxжΔHandler(mux))
+        Handler: Δhttp.NewCrossOriginProtection().Handler(new Δhttp.ServeMuxжHandler(mux))
     ), out var Ꮡsrv);
 
     log.Fatal(Ꮡsrv.ListenAndServe());

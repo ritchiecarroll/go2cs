@@ -6,6 +6,7 @@ namespace go;
 
 using syscall = syscall_package;
 using time = time_package;
+using static os_package;
 
 partial class os_package {
 
@@ -18,10 +19,14 @@ partial struct fileStat {
     internal syscall.Stat_t sys;
 }
 
+} partial class osᴛfileStat {
+
 internal static int64 Size(this ref fileStat fs) { return fs.size; }
 internal static FileMode Mode(this ref fileStat fs) { return fs.mode; }
 internal static time.Time ModTime(this ref fileStat fs) { return fs.modTime; }
 internal static any Sys(this ж<fileStat> Ꮡfs) { return Ꮡfs.Ꮡsys; }
+
+} partial class os_package {
 
 internal static bool sameFile(ref fileStat fs1, ref fileStat fs2) {
     return fs1.sys.Dev == fs2.sys.Dev && fs1.sys.Ino == fs2.sys.Ino;

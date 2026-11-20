@@ -26,15 +26,15 @@ public static void TestIssue33649(ж<testing.T> t) {
         }
 
         // find corresponding token.File
-        ref var tf = ref heap<ж<tokenꓸFile>>(out var Ꮡtf);
-        fset.Iterate((ж<tokenꓸFile> fΔ1) => {
+        ref var tf = ref heap<ж<token.File>>(out var Ꮡtf);
+        fset.Iterate((ж<token.File> fΔ1) => {
             Ꮡtf.ValueSlot = fΔ1;
             return true;
         });
-        tokenꓸPos tfEnd = tf.End();
+        token.Pos tfEnd = tf.End();
 
         var fd = f.Decls[len(f.Decls) - 1]._<ж<ast.FuncDecl>>();
-        tokenꓸPos fdEnd = fd.End();
+        token.Pos fdEnd = fd.End();
 
         if (fdEnd != tfEnd) {
             t.Errorf("%q: got fdEnd = %d; want %d (base = %d, size = %d)", src, fdEnd, tfEnd, tf.Base(), tf.Size());

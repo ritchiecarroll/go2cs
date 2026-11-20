@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
-global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,8 +28,6 @@ using static go.crypto.hpke_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657b42797465732829205b5d627974657d", "Bytes_type")]
-[assembly: GoTypeAlias("KEM", "ΔKEM")]
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -41,21 +37,21 @@ using static go.crypto.hpke_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<dhKEM, ΔKEM>(Pointer = true)]
+[assembly: GoImplement<aead, AEAD>(Pointer = true)]
+[assembly: GoImplement<dhKEM, KEM>(Pointer = true)]
 [assembly: GoImplement<dhKEMPrivateKey, PrivateKey>(Pointer = true)]
-[assembly: GoImplement<dhKEMPublicKey, ΔPublicKey>(Pointer = true)]
+[assembly: GoImplement<dhKEMPublicKey, PublicKey>(Pointer = true)]
 [assembly: GoImplement<exportOnlyAEAD, AEAD>]
 [assembly: GoImplement<go.crypto.@internal.fips140.aes.gcm_package.GCMWithXORCounterNonce, go.crypto.cipher_package.AEAD>(Pointer = true)]
 [assembly: GoImplement<hkdfKDF, KDF>(Pointer = true)]
-[assembly: GoImplement<hybridKEM, ΔKEM>(Pointer = true)]
+[assembly: GoImplement<hybridKEM, KEM>(Pointer = true)]
 [assembly: GoImplement<hybridPrivateKey, PrivateKey>(Pointer = true)]
-[assembly: GoImplement<hybridPublicKey, ΔPublicKey>(Pointer = true)]
-[assembly: GoImplement<mlkemKEM, ΔKEM>(Pointer = true)]
+[assembly: GoImplement<hybridPublicKey, PublicKey>(Pointer = true)]
+[assembly: GoImplement<mlkemKEM, KEM>(Pointer = true)]
 [assembly: GoImplement<mlkemPrivateKey, PrivateKey>(Pointer = true)]
-[assembly: GoImplement<mlkemPublicKey, ΔPublicKey>(Pointer = true)]
+[assembly: GoImplement<mlkemPublicKey, PublicKey>(Pointer = true)]
 [assembly: GoImplement<shakeKDF, KDF>(Pointer = true)]
-[assembly: GoImplement<unsupportedCurveKEM, ΔKEM>]
-[assembly: GoImplement<Δaead, AEAD>(Pointer = true)]
+[assembly: GoImplement<unsupportedCurveKEM, KEM>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -79,12 +75,12 @@ using static go.crypto.hpke_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/hpke/aead.go", "aead.cs", "ABc4wpSkpKSkuoCWgJaAnLAACBLu7u6C5oKClKaCpoLagqaCpoKmgg==")]
+[assembly: GoPositionMap("crypto/hpke/aead.go", "aead.cs", "ABg4wpSkpKSkuoCWgJaAnLAACBLu7gAIDoLmgoKUpoKmggAJCoKmgqaCpoI=")]
 [assembly: GoPositionMap("crypto/hpke/aead_fips140v1.26.go", "aead_fips140v1.26.cs", "AA8egoKClA==")]
-[assembly: GoPositionMap("crypto/hpke/hpke.go", "hpke.cs", "ADpWgpSCgoKClIKCgoKUlIKUgoKUgoKUuAAHEIKClIKClIKUgoKUgoKUgoKUgoKUgoKUuAAHIgALAoKClIKClAACFPKCgpSCgpQABhDSgpSCgqyygoKUgoKU6qKClAACENKClIKClILssoKClJKCgpSqooKUpoKCgoKUpoKCgoKCgg==", "71-73:1;114-116:2", "", "74=keySize/1/1/1,nonceSize/1/1/1,size/1/1/1")]
-[assembly: GoPositionMap("crypto/hpke/kdf.go", "kdf.cs", "AB1CwpSkpKSkpLqAloCWgAAHEIKClIKmgqaC5oKmgoKCgoKCpoKCgoKCgoKokqiSAAgSgpSCpoKmgqaCgoKCgoKCgoKCguaC5oI=")]
-[assembly: GoPositionMap("crypto/hpke/kem.go", "kem.cs", "ACtcwpSkpKSkpKSkpKQAMmSCgoKClKaCpoK2kpKSAAEUAAgClKSkpNrsgtSClIKUgpSClIIAByoADwKCgpTcgoKClKaCpoLusoKClIKUgoKUlIKCgoKUAAcsAA4CgoKU3IKCgpSmgoKClAAIBrSCgoKUgoKClJSCgoKClIKUgoKClJSmguYACRSCgpSCgoKCgpSmgtyCgoKUgoKUgg==", "", "", "408=PublicKey/1/1/2")]
-[assembly: GoPositionMap("crypto/hpke/pq.go", "pq.cs", "ABcoAAwYtsyipgAKFrbKkqYACha2ypIADiKCpoKmgoKCgoKCggAQLAAPApSClKSClKSClKT4ooKUkoKUgpKUgpSmgqaCyrKCgpSClIKUgoKUgpSUgoKmgoIACTIADwKmgoKC5qKCpoKUgoKSgqaCgoKCkqSClLiClIKUpIKUpIKUpPiigoKClKaC5oKClKaCAAoOooKUgpKClIKSlIKUgoKUgpSCpri2tsqSpri2tsqSAAoWgqaCAAsmAAsClKSkuIKCgpSmgqaCpoKCgpQAByYACwKUpKS4goKClKaCgoKUpoKCgoKUpoLmgoaClKaC3II=", "173-175:1;194-196:1;204-206:2;273-275:1;343-345:1;350-352:2", "", "24=X25519/1/1/4;52=P256/1/1/3;77=P384/1/1/3;381=PublicKey/1/1/2,Encapsulator/1/1/3;611=Encapsulator/1/1/2")]
+[assembly: GoPositionMap("crypto/hpke/hpke.go", "hpke.cs", "ADtWgpSCgoKClIKCgoKUlIKUgoKUgoKUuAAHEIKClIKClIKUgoKUgoKUgoKUgoKUgoKUuAAHIgALAoKClIKClAACFPKCgpSCgpQACBDSgpSCgsyygoKUgoKUAAgKooKUAAgQ0oKUgoKUggAIDLKCgpSSgoKUAAgKooKUxoKCgoKUxoKCgoKCgg==", "71-73:1;114-116:2", "", "75=keySize/1/1/1,nonceSize/1/1/1,size/1/1/1")]
+[assembly: GoPositionMap("crypto/hpke/kdf.go", "kdf.cs", "AB5CwpSkpKSkpLqAloCWgAAHEIKCtIKmgqaC5oKmgoKCgoKCpoKCgoKCgoLIkqiSAAgSgrSCpoKmgqaCgoKCgoKCgoKCguaC5oI=")]
+[assembly: GoPositionMap("crypto/hpke/kem.go", "kem.cs", "ACxcwpSkpKSkpKSkpKQANGSCgoKClKaCpoLWkpKSAAEUAAgClKSkpNoACAyC1IKUgpSClIKUggANKgAPAoKClPyCgoKUxoKmggAKDrKCgpSClIKClJSCgoKClAAJLAAOAoKClPyCgoKUpoKCgpQACAa0goKClIKCgpSUgoKCgpSClIKCgpSUxoLmAAkUgoKUgoKCgoKUpoLcgoKClIKClII=", "", "", "435=PublicKey/1/1/2")]
+[assembly: GoPositionMap("crypto/hpke/pq.go", "pq.cs", "ABgoAAwYtsyipgAKFrbKkqYACha2ypIAECKCpoKmgoKCgoKCggASLAAPApSClKSClKSClKQACQiigpSSgpSCkpSClMaCpoIACAqygoKUgpSClIKClIKUlIKCpoKCAAsyAA8CxoKCguaigqaClIKCkoKmgoKCgpKkgpTYgpSClKSClKSClKQACQiigoKClMaC5oKClKaCAAoOooKUgpKClIKSlIKUgoKUgpSCxri2tsqSpri2tsqSAAwWgqaCAA0mAAsClKSk2IKCgpTGgqaCpoKCgpQACSYACwKUpKTYgoKClKaCgoKU5oKCgoKUxoIADgaChoKUpoLcgg==", "173-175:1;194-196:1;204-206:2;273-275:1;343-345:1;350-352:2", "", "25=X25519/1/1/4;53=P256/1/1/3;78=P384/1/1/3;404=PublicKey/1/1/2,Encapsulator/1/1/3;662=Encapsulator/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -100,6 +96,7 @@ public static partial class hpke_package
 
     // <TypeAccessibility>
     internal partial interface Bytes_type {}
+    internal partial struct aead {}
     internal partial struct context {}
     internal partial struct dhKEM {}
     internal partial struct dhKEMPrivateKey {}
@@ -114,12 +111,11 @@ public static partial class hpke_package
     internal partial struct mlkemPublicKey {}
     internal partial struct shakeKDF {}
     internal partial struct unsupportedCurveKEM {}
-    internal partial struct Δaead {}
     public partial interface AEAD {}
     public partial interface KDF {}
+    public partial interface KEM {}
     public partial interface PrivateKey {}
-    public partial interface ΔKEM {}
-    public partial interface ΔPublicKey {}
+    public partial interface PublicKey {}
     public partial struct Recipient {}
     public partial struct Sender {}
     // </TypeAccessibility>
@@ -152,3 +148,29 @@ public static partial class hpke_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸcryptoꓸchacha20poly1305() => builtin.initPackage(typeof(vendor.golang.org.x.crypto.chacha20poly1305_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(hpke_package.Recipient)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛRecipient;
+[GoMethodHost(typeof(hpke_package.Sender)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛSender;
+[GoMethodHost(typeof(hpke_package.aead)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛaead;
+[GoMethodHost(typeof(hpke_package.context)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛcontext;
+[GoMethodHost(typeof(hpke_package.dhKEM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEM;
+[GoMethodHost(typeof(hpke_package.dhKEMPrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEMPrivateKey;
+[GoMethodHost(typeof(hpke_package.dhKEMPublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛdhKEMPublicKey;
+[GoMethodHost(typeof(hpke_package.exportOnlyAEAD)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛexportOnlyAEAD;
+[GoMethodHost(typeof(hpke_package.hkdfKDF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛhkdfKDF;
+[GoMethodHost(typeof(hpke_package.hybridKEM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛhybridKEM;
+[GoMethodHost(typeof(hpke_package.hybridPrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛhybridPrivateKey;
+[GoMethodHost(typeof(hpke_package.hybridPublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛhybridPublicKey;
+[GoMethodHost(typeof(hpke_package.mlkemKEM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemKEM;
+[GoMethodHost(typeof(hpke_package.mlkemPrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemPrivateKey;
+[GoMethodHost(typeof(hpke_package.mlkemPublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛmlkemPublicKey;
+[GoMethodHost(typeof(hpke_package.shakeKDF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛshakeKDF;
+[GoMethodHost(typeof(hpke_package.unsupportedCurveKEM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpkeᴛunsupportedCurveKEM;
+// </MethodHolders>

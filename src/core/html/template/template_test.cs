@@ -15,6 +15,7 @@ using io = io_package;
 using static go.html.template_internal_test_package;
 using template = go.html.template_package;
 using text.template;
+using static template_test_package;
 
 partial class template_test_package {
 
@@ -292,6 +293,8 @@ internal static ж<testCase> newTestCase(ж<testing.T> t) {
     ));
 }
 
+} partial class template_testᴛtestCase {
+
 internal static ж<template.Template> lookup(this ref testCase c, @string name) {
     return c.root.Lookup(name);
 }
@@ -327,4 +330,4 @@ internal static void mustExecute(this ref testCase c, ж<template.Template> Ꮡt
     }
 }
 
-} // end template_test_package
+} // end template_testᴛtestCase

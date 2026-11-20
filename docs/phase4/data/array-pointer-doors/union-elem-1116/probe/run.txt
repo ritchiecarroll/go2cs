@@ -1,0 +1,54 @@
+start 03:34:20Z bin=7d72da607b7cafb0
+convert rc=0
+raw Go struct text in the emission: 0
+build rc=0
+run rc=0
+1,5c1,5
+< A 2.25 0x40100000
+< B 1.5
+< C 9 9
+< D 7 24
+< E 0x5a000000 16
+---
+> A panic: runtime error: index out of range [3] with length 0
+> B panic: runtime error: index out of range [0] with length 0
+> C panic: runtime error: index out of range [2] with length 0
+> D panic: runtime error: index out of range [1] with length 0
+> E panic: runtime error: index out of range [1] with length 0
+7c7
+< G 3 3 0x40600000
+---
+> G panic: runtime error: slice bounds out of range [1:0]
+58:    return (@unsafe.Pointer.To<array<TRtreeCoord>>(p)).Value[i].Ff;
+62:    (@unsafe.Pointer.To<array<TRtreeCoord>>(p)).Value[i].Ff = f;
+66:    return (@unsafe.Pointer.To<array<TExpr>>(p)).Value[i].Fw.FiJoin;
+70:    (@unsafe.Pointer.To<array<TExpr>>(p)).Value[i].Fw.FiJoin = j;
+76:        @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡraw);
+84:        fmt.Println("B", readCoord(@unsafe.Pointer.FromPinnedBox(Ꮡraw), 0));
+89:        @unsafe.Pointer q = @unsafe.Pointer.FromPinnedBox(Ꮡwords);
+97:        fmt.Println("D", joinOf(@unsafe.Pointer.FromPinnedBox(Ꮡwords), 1), /* unsafe.Sizeof(TExpr{}) */ (uintptr)24);
+102:        (@unsafe.Pointer.To<array<TAddr>>(@unsafe.Pointer.FromPinnedBox(Ꮡwords))).Value[1].Fb[3] = 0x5a;
+108:        writeCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1, 4.5F);
+109:        fmt.Println("F", arr[1].Ff, readCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1));
+114:        var s = @unsafe.Pointer.To<array<TRtreeCoord>>(@unsafe.Pointer.FromPinnedBox(Ꮡraw)).slice(1);
+CONVDONE 03:40:22Z
+====
+start 03:40:22Z bin=e6ca0081042219b7
+convert rc=0
+raw Go struct text in the emission: 0
+build rc=0
+run rc=0
+EQUAL to Go, 7 lines
+58:    return @unsafe.Pointer.ElementRef<TRtreeCoord>(p, i, 4).Ff;
+62:    @unsafe.Pointer.ElementRef<TRtreeCoord>(p, i, 4).Ff = f;
+66:    return @unsafe.Pointer.ElementRef<TExpr>(p, i, 3).Fw.FiJoin;
+70:    @unsafe.Pointer.ElementRef<TExpr>(p, i, 3).Fw.FiJoin = j;
+76:        @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡraw);
+84:        fmt.Println("B", readCoord(@unsafe.Pointer.FromPinnedBox(Ꮡraw), 0));
+89:        @unsafe.Pointer q = @unsafe.Pointer.FromPinnedBox(Ꮡwords);
+97:        fmt.Println("D", joinOf(@unsafe.Pointer.FromPinnedBox(Ꮡwords), 1), /* unsafe.Sizeof(TExpr{}) */ (uintptr)24);
+102:        @unsafe.Pointer.ElementRef<TAddr>(@unsafe.Pointer.FromPinnedBox(Ꮡwords), 1, 2).Fb[3] = 0x5a;
+108:        writeCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1, 4.5F);
+109:        fmt.Println("F", arr[1].Ff, readCoord(@unsafe.Pointer.FromPinnedBox(Ꮡarr), 1));
+114:        var s = @unsafe.Pointer.View<TRtreeCoord>(@unsafe.Pointer.FromPinnedBox(Ꮡraw), 1, 4);
+CONVDONE 03:40:37Z

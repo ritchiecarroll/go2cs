@@ -4,6 +4,7 @@
 namespace go.image;
 
 using io = io_package;
+using static jpeg_package;
 
 partial class jpeg_package {
 
@@ -40,6 +41,8 @@ partial struct huffman {
 // errShortHuffmanData means that an unexpected EOF occurred while decoding
 // Huffman data.
 internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short Huffman data");
+
+} partial class jpegᴛdecoder {
 
 // ensureNBits reads bytes from the byte buffer to ensure that d.bits.n is at
 // least n. For best performance (avoiding function calls inside hot loops),
@@ -271,4 +274,4 @@ internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
     return (ret, default);
 }
 
-} // end jpeg_package
+} // end jpegᴛdecoder

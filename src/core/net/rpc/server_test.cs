@@ -20,6 +20,7 @@ using global::go.net.http;
 using global::go.sync;
 using static global::go.net.rpc_package;
 using Δhttp = global::go.net.http_package;
+using static rpc_internal_test_package;
 
 partial class rpc_internal_test_package {
 
@@ -46,6 +47,8 @@ public partial struct Reply {
 }
 
 public partial struct Arith /*num:nint*/;
+
+} partial class rpc_internal_testᴛArith {
 
 // Some of Arith's methods have value args, some have pointer args. That's deliberate.
 public static error Add(this ref Arith t, Args args, ж<Reply> Ꮡreply) {
@@ -103,7 +106,11 @@ public static error SleepMilli(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> rep
     return default;
 }
 
+} partial class rpc_internal_test_package {
+
 internal partial struct hidden /*num:nint*/;
+
+} partial class rpc_internal_testᴛhidden {
 
 internal static error Exported(this ref hidden t, Args args, ж<Reply> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
@@ -112,12 +119,16 @@ internal static error Exported(this ref hidden t, Args args, ж<Reply> Ꮡreply)
     return default;
 }
 
+} partial class rpc_internal_test_package {
+
 public partial struct Embed {
     /*embed*/ internal hidden hidden;
 }
 
 public partial struct BuiltinTypes {
 }
+
+} partial class rpc_internal_testᴛBuiltinTypes {
 
 public static error Map(this BuiltinTypes _, ж<Args> Ꮡargs, ж<map<nint, nint>> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
@@ -143,6 +154,8 @@ public static error Array(this BuiltinTypes _, ж<Args> Ꮡargs, /*[2]*/ ж<arra
     (reply)[1] = args.B;
     return default;
 }
+
+} partial class rpc_internal_test_package {
 
 internal static (net.Listener, @string) listenTCP() {
     var (l, err) = net.Listen(tcpˢ, "127.0.0.1:0"); // any available address
@@ -528,6 +541,8 @@ public partial struct CodecEmulator {
     internal error err;
 }
 
+} partial class rpc_internal_testᴛCodecEmulator {
+
 public static error Call(this ж<CodecEmulator> Ꮡcodec, @string serviceMethod, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     ref var codec = ref Ꮡcodec.DerefOrNull();
     ref var args = ref Ꮡargs.DerefOrNull();
@@ -580,6 +595,8 @@ public static error Close(this ref CodecEmulator codec) {
     return default;
 }
 
+} partial class rpc_internal_test_package {
+
 public static void TestServeRequest(ж<testing.T> t) {
     Ꮡonce.Do(startServer);
     testServeRequest(t, nil);
@@ -612,28 +629,38 @@ internal static void testServeRequest(ж<testing.T> t, ж<global::go.net.rpc_pac
     finally { ᒐ.Run(); }
 }
 
-public partial struct ΔReplyNotPointer /*num:nint*/;
-public partial struct ΔArgNotPublic /*num:nint*/;
-public partial struct ΔReplyNotPublic /*num:nint*/;
-public partial struct ΔNeedsPtrType /*num:nint*/;
+public partial struct ReplyNotPointer /*num:nint*/;
+public partial struct ArgNotPublic /*num:nint*/;
+public partial struct ReplyNotPublic /*num:nint*/;
+public partial struct NeedsPtrType /*num:nint*/;
 public partial struct local {
 }
 
-public static error ReplyNotPointer(this ref ΔReplyNotPointer t, ж<Args> args, Reply reply) {
+} partial class rpc_internal_testᴛReplyNotPointer {
+
+public static error ReplyNotPointer(this ref ReplyNotPointer t, ж<Args> args, Reply reply) {
     return default;
 }
 
-public static error ArgNotPublic(this ref ΔArgNotPublic t, ж<local> args, ж<Reply> reply) {
+} partial class rpc_internal_testᴛArgNotPublic {
+
+public static error ArgNotPublic(this ref ArgNotPublic t, ж<local> args, ж<Reply> reply) {
     return default;
 }
 
-public static error ReplyNotPublic(this ref ΔReplyNotPublic t, ж<Args> args, ж<local> reply) {
+} partial class rpc_internal_testᴛReplyNotPublic {
+
+public static error ReplyNotPublic(this ref ReplyNotPublic t, ж<Args> args, ж<local> reply) {
     return default;
 }
 
-public static error NeedsPtrType(this ref ΔNeedsPtrType t, ж<Args> args, ж<Reply> reply) {
+} partial class rpc_internal_testᴛNeedsPtrType {
+
+public static error NeedsPtrType(this ref NeedsPtrType t, ж<Args> args, ж<Reply> reply) {
     return default;
 }
+
+} partial class rpc_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorRegisteringˢ = (@string)"expected error registering ReplyNotPointer"u8;
@@ -646,19 +673,19 @@ internal static readonly object expectedHintWhenˢ = (@string)"expected hint whe
 
 // Check that registration handles lots of bad methods and a type with no suitable methods.
 public static void TestRegistrationError(ж<testing.T> t) {
-    var err = Register(@new<ΔReplyNotPointer>());
+    var err = Register(@new<ReplyNotPointer>());
     if (err == nil) {
         t.Error(expectedErrorRegisteringˢ);
     }
-    err = Register(@new<ΔArgNotPublic>());
+    err = Register(@new<ArgNotPublic>());
     if (err == nil) {
         t.Error(expectedErrorRegisteringˢ2);
     }
-    err = Register(@new<ΔReplyNotPublic>());
+    err = Register(@new<ReplyNotPublic>());
     if (err == nil) {
         t.Error(expectedErrorRegisteringˢ3);
     }
-    err = Register((ΔNeedsPtrType)0);
+    err = Register((NeedsPtrType)0);
     if (err == nil) {
         t.Error(expectedErrorRegisteringˢ4);
     } else if (!strings.Contains(err.Error(), pointerˢ)) {
@@ -667,6 +694,8 @@ public static void TestRegistrationError(ж<testing.T> t) {
 }
 
 public partial struct WriteFailCodec /*num:nint*/;
+
+} partial class rpc_internal_testᴛWriteFailCodec {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string failˢ => ref failˢᵇ;
@@ -691,6 +720,8 @@ public static error Close(this WriteFailCodec _) {
     return default;
 }
 
+} partial class rpc_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object deadlockˢ = (@string)"deadlock"u8;
 
@@ -709,10 +740,10 @@ public static partial void TestSendDeadlock(ж<testing.T> t) {
             testSendDeadlock(clientʗ2);
             doneʗ1.ᐸꟷ(true);
         });
-        var selᴛ1 = done;
+        var doneᴛ1 = done;
         var selᴛ2 = time.After((time.Duration)(5000000000L));
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-        case 0 when selᴛ1.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        case 0 when doneᴛ1.ꟷᐳ(out _): {
             return;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
@@ -807,6 +838,8 @@ internal partial struct writeCrasher {
     internal channel<bool> done;
 }
 
+} partial class rpc_internal_testᴛwriteCrasher {
+
 internal static error Close(this writeCrasher _) {
     return default;
 }
@@ -823,6 +856,8 @@ private static readonly @string fakeWriteFailureˢᵇ = "fake write failure"u8;
 internal static (nint, error) Write(this writeCrasher _, slice<byte> p) {
     return (0, errors.New(fakeWriteFailureˢ));
 }
+
+} partial class rpc_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooˢ => ref fooˢᵇ;
@@ -966,7 +1001,7 @@ public static partial void TestShutdown(ж<testing.T> t) {
     // be reported as passing, but we're OK with that kind of flakiness.
     // If the code is correct, this test will never fail, regardless of timeout.
     args.A = 10; // 10 ms
-    var done = new channel<ж<global::go.net.rpc_package.ΔCall>>(1);
+    var done = new channel<ж<global::go.net.rpc_package.Call>>(1);
     var call = client.Go(arithSleepMilliˢ, args.OrTypedNil(), reply.OrTypedNil(), done);
     c._<ж<net.TCPConn>>().CloseWrite();
     ᐸꟷ(done);
@@ -1039,7 +1074,7 @@ internal static partial void benchmarkEndToEndAsync(Func<(ж<global::go.net.rpc_
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(procs);
         var gate = new channel<bool>(MaxConcurrentCalls);
-        var res = new channel<ж<global::go.net.rpc_package.ΔCall>>(MaxConcurrentCalls);
+        var res = new channel<ж<global::go.net.rpc_package.Call>>(MaxConcurrentCalls);
         b.ResetTimer();
 
         for (nint p = 0; p < procs; p++) {

@@ -7,13 +7,18 @@ using fmt = fmt_package;
 using Δos = os_package;
 using Δsync = sync_package;
 using static go.sync_internal_test_package;
+using static sync_test_package;
 
 partial class sync_test_package {
 
 partial struct httpPkg {
 }
 
+} partial class sync_testᴛhttpPkg {
+
 internal static void Get(this httpPkg _, @string url) { }
+
+} partial class sync_test_package {
 
 internal static httpPkg http;
 

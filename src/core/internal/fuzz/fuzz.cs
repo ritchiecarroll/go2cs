@@ -23,7 +23,8 @@ using reflect = reflect_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using fs = global::go.io.fs_package;
 using global::go.@internal;
@@ -32,6 +33,7 @@ using global::go.math;
 using path;
 using ꓸꓸꓸCorpusEntry = Span<CorpusEntry>;
 using ꓸꓸꓸany = Span<any>;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -66,7 +68,7 @@ partial struct CoordinateFuzzingOpts {
     public slice<CorpusEntry> Seed;
     // Types is the list of types which make up a corpus entry.
     // Types must be set and must match values in Seed.
-    public slice<reflectꓸType> Types;
+    public slice<reflect.Type> Types;
     // CorpusDir is a directory where files containing values that crash the
     // code being tested may be written. CorpusDir must be set.
     public @string CorpusDir;
@@ -240,20 +242,20 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 minimizeC = c.minimizeC;
             }
 
-            var selᴛ1 = doneC;
-            var selᴛ2 = errC;
+            var doneCᴛ1 = doneC;
+            var errCᴛ1 = errC;
             var selᴛ3 = c.resultC;
-            var selᴛ4 = inputC.ᐸꟷ(input, ꓸꓸꓸ);
-            var selᴛ5 = minimizeC.ᐸꟷ(minimizeInput, ꓸꓸꓸ);
+            var inputCᴛ1 = inputC.ᐸꟷ(input, ꓸꓸꓸ);
+            var minimizeCᴛ1 = minimizeC.ᐸꟷ(minimizeInput, ꓸꓸꓸ);
             var selᴛ6 = statTicker.C;
-            switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ), selᴛ4, selᴛ5, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-            case 0 when selᴛ1.ꟷᐳ(out _): {
+            switch (select(ᐸꟷ(doneCᴛ1, ꓸꓸꓸ), ᐸꟷ(errCᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ), inputCᴛ1, minimizeCᴛ1, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+            case 0 when doneCᴛ1.ꟷᐳ(out _): {
                 // Interrupted, canceled, or timed out.
                 // stop sets doneC to nil, so we don't busy wait here.
                 stop(ctx.Err());
                 break;
             }
-            case 1 when selᴛ2.ꟷᐳ(out var errΔ5): {
+            case 1 when errCᴛ1.ꟷᐳ(out var errΔ5): {
                 // A worker terminated, possibly after encountering a fatal error.
                 stop(errΔ5);
                 activeWorkers--;
@@ -435,6 +437,8 @@ partial struct crashError {
     internal error err;
 }
 
+} partial class fuzzᴛcrashError {
+
 internal static @string Error(this ref crashError e) {
     return e.err.Error();
 }
@@ -447,10 +451,14 @@ internal static @string CrashPath(this ref crashError e) {
     return e.path;
 }
 
+} partial class fuzz_package {
+
 partial struct corpus {
     internal slice<CorpusEntry> entries;
     internal map</*[32]*/ array<byte>, bool> hashes;
 }
+
+} partial class fuzzᴛcoordinator {
 
 // addCorpusEntries adds entries to the corpus, and optionally writes the entries
 // to the cache directory. If an entry is already in the corpus it is skipped. If
@@ -487,6 +495,8 @@ internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addT
     }
     return (noDupes, default);
 }
+
+} partial class fuzz_package {
 
 // CorpusEntry represents an individual input for fuzzing.
 //
@@ -713,6 +723,8 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     return (c, default);
 }
 
+} partial class fuzzᴛcoordinator {
+
 internal static void updateStats(this ref coordinator c, fuzzResult result) {
     c.count += result.count;
     c.countWaiting -= result.limit;
@@ -922,7 +934,7 @@ internal static bool canMinimize(this ref coordinator c) {
 }
 
 internal static time.Duration elapsed(this ref coordinator c) {
-    return time.Since(c.startTime).Round(1 * time.ΔSecond);
+    return time.Since(c.startTime).Round(1 * time.Second);
 }
 
 // readCache creates a combined corpus from seed values and values in the cache
@@ -951,12 +963,16 @@ internal static error readCache(this ref coordinator c) {
     return default;
 }
 
+} partial class fuzz_package {
+
 // MalformedCorpusError is an error found while reading the corpus from the
 // filesystem. All of the errors are stored in the errs list. The testing
 // framework uses this to report malformed files in testdata.
 partial struct MalformedCorpusError {
     internal slice<error> errs;
 }
+
+} partial class fuzzᴛMalformedCorpusError {
 
 public static @string Error(this ref MalformedCorpusError e) {
     var msgsᴷ = new stackAppend<@string>();
@@ -968,11 +984,13 @@ public static @string Error(this ref MalformedCorpusError e) {
     return strings.Join(msgs, "\n");
 }
 
+} partial class fuzz_package {
+
 // ReadCorpus reads the corpus from the provided dir. The returned corpus
 // entries are guaranteed to match the given types. Any malformed files will
 // be saved in a MalformedCorpusError and returned, along with the most recent
 // error.
-public static (slice<CorpusEntry>, error) ReadCorpus(@string dir, slice<reflectꓸType> types) {
+public static (slice<CorpusEntry>, error) ReadCorpus(@string dir, slice<reflect.Type> types) {
     var (files, err) = os.ReadDir(dir);
     if (os.IsNotExist(err)) {
         return (default, default); // No corpus to read
@@ -1009,7 +1027,7 @@ public static (slice<CorpusEntry>, error) ReadCorpus(@string dir, slice<reflect�
     return (corpus, default);
 }
 
-internal static (slice<any>, error) readCorpusData(slice<byte> data, slice<reflectꓸType> types) {
+internal static (slice<any>, error) readCorpusData(slice<byte> data, slice<reflect.Type> types) {
     var (vals, err) = unmarshalCorpusFile(data);
     if (err != nil) {
         return (default, fmt.Errorf("unmarshal: %v"u8, err));
@@ -1022,11 +1040,11 @@ internal static (slice<any>, error) readCorpusData(slice<byte> data, slice<refle
 
 // CheckCorpus verifies that the types in vals match the expected types
 // provided.
-public static error CheckCorpus(slice<any> vals, slice<reflectꓸType> types) {
+public static error CheckCorpus(slice<any> vals, slice<reflect.Type> types) {
     if (len(vals) != len(types)) {
         return fmt.Errorf("wrong number of values in corpus entry: %d, want %d"u8, len(vals), len(types));
     }
-    var valsT = new slice<reflectꓸType>(len(vals));
+    var valsT = new slice<reflect.Type>(len(vals));
     foreach (var (valsI, v) in range(vals)) {
         valsT[valsI] = reflect.TypeOf(v);
     }
@@ -1061,7 +1079,7 @@ internal static @string testName(@string path) {
     return filepath.Base(path);
 }
 
-internal static any zeroValue(reflectꓸType t) {
+internal static any zeroValue(reflect.Type t) {
     foreach (var (_, v) in range(zeroVals)) {
         if (AreEqual(reflect.TypeOf(v), t)) {
             return v;
@@ -1096,6 +1114,8 @@ internal static bool shouldPrintDebugInfo() {
     return debugInfo;
 }
 
+} partial class fuzzᴛcoordinator {
+
 internal static void debugLogf(this ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
@@ -1103,4 +1123,4 @@ internal static void debugLogf(this ref coordinator c, @string format, params �
     fmt.Fprintf(c.opts.Log, t + " DEBUG "u8 + format + "\n"u8, args.ꓸꓸꓸ);
 }
 
-} // end fuzz_package
+} // end fuzzᴛcoordinator

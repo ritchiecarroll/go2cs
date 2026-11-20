@@ -44,7 +44,7 @@ internal static void main() {
 
     v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf("again"));
     fmt.Println("m[nil] after overwrite:", m[default]);
-    v.SetMapIndex(reflect.Zero(keyType), new reflectꓸValue());
+    v.SetMapIndex(reflect.Zero(keyType), new reflect.Value());
     show("after delete nil key:", m);
 
     var keys = v.MapKeys();

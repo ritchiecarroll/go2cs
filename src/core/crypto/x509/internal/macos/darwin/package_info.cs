@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -59,7 +57,7 @@ using static go.crypto.x509.@internal.macos_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/x509/internal/macos/corefoundation.go", "corefoundation.cs", "AB0+koKCgqqigoKUgoKokoKCAAcUkoKigpSasoK0gpSYsqSClJT8koKkgpSUmJKClJiSgpSYkoKUmJKClJiSgpSYkpSYkpKUmJKUmJKClJiSgpSYkpTYkoKClJSWqrKCgpQ=")]
-[assembly: GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ACBKgqqSgqSClJSYsoKCpoKUxJiygoKClJKClMSYkoKClJSYkoKigpSUmJKCooKCgoKCgpSU2JKCgpSCgpSYkoKClJQ=")]
+[assembly: GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ACNKgsqSgqSClJSYsoKCpoKUxJiygoKClJKClMSYkoKClJSYkoKigpSUmJKCooKCgoKCgpSU2JKCgpSCgpSYkoKClJQ=")]
 // </GoSourcePositionMaps>
 
 // Dynamically imported C entry points are recorded here, one `GoCgoImportDynamic` attribute
@@ -128,3 +126,13 @@ public static partial class macos_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(macos_package.OSStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class macosᴛOSStatus;
+// </MethodHolders>

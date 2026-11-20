@@ -99,8 +99,10 @@ internal interface ISliceBacking
         T[] backing = AllocationCounter.NewArray<T>(capacity);
 
         // Block copy, not an element loop: encoding/gob's decUint8Slice grows buffers past internal/saferio's 10 MiB
-        // chunk, where a per-element ref indexer walk is orders of magnitude slower than the memmove a Span copy is.
-        s.ToSpan().CopyTo(backing);
+        // chunk, where a per-element ref indexer walk is orders of magnitude slower than the memmove a Span copy is. An
+        // element that owns array storage is then copied on its own (GoElementCopy.CloneInto), so the old backing and the
+        // new one share no inner array.
+        GoElementCopy.CloneInto<T>(s.ToSpan(), backing.AsSpan(0, (int)length));
 
         return new slice<T>(backing, 0, length);
     }
@@ -1258,9 +1260,14 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return new slice<T>(value);
     }
 
+    // A copy of the elements, so an element that owns array storage is copied on its own, as array<T>'s conversion
+    // constructor copies it.
     public static implicit operator array<T>(slice<T> value)
     {
-        return new array<T>(AllocationCounter.CopyOf<T>(value.ToSpan()));
+        T[] copy = AllocationCounter.CopyOf<T>(value.ToSpan());
+        GoElementCopy.CloneElements<T>(copy);
+
+        return new array<T>(copy);
     }
 
     // slice<T> to slice<T> comparisons — HEADER identity (same backing array reference, window and
@@ -1586,6 +1593,27 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // collection-expression call site in the corpus, which is a bad trade for a parameter type.
     public static slice<T> Append(in slice<T> slice, params ReadOnlySpan<T> elems)
     {
+        return Append(slice, elems, elemsAreCopies: true);
+    }
+
+    /// <summary>
+    /// Go's <c>append(s, t...)</c> with a spread whose elements are another slice's (a window, a named slice, a variadic
+    /// pack): each element that owns array storage is copied as it lands, where append's element LIST arrives already
+    /// copied (the converter passes <c>x.Clone()</c>).
+    /// </summary>
+    internal static slice<T> AppendSpread(in slice<T> slice, ReadOnlySpan<T> elems)
+    {
+        return Append(slice, elems, elemsAreCopies: false);
+    }
+
+    // elemsAreCopies: the elements are values of their own, so new storage takes them as they are. Otherwise they are
+    // another slice's, and an element that owns array storage (array<T>.ElementNeedsDeepCopy) would carry that storage
+    // along and leave two slices holding one inner array: within capacity each is copied INTO its slot
+    // (GoElementCopy.CopyInto, as copy() writes), and into new storage each is copied on its own (CloneInto). The old
+    // elements a growth moves are always copied on their own: the old slice still holds them. For any other element
+    // type both are the span copies they were (per-T constants the JIT folds).
+    private static slice<T> Append(in slice<T> slice, ReadOnlySpan<T> elems, bool elemsAreCopies)
+    {
         // Go's append with nothing to add returns s ITSELF (no growth is needed, so the same
         // header comes back): nil stays nil and a non-nil empty stays that same non-nil empty —
         // `append([]byte{}, b...)` with an empty b (bytes.Clone) must return the non-nil literal,
@@ -1621,7 +1649,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             nint firstCapacity = GrowCapacity(slice, elems.Length, AppendedElemDims(elems));
             newArray = AllocationCounter.NewArray<T>(firstCapacity);
             GoMemProfile.Charge<T>(newArray, firstCapacity, GoAllocEntry.GrowSlice);
-            elems.CopyTo(newArray);
+            MoveIn(elems, newArray.AsSpan(0, elems.Length), elemsAreCopies);
             return new slice<T>(newArray, 0, elems.Length);
         }
 
@@ -1645,7 +1673,9 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             }
 
             // Single-element append is the dominant Go idiom — store directly instead of span-copying.
-            if (elems.Length == 1)
+            if (!elemsAreCopies)
+                GoElementCopy.CopyInto(elems, new Span<T>(slice.m_array, (int)slice.High, elems.Length));
+            else if (elems.Length == 1)
                 slice.m_array[slice.High] = elems[0];
             else
                 elems.CopyTo(new Span<T>(slice.m_array, (int)slice.High, elems.Length));
@@ -1661,10 +1691,19 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         newArray = AllocationCounter.NewArray<T>(newCapacity);
         GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
-        slice.ToSpan().CopyTo(newArray);
-        elems.CopyTo(newArray.AsSpan((int)slice.Length));
+        GoElementCopy.CloneInto<T>(slice.ToSpan(), newArray.AsSpan(0, (int)slice.Length));
+        MoveIn(elems, newArray.AsSpan((int)slice.Length, elems.Length), elemsAreCopies);
 
         return new slice<T>(newArray, 0, slice.Length + elems.Length);
+    }
+
+    // Appended elements into new storage: as they are when they are copies already, else each copied on its own.
+    private static void MoveIn(ReadOnlySpan<T> elems, Span<T> destination, bool elemsAreCopies)
+    {
+        if (elemsAreCopies)
+            elems.CopyTo(destination);
+        else
+            GoElementCopy.CloneInto(elems, destination);
     }
 
     // A slice-typed spread operand's elements appended to slice: the window arm of the ISlice<T> form below, and
@@ -1693,7 +1732,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         }
 
         if (window.m_nativeBase == 0 || window.m_length <= int.MaxValue)
-            return Append(slice, window.ToSpan());
+            return AppendSpread(slice, window.ToSpan());
 
         // A native window past the span ceiling cannot land in any managed backing either —
         // Go's growslice answers the same impossible request with this panic.
@@ -1723,7 +1762,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // inside the core, where the slice-shaped fast path above no longer pays it. Managed
         // backings are int-bounded by construction, so the span expresses every wrapper window
         // and the allocation count is byte-identical to the old boundary's.
-        return Append(slice, (ReadOnlySpan<T>)elems.ꓸꓸꓸ);
+        return AppendSpread(slice, (ReadOnlySpan<T>)elems.ꓸꓸꓸ);
     }
 
     // REC-C §B (docs/phase4/DESIGN-slice-idiom-allocations.md), Go's EXTENDSLICE:
@@ -1787,7 +1826,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         newArray = AllocationCounter.NewArray<T>(newCapacity);
         GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
-        slice.ToSpan().CopyTo(newArray);
+        GoElementCopy.CloneInto<T>(slice.ToSpan(), newArray.AsSpan(0, (int)slice.Length));
 
         return new slice<T>(newArray, 0, slice.Length + count);
     }

@@ -59,10 +59,10 @@ public static void TestSymbols(ж<testing.T> t) {
         finally { ᒐ.Run(); }
     }
     foreach (var (@file, ts) in symbolsGolden) {
-        @do(@file, ts, ((Func<ж<global::go.debug.elf_package.File>, (slice<global::go.debug.elf_package.Symbol>, error)>)(global::go.debug.elf_package.Symbols)));
+        @do(@file, ts, ((Func<ж<global::go.debug.elf_package.File>, (slice<global::go.debug.elf_package.Symbol>, error)>)(global::go.debug.elfᴛFile.Symbols)));
     }
     foreach (var (@file, ts) in dynamicSymbolsGolden) {
-        @do(@file, ts, ((Func<ж<global::go.debug.elf_package.File>, (slice<global::go.debug.elf_package.Symbol>, error)>)(global::go.debug.elf_package.DynamicSymbols)));
+        @do(@file, ts, ((Func<ж<global::go.debug.elf_package.File>, (slice<global::go.debug.elf_package.Symbol>, error)>)(global::go.debug.elfᴛFile.DynamicSymbols)));
     }
 }
 

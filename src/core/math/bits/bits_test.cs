@@ -1241,7 +1241,7 @@ public static void TestDivPanicOverflow(ж<testing.T> t) {
         defer(() => {
             var err = recover(); if (err == nil) {
                 t.Error(divShouldHavePanickedˢ);
-            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
+            } else if (err._<runtime.Error>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
                 t.Errorf("Div expected panic: %q, got: %q ", overflowError, e.Error());
             }
         }, ref ᒐ);
@@ -1262,7 +1262,7 @@ public static void TestDiv32PanicOverflow(ж<testing.T> t) {
         defer(() => {
             var err = recover(); if (err == nil) {
                 t.Error(div32ShouldHavePanickedˢ);
-            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
+            } else if (err._<runtime.Error>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
                 t.Errorf("Div32 expected panic: %q, got: %q ", overflowError, e.Error());
             }
         }, ref ᒐ);
@@ -1283,7 +1283,7 @@ public static void TestDiv64PanicOverflow(ж<testing.T> t) {
         defer(() => {
             var err = recover(); if (err == nil) {
                 t.Error(div64ShouldHavePanickedˢ);
-            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
+            } else if (err._<runtime.Error>(ᐧ) is var (e, ok) && (!ok || e.Error() != overflowError)) {
                 t.Errorf("Div64 expected panic: %q, got: %q ", overflowError, e.Error());
             }
         }, ref ᒐ);
@@ -1304,7 +1304,7 @@ public static void TestDivPanicZero(ж<testing.T> t) {
         defer(() => {
             var err = recover(); if (err == nil) {
                 t.Error(divShouldHavePanickedˢ2);
-            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
+            } else if (err._<runtime.Error>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
                 t.Errorf("Div expected panic: %q, got: %q ", divZeroError, e.Error());
             }
         }, ref ᒐ);
@@ -1325,7 +1325,7 @@ public static void TestDiv32PanicZero(ж<testing.T> t) {
         defer(() => {
             var err = recover(); if (err == nil) {
                 t.Error(div32ShouldHavePanickedˢ2);
-            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
+            } else if (err._<runtime.Error>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
                 t.Errorf("Div32 expected panic: %q, got: %q ", divZeroError, e.Error());
             }
         }, ref ᒐ);
@@ -1346,7 +1346,7 @@ public static void TestDiv64PanicZero(ж<testing.T> t) {
         defer(() => {
             var err = recover(); if (err == nil) {
                 t.Error(div64ShouldHavePanickedˢ2);
-            } else if (err._<runtimeꓸError>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
+            } else if (err._<runtime.Error>(ᐧ) is var (e, ok) && (!ok || e.Error() != divZeroError)) {
                 t.Errorf("Div64 expected panic: %q, got: %q ", divZeroError, e.Error());
             }
         }, ref ᒐ);

@@ -8,6 +8,7 @@ using static go.io.fs_package;
 using testing = testing_package;
 using fs = go.io.fs_package;
 using go.io;
+using static fs_test_package;
 
 partial class fs_test_package {
 
@@ -15,7 +16,11 @@ partial struct statOnly {
     /*embed*/ public go.io.fs_package.StatFS StatFS;
 }
 
+} partial class fs_testᴛstatOnly {
+
 internal static (fs.File, error) Open(this statOnly _, @string name) { return (default, ErrNotExist); }
+
+} partial class fs_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string nilˢ => ref nilˢᵇ;

@@ -7,8 +7,6 @@
 global using static global::go.log.slog.@internal.benchmarks_package;
 
 // <ImportedTypeAliases>
-global using slogꓸHandler = go.log.slog_package.ΔHandler;
-global using slogꓸLevel = go.log.slog_package.ΔLevel;
 // </ImportedTypeAliases>
 
 using go;
@@ -19,8 +17,8 @@ using static global::go.log.slog.@internal.benchmarks_internal_test_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<global::go.log.slog.@internal.benchmarks_package.asyncHandler, go.log.slog_package.ΔHandler>(Pointer = true)]
-[assembly: GoImplement<global::go.log.slog.@internal.benchmarks_package.disabledHandler, go.log.slog_package.ΔHandler>]
+[assembly: GoImplement<global::go.log.slog.@internal.benchmarks_package.asyncHandler, go.log.slog_package.Handler>(Pointer = true)]
+[assembly: GoImplement<global::go.log.slog.@internal.benchmarks_package.disabledHandler, go.log.slog_package.Handler>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

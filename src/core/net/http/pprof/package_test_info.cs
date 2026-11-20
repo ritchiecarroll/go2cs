@@ -7,7 +7,6 @@
 global using static global::go.net.http.pprof_package;
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
 // </ImportedTypeAliases>
 
 using go;

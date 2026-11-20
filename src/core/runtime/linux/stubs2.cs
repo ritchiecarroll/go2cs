@@ -12,7 +12,7 @@ partial class runtime_package {
 
 // read calls the read system call.
 // It returns a non-negative number of bytes written or a negative errno value.
-internal static partial int32 read(int32 fd, @unsafe.Pointer Δp, int32 n);
+internal static partial int32 read(int32 fd, @unsafe.Pointer p, int32 n);
 
 internal static partial int32 closefd(int32 fd);
 
@@ -28,7 +28,7 @@ internal static void usleep_no_g(uint32 usec) {
 // It returns a non-negative number of bytes written or a negative errno value.
 //
 //go:noescape
-internal static partial int32 write1(uintptr fd, @unsafe.Pointer Δp, int32 n);
+internal static partial int32 write1(uintptr fd, @unsafe.Pointer p, int32 n);
 
 //go:noescape
 internal static partial int32 open(ж<byte> name, int32 mode, int32 perm);

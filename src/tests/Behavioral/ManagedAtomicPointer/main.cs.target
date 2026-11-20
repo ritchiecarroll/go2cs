@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
 using sync;
+using static main_package;
 
 partial class main_package {
 
@@ -15,6 +16,8 @@ partial struct lazyProc {
     internal ж<proc> p;
 }
 
+} partial class mainᴛlazyProc {
+
 internal static bool find(this ж<lazyProc> Ꮡl) {
     if (atomic.LoadPointer(Ꮡl.Ꮡp) == nil) {
         atomic.StorePointer(Ꮡl.Ꮡp, Ꮡ(new proc(addr: 42)));
@@ -22,6 +25,8 @@ internal static bool find(this ж<lazyProc> Ꮡl) {
     }
     return false;
 }
+
+} partial class main_package {
 
 internal static void identity() {
     ref var a = ref heap(new int32(), out var Ꮡa);

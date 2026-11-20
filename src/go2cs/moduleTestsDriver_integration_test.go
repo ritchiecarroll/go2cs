@@ -105,13 +105,20 @@ func writeJwtLikeModule(t *testing.T, root string, goLine string) string {
 func runTestsRecurse(t *testing.T, moduleDir string, outRoot string) (string, error) {
 	t.Helper()
 
+	return runTestsRecurseAction(t, "convert", moduleDir, outRoot)
+}
+
+// runTestsRecurseAction runs -tests -recurse with -test-action action over moduleDir, against this tree's src.
+func runTestsRecurseAction(t *testing.T, action string, moduleDir string, outRoot string) (string, error) {
+	t.Helper()
+
 	treeSrc, err := filepath.Abs("..")
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cmd := exec.Command(driverBinary(t), "-tests", "-test-action", "convert", "-recurse", "-go2cspath", treeSrc, moduleDir, outRoot)
+	cmd := exec.Command(driverBinary(t), "-tests", "-test-action", action, "-recurse", "-go2cspath", treeSrc, moduleDir, outRoot)
 	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=")
 	output, err := cmd.CombinedOutput()
 
@@ -252,5 +259,146 @@ func TestTestsRecurseRefusesANewerGoLineAndAnInModuleRoot(t *testing.T) {
 
 	if err == nil || !strings.Contains(output, "inside the module's source tree") {
 		t.Errorf("an output root inside the module was not refused (err=%v):\n%s", err, output)
+	}
+}
+
+// writeRefusedPackageModule writes a module whose packages relate to one refused package (recurseRefusalFixture's
+// GO2CS2002 shape) in each way a tested package can:
+//   - good: tested, and neither it nor its tests reach refused/;
+//   - refused: tested, and refused itself;
+//   - blocked: tested, and its production code imports refused/;
+//   - viatest: tested, and only its _test.go imports refused/.
+func writeRefusedPackageModule(t *testing.T, root string) string {
+	t.Helper()
+
+	moduleDir := filepath.Join(root, "skipmod")
+	testFile := func(pkg, call string) string {
+		return "package " + pkg + "\n\nimport \"testing\"\n\nfunc TestIt(t *testing.T) {\n\t" + call + "\n}\n"
+	}
+
+	writeModuleFile(t, filepath.Join(moduleDir, "go.mod"), "module example.test/skipmod\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "good", "good.go"), "package good\n\nfunc One() int { return 1 }\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "good", "good_test.go"), testFile("good", "if One() != 1 {\n\t\tt.Fatal(\"one\")\n\t}"))
+	writeModuleFile(t, filepath.Join(moduleDir, "refused", "refused.go"), recurseRefusalFixture["refused/refused.go"])
+	writeModuleFile(t, filepath.Join(moduleDir, "refused", "refused_test.go"), testFile("refused", "Run()"))
+	writeModuleFile(t, filepath.Join(moduleDir, "blocked", "blocked.go"),
+		"package blocked\n\nimport \"example.test/skipmod/refused\"\n\nfunc Use() { refused.Run() }\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "blocked", "blocked_test.go"), testFile("blocked", "Use()"))
+	writeModuleFile(t, filepath.Join(moduleDir, "viatest", "viatest.go"), "package viatest\n\nfunc Two() int { return 2 }\n")
+	writeModuleFile(t, filepath.Join(moduleDir, "viatest", "viatest_test.go"),
+		"package viatest\n\nimport (\n\t\"testing\"\n\n\t\"example.test/skipmod/refused\"\n)\n\nfunc TestIt(t *testing.T) {\n\trefused.Run()\n\t_ = Two()\n}\n")
+
+	return moduleDir
+}
+
+// TestTestsRecurseConvertsWhatItCanPastARefusedPackage: under -tests -recurse a refused package does not end the run.
+// As `go test ./...` does, each tested package gets its own verdict: one whose test closure does not reach the refused
+// package is converted and tested, and one that is refused or whose test closure imports a refused package is
+// reported by name without a test project. The run still exits nonzero, as `go test ./...` does when a package
+// fails to build, naming the refused package.
+func TestTestsRecurseConvertsWhatItCanPastARefusedPackage(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: builds the converter and converts a module with its tests")
+	}
+
+	root := t.TempDir()
+	moduleDir := writeRefusedPackageModule(t, root)
+	outRoot := filepath.Join(root, "out")
+
+	output, err := runTestsRecurse(t, moduleDir, outRoot)
+
+	if err == nil {
+		t.Errorf("exit 0; want nonzero, since a package was refused\n%s", output)
+	}
+
+	srcRoot := filepath.Join(outRoot, "src", "example.test", "skipmod")
+	testProjects := func(pkg string) []string {
+		projects, _ := filepath.Glob(filepath.Join(srcRoot, pkg, "*.tests.csproj"))
+		return projects
+	}
+
+	// good/ is outside the refused package's reach: phase B converts its tests.
+	if projects := testProjects("good"); len(projects) != 1 {
+		t.Errorf("good/: want one test project, got %v; a refused package outside its test closure must not stop it\n%s", projects, output)
+	}
+
+	// refused/ gets no project at all, and the others no test project.
+	if hasProject(t, filepath.Join(srcRoot, "refused")) {
+		t.Errorf("refused/ has a project; want none, since it was refused")
+	}
+
+	for _, pkg := range []string{"refused", "blocked", "viatest"} {
+		if projects := testProjects(pkg); len(projects) != 0 {
+			t.Errorf("%s/: want no test project, got %v", pkg, projects)
+		}
+	}
+
+	// blocked/ and viatest/ still convert as production code, as under plain -recurse.
+	for _, pkg := range []string{"blocked", "viatest"} {
+		if !hasProject(t, filepath.Join(srcRoot, pkg)) {
+			t.Errorf("%s/: no production project; want it converted, as plain -recurse converts it", pkg)
+		}
+	}
+
+	checkRefusedPackageReasons(t, output)
+}
+
+// checkRefusedPackageReasons checks a -tests -recurse run over writeRefusedPackageModule's module names the refused
+// package, and each tested package it reaches with the reason, and does not name good/.
+func checkRefusedPackageReasons(t *testing.T, output string) {
+	t.Helper()
+
+	for _, want := range []string{
+		"Refused 1 package (no project written):",
+		"  example.test/skipmod/refused  GO2CS2002",
+		"-tests example.test/skipmod/refused: not converted: the package was refused (GO2CS2002)",
+		"-tests example.test/skipmod/blocked: not converted: its test closure imports the refused package example.test/skipmod/refused",
+		"-tests example.test/skipmod/viatest: not converted: its test closure imports the refused package example.test/skipmod/refused",
+	} {
+		if !strings.Contains(output, want) {
+			t.Errorf("output does not contain %q\n%s", want, output)
+		}
+	}
+
+	if strings.Contains(output, "-tests example.test/skipmod/good: not converted") {
+		t.Errorf("good/ is reported as not converted; its test closure does not reach refused/\n%s", output)
+	}
+}
+
+// testsE2EEnv turns on the -tests -recurse arms that build and run a converted test project. It is opt-in, since the
+// build takes the fixture's whole closure of the converted standard library, which takes minutes. The hosted
+// cgo-e2e stage sets it (os-matrix.yml) because that stage's 40-minute test budget fits the cold build; this is not a
+// cgo test.
+const testsE2EEnv = "GO2CS_TESTS_E2E"
+
+// TestTestsRecurseRunsWhatItCanPastARefusedPackage is TestTestsRecurseConvertsWhatItCanPastARefusedPackage run with
+// -test-action all: good/'s converted tests build, run and compare equal to go test, while the refused package and
+// the two packages it reaches are named and not built.
+func TestTestsRecurseRunsWhatItCanPastARefusedPackage(t *testing.T) {
+	if os.Getenv(testsE2EEnv) != "1" {
+		t.Skipf("opt-in (%s=1): builds and runs the converted tests against the converted standard library", testsE2EEnv)
+	}
+
+	if _, err := exec.LookPath("dotnet"); err != nil {
+		t.Fatalf("%s=1 needs the .NET SDK on PATH: %v", testsE2EEnv, err)
+	}
+
+	root := t.TempDir()
+	moduleDir := writeRefusedPackageModule(t, root)
+
+	output, err := runTestsRecurseAction(t, "all", moduleDir, filepath.Join(root, "out"))
+
+	if err == nil {
+		t.Errorf("exit 0; want nonzero, since a package was refused\n%s", output)
+	}
+
+	checkRefusedPackageReasons(t, output)
+
+	if !strings.Contains(output, "Validated 1 tests against go test") {
+		t.Errorf("good/'s one test was not validated against go test\n%s", output)
+	}
+
+	if !strings.Contains(output, "phase B: 3 of 4 package(s) failed:") {
+		t.Errorf("phase B does not report exactly the three packages the refusal reaches as failed\n%s", output)
 	}
 }

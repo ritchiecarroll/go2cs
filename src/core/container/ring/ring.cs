@@ -5,6 +5,8 @@
 // Package ring implements operations on circular lists.
 namespace go.container;
 
+using static ring_package;
+
 partial class ring_package {
 
 // A Ring is an element of a circular list, or ring.
@@ -16,6 +18,8 @@ partial struct Ring {
     internal ж<Ring> next, prev;
     public any Value; // for use by client; untouched by this library
 }
+
+} partial class ringᴛRing {
 
 internal static ж<Ring> init(this ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -69,6 +73,8 @@ public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) {
     return Ꮡr;
 }
 
+} partial class ring_package {
+
 // New creates a ring of n elements.
 public static ж<Ring> New(nint n) {
     if (n <= 0) {
@@ -84,6 +90,8 @@ public static ж<Ring> New(nint n) {
     r.prev = p;
     return r;
 }
+
+} partial class ringᴛRing {
 
 // Link connects ring r with ring s such that r.Next()
 // becomes s and returns the original value for r.Next().
@@ -153,4 +161,4 @@ public static void Do(this ж<Ring> Ꮡr, Action<any> f) {
     }
 }
 
-} // end ring_package
+} // end ringᴛRing

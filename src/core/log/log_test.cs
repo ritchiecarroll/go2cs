@@ -23,6 +23,7 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 using go.@internal;
 using go.os;
 using static go.log_package;
+using static log_internal_test_package;
 
 partial class log_internal_test_package {
 
@@ -211,7 +212,7 @@ public static void TestUTCFlag(ж<testing.T> t) {
     }
     // It's possible we crossed a second boundary between getting now and logging,
     // so add a second and try again. This should very nearly always work.
-    now = now.Add(time.ΔSecond);
+    now = now.Add(time.Second);
     want = fmt.Sprintf("Test:%d/%.2d/%.2d %.2d:%.2d:%.2d hello\n"u8,
         now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
     if (got == want) {
@@ -444,9 +445,13 @@ public static void BenchmarkPrintlnNoFlags(ж<testing.B> Ꮡb) {
 internal partial struct discard {
 }
 
+} partial class log_internal_testᴛdiscard {
+
 internal static (nint, error) Write(this discard _, slice<byte> p) {
     return (len(p), default);
 }
+
+} partial class log_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string prefixˢ => ref prefixˢᵇ;

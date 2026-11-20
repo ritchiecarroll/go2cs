@@ -8,6 +8,7 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using static go.context_internal_test_package;
+using static context_test_package;
 
 partial class context_test_package {
 
@@ -21,6 +22,8 @@ partial struct afterFuncContext {
 }
 
 internal static context.Context _ᴛ1ʗ = new context_test_package.afterFuncContextжContext(((ж<afterFuncContext>)nil));
+
+} partial class context_testᴛafterFuncContext {
 
 internal static (time.Time, bool) Deadline(this ref afterFuncContext c) {
     return (new time.Time(), false);
@@ -61,7 +64,7 @@ internal static any Value(this ref afterFuncContext c, any key) {
     return default;
 }
 
-internal static Func<bool> ΔAfterFunc(this ж<afterFuncContext> Ꮡc, Action f) {
+internal static Func<bool> AfterFunc(this ж<afterFuncContext> Ꮡc, Action f) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -112,6 +115,8 @@ internal static partial void cancel(this ж<afterFuncContext> Ꮡc, error err) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
+
+} partial class context_test_package {
 
 public static void TestCustomContextAfterFuncCancel(ж<testing.T> t) {
     GoFrame ᒐ = default;

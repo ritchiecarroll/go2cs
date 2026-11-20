@@ -58,11 +58,11 @@ public static void TestLargeXXHash(ж<testing.T> t) {
     global::go.@internal.zstd_package.xxhash64 xh = new();
     xh.reset();
     nint i = 0;
-    while (i < builtin.len(data)) {
+    while (i < len(data)) {
         // Write varying amounts to test buffering.
         nint c = i % 4094 + 1;
-        if (i + c > builtin.len(data)) {
-            c = builtin.len(data) - i;
+        if (i + c > len(data)) {
+            c = len(data) - i;
         }
         xh.update(data.slice(i, i + c));
         i += c;

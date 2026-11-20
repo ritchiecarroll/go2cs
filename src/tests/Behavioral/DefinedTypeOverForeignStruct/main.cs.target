@@ -3,14 +3,19 @@ namespace go;
 using fmt = fmt_package;
 using ptlike = DefinedTypeOverForeignStruct.ptlike_package;
 using DefinedTypeOverForeignStruct;
+using static main_package;
 
 partial class main_package {
 
 partial struct alias /*global::go.DefinedTypeOverForeignStruct.ptlike_package.Outer*/;
 
+} partial class mainᴛalias {
+
 internal static @string describe(this ref alias a) {
     return fmt.Sprintf("%s/%d"u8, a.Name, a.In.Len());
 }
+
+} partial class main_package {
 
 internal static void main() {
     var a = (alias)ptlike.New("first", 1, 2, 3);

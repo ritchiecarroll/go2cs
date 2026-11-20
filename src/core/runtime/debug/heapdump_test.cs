@@ -9,6 +9,7 @@ using static go.runtime.debug_package;
 using testing = testing_package;
 using fs = go.io.fs_package;
 using go.io;
+using static debug_test_package;
 
 partial class debug_test_package {
 
@@ -91,8 +92,12 @@ partial interface I {
     void M();
 }
 
+} partial class debug_testᴛG {
+
 //go:noinline
 public static partial void M<T>(this G<T> g) { }
+
+} partial class debug_test_package {
 
 internal static I dummy = new G<nint>();
 internal static I dummy2 = new G<G<nint>>();

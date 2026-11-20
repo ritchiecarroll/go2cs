@@ -4,6 +4,7 @@
 namespace go.compress;
 
 using math = math_package;
+using static flate_package;
 
 partial class flate_package {
 
@@ -58,6 +59,8 @@ partial struct deflateFast {
 internal static ж<deflateFast> newDeflateFast() {
     return Ꮡ(new deflateFast(cur: maxStoreBlockSize, prev: new slice<byte>(0, maxStoreBlockSize)));
 }
+
+} partial class flateᴛdeflateFast {
 
 // encode encodes a block given in src and appends tokens
 // to dst and returns the result.
@@ -193,12 +196,16 @@ emitRemainder:
     return dst;
 }
 
+} partial class flate_package {
+
 internal static slice<token> emitLiteral(slice<token> dst, slice<byte> lit) {
     foreach (var (_, v) in range(lit)) {
         dst = append(dst, literalToken((uint32)v));
     }
     return dst;
 }
+
+} partial class flateᴛdeflateFast {
 
 // matchLen returns the match length between src[s:] and src[t:].
 // t can be negative to indicate the match is starting in e.prev.
@@ -301,4 +308,4 @@ internal static void shiftOffsets(this ref deflateFast e) {
     e.cur = maxMatchOffset + 1;
 }
 
-} // end flate_package
+} // end flateᴛdeflateFast

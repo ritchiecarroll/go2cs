@@ -5,6 +5,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static norm_package;
 
 partial class norm_package {
 
@@ -20,6 +21,8 @@ internal static input inputBytes(slice<byte> str) {
 internal static input inputString(@string str) {
     return new input(str: str);
 }
+
+} partial class normᴛinput {
 
 internal static void setBytes(this ref input @in, slice<byte> str) {
     @in.str = ""u8;
@@ -112,4 +115,4 @@ internal static rune /*r*/ hangul(this ref input @in, nint p) {
     return r;
 }
 
-} // end norm_package
+} // end normᴛinput

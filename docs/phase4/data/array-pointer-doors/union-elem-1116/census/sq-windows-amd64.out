@@ -1,0 +1,8 @@
+roots: 1, errors: 0
+packages with a module: 23, files: 247
+    11  W19: managed only by its arrays, every one a [0]T carrier
+   478  control: (*A)(x), x an unsafe.Pointer
+     1  struct element, managed in both readings (the door declines, rightly)
+     5  struct element, unmanaged in both readings (the door takes it)
+     7  W19: managed only by its arrays, every one a [0]T carrier	TExpr
+     4  W19: managed only by its arrays, every one a [0]T carrier	TRtreeCoord

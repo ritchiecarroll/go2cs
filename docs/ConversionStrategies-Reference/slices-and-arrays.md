@@ -151,7 +151,7 @@ so a nil `p` ranges N times as in Go, and a deref-aliased pointer parameter or r
 
 **Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
 
-<!-- source: src/core/net/windows/fd_windows.cs:256 -->
+<!-- source: src/core/net/windows/fd_windows.cs:262 -->
 ```csharp
     var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
 ```
@@ -696,12 +696,30 @@ must write through. Its `unsafe.Pointer` half emits the load door and stays comp
 results deliberately discarded; the load door's values are compared against Go by the
 `ArrayPointerElementDoors` program.)
 
-**Known gaps:** (1) golib-internal
-element-wise transfers of nested-array elements (`copy(dst, src)`, spread `append(dst, src...)`)
-copy element structs without re-cloning; (2) an array-typed map KEY at an index-STORE (`mk[k] = v`
-stores `k` uncloned — only the composite-literal key form clones); (3) a named↔underlying array
+**`copy` and a spread `append` copy each element's VALUE** (golib `GoElementCopy`). An element that
+owns array storage (an array, a named array, a struct carrying array fields) is a struct over storage
+of its own, so moving the elements with a span copy left two slices holding one inner array:
+`copy(dst, src)` then `src[0][1] = 9` changed `dst` too. golib now copies such elements one by one, in
+the two ways Go's memmove behaves:
+
+- **into existing elements** (`copy`, a spread `append` within capacity, a growth into the stack
+  buffer): each element is assigned IN PLACE through `IGoValueAssign`, top-down when two windows over
+  one backing overlap with the destination above, so a slice taken from a destination element before
+  the copy (`q := dst[0][:]`) sees the copied values, as in Go;
+- **into new storage** (append's first backing and every growth, reflect's `Value.Grow`, `[N]T(s)`):
+  each element is a copy of its own, through `ICloneable`. That is one counted malloc per moved element
+  that owns an array, where Go's memmove has none.
+
+Every other element type keeps its single span copy (the test is a per-`T` constant), and append's
+element LIST (`append(s, a.Clone())`) is not copied a second time. Guarded by the
+`SliceArrayElementCopies` behavioral test and GolibTests' `SliceArrayElementCopyTests`.
+<!-- 2026-11-18, .4 blocker (P5's class 2, found closing the gob root cause): red at master 8a86140f79,
+     20 of the fixture's 24 lines differed from go run and all 10 GolibTests arms failed. -->
+
+**Known gaps:** (1) an array-typed map KEY at an index-STORE (`mk[k] = v`
+stores `k` uncloned — only the composite-literal key form clones); (2) a named↔underlying array
 CONVERSION (`[4]int(named)`) hands the wrapper's backing through the implicit operator uncloned;
-(4) a fixed-size ARRAY reached only through an EMBEDDED struct member keeps a shared backing. An
+(3) a fixed-size ARRAY reached only through an EMBEDDED struct member keeps a shared backing. An
 embed is an INLINE field (see
 [An embedded struct is an INLINE field, so a value copy copies it](struct-embedding.md#an-embedded-struct-is-an-inline-field-so-a-value-copy-copies-it)),
 so a struct copy copies the embed itself, but the clone walk in the section below skips embeds.
@@ -737,7 +755,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:51-57, 210, 213-214 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-225 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);
@@ -1099,7 +1117,7 @@ binds `appendꓸꓸꓸ<T>(slice<T>, in sslice<T>)` and is read as the span it al
 reach the call. The `ISlice<T>` overload remains for other operands. Its interface parameter boxes a
 struct operand, which is why a `slice<T>` has its own exact overload. The constrained form,
 `appendꓸꓸꓸ<S, E>`, takes `ISlice<E>`, with an `sslice<E>` twin.
-<!-- src/core/golib/builtin.cs:543 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :556 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :530 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1447 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1455 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
+<!-- src/core/golib/builtin.cs:543 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :556 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :530 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1451 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1459 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
 <!-- The exact slice<T> overload landed in golib 17785ec85 (2026-10-22). Before it a slice<T> operand bound the ISlice<T> overload and was boxed: 56 B per call that AllocationCounter never sees; Go 1.26's bytes TestReplace read it as 56 objects per run for `append([]byte(nil), s...)`, which allocates nothing in Go (builtin.cs's doc comment on that overload). -->
 
 Inside golib the window's own span serves every copy a span can express (managed backings are
@@ -1927,7 +1945,7 @@ read/write vs Go.)
 
 ## Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:159-160 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:188-189 -->
 ```csharp
     pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));

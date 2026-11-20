@@ -154,14 +154,14 @@ func TestPatternSwitchEmission(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	mainCs := convertPatternSwitchFixture(t)
 
-	// Each want is one whole emitted line, trimmed.
+	// Each want is one whole emitted line, trimmed. Tour item 3: a tag that is a local the clauses cannot change
+	// is read in place, so neither the fallthrough chain nor the string switch carries a tag temp.
 	wants := map[string][]string{
 		"classify":                    {`switch (t) {`, `default: {`, `case 3 or 4: {`, `case var ᴛ when ᴛ == y: {`},
 		"loop":                        {`switch (x) {`, `case var ᴛ when ᴛ == label(1): {`, `continue;`},
 		"nested":                      {`switch (a) {`, `switch (k) {`, `case var ᴛ2 when ᴛ2 == y: {`},
-		"fallthrough keeps the chain": {`var exprᴛ1 = t;`, `fallthrough = true;`},
-		"a string tag keeps its temp": {`var exprᴛ1 = cmd;`, `switch (ᐧ) {`, `case {} when exprᴛ1 == "get"u8: {`,
-			`case {} when exprᴛ1 == alt: {`},
+		"fallthrough keeps the chain": {`var matchᴛ1 = false;`, `if (t == y) {`, `fallthrough = true;`},
+		"a string tag reads in place": {`switch (ᐧ) {`, `case {} when cmd == "get"u8: {`, `case {} when cmd == alt: {`},
 	}
 
 	mainCs = strings.ReplaceAll(mainCs, "\r\n", "\n")
@@ -197,8 +197,8 @@ func TestPatternSwitchEmission(t *testing.T) {
 		}
 	}
 
-	if got := strings.Count(mainCs, "var exprᴛ"); got != 2 {
-		t.Errorf("wanted the tag temps of the fallthrough switch and the string switch, read %d", got)
+	if got := strings.Count(mainCs, "var exprᴛ"); got != 0 {
+		t.Errorf("wanted no tag temp (each tag is a parameter read in place), read %d", got)
 	}
 
 	if t.Failed() {

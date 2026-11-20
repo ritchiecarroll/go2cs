@@ -111,7 +111,7 @@ public static void BenchmarkFindChild(ж<testing.B> b) {
         "tos.html",
         "articles"
     ]);
-    if (builtin.len(children) != 32) {
+    if (len(children) != 32) {
         throw panic("bad len");
     }
     foreach (var (_, n) in range(slice<nint>([2, 4, 8, 16, 32]))) {

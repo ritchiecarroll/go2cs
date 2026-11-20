@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -33,6 +34,8 @@ internal static void report(/*[6]*/ ж<array<nint>> p) { fmt.Println("aliased ni
 
 partial struct words /*[5]uint64*/;
 
+} partial class mainᴛwords {
+
 internal static nint /*n*/ count(this ref words w) {
     nint n = default;
 
@@ -41,6 +44,8 @@ internal static nint /*n*/ count(this ref words w) {
     }
     return n;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var b = new uint64[]{0x100000002UL, 0x300000004UL, 5, 0}.array();

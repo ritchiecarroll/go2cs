@@ -8,38 +8,38 @@ partial class main_package {
 
 partial struct tzLocation {
     internal @string tz;
-    internal ж<gotime.ΔLocation> loc;
+    internal ж<gotime.Location> loc;
 }
 
-internal static ж<gotime.ΔLocation> @fixed(@string name, nint offset) {
+internal static ж<gotime.Location> @fixed(@string name, nint offset) {
     return gotime.FixedZone(name, offset);
 }
 
 internal static gotime.Duration timeout(nint n) {
-    return ((gotime.Duration)(int64)n) * gotime.ΔSecond + 250 * gotime.Millisecond;
+    return ((gotime.Duration)(int64)n) * gotime.Second + 250 * gotime.Millisecond;
 }
 
 internal static void main() {
-    var locsᴷ = new stackAppend<ж<gotime.ΔLocation>>();
+    var locsᴷ = new stackAppend<ж<gotime.Location>>();
 
-    var z = new tzLocation(tz: "UTC", loc: gotime.ΔUTC);
+    var z = new tzLocation(tz: "UTC", loc: gotime.UTC);
     fmt.Println(z.tz, z.loc.String());
 
-    slice<ж<gotime.ΔLocation>> locs = default;
-    locs = append(locsᴷ, locs, gotime.ΔUTC, @fixed("EST", -5 * 3600));
+    slice<ж<gotime.Location>> locs = default;
+    locs = append(locsᴷ, locs, gotime.UTC, @fixed("EST", -5 * 3600));
     foreach (var (_, l) in range(locs)) {
         fmt.Println(l.OrTypedNil());
     }
 
-    fmt.Println(gotime.ΔLocal != nil, gotime.ΔLocal == gotime.ΔUTC || gotime.ΔLocal != gotime.ΔUTC);
+    fmt.Println(gotime.Local != nil, gotime.Local == gotime.UTC || gotime.Local != gotime.UTC);
 
-    fmt.Println(timeout(3), gotime.ΔSecond * 2, gotime.Millisecond < gotime.ΔSecond);
+    fmt.Println(timeout(3), gotime.Second * 2, gotime.Millisecond < gotime.Second);
 
-    var t = gotime.Date(2024, gotime.March, 5, 6, 7, 8, 0, gotime.ΔUTC);
-    fmt.Println(t.In(@fixed("EST", -5 * 3600)).Format(gotime.RFC3339), t.Location() == gotime.ΔUTC);
+    var t = gotime.Date(2024, gotime.March, 5, 6, 7, 8, 0, gotime.UTC);
+    fmt.Println(t.In(@fixed("EST", -5 * 3600)).Format(gotime.RFC3339), t.Location() == gotime.UTC);
 
-    gotime.ΔMonth m = (gotime.ΔMonth)(2 + 1);
-    fmt.Println(m, t.Month() == m, (gotime.ΔMonth)12);
+    gotime.Month m = (gotime.Month)(2 + 1);
+    fmt.Println(m, t.Month() == m, (gotime.Month)12);
 }
 
 } // end main_package

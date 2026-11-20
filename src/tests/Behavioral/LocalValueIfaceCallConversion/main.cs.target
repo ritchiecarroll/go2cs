@@ -1,18 +1,27 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct LocalKey /*[]byte*/;
 
+} partial class mainᴛLocalKey {
+
 public static @string String(this LocalKey k) { return "key:"u8 + ((@string)(slice<byte>)k); }
+
+} partial class main_package {
 
 partial struct Label {
     public @string Text;
 }
 
+} partial class mainᴛLabel {
+
 public static @string String(this Label l) { return "label:"u8 + l.Text; }
+
+} partial class main_package {
 
 partial interface unexpIface {
     @string f();
@@ -21,7 +30,11 @@ partial interface unexpIface {
 partial struct embedWithUnexpMeth {
 }
 
+} partial class mainᴛembedWithUnexpMeth {
+
 internal static @string f(this embedWithUnexpMeth _) { return "f"; }
+
+} partial class main_package {
 
 internal static unexpIface pinUnexpMethI = ((unexpIface)new embedWithUnexpMeth());
 
@@ -33,15 +46,27 @@ partial struct localImpl {
     public nint N;
 }
 
+} partial class mainᴛlocalImpl {
+
 internal static @string G(this localImpl l) { return fmt.Sprint("g", l.N); }
+
+} partial class main_package {
 
 internal delegate nint meter();
 
+} partial class mainᴛmeter {
+
 internal static nint Value(this meter m) { return m(); }
+
+} partial class main_package {
 
 partial struct gauge /*num:nint*/;
 
+} partial class mainᴛgauge {
+
 internal static nint Value(this gauge g) { return (nint)g * 2; }
+
+} partial class main_package {
 
 partial interface valued {
     nint Value();

@@ -4,7 +4,11 @@
 //go:build amd64 || arm64 || loong64 || mips64 || mips64le || ppc64 || ppc64le || riscv64 || s390x || wasm
 namespace go.@internal.runtime;
 
+using static atomic_package;
+
 partial class atomic_package {
+
+} partial class atomicᴛUint64 {
 
 // LoadAcquire is a partially unsynchronized version
 // of Load that relaxes ordering constraints. Other threads
@@ -32,4 +36,4 @@ public static void StoreRelease(this ж<Uint64> Ꮡu, uint64 value) {
     StoreRel64(Ꮡu.Ꮡvalue, value);
 }
 
-} // end atomic_package
+} // end atomicᴛUint64

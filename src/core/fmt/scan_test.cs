@@ -19,6 +19,7 @@ using fmt = fmt_package;
 using go.testing;
 using go.unicode;
 using static go.fmt_internal_test_package;
+using static fmt_test_package;
 
 partial class fmt_test_package {
 
@@ -121,6 +122,8 @@ internal static ref renamedComplex128 renamedComplex128Val => ref ((StaticBox<re
 // Xs accepts any non-empty run of the verb character
 partial struct Xs /*@string*/;
 
+} partial class fmt_testᴛXs {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string syntaxErrorForXsˢ => ref syntaxErrorForXsˢᵇ;
 private static readonly @string syntaxErrorForXsˢᵇ = "syntax error for xs"u8;
@@ -138,6 +141,8 @@ public static error Scan(this ref Xs x, fmt.ScanState state, rune verb) {
     return default;
 }
 
+} partial class fmt_test_package {
+
 internal static readonly ж<Xs> ᏑxVal = new StaticBox<Xs>(default(Xs));
 internal static ref Xs xVal => ref ((StaticBox<Xs>)ᏑxVal).ValueSlot;
 
@@ -147,6 +152,8 @@ partial struct IntString {
     internal nint i;
     internal @string s;
 }
+
+} partial class fmt_testᴛIntString {
 
 public static error Scan(this ж<IntString> Ꮡs, fmt.ScanState state, rune verb) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -162,6 +169,8 @@ public static error Scan(this ж<IntString> Ꮡs, fmt.ScanState state, rune verb
     s.s = (@string)tok;
     return default;
 }
+
+} partial class fmt_test_package {
 
 internal static readonly ж<IntString> ᏑintStringVal = new StaticBox<IntString>(default(IntString));
 internal static ref IntString intStringVal => ref ((StaticBox<IntString>)ᏑintStringVal).ValueSlot;
@@ -582,7 +591,7 @@ internal static void testScan(ж<Δtesting.T> t, Func<@string, Δio.Reader> f, F
         }
         // The incoming value may be a pointer
         var v = reflect.ValueOf(test.@in);
-        var p = v; if (p.Kind() == reflect.ΔPointer) {
+        var p = v; if (p.Kind() == reflect.Pointer) {
             v = p.Elem();
         }
         var val = v.Interface();
@@ -635,7 +644,7 @@ public static void TestScanf(ж<Δtesting.T> t) {
         }
         // The incoming value may be a pointer
         var v = reflect.ValueOf(test.@in);
-        var p = v; if (p.Kind() == reflect.ΔPointer) {
+        var p = v; if (p.Kind() == reflect.Pointer) {
             v = p.Elem();
         }
         var val = v.Interface();
@@ -875,6 +884,8 @@ partial struct eofCounter {
     internal nint eofCount;
 }
 
+} partial class fmt_testᴛeofCounter {
+
 internal static (nint n, error err) Read(this ref eofCounter ec, slice<byte> b) {
     nint n = default;
     error err = default;
@@ -885,6 +896,8 @@ internal static (nint n, error err) Read(this ref eofCounter ec, slice<byte> b) 
     }
     return (n, err);
 }
+
+} partial class fmt_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedErrorˢ = (@string)"unexpected error"u8;
@@ -1014,6 +1027,8 @@ public static void TestUnreadRuneWithBufio(ж<Δtesting.T> t) {
 
 partial struct TwoLines /*@string*/;
 
+} partial class fmt_testᴛTwoLines {
+
 // Scan attempts to read two lines into the object. Scanln should prevent this
 // because it stops at newline; Scan and Scanf should be fine.
 public static error Scan(this ref TwoLines t, fmt.ScanState state, rune verb) {
@@ -1033,6 +1048,8 @@ public static error Scan(this ref TwoLines t, fmt.ScanState state, rune verb) {
     t = (TwoLines)((@string)chars);
     return default;
 }
+
+} partial class fmt_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string abcDefˢ => ref abcDefˢᵇ;
@@ -1109,12 +1126,16 @@ partial struct runeScanner {
     internal nint size;
 }
 
+} partial class fmt_testᴛruneScanner {
+
 internal static error Scan(this ref runeScanner rs, fmt.ScanState state, rune verb) {
     var (r, size, err) = state.ReadRune();
     rs.rune = r;
     rs.size = size;
     return err;
 }
+
+} partial class fmt_test_package {
 
 public static void TestScanStateCount(ж<Δtesting.T> t) {
     ref var a = ref heap(new runeScanner(), out var Ꮡa);
@@ -1143,6 +1164,8 @@ partial struct RecursiveInt {
     internal ж<RecursiveInt> next;
 }
 
+} partial class fmt_testᴛRecursiveInt {
+
 public static error /*err*/ Scan(this ж<RecursiveInt> Ꮡr, fmt.ScanState state, rune verb) {
     error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
@@ -1162,6 +1185,8 @@ public static error /*err*/ Scan(this ж<RecursiveInt> Ꮡr, fmt.ScanState state
     r.next = next;
     return err;
 }
+
+} partial class fmt_test_package {
 
 // scanInts performs the same scanning task as RecursiveInt.Scan
 // but without recurring through scanner, so we can compare
@@ -1482,6 +1507,8 @@ public static void TestScanfNewlineMatchFormat(ж<Δtesting.T> t) {
 
 partial struct hexBytes /*[2]byte*/;
 
+} partial class fmt_testᴛhexBytes {
+
 // Test for issue 12090: Was unreading at EOF, double-scanning a byte.
 internal static error Scan(this ref hexBytes h, fmt.ScanState ss, rune verb) {
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
@@ -1492,6 +1519,8 @@ internal static error Scan(this ref hexBytes h, fmt.ScanState ss, rune verb) {
     copy((h)[..], b);
     return err;
 }
+
+} partial class fmt_test_package {
 
 public static void TestHexByte(ж<Δtesting.T> t) {
     ref var h = ref heap(new hexBytes(), out var Ꮡh);

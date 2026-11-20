@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -30,6 +31,23 @@ func typeIsArrayValue(t types.Type) bool {
 	return isArray
 }
 
+// typeIsZeroLengthArray reports whether t is an array of length zero, `[0]E` or a type over one. Such an array
+// holds no element, so a struct copy that shares its empty backing store with the source is indistinguishable from
+// a copy that does not: there is nothing to write through either. A FIELD of that type is therefore no reason to
+// clone a struct, and no member of its `[GoValueClone(…)]` list -- syscall's `InotifyEvent.Name [0]uint8` (the
+// flexible-array member idiom) and go-json-experiment's embedded `nonComparable [0]func()` (the uncomparable
+// marker) both cost a clone at every copy and bought nothing. A bare `[0]E` VALUE still takes its own `.Clone()`
+// where Go copies it; only the field walks below skip it.
+func typeIsZeroLengthArray(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	array, isArray := t.Underlying().(*types.Array)
+
+	return isArray && array.Len() == 0
+}
+
 // typeNeedsValueClone reports whether a Go BY-VALUE copy of t needs an explicit `.Clone()` in the
 // emitted C# — t is a fixed-size array (typeIsArrayValue above), or a STRUCT that carries one in a
 // field, directly or through another such struct.
@@ -43,16 +61,15 @@ func typeIsArrayValue(t types.Type) bool {
 // `[GoValueClone(…)]`, go2cs-gen generates its field-precise `Clone()`, and every copy site here
 // appends it.
 //
-// EMBEDDED (promoted) struct members are not a reason to clone: go2cs-gen holds an embed as an
-// INLINE field, so the plain C# struct copy already copies it, exactly as Go does. (Until
-// 2026-08-14 an embed was a shared `ж<T>` box, which gave it reference semantics a value copy then
-// aliased — the defect behind go/types' type-parameter identity wall; see
-// ConversionStrategies-Reference, *An embedded struct is an INLINE field, so a value copy copies
-// it*.) What the skip below still costs is narrower and named: a fixed ARRAY reached only THROUGH
-// an embed is not seen, so such a struct is not stamped and the array backing stays shared. Widening
-// the walk is now sound — the generated `copy.<member> = <member>.ΔClone()` lands in the copy's own
-// inline storage — but it moves EMISSION corpus-wide, so it belongs to a change that owns that
-// footprint.
+// An EMBEDDED (promoted) struct is walked like any other field. go2cs-gen holds an embed as an INLINE
+// field, so the plain C# struct copy copies the embed itself, exactly as Go does (until 2026-08-14 an
+// embed was a shared `ж<T>` box, which gave it reference semantics a value copy then aliased -- the
+// defect behind go/types' type-parameter identity wall; see ConversionStrategies-Reference, *An
+// embedded struct is an INLINE field, so a value copy copies it*). An ARRAY the embed carries is
+// another matter: its backing store is shared by that copy, so a struct that carries an array only
+// through an embed is stamped with the embed's member, and the generated `copy.<member> =
+// <member>.ΔClone()` lands in the copy's own inline storage. An embedded POINTER is a pointer, shared
+// in Go too, and needs nothing.
 func typeNeedsValueClone(t types.Type) bool {
 	return typeNeedsValueCloneSeen(t, map[types.Type]bool{})
 }
@@ -88,7 +105,7 @@ func typeNeedsValueCloneSeen(t types.Type, seen map[types.Type]bool) bool {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 
-		if field.Embedded() || field.Name() == "_" {
+		if field.Name() == "_" || typeIsZeroLengthArray(field.Type()) {
 			continue
 		}
 
@@ -128,7 +145,7 @@ func structValueCloneFields(t types.Type, structTypeName string) []string {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 
-		if field.Embedded() || field.Name() == "_" {
+		if field.Name() == "_" || typeIsZeroLengthArray(field.Type()) {
 			continue
 		}
 
@@ -178,6 +195,124 @@ func valueCloneSuffix(t types.Type) string {
 	}
 
 	return ""
+}
+
+// valueAssignInPlace reports whether lhs, one left operand of assignStmt, takes the IN-PLACE copy: it is an EXISTING
+// location (not `_`) whose type owns array storage (valueAssignMethod). In Go an array variable IS its storage, so
+// `a = b` copies b's elements INTO a, and a slice, an element pointer or a's address taken beforehand still names a
+// afterwards; a struct holding an array is the same one level up. The emitted `array<T>` (the named-array wrapper, a
+// [GoValueClone] struct) is a struct over a shared backing, so the swap `a = b.Clone()` gave a new storage and left
+// everything taken from a on the old one (docs/phase4/DESIGN-array-reassign-in-place.md). `a.Assign(b)` copies into
+// a's own storage instead. A declaration, an argument, a return, a map value and a send are new storage in Go too,
+// and keep the clone (cloneValueCopy).
+//
+// The predicate is "existing location", decided PER OPERAND (P5's C5): every operand of an `=`, and an operand of a
+// `:=` that REDECLARES a variable already in scope (`a, err := f()` with `a` declared: go/types records no new object
+// for it, so it assigns the existing `a`). The caller decides the emission shape (a single assignment, a tuple's
+// temporaries, a range or select binding).
+func (v *Visitor) valueAssignInPlace(assignStmt *ast.AssignStmt, lhs ast.Expr) bool {
+	ident, isIdent := ast.Unparen(lhs).(*ast.Ident)
+
+	if isIdent && ident.Name == "_" {
+		return false
+	}
+
+	// A map element is a VALUE, not a location: `m[k] = b` stores a new value, which is new storage in Go too, and a C#
+	// map indexer is not ref-returning (`m[k].Assign(b)` is CS0206). It keeps the clone, as the design's rule says.
+	if index, isIndex := ast.Unparen(lhs).(*ast.IndexExpr); isIndex {
+		if base := v.info.TypeOf(index.X); base != nil {
+			if _, isMap := base.Underlying().(*types.Map); isMap {
+				return false
+			}
+		}
+	}
+
+	switch assignStmt.Tok {
+	case token.ASSIGN:
+	case token.DEFINE:
+		if !isIdent || v.info.Defs[ident] != nil {
+			return false
+		}
+	default:
+		return false
+	}
+
+	return valueAssignMethod(v.info.TypeOf(lhs)) != ""
+}
+
+// valueAssignMethod is the in-place copy's member on t, or "" when t owns no array storage. An array (direct, aliased
+// or named) takes Assign: golib's ArrayExtensions.Assign for array<T>, the generated member for a named array. A
+// struct holding one ([GoValueClone], typeNeedsValueClone) takes go2cs-gen's AssignFrom. A Go type that declares its
+// OWN method of that name gets the Δ-prefixed member instead, which the generator names the same way so it cannot
+// shadow Go's method (the ValueCloneMethod precedent). A struct whose arrays are held inline is copied whole by a
+// plain C# assignment already, and is not one of these.
+func valueAssignMethod(t types.Type) string {
+	if t == nil {
+		return ""
+	}
+
+	if typeIsArrayValue(t) {
+		if declaresGoMethod(t, "Assign") {
+			return "ΔAssign"
+		}
+
+		return "Assign"
+	}
+
+	if _, isStruct := t.Underlying().(*types.Struct); isStruct && typeNeedsValueClone(t) {
+		if declaresGoMethod(t, "AssignFrom") {
+			return "ΔAssignFrom"
+		}
+
+		return "AssignFrom"
+	}
+
+	return ""
+}
+
+// valueAssignTarget is the rendered location an in-place copy is called on. `*p = R` for a pointer to an UNNAMED array
+// calls golib's ж<array<T>> extension, `p.Assign(R)`, so a box over NATIVE memory stores through its element door
+// (P5's C6: NativeArrayBox has no array<T> to hand out, and `p.Value` throws there by design); the rendering's
+// `.Value` deref is dropped for it. Every other location keeps its rendering.
+func valueAssignTarget(lhs ast.Expr, t types.Type, rendered string) string {
+	if _, isStar := ast.Unparen(lhs).(*ast.StarExpr); !isStar || t == nil {
+		return rendered
+	}
+
+	if _, unnamed := types.Unalias(t).(*types.Array); !unnamed {
+		return rendered
+	}
+
+	if trimmed, ok := strings.CutSuffix(rendered, ".Value"); ok {
+		return trimmed
+	}
+
+	return rendered
+}
+
+// valueAssignTempRoot names a temporary for an in-place operand after the variable its location is rooted at
+// (`arrs[i]` -> arrs), so a tuple's temporaries read as the operands they stand for; `ᴛ` follows from getTempVarName.
+func valueAssignTempRoot(lhs ast.Expr) string {
+	for {
+		switch e := lhs.(type) {
+		case *ast.ParenExpr:
+			lhs = e.X
+		case *ast.IndexExpr:
+			lhs = e.X
+		case *ast.SelectorExpr:
+			lhs = e.X
+		case *ast.StarExpr:
+			lhs = e.X
+		case *ast.Ident:
+			if e.Name != "_" {
+				return strings.TrimPrefix(getSanitizedIdentifier(e.Name), "@")
+			}
+
+			return "val"
+		default:
+			return "val"
+		}
+	}
 }
 
 // declaresGoMethod reports whether t is (an alias of) a NAMED type declaring a method called name,
@@ -240,8 +375,24 @@ func (v *Visitor) exprReadsValueNeedingClone(expr ast.Expr) bool {
 		expr = paren.X
 	}
 
-	switch expr.(type) {
+	switch e := expr.(type) {
 	case *ast.Ident, *ast.SelectorExpr, *ast.IndexExpr, *ast.StarExpr:
+	case *ast.CallExpr:
+		// A CONVERSION between clone-needing types (`[4]int(named)`, `N(arr)`, a struct to a struct of the same
+		// layout) is the operand's value under another type: the converted `(array<nint>)n` hands n's backing over
+		// through the wrapper's operator, so it reads existing storage exactly when its operand does
+		// (DESIGN-array-reassign-in-place.md §8 N1). appendValueClone parenthesizes the cast it then clones.
+		if len(e.Args) != 1 || !v.callExprIsTypeConversion(e) || !typeNeedsValueClone(v.getExprType(expr)) {
+			return false
+		}
+
+		// An inherited wrapper's operator with its base copies by itself: the value is copied once
+		// (structConversionCopy.go).
+		if conversionCopiedByWrapperOperator(v.getExprType(expr), v.getExprType(e.Args[0])) {
+			return false
+		}
+
+		return v.exprReadsValueNeedingClone(e.Args[0])
 	default:
 		return false
 	}
@@ -271,11 +422,46 @@ func appendValueClone(rendered string, valueType types.Type) string {
 		return rendered
 	}
 
-	if strings.HasPrefix(rendered, PointerDerefOp) {
+	if strings.HasPrefix(rendered, PointerDerefOp) || renderedIsCast(rendered) {
 		return fmt.Sprintf("(%s)%s", rendered, suffix)
 	}
 
 	return rendered + suffix
+}
+
+// renderedIsCast reports whether rendered is a C# cast, `(T)x` or `(T)(x)`: its leading parenthesis closes before the
+// end and an operand follows it. A postfix suffix binds tighter than a cast, so `(array<nint>)n.Clone()` would clone
+// n under its own type; the conversion arm of exprReadsValueNeedingClone is the clone site that renders one. A
+// parenthesized primary (`(x).Value`, `(a + b)`) is not a cast and is left alone.
+func renderedIsCast(rendered string) bool {
+	if !strings.HasPrefix(rendered, "(") {
+		return false
+	}
+
+	depth := 0
+
+	for i, r := range rendered {
+		switch r {
+		case '(':
+			depth++
+		case ')':
+			depth--
+
+			if depth == 0 {
+				rest := rendered[i+1:]
+
+				if rest == "" {
+					return false
+				}
+
+				next := rest[0]
+
+				return next == '(' || next == '@' || next == '_' || (next >= 'a' && next <= 'z') || (next >= 'A' && next <= 'Z') || next >= 0x80
+			}
+		}
+	}
+
+	return false
 }
 
 // appendRangeSnapshot appends the array RANGE-EXPRESSION copy (RangeSnapshotMethod) to an

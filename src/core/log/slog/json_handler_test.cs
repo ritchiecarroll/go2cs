@@ -22,6 +22,7 @@ using go.encoding;
 using go.log.slog.@internal;
 using path;
 using static go.log.slog_package;
+using static slog_internal_test_package;
 
 partial class slog_internal_test_package {
 
@@ -68,6 +69,8 @@ internal partial struct jsonMarshaler {
     internal @string s;
 }
 
+} partial class slog_internal_testᴛjsonMarshaler {
+
 internal static @string String(this jsonMarshaler j) { return j.s; } // should be ignored
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -81,15 +84,21 @@ internal static (slice<byte>, error) MarshalJSON(this jsonMarshaler j) {
     return (slice<byte>(fmt.Sprintf(@"[%q]"u8, j.s)), default);
 }
 
+} partial class slog_internal_test_package {
+
 internal partial struct jsonMarshalerError {
     /*embed*/ internal jsonMarshaler jsonMarshaler;
 }
+
+} partial class slog_internal_testᴛjsonMarshalerError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string oopsˢ => ref oopsˢᵇ;
 private static readonly @string oopsˢᵇ = "oops"u8;
 
 internal static @string Error(this jsonMarshalerError _) { return oopsˢ; }
+
+} partial class slog_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object helloˢ = (@string)"hello\r\n\t\a"u8;
@@ -111,7 +120,7 @@ public static void TestAppendJSONValue(ж<testing.T> t) {
         -12.75D,
         1.23e-9D,
         false,
-        time_package.ΔMinute,
+        time.Minute,
         testTime,
         new jsonMarshaler("xyz"),
         new jsonMarshalerError(new jsonMarshaler("pqr")),
@@ -180,8 +189,8 @@ internal static ref readonly @string subtestˢ => ref subtestˢᵇ;
 private static readonly @string subtestˢᵇ = "subtest"u8;
 internal static ref readonly @string flagˢ => ref flagˢᵇ;
 private static readonly @string flagˢᵇ = "flag"u8;
-internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
-private static readonly @string errorˢ2ᵇ = "error"u8;
+internal static ref readonly @string errorˢ => ref errorˢᵇ;
+private static readonly @string errorˢᵇ = "error"u8;
 internal static ref readonly @string eventˢ => ref eventˢᵇ;
 private static readonly @string eventˢᵇ = "event"u8;
 
@@ -193,7 +202,7 @@ internal partial struct TestJSONAllocs_testEvent /*dyn*/ {
 
 public static void TestJSONAllocs(ж<testing.T> t) {
     var ctx = t.Context();
-    var l = New(new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(io.Discard, Ꮡ(new HandlerOptions()))));
+    var l = New(new global::go.log.slog_package.JSONHandlerжHandler(NewJSONHandler(io.Discard, Ꮡ(new HandlerOptions()))));
     var testErr = errors.New(anErrorOccurredˢ);
     ref var testEvent = ref heap<TestJSONAllocs_testEvent>(new TestJSONAllocs_testEvent(
         123456, "abcdefgh", true
@@ -224,7 +233,7 @@ public static void TestJSONAllocs(ж<testing.T> t) {
                 go.log.slog_package.String(componentˢ, subtestˢ),
                 Int("id", 67890),
                 go.log.slog_package.Bool(flagˢ, true),
-                go.log.slog_package.Any(errorˢ2, testErrʗ2),
+                go.log.slog_package.Any(errorˢ, testErrʗ2),
                 go.log.slog_package.Any(eventˢ, testEventʗ2));
         });
     });
@@ -298,7 +307,7 @@ public static void BenchmarkJSONHandler(ж<testing.B> b) {
 
         b.Run(bench.name, (ж<testing.B> bΔ1) => {
             var ctx = context.Background();
-            var l = New(new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(io.Discard, Ꮡbench.of(BenchmarkJSONHandler_type.Ꮡopts)))).With(
+            var l = New(new global::go.log.slog_package.JSONHandlerжHandler(NewJSONHandler(io.Discard, Ꮡbench.of(BenchmarkJSONHandler_type.Ꮡopts)))).With(
                 go.log.slog_package.String(programˢ, myTestProgramˢ),
                 go.log.slog_package.String(packageˢ, logSlogˢ),
                 go.log.slog_package.String(traceIDˢ, "2039232309232309"),
@@ -385,7 +394,7 @@ public static void BenchmarkPreformatting(ж<testing.B> b) {
             var benchʗ1 = bench;
             var ctxʗ1 = ctx;
             b.Run(bench.name, (ж<testing.B> bΔ1) => {
-                var l = New(new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(benchʗ1.wc, nil))).With(benchʗ1.attrs.ꓸꓸꓸ);
+                var l = New(new global::go.log.slog_package.JSONHandlerжHandler(NewJSONHandler(benchʗ1.wc, nil))).With(benchʗ1.attrs.ꓸꓸꓸ);
                 bΔ1.ReportAllocs();
                 bΔ1.ResetTimer();
                 for (nint i = 0; i < (~bΔ1).N; i++) {

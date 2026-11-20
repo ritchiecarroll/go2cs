@@ -43,7 +43,7 @@ using static go.encoding.binary_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/binary/binary_test.go", "binary_test.cs", "AC1aABk2ABQqABQqgoKUgoKCgpSCAAgIvoKC3JSCgqaCgpQADBQABxqCgpTKgoKyooKCyoKCsqKCyoKClIKCAAkEgoKCgqaCgoK4gqaCspKCgoKCgoKCgoLMgrKSgoLcAAoWgrKyooKCsoKUpIKClKaCgoKUgoKCgpSCggAMEoKykoKAgraCgoKClIKCggAiPoKykoKCgqiSgriCuIKCqJKClIIAGAyUlIKCgoKUpoKSgoKWAAAUAAsegoKmgsqCABcwgoIADhqCgoKCprKygoKmgqLKgrKSkoKCgoKUgqaCgoKCAA4KgpSinIKClLS0toCCpICC2rKClIKC5rKClIKCAA4GgoqCggAIEoKCgIKkgoCCpIKmgoKAgqSCgIKkgqaCgoCCpIKAgqSC3IKClIK4goKmggANHIKCgoIACgqCAAUYspKCgpSCggAJDIKClIKCkpSClIK4ABQqgoKUgsiSlIIACRSCgoKmooKCgoKCgoK4ooKCgoKCgoKClIKCuKKCgoK4ooKClIK4ooKCgoKCgoKUpqKCgoKCgpSmooKCgoKCgoK4ooKCgoKCgoKCgoKCgoKClIKCgoKCgoKCgoK4ooKCgoKCgoKCgoKCgoKUgoK4ooKCgoKCgoKCgoKCgpSCgriigoKCgoKCgpSmooKCgoKClKaigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoKCgoKCgoKUgoKCgoKCgoKCgoKCgoKCgriigoKCgoKCgpSCgriigoKCgoKCgriigoKCgoKCgpSmooKCgoKCgoK4ooKCgoKCgoK4goKSgtyCgoKCgg==", "190-194:1;201-204:1;217-221:1;223-227:2;236-247:1;254-258:1;277-310:1;280-308:1.1;317-335:1;365-397:1;405-412:1;407-410:1.1;415-419:2;505-513:1;506-510:1.1;520-537:1;521-531:1.1;572-574:1;581-583:1;700-709:1;719-721:1;756-766:1;760-762:1.1;1143-1147:1", "", "46=Float32frombits/1/3/10,Float64frombits/1/3/11,Float32frombits/2/3/13,Float32frombits/3/3/14,Float64frombits/2/3/17,Float64frombits/3/3/18", "", "576:29,577:21,669:21,670:13,685:21,686:13")]
+[assembly: GoPositionMap("encoding/binary/binary_test.go", "binary_test.cs", "AC5aABk2ABQqABQqgoKUgoKCgpSCAAgIvoKC3JSCgqaCgpQADBQABxqCgpTKgoKyooKCyoKCsqKCyoKClIKCAAkEgoKCgqaCgoK4gqaCspKCgoKCgoKCgoLMgrKSgoLcAAoWgrKyooKCsoKUpIKClKaCgoKUgoKCgpSCggAMEoKykoKAgraCgoKClIKCggAiPoKykoKCgqiSgriCuIKCqJKClIIAGAyUlIKCgoKUpoKSgoKWAAAUAAsegoKmgsqCABcwgoIADhqCgoKCprKygoKmgqLKgrKSkoKCgoKUgqaCgoKCAA4KgpSinIKClLS0toCCpICC2rKClIKC5rKClIKCAA4GgoqCggAIEoKCgIKkgoCCpIKmgoKAgqSCgIKkgqaCgoCCpIKAgqSC3IKClIK4goKmggANHIKCgoIACgqCAAUYspKCgpSCggAJDIKClIKCkpSClIK4ABQqgoKUgsiSlIIACxSCgoLGooKCgoKCgoK4ooKCgoKCgoKClIKCuKKCgoK4ooKClIK4ooKCgoKCgoKUpqKCgoKCgpSmooKCgoKCgoK4ooKCgoKCgoKCgoKCgoKClIKCgoKCgoKCgoK4ooKCgoKCgoKCgoKCgoKUgoK4ooKCgoKCgoKCgoKCgpSCgriigoKCgoKCgpSmooKCgoKClKaigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoKCgoKCgoKUgoKCgoKCgoKCgoKCgoKCgriigoKCgoKCgpSCgriigoKCgoKCgriigoKCgoKCgpSmooKCgoKCgoK4ooKCgoKCgoK4goKSgtyCgoKCgg==", "190-194:1;201-204:1;217-221:1;223-227:2;236-247:1;254-258:1;277-310:1;280-308:1.1;317-335:1;365-397:1;405-412:1;407-410:1.1;415-419:2;505-513:1;506-510:1.1;520-537:1;521-531:1.1;572-574:1;581-583:1;700-709:1;719-721:1;756-766:1;760-762:1.1;1143-1147:1", "", "47=Float32frombits/1/3/10,Float64frombits/1/3/11,Float32frombits/2/3/13,Float32frombits/3/3/14,Float64frombits/2/3/17,Float64frombits/3/3/18", "", "577:29,578:21,670:21,671:13,686:21,687:13")]
 [assembly: GoPositionMap("encoding/binary/varint_test.go", "varint_test.cs", "AA0cgoKCgriCgoKmgoKCgoKUgqaCgoKmgoKUgriCgoKCgpSCpoKCgqaCgpSCuAAUKoKCgpSCgriCgpSCuIKCgoKCgqaCgoKUggALDqIAAxKCgpSCABgyspKCgJKkgILsgoKCpoKCgoKUgriCgoKmgoKCgrqigoKCgsqigoKCgg==", "152-159:1;184-192:2")]
 // </GoSourcePositionMaps>
 
@@ -88,3 +88,13 @@ public static partial class binary_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(binary_internal_test_package.byteSliceReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binary_internal_testᴛbyteSliceReader;
+// </MethodHolders>

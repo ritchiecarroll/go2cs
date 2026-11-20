@@ -41,6 +41,8 @@ using System.Threading;
 
 namespace go;
 
+using static sync_package;
+
 partial class sync_package {
 
 // A Pool is a set of temporary objects that may be individually saved and
@@ -53,7 +55,7 @@ partial class sync_package {
 // A Pool is safe for use by multiple goroutines simultaneously.
 //
 // A Pool must not be copied after first use.
-[GoType] partial struct Pool {
+[GoType] public partial struct Pool {
     // state materializes through the Pool's heap box on first Put/Get, so every access through the
     // same boxed Pool shares it (never through a copy — Go forbids copying a Pool after first use).
     // Go keeps this state in the Pool struct itself, as an unsafe.Pointer to the shard block plus its
@@ -94,6 +96,8 @@ internal sealed class poolLocal
 private static readonly object allPoolsMu = new();
 private static List<poolState> allPools = [];
 private static List<poolState> oldPools = [];
+
+} partial class syncᴛPool {
 
 // Put adds x to the pool.
 [GoRecv] public static void Put(this ref Pool p, any x) {
@@ -194,8 +198,10 @@ private static List<poolState> oldPools = [];
     return default!;
 }
 
+} partial class sync_package {
+
 // stateOf returns the Pool's state, creating it once on first use (race-safe).
-private static poolState stateOf(ref Pool p) {
+internal static poolState stateOf(ref Pool p) {
     poolState? s = Volatile.Read(ref p.state);
 
     if (s is not null) {
@@ -206,6 +212,8 @@ private static poolState stateOf(ref Pool p) {
 
     return Interlocked.CompareExchange(ref p.state, created, null) ?? created;
 }
+
+} partial class syncᴛPool {
 
 // pin returns the poolLocal shard for the calling goroutine and the shard's index. Go pins the
 // goroutine to its P for the duration and the caller must runtime_procUnpin(); the index here is
@@ -225,9 +233,11 @@ private static poolState stateOf(ref Pool p) {
     return pinSlow(state);
 }
 
+} partial class sync_package {
+
 // pinSlow allocates this cycle's shard array — Go's [P]poolLocal block — and enrolls the pool for
 // cleanup. allPoolsMu serializes it against both other pins and poolCleanup.
-private static (poolLocal, nint) pinSlow(poolState state) {
+internal static (poolLocal, nint) pinSlow(poolState state) {
     lock (allPoolsMu) {
         // Retry under the lock: another thread may have built the array, or poolCleanup may have
         // taken it away, since pin looked.

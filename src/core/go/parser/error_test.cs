@@ -43,10 +43,10 @@ internal static ref readonly @string testdata => ref testdataᵇ;
 private static readonly @string testdataᵇ = "testdata"u8;
 
 // getFile assumes that each filename occurs at most once
-internal static ж<tokenꓸFile> /*file*/ getFile(ж<token.FileSet> fset, @string filename) {
-    ж<tokenꓸFile> @file = default;
+internal static ж<token.File> /*file*/ getFile(ж<token.FileSet> fset, @string filename) {
+    ж<token.File> @file = default;
 
-    fset.Iterate((ж<tokenꓸFile> f) => {
+    fset.Iterate((ж<token.File> f) => {
         if (f.Name() == filename) {
             if (@file != nil) {
                 throw panic(filename + " used multiple times");
@@ -58,7 +58,7 @@ internal static ж<tokenꓸFile> /*file*/ getFile(ж<token.FileSet> fset, @strin
     return @file;
 }
 
-internal static tokenꓸPos getPos(ж<token.FileSet> fset, @string filename, nint offset) {
+internal static token.Pos getPos(ж<token.FileSet> fset, @string filename, nint offset) {
     var f = getFile(fset, filename); if (f != nil) {
         return f.Pos(offset);
     }
@@ -75,38 +75,37 @@ internal static ж<regexp.Regexp> errRx = regexp.MustCompile(@"^/\* *ERROR *(HER
 
 // expectedErrors collects the regular expressions of ERROR comments found
 // in files and returns them as a map of error positions to error messages.
-internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> fset, @string filename, slice<byte> src) {
-    var errors = new map<tokenꓸPos, @string>();
+internal static map<token.Pos, @string> expectedErrors(ж<token.FileSet> fset, @string filename, slice<byte> src) {
+    var errors = new map<token.Pos, @string>();
 
     scanner.Scanner s = default;
     // file was parsed already - do not add it again to the file
     // set otherwise the position information returned here will
     // not match the position information collected by the parser
     s.Init(getFile(fset, filename), src, default, scanner.ScanComments);
-    tokenꓸPos prev = default; // position of last non-comment, non-semicolon token
-    tokenꓸPos here = default; // position immediately after the token at position prev
+    token.Pos prev = default; // position of last non-comment, non-semicolon token
+    token.Pos here = default; // position immediately after the token at position prev
 
     for (;;) {
         var (pos, tok, lit) = s.Scan();
-        var exprᴛ1 = tok;
         var matchᴛ1 = false;
-        if (exprᴛ1 == token.EOF) { matchᴛ1 = true;
+        if (tok == token.EOF) { matchᴛ1 = true;
             return errors;
         }
-        if (exprᴛ1 == token.COMMENT) { matchᴛ1 = true;
+        if (tok == token.COMMENT) { matchᴛ1 = true;
             var sΔ2 = errRx.FindStringSubmatch(lit);
             if (len(sΔ2) == 3) {
                 if (sΔ2[1] == "HERE") {
                     pos = here; // position right after the previous token prior to comment
                 } else if (sΔ2[1] == "AFTER") {
-                    pos += ((tokenꓸPos)len(lit)); // end of comment
+                    pos += ((token.Pos)len(lit)); // end of comment
                 } else {
                     pos = prev; // token prior to comment
                 }
                 errors[pos] = sΔ2[2];
             }
         }
-        else if (exprᴛ1 == token.SEMICOLON) { matchᴛ1 = true;
+        else if (tok == token.SEMICOLON) { matchᴛ1 = true;
             do {
                 // don't use the position of auto-inserted (invisible) semicolons
                 if (lit != ";"u8) {
@@ -123,19 +122,19 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> fset,
             } else {
                 l = len(tok.String());
             }
-            here = prev + ((tokenꓸPos)l);
+            here = prev + ((token.Pos)l);
         }
     }
 }
 
 // compareErrors compares the map of expected error messages with the list
 // of found errors and reports discrepancies.
-internal static void compareErrors(ж<testing.T> t, ж<token.FileSet> fset, map<tokenꓸPos, @string> expected, scanner.ErrorList found) {
+internal static void compareErrors(ж<testing.T> t, ж<token.FileSet> fset, map<token.Pos, @string> expected, scanner.ErrorList found) {
     t.Helper();
-    foreach (var (_, error) in range<ж<scannerꓸError>>(found)) {
+    foreach (var (_, error) in range<ж<scanner.Error>>(found)) {
         // error.Pos is a token.Position, but we want
         // a token.Pos so we can do a map lookup
-        tokenꓸPos pos = getPos(fset, error.Pos.Filename, error.Pos.Offset);
+        token.Pos pos = getPos(fset, error.Pos.Filename, error.Pos.Offset);
         var (msg, foundΔ1) = expected[pos, ꟷ]; if (foundΔ1) {
             // we expect a message at pos; check if it matches
             var (rx, err) = regexp.Compile(msg);
@@ -185,7 +184,7 @@ internal static void checkErrors(ж<testing.T> t, @string filename, any input, g
     }
     Ꮡfound.RemoveMultiples();
 
-    var expected = new map<tokenꓸPos, @string>{};
+    var expected = new map<token.Pos, @string>{};
     if (expectErrors) {
         // we are expecting the following errors
         // (collect these after parsing a file so that it is found in the file set)

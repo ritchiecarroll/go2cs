@@ -16,6 +16,7 @@ using stringslite = @internal.stringslite_package;
 using netip = net.netip_package;
 using @internal;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -120,6 +121,8 @@ public static ref IP IPv6linklocalallnodes => ref ((StaticBox<IP>)ᏑIPv6linkloc
 public static readonly ж<IP> ᏑIPv6linklocalallrouters = new StaticBox<IP>(new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x02}.slice()));
 public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linklocalallrouters).ValueSlot;
 
+} partial class netᴛIP {
+
 // IsUnspecified reports whether ip is an unspecified address, either
 // the IPv4 address "0.0.0.0" or the IPv6 address "::".
 public static bool IsUnspecified(this IP ip) {
@@ -195,6 +198,8 @@ public static bool IsGlobalUnicast(this IP ip) {
     return (len(ip) == IPv4len || len(ip) == IPv6len) && !ip.Equal(IPv4bcast) && !ip.IsUnspecified() && !ip.IsLoopback() && !ip.IsMulticast() && !ip.IsLinkLocalUnicast();
 }
 
+} partial class net_package {
+
 // Is p all zeros?
 internal static bool isZeros(IP p) {
     for (nint i = 0; i < len(p); i++) {
@@ -204,6 +209,8 @@ internal static bool isZeros(IP p) {
     }
     return true;
 }
+
+} partial class netᴛIP {
 
 // To4 converts the IPv4 address ip to a 4-byte representation.
 // If ip is not an IPv4 address, To4 returns nil.
@@ -229,10 +236,14 @@ public static IP To16(this IP ip) {
     return default;
 }
 
+} partial class net_package {
+
 // Default route masks for IPv4.
 internal static IPMask classAMask = IPv4Mask(0xff, 0, 0, 0);
 internal static IPMask classBMask = IPv4Mask(0xff, 0xff, 0, 0);
 internal static IPMask classCMask = IPv4Mask(0xff, 0xff, 0xff, 0);
+
+} partial class netᴛIP {
 
 // DefaultMask returns the default IP mask for the IP address ip.
 // Only IPv4 addresses have default masks; DefaultMask returns
@@ -253,6 +264,8 @@ public static IPMask DefaultMask(this IP ip) {
     }}
 }
 
+} partial class net_package {
+
 internal static bool allFF(slice<byte> b) {
     foreach (var (_, c) in range(b)) {
         if (c != 0xff) {
@@ -261,6 +274,8 @@ internal static bool allFF(slice<byte> b) {
     }
     return true;
 }
+
+} partial class netᴛIP {
 
 // Mask returns the result of masking the IP address ip with mask.
 public static IP Mask(this IP ip, IPMask mask) {
@@ -316,6 +331,8 @@ public static @string String(this IP ip) {
     return (@string)buf;
 }
 
+} partial class net_package {
+
 internal static @string hexString(slice<byte> b) {
     var s = new slice<byte>(len(b) * 2);
     foreach (var (i, tn) in range(b)) {
@@ -332,6 +349,8 @@ internal static @string ipEmptyString(IP ip) {
     }
     return ip.String();
 }
+
+} partial class netᴛIP {
 
 // appendTo appends the string representation of ip to b and returns the expanded b
 // If len(ip) != IPv4len or IPv6len, it appends nothing.
@@ -406,6 +425,8 @@ internal static bool matchAddrFamily(this IP ip, IP x) {
     return ip.To4() != nil && x.To4() != nil || ip.To16() != nil && ip.To4() == nil && x.To16() != nil && x.To4() == nil;
 }
 
+} partial class net_package {
+
 // If mask is a sequence of 1 bits followed by 0 bits,
 // return the number of 1 bits.
 internal static nint simpleMaskLength(IPMask mask) {
@@ -438,6 +459,8 @@ internal static nint simpleMaskLength(IPMask mask) {
     return n;
 }
 
+} partial class netᴛIPMask {
+
 // Size returns the number of leading ones and total bits in the mask.
 // If the mask is not in the canonical form--ones followed by zeros--then
 // Size returns 0, 0.
@@ -452,6 +475,10 @@ public static (nint ones, nint bits) Size(this IPMask m) {
     return (ones, bits);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
 // String returns the hexadecimal form of m, with no punctuation.
 public static @string String(this IPMask m) {
     if (len(m) == 0) {
@@ -459,6 +486,8 @@ public static @string String(this IPMask m) {
     }
     return hexString(m);
 }
+
+} partial class net_package {
 
 internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
     IP ip = default;
@@ -490,6 +519,8 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
     return (ip, m);
 }
 
+} partial class netᴛIPNet {
+
 // Contains reports whether the network includes ip.
 public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
     var (nn, m) = networkNumberAndMask(ref (Ꮡn).DerefOrNull());
@@ -515,6 +546,10 @@ private static readonly @string ipNetˢᵇ = "ip+net"u8;
 // Network returns the address's network name, "ip+net".
 public static @string Network(this ref IPNet n) { return ipNetˢ; }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
 // String returns the CIDR notation of n like "192.0.2.0/24"
 // or "2001:db8::/48" as defined in RFC 4632 and RFC 4291.
 // If the mask is not in the canonical form, it returns the
@@ -535,6 +570,8 @@ public static @string String(this ж<IPNet> Ꮡn) {
     }
     return nn.String() + "/"u8 + strconv.Itoa(l);
 }
+
+} partial class net_package {
 
 // ParseIP parses s as an IP address, returning the result.
 // The string s can be in IPv4 dotted decimal ("192.0.2.1"), IPv6

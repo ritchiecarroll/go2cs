@@ -182,6 +182,7 @@ using atomic = go.sync.atomic_package;
 using go;
 using go.sync;
 using ꓸꓸꓸany = Span<any>;
+using static bisect_package;
 
 partial class bisect_package {
 
@@ -253,36 +254,35 @@ public static (ж<Matcher>, error) New(@string pattern) {
             wid = 4;
             continue;
         }
-        var exprᴛ1 = c;
         var matchᴛ1 = false;
-        var matchᴛ2 = (exprᴛ1 is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') || (exprᴛ1 is (byte)'0' or (byte)'1') || (exprᴛ1 is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') || exprᴛ1 is (byte)'y' || (exprᴛ1 is (byte)'+' or (byte)'-');
+        var matchᴛ2 = (c is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') || (c is (byte)'0' or (byte)'1') || (c is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') || c is (byte)'y' || (c is (byte)'+' or (byte)'-');
         if (!matchᴛ2) { /* default: */
             return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
         }
-        if (exprᴛ1 is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') { matchᴛ1 = true;
+        if (c is (byte)'2' or (byte)'3' or (byte)'4' or (byte)'5' or (byte)'6' or (byte)'7' or (byte)'8' or (byte)'9') { matchᴛ1 = true;
             if (wid != 4) {
                 return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 is (byte)'0' or (byte)'1')) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && (c is (byte)'0' or (byte)'1')) { matchᴛ1 = true;
             bits.LshAssign((int64)(wid));
             bits |= (uint64)((uint64)((byte)(c - '0')));
         }
-        else if (exprᴛ1 is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') { matchᴛ1 = true;
+        else if (c is (byte)'a' or (byte)'b' or (byte)'c' or (byte)'d' or (byte)'e' or (byte)'f' or (byte)'A' or (byte)'B' or (byte)'C' or (byte)'D' or (byte)'E' or (byte)'F') { matchᴛ1 = true;
             if (wid != 4) {
                 return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
             bits <<= 4;
             bits |= (uint64)((uint64)((byte)((byte)(c & ~0x20) - 'A' + 10)));
         }
-        else if (exprᴛ1 is (byte)'y') {
+        else if (c is (byte)'y') {
             if (i + 1 < len(p) && (p[i + 1] == '0' || p[i + 1] == '1')) {
                 return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
             }
             bits = 0;
         }
-        else if (exprᴛ1 is (byte)'+' or (byte)'-') { matchᴛ1 = true;
+        else if (c is (byte)'+' or (byte)'-') { matchᴛ1 = true;
             if (c == '+' && result == false) {
                 // Have already seen a -. Should be - from here on.
                 return (default, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax (+ after -): "u8 + pattern))));
@@ -330,6 +330,8 @@ partial struct cond {
     internal uint64 bits;
     internal bool result;
 }
+
+} partial class bisectᴛMatcher {
 
 // MarkerOnly reports whether it is okay to print only the marker for
 // a given change, omitting the identifying information.
@@ -395,6 +397,8 @@ internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, ni
     return Ꮡm.ShouldEnable(h);
 }
 
+} partial class bisect_package {
+
 // printFileLine prints a non-marker-only report for file:line to w.
 internal static error printFileLine(Writer w, uint64 h, @string @file, nint line) {
     const nint markerLen = 40; // overestimate
@@ -425,6 +429,8 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
     dst = appendꓸꓸꓸ(dst, buf.slice(i));
     return dst;
 }
+
+} partial class bisectᴛMatcher {
 
 // MatchStack assigns the current call stack a change ID.
 // If the stack should be printed, MatchStack prints it.
@@ -485,6 +491,8 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
     }
     return Ꮡm.ShouldEnable(h);
 }
+
+} partial class bisect_package {
 
 // Writer is the same interface as io.Writer.
 // It is duplicated here to avoid importing io.
@@ -764,7 +772,11 @@ partial struct parseError {
     internal @string text;
 }
 
+} partial class bisectᴛparseError {
+
 internal static @string Error(this ref parseError e) { return e.text; }
+
+} partial class bisect_package {
 
 // FNV-1a implementation. See Go's hash/fnv/fnv.go.
 // Copied here for simplicity (can handle integers more directly)
@@ -819,6 +831,8 @@ partial struct dedup {
     internal map<uint64, bool> m;
 }
 
+} partial class bisectᴛdedup {
+
 // seen records that h has now been seen and reports whether it was seen before.
 // When seen returns false, the caller is expected to print a report for h.
 internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
@@ -855,4 +869,4 @@ internal static bool seenLossy(this ref dedup d, uint64 h) {
     return false;
 }
 
-} // end bisect_package
+} // end bisectᴛdedup

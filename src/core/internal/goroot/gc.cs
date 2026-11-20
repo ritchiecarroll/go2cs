@@ -14,6 +14,7 @@ using go;
 using go.os;
 using io;
 using path;
+using static goroot_package;
 
 partial class goroot_package {
 
@@ -24,9 +25,8 @@ private static readonly @string srcˢᵇ = "src"u8;
 // IsStandardPackage reports whether path is a standard package,
 // given goroot and compiler. readDir accepts OS filesystem paths.
 public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> readDir, @string goroot, @string compiler, @string path) {
-    var exprᴛ1 = compiler;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "gc"u8: {
+    case {} when compiler == "gc"u8: {
         @string dir = filepath.Join(goroot, srcˢ, path);
         var (dirents, err) = readDir(dir);
         if (err != nil) {
@@ -39,7 +39,7 @@ public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> 
         }
         return false;
     }
-    case {} when exprᴛ1 == "gccgo"u8: {
+    case {} when compiler == "gccgo"u8: {
         return ᏑgccgoSearch.isStandard(path);
     }
     default: {
@@ -58,6 +58,8 @@ partial struct gccgoDirs {
 // standard library.
 internal static readonly ж<gccgoDirs> ᏑgccgoSearch = new StaticBox<gccgoDirs>(default(gccgoDirs));
 internal static ref gccgoDirs gccgoSearch => ref ((StaticBox<gccgoDirs>)ᏑgccgoSearch).ValueSlot;
+
+} partial class gorootᴛgccgoDirs {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string gccgoˢ => ref gccgoˢᵇ;
@@ -174,4 +176,4 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
     return false;
 }
 
-} // end goroot_package
+} // end gorootᴛgccgoDirs

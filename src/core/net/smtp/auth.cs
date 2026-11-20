@@ -9,11 +9,12 @@ using errors = errors_package;
 using fmt = fmt_package;
 using crypto;
 using hash = hash_package;
+using static smtp_package;
 
 partial class smtp_package {
 
 // Auth is implemented by an SMTP authentication mechanism.
-partial interface ΔAuth {
+partial interface Auth {
     // Start begins an authentication with a server.
     // It returns the name of the authentication protocol
     // and optionally data to include in the initial AUTH message
@@ -50,13 +51,15 @@ partial struct plainAuth {
 // PlainAuth will only send the credentials if the connection is using TLS
 // or is connected to localhost. Otherwise authentication will fail with an
 // error, without sending the credentials.
-public static ΔAuth PlainAuth(@string identity, @string username, @string password, @string host) {
-    return new plainAuthжΔAuth(Ꮡ(new plainAuth(identity, username, password, host)));
+public static Auth PlainAuth(@string identity, @string username, @string password, @string host) {
+    return new plainAuthжAuth(Ꮡ(new plainAuth(identity, username, password, host)));
 }
 
 internal static bool isLocalhost(@string name) {
     return name == "localhost"u8 || name == "127.0.0.1"u8 || name == "::1"u8;
 }
+
+} partial class smtpᴛplainAuth {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unencryptedConnectionˢ => ref unencryptedConnectionˢᵇ;
@@ -96,6 +99,8 @@ internal static (slice<byte>, error) Next(this ref plainAuth a, slice<byte> from
     return (default, default);
 }
 
+} partial class smtp_package {
+
 partial struct cramMD5Auth {
     internal @string username, secret;
 }
@@ -104,9 +109,11 @@ partial struct cramMD5Auth {
 // mechanism as defined in RFC 2195.
 // The returned Auth uses the given username and secret to authenticate
 // to the server using the challenge-response mechanism.
-public static ΔAuth CRAMMD5Auth(@string username, @string secret) {
-    return new cramMD5AuthжΔAuth(Ꮡ(new cramMD5Auth(username, secret)));
+public static Auth CRAMMD5Auth(@string username, @string secret) {
+    return new cramMD5AuthжAuth(Ꮡ(new cramMD5Auth(username, secret)));
 }
+
+} partial class smtpᴛcramMD5Auth {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cramMd5ˢ => ref cramMd5ˢᵇ;
@@ -126,4 +133,4 @@ internal static (slice<byte>, error) Next(this ref cramMD5Auth a, slice<byte> fr
     return (default, default);
 }
 
-} // end smtp_package
+} // end smtpᴛcramMD5Auth

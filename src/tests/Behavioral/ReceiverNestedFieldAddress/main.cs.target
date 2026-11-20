@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct outer {
     internal inner @in;
     internal ж<inner> ptr;
 }
+
+} partial class mainᴛouter {
 
 internal static void bumpA(this ж<outer> Ꮡo) {
     var p = Ꮡo.Ꮡin.Ꮡa;
@@ -40,6 +43,8 @@ internal static void bumpViaPtr(this ref outer o) {
     p.Value += 3;
 }
 
+} partial class main_package {
+
 partial struct leaf {
     internal nint n;
 }
@@ -52,15 +57,21 @@ partial struct deep {
     internal mid md;
 }
 
+} partial class mainᴛdeep {
+
 internal static void bumpLeaf(this ж<deep> Ꮡd) {
     var p = Ꮡd.Ꮡmd.Ꮡlf.Ꮡn;
     p.Value += 5;
 }
 
+} partial class mainᴛouter {
+
 internal static uint16 readA(this ж<outer> Ꮡo) {
     var p = Ꮡo.Ꮡin.Ꮡa;
     return p.Value;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var o = Ꮡ(new outer(name: "x", ptr: Ꮡ(new inner())));

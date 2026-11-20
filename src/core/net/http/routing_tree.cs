@@ -17,6 +17,7 @@
 namespace go.net;
 
 using strings = strings_package;
+using static http_package;
 
 partial class http_package {
 
@@ -26,7 +27,7 @@ partial struct routingNode {
     // A leaf node holds a single pattern and the Handler it was registered
     // with.
     internal ж<pattern> pattern;
-    internal ΔHandler handler;
+    internal Handler handler;
     // An interior node maps parts of the incoming request to child nodes.
     // special children keys:
     //     "/"	trailing slash (resulting from {$})
@@ -36,9 +37,11 @@ partial struct routingNode {
     internal ж<routingNode> emptyChild; // optimization: child with key ""
 }
 
+} partial class httpᴛroutingNode {
+
 // addPattern adds a pattern and its associated Handler to the tree
 // at root.
-internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, ΔHandler h) {
+internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, Handler h) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // First level of tree is host.
@@ -52,16 +55,16 @@ internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, 
 // addSegments adds the given segments to the tree rooted at n.
 // If there are no segments, then n is a leaf node that holds
 // the given pattern and handler.
-internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> p, ΔHandler h) {
+internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> p, Handler h) {
     ref var n = ref Ꮡn.DerefOrNull();
 
-    if (builtin.len(segs) == 0) {
+    if (len(segs) == 0) {
         n.set(p, h);
         return;
     }
     var seg = segs[0];
     if (seg.multi) {
-        if (builtin.len(segs) != 1) {
+        if (len(segs) != 1) {
             throw panic("multi wildcard not last");
         }
         var c = Ꮡ(new routingNode());
@@ -76,7 +79,7 @@ internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs,
 
 // set sets the pattern and handler for n, which
 // must be a leaf node.
-internal static void set(this ref routingNode n, ж<pattern> p, ΔHandler h) {
+internal static void set(this ref routingNode n, ж<pattern> p, Handler h) {
     if (n.pattern != nil || n.handler != nil) {
         throw panic("non-nil leaf fields");
     }
@@ -132,6 +135,10 @@ internal static (ж<routingNode>, slice<@string>) match(this ж<routingNode> Ꮡ
     }
     return root.emptyChild.matchMethodAndPath(method, path);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string getˢ => ref getˢᵇ;
+private static readonly @string getˢᵇ = "GET"u8;
 
 // matchMethodAndPath matches the method and path.
 // Its return values are the same as [routingNode.match].
@@ -213,6 +220,8 @@ internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode>
     return (default, default);
 }
 
+} partial class http_package {
+
 // firstSegment splits path into its first segment, and the rest.
 // The path must begin with "/".
 // If path consists of only a slash, firstSegment returns ("/", "").
@@ -224,10 +233,16 @@ internal static (@string seg, @string rest) firstSegment(@string path) {
     path = path[1..]; // drop initial slash
     nint i = strings.IndexByte(path, (byte)'/');
     if (i < 0) {
-        i = builtin.len(path);
+        i = len(path);
     }
     return (pathUnescape(path.slice(0, i)), path.slice(i));
 }
+
+} partial class httpᴛroutingNode {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string headˢ => ref headˢᵇ;
+private static readonly @string headˢᵇ = "HEAD"u8;
 
 // matchingMethods adds to methodSet all the methods that would result in a
 // match if passed to routingNode.match with the given host and path.
@@ -259,4 +274,4 @@ internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path
     // call this when we fail to match on a method.
 }
 
-} // end http_package
+} // end httpᴛroutingNode

@@ -5,7 +5,9 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using static types_package;
 
 partial class types_package {
 
@@ -14,7 +16,9 @@ partial struct gcSizes {
     public int64 MaxAlign; // maximum alignment in bytes - must be >= 1
 }
 
-internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
+} partial class typesᴛgcSizes {
+
+internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, Type T) {
     int64 result = default;
     GoFrame ᒐ = default;
     try {
@@ -120,7 +124,7 @@ internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fie
     return offsets;
 }
 
-internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
+internal static int64 Sizeof(this ж<gcSizes> Ꮡs, Type T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var switchᴛ8 = T.Underlying();
@@ -133,7 +137,7 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
                 return (int64)sΔ1;
             }
         }
-        if (k == ΔString) {
+        if (k == String) {
             return s.WordSize * 2;
         }
         break;
@@ -179,7 +183,7 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
             size = 1;
         }
         // gc: Size includes alignment padding.
-        return align(offs + size, Ꮡs.Alignof(new StructжΔType(t))); // may overflow to < 0 which is ok
+        return align(offs + size, Ꮡs.Alignof(new StructжType(t))); // may overflow to < 0 which is ok
     }
     case ж<Interface> t: {
         // Type parameters lead to variable sizes/alignments;
@@ -195,6 +199,8 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
     }}
     return s.WordSize; // catch-all
 }
+
+} partial class types_package {
 
 // gcSizesFor returns the Sizes used by gc for an architecture.
 // The result is a nil *gcSizes pointer (which is not a valid types.Sizes)

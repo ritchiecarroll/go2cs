@@ -30,7 +30,7 @@ using static go.@internal.trace_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/trace/batchcursor_test.go", "batchcursor_test.cs", "AA4eoqaCgoKCgriCgoKCpoKCuIKCgoK4goKCgriCgoKCuIKCgqaCgoLKgqaCgoKCgpSCuIKmgoKCgoKUlIKmgpSCgpSCpoI=")]
 [assembly: GoPositionMap("internal/trace/event_test.go", "event_test.cs", "AIUBIIKSgoKmgoKClIKCgpSUmoKCgoKmuMrCAAYassLcgpSCgoKClILcosqClIKClIKUgpSmogAZPrKCssqClIKClIKUgpTK0oIA4gHaA7LCgoKC7oKUgoKUgoKUgoKUgpSClILKogAGHLKygtyClIKCgoKUgpSClILcogArZrKyyoKUgoKClIKCgoKCgpSClIKmgtyiAAcesrLKgpSCgoKUgpSC3KIABRiyssqClIKCgpSC3KIABBiyssqClIKCgpSClILewgAEFLLC7oKUgoLegriCgpSCgsqUlJKUkpSSlJKUkpSSlJLoooKCpqI=", "17-22:1;23-34:2;40-46:3;56-92:4;71-90:4.1;94-114:5;116-172:6;150-170:6.1;174-450:7;414-448:7.1;452-496:8;468-494:8.1;498-585:9;551-583:9.1;587-626:10;604-624:10.1;628-661:11;642-659:11.1;663-700:12;677-697:12.1;702-731:13;714-728:13.1;754-756:1;757-759:2;760-762:3;763-765:4;766-768:5;769-771:6;772-774:7;778-782:1", "", "193=Uint64Value/1/1/3;218=MakeResourceID/1/1/3;242=MakeResourceID/1/15/12,MakeResourceID/2/15/13,MakeResourceID/3/15/14,MakeResourceID/4/15/15,MakeResourceID/5/15/16,MakeResourceID/6/15/18,MakeResourceID/7/15/19,MakeResourceID/8/15/20,MakeResourceID/9/15/21,MakeResourceID/10/15/22,MakeResourceID/11/15/24,MakeResourceID/12/15/25,MakeResourceID/13/15/26,MakeResourceID/14/15/27,MakeResourceID/15/15/28;630=Unix/1/1/27", "", "928:21,929:13")]
-[assembly: GoPositionMap("internal/trace/export_reader_test.go", "export_reader_test.cs", "AAsUkg==")]
+[assembly: GoPositionMap("internal/trace/export_reader_test.go", "export_reader_test.cs", "AA4Ukg==")]
 [assembly: GoPositionMap("internal/trace/export_test.go", "export_test.cs", "AAsO")]
 [assembly: GoPositionMap("internal/trace/mud_test.go", "mud_test.cs", "AA0apoKCgoKCgpSCgqaCgpSCuIKCgoKClILcpoKCgoKCgoKCgoKClIKClIKmgpSClIIABhSygpSCgg==")]
 [assembly: GoPositionMap("internal/trace/order_test.go", "order_test.cs", "ABYSgoKCgpSCgoKCpoCCpICCtoKCgoI=", "11-28:1")]
@@ -81,3 +81,13 @@ public static partial class trace_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(global::go.@internal.trace_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class trace_internal_testᴛReader;
+// </MethodHolders>

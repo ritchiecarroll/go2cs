@@ -5,12 +5,14 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using static types_package;
+
 partial class types_package {
 
 // A Chan represents a channel type.
 partial struct Chan {
     internal ChanDir dir;
-    internal ΔType elem;
+    internal Type elem;
 }
 
 // A ChanDir value indicates a channel direction.
@@ -22,17 +24,19 @@ public static ChanDir SendOnly => 1;
 public static ChanDir RecvOnly => 2;
 
 // NewChan returns a new channel type for the given direction and element type.
-public static ж<Chan> NewChan(ChanDir dir, ΔType elem) {
+public static ж<Chan> NewChan(ChanDir dir, Type elem) {
     return Ꮡ(new Chan(dir: dir, elem: elem));
 }
+
+} partial class typesᴛChan {
 
 // Dir returns the direction of channel c.
 public static ChanDir Dir(this ref Chan c) { return c.dir; }
 
 // Elem returns the element type of channel c.
-public static ΔType Elem(this ref Chan c) { return c.elem; }
+public static Type Elem(this ref Chan c) { return c.elem; }
 
-public static ΔType Underlying(this ж<Chan> Ꮡc) { return new ChanжΔType(Ꮡc); }
-public static @string String(this ж<Chan> Ꮡc) { return TypeString(new ChanжΔType(Ꮡc), default); }
+public static Type Underlying(this ж<Chan> Ꮡc) { return new ChanжType(Ꮡc); }
+public static @string String(this ж<Chan> Ꮡc) { return TypeString(new ChanжType(Ꮡc), default); }
 
-} // end types_package
+} // end typesᴛChan

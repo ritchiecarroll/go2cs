@@ -17,6 +17,7 @@ using testing = testing_package;
 using encoding = encoding_package;
 using go.encoding;
 using static go.net.url_package;
+using static url_internal_test_package;
 
 partial class url_internal_test_package {
 
@@ -2017,6 +2018,8 @@ internal partial struct timeoutError {
     internal bool timeout;
 }
 
+} partial class url_internal_testᴛtimeoutError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string timeoutErrorˢ => ref timeoutErrorˢᵇ;
 private static readonly @string timeoutErrorˢᵇ = "timeout error"u8;
@@ -2024,9 +2027,13 @@ private static readonly @string timeoutErrorˢᵇ = "timeout error"u8;
 internal static @string Error(this ref timeoutError e) { return timeoutErrorˢ; }
 internal static bool Timeout(this ref timeoutError e) { return e.timeout; }
 
+} partial class url_internal_test_package {
+
 internal partial struct temporaryError {
     internal bool temporary;
 }
+
+} partial class url_internal_testᴛtemporaryError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string temporaryErrorˢ => ref temporaryErrorˢᵇ;
@@ -2035,10 +2042,14 @@ private static readonly @string temporaryErrorˢᵇ = "temporary error"u8;
 internal static @string Error(this ref temporaryError e) { return temporaryErrorˢ; }
 internal static bool Temporary(this ref temporaryError e) { return e.temporary; }
 
+} partial class url_internal_test_package {
+
 internal partial struct timeoutTemporaryError {
     /*embed*/ internal timeoutError timeoutError;
     /*embed*/ internal temporaryError temporaryError;
 }
+
+} partial class url_internal_testᴛtimeoutTemporaryError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string timeoutTemporaryErrorˢ => ref timeoutTemporaryErrorˢᵇ;
@@ -2046,45 +2057,47 @@ private static readonly @string timeoutTemporaryErrorˢᵇ = "timeout/temporary 
 
 internal static @string Error(this ref timeoutTemporaryError e) { return timeoutTemporaryErrorˢ; }
 
+} partial class url_internal_test_package {
+
 partial struct netErrorTestsᴛ1 /*dyn*/ {
     internal error err;
     internal bool timeout;
     internal bool temporary;
 }
 internal static slice<netErrorTestsᴛ1> netErrorTests = [new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.timeoutErrorжerror(Ꮡ(new timeoutError(timeout: true)))))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", new url_internal_test_package.timeoutErrorжerror(Ꮡ(new timeoutError(timeout: true)))))),
     timeout: true,
     temporary: false
 ), new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.timeoutErrorжerror(Ꮡ(new timeoutError(timeout: false)))))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", new url_internal_test_package.timeoutErrorжerror(Ꮡ(new timeoutError(timeout: false)))))),
     timeout: false,
     temporary: false
 ), new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.temporaryErrorжerror(Ꮡ(new temporaryError(temporary: true)))))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", new url_internal_test_package.temporaryErrorжerror(Ꮡ(new temporaryError(temporary: true)))))),
     timeout: false,
     temporary: true
 ), new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.temporaryErrorжerror(Ꮡ(new temporaryError(temporary: false)))))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", new url_internal_test_package.temporaryErrorжerror(Ꮡ(new temporaryError(temporary: false)))))),
     timeout: false,
     temporary: false
 ), new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.timeoutTemporaryErrorжerror(Ꮡ(new timeoutTemporaryError(new timeoutError(timeout: true), new temporaryError(temporary: true))))))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", new url_internal_test_package.timeoutTemporaryErrorжerror(Ꮡ(new timeoutTemporaryError(new timeoutError(timeout: true), new temporaryError(temporary: true))))))),
     timeout: true,
     temporary: true
 ), new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.timeoutTemporaryErrorжerror(Ꮡ(new timeoutTemporaryError(new timeoutError(timeout: false), new temporaryError(temporary: true))))))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", new url_internal_test_package.timeoutTemporaryErrorжerror(Ꮡ(new timeoutTemporaryError(new timeoutError(timeout: false), new temporaryError(temporary: true))))))),
     timeout: false,
     temporary: true
 ), new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.timeoutTemporaryErrorжerror(Ꮡ(new timeoutTemporaryError(new timeoutError(timeout: true), new temporaryError(temporary: false))))))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", new url_internal_test_package.timeoutTemporaryErrorжerror(Ꮡ(new timeoutTemporaryError(new timeoutError(timeout: true), new temporaryError(temporary: false))))))),
     timeout: true,
     temporary: false
 ), new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", new url_internal_test_package.timeoutTemporaryErrorжerror(Ꮡ(new timeoutTemporaryError(new timeoutError(timeout: false), new temporaryError(temporary: false))))))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", new url_internal_test_package.timeoutTemporaryErrorжerror(Ꮡ(new timeoutTemporaryError(new timeoutError(timeout: false), new temporaryError(temporary: false))))))),
     timeout: false,
     temporary: false
 ), new(
-    err: new url_test_package.url_ΔErrorжerror(Ꮡ(new ΔError("Get", "http://google.com/", io.EOF))),
+    err: new global::go.net.url_package.Errorжerror(Ꮡ(new Error("Get", "http://google.com/", io.EOF))),
     timeout: false,
     temporary: false
 )
@@ -2093,7 +2106,7 @@ internal static slice<netErrorTestsᴛ1> netErrorTests = [new(
 // Test that url.Error implements net.Error and that it forwards
 public static void TestURLErrorImplementsNetError(ж<testing.T> t) {
     foreach (var (i, tt) in range(netErrorTests)) {
-        var (err, ok) = tt.err._<netꓸError>(ᐧ);
+        var (err, ok) = tt.err._<net.Error>(ᐧ);
         if (!ok) {
             t.Errorf("%d: %T does not implement net.Error", i + 1, tt.err);
             continue;

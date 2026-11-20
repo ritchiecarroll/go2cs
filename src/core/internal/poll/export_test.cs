@@ -7,6 +7,7 @@
 namespace go.@internal;
 
 using static go.@internal.poll_package;
+using static poll_internal_test_package;
 
 partial class poll_internal_test_package {
 
@@ -16,6 +17,8 @@ public static ref Action<ж<slice<slice<byte>>>, int64> Consume => ref ((StaticB
 public partial struct XFDMutex {
     /*embed*/ internal global::go.@internal.poll_package.fdMutex fdMutex;
 }
+
+} partial class poll_internal_testᴛXFDMutex {
 
 public static bool Incref(this ж<XFDMutex> Ꮡmu) {
     return Ꮡmu.of(XFDMutex.ᏑfdMutex).incref();
@@ -37,4 +40,4 @@ public static bool RWUnlock(this ж<XFDMutex> Ꮡmu, bool read) {
     return Ꮡmu.of(XFDMutex.ᏑfdMutex).rwunlock(read);
 }
 
-} // end poll_internal_test_package
+} // end poll_internal_testᴛXFDMutex

@@ -23,6 +23,7 @@ using @internal.runtime;
 using static global::go.runtime_package;
 using ꓸꓸꓸAddrRange = Span<runtime_internal_test_package.AddrRange>;
 using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
+using static runtime_internal_test_package;
 
 partial class runtime_internal_test_package {
 
@@ -111,9 +112,13 @@ internal static void initᴛLockPartialOrder() { LockPartialOrder = lockPartialO
 
 public partial struct LockRank /*num:nint*/;
 
+} partial class runtime_internal_testᴛLockRank {
+
 public static @string String(this LockRank l) {
     return ((global::go.runtime_package.lockRank)(nint)l).String();
 }
+
+} partial class runtime_internal_test_package {
 
 public const bool PreemptMSupported = /* preemptMSupported */ true;
 
@@ -127,7 +132,7 @@ public static void LFStackPush(ж<uint64> head, ж<LFNode> node) {
 }
 
 public static ж<LFNode> LFStackPop(ж<uint64> head) {
-    return (ж<LFNode>)(uintptr)((head.Reinterpret<uint64, global::go.runtime_package.lfstack>()).pop());
+    return @unsafe.Pointer.To<LFNode>((head.Reinterpret<uint64, global::go.runtime_package.lfstack>()).pop());
 }
 public static void LFNodeValidate(ж<LFNode> node) {
     lfnodeValidate(node.Reinterpret<LFNode, global::go.runtime_package.lfnode>());
@@ -157,7 +162,7 @@ internal static ref readonly @string runqIsNotEmptyAfterwardsˢ => ref runqIsNot
 private static readonly @string runqIsNotEmptyAfterwardsˢᵇ = "runq is not empty afterwards"u8;
 
 public static void RunSchedLocalQueueTest() {
-    var pp = @new<global::go.runtime_package.Δp>();
+    var pp = @new<global::go.runtime_package.p>();
     var gs = new slice<global::go.runtime_package.g>(len((~pp).runq), () => new());
     Escape(gs); // Ensure gs doesn't move, since we use guintptrs
     for (nint i = 0; i < len((~pp).runq); i++) {
@@ -188,8 +193,8 @@ internal static ref readonly @string badStealˢ => ref badStealˢᵇ;
 private static readonly @string badStealˢᵇ = "bad steal"u8;
 
 public static void RunSchedLocalQueueStealTest() {
-    var p1 = @new<global::go.runtime_package.Δp>();
-    var p2 = @new<global::go.runtime_package.Δp>();
+    var p1 = @new<global::go.runtime_package.p>();
+    var p2 = @new<global::go.runtime_package.p>();
     var gs = new slice<global::go.runtime_package.g>(len((~p1).runq), () => new());
     Escape(gs); // Ensure gs doesn't move, since we use guintptrs
     for (nint i = 0; i < len((~p1).runq); i++) {
@@ -241,7 +246,7 @@ public static partial void RunSchedLocalQueueEmptyTest(nint iters) {
     // can lead to underutilization (both runnable Gs and idle Ps coexist
     // for arbitrary long time).
     var done = new channel<bool>(1);
-    var Δp = @new<global::go.runtime_package.Δp>();
+    var p = @new<global::go.runtime_package.p>();
     var gs = new slice<global::go.runtime_package.g>(2, () => new());
     Escape(gs); // Ensure gs doesn't move, since we use guintptrs
     var ready = @new<uint32>();
@@ -249,9 +254,9 @@ public static partial void RunSchedLocalQueueEmptyTest(nint iters) {
         ready.Value = 0;
         var next0 = (i & 1) == 0;
         var next1 = (i & 2) == 0;
-        runqput(Δp, Ꮡ(gs, 0), next0);
+        runqput(p, Ꮡ(gs, 0), next0);
         var doneʗ1 = done;
-        var pʗ1 = Δp;
+        var pʗ1 = p;
         var readyʗ1 = ready;
         goǃ(() => {
             for (atomic.Xadd(readyʗ1, 1); atomic.Load(readyʗ1) != 2; ) {
@@ -264,10 +269,10 @@ public static partial void RunSchedLocalQueueEmptyTest(nint iters) {
         });
         for (atomic.Xadd(ready, 1); atomic.Load(ready) != 2; ) {
         }
-        runqput(Δp, Ꮡ(gs, 1), next1);
-        runqget(Δp);
+        runqput(p, Ꮡ(gs, 1), next1);
+        runqget(p);
         ᐸꟷ(done);
-        runqget(Δp);
+        runqget(p);
     }
 }
 
@@ -298,7 +303,7 @@ internal static void initᴛUseAeshash() { UseAeshash = ᏑuseAeshash; }
 public static void MemclrBytes(slice<byte> bʗp) {
     ref var b = ref heap(bʗp, out var Ꮡb);
 
-    var s = Ꮡb.Reinterpret<slice<byte>, global::go.runtime_package.Δsliceᴛ>();
+    var s = Ꮡb.Reinterpret<slice<byte>, global::go.runtime_package.Δslice>();
     memclrNoHeapPointers(s.Δarray, (uintptr)s.len);
 }
 
@@ -318,15 +323,15 @@ public static @string /*s*/ GostringW(slice<uint16> w) {
 public static readonly ж<Func<ж<byte>, int32, int32, int32>> ᏑOpen = new StaticBox<Func<ж<byte>, int32, int32, int32>>(default(Func<ж<byte>, int32, int32, int32>));
 public static ref Func<ж<byte>, int32, int32, int32> Open => ref ((StaticBox<Func<ж<byte>, int32, int32, int32>>)ᏑOpen).ValueSlot;
 internal static void initᴛOpen() { Open = (ж<byte> ᴛ0, int32 ᴛ1, int32 ᴛ2) => open(ref ᴛ0.DerefOrNull(), ᴛ1, ᴛ2); }
-public static readonly ж<Func<int32, int32>> ᏑΔClose = new StaticBox<Func<int32, int32>>(default(Func<int32, int32>));
-public static ref Func<int32, int32> ΔClose => ref ((StaticBox<Func<int32, int32>>)ᏑΔClose).ValueSlot;
-internal static void initᴛΔClose() { ΔClose = closefd; }
-public static readonly ж<Func<int32, @unsafe.Pointer, int32, int32>> ᏑΔRead = new StaticBox<Func<int32, @unsafe.Pointer, int32, int32>>(default(Func<int32, @unsafe.Pointer, int32, int32>));
-public static ref Func<int32, @unsafe.Pointer, int32, int32> ΔRead => ref ((StaticBox<Func<int32, @unsafe.Pointer, int32, int32>>)ᏑΔRead).ValueSlot;
-internal static void initᴛΔRead() { ΔRead = read; }
-public static readonly ж<Func<uintptr, @unsafe.Pointer, int32, int32>> ᏑΔWrite = new StaticBox<Func<uintptr, @unsafe.Pointer, int32, int32>>(default(Func<uintptr, @unsafe.Pointer, int32, int32>));
-public static ref Func<uintptr, @unsafe.Pointer, int32, int32> ΔWrite => ref ((StaticBox<Func<uintptr, @unsafe.Pointer, int32, int32>>)ᏑΔWrite).ValueSlot;
-internal static void initᴛΔWrite() { ΔWrite = write; }
+public static readonly ж<Func<int32, int32>> ᏑClose = new StaticBox<Func<int32, int32>>(default(Func<int32, int32>));
+public static ref Func<int32, int32> Close => ref ((StaticBox<Func<int32, int32>>)ᏑClose).ValueSlot;
+internal static void initᴛClose() { Close = closefd; }
+public static readonly ж<Func<int32, @unsafe.Pointer, int32, int32>> ᏑRead = new StaticBox<Func<int32, @unsafe.Pointer, int32, int32>>(default(Func<int32, @unsafe.Pointer, int32, int32>));
+public static ref Func<int32, @unsafe.Pointer, int32, int32> Read => ref ((StaticBox<Func<int32, @unsafe.Pointer, int32, int32>>)ᏑRead).ValueSlot;
+internal static void initᴛRead() { Read = read; }
+public static readonly ж<Func<uintptr, @unsafe.Pointer, int32, int32>> ᏑWrite = new StaticBox<Func<uintptr, @unsafe.Pointer, int32, int32>>(default(Func<uintptr, @unsafe.Pointer, int32, int32>));
+public static ref Func<uintptr, @unsafe.Pointer, int32, int32> Write => ref ((StaticBox<Func<uintptr, @unsafe.Pointer, int32, int32>>)ᏑWrite).ValueSlot;
+internal static void initᴛWrite() { Write = write; }
 
 public static slice<@string> Envs() { return envs; }
 public static void SetEnvs(slice<@string> e) { envs = e; }
@@ -384,12 +389,18 @@ public static ж<ProfBuf> NewProfBuf(nint hdrsize, nint bufwords, nint tags) {
     return newProfBuf(hdrsize, bufwords, tags).Reinterpret<global::go.runtime_package.profBuf, ProfBuf>();
 }
 
+} partial class runtime_internal_testᴛProfBuf {
+
 public static void Write(this ж<ProfBuf> Ꮡp, ж<@unsafe.Pointer> tag, int64 now, slice<uint64> hdr, slice<uintptr> stk) {
     (Ꮡp.Reinterpret<ProfBuf, global::go.runtime_package.profBuf>()).write(tag, now, hdr, stk);
 }
 
+} partial class runtime_internal_test_package {
+
 internal static global::go.runtime_package.profBufReadMode ProfBufBlocking => /* profBufBlocking */ 0;
 internal static global::go.runtime_package.profBufReadMode ProfBufNonBlocking => /* profBufNonBlocking */ 1;
+
+} partial class runtime_internal_testᴛProfBuf {
 
 internal static (slice<uint64>, slice<@unsafe.Pointer>, bool) Read(this ж<ProfBuf> Ꮡp, global::go.runtime_package.profBufReadMode mode) {
     return (Ꮡp.Reinterpret<ProfBuf, global::go.runtime_package.profBuf>()).read(mode);
@@ -398,6 +409,8 @@ internal static (slice<uint64>, slice<@unsafe.Pointer>, bool) Read(this ж<ProfB
 public static void Close(this ж<ProfBuf> Ꮡp) {
     (Ꮡp.Reinterpret<ProfBuf, global::go.runtime_package.profBuf>()).close();
 }
+
+} partial class runtime_internal_test_package {
 
 internal static CPUStats ReadCPUStats() {
     return work.cpuStats;
@@ -466,7 +479,7 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
 
         // Initialize slow from base and zero the fields we're
         // recomputing.
-        slow = Ꮡbase.Value.ΔClone();
+        slow.AssignFrom(Ꮡbase.Value);
         slow.Alloc = 0;
         slow.TotalAlloc = 0;
         slow.Mallocs = 0;
@@ -522,9 +535,9 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
             nuint pg = chunk.Ꮡscavenged.popcntRange(0, pallocChunkPages);
             slow.HeapReleased += (uint64)pg * (uint64)pageSize;
         }
-        foreach (var (_, Δp) in range(allp)) {
+        foreach (var (_, p) in range(allp)) {
             // Only count scav bits for pages in the cache
-            nint pg = sys.OnesCount64((~Δp).pcache.cache & (~Δp).pcache.scav);
+            nint pg = sys.OnesCount64((~p).pcache.cache & (~p).pcache.scav);
             slow.HeapReleased += (uint64)pg * (uint64)pageSize;
         }
 
@@ -562,7 +575,11 @@ public static void ShrinkStackAndVerifyFramePointers() {
 
 public partial struct StackPoisonCopyRestore /*num:nint*/;
 
+} partial class runtime_internal_testᴛStackPoisonCopyRestore {
+
 public static void Restore(this StackPoisonCopyRestore s) { stackPoisonCopy = (nint)s; }
+
+} partial class runtime_internal_test_package {
 
 public static StackPoisonCopyRestore StackPoisonCopy() {
     nint before = stackPoisonCopy;
@@ -587,6 +604,8 @@ public partial struct RWMutex {
     internal global::go.runtime_package.rwmutex rw;
 }
 
+} partial class runtime_internal_testᴛRWMutex {
+
 public static void Init(this ж<RWMutex> Ꮡrw) {
     Ꮡrw.Ꮡrw.init(lockRankTestR, lockRankTestRInternal, lockRankTestW);
 }
@@ -606,6 +625,8 @@ public static void Lock(this ж<RWMutex> Ꮡrw) {
 public static void Unlock(this ж<RWMutex> Ꮡrw) {
     Ꮡrw.Ꮡrw.unlock();
 }
+
+} partial class runtime_internal_test_package {
 
 public static (uint32 external, uint32 @internal) LockOSCounts() {
     var gp = getg();
@@ -644,7 +665,7 @@ public static (uintptr start, uintptr end, bool ok) MapNextArenaHint() {
     } else {
         (start, end) = (addr, addr + (uintptr)heapArenaBytes);
     }
-    @unsafe.Pointer got = (uintptr)sysReserve((@unsafe.Pointer)addr, physPageSize, ""u8);
+    @unsafe.Pointer got = sysReserve((@unsafe.Pointer)addr, physPageSize, ""u8);
     ok = (addr == (uintptr)got);
     if (!ok) {
         // We were unable to get the requested reservation.
@@ -730,8 +751,8 @@ public static partial void RunGetgThreadSwitchTest() {
 }
 
 // Expose freegc for testing.
-public static void Freegc(@unsafe.Pointer Δp, uintptr size, bool noscan) {
-    freegc(Δp, size, noscan);
+public static void Freegc(@unsafe.Pointer p, uintptr size, bool noscan) {
+    freegc(p, size, noscan);
 }
 
 // Expose gcAssistBytes for the current g for testing.
@@ -766,43 +787,52 @@ public static uintptr PallocSumBytes => /* pallocSumBytes */ 8;
 public partial struct PallocSum /*num:uint64*/;
 
 public static PallocSum PackPallocSum(nuint start, nuint max, nuint end) { return (PallocSum)(uint64)packPallocSum(start, max, end); }
+
+} partial class runtime_internal_testᴛPallocSum {
+
 public static nuint Start(this PallocSum m) { return ((global::go.runtime_package.pallocSum)(uint64)m).start(); }
 public static nuint Max(this PallocSum m) { return ((global::go.runtime_package.pallocSum)(uint64)m).max(); }
 public static nuint End(this PallocSum m) { return ((global::go.runtime_package.pallocSum)(uint64)m).end(); }
 
-// Expose pallocBits for testing.
-public partial struct ΔPallocBits /*global::go.runtime_package.pallocBits*/;
+} partial class runtime_internal_test_package {
 
-public static (nuint, nuint) Find(this ж<ΔPallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
-    return (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).find(npages, searchIdx);
+// Expose pallocBits for testing.
+public partial struct PallocBits /*global::go.runtime_package.pallocBits*/;
+
+} partial class runtime_internal_testᴛPallocBits {
+
+public static (nuint, nuint) Find(this ж<PallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
+    return (Ꮡb.Reinterpret<PallocBits, global::go.runtime_package.pallocBits>()).find(npages, searchIdx);
 }
-public static void AllocRange(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) { (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).allocRange(i, n); }
-public static void Free(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) { (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).free(i, n); }
-public static PallocSum Summarize(this ж<ΔPallocBits> Ꮡb) { return (PallocSum)(uint64)(Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).summarize(); }
-public static nuint PopcntRange(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) { return (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>()).popcntRange(i, n); }
+public static void AllocRange(this ж<PallocBits> Ꮡb, nuint i, nuint n) { (Ꮡb.Reinterpret<PallocBits, global::go.runtime_package.pallocBits>()).allocRange(i, n); }
+public static void Free(this ж<PallocBits> Ꮡb, nuint i, nuint n) { (Ꮡb.Reinterpret<PallocBits, global::go.runtime_package.pallocBits>()).free(i, n); }
+public static PallocSum Summarize(this ж<PallocBits> Ꮡb) { return (PallocSum)(uint64)(Ꮡb.Reinterpret<PallocBits, global::go.runtime_package.pallocBits>()).summarize(); }
+public static nuint PopcntRange(this ж<PallocBits> Ꮡb, nuint i, nuint n) { return (Ꮡb.Reinterpret<PallocBits, global::go.runtime_package.pageBits>()).popcntRange(i, n); }
+
+} partial class runtime_internal_test_package {
 
 // SummarizeSlow is a slow but more obviously correct implementation
 // of (*pallocBits).summarize. Used for testing.
-public static PallocSum SummarizeSlow(ж<ΔPallocBits> b) {
+public static PallocSum SummarizeSlow(ж<PallocBits> b) {
     nuint start = default;
     nuint most = default;
     nuint end = default;
 
     const nuint N = /* uint(len(b)) * 64 */ 512;
-    while (start < N && (b.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>()).get(start) == 0) {
+    while (start < N && (b.Reinterpret<PallocBits, global::go.runtime_package.pageBits>()).get(start) == 0) {
         start++;
     }
-    while (end < N && (b.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>()).get(N - end - 1) == 0) {
+    while (end < N && (b.Reinterpret<PallocBits, global::go.runtime_package.pageBits>()).get(N - end - 1) == 0) {
         end++;
     }
     nuint run = (nuint)0;
     for (nuint i = (nuint)0; i < N; i++) {
-        if ((b.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>()).get(i) == 0) {
+        if ((b.Reinterpret<PallocBits, global::go.runtime_package.pageBits>()).get(i) == 0) {
             run++;
         } else {
             run = 0;
         }
-        most = builtin.max(most, run);
+        most = max(most, run);
     }
     return PackPallocSum(start, most, end);
 }
@@ -812,9 +842,9 @@ public static nuint FindBitRange64(uint64 c, nuint n) { return findBitRange64(c,
 
 // Given two PallocBits, returns a set of bit ranges where
 // they differ.
-public static slice<BitRange> DiffPallocBits(ж<ΔPallocBits> a, ж<ΔPallocBits> b) {
-    var ba = a.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>();
-    var bb = b.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>();
+public static slice<BitRange> DiffPallocBits(ж<PallocBits> a, ж<PallocBits> b) {
+    var ba = a.Reinterpret<PallocBits, global::go.runtime_package.pageBits>();
+    var bb = b.Reinterpret<PallocBits, global::go.runtime_package.pageBits>();
 
     slice<BitRange> d = default;
     nuint @base = (nuint)0;
@@ -841,10 +871,10 @@ public static slice<BitRange> DiffPallocBits(ж<ΔPallocBits> a, ж<ΔPallocBits
 // StringifyPallocBits gets the bits in the bit range r from b,
 // and returns a string containing the bits as ASCII 0 and 1
 // characters.
-public static @string StringifyPallocBits(ж<ΔPallocBits> b, BitRange r) {
+public static @string StringifyPallocBits(ж<PallocBits> b, BitRange r) {
     @string str = ""u8;
     for (nuint j = r.I; j < r.I + r.N; j++) {
-        if ((b.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>()).get(j) != 0) {
+        if ((b.Reinterpret<PallocBits, global::go.runtime_package.pageBits>()).get(j) != 0) {
             str += "1"u8;
         } else {
             str += "0"u8;
@@ -854,21 +884,25 @@ public static @string StringifyPallocBits(ж<ΔPallocBits> b, BitRange r) {
 }
 
 // Expose pallocData for testing.
-public partial struct ΔPallocData /*global::go.runtime_package.pallocData*/;
+public partial struct PallocData /*global::go.runtime_package.pallocData*/;
 
-public static (nuint, nuint) FindScavengeCandidate(this ж<ΔPallocData> Ꮡd, nuint searchIdx, uintptr min, uintptr max) {
-    return (Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).findScavengeCandidate(searchIdx, min, max);
+} partial class runtime_internal_testᴛPallocData {
+
+public static (nuint, nuint) FindScavengeCandidate(this ж<PallocData> Ꮡd, nuint searchIdx, uintptr min, uintptr max) {
+    return (Ꮡd.Reinterpret<PallocData, global::go.runtime_package.pallocData>()).findScavengeCandidate(searchIdx, min, max);
 }
-public static void AllocRange(this ж<ΔPallocData> Ꮡd, nuint i, nuint n) { (Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).allocRange(i, n); }
-public static void ScavengedSetRange(this ж<ΔPallocData> Ꮡd, nuint i, nuint n) {
-    (Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).Value.scavenged.setRange(i, n);
+public static void AllocRange(this ж<PallocData> Ꮡd, nuint i, nuint n) { (Ꮡd.Reinterpret<PallocData, global::go.runtime_package.pallocData>()).allocRange(i, n); }
+public static void ScavengedSetRange(this ж<PallocData> Ꮡd, nuint i, nuint n) {
+    (Ꮡd.Reinterpret<PallocData, global::go.runtime_package.pallocData>()).Value.scavenged.setRange(i, n);
 }
-public static ж<ΔPallocBits> PallocBits(this ж<ΔPallocData> Ꮡd) {
-    return Ꮡ((Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).Value.pallocBits).Reinterpret<global::go.runtime_package.pallocBits, ΔPallocBits>();
+public static ж<PallocBits> PallocBits(this ж<PallocData> Ꮡd) {
+    return Ꮡd.Reinterpret<PallocData, global::go.runtime_package.pallocData>().ᏑpallocBits.Reinterpret<global::go.runtime_package.pallocBits, PallocBits>();
 }
-public static ж<ΔPallocBits> Scavenged(this ж<ΔPallocData> Ꮡd) {
-    return Ꮡ((Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).Value.scavenged).Reinterpret<global::go.runtime_package.pageBits, ΔPallocBits>();
+public static ж<PallocBits> Scavenged(this ж<PallocData> Ꮡd) {
+    return Ꮡd.Reinterpret<PallocData, global::go.runtime_package.pallocData>().Ꮡscavenged.Reinterpret<global::go.runtime_package.pageBits, PallocBits>();
 }
+
+} partial class runtime_internal_test_package {
 
 // Expose fillAligned for testing.
 public static uint64 FillAligned(uint64 x, nuint m) { return fillAligned(x, m); }
@@ -881,6 +915,9 @@ public static uintptr PageCachePages => /* pageCachePages */ 64;
 public static PageCache NewPageCache(uintptr @base, uint64 cache, uint64 scav) {
     return new PageCache(new pageCache(@base: @base, cache: cache, scav: scav));
 }
+
+} partial class runtime_internal_testᴛPageCache {
+
 public static bool Empty(this ж<PageCache> Ꮡc) { return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).empty(); }
 public static uintptr Base(this ж<PageCache> Ꮡc) { return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).Value.@base; }
 public static uint64 Cache(this ж<PageCache> Ꮡc) { return (Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>()).Value.cache; }
@@ -903,12 +940,16 @@ public static void Flush(this ж<PageCache> Ꮡc, ж<PageAlloc> s) {
     });
 }
 
+} partial class runtime_internal_test_package {
+
 // Expose chunk index type.
 public partial struct ChunkIdx /*num:nuint*/;
 
 // Expose pageAlloc for testing. Note that because pageAlloc is
 // not in the heap, so is PageAlloc.
 public partial struct PageAlloc /*global::go.runtime_package.pageAlloc*/;
+
+} partial class runtime_internal_testᴛPageAlloc {
 
 public static (uintptr, uintptr) Alloc(this ж<PageAlloc> Ꮡp, uintptr npages) {
     var pp = Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
@@ -964,19 +1005,21 @@ public static uintptr /*r*/ Scavenge(this ж<PageAlloc> Ꮡp, uintptr nbytes) {
     });
     return r;
 }
-public static slice<AddrRange> InUse(this ref PageAlloc Δp) {
-    var ranges = new slice<AddrRange>(0, () => new(nil), len(Δp.inUse.ranges));
-    foreach (var (_, r) in range(Δp.inUse.ranges)) {
+public static slice<AddrRange> InUse(this ref PageAlloc p) {
+    var ranges = new slice<AddrRange>(0, () => new(nil), len(p.inUse.ranges));
+    foreach (var (_, r) in range(p.inUse.ranges)) {
         ranges = append(ranges, new AddrRange(r));
     }
     return ranges;
 }
 
 // Returns nil if the PallocData's L2 is missing.
-public static ж<ΔPallocData> PallocData(this ж<PageAlloc> Ꮡp, ChunkIdx i) {
+public static ж<PallocData> PallocData(this ж<PageAlloc> Ꮡp, ChunkIdx i) {
     global::go.runtime_package.chunkIdx ci = (global::go.runtime_package.chunkIdx)(nuint)i;
-    return (Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).tryChunkOf(ci).Reinterpret<global::go.runtime_package.pallocData, ΔPallocData>();
+    return (Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).tryChunkOf(ci).Reinterpret<global::go.runtime_package.pallocData, PallocData>();
 }
+
+} partial class runtime_internal_test_package {
 
 // AddrRange is a wrapper around addrRange for testing.
 public partial struct AddrRange {
@@ -987,6 +1030,8 @@ public partial struct AddrRange {
 public static AddrRange MakeAddrRange(uintptr @base, uintptr limit) {
     return new AddrRange(makeAddrRange(@base, limit));
 }
+
+} partial class runtime_internal_testᴛAddrRange {
 
 // Base returns the virtual base address of the address range.
 public static uintptr Base(this AddrRange a) {
@@ -1007,6 +1052,8 @@ public static bool ΔEquals(this AddrRange a, AddrRange b) {
 public static uintptr Size(this AddrRange a) {
     return a.addrRange.size();
 }
+
+} partial class runtime_internal_test_package {
 
 // testSysStat is the sysStat passed to test versions of various
 // runtime structures. We do actually have to keep track of this
@@ -1062,6 +1109,8 @@ public static AddrRanges MakeAddrRanges(params ꓸꓸꓸAddrRange aʗp) {
     ), false);
 }
 
+} partial class runtime_internal_testᴛAddrRanges {
+
 // Ranges returns a copy of the ranges described by the
 // addrRanges.
 public static slice<AddrRange> Ranges(this ref AddrRanges a) {
@@ -1100,6 +1149,8 @@ public static uintptr TotalBytes(this ref AddrRanges a) {
     return a.addrRanges.totalBytes;
 }
 
+} partial class runtime_internal_test_package {
+
 // BitRange represents a range over a bitmap.
 public partial struct BitRange {
     public nuint I, N; // bit index and length in bits
@@ -1120,16 +1171,16 @@ public partial struct BitRange {
 // chunk index in scav must appear in chunks; ones that do not are
 // ignored.
 public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, map<ChunkIdx, slice<BitRange>> scav) {
-    var Δp = @new<global::go.runtime_package.pageAlloc>();
+    var p = @new<global::go.runtime_package.pageAlloc>();
 
     // We've got an entry, so initialize the pageAlloc.
-    Δp.init(@new<global::go.runtime_package.mutex>(), testSysStat, true);
-    lockInit(ref (Δp.mheapLock).DerefOrNull(), lockRankMheap);
+    p.init(@new<global::go.runtime_package.mutex>(), testSysStat, true);
+    lockInit(ref (p.mheapLock).DerefOrNull(), lockRankMheap);
     foreach (var (i, init) in chunks) {
         var addr = chunkBase((global::go.runtime_package.chunkIdx)(nuint)i);
 
         // Mark the chunk's existence in the pageAlloc.
-        var pʗ1 = Δp;
+        var pʗ1 = p;
         systemstack(() => {
             @lock(pʗ1.mheapLock);
             pʗ1.grow(addr, pallocChunkBytes);
@@ -1138,7 +1189,7 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
 
         // Initialize the bitmap and update pageAlloc metadata.
         global::go.runtime_package.chunkIdx ci = chunkIndex(addr);
-        var chunk = Δp.chunkOf(ci);
+        var chunk = p.chunkOf(ci);
 
         // Clear all the scavenged bits which grow set.
         chunk.Ꮡscavenged.clearRange(0, pallocChunkPages);
@@ -1146,8 +1197,8 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
         // Simulate the allocation and subsequent free of all pages in
         // the chunk for the scavenge index. This sets the state equivalent
         // with all pages within the index being free.
-        Δp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).alloc(ci, pallocChunkPages);
-        Δp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).free(ci, 0, pallocChunkPages);
+        p.Ꮡscav.of(pageAlloc_scav.Ꮡindex).alloc(ci, pallocChunkPages);
+        p.Ꮡscav.of(pageAlloc_scav.Ꮡindex).free(ci, 0, pallocChunkPages);
 
         // Apply scavenge state if applicable.
         if (scav != nil) {
@@ -1170,12 +1221,12 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
                 chunk.allocRange(s.I, s.N);
 
                 // Make sure the scavenge index is updated.
-                Δp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).alloc(ci, s.N);
+                p.Ꮡscav.of(pageAlloc_scav.Ꮡindex).alloc(ci, s.N);
             }
         }
 
         // Update heap metadata for the allocRange calls above.
-        var pʗ2 = Δp;
+        var pʗ2 = p;
         systemstack(() => {
             @lock(pʗ2.mheapLock);
             pʗ2.update(addr, pallocChunkPages, false, false);
@@ -1183,14 +1234,14 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
         });
     }
 
-    return Δp.Reinterpret<global::go.runtime_package.pageAlloc, PageAlloc>();
+    return p.Reinterpret<global::go.runtime_package.pageAlloc, PageAlloc>();
 }
 
 // FreePageAlloc releases hard OS resources owned by the pageAlloc. Once this
 // is called the pageAlloc may no longer be used. The object itself will be
 // collected by the garbage collector once it is no longer live.
 public static void FreePageAlloc(ж<PageAlloc> pp) {
-    var Δp = pp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
+    var p = pp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
 
     // Free all the mapped space for the summary levels.
     if (pageAlloc64Bit != 0) {
@@ -1199,34 +1250,34 @@ public static void FreePageAlloc(ж<PageAlloc> pp) {
             // be Ready instead of Reserved. The mappedReady and
             // testSysStat adjustments below correct for the
             // difference.
-            sysUnreserve(@unsafe.Pointer.FromPinnedBox(Ꮡ(Δp.summary[l], 0)), (uintptr)cap(Δp.summary[l]) * pallocSumBytes);
+            sysUnreserve(@unsafe.Pointer.FromPinnedBox(Ꮡ(p.summary[l], 0)), (uintptr)cap(p.summary[l]) * pallocSumBytes);
         }
     } else {
         var resSize = (uintptr)0;
-        foreach (var (_, s) in range(Δp.summary.ΔRangeSnapshot())) {
+        foreach (var (_, s) in range(p.summary.ΔRangeSnapshot())) {
             resSize += (uintptr)cap(s) * pallocSumBytes;
         }
         // See sysUnreserve comment above.
-        sysUnreserve(@unsafe.Pointer.FromPinnedBox(Ꮡ(Δp.summary[0], 0)), alignUp(resSize, physPageSize));
+        sysUnreserve(@unsafe.Pointer.FromPinnedBox(Ꮡ(p.summary[0], 0)), alignUp(resSize, physPageSize));
     }
 
     // Subtract back out whatever we mapped for the summaries.
     // sysUsed adds to p.sysStat and memstats.mappedReady no matter what
     // (and in anger should actually be accounted for), and there's no other
     // way to figure out how much we actually mapped.
-    ᏑgcController.ᏑmappedReady.Add(-(int64)Δp.summaryMappedReady);
-    testSysStat.add(-(int64)Δp.summaryMappedReady);
+    ᏑgcController.ᏑmappedReady.Add(-(int64)p.summaryMappedReady);
+    testSysStat.add(-(int64)p.summaryMappedReady);
 
     // Free extra data structures.
     //
     // TODO(prattmic): As above, some of this may be Ready, so we should
     // manually adjust mappedReady and testSysStat?
-    sysUnreserve(@unsafe.Pointer.FromPinnedBox(Ꮡ(Δp.scav.index.chunks, 0)), (uintptr)cap(Δp.scav.index.chunks) * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8);
+    sysUnreserve(@unsafe.Pointer.FromPinnedBox(Ꮡ(p.scav.index.chunks, 0)), (uintptr)cap(p.scav.index.chunks) * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8);
 
     // Free the mapped space for chunks.
-    foreach (var i in range(len(Δp.chunks))) {
-        var x = Δp.chunks[i]; if (x != nil) {
-            Δp.chunks[i] = ж<array<global::go.runtime_package.pallocData>>.NilBoxOfDims(8192L);
+    foreach (var i in range(len(p.chunks))) {
+        var x = p.chunks[i]; if (x != nil) {
+            p.chunks[i] = ж<array<global::go.runtime_package.pallocData>>.NilBoxOfDims(8192L);
             // This memory comes from sysAlloc and will always be page-aligned.
             sysFree(@unsafe.Pointer.FromPinnedBox(x), /* unsafe.Sizeof(*p.chunks[0]) */ (uintptr)1048576, testSysStat);
         }
@@ -1355,11 +1406,11 @@ public static uintptr /*leaked*/ PageCachePagesLeaked() {
 
     // Walk over destroyed Ps and look for unflushed caches.
     var deadp = allp.slice(len(allp), cap(allp));
-    foreach (var (_, Δp) in range(deadp)) {
+    foreach (var (_, p) in range(deadp)) {
         // Since we're going past len(allp) we may see nil Ps.
         // Just ignore them.
-        if (Δp != nil) {
-            leaked += (uintptr)sys.OnesCount64((~Δp).pcache.cache);
+        if (p != nil) {
+            leaked += (uintptr)sys.OnesCount64((~p).pcache.cache);
         }
     }
 
@@ -1373,12 +1424,12 @@ public static readonly ж<Action> ᏑOSYield = new StaticBox<Action>(default(Act
 public static ref Action OSYield => ref ((StaticBox<Action>)ᏑOSYield).ValueSlot;
 internal static void initᴛOSYield() { OSYield = osyield; }
 
-internal static readonly ж<Action<ж<global::go.runtime_package.mutex>>> ᏑΔLock = new StaticBox<Action<ж<global::go.runtime_package.mutex>>>(default(Action<ж<global::go.runtime_package.mutex>>));
-internal static ref Action<ж<global::go.runtime_package.mutex>> ΔLock => ref ((StaticBox<Action<ж<global::go.runtime_package.mutex>>>)ᏑΔLock).ValueSlot;
-internal static void initᴛΔLock() { ΔLock = @lock; }
-internal static readonly ж<Action<ж<global::go.runtime_package.mutex>>> ᏑΔUnlock = new StaticBox<Action<ж<global::go.runtime_package.mutex>>>(default(Action<ж<global::go.runtime_package.mutex>>));
-internal static ref Action<ж<global::go.runtime_package.mutex>> ΔUnlock => ref ((StaticBox<Action<ж<global::go.runtime_package.mutex>>>)ᏑΔUnlock).ValueSlot;
-internal static void initᴛΔUnlock() { ΔUnlock = unlock; }
+internal static readonly ж<Action<ж<global::go.runtime_package.mutex>>> ᏑLock = new StaticBox<Action<ж<global::go.runtime_package.mutex>>>(default(Action<ж<global::go.runtime_package.mutex>>));
+internal static ref Action<ж<global::go.runtime_package.mutex>> Lock => ref ((StaticBox<Action<ж<global::go.runtime_package.mutex>>>)ᏑLock).ValueSlot;
+internal static void initᴛLock() { Lock = @lock; }
+internal static readonly ж<Action<ж<global::go.runtime_package.mutex>>> ᏑUnlock = new StaticBox<Action<ж<global::go.runtime_package.mutex>>>(default(Action<ж<global::go.runtime_package.mutex>>));
+internal static ref Action<ж<global::go.runtime_package.mutex>> Unlock => ref ((StaticBox<Action<ж<global::go.runtime_package.mutex>>>)ᏑUnlock).ValueSlot;
+internal static void initᴛUnlock() { Unlock = unlock; }
 
 internal static readonly ж<Func<ж<global::go.runtime_package.mutex>, bool>> ᏑMutexContended = new StaticBox<Func<ж<global::go.runtime_package.mutex>, bool>>(mutexContended);
 internal static ref Func<ж<global::go.runtime_package.mutex>, bool> MutexContended => ref ((StaticBox<Func<ж<global::go.runtime_package.mutex>, bool>>)ᏑMutexContended).ValueSlot;
@@ -1404,6 +1455,8 @@ public partial struct SemTable {
     /*embed*/ internal global::go.runtime_package.semTable semTable;
 }
 
+} partial class runtime_internal_testᴛSemTable {
+
 // Enqueue simulates enqueuing a waiter for a semaphore (or lock) at addr.
 public static void Enqueue(this ref SemTable t, ж<uint32> addr) {
     var s = acquireSudog();
@@ -1425,6 +1478,8 @@ public static bool Dequeue(this ref SemTable t, ж<uint32> addr) {
     return false;
 }
 
+} partial class runtime_internal_test_package {
+
 // mspan wrapper for testing.
 public partial struct MSpan /*global::go.runtime_package.mspan*/;
 
@@ -1433,7 +1488,7 @@ public static ж<MSpan> AllocMSpan() {
     ref var s = ref heap<ж<global::go.runtime_package.mspan>>(out var Ꮡs);
     systemstack(() => {
         @lock(Ꮡmheap_.Ꮡlock);
-        Ꮡs.ValueSlot = (ж<global::go.runtime_package.mspan>)(uintptr)(Ꮡmheap_.Ꮡspanalloc.alloc());
+        Ꮡs.ValueSlot = @unsafe.Pointer.To<global::go.runtime_package.mspan>(Ꮡmheap_.Ꮡspanalloc.alloc());
         Ꮡs.ValueSlot.init(0, 0);
         unlock(Ꮡmheap_.Ꮡlock);
     });
@@ -1466,6 +1521,8 @@ public static UntypedInt TimeHistMaxBucketBits => /* timeHistMaxBucketBits */ 48
 
 public partial struct TimeHistogram /*global::go.runtime_package.timeHistogram*/;
 
+} partial class runtime_internal_testᴛTimeHistogram {
+
 // Count returns the counts for the given bucket, subBucket indices.
 // Returns true if the bucket was valid, otherwise returns the counts
 // for the overflow bucket if bucket > 0 or the underflow bucket if
@@ -1485,6 +1542,8 @@ public static (uint64, bool) Count(this ж<TimeHistogram> Ꮡth, nint bucket, ni
 public static void Record(this ж<TimeHistogram> Ꮡth, int64 duration) {
     (Ꮡth.Reinterpret<TimeHistogram, global::go.runtime_package.timeHistogram>()).record(duration);
 }
+
+} partial class runtime_internal_test_package {
 
 public static readonly ж<Func<slice<float64>>> ᏑTimeHistogramMetricsBuckets = new StaticBox<Func<slice<float64>>>(timeHistogramMetricsBuckets);
 public static ref Func<slice<float64>> TimeHistogramMetricsBuckets => ref ((StaticBox<Func<slice<float64>>>)ᏑTimeHistogramMetricsBuckets).ValueSlot;
@@ -1523,8 +1582,8 @@ public static uint64 /*mask*/ GCTestIsReachable(params ꓸꓸꓸunsafeꓸPointer
 // This is nosplit because gcTestPointerClass is.
 //
 //go:nosplit
-public static @string GCTestPointerClass(@unsafe.Pointer Δp) {
-    return gcTestPointerClass(Δp);
+public static @string GCTestPointerClass(@unsafe.Pointer p) {
+    return gcTestPointerClass(p);
 }
 
 public const bool Raceenabled = /* raceenabled */ false;
@@ -1549,6 +1608,8 @@ public static ж<GCController> NewGCController(nint gcPercent, int64 memoryLimit
     g.of(GCController.ᏑgcControllerState).init((int32)gcPercent, memoryLimit);
     return g;
 }
+
+} partial class runtime_internal_testᴛGCController {
 
 public static void StartCycle(this ж<GCController> Ꮡc, uint64 stackSize, uint64 globalsSize, float64 scannableFrac, nint gomaxprocs) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -1584,6 +1645,8 @@ public static uint64 Triggered(this ref GCController c) {
     return c.triggered;
 }
 
+} partial class runtime_internal_test_package {
+
 public partial struct GCControllerReviseDelta {
     public int64 HeapLive;
     public int64 HeapScan;
@@ -1591,6 +1654,8 @@ public partial struct GCControllerReviseDelta {
     public int64 StackScanWork;
     public int64 GlobalsScanWork;
 }
+
+} partial class runtime_internal_testᴛGCController {
 
 public static void Revise(this ж<GCController> Ꮡc, GCControllerReviseDelta d) {
     Ꮡc.of(GCController.ᏑheapLive).Add(d.HeapLive);
@@ -1623,6 +1688,8 @@ public static void RemoveIdleMarkWorker(this ж<GCController> Ꮡc) {
 public static void SetMaxIdleMarkWorkers(this ж<GCController> Ꮡc, int32 max) {
     Ꮡc.of(GCController.ᏑgcControllerState).setMaxIdleMarkWorkers(max);
 }
+
+} partial class runtime_internal_test_package {
 
 internal static bool alwaysFalse;
 internal static any escapeSink;
@@ -1667,9 +1734,13 @@ public static partial ж<PIController> NewPIController(float64 kp, float64 ti, f
     ));
 }
 
+} partial class runtime_internal_testᴛPIController {
+
 public static (float64, bool) Next(this ref PIController c, float64 input, float64 setpoint, float64 period) {
     return c.piController.next(input, setpoint, period);
 }
+
+} partial class runtime_internal_test_package {
 
 public static UntypedFloat CapacityPerProc => /* capacityPerProc */ 1e+09;
 public static UntypedFloat GCCPULimiterUpdatePeriod => /* gcCPULimiterUpdatePeriod */ 1e+07;
@@ -1688,6 +1759,8 @@ public static ж<GCCPULimiter> NewGCCPULimiter(int64 now, int32 gomaxprocs) {
     l.Ꮡlimiter.resetCapacity(now, gomaxprocs);
     return l;
 }
+
+} partial class runtime_internal_testᴛGCCPULimiter {
 
 public static uint64 Fill(this ref GCCPULimiter l) {
     return l.limiter.bucket.fill;
@@ -1729,6 +1802,8 @@ public static void ResetCapacity(this ж<GCCPULimiter> Ꮡl, int64 now, int32 np
     Ꮡl.Ꮡlimiter.resetCapacity(now, nprocs);
 }
 
+} partial class runtime_internal_test_package {
+
 public static UntypedInt ScavengePercent => /* scavengePercent */ 1;
 
 public partial struct Scavenger {
@@ -1741,6 +1816,8 @@ public partial struct Scavenger {
     internal channel/*<-*/<EmptyStruct> stop = channel/*<-*/<EmptyStruct>.SendOnly;
     internal /*<-*/channel<EmptyStruct> done = /*<-*/channel<EmptyStruct>.RecvOnly;
 }
+
+} partial class runtime_internal_testᴛScavenger {
 
 public static partial void Start(this ж<Scavenger> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -1767,10 +1844,10 @@ public static partial void Start(this ж<Scavenger> Ꮡs) {
         Ꮡs.Ꮡscavenger.init();
         Ꮡs.Ꮡscavenger.park();
         for (;;) {
-            var selᴛ1 = stopʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-            case 0 when selᴛ1.ꟷᐳ(out _): {
-                builtin.close(doneʗ1);
+            var stopᴛ1 = stopʗ1;
+            switch (trySelect(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
+            case 0 when stopᴛ1.ꟷᐳ(out _): {
+                close(doneʗ1);
                 return;
             }
             default: {
@@ -1838,10 +1915,12 @@ public static void Stop(this ж<Scavenger> Ꮡs) {
     if (!parked) {
         throw panic("tried to clean up scavenger that is not parked");
     }
-    builtin.close(s.stop);
+    close(s.stop);
     Ꮡs.Wake();
     ᐸꟷ(s.done);
 }
+
+} partial class runtime_internal_test_package {
 
 public partial struct ScavengeIndex {
     internal global::go.runtime_package.scavengeIndex i;
@@ -1867,6 +1946,8 @@ public static ж<ScavengeIndex> NewScavengeIndex(ChunkIdx min, ChunkIdx max) {
     s.i.test = true;
     return s;
 }
+
+} partial class runtime_internal_testᴛScavengeIndex {
 
 public static (ChunkIdx, nuint) Find(this ж<ScavengeIndex> Ꮡs, bool force) {
     var (ci, off) = Ꮡs.Ꮡi.find(force);
@@ -1932,6 +2013,8 @@ public static void SetEmpty(this ref ScavengeIndex s, ChunkIdx ci) {
     s.i.setEmpty((global::go.runtime_package.chunkIdx)(nuint)ci);
 }
 
+} partial class runtime_internal_test_package {
+
 public static bool CheckPackScavChunkData(uint32 gen, uint16 inUse, uint16 lastInUse, uint8 flags) {
     var sc0 = new scavChunkData(
         gen: gen,
@@ -1960,6 +2043,8 @@ public static partial ж<UserArena> NewUserArena() {
     return Ꮡ(new UserArena(newUserArena()));
 }
 
+} partial class runtime_internal_testᴛUserArena {
+
 // go2cs generated this placeholder — func New is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static void Slice(this ref UserArena a, any sl, nint cap) {
@@ -1969,6 +2054,8 @@ public static void Slice(this ref UserArena a, any sl, nint cap) {
 public static void Free(this ref UserArena a) {
     a.arena.free();
 }
+
+} partial class runtime_internal_test_package {
 
 public static nint GlobalWaitingArenaChunks() {
     nint n = 0;
@@ -2006,7 +2093,7 @@ public static nint FrameStartLine(ж<global::go.runtime_package.Frame> Ꮡf) {
 // PersistentAlloc allocates some memory that lives outside the Go heap.
 // This memory will never be freed; use sparingly.
 public static @unsafe.Pointer PersistentAlloc(uintptr n, uintptr align) {
-    return (uintptr)persistentalloc(n, align, Ꮡmemstats.Ꮡother_sys);
+    return persistentalloc(n, align, Ꮡmemstats.Ꮡother_sys);
 }
 
 public static UntypedInt TagAlign => /* tagAlign */ 512;
@@ -2067,6 +2154,8 @@ public partial struct TraceMap {
     /*embed*/ internal global::go.runtime_package.traceMap traceMap;
 }
 
+} partial class runtime_internal_testᴛTraceMap {
+
 public static (uint64, bool) PutString(this ж<TraceMap> Ꮡm, @string s) {
     return Ꮡm.ᏑtraceMap.put(@unsafe.Pointer.FromPinnedBox(@unsafe.StringData(s)), (uintptr)len(s));
 }
@@ -2074,6 +2163,8 @@ public static (uint64, bool) PutString(this ж<TraceMap> Ꮡm, @string s) {
 public static void Reset(this ж<TraceMap> Ꮡm) {
     Ꮡm.ᏑtraceMap.reset();
 }
+
+} partial class runtime_internal_test_package {
 
 public static void SetSpinInGCMarkDone(bool spin) {
     ᏑgcDebugMarkDone.of(gcDebugMarkDoneᴛ1.ᏑspinAfterRaggedBarrier).Store(spin);
@@ -2110,6 +2201,8 @@ public static BitCursor NewBitCursor(ж<byte> buf) {
     return new BitCursor(b: new bitCursor(ptr: buf, n: 0));
 }
 
+} partial class runtime_internal_testᴛBitCursor {
+
 public static void Write(this BitCursor b, ж<byte> data, uintptr cnt) {
     b.b.write(data, cnt);
 }
@@ -2117,15 +2210,21 @@ public static BitCursor Offset(this BitCursor b, uintptr cnt) {
     return new BitCursor(b: b.b.offset(cnt));
 }
 
+} partial class runtime_internal_test_package {
+
 public static UntypedInt BubbleAssocUnbubbled => /* bubbleAssocUnbubbled */ 0;
 public static UntypedInt BubbleAssocCurrentBubble => /* bubbleAssocCurrentBubble */ 1;
 public static UntypedInt BubbleAssocOtherBubble => /* bubbleAssocOtherBubble */ 2;
 
 public partial struct TraceStackTable /*global::go.runtime_package.traceStackTable*/;
 
+} partial class runtime_internal_testᴛTraceStackTable {
+
 public static void Reset(this ж<TraceStackTable> Ꮡt) {
     Ꮡt.of(TraceStackTable.Ꮡtab).reset();
 }
+
+} partial class runtime_internal_test_package {
 
 internal static partial void TraceStack(ж<G> gp, ж<TraceStackTable> tab) {
     traceStack(0, gp, tab.Reinterpret<TraceStackTable, global::go.runtime_package.traceStackTable>());
@@ -2143,49 +2242,65 @@ public partial struct ListHead {
     internal global::go.runtime_package.listHead l;
 }
 
+} partial class runtime_internal_testᴛListHead {
+
 public static void Init(this ref ListHead head, uintptr off) {
     head.l.init(off);
 }
+
+} partial class runtime_internal_test_package {
 
 public partial struct ListNode {
     internal global::go.runtime_package.listNode l;
 }
 
-public static void Push(this ref ListHead head, @unsafe.Pointer Δp) {
-    head.l.push(Δp);
+} partial class runtime_internal_testᴛListHead {
+
+public static void Push(this ref ListHead head, @unsafe.Pointer p) {
+    head.l.push(p);
 }
 
 public static @unsafe.Pointer Pop(this ref ListHead head) {
-    return (uintptr)head.l.pop();
+    return head.l.pop();
 }
 
-public static void Remove(this ref ListHead head, @unsafe.Pointer Δp) {
-    head.l.remove(Δp);
+public static void Remove(this ref ListHead head, @unsafe.Pointer p) {
+    head.l.remove(p);
 }
+
+} partial class runtime_internal_test_package {
 
 public partial struct ListHeadManual {
     internal global::go.runtime_package.listHeadManual l;
 }
 
+} partial class runtime_internal_testᴛListHeadManual {
+
 public static void Init(this ref ListHeadManual head, uintptr off) {
     head.l.init(off);
 }
+
+} partial class runtime_internal_test_package {
 
 public partial struct ListNodeManual {
     internal global::go.runtime_package.listNodeManual l;
 }
 
-public static void Push(this ref ListHeadManual head, @unsafe.Pointer Δp) {
-    head.l.push(Δp);
+} partial class runtime_internal_testᴛListHeadManual {
+
+public static void Push(this ref ListHeadManual head, @unsafe.Pointer p) {
+    head.l.push(p);
 }
 
 public static @unsafe.Pointer Pop(this ref ListHeadManual head) {
-    return (uintptr)head.l.pop();
+    return head.l.pop();
 }
 
-public static void Remove(this ref ListHeadManual head, @unsafe.Pointer Δp) {
-    head.l.remove(Δp);
+public static void Remove(this ref ListHeadManual head, @unsafe.Pointer p) {
+    head.l.remove(p);
 }
+
+} partial class runtime_internal_test_package {
 
 public static @string Hexdumper(uintptr @base, nint wordBytes, Action<uintptr, Action> mark, params Span<slice<byte>> dataʗp) {
     var data = dataʗp.sslice();
@@ -2211,10 +2326,10 @@ public static @string Hexdumper(uintptr @base, nint wordBytes, Action<uintptr, A
     return (@string)(buf.slice(0, n));
 }
 
-public static @string HexdumpWords(uintptr Δp, uintptr bytes) {
+public static @string HexdumpWords(uintptr p, uintptr bytes) {
     var buf = new slice<byte>(0, 2048);
     getg().Value.writebuf = buf;
-    hexdumpWords(Δp, bytes, default);
+    hexdumpWords(p, bytes, default);
     nint n = len((~getg()).writebuf);
     getg().Value.writebuf = default;
     if (n == cap(buf)) {

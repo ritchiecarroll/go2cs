@@ -1,0 +1,2 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	absent	divergent_names	run	wall_s	cells	same_names
+HX-NET	net	linux-x64	600	597	3	3	0	validated	-	-	TestAllocs;TestIPAppendTextNoAllocs;TestTCPReadWriteAllocs	44459492597	401	read	yes

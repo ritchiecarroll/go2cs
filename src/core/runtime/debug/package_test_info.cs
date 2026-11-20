@@ -46,9 +46,9 @@ using static global::go.runtime.debug_test_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("runtime/debug/example_monitor_test.go", "example_monitor_test.cs", "AA8mwgAOIJKmggAOEuKClIKUgoKUlLiCgpSClIKUyoKClLiCgoKCgpSCgg==")]
 [assembly: GoPositionMap("runtime/debug/garbage_test.go", "garbage_test.cs", "ABAgopSCgsiCgqaClIKUgpSClIKClIKUgoKCgpSCgpSUuIKCgqaCgsqClIKCgoKUtMjKgqaUgrgACRSUgsqCAAoWgoKClJSUggAGEqKmgoKCuIKClIKEkoKCgoKCgpaSgIK2gpSUgoKAgsiClJSCgpSCgoKCtKSCgpSmAAgSgg==", "169-172:1", "", "", "", "176:21,177:13")]
-[assembly: GoPositionMap("runtime/debug/heapdump_test.go", "heapdump_test.cs", "ABIcooKUgoKUgpKCgoKUgoK07LiigpSCgpSCtoKCgoKmgqaCgqIACBCkgpSigpSCgpSCkoKCog==", "", "", "", "31:21,66:21,112:21")]
+[assembly: GoPositionMap("runtime/debug/heapdump_test.go", "heapdump_test.cs", "ABMcooKUgoKUgpKCgoKUgoK07LiigpSCgpSCtoKCgoKmgqaCgqIAChDEgpSigpSCgpSCkoKCog==", "", "", "", "32:21,67:21,117:21")]
 [assembly: GoPositionMap("runtime/debug/mod_test.go", "mod_test.cs", "AA0ekoKClAAlBrSspgACEK6cgoKUgsqCgoKmgg==", "55-74:1")]
-[assembly: GoPositionMap("runtime/debug/stack_test.go", "stack_test.cs", "AB4sgqSCtoKClIKUgsjKgpSCABUqABICgoKC7oLcgoKCgoKUuJSCgqaCkpSCgpSUlIKClJSUgoKCggAIBoKUgoKCgoKClAALGIKClIKCpsqClILKgoKUgg==", "108-124:1")]
+[assembly: GoPositionMap("runtime/debug/stack_test.go", "stack_test.cs", "AB8sgqSCtoKClIKUgsjqgpSCABcqABICgoKC7oLcgoKCgoKUuJSCgqaCkpSCgpSUlIKClJSUgoKCggAIBoKUgoKCgoKClAALGIKClIKCpsqClILKgoKUgg==", "108-124:1")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
@@ -99,3 +99,14 @@ public static partial class debug_test_package
         builtin.initPackage(typeof(global::go.runtime.debug_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(debug_test_package.G<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class debug_testᴛG;
+[GoMethodHost(typeof(debug_test_package.T)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class debug_testᴛT;
+// </MethodHolders>

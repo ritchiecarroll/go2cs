@@ -27,28 +27,29 @@ namespace go;
 
 using System.Runtime.CompilerServices;
 using System.Threading;
+using static runtime_package;
 
 partial class runtime_package {
 
 // A guintptr holds a goroutine pointer; in the original it is a uintptr deliberately hidden
 // from Go's GC. The managed form holds the ж<g> box itself — see the module header.
-internal partial struct Δguintptr {
+internal partial struct guintptr {
     internal ж<g> m_ref;
 
-    public Δguintptr(ж<g> gp) {
+    public guintptr(ж<g> gp) {
         m_ref = gp;
     }
 
     // Go code assigns and compares the untyped constant 0 (nil) to these types; any other
     // number cannot become a managed reference and panics loudly rather than mis-routing.
-    public static implicit operator Δguintptr(nint value) {
+    public static implicit operator guintptr(nint value) {
         if (value != 0)
             throw panic("guintptr: a non-zero integer cannot carry a managed reference");
 
         return default;
     }
 
-    public static explicit operator Δguintptr(nuint value) {
+    public static explicit operator guintptr(nuint value) {
         if (value != 0)
             throw panic("guintptr: a non-zero integer cannot carry a managed reference");
 
@@ -56,46 +57,46 @@ internal partial struct Δguintptr {
     }
 
     // Diagnostic identity for print/hex sites: an opaque stable token, never an address.
-    public static explicit operator nuint(Δguintptr value) {
+    public static explicit operator nuint(guintptr value) {
         return value.m_ref is null ? 0u : (nuint)(uint)RuntimeHelpers.GetHashCode(value.m_ref);
     }
 
     // Direct uintptr bridges: C#'s user-conversion "encompassing" rules count only STANDARD
     // conversions, so nothing chains through nuint's user bridge — `(uintptr)mp` (print
     // diagnostics) and the reverse need their own operators (same loud/token semantics).
-    public static explicit operator uintptr(Δguintptr value) {
+    public static explicit operator uintptr(guintptr value) {
         return (nuint)value;
     }
 
-    public static explicit operator Δguintptr(uintptr value) {
+    public static explicit operator guintptr(uintptr value) {
         if (value != 0)
             throw panic("guintptr: a non-zero integer cannot carry a managed reference");
 
         return default;
     }
 
-    public static implicit operator Δhex(Δguintptr value) {
-        return (Δhex)(ulong)(nuint)value;
+    public static implicit operator hex(guintptr value) {
+        return (hex)(ulong)(nuint)value;
     }
 
-    public static bool operator ==(Δguintptr left, Δguintptr right) {
+    public static bool operator ==(guintptr left, guintptr right) {
         return ReferenceEquals(left.m_ref, right.m_ref);
     }
 
-    public static bool operator !=(Δguintptr left, Δguintptr right) {
+    public static bool operator !=(guintptr left, guintptr right) {
         return !(left == right);
     }
 
-    public static bool operator ==(Δguintptr left, nint right) {
+    public static bool operator ==(guintptr left, nint right) {
         return right == 0 && left.m_ref is null;
     }
 
-    public static bool operator !=(Δguintptr left, nint right) {
+    public static bool operator !=(guintptr left, nint right) {
         return !(left == right);
     }
 
     public override bool Equals(object? obj) {
-        return obj is Δguintptr other && this == other;
+        return obj is guintptr other && this == other;
     }
 
     public override int GetHashCode() {
@@ -107,25 +108,31 @@ internal partial struct Δguintptr {
     }
 }
 
+} partial class runtimeᴛguintptr {
+
 //go:nosplit
-internal static ж<g> ptr(this Δguintptr gp) {
+internal static ж<g> ptr(this guintptr gp) {
     return gp.m_ref;
 }
 
 //go:nosplit
-[GoRecv] internal static void set(this ref Δguintptr gp, ж<g> Ꮡg) {
+[GoRecv] internal static void set(this ref guintptr gp, ж<g> Ꮡg) {
     gp.m_ref = Ꮡg;
 }
 
 //go:nosplit
-[GoRecv] internal static bool cas(this ref Δguintptr gp, Δguintptr old, Δguintptr @new) {
+[GoRecv] internal static bool cas(this ref guintptr gp, guintptr old, guintptr @new) {
     return ReferenceEquals(Interlocked.CompareExchange(ref gp.m_ref, @new.m_ref, old.m_ref), old.m_ref);
 }
 
+} partial class runtimeᴛg {
+
 //go:nosplit
-internal static Δguintptr guintptr(this ж<g> Ꮡgp) {
-    return new Δguintptr(Ꮡgp);
+internal static guintptr guintptr(this ж<g> Ꮡgp) {
+    return new guintptr(Ꮡgp);
 }
+
+} partial class runtime_package {
 
 // runqempty reports whether pp has no Gs on its local run queue. It never returns true spuriously.
 //
@@ -136,15 +143,15 @@ internal static Δguintptr guintptr(this ж<g> Ꮡgp) {
 // and Loaduintptr's Volatile.Read dereferences an order token -- the host dies (arm-2a). All Go asks
 // of the number is whether it is 0, i.e. whether runnext is nil, which here is the managed reference
 // being null, read with the same acquire. The loop and the re-read of runqtail are Go's, unchanged.
-internal static bool runqempty(ж<Δp> Ꮡpp) {
+internal static bool runqempty(ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.Value;
 
     while (true) {
-        var head = global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(Δp.Ꮡrunqhead));
-        var tail = global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(Δp.Ꮡrunqtail));
+        var head = global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(p.Ꮡrunqhead));
+        var tail = global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(p.Ꮡrunqtail));
         var runnextNil = Volatile.Read(ref pp.runnext.m_ref) is null;
 
-        if (tail == global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(Δp.Ꮡrunqtail)))
+        if (tail == global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(p.Ꮡrunqtail)))
             return head == tail && runnextNil;
     }
 }
@@ -159,9 +166,9 @@ internal static void setGNoWB(ж<ж<g>> Ꮡgp, ж<g> Ꮡnew) {
 }
 
 internal partial struct puintptr {
-    internal ж<Δp> m_ref;
+    internal ж<p> m_ref;
 
-    public puintptr(ж<Δp> pp) {
+    public puintptr(ж<p> pp) {
         m_ref = pp;
     }
 
@@ -197,8 +204,8 @@ internal partial struct puintptr {
         return default;
     }
 
-    public static implicit operator Δhex(puintptr value) {
-        return (Δhex)(ulong)(nuint)value;
+    public static implicit operator hex(puintptr value) {
+        return (hex)(ulong)(nuint)value;
     }
 
     public static bool operator ==(puintptr left, puintptr right) {
@@ -230,15 +237,19 @@ internal partial struct puintptr {
     }
 }
 
+} partial class runtimeᴛpuintptr {
+
 //go:nosplit
-internal static ж<Δp> ptr(this puintptr pp) {
+internal static ж<p> ptr(this puintptr pp) {
     return pp.m_ref;
 }
 
 //go:nosplit
-[GoRecv] internal static void set(this ref puintptr pp, ж<Δp> Ꮡp) {
+[GoRecv] internal static void set(this ref puintptr pp, ж<p> Ꮡp) {
     pp.m_ref = Ꮡp;
 }
+
+} partial class runtime_package {
 
 // muintptr is a *m that is not tracked by the garbage collector.
 //
@@ -288,8 +299,8 @@ internal partial struct muintptr {
         return default;
     }
 
-    public static implicit operator Δhex(muintptr value) {
-        return (Δhex)(ulong)(nuint)value;
+    public static implicit operator hex(muintptr value) {
+        return (hex)(ulong)(nuint)value;
     }
 
     public static bool operator ==(muintptr left, muintptr right) {
@@ -321,6 +332,8 @@ internal partial struct muintptr {
     }
 }
 
+} partial class runtimeᴛmuintptr {
+
 //go:nosplit
 internal static ж<m> ptr(this muintptr mp) {
     return mp.m_ref;
@@ -330,6 +343,8 @@ internal static ж<m> ptr(this muintptr mp) {
 [GoRecv] internal static void set(this ref muintptr mp, ж<m> Ꮡm) {
     mp.m_ref = Ꮡm;
 }
+
+} partial class runtime_package {
 
 // setMNoWB performs *mp = new without a write barrier.
 // For times when it's impractical to use an muintptr.

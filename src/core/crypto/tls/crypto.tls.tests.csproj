@@ -318,7 +318,6 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/cryptotest/crypto.internal.cryptotest.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/tls13/crypto.internal.fips140.tls13.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rsa/crypto.rsa.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha256/crypto.sha256.csproj" />
@@ -338,9 +337,6 @@
     <ProjectReference Include="$(go2csPath)core/html/template/html.template.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/byteorder/internal.byteorder.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/obscuretestdata/internal.obscuretestdata.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />

@@ -8,6 +8,7 @@ using fmt = fmt_package;
 using url = go.net.url_package;
 using go.net;
 using static go.flag_internal_test_package;
+using static flag_test_package;
 
 partial class flag_test_package {
 
@@ -15,14 +16,16 @@ partial struct URLValue {
     public ж<url.URL> URL;
 }
 
-public static @string ΔString(this URLValue v) {
+} partial class flag_testᴛURLValue {
+
+public static @string String(this URLValue v) {
     if (v.URL != nil) {
         return v.URL.String();
     }
     return ""u8;
 }
 
-public static error ΔSet(this URLValue v, @string s) {
+public static error Set(this URLValue v, @string s) {
     var (u, err) = url.Parse(s); if (err != nil) {
         return err;
     } else {
@@ -30,6 +33,8 @@ public static error ΔSet(this URLValue v, @string s) {
     }
     return default;
 }
+
+} partial class flag_test_package {
 
 internal static ж<url.URL> u = Ꮡ(new url.URL());
 

@@ -16,6 +16,7 @@ using encoding;
 using go;
 using go.@internal;
 using go.@internal.coverage;
+using static decodecounter_package;
 
 partial class decodecounter_package {
 
@@ -88,6 +89,8 @@ internal static bool checkMagic(/*[4]*/ array<byte> v) {
     var g = coverage.CovCounterMagic.Clone();
     return v[0] == g[0] && v[1] == g[1] && v[2] == g[2] && v[3] == g[3];
 }
+
+} partial class decodecounterᴛCounterDataReader {
 
 internal static error readFooter(this ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
@@ -262,6 +265,8 @@ public static @string Goarch(this ref CounterDataReader cdr) {
     return cdr.goarch;
 }
 
+} partial class decodecounter_package {
+
 // FuncPayload encapsulates the counter data payload for a single
 // function as read from a counter data file.
 partial struct FuncPayload {
@@ -269,6 +274,8 @@ partial struct FuncPayload {
     public uint32 FuncIdx;
     public slice<uint32> Counters;
 }
+
+} partial class decodecounterᴛCounterDataReader {
 
 // NumSegments returns the number of execution segments in the file.
 public static uint32 NumSegments(this ref CounterDataReader cdr) {
@@ -309,7 +316,11 @@ public static uint32 NumFunctionsInSegment(this ref CounterDataReader cdr) {
     return (uint32)cdr.shdr.FcnEntries;
 }
 
+} partial class decodecounter_package {
+
 internal const bool supportDeadFunctionsInCounterData = false;
+
+} partial class decodecounterᴛCounterDataReader {
 
 // NextFunc reads data for the next function in this current segment
 // into "p", returning TRUE if the read was successful or FALSE
@@ -420,4 +431,4 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
     return (true, default);
 }
 
-} // end decodecounter_package
+} // end decodecounterᴛCounterDataReader

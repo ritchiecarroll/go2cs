@@ -20,6 +20,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -57,6 +58,8 @@ partial struct traceMapNode {
     internal uint64 id;
     internal slice<byte> data;
 }
+
+} partial class runtimeᴛtraceMap {
 
 // stealID steals an ID from the table, ensuring that it will not
 // appear in the table anymore.
@@ -130,4 +133,4 @@ internal static void reset(this ж<traceMap> Ꮡtab) {
     Ꮡtab.Ꮡmem.drop();
 }
 
-} // end runtime_package
+} // end runtimeᴛtraceMap

@@ -8,7 +8,6 @@ global using static global::go.crypto.rsa_package;
 global using static global::go.crypto.rsa_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
@@ -56,8 +55,8 @@ using static global::go.crypto.rsa_test_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/rsa/equal_test.go", "equal_test.cs", "ABQcgpSClIKUgpSCpoKClIKClIKUgqaCgpSCpoKCgg==")]
 [assembly: GoPositionMap("crypto/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABwugoKCgpQABxAAEiaClJSmuIKCgoKUgoLcgoKUkoKmgoKCpoKClJSCgoKmgoKUpoKClLgAEiaCgoKCgoKUgoLKgoKCgoKUgqaCyoKUgoKClIKCggALGLiCgoKCgpSCgqaCgsqCgoKCgpSUgoL6goKCgoK4gpTulIKClIKUguimgoKmgoKmgoLKgoKCgpQADAaCiIKCpoKCgg==", "60-62:1;63-65:2;86-114:1")]
-[assembly: GoPositionMap("crypto/rsa/pss_test.go", "pss_test.cs", "ACs0woKClKzClJTCgoKClIKClIKCgpS0grSCtLS2grSkgoKCgriCpIKCgpSClILGgoKUgoKUgsbWqKKUgoKCpgAJFIK4goKCgpT2ggAOJIKCgoKUgoKCgoKmgoKCgpSCyriCgoKUgriClIKCuIKCgpSmgoKClKaCgoKU5oKCgoKmgrjKpriClIKCuII=", "42-73:1", "", "", "54:21,70:29")]
-[assembly: GoPositionMap("crypto/rsa/rsa_test.go", "rsa_test.cs", "ACdAgoKClIKCgoKClJSCgpSClMqCgoKCpoKClKaCgoKCpoKClKaCgoKCgoKmgoKClMqmgoKCgoLolIKUgoKCgpSCAA4KgriKpsKCgriClIKmgoKCgqaCgoKUgrSkgpSCgoKmgKKCgpSCpsiUgpSCkoKmpoKCgoKUkoKCgoKUgpQADwqygoKmgoKCgoKUgoKClIKClIK4goKCgoKUgoKClIK4goKCpoKCgoKClIKCgpSCgoKUgoKCgpSmgoKCgoKUgoKClIKCgpSCgoKClKaCgoKCgpSCgoKUgoKClIKCgoKUyoKCgpSCgpSCgoKUgoKmgoKClIKClIK4goKUgoKUggAICIKCgoKUgqaSgqaCkpKSkoKCkpKSkpKSppSCgoKCgpSUgoKUxpQADBQADBYAESAAHjqkygAHEAAKFgAqUgA2aoKAkoCSgLailIKCgqaCgoKCgpSClLiCgoKUgoKCgpTKgoKUgoKCpoKCgoKClIKUyoKCgpSCgoKClAAMCoKAkoKUgriCuKKUgoKCgoKUuIKCgoKCpoKCgoLcgoKUgoKCgoKUyoKCgoKCpoKCgoLcgoKCgoKCAAkMgoKCgpSCgoIACxgACRCCpoKCgoKCpoKClIKUggAPIIKCgoKClIKCgoKUgtyClIKCgoKCgoKClIKCgoKCuIKCgoKmgsqClIKUgoKCgoKCgoKUlIKCgriCgoKCgoKCgoKUgoKCgoKUgoKClIK4goKClIKCgpSCuIKCgpSCgoKUgu4AoAGkApQAABKCgpQAKQaUAAIkAAEggpSCAAsGgoKCgoKUgoKCgoKUlIKCgoKClAATCIKCpoKCpoKCuIKClIKmgoKmgoK4goKmgoKmgoK4goKmgoKmgoK4goKmgoKmgoK4goKmgoIACAqCgoKCgoCCpIKAgg==", "38-54:1;148-152:1;187-195:1;206-209:1;221-231:2;412-420:1;421-424:2;649-649:1;650-650:2;651-651:3;678-690:1;694-715:1;719-731:1;735-735:1;736-738:2;739-741:3;744-746:4;764-778:1;782-794:1;798-812:1;816-824:1;828-839:1;1241-1246:1;1247-1255:2;1256-1264:3;1272-1276:1;1273-1275:1.1;1277-1281:2;1278-1280:2.1;1283-1290:3;1287-1289:3.1;1291-1295:4;1292-1294:4.1;1296-1300:5;1297-1299:5.1;1302-1306:6;1303-1305:6.1;1307-1311:7;1308-1310:7.1;1312-1316:8;1313-1315:8.1;1318-1322:9;1319-1321:9.1;1323-1327:10;1324-1326:10.1;1328-1332:11;1329-1331:11.1;1334-1338:12;1335-1337:12.1;1339-1343:13;1340-1342:13.1;1344-1348:14;1345-1347:14.1;1350-1354:15;1351-1353:15.1;1355-1359:16;1356-1358:16.1", "", "", "", "169:21,170:13")]
+[assembly: GoPositionMap("crypto/rsa/pss_test.go", "pss_test.cs", "ACs0woKClKzClJTCgoKClIKClIKCgpS0grSCtLS2grSkgoKCgriClIKCgpSClILGgoKUgoKUgsbWqKKUgoKCpgAJFIK4goKCgpT2ggAOJIKCgoKUgoKCgoKmgoKCgpSCyriCgoKUgriClIKCuIKCgpSmgoKClKaCgoKU5oKCgoKmgrjKpriClIKCuII=", "42-73:1", "", "", "54:21,70:29")]
+[assembly: GoPositionMap("crypto/rsa/rsa_test.go", "rsa_test.cs", "AChAgoKClIKCgoKClJSCgpSClMqCgoKCpoKClKaCgoKCpoKClKaCgoKCgoKmgoKClMqmgoKCgoLolIKUgoKCgpSCAA4KgriKpsKCgriClIKmgoKCgqaCgoKUgrSkgpSCgoKmgKKCgpSCpsiUgpSCkoKmpoKCgoKUkoKCgoKUgpQADwqygoKmgoKCgoKUgoKClIKClIK4goKCgoKUgoKClIK4goKCpoKCgoKClIKCgpSCgoKUgoKCgpSmgoKCgoKUgoKClIKCgpSCgoKClKaCgoKCgpSCgoKUgoKClIKCgoKUyoKCgpSCgpSCgoKUgoKmgoKClIKClIK4goKUgoKUggAICIKCgoKUgqaSgqaCkpKSkoKCkpKSkpKSppSCgoKCgpSUgoKUxpQADBQADBYAESAAHjqkygAHEAAKFgAqUgA2aoKAkoCSgLailIKCgqaCgoKCgpSClLiCgoKUgoKCgpTKgoKUgoKCpoKCgoKClIKUyoKCgpSCgoKClAAMCoKAkoKUgriCuKKUgoKCgoKUuIKCgoKCpoKCgoLcgoKUgoKCgoKUyoKCgoKCpoKCgoLcgoKCgoKCAAkMgoKCgpSCgoIADRgACRCCpoKCgoKCpoKClIKUggARIIKCgoKClIKCgoKUgtyClIKCgoKCgoKClIKCgoKCuIKCgoKmgsqClIKUgoKCgoKCgoKUlIKCgriCgoKCgoKCgoKUgoKCgoKUgoKClIK4goKClIKCgpSCuIKCgpSCgoKUgu4AoAGkApQAABKCgpQAKQaUAAIkAAEggpSCAAsGgoKCgoKUgoKCgoKUlIKCgoKClAATCIKCpoKCpoKCuIKClIKmgoKmgoK4goKmgoKmgoK4goKmgoKmgoK4goKmgoKmgoK4goKmgoIACAqCgoKCgoCCpIKAgg==", "38-54:1;148-152:1;187-195:1;206-209:1;221-231:2;412-420:1;421-424:2;649-649:1;650-650:2;651-651:3;678-690:1;694-715:1;719-731:1;735-735:1;736-738:2;739-741:3;744-746:4;764-778:1;782-794:1;798-812:1;816-824:1;828-839:1;1241-1246:1;1247-1255:2;1256-1264:3;1272-1276:1;1273-1275:1.1;1277-1281:2;1278-1280:2.1;1283-1290:3;1287-1289:3.1;1291-1295:4;1292-1294:4.1;1296-1300:5;1297-1299:5.1;1302-1306:6;1303-1305:6.1;1307-1311:7;1308-1310:7.1;1312-1316:8;1313-1315:8.1;1318-1322:9;1319-1321:9.1;1323-1327:10;1324-1326:10.1;1328-1332:11;1329-1331:11.1;1334-1338:12;1335-1337:12.1;1339-1343:13;1340-1342:13.1;1344-1348:14;1345-1347:14.1;1350-1354:15;1351-1353:15.1;1355-1359:16;1356-1358:16.1", "", "", "", "170:21,171:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -122,3 +121,13 @@ public static partial class rsa_test_package
         builtin.initPackage(typeof(global::go.crypto.rsa_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(rsa_test_package.testPrimeReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsa_testᴛtestPrimeReader;
+// </MethodHolders>

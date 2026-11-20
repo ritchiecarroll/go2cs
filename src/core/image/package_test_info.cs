@@ -8,7 +8,6 @@ global using static global::go.image_package;
 global using static global::go.image_internal_test_package;
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -17,15 +16,12 @@ using static global::go.image_test_package;
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657b536574524742413634287820696e742c207920696e742c206320696d6167652f636f6c6f722e524742413634297d", "TestRGBA64Image_type")]
 [assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b20696d6167652066756e63282920696d6167652e696d6167657d", "testImagesᴛ1")]
-[assembly: GoTypeAlias("Opaque", "const:ΔOpaque")]
-[assembly: GoTypeAlias("RGBA", "ΔRGBA")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
 [assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<global::go.image_package.Rectangle, global::go.image_package.Image>]
 [assembly: GoImplement<global::go.image_package.Uniform, go.image.color_package.Color>(Pointer = true)]
-[assembly: GoImplement<global::go.image_package.ΔRGBA, global::go.image_package.Image>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>

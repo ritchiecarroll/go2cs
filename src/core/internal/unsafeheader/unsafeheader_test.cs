@@ -58,10 +58,10 @@ internal static void testHeaderMatchesReflect(ж<testing.T> t, any header, any r
     }
 }
 
-internal static reflectꓸType unsafePointerType = reflect.TypeOf(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default));
-internal static reflectꓸType uintptrType = reflect.TypeOf((uintptr)0);
+internal static reflect.Type unsafePointerType = reflect.TypeOf(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default));
+internal static reflect.Type uintptrType = reflect.TypeOf((uintptr)0);
 
-internal static bool typeCompatible(reflectꓸType t, reflectꓸType rt) {
+internal static bool typeCompatible(reflect.Type t, reflect.Type rt) {
     return AreEqual(t, rt) || (AreEqual(t, unsafePointerType) && AreEqual(rt, uintptrType));
 }
 

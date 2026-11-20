@@ -115,7 +115,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> t) {
                 t.Fatal(errΔ3);
             }
             fmt.Printf("sleeping\n"u8);
-            time.Sleep(time.ΔMinute); // process will be killed here
+            time.Sleep(time.Minute); // process will be killed here
             c.Close();
         }
 
@@ -181,13 +181,12 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("recv failed: %v", err);
         }
-        var exprᴛ1 = s;
         switch (ᐧ) {
-        case {} when exprᴛ1 == ""u8: {
+        case {} when s == ""u8: {
             // First connection data is received, let's get second connection data.
             break;
         }
-        case {} when exprᴛ1 == "abc"u8: {
+        case {} when s == "abc"u8: {
             // First connection is lost forever, but that is ok.
             return;
         }

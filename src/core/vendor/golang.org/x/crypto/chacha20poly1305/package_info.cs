@@ -27,8 +27,6 @@ using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("NonceSize", "const:ΔNonceSize")]
-[assembly: GoTypeAlias("Overhead", "const:ΔOverhead")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -64,11 +62,11 @@ using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "ACtQkoKUgpSCgqaCpoKmgoKmgqamlIKClIKUgqau8oKUgpSC")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "AA8egoKCgoK4goKCpoKCgoKUgqaCgoKClIKCgoKClKaCgpSCgoKUgoKCgpSCgpSClIKClKaC")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_noasm.go", "chacha20poly1305_noasm.cs", "AAgSgqaC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "ACxQkoKUgpSCgsaCpoKmgoKmgqbGtIKClIKUgqbO8oKUgpSC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "ABAegoKCgoK4goKCxoKCgoKUgqaCgoKClIKCgoKClKaCgpSCgoKUgoKCgpSCgpSClIKClKaC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_noasm.go", "chacha20poly1305_noasm.cs", "AAwSgqaC")]
 [assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/fips140only_go1.26.go", "fips140only_go1.26.cs", "AAsW")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABEw4oKUgpSCgqaCpoKmgoIABxCCpoKCpoKUpoKClIKUgqaCgqaClA==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABIw4oKUgpSCgsaCpoKmgoIABxCCpoKCpoKUpoKClIKUgqaCgqaClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto;
@@ -103,3 +101,14 @@ public static partial class chacha20poly1305_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸcryptoꓸinternalꓸpoly1305() => builtin.initPackage(typeof(go.vendor.golang.org.x.crypto.@internal.poly1305_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(chacha20poly1305_package.chacha20poly1305)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha20poly1305ᴛchacha20poly1305;
+[GoMethodHost(typeof(chacha20poly1305_package.xchacha20poly1305)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha20poly1305ᴛxchacha20poly1305;
+// </MethodHolders>

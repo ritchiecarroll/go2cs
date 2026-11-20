@@ -7,8 +7,11 @@ using utf8 = go.unicode.utf8_package;
 using transform = go.vendor.golang.org.x.text.transform_package;
 using go.unicode;
 using go.vendor.golang.org.x.text;
+using static norm_package;
 
 partial class norm_package {
+
+} partial class normᴛForm {
 
 // Reset implements the Reset method of the transform.Transformer interface.
 public static void Reset(this Form _) { }
@@ -43,6 +46,8 @@ public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byt
     return (n, n, err);
 }
 
+} partial class norm_package {
+
 internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
@@ -54,7 +59,9 @@ internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
     return true;
 }
 
-internal static slice<error> errs = [default, go.vendor.golang.org.x.text.transform_package.ErrShortDst, go.vendor.golang.org.x.text.transform_package.ErrShortSrc];
+internal static slice<error> errs = [default, transform.ErrShortDst, transform.ErrShortSrc];
+
+} partial class normᴛForm {
 
 // transform implements the transform.Transformer interface. It is only called
 // when quickSpan does not pass for a given string.
@@ -97,4 +104,4 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
     }
 }
 
-} // end norm_package
+} // end normᴛForm

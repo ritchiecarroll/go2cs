@@ -8,6 +8,7 @@ using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
@@ -18,12 +19,14 @@ partial class types_package {
 partial struct Interface {
     internal ж<Checker> check;             // for error reporting; nil once type set is computed
     internal slice<ж<Func>> methods;       // ordered list of explicitly declared methods
-    internal slice<ΔType> embeddeds;       // ordered list of explicitly embedded elements
-    internal ж<slice<tokenꓸPos>> embedPos; // positions of embedded elements; or nil (for error messages) - use pointer to save space
+    internal slice<Type> embeddeds;        // ordered list of explicitly embedded elements
+    internal ж<slice<token.Pos>> embedPos; // positions of embedded elements; or nil (for error messages) - use pointer to save space
     internal bool @implicit;               // interface is wrapper for type set literal (non-interface T, ~T, or A|B)
     internal bool complete;                // indicates that obj, methods, and embeddeds are set and type set can be computed
     internal ж<_TypeSet> tset; // type set described by this interface, computed lazily
 }
+
+} partial class typesᴛInterface {
 
 // typeSet returns the type set for interface t.
 internal static ж<_TypeSet> typeSet(this ж<Interface> Ꮡt) {
@@ -31,6 +34,8 @@ internal static ж<_TypeSet> typeSet(this ж<Interface> Ꮡt) {
 
     return computeInterfaceTypeSet(t.check, nopos, Ꮡt);
 }
+
+} partial class types_package {
 
 // emptyInterface represents the empty (completed) interface
 internal static readonly ж<Interface> ᏑemptyInterface = new StaticBox<Interface>(default(Interface));
@@ -43,9 +48,9 @@ internal static void initᴛemptyInterface() { emptyInterface = new Interface(co
 //
 // Deprecated: Use NewInterfaceType instead which allows arbitrary embedded types.
 public static ж<Interface> NewInterface(slice<ж<Func>> methods, slice<ж<Named>> embeddeds) {
-    var tnames = new slice<ΔType>(len(embeddeds));
+    var tnames = new slice<Type>(len(embeddeds));
     foreach (var (i, t) in range(embeddeds)) {
-        tnames[i] = new NamedжΔType(t);
+        tnames[i] = new NamedжType(t);
     }
     return NewInterfaceType(methods, tnames);
 }
@@ -56,7 +61,7 @@ public static ж<Interface> NewInterface(slice<ж<Func>> methods, slice<ж<Named
 //
 // To avoid race conditions, the interface's type set should be computed before
 // concurrent use of the interface, by explicitly calling Complete.
-public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔType> embeddeds) {
+public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<Type> embeddeds) {
     if (len(methods) == 0 && len(embeddeds) == 0) {
         return ᏑemptyInterface;
     }
@@ -64,8 +69,8 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     // set method receivers if necessary
     var typ = (((ж<Checker>)nil)).newInterface();
     foreach (var (_, m) in range(methods)) {
-        var sig = m.typ._<ж<ΔSignature>>(); if (sig.recv == nil) {
-            sig.recv = newVar(RecvVar, m.pos, m.pkg, ""u8, new InterfaceжΔType(typ));
+        var sig = m.typ._<ж<Signature>>(); if (sig.recv == nil) {
+            sig.recv = newVar(RecvVar, m.pos, m.pkg, ""u8, new InterfaceжType(typ));
         }
     }
 
@@ -79,6 +84,8 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     return typ;
 }
 
+} partial class typesᴛChecker {
+
 // check may be nil
 internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -89,6 +96,8 @@ internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
     }
     return typ;
 }
+
+} partial class typesᴛInterface {
 
 // MarkImplicit marks the interface t as implicit, meaning this interface
 // corresponds to a constraint literal such as ~T or A|B without explicit
@@ -115,7 +124,7 @@ public static nint NumEmbeddeds(this ref Interface t) { return len(t.embeddeds);
 public static ж<Named> Embedded(this ref Interface t, nint i) { return asNamed(t.embeddeds[i]); }
 
 // EmbeddedType returns the i'th embedded type of interface t for 0 <= i < t.NumEmbeddeds().
-public static ΔType EmbeddedType(this ref Interface t, nint i) { return t.embeddeds[i]; }
+public static Type EmbeddedType(this ref Interface t, nint i) { return t.embeddeds[i]; }
 
 // NumMethods returns the total number of methods of interface t.
 public static nint NumMethods(this ж<Interface> Ꮡt) { return Ꮡt.typeSet().NumMethods(); }
@@ -154,8 +163,8 @@ public static ж<Interface> Complete(this ж<Interface> Ꮡt) {
     return Ꮡt;
 }
 
-public static ΔType Underlying(this ж<Interface> Ꮡt) { return new InterfaceжΔType(Ꮡt); }
-public static @string String(this ж<Interface> Ꮡt) { return TypeString(new InterfaceжΔType(Ꮡt), default); }
+public static Type Underlying(this ж<Interface> Ꮡt) { return new InterfaceжType(Ꮡt); }
+public static @string String(this ж<Interface> Ꮡt) { return TypeString(new InterfaceжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -166,6 +175,8 @@ internal static void cleanup(this ж<Interface> Ꮡt) {
     t.check = default;
     t.embedPos = default;
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string methodsMustHaveAUniqueˢ => ref methodsMustHaveAUniqueˢᵇ;
@@ -179,10 +190,10 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
     ref var iface = ref Ꮡiface.DerefOrNull();
     ref var def = ref Ꮡdef.DerefOrNull();
 
-    void addEmbedded(tokenꓸPos pos, ΔType typ) {
+    void addEmbedded(token.Pos pos, Type typ) {
         Ꮡityp.Value.embeddeds = append(Ꮡityp.Value.embeddeds, typ);
         if (Ꮡityp.Value.embedPos == nil) {
-            Ꮡityp.Value.embedPos = @new<slice<tokenꓸPos>>();
+            Ꮡityp.Value.embedPos = @new<slice<token.Pos>>();
         }
         Ꮡityp.Value.embedPos.ValueSlot = append(Ꮡityp.Value.embedPos.ValueSlot, pos);
     }
@@ -202,7 +213,7 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
         }
 
         var typ = Ꮡcheck.typ(f.Type);
-        var (sig, _) = typ._<ж<ΔSignature>>(ᐧ);
+        var (sig, _) = typ._<ж<Signature>>(ᐧ);
         if (sig == nil) {
             if (isValid(typ)) {
                 Ꮡcheck.errorf(new ast_Exprᴠpositioner(f.Type), InvalidSyntaxTree, "%s is not a method signature", typ);
@@ -220,10 +231,10 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
         }
 
         // use named receiver type if available (for better error messages)
-        ΔType recvTyp = new InterfaceжΔType(Ꮡityp);
+        Type recvTyp = new InterfaceжType(Ꮡityp);
         if (Ꮡdef != nil) {
             var named = asNamed(def.typ); if (named != nil) {
-                recvTyp = new NamedжΔType(named);
+                recvTyp = new NamedжType(named);
             }
         }
         sig.recv = newVar(RecvVar, name.Pos(), check.pkg, ""u8, recvTyp);
@@ -255,4 +266,4 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
     }).describef(new ast_InterfaceTypeжpositioner(Ꮡiface), "compute type set for %s", Ꮡityp.OrTypedNil());
 }
 
-} // end types_package
+} // end typesᴛChecker

@@ -48,11 +48,11 @@ partial class asmgen_package {
     storeDecN: armStoreDecN
 )); }
 
-internal static void armMulWide(ж<Asm> a, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
+internal static void armMulWide(ж<Asm> a, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
     a.Printf("\tMULLU %s, %s, (%s, %s)\n", src1, src2, dsthi, dstlo);
 }
 
-internal static void armLoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
+internal static void armLoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<Reg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     foreach (var (_, r) in range(regs)) {
@@ -60,7 +60,7 @@ internal static void armLoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     }
 }
 
-internal static void armLoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
+internal static void armLoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<Reg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     foreach (var (_, r) in range(regs)) {
@@ -68,7 +68,7 @@ internal static void armLoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     }
 }
 
-internal static void armStoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
+internal static void armStoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<Reg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     foreach (var (_, r) in range(regs)) {
@@ -76,7 +76,7 @@ internal static void armStoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     }
 }
 
-internal static void armStoreDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
+internal static void armStoreDecN(ж<Asm> Ꮡa, RegPtr p, slice<Reg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     foreach (var (_, r) in range(regs)) {

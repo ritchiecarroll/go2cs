@@ -257,7 +257,7 @@ partial class poll_package
         // handle's VALUE, two FDs can share one (os.NewFile twice on one handle), and SetReadiness
         // below REPLACES whatever is filed there, so a refused FD that went on to register would take
         // the completions of the bound, live FD it shares the value with.
-        Δsyscall.Errno errno = Δsyscall.GoAssociateAtOpen((Δsyscall.ΔHandle)fd);
+        Δsyscall.Errno errno = Δsyscall.GoAssociateAtOpen((Δsyscall.Handle)fd);
 
         if (errno != 0)
             return (0, (nint)(uintptr)errno);

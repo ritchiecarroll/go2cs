@@ -14,6 +14,7 @@ namespace go;
 using bytealg = @internal.bytealg_package;
 using @internal;
 using ꓸꓸꓸstring = Span<@string>;
+using static path_package;
 
 partial class path_package {
 
@@ -26,6 +27,8 @@ partial struct lazybuf {
     internal slice<byte> buf;
     internal nint w;
 }
+
+} partial class pathᴛlazybuf {
 
 internal static byte index(this ref lazybuf b, nint i) {
     if (b.buf != nil) {
@@ -53,6 +56,8 @@ internal static @string @string(this ref lazybuf b) {
     }
     return (@string)(b.buf.slice(0, b.w));
 }
+
+} partial class path_package {
 
 // Clean returns the shortest path name equivalent to path
 // by purely lexical processing. It applies the following rules
@@ -182,9 +187,9 @@ public static @string Join(params ꓸꓸꓸstring elemʗp) {
     foreach (var (_, e) in range(elem)) {
         if (len(buf) > 0 || e != ""u8) {
             if (len(buf) > 0) {
-                buf = builtin.append(bufᴷ, buf, (byte)'/');
+                buf = append(bufᴷ, buf, (byte)'/');
             }
-            buf = builtin.append(buf, e.ꓸꓸꓸ);
+            buf = append(buf, e.ꓸꓸꓸ);
         }
     }
     return Clean((@string)buf);

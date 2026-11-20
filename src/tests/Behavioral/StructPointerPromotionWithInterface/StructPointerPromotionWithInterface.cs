@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -20,22 +21,32 @@ partial struct MyCustomError {
     /*embed*/ public ж<MyError> MyError;
 }
 
+} partial class mainᴛMyCustomError {
+
 public static float64 Time(this ref MyCustomError myErr) {
     return 0.0D;
 }
+
+} partial class mainᴛMyError {
 
 public static float64 Time(this MyError myErr) {
     return (float64)myErr.When.Unix();
 }
 
+} partial class main_package {
+
 partial struct core {
     internal nint pings;
 }
+
+} partial class mainᴛcore {
 
 internal static @string Ping(this ref core c) {
     c.pings++;
     return "pong";
 }
+
+} partial class main_package {
 
 partial struct Station {
     /*embed*/ internal core core;
@@ -59,6 +70,8 @@ partial struct Device {
     internal nint hits;
 }
 
+} partial class mainᴛDevice {
+
 public static ж<nint> Tag(this ж<Device> Ꮡd) {
     return Ꮡd.Ꮡhits;
 }
@@ -67,10 +80,14 @@ public static @string Describe(this ref Device d) {
     return d.name;
 }
 
+} partial class main_package {
+
 partial struct meta {
     internal @string label;
     internal nint count;
 }
+
+} partial class mainᴛmeta {
 
 internal static @string Stamp(this ref meta m) {
     m.count++;
@@ -80,6 +97,8 @@ internal static @string Stamp(this ref meta m) {
 internal static nint Hits(this ref meta m) {
     return m.count;
 }
+
+} partial class main_package {
 
 partial struct kindBase {
     /*embed*/ internal meta meta;
@@ -117,13 +136,21 @@ partial struct leftSide {
     internal @string tag;
 }
 
+} partial class mainᴛleftSide {
+
 internal static @string Ping(this leftSide l) { return "L"; }
+
+} partial class main_package {
 
 partial struct rightSide {
     internal @string tag;
 }
 
+} partial class mainᴛrightSide {
+
 internal static @string Ping(this rightSide r) { return "R"; }
+
+} partial class main_package {
 
 partial struct pair {
     /*embed*/ internal leftSide leftSide;

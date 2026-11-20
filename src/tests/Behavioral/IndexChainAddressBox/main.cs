@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using atomic = sync.atomic_package;
 using sync;
+using static main_package;
 
 partial class main_package {
 
@@ -10,7 +11,11 @@ partial struct counter {
     internal nint n;
 }
 
+} partial class mainᴛcounter {
+
 internal static void inc(this ref counter c) { c.n++; }
+
+} partial class main_package {
 
 partial struct hist {
     internal array<atomic.Uint64> counts = new(4);
