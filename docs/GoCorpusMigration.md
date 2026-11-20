@@ -4136,8 +4136,9 @@ release published nothing: §2, AMENDED
    the push of the record commit and the tag** (`git push && git push origin nuget-<version>`). A failure after the
    record commit leaves it local, and the failure text names both ways on: the pack, sign and `-ResumePush` commands
    to finish by hand, or `git reset --soft HEAD~1` to abandon. **Before the publish confirmation, on every path
-   (`-ResumePush` included), the script refuses with nothing published unless HEAD is the record commit** (its
-   subject compared whole) and `corpus-release.txt` regenerates unchanged; Phase 4 reads the same again.
+   (`-ResumePush` included), the script refuses with nothing published unless HEAD is the record commit** (the
+   hash Phase 1b wrote to `go2cs-record-commit.txt` beside the packages, and the subject compared whole) and
+   `corpus-release.txt` regenerates unchanged; Phase 4 reads the same again. An amended record is refused.
    `-OfflineSigning` makes the record commit and packs no tool; it prints how to carry that exact commit to the
    signing machine in a `git bundle` and pack there, since a commit re-made there has another hash.
    <!-- Amended 2026-11-20 (COORD ruling B1 on P4's (w) measurement): 1.26.11.1's published tool read
@@ -4146,7 +4147,8 @@ release published nothing: §2, AMENDED
         run of the reordered Phase 1b on a scratch clone of the 1.26.11.1 tag (pack -Unsigned -RequireCleanTree, the
         commit unsigned) read the record commit and vcs.modified=false; its record commit equals 5dd5cafd5b apart
         from the dry run's own pack script. P3's review of the same day (inbox/COORD/20261120T090127Z-P3.md) added the
-        check before the publish, the check before the commit, the by-hand commands and the bundle. This paragraph read: "Phase 1b regenerates `corpus-release.txt` (Phase 4
+        check before the publish, the check before the commit, the by-hand commands and the bundle; its delta read
+        (20261120T091904Z-P3.md) added the record hash and core.quotePath=false. This paragraph read: "Phase 1b regenerates `corpus-release.txt` (Phase 4
         does again for the record commit), cross-compiles the six `go2cs` binaries from the bumped tree,
         Authenticode-signs the two Windows executables in one signtool process, which is a PIN prompt of its own,
         before Phase 2's, and packs `go2cs.<rid>` for the six platforms and the `go2cs` package that names them into

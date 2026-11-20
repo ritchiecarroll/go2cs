@@ -319,6 +319,7 @@ Write-Host "  version          : $ver"
 
 $recordPaths = @('src/version.props', "docs/validation/$ver", 'src/core', 'src/go2cs/corpus-release.txt')
 $recordSubject = "release: go2cs converted stdlib $ver"
+$recordHashFile = Join-Path $OutDir 'go2cs-record-commit.txt'
 
 function Save-GoReleaseRecord {
     Push-Location (Join-Path $PSScriptRoot 'go2cs')
@@ -331,7 +332,9 @@ function Save-GoReleaseRecord {
     # Checked BEFORE the commit, so a refusal leaves nothing committed: once the record paths are staged, every
     # porcelain line must be a staged change (worktree column blank) under one of them. Anything else -- an untracked
     # file, an unstaged edit, a staged path outside the record -- would make the tool report vcs.modified=true.
-    $stray = @(git -C $RepoRoot status --porcelain 2>$null | Where-Object {
+    # core.quotePath=false: git otherwise quotes a path with non-ASCII bytes (a quoted "src/core/..." name), which then matches
+    # no record path and stops the release with the tag minted; this tree's file names carry non-ASCII letters.
+    $stray = @(git -C $RepoRoot -c core.quotePath=false status --porcelain 2>$null | Where-Object {
         $line = "$_"
         if ($line.Length -lt 4 -or $line[1] -ne ' ' -or $line[0] -eq '?') { return $true }
         $path = $line.Substring(3)
@@ -353,7 +356,13 @@ function Save-GoReleaseRecord {
         $left | Select-Object -First 8 | ForEach-Object { Write-Host "    $_" }
         Die "Phase 1b: the tree is not clean after the record commit (the check before the commit passed, so something changed while committing, such as a hook), and the go2cs tool would report vcs.modified=true. Nothing was signed or published. The record commit is local. Move the paths above out of the tree and go on by hand with the three commands of the Phase 1b failure text (pack, sign, -ResumePush); do NOT re-run this script, which would bump the build number again."
     }
-    Write-Host "  record commit    : $(git -C $RepoRoot log -1 --format='%h %s') (local, not pushed)"
+    # The record commit's HASH goes beside the packages (the artifacts folder is ignored), so the checks before the
+    # publish and in Phase 4 refuse a record amended after the tool was built from it: same subject, other hash.
+    $hash = "$(git -C $RepoRoot rev-parse HEAD 2>$null)".Trim()
+    if ($hash -notmatch '^[0-9a-f]{40,64}$') { Die "Phase 1b: could not read the record commit's hash. Nothing was signed or published; the record commit is local." }
+    New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+    Set-Content -LiteralPath $recordHashFile -Value $hash -Encoding ascii
+    Write-Host "  record commit    : $(git -C $RepoRoot log -1 --format='%h %s') (local, not pushed; hash in $recordHashFile)"
 }
 
 # HEAD must be the record commit Phase 1b made, and regenerating corpus-release.txt must change nothing. Read before
@@ -371,10 +380,13 @@ function Assert-GoReleaseRecordHead([string] $Phase, [string] $Consequence) {
     $subject = "$(git -C $RepoRoot log -1 --format='%s' 2>$null)"
     $head = "$(git -C $RepoRoot log -1 --format='%h %s' 2>$null)"
     $moved = @(git -C $RepoRoot status --porcelain -- src/go2cs/corpus-release.txt 2>$null)
-    if ($moved.Count -gt 0 -or $subject -cne $recordSubject) {
-        Write-Host "  HEAD is $head" -ForegroundColor Yellow
-        Write-Host "  want  : $recordSubject, with src/go2cs/corpus-release.txt unchanged after regenerating it" -ForegroundColor Yellow
-        Die "${Phase}: HEAD is not the record commit for $ver, or corpus-release.txt moved after it. $Consequence"
+    $hash = "$(git -C $RepoRoot rev-parse HEAD 2>$null)".Trim()
+    $recorded = if (Test-Path -LiteralPath $recordHashFile) { "$(Get-Content -LiteralPath $recordHashFile -Raw)".Trim() } else { '' }
+    if (-not $recorded) { Die "${Phase}: $recordHashFile is missing or empty, so the record commit the packages were built from is unknown. $Consequence" }
+    if ($moved.Count -gt 0 -or $subject -cne $recordSubject -or $hash -cne $recorded) {
+        Write-Host "  HEAD is $head ($hash)" -ForegroundColor Yellow
+        Write-Host "  want  : $recordSubject at $recorded (Phase 1b's record commit), with src/go2cs/corpus-release.txt unchanged after regenerating it" -ForegroundColor Yellow
+        Die "${Phase}: HEAD is not the record commit for $ver that the packages were built from (amended, replaced or undone), or corpus-release.txt moved after it. $Consequence"
     }
     return $head
 }
@@ -397,6 +409,7 @@ elseif ($OfflineSigning) {
     Write-Host "              src\tools\go2cs-tool\pack-go2cs-tool.ps1 -Version $ver -OutDir <the copied package folder>" -ForegroundColor DarkGray
     Write-Host ''
     Write-Host '  then sign the whole folder as Phase 2 says. Or leave the tool out and publish it with a later release.'
+    Write-Host "  Leave go2cs-record-commit.txt in $OutDir; Phase 3 refuses without it."
 }
 else {
     Write-Phase 'Phase 1b: commit the record, then pack the go2cs dotnet tool (one PIN prompt for its Windows executables)'
