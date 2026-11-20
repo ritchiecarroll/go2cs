@@ -229,7 +229,7 @@ func TestModuleProofPagesStateTheirBuildTags(t *testing.T) {
 		testComparison{Package: "example.com/mod/sub", Status: "validated", Matched: true, Go: map[string]string{"TestA": "pass"},
 			CSharp: map[string]string{"TestA": "pass"}, Environment: testEnvironmentRecord{OracleBuildTags: oracleTags}},
 		nil, nil)
-	want := "Both sides were built with `-tags " + strings.Join(oracleTags, ",") + "`; the conversion also takes `" + mathBigPureGoTag + "`"
+	want := "Both sides were built with `-tags " + strings.Join(*oracleTags, ",") + "`; the conversion also takes `" + mathBigPureGoTag + "`"
 	if !strings.Contains(page, want) {
 		t.Errorf("a page whose oracle dropped %s must say so (%s):\n%s", mathBigPureGoTag, want, page)
 	}

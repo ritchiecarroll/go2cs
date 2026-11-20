@@ -148,10 +148,12 @@ func proofBuildTagsText(tags []string) string {
 // the conversion's own tags (oracle nil) it is proofBuildTagsText of them. Otherwise it names what both sides shared
 // and what the conversion took beside it: every row but math/big's own drops math_big_pure_go from Go's side
 // (oracleBuildFlags), so the sentence must not claim Go ran with it.
-func proofBuildTagsSentence(conversion, oracle []string) string {
-	if oracle == nil {
+func proofBuildTagsSentence(conversion []string, recorded *[]string) string {
+	if recorded == nil {
 		return proofBuildTagsText(conversion)
 	}
+
+	oracle := *recorded
 
 	var extra []string
 

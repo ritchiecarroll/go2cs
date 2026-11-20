@@ -5513,7 +5513,7 @@ func TestTestEnvironmentRecordRoundTrips(t *testing.T) {
 			// Terminal is the same kind of field: a driver observation, never derived from options.
 			record.Terminal = driverTerminalPresent
 			// OracleBuildTags is the third: filled by the caller from the package under test.
-			record.OracleBuildTags = []string{"purego"}
+			record.OracleBuildTags = &[]string{"purego"}
 
 			// The round trip: what a proof-page regeneration reads back is exactly what this
 			// comparison run recorded, byte for byte through JSON — not just equal Go values.

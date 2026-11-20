@@ -150,7 +150,7 @@ func TestOracleBuildTagsAreRecordedAndAnUnknownPathIsNamed(t *testing.T) {
 	resolved := resolveBuildTags(false, true, true, true, false, nil)
 	options := Options{buildTags: resolved}
 
-	if got := oracleBuildTagsRecord(options, "example.test/bigpull"); slices.Contains(got, mathBigPureGoTag) || len(got) != len(resolved)-1 {
+	if got := oracleBuildTagsRecord(options, "example.test/bigpull"); got == nil || slices.Contains(*got, mathBigPureGoTag) || len(*got) != len(resolved)-1 {
 		t.Fatalf("a row other than math/big records the oracle's tags without %s: got %v from %v", mathBigPureGoTag, got, resolved)
 	}
 
@@ -175,7 +175,7 @@ func TestOracleBuildTagsAreRecordedAndAnUnknownPathIsNamed(t *testing.T) {
 	}
 
 	// The record field's JSON name, as a reader of a banked row finds it.
-	data, err := json.Marshal(testEnvironmentRecord{OracleBuildTags: []string{"purego"}})
+	data, err := json.Marshal(testEnvironmentRecord{OracleBuildTags: &[]string{"purego"}})
 	if err != nil || !strings.Contains(string(data), `"oracleBuildTags":["purego"]`) {
 		t.Fatalf("record JSON %s (%v) does not carry oracleBuildTags", data, err)
 	}

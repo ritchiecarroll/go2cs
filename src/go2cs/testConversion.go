@@ -7927,8 +7927,10 @@ type testEnvironmentRecord struct {
 
 	// OracleBuildTags is the oracle `go test` child's build tags, recorded only when they differ from the
 	// conversion's (oracleBuildTagsRecord): every row but math/big's own drops math_big_pure_go, so Go ran
-	// math/big's assembly where the conversion runs its pure-Go arithmetic. Omitted otherwise.
-	OracleBuildTags []string `json:"oracleBuildTags,omitempty"`
+	// math/big's assembly where the conversion runs its pure-Go arithmetic. Omitted otherwise. A POINTER so an
+	// EMPTY set (math_big_pure_go was the conversion's only tag) survives the JSON round trip as `[]` and stays
+	// distinct from "the oracle ran the conversion's tags" (absent); a plain omitempty slice drops both alike.
+	OracleBuildTags *[]string `json:"oracleBuildTags,omitempty"`
 }
 
 // oracleOptions is the options the ORACLE child runs under: the conversion's own, with the target's GOARCH replaced
@@ -10780,15 +10782,17 @@ func oracleBuildTags(options Options, packagePath string) ([]string, string) {
 
 // oracleBuildTagsRecord is the comparison record's oracleBuildTags: the oracle's tags when they differ
 // from the conversion's, nil otherwise, so a record whose oracle ran with the conversion's own tags is
-// unchanged (the same rule as oracleGoarch).
-func oracleBuildTagsRecord(options Options, packagePath string) []string {
+// unchanged (the same rule as oracleGoarch). An empty set is a non-nil empty slice, so it marshals as `[]`.
+func oracleBuildTagsRecord(options Options, packagePath string) *[]string {
 	tags, _ := oracleBuildTags(options, packagePath)
 
 	if slices.Equal(tags, options.buildTags) {
 		return nil
 	}
 
-	return tags
+	recorded := append([]string{}, tags...)
+
+	return &recorded
 }
 
 // oracleBuildFailure names why the Go side of a comparison did not BUILD: the first line the build
