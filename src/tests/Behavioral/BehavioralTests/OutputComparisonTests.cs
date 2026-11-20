@@ -89,6 +89,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnonInterfaceVarWitness() => CheckTarget("AnonInterfaceVarWitness");
 
     [TestMethod]
+    public void CheckAnonLiftOnePerType() => CheckTarget("AnonLiftOnePerType");
+
+    [TestMethod]
     public void CheckAnonStructAliasForwardFile() => CheckTarget("AnonStructAliasForwardFile");
 
     [TestMethod]

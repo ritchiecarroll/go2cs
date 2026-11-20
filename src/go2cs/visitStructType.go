@@ -45,6 +45,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	var preLiftIndentLevel int
 	var structPrefix *strings.Builder
 	var liftedIsPublicized bool
+	registeredLift := "" // a fresh lift this call registered for reuse (recordLiftDeclaredPublic, after its access is known)
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
@@ -168,9 +169,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		// cross-tier census, 2026-09-01): 0 hits in the whole `-stdlib` corpus, 2 in reflect's own
 		// `-tests` (both false — guess public, actual internal), 0 in the five reflect-importer
 		// canaries' `-tests` — this removal costs no currently-safe dedup anywhere measured.
+		//
+		// RESTORED on the candidate's real recorded accessibility: liftDeclaredPublic reads the
+		// access modifier each lift was DECLARED with (recordLiftDeclaredPublic), so the
+		// localTypeAccess override is seen. File visits within a package are sequential
+		// (conversionDriver), so a lift from an earlier file is recorded before this check runs.
+		// AnonLiftOnePerType guards the one-lift-per-type result.
 		if anonLiftKey != "" {
 			existing := lookupDynamicTypeName(structSignatureType.String())
-			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name))
+			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name) || liftDeclaredPublic(existing))
 
 			// The reference-model `-tests` sibling of the same-pass check above: a name
 			// PRODUCTION already lifted and published via GoDynamicTypeLift for this exact
@@ -261,6 +268,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		// win the name and the second side simply reuse it via the wide lookup below.
 		if (!v.inFunction || v.liftAtCallBoundary) && structSignatureType != nil {
 			registerDynamicTypeName(structSignatureType.String(), structTypeName)
+			registeredLift = structTypeName
 		}
 
 		// A lifted anonymous struct referenced by a PUBLICIZED interface method (or an exported
@@ -363,6 +371,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	if access == "" {
 		access = v.localTypeAccess()
 	}
+
+	recordLiftDeclaredPublic(registeredLift, access)
 
 	// A struct carrying FIXED-SIZE ARRAY fields (directly, or through another such struct) is not
 	// completely copied by a plain C# struct assignment — `array<T>` is a struct over a shared T[]

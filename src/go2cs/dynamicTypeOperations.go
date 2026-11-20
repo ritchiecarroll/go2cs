@@ -859,3 +859,27 @@ func resolvedDynamicTypeText(text string) (result string, unresolved []string) {
 
 	return resolved.String(), unresolved
 }
+
+// recordLiftDeclaredPublic notes that a lift this package declares is public, so a later site whose
+// own lift would need public may reuse it (board (jj)): one Go type, one lift. access is the modifier
+// the declaration carries: "public " (publicized), "internal " (function-local, localTypeAccess), or
+// "" (go2cs-gen scopes the type by its name, as generatedTypeScope does).
+func recordLiftDeclaredPublic(csTypeName, access string) {
+	if csTypeName == "" || !(access == "public " || access == "" && generatedTypeScope(csTypeName) == "public") {
+		return
+	}
+
+	packageLock.Lock()
+	packagePublicLiftNames[csTypeName] = true
+	packageLock.Unlock()
+}
+
+// liftDeclaredPublic reports whether a lift registered for reuse was declared public by
+// recordLiftDeclaredPublic. This is the declaration's real accessibility, not a guess from its
+// name, which is what the removed name-based disjunct got wrong for function-local lifts.
+func liftDeclaredPublic(csTypeName string) bool {
+	packageLock.Lock()
+	public := packagePublicLiftNames[csTypeName]
+	packageLock.Unlock()
+	return public
+}

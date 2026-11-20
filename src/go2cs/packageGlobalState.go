@@ -471,6 +471,12 @@ var packageLock = sync.Mutex{}
 // concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
 var packageDynamicTypeNames map[string]string
 
+// packagePublicLiftNames holds the package-level lifts this package has DECLARED public: publicized
+// (isPublicizedLiftedType) or public by the name rule, and never a function-local lift, which
+// localTypeAccess pins internal whatever its name reads. A reuse that needs a public type may take
+// a lift named here (liftDeclaredPublic). Guarded by packageLock.
+var packagePublicLiftNames map[string]bool
+
 // importedDynamicTypeNames is packageDynamicTypeNames' cross-PACKAGE sibling: each IMPORTED package's
 // published GoDynamicTypeLift records (signature -> lifted C# name), keyed by that package's cleaned
 // source directory. An importer passing a value to another package's anonymous-interface parameter

@@ -169,12 +169,19 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		// removing it costs no currently-safe dedup anywhere in the corpus (i9's cross-tier census,
 		// 2026-09-01: 0 hits `-stdlib`-wide, 2 in reflect's own `-tests`, both false, 0 in the five
 		// reflect-importer canaries' `-tests`).
+		//
+		// The disjunct is now RESTORED on the truthful fact the removal said was missing:
+		// liftDeclaredPublic reads the access modifier the lift was actually DECLARED with
+		// (recordLiftDeclaredPublic, below), not a guess from its name. File visits within a
+		// package are sequential, so the record is complete for every earlier file. Without it, an
+		// exported field whose type repeats an exported signature's anonymous interface minted a
+		// second, identical lift (AnonLiftOnePerType guards it).
 		// A lift that closes over type parameters is never reused or registered by signature: its
 		// signature text names `T`/`V`, which mean something different in every generic declaration.
 		if signatureType := v.getType(interfaceType, false); signatureType != nil && len(capturedTypeParams) == 0 {
 			signature := signatureType.String()
 			existing := lookupDynamicTypeName(signature)
-			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name))
+			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name) || liftDeclaredPublic(existing))
 
 			// The PRODUCTION-registry arm carries an accessibility question the same-pass arm above
 			// cannot have: its candidate may live in ANOTHER assembly, and this arm emits no
@@ -271,6 +278,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 		if t := v.getType(interfaceType, false); t != nil && len(capturedTypeParams) == 0 {
 			registerDynamicTypeName(t.String(), interfaceTypeName)
+			recordLiftDeclaredPublic(interfaceTypeName, access)
 		}
 	} else {
 		interfaceTypeName = name

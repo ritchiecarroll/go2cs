@@ -1625,7 +1625,12 @@ adapter-name composition (`adapterTypeRef`/`valueAdapterTypeRef` skip the simple
 it is present — the marker resolves as one unit to the already-simple lifted name), and the
 `GoImplement` attribute writer resolves or drops it (mirroring the implicit-conversion writer).
 `registerDynamicTypeName` keeps the lexically smallest name for a signature so the winner is
-well-defined even when several files lift the same shape. Emitted form:
+well-defined even when several files lift the same shape. A site whose member is exported (so its
+type must be public) reuses a registered lift only if that lift was DECLARED public
+(`liftDeclaredPublic`, which reads the access modifier recorded when the lift was emitted, not a
+guess from its name). An exported function's anonymous result and an exported field of the same
+type therefore share one lift, in that file and in later files of the package (guarded by
+`AnonLiftOnePerType`; the struct twin is in [struct-types.md](struct-types.md)). Emitted form:
 The declaring file, `batch.cs`:
 
 <!-- source: src/core/internal/trace/batch.cs:54-58 -->
