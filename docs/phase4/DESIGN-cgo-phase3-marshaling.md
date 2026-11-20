@@ -2141,3 +2141,123 @@ finding 1's "the box keeps its own pin-only hold" and 18.3's "W2 writes `v`'s NU
 - c2 not dead within the cap.
 
 — H (2026-11-17)
+
+### 18.8 Record 2026-11-20: seat S-B1 as built, the rulings it carries, and its first battery
+
+S-B1 is the golib and converter half of 18.3 to 18.7. Its seat runs on branch `claude/h-cgo-32`, on master `a98c5175be`.
+S-B2 comes after it, on hosted legs: the pinned class, `[GoCgoStruct]` with the gen accessor (D-1 to D-5), and the
+B-10 door lookups.
+
+**As built.**
+- **The doors.** `unsafe.Pointer.LoadWord`, `StoreWord`, `SwapWord` and `CompareAndSwapWord` decide by the slot
+  (`GoPointerWords.Classify`):
+  - a CLR `Pointer` slot takes `.Value`;
+  - a word of Go memory takes the per-slot bag table (`golib/GoPointerWords.cs`);
+  - a word of C memory refuses a Go pointer: W2(a) refuses the store, and W1 refuses a Go address read out of C memory;
+  - an unheld word refuses by name.
+- **The number.** Every word W2 writes and W3 compares is the projection, `ProjectWord` over `BaseOf`, with 18.7
+  finding 1's post-check. Ruling (B)'s guard refuses a number that is both `IsPinnedAt` and `IsTaggedToken`.
+- **W3** runs through the doors in the hand-owned atomics: `sync/atomic/doc_impl.cs` (Swap, CompareAndSwap, Load and
+  Store over `unsafe.Pointer`) and `internal/runtime/atomic/atomic_impl.cs` (`storePointer`, `casPointerLatched`).
+- **The memmove and clear doors.** `runtime/memmove_impl.cs` copies the entries over the moved range
+  (`GoPointerWords.CopyEntries`) and drops them over a cleared range (`ClearEntries`). Both are free while no table
+  exists.
+- **W4.** `NativeBox<T>` refuses a reference read for `unsafe.Pointer` too: the floor's exemption is deleted.
+- **The converter.** `src/go2cs/unsafePointerWordDoor.go` emits `*p` and `*p = v`, for `p` exactly a
+  `*unsafe.Pointer`, as the load and store doors. One hand-owned site takes the door by hand: `runtime/mfinal.cs`'s
+  single store.
+- **Found during the cure.** `Pointer.StoreThrough` and `LoadThrough`, the bare-Pointer atomic primitives, reached a
+  word of Go memory too. They gain the word route (`WordSlotForThrough`): a slot that holds a `uintptr` whose
+  reinterpret classifies as Go memory goes through `StoreWord` / `LoadWord`.
+- **Untouched by design.**
+  - `runtime/profbuf_impl.cs` (hand-owned) reads `*tagPtr` through a `ж<unsafe.Pointer>` that names a CLR `Pointer`
+    slot, the sampler's labels, never a word. `.Value` is that slot's value, so the read keeps its form.
+  - The hand-owned `runtime/mcleanup.cs` replaces the Go body whose `*(*unsafe.Pointer)(unsafe.Pointer(&arg))` reads
+    reach the door. Only its review sibling, `mcleanup.cs.auto`, carries them, and the narrowing below returns those
+    to master's text.
+
+**Ruling (B): the arm64 derivation (owed by 18.7 finding 1).**
+- `IsTaggedToken` reads bit 63 set and bit 47 clear. A word reads as a token only with bit 63 set.
+- On linux/arm64 and darwin/arm64, a user address has bit 63 clear unless top-byte tagging is in use.
+  - Linux enables tagged addresses per process: the tagged address ABI, `PR_SET_TAGGED_ADDR_CTRL`, which MTE builds
+    on.
+  - darwin's pointer authentication signs pointers only in arm64e processes.
+  - The .NET runtime enables neither, and an arm64 (not arm64e) process is what it ships.
+  - So no address the GC heap, a pin or the native allocator hands out reads as a token, and no token (bit 63 set)
+    is a user address.
+- **The named residual.** A C library built for MTE or HWASan could hand back a top-byte-tagged pointer. No 3.2
+  library is one. The B-12 arm64 legs (S-B2, hosted runners) measure the rule there. Until they do, the arm64 claim
+  is derived, not read.
+
+**One lock per storage object.**
+- A load holds the storage's lock while it reads the word and looks it up. A store holds it while it adds, exchanges
+  and removes.
+- There is no lock-free hit path. A load first reads the word without the lock only to learn whether a table exists,
+  then re-reads it under the lock before any lookup.
+- So 18.6 finding 5's ABA window, a number answered while its entry is being removed, is designed out rather than
+  narrowed.
+
+**P3's confirm items, folded at the cut.**
+- **(i)** B-12's CAS arm carries the positive control: a CAS whose `old` is the stored pointer SUCCEEDS. So the
+  failing CAS fails on the projection, not on a CAS that cannot succeed.
+- **(ii)** In `GoPointerWords.CompareAndSwap`, when the word is a token and an entry exists for it, the swap requires
+  `ReferenceEquals` between `old`'s referent and the entry's. A token number match alone does not swap.
+- **(iii)** `StructPointer`'s copy-back after the call overwrites the copied range, so a store from another thread
+  during the call is lost. That is the same as Go's outcome. In Go, C writes the struct in place, and a Go store
+  racing the C call on the same memory is a data race: Go defines no winner, and a lost Go store is one outcome it
+  permits.
+- **(A)** The helper doors take no lookup (S-B2).
+
+**The named leak, in its general form (BOARD row widened 2026-11-20).**
+- The form: a published word whose referent reaches the box that pins the destination's storage. The destination's
+  own BaseOf pin roots the table key, so the slot is retained until a word of the cycle is overwritten through a store
+  or cleared.
+- Instances, all measured in `UnsafePointerWordTests.B4_…`, with the c2 control dead within the cap:
+  - c3, a self word;
+  - c4, a mutual pair;
+  - c1, a referent that holds the destination's box. COORD ruled c1 inside the leak, and that ruling widened the row.
+
+**B-1, the footprint prediction, kept visible.**
+- Predicted: 82 lines in 14 files per target. Measured: 18 to 19 files and about 91 code lines.
+- MECHANISM HELD, SPECIFICS MISSED. The census behind the prediction was blind to three forms:
+  - the `Ꮡ(..)` temp box of the reinterpret carrying arm;
+  - its func-word form, `Ꮡ(OfFunc(f))`;
+  - a package variable declared in another file (`cgo_yield`).
+- The narrowing below takes the first two out of the footprint again. The third stays on the door by rule.
+
+**The first battery, at `88d891e84d`: RED, scored as worded.**
+- **Scores, all unfiltered:**
+  - GolibTests Release and Debug: empty failed sets.
+  - GenTests: all pass.
+  - B-2: 0 `kind=UnsafePointer` rows in C1 and C2.
+  - B-3: C2 executed, with 0 output failures.
+  - MISSED: go test (2 packages FAIL), CNR (1 golden), repoguard, and one C1 test (census on).
+- **Four missed sites, posted before any fix:**
+  - **M1** — `NativeBoxDereferenceCensusControlTests` read `.Value` over a native `unsafe.Pointer` box, the most-likely
+    red, in a census-gated test.
+  - **M2** — the door rewrote the carrying arm's temp boxes in `unsafePointerWordRead_test.go` and the
+    `UnsafePointerWordRead` golden.
+  - **M3** — the door file had no AGPL header and was missing from the projitems.
+  - **M4** — 20 provenance notes and one docs sample moved, and `FromWord`'s mint row was missing.
+- **Attribution.** Each red test was run FILTERED at master `a98c5175be` on H: every one passes there.
+- **COORD's ruling on M2: NARROW the door.**
+  - The door skips (a) the carrying arm's fresh `Ꮡ(<rvalue>)` box at any level, and (b) `&x` through the identity
+    round trip, where `x` is a local or a parameter.
+  - Over those slots the doors take `.Value` anyway, so the call bought no behavior and cost the Go-like shape.
+  - A predicate mistake fails loud, as a W4 refusal by name.
+  - The door test is red both ways (the predicate forced false, then true), and its text is in `pointers.md`.
+- **The fixes.**
+  - M1 asserts the refusal by name, with the B2a counter unmoved: the control that makes B-2's zero a reading.
+  - M3 adds the header and registers both files.
+  - M4 re-cites the notes and adds the `FromWord` row: the loaded word's number is the stored projection, never
+    `FromBox`'s transient.
+- **The re-predicted footprint.**
+  - Exactly 5 door lines leave each target, each reverting 1:1 to master's text: `debugcall.cs` 1, `tracetype.cs` 1,
+    `mcleanup.cs.auto` 2, and the per-OS `cgocall.cs` 1.
+  - No map line moves.
+  - The committed footprint goes from 27 files +115 -117 to 24 files +108 -110.
+
+**Recorded for the BOARD after READY, not fixed in this cut.** `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = ..` over a
+func variable stores into a fresh box, so the write is lost. The sites are `debugcall.cs` (dispatchF) and
+`cgocall.cs` (`cgocallbackg1`'s cb). The narrowing keeps master's form there exactly, and `funcWordOperations` does
+not take the shape.

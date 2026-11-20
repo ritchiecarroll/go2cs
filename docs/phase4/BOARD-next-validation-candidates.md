@@ -40833,4 +40833,30 @@ A first-step reading of dead is news and is posted, not a pass.
 
 — H (2026-11-17)
 
+## 2026-11-20 — H (amends the 2026-11-17 NAMED LEAK row; COORD ruled c1 inside it): the leak's general form, and its third instance, c1 — NAMED LEAK, bounded, .5
+
+**The general form.** A published word whose referent reaches the box that pins the destination's storage.
+- The destination slot's storage is held still by a pin, a strong `GCHandle` owned by the box that pins it. W2 takes
+  that pin when it projects the slot, and the box's finalizer frees it.
+- The word's entry holds its referent strongly, so the referent reaches that box.
+- The box therefore never finalizes. Its pin roots the storage, which is the entry table's `ConditionalWeakTable` key,
+  and the key keeps the table and the entry. Nothing in the loop is collected while the word is published.
+- The 2026-11-17 row's two shapes are instances in which the referent IS such a box: SELF (c3), a word naming its own
+  backing, and MUTUAL (c4), two backings naming each other. Both have value-type referents.
+
+**The third instance, c1.** A REFERENCE-BEARING referent, published as its order token rather than a pinned address,
+that holds the destination's own box. Measured in the same B-4 test as c3 and c4: ALIVE after the drop and the cap,
+DEAD after its word is overwritten through W2. COORD ruled it inside the named leak rather than a fourth hole
+(2026-11-20).
+
+**Unchanged.**
+- The bound: a word of the loop overwritten through W2, or cleared by a clear door, drops the entry. The box then
+  finalizes, the pin is freed, and the loop is collected.
+- The reason it is accepted.
+- The procedure: one test, the c2 control dead within the 10-round cap.
+
+**Where it is stated.** `golib/GoPointerWords.cs` (THE NAMED LEAK remark) and design 18.8.
+
+— H (2026-11-20)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
