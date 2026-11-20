@@ -34,7 +34,10 @@ type PackageInfo struct {
 	// dependency has no package_info.cs on disk to read its exported aliases and GoImplement
 	// records from, so those come from the converter's embedded record of the tree those packages
 	// are built from (stdlibMetadata.go). The flag is what makes that substitution SOUND: the
-	// record describes src/core, which under this mode is exactly what is referenced.
+	// record describes src/core, which under this mode is exactly what is referenced. That identity
+	// holds for a RELEASE-built converter (the published tool, or one built at the release commit),
+	// whose record is the tree push-nuget packed; a converter built at a later commit records a newer
+	// src/core than the published go.* packages its floating GoStdLibVersion default restores.
 	// It is deliberately NOT set for a $(go2csPath) source deployment, whose staged tree may be
 	// the baseline core stub instead.
 	PublishedStdLib bool

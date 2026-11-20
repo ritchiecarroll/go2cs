@@ -12,6 +12,7 @@ import (
 	"go/build"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -286,6 +287,75 @@ func TestPublishedStdLibRecordWinsOverAStaleRuntimeRoot(t *testing.T) {
 
 	if got, want := importedTypeAliases["os.FileMode"], RootNamespace+".io.fs"+PackageSuffix+".FileMode"; got != want {
 		t.Errorf("control: os.FileMode from the embedded record = %q, want %q", got, want)
+	}
+}
+
+// TestEveryPublishedStdLibPackageHasAnEmbeddedRecord closes the one silent fallback publishedStdLibRecord leaves: a
+// PublishedStdLib dependency the embedded record does not carry falls to its source-derived re-export aliases with no
+// message (P3's review of the nuget-precedence seat, 2026-11-20). The population is what push-nuget.ps1 packs, read the
+// way it reads it: every src/core project in go2cs-stdlib.slnx whose file name is its folder's dotted package path
+// (the converted-package shape). Projects that are not Go packages are left out: golib (go.lib) and any folder whose
+// first segment holds a dot (go.arrays, go2cs.CpuProfiler), which no standard-library import path has; vendored
+// packages start with `vendor` and stay in. Each must have a section in the record, flat or per flavor
+// (`<name>@<folder>`). TestStdLibMetadataInSync proves the record equals src/core's package_info.cs files; this proves no
+// packed package lacks one.
+//
+// The one exception is hand-owned `testing`, which carries no package_info.cs in src/core at all, so a source-
+// referencing conversion reads nothing for it either and the two modes already agree. The exception is held live: if
+// `testing` ever gains a section, it must leave this list.
+var publishedStdLibWithoutRecord = map[string]string{
+	"testing": "hand-owned; no package_info.cs in src/core, so clone mode reads none either",
+}
+
+func TestEveryPublishedStdLibPackageHasAnEmbeddedRecord(t *testing.T) {
+	solution, err := os.ReadFile(filepath.Join(convertedStdLibRoot, "..", "go2cs-stdlib.slnx"))
+
+	if err != nil {
+		t.Skipf("go2cs-stdlib.slnx not present: %v", err)
+	}
+
+	stdLibExportedMetadata("", "") // parse the asset once
+
+	recorded := map[string]bool{}
+
+	for name := range stdLibMetadataSections {
+		base, _, _ := strings.Cut(name, stdlibmeta.FlavorSeparator)
+		recorded[base] = true
+	}
+
+	projectPath := regexp.MustCompile(`Path="core/([^"]+)/([^"/]+)\.csproj"`)
+	published, missing := 0, []string{}
+
+	for _, match := range projectPath.FindAllStringSubmatch(string(solution), -1) {
+		dir, file := match[1], match[2]
+		dotted := strings.ReplaceAll(dir, "/", ".")
+
+		if first, _, _ := strings.Cut(dir, "/"); dir == "golib" || strings.Contains(first, ".") || file != dotted {
+			continue
+		}
+
+		published++
+
+		if _, excepted := publishedStdLibWithoutRecord[dotted]; excepted {
+			if recorded[dotted] {
+				t.Errorf("%s now has a section in the embedded record; remove it from publishedStdLibWithoutRecord", dotted)
+			}
+
+			continue
+		}
+
+		if !recorded[dotted] {
+			missing = append(missing, dotted)
+		}
+	}
+
+	if published < 250 {
+		t.Fatalf("premise: only %d converted-package projects read from go2cs-stdlib.slnx; the reader is not seeing the solution", published)
+	}
+
+	if len(missing) > 0 {
+		t.Errorf("%d of %d published standard-library packages have no section in the embedded record, so -recurse=nuget "+
+			"would describe them from source-derived aliases only: %s", len(missing), published, strings.Join(missing, ", "))
 	}
 }
 
