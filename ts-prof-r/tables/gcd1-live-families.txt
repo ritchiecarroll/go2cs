@@ -1,0 +1,33 @@
+# live object counts by family, heap snapshot at 90 s (run gcd1, untraced, server GC); dotnet-gcdump lossy buffering (runtime < .NET 11): may be incomplete
+go.FieldRefBox<                 1,749,095
+go.ViewEntry                    1,749,079
+go.ViewTable                           54
+go.SlottedStandardBox<              2,364
+go.StandardBox<                     4,064
+go.ElemRefBox<                    385,431
+# top FieldRefBox<T> / ElemRefBox<T> instantiations by live count
+     281,408  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase>
+     281,408  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault>
+     281,408  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node>
+     111,349  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase>
+     108,750  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase>
+     108,750  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase>
+     108,742  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase>
+     108,742  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase>
+     108,454  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase>
+      99,438  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier>
+      85,010  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase>
+      50,767  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+DeclarationBase>
+      50,116  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Symbol>
+      35,367  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeList>
+      32,852  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeWithTypeArgumentsBase>
+      32,826  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeReferenceNode>
+      26,317  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+KeywordTypeNode>
+      22,849  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration>
+      18,619  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Token>
+      17,950  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PropertySignatureDeclaration>
+      17,341  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ModifiersBase>
+      12,907  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+SymbolTable>
+      11,118  go.FieldRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LocalsContainerBase>
+      10,503  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+FlowNode>
+      10,420  go.ElemRefBox<go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LiteralTypeNode>

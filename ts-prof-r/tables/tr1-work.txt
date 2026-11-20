@@ -1,0 +1,373 @@
+# trace C:\go2cs-tmp\ts-prof\runs\tr1.nettrace; duration 100049 ms; phase filter: main_package\.main
+# CPU samples 41962 of 474867; sampled allocation 16272.9 MB of 16538.0 MB (ticks are ~100 KB samples, so MB are estimates)
+## GC (whole trace, not phase-filtered): gen0 30, gen1 17, gen2 16; pause total 17178 ms = 17.2% of the trace; peak heap (GCHeapStats sum) 1665 MB
+## CPU exclusive (top 40): samples  pct  method
+   25181  60.01%  System.Private.CoreLib!System.Threading.Thread.<PollGC>g__PollGCWorker|70_0()
+     794   1.89%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bind(class go.?`1<value class Binder>,class go.?`1<value class Node>)
+     741   1.77%  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?Node.ForEachChild(value class Node&,class System.Func`2<class go.?`1<value class Node>,bool>)
+     638   1.52%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.declareSymbolEx(value class Binder&,value class SymbolTable,class go.?`1<value class Symbol>,class go.?`1<value class Node>,value class SymbolFlags,value class SymbolFlags,bool,bool)
+     442   1.05%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     350   0.83%  System.Private.CoreLib!System.Threading.Monitor.Enter_Slowpath(class System.Object)
+     316   0.75%  System.Private.CoreLib!System.Runtime.CompilerServices.CastHelpers.IsInstanceOfInterface(void*,class System.Object)
+     296   0.71%  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.visitNodes(class System.Func`2<class go.?`1<value class Node>,bool>,value class go.slice`1<class go.?`1<value class Node>>)
+     287   0.68%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindChildren(class go.?`1<value class Binder>,class go.?`1<value class Node>)
+     223   0.53%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.getDeclarationName(value class Binder&,class go.?`1<value class Node>)
+     216   0.51%  golib!go.builtin.TryTypeAssert(class System.Object,!!0&)
+     209   0.50%  System.Private.CoreLib!System.Threading.Monitor.Wait(class System.Object,int32)
+     206   0.49%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.finishNodeWithEnd(value class Parser&,class go.?`1<value class Node>,int,int)
+     204   0.49%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindParameter(value class Binder&,class go.?`1<value class Node>)
+     201   0.48%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindPropertyOrMethodOrAccessor(value class Binder&,class go.?`1<value class Node>,value class SymbolFlags,value class SymbolFlags)
+     193   0.46%  System.Private.CoreLib!System.Runtime.CompilerServices.InitHelpers.InitClassSlow(value class System.Runtime.CompilerServices.MethodTable*)
+     170   0.41%  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TypeReferenceNode.ForEachChild(value class TypeReferenceNode&,class System.Func`2<class go.?`1<value class Node>,bool>)
+     165   0.39%  System.Private.CoreLib!System.ValueType.GetHashCode()
+     160   0.38%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.declareSymbolAndAddToSymbolTable(value class Binder&,class go.?`1<value class Node>,value class SymbolFlags,value class SymbolFlags)
+     159   0.38%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindParameterFlow(class go.?`1<value class Binder>,class go.?`1<value class Node>)
+     152   0.36%  golib!go.?`1+FieldRefWrappers`1+<>c__DisplayClass2_0[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase,go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].<Wrap>g__getFieldRef|0(class System.Object)
+     146   0.35%  golib!go.PointerExtensions.DerefOrNull(class go.?`1<!!0>)
+     144   0.34%  System.Private.CoreLib!System.Runtime.CompilerServices.CastHelpers.IsInstanceOfAny(void*,class System.Object)
+     143   0.34%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseParameterEx(class go.?`1<value class Parser>,bool,bool)
+     136   0.32%  github.com.microsoft.TypeScript.tsc.internal.scanner!go.github.com.microsoft.TypeScript.tsc.internal.scanner?Scanner.Scan(class go.?`1<value class Scanner>)
+     131   0.31%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parsePropertyOrMethodSignature(class go.?`1<value class Parser>,int,value class jsdocScannerInfo,class go.?`1<value class ModifierList>)
+     130   0.31%  github.com.microsoft.TypeScript.tsc.internal.scanner!go.github.com.microsoft.TypeScript.tsc.internal.scanner?Scanner.scanASCIIWhile(value class Scanner&,class System.Func`2<unsigned int8,bool>)
+     116   0.28%  System.Private.CoreLib!System.RuntimeTypeHandle.GetRuntimeTypeFromHandle(int)
+     110   0.26%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.addDeclarationToSymbol(value class Binder&,class go.?`1<value class Symbol>,class go.?`1<value class Node>,value class SymbolFlags)
+     106   0.25%  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     103   0.25%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindContainer(class go.?`1<value class Binder>,class go.?`1<value class Node>,value class ContainerFlags)
+     102   0.24%  System.Private.CoreLib!System.Runtime.CompilerServices.RuntimeHelpers.<GetHashCode>g__GetHashCodeWorker|15_0(class System.Object)
+     100   0.24%  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      94   0.22%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder_package.GetContainerFlags(class go.?`1<value class Node>)
+      94   0.22%  golib!go.golib.Coro.Start(class System.Action)
+      91   0.22%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseTypeReference(class go.?`1<value class Parser>)
+      89   0.21%  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.GetSourceFileOfNode(class go.?`1<value class Node>)
+      87   0.21%  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.initializeChecker(class go.?`1<value class Checker>)
+      84   0.20%  System.Private.CoreLib!System.Threading.SemaphoreSlim.WaitCore(int64,value class System.Threading.CancellationToken)
+      69   0.16%  golib!go.?`1+FieldRefWrappers`1+<>c__DisplayClass2_0[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+StatementBase,go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].<Wrap>g__getFieldRef|0(class System.Object)
+## CPU inclusive (top 40): samples  pct  method
+   41962 100.00%  checkdemo!go.main_package.main()
+   41920  99.90%  golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0()
+   41880  99.80%  System.Private.CoreLib!System.Threading.Thread.StartCallback()
+   36914  87.97%  github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core?singleThreadedWorkGroup.RunAndWait(class go.?`1<value class singleThreadedWorkGroup>)
+   25181  60.01%  System.Private.CoreLib!System.Threading.Thread.<PollGC>g__PollGCWorker|70_0()
+   24333  57.99%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.NewProgram(value class ProgramOptions)
+   24284  57.87%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler_package.processAllProgramFiles(value class ProgramOptions,bool)
+   24034  57.28%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?filesParser+<>c__DisplayClass1_1.<start>b__0()
+   23988  57.17%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?parseTask.load(class go.?`1<value class parseTask>,class go.?`1<value class fileLoader>)
+   23896  56.95%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.ParseSourceFile(value class SourceFileParseOptions,value class go.string,value class ScriptKind)
+   23796  56.71%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?fileLoader.parseSourceFile(class go.?`1<value class fileLoader>,class go.?`1<value class parseTask>)
+   23669  56.41%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseSourceFileWorker(class go.?`1<value class Parser>)
+   22795  54.32%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseListIndex(class go.?`1<value class Parser>,value class ParsingContext,class System.Func`3<class go.?`1<value class Parser>,int,class go.?`1<value class Node>>)
+   22765  54.25%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseStatement(class go.?`1<value class Parser>)
+   22765  54.25%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseToplevelStatement(class go.?`1<value class Parser>,int)
+   22627  53.92%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseDeclaration(class go.?`1<value class Parser>)
+   17976  42.84%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseInterfaceDeclaration(class go.?`1<value class Parser>,int,value class jsdocScannerInfo,class go.?`1<value class ModifierList>)
+   16641  39.66%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseObjectTypeMembers(class go.?`1<value class Parser>)
+   16602  39.56%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseTypeMember(class go.?`1<value class Parser>)
+   15742  37.51%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?filesParser.parse(class go.?`1<value class filesParser>,class go.?`1<value class fileLoader>,value class go.slice`1<class go.?`1<value class parseTask>>)
+   14964  35.66%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseDelimitedList(class go.?`1<value class Parser>,value class ParsingContext,class System.Func`2<class go.?`1<value class Parser>,class go.?`1<value class Node>>)
+   12924  30.80%  go.sync!go.sync?Once.doSlow(class go.?`1<value class Once>,class System.Action)
+   12900  30.74%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?Program.GetGlobalDiagnostics(class go.?`1<value class Program>,class Context)
+   12879  30.69%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?checkerPool+<>c__DisplayClass4_0.<createCheckers>b__0()
+   12875  30.68%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?checkerPool+<>c__DisplayClass4_1.<createCheckers>b__1()
+   12867  30.66%  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package.NewChecker(class Program,class go.?`1<value class Tracer>)
+   12563  29.94%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parsePropertyOrMethodSignature(class go.?`1<value class Parser>,int,value class jsdocScannerInfo,class go.?`1<value class ModifierList>)
+   12336  29.40%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?Program.BindSourceFiles(class go.?`1<value class Program>)
+   12328  29.38%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?Program+<>c__DisplayClass41_1.<BindSourceFiles>b__0()
+   12324  29.37%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder_package+<>c__DisplayClass46_0.<bindSourceFile>b__0()
+   12212  29.10%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bind(class go.?`1<value class Binder>,class go.?`1<value class Node>)
+   12144  28.94%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindContainer(class go.?`1<value class Binder>,class go.?`1<value class Node>,value class ContainerFlags)
+   12142  28.94%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindChildren(class go.?`1<value class Binder>,class go.?`1<value class Node>)
+   12108  28.85%  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindEachStatementFunctionsFirst(class go.?`1<value class Binder>,class go.?`1<value class NodeList>)
+   11273  26.86%  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.visitNodes(class System.Func`2<class go.?`1<value class Node>,bool>,value class go.slice`1<class go.?`1<value class Node>>)
+   10984  26.18%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseType(class go.?`1<value class Parser>)
+    9399  22.40%  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseUnionOrIntersectionType(class go.?`1<value class Parser>,value class Kind,class System.Func`2<class go.?`1<value class Parser>,class go.?`1<value class Node>>)
+    8768  20.90%  github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core_package+singleThreadedWorkGroup?WorkGroup.global::go.github.com.microsoft.TypeScript.tsc.@internal.core_package.WorkGroup.RunAndWait()
+    8699  20.73%  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?InterfaceDeclaration.ForEachChild(value class InterfaceDeclaration&,class System.Func`2<class go.?`1<value class Node>,bool>)
+    8593  20.48%  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?checkerPool.GetGlobalDiagnostics(class go.?`1<value class checkerPool>)
+## CPU inclusive, GOLIB frames only (top 40): samples  pct  method
+   41920  99.90%  golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0()
+    6629  15.80%  golib!go.builtin.copy(value class go.slice`1<!!0>&,value class go.slice`1<!!1>&)
+    2106   5.02%  golib!go.slice`1[System.__Canon].Append(value class go.slice`1<!0>&,value class System.ReadOnlySpan`1<!0>,bool)
+     930   2.22%  golib!go.builtin.TryTypeAssert(class System.Object,!!0&)
+     604   1.44%  golib!go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node].Equals(class go.?`1<!0>)
+     457   1.09%  golib!go.golib.Coro.Start(class System.Action)
+     454   1.08%  golib!go.builtin.AreEqual(class System.Object,class System.Object)
+     436   1.04%  golib!go.builtin._(!!0)
+     421   1.00%  golib!go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].Equals(class go.?`1<!0>)
+     408   0.97%  golib!go.builtin._(class System.Object,bool)
+     357   0.85%  golib!go.golib.Coro.Switch()
+     351   0.84%  golib!go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].Equals(class go.?`1<!0>)
+     296   0.71%  golib!go.?`1+FieldRefWrappers`1+<>c__DisplayClass2_0[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase,go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].<Wrap>g__getFieldRef|0(class System.Object)
+     295   0.70%  golib!go.GoDeferredRegistrations.Run()
+     261   0.62%  golib!go.ManagedPointerTokens.IdentityOf(class System.Object)
+     249   0.59%  golib!go.AdapterRegistry.TryGetAdapterFactory(class System.Type,class System.Type,class System.Func`2<class System.Object,class System.Object>&)
+     189   0.45%  golib!go.PointerExtensions.DerefOrNull(class go.?`1<!!0>)
+     167   0.40%  golib!go.builtin.append(value class go.slice`1<!!0>,value class System.ReadOnlySpan`1<!!0>)
+     166   0.40%  golib!go.builtin.subslice(!!0,int,int)
+     163   0.39%  golib!go.golib.TypeExtensions.GetGoMethodSetCandidates(class System.Type,bool)
+     162   0.39%  golib!go.golib.TypeExtensions.CollectGoMethodSetCandidates(class System.Type,bool,class System.Collections.Generic.IReadOnlyList`1<value class System.ValueTuple`2<class System.Reflection.MethodInfo,class System.Type>>)
+     162   0.39%  golib!go.golib.TypeExtensions+<>c.<GetGoMethodSetCandidates>b__75_0(value class System.ValueTuple`2<class System.Type,bool>)
+     160   0.38%  golib!go.GoFrame.Run()
+     158   0.38%  golib!go.golib.TypeExtensions.GetExtensionMethodsHomedIn(class System.Collections.Generic.IReadOnlySet`1<class System.Reflection.Assembly>)
+     157   0.37%  golib!go.builtin.append???(!!0,value class ZeroElements`1<!!1>)
+     152   0.36%  golib!go.builtin.Implements(class System.Object)
+     151   0.36%  golib!go.builtin+Cache`1[System.__Canon].Implements(class System.Type)
+     150   0.36%  golib!go.golib.TypeExtensions.StructurallyImplements(class System.Type,class System.Type)
+     150   0.36%  golib!go.builtin+Cache`1+<>c[System.__Canon].<Implements>b__1_0(class System.Type)
+     137   0.33%  golib!go.golib.GoElementCopy.CopyInto(value class System.ReadOnlySpan`1<!!0>,value class System.Span`1<!!0>)
+     130   0.31%  golib!go.golib.TypeExtensions.WalkExtensionHosts()
+     127   0.30%  golib!go.golib.TypeExtensions.LoadAssemblyExtensionHosts(class System.Reflection.Assembly,class System.Collections.Generic.List`1<class ExtensionHost>)
+     126   0.30%  golib!go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node].ComputeIdentityFacts()
+     124   0.30%  golib!go.golib.TypeExtensions.WalkedExtensionHosts(class System.Reflection.Assembly)
+     123   0.29%  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     116   0.28%  golib!go.ManagedPointerTokens.AllocationIdOf(class System.Object)
+     112   0.27%  golib!go.?`1+FieldRefWrappers`1+<>c__DisplayClass2_0[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+StatementBase,go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].<Wrap>g__getFieldRef|0(class System.Object)
+     109   0.26%  golib!go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].ComputeIdentityFacts()
+     105   0.25%  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     103   0.25%  golib!go.golib.YieldFunctionEnumerable`1+YieldFunctionEnumerator[System.__Canon].MoveNext()
+## Allocations by type (top 40): MB  pct  ticks  key
+    3611.5  22.19%    33879  go.ViewEntry
+    1162.7   7.15%    10905  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase]
+    1153.5   7.09%    10818  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault]
+    1142.9   7.02%    10718  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node]
+     787.6   4.84%     7382  go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node][]
+     458.7   2.82%     3934  Symbol[]
+     455.6   2.80%     4273  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase]
+     453.6   2.79%     4255  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase]
+     453.3   2.79%     4251  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase]
+     448.8   2.76%     4209  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase]
+     441.1   2.71%     4137  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase]
+     436.6   2.68%     4094  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase]
+     373.5   2.30%     3504  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier]
+     343.0   2.11%     3101  Identifier[]
+     335.0   2.06%     3142  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase]
+     256.0   1.57%     2314  Entry[go.string,go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Symbol]][]
+     253.9   1.56%     2391  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+DeclarationBase]
+     225.4   1.39%     2121  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Symbol]
+     144.1   0.89%     1252  ParameterDeclaration[]
+     130.2   0.80%     1222  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeWithTypeArgumentsBase]
+     129.5   0.80%     1215  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeList]
+     120.2   0.74%     1127  Identifier?nodeData
+     118.4   0.73%     1111  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeReferenceNode]
+     108.4   0.67%      972  TypeReferenceNode[]
+     106.0   0.65%      977  NodeList[]
+      99.5   0.61%      936  NilKeyDictionary[go.string,go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Symbol]]
+      97.2   0.60%      912  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+KeywordTypeNode]
+      91.9   0.56%      865  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ModifiersBase]
+      90.0   0.55%      782  PropertySignatureDeclaration[]
+      80.9   0.50%      753  KeywordTypeNode[]
+      78.0   0.48%      732  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration]
+      74.7   0.46%      584  System.Byte[]
+      67.4   0.41%      584  MethodSignatureDeclaration[]
+      67.1   0.41%      629  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Token]
+      66.5   0.41%      624  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PropertySignatureDeclaration]
+      64.2   0.39%      603  System.Int32[]
+      63.4   0.39%      596  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+SymbolTable]
+      59.4   0.36%      558  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LocalsContainerBase]
+      53.9   0.33%      506  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+FunctionLikeBase]
+      49.3   0.30%      464  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+FlowNode]
+## Allocations by allocating method (first non-framework frame) (top 40): MB  pct  ticks  key
+    1817.7  11.17%    16221  go.slices!go.slices_package.Grow(!!0,int)
+    1735.2  10.66%    16275  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+    1702.2  10.46%    15964  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     687.4   4.22%     6447  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     680.0   4.18%     6377  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     675.6   4.15%     6336  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     673.6   4.14%     6318  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     666.8   4.10%     6253  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     656.6   4.03%     6158  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     599.3   3.68%     5620  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     592.2   3.64%     5562  github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core?Arena.New(value class Arena`1<!!0>&)
+     516.5   3.17%     4843  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     492.5   3.03%     4620  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     407.3   2.50%     3829  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     267.6   1.64%     2451  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.declareSymbolEx(value class Binder&,value class SymbolTable,class go.?`1<value class Symbol>,class go.?`1<value class Node>,value class SymbolFlags,value class SymbolFlags,bool,bool)
+     240.5   1.48%     2255  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseDelimitedList(class go.?`1<value class Parser>,value class ParsingContext,class System.Func`2<class go.?`1<value class Parser>,class go.?`1<value class Node>>)
+     216.4   1.33%     2036  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PropertySignatureDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     207.2   1.27%     1943  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseModifiersEx(class go.?`1<value class Parser>,bool,bool,bool)
+     202.4   1.24%     1899  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseParameterEx(class go.?`1<value class Parser>,bool,bool)
+     196.4   1.21%     1843  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeReferenceNode].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     193.4   1.19%     1813  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeWithTypeArgumentsBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     156.5   0.96%     1468  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+KeywordTypeNode].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     149.5   0.92%     1404  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MethodSignatureDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+     145.1   0.89%     1361  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseTypeReference(class go.?`1<value class Parser>)
+     108.3   0.67%     1015  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Token].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      81.3   0.50%      765  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.GetSymbolTable(class go.?`1<value class SymbolTable>)
+      74.4   0.46%      699  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+FunctionLikeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      70.3   0.43%      655  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseListIndex(class go.?`1<value class Parser>,value class ParsingContext,class System.Func`3<class go.?`1<value class Parser>,int,class go.?`1<value class Node>>)
+      63.1   0.39%      593  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LocalsContainerBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      60.6   0.37%      568  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LiteralTypeNode].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      53.8   0.33%      504  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LiteralExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      52.8   0.32%      495  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+StatementBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      51.4   0.32%      482  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseDeclaration(class go.?`1<value class Parser>)
+      50.6   0.31%      446  golib!go.AllocationCounter.NewArray(int)
+      50.1   0.31%      471  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+InterfaceDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      47.3   0.29%      443  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?NodeFactory.NewToken(value class NodeFactory&,value class Kind)
+      46.7   0.29%      438  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseLiteralTypeNode(value class Parser&,bool)
+      44.9   0.28%      422  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+FunctionOrConstructorTypeNodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      40.5   0.25%      381  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Symbol].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+      40.0   0.25%      375  golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnionOrIntersectionTypeNodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>)
+## Allocations of --alloc-type by (type | first golib frame | nearest app frame) (top 40): MB  pct  ticks  key
+     408.8   2.51%     3834  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     408.8   2.51%     3833  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     407.9   2.51%     3826  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     407.7   2.51%     3823  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     404.8   2.49%     3797  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     403.8   2.48%     3788  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     403.7   2.48%     3786  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     399.7   2.46%     3748  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     398.1   2.45%     3734  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     372.5   2.29%     3495  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier] | golib: golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0() | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     209.9   1.29%     1975  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Symbol] | golib: golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0() | app: github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core?Arena.New(value class Arena`1<!!0>&)
+     208.5   1.28%     1955  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UpdateExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     206.4   1.27%     1936  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     204.6   1.26%     1918  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PrimaryExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     203.8   1.25%     1912  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+UnaryExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     202.0   1.24%     1894  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     200.4   1.23%     1880  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     199.2   1.22%     1869  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+LeftHandSideExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+     198.9   1.22%     1865  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Identifier].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     194.8   1.20%     1827  go.ViewEntry | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MemberExpressionBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+     125.7   0.77%     1179  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TypeNodeBase?pkg.AsNode(class go.?`1<value class TypeNodeBase>)
+     125.6   0.77%     1178  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TypeNodeBase?pkg.AsNode(class go.?`1<value class TypeNodeBase>)
+     121.5   0.75%     1140  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeWithTypeArgumentsBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseTypeReference(class go.?`1<value class Parser>)
+     120.9   0.74%     1135  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeWithTypeArgumentsBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeReferenceNode].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseTypeReference(class go.?`1<value class Parser>)
+     119.3   0.73%     1119  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TypeNodeBase?pkg.AsNode(class go.?`1<value class TypeNodeBase>)
+     111.7   0.69%     1048  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeReferenceNode] | golib: golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0() | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseTypeReference(class go.?`1<value class Parser>)
+      92.8   0.57%      870  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?KeywordTypeNode?pkg.AsNode(class go.?`1<value class KeywordTypeNode>)
+      91.9   0.56%      865  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ModifiersBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindParameterFlow(class go.?`1<value class Binder>,class go.?`1<value class Node>)
+      89.8   0.55%      842  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?KeywordTypeNode?pkg.AsNode(class go.?`1<value class KeywordTypeNode>)
+      88.6   0.54%      831  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?ParameterDeclaration?pkg.AsNode(class go.?`1<value class ParameterDeclaration>)
+      87.9   0.54%      825  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?ParameterDeclaration?pkg.AsNode(class go.?`1<value class ParameterDeclaration>)
+      86.8   0.53%      816  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+DeclarationBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration?nodeData.global::go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.nodeData.DeclarationData()
+      85.8   0.53%      805  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+TypeNodeBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+KeywordTypeNode].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?KeywordTypeNode?pkg.AsNode(class go.?`1<value class KeywordTypeNode>)
+      85.6   0.53%      803  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?KeywordTypeNode?pkg.AsNode(class go.?`1<value class KeywordTypeNode>)
+      85.3   0.52%      800  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Node] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?ParameterDeclaration?pkg.AsNode(class go.?`1<value class ParameterDeclaration>)
+      80.7   0.50%      757  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+KeywordTypeNode] | golib: golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0() | app: github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core?Arena.New(value class Arena`1<!!0>&)
+      78.7   0.48%      738  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeDefault] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package+Token?nodeData.global::go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.nodeData.AsNode()
+      77.7   0.48%      729  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeList] | golib: golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0() | app: github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseDelimitedList(class go.?`1<value class Parser>,value class ParsingContext,class System.Func`2<class go.?`1<value class Parser>,class go.?`1<value class Node>>)
+      77.6   0.48%      728  go.ElemRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration] | golib: golib!go.golib.MainThread+<>c__DisplayClass1_0.<Run>b__0() | app: github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core?Arena.New(value class Arena`1<!!0>&)
+      77.6   0.48%      727  go.FieldRefBox`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+NodeBase] | golib: golib!go.?`1[go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PropertySignatureDeclaration].viewOfSlow(class go.FieldRefFunc`2<!0,!!0>) | app: github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?PropertySignatureDeclaration?pkg.AsNode(class go.?`1<value class PropertySignatureDeclaration>)
+## QUERY /viewOfSlow/: inclusive samples 1140 (2.72%)
+    1140  K=-
+   -- by nearest APP caller:
+     132  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?LeftHandSideExpressionBase?pkg.AsNode(class go.?`1<value class LeftHandSideExpressionBase>)
+      72  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.createIdentifierWithDiagnostic(value class Parser&,bool,class go.?`1<value class Message>,class go.?`1<value class Message>)
+      62  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindParameterFlow(class go.?`1<value class Binder>,class go.?`1<value class Node>)
+      39  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package+ParameterDeclaration?nodeData.global::go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.nodeData.DeclarationData()
+      37  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TypeNodeBase?pkg.AsNode(class go.?`1<value class TypeNodeBase>)
+      36  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package+PropertySignatureDeclaration?nodeData.global::go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.nodeData.DeclarationData()
+      34  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?KeywordTypeNode?pkg.AsNode(class go.?`1<value class KeywordTypeNode>)
+      29  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser?Parser.parseTypeReference(class go.?`1<value class Parser>)
+      27  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?ParameterDeclaration?pkg.AsNode(class go.?`1<value class ParameterDeclaration>)
+      27  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package+MethodSignatureDeclaration?nodeData.global::go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.nodeData.LocalsContainerData()
+## QUERY /publishView/: inclusive samples 17 (0.04%)
+      17  K=-
+   -- by nearest APP caller:
+       4  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.bindParameterFlow(class go.?`1<value class Binder>,class go.?`1<value class Node>)
+       3  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?ParameterDeclaration?pkg.DeclarationData(class go.?`1<value class ParameterDeclaration>)
+       2  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?FunctionOrConstructorTypeNodeBase?pkg.LocalsContainerData(class go.?`1<value class FunctionOrConstructorTypeNodeBase>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?KeywordTypeNode?pkg.AsNode(class go.?`1<value class KeywordTypeNode>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?ExpressionBase?pkg.AsNode(class go.?`1<value class ExpressionBase>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.GoFieldAccess.get_?Members(class go.?`1<value class Symbol>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?IndexSignatureDeclaration?pkg.LocalsContainerData(class go.?`1<value class IndexSignatureDeclaration>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.GoFieldAccess.get_?LocalsContainerBase(class go.?`1<value class FunctionLikeBase>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TypeParameterDeclaration?pkg.DeclarationData(class go.?`1<value class TypeParameterDeclaration>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?FunctionDeclaration?pkg.DeclarationData(class go.?`1<value class FunctionDeclaration>)
+## QUERY /ConditionalWeakTable.*GetOrCreateValue/: inclusive samples 2 (0.00%)
+       2  K=-
+   -- by nearest APP caller:
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TypeQueryNode?pkg.AsNode(class go.?`1<value class TypeQueryNode>)
+       1  github.com.microsoft.TypeScript.tsc.internal.checker!go.GoFieldAccess.get_?visitedTypes(class go.?`1<value class NodeBuilderContext>)
+## QUERY /viewsHead/: inclusive samples 37 (0.09%)
+      37  K=-
+   -- by nearest APP caller:
+       2  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package+LiteralType?TypeData.global::go.github.com.microsoft.TypeScript.tsc.@internal.checker_package.TypeData.AsType()
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?ArrayLiteralExpression?pkg.AsNode(class go.?`1<value class ArrayLiteralExpression>)
+       1  github.com.microsoft.TypeScript.tsc.internal.parser!go.GoFieldAccess.get_?factory(class go.?`1<value class Parser>)
+       1  github.com.microsoft.TypeScript.tsc.internal.compiler!go.GoFieldAccess.get_?mu(class go.?`1<value class parseTaskData>)
+       1  github.com.microsoft.TypeScript.tsc.internal.compiler!go.GoFieldAccess.get_?realpathDtsToSource(class go.?`1<value class projectReferenceFileMapper>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TypeQueryNode?pkg.AsNode(class go.?`1<value class TypeQueryNode>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?IndexSignatureDeclaration?pkg.AsNode(class go.?`1<value class IndexSignatureDeclaration>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TemplateHead?pkg.AsNode(class go.?`1<value class TemplateHead>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TemplateMiddle?pkg.AsNode(class go.?`1<value class TemplateMiddle>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast?TemplateLiteralTypeSpan?pkg.AsNode(class go.?`1<value class TemplateLiteralTypeSpan>)
+## QUERY /ValueType\.GetHashCode/: inclusive samples 172 (0.41%)
+     156  K=-
+      15  K=go.github.com.microsoft.TypeScript.tsc.internal.tspath_package+Path
+       1  K=go.github.com.microsoft.TypeScript.tsc.internal.ast_package+diagnosticLocationKey
+   -- by nearest APP caller:
+     111  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?projectReferenceFileMapper.getSourceToDtsIfSymlink(class go.?`1<value class projectReferenceFileMapper>,class HasFileName)
+      27  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?filesParser+<>c__DisplayClass2_0.<getProcessedFiles>b__0(value class go.slice`1<class go.?`1<value class parseTask>>,value class go.map`2<class go.?`1<value class parseTaskData>,value class go.string>)
+      17  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?filesParser.start(class go.?`1<value class filesParser>,class go.?`1<value class fileLoader>,value class go.slice`1<class go.?`1<value class parseTask>>,int)
+       9  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?includeProcessor+<>c__DisplayClass0_0.<getDiagnostics>b__0()
+       3  github.com.microsoft.TypeScript.tsc.internal.collections!go.github.com.microsoft.TypeScript.tsc.internal.collections?SyncMap.Load(class go.?`1<value class SyncMap`2<!!0,!!1>>,!!0)
+       2  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.checkCollisionWithRequireExportsInGeneratedCode(class go.?`1<value class Checker>,class go.?`1<value class Node>,class go.?`1<value class Node>)
+       1  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?Program.GetSourceFileByPath(value class Program&,value class Path)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package+diagnosticLocationKey.GetHashCode()
+       1  github.com.microsoft.TypeScript.tsc.internal.module!go.github.com.microsoft.TypeScript.tsc.internal.module?resolutionState.getPackageJsonInfo(value class resolutionState&,value class go.string)
+## QUERY /ValueType\.Equals/: inclusive samples 14 (0.03%)
+      14  K=-
+   -- by nearest APP caller:
+       6  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?includeProcessor+<>c__DisplayClass0_0.<getDiagnostics>b__0()
+       3  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?filesParser+<>c__DisplayClass2_0.<getProcessedFiles>b__0(value class go.slice`1<class go.?`1<value class parseTask>>,value class go.map`2<class go.?`1<value class parseTaskData>,value class go.string>)
+       2  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?filesParser.start(class go.?`1<value class filesParser>,class go.?`1<value class fileLoader>,value class go.slice`1<class go.?`1<value class parseTask>>,int)
+       1  github.com.microsoft.TypeScript.tsc.internal.tsoptions!go.github.com.microsoft.TypeScript.tsc.internal.tsoptions_package+CommandLineOptionKind.op_Equality(value class CommandLineOptionKind,value class CommandLineOptionKind)
+       1  github.com.microsoft.TypeScript.tsc.internal.tsoptions!go.github.com.microsoft.TypeScript.tsc.internal.tsoptions_package.convertJsonOption(class go.?`1<value class CommandLineOption>,class System.Object,value class go.string,class go.?`1<value class PropertyAssignment>,class go.?`1<value class Node>,class go.?`1<value class SourceFile>)
+       1  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.checkCollisionWithRequireExportsInGeneratedCode(class go.?`1<value class Checker>,class go.?`1<value class Node>,class go.?`1<value class Node>)
+## QUERY /EqualityComparer/: inclusive samples 14 (0.03%)
+       4  K=-
+       2  K=go.github.com.microsoft.TypeScript.tsc.internal.checker_package+SubstitutionTypeKey
+       2  K=go.github.com.microsoft.TypeScript.tsc.internal.checker_package+CacheHashKey
+       1  K=go.github.com.microsoft.TypeScript.tsc.internal.module_package+PackageId
+       1  K=go.github.com.microsoft.TypeScript.tsc.internal.checker_package+InstantiationExpressionKey
+       1  K=go.string
+       1  K=go.github.com.microsoft.TypeScript.tsc.internal.ast_package+diagnosticLocationKey
+       1  K=go.github.com.microsoft.TypeScript.tsc.internal.vfs.vfstest_package+canonicalPath
+       1  K=go.github.com.microsoft.TypeScript.tsc.internal.module_package+ModeAwareCacheKey
+   -- by nearest APP caller:
+       3  !?
+       2  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package.NewChecker(class Program,class go.?`1<value class Tracer>)
+       1  github.com.microsoft.TypeScript.tsc.internal.vfs.vfstest!go.github.com.microsoft.TypeScript.tsc.internal.vfs.vfstest?MapFS.Open(class go.?`1<value class MapFS>,value class go.string)
+       1  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?filesParser.getProcessedFiles(class go.?`1<value class filesParser>,class go.?`1<value class fileLoader>)
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package+SymbolTable.go.IMap.CloneMap()
+       1  github.com.microsoft.TypeScript.tsc.internal.collections!go.github.com.microsoft.TypeScript.tsc.internal.collections?Set.Delete(value class Set`1<!!0>&,!!0)
+       1  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Relation.set(value class Relation&,value class CacheHashKey,value class RelationComparisonResult)
+       1  github.com.microsoft.TypeScript.tsc.internal.vfs.vfstest!go.github.com.microsoft.TypeScript.tsc.internal.vfs.vfstest_package.convertMapFS(value class MapFS,bool,class Clock)
+       1  github.com.microsoft.TypeScript.tsc.internal.module!go.github.com.microsoft.TypeScript.tsc.internal.module_package+ModeAwareCache`1[System.__Canon].get_Item(value class ModeAwareCacheKey,bool)
+       1  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.getErasedSignature(class go.?`1<value class Checker>,class go.?`1<value class Signature>)
+## QUERY /HashCode\.Combine/: inclusive samples 3 (0.01%)
+       1  K=go.github.com.microsoft.TypeScript.tsc.internal.checker_package+InferenceKey
+       1  K=-
+       1  K=go.github.com.microsoft.TypeScript.tsc.internal.ast_package+diagnosticLocationKey
+   -- by nearest APP caller:
+       1  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package+InferenceKey.GetHashCode()
+       1  github.com.microsoft.TypeScript.tsc.internal.module!go.github.com.microsoft.TypeScript.tsc.internal.module_package+moduleResolutionCacheKey.GetHashCode()
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package+diagnosticLocationKey.GetHashCode()
+## QUERY /GoEqualityComparer/: inclusive samples 0 (0.00%)
+   -- by nearest APP caller:
+## QUERY /builtin\.AreEqual/: inclusive samples 462 (1.10%)
+     462  K=-
+   -- by nearest APP caller:
+     388  github.com.microsoft.TypeScript.tsc.internal.binder!go.github.com.microsoft.TypeScript.tsc.internal.binder?Binder.addDeclarationToSymbol(value class Binder&,class go.?`1<value class Symbol>,class go.?`1<value class Node>,value class SymbolFlags)
+      42  github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core_package.AppendIfUnique(value class go.slice`1<!!0>,!!0)
+      12  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.isDeeplyNestedType(value class Checker&,class go.?`1<value class Type>,value class go.slice`1<class go.?`1<value class Type>>,int)
+       5  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package.instantiateList(class go.?`1<value class Checker>,value class go.slice`1<!!0>,class go.?`1<value class TypeMapper>,class System.Func`4<class go.?`1<value class Checker>,!!0,class go.?`1<value class TypeMapper>,!!0>)
+       3  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?fileLoader.getDefaultLibFilePriority(value class fileLoader&,class go.?`1<value class SourceFile>)
+       2  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.instantiateSignatureEx(class go.?`1<value class Checker>,class go.?`1<value class Signature>,class go.?`1<value class TypeMapper>,bool)
+       2  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.instantiateTypes(class go.?`1<value class Checker>,value class go.slice`1<class go.?`1<value class Type>>,class go.?`1<value class TypeMapper>)
+       1  checkdemo!go.main_package.main()
+       1  github.com.microsoft.TypeScript.tsc.internal.ast!go.github.com.microsoft.TypeScript.tsc.internal.ast_package.NodeKindIs(class go.?`1<value class Node>,value class System.Span`1<value class Kind>)
+       1  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?fileLoader+<>c__DisplayClass6_0.<sortLibs>b__0(class go.?`1<value class SourceFile>,class go.?`1<value class SourceFile>)
+## QUERY /YieldFunctionEnumerator.*MoveNext/: inclusive samples 210 (0.50%)
+     210  K=-
+   -- by nearest APP caller:
+      84  github.com.microsoft.TypeScript.tsc.internal.core!go.github.com.microsoft.TypeScript.tsc.internal.core_package.getSpellingSuggestion(value class go.string,class Seq`1<!!0>,class System.Func`2<!!0,value class go.string>,class System.Func`3<!!0,!!0,int>,int)
+      27  github.com.microsoft.TypeScript.tsc.internal.parser!go.github.com.microsoft.TypeScript.tsc.internal.parser_package.getCommentPragmas(class go.?`1<value class NodeFactory>,value class go.string)
+      17  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker_package.NewChecker(class Program,class go.?`1<value class Tracer>)
+      14  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?NodeBuilderImpl.mapToTypeNodes(class go.?`1<value class NodeBuilderImpl>,value class go.slice`1<class go.?`1<value class Type>>,bool)
+      12  github.com.microsoft.TypeScript.tsc.internal.printer!go.github.com.microsoft.TypeScript.tsc.internal.printer?textWriter.updateLineCountAndPosFor(value class textWriter&,value class go.string)
+       9  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.checkDeferredNodes(class go.?`1<value class Checker>,class go.?`1<value class SourceFile>)
+       8  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?filesParser.getProcessedFiles(class go.?`1<value class filesParser>,class go.?`1<value class fileLoader>)
+       7  github.com.microsoft.TypeScript.tsc.internal.compiler!go.github.com.microsoft.TypeScript.tsc.internal.compiler?Program.verifyCompilerOptions(class go.?`1<value class Program>)
+       7  github.com.microsoft.TypeScript.tsc.internal.checker!go.github.com.microsoft.TypeScript.tsc.internal.checker?Checker.createUnionOrIntersectionProperty(class go.?`1<value class Checker>,class go.?`1<value class Type>,value class go.string,bool)
+       6  github.com.microsoft.TypeScript.tsc.internal.vfs.vfstest!go.github.com.microsoft.TypeScript.tsc.internal.vfs.vfstest_package.FromMapWithClock(value class go.map`2<value class go.string,!!0>,bool,class Clock)
