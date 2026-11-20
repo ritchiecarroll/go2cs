@@ -252,7 +252,13 @@ you reference its `go.*` dependencies at 1.26.11.1 directly, restore succeeds an
 
 **Symptom.** A program converted with `go2cs -recurse=nuget` does not build against the published `go.*` packages,
 with `CS0426` on a standard-library name that carries a `Δ` prefix the packages no longer have, for example
-`reflect_package.ΔKind`. The conversion itself reports no warning and exits 0.
+`reflect_package.ΔKind`. The conversion itself reports no warning and exits 0. The names affected are the
+standard-library names that earlier go2cs releases prefixed with `Δ` and the published packages no longer do, about
+170 across about 70 packages, among them `time.Second`, `time.Month`, `reflect.Type`, `reflect.Value` and
+`os.Signal`, so most programs converted on such a machine meet it.
+
+**Fixed** in the next go2cs release: under `-recurse=nuget` the converter reads standard-library names only from the
+metadata built into it, and says once when it finds a local go2cs standard library that it does not read.
 
 **Cause.** Under `-recurse=nuget` the converter still looks for a local go2cs root: `-go2cspath` when it is given,
 else the `GO2CSPATH` environment variable, else `~/go2cs` (`%USERPROFILE%\go2cs` on Windows). When that folder holds
@@ -261,7 +267,7 @@ into the converter, which is the metadata that matches the published packages. A
 such as one left by an earlier `deploy-core` or a go2cs clone, supplies that release's names. On a machine with no
 such folder and `GO2CSPATH` unset, the emission is correct.
 
-**Workaround.** Make the run unable to find an old root: unset `GO2CSPATH` and pass `-go2cspath` an empty folder, or
+**Workaround** with go2cs 1.26.11.1 and earlier. Make the run unable to find an old root: unset `GO2CSPATH` and pass `-go2cspath` an empty folder, or
 move the old `~/go2cs` aside for the run. Then convert again. Measured on `windows-amd64` and `linux-x64`.
 
 <!-- Found 2026-11-20 by the sqlite-cs staging at the 1.26.11.1 release converter (5dd5cafd5b): i9 (COORD inbox
@@ -272,7 +278,14 @@ move the old `~/go2cs` aside for the run. Then convert again. Measured on `windo
      the sqlite-cs demo: no root and the release tree as root both clean, a pre-OQ2 clone as -go2cspath gives the
      ΔKind alias. resolveGo2CSPath skips the root warning for nugetRefs, so the run is silent. The .5 fix (i9: a
      PublishedStdLib dependency reads the embedded record first) retires this entry. First .5 docs item, COORD
-     2026-11-20 07:40Z. -->
+     2026-11-20 07:40Z.
+     The fix, claude/i9-nuget-metadata-precedence (954b184a3d, then this note): publishedStdLibRecord is read before any
+     on-disk package_info.cs for a PublishedStdLib dependency, and resolveGo2CSPath gives a one-time notice when
+     -recurse=nuget finds a core\ tree under its root (keyed on core\, since i9's stale root had no core\golib).
+     The scope above is the census in docs/phase4/data/nuget-metadata-precedence/census-oq2.txt: the embedded record at
+     780cb9b34f (the last before OQ2) against 47ce71a520 lists 208 Delta-renames dropped by OQ2 in 91 sections, 169
+     distinct names in 72 packages once the per-platform sections are folded, and 0 left at 47ce71a520. COORD
+     2026-11-20 11:36Z: the census goes here, and the entry reads "fixed in the next release" at landing. -->
 
 ## Ubuntu's packaged .NET 10 can end a converted program early
 
