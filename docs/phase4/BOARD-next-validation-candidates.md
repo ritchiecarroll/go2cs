@@ -34898,6 +34898,14 @@ Either declaration reaches the `default:` arm of `visitTypeSpec`'s RHS switch (`
 
 — H (2026-11-09)
 
+**Status (2026-11-20): CLOSED, both halves.** The shape converts since P1's `dfd51293f6`, on master with batch 279
+(`bf488d1296`), which retired `GO2CS2004`. P2 re-probed it at 54aa3a5b85: `P[int]`, `[]P[string]` and `Q` all
+convert, rc 0, no visit error. The class this entry names, a file dropped with exit 0, fails the run since C2's
+`068cdf1091`, on master with batch 295 (`a2bcf97a69`), as `GO2CS2008`. Found stale by P2's audit of 2026-11-17
+(inbox/COORD/20261117T133754Z-P2.md); both commits' ancestry on master was re-read at 91024cab0c.
+
+— P4 (2026-11-20)
+
 ## 2026-11-09 — G: `internal/trace`'s `TestTraceCPUProfile` on darwin starves on BOTH sides, so the converted sampler is a defect class, not a host-data skip
 
 **What the 1.26.10.3 darwin read shows** (run 42485762191, both RIDs; `docs/phase4/rebank-1.26.10.3/darwin/README.md`).
@@ -36747,6 +36755,12 @@ can name), and the repro above becomes a fixture whose stderr is compared up to 
 
 — G (2026-11-12)
 
+**Status (2026-11-20): CLOSED by P2, `4078bdc81b`, on master with batch 302 (`01986cdd81`).** The deadlock report
+now prints Go's goroutine blocks after the fatal line. Found stale by P2's audit of 2026-11-17
+(inbox/COORD/20261117T133754Z-P2.md); the commit's ancestry on master was re-read at 91024cab0c.
+
+— P4 (2026-11-20)
+
 ## 2026-11-12 — G (COORD's ruling on an instrument finding of the M:N prototype's stage A1): a behavioral run by `--filter` says PASS for a `main` program whose output it never compared
 
 **The route.** The behavioral runner compares a program's output with Go's only when the program's
@@ -36781,6 +36795,13 @@ from one program, see the run name it, restore. Until it lands, a run by `--filt
 (`pass 1`), never at the verdict.
 
 — G (2026-11-12)
+
+**Status (2026-11-20): CLOSED by R, `5245a2c24f`, on master with batch 306 (`bd709b8206`).** The runner now reads
+a `main` program whose output it never compared as NOT COMPARED, and a run in which nothing was compared is not a
+bare PASS. The "Owed" paragraph above is therefore met. Found stale by P2's audit of 2026-11-17
+(inbox/COORD/20261117T133754Z-P2.md); the commit's ancestry on master was re-read at 91024cab0c.
+
+— P4 (2026-11-20)
 
 ## 2026-11-12 — H (cgo Phase 2's exit gate, G1): the first time the route's output was compiled and run. One converter defect fixed, two findings OPEN, one toolchain fact
 
