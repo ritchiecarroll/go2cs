@@ -2539,11 +2539,39 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							// promoted Errorf/Helper/Logf). Call the method DIRECTLY on the receiver box —
 							// go2cs-gen emits a public `M(this ж<T>)` descent shim for exactly this case
 							// (IsValueEmbedBoxRecv). Reuse the first-hop box the &-machinery just computed,
-							// dropping the inaccessible trailing `.of(…)` view. Single-hop only (a deeper
-							// foreign value chain has no shim); the box is the text before the last `.of(`.
-							if len(hopFields) == 1 && !embedField.Exported() && embedField.Pkg() != nil && embedField.Pkg() != v.pkg {
+							// dropping the inaccessible trailing `.of(…)` view; the box is the text before the
+							// last `.of(`.
+							//
+							// ANY hop of the chain, at any depth: since TS readiness C29 the generator gives
+							// the outer type that shim (and the `ref` forwarder) at whatever depth the method is
+							// declared, by the same rule one level down. This arm was single-hop until
+							// 2026-11-20 ("a deeper foreign value chain has no shim", true before C29), and a
+							// deeper chain fell through to the `.of(…)` descent, whose unexported hop accessor
+							// is CS0117/CS0122 from the other assembly: goldmark v1.7.13's
+							// `l.of(ast.Link.ᏑbaseLink).of(ast.baseLink.ᏑBaseInline)…AppendChild(…)` (board
+							// pp; guarded by PromotedUnexportedEmbedChain). An EXPORTED hop before the
+							// unexported one (`Image{Inline{inner{BaseNode}}}`) has the same answer.
+							foreignUnexportedHop := false
+
+							for _, hop := range hopFields {
+								if !hop.Exported() && hop.Pkg() != nil && hop.Pkg() != v.pkg {
+									foreignUnexportedHop = true
+									break
+								}
+							}
+
+							if foreignUnexportedHop {
 								if ofIndex := strings.LastIndex(fieldAddr, ".of("); ofIndex != -1 && strings.HasSuffix(fieldAddr, ")") {
 									box := fieldAddr[:ofIndex]
+
+									// A COPY box (`Ꮡ(v)`, an addressable value with no box of its own) would take
+									// the promoted pointer method's writes into the copy and drop them. The value
+									// itself is the receiver: the generated `ref` forwarder binds it in place. A
+									// direct-ж target has no `ref` forwarder and keeps the box.
+									if strings.HasPrefix(box, AddressPrefix+"(") && !v.selectorTargetIsDirectBoxMethod(selectorExpr) {
+										box = v.convExpr(selectorExpr.X, nil)
+									}
+
 									return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s.%s", box, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 								}
 
@@ -2558,6 +2586,15 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 								// A pointer IDENT (raw-box local or deref-aliased param) renders its
 								// address as `<box>.of(…)` and stays with the strip above.
 								if _, xIsPtr := v.info.TypeOf(selectorExpr.X).Underlying().(*types.Pointer); xIsPtr && !v.exprIsDerefAliasedPointer(selectorExpr.X) {
+									return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+								}
+
+								// An addressable VALUE with no box (`var v ast.Link; v.AppendChild(…)`): the
+								// &-machinery's copy box `Ꮡ(…)` would send the member chain below through the
+								// unexported hop's accessor (CS0122). The value itself is the receiver: the
+								// generated `ref` forwarder on its type binds it in place, as the box shim does
+								// for a pointer. A direct-ж target has no `ref` forwarder and keeps the path below.
+								if strings.HasPrefix(fieldAddr, AddressPrefix+"(") && !v.selectorTargetIsDirectBoxMethod(selectorExpr) {
 									return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 								}
 							}
