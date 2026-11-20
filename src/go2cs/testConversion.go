@@ -5899,8 +5899,8 @@ func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded ma
 		enqueue(named)
 	}
 
-	// The names the compiled test sources call as methods on a concrete receiver, for the cross-package candidate edge
-	// below.
+	// The names the compiled test sources select as methods on a concrete receiver (a call or a method value), for the
+	// cross-package candidate edge below.
 	calledMethods := map[string][]*types.Signature{}
 
 	for _, root := range roots {
@@ -6239,7 +6239,13 @@ func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*typ
 		qualifier := argument[match[2]:match[3]]
 		name := strings.TrimPrefix(strings.TrimPrefix(argument[match[1]:], "."), "Δ")
 
-		if name == "" || strings.ContainsAny(name, "<.") {
+		// A generic instantiation (`Checker<nint>`) seeds its declaration: the converter emits a generic interface's
+		// bases from the declared type (getStructuralInterfaceBases), so the walk looks up the same one.
+		if open := strings.IndexByte(name, '<'); open >= 0 {
+			name = name[:open]
+		}
+
+		if name == "" || strings.Contains(name, ".") {
 			continue
 		}
 
@@ -6500,8 +6506,10 @@ type typeSeeds struct {
 	constructed      []*types.Named
 	constructedEmpty []*types.Named
 	memberBases      []*types.Named
-	// methodCalls carries the concrete methods a compiled test source CALLS through a selector; the
-	// overload-candidate edge reads their same-named siblings (see declarationClosureImports).
+	// methodCalls carries the concrete methods a compiled test source selects through a selector, a
+	// call or a method VALUE (`f := tx.Commit`, which converts a method group and weighs the same
+	// candidates); the overload-candidate and cross-package candidate edges read their same-named
+	// siblings (see declarationClosureImports).
 	methodCalls []*types.Func
 	// memberBound carries the types a compiled test source binds a member on through a form that
 	// spells no selector — a builtin call, a range, an index/slice. It feeds ONLY the
