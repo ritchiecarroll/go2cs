@@ -77,7 +77,7 @@ func resolveDisclosureManifestDir(outputPath, root, modulePath, moduleDir, claim
 	}
 
 	// The module is kept under OTHER versions only: say so, by name, and apply nothing.
-	others, _ := filepath.Glob(moduleBase + "@*")
+	others := moduleVersionDirs(moduleBase)
 	var present []string
 
 	for _, other := range others {
@@ -247,7 +247,7 @@ func moduleDisclosurePreflight(root, moduleDir, claimedVersion string) error {
 	// A claimed version the root holds the module under OTHER versions only: refused here too (SHOULD 2), at module
 	// level, since the per-package lookup would only reach it after the conversion.
 	moduleBase := filepath.Join(root, filepath.FromSlash(escapedPath))
-	others, _ := filepath.Glob(moduleBase + "@*")
+	others := moduleVersionDirs(moduleBase)
 
 	if len(others) > 0 && !slices.Contains(others, moduleBase+"@"+version) {
 		sort.Strings(others)
@@ -286,6 +286,30 @@ func moduleCacheVersion(moduleDir, escapedPath string) string {
 	}
 
 	return version
+}
+
+// moduleVersionDirs lists the directories a -module-disclosures root keeps a module under, one per version:
+// <moduleBase>@<version>, sorted. Read with os.ReadDir and a name prefix rather than filepath.Glob, which read a root
+// path holding a glob metacharacter ([ or *) as a pattern and matched nothing (P3's NIT 6).
+func moduleVersionDirs(moduleBase string) []string {
+	entries, err := os.ReadDir(filepath.Dir(moduleBase))
+
+	if err != nil {
+		return nil
+	}
+
+	prefix := filepath.Base(moduleBase) + "@"
+	var dirs []string
+
+	for _, entry := range entries {
+		if entry.IsDir() && strings.HasPrefix(entry.Name(), prefix) {
+			dirs = append(dirs, filepath.Join(filepath.Dir(moduleBase), entry.Name()))
+		}
+	}
+
+	sort.Strings(dirs)
+
+	return dirs
 }
 
 func fileExists(path string) bool {

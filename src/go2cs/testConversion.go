@@ -8770,8 +8770,9 @@ func hostFatalMintAgainstPage(page, importPath, dir, absentReason string, names 
 // entry UNCHECKED and no module page was read.
 //
 // The checkout is the parent of -go2cspath, and the version is the one -module-disclosures resolves
-// (moduleDisclosureVersion: the module-cache directory's, or -module-version's for a copy). Without either, the rule
-// can key no page, and every entry is reported unchecked with that reason.
+// (moduleDisclosureVersion: the module-cache directory's, or -module-version's for a copy). Under a CLAIMED version
+// the rule reads that claimed version's page; the claim itself is marked on the row (moduleVersionClaimed). Without
+// either, the rule can key no page, and every entry is reported unchecked with that reason.
 func hostFatalMintViolationsFor(outputPath, inputPath string, disclosures map[string]testDisclosure, options Options) ([]string, []string) {
 	if options.mainModulePath == "" {
 		return hostFatalMintViolations(outputPath, disclosures)

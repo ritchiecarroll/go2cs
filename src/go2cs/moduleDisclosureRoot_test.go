@@ -374,3 +374,24 @@ func TestModuleDisclosureFlagsAreRefusedWhereTheyCannotTakeEffect(t *testing.T) 
 		}
 	}
 }
+
+// P3 NIT 6 (COORD 101957Z): a disclosure root whose path holds a glob metacharacter ([ or *) still sees the module's
+// other versions. filepath.Glob read "root[x]" as a pattern, matched nothing, and the wrong-version line and the
+// claimed-version refusal both went silent.
+func TestModuleDisclosureRootWithGlobCharactersStillSeesOtherVersions(t *testing.T) {
+	moduleDir, pkgDir, outputDir, _ := moduleRootFixture(t)
+	root := filepath.Join(t.TempDir(), "Module[Disclosures]*")
+	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.6.0", "cmp"), "TestDiff/Comparer/MapKeyPointer")
+
+	if _, note, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, moduleDir, "", pkgDir); err != nil ||
+		!strings.Contains(note, "v0.6.0") || !strings.Contains(note, "not applied") {
+		t.Fatalf("the root holds v0.6.0 only and this run resolved v0.7.0: the line must say so; got note %q, err %v", note, err)
+	}
+
+	claimedCache(t, "v0.7.0", goCmpGoMod)
+	checkout, _ := copyWithGoMod(t, goCmpGoMod)
+
+	if err := moduleDisclosurePreflight(root, checkout, "v0.7.0"); err == nil || !strings.Contains(err.Error(), "v0.6.0") {
+		t.Fatalf("a claimed v0.7.0 against a root holding v0.6.0 only must be refused, whatever the root's path; got %v", err)
+	}
+}
