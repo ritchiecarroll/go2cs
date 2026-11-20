@@ -729,3 +729,56 @@ byref-param equals plain.
 - PB-5's remaining 9 non-casLoop rows (stack locals, the composite temp, the cascade receiver).
 - Timed arms and an A/A pair: none run here, by COORD's ruling; they wait for G's laptop.
 - The BOARD rows: RecvGenerator CS1620, and the f(p, <-ch) divergence.
+
+## 15. HANDBACK from P4, second (dated block, 2026-11-20)
+
+Section 14 handed back to 4216b1be70 (2026-11-17). This block covers what landed on `claude/p4-mn-byref` after it, to
+the account-A reset; section 13's arrangement ends here and M:N returns to G.
+
+**Tip.** `claude/p4-mn-byref` at this block's commit, on 85d10c5215. Master is merged in twice: 39595510a4 (128f9685bc,
+behavioral projects re-converted at 870b0f04ad) and a98c5175be, the 1.26.11.1 release record (1aa85ac296). M:N stays
+opt-in; COORD seats it after G's review, and it rides none of the first post-.4 batches.
+
+**Commits since section 14.**
+- 1771d2347a, 67b2e00be0, e86ebb9b7f: the spill, rules 1 and 2 (12.4), units P25-P32, probe row `param-later-call`.
+- ea5cae22f7, 0b03ace1fc, 5303b1777e, a6c2409581: PB-5, a stack local handed to a box twin is a heap local in the twin
+  (12.5), units P33-P40, probe row `param-stack`.
+- 85d10c5215: G's review gaps 1 and 2 (end of 12.5), units P41 and P42, probe row `param-stack-init`.
+
+**Green, at 85d10c5215.**
+- GenTests 691/691 (`dotnet test src/tests/GenTests -c Release`, GoTargetOS and GoTargetArch unset).
+- MnBoxAlias (linux, Release, GO2CS_MN=1, 3 runs per arm): plain and twins (`-p:GoTwinsFor=MnBoxAlias`) each EQUAL Go's
+  whole output 3 of 3. Under GoTwinsBoxCopy and under GoTwinsBoxArgCopy the program DIFFERS and exits 2 at
+  param-nil-field, as in section 14. The three rows added since then read: `param-later-call` 1903 (controls 103),
+  `param-stack` 21 (controls 1), `param-stack-init` 23 (controls 3).
+- Every unit since section 14 was red first: its mechanism neutered, the unit red, the source restored sha-identical.
+
+**Arms.** Count only: windows/amd64 flavour, MnHttpClosure convert plus build, 185 reports, rc 0, 0 errors, on the same
+4-core linux box as section 14. Host-independent readings; full tables in 12.4 and 12.5.
+
+| Arm | Tip | twinned | await | refused | box twins/calls/P rows |
+|---|---|---|---|---|---|
+| M-P | 870b0f04ad | 3,946 | 10,165 | 109 | - |
+| R-P | spill rules 1+2 | 3,946 | 10,171 | 109 | 632/1,203/31 |
+| T-P | ea5cae22f7 (PB-5) | 3,960 | 10,207 | 109 | 633/1,219/16 |
+| M-N, R-N, T-N | as above, BoxParam=false | 3,844 | 9,665 / 9,666 / 9,666 | 169 | T-N's 185 reports byte-identical to R-N's |
+
+12.4's predictions were all met. 12.5's T-P prediction MISSED on all three counts, for the reason stated there (it
+counted PB-5's byref-param rows only; the rule covers receivers too). The arms T2-P and T3-P that followed the two
+PB-5 fixes moved only the reports their prediction named.
+
+**Closed since section 14.**
+- The spill (12.1 item 5, section 14's first open item): all 5 inner calls of G 1(c) now await (12.4).
+- PB-5's stack-local rows: P rows 31 -> 16 at arm T-P, the 15 handed being 9 byref-param rows and 6 more stack locals
+  (receivers included); 8 locals stay plain with a named reason (12.5).
+- G's review of 12.4 and 12.5: CONCUR, gaps 1 and 2 closed (end of 12.5).
+
+**Disclosures.** Unchanged from the list at the end of 12.5: PB-5's box per twinned call, nit 9's box per built field
+or element pointer, the f(p, <-ch) divergence (MnLaterArg), RecvGenerator CS1620 (byref-mixed).
+
+**Open, for G.**
+- The 16 P rows left at arm T-P (12.5): casLoop x3 (ruled no code), chunked.cs `bw.Value.Writer.Value`,
+  filetransport.cs `t.fh`, runtime mcache x3, and the 8 refused locals (`loop` 3, `declaration` 5).
+- Timed arms (PB-1, PB-4) and an A/A pair: none run on this box; they wait for G's laptop.
+- The BOARD rows: RecvGenerator CS1620, and the f(p, <-ch) divergence.
+- The GoFieldAccess box rule still has no unit (the GenTests Roslyn parses C# 13; section 14's named limit).
