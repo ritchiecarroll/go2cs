@@ -353,7 +353,15 @@ differences above.
   default from the packages. A trimmed publish runs, and its output matches the untrimmed build's. It warns
   (on linux-x64): one IL2104 for each `go.*` package with trim warnings, a handful for a program that uses `fmt`, and
   `-p:TrimmerSingleWarn=false` lists the warnings behind them, most of them golib's, `runtime`'s and `reflect`'s use
-  of reflection. A project built from the converted source lists them all.
+  of reflection. A project built from the converted source lists them all. A Native AOT publish adds two more codes: one IL3053
+  for each package with AOT analysis warnings (three: `runtime`, `internal.abi` and `reflect`), and one IL3000, where
+  `runtime` reads `Assembly.Location` to open a symbol file; the path is empty in a native image, and `runtime` falls
+  back to reading the file another way.
+  <!-- IL3053 and IL3000: P3's cold first-user pass on the published 1.26.11.1 packages (linux-x64, .NET SDK 10.0.404,
+       mailbox 2026-11-19 23:12Z): the colordemo's `dotnet publish -r linux-x64 -p:PublishAot=true` warned 12 times,
+       8 IL2104 (the eight packages named below), 3 IL3053 (runtime, internal.abi, reflect) and 1 IL3000
+       (runtime/managed_impl.cs, Assembly.Location in openPortablePdb). The codes were named only in
+       PLAN-golib-full-trim.md before. First post-.4 docs batch, COORD 2026-11-20 07:19Z. -->
   <!-- Trim warnings: P1's reconciliation, linux-x64, go1.26.10, .NET SDK 10.0.112, at a8821c781a
        (claude/p1-trim-recon ddf7c054d7, docs/phase4/DATA-trim-recon-p1-2026-10-24.md §2-§4). A fmt program converted
        with -recurse=nuget against a local feed of the closure's packages: rc 0 and 8 IL2104, one each for errors,

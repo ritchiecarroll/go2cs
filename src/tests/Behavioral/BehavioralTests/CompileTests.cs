@@ -907,6 +907,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
 
     [TestMethod]
+    public void CheckGenericHolderForeignConstraint() => CheckTarget("GenericHolderForeignConstraint");
+
+    [TestMethod]
     public void CheckGenericInstClosedIface() => CheckTarget("GenericInstClosedIface");
 
     [TestMethod]

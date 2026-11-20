@@ -875,6 +875,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
 
     [TestMethod]
+    public void CheckGenericHolderForeignConstraint() => CheckTarget("GenericHolderForeignConstraint");
+
+    [TestMethod]
     public void CheckGenericInstClosedIface() => CheckTarget("GenericInstClosedIface");
 
     [TestMethod]
