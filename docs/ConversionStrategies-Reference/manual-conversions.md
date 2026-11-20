@@ -642,7 +642,7 @@ variadic `Call`/`CallSlice`, and `reflectlite`'s `rtype.Name` — are hand-owned
 
 <a id="variadic-call-and-makefunc-under-native-aot"></a>
 **A variadic `Call` and `MakeFunc` work under Native AOT through compiled trampolines that go2cs-gen
-registers.** A converted Go variadic takes its tail as a C# `Span<T>`, so it is a golib `Funcꓸꓸꓸ<…>` or
+registers.** A converted Go variadic takes its tail as golib's `variadic<T>` pack, so it is a golib `Funcꓸꓸꓸ<…>` or
 `Actionꓸꓸꓸ<…>` delegate, and `reflect` calls or makes one through a generic trampoline closed over that
 delegate's own type arguments (`GoReflect.VariadicRegistry.cs`). The JIT closes such a trampoline for any types.
 Native AOT has code for it only when compiled code named the instantiation, and a value type such as `@string`, a
@@ -2951,10 +2951,11 @@ what keeps `Name()` and the descriptor's `TFlagNamed` agreeing with the string.
 **The variadic tail is recognized by SHAPE, not by the delegate family's name.** The golib families
 carry a name marker and the detection used to rely on it, but a declared `func(string, ...int)` used
 as a method group in an `any` position acquires C#'s NATURAL delegate type instead, whose name carries
-no marker — so it reported non-variadic and `In(1)` handed back a raw `Span<int>`, rendering
-``func(string, Span`1)``. A `Span<T>` parameter cannot arise any other way in converted code (Go has
-no such type, and the converter emits one only for a variadic tail), so testing for it subsumes the
-name test rather than widening it.
+no marker — so it reported non-variadic and `In(1)` handed back the raw tail type, rendering
+``func(string, Span`1)`` in the releases whose tail was a `Span<T>`. A `variadic<T>` parameter cannot
+arise any other way in converted code (Go has no such type, and the converter emits one only for a
+variadic tail), so testing for it subsumes the name test rather than widening it.
+<!-- the shape test: src/core/golib/GoReflect.TypeLayout.cs:1567 `tail.GetGenericTypeDefinition() == typeof(variadic<>);` (wall E moved it from Span<>). -->
 
 Residual, stated rather than hidden: a defined **methodless** func type has no managed identity — the
 converter renders it inline as its base delegate family — so it is indistinguishable from an unnamed
@@ -4552,7 +4553,7 @@ exactly what the descriptor's **dims cargo** already carries for every declared 
 construction is the `(managed type, dims)` pair `abi.TypeOf` reaches from a live `[n]T` value. The hand-own
 `reflect/value_impl.cs` builds it, beside its sibling constructor `PointerTo`:
 
-<!-- source: src/core/reflect/value_impl.cs:3692-3713 -->
+<!-- source: src/core/reflect/value_impl.cs:3685-3706 -->
 ```csharp
 public static Type ArrayOf(nint length, Type elem) {
     if (length < 0) {

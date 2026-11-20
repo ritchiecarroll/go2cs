@@ -875,22 +875,24 @@ The full identity enumeration golib maintains (invariant: **nil ⟺ `m_array is 
 | `s[a:a]`, `s[len(s):]` of non-nil `s` (even cap 0) | non-nil empty | `Reslice` shares the real backing array |
 | `append(emptySlice)` — nothing to add | that same non-nil empty | `Append` identity return |
 | `append(s, elems...)` with elements | non-nil | in-place or reallocated — always a real array |
-| `f()` — zero-argument variadic call | nil | empty `params` pack → `Span<T>.slice()` answers `default` |
-| `f(nilSlice...)` — spread of nil | nil | `ꓸꓸꓸ`/`ToSpan` of a null backing → same path |
-| `f([]T{}...)`, `f(x[:0]...)` — spread of non-nil empty | non-nil empty | span carries a real reference → the copy path |
+| `f()` — zero-argument variadic call | nil | empty literal `params` pack → its `.slice()` copies through `Span<T>.slice()`, which answers `default` |
+| `f(nilSlice...)` — spread of nil | nil | the `variadic<T>` pack carries the caller's nil slice, and `.slice()` hands it back |
+| `f([]T{}...)`, `f(x[:0]...)` — spread of non-nil empty | non-nil empty | the pack carries the caller's slice itself, and `.slice()` hands it back |
 
-The last three rows rest on one fact. Copied through `ReadOnlySpan<T>.ToArray()`, a zero-argument
+A spread passes the caller's slice itself, as Go does, so the last two rows need nothing more. The
+zero-argument row rests on one fact. Copied through `ReadOnlySpan<T>.ToArray()`, a zero-argument
 variadic call's pack would be a non-nil empty where Go passes nil, because `Array.Empty<T>()` is a real
 (hence non-nil) backing array. Nil-ness crosses the C# `params` boundary intact once you read the right
 property: **a span's data reference is null exactly when Go's slice header's data pointer is nil**,
 which is the same invariant `slice<T>` already keeps one level up (`m_array is null` ⟺ nil).
 `SliceExtensions.slice<T>(this Span<T>, …)` answers `default` for an empty pack whose reference
-is null and takes the copy path otherwise, which separates all three variadic shapes above. Roslyn's
+is null and takes the copy path otherwise, which keeps the zero-argument call nil. Roslyn's
 choice of `default(Span<T>)` for an empty pack is not language-guaranteed, but the degradation if it
 ever changes is to a real reference (hence non-nil), never to a nil where Go
-has storage; the spread half depends on golib's own `ToSpan`, not on the compiler. One residual, from
-`ToSpan` rather than from the rule: a zero-size element type (`[]struct{}`) spans as `Span<T>.Empty`
-when empty, so an empty non-nil slice of a zero-size type reads as nil across a spread.
+has storage. Releases whose pack was a `Span<T>` read a spread through golib's `ToSpan` too, and so
+read an empty non-nil slice of a zero-size element type (`[]struct{}`, which spans as `Span<T>.Empty`)
+as nil across a spread; the `variadic<T>` pack carries the slice and has no such residual.
+<!-- src/core/golib/variadicPack.cs:117-118 `pack.IsSpread ? pack.Spread : pack.Elements.slice();` -->
 
 (Guarded by the `SliceNilVsEmpty` behavioral test — every row of the table probed with `s == nil`,
 `len`, and `cap` against `go run`; `resliceTailCapZero` discriminates the operator fix, `nilReslice`
@@ -1095,8 +1097,8 @@ answers the ONE shared element (Go computes `&s[i]` as `data + i*0`, so every in
 address), and `range` is a counted loop.
 
 **A slice-typed spread operand travels AS THE SLICE IT IS.** `Span<T>.Length` is `int32` while a Go
-slice length is `int`, so a spread projected to a span (`ꓸꓸꓸ`, golib's `Span<T>` projection of a slice)
-could not carry `slices.Grow`'s `append(s[:cap(s)], make([]E, n)...)` to `n == MaxInt`. The emission
+slice length is `int`, so a spread projected to a span (`ꓸꓸꓸ` was golib's `Span<T>` projection of a slice
+before the `variadic<T>` pack replaced it) could not carry `slices.Grow`'s `append(s[:cap(s)], make([]E, n)...)` to `n == MaxInt`. The emission
 therefore passes a slice-typed operand whole to golib's `appendꓸꓸꓸ`, whose name carries the spread:
 <!-- history: until 2026-08-27 a spread emitted as append(dst, src.ꓸꓸꓸ), projecting every operand to a span. -->
 
@@ -1889,7 +1891,7 @@ emitted both public; the CS0111 held fmt's (63 verdicts) and archive/tar's (97) 
 
 The non-generic overload is explicit —
 
-<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:129 -->
+<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:133 -->
 ```csharp
 ISlice? ISlice.Append(object[] elems) => ((ISlice)m_value).Append(elems);
 ```
