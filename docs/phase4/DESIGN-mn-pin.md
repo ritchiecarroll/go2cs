@@ -514,3 +514,36 @@ bytes, `Enqueue` inlined again and one `HandToIdle` call. `Commit` calls `Ready`
   visible as MISSED.
 - P3's note, recorded as the named candidate for item 11 (park step thin), not tested here: the cost may sit in
   `Enqueue`'s `ClaimIdle` lock.
+
+## 15. P3's MUST on the pin build: the shared-pool floor (dated block, 2026-11-20)
+
+P3's one-pass read of `7cef357ae9` found the shared pool could fall to ZERO and strand the queue. (a) A goroutine that
+ends locked retired its carrier with no replacement, even an ordinary shared carrier that never pinned. (b) A RUNNING
+pinned carrier counted as shared capacity in the retire rule. P3's two SHOULDs: both rooms read the shared count,
+and a standing reading of the floor.
+
+**Red first, each named by MnLockPin's watchdog** (`MN_PIN_SCENARIO`, `GO2CS_MN_PROCS=4`, 10 s deadline):
+- Scenario A, four goroutines that lock, compute 50 ms and end without parking, then one unlocked goroutine readied:
+  `MNPIN-WATCHDOG arm=scenA`, rc 3, 2 runs of 2.
+- Scenario B, K = P goroutines that lock, park once, compute 150 ms and end locked, with main readied by their
+  sends: `arm=scenB`, rc 3, 3 runs of 3. A first form, where main waited in `WaitGroup.Wait`, stayed green. That
+  wait is a plain block, which never queues main, so the scenario needs a twin park.
+
+**The fix:** a pinned-carrier count, `s_pinnedCount`, kept under the carriers' lock at pin, unpin and retire.
+`SharedUnblocked()` is the carriers that are neither pinned nor blocked: `Count - s_pinnedCount - (s_blocked -
+s_pinnedWaiting)`. The idle retire, `EnsureCarrier`'s room and the injection room all read it (the RAW switches keep
+the old raw count for the arms). `RefillShared()` keeps at least P shared carriers. It runs when a carrier pins, and
+when a retiring thread leaves, inside the same lock, whatever the queue holds. `CheckIdleSet` reads the floor on every
+reading tick (`shared-floor-violations`).
+
+| reading | result |
+|---|---|
+| scenario A / B after the fix | green 3 of 3 each; 4 carriers retired and 4 replacements started (`carriers-started` 8); floor violations 0 |
+| MnLockPin | green 3/3, output = plain, idle-set and floor violations 0 |
+| M3 K = 24 / M3b 100 ms / the 11.1 shape | 962,181 to 1,019,784 trips/s / p99 0.370 ms, max 1.46 ms / peak carriers 34; floor violations 0 |
+| **P1 guard, rule fixed first** | A/A 1,059.7 vs 1,060.7 ns (0.09%), so the line is 2%; base vs floor 1,085.8 vs 1,116.6 (32 + 32): **+2.84%, MISSED** |
+
+**Mechanism read for the P1 miss (a hypothesis, untested):** unlocked ping-pong never pins, and the floor fix touches
+only the pin, retire and room paths. So this reading most likely carries the cure's own cost, which has read +1.3%
+to +2.7% across sessions (14.1, 14.2), and not anything the floor adds. The one-axis read that would separate them,
+cure+(c) vs the floor fix, was not in the ruled protocol, and it is not run.

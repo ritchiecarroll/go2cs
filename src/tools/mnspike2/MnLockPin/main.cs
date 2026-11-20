@@ -25,6 +25,8 @@ internal const nint shapeWait = 6;
 internal const nint shapeNest = 7;
 internal const nint shapeExit = 8;
 internal const nint shapeUnpin = 9;
+internal const nint shapeScenA = 10;
+internal const nint shapeScenB = 11;
 
 // echo answers round trips until it is sent a negative value. It is never locked, so it checks after every park that
 // it is not on a thread a locked goroutine holds.
@@ -246,7 +248,80 @@ internal static void unpin(nint rounds, channel<nint> done) {
     done.ᐸꟷ(shapeUnpin);
 }
 
+// P3's MUST (DESIGN-mn-pin.md 15), scenario A: goroutines that lock, compute and END locked without parking. Each
+// takes its carrier with it; the unlocked goroutine readied afterwards must still find a carrier.
+internal static void lockAndEnd(nint ms, channel<nint> done) {
+    runtime.LockOSThread();
+    spinMs(ms);
+    done.ᐸꟷ(1);
+}
+
+internal static void answer(channel<nint> ch) {
+    ch.ᐸꟷ(7);
+}
+
+internal static void scenarioA(nint k) {
+    armStart(shapeScenA);
+    nint ms = 50;
+    var done = new channel<nint>(k);
+
+    for (nint i = 0; i < k; i++) {
+        goǃ(lockAndEnd, ms, done);
+    }
+
+    for (nint i = 0; i < k; i++) {
+        ᐸꟷ(done);
+    }
+
+    var ch = new channel<nint>(0);
+    goǃ(answer, ch);
+    ᐸꟷ(ch);
+    armDone(shapeScenA);
+    fmt.Println("scenario A finished: true");
+}
+
+// Scenario B: K = P goroutines lock, park once (pinned), then compute over 100 ms at once and end locked; the last
+// send readies main (a twin park, not a thread block), which must still find a carrier.
+internal static void lockParkCompute(channel<nint> release, channel<nint> done, nint ms) {
+    runtime.LockOSThread();
+    ᐸꟷ(release);
+    spinMs(ms);
+    done.ᐸꟷ(1);
+}
+
+internal static void scenarioB(nint k) {
+    armStart(shapeScenB);
+    nint ms = 150;
+    var release = new channel<nint>(0);
+    var done = new channel<nint>(k);
+
+    for (nint i = 0; i < k; i++) {
+        goǃ(lockParkCompute, release, done, ms);
+    }
+
+    for (nint i = 0; i < k; i++) {
+        release.ᐸꟷ(1);
+    }
+
+    for (nint i = 0; i < k; i++) {
+        ᐸꟷ(done);
+    }
+
+    armDone(shapeScenB);
+    fmt.Println("scenario B finished: true");
+}
+
 internal static void main() {
+    if (scenario() == "A") {
+        scenarioA(procs());
+        return;
+    }
+
+    if (scenario() == "B") {
+        scenarioB(procs());
+        return;
+    }
+
     controlForeign();
     var done = new channel<nint>(0);
     nint rounds = roundsOf(20000);

@@ -16,7 +16,7 @@ namespace go;
 partial class main_package {
 
 private static readonly string[] s_shapeNames =
-    ["chan", "select", "nested", "foreign", "sleep", "mutex", "wait", "nest", "exit", "unpin"];
+    ["chan", "select", "nested", "foreign", "sleep", "mutex", "wait", "nest", "exit", "unpin", "scenA", "scenB"];
 
 private static readonly Thread?[] s_pinned = new Thread?[s_shapeNames.Length];
 private static readonly long[] s_changes = new long[s_shapeNames.Length];
@@ -151,7 +151,7 @@ private readonly struct PreWoken : ICriticalNotifyCompletion {
 
 internal static void report() {
     for (int i = 0; i < s_shapeNames.Length; i++) {
-        if (i == shapeExit)
+        if (i == shapeExit || i >= shapeScenA)
             continue;
 
         fmt_package.Println("shape", s_shapeNames[i], "thread-changes:", s_changes[i]);
@@ -165,3 +165,21 @@ internal static void report() {
 }
 
 } // end main_package
+
+partial class main_package {
+
+// DESIGN-mn-pin.md 15: the scenario this run is (MN_PIN_SCENARIO=A or B; empty runs the identity arms), the P the
+// scheduler reads (GO2CS_MN_PROCS, else the processor count), and a CPU spin outside any park.
+internal static @string scenario() => Environment.GetEnvironmentVariable("MN_PIN_SCENARIO") ?? "";
+
+internal static nint procs() =>
+    nint.TryParse(Environment.GetEnvironmentVariable("GO2CS_MN_PROCS"), out nint p) && p > 0 ? p : Environment.ProcessorCount;
+
+internal static void spinMs(nint ms) {
+    long until = System.Diagnostics.Stopwatch.GetTimestamp() + ms * System.Diagnostics.Stopwatch.Frequency / 1000;
+
+    while (System.Diagnostics.Stopwatch.GetTimestamp() < until)
+        Thread.SpinWait(32);
+}
+
+} // end main_package (scenarios)

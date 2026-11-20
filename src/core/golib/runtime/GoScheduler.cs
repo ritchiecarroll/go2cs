@@ -174,6 +174,13 @@ public static class GoScheduler
                     Interlocked.Increment(ref s_idleSetViolations);
             }
         }
+
+        // DESIGN-mn-pin.md 15 (P3's SHOULD 3): the shared-pool floor, a standing reading: at least P shared carriers.
+        lock (s_carriersLock)
+        {
+            if (s_carriers.Count - s_pinnedCount < s_procs)
+                Interlocked.Increment(ref s_sharedFloorViolations);
+        }
     }
 
     // Takes one carrier out of the idle set: `prefer` when it is idle, else the one that went idle last. The caller
@@ -212,6 +219,31 @@ public static class GoScheduler
     private static int s_idle;
     private static int s_overBudget;
     private static int s_blocked;
+
+    // DESIGN-mn-pin.md 15 (P3's MUST on the pin build): carriers pinned to a goroutine, running or waiting, kept under
+    // s_carriersLock at pin, unpin and retire. A pinned carrier serves one goroutine, so it is never shared capacity.
+    private static int s_pinnedCount;
+    private static long s_sharedFloorViolations;
+
+    // The shared carriers that are not blocked: what the idle retire, EnsureCarrier and the injection read (under
+    // s_carriersLock). s_blocked holds the pinned carriers that wait (s_pinnedWaiting) as well as the shared ones.
+    private static int SharedUnblocked() =>
+        s_carriers.Count - s_pinnedCount - (Volatile.Read(ref s_blocked) - Volatile.Read(ref s_pinnedWaiting));
+
+    // Keeps at least P shared carriers (under s_carriersLock; AddCarrier takes it again, reentrantly), so Enqueue's
+    // assumption that a shared carrier exists always holds.
+    private static void RefillShared()
+    {
+        while (s_carriers.Count - s_pinnedCount < s_procs)
+        {
+            int before = s_carriers.Count;
+            AddCarrier();
+
+            if (s_carriers.Count == before)
+                break;
+        }
+    }
+
     private static int s_peakCarriers;
     private static int s_peakThreads;
     private static long s_steps;
@@ -408,7 +440,7 @@ public static class GoScheduler
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
                $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
                $" pin-retired={Interlocked.Read(ref s_pinRetired)} peak-pinned-waiting={Volatile.Read(ref s_peakPinnedWaiting)}" +
-               $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)} idle-handoffs={Interlocked.Read(ref s_idleHandoffs)} idle-set-violations={Interlocked.Read(ref s_idleSetViolations)}" +
+               $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)} idle-handoffs={Interlocked.Read(ref s_idleHandoffs)} idle-set-violations={Interlocked.Read(ref s_idleSetViolations)} shared-floor-violations={Interlocked.Read(ref s_sharedFloorViolations)}" +
                $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading();
     }
 
@@ -490,7 +522,7 @@ public static class GoScheduler
         bool room;
 
         lock (s_carriersLock)
-            room = s_carriers.Count - Volatile.Read(ref s_blocked) < s_procs;
+            room = SharedUnblocked() < s_procs;
 
         if (room)
             AddCarrier();
@@ -690,7 +722,7 @@ public static class GoScheduler
                 // DESIGN-mn-pin.md 11.1: the UNBLOCKED count, as the retire and EnsureCarrier read it; a pinned carrier
                 // waiting for its goroutine is blocked and runs nothing queued.
                 lock (s_carriersLock)
-                    room = s_carriers.Count - (s_roomRaw ? 0 : Volatile.Read(ref s_blocked)) < s_procs + over;
+                    room = (s_roomRaw ? s_carriers.Count : SharedUnblocked()) < s_procs + over;
 
                 if (room)
                     AddCarrier();
@@ -817,8 +849,13 @@ public static class GoScheduler
                 // 3.4: the goroutine ended locked to this thread, so the thread ends with it, as Go terminates it.
                 if (m_retiring)
                 {
+                    // DESIGN-mn-pin.md 15 (P3's MUST, (i)): the retiring thread starts its replacement whenever fewer
+                    // than P shared carriers remain, whatever the queue holds: a later Enqueue would strand too.
                     lock (s_carriersLock)
+                    {
                         s_carriers.Remove(this);
+                        RefillShared();
+                    }
 
                     Interlocked.Increment(ref s_pinRetired);
                     return;
@@ -870,7 +907,7 @@ public static class GoScheduler
                     // them would let every shared carrier retire under K >= P pinned and parked.
                     lock (s_carriersLock)
                     {
-                        if (s_carriers.Count - (s_retireRaw ? 0 : Volatile.Read(ref s_blocked)) > s_procs)
+                        if ((s_retireRaw ? s_carriers.Count : SharedUnblocked()) > s_procs)
                         {
                             s_carriers.Remove(this);
                             return;
@@ -1008,6 +1045,13 @@ public static class GoScheduler
                     {
                         m_pinned = goroutine;
                         Interlocked.Increment(ref s_pins);
+
+                        // DESIGN-mn-pin.md 15: this carrier leaves the shared pool, which is refilled to P at once.
+                        lock (s_carriersLock)
+                        {
+                            s_pinnedCount++;
+                            RefillShared();
+                        }
                     }
 
                     goroutine.m_pin = this;
@@ -1016,6 +1060,9 @@ public static class GoScheduler
                 {
                     goroutine.m_pin = null;
                     m_pinned = null;
+
+                    lock (s_carriersLock)
+                        s_pinnedCount--;
                 }
 
                 slot.Commit(goroutine, continuation);
@@ -1024,7 +1071,15 @@ public static class GoScheduler
             {
                 // The goroutine ended (the fourth case was refused above). Locked: this thread ends with it (3.4).
                 goroutine.m_pin = null;
-                m_pinned = null;
+
+                if (m_pinned is not null)
+                {
+                    m_pinned = null;
+
+                    lock (s_carriersLock)
+                        s_pinnedCount--;
+                }
+
                 m_retiring = locked;
             }
         }
