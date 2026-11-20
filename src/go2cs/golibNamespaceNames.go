@@ -219,6 +219,8 @@ var golibFriendNamespaceTypes = nameSet(
 	"SelectRuntime",
 	"SelectState",
 	"StringLiteralCache",
+	"ViewCensus",
+	"ViewCensusTally",
 	"ViewEntry",
 	"ViewTable",
 	"Waiter",
