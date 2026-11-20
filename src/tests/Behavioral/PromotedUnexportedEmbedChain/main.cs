@@ -14,7 +14,7 @@ partial struct wrap {
 
 } partial class mainᴛwrap {
 
-internal static void add(this ref wrap w, @string s) { w.Link.baseLink.BaseInline.BaseNode.Add(s); }
+internal static void add(this ref wrap w, @string s) { w.Add(s); }
 
 } partial class main_package {
 

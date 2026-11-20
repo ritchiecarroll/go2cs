@@ -2500,6 +2500,18 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						}
 
 						if allValueChain {
+							// Whether some hop is an UNEXPORTED embed of a FOREIGN package: its accessor is
+							// `internal` to that package's assembly, so no spelled hop path can pass it, and the
+							// call goes to the outer value instead (see the arm below this one, board pp).
+							foreignUnexportedHop := false
+
+							for _, hop := range hopFields {
+								if !hop.Exported() && hop.Pkg() != nil && hop.Pkg() != v.pkg {
+									foreignUnexportedHop = true
+									break
+								}
+							}
+
 							// When the base is the current method's OWN receiver and that method is NOT
 							// direct-ж, the receiver renders as `this ref T` with NO box — the descent's
 							// `Ꮡrecv.of(…)` references a nonexistent `Ꮡrecv` (CS0103; runtime mgcscavenge
@@ -2515,6 +2527,15 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							if recvIdent, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
 								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(recvIdent, recvName) &&
 									v.getIdentName(recvIdent) == recvIdent.Name && !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
+									// Through a FOREIGN UNEXPORTED hop the spelled path names that hop's internal
+									// accessor (`w.Link.baseLink…Add(s)`, CS0122; P3 132359Z, SHOULD 1): call the
+									// promoted method on the `ref` receiver itself, which binds the outer type's
+									// generated `ref` forwarder, as the arm below does for any other base.
+									if foreignUnexportedHop {
+										return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil),
+											v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+									}
+
 									hopPath := make([]string, 0, len(hopFields))
 
 									for _, hop := range hopFields {
@@ -2551,15 +2572,6 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							// `l.of(ast.Link.ᏑbaseLink).of(ast.baseLink.ᏑBaseInline)…AppendChild(…)` (board
 							// pp; guarded by PromotedUnexportedEmbedChain). An EXPORTED hop before the
 							// unexported one (`Image{Inline{inner{BaseNode}}}`) has the same answer.
-							foreignUnexportedHop := false
-
-							for _, hop := range hopFields {
-								if !hop.Exported() && hop.Pkg() != nil && hop.Pkg() != v.pkg {
-									foreignUnexportedHop = true
-									break
-								}
-							}
-
 							if foreignUnexportedHop {
 								if ofIndex := strings.LastIndex(fieldAddr, ".of("); ofIndex != -1 && strings.HasSuffix(fieldAddr, ")") {
 									box := fieldAddr[:ofIndex]
@@ -2567,7 +2579,9 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 									// A COPY box (`Ꮡ(v)`, an addressable value with no box of its own) would take
 									// the promoted pointer method's writes into the copy and drop them. The value
 									// itself is the receiver: the generated `ref` forwarder binds it in place. A
-									// direct-ж target has no `ref` forwarder and keeps the box.
+									// direct-ж target has no `ref` forwarder and keeps the box. The copy box is
+									// recognized by its SPELLING, `Ꮡ(<expr>)`, which convUnaryExprCore's last-resort
+									// address arms produce; a change there must keep this test in step.
 									if strings.HasPrefix(box, AddressPrefix+"(") && !v.selectorTargetIsDirectBoxMethod(selectorExpr) {
 										box = v.convExpr(selectorExpr.X, nil)
 									}
