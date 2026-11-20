@@ -4140,6 +4140,21 @@ release published nothing: §2, AMENDED
    - **An entry that matches nothing is red too.** After a release publishes, delete the entries it announced: they
      are its baseline now.
    - **`-VerifyOnly`** proves the tool restores and every suppression file reads.
+   **The GitHub Release body** *(added 2026-11-20: the owner's ruling of 2026-11-19 for 1.26.11.1)*: the draft that
+   `release-binaries.yml` opens is published with the release's NEWS entry as its body, from the bold version line
+   down, after three changes and no others:
+   - HTML comments are removed;
+   - every relative link is rooted at `https://github.com/ritchiecarroll/go2cs/blob/master/docs/`, so it resolves
+     from the Release page;
+   - each paragraph and list item is one line. GitHub renders a line break inside a Release body as a break, where
+     the docs site joins the lines, so a body pasted with the docs' wrapping breaks mid-sentence.
+
+   Then compare the words of the result with the words of the NEWS entry, comments and link targets aside: they must
+   be the same. The coordinator's unwrap script makes the three changes and that comparison.
+   <!-- Owner, 2026-11-19, at the 1.26.11.1 publish (relayed by COORD, first post-.4 docs batch, 2026-11-20 07:19Z):
+        the Release body is the NEWS entry with comments stripped, links rooted at master/docs and unwrapped; COORD's
+        unwrap_md.py, words checked unchanged. The published Release nuget-1.26.11.1 is the first one made this way.
+        PLAN-rebank-1-26-11-1.md item 9 named the body as the NEWS entry from "NuGet 1.26.11.1" down. -->
 4. **To resume a failed Phase 2, NEVER re-run release-nuget** — it re-bumps the version. Run the signer's census,
    then the signer with `-Apply -Overwrite` (one PIN), then Phase 3's exact push. Nothing is re-packed.
 5. **After the publish**, "indexed" means every id in the walkthrough's restore closure is listed — a partial
