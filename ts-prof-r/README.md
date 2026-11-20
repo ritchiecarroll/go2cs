@@ -62,3 +62,39 @@ Scratch, not for master. These are raw tables for P3. R has not analysed them.
 
 `ts-profile.ps1` (launch, attach, optional gcdump), `ts-control.sh` (cut 8), `traceagg-Program.cs` + `traceagg.csproj`
 (the aggregator, Microsoft.Diagnostics.Tracing.TraceEvent 3.1). Local paths are replaced by placeholders.
+
+## Round 2 (2026-11-20, P3's cuts 9-12) and a CORRECTION to round 1
+
+**CORRECTION, scored against round 1.** Round 1 read `Thread.PollGC` (39% exclusive in the type-check phase) as the work
+thread suspended for GC, and gave tr1's GC pause as 17.2% of the trace. Both were wrong.
+- All 6,551 type-check PollGC samples fall inside runtime suspensions with reason `SuspendOther`: 44,463 of them in tr1,
+  16.8 s in total. Those are the sample profiler's own stack-walk suspensions, not GCs. A thread in a loop is caught at its
+  poll, so the PollGC split by holder is ordinary CPU by method (P3's reading, as P3 predicted).
+- The old pause figure summed every suspension, the sampler's included. Counting only GC-reason suspensions, tr1 shows
+  332 ms, but tr1 cannot separate GC pause by reason: it has 63 collections and only 19 GC-reason suspensions, so
+  collections ran inside the sampler's suspensions (the longest SuspendOther is 647 ms).
+- The reliable GC figures are the sampler-free gc-collect runs (`control-gc-suspensions.txt`):
+  - server: 13.2 s SuspendForGC + 0.3 s prep = 12.8% of the run, 39 collections;
+  - workstation: 56.4 s + 0.8 s = 36.4%.
+- The aggregator now counts only `SuspendForGC*` suspensions as GC pause, and prints every suspension reason.
+
+**9 and 10, PollGC split** (`tr1-check-r2.txt`, `tr1-work-r2.txt`): by the first frame above the poll, and by the nearest
+converted caller. Placement against suspensions: type-check 6,551 of 6,551 inside SuspendOther. Work phase: 25,198
+inside SuspendOther, 2 inside SuspendForGCPrep, 6 outside any suspension.
+- Type-check holders: `Dictionary<go.string,__Canon>.Resize` 46.2%, `Buffer.BulkMoveWithWriteBarrier` 42.0%,
+  `Array.Copy` 2.7%.
+
+**11, callee splits, type-check phase** (`tr1-check-r2.txt`; inclusive, top 15 children, plus own exclusive):
+`Dictionary<go.string,__Canon>.Resize` 19.9% of the phase; `slice.Append(ref, ReadOnlySpan, bool)` 11.9%;
+`Binder.declareSymbolEx` 44.8% (43% of it in `Dictionary.TryInsert`, 38% in `addDeclarationToSymbol`);
+`FieldRefBox<Node>.Equals` 3.7%; `builtin.TryTypeAssert` 2.7%. The callers of `Monitor.Enter_Slowpath` (1.4%): 83% are
+`ManagedPointerTokens.IdentityOf`.
+
+**12, gen0 budget** (`gen0.txt`; untraced, 3 each, alternating, base first):
+- server GC as published: 87.8 / 82.7 / 83.9 s, median 83.9;
+- `DOTNET_GCgen0size=0x10000000`: 81.6 / 81.5 / 82.8 s, median 81.6.
+
+That is -2.7% on the median wall, with the ranges overlapping (base 82.7-87.8, arm 81.5-82.8). CPU time fell from
+200 / 192 / 193 s to 178 / 181 / 183 s, about -7%. P3's prediction of a 5-12% wall fall MISSED as worded; by P3's own
+falsifier the change sits inside the base's spread. The box was faster than in round 1's control (base median then
+99.4 s), so compare only within this pair.

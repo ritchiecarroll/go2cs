@@ -1,0 +1,6 @@
+srv-gc: ## GC (whole trace, not phase-filtered): gen0 18, gen1 11, gen2 10; pause total 13470 ms = 12.8% of the trace; peak heap (GCHeapStats sum) 3854 MB
+srv-gc: ## suspensions, reason SuspendForGC: 29 intervals, 13188 ms total, longest 2570.4 ms
+srv-gc: ## suspensions, reason SuspendForGCPrep: 10 intervals, 282 ms total, longest 78.9 ms
+wks-gc: ## GC (whole trace, not phase-filtered): gen0 41, gen1 1929, gen2 97; pause total 57156 ms = 36.4% of the trace; peak heap (GCHeapStats sum) 870 MB
+wks-gc: ## suspensions, reason SuspendForGC: 1972 intervals, 56403 ms total, longest 86.1 ms
+wks-gc: ## suspensions, reason SuspendForGCPrep: 96 intervals, 753 ms total, longest 16.5 ms

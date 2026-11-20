@@ -1,0 +1,7 @@
+tag=g0base1 rc=0 wall_ms=87787 cpu_ms=200078 stdout_sha16=3EB1134A0D5BFF02 lines=405 env= trace=False
+tag=g0big1 rc=0 wall_ms=81622 cpu_ms=178438 stdout_sha16=3EB1134A0D5BFF02 lines=405 env=DOTNET_GCgen0size=0x10000000 trace=False
+tag=g0base2 rc=0 wall_ms=82731 cpu_ms=192312 stdout_sha16=3EB1134A0D5BFF02 lines=405 env= trace=False
+tag=g0big2 rc=0 wall_ms=81458 cpu_ms=181406 stdout_sha16=3EB1134A0D5BFF02 lines=405 env=DOTNET_GCgen0size=0x10000000 trace=False
+tag=g0base3 rc=0 wall_ms=83918 cpu_ms=192984 stdout_sha16=3EB1134A0D5BFF02 lines=405 env= trace=False
+tag=g0big3 rc=0 wall_ms=82767 cpu_ms=183484 stdout_sha16=3EB1134A0D5BFF02 lines=405 env=DOTNET_GCgen0size=0x10000000 trace=False
+GEN0-DONE

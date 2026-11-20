@@ -25,8 +25,31 @@ var allocTypes = Opts("--alloc-type").Select(q => new Regex(q)).ToList();
 string Opt(string name) { int i = a.IndexOf(name); return i >= 0 && i + 1 < a.Count ? a[i + 1] : null; }
 IEnumerable<string> Opts(string name) { for (int i = 0; i < a.Count - 1; i++) if (a[i] == name) yield return a[i + 1]; }
 
+var calleeRes = Opts("--callee").Select(q => new Regex(q)).ToList();
+var callerRes = Opts("--caller").Select(q => new Regex(q)).ToList();
+bool pollSplit = a.Contains("--pollgc");
+
 string etlx = TraceLog.CreateFromEventPipeDataFile(path);
 using var log = new TraceLog(etlx);
+
+// Pre-pass: the runtime-suspension intervals (SuspendEE start -> RestartEE stop), each with its suspend reason, so a
+// PollGC sample can be placed inside or outside one.
+var susp = new List<(double s, double e, string reason)>(); double ss = -1; string sr = "";
+foreach (var ev in log.Events)
+{
+    if (ev is GCSuspendEETraceData se) { ss = se.TimeStampRelativeMSec; sr = se.Reason.ToString(); }
+    else if (ev.EventName == "GC/RestartEEStop" && ss >= 0) { susp.Add((ss, ev.TimeStampRelativeMSec, sr)); ss = -1; }
+}
+string SuspAt(double t)
+{
+    int lo = 0, hi = susp.Count - 1;
+    while (lo <= hi) { int mid = (lo + hi) / 2; if (susp[mid].e < t) lo = mid + 1; else if (susp[mid].s > t) hi = mid - 1; else return susp[mid].reason; }
+    return null;
+}
+var pollHolder = new Dictionary<string, long>(); var pollCaller = new Dictionary<string, long>(); var pollWhere = new Dictionary<string, long>();
+long pollTotal = 0;
+var calleeKids = new Dictionary<string, long>(); var calleeTotal = new Dictionary<string, long>();
+var callerParents = new Dictionary<string, long>(); var callerTotal = new Dictionary<string, long>();
 
 static string Name(TraceCallStack s) => s.CodeAddress.FullMethodName is { Length: > 0 } m ? $"{Mod(s)}!{m}" : $"{Mod(s)}!?";
 static string Mod(TraceCallStack s) { var m = s.CodeAddress.ModuleName ?? "?"; return m.EndsWith(".il") ? m[..^3] : m; }
@@ -57,6 +80,30 @@ foreach (var ev in log.Events)
         if (phaseRe != null && !names.Any(n => phaseRe.IsMatch(n))) continue;
         phaseSamples++;
         excl[names[0]] = excl.GetValueOrDefault(names[0]) + 1;
+        if (pollSplit && names[0].Contains("PollGC"))
+        {
+            pollTotal++;
+            int hi = names.FindIndex(n => !n.Contains("PollGC"));
+            string holder = hi >= 0 ? names[hi] : "-"; pollHolder[holder] = pollHolder.GetValueOrDefault(holder) + 1;
+            string caller = "-"; for (int i = Math.Max(hi, 0); i < frames.Count; i++) if (Class(frames[i]) == "APP") { caller = names[i]; break; }
+            pollCaller[caller] = pollCaller.GetValueOrDefault(caller) + 1;
+            string where = SuspAt(ev.TimeStampRelativeMSec) is { } r ? $"inside a suspension, reason {r}" : "outside every suspension";
+            pollWhere[where] = pollWhere.GetValueOrDefault(where) + 1;
+        }
+        foreach (var re in calleeRes)
+        {
+            int h = names.FindIndex(n => re.IsMatch(n)); if (h < 0) continue;
+            string k = re.ToString(); calleeTotal[k] = calleeTotal.GetValueOrDefault(k) + 1;
+            string child = h == 0 ? "<self, exclusive>" : names[h - 1];
+            calleeKids[$"{k} | {child}"] = calleeKids.GetValueOrDefault($"{k} | {child}") + 1;
+        }
+        foreach (var re in callerRes)
+        {
+            int h = names.FindIndex(n => re.IsMatch(n)); if (h < 0) continue;
+            string k = re.ToString(); callerTotal[k] = callerTotal.GetValueOrDefault(k) + 1;
+            string parent = h + 1 < names.Count ? names[h + 1] : "<root>";
+            callerParents[$"{k} | {parent}"] = callerParents.GetValueOrDefault($"{k} | {parent}") + 1;
+        }
         foreach (var (n, i) in names.Select((n, i) => (n, i)).DistinctBy(x => x.n))
         {
             incl[n] = incl.GetValueOrDefault(n) + 1;
@@ -90,7 +137,9 @@ foreach (var ev in log.Events)
         }
     }
     else if (ev is GCStartTraceData gs) { if (gs.Depth is >= 0 and <= 2) gcByGen[gs.Depth]++; if (gcFirst < 0) gcFirst = gs.TimeStampRelativeMSec; gcLast = gs.TimeStampRelativeMSec; }
-    else if (ev is GCSuspendEETraceData) suspendStart = ev.TimeStampRelativeMSec;
+    // Only a suspension FOR a GC counts as GC pause: the sample profiler suspends the runtime too (reason SuspendOther),
+    // and those suspensions are not GC.
+    else if (ev is GCSuspendEETraceData sx) suspendStart = sx.Reason.ToString().StartsWith("SuspendForGC") ? ev.TimeStampRelativeMSec : -1;
     else if (ev.EventName == "GC/RestartEEStop" && suspendStart >= 0) { pauseTotal += ev.TimeStampRelativeMSec - suspendStart; suspendStart = -1; }
     else if (ev is GCHeapStatsTraceData hs) { double h = hs.GenerationSize0 + hs.GenerationSize1 + hs.GenerationSize2 + hs.GenerationSize3 + hs.GenerationSize4; if (h > peakHeap) peakHeap = h; }
 }
@@ -112,6 +161,28 @@ foreach (var q in queries)
     foreach (var kv in qByKey.Where(k => k.Key.StartsWith(qk + " |")).OrderByDescending(k => k.Value).Take(15)) Console.WriteLine($"{kv.Value,8}  {kv.Key[(qk.Length + 3)..]}");
     Console.WriteLine($"   -- by nearest APP caller:");
     foreach (var kv in qByCaller.Where(k => k.Key.StartsWith(qk + " |")).OrderByDescending(k => k.Value).Take(10)) Console.WriteLine($"{kv.Value,8}  {kv.Key[(qk.Length + 3)..]}");
+}
+
+foreach (var g in susp.GroupBy(x => x.reason).OrderByDescending(g => g.Sum(x => x.e - x.s)))
+    Console.WriteLine($"## suspensions, reason {g.Key}: {g.Count()} intervals, {g.Sum(x => x.e - x.s):F0} ms total, longest {g.Max(x => x.e - x.s):F1} ms");
+if (pollSplit)
+{
+    Console.WriteLine($"## PollGC samples (leaf frame holds 'PollGC'): {pollTotal}; runtime suspensions in the trace: {susp.Count}");
+    foreach (var kv in pollWhere.OrderByDescending(k => k.Value)) Console.WriteLine($"{kv.Value,8}  {kv.Key}");
+    Table("PollGC split by the first frame above the poll (the method holding it)", pollHolder, pollTotal);
+    Table("PollGC split by the nearest APP caller", pollCaller, pollTotal);
+}
+foreach (var re in calleeRes)
+{
+    string k = re.ToString(); long tot = calleeTotal.GetValueOrDefault(k);
+    Console.WriteLine($"## CALLEES of /{k}/ (its nearest-to-leaf occurrence): inclusive {tot} ({100.0 * tot / Math.Max(1, phaseSamples):F2}% of the phase)");
+    foreach (var kv in calleeKids.Where(x => x.Key.StartsWith(k + " |")).OrderByDescending(x => x.Value).Take(15)) Console.WriteLine($"{kv.Value,8} {100.0 * kv.Value / Math.Max(1, tot),6:F2}%  {kv.Key[(k.Length + 3)..]}");
+}
+foreach (var re in callerRes)
+{
+    string k = re.ToString(); long tot = callerTotal.GetValueOrDefault(k);
+    Console.WriteLine($"## CALLERS of /{k}/: inclusive {tot} ({100.0 * tot / Math.Max(1, phaseSamples):F2}% of the phase)");
+    foreach (var kv in callerParents.Where(x => x.Key.StartsWith(k + " |")).OrderByDescending(x => x.Value).Take(15)) Console.WriteLine($"{kv.Value,8} {100.0 * kv.Value / Math.Max(1, tot),6:F2}%  {kv.Key[(k.Length + 3)..]}");
 }
 
 void Table(string title, Dictionary<string, long> d, long total)
