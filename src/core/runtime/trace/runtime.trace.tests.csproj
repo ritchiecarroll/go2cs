@@ -137,7 +137,6 @@
     <ProjectReference Include="$(go2csPath)core/flag/flag.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/internal.trace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/testtrace/internal.trace.testtrace.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />

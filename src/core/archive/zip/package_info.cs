@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -89,10 +87,10 @@ using static go.archive.zip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("archive/zip/reader.go", "reader.cs", "AB00loKCggAhXAAJAoKClIKCgpSCgoKUggAGGgAKAoKUgoKClKaigoKUgu6ClIKCgpTcgoKCgpSClIKUppSCgpS4goK4rLKClKaCgoKUqJIAAhAACAKCgpSqwoKClAAJFIKUpoKCgoKUgoKClNyqooKClILugqaCAAsYgqaygpSCgoKClIKUgoKUgoKClJSC3IK4gqaYooKClIKClIKCgqyygoCCpIKClIKCgoKCgoKCgoKCgoKCgoKCgoCCpIKCpoKCpsb8toKCmrKCgoKCgpSUlNyCgoKUlIKCgpSUgoKClMaClIKCgoKClIKCpoKCgoKCxoKUgoK0gpSC6IKCggAJFIIACxiUgqamggAKFoCCpIKCppSAgqSCggAIEuakkoKigpSCgpSCgoKUgsqCAAgSgoKUpoKCgoKUgriCgqamggAHEIKCgpK4rLKCgpSCgpSCgpSClIKClKqigoKmgoKmgoKCgoKClKaClJSCuJSmyoKCgqaCgoKmgoKCpoKCgqaCgoIAFSKigpSClKiQgKKCgoKClIKClKaUgqiSgpSUgqamgqa4griUgoKCgqaCgpSCgqaCgoKUlIKUpoLKgoKUpoKCgpTKyryCgoKClK7ilIKUgoKUgpSCgpSmooKCgpSmlIKCpoKCgoKClJSCgoKmpoKCgoKCppSCgoKmlAAIEoLUgqaCgoKUgoKUlIKCgoKCgtyUgg==", "807-881:1;878-880:1.1;935-941:1;953-960:1;961-968:2", "", "261=NewIEEE/1/1/2;636=uint16/1/5/1,uint16/2/5/2,uint16/3/5/3,uint16/4/5/4,uint32/1/2/5,uint32/2/2/6,uint16/5/5/7;1064=Errorf/1/1/3")]
-[assembly: GoPositionMap("archive/zip/register.go", "register.cs", "AB48goKClJQACxDigoKClObSgoKCgoKClAAICoKCgpSUAAsQ4oKCgpTm0oKCgoKCgpQAChCCgpSCqqKCvKKCuIKCgpSmgoKClA==", "110-110:1;111-111:2")]
-[assembly: GoPositionMap("archive/zip/struct.go", "struct.cs", "AJIByAKSAAcQgoKClJSCgoKUlIKClJSCAAIU8oK4goKClJQADSCiqoKClKyyAA4m4oKCrsKuwoKCABMuspS0pIKUqJKCpoKUgrqSpoKmooKUlIKUpoKClLS0tLS0tKSClIKUgpSmgoKUtLS0tPikgpSClIKU", "", "", "190=Name/1/1/1")]
-[assembly: GoPositionMap("archive/zip/writer.go", "writer.cs", "ABYoggAUMJKuwoKUqqLqooKUguqigoKUlIKUpoKCgoKCgoKCgoKCgriClpKCgoKCgoKUgqaCgoKCgoKUlICCpICCpICCpICCtpSCgpSCpoKCpoKCgoKCgoKCgqaCgoKUgsqCgqiSgoKCgoKCgoKAgqSAgrYAAhoACgK4rNKCgu6CgpSm6qKCgqaUlAACFAAJAoCCABMmgoKUtLaCpgAIEgABEOKCgoKCgoKmmMrKgqaCgoKUlJTKgoKUgoKClIKClIKAgraCpqKCgpSCpoKCgoKCgoK4goKCuIKClIKCgpSClIIAAhoADAKAgraClMqCgIK2goKmuIKqwoKCuIKCgpSCrLKClOyyooKUgpSCgpSClIKClIKClIKCgpSClIKClJKC6IKCgpQACQqCgpQAEBqCgpSClILmgoKUgoKUgriCgoKUgoKClIKmpoKCntKClJSCgoKCgpSClIIABxCCgoLugsqCgqaCgqaCgqaCgg==", "504-541:1", "", "393=NewIEEE/1/1/3", "589:25")]
+[assembly: GoPositionMap("archive/zip/reader.go", "reader.cs", "AB80loKCggAhXAAJAoKClIKCgpSCgoKUggAGGgAKAoKUgoKClMaigoKUgu6ClIKCgpTcgoKCgpSClIKUppSCgpS4goK4rLKClKaCgoKUyJIABBAACAKCgpSqwoKClAAJFIKUpoKCgoKUgoKClNyqooKClIIACg6CpoIADxiCprKClIKCgoKUgpSCgpSCgoKUlILcgriCpriigoKUgoKUgoKCzLKCgIKkgoKUgoKCgoKCgoKCgoKCgoKCgoKCgIKkgoKmgoKmxvy2goKasoKCgoKClJSU3IKCgpSUgoKClJSCgoKUxoKUgoKCgoKUgoKmgoKCgoLGgpSCgrSClILogoKCAAkUggALGJSCpqaCAAoWgIKkgoKmlICCpIKCAAgS5qSSgqKClIKClIKCgpSCyoIACBKCgpSmgoKCgpSCuIKCpqaCAAcQgoKCkrissoKClIKClIKClIKUgoKUqqKCgqaCgqaCgoKCgoKUpoKUlIK4lKbqgoKCpoKCgqaCgoKmgoKCpoKCggAZIqKClIKUqJCAooKCgoKUgoKUppSCyJKClJSCpsaCpriCuJSCgoKCpoKClIKCpoKCgpSUgpSmgsqCgpSmgoKClMrK3IKCgoKUzuKUgpSCgpSClIKClMaigoKClKa0goKmgoKCgoKUlIKCgqamgoKCgoKmlIKCgqaUAAwSgtSCpoKCgpSCgpSUgoKCgoKC3JSC", "807-881:1;878-880:1.1;935-941:1;953-960:1;961-968:2", "", "269=NewIEEE/1/1/2;656=uint16/1/5/1,uint16/2/5/2,uint16/3/5/3,uint16/4/5/4,uint32/1/2/5,uint32/2/2/6,uint16/5/5/7;1106=Errorf/1/1/3")]
+[assembly: GoPositionMap("archive/zip/register.go", "register.cs", "AB88goKClJQADRDigoKClObSgoKCgoKClAAKCoKCgpSUAA0Q4oKCgpTm0oKCgoKCgpQADBCCgpSCqqKCvKKCuIKCgpSmgoKClA==", "110-110:1;111-111:2")]
+[assembly: GoPositionMap("archive/zip/struct.go", "struct.cs", "AJUByAKSAAsQgoKClJSCgoKUlIKClJSCAAQU8oK4goKClJQADSCiqoKClKyyAA4m4oKCzsKuwoKCABcuspS0pIKUqJKCpoKUgrqSpoLGooKUlIKUpoKClLS0tLS0tKSClIKUgpSmgoKUtLS0tPikgpSClIKU", "", "", "199=Name/1/1/1")]
+[assembly: GoPositionMap("archive/zip/writer.go", "writer.cs", "ABgoggAUMJLOwoKUqqLqooKUguqigoKUlIKUpoKCgoKCgoKCgoKCgriClpKCgoKCgoKUgqaCgoKCgoKUlICCpICCpICCpICCtpSCgpSCpoKCpoKCgoKCgoKCgqaCgoKUgsqCgqiSgoKCgoKCgoKAgqSAgrYAAhoACgK4zNKCgu6CgpSmAAgKooKCppSUAAIUAAkCgIIAEyaCgpS0toKmAAgSAAEQ4oKCgoKCgqaYysqCpoKCgpSUlMqCgpSCgoKUgoKUgoCCtoLGooKClIKmgoKCgoKCgriCgoK4goKUgoKClIKUggAEGgAMAoCCtoKUyoKAgraCgqa4gqrCgoK4goKClIKssoKU7LKigpSClIKClIKUgoKUgoKUgoKClIKUgoKUkoLogoKClAANCoKClAAUGoKClIKUguaCgpSCgpSCuIKCgpSCgoKUgqamgoKe0oKUlIKCgoKClIKUggALEIKCggAKDoIACAqCgqaCgqaCgqaCgg==", "504-541:1", "", "401=NewIEEE/1/1/3", "601:25")]
 // </GoSourcePositionMaps>
 
 namespace go.archive;
@@ -157,3 +155,30 @@ public static partial class zip_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(zip_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛFile;
+[GoMethodHost(typeof(zip_package.FileHeader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛFileHeader;
+[GoMethodHost(typeof(zip_package.ReadCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛReadCloser;
+[GoMethodHost(typeof(zip_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛReader;
+[GoMethodHost(typeof(zip_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛWriter;
+[GoMethodHost(typeof(zip_package.checksumReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛchecksumReader;
+[GoMethodHost(typeof(zip_package.countWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛcountWriter;
+[GoMethodHost(typeof(zip_package.dirReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛdirReader;
+[GoMethodHost(typeof(zip_package.dirWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛdirWriter;
+[GoMethodHost(typeof(zip_package.fileListEntry)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛfileListEntry;
+[GoMethodHost(typeof(zip_package.fileWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛfileWriter;
+[GoMethodHost(typeof(zip_package.headerFileInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛheaderFileInfo;
+[GoMethodHost(typeof(zip_package.nopCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛnopCloser;
+[GoMethodHost(typeof(zip_package.openDir)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛopenDir;
+[GoMethodHost(typeof(zip_package.pooledFlateReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛpooledFlateReader;
+[GoMethodHost(typeof(zip_package.pooledFlateWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛpooledFlateWriter;
+[GoMethodHost(typeof(zip_package.readBuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛreadBuf;
+[GoMethodHost(typeof(zip_package.writeBuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zipᴛwriteBuf;
+// </MethodHolders>

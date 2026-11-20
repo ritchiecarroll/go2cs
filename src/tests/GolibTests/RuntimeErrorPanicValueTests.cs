@@ -69,7 +69,7 @@ public class RuntimeErrorPanicValueTests
     {
         Assert.IsNotNull(recovered, $"{site}: did not panic");
 
-        Assert.IsTrue(recovered._<Δruntime.ΔError>(out Δruntime.ΔError? error),
+        Assert.IsTrue(recovered._<Δruntime.Error>(out Δruntime.Error? error),
             $"{site}: recovered value {recovered} (type {recovered.GetType().FullName}) does not implement runtime.Error");
 
         Assert.AreEqual(want, error!.Error().ToString(), $"{site}: runtime.Error text");
@@ -600,7 +600,7 @@ public class RuntimeErrorPanicValueTests
 
         AssertRuntimeError(PanicValue(() => reflect.ValueOf(empty).MapIndex(reflect.ValueOf(OneInt()))), want, "reflect MapIndex on empty map");
         AssertRuntimeError(PanicValue(() => reflect.ValueOf(nilMap).MapIndex(reflect.ValueOf(OneInt()))), want, "reflect MapIndex on nil map");
-        AssertRuntimeError(PanicValue(() => reflect.ValueOf(nilMap).SetMapIndex(reflect.ValueOf(OneInt()), new reflect.ΔValue(nil))), want, "reflect delete on nil map");
+        AssertRuntimeError(PanicValue(() => reflect.ValueOf(nilMap).SetMapIndex(reflect.ValueOf(OneInt()), new reflect.Value(nil))), want, "reflect delete on nil map");
     }
 
     // With nothing registered, the text is still Go 1.26's (a string value, as the other fallbacks are).

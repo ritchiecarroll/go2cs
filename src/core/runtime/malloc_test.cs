@@ -618,9 +618,9 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 var doneʗ1 = done;
                 goǃ(() => {
                     for (;;) {
-                        var selᴛ70 = doneʗ1;
-                        switch (trySelect(ᐸꟷ(selᴛ70, ꓸꓸꓸ))) {
-                        case 0 when selᴛ70.ꟷᐳ(out _): {
+                        var doneᴛ1 = doneʗ1;
+                        switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+                        case 0 when doneᴛ1.ꟷᐳ(out _): {
                             return;
                         }
                         default: {
@@ -905,16 +905,16 @@ public static void BenchmarkGoroutineSelect(ж<testing.B> b) {
     var quitʗ1 = quit;
     var read = (channel<EmptyStruct> ch) => {
         for (;;) {
-            var selᴛ71 = ch;
-            var selᴛ72 = quitʗ1;
-            switch (select(ᐸꟷ(selᴛ71, ꓸꓸꓸ), ᐸꟷ(selᴛ72, ꓸꓸꓸ))) {
-            case 0 when selᴛ71.ꟷᐳ(out var _, out var ok): {
+            var chᴛ1 = ch;
+            var quitᴛ1 = quitʗ1;
+            switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(quitᴛ1, ꓸꓸꓸ))) {
+            case 0 when chᴛ1.ꟷᐳ(out var _, out var ok): {
                 if (!ok) {
                     return;
                 }
                 break;
             }
-            case 1 when selᴛ72.ꟷᐳ(out _): {
+            case 1 when quitᴛ1.ꟷᐳ(out _): {
                 return;
             }}
         }

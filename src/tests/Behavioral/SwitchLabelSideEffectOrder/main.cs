@@ -65,9 +65,9 @@ internal static void middle(nint t) {
 
 internal static void nested(@string a, nint b) {
     @string x = a + "!"u8;
-    var exprᴛ1 = x;
+    var xᴛ1 = x;
     switch (ᐧ) {
-    case {} when exprᴛ1 == s("p", "p!"): {
+    case {} when xᴛ1 == s("p", "p!"): {
         switch (b) {
         case var ᴛ when ᴛ == f("q", 1): {
             flush("nested "u8 + x, fmt.Sprint("p/q ", b));
@@ -80,7 +80,7 @@ internal static void nested(@string a, nint b) {
 
         break;
     }
-    case {} when exprᴛ1 == s("r", "r!") || exprᴛ1 == s("t", "t!"): {
+    case {} when xᴛ1 == s("r", "r!") || xᴛ1 == s("t", "t!"): {
         flush("nested "u8 + x, "rt");
         break;
     }}
@@ -105,13 +105,12 @@ internal static void iface(any v) {
 }
 
 internal static void bytesNotText(@string t, @string y) {
-    var exprᴛ1 = t;
     switch (ᐧ) {
-    case {} when exprᴛ1 == y: {
+    case {} when t == y: {
         flush(fmt.Sprintf("bytes %x"u8, t), fmt.Sprintf("matched %x"u8, y));
         break;
     }
-    case {} when exprᴛ1 == ((@string)(new byte[]{0xff})): {
+    case {} when t == ((@string)(new byte[]{0xff})): {
         flush(fmt.Sprintf("bytes %x"u8, t), "ff");
         break;
     }

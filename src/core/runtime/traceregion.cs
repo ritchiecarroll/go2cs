@@ -8,6 +8,7 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -37,6 +38,8 @@ partial struct traceRegionAllocBlockHeader {
 }
 
 internal static uintptr traceRegionAllocBlockData => /* 64<<10 - unsafe.Sizeof(traceRegionAllocBlockHeader{}) */ 65520;
+
+} partial class runtimeᴛtraceRegionAlloc {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string traceRegionAllocTooLargeˢ => ref traceRegionAllocTooLargeˢᵇ;
@@ -128,4 +131,4 @@ internal static void drop(this ж<traceRegionAlloc> Ꮡa) {
     Ꮡa.Ꮡdropping.Store(false);
 }
 
-} // end runtime_package
+} // end runtimeᴛtraceRegionAlloc

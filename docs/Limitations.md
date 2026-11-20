@@ -98,13 +98,13 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
          goroutines;
        - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
        Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws
-       System.OutOfMemoryException, synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1344
+       System.OutOfMemoryException, synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1345
        (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`); a smaller stack reserve does not raise
        the cap. Found when internal/synctest's TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac
        runners at the 1.26.10.3 re-bank. A developer Mac's cap may differ. -->
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
-  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1344 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1345 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
        Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
@@ -112,8 +112,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`, and then
   with Go's goroutine blocks. A deadlock on an ordinary channel or lock blocks forever: break in with a debugger,
   where, by default, each goroutine is a thread named `goroutine-N`.
-  <!-- src/core/golib/runtime/Goroutine.cs:1088 `internal static bool IsForeverWait(WaitReason reason) =>`
-       and :1161 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
+  <!-- src/core/golib/runtime/Goroutine.cs:1089 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :1162 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
   a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), or 16 MB when the converter proves it
   cannot recurse ([how](ConversionStrategies.md#goroutines)). Recursion past a thread's reserve ends the process
@@ -198,7 +198,7 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
   .NET's collector does not follow them.
-  <!-- src/core/runtime/managed_impl.cs:1312 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+  <!-- src/core/runtime/managed_impl.cs:1315 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
        nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
 * **Runtime introspection is thinner than Go's.** A dump of all goroutines lists each one and what it waits on,
   with frames for the calling goroutine only. `pprof.StartCPUProfile` gives a profile with no samples (profile with
@@ -353,7 +353,15 @@ differences above.
   default from the packages. A trimmed publish runs, and its output matches the untrimmed build's. It warns
   (on linux-x64): one IL2104 for each `go.*` package with trim warnings, a handful for a program that uses `fmt`, and
   `-p:TrimmerSingleWarn=false` lists the warnings behind them, most of them golib's, `runtime`'s and `reflect`'s use
-  of reflection. A project built from the converted source lists them all.
+  of reflection. A project built from the converted source lists them all. A Native AOT publish adds two more codes: one IL3053
+  for each package with AOT analysis warnings (three: `runtime`, `internal.abi` and `reflect`), and one IL3000, where
+  `runtime` reads `Assembly.Location` to open a symbol file; the path is empty in a native image, and `runtime` falls
+  back to reading the file another way.
+  <!-- IL3053 and IL3000: P3's cold first-user pass on the published 1.26.11.1 packages (linux-x64, .NET SDK 10.0.404,
+       mailbox 2026-11-19 23:12Z): the colordemo's `dotnet publish -r linux-x64 -p:PublishAot=true` warned 12 times,
+       8 IL2104 (the eight packages named below), 3 IL3053 (runtime, internal.abi, reflect) and 1 IL3000
+       (runtime/managed_impl.cs, Assembly.Location in openPortablePdb). The codes were named only in
+       PLAN-golib-full-trim.md before. First post-.4 docs batch, COORD 2026-11-20 07:19Z. -->
   <!-- Trim warnings: P1's reconciliation, linux-x64, go1.26.10, .NET SDK 10.0.112, at a8821c781a
        (claude/p1-trim-recon ddf7c054d7, docs/phase4/DATA-trim-recon-p1-2026-10-24.md §2-§4). A fmt program converted
        with -recurse=nuget against a local feed of the closure's packages: rc 0 and 8 IL2104, one each for errors,
@@ -428,8 +436,8 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4191 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
-       Example- and Benchmark-only test files are left out of the compile set, :849
+  <!-- src/go2cs/testConversion.go:4227 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+       Example- and Benchmark-only test files are left out of the compile set, :844
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.
 * **Disclosed differences are real differences.** Where a Go test asserts something a managed runtime

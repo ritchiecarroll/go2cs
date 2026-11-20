@@ -132,15 +132,14 @@ internal static void testSehCallersEqual(ж<testing.T> t, slice<uintptr> pcs, sl
             break;
         }
         @string name = fn.Name();
-        var exprᴛ1 = name;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "runtime.panicmem"u8: {
+        case {} when name == "runtime.panicmem"u8: {
             // These functions are skipped as they appear inconsistently depending
             // whether inlining is on or off.
             continue;
             break;
         }
-        case {} when exprᴛ1 == "runtime_test.sehCallers"u8: {
+        case {} when name == "runtime_test.sehCallers"u8: {
             // This is an artifact of the implementation of sehCallers.
             continue;
             break;

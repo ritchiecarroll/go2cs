@@ -458,14 +458,14 @@ public static partial void TestIssue6550(ж<testing.T> t) {
             }
             doneʗ1.ᐸꟷ(true);
         });
-        var selᴛ1 = time.After(1 * time.ΔSecond);
-        var selᴛ2 = done;
-        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+        var selᴛ1 = time.After(1 * time.Second);
+        var doneᴛ1 = done;
+        switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out _): {
             t.Errorf("Copy hung");
             break;
         }
-        case 1 when selᴛ2.ꟷᐳ(out _): {
+        case 1 when doneᴛ1.ꟷᐳ(out _): {
             // ok
             break;
         }}

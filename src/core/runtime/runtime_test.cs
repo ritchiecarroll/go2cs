@@ -282,7 +282,7 @@ internal static void testSetPanicOnFault(ж<testing.T> t, uintptr addr, ж<nint>
         // addresses that have had C or kernel pages mapped there
         // readable by user code. So just log the content.
         // If no addresses fault, we'll fail the test.
-        var v = ~(ж<byte>)(uintptr)((@unsafe.Pointer)addr);
+        var v = ~@unsafe.Pointer.To<byte>((@unsafe.Pointer)addr);
         t.Logf("addr %#x: %#x\n", addr, v);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -418,7 +418,7 @@ public static void TestAppendGrowthStack(ж<testing.T> t) {
         x = append(xᴷ, x, (int64)1);
         check(want);
         if ((i & (i - 1)) == 0) {
-            want = builtin.max(want, 2 * i);
+            want = max(want, 2 * i);
         }
     }
 }
@@ -650,9 +650,9 @@ public static partial void BenchmarkMutexContention(ж<testing.B> b) {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 for (;;) {
-                    runtime_internal_test_package.ΔLock(Ꮡstate.of(BenchmarkMutexContention_state.Ꮡlock));
+                    runtime_internal_test_package.Lock(Ꮡstate.of(BenchmarkMutexContention_state.Ꮡlock));
                     var ours = Ꮡstate.of(BenchmarkMutexContention_state.Ꮡcount).Add(1);
-                    runtime_internal_test_package.ΔUnlock(Ꮡstate.of(BenchmarkMutexContention_state.Ꮡlock));
+                    runtime_internal_test_package.Unlock(Ꮡstate.of(BenchmarkMutexContention_state.Ꮡlock));
                     if (ours >= (int64)b.Value.N) {
                         return;
                     }
@@ -713,23 +713,23 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
             int64 streak = default;
             ref var histogramΔ1 = ref heap(new array<array<nint>>(2, () => new(65)), out var ᏑhistogramΔ1);
             for (;;) {
-                runtime_internal_test_package.ΔLock(Ꮡstate.of(BenchmarkMutexCapture_state.Ꮡlock));
+                runtime_internal_test_package.Lock(Ꮡstate.of(BenchmarkMutexCapture_state.Ꮡlock));
                 var ours = Ꮡstate.of(BenchmarkMutexCapture_state.Ꮡcount).Add(1);
-                runtime_internal_test_package.ΔUnlock(Ꮡstate.of(BenchmarkMutexCapture_state.Ꮡlock));
+                runtime_internal_test_package.Unlock(Ꮡstate.of(BenchmarkMutexCapture_state.Ꮡlock));
                 var delta = ours - prev - 1;
                 prev = ours;
                 if (delta == 0) {
                     streak++;
                 } else {
-                    histogramΔ1[0][global::go.math.bits_package.LeadingZeros64((uint64)streak)]++;
-                    histogramΔ1[1][global::go.math.bits_package.LeadingZeros64((uint64)delta)]++;
+                    histogramΔ1[0][bits.LeadingZeros64((uint64)streak)]++;
+                    histogramΔ1[1][bits.LeadingZeros64((uint64)delta)]++;
                     streak = 1;
                 }
                 if (ours >= (int64)Ꮡb.Value.N) {
                     Ꮡwg.Done();
                     if (delta == 0) {
-                        histogramΔ1[0][global::go.math.bits_package.LeadingZeros64((uint64)streak)]++;
-                        histogramΔ1[1][global::go.math.bits_package.LeadingZeros64((uint64)delta)]++;
+                        histogramΔ1[0][bits.LeadingZeros64((uint64)streak)]++;
+                        histogramΔ1[1][bits.LeadingZeros64((uint64)delta)]++;
                     }
                     histogramsʗ1.ᐸꟷ(histogramΔ1.Clone());
                     return;
@@ -841,11 +841,11 @@ public static void BenchmarkMutexHandoff(ж<testing.B> b) {
                     defer(Ꮡwg.Done, ref ᒐ);
                     int64 t = default;
                     foreach (var _ᴛ1 in range((~bΔ1).N)) {
-                        runtime_internal_test_package.ΔLock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
+                        runtime_internal_test_package.Lock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
                         Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Add(2);
                         delay(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
                         t -= runtime_internal_test_package.Nanotime(); // start the timer
-                        runtime_internal_test_package.ΔUnlock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
+                        runtime_internal_test_package.Unlock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
                         while ((Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Load() & 0x2) != 0) {
                         }
                     }
@@ -876,9 +876,9 @@ public static void BenchmarkMutexHandoff(ж<testing.B> b) {
                             return;
                         }
                         case 2: {
-                            runtime_internal_test_package.ΔLock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
+                            runtime_internal_test_package.Lock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
                             t += runtime_internal_test_package.Nanotime(); // stop the timer
-                            runtime_internal_test_package.ΔUnlock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
+                            runtime_internal_test_package.Unlock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
                             Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Add(2);
                             break;
                         }}
@@ -895,8 +895,8 @@ public static void BenchmarkMutexHandoff(ж<testing.B> b) {
     b.Run(soloˢ, (ж<testing.B> bΔ2) => {
         ref var @lock = ref heap(new Mutex(), out var Ꮡlock);
         foreach (var _ᴛ2 in range((~bΔ2).N)) {
-            runtime_internal_test_package.ΔLock(Ꮡlock);
-            runtime_internal_test_package.ΔUnlock(Ꮡlock);
+            runtime_internal_test_package.Lock(Ꮡlock);
+            runtime_internal_test_package.Unlock(Ꮡlock);
         }
     });
 

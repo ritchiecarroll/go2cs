@@ -65,6 +65,34 @@ architecture-specific path in the standard library.
 
 
 <a id="the-packages-do-not-ship-linux-arm64"></a>
+## Converting modernc sqlite for Windows needs a seed for libc's `largeInteger` {#converting-modernc-sqlite-for-windows-needs-a-seed-for-libcs-largeinteger}
+
+A converted `modernc.org/sqlite` program on Windows panics the first time it opens a database in WAL mode, unless
+the conversion passed `-inline-arrays=modernc.org/libc#largeInteger`. The panic names both delegate types:
+
+```text
+panic: go2cs: func cookie 0x... holds a
+  System.Func<ж<libc_package+TLS>, uintptr, libc_package+largeIntegerᴛ1, uintptr, UInt32, Int32>,
+  which cannot be read as
+  System.Func<ж<libc_package+TLS>, uintptr, sqlite.lib.sqlite3_package+TLARGE_INTEGERᴛ1, uintptr, UInt32, Int32>
+```
+
+Go calls sqlite's `TLARGE_INTEGER` and libc's `largeInteger` one type. sqlite converts its spelling whole through
+`unsafe.Pointer`, so it holds that struct's arrays inline. libc never does, so without the seed its spelling keeps
+golib's `array<T>`, and the two are different C# types. A function word that libc builds over its own type is
+then called through sqlite's type, and the call fails. The seed makes libc lay the type out as sqlite does, so both
+packages share one lift. A database that is never opened in WAL mode does not reach the call.
+
+**To avoid it**, convert the sqlite module and libc together (`-recurse`) and pass
+`-inline-arrays=modernc.org/libc#largeInteger`; the same value is harmless on other targets, where libc declares
+no `largeInteger`. A libc converted on its own (as a separate package) carries no seed, so sqlite on Windows hits
+the panic again when built against it.
+<!-- Source: COORD ruling C, 2026-11-17 12:14Z (C2, claude/c2-c-inline-seed). G's windows WAL read at 6bcc05d11f
+     (mailbox 01d7b332fe): delete pass equal to Go, WAL pass panics at _winHandleSeek <- _winHandleTruncate <-
+     _winLockSharedMemory <- _winShmMap with the message above; it was ruling A's known limit. Census at bd2a09c423:
+     sqlite/lib <- libc largeIntegerᴛ1 need=true have=false (valueclone record), so sqlite/lib kept its own lift.
+     The seed's end-to-end arm is TestAdmittedUnionByValueCrossingWithTheSeedReadsAsGo (libc's union verbatim). -->
+
 ## Platforms the packages do not ship
 
 The go.* packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. A package
@@ -195,6 +223,57 @@ a solution: the core projects a solution does not list build Debug. In Visual St
      equal to go run. (c) was ruled, scoped to local references. Under -recurse=nuget the i9 measured, as relayed by
      the coordinator, a bare build through the generated solution: 0 Debug, and the bare publish succeeded. -->
 
+## A nugetgo package built on 1.26.10.3 beside the go.* 1.26.11.1 packages fails at restore {#a-nugetgo-package-built-on-126103-beside-the-go-126111-packages-fails-at-restore}
+
+**Symptom.** `dotnet restore`, or the restore a `dotnet build` starts with, stops with `NU1107`, a version conflict
+on one `go.*` package (`go.internal.bytealg`, for one). The project references a `nugetgo.*` revision built on
+1.26.10.3 and `go.*` packages at 1.26.11.1.
+
+**Cause.** Each `go.*` package pins the `go.*` packages it depends on to its own exact version. A `nugetgo.*`
+revision built on 1.26.10.3 accepts any `go.*` version from 1.26.10.3 up to 1.27.0. When nothing else in the project
+asks for a newer version of one of those packages, NuGet takes the lowest, 1.26.10.3, and that package's exact pins
+conflict with the 1.26.11.1 pins of the `go.*` packages the project references. Restore fails before the build
+runs, so the break-floor check, which would name the old package (`GO2CS3002`), is never reached.
+
+**Workaround.** Move each `nugetgo.*` reference to its 1.26.11.1 revision, as
+[Upgrading from 1.26.10.3](NEWS.md) says. A revision built on 1.26.10.3 is below the break floor in any case: if
+you reference its `go.*` dependencies at 1.26.11.1 directly, restore succeeds and the build stops with
+`GO2CS3002`, naming that package.
+
+<!-- Found 2026-11-20 by P2's nugetgo restore rehearsal (wall W-ng-ctl, mailbox 01:31Z and 01:41Z): the floor
+     control, google/uuid's revision 3 (built on 1.26.10.3) beside go.fmt 1.26.11.1, failed at RESTORE with NU1107 on
+     go.internal.bytealg: uuid rev 3 references go.bytes at [1.26.10.3, 1.27.0), go.fmt's closure does not lift
+     go.bytes, so NuGet took 1.26.10.3, whose exact pin go.internal.bytealg (= 1.26.10.3) collides with go.os
+     1.26.11.1's (= 1.26.11.1). P2's fix (5377c56403) has the control consumer reference the revision's direct go.*
+     dependencies at the release, after which the build refuses it with GO2CS3002 as planned. First post-.4 docs
+     batch, COORD 2026-11-20 07:19Z. -->
+
+## A `-recurse=nuget` conversion reads an older local go2cs root and emits names the packages do not have
+
+**Symptom.** A program converted with `go2cs -recurse=nuget` does not build against the published `go.*` packages,
+with `CS0426` on a standard-library name that carries a `Δ` prefix the packages no longer have, for example
+`reflect_package.ΔKind`. The conversion itself reports no warning and exits 0.
+
+**Cause.** Under `-recurse=nuget` the converter still looks for a local go2cs root: `-go2cspath` when it is given,
+else the `GO2CSPATH` environment variable, else `~/go2cs` (`%USERPROFILE%\go2cs` on Windows). When that folder holds
+a go2cs standard library, the converter reads each imported package's names from it, ahead of the metadata built
+into the converter, which is the metadata that matches the published packages. A root from an older go2cs release,
+such as one left by an earlier `deploy-core` or a go2cs clone, supplies that release's names. On a machine with no
+such folder and `GO2CSPATH` unset, the emission is correct.
+
+**Workaround.** Make the run unable to find an old root: unset `GO2CSPATH` and pass `-go2cspath` an empty folder, or
+move the old `~/go2cs` aside for the run. Then convert again. Measured on `windows-amd64` and `linux-x64`.
+
+<!-- Found 2026-11-20 by the sqlite-cs staging at the 1.26.11.1 release converter (5dd5cafd5b): i9 (COORD inbox
+     20261120T073737Z-i9, windows-amd64) traced CS0426 reflect_package.ΔKind to a stale ~/go2cs deploy whose
+     core/reflect/package_info.cs carries the pre-OQ2 GoTypeAlias("Kind", "ΔKind") record, read by
+     importOperations.go loadImportedTypeAliases before the embedded stdlib-metadata.txt (which has no Δ); a GO2CSPATH
+     pointed at an empty folder gave reflect.Kind. P5 (20261120T073911Z-P5, linux-x64) reproduced it in three arms on
+     the sqlite-cs demo: no root and the release tree as root both clean, a pre-OQ2 clone as -go2cspath gives the
+     ΔKind alias. resolveGo2CSPath skips the root warning for nugetRefs, so the run is silent. The .5 fix (i9: a
+     PublishedStdLib dependency reads the embedded record first) retires this entry. First .5 docs item, COORD
+     2026-11-20 07:40Z. -->
+
 ## Ubuntu's packaged .NET 10 can end a converted program early
 
 On Ubuntu's own build of .NET 10 (the `dotnet` installed with `apt`, runtime identifier `ubuntu.*-x64`), a
@@ -309,13 +388,32 @@ A full trim (`TrimMode` set to `full`) produces a program that runs as well. Tha
 one development machine, with the 1.24.13.5 packages; the hosted check measures the default.
 
 **What it costs.** With `partial`, Native AOT compiles every `go.*` assembly the program references in
-full, not only the parts the program uses. For a small program that references about thirty of them, the
-publish took under four minutes on a hosted CI runner for Linux and for Windows, about six minutes on a Mac
-with Apple silicon and about eleven on an Intel Mac (measured 2026-10-14, with packages converted from Go
-1.24.13). A converted project pays the same cost, because it uses the same setting. A build, `dotnet run` and a publish without
+full, not only the parts the program uses. With the published 1.26.11.1 packages, on `linux-x64` (a 4-core cloud
+machine with 15 GB and .NET SDK 10.0.404), the README walkthrough's program, which uses github.com/fatih/color, took
+18 minutes 9 seconds to publish; the executable is 154.5 MB and runs in 0.21 seconds. A converted project pays the same
+cost, because it uses the same setting. With the 1.26.10.3 packages the walkthrough's program does not publish at
+all on `linux-x64`: the compiler stops at the native string table's 2 GiB ceiling
+([how to recognize it](Tuning.md#native-aot-method-body-folding)). A build, `dotnet run` and a publish without
 Native AOT are not affected. For the 1.24.13.7 packages and earlier, see the section that follows.
 
-<!-- 2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
+<!-- 2026-11-20 (P4, first post-.4 docs batch, COORD 07:19Z): the cost sentence read "On a 4-core Linux cloud machine,
+     converted from source at the tree of the coming 1.26.11.1 release, a hello world that imports `strings` and `fmt`
+     took about 19 minutes to publish, and the README walkthrough's program, which uses github.com/fatih/color, about 26
+     minutes" (P1's readings, the comment below). Replaced by P3's cold first-user pass on the PUBLISHED 1.26.11.1
+     packages (mailbox 2026-11-19 23:12Z): a new empty HOME, nuget.org the only source, `dotnet publish -r linux-x64
+     -p:PublishAot=true` on the colordemo, rc 0 in 18 min 9 s, 154.5 MB, the executable ran in 0.21 s with rc 0 and Go's
+     line; 12 warnings, all of the documented classes (8 IL2104, 3 IL3053, 1 IL3000). -->
+
+<!-- 2026-11-16 (P4, P3's docs item 3 and COORD's AOT ruling): the cost sentence's figures were "under four minutes
+     on a hosted CI runner for Linux and for Windows, about six minutes on a Mac with Apple silicon and about eleven on
+     an Intel Mac (measured 2026-10-14, with packages converted from Go 1.24.13)", a reading of the 1.24.13 packages
+     that no 1.26 run repeats. Replaced by P1's readings, 2026-11-16, a linux-x64 cloud box (4 cores, SDK 10.0.403,
+     ILCompiler 10.0.14), local -recurse at master 0c1d295ea8 with <PublishAot>true</PublishAot> in the program's
+     csproj: the strings/fmt hello 1146 s, colordemo (fatih/color v1.18.0) 1545 s, both executables ran, 0 'will
+     always throw'. The 1.26.10.3 failure: P3 runs A and B (2026-11-15) and P1 row 2 (2026-11-16): ILC fails at
+     StringTableBuilder.CreateIndex after 1509-1599 s with 6,188 'will always throw' lines; batch 308's lever G
+     (merge 055f4e6230) removed the generic cycle that caused it.
+     2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
      fix (e2move, merge b1ba1380b4, 2026-10-14), from the BOARD's 2026-10-14 entry under "the AOT-cost row" and
      docs/CIMatrix.md's aot-smoke budget row: 0 ILC cycle cut-offs on every RID; linux 224 s, windows 230 s, osx-x64 654 s
      on the e2move tip (run 38575258530); linux 212 s, windows 167 s, osx-arm64 354 s from master (run 38587876788).

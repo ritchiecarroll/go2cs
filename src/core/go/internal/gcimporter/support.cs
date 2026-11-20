@@ -11,6 +11,7 @@ using sync = sync_package;
 using global::go.@internal;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
+using static gcimporter_package;
 
 partial class gcimporter_package {
 
@@ -33,13 +34,15 @@ partial struct fakeFileSet {
 }
 
 partial struct fileInfo {
-    internal ж<tokenꓸFile> @file;
+    internal ж<token.File> @file;
     internal nint lastline;
 }
 
 internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
 
-internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line, nint column) {
+} partial class gcimporterᴛfakeFileSet {
+
+internal static token.Pos pos(this ref fakeFileSet s, @string @file, nint line, nint column) {
     // TODO(mdempsky): Make use of column.
 
     // Since we don't know the set of needed file positions, we reserve
@@ -60,7 +63,7 @@ internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line
     }
 
     // Return a fake position assuming that f.file consists only of newlines.
-    return (tokenꓸPos)(f.@file.Base() + line - 1);
+    return (token.Pos)(f.@file.Base() + line - 1);
 }
 
 internal static void setLines(this ref fakeFileSet s) {
@@ -74,6 +77,8 @@ internal static void setLines(this ref fakeFileSet s) {
         f.@file.SetLines(fakeLines.slice(0, f.lastline));
     }
 }
+
+} partial class gcimporter_package {
 
 internal static slice<nint> fakeLines;
 internal static readonly ж<sync.Once> ᏑfakeLinesOnce = new StaticBox<sync.Once>(default(sync.Once));

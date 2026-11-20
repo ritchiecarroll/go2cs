@@ -8,6 +8,7 @@ using slicereader = go.@internal.coverage.slicereader_package;
 using uleb128 = go.@internal.coverage.uleb128_package;
 using io = io_package;
 using go.@internal.coverage;
+using static stringtab_package;
 
 partial class stringtab_package {
 
@@ -22,6 +23,8 @@ partial struct Writer {
     internal slice<byte> tmp;
     internal bool frozen;
 }
+
+} partial class stringtabᴛWriter {
 
 // InitWriter initializes a stringtab.Writer.
 public static void InitWriter(this ref Writer stw) {
@@ -110,6 +113,8 @@ public static void Freeze(this ref Writer stw) {
     stw.frozen = true;
 }
 
+} partial class stringtab_package {
+
 // Reader is a helper for reading a string table previously
 // serialized by a Writer.Write call.
 partial struct Reader {
@@ -125,6 +130,8 @@ public static ж<Reader> NewReader(ж<slicereader.Reader> r) {
     ));
     return str;
 }
+
+} partial class stringtabᴛReader {
 
 // Read reads/decodes a string table using the reader provided.
 public static void Read(this ref Reader str) {
@@ -146,4 +153,4 @@ public static @string Get(this ref Reader str, uint32 idx) {
     return str.strs[idx];
 }
 
-} // end stringtab_package
+} // end stringtabᴛReader

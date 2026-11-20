@@ -75,9 +75,9 @@ partial class poll_package
 
         prepare(
             runtime_pollSetDeadline, applyDeadlineLocked, armDeadlineLocked, stopDeadlineLocked, fireDeadline,
-            deadlineFired, runtime_pollReset, runtime_pollWait, pollBlock, modeState, runtimeNano, convertErr, Read,
-            (pollDescFileFunc)prepareRead, (pollDescFileFunc)waitRead, (pollDescWaitFunc)wait,
-            (pollDescPollableFunc)pollable);
+            deadlineFired, runtime_pollReset, runtime_pollWait, pollBlock, modeState, runtimeNano, convertErr, pollᴛFD.Read,
+            (pollDescFileFunc)pollᴛpollDesc.prepareRead, (pollDescFileFunc)pollᴛpollDesc.waitRead, (pollDescWaitFunc)pollᴛpollDesc.wait,
+            (pollDescPollableFunc)pollᴛpollDesc.pollable);
 
         ж<FD> spare = Ꮡ(new FD());
         spare.SetReadDeadline(default);
@@ -110,7 +110,7 @@ partial class poll_package
     private delegate error pollDescWaitFunc(ref pollDesc pd, nint mode, bool isFile);
     private delegate bool pollDescPollableFunc(ref pollDesc pd);
 
-    private static void prepare(params Delegate[] methods)
+    internal static void prepare(params Delegate[] methods)
     {
         foreach (Delegate method in methods)
             RuntimeHelpers.PrepareMethod(method.Method.MethodHandle);

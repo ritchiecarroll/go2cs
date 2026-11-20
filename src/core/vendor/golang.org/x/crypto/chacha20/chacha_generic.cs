@@ -15,6 +15,7 @@ using encoding;
 using go.crypto;
 using go.vendor.golang.org.x.crypto.@internal;
 using math;
+using static chacha20_package;
 
 partial class chacha20_package {
 
@@ -100,7 +101,7 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
     }
 
     (key, nonce) = (key[..(int)(KeySize)], nonce[..(int)(NonceSize)]); // bounds check elimination hint
-    c.key = new uint32[]{
+    c.key.Assign(new uint32[]{
         binary.LittleEndian.Uint32(key[0..4]),
         binary.LittleEndian.Uint32(key[4..8]),
         binary.LittleEndian.Uint32(key[8..12]),
@@ -109,12 +110,12 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
         binary.LittleEndian.Uint32(key[20..24]),
         binary.LittleEndian.Uint32(key[24..28]),
         binary.LittleEndian.Uint32(key[28..32])
-    }.array();
-    c.nonce = new uint32[]{
+    }.array());
+    c.nonce.Assign(new uint32[]{
         binary.LittleEndian.Uint32(nonce[0..4]),
         binary.LittleEndian.Uint32(nonce[4..8]),
         binary.LittleEndian.Uint32(nonce[8..12])
-    }.array();
+    }.array());
     return (Ꮡc, default);
 }
 
@@ -144,6 +145,8 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     b = bits.RotateLeft32(b, 7);
     return (a, b, c, d);
 }
+
+} partial class chacha20ᴛCipher {
 
 // SetCounter sets the Cipher counter. The next invocation of XORKeyStream will
 // behave as if (64 * counter) bytes had been encrypted so far.
@@ -238,7 +241,7 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
     // one that does one block at a time.
     const uint64 blocksPerBuf = /* bufSize / blockSize */ 1;
     if ((uint64)s.counter + blocksPerBuf > (uint64)1 << 32) {
-        s.buf = new byte[]{}.array(64);
+        s.buf.Assign(new byte[]{}.array(64));
         nint numBlocksΔ1 = (len(src) + (nint)blockSize - 1) / (nint)blockSize;
         var buf = s.buf.slice((nint)bufSize - numBlocksΔ1 * (nint)blockSize);
         copy(buf, src);
@@ -250,7 +253,7 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
     // If we have a partial (multi-)block, pad it for xorKeyStreamBlocks, and
     // keep the leftover keystream for the next XORKeyStream invocation.
     if (len(src) > 0) {
-        s.buf = new byte[]{}.array(64);
+        s.buf.Assign(new byte[]{}.array(64));
         copy(s.buf[..], src);
         s.xorKeyStreamBlocks(s.buf[..], s.buf[..]);
         s.len = (nint)bufSize - copy(dst, s.buf[..]);
@@ -351,6 +354,8 @@ internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> ds
         (src, dst) = (src[(int)(blockSize)..], dst[(int)(blockSize)..]);
     }
 }
+
+} partial class chacha20_package {
 
 // HChaCha20 uses the ChaCha20 core to generate a derived key from a 32 bytes
 // key and a 16 bytes nonce. It returns an error if key or nonce have any other

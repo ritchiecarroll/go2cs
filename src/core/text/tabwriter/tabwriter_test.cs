@@ -10,12 +10,15 @@ using testing = testing_package;
 using static go.text.tabwriter_package;
 using go.text;
 using tabwriter = go.text.tabwriter_package;
+using static tabwriter_test_package;
 
 partial class tabwriter_test_package {
 
 partial struct buffer {
     internal slice<byte> a;
 }
+
+} partial class tabwriter_testᴛbuffer {
 
 internal static void init(this ref buffer b, nint n) { b.a = new slice<byte>(0, n); }
 
@@ -36,6 +39,8 @@ internal static (nint written, error err) Write(this ref buffer b, slice<byte> b
 }
 
 internal static @string String(this ref buffer b) { return (@string)b.a; }
+
+} partial class tabwriter_test_package {
 
 internal static void write(ж<testing.T> t, @string testname, ж<tabwriter.Writer> w, @string src) {
     var (written, err) = io.WriteString(new tabwriter.WriterжWriter(w), src);
@@ -507,9 +512,13 @@ public static void Test(ж<testing.T> t) {
 partial struct panicWriter {
 }
 
+} partial class tabwriter_testᴛpanicWriter {
+
 internal static (nint, error) Write(this panicWriter _Δp0, slice<byte> _Δp1) {
     throw panic("cannot write");
 }
+
+} partial class tabwriter_test_package {
 
 internal static void wantPanicString(ж<testing.T> t, @string want) {
     GoFrame ᒐ = default;

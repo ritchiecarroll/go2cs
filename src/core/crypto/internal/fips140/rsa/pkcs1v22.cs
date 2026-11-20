@@ -260,7 +260,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
 
 // PSSMaxSaltLength returns the maximum salt length for a given public key and
 // hash function.
-public static (nint, error) PSSMaxSaltLength(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1) {
+public static (nint, error) PSSMaxSaltLength(ж<PublicKey> Ꮡpub, hash.Hash hashΔ1) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     nint saltLength = (pub.N.BitLen() - 1 + 7) / 8 - 2 - hashΔ1.Size();
@@ -330,19 +330,19 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
 }
 
 // VerifyPSS verifies sig with RSASSA-PSS automatically detecting the salt length.
-public static error VerifyPSS(ж<ΔPublicKey> pub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig) {
+public static error VerifyPSS(ж<PublicKey> pub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig) {
     return verifyPSS(pub, hashΔ1, digest, sig, pssSaltLengthAutodetect);
 }
 
 // VerifyPSSWithSaltLength verifies sig with RSASSA-PSS and an expected salt length.
-public static error VerifyPSSWithSaltLength(ж<ΔPublicKey> pub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
+public static error VerifyPSSWithSaltLength(ж<PublicKey> pub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
     if (saltLength < 0) {
         return errors.New(cryptoRsaSaltLengthˢ);
     }
     return verifyPSS(pub, hashΔ1, digest, sig, saltLength);
 }
 
-internal static error verifyPSS(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
+internal static error verifyPSS(ж<PublicKey> Ꮡpub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     fipsSelfTest();
@@ -394,7 +394,7 @@ internal static void checkApprovedHash(hash.Hash hashΔ1) {
 }
 
 // EncryptOAEP encrypts the given message with RSAES-OAEP.
-public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, hash.Hash mgfHash, io.Reader random, ж<ΔPublicKey> Ꮡpub, slice<byte> msg, slice<byte> label) {
+public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, hash.Hash mgfHash, io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg, slice<byte> label) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     // Note that while we don't commit to deterministic execution with respect

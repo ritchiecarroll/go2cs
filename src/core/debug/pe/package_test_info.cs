@@ -13,7 +13,6 @@ using go;
 using static global::go.debug.pe_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Section", "ΔSection")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -37,7 +36,7 @@ using static global::go.debug.pe_internal_test_package;
 [assembly: GoFieldAccess(typeof(global::go.debug.pe_package.File))]
 [assembly: GoFieldAccess(typeof(global::go.debug.pe_package.OptionalHeader32))]
 [assembly: GoFieldAccess(typeof(global::go.debug.pe_package.OptionalHeader64))]
-[assembly: GoFieldAccess(typeof(global::go.debug.pe_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(global::go.debug.pe_package.Section))]
 [assembly: GoFieldAccess(typeof(go.debug.dwarf_package.Entry))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

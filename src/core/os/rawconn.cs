@@ -6,6 +6,7 @@ namespace go;
 
 using runtime = runtime_package;
 using @internal;
+using static os_package;
 
 partial class os_package {
 
@@ -13,6 +14,8 @@ partial class os_package {
 partial struct rawConn {
     internal ж<File> @file;
 }
+
+} partial class osᴛrawConn {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string syscallConnControlˢ => ref syscallConnControlˢᵇ;
@@ -52,6 +55,8 @@ internal static error Write(this ref rawConn c, Func<uintptr, bool> f) {
     runtime.KeepAlive(c.@file.OrTypedNil());
     return err;
 }
+
+} partial class os_package {
 
 internal static (ж<rawConn>, error) newRawConn(ж<File> @file) {
     return (Ꮡ(new rawConn(@file: @file)), default);

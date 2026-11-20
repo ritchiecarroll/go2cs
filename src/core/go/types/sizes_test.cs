@@ -22,7 +22,7 @@ internal static ж<types.Struct> findStructType(ж<testing.T> t, @string src) {
 
 internal static ж<types.Struct> findStructTypeConfig(ж<testing.T> t, @string src, ж<types.Config> conf) {
     var types_ = new map<ast.Expr, types.TypeAndValue>();
-    mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types_)));
+    mustTypecheck(src, nil, Ꮡ(new types.Info(Types: types_)));
     foreach (var (_, tv) in types_) {
         var (ts, ok) = tv.Type._<ж<types.Struct>>(ᐧ); if (ok) {
             return ts;
@@ -53,13 +53,13 @@ public static void TestMultipleSizeUse(ж<testing.T> t) {
     var ts = findStructType(t, src);
     ref var sizes = ref heap<types.StdSizes>(new types.StdSizes(WordSize: 4, MaxAlign: 4), out var Ꮡsizes);
     {
-        var got = Ꮡsizes.Sizeof(new types.StructжΔType(ts)); if (got != 20) {
+        var got = Ꮡsizes.Sizeof(new types.StructжType(ts)); if (got != 20) {
             t.Errorf("Sizeof(%v) with WordSize 4 = %d want 20", ts.OrTypedNil(), got);
         }
     }
     sizes = new types.StdSizes(WordSize: 8, MaxAlign: 8);
     {
-        var got = Ꮡsizes.Sizeof(new types.StructжΔType(ts)); if (got != 40) {
+        var got = Ꮡsizes.Sizeof(new types.StructжType(ts)); if (got != 40) {
             t.Errorf("Sizeof(%v) with WordSize 8 = %d want 40", ts.OrTypedNil(), got);
         }
     }
@@ -110,7 +110,7 @@ const _ = unsafe.Offsetof(struct{ x int64 }{}.x)
 
 public static void TestIssue16902(ж<testing.T> t) {
     @string src = srcᶜ39;
-    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
+    ref var info = ref heap<types.Info>(new types.Info(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
     ref var conf = ref heap<types.Config>(new types.Config(
         // TODO(adonovan): use same FileSet as mustTypecheck.
         Importer: defaultImporter(token.NewFileSet()),

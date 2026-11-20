@@ -2753,7 +2753,7 @@ func (v *Visitor) constraintProxyLambdaParams(funIdent *ast.Ident, typeArgs *typ
 	proxied := false
 
 	for p := 0; p < typeParams.Len() && p < typeArgs.Len(); p++ {
-		if _, ok := v.constraintProxyFor(typeParams.At(p), typeArgs.At(p)); !ok {
+		if _, ok := v.callTypeArgProxy(funIdent, typeParams, typeArgs, p); !ok {
 			continue
 		}
 
@@ -2774,6 +2774,17 @@ func (v *Visitor) constraintProxyLambdaParams(funIdent *ast.Ident, typeArgs *typ
 	}
 
 	return strings.Join(params, ", "), true
+}
+
+// callTypeArgProxy is the constraint proxy type argument position `p` of a generic FUNCTION call renders as: the
+// self-referential proxy, or the non-self one (nonSelfConstraintProxy.go). A func-typed parameter that mentions either
+// renders its delegate over the proxy, so both take the lambda re-wrap below and the literal's proxy parameters.
+func (v *Visitor) callTypeArgProxy(funIdent *ast.Ident, typeParams *types.TypeParamList, typeArgs *types.TypeList, p int) (string, bool) {
+	if proxyName, ok := v.constraintProxyFor(typeParams.At(p), typeArgs.At(p)); ok {
+		return proxyName, true
+	}
+
+	return v.nonSelfConstraintProxyFor(funIdent, typeParams, typeArgs, p)
 }
 
 // constraintProxyLitParamTypes reports, for a FUNC-LITERAL argument at position `i` of a generic
@@ -2833,7 +2844,7 @@ func (v *Visitor) constraintProxyLitParamTypes(funIdent *ast.Ident, typeArgs *ty
 	proxyOf := map[*types.TypeParam]string{}
 
 	for p := 0; p < typeParams.Len() && p < typeArgs.Len(); p++ {
-		if proxyName, ok := v.constraintProxyFor(typeParams.At(p), typeArgs.At(p)); ok {
+		if proxyName, ok := v.callTypeArgProxy(funIdent, typeParams, typeArgs, p); ok {
 			proxyOf[typeParams.At(p)] = proxyName
 		}
 	}

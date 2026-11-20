@@ -91,7 +91,7 @@ internal static slice<stringTestsᴛ1> stringTests = [
 ];
 
 public static void TestIntText(ж<testing.T> t) {
-    var z = @new<global::go.math.big_package.ΔInt>();
+    var z = @new<global::go.math.big_package.Int>();
     foreach (var (_, test) in range(stringTests)) {
         if (!test.ok) {
             continue;
@@ -115,7 +115,7 @@ public static void TestIntText(ж<testing.T> t) {
 }
 
 public static void TestAppendText(ж<testing.T> t) {
-    var z = @new<global::go.math.big_package.ΔInt>();
+    var z = @new<global::go.math.big_package.Int>();
     slice<byte> buf = default;
     foreach (var (_, test) in range(stringTests)) {
         if (!test.ok) {
@@ -156,7 +156,7 @@ internal static @string format(nint @base) {
 }
 
 public static void TestGetString(ж<testing.T> t) {
-    var z = @new<global::go.math.big_package.ΔInt>();
+    var z = @new<global::go.math.big_package.Int>();
     foreach (var (i, test) in range(stringTests)) {
         if (!test.ok) {
             continue;
@@ -184,12 +184,12 @@ public static void TestGetString(ж<testing.T> t) {
 }
 
 public static void TestSetString(ж<testing.T> t) {
-    var tmp = @new<global::go.math.big_package.ΔInt>();
+    var tmp = @new<global::go.math.big_package.Int>();
     foreach (var (i, test) in range(stringTests)) {
         // initialize to a non-zero value so that issues with parsing
         // 0 are detected
         tmp.SetInt64(1234567890);
-        var (n1, ok1) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, test.@base);
+        var (n1, ok1) = @new<global::go.math.big_package.Int>().SetString(test.@in, test.@base);
         var (n2, ok2) = tmp.SetString(test.@in, test.@base);
         var expected = NewInt(test.val);
         if (ok1 != test.ok || ok2 != test.ok) {
@@ -381,10 +381,10 @@ internal static slice<formatTestsᴛ1> formatTests = [
 
 public static void TestFormat(ж<testing.T> t) {
     foreach (var (i, test) in range(formatTests)) {
-        ж<global::go.math.big_package.ΔInt> x = default;
+        ж<global::go.math.big_package.Int> x = default;
         if (test.input != "<nil>"u8) {
             bool ok = default;
-            (x, ok) = @new<global::go.math.big_package.ΔInt>().SetString(test.input, 0);
+            (x, ok) = @new<global::go.math.big_package.Int>().SetString(test.input, 0);
             if (!ok) {
                 t.Errorf("#%d failed reading input %s", i, test.input);
             }
@@ -443,7 +443,7 @@ internal static slice<scanTest> scanTests = [
 public static void TestScan(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (i, test) in range(scanTests)) {
-        var x = @new<global::go.math.big_package.ΔInt>();
+        var x = @new<global::go.math.big_package.Int>();
         buf.Reset();
         buf.WriteString(test.input);
         var (_, err) = fmt.Fscanf(new big_test_package.bytes_BufferжReader(Ꮡbuf), test.format, x.OrTypedNil()); if (err != nil) {

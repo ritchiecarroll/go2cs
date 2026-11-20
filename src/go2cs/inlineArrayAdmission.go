@@ -14,6 +14,7 @@ import (
 	"go/token"
 	"go/types"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -36,6 +37,10 @@ import (
 //  3. STAMP. The decision is recorded in package_info.cs, and a -tests conversion reads it (inlineArrayStamp.go).
 //  4. OVERRIDE. -inline-arrays=<patterns> forces a package ON with the declaration-local population (every struct the
 //     package declares or spells that holds an array), and "-<pattern>" turns auto OFF. std stays out either way.
+//     "<import path>#<TypeName>" SEEDS one type instead (COORD ruling C, 2026-11-17 12:14Z): the package selects that
+//     type as if it converted it whole through unsafe.Pointer, under the automatic rule, so its closure, the caps, the
+//     faces check and GO2CS2009 apply exactly as to any other seed. It exists for a type an IMPORTER converts whole
+//     and passes back by value: modernc.org/libc's largeInteger, which sqlite/lib admits and libc never converts.
 //
 // A type the rule SELECTS (converted whole, or forced) that a cap keeps out stays exactly as today and is reported by a
 // WARNING naming the type, the field and the cap (GO2CS2009; COORD 2026-11-13 05:20Z). So is a type whose closure
@@ -53,6 +58,7 @@ const (
 type inlineArrayAdmission struct {
 	pkgPath  string
 	forced   bool
+	seeded   []string              // the -inline-arrays seeds this package declares, sorted (its GoInlineArraySeed records)
 	admitted map[string]bool       // inlineTypeKey -> admitted
 	keyOrder []string              // admitted keys, sorted
 	holding  int                   // admitted types that hold an array at any depth
@@ -125,12 +131,19 @@ func inlineTypeKey(t types.Type) (string, bool) {
 
 // inlineArrayOverride is the parsed -inline-arrays value.
 type inlineArrayOverride struct {
-	force []string // patterns forced ON
-	off   []string // patterns with auto OFF ("-<pattern>")
+	force []string            // patterns forced ON
+	off   []string            // patterns with auto OFF ("-<pattern>")
+	seeds map[string][]string // import path -> the type names seeded in it ("<path>#<TypeName>")
+}
+
+// seedsFor returns the type names seeded in the package pkgPath.
+func (o inlineArrayOverride) seedsFor(pkgPath string) []string {
+	return o.seeds[pkgPath]
 }
 
 // parseInlineArrayOverride parses -inline-arrays: a comma-separated list of import-path patterns, each an exact path or
-// a "/..." prefix, a leading "-" turning auto off for the pattern instead of forcing it on.
+// a "/..." prefix, a leading "-" turning auto off for the pattern instead of forcing it on, or a "<path>#<TypeName>"
+// seed of one type in one package (an exact path; a seed admits, so it takes no "-").
 func parseInlineArrayOverride(value string) (inlineArrayOverride, error) {
 	var override inlineArrayOverride
 
@@ -138,6 +151,23 @@ func parseInlineArrayOverride(value string) (inlineArrayOverride, error) {
 		entry = strings.TrimSpace(entry)
 
 		if entry == "" {
+			continue
+		}
+
+		if path, name, isSeed := strings.Cut(entry, "#"); isSeed {
+			if path == "" || strings.HasPrefix(path, "-") || strings.HasSuffix(path, "/...") || strings.ContainsAny(path, " \t") || !token.IsIdentifier(name) {
+				return inlineArrayOverride{}, fmt.Errorf("-inline-arrays: %q is not a <import path>#<TypeName> seed", entry)
+			}
+
+			if override.seeds == nil {
+				override.seeds = map[string][]string{}
+			}
+
+			if !slices.Contains(override.seeds[path], name) {
+				override.seeds[path] = append(override.seeds[path], name)
+				slices.Sort(override.seeds[path])
+			}
+
 			continue
 		}
 
@@ -202,6 +232,10 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 		}
 	}
 
+	// The -inline-arrays seeds this package declares (a name the package does not declare selects nothing: libc declares
+	// largeInteger only on windows, and one flag serves every target).
+	seedNames := options.inlineArrays.seedsFor(pkg.Path())
+
 	// The SELECTED types: each a seed whose by-value closure must be inline, with the position that selected it.
 	type selection struct {
 		t   types.Type
@@ -254,6 +288,17 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 					if obj, ok := info.Defs[node.Name].(*types.TypeName); ok && obj.Pkg() == pkg {
 						if st, ok := obj.Type().Underlying().(*types.Struct); ok && structHoldsArray(st, 0) && node.TypeParams == nil {
 							seeds = append(seeds, selection{obj.Type(), node.Pos()})
+						}
+					}
+				} else if slices.Contains(seedNames, node.Name.Name) {
+					// A -inline-arrays seed: selected as a whole-struct conversion would select it (OVERRIDE, above).
+					if obj, ok := info.Defs[node.Name].(*types.TypeName); ok && obj.Pkg() == pkg && obj.Parent() == pkg.Scope() && node.TypeParams == nil {
+						if _, ok := obj.Type().Underlying().(*types.Struct); ok {
+							seeds = append(seeds, selection{obj.Type(), node.Pos()})
+
+							if !slices.Contains(a.seeded, obj.Name()) {
+								a.seeded = append(a.seeded, obj.Name())
+							}
 						}
 					}
 				}
@@ -411,6 +456,7 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 	}
 
 	sort.Strings(a.keyOrder)
+	sort.Strings(a.seeded)
 
 	// The pair rule (GO2CS2010): both sides hold arrays and disagree. A struct another package lays out is that package's
 	// decision, read from its record (inlineArrayStamp.go); a pair reaching one whose record cannot be read, or an

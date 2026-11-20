@@ -13,6 +13,7 @@ using global::go.@internal;
 using global::go.go;
 using reflectlite = global::go.@internal.reflectlite_package;
 using static global::go.@internal.reflectlite_internal_test_package;
+using static reflectlite_test_package;
 
 partial class reflectlite_test_package {
 
@@ -50,9 +51,13 @@ internal static slice<implementsTestsᴛ1> implementsTests = slice<implementsTes
 partial struct notAnExpr {
 }
 
-internal static tokenꓸPos Pos(this notAnExpr _) { return token.NoPos; }
-internal static tokenꓸPos End(this notAnExpr _) { return token.NoPos; }
+} partial class reflectlite_testᴛnotAnExpr {
+
+internal static token.Pos Pos(this notAnExpr _) { return token.NoPos; }
+internal static token.Pos End(this notAnExpr _) { return token.NoPos; }
 internal static void exprNode(this notAnExpr _) { }
+
+} partial class reflectlite_test_package {
 
 partial interface notASTExpr :
     ast.Node
@@ -62,11 +67,15 @@ partial interface notASTExpr :
 
 partial struct mapError /*map[@string, @string]*/;
 
+} partial class reflectlite_testᴛmapError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mapErrorˢ => ref mapErrorˢᵇ;
 private static readonly @string mapErrorˢᵇ = "mapError"u8;
 
 internal static @string Error(this mapError _) { return mapErrorˢ; }
+
+} partial class reflectlite_test_package {
 
 internal static error _ᴛ1ʗ = new mapError(new map<@string, @string>{});
 internal static error _ᴛ2ʗ = new reflectlite_test_package.mapErrorжerror(@new<mapError>());

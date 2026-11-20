@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="PublishAot">
 
   <!--
     The generator of go.arrays.dll's inline-array family (docs/phase4/DESIGN-array-value-storage.md, 7.7):
@@ -10,6 +10,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- An analyzer is loaded by the compiler, never published. A program's publish with -p:PublishAot=true
+         reaches this project through go.arrays' analyzer reference; TreatAsLocalProperty lets this value win
+         over that global, where netstandard2.0 would otherwise stop the build with NETSDK1207. -->
+    <PublishAot>false</PublishAot>
     <AssemblyName>go2cs-arrays-gen</AssemblyName>
     <RootNamespace>go2cs</RootNamespace>
     <Product>go2cs</Product>

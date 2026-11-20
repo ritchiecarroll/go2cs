@@ -21,8 +21,8 @@ partial class runtime_test_package {
 
 // makePallocData produces an initialized PallocData by setting
 // the ranges of described in alloc and scavenge.
-internal static ж<global::go.runtime_internal_test_package.ΔPallocData> makePallocData(slice<global::go.runtime_internal_test_package.BitRange> alloc, slice<global::go.runtime_internal_test_package.BitRange> scavenged) {
-    var b = @new<global::go.runtime_internal_test_package.ΔPallocData>();
+internal static ж<global::go.runtime_internal_test_package.PallocData> makePallocData(slice<global::go.runtime_internal_test_package.BitRange> alloc, slice<global::go.runtime_internal_test_package.BitRange> scavenged) {
+    var b = @new<global::go.runtime_internal_test_package.PallocData>();
     foreach (var (_, v) in range(alloc)) {
         if (v.N == 0) {
             // Skip N==0. It's harmless and allocRange doesn't

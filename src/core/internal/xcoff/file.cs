@@ -16,6 +16,7 @@ using strings = strings_package;
 using debug;
 using encoding;
 using go.@internal;
+using static xcoff_package;
 
 partial class xcoff_package {
 
@@ -29,7 +30,7 @@ partial struct SectionHeader {
     public uint32 Nreloc;
 }
 
-partial struct ΔSection {
+partial struct Section {
     /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     /*embed*/ public io_package.ReaderAt ReaderAt;
@@ -80,7 +81,7 @@ partial struct FileHeader {
 // A File represents an open XCOFF file.
 partial struct File {
     /*embed*/ public FileHeader FileHeader;
-    public slice<ж<ΔSection>> Sections;
+    public slice<ж<Section>> Sections;
     public slice<ж<Symbol>> Symbols;
     public slice<byte> StringTable;
     public slice<@string> LibraryPaths;
@@ -102,6 +103,8 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
+} partial class xcoffᴛFile {
+
 // Close closes the File.
 // If the File was created using NewFile directly instead of Open,
 // Close has no effect.
@@ -118,7 +121,7 @@ public static error Close(this ref File f) {
 // section exists.
 // Xcoff have section's name limited to 8 bytes. Some sections like .gosymtab
 // can be trunked but this method will still find them.
-public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<Section> Section(this ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name || (len(name) > 8 && s.Name == name[..8])) {
             return s;
@@ -129,7 +132,7 @@ public static ж<ΔSection> Section(this ref File f, @string name) {
 
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
-public static ж<ΔSection> SectionByType(this ref File f, uint32 typ) {
+public static ж<Section> SectionByType(this ref File f, uint32 typ) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Type == typ) {
             return s;
@@ -137,6 +140,8 @@ public static ж<ΔSection> SectionByType(this ref File f, uint32 typ) {
     }
     return default;
 }
+
+} partial class xcoff_package {
 
 // cstring converts ASCII byte sequence b to string.
 // It stops once it finds 0 or reaches end of b.
@@ -245,14 +250,14 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default, err);
         }
     }
-    nint c = saferio.SliceCap<ж<ΔSection>>((uint64)nscns);
+    nint c = saferio.SliceCap<ж<Section>>((uint64)nscns);
     if (c < 0) {
         return (default, fmt.Errorf("too many XCOFF sections (%d)"u8, nscns));
     }
-    f.Sections = new slice<ж<ΔSection>>(0, c);
+    f.Sections = new slice<ж<Section>>(0, c);
     for (nint i = 0; i < (nint)nscns; i++) {
         uint64 scnptr = default;
-        var s = @new<ΔSection>();
+        var s = @new<Section>();
         switch (f.TargetMachine) {
         case var ᴛ when ᴛ == U802TOCMAGIC: {
             var shdr = @new<SectionHeader32>();
@@ -515,6 +520,8 @@ skip:
 partial struct nobitsSectionReader {
 }
 
+} partial class xcoffᴛnobitsSectionReader {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedReadFromˢ => ref unexpectedReadFromˢᵇ;
 private static readonly @string unexpectedReadFromˢᵇ = "unexpected read from section with uninitialized data"u8;
@@ -523,8 +530,10 @@ internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice
     return (0, errors.New(unexpectedReadFromˢ));
 }
 
+} partial class xcoffᴛSection {
+
 // Data reads and returns the contents of the XCOFF section s.
-public static (slice<byte>, error) Data(this ref ΔSection s) {
+public static (slice<byte>, error) Data(this ref Section s) {
     var dat = new slice<byte>((nint)(s.sr.Size()));
     var (n, err) = s.sr.ReadAt(dat, 0);
     if (n == len(dat)) {
@@ -532,6 +541,8 @@ public static (slice<byte>, error) Data(this ref ΔSection s) {
     }
     return (dat.slice(0, n), err);
 }
+
+} partial class xcoffᴛFile {
 
 // CSect reads and returns the contents of a csect.
 public static slice<byte> CSect(this ref File f, @string name) {
@@ -577,7 +588,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
 
 // readImportID returns the import file IDs stored inside the .loader section.
 // Library name pattern is either path/base/member or base/member
-internal static (slice<@string>, error) readImportIDs(this ref File f, ж<ΔSection> Ꮡs) {
+internal static (slice<@string>, error) readImportIDs(this ref File f, ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Read loader header
@@ -778,4 +789,4 @@ public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     return (all, err);
 }
 
-} // end xcoff_package
+} // end xcoffᴛFile

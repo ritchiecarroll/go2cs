@@ -6,6 +6,7 @@ namespace go;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -20,6 +21,8 @@ partial struct pageCache {
     internal uint64 cache;  // 64-bit bitmap representing free pages (1 means free)
     internal uint64 scav;   // 64-bit bitmap representing scavenged pages (1 means scavenged)
 }
+
+} partial class runtimeᴛpageCache {
 
 // empty reports whether the page cache has no free pages.
 internal static bool empty(this ref pageCache c) {
@@ -76,9 +79,9 @@ internal static (uintptr, uintptr) allocN(this ref pageCache c, uintptr npages) 
 //
 //go:systemstack
 internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
-    ref var Δp = ref Ꮡp.DerefOrNull();
+    ref var p = ref Ꮡp.DerefOrNull();
 
-    assertLockHeld(Δp.mheapLock);
+    assertLockHeld(p.mheapLock);
 
     if (c.empty()) {
         return;
@@ -90,24 +93,26 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
     // slower, safer thing by iterating over each bit individually.
     for (nuint i = (nuint)0; i < 64; i++) {
         if ((c.cache & (((uint64)1).Lsh(i))) != 0) {
-            Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).free1(pi + i);
+            p.chunkOf(ci).of(pallocData.ᏑpallocBits).free1(pi + i);
 
             // Update density statistics.
             Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).free(ci, pi + i, 1);
         }
         if ((c.scav & (((uint64)1).Lsh(i))) != 0) {
-            Δp.chunkOf(ci).Ꮡscavenged.setRange(pi + i, 1);
+            p.chunkOf(ci).Ꮡscavenged.setRange(pi + i, 1);
         }
     }
 
     // Since this is a lot like a free, we need to make sure
     // we update the searchAddr just like free does.
-    var b = (new offAddr(c.@base)); if (b.lessThan(Δp.searchAddr)) {
-        Δp.searchAddr = b;
+    var b = (new offAddr(c.@base)); if (b.lessThan(p.searchAddr)) {
+        p.searchAddr = b;
     }
-    Δp.update(c.@base, pageCachePages, false, false);
+    p.update(c.@base, pageCachePages, false, false);
     c = new pageCache();
 }
+
+} partial class runtimeᴛpageAlloc {
 
 // allocToCache acquires a pageCachePages-aligned chunk of free pages which
 // may not be contiguous, and returns a pageCache structure which owns the
@@ -118,21 +123,21 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-internal static pageCache allocToCache(this ref pageAlloc Δp) {
-    assertLockHeld(Δp.mheapLock);
+internal static pageCache allocToCache(this ref pageAlloc p) {
+    assertLockHeld(p.mheapLock);
 
     // If the searchAddr refers to a region which has a higher address than
     // any known chunk, then we know we're out of memory.
-    if (chunkIndex(Δp.searchAddr.addr()) >= Δp.end) {
+    if (chunkIndex(p.searchAddr.addr()) >= p.end) {
         return new pageCache();
     }
     var c = new pageCache();
-    chunkIdx ci = chunkIndex(Δp.searchAddr.addr()); // chunk index
+    chunkIdx ci = chunkIndex(p.searchAddr.addr()); // chunk index
     ж<pallocData> chunk = default;
-    if (Δp.summary[len(Δp.summary) - 1][ci] != 0) {
+    if (p.summary[len(p.summary) - 1][ci] != 0) {
         // Fast path: there's free pages at or near the searchAddr address.
-        chunk = Δp.chunkOf(ci);
-        var (j, _) = chunk.of(pallocData.ᏑpallocBits).find(1, chunkPageIndex(Δp.searchAddr.addr()));
+        chunk = p.chunkOf(ci);
+        var (j, _) = chunk.of(pallocData.ᏑpallocBits).find(1, chunkPageIndex(p.searchAddr.addr()));
         if (j == ~(nuint)0) {
             @throw(badSummaryDataˢ);
         }
@@ -144,15 +149,15 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
     } else {
         // Slow path: the searchAddr address had nothing there, so go find
         // the first free page the slow way.
-        var (addr, _) = Δp.find(1);
+        var (addr, _) = p.find(1);
         if (addr == 0) {
             // We failed to find adequate free space, so mark the searchAddr as OoM
             // and return an empty pageCache.
-            Δp.searchAddr = maxSearchAddr();
+            p.searchAddr = maxSearchAddr();
             return new pageCache();
         }
         ci = chunkIndex(addr);
-        chunk = Δp.chunkOf(ci);
+        chunk = p.chunkOf(ci);
         c = new pageCache(
             @base: alignDown(addr, 64 * pageSize),
             cache: ~chunk.of(pallocData.ᏑpallocBits).pages64(chunkPageIndex(addr)),
@@ -167,10 +172,10 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
     chunk.Ꮡscavenged.clearBlock64(cpi, c.cache & c.scav /* free and scavenged */);
 
     // Update as an allocation, but note that it's not contiguous.
-    Δp.update(c.@base, pageCachePages, false, true);
+    p.update(c.@base, pageCachePages, false, true);
 
     // Update density statistics.
-    Δp.scav.index.alloc(ci, (nuint)sys.OnesCount64(c.cache));
+    p.scav.index.alloc(ci, (nuint)sys.OnesCount64(c.cache));
 
     // Set the search address to the last page represented by the cache.
     // Since all of the pages in this block are going to the cache, and we
@@ -180,8 +185,8 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
     // However, p.searchAddr is not allowed to point into unmapped heap memory
     // unless it is maxSearchAddr, so make it the last page as opposed to
     // the page after.
-    Δp.searchAddr = new offAddr(c.@base + (uintptr)((uintptr)pageSize * (pageCachePages - 1)));
+    p.searchAddr = new offAddr(c.@base + (uintptr)((uintptr)pageSize * (pageCachePages - 1)));
     return c;
 }
 
-} // end runtime_package
+} // end runtimeᴛpageAlloc

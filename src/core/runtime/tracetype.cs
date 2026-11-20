@@ -12,6 +12,7 @@ using @internal;
 using @internal.runtime;
 using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -20,6 +21,8 @@ partial class runtime_package {
 partial struct traceTypeTable {
     internal traceMap tab;
 }
+
+} partial class runtimeᴛtraceTypeTable {
 
 // put returns a unique id for the type typ and caches it in the table,
 // if it's seeing it for the first time.
@@ -48,6 +51,8 @@ internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) {
     w.flush().end();
     Ꮡt.Ꮡtab.reset();
 }
+
+} partial class runtime_package {
 
 internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w) {
     ref var node = ref Ꮡnode.DerefOrNull();

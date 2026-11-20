@@ -247,11 +247,26 @@ public class ArrayPointerElementDoorTests
         return allocated;
     }
 
+    // The measured loop: 1,000,000 iterations, a store and a read each, so 2,000,000 accesses.
+    private const int IndexedLoopIterations = 1_000_000;
+
+    // The smallest object a 64-bit process allocates: header, method table, one field.
+    private const long SmallestObjectBytes = 24;
+
+    // What the window may hold that is not per access. An access that allocates allocates at least one object, so a
+    // per-access cost reads at least 2,000,000 x 24 B = 48 MB. A cost paid once per call or once per process is not
+    // per access, and it lands in the window whenever the JIT moves the loop between tiers inside it: the loop's
+    // unoptimized body allocates 24 B per call (measured with on-stack replacement off), and a full-suite Release
+    // run read 5,784 B once (COORD, 2026-11-16). 64 KB is eleven times that one-time cost and below one smallest
+    // object per 700 accesses, so the bound keeps the claim (nothing per access) and drops what is not that claim.
+    private const long OneTimeCostBound = 64 * 1024;
+
     /// <summary>
-    /// Stop line 7 of the design (10.5): 100,000 stores and reads through
-    /// <c>(*[1&lt;&lt;20]uint32)(unsafe.Pointer(c))[i]</c> over C memory allocate NOTHING, after one warm-up pass.
-    /// The control is the same loop over a Go slice's first element, which takes the element door's box and shows
-    /// that the instrument reads a number that is not zero.
+    /// Stop line 7 of the design (10.5): stores and reads through <c>(*[1&lt;&lt;20]uint32)(unsafe.Pointer(c))[i]</c>
+    /// over C memory allocate NOTHING per access, after one warm-up pass. The window is bounded, not zero: a tier
+    /// change inside it is a one-time cost (see <see cref="OneTimeCostBound"/>). The control is the same loop over a
+    /// Go slice's first element, which takes the element door's box and must read at least one smallest object per
+    /// access, so the instrument reads a per-access cost when there is one, far above the bound.
     /// </summary>
     [TestMethod]
     public void AnIndexedLoopOverNativeMemoryAllocatesNothing()
@@ -261,13 +276,16 @@ public class ArrayPointerElementDoorTests
         try
         {
             @unsafe.Pointer c = Pointer(block);
+            const int last = IndexedLoopIterations - 1;
 
             AllocatedByIndexedLoop(c, 1000);
 
-            long native = AllocatedByIndexedLoop(c, 100_000);
+            long native = AllocatedByIndexedLoop(c, IndexedLoopIterations);
 
-            Assert.AreEqual(0L, native, "bytes allocated by 100,000 stores and reads over C memory");
-            Assert.AreEqual(99_999u, (uint)Marshal.ReadInt32(block, (99_999 & 1023) * 4), "and the stores are in the memory");
+            Assert.IsTrue(native < OneTimeCostBound,
+                $"bytes allocated by {2L * IndexedLoopIterations:N0} stores and reads over C memory: {native:N0}, " +
+                $"where the one-time bound is {OneTimeCostBound:N0}");
+            Assert.AreEqual((uint)last, (uint)Marshal.ReadInt32(block, (last & 1023) * 4), "and the stores are in the memory");
 
             slice<uint> s = new uint[1024];
             ж<uint> first = Ꮡ(s, 0);
@@ -275,10 +293,11 @@ public class ArrayPointerElementDoorTests
 
             AllocatedByIndexedLoop(g, 1000);
 
-            long managed = AllocatedByIndexedLoop(g, 100_000);
+            long managed = AllocatedByIndexedLoop(g, IndexedLoopIterations);
 
-            Assert.IsTrue(managed > 0, "the control: the same loop over a Go slice takes a box per access");
-            Assert.AreEqual(99_999u, s[99_999 & 1023], "and its stores are in the slice");
+            Assert.IsTrue(managed >= 2L * IndexedLoopIterations * SmallestObjectBytes,
+                $"the control: the same loop over a Go slice takes a box per access, read {managed:N0} bytes");
+            Assert.AreEqual((uint)last, s[last & 1023], "and its stores are in the slice");
             GC.KeepAlive(first);
         }
         finally

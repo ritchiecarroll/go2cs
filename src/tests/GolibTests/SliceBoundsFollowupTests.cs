@@ -54,7 +54,7 @@ public class SliceBoundsFollowupTests
     {
         Assert.IsNotNull(recovered, $"{site}: did not panic");
 
-        Assert.IsTrue(recovered._<Δruntime.ΔError>(out Δruntime.ΔError? error),
+        Assert.IsTrue(recovered._<Δruntime.Error>(out Δruntime.Error? error),
             $"{site}: recovered value {recovered} (type {recovered.GetType().FullName}) does not implement runtime.Error");
 
         Assert.AreEqual(want, error!.Error().ToString(), $"{site}: runtime.Error text");

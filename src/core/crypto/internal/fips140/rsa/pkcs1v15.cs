@@ -63,7 +63,7 @@ internal static (slice<byte>, error) signPKCS1v15(ж<PrivateKey> priv, @string h
 internal static ref readonly @string cryptoRsaUnsupportedHashˢ => ref cryptoRsaUnsupportedHashˢᵇ;
 private static readonly @string cryptoRsaUnsupportedHashˢᵇ = "crypto/rsa: unsupported hash function"u8;
 
-internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<ΔPublicKey> Ꮡpub, @string hash, slice<byte> hashed) {
+internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<PublicKey> Ꮡpub, @string hash, slice<byte> hashed) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     // Special case: "" is used to indicate that the data is signed directly.
@@ -95,7 +95,7 @@ internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<ΔPublicKey> Ꮡpub,
 //
 // hash is the name of the hash function as returned by [crypto.Hash.String]
 // or the empty string to indicate that the message is signed directly.
-public static error VerifyPKCS1v15(ж<ΔPublicKey> pub, @string hash, slice<byte> hashed, slice<byte> sig) {
+public static error VerifyPKCS1v15(ж<PublicKey> pub, @string hash, slice<byte> hashed, slice<byte> sig) {
     fipsSelfTest();
     fips140.RecordApproved();
     checkApprovedHashName(hash);
@@ -103,7 +103,7 @@ public static error VerifyPKCS1v15(ж<ΔPublicKey> pub, @string hash, slice<byte
     return verifyPKCS1v15(pub, hash, hashed, sig);
 }
 
-internal static error verifyPKCS1v15(ж<ΔPublicKey> Ꮡpub, @string hash, slice<byte> hashed, slice<byte> sig) {
+internal static error verifyPKCS1v15(ж<PublicKey> Ꮡpub, @string hash, slice<byte> hashed, slice<byte> sig) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     var (fipsApproved, errΔ1) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
@@ -136,9 +136,8 @@ internal static error verifyPKCS1v15(ж<ΔPublicKey> Ꮡpub, @string hash, slice
 }
 
 internal static void checkApprovedHashName(@string hash) {
-    var exprᴛ1 = hash;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "SHA-224"u8 || exprᴛ1 == "SHA-256"u8 || exprᴛ1 == "SHA-384"u8 || exprᴛ1 == "SHA-512"u8 || exprᴛ1 == "SHA-512/224"u8 || exprᴛ1 == "SHA-512/256"u8 || exprᴛ1 == "SHA3-224"u8 || exprᴛ1 == "SHA3-256"u8 || exprᴛ1 == "SHA3-384"u8 || exprᴛ1 == "SHA3-512"u8: {
+    case {} when hash == "SHA-224"u8 || hash == "SHA-256"u8 || hash == "SHA-384"u8 || hash == "SHA-512"u8 || hash == "SHA-512/224"u8 || hash == "SHA-512/256"u8 || hash == "SHA3-224"u8 || hash == "SHA3-256"u8 || hash == "SHA3-384"u8 || hash == "SHA3-512"u8: {
         break;
     }
     default: {

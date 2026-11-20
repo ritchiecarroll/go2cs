@@ -19,6 +19,7 @@ using global::go.math;
 using global::go.testing;
 using iter = iter_package;
 using static global::go.reflect_internal_test_package;
+using static reflect_test_package;
 
 partial class reflect_test_package {
 
@@ -148,6 +149,8 @@ partial struct StructFillRegs {
     internal float64 f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14;
 }
 
+} partial class reflect_testᴛStructWithMethods {
+
 public static StructFewRegs AllRegsCall(this ref StructWithMethods m, StructFewRegs s, MagicLastTypeNameForTestingRegisterABI _) {
     m.Value = 1;
     return s;
@@ -179,6 +182,8 @@ public static (StructFillRegs, ж<byte>) ValueRegMethodSpillPtr(this ref StructW
     return (s, i);
 }
 
+} partial class reflect_test_package {
+
 public static void TestReflectCallABI(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
@@ -193,7 +198,7 @@ public static void TestReflectCallABI(ж<Δtesting.T> t) {
         // and make sure it works.
         var r = rand.New(rand.NewSource(genValueRandSeed));
         foreach (var (_, fn) in range(abiCallTestCases)) {
-            ref var fnΔ1 = ref heap<reflectꓸValue>(Δreflect.ValueOf(fn), out var ᏑfnΔ1);
+            ref var fnΔ1 = ref heap<Δreflect.Value>(Δreflect.ValueOf(fn), out var ᏑfnΔ1);
             var fnʗ1 = fnΔ1;
             var rʗ1 = r;
             t.Run(Δruntime.FuncForPC(fnΔ1.Pointer()).Name(), (ж<Δtesting.T> tΔ1) => {
@@ -204,8 +209,8 @@ public static void TestReflectCallABI(ж<Δtesting.T> t) {
                 if (typ.NumIn() != typ.NumOut()) {
                     tΔ1.Fatalf("test case has different number of inputs and outputs: %d in, %d out", typ.NumIn(), typ.NumOut());
                 }
-                slice<reflectꓸValue> args = default;
-                foreach (var arg in range<reflectꓸType>(typ.Ins().Invoke)) {
+                slice<Δreflect.Value> args = default;
+                foreach (var arg in range<Δreflect.Type>(typ.Ins().Invoke)) {
                     args = append(args, genValue(tΔ1, arg, rʗ1));
                 }
                 var results = fnʗ1.Call(args);
@@ -240,23 +245,23 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> t) {
         // to return values. The purpose is to test the call boundary
         // and make sure it works.
         var r = rand.New(rand.NewSource(genValueRandSeed));
-        var makeFuncHandler = (slice<reflectꓸValue> args) => {
+        var makeFuncHandler = (slice<Δreflect.Value> args) => {
             if (len(args) == 0) {
-                return slice<reflectꓸValue>([]);
+                return slice<Δreflect.Value>([]);
             }
             return args.slice(0, len(args) - 1); // The last Value is an empty magic value.
         };
         foreach (var (_, callFn) in range(abiMakeFuncTestCases)) {
             var fnTyp = Δreflect.TypeOf(callFn).In(0);
-            ref var fn = ref heap<reflectꓸValue>(Δreflect.MakeFunc(fnTyp, makeFuncHandler), out var Ꮡfn);
-            ref var callFnΔ1 = ref heap<reflectꓸValue>(Δreflect.ValueOf(callFn), out var ᏑcallFnΔ1);
+            ref var fn = ref heap<Δreflect.Value>(Δreflect.MakeFunc(fnTyp, makeFuncHandler), out var Ꮡfn);
+            ref var callFnΔ1 = ref heap<Δreflect.Value>(Δreflect.ValueOf(callFn), out var ᏑcallFnΔ1);
             var callFnʗ1 = callFnΔ1;
             var fnʗ1 = fn;
             var fnTypʗ1 = fnTyp;
             var rʗ1 = r;
             t.Run(Δruntime.FuncForPC(callFnΔ1.Pointer()).Name(), (ж<Δtesting.T> tΔ1) => {
-                var argsᴷ = new stackAppend<reflectꓸValue>();
-                var args = slice<reflectꓸValue>([fnʗ1]);
+                var argsᴷ = new stackAppend<Δreflect.Value>();
+                var args = slice<Δreflect.Value>([fnʗ1]);
                 for (nint i = 0; i < fnTypʗ1.NumIn() - 1; i++) {
                     /* last one is magic type */
                     args = append(argsᴷ, args, genValue(tΔ1, fnTypʗ1.In(i), rʗ1));
@@ -279,7 +284,7 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> t) {
             // freed and then the next GC should notice that an object
             // was inexplicably revived.
             Func<ж<uint64>, MagicLastTypeNameForTestingRegisterABI, ж<uint64>> f = default;
-            var mkfn = Δreflect.MakeFunc(Δreflect.TypeOf((f).OrTypedNilFunc()), (slice<reflectꓸValue> args) => {
+            var mkfn = Δreflect.MakeFunc(Δreflect.TypeOf((f).OrTypedNilFunc()), (slice<Δreflect.Value> args) => {
                 (args[0].Interface()._<ж<uint64>>()).Value = 5;
                 return args[..1];
             });
@@ -538,7 +543,9 @@ internal static partial Struct6 passStruct6(Struct6 a) {
 //go:registerparams
 //go:noinline
 internal static partial Struct7 passStruct7(Struct7 a) {
-    return a;
+    a = a.ΔClone();
+
+    return a.ΔClone();
 }
 
 //go:registerparams
@@ -550,7 +557,9 @@ internal static partial Struct8 passStruct8(Struct8 a) {
 //go:registerparams
 //go:noinline
 internal static partial Struct9 passStruct9(Struct9 a) {
-    return a;
+    a = a.ΔClone();
+
+    return a.ΔClone();
 }
 
 //go:registerparams
@@ -847,6 +856,8 @@ internal static partial Struct6 callArgsStruct6(Func<Struct6, MagicLastTypeNameF
 //go:registerparams
 //go:noinline
 internal static partial Struct7 callArgsStruct7(Func<Struct7, MagicLastTypeNameForTestingRegisterABI, Struct7> f, Struct7 a0) {
+    a0 = a0.ΔClone();
+
     return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
@@ -859,6 +870,8 @@ internal static partial Struct8 callArgsStruct8(Func<Struct8, MagicLastTypeNameF
 //go:registerparams
 //go:noinline
 internal static partial Struct9 callArgsStruct9(Func<Struct9, MagicLastTypeNameForTestingRegisterABI, Struct9> f, Struct9 a0) {
+    a0 = a0.ΔClone();
+
     return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
@@ -1034,7 +1047,7 @@ internal static readonly object failedToGenerateValueˢ = (@string)"failed to ge
 // genValue generates a pseudorandom reflect.Value with type t.
 // The reflect.Value produced by this function is always the same
 // for the same type.
-internal static reflectꓸValue genValue(ж<Δtesting.T> t, reflectꓸType typ, ж<rand.Rand> r) {
+internal static Δreflect.Value genValue(ж<Δtesting.T> t, Δreflect.Type typ, ж<rand.Rand> r) {
     // Re-seed and reset the PRNG because we want each value with the
     // same type to be the same random value.
     r.Seed(genValueRandSeed);
@@ -1053,7 +1066,7 @@ public static void TestSignalingNaNArgument(ж<Δtesting.T> t) {
             t.Fatalf("signaling NaN not correct: %x\n", u);
         }
     });
-    v.Call(slice<reflectꓸValue>([Δreflect.ValueOf(Δmath.Float32frombits(snan))]));
+    v.Call(slice<Δreflect.Value>([Δreflect.ValueOf(Δmath.Float32frombits(snan))]));
 }
 
 public static void TestSignalingNaNReturn(ж<Δtesting.T> t) {

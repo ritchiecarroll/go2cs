@@ -42,7 +42,8 @@ internal static ж<array<byte>> getEntropy() {
         retries++; if (retries > 100) {
             throw panic("fips140/drbg: failed to obtain initial entropy");
         }
-        (seed, err) = entropy.Seed(Ꮡmemory);
+        (var seedᴛ1, err) = entropy.Seed(Ꮡmemory);
+        seed.Assign(seedᴛ1);
     }
     return Ꮡseed;
 }

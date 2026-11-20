@@ -34,6 +34,7 @@ using hash = hash_package;
 using math;
 using rsa = go.crypto.rsa_package;
 using static go.crypto.rsa_internal_test_package;
+using static rsa_test_package;
 
 partial class rsa_test_package {
 
@@ -945,6 +946,8 @@ partial struct testPrimeReader {
     internal @string primes;
 }
 
+} partial class rsa_testᴛtestPrimeReader {
+
 internal static (nint n, error err) Read(this ref testPrimeReader r, slice<byte> p) {
     error err = default;
 
@@ -978,6 +981,8 @@ internal static (nint n, error err) Read(this ref testPrimeReader r, slice<byte>
     return (len(p), default);
 }
 
+} partial class rsa_test_package {
+
 partial struct testEncryptOAEPMessage {
     internal slice<byte> @in;
     internal slice<byte> seed;
@@ -993,7 +998,7 @@ partial struct testEncryptOAEPStruct {
 
 public static void TestEncryptOAEP(ж<testing.T> t) {
     var sha1Δ1 = sha1.New();
-    var n = @new<bigꓸInt>();
+    var n = @new<big.Int>();
     foreach (var (i, test) in range(testEncryptOAEPData)) {
         n.SetString(test.modulus, 16);
         ref var @public = ref heap<rsa.PublicKey>(new PublicKey(N: n, E: test.e), out var Ꮡpublic);
@@ -1015,8 +1020,8 @@ public static void TestDecryptOAEP(ж<testing.T> t) {
     var random = rand.Reader;
 
     var sha1Δ1 = sha1.New();
-    var n = @new<bigꓸInt>();
-    var d = @new<bigꓸInt>();
+    var n = @new<big.Int>();
+    var d = @new<big.Int>();
     foreach (var (i, test) in range(testEncryptOAEPData)) {
         n.SetString(test.modulus, 16);
         d.SetString(test.d, 16);
@@ -1052,8 +1057,8 @@ public static void Test2DecryptOAEP(ж<testing.T> t) {
     var msg = slice<byte>([0xed, 0x36, 0x90, 0x8d, 0xbe, 0xfc, 0x35, 0x40, 0x70, 0x4f, 0xf5, 0x9d, 0x6e, 0xc2, 0xeb, 0xf5, 0x27, 0xae, 0x65, 0xb0, 0x59, 0x29, 0x45, 0x25, 0x8c, 0xc1, 0x91, 0x22]);
     var @in = slice<byte>([0x72, 0x26, 0x84, 0xc9, 0xcf, 0xd6, 0xa8, 0x96, 0x04, 0x3e, 0x34, 0x07, 0x2c, 0x4f, 0xe6, 0x52, 0xbe, 0x46, 0x3c, 0xcf, 0x79, 0x21, 0x09, 0x64, 0xe7, 0x33, 0x66, 0x9b, 0xf8, 0x14, 0x22, 0x43, 0xfe, 0x8e, 0x52, 0x8b, 0xe0, 0x5f, 0x98, 0xef, 0x54, 0xac, 0x6b, 0xc6, 0x26, 0xac, 0x5b, 0x1b, 0x4b, 0x7d, 0x2e, 0xd7, 0x69, 0x28, 0x5a, 0x2f, 0x4a, 0x95, 0x89, 0x6c, 0xc7, 0x53, 0x95, 0xc7, 0xd2, 0x89, 0x04, 0x6f, 0x94, 0x74, 0x9b, 0x09, 0x0d, 0xf4, 0x61, 0x2e, 0xab, 0x48, 0x57, 0x4a, 0xbf, 0x95, 0xcb, 0xff, 0x15, 0xe2, 0xa0, 0x66, 0x58, 0xf7, 0x46, 0xf8, 0xc7, 0x0b, 0xb5, 0x1e, 0xa7, 0xba, 0x36, 0xce, 0xdd, 0x36, 0x41, 0x98, 0x6e, 0x10, 0xf9, 0x3b, 0x70, 0xbb, 0xa1, 0xda, 0x00, 0x40, 0xd5, 0xa5, 0x3f, 0x87, 0x64, 0x32, 0x7c, 0xbc, 0x50, 0x52, 0x0e, 0x4f, 0x21, 0xbd]);
 
-    var n = @new<bigꓸInt>();
-    var d = @new<bigꓸInt>();
+    var n = @new<big.Int>();
+    var d = @new<big.Int>();
     n.SetString(testEncryptOAEPData[0].modulus, 16);
     d.SetString(testEncryptOAEPData[0].d, 16);
     var priv = @new<rsa.PrivateKey>();
@@ -1073,8 +1078,8 @@ public static void Test2DecryptOAEP(ж<testing.T> t) {
 
 public static void TestEncryptDecryptOAEP(ж<testing.T> t) {
     var sha256Δ1 = sha256.New();
-    var n = @new<bigꓸInt>();
-    var d = @new<bigꓸInt>();
+    var n = @new<big.Int>();
+    var d = @new<big.Int>();
     foreach (var (i, test) in range(testEncryptOAEPData)) {
         n.SetString(test.modulus, 16);
         d.SetString(test.d, 16);
@@ -1429,12 +1434,12 @@ public static void TestModifiedPrivateKey(ж<testing.T> t) {
             tΔ3.Skip(thisWasFixedAfterV100ˢ);
         }
         testModifiedPrivateKey(tΔ3, (ж<rsa.PrivateKey> k) => {
-            k.D = @new<bigꓸInt>().Add(k.D, big.NewInt(2));
+            k.D = @new<big.Int>().Add(k.D, big.NewInt(2));
         });
     });
     t.Run("D=0", (ж<testing.T> tΔ4) => {
         testModifiedPrivateKey(tΔ4, (ж<rsa.PrivateKey> k) => {
-            k.D = @new<bigꓸInt>();
+            k.D = @new<big.Int>();
         });
     });
     t.Run(dIsNilˢ, (ж<testing.T> tΔ5) => {
@@ -1445,12 +1450,12 @@ public static void TestModifiedPrivateKey(ж<testing.T> t) {
 
     t.Run("N+2", (ж<testing.T> tΔ6) => {
         testModifiedPrivateKey(tΔ6, (ж<rsa.PrivateKey> k) => {
-            k.N = @new<bigꓸInt>().Add(k.N, big.NewInt(2));
+            k.N = @new<big.Int>().Add(k.N, big.NewInt(2));
         });
     });
     t.Run("N=0", (ж<testing.T> tΔ7) => {
         testModifiedPrivateKey(tΔ7, (ж<rsa.PrivateKey> k) => {
-            k.N = @new<bigꓸInt>();
+            k.N = @new<big.Int>();
         });
     });
     t.Run(nIsNilˢ, (ж<testing.T> tΔ8) => {
@@ -1461,12 +1466,12 @@ public static void TestModifiedPrivateKey(ж<testing.T> t) {
 
     t.Run("P+2", (ж<testing.T> tΔ9) => {
         testModifiedPrivateKey(tΔ9, (ж<rsa.PrivateKey> k) => {
-            k.Primes[0] = @new<bigꓸInt>().Add(k.Primes[0], big.NewInt(2));
+            k.Primes[0] = @new<big.Int>().Add(k.Primes[0], big.NewInt(2));
         });
     });
     t.Run("P=0", (ж<testing.T> tΔ10) => {
         testModifiedPrivateKey(tΔ10, (ж<rsa.PrivateKey> k) => {
-            k.Primes[0] = @new<bigꓸInt>();
+            k.Primes[0] = @new<big.Int>();
         });
     });
     t.Run(pIsNilˢ, (ж<testing.T> tΔ11) => {
@@ -1477,12 +1482,12 @@ public static void TestModifiedPrivateKey(ж<testing.T> t) {
 
     t.Run("Q+2", (ж<testing.T> tΔ12) => {
         testModifiedPrivateKey(tΔ12, (ж<rsa.PrivateKey> k) => {
-            k.Primes[1] = @new<bigꓸInt>().Add(k.Primes[1], big.NewInt(2));
+            k.Primes[1] = @new<big.Int>().Add(k.Primes[1], big.NewInt(2));
         });
     });
     t.Run("Q=0", (ж<testing.T> tΔ13) => {
         testModifiedPrivateKey(tΔ13, (ж<rsa.PrivateKey> k) => {
-            k.Primes[1] = @new<bigꓸInt>();
+            k.Primes[1] = @new<big.Int>();
         });
     });
     t.Run(qIsNilˢ, (ж<testing.T> tΔ14) => {
@@ -1510,7 +1515,7 @@ internal static readonly object validateShouldHaveFailedˢ2 = (@string)"Validate
 internal static void testModifiedPrivateKey(ж<testing.T> t, Action<ж<rsa.PrivateKey>> f) {
     var k = @new<rsa.PrivateKey>();
     k.Value = test512Key.Value;
-    k.Primes = slices.Clone<slice<ж<bigꓸInt>>, ж<bigꓸInt>>(k.Primes);
+    k.Primes = slices.Clone<slice<ж<big.Int>>, ж<big.Int>>(k.Primes);
     f(k);
     {
         var err = k.Validate(); if (err == nil) {

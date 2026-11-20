@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,7 +27,6 @@ using static go.crypto.@internal.fips140.rsa_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -64,9 +62,9 @@ using static go.crypto.@internal.fips140.rsa_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/cast.go", "cast.cs", "ABAglAAgQgAgQgAQIgAQIgAQIgAQIgAQIgAJFIKCgtwAIUSCgpSClIKU")]
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "AB0iooKUgoKCpoKCgpSCgqaCgpSCgqaCpoKClIIADh6ClJSCpoKCAAcQpoIADyCCgqaCktyCgpS4ygAJBsIABxCSgpSmgoKUggAHEIKUgpSCpuqigqaCgoLKgtyClIK4ABEkggAEGPKClLiCooKCABAigoKUtLS0tLS0tLaCgoKCgoKUlIKUgoIADRwAIDqipoKClIKUpoKClLiCgoKmAAsMlIKUgoKUggAIEoKCuIKCgpSUuA==", "115-127:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "ABcyABAqwoKClKaCgoKm5qSSgoKCgsqCgpSCgoKUgoKuwoKClKaigoKC3IKmgoKmgoKUgqamgtg=")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "ABcyABAqwoKClKaCgoKm5qSSgoKCgsqCgpSCgoKUgoKuwoKClKaigoKC3IKmgoKmgoKUgqamgsg=")]
 [assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABdMAA4CgpSClIKUqqKClIKCgoKClIKClPimgoIABxCCyoKmgoKCAAwalIKCgpQABxCC3MqmpgAICqaCgoIABxCCuILKgsqCmrKC3LimgoKClMqC7oKCgqaCuAAHEIKCgoKUpoKUqsKCgriClOiygoIABxCCuIKUgoKmgoKCAAkUkoKCpqiSqJKClKaigoKCgoKCpoKmgoKCggAHEIKClKamgubKAAkOgoKCgoCCgoKkgoKmgoKUgoKUgoKUgIK2gpSosoKCgpSChKaCgqaCgpSUgpSClNye8oKUgoKCgoKmgqY=", "", "", "456=Size/1/1/1")]
-[assembly: GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKCgpSCgpSCgpSCgpTmsoKCgpSUgoKClLiUlIKClO6ClKqilIKClIKClIKClIKClIKCpu6ClKyygoKUgoKU3IKUrgANAoKCgoKUgoKCgoIAFgqilIKCgqaUgqaCgqaCuIKClIKClIIAChaCgpSCgpSCgoKCpoKClIKClIKCgriClJSCyoKClIKCAAgSgpSCgqa4uIIACBKCpgAOBqKCgpSCyoKUgpSCuIK4gtyClKiSgoKUpoKCgpSmgoLMkoKqooKssoKmgqSCgqaUgpaClJSUlJSUpoKCgrg=")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABYqogAZLILOwoKCgpSCgpSCgpSCgpTmsoKCgpSUgoKClLiUlIKClO6ClKqilIKClIKClIKClIKClIKCpu6ClKyygoKUgoKU3IKUzgANAoKCgoKUgoKCgoIAGAqilIKCgqaUgqaCgqaCuIKClIKClIIAChaCgpSCgpSCgoKCpoKClIKClIKCgriClJSCyoKClIKCAAgSgpSCgqa4uIIACBKCpgAOBqKCgpSCyoKUgpSCuIK4gtyClKiSgoKUpoKCgpSmgoLMkoKqooKssoKmgqSCgqaUgpaClJSUlJSUpoKCgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -83,7 +81,7 @@ public static partial class rsa_package
     // <TypeAccessibility>
     internal partial struct millerRabin {}
     public partial struct PrivateKey {}
-    public partial struct ΔPublicKey {}
+    public partial struct PublicKey {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -108,3 +106,14 @@ public static partial class rsa_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(rsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
+[GoMethodHost(typeof(rsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
+// </MethodHolders>

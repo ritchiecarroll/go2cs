@@ -83,13 +83,12 @@ public static void TestExamples(ж<testing.T> t) {
                 }
 
                 @string got = default;
-                var exprᴛ1 = kind;
                 switch (ᐧ) {
-                case {} when exprᴛ1 == "Play"u8: {
+                case {} when kind == "Play"u8: {
                     got = strings.TrimSpace(formatFile(tΔ1, fset, ex.Play));
                     break;
                 }
-                case {} when exprᴛ1 == "Output"u8: {
+                case {} when kind == "Output"u8: {
                     got = strings.TrimSpace(ex.Output);
                     break;
                 }

@@ -16,6 +16,7 @@ using io = io_package;
 using static global::go.go.types_internal_test_package;
 using types = global::go.go.types_package;
 using ꓸꓸꓸany = Span<any>;
+using static types_test_package;
 
 partial class types_test_package {
 
@@ -74,6 +75,8 @@ func main() {
 partial struct gen {
     /*embed*/ public bytes_package.Buffer Buffer;
 }
+
+} partial class types_testᴛgen {
 
 internal static void p(this ж<gen> Ꮡg, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -278,4 +281,4 @@ internal static void factorials(this ж<gen> Ꮡg, nint n) {
     Ꮡg.p(")\n\n");
 }
 
-} // end types_test_package
+} // end types_testᴛgen

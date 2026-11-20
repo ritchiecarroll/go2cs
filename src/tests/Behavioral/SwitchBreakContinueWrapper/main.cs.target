@@ -96,9 +96,8 @@ continue_outer:;
 break_outer:;
 
     foreach (var (idx, w) in range(slice<@string>(["go", "brk", "go", "end"]))) {
-        var exprᴛ6 = w;
         switch (ᐧ) {
-        case {} when exprᴛ6 == "go"u8 || exprᴛ6 == "brk"u8: {
+        case {} when w == "go"u8 || w == "brk"u8: {
             if (w == "brk"u8) {
                 fmt.Println("f: breaking at", idx);
                 break;

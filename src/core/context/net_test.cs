@@ -14,7 +14,7 @@ partial class context_test_package {
 internal static readonly object deadlineExceededDoesNotˢ = (@string)"DeadlineExceeded does not implement net.Error"u8;
 
 public static void TestDeadlineExceededIsNetError(ж<testing.T> t) {
-    var (err, ok) = context.DeadlineExceeded._<netꓸError>(ᐧ);
+    var (err, ok) = context.DeadlineExceeded._<Δnet.Error>(ᐧ);
     if (!ok) {
         t.Fatal(deadlineExceededDoesNotˢ);
     }

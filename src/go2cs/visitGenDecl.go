@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"strings"
 )
 
 func (v *Visitor) visitGenDecl(genDecl *ast.GenDecl) {
@@ -31,6 +32,15 @@ func (v *Visitor) visitGenDecl(genDecl *ast.GenDecl) {
 			v.dropEmptyGap(gap)
 			hasValueSpec = true
 		case *ast.TypeSpec:
+			// A struct's promoted forwarders leave its method holder open (emitPromotedInterfaceForwarders);
+			// the next type of a grouped declaration is the package's.
+			if index > 0 && !v.inFunction {
+				if switched := v.switchClass(v.emittedClassName); switched != "" {
+					v.outputBuilder.WriteString(v.newline)
+					v.outputBuilder.WriteString(strings.TrimSuffix(switched, v.newline))
+				}
+			}
+
 			v.visitTypeSpec(specType, specDoc(genDecl, index, specType.Doc))
 		default:
 			panic(fmt.Sprintf("@visitGenDecl - unexpected GenDecl Spec: %#v", v.getPrintedNode(specType)))

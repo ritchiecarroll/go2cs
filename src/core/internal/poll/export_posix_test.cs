@@ -8,11 +8,14 @@
 namespace go.@internal;
 
 using static go.@internal.poll_package;
+using static poll_internal_test_package;
 
 partial class poll_internal_test_package {
+
+} partial class poll_internal_testᴛFD {
 
 internal static error EOFError(this ref global::go.@internal.poll_package.FD fd, nint n, error err) {
     return fd.eofError(n, err);
 }
 
-} // end poll_internal_test_package
+} // end poll_internal_testᴛFD

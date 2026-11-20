@@ -58,8 +58,8 @@ using static go.text.tabwriter_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUtsqCgt6SgoKCgoKCADKEAQAPAoKUgoKCgoKUlJSUlKiSgoKCgoKUlAAIEoKCgpSCuIKCgpSogpaClIKmgoKClIK4ppSigoKmlIKUppSCuIKCgoKCpoKUgsqmgqamruKCgoKUggAJFIKmgoKCgoKmlIKmgtyCyoKCgriokoKokoIAChiSlLS0AAQQwpSCgvikgqqigoKCgqbigpSUgoKUtKzC6gAIAoKC7MSClJS4gqbaAAoCpoKClKaCgoKClILcgpT+goKCgpTIlIKCgtyUgoKUgoLcgoLaog==")]
-[assembly: GoPositionMap("text/tabwriter/tabwriter_test.go", "tabwriter_test.cs", "ABMmlJSCgoKCgoKmlKaUgoKClIK4ooKCpoKCuIKClIKmgoKCpoKCgpSmgoKCgoKCpgAJBgCLA4wIgoLsgqbCgoKUtNbkooKCgoKCgqLkooKCgoKCogAIBIKUgoKCgoKCgpSClLiCgoKUgpQABxCClIKSgoKUgoKU3IKClJSCkoKClIKClAAVJqKCgqaC", "662-686:1;663-673:1.1;675-685:1.2;695-706:1;717-728:1")]
+[assembly: GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AG7eAeiAgoKUtsqCgt6SgoKCgoKCADaEAQAPAoKUgoKCgoKUlJSUlKiSgoKCgoKUlAAMEoKCgpSCuIKCgpTIgraClIKmgoKClIK4xrSigoKmlIKUppSCuIKCgoKCpoKUgsqmgqamruKCgoKUggAJFIKmgoKCgoKmlIKmgtyCyoKCgriokoKokoIADhiSlLS0AAQQwpSCgvikgqqigoKCgqbigpSUgoKUtKzC6gAIAoKC7MSClJS4gsb6AAoCpoKClKaCgoKClILcgpT+goKCgpTIlIKCgtyUgoKUgoLcgoL6og==")]
+[assembly: GoPositionMap("text/tabwriter/tabwriter_test.go", "tabwriter_test.cs", "ABYmlJSCgoKCgoKmlKa0goKClIK4ooKCpoKCuIKClIKmgoKCpoKCgpSmgoKCgoKCpgAJBgCLA4wIgoIACAyCxsKCgpS01uSigoKCgoKCouSigoKCgoKiAAgEgpSCgoKCgoKClIKUuIKCgpSClAAHEIKUgpKCgpSCgpTcgoKUlIKSgoKUgoKUABUmooKCpoI=", "662-686:1;663-673:1.1;675-685:1.2;695-706:1;717-728:1")]
 // </GoSourcePositionMaps>
 
 namespace go.text;
@@ -93,6 +93,16 @@ public static partial class tabwriter_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(tabwriter_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tabwriterᴛWriter;
+// </MethodHolders>
 
 [GoPackage("tabwriter_test")]
 public static partial class tabwriter_test_package

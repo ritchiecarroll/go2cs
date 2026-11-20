@@ -220,7 +220,7 @@ public static void TestSetGlobalRandom(ж<testing.T> t) {
         // Again, with SetGlobalRandom.
         SetGlobalRandom(tΔ9, 1);
 
-        seen = new bool[]{}.array(2);
+        seen.Assign(new bool[]{}.array(2));
         for (nint i = 0; i < 1000; i++) {
             var r = bytes.NewReader(buf);
             var (got, errΔ2) = ecdsa.GenerateKey(elliptic.P384(), new cryptotest_internal_test_package.bytes_ReaderжReader(r));

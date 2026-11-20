@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,6 +13,8 @@ internal static void clearViaPtr(ref mc c) { c.n = 0; }
 
 internal static void bump(ref nint p) { p++; }
 
+} partial class mainᴛmc {
+
 internal static void reset(this ж<mc> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -19,10 +22,14 @@ internal static void reset(this ж<mc> Ꮡc) {
     clearViaPtr(ref (Ꮡc).DerefOrNull());
 }
 
+} partial class main_package {
+
 partial struct wrap {
     internal ж<mc> p;
     internal nint tag;
 }
+
+} partial class mainᴛmc {
 
 internal static wrap wrapped(this ж<mc> Ꮡc) {
     return new wrap(Ꮡc, 7);
@@ -31,6 +38,8 @@ internal static wrap wrapped(this ж<mc> Ꮡc) {
 internal static wrap keyed(this ж<mc> Ꮡc) {
     return new wrap(tag: 8, p: Ꮡc);
 }
+
+} partial class main_package {
 
 internal static void main() {
     var c = Ꮡ(new mc(n: 9));

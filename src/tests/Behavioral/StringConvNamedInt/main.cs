@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,7 +9,11 @@ partial struct Delim /*num:rune*/;
 
 partial struct Code /*num:nint*/;
 
+} partial class mainᴛDelim {
+
 public static @string String(this Delim d) { return (@string)(rune)d; }
+
+} partial class main_package {
 
 internal static void main() {
     var d = (Delim)(rune)'{';

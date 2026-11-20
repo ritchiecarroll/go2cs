@@ -237,7 +237,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     // imports from that group.
     var groupStarts = findImportGroupStarts(@file.Imports);
     var groupStartsʗ1 = groupStarts;
-    tokenꓸPos groupStart(ж<ast.ImportSpec> s) {
+    token.Pos groupStart(ж<ast.ImportSpec> s) {
         foreach (var (i, start) in range(groupStartsʗ1)) {
             if (s.Path.ValuePos < start) {
                 return groupStartsʗ1[i - 1];
@@ -259,14 +259,13 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
         @string n = assumedPackageName(p);
         if (s.Name != nil) {
             n = s.Name.Name;
-            var exprᴛ1 = n;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "_"u8: {
+            case {} when n == "_"u8: {
                 blankImports = append(blankImportsᴷ, blankImports, (ast.Spec)(new ast.ImportSpecжSpec(s)));
                 continue;
                 break;
             }
-            case {} when exprᴛ1 == "."u8: {
+            case {} when n == "."u8: {
                 // We can't resolve dot imports (yet).
                 return default;
             }}
@@ -557,9 +556,9 @@ internal static bool hasIota(ast.Spec s) {
 
 // findImportGroupStarts finds the start positions of each sequence of import
 // specs that are not separated by a blank line.
-internal static slice<tokenꓸPos> findImportGroupStarts(slice<ж<ast.ImportSpec>> imps) {
+internal static slice<token.Pos> findImportGroupStarts(slice<ж<ast.ImportSpec>> imps) {
     var startImps = findImportGroupStarts1(imps);
-    var groupStarts = new slice<tokenꓸPos>(len(startImps));
+    var groupStarts = new slice<token.Pos>(len(startImps));
     foreach (var (i, imp) in range(startImps)) {
         groupStarts[i] = imp.Pos();
     }
@@ -578,7 +577,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
     // Assume gofmt has been applied, so there is a blank line between adjacent imps
     // if and only if they are more than 2 positions apart (newline, tab).
     slice<ж<ast.ImportSpec>> groupStarts = default;
-    tokenꓸPos prevEnd = (tokenꓸPos)(-2);
+    token.Pos prevEnd = (token.Pos)(-2);
     foreach (var (_, imp) in range(imps)) {
         if (imp.Pos() - prevEnd > 2) {
             groupStarts = append(groupStartsᴷ, groupStarts, imp);
@@ -664,8 +663,8 @@ internal static (nint i, ж<ast.CommentGroup> last) lastComment(ж<ast.BlockStmt
     if (Ꮡb == nil) {
         return (i, last);
     }
-    tokenꓸPos pos = b.Pos();
-    tokenꓸPos end = b.End();
+    token.Pos pos = b.Pos();
+    token.Pos end = b.End();
     foreach (var (j, cg) in range(c)) {
         if (cg.Pos() < pos) {
             continue;
@@ -798,10 +797,10 @@ internal static bool isExampleSuffix(@string s) {
 // updateBasicLitPos updates lit.Pos,
 // ensuring that lit.End is displaced by the same amount.
 // (See https://go.dev/issue/76395.)
-internal static void updateBasicLitPos(ж<ast.BasicLit> Ꮡlit, tokenꓸPos pos) {
+internal static void updateBasicLitPos(ж<ast.BasicLit> Ꮡlit, token.Pos pos) {
     ref var lit = ref Ꮡlit.DerefOrNull();
 
-    tokenꓸPos len = lit.End() - lit.Pos();
+    token.Pos len = lit.End() - lit.Pos();
     lit.ValuePos = pos;
     if (lit.ValueEnd.IsValid()) {
         lit.ValueEnd = pos + len;

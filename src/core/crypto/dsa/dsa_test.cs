@@ -45,14 +45,14 @@ internal static void testParameterGeneration(ж<testing.T> t, global::go.crypto.
         t.Errorf("%d: q.BitLen got:%d want:%d", (nint)sizes, @params.Q.BitLen(), L);
     }
 
-    var one = @new<bigꓸInt>();
+    var one = @new<big.Int>();
     one.SetInt64(1);
-    var pm1 = @new<bigꓸInt>().Sub(@params.P, one);
-    var (quo, rem) = @new<bigꓸInt>().DivMod(pm1, @params.Q, @new<bigꓸInt>());
+    var pm1 = @new<big.Int>().Sub(@params.P, one);
+    var (quo, rem) = @new<big.Int>().DivMod(pm1, @params.Q, @new<big.Int>());
     if (rem.Sign() != 0) {
         t.Errorf("%d: p-1 mod q != 0", (nint)sizes);
     }
-    var x = @new<bigꓸInt>().Exp(@params.G, quo, @params.P);
+    var x = @new<big.Int>().Exp(@params.G, quo, @params.P);
     if (x.Cmp(one) == 0) {
         t.Errorf("%d: invalid generator", (nint)sizes);
     }
@@ -80,8 +80,8 @@ public static void TestParameterGeneration(ж<testing.T> t) {
     testParameterGeneration(t, L3072N256, 3072, 256);
 }
 
-internal static ж<bigꓸInt> fromHex(@string s) {
-    var (result, ok) = @new<bigꓸInt>().SetString(s, 16);
+internal static ж<big.Int> fromHex(@string s) {
+    var (result, ok) = @new<big.Int>().SetString(s, 16);
     if (!ok) {
         throw panic(s);
     }

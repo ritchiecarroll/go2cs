@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct Queue<T> {
     internal slice<T> items;
 }
+
+} partial class mainᴛQueue {
 
 public static void Enqueue<T>(this ref Queue<T> q, T item) {
     q.items = append(q.items, item);
@@ -26,6 +29,8 @@ public static (T, bool) Dequeue<T>(this ref Queue<T> q) {
 public static nint Size<T>(this ref Queue<T> q) {
     return len(q.items);
 }
+
+} partial class main_package {
 
 internal static void main() {
     var intQueue = new Queue<nint>();

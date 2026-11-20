@@ -14,6 +14,7 @@ namespace go.crypto;
 using crypto = crypto_package;
 using mlkem = go.crypto.@internal.fips140.mlkem_package;
 using go.crypto.@internal.fips140;
+using static mlkem_package;
 
 partial class mlkem_package {
 
@@ -63,6 +64,8 @@ public static (ж<DecapsulationKey768>, error) NewDecapsulationKey768(slice<byte
     return (Ꮡ(new DecapsulationKey768(key)), default);
 }
 
+} partial class mlkemᴛDecapsulationKey768 {
+
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
 //
 // The decapsulation key must be kept secret.
@@ -92,6 +95,8 @@ public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey768 dk) 
     return new EncapsulationKey768жEncapsulator(dk.EncapsulationKey());
 }
 
+} partial class mlkem_package {
+
 internal static crypto.Decapsulator _ᴛ1ʗ = new DecapsulationKey768жDecapsulator(((ж<DecapsulationKey768>)nil));
 
 // An EncapsulationKey768 is the public key used to produce ciphertexts to be
@@ -111,6 +116,8 @@ public static (ж<EncapsulationKey768>, error) NewEncapsulationKey768(slice<byte
     return (Ꮡ(new EncapsulationKey768(key)), default);
 }
 
+} partial class mlkemᴛEncapsulationKey768 {
+
 // Bytes returns the encapsulation key as a byte slice.
 public static slice<byte> Bytes(this ref EncapsulationKey768 ek) {
     return ek.key.Bytes();
@@ -126,6 +133,8 @@ public static slice<byte> Bytes(this ref EncapsulationKey768 ek) {
 public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey768 ek) {
     return ek.key.Encapsulate();
 }
+
+} partial class mlkem_package {
 
 // DecapsulationKey1024 is the secret key used to decapsulate a shared key
 // from a ciphertext. It includes various precomputed values.
@@ -154,6 +163,8 @@ public static (ж<DecapsulationKey1024>, error) NewDecapsulationKey1024(slice<by
 
     return (Ꮡ(new DecapsulationKey1024(key)), default);
 }
+
+} partial class mlkemᴛDecapsulationKey1024 {
 
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
 //
@@ -184,6 +195,8 @@ public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey1024 dk)
     return new EncapsulationKey1024жEncapsulator(dk.EncapsulationKey());
 }
 
+} partial class mlkem_package {
+
 internal static crypto.Decapsulator _ᴛ2ʗ = new DecapsulationKey1024жDecapsulator(((ж<DecapsulationKey1024>)nil));
 
 // An EncapsulationKey1024 is the public key used to produce ciphertexts to be
@@ -203,6 +216,8 @@ public static (ж<EncapsulationKey1024>, error) NewEncapsulationKey1024(slice<by
     return (Ꮡ(new EncapsulationKey1024(key)), default);
 }
 
+} partial class mlkemᴛEncapsulationKey1024 {
+
 // Bytes returns the encapsulation key as a byte slice.
 public static slice<byte> Bytes(this ref EncapsulationKey1024 ek) {
     return ek.key.Bytes();
@@ -219,4 +234,4 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this r
     return ek.key.Encapsulate();
 }
 
-} // end mlkem_package
+} // end mlkemᴛEncapsulationKey1024

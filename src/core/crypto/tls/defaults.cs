@@ -68,8 +68,8 @@ internal static slice<uint16> supportedCipherSuites(bool aesGCMPreferred) {
 }
 
 internal static slice<uint16> defaultCipherSuites(bool aesGCMPreferred) {
-    var ΔcipherSuites = supportedCipherSuites(aesGCMPreferred);
-    return slices.DeleteFunc(ΔcipherSuites, (uint16 c) => disabledCipherSuites[c] || tlsrsakex.Value() != "1"u8 && rsaKexCiphers[c] || tls3des.Value() != "1"u8 && tdesCiphers[c]);
+    var cipherSuites = supportedCipherSuites(aesGCMPreferred);
+    return slices.DeleteFunc(cipherSuites, (uint16 c) => disabledCipherSuites[c] || tlsrsakex.Value() != "1"u8 && rsaKexCiphers[c] || tls3des.Value() != "1"u8 && tdesCiphers[c]);
 }
 
 // defaultCipherSuitesTLS13 is also the preference order, since there are no

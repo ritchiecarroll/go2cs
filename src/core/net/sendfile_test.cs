@@ -27,6 +27,7 @@ using fs = go.io.fs_package;
 using hash = hash_package;
 using math;
 using static go.net_package;
+using static net_internal_test_package;
 
 partial class net_internal_test_package {
 
@@ -149,7 +150,7 @@ internal static partial void testSendfile(ж<testing.T> t, @string filePath, @st
             var (conn, errΔ1) = lnΔ1.Accept();
             if (errΔ1 != nil) {
                 errcʗ1.ᐸꟷ(errΔ1);
-                builtin.close(errcʗ1);
+                close(errcʗ1);
                 return;
             }
 
@@ -158,7 +159,7 @@ internal static partial void testSendfile(ж<testing.T> t, @string filePath, @st
             goǃ(() => {
                 GoFrame ᒐ = default;
                 try {
-                    defer(ᴛ1 => builtin.close(ᴛ1), errcʗ2, ref ᒐ);
+                    defer(ᴛ1 => close(ᴛ1), errcʗ2, ref ᒐ);
                     var connʗ2 = connʗ1;
                     defer(() => connʗ2.Close(), ref ᒐ);
 
@@ -250,7 +251,7 @@ public static partial void TestSendfileParts(ж<testing.T> t) {
             var (conn, errΔ1) = lnΔ1.Accept();
             if (errΔ1 != nil) {
                 errcʗ1.ᐸꟷ(errΔ1);
-                builtin.close(errcʗ1);
+                close(errcʗ1);
                 return;
             }
 
@@ -259,7 +260,7 @@ public static partial void TestSendfileParts(ж<testing.T> t) {
             goǃ(() => {
                 GoFrame ᒐ = default;
                 try {
-                    defer(ᴛ1 => builtin.close(ᴛ1), errcʗ2, ref ᒐ);
+                    defer(ᴛ1 => close(ᴛ1), errcʗ2, ref ᒐ);
                     var connʗ2 = connʗ1;
                     defer(() => connʗ2.Close(), ref ᒐ);
 
@@ -331,7 +332,7 @@ public static partial void TestSendfileSeeked(ж<testing.T> t) {
             var (conn, errΔ1) = lnΔ1.Accept();
             if (errΔ1 != nil) {
                 errcʗ1.ᐸꟷ(errΔ1);
-                builtin.close(errcʗ1);
+                close(errcʗ1);
                 return;
             }
 
@@ -340,7 +341,7 @@ public static partial void TestSendfileSeeked(ж<testing.T> t) {
             goǃ(() => {
                 GoFrame ᒐ = default;
                 try {
-                    defer(ᴛ1 => builtin.close(ᴛ1), errcʗ2, ref ᒐ);
+                    defer(ᴛ1 => close(ᴛ1), errcʗ2, ref ᒐ);
                     var connʗ2 = connʗ1;
                     defer(() => connʗ2.Close(), ref ᒐ);
 
@@ -454,7 +455,7 @@ public static partial void TestSendfilePipe(ж<testing.T> t) {
                     return;
                 }
                 // Signal the main goroutine that we've copied the byte.
-                builtin.close(copiedʗ1);
+                close(copiedʗ1);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
@@ -553,7 +554,7 @@ public static partial void TestSendfileOnWriteTimeoutExceeded(ж<testing.T> t) {
                 var errcʗ2 = errcʗ1;
                 defer(() => {
                     errcʗ2.ᐸꟷ(retErr);
-                    builtin.close(errcʗ2);
+                    close(errcʗ2);
                 }, ref ᒐ);
 
                 var (connΔ1, errΔ1) = lnΔ1.Accept();
@@ -767,6 +768,8 @@ internal partial struct sendFileBench {
     internal nint chunkSize;
 }
 
+} partial class net_internal_testᴛsendFileBench {
+
 internal static void benchSendFile(this sendFileBench bench, ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
     try {
@@ -803,6 +806,8 @@ internal static void benchSendFile(this sendFileBench bench, ж<testing.B> Ꮡb)
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class net_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sendfileBenchˢ => ref sendfileBenchˢᵇ;

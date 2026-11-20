@@ -43,14 +43,33 @@ report it. A goroutine's stack does not grow.
 [What converts, but doesn't behave exactly like Go](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)
 lists them all.
 
+## Did AI write this?
+
+Not the foundation. I started go2cs in 2018 as a one-person, nights-and-weekends project, believing that Go's
+simplicity could be brought to .NET. The runtime library, the conversion strategies and the shape of the generated
+C# all come from that hand-built groundwork.
+
+What changed recently is pace. Leaning on Claude took go2cs from an experiment to a tool in a matter of months — the
+entire Go standard library now converts and compiles clean, and
+[every package that can be validated](ValidatedTestPackages.md) passes its own Go test suite in C#.
+
+The bar is the same whether I wrote the code or Claude did, and nothing lands because it looked right. More than a
+thousand converted programs are compiled and their output compared against `go run`, every converter change is
+measured by re-transpiling the corpus and byte-comparing the result, and each validated package carries a proof page
+showing Go's verdicts beside C#'s.
+
+Read about the journey: [How AI is used in this project](AIAssistance.md).
+
 ## What does not convert?
 
-- **Most of cgo.** `go2cs -cgo` converts a package whose C uses are calls of C library functions, on
+- **Parts of cgo.** `go2cs -cgo` converts a package whose C uses are calls of C library functions, on
   a machine with a C compiler. It was measured on linux/amd64, darwin/amd64, darwin/arm64 and
   windows/amd64.
   Other C uses are refused, by name, with the phase that covers them: Go memory handed to C, C code
   written inline in the Go file, and callbacks into Go. Without `-cgo`, a package that imports `"C"`
   stops the run ([what converts, and what comes next](Roadmap.md#cgo)).
+  <!-- Heading was "Most of cgo" until 2026-11-20: true before `-cgo` converted anything, stale once it did (owner,
+       first post-.4 docs batch, COORD 07:19Z). The README's FAQ list reads "Parts of cgo" to match. -->
 - **Hand-written assembly.** A function whose body lives in a `.s` file becomes a stub that throws when
   it is called. Many libraries ship a pure-Go fallback behind a build tag, and converting with that tag
   is the usual answer.
@@ -131,7 +150,9 @@ than under the JIT on most rows of the [performance comparison](Performance.md),
 [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
 has the measured cost and the platform it was measured on, and the
 [Roadmap](Roadmap.md#native-aot-and-trimming) has the work under way to reduce it.
-[Tuning converted code](Tuning.md#choosing-a-deployment) compares Native AOT with the JIT and ReadyToRun.
+[Tuning converted code](Tuning.md#choosing-a-deployment) compares Native AOT with the JIT and ReadyToRun,
+and says how to publish: put `<PublishAot>true</PublishAot>` in the program's own project file and name that
+project to `dotnet publish`. On Linux the publish needs `clang` and `zlib1g-dev`.
 
 ## What does converted code depend on at run time?
 

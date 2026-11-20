@@ -164,11 +164,11 @@ public static void TestFirstZone(ж<Δtesting.T> t) {
 }
 
 public static void TestLocationNames(ж<Δtesting.T> t) {
-    if (Δtime.ΔLocal.String() != "Local"u8) {
-        t.Errorf(@"invalid Local location name: got %q want ""Local""", Δtime.ΔLocal.OrTypedNil());
+    if (Δtime.Local.String() != "Local"u8) {
+        t.Errorf(@"invalid Local location name: got %q want ""Local""", Δtime.Local.OrTypedNil());
     }
-    if (Δtime.ΔUTC.String() != "UTC"u8) {
-        t.Errorf(@"invalid UTC location name: got %q want ""UTC""", Δtime.ΔUTC.OrTypedNil());
+    if (Δtime.UTC.String() != "UTC"u8) {
+        t.Errorf(@"invalid UTC location name: got %q want ""UTC""", Δtime.UTC.OrTypedNil());
     }
 }
 
@@ -269,7 +269,7 @@ public static void TestMalformedTZData(ж<Δtesting.T> t) {
 partial struct slimTestsᴛ1 /*dyn*/ {
     internal @string zoneName;
     internal @string fileName;
-    internal Func<ж<timeꓸLocation>, Δtime.Time> date;
+    internal Func<ж<Δtime.Location>, Δtime.Time> date;
     internal @string wantName;
     internal nint wantOffset;
 }
@@ -278,7 +278,7 @@ internal static slice<slimTestsᴛ1> slimTests = [
         // 2020b slim tzdata for Europe/Berlin.
         zoneName: "Europe/Berlin",
         fileName: "2020b_Europe_Berlin",
-        date: (ж<timeꓸLocation> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
+        date: (ж<Δtime.Location> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
         wantName: "CET",
         wantOffset: 3600
     ),
@@ -286,7 +286,7 @@ internal static slice<slimTestsᴛ1> slimTests = [
         // 2021a slim tzdata for America/Nuuk.
         zoneName: "America/Nuuk",
         fileName: "2021a_America_Nuuk",
-        date: (ж<timeꓸLocation> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
+        date: (ж<Δtime.Location> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
         wantName: "-03",
         wantOffset: -10800
     ),
@@ -294,7 +294,7 @@ internal static slice<slimTestsᴛ1> slimTests = [
         // 2021a slim tzdata for Asia/Gaza.
         zoneName: "Asia/Gaza",
         fileName: "2021a_Asia_Gaza",
-        date: (ж<timeꓸLocation> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
+        date: (ж<Δtime.Location> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
         wantName: "EET",
         wantOffset: 7200
     ),
@@ -302,7 +302,7 @@ internal static slice<slimTestsᴛ1> slimTests = [
         // 2021a slim tzdata for Europe/Dublin.
         zoneName: "Europe/Dublin",
         fileName: "2021a_Europe_Dublin",
-        date: (ж<timeꓸLocation> loc) => Δtime.Date(2021, Δtime.April, 2, 11, 12, 13, 0, loc),
+        date: (ж<Δtime.Location> loc) => Δtime.Date(2021, Δtime.April, 2, 11, 12, 13, 0, loc),
         wantName: "IST",
         wantOffset: 3600
     )

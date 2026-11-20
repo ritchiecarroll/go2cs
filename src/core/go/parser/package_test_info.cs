@@ -8,11 +8,6 @@ global using static global::go.go.parser_package;
 global using static global::go.go.parser_internal_test_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using scannerꓸError = go.go.scanner_package.ΔError;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -55,7 +50,7 @@ using static global::go.go.parser_test_package;
 [assembly: GoFieldAccess(typeof(go.go.ast_package.StructType))]
 [assembly: GoFieldAccess(typeof(go.go.ast_package.TypeSpec))]
 [assembly: GoFieldAccess(typeof(go.go.ast_package.ValueSpec))]
-[assembly: GoFieldAccess(typeof(go.go.scanner_package.ΔError))]
+[assembly: GoFieldAccess(typeof(go.go.scanner_package.Error))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

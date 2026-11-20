@@ -56,7 +56,7 @@ using static go.path_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("path/match.go", "match.cs", "AA4cAAEuABUCgoKCgoKUpriCgpSClKaCgpSClIKUgtyCgoKmtKrCgoKUgoKmgsa0tILIrAAICIKCgqaSgoKClJSCgoKmgoKCgoKUkoKUgoKCpoKUpoKCgpSmgoKUpoKClKaClKjSgoKUgoKCgqaCgpSCgpQ=")]
-[assembly: GoPositionMap("path/path.go", "path.cs", "AB00goKUpoKCgoKUgpSCpoKClAACLAATAoKmgu6CkoKCpoKmxsaCpoKC2IKUgoL6gqaC7IKmAAIQ0oIAAhAACAKCgpSClIKCgoKUpq7CgoKmrsKCpoKmgqaClKiSAAIU8oI=")]
+[assembly: GoPositionMap("path/path.go", "path.cs", "ACA0goKUpoKCgoKUgpSCpoKClAAELAATAoKmgu6CkoKCpoKmxsaCpoKC2IKUgoL6gqaC7IKmAAIQ0oIAAhAACAKCgpSClIKCgoKUpq7CgoKmrsKCpoKmgqaClKiSAAIU8oI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -86,3 +86,13 @@ public static partial class path_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(path_package.lazybuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pathᴛlazybuf;
+// </MethodHolders>

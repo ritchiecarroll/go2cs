@@ -243,9 +243,9 @@ public static partial void TestMutexFairness(ж<Δtesting.T> t) {
                 Ꮡmu.Lock();
                 time.Sleep(100 * time.Microsecond);
                 Ꮡmu.Unlock();
-                var selᴛ6 = stopʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-                case 0 when selᴛ6.ꟷᐳ(out _): {
+                var stopᴛ1 = stopʗ1;
+                switch (trySelect(ᐸꟷ(stopᴛ1, ꓸꓸꓸ))) {
+                case 0 when stopᴛ1.ꟷᐳ(out _): {
                     return;
                 }
                 default: {
@@ -263,10 +263,10 @@ public static partial void TestMutexFairness(ж<Δtesting.T> t) {
             }
             doneʗ1.ᐸꟷ(true);
         });
-        var selᴛ7 = done;
+        var doneᴛ1 = done;
         var selᴛ8 = time.After((time.Duration)(10000000000L));
-        switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
-        case 0 when selᴛ7.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
+        case 0 when doneᴛ1.ꟷᐳ(out _): {
             break;
         }
         case 1 when selᴛ8.ꟷᐳ(out _): {

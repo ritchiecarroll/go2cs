@@ -827,7 +827,6 @@
     <ProjectReference Include="$(go2csPath)core/bufio/bufio.csproj" />
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/binary/encoding.binary.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
@@ -855,13 +854,10 @@
     <ProjectReference Include="$(go2csPath)core/internal/runtime/atomic/internal.runtime.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/gc/internal.runtime.gc.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/maps/internal.runtime.maps.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/startlinetest/internal.runtime.startlinetest.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/sys/internal.runtime.sys.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/stringslite/internal.stringslite.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/synctest/internal.synctest.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/sysdll/internal.syscall.windows.sysdll.csproj" />
@@ -869,7 +865,6 @@
     <ProjectReference Include="$(go2csPath)core/internal/trace/internal.trace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/testtrace/internal.trace.testtrace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/tracev2/internal.trace.tracev2.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/types/errors/internal.types.errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />

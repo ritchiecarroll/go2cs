@@ -347,7 +347,11 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 			continue
 		}
 
-		packageHoistNames[hl.token] = hoistSeed{name: hl.name, preBoxed: hl.preBoxed}
+		// Only a field of the package class seeds a `-tests` conversion: a holder's field is private
+		// to its holder.
+		if hl.owner == nil || hl.owner.Recv == nil {
+			packageHoistNames[hl.token] = hoistSeed{name: hl.name, preBoxed: hl.preBoxed}
+		}
 
 		// owner == nil means the field is SEEDED — declared by the production conversion's own
 		// output, which this pass does not re-emit.
@@ -812,7 +816,13 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 		return
 	}
 
-	hl := c.byToken[lit.Value]
+	// A field is a private member of the class its owner is emitted into: the package class for a
+	// function, and for a method its receiver type's holder (methodHolder.go). So a literal has one
+	// field in each class that uses it, each declared above that class's first use. A seeded field is
+	// the production package class's, which every class of a `-tests` unit reads by its simple name.
+	_, isSeeded := c.seed[lit.Value]
+	key := hoistClassKey(c.info, c.funcDecl, isSeeded) + lit.Value
+	hl := c.byToken[key]
 
 	if hl == nil {
 		if seeded, isSeeded := c.seed[lit.Value]; isSeeded {
@@ -825,7 +835,7 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 			hl = &hoistedLiteral{token: lit.Value, node: lit, owner: c.funcDecl}
 		}
 
-		c.byToken[lit.Value] = hl
+		c.byToken[key] = hl
 		c.ordered = append(c.ordered, hl)
 	}
 
@@ -1469,9 +1479,18 @@ func (c *hoistCollector) assignNames(pkg *types.Package) {
 		}
 	}
 
+	// One literal has one name, in every class that declares a field for it.
+	named := map[string]string{}
+
 	for _, hl := range c.ordered {
 		if hl.seeded {
 			continue // the production declaration decides both the name AND the field type
+		}
+
+		if name, isNamed := named[hl.token]; isNamed {
+			hl.name = name
+			hl.preBoxed = hl.anyUses > 0 && hl.valueUses == 0
+			continue
 		}
 
 		value, err := strconv.Unquote(hl.token)
@@ -1493,6 +1512,7 @@ func (c *hoistCollector) assignNames(pkg *types.Package) {
 		}
 
 		claimed[name] = true
+		named[hl.token] = name
 		hl.name = name
 		hl.preBoxed = hl.anyUses > 0 && hl.valueUses == 0
 	}
@@ -1755,12 +1775,14 @@ func (v *Visitor) writeHoistedLiteralDecls(funcDecl *ast.FuncDecl) {
 		return
 	}
 
-	if v.currentFuncPrefix.Len() > 0 {
-		v.currentFuncPrefix.WriteString(v.newline)
+	prefix := v.hoistPrefix()
+
+	if prefix.Len() > 0 {
+		prefix.WriteString(v.newline)
 	}
 
-	v.currentFuncPrefix.WriteString("// Hoisted @string literals (single allocation; Go keeps these in RODATA)")
-	v.currentFuncPrefix.WriteString(v.newline)
+	prefix.WriteString("// Hoisted @string literals (single allocation; Go keeps these in RODATA)")
+	prefix.WriteString(v.newline)
 
 	for _, hl := range decls {
 		litContext := DefaultBasicLitContext()
@@ -1783,11 +1805,11 @@ func (v *Visitor) writeHoistedLiteralDecls(funcDecl *ast.FuncDecl) {
 
 		if hl.preBoxed {
 			// A reference type: the inliner refuses value-class loads only, so the field stays as it is.
-			v.currentFuncPrefix.WriteString(fmt.Sprintf("%s static readonly %s %s = %s;", access, fieldType, hl.name, v.convBasicLit(hl.node, litContext)))
+			prefix.WriteString(fmt.Sprintf("%s static readonly %s %s = %s;", access, fieldType, hl.name, v.convBasicLit(hl.node, litContext)))
 		} else {
-			v.currentFuncPrefix.WriteString(structStaticReadAccessorDecl(access, fieldType, hl.name, v.newline, "") + v.convBasicLit(hl.node, litContext) + ";")
+			prefix.WriteString(structStaticReadAccessorDecl(access, fieldType, hl.name, v.newline, "") + v.convBasicLit(hl.node, litContext) + ";")
 		}
 
-		v.currentFuncPrefix.WriteString(v.newline)
+		prefix.WriteString(v.newline)
 	}
 }

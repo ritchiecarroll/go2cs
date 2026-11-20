@@ -22,6 +22,7 @@ using go.testing;
 using go.unicode;
 using math;
 using static go.bufio_internal_test_package;
+using static bufio_test_package;
 
 partial class bufio_test_package {
 
@@ -36,6 +37,8 @@ internal static ж<rot13Reader> newRot13Reader(Δio.Reader r) {
     return r13;
 }
 
+} partial class bufio_testᴛrot13Reader {
+
 internal static (nint, error) Read(this ref rot13Reader r13, slice<byte> p) {
     var (n, err) = r13.r.Read(p);
     for (nint i = 0; i < n; i++) {
@@ -48,6 +51,8 @@ internal static (nint, error) Read(this ref rot13Reader r13, slice<byte> p) {
     }
     return (n, err);
 }
+
+} partial class bufio_test_package {
 
 // Call ReadByte to accumulate the text of a file
 internal static @string readBytes(ж<bufio.Reader> Ꮡbuf) {
@@ -196,9 +201,13 @@ public static void TestReader(ж<Δtesting.T> t) {
 partial struct zeroReader {
 }
 
+} partial class bufio_testᴛzeroReader {
+
 internal static (nint, error) Read(this zeroReader _, slice<byte> p) {
     return (0, default);
 }
+
+} partial class bufio_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorExpectedˢ = (@string)"error expected"u8;
@@ -217,10 +226,10 @@ public static partial void TestZeroReader(ж<Δtesting.T> t) {
         cʗ1.ᐸꟷ(err);
     });
 
-    var selᴛ1 = c;
-    var selᴛ2 = time.After(time.ΔSecond);
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out var err): {
+    var cᴛ1 = c;
+    var selᴛ2 = time.After(time.Second);
+    switch (select(ᐸꟷ(cᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+    case 0 when cᴛ1.ꟷᐳ(out var err): {
         if (err == nil) {
             t.Error(errorExpectedˢ);
         } else if (!AreEqual(err, Δio.ErrNoProgress)) {
@@ -240,6 +249,8 @@ partial struct StringReader {
     internal nint step;
 }
 
+} partial class bufio_testᴛStringReader {
+
 public static (nint n, error err) Read(this ref StringReader r, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -253,6 +264,8 @@ public static (nint n, error err) Read(this ref StringReader r, slice<byte> p) {
     }
     return (n, err);
 }
+
+} partial class bufio_test_package {
 
 internal static void readRuneSegments(ж<Δtesting.T> t, slice<@string> segments) {
     @string got = ""u8;
@@ -476,8 +489,8 @@ private static readonly @string efgˢᵇ = "efg"u8;
 public static void TestUnreadByteOthers(ж<Δtesting.T> t) {
     // A list of readers to use in conjunction with UnreadByte.
     slice<Func<ж<bufio.Reader>, byte, (slice<byte>, error)>> readers = slice<Func<ж<bufio.Reader>, byte, (slice<byte>, error)>>([
-        ((Func<ж<bufio.Reader>, byte, (slice<byte>, error)>)(bufio.ReadBytes)),
-        ((Func<ж<bufio.Reader>, byte, (slice<byte>, error)>)(bufio.ReadSlice)),
+        ((Func<ж<bufio.Reader>, byte, (slice<byte>, error)>)(global::go.bufioᴛReader.ReadBytes)),
+        ((Func<ж<bufio.Reader>, byte, (slice<byte>, error)>)(global::go.bufioᴛReader.ReadSlice)),
         (ж<bufio.Reader> r, byte delim) => {
             var (data, err) = r.ReadString(delim);
             return (slice<byte>(data), err);
@@ -791,9 +804,13 @@ partial struct errorWriterTest {
     internal error expect;
 }
 
+} partial class bufio_testᴛerrorWriterTest {
+
 internal static (nint, error) Write(this errorWriterTest w, slice<byte> p) {
     return (quo(len(p) * w.n, w.m), w.err);
 }
+
+} partial class bufio_test_package {
 
 internal static slice<errorWriterTest> errorWriterTests = [
     new(0, 1, default, Δio.ErrShortWrite),
@@ -928,6 +945,8 @@ partial struct teststringwriter {
     internal @string writeString;
 }
 
+} partial class bufio_testᴛteststringwriter {
+
 internal static (nint, error) Write(this ref teststringwriter w, slice<byte> b) {
     w.write += ((@string)b);
     return (len(b), default);
@@ -947,6 +966,8 @@ internal static void check(this ref teststringwriter w, ж<Δtesting.T> t, @stri
         t.Errorf("writeString: expected %q, got %q", writeString, w.writeString);
     }
 }
+
+} partial class bufio_test_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string longStringᶜ => ref longStringᶜᵇ;
@@ -1064,9 +1085,13 @@ public static void TestPeek(ж<Δtesting.T> t) {
 
 partial struct dataAndEOFReader /*@string*/;
 
+} partial class bufio_testᴛdataAndEOFReader {
+
 internal static (nint, error) Read(this dataAndEOFReader r, slice<byte> p) {
     return (copy(p, r), Δio.EOF);
 }
+
+} partial class bufio_test_package {
 
 public static void TestPeekThenUnreadRune(ж<Δtesting.T> t) {
     // This sequence used to cause a crash.
@@ -1087,6 +1112,8 @@ partial struct testReader {
     internal nint stride;
 }
 
+} partial class bufio_testᴛtestReader {
+
 internal static (nint n, error err) Read(this ref testReader t, slice<byte> buf) {
     nint n = default;
     error err = default;
@@ -1105,6 +1132,8 @@ internal static (nint n, error err) Read(this ref testReader t, slice<byte> buf)
     }
     return (n, err);
 }
+
+} partial class bufio_test_package {
 
 internal static void testReadLine(ж<Δtesting.T> t, slice<byte> input) {
     for (nint stride = 1; stride < 2; stride++) {
@@ -1317,6 +1346,8 @@ partial struct errorWriterToTest {
     internal error expected;
 }
 
+} partial class bufio_testᴛerrorWriterToTest {
+
 internal static (nint, error) Read(this errorWriterToTest r, slice<byte> p) {
     return (len(p) * r.rn, r.rerr);
 }
@@ -1324,6 +1355,8 @@ internal static (nint, error) Read(this errorWriterToTest r, slice<byte> p) {
 internal static (nint, error) Write(this errorWriterToTest w, slice<byte> p) {
     return (len(p) * w.wn, w.werr);
 }
+
+} partial class bufio_test_package {
 
 internal static slice<errorWriterToTest> errorWriterToTests = [
     new(1, 0, default, Δio.ErrClosedPipe, Δio.ErrClosedPipe),
@@ -1384,6 +1417,8 @@ partial struct errorReaderFromTest {
     internal error expected;
 }
 
+} partial class bufio_testᴛerrorReaderFromTest {
+
 internal static (nint, error) Read(this errorReaderFromTest r, slice<byte> p) {
     return (len(p) * r.rn, r.rerr);
 }
@@ -1391,6 +1426,8 @@ internal static (nint, error) Read(this errorReaderFromTest r, slice<byte> p) {
 internal static (nint, error) Write(this errorReaderFromTest w, slice<byte> p) {
     return (len(p) * w.wn, w.werr);
 }
+
+} partial class bufio_test_package {
 
 internal static slice<errorReaderFromTest> errorReaderFromTests = [
     new(0, 1, Δio.EOF, default, default),
@@ -1462,14 +1499,22 @@ public static void TestWriterReadFromCounts(ж<Δtesting.T> t) {
 // Write is called on it.
 partial struct writeCountingDiscard /*num:nint*/;
 
+} partial class bufio_testᴛwriteCountingDiscard {
+
 internal static (nint, error) Write(this ref writeCountingDiscard w, slice<byte> p) {
     w++;
     return (len(p), default);
 }
 
+} partial class bufio_test_package {
+
 partial struct negativeReader /*num:nint*/;
 
+} partial class bufio_testᴛnegativeReader {
+
 internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) { return (-1, default); }
+
+} partial class bufio_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readDidNotPanicˢ = (@string)"read did not panic"u8;
@@ -1514,6 +1559,8 @@ partial struct errorThenGoodReader {
     internal nint nread;
 }
 
+} partial class bufio_testᴛerrorThenGoodReader {
+
 internal static (nint, error) Read(this ref errorThenGoodReader r, slice<byte> p) {
     r.nread++;
     if (!r.didErr) {
@@ -1522,6 +1569,8 @@ internal static (nint, error) Read(this ref errorThenGoodReader r, slice<byte> p
     }
     return (len(p), default);
 }
+
+} partial class bufio_test_package {
 
 public static void TestReaderClearError(ж<Δtesting.T> t) {
     var r = Ꮡ(new errorThenGoodReader());
@@ -1579,6 +1628,8 @@ partial struct emptyThenNonEmptyReader {
     internal nint n;
 }
 
+} partial class bufio_testᴛemptyThenNonEmptyReader {
+
 internal static (nint, error) Read(this ref emptyThenNonEmptyReader r, slice<byte> p) {
     if (r.n <= 0) {
         return r.r.Read(p);
@@ -1586,6 +1637,8 @@ internal static (nint, error) Read(this ref emptyThenNonEmptyReader r, slice<byt
     r.n--;
     return (0, default);
 }
+
+} partial class bufio_test_package {
 
 // Test for golang.org/issue/7611
 public static void TestWriterReadFromUntilEOF(ж<Δtesting.T> t) {
@@ -1635,6 +1688,8 @@ partial struct readFromWriter {
     internal nint readFromBytes;
 }
 
+} partial class bufio_testᴛreadFromWriter {
+
 internal static (nint, error) Write(this ref readFromWriter w, slice<byte> p) {
     w.buf = appendꓸꓸꓸ(w.buf, p);
     w.writeBytes += len(p);
@@ -1647,6 +1702,8 @@ internal static (int64, error) ReadFrom(this ref readFromWriter w, Δio.Reader r
     w.readFromBytes += len(b);
     return ((int64)len(b), err);
 }
+
+} partial class bufio_test_package {
 
 // Test that calling (*Writer).ReadFrom with a partially-filled buffer
 // fills the buffer before switching over to ReadFrom.
@@ -1978,6 +2035,8 @@ partial struct onlyWriter {
 // A scriptedReader is an io.Reader that executes its steps sequentially.
 partial struct scriptedReader /*[]Func<slice<byte>, (nint n, error err)>*/;
 
+} partial class bufio_testᴛscriptedReader {
+
 internal static (nint n, error err) Read(this ref scriptedReader sr, slice<byte> p) {
     if (len(sr) == 0) {
         throw panic("too many Read calls on scripted Reader. No steps remain.");
@@ -1986,6 +2045,8 @@ internal static (nint n, error err) Read(this ref scriptedReader sr, slice<byte>
     sr = (sr)[1..];
     return step(p);
 }
+
+} partial class bufio_test_package {
 
 internal static Δio.Reader newScriptedReader(params Span<Func<slice<byte>, (nint, error)>> stepsʗp) {
     var steps = stepsʗp.slice();
@@ -1998,6 +2059,8 @@ internal static Δio.Reader newScriptedReader(params Span<Func<slice<byte>, (nin
 partial struct eofReader {
     internal slice<byte> buf;
 }
+
+} partial class bufio_testᴛeofReader {
 
 internal static (nint, error) Read(this ref eofReader r, slice<byte> p) {
     nint read = copy(p, r.buf);
@@ -2013,6 +2076,8 @@ internal static (nint, error) Read(this ref eofReader r, slice<byte> p) {
 
     return (read, default);
 }
+
+} partial class bufio_test_package {
 
 public static void TestPartialReadEOF(ж<Δtesting.T> t) {
     var src = new slice<byte>(10);
@@ -2057,6 +2122,8 @@ public static void TestPartialReadEOF(ж<Δtesting.T> t) {
 partial struct writerWithReadFromError {
 }
 
+} partial class bufio_testᴛwriterWithReadFromError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string writerWithReadFromErrorˢ => ref writerWithReadFromErrorˢᵇ;
 private static readonly @string writerWithReadFromErrorˢᵇ = "writerWithReadFromError error"u8;
@@ -2068,6 +2135,8 @@ internal static (int64, error) ReadFrom(this writerWithReadFromError w, Δio.Rea
 internal static (nint n, error err) Write(this writerWithReadFromError w, slice<byte> b) {
     return (10, default);
 }
+
+} partial class bufio_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string test2ˢ => ref test2ˢᵇ;
@@ -2092,6 +2161,8 @@ public static void TestWriterReadFromMustSetUnderlyingError(ж<Δtesting.T> t) {
 partial struct writeErrorOnlyWriter {
 }
 
+} partial class bufio_testᴛwriteErrorOnlyWriter {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string writeErrorOnlyWriterˢ => ref writeErrorOnlyWriterˢᵇ;
 private static readonly @string writeErrorOnlyWriterˢᵇ = "writeErrorOnlyWriter error"u8;
@@ -2099,6 +2170,8 @@ private static readonly @string writeErrorOnlyWriterˢᵇ = "writeErrorOnlyWrite
 internal static (nint n, error err) Write(this writeErrorOnlyWriter w, slice<byte> p) {
     return (0, errors.New(writeErrorOnlyWriterˢ));
 }
+
+} partial class bufio_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string test1ˢ => ref test1ˢᵇ;

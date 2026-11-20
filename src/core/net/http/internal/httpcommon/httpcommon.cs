@@ -533,9 +533,8 @@ internal static (@string, error) commaSeparatedTrailers(map<@string, slice<@stri
         var k = kᴛ1;
 
         k = CanonicalHeader(k);
-        var exprᴛ1 = k;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8: {
+        case {} when k == "Transfer-Encoding"u8 || k == "Trailer"u8 || k == "Content-Length"u8: {
             return ("", fmt.Errorf("invalid Trailer key %q"u8, k));
         }}
         keys = append(keysᴷ, keys, k);
@@ -594,9 +593,8 @@ internal static bool shouldSendReqContentLength(@string method, int64 contentLen
     }
     // For zero bodies, whether we send a content-length depends on the method.
     // It also kinda doesn't matter for http2 either way, with END_STREAM.
-    var exprᴛ1 = method;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "POST"u8 || exprᴛ1 == "PUT"u8 || exprᴛ1 == "PATCH"u8: {
+    case {} when method == "POST"u8 || method == "PUT"u8 || method == "PATCH"u8: {
         return true;
     }
     default: {
@@ -653,9 +651,8 @@ public static ServerRequestResult NewServerRequest(ServerRequestParam rp) {
             var key = vᴛ1;
 
             key = textproto.CanonicalMIMEHeaderKey(textproto.TrimString(key));
-            var exprᴛ1 = key;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8: {
+            case {} when key == "Transfer-Encoding"u8 || key == "Trailer"u8 || key == "Content-Length"u8: {
                 // Bogus. (copy of http1 rules)
                 // Ignore.
                 break;

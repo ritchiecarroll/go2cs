@@ -145,7 +145,7 @@ internal static int64 pseudoUnix(nint year, ref syscall.Systemtime d) {
     // d.Day is week within the month (1 to 5, where 5 is last week of the month)
     // d.Hour, d.Minute and d.Second are absolute time
     nint day = 1;
-    var t = Date(year, (ΔMonth)(nint)d.Month, day, (nint)d.Hour, (nint)d.Minute, (nint)d.Second, 0, ΔUTC);
+    var t = Date(year, (Month)(nint)d.Month, day, (nint)d.Hour, (nint)d.Minute, (nint)d.Second, 0, UTC);
     nint i = (nint)d.DayOfWeek - (nint)t.Weekday();
     if (i < 0) {
         i += 7;
@@ -156,7 +156,7 @@ internal static int64 pseudoUnix(nint year, ref syscall.Systemtime d) {
     } else {
         // "Last" instance of the day.
         day += 4 * 7;
-        if (day > daysIn((ΔMonth)(nint)d.Month, year)) {
+        if (day > daysIn((Month)(nint)d.Month, year)) {
             day -= 7;
         }
     }
@@ -263,6 +263,10 @@ internal static ref syscall.Timezoneinformation usPacific => ref ((StaticBox<sys
     DaylightBias: -60
 )); }
 internal static ref syscall.Timezoneinformation aus => ref ((StaticBox<syscall.Timezoneinformation>)Ꮡaus).ValueSlot;
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string utcˢ => ref utcˢᵇ;
+private static readonly @string utcˢᵇ = "UTC"u8;
 
 internal static void initLocal() {
     ref var i = ref heap(new syscall.Timezoneinformation(), out var Ꮡi);

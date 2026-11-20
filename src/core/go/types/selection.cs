@@ -9,6 +9,7 @@ namespace go.go;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using io = io_package;
+using static types_package;
 
 partial class types_package {
 
@@ -70,17 +71,19 @@ public static SelectionKind MethodExpr => 2;          // x.f is a method express
 //	T.m         MethodExpr    T       m      func(T)    {1, 0}    false
 partial struct Selection {
     internal SelectionKind kind;
-    internal ΔType recv;        // type of x
+    internal Type recv;         // type of x
     internal Object obj;        // object denoted by x.f
     internal slice<nint> index; // path from x to x.f
     internal bool indirect;     // set if there was any pointer indirection on the path
 }
 
+} partial class typesᴛSelection {
+
 // Kind returns the selection kind.
 public static SelectionKind Kind(this ref Selection s) { return s.kind; }
 
 // Recv returns the type of x in x.f.
-public static ΔType Recv(this ref Selection s) { return s.recv; }
+public static Type Recv(this ref Selection s) { return s.recv; }
 
 // Obj returns the object denoted by x.f; a *Var for
 // a field selection, and a *Func in all other cases.
@@ -88,23 +91,23 @@ public static Object Obj(this ref Selection s) { return s.obj; }
 
 // Type returns the type of x.f, which may be different from the type of f.
 // See Selection for more information.
-public static ΔType Type(this ref Selection s) {
+public static Type Type(this ref Selection s) {
     switch (s.kind) {
     case var ᴛ when ᴛ == MethodVal: {
         // The type of x.f is a method with its receiver type set
         // to the type of x.
-        ref var sig = ref heap<ΔSignature>(s.obj._<ж<Func>>().typ._<ж<ΔSignature>>().Value, out var Ꮡsig);
+        ref var sig = ref heap<Signature>(s.obj._<ж<Func>>().typ._<ж<Signature>>().Value, out var Ꮡsig);
         ref var recv = ref heap<Var>(sig.recv.Value, out var Ꮡrecv);
         recv.typ = s.recv;
         sig.recv = Ꮡrecv;
-        return new ΔSignatureжΔType(Ꮡsig);
+        return new SignatureжType(Ꮡsig);
     }
     case var ᴛ when ᴛ == MethodExpr: {
         // The type of x.f is a function (without receiver)
         // and an additional first argument with the same type as x.
         // TODO(gri) Similar code is already in call.go - factor!
         // TODO(gri) Compute this eagerly to avoid allocations.
-        ref var sig = ref heap<ΔSignature>(s.obj._<ж<Func>>().typ._<ж<ΔSignature>>().Value, out var Ꮡsig);
+        ref var sig = ref heap<Signature>(s.obj._<ж<Func>>().typ._<ж<Signature>>().Value, out var Ꮡsig);
         ref var arg0 = ref heap<Var>(sig.recv.Value, out var Ꮡarg0);
         sig.recv = default;
         arg0.typ = s.recv;
@@ -113,7 +116,7 @@ public static ΔType Type(this ref Selection s) {
             @params = sig.@params.vars;
         }
         sig.@params = NewTuple(appendꓸꓸꓸ(slice<ж<Var>>([Ꮡarg0]), @params).ꓸꓸꓸ);
-        return new ΔSignatureжΔType(Ꮡsig);
+        return new SignatureжType(Ꮡsig);
     }}
 
     // In all other cases, the type of x.f is the type of x.
@@ -142,6 +145,8 @@ public static slice<nint> Index(this ref Selection s) { return s.index; }
 public static bool Indirect(this ref Selection s) { return s.indirect; }
 
 public static @string String(this ж<Selection> Ꮡs) { return SelectionString(Ꮡs, default); }
+
+} partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fieldˢ2 => ref fieldˢ2ᵇ;
@@ -190,7 +195,7 @@ public static @string SelectionString(ж<Selection> Ꮡs, Func<ж<Package>, @str
         buf.WriteByte((byte)' ');
         WriteType(Ꮡbuf, T, qf);
     } else {
-        WriteSignature(Ꮡbuf, T._<ж<ΔSignature>>(), qf);
+        WriteSignature(Ꮡbuf, T._<ж<Signature>>(), qf);
     }
     return Ꮡbuf.String();
 }

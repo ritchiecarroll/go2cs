@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using ꓸꓸꓸany = Span<any>;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct Blob {
     public @string Data;
 }
 
+} partial class mainᴛBlob {
+
 public static (@string, error) Encode(this ж<Blob> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -23,9 +26,13 @@ public static (@string, error) Encode(this ж<Blob> Ꮡb) {
     return (b.Data, default);
 }
 
+} partial class main_package {
+
 partial struct Tag {
     public nint N;
 }
+
+} partial class mainᴛTag {
 
 public static (@string, error) Encode(this ж<Tag> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -36,6 +43,8 @@ public static (@string, error) Encode(this ж<Tag> Ꮡt) {
     return (fmt.Sprintf("tag:%d"u8, t.N), default);
 }
 
+} partial class main_package {
+
 partial struct holder {
     public ж<Blob> B;
     public ж<Tag> T;
@@ -45,6 +54,8 @@ partial struct Stamp {
     public @string S;
 }
 
+} partial class mainᴛStamp {
+
 public static @string Error(this ж<Stamp> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -53,6 +64,8 @@ public static @string Error(this ж<Stamp> Ꮡs) {
     }
     return s.S;
 }
+
+} partial class main_package {
 
 internal static @string sink(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -64,7 +77,7 @@ internal static @string sink(params ꓸꓸꓸany argsʗp) {
         args[0] == nil, reflect.ValueOf(args[0]).IsValid(), reflect.TypeOf(args[0]), fmt.Sprint(args[0]));
 }
 
-internal static void report(@string label, reflectꓸValue v) {
+internal static void report(@string label, reflect.Value v) {
     var iface = v.Interface();
     fmt.Printf("%s: kind=%v isNil=%v ifaceIsNil=%v type=%v\n"u8, label, v.Kind(), v.IsNil(), iface == nil, reflect.TypeOf(iface));
     var (e, ok) = iface._<Encoder>(ᐧ);

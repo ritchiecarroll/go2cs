@@ -55,6 +55,7 @@ using fmt = fmt_package;
 using io = io_package;
 using saferio = @internal.saferio_package;
 using encoding;
+using static pe_package;
 
 partial class pe_package {
 
@@ -109,6 +110,8 @@ internal static (slice<COFFSymbol>, error) readCOFFSymbols(ref FileHeader fh, io
     return (syms, default!);
 }
 
+} partial class peᴛFile {
+
 // COFFSymbolReadSectionDefAux returns a blob of auxiliary information (including COMDAT info) for
 // a section definition symbol — see symbol.cs for the full Go doc comment. Hand-owned: Go
 // re-views 18 bytes of the successor COFFSymbol in place; the managed form transcribes that
@@ -143,5 +146,7 @@ internal static (slice<COFFSymbol>, error) readCOFFSymbols(ref FileHeader fh, io
     rv = Ꮡaux;
     return (rv, default!);
 }
+
+} partial class pe_package {
 
 } // end pe_package

@@ -6,7 +6,11 @@
 // This file implements support functions for error messages.
 namespace go.go;
 
+using static types_package;
+
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string objectˢ => ref objectˢᵇ;
@@ -19,7 +23,7 @@ private static readonly @string methodˢᵇ = "method"u8;
 // lookupError returns a case-specific error when a lookup of selector sel in the
 // given type fails but an object with alternative spelling (case folding) is found.
 // If structLit is set, the error message is specifically for struct literal fields.
-internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @string sel, Object obj, bool structLit) {
+internal static @string lookupError(this ж<Checker> Ꮡcheck, Type typ, @string sel, Object obj, bool structLit) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // Provide more detail if there is an unexported object, or one with different capitalization.
@@ -119,6 +123,8 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
 
     throw panic("unreachable");
 }
+
+} partial class types_package {
 
 // tail returns the string s without its first (UTF-8) character.
 // If len(s) == 0, the result is s.

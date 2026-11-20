@@ -19,7 +19,6 @@ using static global::go.@internal.strconv_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b696e2075696e7436343b206f757420737472696e677d", "varlenUintsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b20666c6f617420666c6f617436343b20666d7420627974653b207072656320696e743b2062697453697a6520696e747d", "ftoaBenchesᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b782075696e7436343b207920696e7465726e616c2f737472636f6e765f746573742e75696e743132383b2068692075696e7436343b206d69642075696e7436343b206c6f2075696e7436347d", "umul192Testsᴛ1")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 [assembly: GoTypeAlias("Uint128", "global::go.@internal.strconv_package.uint128")]
 // </ExportedTypeAliases>
 
@@ -66,7 +65,7 @@ using static global::go.@internal.strconv_test_package;
 [assembly: GoPositionMap("internal/strconv/atoi_test.go", "atoi_test.cs", "ABMoABs2AF68AQAjRgBRogEAFy4AIEDcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgpSCgoKC6oKCgoL+gpSCgoKC6oKCgoL+gpSCgoKC2IKCgoIACxb+AAkSgoKUgpSmgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoIACwyCgpSCAAgSgu6ykoKCgtyCgpSCuILKgsqykoKCgg==", "527-529:1;530-532:2;549-555:1;560-562:1;563-565:2;581-587:1")]
 [assembly: GoPositionMap("internal/strconv/ctoa_test.go", "ctoa_test.cs", "ABMYggARMIKCgtyigoKmog==", "47-51:1", "", "", "", "51:21,52:13")]
 [assembly: GoPositionMap("internal/strconv/decimal_test.go", "decimal_test.cs", "ABMkAA0cgoKCgoKCggAMGgASJIKCgoKCgoKmgoKCgqaCgoKCAAsYAAwagoKCgoKCgg==")]
-[assembly: GoPositionMap("internal/strconv/fp_test.go", "fp_test.cs", "ABUmgpSkpJSqooKCgpSCgoKUpoKCgoKClJSCgoKCgpSUlIKClKqigoKCgpSCgoKUlIKCgpTcgoKSgoKCgpSCgoKUgoKkgoKCgpS0goKClIKkgu4AESLygqSklLiCgriCgoKUgpSCgoKUgpTmlIKCgoKCgoKUgoKCgpSClIKCgpSUgoKCAAkMlIKCgoKCgoKUgpSClIKCgoKCgoKC")]
+[assembly: GoPositionMap("internal/strconv/fp_test.go", "fp_test.cs", "ABUmgpSkpJSqooKCgpSCgoKUpoKCgoKClJSCgoKCgpSUlIKClKqigoKCgpSCgoKUlIKCgpTcgoKSgoKCgpSCgoKUgoKkgoKCgpS0goKClIKkgu4AESLygpSklLiCgriCgoKUgpSCgoKUgpTmlIKCgoKCgoKUgoKCgpSClIKCgpSUgoKCAAkMlIKCgoKCgoKUgpSClIKCgoKCgoKC")]
 [assembly: GoPositionMap("internal/strconv/ftoa_test.go", "ftoa_test.cs", "ABUqAAgOAMoBhAOCgoKCgpSCgpSCgqaClIKClIKC3IKCgoKCgqaCgoKC3IKCgpSCgoKUgoKCgoKmgoKCgoKCyqKCgqaiAAkEADJygrKSgtyCgrKigg==", "302-306:1;369-373:1;380-384:1", "", "31=fdiv/1/2/109,fdiv/2/2/110,NaN/1/2/118,NaN/2/2/119,Inf/1/3/120,Inf/2/3/121,Inf/3/3/122;334=Ldexp/1/5/22,Ldexp/2/5/23,Ldexp/3/5/34,Ldexp/4/5/35,Ldexp/5/5/36", "", "316:21,317:13")]
 [assembly: GoPositionMap("internal/strconv/import_test.go", "import_test.cs", "ABAigoKCgoKCgoI=")]
 [assembly: GoPositionMap("internal/strconv/itoa_test.go", "itoa_test.cs", "ABImAC5YooKCgqaCgriCgoKmgoLKgoKC7oKCpqIACBAACBKCgoKCpoKCAAkOABY0goKCgsqigoKCyqKCgoKCyqKCgoLKooKCgoLKgoKCgoKC3KKCgoKC6IKykoKCgg==", "99-103:1;214-219:1;234-240:1", "", "", "", "104:21,105:13")]

@@ -20,7 +20,7 @@ public static void TestRun(ж<testing.T> t) {
 
     var newHandler = (ж<testing.T> _) => {
         Ꮡbuf.Value.Reset();
-        return new slog.JSONHandlerжΔHandler(slog.NewJSONHandler(new bytes_BufferжWriter(Ꮡbuf), nil));
+        return new slog.JSONHandlerжHandler(slog.NewJSONHandler(new bytes_BufferжWriter(Ꮡbuf), nil));
     };
     var result = (ж<testing.T> tΔ1) => {
         ref var m = ref heap<map<@string, any>>(new map<@string, any>{}, out var Ꮡm);

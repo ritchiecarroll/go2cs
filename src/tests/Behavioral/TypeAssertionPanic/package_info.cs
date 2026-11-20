@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0yAAoS2ILcooKCgoKUpqKkgpaQppCSkKaCkKaCkKiQkpCSgpCUgpCmgpCmkJKCkJKQkpCApA==", "46-54:1;62-62:1;65-65:2;66-66:3;70-70:4;74-74:5;78-78:6;79-79:7;81-81:8;84-84:9;88-88:10;91-91:11;93-93:12;94-94:13;95-95:14", "", "", "", "41:21,42:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABAyAA4SAAkIgvyigoKCgpSmoqSClpCmkJKQpoKQpoKQqJCSkJKCkJSCkKaCkKaQkoKQkpCSkICk", "46-54:1;62-62:1;65-65:2;66-66:3;70-70:4;74-74:5;78-78:6;79-79:7;81-81:8;84-84:9;88-88:10;91-91:11;93-93:12;94-94:13;95-95:14", "", "", "", "54:21,55:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -86,3 +85,15 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.circle)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcircle;
+[GoMethodHost(typeof(main_package.myErr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmyErr;
+[GoMethodHost(typeof(main_package.square)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛsquare;
+// </MethodHolders>

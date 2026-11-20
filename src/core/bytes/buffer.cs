@@ -8,6 +8,7 @@ using errors = errors_package;
 using io = io_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static bytes_package;
 
 partial class bytes_package {
 
@@ -48,6 +49,8 @@ public static error ErrTooLarge = errors.New("bytes.Buffer: too large");
 internal static error errNegativeRead = errors.New("bytes.Buffer: reader returned negative count from Read");
 
 internal static nint maxInt => /* int(^uint(0) >> 1) */ unchecked((nint)9223372036854775807);
+
+} partial class bytesᴛBuffer {
 
 // Bytes returns a slice of length b.Len() holding the unread portion of the buffer.
 // The slice is valid for use only until the next buffer modification (that is,
@@ -214,11 +217,15 @@ public static (nint n, error err) WriteString(this ref Buffer b, @string s) {
     return (copy(b.buf.slice(m), s), default);
 }
 
+} partial class bytes_package {
+
 // MinRead is the minimum slice size passed to a [Buffer.Read] call by
 // [Buffer.ReadFrom]. As long as the [Buffer] has at least MinRead bytes beyond
 // what is required to hold the contents of r, [Buffer.ReadFrom] will not grow the
 // underlying buffer.
 public static UntypedInt MinRead => 512;
+
+} partial class bytesᴛBuffer {
 
 // ReadFrom reads data from r until EOF and appends it to the buffer, growing
 // the buffer as needed. The return value n is the number of bytes read. Any
@@ -246,6 +253,8 @@ public static (int64 n, error err) ReadFrom(this ref Buffer b, io.Reader r) {
         }
     }
 }
+
+} partial class bytes_package {
 
 // growSlice grows b by n, preserving the original content of b.
 // If the allocation fails, it panics with ErrTooLarge.
@@ -278,6 +287,8 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class bytesᴛBuffer {
 
 // WriteTo writes data to w until the buffer is drained or an error occurs.
 // The return value n is the number of bytes written; it always fits into an
@@ -442,7 +453,11 @@ public static error UnreadRune(this ref Buffer b) {
     return default;
 }
 
+} partial class bytes_package {
+
 internal static error errUnreadByte = errors.New("bytes.Buffer: UnreadByte: previous operation was not a successful read");
+
+} partial class bytesᴛBuffer {
 
 // UnreadByte unreads the last byte returned by the most recent successful
 // read operation that read at least one byte. If a write has happened since
@@ -505,6 +520,8 @@ public static (@string line, error err) ReadString(this ref Buffer b, byte delim
     (var Δslice, err) = b.readSlice(delim);
     return ((@string)Δslice, err);
 }
+
+} partial class bytes_package {
 
 // NewBuffer creates and initializes a new [Buffer] using buf as its
 // initial contents. The new [Buffer] takes ownership of buf, and the

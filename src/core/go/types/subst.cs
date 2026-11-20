@@ -8,14 +8,15 @@ namespace go.go;
 
 using token = global::go.go.token_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
-partial struct substMap /*map[ж<TypeParam>, ΔType]*/;
+partial struct substMap /*map[ж<TypeParam>, Type]*/;
 
 // makeSubstMap creates a new substitution map mapping tpars[i] to targs[i].
 // If targs[i] is nil, tpars[i] is not substituted.
-internal static substMap makeSubstMap(slice<ж<TypeParam>> tpars, slice<ΔType> targs) {
+internal static substMap makeSubstMap(slice<ж<TypeParam>> tpars, slice<Type> targs) {
     assert(len(tpars) == len(targs));
     var proj = new substMap(len(tpars));
     foreach (var (i, tpar) in range(tpars)) {
@@ -30,21 +31,25 @@ internal static substMap makeRenameMap(slice<ж<TypeParam>> from, slice<ж<TypeP
     assert(len(from) == len(to));
     var proj = new substMap(len(from));
     foreach (var (i, tpar) in range(from)) {
-        proj[tpar] = new TypeParamжΔType(to[i]);
+        proj[tpar] = new TypeParamжType(to[i]);
     }
     return proj;
 }
+
+} partial class typesᴛsubstMap {
 
 internal static bool empty(this substMap m) {
     return len(m) == 0;
 }
 
-internal static ΔType lookup(this substMap m, ж<TypeParam> tpar) {
+internal static Type lookup(this substMap m, ж<TypeParam> tpar) {
     var t = m[tpar]; if (t != nil) {
         return t;
     }
-    return new TypeParamжΔType(tpar);
+    return new TypeParamжType(tpar);
 }
+
+} partial class typesᴛChecker {
 
 // subst returns the type typ with its type parameters tpars replaced by the
 // corresponding type arguments targs, recursively. subst doesn't modify the
@@ -53,7 +58,7 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> tpar) {
 //
 // If expanding is non-nil, it is the instance type currently being expanded.
 // One of expanding or ctxt must be non-nil.
-internal static ΔType subst(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType typ, substMap smap, ж<Named> expanding, ж<Context> ctxt) {
+internal static Type subst(this ж<Checker> Ꮡcheck, token.Pos pos, Type typ, substMap smap, ж<Named> expanding, ж<Context> ctxt) {
     assert(expanding != nil || ctxt != nil);
 
     if (smap.empty()) {
@@ -80,15 +85,19 @@ internal static ΔType subst(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType 
     return Ꮡsubst.typ(typ);
 }
 
+} partial class types_package {
+
 partial struct subster {
-    internal tokenꓸPos pos;
+    internal token.Pos pos;
     internal substMap smap;
     internal ж<Checker> check;   // nil if called via Instantiate
     internal ж<Named> expanding; // if non-nil, the instance that is being expanded
     internal ж<Context> ctxt;
 }
 
-internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
+} partial class typesᴛsubster {
+
+internal static Type typ(this ж<subster> Ꮡsubst, Type typ) {
     ref var subst = ref Ꮡsubst.DerefOrNull();
 
     switch (typ.type()) {
@@ -107,12 +116,12 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         var orig = t.Origin();
         nint n = orig.TypeParams().Len();
         if (n == 0) {
-            return new AliasжΔType(t); // type is not parameterized
+            return new AliasжType(t); // type is not parameterized
         }
 
         // TODO(gri) do we need this for Alias types?
         if (t.TypeArgs().Len() != n) {
-            return new BasicжΔType(Typ[Invalid]); // error reported elsewhere
+            return new BasicжType(Typ[Invalid]); // error reported elsewhere
         }
 
         // already instantiated
@@ -120,8 +129,8 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         // to be substituted; i.e., if it is or contains a type parameter
         // that has a type argument for it.
         {
-            var targs = substList<ΔType>(t.TypeArgs().list(), Ꮡsubst.typ); if (targs != nil) {
-                return new AliasжΔType(subst.check.newAliasInstance(subst.pos, t.orig, targs, subst.expanding, subst.ctxt));
+            var targs = substList<Type>(t.TypeArgs().list(), Ꮡsubst.typ); if (targs != nil) {
+                return new AliasжType(subst.check.newAliasInstance(subst.pos, t.orig, targs, subst.expanding, subst.ctxt));
             }
         }
         break;
@@ -129,14 +138,14 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
     case ж<Array> t: {
         var elem = Ꮡsubst.typOrNil(t.elem);
         if (!AreEqual(elem, t.elem)) {
-            return new ArrayжΔType(Ꮡ(new Array(len: t.len, elem: elem)));
+            return new ArrayжType(Ꮡ(new Array(len: t.len, elem: elem)));
         }
         break;
     }
     case ж<Slice> t: {
         var elem = Ꮡsubst.typOrNil(t.elem);
         if (!AreEqual(elem, t.elem)) {
-            return new SliceжΔType(Ꮡ(new Slice(elem: elem)));
+            return new SliceжType(Ꮡ(new Slice(elem: elem)));
         }
         break;
     }
@@ -145,7 +154,7 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
             var fields = substList<ж<Var>>(t.fields, Ꮡsubst.var_); if (fields != nil) {
                 var s = Ꮡ(new Struct(fields: fields, tags: t.tags));
                 s.markComplete();
-                return new StructжΔType(s);
+                return new StructжType(s);
             }
         }
         break;
@@ -153,14 +162,14 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
     case ж<Pointer> t: {
         var @base = Ꮡsubst.typ(t.@base);
         if (!AreEqual(@base, t.@base)) {
-            return new PointerжΔType(Ꮡ(new Pointer(@base: @base)));
+            return new PointerжType(Ꮡ(new Pointer(@base: @base)));
         }
         break;
     }
     case ж<Tuple> t: {
-        return new TupleжΔType(Ꮡsubst.tuple(t));
+        return new TupleжType(Ꮡsubst.tuple(t));
     }
-    case ж<ΔSignature> t: {
+    case ж<Signature> t: {
         // Preserve the receiver: it is handled during *Interface and *Named type
         // substitution.
         //
@@ -179,7 +188,7 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         var @params = Ꮡsubst.tuple(t.@params);
         var results = Ꮡsubst.tuple(t.results);
         if (@params != t.@params || results != t.results) {
-            return new ΔSignatureжΔType(Ꮡ(new ΔSignature(
+            return new SignatureжType(Ꮡ(new Signature(
                 rparams: t.rparams,
                 // TODO(gri) why can't we nil out tparams here, rather than in instantiate?
                 tparams: t.tparams,
@@ -194,18 +203,18 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
     }
     case ж<Union> t: {
         {
-            var terms = substList<ж<ΔTerm>>(t.terms, Ꮡsubst.term); if (terms != nil) {
+            var terms = substList<ж<Term>>(t.terms, Ꮡsubst.term); if (terms != nil) {
                 // term list substitution may introduce duplicate terms (unlikely but possible).
                 // This is ok; lazy type set computation will determine the actual type set
                 // in normal form.
-                return new UnionжΔType(Ꮡ(new Union(terms)));
+                return new UnionжType(Ꮡ(new Union(terms)));
             }
         }
         break;
     }
     case ж<Interface> t: {
         var methods = substList<ж<Func>>(t.methods, Ꮡsubst.func_);
-        var embeddeds = substList<ΔType>(t.embeddeds, Ꮡsubst.typ);
+        var embeddeds = substList<Type>(t.embeddeds, Ꮡsubst.typ);
         if (methods != nil || embeddeds != nil) {
             if (methods == nil) {
                 methods = t.methods;
@@ -232,13 +241,13 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
             // method signatures do not depend on the type parameter P, but we still
             // need to create new interface methods to hold the instantiated
             // receiver. This is handled by Named.expandUnderlying.
-            (iface.methods, _) = replaceRecvType(methods, new InterfaceжΔType(t), new InterfaceжΔType(iface));
+            (iface.methods, _) = replaceRecvType(methods, new InterfaceжType(t), new InterfaceжType(iface));
 
             // If check != nil, check.newInterface will have saved the interface for later completion.
             if (subst.check == nil) { // golang/go#61561: all newly created interfaces must be completed
                 iface.typeSet();
             }
-            return new InterfaceжΔType(iface);
+            return new InterfaceжType(iface);
         }
         break;
     }
@@ -246,14 +255,14 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         var key = Ꮡsubst.typ(t.key);
         var elem = Ꮡsubst.typ(t.elem);
         if (!AreEqual(key, t.key) || !AreEqual(elem, t.elem)) {
-            return new MapжΔType(Ꮡ(new Map(key: key, elem: elem)));
+            return new MapжType(Ꮡ(new Map(key: key, elem: elem)));
         }
         break;
     }
     case ж<Chan> t: {
         var elem = Ꮡsubst.typ(t.elem);
         if (!AreEqual(elem, t.elem)) {
-            return new ChanжΔType(Ꮡ(new Chan(dir: t.dir, elem: elem)));
+            return new ChanжType(Ꮡ(new Chan(dir: t.dir, elem: elem)));
         }
         break;
     }
@@ -266,11 +275,11 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         var orig = t.Origin();
         nint n = orig.TypeParams().Len();
         if (n == 0) {
-            return new NamedжΔType(t); // type is not parameterized
+            return new NamedжType(t); // type is not parameterized
         }
 
         if (t.TypeArgs().Len() != n) {
-            return new BasicжΔType(Typ[Invalid]); // error reported elsewhere
+            return new BasicжType(Typ[Invalid]); // error reported elsewhere
         }
 
         // already instantiated
@@ -278,12 +287,12 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         // to be substituted; i.e., if it is or contains a type parameter
         // that has a type argument for it.
         {
-            var targs = substList<ΔType>(t.TypeArgs().list(), Ꮡsubst.typ); if (targs != nil) {
+            var targs = substList<Type>(t.TypeArgs().list(), Ꮡsubst.typ); if (targs != nil) {
                 // Create a new instance and populate the context to avoid endless
                 // recursion. The position used here is irrelevant because validation only
                 // occurs on t (we don't call validType on named), but we use subst.pos to
                 // help with debugging.
-                return subst.check.instance(subst.pos, new NamedжΔgenericType(orig), targs, subst.expanding, subst.ctxt);
+                return subst.check.instance(subst.pos, new NamedжgenericType(orig), targs, subst.expanding, subst.ctxt);
             }
         }
         break;
@@ -303,9 +312,9 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
 // typOrNil is like typ but if the argument is nil it is replaced with Typ[Invalid].
 // A nil type may appear in pathological cases such as type T[P any] []func(_ T([]_))
 // where an array/slice element is accessed before it is set up.
-internal static ΔType typOrNil(this ж<subster> Ꮡsubst, ΔType typ) {
+internal static Type typOrNil(this ж<subster> Ꮡsubst, Type typ) {
     if (typ == nil) {
-        return new BasicжΔType(Typ[Invalid]);
+        return new BasicжType(Typ[Invalid]);
     }
     return Ꮡsubst.typ(typ);
 }
@@ -321,7 +330,9 @@ internal static ж<Var> var_(this ж<subster> Ꮡsubst, ж<Var> Ꮡv) {
     return Ꮡv;
 }
 
-internal static ж<Var> cloneVar(ж<Var> Ꮡv, ΔType typ) {
+} partial class types_package {
+
+internal static ж<Var> cloneVar(ж<Var> Ꮡv, Type typ) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     ref var copy = ref heap<Var>(v, out var Ꮡcopy);
@@ -329,6 +340,8 @@ internal static ж<Var> cloneVar(ж<Var> Ꮡv, ΔType typ) {
     copy.origin = Ꮡv.Origin();
     return Ꮡcopy;
 }
+
+} partial class typesᴛsubster {
 
 internal static ж<Tuple> tuple(this ж<subster> Ꮡsubst, ж<Tuple> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -342,6 +355,8 @@ internal static ж<Tuple> tuple(this ж<subster> Ꮡsubst, ж<Tuple> Ꮡt) {
     }
     return Ꮡt;
 }
+
+} partial class types_package {
 
 // substList applies subst to each element of the incoming slice.
 // If at least one element changes, the result is a new slice with
@@ -363,6 +378,8 @@ internal static slice<T> /*out*/ substList<T>(slice<T> @in, Func<T, T> subst) {
     return @out;
 }
 
+} partial class typesᴛsubster {
+
 internal static ж<Func> func_(this ж<subster> Ꮡsubst, ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -374,7 +391,9 @@ internal static ж<Func> func_(this ж<subster> Ꮡsubst, ж<Func> Ꮡf) {
     return Ꮡf;
 }
 
-internal static ж<Func> cloneFunc(ж<Func> Ꮡf, ΔType typ) {
+} partial class types_package {
+
+internal static ж<Func> cloneFunc(ж<Func> Ꮡf, Type typ) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     ref var copy = ref heap<Func>(f, out var Ꮡcopy);
@@ -383,7 +402,9 @@ internal static ж<Func> cloneFunc(ж<Func> Ꮡf, ΔType typ) {
     return Ꮡcopy;
 }
 
-internal static ж<ΔTerm> term(this ж<subster> Ꮡsubst, ж<ΔTerm> Ꮡt) {
+} partial class typesᴛsubster {
+
+internal static ж<Term> term(this ж<subster> Ꮡsubst, ж<Term> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var typ = Ꮡsubst.typ(t.typ); if (!AreEqual(typ, t.typ)) {
@@ -392,13 +413,15 @@ internal static ж<ΔTerm> term(this ж<subster> Ꮡsubst, ж<ΔTerm> Ꮡt) {
     return Ꮡt;
 }
 
+} partial class types_package {
+
 // replaceRecvType updates any function receivers that have type old to have
 // type new. It does not modify the input slice; if modifications are required,
 // the input slice and any affected signatures will be copied before mutating.
 //
 // The resulting out slice contains the updated functions, and copied reports
 // if anything was modified.
-internal static (slice<ж<Func>> @out, bool copied) replaceRecvType(slice<ж<Func>> @in, ΔType old, ΔType @new) {
+internal static (slice<ж<Func>> @out, bool copied) replaceRecvType(slice<ж<Func>> @in, Type old, Type @new) {
     slice<ж<Func>> @out = default;
     bool copied = default;
 
@@ -414,9 +437,9 @@ internal static (slice<ж<Func>> @out, bool copied) replaceRecvType(slice<ж<Fun
                 copy(@out, @in);
                 copied = true;
             }
-            ref var newsig = ref heap<ΔSignature>(sig.Value, out var Ꮡnewsig);
+            ref var newsig = ref heap<Signature>(sig.Value, out var Ꮡnewsig);
             newsig.recv = cloneVar(sig.recv, @new);
-            @out[i] = cloneFunc(method, new ΔSignatureжΔType(Ꮡnewsig));
+            @out[i] = cloneFunc(method, new SignatureжType(Ꮡnewsig));
         }
     }
     return (@out, copied);

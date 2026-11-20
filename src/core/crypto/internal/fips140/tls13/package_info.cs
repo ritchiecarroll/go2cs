@@ -27,9 +27,6 @@ using static go.crypto.@internal.fips140.tls13_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("ExporterMasterSecret", "ΔExporterMasterSecret")]
-[assembly: GoTypeAlias("HandshakeSecret", "ΔHandshakeSecret")]
-[assembly: GoTypeAlias("MasterSecret", "ΔMasterSecret")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -60,7 +57,7 @@ using static go.crypto.@internal.fips140.tls13_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/tls13/cast.go", "cast.cs", "ABAegoK43IKCgoKCgpQ=", "16-36:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABAoAAkCAAgSlIKCgoKCgoKmooKUpqKClAAaKKLcgqqiAAsQgoIABRCiqqIABxCCggAFEKKqoqqiAAcUogAFEKIACQyCgoKCpqI=", "76-76:1", "", "93=extract/1/1/1;120=extract/1/1/1;145=extract/1/1/1;177=deriveSecret/1/1/1;186=deriveSecret/1/1/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABEoAAkCAAgSlIKCgoKCgoKmooKUpqKClAAaKKL8gqqiAA8QgoIABxCiqqIADxCCggAHEKKqoqqiAAsUogAHEKIACwyCgoKCxqI=", "76-76:1", "", "94=extract/1/1/1;127=extract/1/1/1;162=extract/1/1/1;200=deriveSecret/1/1/1;211=deriveSecret/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -76,9 +73,9 @@ public static partial class tls13_package
 
     // <TypeAccessibility>
     public partial struct EarlySecret {}
-    public partial struct ΔExporterMasterSecret {}
-    public partial struct ΔHandshakeSecret {}
-    public partial struct ΔMasterSecret {}
+    public partial struct ExporterMasterSecret {}
+    public partial struct HandshakeSecret {}
+    public partial struct MasterSecret {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -97,3 +94,16 @@ public static partial class tls13_package
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(tls13_package.EarlySecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛEarlySecret;
+[GoMethodHost(typeof(tls13_package.ExporterMasterSecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛExporterMasterSecret;
+[GoMethodHost(typeof(tls13_package.HandshakeSecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛHandshakeSecret;
+[GoMethodHost(typeof(tls13_package.MasterSecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛMasterSecret;
+// </MethodHolders>

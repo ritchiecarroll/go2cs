@@ -14,6 +14,7 @@ using atomic = @internal.runtime.atomic_package;
 using gc = @internal.runtime.gc_package;
 using sys = @internal.runtime.sys_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -42,6 +43,8 @@ partial struct mcentral {
     internal array<spanSet> partial = new(2, () => new()); // list of spans with a free object
     internal array<spanSet> full = new(2, () => new());    // list of spans with no free objects
 }
+
+} partial class runtimeᴛmcentral {
 
 // Initialize a single central free list.
 internal static void init(this ref mcentral c, spanClass spc) {
@@ -87,10 +90,10 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
     deductSweepCredit(spanBytes, 0);
 
     var traceDone = false;
-    var Δtrace = traceAcquire();
-    if (Δtrace.ok()) {
-        Δtrace.GCSweepStart();
-        traceRelease(Δtrace);
+    var trace = traceAcquire();
+    if (trace.ok()) {
+        trace.GCSweepStart();
+        traceRelease(trace);
     }
 
     // If we sweep spanBudget spans without finding any free
@@ -117,7 +120,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
         goto havespan;
     }
 
-    sl = ᏑΔsweep.Ꮡactive.begin();
+    sl = Ꮡsweep.Ꮡactive.begin();
     if (sl.valid) {
         // Now try partial unswept spans.
         for (; spanBudget >= 0; spanBudget--) {
@@ -128,7 +131,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
             var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
                 // We got ownership of the span, so let's sweep it and use it.
                 sΔ1.sweep(true);
-                ᏑΔsweep.Ꮡactive.end(sl);
+                Ꮡsweep.Ꮡactive.end(sl);
                 goto havespan;
             }
             // We failed to get ownership of the span, which means it's being or
@@ -152,7 +155,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
                 var freeIndex = sΔ2.nextFreeIndex();
                 if (freeIndex != sΔ2.nelems) {
                     sΔ2.freeindex = freeIndex;
-                    ᏑΔsweep.Ꮡactive.end(sl);
+                    Ꮡsweep.Ꮡactive.end(sl);
                     goto havespan;
                 }
                 // Add it to the swept list, because sweeping didn't give us any free space.
@@ -160,13 +163,13 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
             }
             // See comment for partial unswept spans.
         }
-        ᏑΔsweep.Ꮡactive.end(sl);
+        Ꮡsweep.Ꮡactive.end(sl);
     }
-    Δtrace = traceAcquire();
-    if (Δtrace.ok()) {
-        Δtrace.GCSweepDone();
+    trace = traceAcquire();
+    if (trace.ok()) {
+        trace.GCSweepDone();
         traceDone = true;
-        traceRelease(Δtrace);
+        traceRelease(trace);
     }
 
     // We failed to get a span from the mcentral so get one from mheap.
@@ -266,4 +269,4 @@ internal static ж<mspan> grow(this ref mcentral c) {
     return s;
 }
 
-} // end runtime_package
+} // end runtimeᴛmcentral

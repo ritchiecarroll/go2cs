@@ -16,6 +16,7 @@ using syntax = regexp.syntax_package;
 using Δsync = sync_package;
 using io = io_package;
 using regexp;
+using static regexp_package;
 
 partial class regexp_package {
 
@@ -74,6 +75,8 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
     return len(prog.Inst) <= maxBacktrackProg;
 }
 
+} partial class regexpᴛbitState {
+
 // reset resets the state of the backtracker.
 // end is the end position in the input.
 // ncap is the number of captures.
@@ -93,7 +96,7 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
         b.visited = new slice<uint32>(visitedSize, maxBacktrackVector / visitedBits);
     } else {
         b.visited = b.visited.slice(0, visitedSize);
-        builtin.clear(b.visited); // set to 0
+        clear(b.visited); // set to 0
     }
 
     if (cap(b.cap) < ncap) {
@@ -137,6 +140,8 @@ internal static void push(this ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint
         b.jobs = append(b.jobs, new job(pc: pc, arg: arg, pos: pos));
     }
 }
+
+} partial class regexpᴛRegexp {
 
 // tryBacktrack runs a backtracking search starting at pos.
 internal static bool tryBacktrack(this ж<Regexp> Ꮡre, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) {
@@ -386,4 +391,4 @@ Match:
     return dstCap;
 }
 
-} // end regexp_package
+} // end regexpᴛRegexp

@@ -13,6 +13,7 @@ using go.math.rand;
 using sort = sort_package;
 using static go.sort_internal_test_package;
 using strings = strings_package;
+using static sort_test_package;
 
 partial class sort_test_package {
 
@@ -54,7 +55,7 @@ public static void BenchmarkSortInts(ж<testing.B> Ꮡb) {
         b.StopTimer();
         var ints = makeRandomInts(N);
         b.StartTimer();
-        Sort((sort.Interface)((sort.IntSlice)ints));
+        Sort((sort.IntSlice)ints);
     }
 }
 
@@ -115,7 +116,7 @@ public static void BenchmarkSortStrings(ж<testing.B> Ꮡb) {
         b.StopTimer();
         var ss = makeRandomStrings(N);
         b.StartTimer();
-        Sort((sort.Interface)((sort.StringSlice)ss));
+        Sort((sort.StringSlice)ss);
     }
 }
 
@@ -137,7 +138,7 @@ public static void BenchmarkSortStrings_Sorted(ж<testing.B> Ꮡb) {
     b.ResetTimer();
 
     for (nint i = 0; i < b.N; i++) {
-        Sort((sort.Interface)((sort.StringSlice)ss));
+        Sort((sort.StringSlice)ss);
     }
 }
 
@@ -161,9 +162,13 @@ partial struct myStruct {
 
 partial struct myStructs /*[]ж<myStruct>*/;
 
+} partial class sort_testᴛmyStructs {
+
 internal static nint Len(this myStructs s) { return len(s); }
 internal static bool Less(this myStructs s, nint i, nint j) { return s[i].n < s[j].n; }
 internal static void Swap(this myStructs s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+
+} partial class sort_test_package {
 
 internal static myStructs makeRandomStructs(nint n) {
     var r = rand.New(new rand.PCGжSource(rand.NewPCG(42, 0)));

@@ -152,7 +152,7 @@ public static void BenchmarkCopyValues(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         var dst = new url.Values(new map<@string, slice<@string>>{["a"] = ["b"], ["b"] = ["2"], ["c"] = ["3"], ["d"] = ["4"], ["j"] = default, ["m"] = ["x"]});
         copyValues(dst, src);
-        http_internal_test_package.valuesCount = builtin.len(dst["a"]); if (http_internal_test_package.valuesCount != 6) {
+        http_internal_test_package.valuesCount = len(dst["a"]); if (http_internal_test_package.valuesCount != 6) {
             Ꮡb.Fatalf(@"%d items in dst[""a""] but expected 6", http_internal_test_package.valuesCount);
         }
     }

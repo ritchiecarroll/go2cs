@@ -10,13 +10,18 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
 using static global::go.runtime_internal_test_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
 partial class Tintptr /*ж<nint>*/; // assignable to *int
 partial struct Tint /*num:nint*/;  // *Tint implements Tinter, interface{}
 
+} partial class runtime_testᴛTint {
+
 internal static void m(this ref Tint t) { }
+
+} partial class runtime_test_package {
 
 partial interface Tinter {
     void m();
@@ -84,7 +89,7 @@ public static partial void TestFinalizerType(ж<testing.T> t) {
         // call32 as the result has (exactly) 32 bytes. When the argument actually spills,
         // it clobbers the caller's frame (likely the return PC).
         new((ж<nint> x) => x.OrTypedNil(), array<int64> (any v) => {
-            builtin.print(); // force spill
+            print(); // force spill
             finalizeʗ6(v._<ж<nint>>());
             return new int64[]{}.array(4);
         })
@@ -310,7 +315,7 @@ public static void TestDeferKeepAlive(ж<testing.T> t) {
         });
         defer(Δruntime.KeepAlive, x.OrTypedNil(), ref ᒐ);
         Δruntime.GC();
-        time.Sleep(time.ΔSecond);
+        time.Sleep(time.Second);
         if (finRun) {
             t.Errorf("finalizer ran prematurely");
         }

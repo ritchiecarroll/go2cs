@@ -16,6 +16,7 @@ using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAt
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using math;
 using static go.os_internal_test_package;
+using static os_test_package;
 
 partial class os_test_package {
 
@@ -179,10 +180,10 @@ public static void TestReadTimeoutMustNotReturn(ж<Δtesting.T> t) {
                     chʗ1.ᐸꟷ(err);
                 });
 
-                var selᴛ6 = ch;
+                var chᴛ1 = ch;
                 var selᴛ7 = max.C;
-                switch (select(ᐸꟷ(selᴛ6, ꓸꓸꓸ), ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
-                case 0 when selᴛ6.ꟷᐳ(out var err): {
+                switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
+                case 0 when chᴛ1.ꟷᐳ(out var err): {
                     tΔ1.Fatalf("expected Read to not return, but it returned with %v", err);
                     break;
                 }
@@ -319,10 +320,10 @@ public static void TestWriteTimeoutMustNotReturn(ж<Δtesting.T> t) {
                     }
                 });
 
-                var selᴛ8 = ch;
+                var chᴛ1 = ch;
                 var selᴛ9 = max.C;
-                switch (select(ᐸꟷ(selᴛ8, ꓸꓸꓸ), ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
-                case 0 when selᴛ8.ꟷᐳ(out var err): {
+                switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
+                case 0 when chᴛ1.ꟷᐳ(out var err): {
                     tΔ1.Fatalf("expected Write to not return, but it returned with %v", err);
                     break;
                 }
@@ -606,12 +607,16 @@ public static void TestVariousDeadlines4Proc(ж<Δtesting.T> t) {
 
 partial struct neverEnding /*num:byte*/;
 
+} partial class os_testᴛneverEnding {
+
 internal static (nint, error) Read(this neverEnding b, slice<byte> p) {
     foreach (var i in range(len(p))) {
         p[i] = (byte)b;
     }
     return (len(p), default);
 }
+
+} partial class os_test_package {
 
 internal partial struct testVariousDeadlines_result /*dyn*/ {
     internal int64 n;
@@ -630,14 +635,14 @@ internal static void testVariousDeadlines(ж<Δtesting.T> t, Func<ж<Δtesting.T
     }
 
     foreach (var (_, timeout) in range(slice<time.Duration>([
-        1 * time.ΔNanosecond,
-        2 * time.ΔNanosecond,
-        5 * time.ΔNanosecond,
-        50 * time.ΔNanosecond,
-        100 * time.ΔNanosecond,
-        200 * time.ΔNanosecond,
-        500 * time.ΔNanosecond,
-        750 * time.ΔNanosecond,
+        1 * time.Nanosecond,
+        2 * time.Nanosecond,
+        5 * time.Nanosecond,
+        50 * time.Nanosecond,
+        100 * time.Nanosecond,
+        200 * time.Nanosecond,
+        500 * time.Nanosecond,
+        750 * time.Nanosecond,
         1 * time.Microsecond,
         5 * time.Microsecond,
         25 * time.Microsecond,
@@ -648,7 +653,7 @@ internal static void testVariousDeadlines(ж<Δtesting.T> t, Func<ж<Δtesting.T
         100 * time.Millisecond,
         250 * time.Millisecond,
         500 * time.Millisecond,
-        1 * time.ΔSecond
+        1 * time.Second
     ]))) {
         nint numRuns = 3;
         if (Δtesting.Short()) {
@@ -690,10 +695,10 @@ internal static void testVariousDeadlines(ж<Δtesting.T> t, Func<ж<Δtesting.T
                         actvchʗ1.ᐸꟷ(new testVariousDeadlines_result(n, err, dt));
                     });
 
-                    var selᴛ10 = actvch;
+                    var actvchᴛ1 = actvch;
                     var selᴛ11 = max.C;
-                    switch (select(ᐸꟷ(selᴛ10, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
-                    case 0 when selᴛ10.ꟷᐳ(out var res): {
+                    switch (select(ᐸꟷ(actvchᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+                    case 0 when actvchᴛ1.ꟷᐳ(out var res): {
                         if (isDeadlineExceeded(res.err)) {
                             tΔ1.Logf("good client timeout after %v, reading %d bytes", res.d, res.n);
                         } else {
@@ -706,10 +711,10 @@ internal static void testVariousDeadlines(ж<Δtesting.T> t, Func<ж<Δtesting.T
                         break;
                     }}
 
-                    var selᴛ12 = pasvch;
+                    var pasvchᴛ1 = pasvch;
                     var selᴛ13 = max.C;
-                    switch (select(ᐸꟷ(selᴛ12, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
-                    case 0 when selᴛ12.ꟷᐳ(out var res): {
+                    switch (select(ᐸꟷ(pasvchᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
+                    case 0 when pasvchᴛ1.ꟷᐳ(out var res): {
                         tΔ1.Logf("writer in %v wrote %d: %v", res.d, res.n, res.err);
                         break;
                     }

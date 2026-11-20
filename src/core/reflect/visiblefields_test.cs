@@ -54,7 +54,7 @@ partial struct fieldsTestsᴛ1 /*dyn*/ {
         /*embed*/ public ж<SF> SF;
     }
     partial struct Δtypeᴛ44 /*dyn*/ {
-        /*embed*/ public ΔM M;
+        /*embed*/ public M M;
     }
 internal static slice<fieldsTestsᴛ1> fieldsTests = [new(
     testName: "SimpleStruct",
@@ -303,7 +303,7 @@ partial struct RS3 {
     /*embed*/ public RS1 RS1;
 }
 
-partial struct ΔM /*map[@string, any]*/;
+partial struct M /*map[@string, any]*/;
 
 partial struct Rec1 {
     /*embed*/ public ж<Rec2> Rec2;

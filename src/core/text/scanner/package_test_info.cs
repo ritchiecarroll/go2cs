@@ -14,7 +14,6 @@ using go;
 using static global::go.text.scanner_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("String", "const:ΔString")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

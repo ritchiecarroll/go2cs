@@ -21,6 +21,7 @@ using @internal;
 using flag = flag_package;
 using go.os;
 using static go.flag_internal_test_package;
+using static flag_test_package;
 
 partial class flag_test_package {
 
@@ -374,14 +375,18 @@ public static void TestFlagSetParse(ж<testing.T> t) {
 // Declare a user-defined flag type.
 partial struct flagVar /*[]@string*/;
 
-internal static @string ΔString(this ref flagVar f) {
+} partial class flag_testᴛflagVar {
+
+internal static @string String(this ref flagVar f) {
     return fmt.Sprint((slice<@string>)(f));
 }
 
-internal static error ΔSet(this ref flagVar f, @string value) {
+internal static error Set(this ref flagVar f, @string value) {
     f = append(f, value);
     return default;
 }
+
+} partial class flag_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string usageˢ => ref usageˢᵇ;
@@ -401,8 +406,8 @@ public static void TestUserDefined(ж<testing.T> t) {
         t.Fatal(expected3ArgsGotˢ, len(v));
     }
     @string expect = "[1 2 3]";
-    if (v.ΔString() != expect) {
-        t.Errorf("expected value %q got %q", expect, v.ΔString());
+    if (v.String() != expect) {
+        t.Errorf("expected value %q got %q", expect, v.String());
     }
 }
 
@@ -481,11 +486,13 @@ partial struct boolFlagVar {
     internal nint count;
 }
 
-internal static @string ΔString(this ref boolFlagVar b) {
+} partial class flag_testᴛboolFlagVar {
+
+internal static @string String(this ref boolFlagVar b) {
     return fmt.Sprintf("%d"u8, b.count);
 }
 
-internal static error ΔSet(this ref boolFlagVar b, @string value) {
+internal static error Set(this ref boolFlagVar b, @string value) {
     if (value == "true"u8) {
         b.count++;
     }
@@ -495,6 +502,8 @@ internal static error ΔSet(this ref boolFlagVar b, @string value) {
 internal static bool IsBoolFlag(this ref boolFlagVar b) {
     return b.count < 4;
 }
+
+} partial class flag_test_package {
 
 public static void TestUserDefinedBool(ж<testing.T> t) {
     ref var flags = ref heap(new flag.FlagSet(), out var Ꮡflags);
@@ -672,17 +681,21 @@ partial struct zeroPanicker {
     internal @string v;
 }
 
-internal static error ΔSet(this ref zeroPanicker f, @string s) {
+} partial class flag_testᴛzeroPanicker {
+
+internal static error Set(this ref zeroPanicker f, @string s) {
     f.v = s;
     return default;
 }
 
-internal static @string ΔString(this ref zeroPanicker f) {
+internal static @string String(this ref zeroPanicker f) {
     if (!f.dontPanic) {
         throw panic("panic!");
     }
     return f.v;
 }
+
+} partial class flag_test_package {
 
 internal static ref readonly @string defaultOutput => ref defaultOutputᵇ;
 private static readonly @string defaultOutputᵇ = """
@@ -845,7 +858,7 @@ private static readonly @string gopherˢᵇ = "gopher"u8;
 
 public static void TestGetters(ж<testing.T> t) {
     @string expectedName = flagSetˢ;
-    flagꓸErrorHandling expectedErrorHandling = ContinueOnError;
+    flag.ErrorHandling expectedErrorHandling = ContinueOnError;
     var expectedOutput = ((Δio.Writer)new Δos.FileжWriter(Δos.Stderr));
     var fs = NewFlagSet(expectedName, expectedErrorHandling);
 

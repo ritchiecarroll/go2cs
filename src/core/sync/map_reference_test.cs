@@ -8,6 +8,7 @@ using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using go.sync;
 using static go.sync_internal_test_package;
+using static sync_test_package;
 
 partial class sync_test_package {
 
@@ -36,6 +37,8 @@ partial struct RWMutexMap {
     internal Δsync.RWMutex mu;
     internal map<any, any> dirty;
 }
+
+} partial class sync_testᴛRWMutexMap {
 
 public static (any value, bool ok) Load(this ж<RWMutexMap> Ꮡm, any key) {
     any value = default;
@@ -202,6 +205,8 @@ public static void Clear(this ж<RWMutexMap> Ꮡm) {
     finally { if (ᒐd1) Ꮡm.Ꮡmu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class sync_test_package {
+
 // DeepCopyMap is an implementation of mapInterface using a Mutex and
 // atomic.Value.  It makes deep copies of the map on every write to avoid
 // acquiring the Mutex in Load.
@@ -209,6 +214,8 @@ partial struct DeepCopyMap {
     internal Δsync.Mutex mu;
     internal atomic.Value clean;
 }
+
+} partial class sync_testᴛDeepCopyMap {
 
 public static (any value, bool ok) Load(this ж<DeepCopyMap> Ꮡm, any key) {
     any value = default;
@@ -380,4 +387,4 @@ public static void Clear(this ж<DeepCopyMap> Ꮡm) {
     finally { if (ᒐd1) Ꮡm.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-} // end sync_test_package
+} // end sync_testᴛDeepCopyMap

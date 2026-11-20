@@ -68,6 +68,7 @@ using go.os;
 using math;
 using nistec = go.crypto.@internal.fips140.nistec_package;
 using path;
+using static fipstest_internal_test_package;
 
 partial class fipstest_internal_test_package {
 
@@ -1019,8 +1020,8 @@ internal static command cmdEcdsaKeyVerAft() {
                 return (default, err);
             }
 
-            var x = @new<bigꓸInt>().SetBytes(args[1]);
-            var y = @new<bigꓸInt>().SetBytes(args[2]);
+            var x = @new<big.Int>().SetBytes(args[1]);
+            var y = @new<big.Int>().SetBytes(args[2]);
 
             if (curve.IsOnCurve(x, y)) {
                 return (slice<slice<byte>>([[1]]), default);
@@ -1033,7 +1034,7 @@ internal static command cmdEcdsaKeyVerAft() {
 
 // pointFromAffine is used to convert the PublicKey to a nistec SetBytes input.
 // Duplicated from crypto/ecdsa.go's pointFromAffine.
-internal static (slice<byte>, error) pointFromAffine(elliptic.Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
+internal static (slice<byte>, error) pointFromAffine(elliptic.Curve curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -1104,7 +1105,7 @@ internal static command cmdEcdsaSigGenAft(ecdsaSigType sigType) {
             hashFunc.Write(msg);
             var digest = hashFunc.Sum(default);
 
-            var d = @new<bigꓸInt>().SetBytes(sk);
+            var d = @new<big.Int>().SetBytes(sk);
             var (x, y) = curve.ScalarBaseMult(d.Bytes());
             (var q, err) = pointFromAffine(curve, x, y);
             if (err != nil) {
@@ -1161,7 +1162,7 @@ internal static command cmdEcdsaSigVerAft() {
             var digest = hashFunc.Sum(default);
 
             var (x, y) = (args[3], args[4]);
-            (var q, err) = pointFromAffine(curve, @new<bigꓸInt>().SetBytes(x), @new<bigꓸInt>().SetBytes(y));
+            (var q, err) = pointFromAffine(curve, @new<big.Int>().SetBytes(x), @new<big.Int>().SetBytes(y));
             if (err != nil) {
                 return (default, fmt.Errorf("invalid x/y coordinates: %v"u8, err));
             }
@@ -1212,45 +1213,44 @@ internal static error verifyEcdsa<P>(ж<ecdsa.Curve<P>> c, slice<byte> q, slice<
 internal static (Func<hash.Hash>, error) lookupHash(@string name) {
     Func<hash.Hash> h = default;
 
-    var exprᴛ1 = name;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "SHA2-224"u8: {
+    case {} when name == "SHA2-224"u8: {
         h = () => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224());
         break;
     }
-    case {} when exprᴛ1 == "SHA2-256"u8: {
+    case {} when name == "SHA2-256"u8: {
         h = () => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New());
         break;
     }
-    case {} when exprᴛ1 == "SHA2-384"u8: {
+    case {} when name == "SHA2-384"u8: {
         h = () => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384());
         break;
     }
-    case {} when exprᴛ1 == "SHA2-512"u8: {
+    case {} when name == "SHA2-512"u8: {
         h = () => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New());
         break;
     }
-    case {} when exprᴛ1 == "SHA2-512/224"u8: {
+    case {} when name == "SHA2-512/224"u8: {
         h = () => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224());
         break;
     }
-    case {} when exprᴛ1 == "SHA2-512/256"u8: {
+    case {} when name == "SHA2-512/256"u8: {
         h = () => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256());
         break;
     }
-    case {} when exprᴛ1 == "SHA3-224"u8: {
+    case {} when name == "SHA3-224"u8: {
         h = () => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224());
         break;
     }
-    case {} when exprᴛ1 == "SHA3-256"u8: {
+    case {} when name == "SHA3-256"u8: {
         h = () => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256());
         break;
     }
-    case {} when exprᴛ1 == "SHA3-384"u8: {
+    case {} when name == "SHA3-384"u8: {
         h = () => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384());
         break;
     }
-    case {} when exprᴛ1 == "SHA3-512"u8: {
+    case {} when name == "SHA3-512"u8: {
         h = () => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512());
         break;
     }
@@ -1388,21 +1388,20 @@ internal static command cmdMlKem1024DecapAft() {
 internal static (elliptic.Curve, error) lookupCurve(@string name) {
     elliptic.Curve c = default;
 
-    var exprᴛ1 = name;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "P-224"u8: {
+    case {} when name == "P-224"u8: {
         c = elliptic.P224();
         break;
     }
-    case {} when exprᴛ1 == "P-256"u8: {
+    case {} when name == "P-256"u8: {
         c = elliptic.P256();
         break;
     }
-    case {} when exprᴛ1 == "P-384"u8: {
+    case {} when name == "P-384"u8: {
         c = elliptic.P384();
         break;
     }
-    case {} when exprᴛ1 == "P-521"u8: {
+    case {} when name == "P-521"u8: {
         c = elliptic.P521();
         break;
     }
@@ -1495,8 +1494,8 @@ internal static command cmdAesCtr(aesDirection direction) {
                 return (default, fmt.Errorf("invalid num iterations: expected 1, got %d"u8, numIterations));
             }
 
-            if (len(iv) != aes.ΔBlockSize) {
-                return (default, fmt.Errorf("invalid IV size: expected %d, got %d"u8, (nint)(aes.ΔBlockSize), len(iv)));
+            if (len(iv) != aes.BlockSize) {
+                return (default, fmt.Errorf("invalid IV size: expected %d, got %d"u8, (nint)(aes.BlockSize), len(iv)));
             }
 
             var (blockCipher, err) = aes.New(key);
@@ -1662,17 +1661,16 @@ internal static command cmdSshKdfAft(Func<hash.Hash> hFunc, ssh.Direction direct
             @string cipher = (@string)args[3];
 
             nint keyLen = default;
-            var exprᴛ1 = cipher;
             switch (ᐧ) {
-            case {} when exprᴛ1 == "AES-128"u8: {
+            case {} when cipher == "AES-128"u8: {
                 keyLen = 16;
                 break;
             }
-            case {} when exprᴛ1 == "AES-192"u8: {
+            case {} when cipher == "AES-192"u8: {
                 keyLen = 24;
                 break;
             }
-            case {} when exprᴛ1 == "AES-256"u8: {
+            case {} when cipher == "AES-256"u8: {
                 keyLen = 32;
                 break;
             }
@@ -1801,6 +1799,8 @@ internal partial struct acvpCtrDrbg {
     internal slice<byte> reseedEntropy; // May be empty for no reseed
 }
 
+} partial class fipstest_internal_testᴛacvpCtrDrbg {
+
 internal static (slice<slice<byte>>, error) process(this acvpCtrDrbg args) {
     // Our capability describes no personalization support.
     if (len(args.personalization) > 0) {
@@ -1860,6 +1860,8 @@ internal static (slice<slice<byte>>, error) process(this acvpCtrDrbg args) {
 
     return (slice<slice<byte>>([@out]), default);
 }
+
+} partial class fipstest_internal_test_package {
 
 // Verify input is 48 byte slice, and cast it to a pointer to a fixed-size array
 // of 48 bytes, or return an error.
@@ -2049,7 +2051,7 @@ internal static command cmdRsaSigVerAft(Func<hash.Hash> hashFunc, @string hashNa
                 return (default, fmt.Errorf("invalid RSA modulus: %w"u8, err));
             }
 
-            var pub = Ꮡ(new rsaꓸPublicKey(
+            var pub = Ꮡ(new rsa.PublicKey(
                 N: n,
                 E: e
             ));
@@ -2139,7 +2141,7 @@ internal static command cmdKtsIfcInitiatorAft(Func<hash.Hash> h) {
                 return (default, errors.New("e must be 0x10001"));
             }
 
-            var pub = Ꮡ(new rsaꓸPublicKey(
+            var pub = Ꮡ(new rsa.PublicKey(
                 N: n,
                 E: e
             ));

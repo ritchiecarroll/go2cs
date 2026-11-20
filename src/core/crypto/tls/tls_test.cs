@@ -44,6 +44,7 @@ using go.math;
 using hash = hash_package;
 using static go.crypto.tls_package;
 using vendor.golang.org.x.crypto;
+using static tls_internal_test_package;
 
 partial class tls_internal_test_package {
 
@@ -301,7 +302,7 @@ public static partial void TestDialTimeout(ж<testing.T> t) {
         t.Skip(skippingInShortModeˢ);
     }
 
-    ref var timeout = ref heap<time.Duration>(100 * time_package.Microsecond, out var Ꮡtimeout);
+    ref var timeout = ref heap<time.Duration>(100 * time.Microsecond, out var Ꮡtimeout);
     while (!t.Failed()) {
         var acceptc = new channel<net.Conn>(0);
         var listener = newLocalListener(new tls_test_package.testing_TжTB(t));
@@ -419,7 +420,7 @@ public static partial void TestDeadlineOnWrite(ж<testing.T> t) {
         }
 
         // Set a deadline which should cause Write to timeout
-        err = srv.SetDeadline(time_package.Now()); if (err != nil) {
+        err = srv.SetDeadline(time.Now()); if (err != nil) {
             t.Fatalf("SetDeadline(time.Now()) err: %v", err);
         }
         (_, err) = srv.Write(slice<byte>("should fail"u8)); if (err == nil) {
@@ -427,7 +428,7 @@ public static partial void TestDeadlineOnWrite(ж<testing.T> t) {
         }
 
         // Clear deadline and make sure it still times out
-        err = srv.SetDeadline(new time_package.Time()); if (err != nil) {
+        err = srv.SetDeadline(new time.Time()); if (err != nil) {
             t.Fatalf("SetDeadline(time.Time{}) err: %v", err);
         }
         (_, err) = srv.Write(slice<byte>("This connection is permanently broken"u8)); if (err == nil) {
@@ -435,7 +436,7 @@ public static partial void TestDeadlineOnWrite(ж<testing.T> t) {
         }
 
         // Verify the error
-        var ne = err._<netꓸError>(); if (ne.Temporary() != false) {
+        var ne = err._<net.Error>(); if (ne.Temporary() != false) {
             t.Error(writeTimedOutButˢ);
         }
         if (!isTimeoutError(err)) {
@@ -448,7 +449,11 @@ public static partial void TestDeadlineOnWrite(ж<testing.T> t) {
 
 internal delegate (nint, error) readerFunc(slice<byte> _Δp0);
 
+} partial class tls_internal_testᴛreaderFunc {
+
 internal static (nint, error) Read(this readerFunc f, slice<byte> b) { return f(b); }
+
+} partial class tls_internal_test_package {
 
 // TestDialer tests that tls.Dialer.DialContext can abort in the middle of a handshake.
 // (The other cases are all handled by the existing dial tests in this package, which
@@ -504,7 +509,7 @@ public static partial void TestDialer(ж<testing.T> t) {
 }
 
 internal static bool isTimeoutError(error err) {
-    var (ne, ok) = err._<netꓸError>(ᐧ); if (ok) {
+    var (ne, ok) = err._<net.Error>(ᐧ); if (ok) {
         return ne.Timeout();
     }
     return false;
@@ -524,7 +529,7 @@ public static void TestConnReadNonzeroAndEOF(ж<testing.T> t) {
         t.Skip(skippingInShortModeˢ);
     }
     error err = default;
-    for (var delay = time_package.Millisecond; delay <= 64 * time_package.Millisecond; delay *= 2) {
+    for (var delay = time.Millisecond; delay <= 64 * time.Millisecond; delay *= 2) {
         err = testConnReadNonzeroAndEOF(t, delay); if (err == nil) {
             return;
         }
@@ -586,7 +591,7 @@ internal static partial error testConnReadNonzeroAndEOF(ж<testing.T> t, time.Du
 
         srv.Write(slice<byte>("abcdef"u8));
         srv.Close();
-        time_package.Sleep(delay);
+        time.Sleep(delay);
         (n, err) = conn.Read(buf);
         if (n != 6 || ((sstring)buf) != "abcdef"u8) {
             return fmt.Errorf("Read = %d, buf= %q; want 6, abcdef"u8, n, buf);
@@ -639,10 +644,10 @@ public static partial void TestTLSUniqueMatches(ж<testing.T> t) {
                         t.Error(errΔ2);
                         return;
                     }
-                    var selᴛ8 = parentDoneʗ1;
-                    var selᴛ9 = serverTLSUniquesʗ1.ᐸꟷ(srv.ConnectionState().TLSUnique, ꓸꓸꓸ);
-                    switch (select(ᐸꟷ(selᴛ8, ꓸꓸꓸ), selᴛ9)) {
-                    case 0 when selᴛ8.ꟷᐳ(out _): {
+                    var parentDoneᴛ1 = parentDoneʗ1;
+                    var serverTLSUniquesᴛ1 = serverTLSUniquesʗ1.ᐸꟷ(srv.ConnectionState().TLSUnique, ꓸꓸꓸ);
+                    switch (select(ᐸꟷ(parentDoneᴛ1, ꓸꓸꓸ), serverTLSUniquesᴛ1)) {
+                    case 0 when parentDoneᴛ1.ꟷᐳ(out _): {
                         return;
                     }
                     case 1: {
@@ -662,13 +667,13 @@ public static partial void TestTLSUniqueMatches(ж<testing.T> t) {
         }
 
         slice<byte> serverTLSUniquesValue = default;
-        var selᴛ10 = childDone;
-        var selᴛ11 = serverTLSUniques;
-        switch (select(ᐸꟷ(selᴛ10, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
-        case 0 when selᴛ10.ꟷᐳ(out _): {
+        var childDoneᴛ1 = childDone;
+        var serverTLSUniquesᴛ2 = serverTLSUniques;
+        switch (select(ᐸꟷ(childDoneᴛ1, ꓸꓸꓸ), ᐸꟷ(serverTLSUniquesᴛ2, ꓸꓸꓸ))) {
+        case 0 when childDoneᴛ1.ꟷᐳ(out _): {
             return;
         }
-        case 1 when selᴛ11.ꟷᐳ(out serverTLSUniquesValue): {
+        case 1 when serverTLSUniquesᴛ2.ꟷᐳ(out serverTLSUniquesValue): {
             break;
         }}
 
@@ -690,13 +695,13 @@ public static partial void TestTLSUniqueMatches(ж<testing.T> t) {
             t.Error(secondSessionDidNotUseˢ);
         }
 
-        var selᴛ12 = childDone;
-        var selᴛ13 = serverTLSUniques;
-        switch (select(ᐸꟷ(selᴛ12, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
-        case 0 when selᴛ12.ꟷᐳ(out _): {
+        var childDoneᴛ2 = childDone;
+        var serverTLSUniquesᴛ3 = serverTLSUniques;
+        switch (select(ᐸꟷ(childDoneᴛ2, ꓸꓸꓸ), ᐸꟷ(serverTLSUniquesᴛ3, ꓸꓸꓸ))) {
+        case 0 when childDoneᴛ2.ꟷᐳ(out _): {
             return;
         }
-        case 1 when selᴛ13.ꟷᐳ(out serverTLSUniquesValue): {
+        case 1 when serverTLSUniquesᴛ3.ꟷᐳ(out serverTLSUniquesValue): {
             break;
         }}
 
@@ -991,10 +996,10 @@ public static partial void TestConnCloseWrite(ж<testing.T> t) {
         });
 
         for (nint i = 0; i < 2; i++) {
-            var selᴛ14 = errChan;
-            var selᴛ15 = time_package.After((time.Duration)(10000000000L));
-            switch (select(ᐸꟷ(selᴛ14, ꓸꓸꓸ), ᐸꟷ(selᴛ15, ꓸꓸꓸ))) {
-            case 0 when selᴛ14.ꟷᐳ(out var err): {
+            var errChanᴛ1 = errChan;
+            var selᴛ15 = time.After((time.Duration)(10000000000L));
+            switch (select(ᐸꟷ(errChanᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ15, ꓸꓸꓸ))) {
+            case 0 when errChanᴛ1.ꟷᐳ(out var err): {
                 if (err != nil) {
                     t.Fatal(err);
                 }
@@ -1117,7 +1122,7 @@ public static void TestCloneFuncFields(ж<testing.T> t) {
     ref var c1 = ref heap<global::go.crypto.tls_package.Config>(new Config(
         Time: () => {
             called |= (nint)((1 << 0));
-            return new time_package.Time();
+            return new time.Time();
         },
         GetCertificate: (ж<global::go.crypto.tls_package.ClientHelloInfo> _) => {
             called |= (nint)((1 << 1));
@@ -1135,19 +1140,19 @@ public static void TestCloneFuncFields(ж<testing.T> t) {
             called |= (nint)((1 << 4));
             return default;
         },
-        VerifyConnection: (global::go.crypto.tls_package.ΔConnectionState _) => {
+        VerifyConnection: (global::go.crypto.tls_package.ConnectionState _) => {
             called |= (nint)((1 << 5));
             return default;
         },
-        UnwrapSession: (slice<byte> identity, global::go.crypto.tls_package.ΔConnectionState cs) => {
+        UnwrapSession: (slice<byte> identity, global::go.crypto.tls_package.ConnectionState cs) => {
             called |= (nint)((1 << 6));
             return (default, default);
         },
-        WrapSession: (global::go.crypto.tls_package.ΔConnectionState cs, ж<global::go.crypto.tls_package.SessionState> ss) => {
+        WrapSession: (global::go.crypto.tls_package.ConnectionState cs, ж<global::go.crypto.tls_package.SessionState> ss) => {
             called |= (nint)((1 << 7));
             return (default, default);
         },
-        EncryptedClientHelloRejectionVerify: (global::go.crypto.tls_package.ΔConnectionState _) => {
+        EncryptedClientHelloRejectionVerify: (global::go.crypto.tls_package.ConnectionState _) => {
             called |= (nint)((1 << 8));
             return default;
         },
@@ -1164,10 +1169,10 @@ public static void TestCloneFuncFields(ж<testing.T> t) {
     c2.GetClientCertificate(nil);
     c2.GetConfigForClient(nil);
     c2.VerifyPeerCertificate(default, default);
-    c2.VerifyConnection(new ΔConnectionState());
-    c2.UnwrapSession(default, new ΔConnectionState());
-    c2.WrapSession(new ΔConnectionState(), nil);
-    c2.EncryptedClientHelloRejectionVerify(new ΔConnectionState());
+    c2.VerifyConnection(new ConnectionState());
+    c2.UnwrapSession(default, new ConnectionState());
+    c2.WrapSession(new ConnectionState(), nil);
+    c2.EncryptedClientHelloRejectionVerify(new ConnectionState());
     c2.GetEncryptedClientHelloKeys(nil);
 
     if (called != (nint)((1 << (int)(expectedCount)) - 1)) {
@@ -1185,88 +1190,87 @@ public static void TestCloneNonFuncFields(ж<testing.T> t) {
         // testing/quick can't handle functions or interfaces and so
         // isn't used here.
         @string fn = typ.Field(i).Name;
-        var exprᴛ1 = fn;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "Rand"u8: {
+        case {} when fn == "Rand"u8: {
             f.Set(reflect.ValueOf((io.Reader)new tls_test_package.os_FileжReader(os.Stdin)));
             break;
         }
-        case {} when exprᴛ1 == "Time"u8 || exprᴛ1 == "GetCertificate"u8 || exprᴛ1 == "GetConfigForClient"u8 || exprᴛ1 == "VerifyPeerCertificate"u8 || exprᴛ1 == "VerifyConnection"u8 || exprᴛ1 == "GetClientCertificate"u8 || exprᴛ1 == "WrapSession"u8 || exprᴛ1 == "UnwrapSession"u8 || exprᴛ1 == "EncryptedClientHelloRejectionVerify"u8 || exprᴛ1 == "GetEncryptedClientHelloKeys"u8: {
+        case {} when fn == "Time"u8 || fn == "GetCertificate"u8 || fn == "GetConfigForClient"u8 || fn == "VerifyPeerCertificate"u8 || fn == "VerifyConnection"u8 || fn == "GetClientCertificate"u8 || fn == "WrapSession"u8 || fn == "UnwrapSession"u8 || fn == "EncryptedClientHelloRejectionVerify"u8 || fn == "GetEncryptedClientHelloKeys"u8: {
             // DeepEqual can't compare functions. If you add a
             // function field to this list, you must also change
             // TestCloneFuncFields to ensure that the func field is
             // cloned.
             break;
         }
-        case {} when exprᴛ1 == "Certificates"u8: {
+        case {} when fn == "Certificates"u8: {
             f.Set(reflect.ValueOf(slice<global::go.crypto.tls_package.Certificate>([
                 new(ΔCertificate: [[(byte)'b']])
             ])));
             break;
         }
-        case {} when exprᴛ1 == "NameToCertificate"u8: {
+        case {} when fn == "NameToCertificate"u8: {
             f.Set(reflect.ValueOf(new map<@string, ж<global::go.crypto.tls_package.Certificate>>{["a"] = default}));
             break;
         }
-        case {} when exprᴛ1 == "RootCAs"u8 || exprᴛ1 == "ClientCAs"u8: {
+        case {} when fn == "RootCAs"u8 || fn == "ClientCAs"u8: {
             f.Set(reflect.ValueOf(Δx509.NewCertPool().OrTypedNil()));
             break;
         }
-        case {} when exprᴛ1 == "ClientSessionCache"u8: {
+        case {} when fn == "ClientSessionCache"u8: {
             f.Set(reflect.ValueOf(NewLRUClientSessionCache(10)));
             break;
         }
-        case {} when exprᴛ1 == "KeyLogWriter"u8: {
+        case {} when fn == "KeyLogWriter"u8: {
             f.Set(reflect.ValueOf((io.Writer)new os.FileжWriter(os.Stdout)));
             break;
         }
-        case {} when exprᴛ1 == "NextProtos"u8: {
+        case {} when fn == "NextProtos"u8: {
             f.Set(reflect.ValueOf(slice<@string>(["a", "b"])));
             break;
         }
-        case {} when exprᴛ1 == "ServerName"u8: {
+        case {} when fn == "ServerName"u8: {
             f.Set(reflect.ValueOf("b"));
             break;
         }
-        case {} when exprᴛ1 == "ClientAuth"u8: {
+        case {} when fn == "ClientAuth"u8: {
             f.Set(reflect.ValueOf(VerifyClientCertIfGiven));
             break;
         }
-        case {} when exprᴛ1 == "InsecureSkipVerify"u8 || exprᴛ1 == "SessionTicketsDisabled"u8 || exprᴛ1 == "DynamicRecordSizingDisabled"u8 || exprᴛ1 == "PreferServerCipherSuites"u8: {
+        case {} when fn == "InsecureSkipVerify"u8 || fn == "SessionTicketsDisabled"u8 || fn == "DynamicRecordSizingDisabled"u8 || fn == "PreferServerCipherSuites"u8: {
             f.Set(reflect.ValueOf(true));
             break;
         }
-        case {} when exprᴛ1 == "MinVersion"u8 || exprᴛ1 == "MaxVersion"u8: {
+        case {} when fn == "MinVersion"u8 || fn == "MaxVersion"u8: {
             f.Set(reflect.ValueOf((uint16)VersionTLS12));
             break;
         }
-        case {} when exprᴛ1 == "SessionTicketKey"u8: {
+        case {} when fn == "SessionTicketKey"u8: {
             f.Set(reflect.ValueOf(new byte[]{}.array(32)));
             break;
         }
-        case {} when exprᴛ1 == "CipherSuites"u8: {
+        case {} when fn == "CipherSuites"u8: {
             f.Set(reflect.ValueOf(slice<uint16>([1, 2])));
             break;
         }
-        case {} when exprᴛ1 == "CurvePreferences"u8: {
+        case {} when fn == "CurvePreferences"u8: {
             f.Set(reflect.ValueOf(slice<global::go.crypto.tls_package.CurveID>([CurveP256])));
             break;
         }
-        case {} when exprᴛ1 == "Renegotiation"u8: {
+        case {} when fn == "Renegotiation"u8: {
             f.Set(reflect.ValueOf(RenegotiateOnceAsClient));
             break;
         }
-        case {} when exprᴛ1 == "EncryptedClientHelloConfigList"u8: {
+        case {} when fn == "EncryptedClientHelloConfigList"u8: {
             f.Set(reflect.ValueOf(slice<byte>([(byte)'x'])));
             break;
         }
-        case {} when exprᴛ1 == "EncryptedClientHelloKeys"u8: {
+        case {} when fn == "EncryptedClientHelloKeys"u8: {
             f.Set(reflect.ValueOf(slice<global::go.crypto.tls_package.EncryptedClientHelloKey>([
                 new(Config: [1], PrivateKey: [1])
             ])));
             break;
         }
-        case {} when exprᴛ1 == "mutex"u8 || exprᴛ1 == "autoSessionTicketKeys"u8 || exprᴛ1 == "sessionTicketKeys"u8: {
+        case {} when fn == "mutex"u8 || fn == "autoSessionTicketKeys"u8 || fn == "sessionTicketKeys"u8: {
             continue; // these are unexported fields that are handled separately
             break;
         }
@@ -1300,9 +1304,11 @@ internal partial struct changeImplConn {
     internal Func<error> closeFunc;
 }
 
+} partial class tls_internal_testᴛchangeImplConn {
+
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *changeImplConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr LocalAddr(this changeImplConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr(this changeImplConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.Read()' - provided ONLY by the embedded
 // interface field in *changeImplConn's method set; see the pointer-only satisfaction record.
@@ -1310,7 +1316,7 @@ internal static (nint, error) Read(this changeImplConn recvᴛ, slice<byte> b) =
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *changeImplConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr RemoteAddr(this changeImplConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr(this changeImplConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *changeImplConn's method set; see the pointer-only satisfaction record.
@@ -1337,6 +1343,8 @@ internal static error Close(this ref changeImplConn w) {
     }
     return w.Conn.Close();
 }
+
+} partial class tls_internal_test_package {
 
 internal static partial void throughput(ж<testing.B> Ꮡb, uint16 version, int64 totalBytes, bool dynamicRecordSizingDisabled) {
     GoFrame ᒐ = default;
@@ -1428,13 +1436,15 @@ internal partial struct slowConn {
     internal nint bps;
 }
 
+} partial class tls_internal_testᴛslowConn {
+
 // Go method set entry for the promoted 'Conn.Close()' - provided ONLY by the embedded
 // interface field in *slowConn's method set; see the pointer-only satisfaction record.
 internal static error Close(this slowConn recvᴛ) => recvᴛ.Conn.Close();
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *slowConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr LocalAddr(this slowConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+internal static net.Addr LocalAddr(this slowConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.Read()' - provided ONLY by the embedded
 // interface field in *slowConn's method set; see the pointer-only satisfaction record.
@@ -1442,7 +1452,7 @@ internal static (nint, error) Read(this slowConn recvᴛ, slice<byte> b) => recv
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *slowConn's method set; see the pointer-only satisfaction record.
-internal static netꓸAddr RemoteAddr(this slowConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+internal static net.Addr RemoteAddr(this slowConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *slowConn's method set; see the pointer-only satisfaction record.
@@ -1460,11 +1470,11 @@ internal static (nint, error) Write(this ref slowConn c, slice<byte> p) {
     if (c.bps == 0) {
         throw panic("too slow");
     }
-    var t0 = time_package.Now();
+    var t0 = time.Now();
     nint wrote = 0;
     while (wrote < len(p)) {
-        time_package.Sleep(100 * time_package.Microsecond);
-        nint allowed = (nint)(time_package.Since(t0).Seconds() * (float64)c.bps) / 8;
+        time.Sleep(100 * time.Microsecond);
+        nint allowed = (nint)(time.Since(t0).Seconds() * (float64)c.bps) / 8;
         if (allowed > len(p)) {
             allowed = len(p);
         }
@@ -1478,6 +1488,8 @@ internal static (nint, error) Write(this ref slowConn c, slice<byte> p) {
     }
     return (len(p), default);
 }
+
+} partial class tls_internal_test_package {
 
 internal static partial void latency(ж<testing.B> Ꮡb, uint16 version, nint bps, bool dynamicRecordSizingDisabled) {
     GoFrame ᒐ = default;
@@ -1558,7 +1570,7 @@ public static void BenchmarkLatency(ж<testing.B> b) {
 }
 
 public static void TestConnectionStateMarshal(ж<testing.T> t) {
-    var cs = Ꮡ(new ΔConnectionState());
+    var cs = Ꮡ(new ConnectionState());
     var (_, err) = json.Marshal(cs.OrTypedNil());
     if (err != nil) {
         t.Errorf("json.Marshal failed on ConnectionState: %v", err);
@@ -1594,7 +1606,7 @@ public static void TestConnectionState(ж<testing.T> t) {
 
     var ocspʗ1 = ocsp;
     var sctsʗ1 = scts;
-    void checkConnectionState(ж<testing.T> tΔ1, global::go.crypto.tls_package.ΔConnectionState cs, uint16 version, bool isClient) {
+    void checkConnectionState(ж<testing.T> tΔ1, global::go.crypto.tls_package.ConnectionState cs, uint16 version, bool isClient) {
         if (cs.Version != version) {
             tΔ1.Errorf("got Version %x, expected %x", cs.Version, version);
         }
@@ -1675,7 +1687,7 @@ public static void TestConnectionState(ж<testing.T> t) {
         }
     }
 
-    void compareConnectionStates(ж<testing.T> tΔ2, global::go.crypto.tls_package.ΔConnectionState cs1, global::go.crypto.tls_package.ΔConnectionState cs2) {
+    void compareConnectionStates(ж<testing.T> tΔ2, global::go.crypto.tls_package.ConnectionState cs1, global::go.crypto.tls_package.ConnectionState cs2) {
         if (cs1.Version != cs2.Version) {
             tΔ2.Errorf("Version mismatch: %x != %x", cs1.Version, cs2.Version);
         }
@@ -1758,8 +1770,8 @@ public static void TestConnectionState(ж<testing.T> t) {
             config.Certificates[0].SignedCertificateTimestamps = sctsʗ2;
             config.Certificates[0].OCSPStaple = ocspʗ2;
 
-            ref var ss = ref heap<global::go.crypto.tls_package.ΔConnectionState>(out var Ꮡss);
-            ref var cs = ref heap<global::go.crypto.tls_package.ΔConnectionState>(out var Ꮡcs);
+            ref var ss = ref heap<global::go.crypto.tls_package.ConnectionState>(out var Ꮡss);
+            ref var cs = ref heap<global::go.crypto.tls_package.ConnectionState>(out var Ꮡcs);
             (ss, cs, var errΔ1) = testHandshake(tΔ3, config, config);
             if (errΔ1 != nil) {
                 tΔ3.Fatalf("handshake failed: %v", errΔ1);
@@ -1786,8 +1798,8 @@ public static void TestConnectionState(ж<testing.T> t) {
                 // TODO: test changing parameters between original and resumed
                 // connection when the protocol allows it.
 
-                ref var ss1 = ref heap<global::go.crypto.tls_package.ΔConnectionState>(out var Ꮡss1);
-                ref var cs1 = ref heap<global::go.crypto.tls_package.ΔConnectionState>(out var Ꮡcs1);
+                ref var ss1 = ref heap<global::go.crypto.tls_package.ConnectionState>(out var Ꮡss1);
+                ref var cs1 = ref heap<global::go.crypto.tls_package.ConnectionState>(out var Ꮡcs1);
                 (ss1, cs1, var errΔ2) = testHandshake(tΔ6, configʗ1, configʗ1);
                 if (errΔ2 != nil) {
                     tΔ6.Fatalf("handshake failed: %v", errΔ2);
@@ -2074,7 +2086,7 @@ public static void TestCipherSuites(ж<testing.T> t) {
         return default;
     }
 
-    foreach (var (_, c) in range(ΔcipherSuites)) {
+    foreach (var (_, c) in range(cipherSuites)) {
         var cc = CipherSuiteByID(c.id);
         if (cc == nil) {
             t.Errorf("%#04x: no CipherSuite entry", c.id);
@@ -2126,7 +2138,7 @@ public static void TestCipherSuites(ж<testing.T> t) {
         }
     }
 
-    if (len(cipherSuitesPreferenceOrder) != len(ΔcipherSuites)) {
+    if (len(cipherSuitesPreferenceOrder) != len(cipherSuites)) {
         t.Errorf("cipherSuitesPreferenceOrder is not the same size as cipherSuites");
     }
     if (len(cipherSuitesPreferenceOrderNoAES) != len(cipherSuitesPreferenceOrder)) {
@@ -2275,10 +2287,14 @@ internal partial struct brokenSigner {
     /*embed*/ public crypto_package.Signer Signer;
 }
 
+} partial class tls_internal_testᴛbrokenSigner {
+
 internal static (slice<byte> signature, error err) Sign(this brokenSigner s, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
     // Replace opts with opts.HashFunc(), so rsa.PSSOptions are discarded.
     return s.Signer.Sign(rand, digest, opts.HashFunc());
 }
+
+} partial class tls_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedBrokenˢ = (@string)"expected broken certificate to cause connection to fail"u8;
@@ -2412,7 +2428,7 @@ internal static void testVerifyCertificates(ж<testing.T> t, uint16 version) {
             var serverConfig = clientConfig.Clone();
             serverConfig.ClientCAs = rootCAsʗ1;
 
-            clientConfig.VerifyConnection = error (global::go.crypto.tls_package.ΔConnectionState csΔ1) => {
+            clientConfig.VerifyConnection = error (global::go.crypto.tls_package.ConnectionState csΔ1) => {
                 clientVerifyConnection = true;
                 return default;
             };
@@ -2420,7 +2436,7 @@ internal static void testVerifyCertificates(ж<testing.T> t, uint16 version) {
                 clientVerifyPeerCertificates = true;
                 return default;
             };
-            serverConfig.VerifyConnection = error (global::go.crypto.tls_package.ΔConnectionState csΔ2) => {
+            serverConfig.VerifyConnection = error (global::go.crypto.tls_package.ConnectionState csΔ2) => {
                 serverVerifyConnection = true;
                 return default;
             };
@@ -2700,7 +2716,7 @@ internal static ref readonly @string godebugUnsetˢ => ref godebugUnsetˢᵇ;
 private static readonly @string godebugUnsetˢᵇ = "GODEBUG unset"u8;
 
 public static void TestX509KeyPairPopulateCertificate(ж<testing.T> t) {
-    var (key, err) = ecdsa.GenerateKey(elliptic.P256(), go.crypto.rand_package.Reader);
+    var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -2713,7 +2729,7 @@ public static void TestX509KeyPairPopulateCertificate(ж<testing.T> t) {
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(CommonName: "test")
     ));
-    (var certDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, key.Public(), key.OrTypedNil());
+    (var certDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, key.Public(), key.OrTypedNil());
     if (err != nil) {
         t.Fatal(err);
     }
@@ -2783,7 +2799,7 @@ public static partial void TestEarlyLargeCertMsg(ж<testing.T> t) {
 }
 
 public static void TestLargeCertMsg(ж<testing.T> t) {
-    var (k, err) = ecdsa.GenerateKey(elliptic.P256(), go.crypto.rand_package.Reader);
+    var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -2799,7 +2815,7 @@ public static void TestLargeCertMsg(ж<testing.T> t) {
             )
         ])
     ));
-    (var cert, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
+    (var cert, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
     if (err != nil) {
         t.Fatal(err);
     }
@@ -2831,17 +2847,17 @@ internal static ref readonly @string randomExampleˢ => ref randomExampleˢᵇ;
 private static readonly @string randomExampleˢᵇ = "random.example"u8;
 
 public static void TestECH(ж<testing.T> t) {
-    var (k, err) = ecdsa.GenerateKey(elliptic.P256(), go.crypto.rand_package.Reader);
+    var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != nil) {
         t.Fatal(err);
     }
     var tmpl = Ꮡ(new Δx509.Certificate(
         SerialNumber: big.NewInt(1),
         DNSNames: ["public.example"],
-        NotBefore: time_package.Now().Add(-time_package.ΔHour),
-        NotAfter: time_package.Now().Add(time_package.ΔHour)
+        NotBefore: time.Now().Add(-time.Hour),
+        NotAfter: time.Now().Add(time.Hour)
     ));
-    (var publicCertDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
+    (var publicCertDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
     if (err != nil) {
         t.Fatal(err);
     }
@@ -2850,7 +2866,7 @@ public static void TestECH(ж<testing.T> t) {
         t.Fatal(err);
     }
     tmpl.DNSNames[0] = secretExampleˢ;
-    (var secretCertDER, err) = Δx509.CreateCertificate(go.crypto.rand_package.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
+    (var secretCertDER, err) = Δx509.CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
     if (err != nil) {
         t.Fatal(err);
     }
@@ -2884,7 +2900,7 @@ public static void TestECH(ж<testing.T> t) {
         return builderΔ1.BytesOrPanic();
     }
 
-    (var echKey, err) = ecdh.X25519().GenerateKey(go.crypto.rand_package.Reader);
+    (var echKey, err) = ecdh.X25519().GenerateKey(rand.Reader);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -2900,7 +2916,7 @@ public static void TestECH(ж<testing.T> t) {
 
     var (clientConfig, serverConfig) = (testConfig.Clone(), testConfig.Clone());
     clientConfig.InsecureSkipVerify = false;
-    clientConfig.Rand = go.crypto.rand_package.Reader;
+    clientConfig.Rand = rand.Reader;
     clientConfig.Time = default;
     clientConfig.MinVersion = VersionTLS13;
     clientConfig.ServerName = secretExampleˢ;
@@ -2910,7 +2926,7 @@ public static void TestECH(ж<testing.T> t) {
     clientConfig.EncryptedClientHelloConfigList = echConfigList;
     clientConfig.ClientSessionCache = NewLRUClientSessionCache(2);
     serverConfig.InsecureSkipVerify = false;
-    serverConfig.Rand = go.crypto.rand_package.Reader;
+    serverConfig.Rand = rand.Reader;
     serverConfig.Time = default;
     serverConfig.MinVersion = VersionTLS13;
     serverConfig.ServerName = publicExampleˢ;
@@ -2955,7 +2971,7 @@ public static void TestECH(ж<testing.T> t) {
     var echConfigʗ2 = echConfig;
     var echKeyʗ1 = echKey;
     serverConfig.GetEncryptedClientHelloKeys = (slice<global::go.crypto.tls_package.EncryptedClientHelloKey>, error) (ж<global::go.crypto.tls_package.ClientHelloInfo> _) => (slice<global::go.crypto.tls_package.EncryptedClientHelloKey>([new(Config: echConfigʗ2, PrivateKey: echKeyʗ1.Bytes(), SendAsRetry: true)]), default);
-    (var randKey, err) = ecdh.X25519().GenerateKey(go.crypto.rand_package.Reader);
+    (var randKey, err) = ecdh.X25519().GenerateKey(rand.Reader);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -3038,6 +3054,8 @@ internal partial struct messageOnlySigner {
     /*embed*/ public crypto_package.Signer Signer;
 }
 
+} partial class tls_internal_testᴛmessageOnlySigner {
+
 internal static cryptoꓸPublicKey Public(this messageOnlySigner s) {
     return s.Signer.Public();
 }
@@ -3057,4 +3075,4 @@ internal static (slice<byte> signature, error err) SignMessage(this messageOnlyS
     return s.Signer.Sign(rand, digest, opts);
 }
 
-} // end tls_internal_test_package
+} // end tls_internal_testᴛmessageOnlySigner

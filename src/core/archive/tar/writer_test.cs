@@ -28,6 +28,7 @@ using encoding;
 using go.io;
 using go.testing;
 using static go.archive.tar_package;
+using static tar_internal_test_package;
 
 partial class tar_internal_test_package {
 
@@ -916,6 +917,8 @@ public static void TestValidTypeflagWithPAXHeader(ж<testing.T> t) {
 // failOnceWriter fails exactly once and then always reports success.
 internal partial struct failOnceWriter /*bool*/;
 
+} partial class tar_internal_testᴛfailOnceWriter {
+
 internal static (nint, error) Write(this ref failOnceWriter w, slice<byte> b) {
     if (((failOnceWriter)(!(bool)w))) {
         return (0, io.ErrShortWrite);
@@ -923,6 +926,8 @@ internal static (nint, error) Write(this ref failOnceWriter w, slice<byte> b) {
     w = true;
     return (len(b), default);
 }
+
+} partial class tar_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string headerOnlyˢ => ref headerOnlyˢᵇ;
@@ -1183,6 +1188,8 @@ internal partial struct testNonEmptyWriter {
     /*embed*/ public io_package.Writer Writer;
 }
 
+} partial class tar_internal_testᴛtestNonEmptyWriter {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unexpectedEmptyWriteCallˢ => ref unexpectedEmptyWriteCallˢᵇ;
 private static readonly @string unexpectedEmptyWriteCallˢᵇ = "unexpected empty Write call"u8;
@@ -1193,6 +1200,8 @@ internal static (nint, error) Write(this testNonEmptyWriter w, slice<byte> b) {
     }
     return w.Writer.Write(b);
 }
+
+} partial class tar_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object cdeXˢ = (@string)"cdeX"u8;

@@ -154,7 +154,7 @@ v, ok := m[nil]
 delete(m, nil)
 lit := map[any]int{nil: 1, "b": 2}
 ```
-<!-- source: src/tests/Behavioral/NilMapKey/main.cs:14-16, 23, 42, 55 -->
+<!-- source: src/tests/Behavioral/NilMapKey/main.cs:19-21, 28, 47, 60 -->
 ```csharp
 var m = new map<any, @string>();
 
@@ -383,9 +383,11 @@ func (cw closeWaiter) Close() { close(cw) }
 func (cw closeWaiter) Wait()  { <-cw }
 ```
 
-<!-- source: src/tests/Behavioral/NamedChannelType/main.cs.target:7-19 -->
+<!-- source: src/tests/Behavioral/NamedChannelType/main.cs.target:8-22 -->
 ```csharp
 partial struct closeWaiter /*chan EmptyStruct*/;
+
+} partial class mainᴛcloseWaiter {
 
 internal static void Init(this ref closeWaiter cw) {
     cw = new closeWaiter(0);
@@ -421,7 +423,7 @@ A generic defined map or channel type declares its type parameters, and their co
 forward declaration AND on the accessibility line, exactly as a generic defined array or slice
 already did. `type Set[T comparable] map[T]void` (the hashset module's exported shape) emits:
 
-<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11, 47-49 -->
+<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:12, 50-52 -->
 ```csharp
 partial struct Set<T> /*map[T, @void]*/;
 …
@@ -550,7 +552,7 @@ has no dot), yielding `public io_package.ReaderFrom ReaderFrom;`. io's own test 
 (`io_test.go`'s `import . "io"`), and its converted test file carries both the field and the
 `using Δio = io_package;` alias.
 <!-- history: this paragraph said the io test suite remained blocked by import . "io" using-alias resolution issues (the
-Δio namespace emitted but never aliased); at 3e3f18925a src/core/io/io_test.cs:19 `using Δio = io_package;` and :26
+Δio namespace emitted but never aliased); at 3e3f18925a src/core/io/io_test.cs:19 `using Δio = io_package;` and :27
 `/*embed*/ public io_package.ReaderFrom ReaderFrom;`, and io is a validated row. -->
 
 ## Select statement lowering (terminating and empty clauses)
@@ -615,10 +617,10 @@ default:   // send but do not block for it
 }
 ```
 
-<!-- source: src/core/os/signal/signal.cs:268-275 -->
+<!-- source: src/core/os/signal/signal.cs:274-281 -->
 ```csharp
-var selᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
-switch (trySelect(selᴛ1)) {
+var cᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
+switch (trySelect(cᴛ1)) {
 case 0: {
     break;
 }
@@ -707,14 +709,14 @@ case took = <-ch:
 
 <!-- source: src/tests/Behavioral/SelectSendRecvMix/main.cs:33-42 -->
 ```csharp
-var selᴛ3 = ch.ᐸꟷ(8, ꓸꓸꓸ);
-var selᴛ4 = ch;
-switch (select(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+var chᴛ1 = ch.ᐸꟷ(8, ꓸꓸꓸ);
+var chᴛ2 = ch;
+switch (select(chᴛ1, ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
 case 0: {
     fmt.Println("send fired on full channel (wrong)");
     break;
 }
-case 1 when selᴛ4.ꟷᐳ(out took): {
+case 1 when chᴛ2.ꟷᐳ(out took): {
     break;
 }}
 ```
@@ -861,7 +863,7 @@ local's form). A plain `out var result` in the comm-clause label would leave `�
 (`visitSelectStmt.go`) receives into a uniquely-numbered temp and opens the clause body with the
 entry-time box pattern proven by the escaping-parameter preamble:
 
-<!-- source: src/core/internal/fuzz/fuzz.cs:265-266 -->
+<!-- source: src/core/internal/fuzz/fuzz.cs:267-268 -->
 ```csharp
 case 2 when selᴛ3.ꟷᐳ(out var resultᴛ1): {
     ref var result = ref heap(resultᴛ1, out var Ꮡresult);

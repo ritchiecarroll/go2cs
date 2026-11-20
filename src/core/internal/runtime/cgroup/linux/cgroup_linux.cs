@@ -5,6 +5,7 @@ namespace go.@internal.runtime;
 
 using linux = go.@internal.runtime.syscall.linux_package;
 using go.@internal.runtime.syscall;
+using static cgroup_package;
 
 partial class cgroup_package {
 
@@ -27,6 +28,12 @@ partial struct CPU {
     internal nint periodFD;
 }
 
+} partial class cgroupᴛCPU {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string impossibleCgroupVersionˢ => ref impossibleCgroupVersionˢᵇ;
+private static readonly @string impossibleCgroupVersionˢᵇ = "impossible cgroup version"u8;
+
 public static void Close(this CPU c) {
     switch (c.version) {
     case var ᴛ when ᴛ == V1: {
@@ -43,6 +50,8 @@ public static void Close(this CPU c) {
         break;
     }}
 }
+
+} partial class cgroup_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeCgroupInvalidˢ => ref runtimeCgroupInvalidˢᵇ;

@@ -7,6 +7,7 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -92,6 +93,8 @@ partial struct timeHistogram {
     internal atomic.Uint64 overflow;
 }
 
+} partial class runtimeᴛtimeHistogram {
+
 // record adds the given duration to the distribution.
 //
 // Disallow preemptions and stack growths because this function
@@ -148,6 +151,8 @@ internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) 
     }
     hist.counts[len(hist.counts) - 1] = Ꮡh.Ꮡoverflow.Load();
 }
+
+} partial class runtime_package {
 
 internal static UntypedInt fInf => 0x7FF0000000000000;
 internal static UntypedInt fNegInf => 0xFFF0000000000000;

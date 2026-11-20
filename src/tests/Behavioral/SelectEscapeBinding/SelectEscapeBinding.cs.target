@@ -15,9 +15,9 @@ internal static void selectEscape() {
 
     ж<boxedResult> saved = default;
 
-    var selᴛ1 = ch;
-    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out var resᴛ1): {
+    var chᴛ1 = ch;
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out var resᴛ1): {
         ref var res = ref heap(resᴛ1, out var Ꮡres);
         saved = Ꮡres;
         saved.value = 42;
@@ -36,9 +36,9 @@ internal static void selectEscapeCommaOk() {
     ж<boxedResult> whole = default;
     ж<nint> field = default;
 
-    var selᴛ2 = ch;
-    switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ2.ꟷᐳ(out var resᴛ2, out var ok): {
+    var chᴛ1 = ch;
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out var resᴛ2, out var ok): {
         ref var res = ref heap(resᴛ2, out var Ꮡres);
         whole = Ꮡres;
         field = Ꮡres.Ꮡvalue;
@@ -57,17 +57,17 @@ internal static void selectEscapeMixed() {
 
     ж<boxedResult> keep = default;
 
-    var selᴛ3 = a;
-    var selᴛ4 = b;
-    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-    case 0 when selᴛ3.ꟷᐳ(out var rᴛ1): {
+    var aᴛ1 = a;
+    var bᴛ1 = b;
+    switch (select(ᐸꟷ(aᴛ1, ꓸꓸꓸ), ᐸꟷ(bᴛ1, ꓸꓸꓸ))) {
+    case 0 when aᴛ1.ꟷᐳ(out var rᴛ1): {
         ref var r = ref heap(rᴛ1, out var Ꮡr);
         keep = Ꮡr;
         keep.tag = "escaped";
         fmt.Println("mixed:", r.tag);
         break;
     }
-    case 1 when selᴛ4.ꟷᐳ(out var n): {
+    case 1 when bᴛ1.ꟷᐳ(out var n): {
         fmt.Println("plain:", n);
         break;
     }}

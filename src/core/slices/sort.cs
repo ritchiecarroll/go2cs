@@ -7,6 +7,7 @@ namespace go;
 using cmp = cmp_package;
 using bits = math.bits_package;
 using math;
+using static slices_package;
 
 partial class slices_package {
 
@@ -204,12 +205,16 @@ internal static sortedHint decreasingHint => 2;
 // xorshift paper: https://www.jstatsoft.org/article/view/v008i14/xorshift.pdf
 partial struct xorshift /*num:uint64*/;
 
+} partial class slicesᴛxorshift {
+
 internal static uint64 Next(this ref xorshift r) {
     r ^= (xorshift)((r << 13));
     r ^= (xorshift)((r >> 7));
     r ^= (xorshift)((r << 17));
     return (uint64)(r);
 }
+
+} partial class slices_package {
 
 internal static nuint nextPowerOfTwo(nint length) {
     return ((nuint)1).Lsh((int64)(bits.Len((nuint)length)));

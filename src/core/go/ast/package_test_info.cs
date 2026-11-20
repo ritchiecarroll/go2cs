@@ -8,9 +8,6 @@ global using static global::go.go.ast_package;
 global using static global::go.go.ast_internal_test_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
 // </ImportedTypeAliases>
 
 using go;
@@ -23,7 +20,6 @@ using static global::go.go.ast_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b6c697374205b5d737472696e673b207465787420737472696e677d", "commentsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b7820616e793b207320737472696e677d", "testsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b7820696e747d", "Δtype")]
-[assembly: GoTypeAlias("Filter", "ΔFilter")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

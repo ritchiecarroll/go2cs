@@ -13,6 +13,7 @@ using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
 using io = io_package;
+using static syslog_package;
 
 partial class syslog_package {
 
@@ -147,6 +148,8 @@ public static (ж<Writer>, error) Dial(@string network, @string raddr, Priority 
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class syslogᴛWriter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string localhostˢ => ref localhostˢᵇ;
@@ -314,6 +317,8 @@ internal static (nint, error) write(this ref Writer w, Priority p, @string msg) 
     return (len(msg), default);
 }
 
+} partial class syslogᴛnetConn {
+
 internal static error writeString(this ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) {
     if (n.local) {
         // Compared to the network form below, the changes are:
@@ -335,6 +340,8 @@ internal static error writeString(this ref netConn n, Priority p, @string hostna
 internal static error close(this ref netConn n) {
     return n.conn.Close();
 }
+
+} partial class syslog_package {
 
 // NewLogger creates a [log.Logger] whose output is written to the
 // system log service with the specified priority, a combination of

@@ -48,7 +48,7 @@ namespace go;
 /// pointer, and <c>unsafe.Pointer(p) == unsafe.Pointer(&amp;x.f)</c> as in Go. It is never nil.
 /// </para>
 /// </remarks>
-internal sealed class ReinterpretedArrayBox<E> : ж<array<E>>, IGoReflectBox, IPointerNumberForwarder
+internal sealed class ReinterpretedArrayBox<E> : ж<array<E>>, IGoReflectBox, IPointerNumberForwarder, INativeArrayStore<E>
 {
     // The field's own pointer, the `x.Ꮡf` the converter passes: every element read goes through its live slot.
     private readonly IReinterpretSource m_field;
@@ -180,6 +180,10 @@ internal sealed class ReinterpretedArrayBox<E> : ж<array<E>>, IGoReflectBox, IP
     object? IGoReflectBox.ReadBoxSlotPublished() => Load();
 
     void IGoReflectBox.WriteBoxSlot(object? value) => Store((array<E>)value!);
+
+    // Go's `*p = v` reached through ArrayExtensions.Assign, which the converter emits for the tuple and range stores
+    // (`*p, n = v, 9`, `for _, *p = range vs`): the same store, since Value has no array<E> to assign into.
+    void INativeArrayStore<E>.StoreElements(in array<E> source) => Store(source);
 
     // The view's number is the field's (see IPointerNumberForwarder): the transient address of the field's slot for
     // unsafe.Pointer's carried mint, and the field's own conversion for a syscall argument word.

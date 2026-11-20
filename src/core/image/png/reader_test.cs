@@ -142,10 +142,10 @@ internal static ref readonly @string unknownPngDecoderColorˢ => ref unknownPngD
 private static readonly @string unknownPngDecoderColorˢᵇ = "unknown PNG decoder color model\n"u8;
 internal static ref readonly @string gAMA10000ˢ => ref gAMA10000ˢᵇ;
 private static readonly @string gAMA10000ˢᵇ = "gAMA {1.0000}\n"u8;
-internal static ref readonly @string plteˢ2 => ref plteˢ2ᵇ;
-private static readonly @string plteˢ2ᵇ = "PLTE {\n"u8;
-internal static ref readonly @string tRNSˢ2 => ref tRNSˢ2ᵇ;
-private static readonly @string tRNSˢ2ᵇ = "tRNS {\n"u8;
+internal static ref readonly @string plteˢ => ref plteˢᵇ;
+private static readonly @string plteˢᵇ = "PLTE {\n"u8;
+internal static ref readonly @string tRNSˢ => ref tRNSˢᵇ;
+private static readonly @string tRNSˢᵇ = "tRNS {\n"u8;
 internal static ref readonly @string imagePixelsHexˢ => ref imagePixelsHexˢᵇ;
 private static readonly @string imagePixelsHexˢᵇ = "IMAGE {\n    pixels hex\n"u8;
 
@@ -236,14 +236,14 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
         var useTransparent = false;
         if (cpm != nil) {
             nint lastAlpha = -1;
-            io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), plteˢ2);
+            io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), plteˢ);
             foreach (var (i, c) in range<color.Color>(cpm)) {
                 uint8 r = default;
                 uint8 g = default;
                 uint8 b = default;
                 uint8 a = default;
                 switch (c.type()) {
-                case colorꓸRGBA cΔ1: {
+                case color.RGBA cΔ1: {
                     (r, g, b, a) = (cΔ1.R, cΔ1.G, cΔ1.B, 0xff);
                     break;
                 }
@@ -266,7 +266,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), s);
             }
             if (lastAlpha != -1) {
-                io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
+                io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ);
                 for (nint i = 0; i <= lastAlpha; i++) {
                     var (_, _, _, a) = cpm[i].RGBA();
                     a >>= 8;
@@ -284,10 +284,9 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
             case color.NRGBA c: {
                 if (c.A == 0) {
                     useTransparent = true;
-                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
-                    var exprᴛ2 = filename;
+                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ);
                     switch (ᐧ) {
-                    case {} when exprᴛ2 == "ftbbn0g01"u8 || exprᴛ2 == "ftbbn0g02"u8 || exprᴛ2 == "ftbbn0g04"u8: {
+                    case {} when filename == "ftbbn0g01"u8 || filename == "ftbbn0g02"u8 || filename == "ftbbn0g04"u8: {
                         // The standard image package doesn't have a "gray with
                         // alpha" type. Instead, we use an image.NRGBA.
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    gray: %d;\n"u8, c.R);
@@ -304,10 +303,9 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
             case color.NRGBA64 c: {
                 if (c.A == 0) {
                     useTransparent = true;
-                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
-                    var exprᴛ3 = filename;
+                    io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ);
                     switch (ᐧ) {
-                    case {} when exprᴛ3 == "ftbwn0g16"u8: {
+                    case {} when filename == "ftbwn0g16"u8: {
                         // The standard image package doesn't have a "gray16 with
                         // alpha" type. Instead, we use an image.NRGBA64.
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    gray: %d;\n"u8, c.R);
@@ -343,7 +341,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
             }
             case {} when AreEqual(cm, color.RGBAModel): {
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
-                    var rgba = png.At(x, y)._<colorꓸRGBA>();
+                    var rgba = png.At(x, y)._<color.RGBA>();
                     fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x%02x%02x "u8, rgba.R, rgba.G, rgba.B);
                 }
                 break;
@@ -358,9 +356,8 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
             case {} when AreEqual(cm, color.NRGBAModel): {
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
                     var nrgba = png.At(x, y)._<color.NRGBA>();
-                    var exprᴛ4 = filename;
                     switch (ᐧ) {
-                    case {} when exprᴛ4 == "ftbbn0g01"u8 || exprᴛ4 == "ftbbn0g02"u8 || exprᴛ4 == "ftbbn0g04"u8: {
+                    case {} when filename == "ftbbn0g01"u8 || filename == "ftbbn0g02"u8 || filename == "ftbbn0g04"u8: {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x"u8, nrgba.R);
                         break;
                     }
@@ -378,9 +375,8 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
             case {} when AreEqual(cm, color.NRGBA64Model): {
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
                     var nrgba64 = png.At(x, y)._<color.NRGBA64>();
-                    var exprᴛ5 = filename;
                     switch (ᐧ) {
-                    case {} when exprᴛ5 == "ftbwn0g16"u8: {
+                    case {} when filename == "ftbwn0g16"u8: {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%04x "u8, nrgba64.R);
                         break;
                     }
@@ -725,7 +721,7 @@ public static void TestMultipletRNSChunks(ж<testing.T> t) {
                 t.Errorf("%d tRNS chunks: %v", i, err);
                 continue;
             }
-            want = new colorꓸRGBA(0xff, 0x00, 0x00, 0xff);
+            want = new color.RGBA(0xff, 0x00, 0x00, 0xff);
             break;
         }
         case 1: {
@@ -774,7 +770,7 @@ public static void TestPaletted8OutOfRangePixel(ж<testing.T> t) {
     }
 
     // Expect that the palette is extended with opaque black.
-    var want = new colorꓸRGBA(0x00, 0x00, 0x00, 0xff);
+    var want = new color.RGBA(0x00, 0x00, 0x00, 0xff);
     var got = img.At(15, 15); if (!AreEqual(got, want)) {
         t.Errorf("got %F %v, expected %T %v", got, got, want, want);
     }

@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.vendor.golang.org.x.text.unicode;
 
+using static norm_package;
+
 partial class norm_package {
 
 partial struct valueRange {
@@ -30,6 +32,8 @@ internal static ref sparseBlocks nfkcSparse => ref ((StaticBox<sparseBlocks>)Ꮡ
 internal static ж<nfcTrie> nfcData = newNfcTrie(0);
 internal static ж<nfkcTrie> nfkcData = newNfkcTrie(0);
 
+} partial class normᴛsparseBlocks {
+
 // lookup determines the type of block n and looks up the value for b.
 // For n < t.cutoff, the block is a simple lookup table. Otherwise, the block
 // is a list of ranges with an accompanying value. Given a matching range r,
@@ -54,4 +58,4 @@ internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
     return 0;
 }
 
-} // end norm_package
+} // end normᴛsparseBlocks

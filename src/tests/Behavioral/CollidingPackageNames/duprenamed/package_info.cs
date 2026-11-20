@@ -27,7 +27,6 @@ using static go.collidea.dup_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Marker", "ΔMarker")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -50,7 +49,7 @@ using static go.collidea.dup_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAcW3gAFFg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAsW/gAHFg==")]
 // </GoSourcePositionMaps>
 
 namespace go.collidea;
@@ -66,8 +65,8 @@ public static partial class dup_package
 
     // <TypeAccessibility>
     public partial struct Box<T> {}
+    public partial struct Marker {}
     public partial struct Widget {}
-    public partial struct ΔMarker {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -79,3 +78,14 @@ public static partial class dup_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(dup_package.Box<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dupᴛBox;
+[GoMethodHost(typeof(dup_package.Widget)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dupᴛWidget;
+// </MethodHolders>

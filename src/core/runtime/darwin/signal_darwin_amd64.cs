@@ -4,6 +4,7 @@
 namespace go;
 
 using @unsafe = unsafe_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -11,6 +12,8 @@ partial struct sigctxt {
     internal ж<siginfo> info;
     internal @unsafe.Pointer ctxt;
 }
+
+} partial class runtimeᴛsigctxt {
 
 //go:nosplit
 //go:nowritebarrierrec
@@ -98,4 +101,4 @@ internal static void fixsigcode(this ref sigctxt c, uint32 sig) {
     }}
 }
 
-} // end runtime_package
+} // end runtimeᴛsigctxt

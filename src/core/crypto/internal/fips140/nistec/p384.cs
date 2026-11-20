@@ -10,6 +10,7 @@ using errors = errors_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
+using static nistec_package;
 
 partial class nistec_package {
 
@@ -32,6 +33,8 @@ public static ж<P384Point> NewP384Point() {
         z: @new<fiat.P384Element>()
     ));
 }
+
+} partial class nistecᴛP384Point {
 
 // SetGenerator sets p to the canonical generator and returns p.
 public static ж<P384Point> SetGenerator(this ж<P384Point> Ꮡp) {
@@ -120,6 +123,8 @@ public static (ж<P384Point>, error) SetBytes(this ж<P384Point> Ꮡp, slice<byt
     }}
 }
 
+} partial class nistec_package {
+
 internal static ж<fiat.P384Element> _p384B;
 internal static readonly ж<sync.Once> Ꮡ_p384BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p384BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p384BOnce).ValueSlot;
@@ -156,6 +161,8 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> x, ж<fiat.P384Eleme
     }
     return default;
 }
+
+} partial class nistecᴛP384Point {
 
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
@@ -359,10 +366,14 @@ public static ж<P384Point> Select(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1,
     return Ꮡq;
 }
 
+} partial class nistec_package {
+
 // A p384Table holds the first 15 multiples of a point at offset -1, so [1]P
 // is at table[0], [15]P is at table[14], and [0]P is implicitly the identity
 // point.
 partial struct p384Table /*[15]ж<P384Point>*/;
+
+} partial class nistecᴛp384Table {
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
@@ -376,6 +387,8 @@ internal static void Select(this ref p384Table table, ж<P384Point> p, uint8 n) 
         p.Select(table.Value[(uint8)(i - 1)], p, cond);
     }
 }
+
+} partial class nistecᴛP384Point {
 
 // ScalarMult sets p = scalar * q, and returns p.
 public static (ж<P384Point>, error) ScalarMult(this ж<P384Point> Ꮡp, ж<P384Point> q, slice<byte> scalar) {
@@ -422,9 +435,13 @@ public static (ж<P384Point>, error) ScalarMult(this ж<P384Point> Ꮡp, ж<P384
     return (Ꮡp, default);
 }
 
+} partial class nistec_package {
+
 internal static ж<array<p384Table>> p384GeneratorTable;
 internal static readonly ж<sync.Once> Ꮡp384GeneratorTableOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once p384GeneratorTableOnce => ref ((StaticBox<sync.Once>)Ꮡp384GeneratorTableOnce).ValueSlot;
+
+} partial class nistecᴛP384Point {
 
 // generatorTable returns a sequence of p384Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
@@ -446,6 +463,10 @@ internal static ж<array<p384Table>> generatorTable(this ref P384Point p) {
     });
     return p384GeneratorTable;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string invalidScalarLengthˢ => ref invalidScalarLengthˢᵇ;
+private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar length"u8;
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
@@ -480,6 +501,8 @@ public static (ж<P384Point>, error) ScalarBaseMult(this ж<P384Point> Ꮡp, sli
 
     return (Ꮡp, default);
 }
+
+} partial class nistec_package {
 
 // p384Sqrt sets e to a square root of x. If x is not a square, p384Sqrt returns
 // false and e is unchanged. e and x can overlap.

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,9 +9,13 @@ partial struct label {
     internal @string name;
 }
 
+} partial class mainᴛlabel {
+
 internal static @string String(this label l) {
     return l.name;
 }
+
+} partial class main_package {
 
 internal static (fmt.Stringer, nint) swap(fmt.Stringer s) {
     return (new label(name: "swapped:"u8 + s.String()), 1);

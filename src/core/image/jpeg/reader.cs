@@ -13,18 +13,27 @@ using imageutil = go.image.@internal.imageutil_package;
 using io = io_package;
 using go.image;
 using go.image.@internal;
+using static jpeg_package;
 
 partial class jpeg_package {
 
 // A FormatError reports that the input is not a valid JPEG.
 partial struct FormatError /*@string*/;
 
+} partial class jpegᴛFormatError {
+
 public static @string Error(this FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
+
+} partial class jpeg_package {
 
 // An UnsupportedError reports that the input uses a valid but unimplemented JPEG feature.
 partial struct UnsupportedError /*@string*/;
 
+} partial class jpegᴛUnsupportedError {
+
 public static @string Error(this UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
+
+} partial class jpeg_package {
 
 internal static UnsupportedError errUnsupportedSubsamplingRatio = ((UnsupportedError)(@string)"luma/chroma subsampling ratio");
 
@@ -141,6 +150,8 @@ partial struct decoder {
     internal array<byte> tmp = new(2 * blockSize);
 }
 
+} partial class jpegᴛdecoder {
+
 // fill fills up the d.bytes.buf buffer from the underlying io.Reader. It
 // should only be called when there are no unread bytes in d.bytes.
 internal static error fill(this ref decoder d) {
@@ -198,9 +209,13 @@ internal static (byte x, error err) readByte(this ref decoder d) {
     return (x, default);
 }
 
+} partial class jpeg_package {
+
 // errMissingFF00 means that readByteStuffedByte encountered an 0xff byte (a
 // marker byte) that wasn't the expected byte-stuffed sequence 0xff, 0x00.
 internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xff00 sequence");
+
+} partial class jpegᴛdecoder {
 
 // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
 internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
@@ -744,14 +759,18 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
     return (default, ((FormatError)(@string)missingSosMarkerˢ));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownColorModel4ˢ => ref unknownColorModel4ˢᵇ;
-private static readonly @string unknownColorModel4ˢᵇ = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
+} partial class jpeg_package {
 
 internal partial struct applyBlack_translations /*dyn*/ {
     internal slice<byte> src;
     internal nint stride;
 }
+
+} partial class jpegᴛdecoder {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string unknownColorModel4ˢ => ref unknownColorModel4ˢᵇ;
+private static readonly @string unknownColorModel4ˢᵇ = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
 
 // applyBlack combines d.img3 and d.blackPix into a CMYK image. The formula
 // used depends on whether the JPEG image is stored as CMYK or YCbCrK,
@@ -849,8 +868,10 @@ internal static (image.Image, error) convertToRGB(this ref decoder d) {
             img.Pix[po + 4 * i + 3] = 255;
         }
     }
-    return (new image.ΔRGBAжImage(img), default);
+    return (new image.RGBAжImage(img), default);
 }
+
+} partial class jpeg_package {
 
 // Decode reads a JPEG image from r and returns it as an [image.Image].
 public static (image.Image, error) Decode(io.Reader r) {
