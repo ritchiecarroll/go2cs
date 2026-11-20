@@ -25,8 +25,8 @@ import (
 //
 // Wall E narrows two of them. A forward to a NON-builtin callee hands Go's pack header on, so the callee may
 // keep it and write it: it is admitted only as the pack's sole use outside any loop, and then binds the pack
-// itself (packForwardOnly). And an element WRITE refuses the view for an element type C# may place in
-// read-only static data (a primitive or a type parameter), since an all-constant argument list is built there.
+// itself (packForwardOnly). And any element WRITE refuses the view, whatever the element type: a literal
+// pack's storage is the compiler's choice (read-only static data for an all-constant primitive list).
 func TestVariadicPackViewAdmitsOnlyNonRetainingUses(t *testing.T) {
 	const source = `package pack
 
@@ -53,13 +53,17 @@ func forwarded(xs ...int)             { sink(xs...) }
 func appendedFrom(d []int, xs ...int) []int { return append(d, xs...) }
 func copySource(d []int, xs ...int) int     { return copy(d, xs) }
 func appendedFromRead(d []int, xs ...int) int { d = append(d, xs...); return xs[0] + len(d) }
-func writtenString(xs ...string)      { xs[0] = "a" }
 
 // refused (wall E)
 func forwardedTwice(xs ...int)        { sink(xs...); sink(1, 2) ; sink(xs...) }
 func forwardedThenRead(xs ...int) int { sink(xs...); return xs[0] }
 func forwardedInLoop(xs ...int)       { for i := 0; i < 2; i++ { sink(xs...) } }
 func writtenPrimitive(xs ...int)      { xs[0] = 1 }
+func writtenString(xs ...string)      { xs[0] = "a" }
+func writtenInterface(xs ...any)      { xs[0] = nil }
+func writtenParenthesised(xs ...any)  { (xs[0]) = 1 }
+func writtenByRange(ys []int, xs ...int) { for _, xs[0] = range ys {} }
+func writtenOpAssign(xs ...string)    { xs[0] += "a" }
 func incremented(xs ...int)           { xs[0]++ }
 func writtenTypeParam[T any](xs ...T) { var z T; xs[0] = z }
 
@@ -141,9 +145,10 @@ func addressTaken(xs ...int) *int    { return &xs[0] }
 	want := map[string]bool{
 		"sink":    true,
 		"lenOnly": true, "indexed": true, "ranged": true,
-		"forwarded": true, "appendedFrom": true, "copySource": true, "appendedFromRead": true, "writtenString": true,
+		"forwarded": true, "appendedFrom": true, "copySource": true, "appendedFromRead": true,
 		"forwardedTwice": false, "forwardedThenRead": false, "forwardedInLoop": false,
-		"writtenPrimitive": false, "incremented": false, "writtenTypeParam": false,
+		"writtenPrimitive": false, "incremented": false, "writtenTypeParam": false, "writtenString": false,
+		"writtenInterface": false, "writtenParenthesised": false, "writtenByRange": false, "writtenOpAssign": false,
 		"appendedInto": false, "copyDestination": false, "deferredForward": false, "goForward": false,
 		"captured": false, "returned": false, "stored": false, "assignedGlobal": false,
 		"passedAsSlice": false, "resliced": false, "addressTaken": false,

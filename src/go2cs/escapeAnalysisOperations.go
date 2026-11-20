@@ -351,7 +351,8 @@ func (v *Visitor) markVariadicSSliceEligible(params *ast.FieldList, body *ast.Bl
 }
 
 // ssliceUsesAreSafe reports whether every occurrence of obj is a non-escaping operation supported
-// directly by sslice<T>: len/cap, the base of an element index, or the expression ranged over.
+// directly by sslice<T>: len/cap, the base of an element READ, or the expression ranged over. An element
+// write refuses the view (ssliceElementIsWritten).
 // A use inside a nested function literal rejects the candidate because it would capture a ref struct.
 // Taking an indexed element's address is also rejected: the converter's element-address helpers are
 // heap-slice based, and the resulting pointer may outlive the stack view.
@@ -438,7 +439,7 @@ func (v *Visitor) ssliceUsesAreSafe(obj types.Object, body *ast.BlockStmt) (safe
 						}
 					}
 
-					if !addressTaken && !ssliceElementWriteNeedsCopy(obj, e, stack) {
+					if !addressTaken && !ssliceElementIsWritten(e, stack) {
 						safeIdents[id] = true
 					}
 				}
@@ -504,47 +505,46 @@ func ssliceStackHasLoop(stack []ast.Node) bool {
 	return false
 }
 
-// ssliceElementWriteNeedsCopy reports whether index is a WRITE of one element of the pack obj (an
-// assignment target or an ++/-- operand) whose element type C# may store in read-only static data.
-// A call whose arguments are all constants of a primitive type hands golib's variadic<T> builder a
-// span over the module's read-only data, so the stack view of such a pack is read-only; a write
-// through it is an access violation. The heap prologue copies a literal pack and is safe to write.
-// A type parameter may be instantiated with a primitive type, so it counts as one.
-func ssliceElementWriteNeedsCopy(obj types.Object, index *ast.IndexExpr, stack []ast.Node) bool {
-	if len(stack) == 0 {
+// ssliceElementIsWritten reports whether index is a WRITE of one element of the pack: an assignment
+// target, an ++/-- operand or a range clause's key or value, each possibly parenthesised. Any such
+// write refuses the stack view, whatever the element type. A literal pack's elements are storage the
+// compiler chose: for an all-constant primitive list it is the module's read-only data (a write is an
+// access violation), and nothing in the language keeps it from reusing storage for other constant
+// lists either. The heap prologue copies a literal pack (and shares a spread's slice), so a pack its
+// callee writes always takes it.
+func ssliceElementIsWritten(index *ast.IndexExpr, stack []ast.Node) bool {
+	var target ast.Expr = index
+	k := len(stack) - 1
+
+	for k >= 0 {
+		paren, ok := stack[k].(*ast.ParenExpr)
+
+		if !ok || paren.X != target {
+			break
+		}
+
+		target = paren
+		k--
+	}
+
+	if k < 0 {
 		return false
 	}
 
-	written := false
-
-	switch parent := stack[len(stack)-1].(type) {
+	switch parent := stack[k].(type) {
 	case *ast.AssignStmt:
 		for _, lhs := range parent.Lhs {
-			if lhs == index {
-				written = true
+			if lhs == target {
+				return true
 			}
 		}
 	case *ast.IncDecStmt:
-		written = parent.X == index
+		return parent.X == target
+	case *ast.RangeStmt:
+		return parent.Key == target || parent.Value == target
 	}
 
-	if !written {
-		return false
-	}
-
-	slice, ok := obj.Type().Underlying().(*types.Slice)
-
-	if !ok {
-		return true
-	}
-
-	switch elem := slice.Elem().(type) {
-	case *types.TypeParam:
-		return true
-	default:
-		basic, ok := elem.Underlying().(*types.Basic)
-		return ok && basic.Info()&types.IsString == 0
-	}
+	return false
 }
 
 // ssliceCallIsDeferredOrGo reports whether call is the call of a `defer` or `go` statement, the two
