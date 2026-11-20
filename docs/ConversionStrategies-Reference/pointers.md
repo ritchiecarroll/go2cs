@@ -531,7 +531,27 @@ if (sigChecks == nil) {
 sigChecks.Value++;
 ```
 Outside a lambda the assignment is followed by `sigChecks = ref ᏑsigChecks.DerefOrNull();`; inside one that line is CS8175, so it is not emitted.
-Every in-lambda and post-lambda dereference of a repointed captured pointer routes through the box `Ꮡp.Value`, so the now-stale value alias is never read — an accepted modeling gap (like the nil-terminated walk's), not a miscompile. The suppression is sound because no LEGITIMATE re-alias ever occurs inside a lambda: a lambda's OWN pointer parameter is passed as the box `ж<T>` (never deref-aliased), and a heap-boxed value local is written THROUGH its box (`Ꮡb.Value = …`, never box-repointed). Guarded by `ClosureReassignsPtrParam` (a closure that reassigns a captured `*int` parameter; a non-nil runtime argument keeps the reassignment branch unreached so output stays deterministic).
+The suppression is sound because no LEGITIMATE re-alias ever occurs inside a lambda: a lambda's OWN pointer parameter is passed as the box `ж<T>` (never deref-aliased), and a heap-boxed value local is written THROUGH its box (`Ꮡb.Value = …`, never box-repointed).
+
+**A pointer parameter that a func literal assigns takes no entry alias at all.** Dropping the re-alias inside the lambda is not enough by itself: the enclosing body still reads the entry alias, which goes on naming the OLD target once the closure has repointed the box. That was a silent wrong read, and an endless loop where the body walks a structure until a callback moves it (`for len(n.kids) > 0 { n.each(func(k *node) bool { n = k; return true }) }` re-read the root forever). Go has one variable, shared by the body and every closure, so such a parameter keeps its box as that variable: `closureRepointedPointerParams` collects every pointer parameter (and direct-ж receiver) that an assignment or range assignment inside any func literal targets — a closure, a deferred literal or a go-statement literal alike — and the declaration emits it with no alias, in the same Go-named form as a parameter whose alias is dead. Every value read goes through the box in the body as well as in the literal:
+<!-- source: src/tests/Behavioral/PointerParamClosureRepoint/main.cs.target:26-37 -->
+```csharp
+internal static nint deepest(ж<node> n) {
+    for (nint i = 0; i < 10; i++) {
+        if (len(n.Value.kids) == 0) {
+            return n.Value.val;
+        }
+        n.Value.each((ж<node> k) => {
+            n = k;
+            return true;
+        });
+    }
+    return -1;
+}
+```
+A pointee that is itself a reference (`*error`, `*[]T`) is read with `.ValueSlot` (`return e.ValueSlot == nil;`), as `*pp` is, because its held value may legally be nil; any other pointee keeps the strict `.Value`. A rebinding in the body itself keeps the alias: it re-aliases in the same statement, so the alias is current at every point the body can observe it. (Guarded by `PointerParamClosureRepoint` — a callback walk, a read, a write, a copy and a range assignment after a closure moved the parameter, a go-statement and a deferred literal that repoint it, a receiver repointed by a callback, `*error` and `*[]int` parameters, and a `goto` body walk as the control, output-compared vs Go — and by `ClosureReassignsPtrParam`, a closure that reassigns a captured `*int` parameter.)
+
+**A range ASSIGNMENT into a pointer parameter is a repoint.** `for _, n = range n.kids` writes the parameter itself, so it takes the box and re-aliases after the assignment, as `n = …` does: `Ꮡn = vᴛ1; n = ref Ꮡn.DerefOrNull();` (inside a literal, or for a parameter a literal repoints, the box alone). It used to assign the `ж<node>` element into the value alias, CS0029. A range assignment into the RECEIVER is a direct-ж trigger for the same reason the assignment is (`bodyReassignsReceiver`). (Guarded by `PointerParamClosureRepoint`'s `rangeBody` and `lastKid`.)
 
 The same repoint-and-re-alias applies when the parameter is reassigned **from a tuple** — `(left, x, idx) = binarySearchTree(x, idx, n/2)` (runtime `mgcstack.go`) or `pp, _ = pidleget(0)` (`proc.go`). Box-reassignment triggers that matched the RHS **element-wise** would never fire for a tuple *deconstruction* (one call RHS, several LHS) — the ж<T> tuple component would be assigned into the deref'd value alias (CS0029) — and element 0's raw expression type is the whole `*types.Tuple` (never a pointer). So the per-element RHS type comes from the call's result tuple, and the emitted form is the single-assign form verbatim: `(left, Ꮡx, idx) = binarySearchTree(Ꮡx, idx, n / 2); x = ref Ꮡx.DerefOrNull();` — the same nil-deferring re-alias every repoint takes (`(Ꮡpp, _) = pidleget(0); pp = ref Ꮡpp.DerefOrNull();`). The triggers are gated to a **reassigned** element: a `:=`-declared pointer element binds the tuple's ж<T> component into a fresh pointer local — which *is* the box — directly, and an inner `:=` local shadowing a parameter's name must not repoint the parameter's box (crypto/x509's `c, _, err := …cert(i)`). (Guarded by the `PointerParamNilWalk` extension — a nil-compared tuple-reassign walk plus a reassign-then-mutate-through probe, values vs Go.)
 
