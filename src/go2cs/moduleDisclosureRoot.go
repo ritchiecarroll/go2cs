@@ -27,9 +27,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -62,8 +64,16 @@ func resolveDisclosureManifestDir(outputPath, root, modulePath, moduleDir, claim
 	moduleBase := filepath.Join(root, filepath.FromSlash(escapedPath))
 	candidate := filepath.Join(moduleBase+"@"+version, relPkg)
 
+	claimed := claimedVersion != "" && moduleCacheVersion(moduleDir, escapedPath) == ""
+
 	if fileExists(filepath.Join(candidate, testDisclosureFileName)) {
-		return candidate, fmt.Sprintf("module disclosures: applying %s", filepath.Join(candidate, testDisclosureFileName)), nil
+		note := fmt.Sprintf("module disclosures: applying %s", filepath.Join(candidate, testDisclosureFileName))
+
+		if claimed {
+			note += fmt.Sprintf(" (version %s claimed by -module-version, not resolved)", version)
+		}
+
+		return candidate, note, nil
 	}
 
 	// The module is kept under OTHER versions only: say so, by name, and apply nothing.
@@ -78,6 +88,15 @@ func resolveDisclosureManifestDir(outputPath, root, modulePath, moduleDir, claim
 
 	if len(present) > 0 {
 		sort.Strings(present)
+
+		// With a CLAIMED version this is most likely a wrong claim, and a note would leave the run exactly where GAP 1
+		// found it: nothing applied, a host-fatal test not withdrawn (P3 093309Z, SHOULD 2). A RESOLVED version keeps
+		// the ruled line (2026-10-05).
+		if claimed {
+			return outputPath, "", fmt.Errorf("-module-version %s: %s holds %s only under other versions (%s); the claim is "+
+				"most likely wrong", version, root, modulePath, strings.Join(present, ", "))
+		}
+
 		return outputPath, fmt.Sprintf("module disclosures: %s exists; this run resolved %s; not applied", strings.Join(present, ", "), version), nil
 	}
 
@@ -109,6 +128,13 @@ func moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion string)
 			return "", "", fmt.Errorf("-module-version %s contradicts the module-cache directory %s, which is %s@%s", claimedVersion, moduleDir, modulePath, cacheVersion)
 		}
 
+		if cacheVersion == "" {
+			if cached := claimedGoModMismatch(moduleDir, escapedPath, claimedVersion); cached != "" {
+				return "", "", fmt.Errorf("-module-version %s is contradicted by the copy itself: %s differs from the module "+
+					"cache's go.mod for %s@%s (%s)", claimedVersion, filepath.Join(moduleDir, "go.mod"), modulePath, claimedVersion, cached)
+			}
+		}
+
 		return escapedPath, claimedVersion, nil
 	}
 
@@ -119,6 +145,77 @@ func moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion string)
 	}
 
 	return escapedPath, cacheVersion, nil
+}
+
+// claimedVersionCacheDir is the module cache a CLAIMED version is checked against (claimedGoModMismatch).
+// A variable so a test can point it at a cache of its own; goModCacheDir memoizes the real one.
+var claimedVersionCacheDir = goModCacheDir
+
+// moduleDisclosureFlagsError refuses -module-disclosures and -module-version where they cannot take effect (P3
+// 093309Z, SHOULD 3 and NIT 4), rather than accepting and ignoring them. Only a -tests -recurse run resolves the main
+// module (runModuleTests); the single-package -tests route never does, so a root given there was ignored silently.
+// -module-version names the version a root is read for, so it means nothing without one.
+func moduleDisclosureFlagsError(options Options) error {
+	if options.testModuleDisclosures != "" && !(options.convertTests && options.recurse) {
+		return fmt.Errorf("-module-disclosures takes effect only with -tests -recurse: a single-package run never " +
+			"resolves its module, so the disclosure root would be ignored")
+	}
+
+	if options.testModuleVersion != "" && options.testModuleDisclosures == "" {
+		return fmt.Errorf("-module-version names the version a -module-disclosures root is read for, and no " +
+			"-module-disclosures was given")
+	}
+
+	return nil
+}
+
+// moduleVersionClaimed is the version a run took from -module-version because the module directory is not a
+// module-cache directory: CLAIMED, not resolved. The comparison record carries it (testEnvironmentRecord.
+// ModuleVersionClaimed) and the proof page says so, so a row read under a claim cannot be banked unnoticed (P3
+// 093309Z, MUST 1a). "" when the version was resolved, including a cache directory -module-version agrees with.
+func moduleVersionClaimed(options Options) string {
+	if options.testModuleVersion == "" || options.mainModulePath == "" {
+		return ""
+	}
+
+	escapedPath, err := module.EscapePath(options.mainModulePath)
+
+	if err != nil || moduleCacheVersion(options.mainModuleDir, escapedPath) != "" {
+		return ""
+	}
+
+	return options.testModuleVersion
+}
+
+// claimedGoModMismatch is the cheap contradiction check on a claimed version (P3 093309Z, MUST 1b): when the module
+// cache holds that version's go.mod (cache/download/<escaped path>/@v/<escaped version>.mod) and the copy has a
+// go.mod, the two must be the same file, line endings aside. A trimmed copy rules out a whole-tree hash, so this is
+// the check that can be made; "" when they agree or either is absent.
+func claimedGoModMismatch(moduleDir, escapedPath, version string) string {
+	escapedVersion, err := module.EscapeVersion(version)
+
+	if err != nil {
+		return ""
+	}
+
+	cached := filepath.Join(claimedVersionCacheDir(), "cache", "download", filepath.FromSlash(escapedPath), "@v", escapedVersion+".mod")
+	want, err := os.ReadFile(cached)
+
+	if err != nil {
+		return ""
+	}
+
+	have, err := os.ReadFile(filepath.Join(moduleDir, "go.mod"))
+
+	if err != nil {
+		return ""
+	}
+
+	if bytes.Equal(bytes.ReplaceAll(want, []byte("\r\n"), []byte("\n")), bytes.ReplaceAll(have, []byte("\r\n"), []byte("\n"))) {
+		return ""
+	}
+
+	return cached
 }
 
 // moduleDisclosurePreflight refuses, before any conversion, a -tests -recurse run whose -module-disclosures root cannot
@@ -141,9 +238,24 @@ func moduleDisclosurePreflight(root, moduleDir, claimedVersion string) error {
 		return nil
 	}
 
-	_, _, err = moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion)
+	escapedPath, version, err := moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion)
 
-	return err
+	if err != nil || claimedVersion == "" || moduleCacheVersion(moduleDir, escapedPath) != "" {
+		return err
+	}
+
+	// A claimed version the root holds the module under OTHER versions only: refused here too (SHOULD 2), at module
+	// level, since the per-package lookup would only reach it after the conversion.
+	moduleBase := filepath.Join(root, filepath.FromSlash(escapedPath))
+	others, _ := filepath.Glob(moduleBase + "@*")
+
+	if len(others) > 0 && !slices.Contains(others, moduleBase+"@"+version) {
+		sort.Strings(others)
+		return fmt.Errorf("-module-version %s: %s holds %s only under other versions (%s); the claim is most likely wrong",
+			version, root, modulePath, strings.Join(others, ", "))
+	}
+
+	return nil
 }
 
 // moduleCacheVersion is the version a module-cache directory names (`…/<escaped path>@<version>`), or ""

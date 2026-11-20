@@ -7924,6 +7924,10 @@ type testEnvironmentRecord struct {
 	// OracleGOARCH is the GOARCH the oracle `go test` child ran at, recorded only when -test-oracle-goarch moved it off
 	// the target's (oracleOptions). Omitted otherwise, so every record whose oracle ran at the target is unchanged.
 	OracleGOARCH string `json:"oracleGoarch,omitempty"`
+
+	// ModuleVersionClaimed is the module version a -tests run on a module COPY took from -module-version: CLAIMED,
+	// not resolved from a module-cache directory (moduleVersionClaimed). Omitted when the version was resolved.
+	ModuleVersionClaimed string `json:"moduleVersionClaimed,omitempty"`
 }
 
 // oracleOptions is the options the ORACLE child runs under: the conversion's own, with the target's GOARCH replaced
@@ -10958,6 +10962,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	}
 	environment := testEnvironmentFromOptions(options)
 	environment.OracleGoVersion = oracleVersion
+	environment.ModuleVersionClaimed = moduleVersionClaimed(options)
 	environment.Terminal = terminal
 	result := testComparison{
 		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
