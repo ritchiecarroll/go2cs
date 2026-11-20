@@ -317,8 +317,10 @@ namespace go
 // THE VARIADIC TAIL (wall E): a variadic parameter's params System.Span<T> became golib's params go.variadic<T>, and the
 // spread property that returned a System.Span<T> returns a go.variadic<T>. Print, Insert, the delegate Logf (its Invoke
 // and BeginInvoke), the interface method ILogger.Log and Ints.Spread are the change; Narrowed (another span type),
-// Recast (another element type), Widened (another parameter changed too), Fixed (a span that is not params) and Window
-// (a property that became another span type) are not, and are refused.
+// Recast (another element type), Widened (another parameter changed too), Fixed (a span that is not params), Fixedf (a
+// delegate's non-params span, in Invoke and BeginInvoke), Window (a property that became another span type) and Packed
+// (a METHOD whose span return became a pack) are not, and are refused; so is Overloaded, whose variadic overload the
+// baseline already had: its span overload was removed, not replaced.
 namespace go
 {
     public static class vat_package
@@ -349,6 +351,14 @@ namespace go
         public static int Widened(int n, params System.Span<object> a) => n;
 
         public static int Fixed(System.Span<object> a, int n) => n;
+
+        public delegate void Fixedf(System.Span<object> a, int n);
+
+        public static System.Span<int> Packed() => default;
+
+        public static int Overloaded(params System.Span<object> a) => a.Length;
+
+        public static int Overloaded(params variadic<object> a) => a.Length;
 #else
         public static int Print(params variadic<object> a) => a.Length;
 
@@ -375,6 +385,12 @@ namespace go
         public static int Widened(long n, params variadic<object> a) => (int)n;
 
         public static int Fixed(variadic<object> a, int n) => n;
+
+        public delegate void Fixedf(variadic<object> a, int n);
+
+        public static variadic<int> Packed() => default;
+
+        public static int Overloaded(params variadic<object> a) => a.Length;
 #endif
     }
 }

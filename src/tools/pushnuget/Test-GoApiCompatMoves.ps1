@@ -11,7 +11,7 @@
     The fixtures are two builds of one assembly (testdata/apicompat, moves-base.dll and moves-moved.dll, built by
     build-apicompat-fixtures.ps1 from src/Moves.cs). Seven forwarders and two methods of a method holder moved as the
     release announced; seven left the package class another way, each a break nobody announced. Seven variadic-tail
-    entries and five members changed some other way test the fourth kind. The generated file is then handed to the guard
+    entries and eight members changed some other way test the fourth kind. The generated file is then handed to the guard
     (GoApiCompat.psm1) as push-nuget.ps1 hands it one: every entry must suppress exactly one diagnostic, none may be
     unnecessary, and the six other members must still read red.
 
@@ -116,7 +116,7 @@ try {
             $needle = '.' + $Member + '('
             return [string](@($refused | Where-Object { $_.Target.Contains($needle) } | ForEach-Object { $_.Reason }) -join ' ; ')
         }
-        Check 'twenty other removed or changed members are refused, per asset: seven moves gone wrong, five Delta-drop negative controls, three clone-drop ones and five variadic-tail ones' ($refused.Count -eq 20 -and @($found.Refused).Count -eq 40) "$($refused.Count) of $(@($found.Refused).Count): $(@($refused | ForEach-Object { $_.Target }) -join ' | ')"
+        Check 'twenty-four other removed or changed members are refused, per asset: seven moves gone wrong, five Delta-drop negative controls, three clone-drop ones and nine variadic-tail ones' ($refused.Count -eq 24 -and @($found.Refused).Count -eq 48) "$($refused.Count) of $(@($found.Refused).Count): $(@($refused | ForEach-Object { $_.Target }) -join ' | ')"
         Check 'a changed return type is not a move' ((Reason 'Changed').Contains('declares no Changed of the same signature')) (Reason 'Changed')
         Check 'a dropped attribute is not a move' ((Reason 'Unmarked').Contains('declares no Unmarked of the same signature')) (Reason 'Unmarked')
         Check 'a changed nullable annotation is not a move, and the reason shows both readings' (
@@ -207,10 +207,12 @@ try {
         $print = @($tails | Where-Object { $_.Asset -ceq $lib -and $_.Target.Contains('.Print(') })
         Check 'each names the member that replaced it' ($print.Count -eq 1 -and $print[0].Host -ceq 'M:go.vat_package.Print(go.variadic{System.Object})') "$(@($print | ForEach-Object { $_.Host }) -join ', ')"
         $tailNegatives = @('M:go.vat_package.Narrowed(System.Span{System.Object})', 'M:go.vat_package.Recast(System.Span{System.Object})',
-                           'M:go.vat_package.Widened(System.Int32,System.Span{System.Object})', 'M:go.vat_package.Fixed(System.Span{System.Object},System.Int32)', 'P:go.vat_package.Ints.Window')
-        Check 'NEGATIVE CONTROL: another span type, another element type, a second parameter changed, a span that is not params and a property that became another span type are refused' (
-            @($tailNegatives | Where-Object { $refusedTargets -ccontains $_ }).Count -eq 5) "refused: $(@($tailNegatives | Where-Object { $refusedTargets -ccontains $_ }) -join ' | ')"
-        Check 'NEGATIVE CONTROL: no entry names any of them' (@($found.Entries | Where-Object { $_.Target -match '\.(Narrowed|Recast|Widened|Fixed)\(|Window' }).Count -eq 0) 'an entry'
+                           'M:go.vat_package.Widened(System.Int32,System.Span{System.Object})', 'M:go.vat_package.Fixed(System.Span{System.Object},System.Int32)', 'P:go.vat_package.Ints.Window',
+                           'M:go.vat_package.Fixedf.Invoke(System.Span{System.Object},System.Int32)',
+                           'M:go.vat_package.Fixedf.BeginInvoke(System.Span{System.Object},System.Int32,System.AsyncCallback,System.Object)', 'M:go.vat_package.Packed', 'M:go.vat_package.Overloaded(System.Span{System.Object})')
+        Check 'NEGATIVE CONTROL: another span type, another element type, a second parameter changed, a span that is not params (in a method and in a delegate''s Invoke and BeginInvoke), a property that became another span type, a method whose span return became a pack, and a span overload removed beside a variadic one the baseline already had are refused' (
+            @($tailNegatives | Where-Object { $refusedTargets -ccontains $_ }).Count -eq 9) "refused: $(@($tailNegatives | Where-Object { $refusedTargets -ccontains $_ }) -join ' | ')"
+        Check 'NEGATIVE CONTROL: no entry names any of them' (@($found.Entries | Where-Object { $_.Target -match '\.(Narrowed|Recast|Widened|Fixed|Packed)\(|Window|Fixedf|\.Packed$|Overloaded' }).Count -eq 0) 'an entry'
 
         $same = Get-GoApiCompatPackageMoves -Baseline $base -Current $base -WorkDir $work
         Check 'the same surface has no move and no refusal' (@($same.Entries).Count -eq 0 -and @($same.Refused).Count -eq 0) "$(@($same.Entries).Count) entries, $(@($same.Refused).Count) refused"
@@ -240,16 +242,16 @@ try {
         Check 'the pinned tool restores from the manifest' ([bool]$pinned) "$why"
         if ($pinned) {
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $null -RepoRoot $repoRoot -WorkDir $work
-            Check 'unsuppressed, the guard names all forty-eight breaks on each asset' ($r.Failures.Count -eq 96 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
+            Check 'unsuppressed, the guard names all fifty-two breaks on each asset' ($r.Failures.Count -eq 104 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
 
             $generated = Join-Path $work 'generated.xml'
             Write-GoApiCompatMoveSuppressions -Entries $found.Entries -Path $generated -Comment $comment
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $generated -RepoRoot $repoRoot -WorkDir $work
             Check 'no generated entry is unnecessary' (@($r.Failures | Where-Object { $_.Contains('unnecessary') }).Count -eq 0) "$(@($r.Failures | Where-Object { $_.Contains('unnecessary') }) -join '; ')"
-            Check 'the forty refused breaks still read red (the negative controls among them), and nothing else does' (
-                $r.Failures.Count -eq 40 -and @($r.Failures | Where-Object { $_.Contains('CP0002') }).Count -eq 36 -and
+            Check 'the forty-eight refused breaks still read red (the negative controls among them), and nothing else does' (
+                $r.Failures.Count -eq 48 -and @($r.Failures | Where-Object { $_.Contains('CP0002') }).Count -eq 44 -and
                 @($r.Failures | Where-Object { $_.Contains('CP0001') }).Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('CP0008') }).Count -eq 2 -and $r.Compared -eq 2) "$($r.Failures.Count) failures: $($r.Failures -join '; ')"
-            foreach ($member in 'Changed', 'Unmarked', 'Kind', 'Elsewhere', 'Misfiled', 'Gone', 'Only', 'Orphan', 'Shifted', 'Retyped', 'Spun', 'Narrowed', 'Recast', 'Widened', 'Fixed') {
+            foreach ($member in 'Changed', 'Unmarked', 'Kind', 'Elsewhere', 'Misfiled', 'Gone', 'Only', 'Orphan', 'Shifted', 'Retyped', 'Spun', 'Narrowed', 'Recast', 'Widened', 'Fixed', 'Overloaded') {
                 $needle = '.' + $member + '('
                 $named = @($r.Failures | Where-Object { $_.Contains($needle) }).Count
                 Check "the guard still names $member" ($named -eq 2) "$named of 2"
@@ -261,6 +263,8 @@ try {
             }
             Check 'and no longer names Event' (@($r.Failures | Where-Object { $_.Contains('cln_package.Event') }).Count -eq 0) 'named'
             Check 'the guard still names Window by its getter' (@($r.Failures | Where-Object { $_.Contains('Ints.Window.get') }).Count -eq 2) 'not named twice'
+            Check 'the guard still names Fixedf''s Invoke and BeginInvoke, and Packed' (
+                @($r.Failures | Where-Object { $_.Contains('Fixedf.Invoke(') -or $_.Contains('Fixedf.BeginInvoke(') -or $_.Contains('vat_package.Packed(') }).Count -eq 6) "$(@($r.Failures | Where-Object { $_.Contains('Fixedf') -or $_.Contains('Packed') }) -join '; ')"
             $suppressedTails = @($r.Failures | Where-Object { $_ -match 'vat_package\.(Print|Insert|Logf|ILogger|Ints\.Spread)' })
             Check 'and names no variadic tail it was given an entry for' ($suppressedTails.Count -eq 0) ($suppressedTails -join '; ')
         }
