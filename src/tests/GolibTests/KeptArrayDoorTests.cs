@@ -45,6 +45,15 @@ public class KeptArrayDoorTests
         internal long n;
     }
 
+    // struct{ Addr [4]byte; Port uint16 }: Addr is an array<byte>, a reference, so a box of it cannot be pinned.
+    private struct Sockaddr
+    {
+        internal array<byte> Addr;
+        internal ushort Port;
+
+        internal static ref ushort ᏑPort(ref Sockaddr instance) => ref instance.Port;
+    }
+
     private static @unsafe.Pointer Pointer(nint address) => (@unsafe.Pointer)(uintptr)(nuint)address;
 
     private static nint Zeroed()
@@ -267,5 +276,48 @@ public class KeptArrayDoorTests
         {
             Marshal.FreeHGlobal(block);
         }
+    }
+
+    /// <summary>
+    /// A window over Go storage is cut only where a box holds the storage still. A field of a struct that holds a
+    /// reference cannot be pinned, so its address is good only until the collector moves the struct: a window over
+    /// it would write wherever the struct used to be. The door declines, and the conversion answers what To
+    /// answers, arm 5's refusal by name. This is Go's <c>(*[2]byte)(unsafe.Pointer(&amp;e.Port))</c> through a promoted
+    /// field, an element or a call result, which the converter emits through the door.
+    /// </summary>
+    [TestMethod]
+    public void AFieldNothingHoldsStillIsNoWindow()
+    {
+        heap(new Sockaddr { Addr = new array<byte>(4), Port = 0x0102 }, out ж<Sockaddr> Ꮡsa);
+
+        @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡsa.of(Sockaddr.ᏑPort));
+
+        string viaTo = PanicText(() => @unsafe.Pointer.To<array<byte>>(p));
+        string viaDoor = PanicText(() => @unsafe.Pointer.ToArray<byte>(p, 2));
+
+        Assert.AreEqual(viaTo, viaDoor, "storage nothing holds still is no window");
+        StringAssert.Contains(viaDoor, "cannot view native memory");
+        GC.KeepAlive(Ꮡsa);
+    }
+
+    /// <summary>
+    /// A window over Go storage held still ends where the storage does: N elements past the end of the value are no
+    /// window, and the conversion answers what To answers.
+    /// </summary>
+    [TestMethod]
+    public void AWindowPastTheEndOfTheGoValueIsNoWindow()
+    {
+        heap(new Pair { a = 1, b = 2, c = 3 }, out ж<Pair> Ꮡpair);
+
+        @unsafe.Pointer p = @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡpair), 4);
+
+        // 12 bytes of the 16-byte value remain from offset 4: three uint32 fit, four do not.
+        Assert.AreEqual(2u, @unsafe.Pointer.ToArray<uint>(p, 3).ElementRef(0), "three elements lie inside the value");
+
+        string viaTo = PanicText(() => @unsafe.Pointer.To<array<uint>>(p));
+        string viaDoor = PanicText(() => @unsafe.Pointer.ToArray<uint>(p, 4));
+
+        Assert.AreEqual(viaTo, viaDoor, "a window past the end of the value is no window");
+        GC.KeepAlive(Ꮡpair);
     }
 }
