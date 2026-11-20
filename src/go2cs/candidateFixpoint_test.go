@@ -13,6 +13,8 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 
@@ -62,5 +64,44 @@ func TestDeclarationClosureImportsScansPackagesTheBaseWalkReaches(t *testing.T) 
 	if !slices.Contains(got, "example/fixpoint/r") {
 		t.Fatalf("q is visible once the base walk adds it, and its `Commit() (r.Conn, error)` is a candidate of the "+
 			"test's `new(Tx).Commit()`, so r must be surfaced; got %v", got)
+	}
+}
+
+// TestTestRecordInterfacesSeedsAGenericInterface: a record whose interface argument is a generic instantiation,
+// `GoImplement<…, x_package.Checker<nint>>`, seeds the generic declaration Checker, so the declaration's emitted bases
+// are walked. The converter emits a generic interface's structural bases from the generic declaration itself
+// (getStructuralInterfaceBases takes the declared, uninstantiated type), so the walk looks up the same type.
+// Here Checker's base q.J is the only reason the project needs q.
+func TestTestRecordInterfacesSeedsAGenericInterface(t *testing.T) {
+	dir := t.TempDir()
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/genrec\n\ngo 1.23\n",
+		"q/q.go": "package q\ntype J interface{ Close() error }\n",
+		"x/x.go": "package x\n" +
+			"import \"example/genrec/q\"\n" +
+			"type Checker[T any] interface {\n\tClose() error\n\tCheck(T) bool\n}\n" +
+			"var _ q.J\n",
+		"main.go":      "package genrec\nimport \"example/genrec/x\"\nfunc Use[T any](c x.Checker[T]) error { return nil }\n",
+		"main_test.go": "package genrec\nimport \"testing\"\nfunc TestNothing(t *testing.T) {}\n",
+	})
+
+	info := filepath.Join(dir, "package_info.cs")
+	record := "[assembly: GoImplement<go.testing_package.T, go.example.genrec.x_package.Checker<nint>>]\n"
+	if err := os.WriteFile(info, []byte(record), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	production := loadProductionForDir(t, dir)
+	internal, external := loadTestVariantsForDir(t, dir)
+	roots := []*packages.Package{production, internal, external}
+
+	seeds := testRecordInterfaces(info, roots)
+	if len(seeds) != 1 || seeds[0].Obj().Name() != "Checker" || seeds[0].Obj().Pkg().Path() != "example/genrec/x" {
+		t.Fatalf("the record names x.Checker<nint>, so the generic declaration x.Checker must seed the walk; got %v", seeds)
+	}
+
+	got := declarationClosureImportsFrom(roots, nil, []string{production.PkgPath, "testing", "example/genrec/x"}, nil, nil, seeds)
+	if !slices.Contains(got, "example/genrec/q") {
+		t.Fatalf("Checker's structural base q.J needs q; got %v", got)
 	}
 }
