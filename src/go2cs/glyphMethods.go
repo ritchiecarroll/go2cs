@@ -90,6 +90,26 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 
 		lines[i] = body + line[len(trimmed):]
 
+		// Constraint clauses on the lines that follow a header with no body of its own (`    where T : C<T>`): the
+		// forwarder repeats them, or its type parameter is unconstrained where the body's is not (CS0314, CS0310).
+		if !strings.Contains(body, "{") && !strings.Contains(body, "=>") {
+			var clauses []string
+
+			for j := i + 1; j < len(lines); j++ {
+				next := strings.TrimSpace(lines[j])
+
+				if !strings.HasPrefix(next, "where ") {
+					break
+				}
+
+				clauses = append(clauses, next)
+			}
+
+			if len(clauses) > 0 {
+				forwarder.text = forwarder.head + " " + strings.Join(clauses, " ") + forwarder.tail
+			}
+		}
+
 		holder := current
 
 		if holder == packageClass {
@@ -172,6 +192,7 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 type glyphForwarderText struct {
 	receiverType string
 	text         string
+	head, tail   string // text split before ` => `, so constraint clauses on the following lines can be inserted
 }
 
 // glyphRewriteHeader recognizes a converted method header at column 0 (`[attrs] mods ret Name<T>(this R r, ...)...`)
@@ -359,9 +380,11 @@ done:
 		forwarder.WriteString(" ")
 	}
 
-	fmt.Fprintf(&forwarder, "%s %s %s%s(%s)%s => %s%s.%s%s%s(%s);", strings.Join(mods, " "), returnType, name, typeParams, params, whereText, callPrefix, packageClass, name, GlyphMethodSuffix, typeParams, strings.Join(args, ", "))
+	fmt.Fprintf(&forwarder, "%s %s %s%s(%s)%s", strings.Join(mods, " "), returnType, name, typeParams, params, whereText)
+	fwdHead := forwarder.String()
+	fwdTail := fmt.Sprintf(" => %s%s.%s%s%s(%s);", callPrefix, packageClass, name, GlyphMethodSuffix, typeParams, strings.Join(args, ", "))
 
-	return body.String(), glyphForwarderText{receiverType: receiverType, text: forwarder.String()}, true
+	return body.String(), glyphForwarderText{receiverType: receiverType, text: fwdHead + fwdTail, head: fwdHead, tail: fwdTail}, true
 }
 
 // glyphBodyStart finds where the body begins after a parameter list: ` {`, `{`, or `=>`, outside any brackets.

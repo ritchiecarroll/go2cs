@@ -191,12 +191,12 @@ partial class genᴛvoid {
 [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind(this @void _) => gen_package.kindᴍ(_);
 }
 partial class genᴛPtr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind<T>(this Ptr<T> _Δp0) => gen_package.kindᴍ<T>(_Δp0);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Ptr<T> wrap<T>(this Ptr<T> _, ж<op> x) => gen_package.wrapᴍ<T>(_, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Ptr<T> /*y*/ AddConst<T>(this Ptr<T> x, nint off) => gen_package.AddConstᴍ<T>(x, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind<T>(this Ptr<T> _Δp0) where T : Value => gen_package.kindᴍ<T>(_Δp0);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Ptr<T> wrap<T>(this Ptr<T> _, ж<op> x) where T : Value => gen_package.wrapᴍ<T>(_, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Ptr<T> /*y*/ AddConst<T>(this Ptr<T> x, nint off) where T : Value => gen_package.AddConstᴍ<T>(x, off);
 }
 partial class genᴛArray {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind<T>(this Array<T> _) => gen_package.kindᴍ<T>(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind<T>(this Array<T> _) where T : Value => gen_package.kindᴍ<T>(_);
 }
 partial class genᴛvalGP {
 [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isWord(this valGP _) => gen_package.isWordᴍ(_);
