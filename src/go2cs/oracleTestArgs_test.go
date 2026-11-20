@@ -184,3 +184,32 @@ func TestOracleBuildTagsAreRecordedAndAnUnknownPathIsNamed(t *testing.T) {
 		t.Fatalf("an unmoved oracle must not add the key: %s", data)
 	}
 }
+
+// TestOracleBuildTagsRecordKeepsAnEmptyOracleSet: when math_big_pure_go is the conversion's ONLY tag, the oracle runs
+// with no tags at all. The record must keep that apart from "the oracle ran the conversion's tags" through a JSON
+// round trip, or a page re-rendered from the banked record claims Go ran with math_big_pure_go.
+func TestOracleBuildTagsRecordKeepsAnEmptyOracleSet(t *testing.T) {
+	options := Options{buildTags: []string{mathBigPureGoTag}}
+
+	data, err := json.Marshal(testEnvironmentRecord{OracleBuildTags: oracleBuildTagsRecord(options, "crypto/rsa")})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var banked testEnvironmentRecord
+	if err := json.Unmarshal(data, &banked); err != nil {
+		t.Fatal(err)
+	}
+
+	page := renderValidationProofPage(
+		proofPageProvenance{importPath: "example.com/mod/sub", goVersion: "1.26.11", platform: "linux/amd64",
+			buildTags: options.buildTags, convertedPath: "src/example.com/mod/sub"},
+		testComparison{Package: "example.com/mod/sub", Status: "validated", Matched: true, Go: map[string]string{"TestA": "pass"},
+			CSharp: map[string]string{"TestA": "pass"}, Environment: banked},
+		nil, nil)
+
+	want := "Both sides were built with no build tags; the conversion also takes `" + mathBigPureGoTag + "`"
+	if !strings.Contains(page, want) {
+		t.Fatalf("the record %s lost the empty oracle tag set; the page must read %q:\n%s", data, want, page)
+	}
+}
