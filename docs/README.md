@@ -30,8 +30,10 @@ on Windows, on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon); the
      (check-roster-format 2e). Written by the 1.26.11.1 release-controls batch (claude/p4-release-controls-12611). -->
 **November 19, 2026, NuGet 1.26.11.1.** The fourth release on the Go 1.26 line, converted from Go 1.26.11, a patch
 release with security fixes. `go2cs -cgo` converts a package that calls C, the packages ship a linux-arm64 build,
-Microsoft's TypeScript compiler, written in Go, converts, compiles and type-checks, and a modernc.org/sqlite program
-that writes and reads a database file prints exactly what native Go prints, on Windows and on Linux. Each Go method
+Microsoft's TypeScript compiler, written in Go, converts, compiles and type-checks
+([typescript-go-cs](https://github.com/ritchiecarroll/typescript-go-cs)), and a modernc.org/sqlite program that writes
+and reads a database file prints exactly what native Go prints, on Windows and on Linux
+([sqlite-cs](https://github.com/ritchiecarroll/sqlite-cs)). Each Go method
 now lives in a class of its type's own, so assemblies built against 1.26.10.3 must be rebuilt, and the build now says
 so by name instead of failing at run time.
 [Full announcement](NEWS.md#november-19-2026--go-12611-cgo-conversion-linux-arm64-packages-and-typescripts-compiler-and-sqlite-in-c).
