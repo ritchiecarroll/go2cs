@@ -1252,14 +1252,14 @@ go.builtin :: method static go.golib.GoTask<System.Int32> selectꞏtwin(params g
 go.builtin :: method static go.golib.GoTask<System.ValueTuple<T, System.Boolean>> ᐸꟷꞏtwin<T>(go.channel<T>, System.Boolean)
 go.builtin :: method static go.golib.GoTask<T> ᐸꟷꞏtwin<T>(go.channel<T>)
 go.channel<T> :: method go.golib.GoTask ᐸꟷꞏtwin(T)
-go.golib.GoFuncPair :: ctor ()
+go.golib.GoFuncPair :: ctor protected ()
 go.golib.GoFuncPair :: method static System.Delegate Underlying(System.Delegate)
-go.golib.GoFuncPair :: property System.Delegate Plain { get; }
-go.golib.GoFuncPair :: property System.Delegate Twin { get; }
-go.golib.GoFuncPair :: shape abstract class
+go.golib.GoFuncPair :: property abstract System.Delegate Plain { get; }
+go.golib.GoFuncPair :: property abstract System.Delegate Twin { get; }
+go.golib.GoFuncPair :: shape abstract class; abstract-members get_Plain(), get_Twin()
 go.golib.GoTask :: method go.golib.GoTaskAwaiter GetAwaiter()
 go.golib.GoTask :: shape readonly struct; builder go.golib.GoTaskBuilder
-go.golib.GoTask<T> :: ctor (T)
+go.golib.GoTask<T> :: ctor public (T)
 go.golib.GoTask<T> :: method go.golib.GoTaskAwaiter<T> GetAwaiter()
 go.golib.GoTask<T> :: shape readonly struct; builder go.golib.GoTaskBuilder<T>
 go.golib.GoTaskAwaiter :: method System.Void GetResult()
@@ -1268,21 +1268,21 @@ go.golib.GoTaskAwaiter :: shape readonly struct; implements System.Runtime.Compi
 go.golib.GoTaskAwaiter<T> :: method T GetResult()
 go.golib.GoTaskAwaiter<T> :: property System.Boolean IsCompleted { get; }
 go.golib.GoTaskAwaiter<T> :: shape readonly struct; implements System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
-go.golib.GoTaskBuilder :: method System.Void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine)
-go.golib.GoTaskBuilder :: method System.Void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine)
+go.golib.GoTaskBuilder :: method System.Void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine) where TAwaiter : System.Runtime.CompilerServices.INotifyCompletion; TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
+go.golib.GoTaskBuilder :: method System.Void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine) where TAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion; TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
 go.golib.GoTaskBuilder :: method System.Void SetException(System.Exception)
 go.golib.GoTaskBuilder :: method System.Void SetResult()
 go.golib.GoTaskBuilder :: method System.Void SetStateMachine(System.Runtime.CompilerServices.IAsyncStateMachine)
-go.golib.GoTaskBuilder :: method System.Void Start<TStateMachine>(ref TStateMachine)
+go.golib.GoTaskBuilder :: method System.Void Start<TStateMachine>(ref TStateMachine) where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
 go.golib.GoTaskBuilder :: method static go.golib.GoTaskBuilder Create()
 go.golib.GoTaskBuilder :: property go.golib.GoTask Task { get; }
 go.golib.GoTaskBuilder :: shape struct
-go.golib.GoTaskBuilder<T> :: method System.Void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine)
-go.golib.GoTaskBuilder<T> :: method System.Void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine)
+go.golib.GoTaskBuilder<T> :: method System.Void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine) where TAwaiter : System.Runtime.CompilerServices.INotifyCompletion; TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
+go.golib.GoTaskBuilder<T> :: method System.Void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter, ref TStateMachine) where TAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion; TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
 go.golib.GoTaskBuilder<T> :: method System.Void SetException(System.Exception)
 go.golib.GoTaskBuilder<T> :: method System.Void SetResult(T)
 go.golib.GoTaskBuilder<T> :: method System.Void SetStateMachine(System.Runtime.CompilerServices.IAsyncStateMachine)
-go.golib.GoTaskBuilder<T> :: method System.Void Start<TStateMachine>(ref TStateMachine)
+go.golib.GoTaskBuilder<T> :: method System.Void Start<TStateMachine>(ref TStateMachine) where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine
 go.golib.GoTaskBuilder<T> :: method static go.golib.GoTaskBuilder<T> Create()
 go.golib.GoTaskBuilder<T> :: property go.golib.GoTask<T> Task { get; }
 go.golib.GoTaskBuilder<T> :: shape struct

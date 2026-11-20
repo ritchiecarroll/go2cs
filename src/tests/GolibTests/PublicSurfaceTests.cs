@@ -162,7 +162,51 @@ public class PublicSurfaceTests
 
     // includeHidden: also the members that carry [EditorBrowsable(Never)] ([mn-frozen] freezes hidden members); names:
     // only the members of those names (".ctor" for a constructor). The defaults are [tier1-members]' read, unchanged.
-    internal static SortedSet<string> MemberSignatures(IEnumerable<Type> types, bool includeHidden = false, ISet<string>? names = null)
+    // frozenDetail ([mn-frozen] only, P3's read of 80c099ee33): a member's abstract/virtual/override modifier (GoFuncPair
+    // is subclassed in user assemblies), a constructor's accessibility, and a generic method's constraints.
+    private static string Modifier(MethodInfo? method) =>
+        method is null ? "" :
+        method.IsAbstract ? "abstract " :
+        method.IsVirtual && !method.IsFinal ? (method.GetBaseDefinition() == method ? "virtual " : "override ") : "";
+
+    private static string Access(MethodBase method) =>
+        method.IsPublic ? "public " : method.IsFamilyOrAssembly ? "protected internal " : method.IsFamily ? "protected " : "internal ";
+
+    private static string Constraints(MethodInfo method)
+    {
+        if (!method.IsGenericMethodDefinition)
+            return "";
+
+        List<string> clauses = [];
+
+        foreach (Type parameter in method.GetGenericArguments())
+        {
+            GenericParameterAttributes attributes = parameter.GenericParameterAttributes;
+            List<string> constraints = [];
+
+            if ((attributes & GenericParameterAttributes.ReferenceTypeConstraint) != 0)
+                constraints.Add("class");
+
+            if ((attributes & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0)
+                constraints.Add("struct");
+
+            constraints.AddRange(parameter.GetGenericParameterConstraints().Where(constraint => constraint != typeof(ValueType))
+                .Select(TypeName).OrderBy(name => name, StringComparer.Ordinal));
+
+            if ((attributes & GenericParameterAttributes.DefaultConstructorConstraint) != 0 && (attributes & GenericParameterAttributes.NotNullableValueTypeConstraint) == 0)
+                constraints.Add("new()");
+
+            if (((int)attributes & 0x20) != 0) // AllowByRefLike: `allows ref struct`
+                constraints.Add("allows ref struct");
+
+            if (constraints.Count > 0)
+                clauses.Add(parameter.Name + " : " + string.Join(", ", constraints));
+        }
+
+        return clauses.Count > 0 ? " where " + string.Join("; ", clauses) : "";
+    }
+
+    internal static SortedSet<string> MemberSignatures(IEnumerable<Type> types, bool includeHidden = false, ISet<string>? names = null, bool frozenDetail = false)
     {
         SortedSet<string> lines = new(StringComparer.Ordinal);
         const BindingFlags all = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
@@ -185,7 +229,7 @@ public class PublicSurfaceTests
                 string index = property.GetIndexParameters() is { Length: > 0 } parameters ? "[" + string.Join(", ", parameters.Select(Parameter)) + "]" : "";
                 string get = IsVisible(property.GetMethod) ? " get;" : "";
                 string set = IsVisible(property.SetMethod) ? " set;" : "";
-                lines.Add($"{owner}property {(any.IsStatic ? "static " : "")}{TypeName(property.PropertyType)} {property.Name}{index} {{{get}{set} }}");
+                lines.Add($"{owner}property {(any.IsStatic ? "static " : "")}{(frozenDetail ? Modifier(any) : "")}{TypeName(property.PropertyType)} {property.Name}{index} {{{get}{set} }}");
             }
 
             foreach (EventInfo @event in type.GetEvents(all))
@@ -209,7 +253,7 @@ public class PublicSurfaceTests
             foreach (ConstructorInfo constructor in type.GetConstructors(all))
             {
                 if (IsVisible(constructor) && !constructor.IsStatic && !Skip(constructor))
-                    lines.Add($"{owner}ctor {Parameters(constructor.GetParameters())}");
+                    lines.Add($"{owner}ctor {(frozenDetail ? Access(constructor) : "")}{Parameters(constructor.GetParameters())}");
             }
 
             foreach (MethodInfo method in type.GetMethods(all))
@@ -219,7 +263,7 @@ public class PublicSurfaceTests
 
                 string generic = method.IsGenericMethodDefinition ? "<" + string.Join(", ", method.GetGenericArguments().Select(argument => argument.Name)) + ">" : "";
                 string returns = method.ReturnType.IsByRef ? "ref " + TypeName(method.ReturnType.GetElementType()!) : TypeName(method.ReturnType);
-                lines.Add($"{owner}method {(method.IsStatic ? "static " : "")}{returns} {method.Name}{generic}{Parameters(method.GetParameters())}");
+                lines.Add($"{owner}method {(method.IsStatic ? "static " : "")}{(frozenDetail ? Modifier(method) : "")}{returns} {method.Name}{generic}{Parameters(method.GetParameters())}{(frozenDetail ? Constraints(method) : "")}");
             }
         }
 
@@ -262,6 +306,18 @@ public class PublicSurfaceTests
         if (interfaces.Length > 0)
             parts.Add("implements " + string.Join(", ", interfaces));
 
+        // A type subclassed outside golib (GoFuncPair) freezes its abstract members of ANY accessibility: a new internal
+        // abstract member breaks every subclass in another assembly (P3's read of 80c099ee33).
+        if (type.IsAbstract && !type.IsSealed && !type.IsInterface)
+        {
+            const BindingFlags declared = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            string[] abstracts = type.GetMethods(declared).Where(method => method.IsAbstract)
+                .Select(method => method.Name + Parameters(method.GetParameters())).OrderBy(name => name, StringComparer.Ordinal).ToArray();
+
+            if (abstracts.Length > 0)
+                parts.Add("abstract-members " + string.Join(", ", abstracts));
+        }
+
         if (type.GetCustomAttributesData().FirstOrDefault(attribute => attribute.AttributeType.FullName == "System.Runtime.CompilerServices.AsyncMethodBuilderAttribute") is { } builder &&
             builder.ConstructorArguments is [{ Value: Type builderType }])
             parts.Add("builder " + TypeName(builderType));
@@ -274,7 +330,7 @@ public class PublicSurfaceTests
         Assembly golib = typeof(builtin).Assembly;
         Type Load(string name) => golib.GetType(name, throwOnError: true)!;
 
-        SortedSet<string> lines = MemberSignatures(s_mnFrozenTypes.Select(Load), includeHidden: true);
+        SortedSet<string> lines = MemberSignatures(s_mnFrozenTypes.Select(Load), includeHidden: true, frozenDetail: true);
 
         // One SHAPE line per frozen type: its kind, its public interfaces, a base other than object, and its async
         // method builder. A twin-built caller binds these too (P3's read of 7b): an awaiter that stops implementing
@@ -283,7 +339,7 @@ public class PublicSurfaceTests
             lines.Add(ShapeSignature(type));
 
         foreach ((string type, string[] names) in s_mnFrozenMembers)
-            lines.UnionWith(MemberSignatures([Load(type)], includeHidden: true, names: new HashSet<string>(names, StringComparer.Ordinal)));
+            lines.UnionWith(MemberSignatures([Load(type)], includeHidden: true, names: new HashSet<string>(names, StringComparer.Ordinal), frozenDetail: true));
 
         return lines;
     }
