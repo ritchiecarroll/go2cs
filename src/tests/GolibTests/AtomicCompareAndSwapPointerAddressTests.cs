@@ -87,7 +87,7 @@ public class AtomicCompareAndSwapPointerAddressTests
         PanicException panic = Assert.ThrowsException<PanicException>(() => atomic.CompareAndSwapPointer(nilAddr, (@unsafe.Pointer)nil, installed));
 
         StringAssert.Contains(panic.Message, "nil pointer dereference");
-        Assert.IsNull(ж<@unsafe.Pointer>.NilBox.ValueSlot, "the shared nil box's slot still holds nothing");
+        Assert.IsNull(global::go.ж<@unsafe.Pointer>.NilBox.ValueSlot, "the shared nil box's slot still holds nothing");
     }
 
     // Pointers minted from Go variables, as converted code mints `unsafe.Pointer(&x)`: their equality is the referent's
