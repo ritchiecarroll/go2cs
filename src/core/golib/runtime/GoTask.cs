@@ -337,18 +337,44 @@ internal class GoTaskCore
     internal static void UnsafeSuspend<TAwaiter>(ref TAwaiter awaiter, GoTaskCore box) where TAwaiter : ICriticalNotifyCompletion
     {
         if (default(TAwaiter) is not null && awaiter is IGoTaskAwaiter)
+        {
             Link(((IGoTaskAwaiter)awaiter).Core, box);
+        }
+        else if (awaiter is not GoParkAwaiter && Goroutine.LockedOnCarrier)
+        {
+            GoParkSlot slot = PinnedForeignAwait();
+            awaiter.UnsafeOnCompleted(slot.Wake);
+            GoScheduler.ParkPending(slot, box.ResumeAction);
+        }
         else
+        {
             awaiter.UnsafeOnCompleted(box.ResumeAction);
+        }
     }
 
     internal static void Suspend<TAwaiter>(ref TAwaiter awaiter, GoTaskCore box) where TAwaiter : INotifyCompletion
     {
         if (default(TAwaiter) is not null && awaiter is IGoTaskAwaiter)
+        {
             Link(((IGoTaskAwaiter)awaiter).Core, box);
+        }
+        else if (awaiter is not GoParkAwaiter && Goroutine.LockedOnCarrier)
+        {
+            GoParkSlot slot = PinnedForeignAwait();
+            awaiter.OnCompleted(slot.Wake);
+            GoScheduler.ParkPending(slot, box.ResumeAction);
+        }
         else
+        {
             awaiter.OnCompleted(box.ResumeAction);
+        }
     }
+
+    // DESIGN-mn-pin.md 10.2: a goroutine locked to its carrier awaits something that is neither a twin nor a park slot.
+    // Its continuation would run wherever that awaiter completes, off the pinned thread. So the await becomes a park:
+    // the foreign continuation only wakes a slot, and the step ends parked, so the pin carries the resume (a wake that
+    // comes before the commit is kept by the slot). One slot per such await.
+    private static GoParkSlot PinnedForeignAwait() => new();
 
     private static void Link(GoTaskCore? awaited, GoTaskCore box)
     {

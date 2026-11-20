@@ -199,7 +199,14 @@ namespace go.golib;
     internal static void NoteLockOSThread()
     {
         if (t_current is { } current)
+        {
             Volatile.Write(ref current.m_lockedExternal, current.m_lockedExternal + 1);
+
+            // DESIGN-mn-pin.md 11.4: a multiplexed goroutine locking on a thread that is no carrier (it resumed off
+            // its carrier after a foreign await) cannot be pinned. A reading, expected 0.
+            if (current.m_multiplexed && !GoScheduler.OnCarrier)
+                GoScheduler.NoteOffCarrierLock();
+        }
     }
 
     /// <summary>runtime.UnlockOSThread on the calling goroutine; a call with no lock outstanding does nothing, as in Go.</summary>

@@ -88,6 +88,18 @@ public sealed partial class Goroutine
     internal object? m_lastCarrier;
     internal bool m_migrated;
 
+    // M:N PIN (docs/phase4/DESIGN-mn-pin.md). The carrier this goroutine is pinned to while it parks locked to its
+    // thread, or null. Its carrier writes it BEFORE a park commits, on pin and on unpin alike (10.3), so a wake that
+    // races the commit reads the right route; GoScheduler.Ready reads it first.
+    internal volatile object? m_pin;
+
+    // Set when the twin's root has ended (FinishTwin, and main's twin): a carrier then lets go of a pinned goroutine,
+    // and ends its own thread when the goroutine ended locked (Go's rule, 3.4).
+    internal volatile bool m_twinEnded;
+
+    /// <summary>Whether the calling thread is a carrier with a goroutine mounted that is locked to it.</summary>
+    internal static bool LockedOnCarrier => t_current is { LockedToThread: true } && GoScheduler.OnCarrier;
+
     /// <summary>
     /// Runs a program's <c>main</c> as the main goroutine when it has a hidden async twin. With the scheduler off,
     /// or when an init function locked the main goroutine to the startup thread, it is exactly
@@ -115,7 +127,7 @@ public sealed partial class Goroutine
         Interlocked.CompareExchange(ref main.m_threadId, 0, Environment.CurrentManagedThreadId);
 
         main.m_context = ExecutionContext.Capture();
-        MainTwin run = new(twin);
+        MainTwin run = new(twin, main);
 
         GoScheduler.Ready(main, run.Run);
 
@@ -144,7 +156,7 @@ public sealed partial class Goroutine
     internal static string MainReading() =>
         s_mainTwinRan ? " main=multiplexed" : " main=thread";
 
-    private sealed class MainTwin(Func<GoTask> twin)
+    private sealed class MainTwin(Func<GoTask> twin, Goroutine main)
     {
         internal readonly ManualResetEventSlim Done = new(false);
         internal ExceptionDispatchInfo? Outcome;
@@ -165,6 +177,8 @@ public sealed partial class Goroutine
                 Outcome = ExceptionDispatchInfo.Capture(ex);
             }
 
+            // The pin: main's twin has ended, so a carrier pinned to it lets go (DESIGN-mn-pin.md 3.4, L2).
+            main.m_twinEnded = true;
             Done.Set();
         }
     }
@@ -216,6 +230,8 @@ public sealed partial class Goroutine
     // The owned half of Scope.Dispose, for a goroutine that ends mounted on a carrier.
     private void FinishTwin()
     {
+        m_twinEnded = true;
+
         if (m_bubble is { } bubble)
         {
             m_bubble = null;

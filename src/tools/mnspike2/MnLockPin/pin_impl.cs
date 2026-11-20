@@ -1,0 +1,128 @@
+// M:N PROTOTYPE, THE PIN: the hand-owned side of the pin fixture. This file has no `.go` counterpart.
+//
+// It holds what Go has no word for: which thread a locked goroutine was pinned to, the counts of thread changes and
+// of goroutines seen on a pinned thread, a foreign await (a .NET Task, neither a twin nor a park slot), and an
+// awaiter whose wake comes before its park commits.
+
+using System;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using go.golib;
+
+namespace go;
+
+partial class main_package {
+
+private static readonly string[] s_shapeNames =
+    ["chan", "select", "nested", "foreign", "sleep", "mutex", "wait", "nest", "exit", "unpin"];
+
+private static readonly Thread?[] s_pinned = new Thread?[s_shapeNames.Length];
+private static readonly long[] s_changes = new long[s_shapeNames.Length];
+private static readonly long[] s_checks = new long[s_shapeNames.Length];
+private static readonly ConcurrentDictionary<Thread, nint> s_owners = new();
+private static long s_foreign;
+private static long s_foreignChecks;
+private static Thread? s_exitThread;
+private static int s_stop;
+
+internal static nint roundsOf(nint fallback) =>
+    nint.TryParse(Environment.GetEnvironmentVariable("MN_PIN_ROUNDS_SCALE"), out nint scale) && scale > 0 ? fallback * scale / 100 : fallback;
+
+// lockMe: runtime.LockOSThread, then the thread this goroutine is on now is the one it must stay on.
+internal static void lockMe(nint shape) {
+    runtime_package.LockOSThread();
+    Thread thread = Thread.CurrentThread;
+    s_pinned[shape] = thread;
+    s_owners[thread] = shape;
+}
+
+internal static void unlockMe(nint shape) {
+    if (s_pinned[shape] is { } thread)
+        s_owners.TryRemove(thread, out _);
+
+    runtime_package.UnlockOSThread();
+}
+
+internal static void checkPinned(nint shape) {
+    Interlocked.Increment(ref s_checks[shape]);
+
+    if (!ReferenceEquals(Thread.CurrentThread, s_pinned[shape]))
+        Interlocked.Increment(ref s_changes[shape]);
+}
+
+// An unlocked goroutine is never on a thread that a locked one holds.
+internal static void checkForeign() {
+    Interlocked.Increment(ref s_foreignChecks);
+
+    if (s_owners.ContainsKey(Thread.CurrentThread))
+        Interlocked.Increment(ref s_foreign);
+}
+
+// The foreign check's positive control: a thread registered as pinned must count. Run once before any goroutine
+// starts, and taken back, so it leaves the count at zero.
+internal static void controlForeign() {
+    s_owners[Thread.CurrentThread] = -1;
+    checkForeign();
+    bool fired = Interlocked.Read(ref s_foreign) == 1;
+    s_owners.TryRemove(Thread.CurrentThread, out _);
+    Interlocked.Exchange(ref s_foreign, 0);
+    Interlocked.Exchange(ref s_foreignChecks, 0);
+    Console.Error.WriteLine($"MNPIN-CONTROL foreign-check-fires={fired}");
+}
+
+internal static void noteExitThread() => s_exitThread = Thread.CurrentThread;
+
+internal static bool stopped() => Volatile.Read(ref s_stop) != 0;
+
+internal static void stop() => Volatile.Write(ref s_stop, 1);
+
+// hop: a foreign await. The plain body blocks on a .NET task; its hand-written twin awaits the task, which completes
+// on the thread pool, so its continuation would run off the carrier unless golib routes it (DESIGN-mn-pin.md 10.2).
+internal static void hop() => Task.Run(static () => { }).Wait();
+
+internal static GoTask hopꞏtwin() => Hop();
+
+private static async GoTask Hop() => await Task.Run(static () => { });
+
+// prewoke: a park whose slot is woken BEFORE the park commits, which sends the wake through GoScheduler.Ready at the
+// commit itself. After an unlock, that wake must find the pin already cleared (DESIGN-mn-pin.md 10.3).
+internal static void prewoke() { }
+
+internal static GoTask prewokeꞏtwin() => Prewoke();
+
+private static async GoTask Prewoke() => await new PreWoken();
+
+private readonly struct PreWoken : ICriticalNotifyCompletion {
+    public PreWoken GetAwaiter() => this;
+
+    public bool IsCompleted => false;
+
+    public void GetResult() { }
+
+    public void OnCompleted(Action continuation) => UnsafeOnCompleted(continuation);
+
+    public void UnsafeOnCompleted(Action continuation) {
+        GoParkSlot slot = new();
+        slot.Wake();
+        slot.GetAwaiter().UnsafeOnCompleted(continuation);
+    }
+}
+
+internal static void report() {
+    for (int i = 0; i < s_shapeNames.Length; i++) {
+        if (i == shapeExit)
+            continue;
+
+        fmt_package.Println("shape", s_shapeNames[i], "thread-changes:", s_changes[i]);
+        Console.Error.WriteLine($"MNPIN-CHECKS shape={s_shapeNames[i]} checks={s_checks[i]} changes={s_changes[i]}");
+    }
+
+    fmt_package.Println("goroutines on a pinned thread:", s_foreign);
+    fmt_package.Println("ended-locked thread gone:", s_exitThread is { IsAlive: false });
+    fmt_package.Println("unpin arm finished: true");
+    Console.Error.WriteLine($"MNPIN-FOREIGN checks={s_foreignChecks} foreign={s_foreign} exit-thread-alive={s_exitThread?.IsAlive}");
+}
+
+} // end main_package

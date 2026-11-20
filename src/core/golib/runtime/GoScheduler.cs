@@ -166,6 +166,18 @@ public static class GoScheduler
     // `handoffs` alone rose under N2 as more goroutines came onto carriers; the two together show where blocks went.
     private static long s_threadBlocks;
     private static long s_injections;
+
+    // The pin's readings (DESIGN-mn-pin.md): carriers that pinned a goroutine, wakes delivered to a pinned carrier,
+    // pinned carriers ended with their goroutine, the most waiting at once, and LockOSThread calls off any carrier.
+    private static long s_pins;
+    private static long s_pinnedWakes;
+    private static long s_pinRetired;
+    private static int s_pinnedWaiting;
+    private static int s_peakPinnedWaiting;
+    private static long s_offCarrierLocks;
+
+    internal static void NoteOffCarrierLock() => Interlocked.Increment(ref s_offCarrierLocks);
+
     private static long s_carrierStartFailures;
     private static long s_carriersStarted;
     private static long s_longSteps;
@@ -244,7 +256,16 @@ public static class GoScheduler
         if (Volatile.Read(ref s_started) == 0)
             Start();
 
-        if (s_runNext && t_carrier is { InStep: true, Chain: < MaxRunNextChain } carrier)
+        // The pin (DESIGN-mn-pin.md 3.3): a goroutine parked locked to its thread runs again only on its own carrier,
+        // which takes a P from the pool; the waker runs on.
+        if (goroutine.m_pin is Carrier pin)
+        {
+            pin.Deliver(step);
+            return;
+        }
+
+        // A waker locked to its carrier does not use the run-next slot: that carrier serves one goroutine.
+        if (s_runNext && t_carrier is { InStep: true, Chain: < MaxRunNextChain } carrier && carrier.Mounted is not { LockedToThread: true })
         {
             goroutine.m_readyStep = step;
 
@@ -300,6 +321,9 @@ public static class GoScheduler
                $" retakes={Interlocked.Read(ref s_retakes)}" +
                $" off-carrier-resumes={Interlocked.Read(ref s_offCarrierResumes)}" +
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
+               $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
+               $" pin-retired={Interlocked.Read(ref s_pinRetired)} peak-pinned-waiting={Volatile.Read(ref s_peakPinnedWaiting)}" +
+               $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)}" +
                $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading();
     }
 
@@ -529,7 +553,12 @@ public static class GoScheduler
                 }
             }
 
-            if (s_preemptTicks == 0 || !queued)
+            // DESIGN-mn-pin.md 10.5 and 11.2: a carrier waiting for a P (a pinned wake, or a thread back from a block) is
+            // waiting work too, as the retake already reads it. With the run queue empty a tick injects at most one P per
+            // such waiter, net of the permits already free, and adds no carrier: the waiters are threads already.
+            int waiters = Volatile.Read(ref s_pWaiters) - s_p.CurrentCount;
+
+            if (s_preemptTicks == 0 || (!queued && waiters <= 0))
                 continue;
 
             long pauses = GC.GetTotalPauseDuration().Ticks;
@@ -539,6 +568,10 @@ public static class GoScheduler
             {
                 foreach (Carrier carrier in s_carriers)
                 {
+                    // Only as many carriers spend their once-per-step injection as there are waiters to serve.
+                    if (!queued && inject >= waiters)
+                        break;
+
                     long since = Volatile.Read(ref carrier.RunningSince);
 
                     if (since == 0 || carrier.Injected || Volatile.Read(ref carrier.Retaken) != 0)
@@ -563,10 +596,15 @@ public static class GoScheduler
                 int over = Interlocked.Increment(ref s_overBudget);
                 s_p.Release();
 
+                if (!queued)
+                    continue;
+
                 bool room;
 
+                // DESIGN-mn-pin.md 11.1: the UNBLOCKED count, as the retire and EnsureCarrier read it; a pinned carrier
+                // waiting for its goroutine is blocked and runs nothing queued.
                 lock (s_carriersLock)
-                    room = s_carriers.Count < s_procs + over;
+                    room = s_carriers.Count - Volatile.Read(ref s_blocked) < s_procs + over;
 
                 if (room)
                     AddCarrier();
@@ -603,6 +641,52 @@ public static class GoScheduler
         // The ExecutionContext this thread holds between steps: no goroutine's.
         private ExecutionContext? m_baseContext;
 
+        // THE PIN (DESIGN-mn-pin.md 3). The goroutine this carrier serves alone while it parks locked to this thread;
+        // the step its Ready delivers, and the one-permit wake that carries it (a permit, not a pulse: a wake that
+        // races the commit is kept); and whether the carrier ends its thread after this step (its goroutine ended
+        // locked, Go's rule).
+        private Goroutine? m_pinned;
+        private Action? m_pinnedStep;
+        private SemaphoreSlim? m_pinWake;
+        private bool m_retiring;
+
+        internal void Deliver(Action step)
+        {
+            Volatile.Write(ref m_pinnedStep, step);
+            m_pinWake!.Release();
+        }
+
+        // 3.2: the pinned goroutine is parked. Hand on whatever waits in the run-next slot, count this carrier BLOCKED
+        // (EnsureCarrier backfills the pool, and the idle retire and the injection room read the unblocked count), and
+        // wait, holding no P, on the private wake. The wait is never on s_work, so a pinned carrier never counts in
+        // s_idle (12.1: EnsureCarrier's idle return relies on it).
+        private Item WaitPinned(Goroutine goroutine)
+        {
+            if (Interlocked.Exchange(ref Next, null) is { } next)
+                Enqueue(next, next.TakeReadyStep());
+
+            Interlocked.Increment(ref s_blocked);
+            int waiting = Interlocked.Increment(ref s_pinnedWaiting);
+            int peak;
+
+            while (waiting > (peak = Volatile.Read(ref s_peakPinnedWaiting)))
+            {
+                if (Interlocked.CompareExchange(ref s_peakPinnedWaiting, waiting, peak) == peak)
+                    break;
+            }
+
+            if (!s_runq.IsEmpty)
+                EnsureCarrier();
+
+            m_pinWake!.Wait();
+
+            Interlocked.Decrement(ref s_pinnedWaiting);
+            Interlocked.Decrement(ref s_blocked);
+            Interlocked.Increment(ref s_pinnedWakes);
+
+            return new Item(goroutine, Interlocked.Exchange(ref m_pinnedStep, null)!);
+        }
+
         internal void Loop()
         {
             t_carrier = this;
@@ -612,7 +696,21 @@ public static class GoScheduler
             {
                 Item item;
 
-                if (Interlocked.Exchange(ref Next, null) is { } next)
+                // 3.4: the goroutine ended locked to this thread, so the thread ends with it, as Go terminates it.
+                if (m_retiring)
+                {
+                    lock (s_carriersLock)
+                        s_carriers.Remove(this);
+
+                    Interlocked.Increment(ref s_pinRetired);
+                    return;
+                }
+
+                if (m_pinned is { } pinned)
+                {
+                    item = WaitPinned(pinned);
+                }
+                else if (Interlocked.Exchange(ref Next, null) is { } next)
                 {
                     Chain++;
                     Interlocked.Increment(ref s_runNextSteps);
@@ -627,10 +725,12 @@ public static class GoScheduler
 
                     if (!signalled)
                     {
-                        // A surplus carrier (one added for a hand-off or an injection) retires when idle.
+                        // A surplus carrier (one added for a hand-off or an injection) retires when idle. Surplus is
+                        // read on the UNBLOCKED count (DESIGN-mn-pin.md 10.1): pinned carriers stay in s_carriers, and
+                        // counting them would let every shared carrier retire under K >= P pinned and parked.
                         lock (s_carriersLock)
                         {
-                            if (s_carriers.Count > s_procs)
+                            if (s_carriers.Count - Volatile.Read(ref s_blocked) > s_procs)
                             {
                                 s_carriers.Remove(this);
                                 return;
@@ -731,6 +831,14 @@ public static class GoScheduler
             // it is unhandled on this thread and golib's backstop reports it for the right goroutine.
             goroutine.RethrowTwinFatal();
 
+            // The pin's fourth step-end case (DESIGN-mn-pin.md 10.2, 11.3): locked, no park pending and the goroutine
+            // not ended. GoTaskCore routes a locked goroutine's foreign await into a park, so this is a golib defect:
+            // raised here, still mounted, so the report names the goroutine.
+            bool locked = goroutine.LockedToThread;
+
+            if (locked && PendingSlot is null && !goroutine.m_twinEnded)
+                throw new InvalidOperationException("golib: a locked goroutine's step ended with no park pending");
+
             // The goroutine keeps the context it ends the step with, and the carrier takes its own back
             // before another goroutine mounts.
             if (s_contextSwap)
@@ -752,7 +860,36 @@ public static class GoScheduler
                 PendingSlot = null;
                 PendingContinuation = null;
                 Interlocked.Increment(ref s_parks);
+
+                // THE PIN'S INVARIANT (DESIGN-mn-pin.md 10.3): m_pin is written BEFORE the commit, on pin and on unpin,
+                // so a wake that races the commit (Commit's own "already woken" branch calls Ready at once) takes the
+                // route the goroutine's next step must run on.
+                if (locked)
+                {
+                    m_pinWake ??= new SemaphoreSlim(0);
+
+                    if (m_pinned is null)
+                    {
+                        m_pinned = goroutine;
+                        Interlocked.Increment(ref s_pins);
+                    }
+
+                    goroutine.m_pin = this;
+                }
+                else if (m_pinned is not null)
+                {
+                    goroutine.m_pin = null;
+                    m_pinned = null;
+                }
+
                 slot.Commit(goroutine, continuation);
+            }
+            else if (m_pinned is not null || locked)
+            {
+                // The goroutine ended (the fourth case was refused above). Locked: this thread ends with it (3.4).
+                goroutine.m_pin = null;
+                m_pinned = null;
+                m_retiring = locked;
             }
         }
     }
