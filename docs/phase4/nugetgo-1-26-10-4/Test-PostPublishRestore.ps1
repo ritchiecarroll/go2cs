@@ -27,9 +27,14 @@
 
     The floor control (the last row, '<kit>-floor') is the build's red arm. It takes the -FloorControl kit's PREVIOUS
     revision (the sheet's Rev less one; uuid rev 3 for this wave), built on an earlier release, and references it
-    beside go.fmt at the release. The release it was built on is read from that revision's own restored nuspec, the
-    lower bound of its go.lib range (go.* 1.26.10.3 for this wave), never derived from the release: a hop that moves
-    the minor version (1.26.10.3 to 1.26.11.1) has no "release less one". It PASSES only when all of
+    beside go.fmt at the release. The release it was built on is read from that revision's own nuspec (nuget.org's
+    flat container, or a local folder source), the lower bound of its go.lib range (go.* 1.26.10.3 for this wave),
+    never derived from the release: a hop that moves the minor version (1.26.10.3 to 1.26.11.1) has no "release less
+    one". The control's consumer also references each of that revision's DIRECT go.* dependencies at exactly the
+    release. Without them NuGet resolves a dependency go.fmt's closure does not reach at its lowest version, the
+    earlier release, whose exact go.* pins collide with the release's (NU1107, P2's audit finding #1), and the
+    consumer is refused at restore before the floor is reached (measured 2026-11-20, uuid rev 3: go.bytes 1.26.10.3
+    against go.os 1.26.11.1 on go.internal.bytealg). It PASSES only when all of
     these hold, so a floor that stopped refusing turns the smoke red:
       [restore] exits 0 (the floor is not a restore check);
       [build]   fails, with exactly one distinct per-package `error GO2CS3002` line, and that line names the package,
@@ -111,8 +116,8 @@ foreach ($o in $Version) {
 foreach ($n in $Only) { if (-not $kits.Contains($n)) { throw "-Only names '$n', which no sheet carries" } }
 $run = @($kits.Values | Where-Object { $Only.Count -eq 0 -or $Only -contains $_.Name })
 
-# The floor control: the kit's previous revision. The release it was built on (BuiltOn) is read from its restored
-# nuspec once its consumer has restored (Get-BuiltOnRelease), never derived from $Release.
+# The floor control: the kit's previous revision. The release it was built on (BuiltOn) is read from its own nuspec
+# (Get-ControlNuspec, Get-BuiltOnRelease), never derived from $Release.
 $control = $null
 if (-not $NoFloorControl) {
     if (-not $kits.Contains($FloorControl)) { throw "-FloorControl names '$FloorControl', which no sheet carries" }
@@ -136,7 +141,7 @@ $results = @()
 # One consumer project in one SHAPE: 'alone' references only the package, so NuGet resolves the lowest version its
 # own go.* ranges allow -- the release, if the package was built on it; any other shape names a go.* package
 # referenced beside it at exactly the release, the audit's shape.
-function Invoke-ConsumerRestore($k, [string]$shape, [switch]$Lenient) {
+function Invoke-ConsumerRestore($k, [string]$shape, [switch]$Lenient, [string[]]$Lift = @()) {
     $dir = Join-Path $work "$($k.Name)-$shape"
     $packages = Join-Path $dir 'packages'
     New-Item -ItemType Directory $dir, $packages | Out-Null
@@ -150,6 +155,7 @@ $(($Source | ForEach-Object -Begin { $i = 0 } -Process { $i++; "    <add key=`"s
 </configuration>
 "@ | Set-Content -LiteralPath (Join-Path $dir 'nuget.config')
     $beside = if ($shape -ne 'alone') { "`n    <PackageReference Include=`"$shape`" Version=`"[$Release]`" />" } else { '' }
+    foreach ($id in @($Lift | Where-Object { $_ -ne $shape })) { $beside += "`n    <PackageReference Include=`"$id`" Version=`"[$Release]`" />" }
     @"
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
@@ -215,18 +221,44 @@ function Invoke-ConsumerBuild([string]$dir, [string]$label, [string[]]$extra = @
                        FirstError = if ($first) { $first -replace '^.*?: error ', '' -replace '\s*\[[^\]]*\]\s*$', '' } else { '' } }
 }
 
-# The release a restored package was built on: the inclusive lower bound of its nuspec's go.lib range ('[a, b)', '[a]'
-# or a bare 'a'), read from the consumer's private packages folder. '' when the nuspec, the dependency or an inclusive
-# bound is missing, which the caller reports as a failure rather than guessing.
-function Get-BuiltOnRelease($k, [string]$dir) {
-    $nuspec = Join-Path $dir "packages/$($k.Id.ToLowerInvariant())/$($k.Version.ToLowerInvariant())/$($k.Id.ToLowerInvariant()).nuspec"
-    if (-not (Test-Path -LiteralPath $nuspec)) { return '' }
-    $xml = [xml](Get-Content -Raw -LiteralPath $nuspec)
+# The control revision's own nuspec, read before its consumer restores: from nuget.org's flat container, or from a
+# local folder source that holds <id>.<version>.nupkg. '' when no source has it.
+function Get-ControlNuspec($k) {
+    $id = $k.Id.ToLowerInvariant(); $v = $k.Version.ToLowerInvariant()
+    foreach ($s in $Source) {
+        if ($s -like 'https://api.nuget.org/*') {
+            try { return [string](Invoke-WebRequest -UseBasicParsing "https://api.nuget.org/v3-flatcontainer/$id/$v/$id.nuspec").Content } catch { continue }
+        } elseif (Test-Path -LiteralPath $s -PathType Container) {
+            $f = @(Get-ChildItem -LiteralPath $s -File -Filter '*.nupkg' | Where-Object { $_.Name -ieq "$id.$v.nupkg" })
+            if (-not $f.Count) { continue }
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            $zip = [IO.Compression.ZipFile]::OpenRead($f[0].FullName)
+            try {
+                $e = @($zip.Entries | Where-Object { $_.FullName -notlike '*/*' -and $_.FullName -like '*.nuspec' })[0]
+                $r = [IO.StreamReader]::new($e.Open()); try { return $r.ReadToEnd() } finally { $r.Dispose() }
+            } finally { $zip.Dispose() }
+        }
+    }
+    return ''
+}
+
+# The release a package was built on: the inclusive lower bound of its nuspec's go.lib range ('[a, b)', '[a]' or a
+# bare 'a'). '' when the dependency or an inclusive bound is missing, or the groups disagree, which the caller
+# reports as a failure rather than guessing.
+function Get-BuiltOnRelease([string]$nuspec) {
+    if (-not $nuspec) { return '' }
+    $xml = [xml]$nuspec
     $ranges = @($xml.SelectNodes("//*[local-name()='dependency']") | Where-Object { $_.GetAttribute('id') -eq 'go.lib' } | ForEach-Object { $_.GetAttribute('version') })
     $lows = @($ranges | ForEach-Object {
         if ($_ -match '^\s*\[\s*([0-9][0-9A-Za-z.\-]*)\s*(,|\])') { $Matches[1] } elseif ($_ -match '^\s*([0-9][0-9A-Za-z.\-]*)\s*$') { $Matches[1] } } | Sort-Object -Unique)
     if ($lows.Count -ne 1) { return '' }
     return $lows[0]
+}
+
+# The go.* packages a nuspec references directly, which the control's consumer lifts to the release.
+function Get-GoDependencyIds([string]$nuspec) {
+    if (-not $nuspec) { return @() }
+    @(([xml]$nuspec).SelectNodes("//*[local-name()='dependency']") | ForEach-Object { $_.GetAttribute('id') } | Where-Object { $_ -like 'go.*' } | Sort-Object -Unique)
 }
 
 # The floor control's two builds of its restored consumer, judged: [build] refused with exactly one per-package
@@ -284,14 +316,20 @@ if ($control) {
     if ($isNugetOrg -and $listed -notcontains $k.Version) {
         $row.Verdict = 'NOT-PUBLISHED'; $row.Detail = "nuget.org does not list $($k.Version), the control's revision"
     } else {
-        $r = Invoke-ConsumerRestore $k $CoReference -Lenient
-        if ($r.Ok) { $k.BuiltOn = Get-BuiltOnRelease $k $r.Dir }
+        $nuspec = Get-ControlNuspec $k
+        $k.BuiltOn = Get-BuiltOnRelease $nuspec
         $row.Version = "$($k.Version) (go.* $(if ($k.BuiltOn) { $k.BuiltOn } else { 'unread' }))"
-        $j = if ($r.Ok -and $k.BuiltOn) { Test-FloorControl $k $r.Dir }
-             elseif ($r.Ok) { [pscustomobject]@{ Ok = $false; Parts = @("[built on] its nuspec names no single inclusive go.lib lower bound") } }
-             else { [pscustomobject]@{ Ok = $false; Parts = @() } }
-        $ok = $r.Ok -and $j.Ok
-        $parts = @("[restore] $($r.Detail)") + $j.Parts
+        if (-not $nuspec) {
+            $ok = $false; $parts = @("[nuspec] no source holds $($k.Id) $($k.Version)")
+        } elseif (-not $k.BuiltOn) {
+            $ok = $false; $parts = @('[built on] its nuspec names no single inclusive go.lib lower bound')
+        } else {
+            $lift = Get-GoDependencyIds $nuspec
+            $r = Invoke-ConsumerRestore $k $CoReference -Lenient -Lift $lift
+            $j = if ($r.Ok) { Test-FloorControl $k $r.Dir } else { [pscustomobject]@{ Ok = $false; Parts = @() } }
+            $ok = $r.Ok -and $j.Ok
+            $parts = @("[restore] $($r.Detail) (its $($lift.Count) direct go.* dependencies lifted to $Release)") + $j.Parts
+        }
         $row.Verdict = if ($ok) { 'PASS' } else { 'FAIL' }
         $row.Detail = $parts -join '  '
     }
