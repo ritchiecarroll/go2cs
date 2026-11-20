@@ -77,4 +77,10 @@ func main() {
 	h := &holder{}
 	h.link.Add("h1")
 	fmt.Println("holder:", h.link.Count(), h.link.Last())
+
+	// A local whose address is taken elsewhere: the call is on the value, and is read back through the pointer.
+	var ev lib.Link
+	pe := &ev
+	ev.Add("x")
+	fmt.Println("escaped:", pe.Count(), pe.Last())
 }

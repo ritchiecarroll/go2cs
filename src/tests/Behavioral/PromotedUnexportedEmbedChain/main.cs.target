@@ -73,6 +73,11 @@ internal static void main() {
     var h = Ꮡ(new holder());
     h.link.Add("h1");
     fmt.Println("holder:", h.link.Count(), h.link.Last());
+
+    ref var ev = ref heap(new lib.Link(), out var Ꮡev);
+    var pe = Ꮡev;
+    ev.Add("x");
+    fmt.Println("escaped:", pe.Count(), pe.Last());
 }
 
 } // end main_package
