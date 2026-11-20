@@ -7,16 +7,21 @@
     Restores the RollForward fixture from ONE feed into a FRESH package cache, builds it per arm, and reads the
     runtimeconfig.json each build writes:
 
-      GREEN       an executable gets "rollForward": "Major".
-      USER WINS   with -p:RollForward=LatestPatch the project's own value is written instead.
-      LIBRARY     with -p:OutputType=Library the property stays unset (a library chooses no runtime).
-      CONTROL     the arm can fail: with -p:RollForward=Disable the runtimeconfig reads "Disable".
+      GREEN         an executable gets "rollForward": "Major".
+      WINEXE        so does a Windows GUI executable (-p:OutputType=WinExe).
+      TEST PROJECT  so does a test project shaped like a converted test host (IsTestProject, OutputType Exe).
+      USER WINS     a RollForward the PROJECT sets (LatestPatch, assigned in the project body through the fixture-only
+                    FixtureRollForward; a -p:RollForward would be global and could not test the clause) is kept.
+      TEMPLATE      with a runtimeconfig.template.json that sets rollForward, the template's value is the only one.
+      LIBRARY       with -p:OutputType=Library the property stays unset (a library chooses no runtime).
+      CONTROL       the arm can fail: a project-set Disable is written and, under -DotnetRoot, cannot start.
 
     With -DotnetRoot pointing at a .NET that has NO 10.0 runtime (an isolated .NET 11 install, say), the GREEN
     build is also RUN under that root and must start and print its runtime major; the CONTROL build must fail to
     start with the missing-framework error. With -TargetsFile (pre-pack), a PUBLISHED arm also builds the fixture
     from the package as published, without the working-tree targets, and expects no rollForward key, and, under
-    -DotnetRoot, the same failure to start: that is the red this change turns green.
+    -DotnetRoot, the same failure to start: that is the red this change turns green. A PUBLISH arm then publishes
+    self-contained with and without the working-tree targets and expects the same warnings from both.
 
     Exit 0 only when every arm reads as expected. Nothing outside a temporary work directory is written.
 
@@ -92,9 +97,19 @@ function Build-Arm([string[]] $Extra) {
 function Read-RollForward([string] $OutDir) {
     $config = Join-Path $OutDir 'RollForward.runtimeconfig.json'
     if (-not (Test-Path $config)) { return '<no runtimeconfig>' }
-    $options = (Get-Content -Raw $config | ConvertFrom-Json).runtimeOptions
-    if ($null -eq $options.rollForward) { return '<unset>' }
-    return [string]$options.rollForward
+    # Read the KEYS, not a parsed object: a parser keeps one of two duplicate keys and hides the other.
+    $values = @([regex]::Matches((Get-Content -Raw $config), '"rollForward"\s*:\s*"([^"]*)"') | ForEach-Object { $_.Groups[1].Value })
+    if ($values.Count -eq 0) { return '<unset>' }
+    if ($values.Count -gt 1) { return "<$($values.Count) keys: $($values -join ', ')>" }
+    return $values[0]
+}
+
+# A project property as MSBuild evaluates it, read as JSON (two properties asked) so a warning line cannot pass for it.
+function Read-Property([string] $Name, [string[]] $Extra) {
+    $json = (& dotnet msbuild $project -restore "-p:GoPackageVersion=$Version" -nologo "-getProperty:$Name" -getProperty:OutputType @Extra 2>$null) -join "`n"
+    $start = $json.IndexOf('{')
+    if ($LASTEXITCODE -ne 0 -or $start -lt 0) { return $null }
+    return ($json.Substring($start) | ConvertFrom-Json).Properties
 }
 
 function Invoke-Program([string] $OutDir) {
@@ -127,18 +142,37 @@ else {
     } else { $verdicts += 'PASS (GREEN): rollForward Major' }
 }
 
-# USER WINS: the project's own value is kept.
-$out = Build-Arm ($withTargets + '-p:RollForward=LatestPatch')
+# WINEXE: a Windows GUI executable rolls forward the same way.
+$out = Build-Arm ($withTargets + '-p:OutputType=WinExe')
+$value = if ($out) { Read-RollForward $out } else { '<build failed>' }
+$verdicts += $(if ($value -eq 'Major') { 'PASS (WINEXE): rollForward Major' } else { "FAIL (WINEXE): rollForward is $value, want Major" })
+
+# TEST PROJECT: a converted test host is an executable test project (its template sets OutputType Exe).
+$out = Build-Arm ($withTargets + '-p:FixtureTestProject=true')
+$value = if ($out) { Read-RollForward $out } else { '<build failed>' }
+$testProps = Read-Property 'IsTestProject' ($withTargets + '-p:FixtureTestProject=true')
+$testType = if ($testProps -and $testProps.IsTestProject -eq 'true') { $testProps.OutputType } else { '<not a test project>' }
+$verdicts += $(if ($value -eq 'Major' -and $testType -eq 'Exe') { 'PASS (TEST PROJECT): IsTestProject with OutputType Exe, rollForward Major' } else { "FAIL (TEST PROJECT): OutputType '$testType', rollForward $value, want Exe and Major" })
+
+# USER WINS: a value the PROJECT sets is kept. Assigned in the project body, never with -p:RollForward, which is global.
+$out = Build-Arm ($withTargets + '-p:FixtureRollForward=LatestPatch')
 $value = if ($out) { Read-RollForward $out } else { '<build failed>' }
 $verdicts += $(if ($value -eq 'LatestPatch') { 'PASS (USER WINS): rollForward LatestPatch' } else { "FAIL (USER WINS): rollForward is $value, want LatestPatch" })
 
-# LIBRARY: no runtime of its own, so the property stays unset.
-$libValue = (& dotnet msbuild $project -restore "-p:GoPackageVersion=$Version" -p:OutputType=Library -nologo -getProperty:RollForward @withTargets 2>&1 | Select-Object -Last 1)
-$libValue = "$libValue".Trim()
-$verdicts += $(if ($LASTEXITCODE -eq 0 -and $libValue -eq '') { 'PASS (LIBRARY): RollForward unset' } else { "FAIL (LIBRARY): RollForward reads '$libValue' (exit $LASTEXITCODE), want unset" })
+# TEMPLATE: a runtimeconfig.template.json that sets rollForward owns the value; it must be the only key written.
+$template = Join-Path $work 'runtimeconfig.template.json'
+'{ "rollForward": "LatestPatch" }' | Set-Content -Path $template -Encoding utf8
+$out = Build-Arm $withTargets
+$value = if ($out) { Read-RollForward $out } else { '<build failed>' }
+Remove-Item $template
+$verdicts += $(if ($value -eq 'LatestPatch') { 'PASS (TEMPLATE): one rollForward key, the template''s LatestPatch' } else { "FAIL (TEMPLATE): rollForward is $value, want the template's LatestPatch alone" })
 
-# CONTROL: the arm can fail. Disable is written as such and, on a root without 10.0, cannot start.
-$out = Build-Arm ($withTargets + '-p:RollForward=Disable')
+# LIBRARY: no runtime of its own, so the property stays unset.
+$library = Read-Property 'RollForward' ($withTargets + '-p:OutputType=Library')
+$verdicts += $(if ($null -ne $library -and $library.OutputType -eq 'Library' -and $library.RollForward -eq '') { 'PASS (LIBRARY): RollForward unset' } else { "FAIL (LIBRARY): RollForward reads '$($library.RollForward)' for OutputType '$($library.OutputType)', want unset" })
+
+# CONTROL: the arm can fail. A project-set Disable is written as such and, on a root without 10.0, cannot start.
+$out = Build-Arm ($withTargets + '-p:FixtureRollForward=Disable')
 $value = if ($out) { Read-RollForward $out } else { '<build failed>' }
 if ($value -ne 'Disable') { $verdicts += "FAIL (CONTROL): rollForward is $value, want Disable" }
 elseif ($DotnetRoot) {
@@ -158,6 +192,22 @@ if ($TargetsFile) {
         if ($run.Code -eq 0) { $verdicts += "FAIL (PUBLISHED): the published package's build started under $DotnetRoot; the red did not reproduce" }
         else { $verdicts += "PASS (PUBLISHED): no rollForward, failed to start under $DotnetRoot (exit $($run.Code)), the red this change turns green" }
     } else { $verdicts += 'PASS (PUBLISHED): no rollForward key' }
+
+    # PUBLISH: a self-contained publish carries its own runtime; the working-tree file must add no warning to it. The
+    # warnings travel as ONE string (a sorted, newline-joined set): a function returning an empty array returns $null,
+    # which would read a clean publish as a failed one.
+    function Publish-Warnings([string[]] $Extra) {
+        Remove-Item -Recurse -Force (Join-Path $work 'bin'), (Join-Path $work 'obj') -ErrorAction SilentlyContinue
+        $log = & dotnet publish $project -c Release -r win-x64 --self-contained "-p:GoPackageVersion=$Version" -nologo -v:m @Extra 2>&1 | ForEach-Object { "$_" }
+        if ($LASTEXITCODE -ne 0) { return '<failed>' }
+        $warnings = @($log | Where-Object { $_ -match ': warning ' } | ForEach-Object { ($_ -replace '\s*\[[^\]]*\]\s*$', '').Trim() } | Sort-Object -Unique)
+        return 'warnings=' + $warnings.Count + "`n" + ($warnings -join "`n")
+    }
+    $before = Publish-Warnings @()
+    $after = Publish-Warnings $withTargets
+    if ($before -eq '<failed>' -or $after -eq '<failed>') { $verdicts += 'FAIL (PUBLISH): a self-contained publish did not complete' }
+    elseif ($before -ne $after) { $verdicts += "FAIL (PUBLISH): the working-tree file changes the publish warnings ($(($before -split "`n")[0]) before, $(($after -split "`n")[0]) after)" }
+    else { $verdicts += "PASS (PUBLISH): self-contained publish, the same $(($after -split "`n")[0]) with and without the file" }
 }
 
 $verdicts | ForEach-Object { Write-Host $_ }

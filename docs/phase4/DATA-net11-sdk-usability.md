@@ -26,6 +26,22 @@ walkthrough (`fatih/color`, `go2cs -recurse=nuget`, build, run) on .NET 11 alone
 the run exits 150; with the working-tree targets the runtimeconfig reads `Major` and the output is byte-identical to
 `go run`.
 
+**What the default reaches** (P3's review, 2026-11-20 12:51Z; each case is an arm of the gate, and each clause of the
+condition was neutered on a copy of the file and turned exactly its own arm red):
+
+- an `Exe` and a `WinExe` (a converted program inside a Windows GUI host fails at launch the same way without it);
+- a TEST project too: a converted test host is an executable (`src/go2cs/test-csproj-template.xml` sets `OutputType`
+  Exe), so a converted `-tests` project that restores the go.* packages runs its tests on .NET 11 when 10 is absent.
+  The validation of record (the roster, the banked counts) is taken on .NET 10; a run on a newer major is not a
+  validation of it;
+- NOT a library (it chooses no runtime), NOT a project that sets `RollForward` itself, and NOT a project that brings a
+  `runtimeconfig.template.json`. With both a template that set `rollForward` and the property, the SDK wrote
+  `rollForward` twice into `runtimeconfig.json` (Major, then the template's value), so a template turns the default off;
+- a self-contained publish carries its own runtime: the same warnings (none) with and without the file.
+
+A user who wants the refusal back sets `RollForward` to `Disable` or `LatestMinor` in the project (docs/README.md,
+Requirements).
+
 ## The repository on .NET 11 alone (contributor side): measured, not changed
 
 `/global.json` pins `10.0.400` with `rollForward: latestFeature`, and `latestFeature` never crosses a major, so every

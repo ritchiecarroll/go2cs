@@ -10,6 +10,19 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
+  <!-- A RollForward the PROJECT sets (the USER WINS and CONTROL arms). It must be assigned here, in the project body:
+       a -p:RollForward on the command line is a GLOBAL property, which no imported file can override whatever its
+       condition says, so an arm that passed it that way could not fail on the clause it tests. -->
+  <PropertyGroup Condition="'$(FixtureRollForward)' != ''">
+    <RollForward>$(FixtureRollForward)</RollForward>
+  </PropertyGroup>
+
+  <!-- The TEST PROJECT arm, in the shape of a converted test host (src/go2cs/test-csproj-template.xml): a test
+       project that declares itself an executable, as that template does with OutputType Exe. -->
+  <PropertyGroup Condition="'$(FixtureTestProject)' == 'true'">
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="go.lib" Version="$(GoPackageVersion)" />
   </ItemGroup>

@@ -60,13 +60,19 @@ runtime) the program still starts, while a machine that has .NET 10 keeps runnin
 arm writes:
 
 - GREEN: an executable gets `"rollForward": "Major"`;
-- USER WINS: with `-p:RollForward=LatestPatch` the project's own value is written;
+- WINEXE: so does a Windows GUI executable;
+- TEST PROJECT: so does a test project shaped like a converted test host (`IsTestProject`, `OutputType` Exe);
+- USER WINS: a `RollForward` the project sets (LatestPatch, assigned in the project body from the fixture-only
+  `FixtureRollForward`) is kept. A `-p:RollForward` would be a global property, which no imported file can override,
+  so it could not test the clause;
+- TEMPLATE: with a `runtimeconfig.template.json` that sets `rollForward`, the template's value is the only key written;
 - LIBRARY: with `-p:OutputType=Library` the property stays unset;
-- CONTROL: with `-p:RollForward=Disable` the value is written as such, proving the arm can fail.
+- CONTROL: a project-set `Disable` is written as such, proving the arm can fail.
 
 With `-DotnetRoot <root>`, a dotnet root with no 10.0 runtime, the GREEN build is also RUN there and must start on a
 newer major, and the CONTROL build must fail to start with the missing-framework error. With `-TargetsFile`, a
-PUBLISHED arm builds from the package as published, without the working-tree file.
+PUBLISHED arm builds from the package as published, without the working-tree file, and a PUBLISH arm publishes
+self-contained with and without it and expects the same warnings.
 
 ```text
 pwsh src/tests/PackageTests/RollForward/test-roll-forward.ps1 -Version <go.lib version> [-Source <feed dir or URL>] [-TargetsFile <go.lib.targets>] [-DotnetRoot <dotnet root without 10.0>]
@@ -74,8 +80,9 @@ pwsh src/tests/PackageTests/RollForward/test-roll-forward.ps1 -Version <go.lib v
 
 Read red-first against the published 1.26.11.1 with an isolated .NET 11.0.100 SDK as `-DotnetRoot`: the PUBLISHED
 arm writes no `rollForward` and fails to start, and with the working-tree file every arm PASSES and GREEN runs on
-runtime 11. Removing the `OutputType` clause from the property's condition turns LIBRARY red and leaves the other
-arms green.
+runtime 11. Each clause of the property's condition was removed on a copy of the file, and each turned exactly its own
+arm red: the empty-value clause USER WINS and CONTROL (the two project-set values), the template checks TEMPLATE (the
+SDK then writes `rollForward` twice), `WinExe` WINEXE, and the `OutputType` clause LIBRARY.
 
 # `BreakFloor`: a package built below the go.* break floor fails the build
 
