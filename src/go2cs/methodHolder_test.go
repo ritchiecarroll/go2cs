@@ -1188,3 +1188,59 @@ func TestSize(t *testing.T) {
 	requireEmitted(t, "the program's main.cs", program["main.cs"], []string{"partial class mainᴛplain {"}, nil)
 	requireEmitted(t, "main_test.cs", convertMainTestsVariant(t, production, test), []string{"global::go.mainᴛplain.Size))"}, nil)
 }
+
+const foreignConstraintHolderLibSource = `package lib
+
+type Text interface{ ~[]byte | ~string }
+`
+
+const foreignConstraintHolderMainSource = `package main
+
+import (
+	"fmt"
+
+	"example.com/app/lib"
+)
+
+type Iterator[T lib.Text] struct{ data T }
+
+func (it *Iterator[T]) SetText(data T) { it.data = data }
+
+type Window[K comparable, T lib.Text] struct {
+	key  K
+	data T
+}
+
+func (w Window[K, T]) Len() int { return len(w.data) }
+
+func main() {
+	it := &Iterator[string]{}
+	it.SetText("go")
+	fmt.Println(len(it.data), Window[int, []byte]{data: []byte("abc")}.Len())
+}
+`
+
+// A generic type's holder is named by the type's identifier alone, whatever its type parameters' constraints
+// are. A constraint from a package whose import path has a slash (example.com/app/lib) used to reach the
+// holder's name through the type's string form, where the last-slash strip left the constraint's own name and
+// the closing bracket: `mainᴛText>` for every such type, two types sharing one broken holder (CS1022), the
+// emission of github.com/clipperhouse/uax29/v2's iterators package.
+func TestGenericHolderIsNamedByTheTypeWhateverItsConstraint(t *testing.T) {
+	emitted := convertMethodHolderTree(t, "example.com/app",
+		map[string]string{"main.go": foreignConstraintHolderMainSource},
+		map[string]string{"lib/lib.go": foreignConstraintHolderLibSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"\n} partial class mainᴛIterator {\n",
+		"\n} partial class mainᴛWindow {\n",
+	}, []string{
+		"Text>",
+	})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"[GoMethodHost(typeof(main_package.Iterator<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛIterator;\n",
+		"[GoMethodHost(typeof(main_package.Window<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛWindow;\n",
+	}, []string{
+		"Text>",
+	})
+}

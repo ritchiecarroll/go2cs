@@ -1,0 +1,17 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	absent	divergent_names	run	wall_s	cells	same_names
+AR-5	crypto/des	linux-arm64	55	55	0	0	0	validated	-	-	-	44449684458	26	read	yes
+AR-5	crypto/hkdf	linux-arm64	3	3	0	0	0	validated	-	-	-	44449684458	19	read	yes
+AR-5	crypto/internal/fips140/mldsa	linux-arm64	46	46	0	0	0	validated	-	-	-	44449684458	28	read	yes
+AR-5	crypto/internal/fips140/rsa	linux-arm64	123	123	0	0	0	validated	-	-	-	44449684458	23	read	yes
+AR-5	crypto/internal/fips140only	linux-arm64	1	1	0	0	0	validated	-	-	-	44449684458	28	read	yes
+AR-5	crypto/internal/fips140test	linux-arm64	2282	2274	8	8	0	validated	-	-	TestEdwards25519Allocations;TestMLDSAAllocations;TestNISTECAllocations;TestNISTECAllocations/P224;TestNISTECAllocations/P256;TestNISTECAllocations/P384;TestNISTECAllocations/P521;TestXAESAllocations	44449684458	172	read	yes
+AR-5	encoding/base64	linux-arm64	17	17	0	0	0	validated	-	-	-	44449684458	38	read	yes
+AR-5	encoding/hex	linux-arm64	12	12	0	0	0	validated	-	-	-	44449684458	205	read	yes
+AR-5	go/parser	linux-arm64	183	183	0	0	0	validated	-	-	-	44449684458	118	read	yes
+AR-5	go/version	linux-arm64	3	3	0	0	0	validated	-	-	-	44449684458	14	read	yes
+AR-5	log	linux-arm64	24	24	0	0	0	validated	-	-	-	44449684458	32	read	yes
+AR-5	net/http/internal/ascii	linux-arm64	13	13	0	0	0	validated	-	-	-	44449684458	13	read	yes
+AR-5	net/http/pprof	linux-arm64	15	15	0	0	0	validated	-	-	-	44449684458	117	read	yes
+AR-5	net/netip	linux-arm64	268	211	57	57	0	validated	-	-	TestAddrStringAllocs;TestAddrStringAllocs/ipv4;TestAddrStringAllocs/ipv4-in-ipv6;TestAddrStringAllocs/ipv4-in-ipv6+zone;TestAddrStringAllocs/ipv6;TestAddrStringAllocs/ipv6+zone;TestNoAllocs;TestNoAllocs/Addr.As16;TestNoAllocs/Addr.As4;TestNoAllocs/Addr.BitLen;TestNoAllocs/Addr.Compare;TestNoAllocs/Addr.Is4;TestNoAllocs/Addr.Is4In6;TestNoAllocs/Addr.Is6;TestNoAllocs/Addr.IsGlobalUnicast;TestNoAllocs/Addr.IsInterfaceLocalMulticast;TestNoAllocs/Addr.IsLinkLocalMulticast;TestNoAllocs/Addr.IsLinkLocalUnicast;TestNoAllocs/Addr.IsLoopback;TestNoAllocs/Addr.IsMulticast;TestNoAllocs/Addr.IsPrivate;TestNoAllocs/Addr.IsUnspecified;TestNoAllocs/Addr.IsZero;TestNoAllocs/Addr.Less;TestNoAllocs/Addr.Next;TestNoAllocs/Addr.Prefix/4;TestNoAllocs/Addr.Prefix/6;TestNoAllocs/Addr.Prev;TestNoAllocs/Addr.Unmap;TestNoAllocs/Addr.WithZone;TestNoAllocs/Addr.Zone/4;TestNoAllocs/Addr.Zone/6;TestNoAllocs/Addr.Zone/6zone;TestNoAllocs/AddrFrom16;TestNoAllocs/AddrFrom4;TestNoAllocs/AddrPortFrom;TestNoAllocs/IPv4;TestNoAllocs/IPv6LinkLocalAllNodes;TestNoAllocs/IPv6LinkLocalAllRouters;TestNoAllocs/IPv6Loopback;TestNoAllocs/MustParseAddr;TestNoAllocs/MustParseAddrPort;TestNoAllocs/MustParsePrefix;TestNoAllocs/ParseAddr/4;TestNoAllocs/ParseAddr/6;TestNoAllocs/ParseAddrPort;TestNoAllocs/ParsePrefix/4;TestNoAllocs/ParsePrefix/6;TestNoAllocs/Prefix.Contains;TestNoAllocs/Prefix.IsSingleIP;TestNoAllocs/Prefix.IsZero;TestNoAllocs/Prefix.Masked;TestNoAllocs/Prefix.Overlaps;TestNoAllocs/PrefixFrom;TestParsePrefixAllocs;TestParsePrefixAllocs/*	44449684458	41	read	yes
+AR-5	runtime/metrics	linux-arm64	2	2	0	0	0	validated	-	-	-	44449684458	28	read	yes
+AR-5	text/scanner	linux-arm64	18	18	0	0	0	validated	-	-	-	44449684458	15	read	yes

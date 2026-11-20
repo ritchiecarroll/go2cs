@@ -212,6 +212,14 @@ func methodsMayStayInPackageClass(origin *types.Named) bool {
 // qualifier and without type arguments. escaped keeps a keyword's `@`, which a class name built from the
 // identifier drops.
 func (v *Visitor) holderTypeName(named *types.Named) (escaped string) {
+	// A generic type is named by its identifier, the spelling getAliasQualifiedTypeName gives a same-package
+	// instantiation. Its origin's string form carries the type parameters with their constraints, and a
+	// constraint from a package whose import path has a slash (Iterator[T stringish.Interface]) lost the
+	// type's own name to that form's last-slash strip, leaving `Interface>`.
+	if typeParams := named.Origin().TypeParams(); typeParams != nil && typeParams.Len() > 0 {
+		return getSanitizedIdentifier(named.Obj().Name())
+	}
+
 	typeName := convertToCSTypeName(v.getCSharpTypeName(named.Origin()))
 
 	if open := strings.Index(typeName, "<"); open != -1 {
