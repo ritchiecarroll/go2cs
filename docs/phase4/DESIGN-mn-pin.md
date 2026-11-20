@@ -6,8 +6,9 @@
 > pinned goroutine costs a carrier, and how the pin meets N5. Predictions and stop lines are in §6 and §7, written
 > before any arm runs. Amended by dated blocks, never rewritten.
 >
-> **Revision 1 (section 10, 2026-11-20): P3's review folded in; COORD approved the asks of section 9 on it.** The
-> build waits on the owner's M:N landing shape.
+> **Revision 1 (section 10, 2026-11-20): P3's review folded in; COORD approved the asks of section 9 on it.**
+> **Revision 2 (section 11, 2026-11-20): P3's re-read of section 10 folded in.** The build waits on the owner's M:N
+> landing shape.
 
 ## 1. The gap
 
@@ -289,3 +290,73 @@ every 10 ms for 10 s; wake-to-run latency per wake, p50 and p99. The same with t
 
 With 10.1-10.5 the golib change is about 130-180 lines (P3's estimate), not 80-120. The lane-days of section 8
 stand: 2-3, the M3b and M7 arms inside the 0.5-1 for arms.
+
+## 11. Revision 2, after P3's re-read of section 10 (dated block, 2026-11-20)
+
+P3 re-read revision 1 (`5a795c18c2`): 10.1-10.4 and 10.6 CLEAR; 10.5 BLOCKED on one line, with one SHOULD, two
+nits and a limit to name. COORD ruled all of them into this block. Where this block and section 10 differ, this
+block holds.
+
+### 11.1 BLOCK: the injection room counted pinned carriers (amends 10.5)
+
+The injection adds its carrier only while `s_carriers.Count < s_procs + over`, and `Count` includes pinned carriers.
+P3's case: P = 2, one pinned goroutine parked, both shared carriers in long steps, one unlocked goroutine queued.
+The monitor injects (over = 1) and releases a P, `3 < 3` is false, and no carrier is added. No carrier is idle
+(injection requires none), so the released P has no thread, and the queued goroutine waits for a step to end. One
+pinned goroutine switched the 10 ms bound off for everyone.
+
+**Rule.** The room reads the unblocked count, `Count - s_blocked < s_procs + over`, as 10.1's retire and
+`EnsureCarrier` do. A census of `GoScheduler.cs` at this branch finds four reads of the carrier count or `s_blocked`
+that decide a thread: `EnsureCarrier`'s room (already unblocked), the injection's room (this fix), the idle retire
+(10.1), and `Enqueue`'s gate (`s_blocked > 0` calls `EnsureCarrier`). The last one is correct as it stands: while a
+pinned goroutine lives, every `Enqueue` with no idle carrier takes `EnsureCarrier`'s lock. That is a cost to read in
+M1, not a defect. The fourth `Count` read only keeps the peak reading.
+
+**M7, third run.** The woken goroutine UNLOCKED, with K = 1 and K = P pinned goroutines parked. Its p50 and p99 must
+match the control's (no pinned goroutines) within 1.25x; stop over 1.5x. Made to fail: the old room line restored,
+K = 1 must show the starvation.
+
+### 11.2 SHOULD: over-injection for P waiters (amends 10.5)
+
+10.5 widened the trigger to `s_pWaiters > 0`, but the loop injects once per carrier past the threshold, not once per
+waiting unit. One P waiter and P long steps give P injections: one is used, and P - 1 permits sit in `s_p` while
+the steps run, so later steps start above P. Each injection may also add a carrier that has nothing queued, which
+idles 100 ms and retires: a thread start per injection. Bounded (`s_maxInject`, and `ReleaseP` retires surplus), so
+it is waste, not a hang. It applies to unpinned P waiters too (a goroutine coming back through `ExitBlocked`).
+
+**Rule.** When the run queue is empty, a tick injects at most `s_pWaiters` permits (net of any already free in
+`s_p`) and adds NO carrier: the waiters are threads already. With work queued, injection is as today.
+
+**A budget the arm must respect, named.** A carrier injects once per step (`carrier.Injected` is reset when its next
+step starts). So in a period where every carrier runs one long step, at most P injections happen, pinned or not;
+a wake beyond that waits for a step to end. This is today's policy for unlocked goroutines too, N5's capped
+injection, and not the pin's. M7 therefore wakes every 25 ms against 200 ms steps (8 wakes per step period, under
+P = 12 on this box), and adds a fourth run at 5 ms wakes (40 per period) that READS the budget for both the pinned
+and the control goroutine. That run is a reading, with no stop line. Its numbers belong to item 5 (N5's policy).
+
+### 11.3 Nits
+
+- **10.2's backstop** is raised while the goroutine is still mounted, as `RethrowTwinFatal` is, before the unmount,
+  so golib's report names the goroutine.
+- **P10 states p50 as well as p99** (replaces P10 of 10.5). With 11.2's rule, a wake waits for the next monitor tick
+  that finds every running step past the threshold. With 200 ms steps that is most of the time, so:
+
+| # | prediction | stop line |
+|---|---|---|
+| P10 | M7 at 25 ms wakes, saturated: pinned p50 1-3 ms, p99 10-13 ms, each within 1.5x of the unlocked control's; unsaturated (no CPU twins): p99 under 0.1 ms | pinned p99 over 25 ms, or over 2x the control's p99 |
+| P11 | M7's third run: unlocked wake with K = 1 and K = P pinned parked: p50 and p99 within 1.25x of the control's | over 1.5x |
+
+### 11.4 L5, widened: a lock taken off-carrier
+
+P3's limit, named under L5. A goroutine that is NOT locked when it awaits something foreign resumes off-carrier
+(10.2 routes only a locked goroutine's foreign await). A `LockOSThread` it then calls runs on a thread that is no
+carrier, so nothing can pin it. Its next park is a park off its carrier, which `ParkPending` refuses by name today.
+This is the existing off-carrier gap, not this design's, and M4's "pinned off-carrier resumes = 0" does not cover
+it. A reading is added to M4: off-carrier `LockOSThread` calls, expected 0 in M4's shapes (none awaits a foreign
+task). Closing the class means routing EVERY foreign await through a slot, as 10.2 does for a locked goroutine.
+That would cost one slot per foreign await for every goroutine. It is named here as an option for item 5, and not
+taken.
+
+### 11.5 Size
+
+The two lines of 11.1 and 11.2 do not move 10.6's 130-180 lines or section 8's 2-3 lane-days.
