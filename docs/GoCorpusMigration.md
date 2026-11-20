@@ -4127,21 +4127,26 @@ release published nothing: §2, AMENDED
    **The go2cs dotnet tool** *(added 2026-10-27, 1.26.10.2 seat #11; [PLAN-dotnet-tool-installer.md](PLAN-dotnet-tool-installer.md) §11 OQ-3)*:
    Phase 1b first makes the **record commit, locally and signed**: it regenerates `corpus-release.txt` and commits
    it with `src/version.props`, `docs/validation/<version>` and `src/core` as
-   `release: go2cs converted stdlib <version>`, then refuses unless the tree is clean. Nothing is pushed; the tag Phase 1 minted stays on the commit
-   before. It then cross-compiles the six `go2cs` binaries from that commit, Authenticode-signs the two Windows
+   `release: go2cs converted stdlib <version>`. Before committing it refuses, with nothing committed, unless every
+   change in the tree is a staged record path. Nothing is pushed; the tag Phase 1 minted stays on the commit before. It then cross-compiles the six `go2cs` binaries from that commit, Authenticode-signs the two Windows
    executables in one signtool process, which is **a PIN prompt of its own, before Phase 2's**, and packs
    `go2cs.<rid>` for the six platforms and the `go2cs` package that names them into the artifacts folder. The pack
    refuses binaries that do not report `vcs.revision=<HEAD>` and `vcs.modified=false`, the reading every tool's
    `-version` prints. Phase 2 signs them with the `go.*` set; Phase 3 pushes `go2cs` last; **Phase 4 only prints
    the push of the record commit and the tag** (`git push && git push origin nuget-<version>`). A failure after the
-   record commit leaves it local: `git reset --soft HEAD~1` undoes it. `-OfflineSigning` makes the record commit and
-   packs no tool, and says how to pack it on the signing machine from that commit.
+   record commit leaves it local, and the failure text names both ways on: the pack, sign and `-ResumePush` commands
+   to finish by hand, or `git reset --soft HEAD~1` to abandon. **Before the publish confirmation, on every path
+   (`-ResumePush` included), the script refuses with nothing published unless HEAD is the record commit** (its
+   subject compared whole) and `corpus-release.txt` regenerates unchanged; Phase 4 reads the same again.
+   `-OfflineSigning` makes the record commit and packs no tool; it prints how to carry that exact commit to the
+   signing machine in a `git bundle` and pack there, since a commit re-made there has another hash.
    <!-- Amended 2026-11-20 (COORD ruling B1 on P4's (w) measurement): 1.26.11.1's published tool read
         vcs.revision=<the tag commit> vcs.modified=true, because Phase 1b built it from the tag commit with the record
         uncommitted (616 paths, the tag-to-record diff), and the record commit was typed by hand after Phase 4. A dry
         run of the reordered Phase 1b on a scratch clone of the 1.26.11.1 tag (pack -Unsigned -RequireCleanTree, the
         commit unsigned) read the record commit and vcs.modified=false; its record commit equals 5dd5cafd5b apart
-        from the dry run's own pack script. This paragraph read: "Phase 1b regenerates `corpus-release.txt` (Phase 4
+        from the dry run's own pack script. P3's review of the same day (inbox/COORD/20261120T090127Z-P3.md) added the
+        check before the publish, the check before the commit, the by-hand commands and the bundle. This paragraph read: "Phase 1b regenerates `corpus-release.txt` (Phase 4
         does again for the record commit), cross-compiles the six `go2cs` binaries from the bumped tree,
         Authenticode-signs the two Windows executables in one signtool process, which is a PIN prompt of its own,
         before Phase 2's, and packs `go2cs.<rid>` for the six platforms and the `go2cs` package that names them into

@@ -21,11 +21,13 @@
                  go2cs package that names them, which goes last
       resume-foreign  release-nuget.ps1 -ResumePush over a folder holding a package of another version -> refused by
                  name, nothing PUT, version.props untouched
+      resume-off-record  release-nuget.ps1 -ResumePush with HEAD a revert of the record commit (its subject contains
+                 the record's) -> refused at Phase 3 before the confirmation, nothing PUT, nothing published
       resume-release  release-nuget.ps1 -ResumePush, end to end, over three packages of the release (one published, a
                  403 with Retry-After 1 on the first PUT) -> exit 0, 2 pushed + 1 skipped + 1 wait, version.props
                  byte-identical (no re-bump), the published one never PUT
 
-    The two release-nuget cases run a scratch copy of release-nuget.ps1 and the files it reads (global.json,
+    The three release-nuget cases run a scratch copy of release-nuget.ps1 and the files it reads (global.json,
     _paths.ps1, Directory.Build.props, _nugetpush.ps1, version.props, and a no-op gencorpusrelease for Phase 4) in a
     child of this PowerShell, so they need dotnet and go on PATH, as a release does.
 
@@ -339,6 +341,31 @@ try {
     Check ($state.Puts.Count -eq 0) "resume-foreign: PUT $(@($state.Puts) -join ', ')"
     Test-PropsUntouched 'resume-foreign'
 
+    # A record commit undone or replaced after Phase 1b must refuse BEFORE the publish, with nothing sent. HEAD here is
+    # a revert of the record: its subject CONTAINS the record subject, so this arm also holds the whole-subject compare.
+    $offDir = Join-Path $work 'out-off-record'
+    New-Item -ItemType Directory -Path $offDir | Out-Null
+    foreach ($id in 'go.x', 'go.lib') { [void](New-FakePackage $id $release $offDir) }
+    $gitSaved = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try {
+        & git -C $root -c user.name=selftest -c user.email=selftest@invalid -c commit.gpgsign=false commit -q --allow-empty -m "Revert `"release: go2cs converted stdlib $recordVersion`"" 2>&1 | Out-Null
+        $offCode = $LASTEXITCODE
+    }
+    finally { $ErrorActionPreference = $gitSaved }
+    Check ($offCode -eq 0) "resume-off-record: the scratch revert commit failed (git exit $offCode)"
+    $state.Puts.Clear(); $state.Script.Clear()
+    $run = Invoke-Release $offDir
+    Check ($run.Code -eq 1) "resume-off-record: exit $($run.Code); want 1:`n$($run.Text)"
+    Check ($run.Text -match 'Phase 3: HEAD is not the record commit' -and $run.Text -match 'NOTHING was published') "resume-off-record: no Phase 3 refusal before the publish:`n$($run.Text)"
+    Check ($run.Text -notmatch 'Phase 3: publish to') "resume-off-record: the publish phase started:`n$($run.Text)"
+    Check ($state.Puts.Count -eq 0) "resume-off-record: PUT $(@($state.Puts) -join ', ')"
+    Check (@($state.Published.Keys | Where-Object { $_ -like "*/$flat" }).Count -eq 0) "resume-off-record: the mock holds a package of $release"
+    Test-PropsUntouched 'resume-off-record'
+    $gitSaved = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try { & git -C $root reset -q --soft HEAD~1 2>&1 | Out-Null; $offCode = $LASTEXITCODE }
+    finally { $ErrorActionPreference = $gitSaved }
+    Check ($offCode -eq 0) "resume-off-record: putting HEAD back on the scratch record failed (git exit $offCode)"
+
     $releaseDir = Join-Path $work 'out-release'
     New-Item -ItemType Directory -Path $releaseDir | Out-Null
     foreach ($id in 'go.x', 'go.gen', 'go.lib') { [void](New-FakePackage $id $release $releaseDir) }
@@ -363,5 +390,5 @@ finally {
 }
 
 if ($failures.Count -gt 0) { $failures | ForEach-Object { Write-Host "FAIL: $_" }; exit 1 }
-Write-Host 'nuget-push selftest: PASS (the go2cs tool pointer pushed last; quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -StopOnRateLimit stopped with a resume time and resumed; 503 waited, 500 refused; -ResumePush refused a foreign version, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
+Write-Host 'nuget-push selftest: PASS (the go2cs tool pointer pushed last; quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -StopOnRateLimit stopped with a resume time and resumed; 503 waited, 500 refused; -ResumePush refused a foreign version, refused a HEAD off the record before publishing anything, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
 exit 0

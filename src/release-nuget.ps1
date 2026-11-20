@@ -47,9 +47,10 @@
 .PARAMETER ResumePush
     Finish a Phase 3 that stopped: push the signed packages already in the artifacts folder at the
     version src\version.props names, skipping every one the feed already has. Nothing is bumped,
-    packed, signed or tagged, and the signing certificate is not needed. HEAD is EXPECTED to be the
-    release's local record commit (Phase 1b), not yet pushed. Every package in the folder must carry that
-    version, or nothing is pushed. Refused with -OfflineSigning.
+    packed, signed or tagged, and the signing certificate is not needed. HEAD must be the release's
+    local record commit (Phase 1b), not yet pushed: it is checked before the confirmation, and nothing is
+    pushed otherwise. Every package in the folder must carry that version, or nothing is pushed. Refused
+    with -OfflineSigning.
 
 .PARAMETER Source
     The feed Phase 3 pushes to: nuget.org's v3 service index unless a rehearsal names another
@@ -326,15 +327,56 @@ function Save-GoReleaseRecord {
 
     & git -C $RepoRoot add -- @recordPaths
     if ($LASTEXITCODE -ne 0) { Die "Phase 1b: git add of the record FAILED. Nothing was committed, signed or published." }
+
+    # Checked BEFORE the commit, so a refusal leaves nothing committed: once the record paths are staged, every
+    # porcelain line must be a staged change (worktree column blank) under one of them. Anything else -- an untracked
+    # file, an unstaged edit, a staged path outside the record -- would make the tool report vcs.modified=true.
+    $stray = @(git -C $RepoRoot status --porcelain 2>$null | Where-Object {
+        $line = "$_"
+        if ($line.Length -lt 4 -or $line[1] -ne ' ' -or $line[0] -eq '?') { return $true }
+        $path = $line.Substring(3)
+        -not ($recordPaths | Where-Object { $path -eq $_ -or $path.StartsWith("$_/") })
+    })
+    if ($stray.Count -gt 0) {
+        $stray | Select-Object -First 8 | ForEach-Object { Write-Host "    $_" }
+        Die ("Phase 1b: the tree holds changes outside the record ($($recordPaths -join ', ')), so the go2cs tool would report vcs.modified=true. NOTHING was committed, signed or published; the record is staged. " +
+             "Do NOT re-run this script: Phase 0 refuses a dirty tree, and a clean re-run bumps the build number again under the tag already minted. " +
+             "Either move the paths above out of the tree and go on by hand: git commit -S -m `"$recordSubject`", then the three commands of the Phase 1b failure text below (pack, sign, -ResumePush); " +
+             "or abandon: git reset; git checkout src/version.props src/go2cs/corpus-release.txt, and delete the tag nuget-$ver.")
+    }
+
     & git -C $RepoRoot commit -S -m $recordSubject
     if ($LASTEXITCODE -ne 0) { Die "Phase 1b: the record commit FAILED (is the commit-signing key available?). Nothing was signed or published; the record is staged, not committed. To abandon the release: git reset; git checkout src/version.props src/go2cs/corpus-release.txt, and delete the tag if one was minted." }
 
     $left = @(git -C $RepoRoot status --porcelain 2>$null)
     if ($left.Count -gt 0) {
         $left | Select-Object -First 8 | ForEach-Object { Write-Host "    $_" }
-        Die "Phase 1b: the tree is not clean after the record commit, so the go2cs tool would report vcs.modified=true. Nothing was signed or published. The record commit is local: undo it with git reset --soft HEAD~1, find what Phase 1 wrote outside $($recordPaths -join ', '), and re-run."
+        Die "Phase 1b: the tree is not clean after the record commit (the check before the commit passed, so something changed while committing, such as a hook), and the go2cs tool would report vcs.modified=true. Nothing was signed or published. The record commit is local. Move the paths above out of the tree and go on by hand with the three commands of the Phase 1b failure text (pack, sign, -ResumePush); do NOT re-run this script, which would bump the build number again."
     }
     Write-Host "  record commit    : $(git -C $RepoRoot log -1 --format='%h %s') (local, not pushed)"
+}
+
+# HEAD must be the record commit Phase 1b made, and regenerating corpus-release.txt must change nothing. Read before
+# the publish confirmation, on every path (a -ResumePush included: Phase 0 does not check the tree on a resume), so a
+# record commit undone or replaced after Phase 1b refuses with NOTHING published; read again in Phase 4. The subject
+# is compared whole and case-sensitively: a revert of the record, or the record of 1.26.11.10 when this is 1.26.11.1,
+# contains the subject and is not it. Returns "<short hash> <subject>".
+function Assert-GoReleaseRecordHead([string] $Phase, [string] $Consequence) {
+    # Out-Host: the generator's output is shown, not returned with the head.
+    Push-Location (Join-Path $PSScriptRoot 'go2cs')
+    try { & go run ./internal/gencorpusrelease | Out-Host } finally { Pop-Location }
+    if ($LASTEXITCODE -ne 0) { Die "${Phase}: regenerating src/go2cs/corpus-release.txt FAILED. $Consequence" }
+    # Strings, never git's raw output: a failed git writes nothing to stdout, and an empty result compared with an
+    # operator yields an empty array, which reads as false and would let this check pass without a commit at all.
+    $subject = "$(git -C $RepoRoot log -1 --format='%s' 2>$null)"
+    $head = "$(git -C $RepoRoot log -1 --format='%h %s' 2>$null)"
+    $moved = @(git -C $RepoRoot status --porcelain -- src/go2cs/corpus-release.txt 2>$null)
+    if ($moved.Count -gt 0 -or $subject -cne $recordSubject) {
+        Write-Host "  HEAD is $head" -ForegroundColor Yellow
+        Write-Host "  want  : $recordSubject, with src/go2cs/corpus-release.txt unchanged after regenerating it" -ForegroundColor Yellow
+        Die "${Phase}: HEAD is not the record commit for $ver, or corpus-release.txt moved after it. $Consequence"
+    }
+    return $head
 }
 
 $toolPack = Join-Path $PSScriptRoot 'tools/go2cs-tool/pack-go2cs-tool.ps1'
@@ -344,9 +386,17 @@ if ($ResumePush) {
 elseif ($OfflineSigning) {
     Write-Phase 'Phase 1b: commit the record; the go2cs dotnet tool is NOT packed (-OfflineSigning)'
     Save-GoReleaseRecord
-    Write-Host '  Its Windows executables are signed before they are packed, so it is packed where the certificate is:'
-    Write-Host "  on the signing machine, at this record commit, run tools\go2cs-tool\pack-go2cs-tool.ps1 -Version $ver -OutDir <the"
-    Write-Host '  copied package folder> before signing; or publish the tool with a later release.'
+    Write-Host '  Its Windows executables are signed before they are packed, so it is packed where the certificate is, and a'
+    Write-Host '  signed pack refuses unless HEAD is the record commit, unmodified. That commit is local and unpushed, and a'
+    Write-Host '  commit re-made on the signing machine has another hash, which is not the one Phase 4 pushes. Carry THIS'
+    Write-Host '  commit there in a bundle (its parent must already be on the signing machine, e.g. from a fetch of master):'
+    Write-Host ''
+    Write-Host "    here:     git bundle create go2cs-record-$ver.bundle nuget-$ver..HEAD" -ForegroundColor DarkGray
+    Write-Host "    there:    git fetch <path>\go2cs-record-$ver.bundle HEAD; git checkout --detach FETCH_HEAD" -ForegroundColor DarkGray
+    Write-Host "              git log -1 --format=%H    (must equal $(git -C $RepoRoot rev-parse HEAD 2>$null))" -ForegroundColor DarkGray
+    Write-Host "              src\tools\go2cs-tool\pack-go2cs-tool.ps1 -Version $ver -OutDir <the copied package folder>" -ForegroundColor DarkGray
+    Write-Host ''
+    Write-Host '  then sign the whole folder as Phase 2 says. Or leave the tool out and publish it with a later release.'
 }
 else {
     Write-Phase 'Phase 1b: commit the record, then pack the go2cs dotnet tool (one PIN prompt for its Windows executables)'
@@ -355,7 +405,9 @@ else {
     $tool = Invoke-Sibling -Script $toolPack -Arguments @('-Version', $ver, '-OutDir', $OutDir) -Passthru
     if ($tool.ExitCode -ne 0) {
         Write-Host ''
-        Die "Phase 1b (go2cs tool) FAILED. Nothing was signed or published. The record commit is local: either fix and re-run from Phase 2 by hand, or undo it with git reset --soft HEAD~1, then restore: git reset; git checkout src/version.props src/go2cs/corpus-release.txt, and delete the tag if one was minted."
+        Die ("Phase 1b (go2cs tool) FAILED. Nothing was signed or published. The record commit is local. Either fix the cause and go on by hand, from src, with HEAD still the record commit: " +
+             ".\tools\go2cs-tool\pack-go2cs-tool.ps1 -Version $ver -OutDir `"$OutDir`"; .\sign-nupkgs.ps1 -PackageDir `"$OutDir`" -Apply; .\release-nuget.ps1 -ResumePush -OutDir `"$OutDir`". " +
+             "Or abandon: git reset --soft HEAD~1; git reset; git checkout src/version.props src/go2cs/corpus-release.txt, and delete the tag nuget-$ver.")
     }
 }
 
@@ -399,7 +451,10 @@ if ($ResumePush) {
     }
 }
 
+$recordHead = Assert-GoReleaseRecordHead 'Phase 3' 'NOTHING was published. Put HEAD back on the record commit (git reflog names it), or abandon the release.'
+
 Write-Phase "Phase 3: publish to $(([uri]$Source).Host)"
+Write-Host "  record commit    : $recordHead"
 Write-Host "  version          : $ver"
 Write-Host "  packages         : $($packages.Count)"
 Write-Host "  source           : $Source"
@@ -431,18 +486,9 @@ Write-Host "  pushed           : $($result.Pushed); already published: $($result
 Write-Phase 'Phase 4: record the release'
 
 # The converter's corpus-release constant (src/go2cs/corpus-release.txt) names the last PUBLISHED release, which
-# is now $ver. Phase 1b regenerated and committed it; regenerating it again must change nothing.
-Push-Location (Join-Path $PSScriptRoot 'go2cs')
-try { & go run ./internal/gencorpusrelease } finally { Pop-Location }
-if ($LASTEXITCODE -ne 0) { Die "Phase 4: regenerating src/go2cs/corpus-release.txt FAILED. $ver IS published; run 'go run ./internal/gencorpusrelease' in src/go2cs and check it matches the record commit before pushing." }
-# A string, never git's raw output: a failed git writes nothing to stdout, and an empty result compared with
-# -notmatch yields an empty array, which reads as false and would let this check pass without a commit at all.
-$head = "$(git -C $RepoRoot log -1 --format='%h %s' 2>$null)"
-$moved = @(git -C $RepoRoot status --porcelain -- src/go2cs/corpus-release.txt 2>$null)
-if ($moved.Count -gt 0 -or $head -notmatch [regex]::Escape($recordSubject)) {
-    Write-Host "  HEAD is $head" -ForegroundColor Yellow
-    Die "Phase 4: HEAD is not the record commit for $ver, or corpus-release.txt moved after it. $ver IS published; amend nothing -- make a commit on top that records it, then push."
-}
+# is now $ver. Phase 1b regenerated and committed it; regenerating it again must change nothing. The same check ran
+# before the publish confirmation; this is its second read, after the push.
+$head = Assert-GoReleaseRecordHead 'Phase 4' "$ver IS published; amend nothing -- make a commit on top that records it, then push."
 
 Write-Host "  The record commit ($head) was made in Phase 1b. Push it and the tag"
 Write-Host '  Phase 1 already minted:'
