@@ -19,6 +19,10 @@
 // still wins), and ONLY for the module version this run resolved: a manifest kept for another version is
 // never applied, and one line names both. Whatever is applied enters the same loader, scope and orphan
 // rule a std manifest does.
+//
+// The version is the module-cache directory's, or -module-version's for a copy of the module (which names no
+// version of its own). A root that cannot be applied, because neither gives a version or the two disagree, is
+// REFUSED, before any conversion where the module's go.mod allows (moduleDisclosurePreflight), and never noted.
 
 package main
 
@@ -29,6 +33,7 @@ import (
 	"sort"
 	"strings"
 
+	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
 	"golang.org/x/mod/semver"
 )
@@ -39,43 +44,26 @@ import (
 // main module's import path and directory ("" for the standard library); pkgDir is the package's
 // source directory.
 func resolveDisclosureManifestDir(outputPath, root, modulePath, moduleDir, claimedVersion, pkgDir string) (string, string, error) {
-	dir, note := resolveDisclosureManifestDirStub(outputPath, root, modulePath, moduleDir, pkgDir)
-	return dir, note, nil
-}
-
-// moduleDisclosurePreflight: RED-COMMIT STUB, refuses nothing yet.
-func moduleDisclosurePreflight(root, moduleDir, claimedVersion string) error {
-	return nil
-}
-
-func resolveDisclosureManifestDirStub(outputPath, root, modulePath, moduleDir, pkgDir string) (string, string) {
 	if root == "" || modulePath == "" || fileExists(filepath.Join(outputPath, testDisclosureFileName)) {
-		return outputPath, ""
+		return outputPath, "", nil
 	}
 
-	escapedPath, err := module.EscapePath(modulePath)
+	escapedPath, version, err := moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion)
 
 	if err != nil {
-		return outputPath, fmt.Sprintf("module disclosures: %s is not a valid module path (%v); %s not consulted", modulePath, err, root)
-	}
-
-	version := moduleCacheVersion(moduleDir, escapedPath)
-
-	if version == "" {
-		return outputPath, fmt.Sprintf("module disclosures: %s has no resolved version (not a module-cache directory); %s not consulted", modulePath, root)
+		return outputPath, "", err
 	}
 
 	relPkg, err := filepath.Rel(moduleDir, pkgDir)
 
 	if err != nil || relPkg == ".." || strings.HasPrefix(relPkg, ".."+string(filepath.Separator)) {
-		return outputPath, fmt.Sprintf("module disclosures: %s is not inside module %s; %s not consulted", pkgDir, modulePath, root)
+		return outputPath, "", fmt.Errorf("-module-disclosures %s cannot be applied: %s is not inside module %s at %s", root, pkgDir, modulePath, moduleDir)
 	}
-
 	moduleBase := filepath.Join(root, filepath.FromSlash(escapedPath))
 	candidate := filepath.Join(moduleBase+"@"+version, relPkg)
 
 	if fileExists(filepath.Join(candidate, testDisclosureFileName)) {
-		return candidate, fmt.Sprintf("module disclosures: applying %s", filepath.Join(candidate, testDisclosureFileName))
+		return candidate, fmt.Sprintf("module disclosures: applying %s", filepath.Join(candidate, testDisclosureFileName)), nil
 	}
 
 	// The module is kept under OTHER versions only: say so, by name, and apply nothing.
@@ -90,10 +78,72 @@ func resolveDisclosureManifestDirStub(outputPath, root, modulePath, moduleDir, p
 
 	if len(present) > 0 {
 		sort.Strings(present)
-		return outputPath, fmt.Sprintf("module disclosures: %s exists; this run resolved %s; not applied", strings.Join(present, ", "), version)
+		return outputPath, fmt.Sprintf("module disclosures: %s exists; this run resolved %s; not applied", strings.Join(present, ", "), version), nil
 	}
 
-	return outputPath, ""
+	return outputPath, "", nil
+}
+
+// moduleDisclosureVersion is the module version a -module-disclosures root is read for, with the module's escaped
+// path: the version a module-cache directory names (moduleCacheVersion), or -module-version (claimedVersion) for a
+// module source that is not one, such as a copy of the module. A copy carries no version of its own: the extracted
+// tree has no version file and its go.mod does not name it. The two must agree when both are present.
+//
+// A root that cannot be applied is REFUSED, not noted (COORD 20261120T091624Z, GAP 1). With a note, P5's sqlite run
+// from a copy applied nothing, the host-fatal disclosure never withdrew its test, and the host aborted.
+func moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion string) (string, string, error) {
+	escapedPath, err := module.EscapePath(modulePath)
+
+	if err != nil {
+		return "", "", fmt.Errorf("-module-disclosures %s cannot be applied: %s is not a valid module path (%v)", root, modulePath, err)
+	}
+
+	cacheVersion := moduleCacheVersion(moduleDir, escapedPath)
+
+	if claimedVersion != "" {
+		if err := module.Check(modulePath, claimedVersion); err != nil {
+			return "", "", fmt.Errorf("-module-version %q is not a version of %s: %v", claimedVersion, modulePath, err)
+		}
+
+		if cacheVersion != "" && cacheVersion != claimedVersion {
+			return "", "", fmt.Errorf("-module-version %s contradicts the module-cache directory %s, which is %s@%s", claimedVersion, moduleDir, modulePath, cacheVersion)
+		}
+
+		return escapedPath, claimedVersion, nil
+	}
+
+	if cacheVersion == "" {
+		return "", "", fmt.Errorf("-module-disclosures %s cannot be applied: %s at %s has no version (not a module-cache directory). "+
+			"Run from the module-cache directory (go mod download -json %s@<version>, its Dir), or name the version the copy is "+
+			"with -module-version", root, modulePath, moduleDir, modulePath)
+	}
+
+	return escapedPath, cacheVersion, nil
+}
+
+// moduleDisclosurePreflight refuses, before any conversion, a -tests -recurse run whose -module-disclosures root cannot
+// be applied, reading the module path from moduleDir's go.mod. Without a go.mod (a module-cache release that has none)
+// it passes, and the per-package lookup (resolveDisclosureManifestDir) still refuses.
+func moduleDisclosurePreflight(root, moduleDir, claimedVersion string) error {
+	if root == "" {
+		return nil
+	}
+
+	data, err := os.ReadFile(filepath.Join(moduleDir, "go.mod"))
+
+	if err != nil {
+		return nil
+	}
+
+	modulePath := modfile.ModulePath(data)
+
+	if modulePath == "" {
+		return nil
+	}
+
+	_, _, err = moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion)
+
+	return err
 }
 
 // moduleCacheVersion is the version a module-cache directory names (`…/<escaped path>@<version>`), or ""
