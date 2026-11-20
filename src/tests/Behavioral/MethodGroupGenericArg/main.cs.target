@@ -35,7 +35,7 @@ internal static bool pairEqual<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> 
     return true;
 }
 
-internal static S insertAt<S, E>(S s, nint i, params Span<E> vʗp)
+internal static S insertAt<S, E>(S s, nint i, params variadic<E> vʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     var v = vʗp.sslice();

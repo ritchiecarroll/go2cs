@@ -3,7 +3,7 @@ global using Hook = object;
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸHook = Span<Hook>;
+using ꓸꓸꓸHook = variadic<Hook>;
 
 partial class main_package {
 

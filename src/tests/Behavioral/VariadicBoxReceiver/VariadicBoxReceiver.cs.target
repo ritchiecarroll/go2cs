@@ -1,7 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸbyte = Span<byte>;
+using ꓸꓸꓸbyte = variadic<byte>;
 using static main_package;
 
 partial class main_package {

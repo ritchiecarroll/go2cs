@@ -19,7 +19,7 @@ partial struct Pipe<T> /*chan T*/;
 
 partial struct Stack<T> /*[]T*/;
 
-public static Set<T> NewSet<T>(params Span<T> itemsʗp) {
+public static Set<T> NewSet<T>(params variadic<T> itemsʗp) {
     var items = itemsʗp.sslice();
 
     var s = new Set<T>(len(items));

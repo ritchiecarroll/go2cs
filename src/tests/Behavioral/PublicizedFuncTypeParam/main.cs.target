@@ -16,7 +16,7 @@ internal static Action<ж<options>> withLevel(nint n) {
     };
 }
 
-internal static nint apply(params Span<Action<ж<options>>> optsʗp) {
+internal static nint apply(params variadic<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.sslice();
 
     var o = Ꮡ(new options());

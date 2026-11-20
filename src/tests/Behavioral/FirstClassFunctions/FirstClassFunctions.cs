@@ -7,7 +7,7 @@ namespace go;
 using fmt = fmt_package;
 using rand = math.rand_package;
 using math;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 using static main_package;
 
 partial class main_package {

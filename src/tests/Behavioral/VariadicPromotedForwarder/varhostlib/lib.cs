@@ -1,7 +1,7 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static varhost_package;
 
 partial class varhost_package {
@@ -19,7 +19,7 @@ partial struct Base {
 
 public static @string Name(this ref Base b) { return "base:"u8 + b.Tag; }
 public static @string Trace(this ref Base b, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     return "trace["u8 + b.Tag + "] "u8 + fmt.Sprintf(format, args.ꓸꓸꓸ);
 }

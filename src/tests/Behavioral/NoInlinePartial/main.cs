@@ -4,7 +4,7 @@ using fmt = fmt_package;
 using runtime = runtime_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 using static main_package;
 
 partial class main_package {

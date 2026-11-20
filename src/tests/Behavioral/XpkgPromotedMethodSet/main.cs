@@ -18,7 +18,7 @@ using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayou
 using XpkgPromotedInnerLib = XpkgPromotedInnerLib_package;
 using XpkgPromotedMidLib = XpkgPromotedMidLib_package;
 using encoding;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static main_package;
 
 partial class main_package {

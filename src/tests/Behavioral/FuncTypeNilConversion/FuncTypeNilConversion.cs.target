@@ -1,9 +1,9 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
-using ꓸꓸꓸжPoint = Span<ж<main_package.Point>>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
+using ꓸꓸꓸжPoint = variadic<ж<main_package.Point>>;
 
 partial class main_package {
 

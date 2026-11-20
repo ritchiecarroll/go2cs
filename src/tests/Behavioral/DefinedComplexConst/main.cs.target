@@ -1,7 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸC128 = Span<main_package.C128>;
+using ꓸꓸꓸC128 = variadic<main_package.C128>;
 
 partial class main_package {
 

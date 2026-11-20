@@ -15,7 +15,7 @@ public static nint Index<S, E>(S s, E v)
     return -1;
 }
 
-internal static S appendAll<S, E>(S s, params Span<E> vʗp)
+internal static S appendAll<S, E>(S s, params variadic<E> vʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     var v = vʗp.sslice();

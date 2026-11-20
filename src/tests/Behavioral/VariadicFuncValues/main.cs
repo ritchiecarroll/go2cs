@@ -1,8 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
 using static main_package;
 
 partial class main_package {
@@ -39,13 +39,13 @@ partial struct logger {
 } partial class mainᴛlogger {
 
 internal static void errorf(this ref logger l, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     fmt.Printf(l.tag + "!"u8 + format + "\n"u8, args.ꓸꓸꓸ);
 }
 
 internal static void logf(this ref logger l, @string format, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     fmt.Printf(l.tag + "~"u8 + format + "\n"u8, args.ꓸꓸꓸ);
 }
@@ -85,7 +85,7 @@ internal static void main() {
     fmt.Println(f("var", 10));
 
     report((@string format, params ꓸꓸꓸany argsʗp) => {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
     });
 

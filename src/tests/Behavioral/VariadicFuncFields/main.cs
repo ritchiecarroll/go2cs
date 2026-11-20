@@ -1,8 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸstring = variadic<@string>;
 using static main_package;
 
 partial class main_package {
@@ -32,7 +32,7 @@ internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
 } partial class mainᴛContext {
 
 internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp) {
-    var elem = elemʗp.sslice();
+    var elem = elemʗp.slice();
 
     if (c.JoinPath != nil) {
         return c.JoinPath(elem.ꓸꓸꓸ);
@@ -48,7 +48,7 @@ internal static void main() {
         Name: "demo",
         JoinPath: slashJoin,
         Log: (@string format, params ꓸꓸꓸany argsʗp) => {
-            var args = argsʗp.sslice();
+            var args = argsʗp;
             fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
         }
     );

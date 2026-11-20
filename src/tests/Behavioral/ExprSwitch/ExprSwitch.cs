@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
@@ -22,7 +22,7 @@ internal static @string getStr2(any test1, @string test2) {
 }
 
 internal static @string getStr3(@string format, params ꓸꓸꓸany aʗp) {
-    var a = aʗp.sslice();
+    var a = aʗp;
 
     return fmt.Sprintf(format, a.ꓸꓸꓸ);
 }

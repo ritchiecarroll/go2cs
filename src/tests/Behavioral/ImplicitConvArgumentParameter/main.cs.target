@@ -1,8 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸV = Span<main_package.V>;
-using ꓸꓸꓸжU = Span<ж<main_package.U>>;
+using ꓸꓸꓸV = variadic<main_package.V>;
+using ꓸꓸꓸжU = variadic<ж<main_package.U>>;
 
 partial class main_package {
 

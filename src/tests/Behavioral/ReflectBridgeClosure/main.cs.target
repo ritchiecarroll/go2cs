@@ -3,7 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using @unsafe = unsafe_package;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸnint = variadic<nint>;
 using static main_package;
 
 partial class main_package {

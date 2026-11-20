@@ -3,8 +3,8 @@ namespace go;
 using fmt = fmt_package;
 using strings = strings_package;
 using testing = testing_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸstring = variadic<@string>;
 using static main_package;
 
 partial class main_package {
@@ -20,7 +20,7 @@ partial struct L {
 } partial class mainᴛL {
 
 public static void Error(this ref L l, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     fmt.Println("L.Error", l.tag, len(args), fmt.Sprint(args.ꓸꓸꓸ));
 }
@@ -38,7 +38,7 @@ partial struct V {
 } partial class mainᴛV {
 
 public static void Error(this V v, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp.slice();
 
     fmt.Println("V.Error", v.n, len(args), fmt.Sprint(args.ꓸꓸꓸ));
 }

@@ -1,8 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸnint = Span<nint>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸnint = variadic<nint>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class main_package {
 

@@ -3,8 +3,8 @@ namespace go;
 using fmt = fmt_package;
 using strings = strings_package;
 using Δio = io_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
 
 partial class main_package {
 
@@ -23,7 +23,7 @@ internal static nint sum(Funcꓸꓸꓸ<nint, nint> add) { return add(1, 2, 3); }
 internal static void main() {
     @string @out = "";
     Actionꓸꓸꓸ<@string, any> writeFormat = (@string format, params ꓸꓸꓸany argsʗp) => {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         @out += fmt.Sprintf(format, args.ꓸꓸꓸ) + ";"u8;
     };
     header(writeFormat, 2);
@@ -35,12 +35,12 @@ internal static void main() {
 
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     Actionꓸꓸꓸ<@string, any> emit = (@string format, params ꓸꓸꓸany argsʗp) => {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "["u8 + format + "]"u8, args.ꓸꓸꓸ);
     };
     header(emit, 6);
     emit = (@string format, params ꓸꓸꓸany argsʗp) => {
-        var args = argsʗp.sslice();
+        var args = argsʗp;
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "<"u8 + format + ">"u8, args.ꓸꓸꓸ);
     };
     header(emit, 7);

@@ -3,8 +3,8 @@ namespace go;
 using fmt = fmt_package;
 using os = os_package;
 using runtime = runtime_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸstring = variadic<@string>;
 using static main_package;
 
 partial class main_package {
@@ -12,7 +12,7 @@ partial class main_package {
 internal static bool all = os.Getenv("GO2CS_CALLER_LINE_ALL_SHAPES") == "1"u8;
 
 internal static void show(bool exactInRelease, params ꓸꓸꓸany argsʗp) {
-    var args = argsʗp.sslice();
+    var args = argsʗp;
 
     if (all || exactInRelease) {
         fmt.Println(args.ꓸꓸꓸ);

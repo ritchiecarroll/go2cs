@@ -5,7 +5,7 @@ using reflect = reflect_package;
 using host = global::go.go.varhost_package;
 using global::go.go;
 using varhost = global::go.go.varhost_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 using static main_package;
 
 partial class main_package {

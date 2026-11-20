@@ -24,7 +24,7 @@ internal static (any, bool) Next<T>(this ref sliceIter<T> it) {
 
 } partial class main_package {
 
-public static Iter NewIter<T>(params Span<T> valuesʗp) {
+public static Iter NewIter<T>(params variadic<T> valuesʗp) {
     var values = valuesʗp.slice();
 
     ref var it = ref heap<sliceIter<T>>((sliceIter<T>)values, out var Ꮡit);

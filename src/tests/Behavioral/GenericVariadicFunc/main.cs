@@ -4,19 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-public static T First<T>(params Span<T> valsʗp) {
+public static T First<T>(params variadic<T> valsʗp) {
     var vals = valsʗp.sslice();
 
     return vals[0];
 }
 
-public static nint Count<T>(params Span<T> valsʗp) {
+public static nint Count<T>(params variadic<T> valsʗp) {
     var vals = valsʗp.sslice();
 
     return len(vals);
 }
 
-public static nint DeferredCount<T>(params Span<T> valsʗp) {
+public static nint DeferredCount<T>(params variadic<T> valsʗp) {
     GoFrame ᒐ = default;
     try {
         var vals = valsʗp.sslice();
@@ -29,7 +29,7 @@ public static nint DeferredCount<T>(params Span<T> valsʗp) {
     finally { ᒐ.Run(); }
 }
 
-public static T Or<T>(params Span<T> valsʗp) {
+public static T Or<T>(params variadic<T> valsʗp) {
     var vals = valsʗp.sslice();
 
     T zero = GoZero<T>();
