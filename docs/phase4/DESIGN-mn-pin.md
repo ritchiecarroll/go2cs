@@ -427,3 +427,39 @@ needs no queue hop. (iii) The falsifier's alternative design: move a locked twin
 length of its lock. For P10, the absolute line assumed that injection bounds the wait near the preemption threshold.
 The unlocked control (no pin anywhere, p99 60 ms) shows that today's policy does not bound it. Ruling asked: score P10
 on its relative line, and move the absolute bound to item 5 (N5's policy), whose 2 s-step reading is above.
+
+## 14. The cure for P2, priced as ruled (dated block, 2026-11-20)
+
+COORD ruled section 13 as follows. P2: price ONE cure first, option (ii), and keep it if it brings P2 inside 2x,
+else take (i). P3 is recorded as scored (MISSED LOW, inside its line). P10 is scored on its RELATIVE line (pinned
+0.73x the control: MET), and the absolute bound moves to item 5 with the 2 s-step readings. The unsaturated p99 is
+recorded as MISSED, with no line. 11.1's red gets one more shape.
+
+**Diagnostic before the cure** (no code change): unlocked ping-pong with run-next OFF reads 2,898-3,045 ns, about
+what one side locked reads (2,675-2,789). P2's cost was the cross-carrier wake through the global queue and the
+shared work semaphore, not the pin.
+
+**11.1's red, SHOWN** (COORD's shape: K = P = 12 pinned parked, 12 CPU twins in 4 s steps, one unlocked goroutine
+woken each second, 12 s, 2 runs per arm). The old room line adds no carrier: peak carriers 24 (12 shared + 12
+pinned), 4-6 wakes through, p50 4.0-6.0 s, p99 7.0 s. The fixed line reads peak carriers 32-34, 10-11 wakes, p50
+1.0-2.0 s, p99 3.0 s.
+
+**The cure (built):** idle carriers wait on their OWN semaphore and sit in an idle set under one lock; `s_idle` is
+the set's size. `Enqueue` claims one idle carrier and releases its semaphore; this replaces the shared work
+semaphore. A LOCKED waker hands the goroutine it readies straight to an idle carrier (the one that ran it last,
+when idle) through that carrier's run-next slot. A carrier registers before it re-reads the run queue, and one
+claimed as its wait times out takes the permit, so no wake is lost. Retire keeps the unblocked count (10.1). A
+pinned carrier never enters the set (12.1); a reading tick checks it (`idle-set-violations`). 
+
+| reading | prediction / guard | result |
+|---|---|---|
+| P2' one side locked | 1.6-1.8 µs; stop over 2x the same-session thread path | MET, INSIDE: 1,767.5 ns (1,743 to 2,754, one outlier) against a thread path of 932.9 ns, 1.89x. Before the cure 2,780.3 in the same session. **Kept**, as ruled |
+| P3 both locked | inside 2.5x | 1,653.0 ns, 1.77x |
+| P1 guard, unlocked ping-pong, interleaved | within 2% | 8 + 8: **+4.0% (a miss by the letter)**, 1,168.6 vs 1,123.9, ranges overlapping (1,123-1,251 vs 1,093-1,271). Resampled 16 + 16 at once: +1.6%, 1,073.7 vs 1,056.4 (1,041-1,226 vs 1,014-1,098). Reported for ruling |
+| P1 guard, never-park | within 2% | 24.7 vs 24.9 ns |
+| side reading, ping-pong with run-next off | falls to 1.6-2.0 µs | MET: 3,066 -> 1,892 ns |
+| P5 guard, M3 K = 0 / K = 24 | within 10% of `9b8c9a0d2f`'s | 1,088,832 (+9.9%) / 1,046,514 trips/s (+7.2%), both faster |
+| M3b guard (100 / 250 ms) | as the fixed arm | p99 0.197 / 0.280 ms, max 1.87 / 2.10 ms, carriers started 36 flat |
+| 11.1 shape guard | as the fixed arm | peak carriers 33-34, 11 wakes, p50 1.02 s, p99 3.01 s |
+| fifth read (12.1) | 0 | idle-set violations 0 in every run |
+| MnLockPin | green 3/3 | green 3/3, output = plain, about 70,000 direct hand-offs per run |

@@ -151,7 +151,59 @@ public static class GoScheduler
     }
 
     private static readonly ConcurrentQueue<Item> s_runq = new();
-    private static readonly SemaphoreSlim s_work = new(0);      // one permit per queued item
+    // THE CURE (DESIGN-mn-pin.md 14): the idle carriers, each waiting on its own semaphore, and how many there are
+    // (s_idle, always the set's size). A pinned carrier never enters it (12.1). Replaces the shared work semaphore.
+    private static readonly object s_idleLock = new();
+    private static readonly List<Carrier> s_idleList = [];
+    private static long s_idleHandoffs;
+
+    // DESIGN-mn-pin.md 12.1, as the cure keeps it (a reading, expected 0): no carrier in the idle set is pinned, and the
+    // set's size is s_idle. Checked by the monitor's reading tick only.
+    private static long s_idleSetViolations;
+
+    private static void CheckIdleSet()
+    {
+        lock (s_idleLock)
+        {
+            if (s_idle != s_idleList.Count)
+                Interlocked.Increment(ref s_idleSetViolations);
+
+            foreach (Carrier carrier in s_idleList)
+            {
+                if (carrier.IsPinned || !carrier.m_idle)
+                    Interlocked.Increment(ref s_idleSetViolations);
+            }
+        }
+    }
+
+    // Takes one carrier out of the idle set: `prefer` when it is idle, else the one that went idle last. The caller
+    // must release the carrier's m_idleWake; the carrier consumes that permit even if its wait has timed out.
+    private static Carrier? ClaimIdle(Carrier? prefer)
+    {
+        lock (s_idleLock)
+        {
+            Carrier? claimed = null;
+
+            if (prefer is { m_idle: true })
+            {
+                s_idleList.Remove(prefer);
+                claimed = prefer;
+            }
+            else if (s_idleList.Count > 0)
+            {
+                claimed = s_idleList[^1];
+                s_idleList.RemoveAt(s_idleList.Count - 1);
+            }
+
+            if (claimed is not null)
+            {
+                claimed.m_idle = false;
+                s_idle = s_idleList.Count;
+            }
+
+            return claimed;
+        }
+    }
     private static readonly SemaphoreSlim s_p = new(s_procs);   // the P tokens
     private static readonly List<Carrier> s_carriers = [];
     private static readonly object s_carriersLock = new();
@@ -282,13 +334,30 @@ public static class GoScheduler
             return;
         }
 
+        // THE CURE (DESIGN-mn-pin.md 14): a waker locked to its carrier hands the goroutine it readies straight to an idle
+        // carrier (the one that ran it last, when idle), through that carrier's run-next slot and its own wake: no queue.
+        if (t_carrier is { Mounted: { LockedToThread: true } } && ClaimIdle(goroutine.m_lastCarrier as Carrier) is { } target)
+        {
+            goroutine.m_readyStep = step;
+
+            if (Interlocked.Exchange(ref target.Next, goroutine) is { } stale)
+                Enqueue(stale, stale.TakeReadyStep());
+
+            Interlocked.Increment(ref s_idleHandoffs);
+            target.m_idleWake.Release();
+            return;
+        }
+
         Enqueue(goroutine, step);
     }
 
     private static void Enqueue(Goroutine goroutine, Action step)
     {
         s_runq.Enqueue(new Item(goroutine, step));
-        s_work.Release();
+
+        // One idle carrier is woken for it (the shared work semaphore this replaced held one permit per item).
+        if (ClaimIdle(null) is { } idle)
+            idle.m_idleWake.Release();
 
         // Work queued while carriers sit blocked under goroutines that had no twin: make sure one can take it.
         if (Volatile.Read(ref s_blocked) > 0)
@@ -330,7 +399,7 @@ public static class GoScheduler
                $" nested-resumes={Interlocked.Read(ref s_nestedResumes)}" +
                $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
                $" pin-retired={Interlocked.Read(ref s_pinRetired)} peak-pinned-waiting={Volatile.Read(ref s_peakPinnedWaiting)}" +
-               $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)}" +
+               $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)} idle-handoffs={Interlocked.Read(ref s_idleHandoffs)} idle-set-violations={Interlocked.Read(ref s_idleSetViolations)}" +
                $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading();
     }
 
@@ -501,6 +570,7 @@ public static class GoScheduler
             {
                 lastSample = now;
                 SampleThreads();
+                CheckIdleSet();
             }
 
             if (s_runNext)
@@ -653,9 +723,41 @@ public static class GoScheduler
         // races the commit is kept); and whether the carrier ends its thread after this step (its goroutine ended
         // locked, Go's rule).
         private Goroutine? m_pinned;
+
+        internal bool IsPinned => m_pinned is not null;
         private Action? m_pinnedStep;
         private SemaphoreSlim? m_pinWake;
         private bool m_retiring;
+
+        // THE CURE (DESIGN-mn-pin.md 14): this carrier's own idle wake, and whether it sits in the idle set. Both are
+        // read and written under s_idleLock only.
+        internal readonly SemaphoreSlim m_idleWake = new(0);
+        internal bool m_idle;
+
+        private void RegisterIdle()
+        {
+            lock (s_idleLock)
+            {
+                m_idle = true;
+                s_idleList.Add(this);
+                s_idle = s_idleList.Count;
+            }
+        }
+
+        // False when a waker has already claimed this carrier: its permit is then on the way.
+        private bool TryUnregisterIdle()
+        {
+            lock (s_idleLock)
+            {
+                if (!m_idle)
+                    return false;
+
+                m_idle = false;
+                s_idleList.Remove(this);
+                s_idle = s_idleList.Count;
+                return true;
+            }
+        }
 
         internal void Deliver(Action step)
         {
@@ -665,7 +767,7 @@ public static class GoScheduler
 
         // 3.2: the pinned goroutine is parked. Hand on whatever waits in the run-next slot, count this carrier BLOCKED
         // (EnsureCarrier backfills the pool, and the idle retire and the injection room read the unblocked count), and
-        // wait, holding no P, on the private wake. The wait is never on s_work, so a pinned carrier never counts in
+        // wait, holding no P, on the private wake. A pinned carrier never registers in the idle set, so it never counts in
         // s_idle (12.1: EnsureCarrier's idle return relies on it).
         private Item WaitPinned(Goroutine goroutine)
         {
@@ -723,32 +825,50 @@ public static class GoScheduler
                     Interlocked.Increment(ref s_runNextSteps);
                     item = new Item(next, next.TakeReadyStep());
                 }
+                else if (s_runq.TryDequeue(out item))
+                {
+                    Chain = 0;
+                }
                 else
                 {
                     Chain = 0;
-                    Interlocked.Increment(ref s_idle);
-                    bool signalled = s_work.Wait(100);
-                    Interlocked.Decrement(ref s_idle);
 
-                    if (!signalled)
-                    {
-                        // A surplus carrier (one added for a hand-off or an injection) retires when idle. Surplus is
-                        // read on the UNBLOCKED count (DESIGN-mn-pin.md 10.1): pinned carriers stay in s_carriers, and
-                        // counting them would let every shared carrier retire under K >= P pinned and parked.
-                        lock (s_carriersLock)
-                        {
-                            if (s_carriers.Count - (s_retireRaw ? 0 : Volatile.Read(ref s_blocked)) > s_procs)
-                            {
-                                s_carriers.Remove(this);
-                                return;
-                            }
-                        }
+                    // THE CURE (DESIGN-mn-pin.md 14): an idle carrier waits on its OWN semaphore, registered in the idle
+                    // set, so a waker can hand it one goroutine directly. Registered first, then the run queue read
+                    // again, so an item queued in between is never left behind.
+                    RegisterIdle();
 
+                    // Work queued between the read above and the registration: take it at the top of the loop. If a
+                    // waker claimed this carrier meanwhile, its permit is coming, and the wait below returns at once.
+                    if (!s_runq.IsEmpty && TryUnregisterIdle())
                         continue;
+
+                    bool woken = m_idleWake.Wait(100);
+
+                    // A waker claimed this carrier as the wait timed out: its permit is on the way.
+                    if (!woken && !TryUnregisterIdle())
+                    {
+                        m_idleWake.Wait();
+                        woken = true;
                     }
 
-                    if (!s_runq.TryDequeue(out item))
+                    // Woken: a hand-off in the run-next slot, or a queued item; both are read at the top of the loop.
+                    if (woken || !s_runq.IsEmpty)
                         continue;
+
+                    // A surplus carrier (one added for a hand-off or an injection) retires when idle. Surplus is read
+                    // on the UNBLOCKED count (DESIGN-mn-pin.md 10.1): pinned carriers stay in s_carriers, and counting
+                    // them would let every shared carrier retire under K >= P pinned and parked.
+                    lock (s_carriersLock)
+                    {
+                        if (s_carriers.Count - (s_retireRaw ? 0 : Volatile.Read(ref s_blocked)) > s_procs)
+                        {
+                            s_carriers.Remove(this);
+                            return;
+                        }
+                    }
+
+                    continue;
                 }
 
                 Interlocked.Increment(ref s_pWaiters);
