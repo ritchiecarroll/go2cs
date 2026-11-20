@@ -19,6 +19,16 @@
 
 **Upgrading from 1.26.11.1.**
 
+This release moves the [break floor](ConsumingGoFromCSharp.md#the-break-floor) once, to <VERSION>, for the two
+breaks listed first below. A `nugetgo.*` package or other assembly built against go.* 1.26.11.1 or earlier is error
+`GO2CS3002` beside the <VERSION> packages: rebuild it against <VERSION>.
+<!-- COORD public-surface ruling for wall E, inbox/P4/20261120T135029Z-COORD.md: ".5 moves the break floor ONCE",
+     to the .5 release, for every .5 break together (Tour item 4's array literals, accepted 2026-11-14, and wall E's
+     variadic<T>); one nugetgo rebuild wave for the release. The compat-check override names floor=<the .5 release>
+     once its version is known. Main-holders (the third bullet) is not a break of this kind: it changes names in
+     package main, an executable no assembly binds, so it is listed here for hand-written C# and is not under the
+     floor. Add any further .5 break to the floor list, above main-holders. -->
+
 - **[QUEUED claude/p1-vp-array-literal c9c62bed56]** **An unnamed array literal now reads `array<nint>([1, 2, 3])`.**
   On every converted platform, a Go array literal of an unnamed array type converts to a call of golib's
   `array<T>(…)` over a C# collection expression, where it was `new nint[]{1, 2, 3}.array()`. C# source written by
@@ -31,6 +41,22 @@
        linux/amd64, darwin/amd64 and linux/arm64. The CS0119 break: docs/PublicSurface.md (63a8fd6037), accepted by
        COORD 2026-11-14 without the priced fix. Named, keyed, sparse and empty literals, and named array types, keep
        their earlier forms (convCompositeLit.go arrayLiteralTakesBuiltin). -->
+- **[QUEUED claude/p2-wall-e-spread-alias df44711719]** **A variadic parameter is now golib's `variadic<T>`, where it
+  was `Span<T>`.** On every converted platform, a converted function's `...T` parameter is declared
+  `params variadic<T>` (through the file's `ꓸꓸꓸT` alias), and `slice<T>.ꓸꓸꓸ` returns `variadic<T>`. `variadic<T>`
+  converts implicitly to `Span<T>` and `ReadOnlySpan<T>`, and a `Span<T>` converts to it, so hand-written C# that
+  calls converted code, or that declares its own `params Span<T>` method for converted code to call, keeps compiling.
+  Three things do not. A generic C# method `M<E>(params Span<E> xs)` called with `s.ꓸꓸꓸ` no longer infers `E`
+  (CS0411): declare it `params variadic<E>` or name `E`. A delegate or interface written against golib's variadic
+  delegate types must change its last parameter to `variadic<TArg>`. Any binary built against the earlier golib must
+  be recompiled. A hand-written body that writes an element of its `params variadic<T>` pack writes the caller's slice
+  for `f(s...)`, as Go does, so it must copy first (`.slice()` copies a pack) when the call passed a list of values.
+  See [Public surface](PublicSurface.md).
+  <!-- P2 wall E, text from inbox/P4/20261120T132748Z-P2.md (P2 sends the final SHA after its regen commit). COORD
+       assignment 20261120T121230Z, decision (b); public-surface ruling 20261120T135029Z (go.variadic<T> tier 1,
+       go.VariadicExtensions go-tier2, the slice<T>.ꓸꓸꓸ return type and two append overloads accepted as this cut's
+       named break). P3 APPROVE WITH CHANGES at d2b979ba88 and df44711719; three-target A/B scored in
+       inbox/COORD/20261120T132422Z-P2.md; red test src/tests/Behavioral/VariadicSpreadHeapAlias. -->
 - **[QUEUED claude/p1-main-holders a2035f6656]** **Package `main` keeps its methods in the package class.** On every
   converted platform, a method of a type declared in package `main` is now a member of `main_package`, beside the
   package's functions, as the Go file reads; it was a member of a separate holder class, `mainᴛ<Type>`. A type of
@@ -46,6 +72,22 @@
 
 **What changed.**
 
+- **[QUEUED claude/p2-wall-e-spread-alias df44711719]** **`f(s...)` passes the slice itself, as Go does.** On every
+  converted platform, a callee that writes the elements of its variadic parameter, or keeps it, now writes and keeps
+  the caller's slice when the call spread one. Before, it worked on a copy and the caller never saw the writes (found
+  in a converted SQLite driver, whose row scan filled a copy of its destination slice). Packs forwarded to another
+  variadic call keep the same slice, and `reflect.Value.CallSlice` passes its slice through too. A call that lists
+  its arguments still builds a new slice for the callee, as Go does.
+  <!-- P2 wall E, inbox/P4/20261120T132748Z-P2.md; the same seat as the variadic<T> bullet under Upgrading. -->
+- **[QUEUED claude/i9-rollforward-major 9b672cc964]** **A converted program runs on a newer .NET.** A converted
+  program (an Exe) built against go.lib now runs on a machine whose only .NET is a newer major version, for example
+  .NET 11, unless the project sets `RollForward` itself. A machine that has the .NET 10 runtime still runs it on
+  .NET 10.
+  <!-- i9 RollForward=Major in go.lib's buildTransitive targets, zero emission change. COORD 20261120T124900Z (add as
+       QUEUED); i9 READY inbox/COORD/20261120T124806Z-i9.md and 20261120T130519Z-i9.md, nine arms, measured on
+       windows-amd64; P3 CLEAR 130706Z. Branch claude/i9-rollforward-major 9b672cc964 on c6a1b0761e. Major rolls
+       forward only when the target major is absent (i9 findings 20261120T072350Z-i9.md). The docs/README.md
+       Requirements sentence ships with the seat. -->
 - **[QUEUED claude/r-shape-witness-on-p5 68a7818821]** **A generic under a method-set constraint that is not
   self-referential now converts within its own package.** On every converted platform, a generic function or type
   whose constraint lists methods, and whose signature puts the type parameter where go2cs's constraint proxy cannot
