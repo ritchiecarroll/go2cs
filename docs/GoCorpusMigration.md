@@ -4126,8 +4126,8 @@ release published nothing: §2, AMENDED
    toolchain)." -->
    **The go2cs dotnet tool** *(added 2026-10-27, 1.26.10.2 seat #11; [PLAN-dotnet-tool-installer.md](PLAN-dotnet-tool-installer.md) §11 OQ-3)*:
    Phase 1b first makes the **record commit, locally and signed**: it regenerates `corpus-release.txt` and commits
-   it with `src/version.props`, `docs/validation/<version>` and `src/core` as `release: go2cs converted stdlib
-   <version>`, then refuses unless the tree is clean. Nothing is pushed; the tag Phase 1 minted stays on the commit
+   it with `src/version.props`, `docs/validation/<version>` and `src/core` as
+   `release: go2cs converted stdlib <version>`, then refuses unless the tree is clean. Nothing is pushed; the tag Phase 1 minted stays on the commit
    before. It then cross-compiles the six `go2cs` binaries from that commit, Authenticode-signs the two Windows
    executables in one signtool process, which is **a PIN prompt of its own, before Phase 2's**, and packs
    `go2cs.<rid>` for the six platforms and the `go2cs` package that names them into the artifacts folder. The pack
