@@ -538,10 +538,10 @@ The suppression is sound because no LEGITIMATE re-alias ever occurs inside a lam
 ```csharp
 internal static nint deepest(ж<node> n) {
     for (nint i = 0; i < 10; i++) {
-        if (len(n.Value.kids) == 0) {
-            return n.Value.val;
+        if (len(n.DerefOrNull().kids) == 0) {
+            return n.DerefOrNull().val;
         }
-        n.Value.each((ж<node> k) => {
+        n.DerefOrNull().each((ж<node> k) => {
             n = k;
             return true;
         });
@@ -549,7 +549,7 @@ internal static nint deepest(ж<node> n) {
     return -1;
 }
 ```
-A pointee that is itself a reference (`*error`, `*[]T`) is read with `.ValueSlot` (`return e.ValueSlot == nil;`), as `*pp` is, because its held value may legally be nil; any other pointee keeps the strict `.Value`. A rebinding in the body itself keeps the alias: it re-aliases in the same statement, so the alias is current at every point the body can observe it. (Guarded by `PointerParamClosureRepoint` — a callback walk, a read, a write, a copy and a range assignment after a closure moved the parameter, a go-statement and a deferred literal that repoint it, a receiver repointed by a callback, `*error` and `*[]int` parameters, and a `goto` body walk as the control, output-compared vs Go — and by `ClosureReassignsPtrParam`, a closure that reassigns a captured `*int` parameter.)
+A value read takes the accessor the alias it replaces was declared with, the nil-deferring `DerefOrNull()`: a nil pointer stays legal to hold and to pass, so a pointer method called on it runs and faults at its own first dereference, as in Go (the strict `.Value` faulted at the read, before the method ran; `nilTag` guards it). Its non-nil path is the slot itself, so a pointee that is itself a reference (`*error`, `*[]T`) reads its held value even when that value is nil (`return e.DerefOrNull() == nil;`). A rebinding in the body itself keeps the alias: it re-aliases in the same statement, so the alias is current at every point the body can observe it. (Guarded by `PointerParamClosureRepoint` — a callback walk, a read, a write, a copy and a range assignment after a closure moved the parameter, a go-statement and a deferred literal that repoint it, a receiver repointed by a callback, `*error` and `*[]int` parameters, a nil argument passed to a nil-tolerant method and to one that prints before it dereferences, and a `goto` body walk as the control, output-compared vs Go — and by `ClosureReassignsPtrParam`, a closure that reassigns a captured `*int` parameter.)
 
 **A range ASSIGNMENT into a pointer parameter is a repoint.** `for _, n = range n.kids` writes the parameter itself, so it takes the box and re-aliases after the assignment, as `n = …` does: `Ꮡn = vᴛ1; n = ref Ꮡn.DerefOrNull();` (inside a literal, or for a parameter a literal repoints, the box alone). It used to assign the `ж<node>` element into the value alias, CS0029. A range assignment into the RECEIVER is a direct-ж trigger for the same reason the assignment is (`bodyReassignsReceiver`). (Guarded by `PointerParamClosureRepoint`'s `rangeBody` and `lastKid`.)
 
