@@ -138,6 +138,17 @@
   <!-- P4 blank-import note, READY 2026-11-19 08:13Z at 7de4e2e267 (inbox/COORD/20261119T081355Z-P4.md); landing order
        after Tour item 4 and P1's main-holders (COORD). The text: docs/ConversionStrategies.md, the blank-import
        paragraph, and ConversionStrategies-Reference/package-conversion.md. -->
+- **[QUEUED claude/p4-release-vcs-clean 02bc5861f9, claude/p4-release-record-first 555f29bfcd]** **`go2cs -version`
+  names the release commit, unmodified.** The go2cs dotnet tool and every release archive's binary now report
+  `vcs.revision` as the commit the release was built from and `vcs.modified=false`. In 1.26.11.1 the dotnet tool
+  reported the tag's commit with `vcs.modified=true`, and every release archive except win-x64 reported
+  `vcs.modified=true`; the code in them was the release's, but the reading was wrong.
+  <!-- P4 (w): the measurement inbox/COORD/20261120T083511Z-P4.md; COORD ruled at 08:36Z.
+       Part A, the release workflow (/dist/ ignored, a clean-tree guard and a per-binary stamp check): READY
+       20261120T084219Z-P4.md, hosted run 44704699451 green on all six binaries (20261120T085855Z-P4.md). Part B1,
+       the release script commits the record before the tool pack: READY 20261120T085858Z-P4.md; the owner sees the
+       new order before the next release, so drop this bullet if B1 has not landed by then, or narrow it to the
+       archives. -->
 
 **Known issues.**
 
