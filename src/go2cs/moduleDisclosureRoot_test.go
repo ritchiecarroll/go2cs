@@ -248,3 +248,129 @@ func TestModuleDisclosureRootInertForStdAndWithoutFlag(t *testing.T) {
 		t.Fatalf("a standard-library package never consults the root; got %q, %q", dir, note)
 	}
 }
+
+// P3 093309Z follow-ups (COORD 093422Z): a CLAIMED version is said and recorded, checked against the module cache's
+// go.mod for that version when the cache has it, refused when the root holds the module under other versions only, and
+// the two flags are refused where they cannot take effect.
+
+// claimedCache points the claimed-version check at a module cache holding <module>@<version>'s go.mod.
+func claimedCache(t *testing.T, version, goMod string) {
+	t.Helper()
+	cache := t.TempDir()
+	dir := filepath.Join(cache, "cache", "download", "github.com", "google", "go-cmp", "@v")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, version+".mod"), []byte(goMod), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	previous := claimedVersionCacheDir
+	claimedVersionCacheDir = func() string { return cache }
+	t.Cleanup(func() { claimedVersionCacheDir = previous })
+}
+
+// copyWithGoMod makes a module copy (not a module-cache directory) whose go.mod is goMod.
+func copyWithGoMod(t *testing.T, goMod string) (checkout, pkgDir string) {
+	t.Helper()
+	checkout = filepath.Join(t.TempDir(), "go-cmp")
+	pkgDir = filepath.Join(checkout, "cmp")
+	if err := os.MkdirAll(pkgDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(checkout, "go.mod"), []byte(goMod), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return checkout, pkgDir
+}
+
+const goCmpGoMod = "module github.com/google/go-cmp\n\ngo 1.21\n"
+
+// MUST 1(a): the applying line says the version was CLAIMED, and the record carries it.
+func TestModuleDisclosureRootClaimedVersionIsSaidAndRecorded(t *testing.T) {
+	_, _, outputDir, root := moduleRootFixture(t)
+	claimedCache(t, "v0.7.0", goCmpGoMod)
+	checkout, pkgDir := copyWithGoMod(t, goCmpGoMod)
+	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp"), "TestDiff/Comparer/MapKeyPointer")
+
+	_, note, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, checkout, "v0.7.0", pkgDir)
+	if err != nil || !strings.Contains(note, "claimed by -module-version, not resolved") {
+		t.Fatalf("the applying line must say the version was claimed, not resolved; got note %q, err %v", note, err)
+	}
+
+	options := Options{testModuleDisclosures: root, mainModulePath: moduleRootTestModule, mainModuleDir: checkout, testModuleVersion: "v0.7.0"}
+	if got := moduleVersionClaimed(options); got != "v0.7.0" {
+		t.Fatalf("the comparison record must carry the claimed version; got %q", got)
+	}
+
+	moduleDir, _, _, _ := moduleRootFixture(t)
+	options.mainModuleDir = moduleDir
+	if got := moduleVersionClaimed(options); got != "" {
+		t.Fatalf("a module-cache directory RESOLVES its version, even when -module-version agrees; got %q", got)
+	}
+
+	page := renderValidationProofPage(proofPageProvenance{importPath: "github.com/google/go-cmp/cmp", goVersion: "1.26.11",
+		platform: "linux/amd64", convertedPath: "src/github.com/google/go-cmp/cmp"},
+		testComparison{Package: "github.com/google/go-cmp/cmp", Status: "validated", Matched: true,
+			Go: map[string]string{"TestA": "pass"}, CSharp: map[string]string{"TestA": "pass"},
+			Environment: testEnvironmentRecord{ModuleVersionClaimed: "v0.7.0"}}, nil, nil)
+	if !strings.Contains(page, "v0.7.0") || !strings.Contains(page, "claimed by -module-version") {
+		t.Fatalf("a module proof page read under a claimed version must say so:\n%s", page)
+	}
+}
+
+// MUST 1(b): when the module cache holds the claimed version, the copy's go.mod must be that version's.
+func TestModuleDisclosureRootClaimedVersionMatchesTheCachesGoMod(t *testing.T) {
+	_, _, outputDir, root := moduleRootFixture(t)
+	claimedCache(t, "v0.7.0", goCmpGoMod)
+	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp"), "TestDiff/Comparer/MapKeyPointer")
+
+	checkout, pkgDir := copyWithGoMod(t, "module github.com/google/go-cmp\n\ngo 1.22\n")
+	if _, _, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, checkout, "v0.7.0", pkgDir); err == nil ||
+		!strings.Contains(err.Error(), "go.mod") || !strings.Contains(err.Error(), "v0.7.0") {
+		t.Fatalf("a copy whose go.mod differs from the cache's v0.7.0 go.mod must be refused; got %v", err)
+	}
+
+	same, samePkg := copyWithGoMod(t, strings.ReplaceAll(goCmpGoMod, "\n", "\r\n"))
+	if _, _, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, same, "v0.7.0", samePkg); err != nil {
+		t.Fatalf("the same go.mod (CRLF aside) must be accepted; got %v", err)
+	}
+}
+
+// SHOULD 2: an explicit -module-version whose root keeps the module under OTHER versions only is refused (it is most
+// likely a wrong claim), in the lookup and in the preflight.
+func TestModuleDisclosureRootClaimedVersionWithOtherVersionsOnlyIsRefused(t *testing.T) {
+	_, _, outputDir, root := moduleRootFixture(t)
+	claimedCache(t, "v0.6.0", goCmpGoMod)
+	checkout, pkgDir := copyWithGoMod(t, goCmpGoMod)
+	writeModuleRootManifest(t, filepath.Join(root, "github.com", "google", "go-cmp@v0.7.0", "cmp"), "TestDiff/Comparer/MapKeyPointer")
+
+	if _, _, err := resolveDisclosureManifestDir(outputDir, root, moduleRootTestModule, checkout, "v0.6.0", pkgDir); err == nil ||
+		!strings.Contains(err.Error(), "v0.7.0") || !strings.Contains(err.Error(), "v0.6.0") {
+		t.Fatalf("claimed v0.6.0 with the root holding v0.7.0 only must be refused naming both; got %v", err)
+	}
+
+	if err := moduleDisclosurePreflight(root, checkout, "v0.6.0"); err == nil || !strings.Contains(err.Error(), "v0.7.0") {
+		t.Fatalf("the preflight must refuse the same claim before any conversion; got %v", err)
+	}
+}
+
+// SHOULD 3 + NIT 4: both flags take effect only on a -tests -recurse run (the single-package route never knows its
+// module, so the root would be ignored silently), and -module-version only with -module-disclosures.
+func TestModuleDisclosureFlagsAreRefusedWhereTheyCannotTakeEffect(t *testing.T) {
+	for _, arm := range []struct {
+		name      string
+		options   Options
+		wantError string
+	}{
+		{"disclosures without -recurse", Options{convertTests: true, testModuleDisclosures: "/r"}, "-recurse"},
+		{"disclosures without -tests", Options{recurse: true, testModuleDisclosures: "/r"}, "-tests"},
+		{"version without disclosures", Options{convertTests: true, recurse: true, testModuleVersion: "v1.0.0"}, "-module-disclosures"},
+		{"both, -tests -recurse", Options{convertTests: true, recurse: true, testModuleDisclosures: "/r", testModuleVersion: "v1.0.0"}, ""},
+		{"neither", Options{convertTests: true}, ""},
+	} {
+		err := moduleDisclosureFlagsError(arm.options)
+		if arm.wantError == "" && err != nil || arm.wantError != "" && (err == nil || !strings.Contains(err.Error(), arm.wantError)) {
+			t.Errorf("%s: got %v, want an error naming %q (empty: none)", arm.name, err, arm.wantError)
+		}
+	}
+}

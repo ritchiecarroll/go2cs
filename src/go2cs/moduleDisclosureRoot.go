@@ -121,6 +121,13 @@ func moduleDisclosureVersion(root, modulePath, moduleDir, claimedVersion string)
 	return escapedPath, cacheVersion, nil
 }
 
+// RED-COMMIT STUBS (P3 093309Z follow-ups): refuse nothing and record nothing yet.
+var claimedVersionCacheDir = goModCacheDir
+
+func moduleDisclosureFlagsError(options Options) error { return nil }
+
+func moduleVersionClaimed(options Options) string { return "" }
+
 // moduleDisclosurePreflight refuses, before any conversion, a -tests -recurse run whose -module-disclosures root cannot
 // be applied, reading the module path from moduleDir's go.mod. Without a go.mod (a module-cache release that has none)
 // it passes, and the per-package lookup (resolveDisclosureManifestDir) still refuses.
