@@ -248,6 +248,32 @@ you reference its `go.*` dependencies at 1.26.11.1 directly, restore succeeds an
      dependencies at the release, after which the build refuses it with GO2CS3002 as planned. First post-.4 docs
      batch, COORD 2026-11-20 07:19Z. -->
 
+## A `-recurse=nuget` conversion reads an older local go2cs root and emits names the packages do not have
+
+**Symptom.** A program converted with `go2cs -recurse=nuget` does not build against the published `go.*` packages,
+with `CS0426` on a standard-library name that carries a `Δ` prefix the packages no longer have, for example
+`reflect_package.ΔKind`. The conversion itself reports no warning and exits 0.
+
+**Cause.** Under `-recurse=nuget` the converter still looks for a local go2cs root: `-go2cspath` when it is given,
+else the `GO2CSPATH` environment variable, else `~/go2cs` (`%USERPROFILE%\go2cs` on Windows). When that folder holds
+a go2cs standard library, the converter reads each imported package's names from it, ahead of the metadata built
+into the converter, which is the metadata that matches the published packages. A root from an older go2cs release,
+such as one left by an earlier `deploy-core` or a go2cs clone, supplies that release's names. On a machine with no
+such folder and `GO2CSPATH` unset, the emission is correct.
+
+**Workaround.** Make the run unable to find an old root: unset `GO2CSPATH` and pass `-go2cspath` an empty folder, or
+move the old `~/go2cs` aside for the run. Then convert again. Measured on `windows-amd64` and `linux-x64`.
+
+<!-- Found 2026-11-20 by the sqlite-cs staging at the 1.26.11.1 release converter (5dd5cafd5b): i9 (COORD inbox
+     20261120T073737Z-i9, windows-amd64) traced CS0426 reflect_package.ΔKind to a stale ~/go2cs deploy whose
+     core/reflect/package_info.cs carries the pre-OQ2 GoTypeAlias("Kind", "ΔKind") record, read by
+     importOperations.go loadImportedTypeAliases before the embedded stdlib-metadata.txt (which has no Δ); a GO2CSPATH
+     pointed at an empty folder gave reflect.Kind. P5 (20261120T073911Z-P5, linux-x64) reproduced it in three arms on
+     the sqlite-cs demo: no root and the release tree as root both clean, a pre-OQ2 clone as -go2cspath gives the
+     ΔKind alias. resolveGo2CSPath skips the root warning for nugetRefs, so the run is silent. The .5 fix (i9: a
+     PublishedStdLib dependency reads the embedded record first) retires this entry. First .5 docs item, COORD
+     2026-11-20 07:40Z. -->
+
 ## Ubuntu's packaged .NET 10 can end a converted program early
 
 On Ubuntu's own build of .NET 10 (the `dotnet` installed with `apt`, runtime identifier `ubuntu.*-x64`), a
