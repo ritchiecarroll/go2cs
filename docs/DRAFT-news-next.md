@@ -153,13 +153,14 @@
 
 **Known issues.**
 
-- **[QUEUED i9, not cut yet]** **A `-recurse=nuget` conversion no longer reads an older local go2cs root.** The
-  known issue added after 1.26.11.1, where such a conversion read `~/go2cs` (or `GO2CSPATH`, or `-go2cspath`) ahead
-  of the metadata embedded in go2cs and emitted names the published packages lack, is fixed, and its entry leaves
-  [Known issues](KnownIssues.md).
-  <!-- The entry: batch 319 (2d6cf69fd6, P4 a0d69468d4), measured on windows-amd64 and linux-x64. The fix is i9's .5
-       seat, not cut when this draft was started (COORD 2026-11-20 08:02Z): replace this mark with its branch and tip
-       when it is READY, and check the wording against its READY post. -->
+- **[QUEUED claude/i9-nuget-metadata-precedence 725bfc923c]** **`go2cs -recurse=nuget` reads standard-library names
+  only from the metadata built into the converter.** An older go2cs copy in `~/go2cs` or `GO2CSPATH` can no longer
+  give a conversion names the published packages lack (such as `reflect_package.ΔKind`); the converter says once when
+  it finds one. [Known issues](KnownIssues.md) marks the entry fixed in this release and keeps its workaround for
+  1.26.11.1 and earlier.
+  <!-- The entry: batch 319 (2d6cf69fd6, P4 a0d69468d4), measured on windows-amd64 and linux-x64. The fix: i9's seat
+       claude/i9-nuget-metadata-precedence, 954b184a3d pushed and 725bfc923c on top (the KnownIssues Fixed line and
+       scoped workaround); line from i9 2026-11-20 11:41Z, queued by COORD 11:42Z. -->
 
 **Documentation.**
 
