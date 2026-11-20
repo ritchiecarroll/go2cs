@@ -2517,7 +2517,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view));
+                return ViewCensus.Door(new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view)), "builtin.cs:2520 Ꮡ(IArray, int)");
             }
         }
 
@@ -2546,7 +2546,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view));
+                return ViewCensus.Door(new NativeBox<T>(view.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(view)), "builtin.cs:2549 Ꮡ(IArray, nint)");
             }
         }
 
@@ -2634,7 +2634,7 @@ public static partial class builtin
             {
                 // Unchecked here too: the length-checked NativeElementAddress refused SliceData over an
                 // empty native window.
-                return new NativeBox<T>(target.NativeElementAddressUnchecked(index), retainedSource: NativeSliceAnchors<T>.Of(target));
+                return ViewCensus.Door(new NativeBox<T>(target.NativeElementAddressUnchecked(index), retainedSource: NativeSliceAnchors<T>.Of(target)), "builtin.cs:2637 ElementAddressUnchecked(slice, int)");
             }
         }
 
@@ -2664,7 +2664,7 @@ public static partial class builtin
         {
             unsafe
             {
-                return new NativeBox<T>(target.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(target));
+                return ViewCensus.Door(new NativeBox<T>(target.NativeElementAddress(index), retainedSource: NativeSliceAnchors<T>.Of(target)), "builtin.cs:2667 Ꮡ(slice, nint)");
             }
         }
 

@@ -470,7 +470,7 @@ namespace go;
         }
 
         // §4's uniform retention: a native box minted from managed storage retains its source.
-        return new NativeBox<TDst>((nuint)referent, pin, retainedSource: this);
+        return ViewCensus.Door(new NativeBox<TDst>((nuint)referent, pin, retainedSource: this), "ж.ElemRefBox.cs:473 pinned element reinterpret");
     }
 
     // The canonical (storage, absolute index) pair: the stored fast pair when the constructor

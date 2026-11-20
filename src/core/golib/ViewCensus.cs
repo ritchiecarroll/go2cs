@@ -23,6 +23,15 @@
 //                     where=uncached   the nil box, or the cache disabled: no lookup at all
 //                 and outcome=found (an existing view returned) or outcome=minted (a FieldRefBox was minted).
 //   NATIVE-FIELD  every of() whose answer was replaced by a native box at the field's Go offset, by the root's kind.
+//   DOOR          (re-run, census-2) every mint through one of golib's 15 construction sites, by that site, EXACT: each
+//                 site wraps its `new NativeBox<T>(...)` in ViewCensus.Door, so an inlined frame cannot hide it (the
+//                 first run's sampled door read `?` for 55% of rows). MINT minus the DOOR rows is the mints made
+//                 outside golib (go.unsafe's unsafe.Add, unsafe.cs:1608), reported as DOOR-UNLABELED.
+//   BARE          (re-run) per T, the mints that carry no provenance: no pin, no retained source, not an order
+//                 token's carrier. Only these could be interned per (T, address) without breaking what a box keeps
+//                 (Change B's population; P3's MUST 1 on the pointer-boundary design).
+//   DISTINCT is now capped PER TYPE (GO2CS_VIEW_CENSUS_DISTINCT_CAP, default 16,000,000), not over all types: the first
+//   run's global 1,000,000 cap left byte's and uintptr's ratios undecided.
 //
 // The per-access signature the scout predicts: for NativeBox, SLOW where=weak-new outcome=minted ~= SLOW calls, and
 // NATIVE-FIELD ~= the of() calls on native roots; for the slotted kinds, minted ~= distinct (box, field) pairs.
@@ -54,7 +63,7 @@ internal static class ViewCensus
         !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GO2CS_VIEW_CENSUS"));
 
     /// <summary>The tally the hooks feed. A control builds its own (<see cref="ViewCensusTally"/>) and never this one.</summary>
-    internal static readonly ViewCensusTally Live = new(SampleFromEnvironment());
+    internal static readonly ViewCensusTally Live = new(SampleFromEnvironment(), DistinctCapFromEnvironment());
 
     internal const string WhereSlot = "slot";
     internal const string WhereWeakNew = "weak-new";
@@ -64,8 +73,25 @@ internal static class ViewCensus
     private static int SampleFromEnvironment() =>
         int.TryParse(Environment.GetEnvironmentVariable("GO2CS_VIEW_CENSUS_SAMPLE"), out int n) && n >= 0 ? n : 256;
 
+    private static int DistinctCapFromEnvironment() =>
+        int.TryParse(Environment.GetEnvironmentVariable("GO2CS_VIEW_CENSUS_DISTINCT_CAP"), out int n) && n > 0 ? n : 16_000_000;
+
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static void Mint(Type pointee, nuint address) => Live.Mint(pointee, address, sampleStack: true);
+    internal static void Mint(Type pointee, nuint address, bool pinned, bool retained, bool aliasesToken) =>
+        Live.Mint(pointee, address, sampleStack: true, pinned, retained, aliasesToken);
+
+    /// <summary>
+    /// Counts one mint at a named golib construction site and returns the box unchanged. A site wraps its
+    /// <c>new NativeBox&lt;T&gt;(...)</c> in it; with the census off it is the box and a folded test.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static TBox Door<TBox>(TBox box, string door) where TBox : class
+    {
+        if (Enabled)
+            Live.Door(door);
+
+        return box;
+    }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void Slow(Type box, string where, bool found) => Live.Slow(box, where, found);
@@ -109,10 +135,10 @@ internal static class ViewCensus
 /// <summary>One census's counters and rows. <see cref="ViewCensus.Live"/> is the one the hooks feed.</summary>
 internal sealed class ViewCensusTally
 {
-    internal const int DistinctCap = 1_000_000;
     private const long FlushEvery = 4_000_000;
 
     private readonly int m_sample;
+    private readonly int m_distinctCap;
 
     private long m_events;
     private long m_mints;
@@ -121,35 +147,63 @@ internal sealed class ViewCensusTally
     private long m_nativeFields;
     private long m_sampled;
     private long m_distinct;
+    private long m_bare;
+    private long m_doors;
     private int m_flushing;
 
     private readonly ConcurrentDictionary<Type, StrongBox<long>> m_mintRows = new();
-    private readonly ConcurrentDictionary<(Type, nuint), byte> m_addresses = new();
-    private readonly ConcurrentDictionary<Type, StrongBox<long>> m_distinctRows = new();
+    // Per T: the distinct non-zero addresses minted, up to m_distinctCap each (a HashSet under its own lock; 28 bytes or
+    // so an entry), and whether the cap was reached.
+    private sealed class Addresses
+    {
+        internal readonly HashSet<nuint> Seen = [];
+        internal bool Capped;
+    }
+
+    private readonly ConcurrentDictionary<Type, Addresses> m_addresses = new();
+    private readonly ConcurrentDictionary<Type, StrongBox<long>> m_bareRows = new();
+    private readonly ConcurrentDictionary<string, StrongBox<long>> m_doorRows = new();
     private readonly ConcurrentDictionary<string, StrongBox<long>> m_siteRows = new();
     private readonly ConcurrentDictionary<(Type, string, bool), StrongBox<long>> m_slowRows = new();
     private readonly ConcurrentDictionary<Type, StrongBox<long>> m_nativeFieldRows = new();
 
-    internal ViewCensusTally(int sample) => m_sample = sample;
+    internal ViewCensusTally(int sample, int distinctCap = 16_000_000)
+    {
+        m_sample = sample;
+        m_distinctCap = distinctCap;
+    }
 
     /// <summary>Where this tally's block is written; null writes nothing.</summary>
     internal string? Path { get; set; }
 
     // Never inlined: the sampled stack trace skips exactly this frame.
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal void Mint(Type pointee, nuint address, bool sampleStack)
+    internal void Mint(Type pointee, nuint address, bool sampleStack, bool pinned = false, bool retained = false, bool aliasesToken = false)
     {
         long n = Interlocked.Increment(ref m_mints);
         bool newRow = Bump(m_mintRows, pointee);
+
+        if (!pinned && !retained && !aliasesToken)
+        {
+            Interlocked.Increment(ref m_bare);
+            Bump(m_bareRows, pointee);
+        }
 
         if (address == 0)
         {
             Interlocked.Increment(ref m_nilMints);
         }
-        else if (Interlocked.Read(ref m_distinct) < DistinctCap && m_addresses.TryAdd((pointee, address), 0))
+        else
         {
-            Interlocked.Increment(ref m_distinct);
-            Bump(m_distinctRows, pointee);
+            Addresses seen = m_addresses.GetOrAdd(pointee, static _ => new Addresses());
+
+            lock (seen)
+            {
+                if (seen.Seen.Count >= m_distinctCap)
+                    seen.Capped = true;
+                else if (seen.Seen.Add(address))
+                    Interlocked.Increment(ref m_distinct);
+            }
         }
 
         if (sampleStack && m_sample > 0 && n % m_sample == 0)
@@ -171,6 +225,30 @@ internal sealed class ViewCensusTally
     {
         Interlocked.Increment(ref m_nativeFields);
         Event(Bump(m_nativeFieldRows, root));
+    }
+
+    // After the mint it names (the constructor counts first), so at every instant DOOR <= MINT.
+    internal void Door(string door)
+    {
+        Interlocked.Increment(ref m_doors);
+        Event(Bump(m_doorRows, door));
+    }
+
+    /// <summary>The DOOR count for one construction site, and the BARE count for one pointee type.</summary>
+    internal long DoorRow(string door) =>
+        m_doorRows.TryGetValue(door, out StrongBox<long>? n) ? Interlocked.Read(ref n.Value) : 0;
+
+    internal long BareRow(Type pointee) =>
+        m_bareRows.TryGetValue(pointee, out StrongBox<long>? n) ? Interlocked.Read(ref n.Value) : 0;
+
+    /// <summary>The distinct addresses seen for one pointee type, and whether its cap was reached.</summary>
+    internal (long distinct, bool capped) DistinctRow(Type pointee)
+    {
+        if (!m_addresses.TryGetValue(pointee, out Addresses? seen))
+            return (0, false);
+
+        lock (seen)
+            return (seen.Seen.Count, seen.Capped);
     }
 
     /// <summary>The counters, for a control: an assertion is that a counter MOVED across a call.</summary>
@@ -315,10 +393,11 @@ internal sealed class ViewCensusTally
     {
         (long mints, long nilMints, long slow, long nativeFields, long distinct) = Snapshot();
         long sampled = Interlocked.Read(ref m_sampled);
+        long bare = Interlocked.Read(ref m_bare), doors = Interlocked.Read(ref m_doors);
 
         List<string> lines =
         [
-            $"{(final ? "VCENSUS" : "VCENSUS-PARTIAL")} mints={mints} nil-mints={nilMints} distinct={distinct}{(distinct >= DistinctCap ? "(CAPPED)" : "")} slow={slow} native-fields={nativeFields} sampled={sampled} sample-every={m_sample}",
+            $"{(final ? "VCENSUS" : "VCENSUS-PARTIAL")} mints={mints} nil-mints={nilMints} distinct={distinct} bare={bare} doors={doors} door-unlabeled={mints - doors} slow={slow} native-fields={nativeFields} sampled={sampled} sample-every={m_sample} distinct-cap-per-type={m_distinctCap}",
             $"VCENSUS-BLOCK pid={Environment.ProcessId} entry={System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name ?? "?"} utc={DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}",
             "VCENSUS-FOLD the file holds ONE block, the latest; a run's count is the sum of the blocks across FILES"
         ];
@@ -327,16 +406,27 @@ internal sealed class ViewCensusTally
             lines.Add("VCENSUS-START armed at module init: the zeros above are a MEASURED zero; NO FILE means the census never armed");
 
         List<string> rows = [];
-        long sumMints = 0, sumSlow = 0, sumNative = 0, sumSites = 0, sumDistinct = 0;
+        long sumMints = 0, sumSlow = 0, sumNative = 0, sumSites = 0, sumDistinct = 0, sumBare = 0, sumDoors = 0;
 
         foreach (KeyValuePair<Type, StrongBox<long>> row in m_mintRows)
         {
             long n = Interlocked.Read(ref row.Value.Value);
-            long d = m_distinctRows.TryGetValue(row.Key, out StrongBox<long>? dn) ? Interlocked.Read(ref dn.Value) : 0;
+            (long d, bool capped) = DistinctRow(row.Key);
+            long b = BareRow(row.Key);
             sumMints += n;
             sumDistinct += d;
-            rows.Add($"VCENSUS-MINT {n,12}  distinct={d,10}  T={NameOf(row.Key)}");
+            sumBare += b;
+            rows.Add($"VCENSUS-MINT {n,12}  distinct={d,10}{(capped ? "(CAPPED)" : "")}  bare={b,12}  T={NameOf(row.Key)}");
         }
+
+        foreach (KeyValuePair<string, StrongBox<long>> row in m_doorRows)
+        {
+            long n = Interlocked.Read(ref row.Value.Value);
+            sumDoors += n;
+            rows.Add($"VCENSUS-DOOR {n,12}  {row.Key}");
+        }
+
+        rows.Add($"VCENSUS-DOOR-UNLABELED {mints - doors,12}  mints made outside golib's 15 sites (go.unsafe's unsafe.Add, unsafe.cs:1608)");
 
         foreach (KeyValuePair<(Type box, string where, bool found), StrongBox<long>> row in m_slowRows)
         {
@@ -359,8 +449,9 @@ internal sealed class ViewCensusTally
             rows.Add($"VCENSUS-SITE {n,12}  {row.Key}");
         }
 
-        bool reconciles = sumMints == mints && sumSlow == slow && sumNative == nativeFields && sumSites == sampled && sumDistinct == distinct;
-        string sums = $"mints={sumMints} slow={sumSlow} native-fields={sumNative} sampled={sumSites} distinct={sumDistinct}";
+        bool reconciles = sumMints == mints && sumSlow == slow && sumNative == nativeFields && sumSites == sampled &&
+                          sumDistinct == distinct && sumBare == bare && sumDoors == doors && doors <= mints;
+        string sums = $"mints={sumMints} slow={sumSlow} native-fields={sumNative} sampled={sumSites} distinct={sumDistinct} bare={sumBare} doors={sumDoors}";
 
         lines.Add(reconciles
             ? $"VCENSUS-RECONCILES rows sum to {sums}"

@@ -1385,7 +1385,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // What the pointer CARRIED is kept here and only here, and only where the resolve kept nothing: a number that
         // missed the registry (an interior address of Go memory: only a box's own address is registered) used to
         // mint a box with no source and no pin under a pointer still in use.
-        return new NativeBox<T>((nuint)value.Value, retainedSource: NativeDerivation.KeptResolved(resolved, aliasesAnOrderToken) ?? NativeDerivation.Kept(carried), aliasesAnOrderToken: aliasesAnOrderToken);
+        return ViewCensus.Door(new NativeBox<T>((nuint)value.Value, retainedSource: NativeDerivation.KeptResolved(resolved, aliasesAnOrderToken) ?? NativeDerivation.Kept(carried), aliasesAnOrderToken: aliasesAnOrderToken), "ж.cs:1388 FromNumber");
     }
 
     // The interior-alias step's one call shape, shared by both refusal arms: walk, record the path

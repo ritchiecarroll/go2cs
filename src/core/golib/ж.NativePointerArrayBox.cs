@@ -297,7 +297,7 @@ internal sealed class NativePointerWords<E> : IArray<ж<E>>, INativeWordArray<ж
 
     private unsafe nuint readWord(nint index) => *(nuint*)ElementAddress(index);
 
-    private static ж<E> mint(nuint word) => word == 0 ? null! : new NativeBox<E>(word);
+    private static ж<E> mint(nuint word) => word == 0 ? null! : ViewCensus.Door(new NativeBox<E>(word), "ж.NativePointerArrayBox.cs:300 mint");
 
     // No managed T[] backs these elements: the members that would hand one out refuse by name.
     private InvalidOperationException noManagedBacking() =>

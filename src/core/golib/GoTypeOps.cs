@@ -98,7 +98,7 @@ public sealed class GoTypeOps<T> : IGoTypeOps
     public object NilBoxOfDims(long[] dims) => ж<T>.NilBoxOfDims(dims);
 
     /// <inheritdoc/>
-    public object NewNativeBox(nuint address) => new NativeBox<T>(address);
+    public object NewNativeBox(nuint address) => ViewCensus.Door(new NativeBox<T>(address), "GoTypeOps.cs:101 NewNativeBox");
 }
 
 /// <summary>

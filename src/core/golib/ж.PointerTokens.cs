@@ -587,17 +587,17 @@ namespace go;
     public static ж<EmptyStruct> MintOpaque<T>(ж<T>? box)
     {
         if (box is null || box.IsNative || !RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            return new NativeBox<EmptyStruct>((nuint)(uintptr)box!);
+            return ViewCensus.Door(new NativeBox<EmptyStruct>((nuint)(uintptr)box!), "ж.PointerTokens.cs:590 MintOpaque native");
 
         nuint token = box.PointerOrderToken;
 
         // A nil-constructed box tokens 0, which is the nil form on the numeric route too.
         if (token == 0)
-            return new NativeBox<EmptyStruct>((nuint)0);
+            return ViewCensus.Door(new NativeBox<EmptyStruct>((nuint)0), "ж.PointerTokens.cs:596 MintOpaque nil");
 
         Register(token, box);
 
-        ж<EmptyStruct> minted = new NativeBox<EmptyStruct>(token);
+        ж<EmptyStruct> minted = ViewCensus.Door(new NativeBox<EmptyStruct>(token), "ж.PointerTokens.cs:600 MintOpaque token");
 
         s_mintedReferents.Add(minted, box);
 

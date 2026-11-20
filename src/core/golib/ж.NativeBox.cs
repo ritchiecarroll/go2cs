@@ -70,7 +70,7 @@ namespace go;
 
         // The view-cache miss census (ViewCensus.cs, a scratch instrument): every mint, by T and address.
         if (ViewCensus.Enabled)
-            ViewCensus.Mint(typeof(T), nativeAddress);
+            ViewCensus.Mint(typeof(T), nativeAddress, pinned: pin is not null, retained: retainedSource is not null, aliasesToken: aliasesAnOrderToken);
     }
 
     /// <summary>

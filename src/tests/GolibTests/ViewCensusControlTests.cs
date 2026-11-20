@@ -57,6 +57,57 @@ public unsafe class ViewCensusControlTests
         Assert.AreEqual(1L, tally.MintRow(typeof(long)));
     }
 
+    // census-2: the per-type cap, the BARE split and the exact DOOR rows.
+    [TestMethod]
+    public void TheDistinctCapIsPerTypeAndSaysWhenItIsReached()
+    {
+        ViewCensusTally tally = new(sample: 0, distinctCap: 2);
+
+        tally.Mint(typeof(censusProbe), 0x1000, sampleStack: false);
+        tally.Mint(typeof(censusProbe), 0x2000, sampleStack: false);
+        tally.Mint(typeof(censusProbe), 0x3000, sampleStack: false);
+        tally.Mint(typeof(long), 0x1000, sampleStack: false);
+        tally.Mint(typeof(long), 0x2000, sampleStack: false);
+
+        Assert.AreEqual((2L, true), tally.DistinctRow(typeof(censusProbe)), "the third address is past this type's cap");
+        Assert.AreEqual((2L, false), tally.DistinctRow(typeof(long)), "another type has a cap of its own");
+        Assert.AreEqual(4L, tally.Snapshot().distinct);
+        StringAssert.Contains(tally.Lines(final: true).Single(line => line.Contains("T=GolibTests.ViewCensusControlTests+censusProbe", StringComparison.Ordinal)), "distinct=         2(CAPPED)");
+    }
+
+    [TestMethod]
+    public void AMintThatKeepsNothingIsBareAndAnyProvenanceIsNot()
+    {
+        ViewCensusTally tally = new(sample: 0);
+
+        tally.Mint(typeof(censusProbe), 0x1000, sampleStack: false);
+        tally.Mint(typeof(censusProbe), 0x1000, sampleStack: false, pinned: true);
+        tally.Mint(typeof(censusProbe), 0x1000, sampleStack: false, retained: true);
+        tally.Mint(typeof(censusProbe), 0x1000, sampleStack: false, aliasesToken: true);
+
+        Assert.AreEqual(4L, tally.MintRow(typeof(censusProbe)));
+        Assert.AreEqual(1L, tally.BareRow(typeof(censusProbe)));
+    }
+
+    [TestMethod]
+    public void DoorRowsAreExactAndTheRestIsUnlabeled()
+    {
+        ViewCensusTally tally = new(sample: 0);
+
+        for (int i = 0; i < 3; i++)
+        {
+            tally.Mint(typeof(censusProbe), 0x1000, sampleStack: false);
+            tally.Door("site A");
+        }
+
+        tally.Mint(typeof(censusProbe), 0x1000, sampleStack: false); // a mint no golib site labelled
+
+        Assert.AreEqual(3L, tally.DoorRow("site A"));
+        string[] lines = tally.Lines(final: true).ToArray();
+        StringAssert.Contains(lines[0], "doors=3 door-unlabeled=1");
+        Assert.IsTrue(lines.Any(line => line.StartsWith("VCENSUS-RECONCILES", StringComparison.Ordinal)), string.Join("\n", lines));
+    }
+
     [TestMethod]
     public void TheRecorderKeysSlowRowsByKindWhereAndOutcome()
     {
@@ -105,7 +156,7 @@ public unsafe class ViewCensusControlTests
 
             string[] lines = File.ReadAllLines(path);
 
-            StringAssert.StartsWith(lines[0], "VCENSUS mints=1 nil-mints=0 distinct=1 slow=1 native-fields=1 sampled=1 sample-every=1");
+            StringAssert.StartsWith(lines[0], "VCENSUS mints=1 nil-mints=0 distinct=1 bare=1 doors=0 door-unlabeled=1 slow=1 native-fields=1 sampled=1 sample-every=1");
             Assert.IsTrue(lines.Any(line => line.StartsWith("VCENSUS-RECONCILES", StringComparison.Ordinal)), string.Join("\n", lines));
             Assert.AreEqual(1, lines.Count(line => line.StartsWith("VCENSUS-SLOW", StringComparison.Ordinal)
                 && line.Contains("kind=NativeBox  where=weak-new  outcome=minted", StringComparison.Ordinal)), string.Join("\n", lines));
@@ -159,6 +210,7 @@ public unsafe class ViewCensusControlTests
         long weakNew0 = live.SlowRow(rootType, ViewCensus.WhereWeakNew, found: false);
         long weakLive0 = live.SlowRow(rootType, ViewCensus.WhereWeakLive, found: true);
         long native0 = live.NativeFieldRow(rootType);
+        long door0 = live.DoorRow("ж.FieldRefBox.cs:332 NativeFieldBox");
 
         try
         {
@@ -175,6 +227,7 @@ public unsafe class ViewCensusControlTests
             Assert.AreEqual(1L, live.SlowRow(rootType, ViewCensus.WhereWeakLive, found: true) - weakLive0, "the live root's second of() finds its view");
             Assert.AreEqual((long)nativeAnswers, live.NativeFieldRow(rootType) - native0, $"one NATIVE-FIELD row per native answer ({nativeAnswers} of 3)");
             Assert.IsTrue(live.MintRow(typeof(nint)) - fieldMints0 >= nativeAnswers, "each native answer is a mint of its own");
+            Assert.IsTrue(live.DoorRow("ж.FieldRefBox.cs:332 NativeFieldBox") - door0 >= nativeAnswers, "and each names its door exactly");
         }
         finally
         {

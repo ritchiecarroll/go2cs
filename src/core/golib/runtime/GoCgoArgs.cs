@@ -100,7 +100,7 @@ namespace go.golib;
         if (address == copiedIn)
             return original;
 
-        return new NativeBox<U>(address);
+        return ViewCensus.Door(new NativeBox<U>(address), "GoCgoArgs.cs:103 cgo result");
     }
 
     // ---- cgo Phase 3, increment 3.1 (docs/phase4/DESIGN-cgo-phase3-marshaling.md §16): a void pointer, and cmd/cgo's

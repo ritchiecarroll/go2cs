@@ -89,7 +89,7 @@ internal static class NativeDerivation
         if (value == 0 || ManagedPointerTokens.IsTaggedToken(value) || Kept(carried) is not { } kept)
             return null;
 
-        return new NativeBox<byte>(value, retainedSource: kept);
+        return ViewCensus.Door(new NativeBox<byte>(value, retainedSource: kept), "ж.NativeDerivation.cs:92 Moved");
     }
 
     // The first MANAGED box `kept` was derived from, for the array-pointer view doors at an address inside a Go value
