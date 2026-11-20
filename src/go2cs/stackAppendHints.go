@@ -699,7 +699,7 @@ func newStackAppendHarvestCommand(tests bool, target string, options Options) st
 	return stackAppendHarvestCommand{
 		goTool: goTool,
 		args:   args,
-		env:    []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS="},
+		env:    []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS=", "GOCACHE=" + probeCacheDir()},
 	}
 }
 
@@ -989,4 +989,41 @@ func (v *Visitor) writeStackAppendMove(stmt ast.Stmt) {
 		v.outputBuilder.WriteString(v.indent(v.indentLevel))
 		fmt.Fprintf(v.outputBuilder, "%s = move2heap(%s, %s);", name, v.stackAppendBufferName(buffer), name)
 	}
+}
+
+// probeCacheEnv overrides the default probe cache directory; -probe-cache (probeCacheFlag) overrides it in turn.
+const probeCacheEnv = "GO2CS_PROBE_CACHE"
+
+// probeCacheFlag is -probe-cache, set by main; empty when the flag was not passed.
+var probeCacheFlag string
+
+// probeCacheDir is the GOCACHE every harvest command runs with: -probe-cache, else GO2CS_PROBE_CACHE, else
+// go2cs/probe-cache under the user cache directory (the temporary directory when there is none). The harvest builds
+// the standard library once per target under its own flags (-trimpath, CGO_ENABLED=0, four targets), which no
+// ordinary build shares, so those entries are kept out of the user's GOCACHE: they cost a cold run about 175 MB and
+// 17 s on a ten-package module and are reused by every later run of any module. Go trims this cache by its own rule
+// (entries unused for five days), and deleting the directory is always safe. Go refuses a relative GOCACHE, so the
+// result is absolute.
+func probeCacheDir() string {
+	dir := probeCacheFlag
+
+	if dir == "" {
+		dir = os.Getenv(probeCacheEnv)
+	}
+
+	if dir == "" {
+		base, err := os.UserCacheDir()
+
+		if err != nil {
+			base = os.TempDir()
+		}
+
+		dir = filepath.Join(base, "go2cs", "probe-cache")
+	}
+
+	if absolute, err := filepath.Abs(dir); err == nil {
+		dir = absolute
+	}
+
+	return dir
 }

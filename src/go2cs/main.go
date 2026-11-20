@@ -309,6 +309,7 @@ func main() {
 	allowStaleConverterCmd := commandLine.Bool("allow-stale-converter", false, "Proceed with a -stdlib or -tests run even when this binary is OLDER than the converter sources beside it. Those two drivers otherwise refuse, because their output is banked or measured and a stale run emits the previous converter's C# while exiting 0. Pass this for the one deliberate case: an A/B against a PRESERVED binary, where the pinned binary IS the measurement (see converterStaleness.go)")
 	dualRecvCmd := commandLine.Bool("dual-recv", false, "Experimental, for converter development: eligible pointer-receiver methods also emit a form that takes the receiver by reference, beside the default form. Off by default; output made with it is not validated")
 	dualRecvParamsCmd := commandLine.Bool("dual-recv-params", false, "Experimental, requires -dual-recv: those forms also lower their pointer parameters, and call sites choose between the two forms. Off by default")
+	probeCacheCmd := commandLine.String("probe-cache", "", "Go build cache (GOCACHE) for the escape probe's go build/go test runs, kept apart from your own GOCACHE; default go2cs/probe-cache under the user cache directory, or $"+probeCacheEnv+". Go trims it by its own rule, and deleting it is always safe")
 
 	var positionals []string
 	positionals, err = parseArgsInterspersed(commandLine, os.Args[1:])
@@ -591,6 +592,8 @@ Examples:
 	if inlineArraysErr != nil {
 		log.Fatalln(inlineArraysErr)
 	}
+
+	probeCacheFlag = strings.TrimSpace(*probeCacheCmd)
 
 	options := Options{
 		warnCodes:           warnCodes,
