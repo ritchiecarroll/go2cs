@@ -178,6 +178,16 @@ jobs:
           GOTOOLCHAIN: local
         run: |
           set -euo pipefail
+          # A go build stamps vcs.modified from git status, untracked files included, so a binary built from a
+          # dirty checkout reports modified=true in -version. The release builds from the record commit as
+          # checked out; refuse anything else.
+          dirty="$(git status --porcelain)"
+          if [ -n "$dirty" ]; then
+            echo "::error::the checkout is not clean before the build, so every binary would report vcs.modified=true:"
+            printf '%s\n' "$dirty"
+            exit 1
+          fi
+          head="$(git rev-parse HEAD)"
           out="$GITHUB_WORKSPACE/dist"
           mkdir -p "$out"
           {
@@ -213,6 +223,24 @@ jobs:
           darwin arm64 osx-arm64
           TARGETS
           (cd "$out" && sha256sum go2cs-* > SHA256SUMS && cat SHA256SUMS)
+          # Every binary must report the commit it was built from, unmodified (go version -m reads a binary of
+          # any platform). An archive written into the checkout between builds once made all but the first
+          # report vcs.modified=true (1.26.11.1); /dist/ is ignored for that reason.
+          stamp_fail=0
+          for bin in "$RUNNER_TEMP"/*/go2cs "$RUNNER_TEMP"/*/go2cs.exe; do
+            [ -f "$bin" ] || continue
+            info="$(go version -m "$bin")"
+            revision="$(printf '%s\n' "$info" | awk '$2 ~ /^vcs\.revision=/ { sub(/^vcs\.revision=/, "", $2); print $2 }')"
+            modified="$(printf '%s\n' "$info" | awk '$2 ~ /^vcs\.modified=/ { sub(/^vcs\.modified=/, "", $2); print $2 }')"
+            if [ "$revision" != "$head" ] || [ "$modified" != false ]; then
+              echo "::error::$bin reports vcs.revision=${revision:-none} vcs.modified=${modified:-none}; want $head and false"
+              stamp_fail=1
+            fi
+          done
+          if [ "$stamp_fail" -ne 0 ]; then
+            git status --porcelain
+            exit 1
+          fi
 
       - uses: actions/setup-dotnet@v5
         with:

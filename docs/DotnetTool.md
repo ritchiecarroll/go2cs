@@ -8,6 +8,13 @@ dotnet tool install -g go2cs
 go2cs -version
 ```
 
+Until the first conversion, `go2cs -version` prints `go.packages=unknown` and `go.toolchain=unknown`: the tool
+downloads its Go on first use, and these two lines are read from that Go.
+<!-- src/go2cs/versionReport.go: go.packages and go.toolchain come from goVersion() (readme.go, `go env GOVERSION`)
+     and print "unknown" when it is empty. P3's cold first-user pass on the published 1.26.11.1 tool (mailbox
+     2026-11-19 23:12Z, finding b): unknown before the first conversion, 1.26.* and go1.26.11 after it. First post-.4
+     docs batch, COORD 2026-11-20 07:19Z. -->
+
 The tool is the converter itself, a native executable for Windows, Linux and macOS on x64 and Arm64. The .NET
 SDK picks the build for your machine when it installs the tool. Building the converted C# still needs the
 [.NET 10 SDK](https://dotnet.microsoft.com/download), and the first build restores the `go.*` packages from
