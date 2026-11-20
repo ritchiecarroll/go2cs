@@ -440,6 +440,38 @@ A closure that captures an outer variable is emitted with a snapshot copy declar
 
 The same rule applies to an **escaping local** whose address is taken — `var p _panic; … preprintpanics(&p)` in runtime's `gopanic`, where `p` collides with the type `p`. The heap allocation is `ref var Δp = ref heap(new _panic(), out var Ꮡp)`, so the box is `Ꮡp` (raw) and `&p` must emit `Ꮡp`, not `ᏑΔp`. **Crucially, the box-name rule is keyed to the rename *kind*, because the two kinds name their boxes differently:** a type-**collision** rename prepends the marker (`p` → `Δp`) but keeps the raw box (`Ꮡp`), whereas a nested-scope **shadow** rename appends the marker plus a counter (`i` → `iΔ1`, `iΔ2`) and keeps the *shadow* box (`ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1)`, so `&i` correctly emits `ᏑiΔ1`). The converter therefore rewrites to the raw name *only* when the alias is exactly `Δ`+rawname (the collision form); a shadow-renamed or non-renamed var keeps its existing box name. (Guarded by the `CollisionRenamedLocalBox` behavioral test, with `ForVariants`/`NestedVarShadow` covering the shadow-rename form left unchanged. Since 2026-11-11 `CollisionRenamedLocalBox` declares the type `p` and its locals unrenamed, `ref var p = ref heap<box>(new box(n: 0), out var Ꮡp)`, so it pins the plain form and no behavioral test reaches the collision form.)
 
+### A generic type's holder is named by the type alone
+
+A method holder's name is the package's class name, the marker and the receiver type's identifier, and for a
+generic type that identifier carries no type parameters and no constraints. `Iterator[T text.Text]` and
+`Window[K comparable, T text.Text]`, both constrained by a type of a package whose import path has a slash,
+take the holders `mainᴛIterator` and `mainᴛWindow`, each declared once with its open generic type
+(`[GoMethodHost(typeof(main_package.Iterator<>))]`, `typeof(main_package.Window<,>)`):
+
+<!-- source: src/tests/Behavioral/GenericHolderForeignConstraint/main.cs.target:17-20, 51-54 -->
+```csharp
+} partial class mainᴛIterator {
+
+public static void SetText<T>(this ref Iterator<T> it, T data)
+    where T : /* text.Text */ IByteSeq<T, byte>, new()
+…
+} partial class mainᴛWindow {
+
+public static nint Len<K, T>(this Window<K, T> w)
+    where T : /* text.Text */ IByteSeq<T, byte>, new()
+```
+(Guarded by the `GenericHolderForeignConstraint` behavioral test, output-compared against `go run`, and by the
+converter test `TestGenericHolderIsNamedByTheTypeWhateverItsConstraint`.)
+<!-- Until 2026-11-19 the holder's name was cut from the type's generic ORIGIN as rendered through
+     getCSharpTypeName, whose string form carries each type parameter with its constraint. For a constraint
+     from a slash-path package the string path's last-slash strip ate the type's own name, so
+     `Iterator[T stringish.Interface]` gave `partial class iteratorsᴛInterface>` and
+     `typeof(iterators_package.Interface><>)` (CS1022/CS1513/CS1525), and every such type of a package
+     shared that one broken holder. Found in github.com/clipperhouse/uax29/v2 internal/iterators, a dependency
+     of gojq's cli through go-runewidth, by the 1.26.11.1 nugetgo dry run (P2, COORD 100212Z). The same-package
+     instantiated-generic arm of getAliasQualifiedTypeName already spelled the name getSanitizedIdentifier(name);
+     src/go2cs/methodHolder.go holderTypeName now takes that spelling for every generic type. -->
+
 ### A nested closure must not clobber the enclosing closure's capture state
 The per-lambda conversion state — `conversionInLambda` (are we inside a closure body?) plus the capture-name maps (`currentLambdaVars`/`currentLambdaVarObjs`) — is what makes closure-body emission rewrite captured references to their box/copy forms: a captured local `s` reads as `sʗ1`, and the current method's **direct-ж receiver** (`func (s *Stmt) …` emitted `this ж<Stmt> Ꮡs`, whose body alias `ref var s = ref Ꮡs.DerefOrNull()` is a `ref`-local that **cannot** be captured by a C# closure) reads through its box as `Ꮡs.Value`. `enterLambdaConversion`/`exitLambdaConversion` are a **LIFO save/restore stack** (`conversionStack`): entering pushes the current state and installs fresh state; exiting **restores the enclosing closure's** state rather than resetting it. Reset on exit, a closure containing an **inner** closure would lose its state the moment the inner one finished, and every reference in the *outer* body **after** it would fall back to the bare, un-rewritten name: `database/sql (*Stmt).QueryContext`'s `s.db.retry(func(){ …; rows.releaseConn = func(err){…}; if s.cg != nil { … } })`, where `s.cg` sits after the inner `releaseConn` closure, would emit `s.cg` (CS8175, "cannot use ref local `s` inside an anonymous method/lambda"), and a captured local would silently split between its bare form and its `ʗ1` copy. A closure at top level restores to `false`/empty, so the stack matters only where a closure body continues after a nested closure — there the receiver box-read (`Ꮡs.Value.cg`, `Ꮡs.Value.cg.txCtx()`) and the captured-local copy name apply consistently across the whole body. (Guarded by the `NestedLambdaReceiverField` behavioral test — a direct-ж receiver method whose closure holds a nested closure followed by a non-call receiver field read, a field-method call, and another field read, all verified to render `Ꮡs.Value.<field>` and output-compared vs Go; `DeferValueFieldPtrReceiver`'s defer-then-body sequence exercises the same restore.)
 

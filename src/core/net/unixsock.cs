@@ -66,9 +66,8 @@ internal static Addr opAddr(this ж<UnixAddr> Ꮡa) {
 // See func [Dial] for a description of the network and address
 // parameters.
 public static (ж<UnixAddr>, error) ResolveUnixAddr(@string network, @string address) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+    case {} when network == "unix"u8 || network == "unixgram"u8 || network == "unixpacket"u8: {
         return (Ꮡ(new UnixAddr(Name: address, Net: network)), default);
     }
     default: {
@@ -250,9 +249,8 @@ public static (ж<UnixConn>, error) DialUnix(@string network, ж<UnixAddr> laddr
 internal static (ж<UnixConn>, error) dialUnix(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
     ref var dialer = ref Ꮡdialer.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+    case {} when network == "unix"u8 || network == "unixgram"u8 || network == "unixpacket"u8: {
         break;
     }
     default: {
@@ -392,9 +390,8 @@ public static (ж<os.File> f, error err) File(this ж<UnixListener> Ꮡl) {
 //
 // The network must be "unix" or "unixpacket".
 public static (ж<UnixListener>, error) ListenUnix(@string network, ж<UnixAddr> laddr) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8: {
+    case {} when network == "unix"u8 || network == "unixpacket"u8: {
         break;
     }
     default: {
@@ -415,9 +412,8 @@ public static (ж<UnixListener>, error) ListenUnix(@string network, ж<UnixAddr>
 //
 // The network must be "unixgram".
 public static (ж<UnixConn>, error) ListenUnixgram(@string network, ж<UnixAddr> laddr) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "unixgram"u8: {
+    case {} when network == "unixgram"u8: {
         break;
     }
     default: {

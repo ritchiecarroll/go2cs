@@ -16,8 +16,10 @@
 // The route is deliberately narrow (docs/phase4/DESIGN-constraint-proxy-nonself.md, section 9's rulings):
 //
 //   - a generic FUNCTION only: a generic named type would carry the proxy in its own identity (ruling 1);
-//   - a type parameter that is a DIRECT parameter or result of the callee: one reached only as a func result keeps
-//     funcResultProjection, one reached only inside []N keeps the element-wise widening;
+//   - a type parameter that is a DIRECT parameter or result of the callee, or (class B) one reached in []T parameters
+//     beside a func-typed parameter that mentions it, whose []T argument then projects to the proxy (sliceWideningRoute):
+//     one reached only as a func result keeps funcResultProjection, one reached only inside []N keeps the element-wise
+//     widening to the constraint;
 //   - a constraint clause the callee actually EMITS (methodSetConstraintNeeded): an elided clause binds the box.
 //
 // The refusals by name live in nonSelfConstraintProxyRefusals.go.
@@ -88,35 +90,181 @@ func typeParamIsDirectPosition(signature *types.Signature, typeParam *types.Type
 	return false
 }
 
-// nonSelfConstraintProxyFor is constraintProxySigArg's fallback when constraintProxyFor gives no (self-referential)
-// proxy: the non-self proxy's name for position `i` of the generic function `funIdent` names, recorded for
-// package_info, or false when the route does not apply.
-func (v *Visitor) nonSelfConstraintProxyFor(funIdent *ast.Ident, typeParams *types.TypeParamList, typeArgs *types.TypeList, i int) (string, bool) {
+// typeParamIsSliceParameter reports whether t is exactly []T (a variadic ...T included): the position convCallExpr's
+// element-wise widening projects (elementWiseSliceWidening).
+func typeParamIsSliceParameter(t types.Type, typeParam *types.TypeParam) bool {
+	slice, ok := types.Unalias(t).(*types.Slice)
+
+	if !ok {
+		return false
+	}
+
+	elem, ok := types.Unalias(slice.Elem()).(*types.TypeParam)
+
+	return ok && elem == typeParam
+}
+
+// typeParamTakesProxyRoute reports whether the type parameter's reach in the signature is one the non-self proxy
+// carries: a direct parameter or result, or (TS readiness class B, tsc's tsbaseline.GetErrorBaseline) []T parameters
+// beside a func-typed parameter whose signature mentions T. The second needs the proxy as much as the first: the []T
+// argument projects element-wise either way, and only a type argument the callback's delegate can also name binds
+// both, so `join[T Named](xs []T, cmp func(a, b T) int)` called with []*item renders T as the proxy, never as the
+// constraint (the callback takes *item) or the box (the widened slice is not a slice of boxes).
+func typeParamTakesProxyRoute(signature *types.Signature, typeParam *types.TypeParam) bool {
+	if typeParamIsDirectPosition(signature, typeParam) {
+		return true
+	}
+
+	sliceParameter, funcParameter := false, false
+
+	for i := range signature.Params().Len() {
+		paramType := signature.Params().At(i).Type()
+
+		if typeParamIsSliceParameter(paramType, typeParam) {
+			sliceParameter = true
+			continue
+		}
+
+		if callback, ok := paramType.Underlying().(*types.Signature); ok && typeMentionsTypeParam(callback, typeParam, map[types.Type]bool{}) {
+			funcParameter = true
+		}
+	}
+
+	return sliceParameter && funcParameter
+}
+
+// typeParamReachedBesideSliceParameters reports whether the signature mentions the type parameter anywhere but in a
+// []T parameter. Where it does not, the element-wise widening renders T as the constraint itself (go/ast's walkList).
+func typeParamReachedBesideSliceParameters(signature *types.Signature, typeParam *types.TypeParam) bool {
+	for i := range signature.Params().Len() {
+		if paramType := signature.Params().At(i).Type(); !typeParamIsSliceParameter(paramType, typeParam) && typeMentionsTypeParam(paramType, typeParam, map[types.Type]bool{}) {
+			return true
+		}
+	}
+
+	for i := range signature.Results().Len() {
+		if typeMentionsTypeParam(signature.Results().At(i).Type(), typeParam, map[types.Type]bool{}) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// sliceWidening is what convCallExpr's element-wise []N widening projects one argument to.
+type sliceWidening int
+
+const (
+	// wideningToConstraint: `widen<ж<E>, I>(xs, e => new EжI(e))`, T rendered as the constraint (walkList).
+	wideningToConstraint sliceWidening = iota
+
+	// wideningToProxy: `widen<ж<E>, EжIᴾ>(xs, e => new EжIᴾ(e))`, T rendered as the non-self proxy.
+	wideningToProxy
+
+	// wideningNone: T renders as the box (its clause is elided), so the caller's slice binds as it is, shared.
+	wideningNone
+)
+
+// sliceWideningRoute decides what an argument elementWiseSliceWidening names projects to, from how the call renders the
+// type parameter. convCallExpr's emission and the GO2CS2006 gate both ask it, so the gate examines exactly the
+// arguments that are copied. A type parameter reached only in []T parameters keeps today's widening to the constraint.
+func (v *Visitor) sliceWideningRoute(callExpr *ast.CallExpr, typeParam *types.TypeParam) sliceWidening {
+	funIdent := getCallFunIdent(callExpr.Fun)
+
+	if funIdent == nil {
+		return wideningToConstraint
+	}
+
+	instance, ok := v.info.Instances[funIdent]
+
+	if !ok || instance.TypeArgs == nil {
+		return wideningToConstraint
+	}
+
 	fn, ok := v.info.ObjectOf(funIdent).(*types.Func)
 
 	if !ok {
-		return "", false
+		return wideningToConstraint
+	}
+
+	signature, ok := fn.Origin().Type().(*types.Signature)
+
+	if !ok || signature.Recv() != nil || signature.TypeParams() == nil {
+		return wideningToConstraint
+	}
+
+	index := typeParam.Index()
+
+	if index < 0 || index >= signature.TypeParams().Len() || signature.TypeParams().At(index) != typeParam || index >= instance.TypeArgs.Len() {
+		return wideningToConstraint
+	}
+
+	if !typeParamReachedBesideSliceParameters(signature, typeParam) {
+		return wideningToConstraint
+	}
+
+	// The self-referential proxy keeps today's emission: no site reaches it (the class B census: std x4, the
+	// behavioral corpus and the tsc closure).
+	if _, ok := v.constraintProxyFor(typeParam, instance.TypeArgs.At(index)); ok {
+		return wideningToConstraint
+	}
+
+	if _, _, ok := v.nonSelfConstraintProxyPair(funIdent, signature.TypeParams(), instance.TypeArgs, index); ok {
+		return wideningToProxy
+	}
+
+	// An elided clause binds the box, so the caller's slice is passed as it is. A kept clause the proxy does not
+	// carry keeps today's widening: no census site reaches it, and the shapes the tsc closure holds are refused by name
+	// (GO2CS2005 ruling 1, GO2CS2006).
+	if !v.methodSetConstraintNeeded(fn.Origin(), index) {
+		return wideningNone
+	}
+
+	return wideningToConstraint
+}
+
+// nonSelfConstraintProxyPair is the element and the constraint of the non-self proxy for position `i` of the generic
+// function `funIdent` names, when the route applies there. It records nothing, so the GO2CS2006 gate can ask it before
+// any emission.
+func (v *Visitor) nonSelfConstraintProxyPair(funIdent *ast.Ident, typeParams *types.TypeParamList, typeArgs *types.TypeList, i int) (*types.Named, *types.Named, bool) {
+	fn, ok := v.info.ObjectOf(funIdent).(*types.Func)
+
+	if !ok {
+		return nil, nil, false
 	}
 
 	signature, ok := fn.Origin().Type().(*types.Signature)
 
 	if !ok || signature.Recv() != nil {
-		return "", false
+		return nil, nil, false
 	}
 
 	typeParam := typeParams.At(i)
 	elemNamed, constraintNamed, ok := nonSelfConstraintShape(typeParam, typeArgs.At(i))
 
-	if !ok || !typeParamIsDirectPosition(signature, typeParam) {
-		return "", false
+	if !ok || !typeParamTakesProxyRoute(signature, typeParam) {
+		return nil, nil, false
 	}
 
 	// The existing routes keep their sites: a func-result projection, and an elided clause (the box binds).
 	if _, _, projected := v.funcResultProjection(funIdent, typeArgs, i); projected {
-		return "", false
+		return nil, nil, false
 	}
 
 	if !v.methodSetConstraintNeeded(fn.Origin(), i) {
+		return nil, nil, false
+	}
+
+	return elemNamed, constraintNamed, true
+}
+
+// nonSelfConstraintProxyFor is constraintProxySigArg's fallback when constraintProxyFor gives no (self-referential)
+// proxy: the non-self proxy's name for position `i` of the generic function `funIdent` names, recorded for
+// package_info, or false when the route does not apply.
+func (v *Visitor) nonSelfConstraintProxyFor(funIdent *ast.Ident, typeParams *types.TypeParamList, typeArgs *types.TypeList, i int) (string, bool) {
+	elemNamed, constraintNamed, ok := v.nonSelfConstraintProxyPair(funIdent, typeParams, typeArgs, i)
+
+	if !ok {
 		return "", false
 	}
 

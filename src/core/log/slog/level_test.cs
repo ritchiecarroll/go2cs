@@ -13,7 +13,7 @@ using static go.log.slog_package;
 partial class slog_internal_test_package {
 
 internal partial struct TestLevelString_type /*dyn*/ {
-    internal global::go.log.slog_package.ΔLevel @in;
+    internal global::go.log.slog_package.Level @in;
     internal @string want;
 }
 
@@ -41,29 +41,29 @@ public static void TestLevelString(ж<testing.T> t) {
 public static void TestLevelVar(ж<testing.T> t) {
     ref var al = ref heap(new global::go.log.slog_package.LevelVar(), out var Ꮡal);
     {
-        global::go.log.slog_package.ΔLevel got = Ꮡal.Level();
-        global::go.log.slog_package.ΔLevel want = LevelInfo; if (got != want) {
+        global::go.log.slog_package.Level got = Ꮡal.Level();
+        global::go.log.slog_package.Level want = LevelInfo; if (got != want) {
             t.Errorf("got %v, want %v", got, want);
         }
     }
     Ꮡal.Set(LevelWarn);
     {
-        global::go.log.slog_package.ΔLevel got = Ꮡal.Level();
-        global::go.log.slog_package.ΔLevel want = LevelWarn; if (got != want) {
+        global::go.log.slog_package.Level got = Ꮡal.Level();
+        global::go.log.slog_package.Level want = LevelWarn; if (got != want) {
             t.Errorf("got %v, want %v", got, want);
         }
     }
     Ꮡal.Set(LevelInfo);
     {
-        global::go.log.slog_package.ΔLevel got = Ꮡal.Level();
-        global::go.log.slog_package.ΔLevel want = LevelInfo; if (got != want) {
+        global::go.log.slog_package.Level got = Ꮡal.Level();
+        global::go.log.slog_package.Level want = LevelInfo; if (got != want) {
             t.Errorf("got %v, want %v", got, want);
         }
     }
 }
 
 public static void TestLevelMarshalJSON(ж<testing.T> t) {
-    global::go.log.slog_package.ΔLevel want = LevelWarn - 3;
+    global::go.log.slog_package.Level want = LevelWarn - 3;
     var wantData = slice<byte>(@"""INFO+1"""u8);
     var (data, err) = want.MarshalJSON();
     if (err != nil) {
@@ -72,7 +72,7 @@ public static void TestLevelMarshalJSON(ж<testing.T> t) {
     if (!bytes.Equal(data, wantData)) {
         t.Errorf("got %s, want %s", (@string)data, (@string)wantData);
     }
-    ref var got = ref heap(new global::go.log.slog_package.ΔLevel(), out var Ꮡgot);
+    ref var got = ref heap(new global::go.log.slog_package.Level(), out var Ꮡgot);
     var errΔ1 = Ꮡgot.UnmarshalJSON(data); if (errΔ1 != nil) {
         t.Fatal(errΔ1);
     }
@@ -82,7 +82,7 @@ public static void TestLevelMarshalJSON(ж<testing.T> t) {
 }
 
 public static void TestLevelMarshalText(ж<testing.T> t) {
-    global::go.log.slog_package.ΔLevel want = LevelWarn - 3;
+    global::go.log.slog_package.Level want = LevelWarn - 3;
     var wantData = slice<byte>("INFO+1"u8);
     var (data, err) = want.MarshalText();
     if (err != nil) {
@@ -91,7 +91,7 @@ public static void TestLevelMarshalText(ж<testing.T> t) {
     if (!bytes.Equal(data, wantData)) {
         t.Errorf("got %s, want %s", (@string)data, (@string)wantData);
     }
-    ref var got = ref heap(new global::go.log.slog_package.ΔLevel(), out var Ꮡgot);
+    ref var got = ref heap(new global::go.log.slog_package.Level(), out var Ꮡgot);
     var errΔ1 = Ꮡgot.UnmarshalText(data); if (errΔ1 != nil) {
         t.Fatal(errΔ1);
     }
@@ -102,7 +102,7 @@ public static void TestLevelMarshalText(ж<testing.T> t) {
 
 public static void TestLevelAppendText(ж<testing.T> t) {
     var buf = new slice<byte>(4, 16);
-    global::go.log.slog_package.ΔLevel want = LevelWarn - 3;
+    global::go.log.slog_package.Level want = LevelWarn - 3;
     var wantData = slice<byte>("\x00\x00\x00\x00INFO+1"u8);
     var (data, err) = want.AppendText(buf);
     if (err != nil) {
@@ -115,7 +115,7 @@ public static void TestLevelAppendText(ж<testing.T> t) {
 
 internal partial struct TestLevelParse_type /*dyn*/ {
     internal @string @in;
-    internal global::go.log.slog_package.ΔLevel want;
+    internal global::go.log.slog_package.Level want;
 }
 
 public static void TestLevelParse(ж<testing.T> t) {
@@ -130,7 +130,7 @@ public static void TestLevelParse(ж<testing.T> t) {
         new("Error-18", LevelError - 18),
         new("Error-8", LevelInfo)
     ]))) {
-        ref var got = ref heap(new global::go.log.slog_package.ΔLevel(), out var Ꮡgot);
+        ref var got = ref heap(new global::go.log.slog_package.Level(), out var Ꮡgot);
         var err = Ꮡgot.parse(test.@in); if (err != nil) {
             t.Fatalf("%q: %v", test.@in, err);
         }
@@ -153,7 +153,7 @@ public static void TestLevelParseError(ж<testing.T> t) {
         new("INFO-", "invalid syntax"),
         new("ERROR+23x", "invalid syntax")
     ]))) {
-        ref var l = ref heap(new global::go.log.slog_package.ΔLevel(), out var Ꮡl);
+        ref var l = ref heap(new global::go.log.slog_package.Level(), out var Ꮡl);
         var err = Ꮡl.parse(test.@in);
         if (err == nil || !strings.Contains(err.Error(), test.want)) {
             t.Errorf("%q: got %v, want string containing %q", test.@in, err, test.want);
@@ -171,14 +171,14 @@ private static readonly @string setLevelˢᵇ = "set level"u8;
 
 public static void TestLevelFlag(ж<testing.T> t) {
     var fs = flag.NewFlagSet(testˢ, flag.ContinueOnError);
-    ref var lf = ref heap<global::go.log.slog_package.ΔLevel>(LevelInfo, out var Ꮡlf);
-    fs.TextVar(new slog_test_package.slog_ΔLevelжTextUnmarshaler(Ꮡlf), levelˢ, new slog_test_package.slog_ΔLevelᴠTextMarshaler(lf), setLevelˢ);
+    ref var lf = ref heap<global::go.log.slog_package.Level>(LevelInfo, out var Ꮡlf);
+    fs.TextVar(new slog_test_package.slog_LevelжTextUnmarshaler(Ꮡlf), levelˢ, new slog_test_package.slog_LevelᴠTextMarshaler(lf), setLevelˢ);
     var err = fs.Parse(["-level", "WARN+3"]);
     if (err != nil) {
         t.Fatal(err);
     }
-    global::go.log.slog_package.ΔLevel g = lf;
-    global::go.log.slog_package.ΔLevel w = LevelWarn + 3; if (g != w) {
+    global::go.log.slog_package.Level g = lf;
+    global::go.log.slog_package.Level w = LevelWarn + 3; if (g != w) {
         t.Errorf("got %v, want %v", g, w);
     }
 }
@@ -194,8 +194,8 @@ public static void TestLevelVarMarshalText(ж<testing.T> t) {
     var errΔ1 = Ꮡv2.UnmarshalText(data); if (errΔ1 != nil) {
         t.Fatal(errΔ1);
     }
-    global::go.log.slog_package.ΔLevel g = Ꮡv2.Level();
-    global::go.log.slog_package.ΔLevel w = LevelWarn; if (g != w) {
+    global::go.log.slog_package.Level g = Ꮡv2.Level();
+    global::go.log.slog_package.Level w = LevelWarn; if (g != w) {
         t.Errorf("got %s, want %s", g, w);
     }
 }
@@ -212,8 +212,8 @@ public static void TestLevelVarAppendText(ж<testing.T> t) {
     var errΔ1 = Ꮡv2.UnmarshalText(data[4..]); if (errΔ1 != nil) {
         t.Fatal(errΔ1);
     }
-    global::go.log.slog_package.ΔLevel g = Ꮡv2.Level();
-    global::go.log.slog_package.ΔLevel w = LevelWarn; if (g != w) {
+    global::go.log.slog_package.Level g = Ꮡv2.Level();
+    global::go.log.slog_package.Level w = LevelWarn; if (g != w) {
         t.Errorf("got %s, want %s", g, w);
     }
 }
@@ -227,8 +227,8 @@ public static void TestLevelVarFlag(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    global::go.log.slog_package.ΔLevel g = v.Level();
-    global::go.log.slog_package.ΔLevel w = LevelWarn + 3; if (g != w) {
+    global::go.log.slog_package.Level g = v.Level();
+    global::go.log.slog_package.Level w = LevelWarn + 3; if (g != w) {
         t.Errorf("got %v, want %v", g, w);
     }
 }
@@ -250,7 +250,7 @@ public static void TestLevelVarString(ж<testing.T> t) {
 public static void BenchmarkLevelString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var levels = slice<global::go.log.slog_package.ΔLevel>([
+    var levels = slice<global::go.log.slog_package.Level>([
         0,
         LevelError,
         LevelError + 2,

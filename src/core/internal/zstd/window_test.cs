@@ -56,18 +56,18 @@ internal static void testWindow(ж<testing.T> t, nint size, slice<byte> a, slice
     tail = appendꓸꓸꓸ(tail, b);
     tail = appendꓸꓸꓸ(tail, c);
 
-    if (builtin.len(tail) > size) {
-        tail = tail.slice(builtin.len(tail) - size);
+    if (len(tail) > size) {
+        tail = tail.slice(len(tail) - size);
     }
 
-    if (w.len() != (uint32)builtin.len(tail)) {
-        t.Errorf("wrong data length: got: %d, want: %d", w.len(), builtin.len(tail));
+    if (w.len() != (uint32)len(tail)) {
+        t.Errorf("wrong data length: got: %d, want: %d", w.len(), len(tail));
     }
 
     uint32 from = default;
     uint32 to = default;
-    for (from = 0; from <= (uint32)builtin.len(tail); from++) {
-        for (to = from; to <= (uint32)builtin.len(tail); to++) {
+    for (from = 0; from <= (uint32)len(tail); from++) {
+        for (to = from; to <= (uint32)len(tail); to++) {
             var got = w.appendTo(default, from, to);
             var want = tail.slice((nint)(from), (nint)(to));
 

@@ -7,7 +7,6 @@
 global using static global::go.@internal.unsafeheader_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;

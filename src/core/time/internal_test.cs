@@ -44,8 +44,8 @@ internal static Action /*undo*/ disablePlatformSources() {
 
 public static readonly ж<Action> ᏑInterrupt = new StaticBox<Action>(interrupt);
 public static ref Action Interrupt => ref ((StaticBox<Action>)ᏑInterrupt).ValueSlot;
-public static readonly ж<Func<global::go.time_package.ΔMonth, nint, nint>> ᏑDaysIn = new StaticBox<Func<global::go.time_package.ΔMonth, nint, nint>>(daysIn);
-public static ref Func<global::go.time_package.ΔMonth, nint, nint> DaysIn => ref ((StaticBox<Func<global::go.time_package.ΔMonth, nint, nint>>)ᏑDaysIn).ValueSlot;
+public static readonly ж<Func<global::go.time_package.Month, nint, nint>> ᏑDaysIn = new StaticBox<Func<global::go.time_package.Month, nint, nint>>(daysIn);
+public static ref Func<global::go.time_package.Month, nint, nint> DaysIn => ref ((StaticBox<Func<global::go.time_package.Month, nint, nint>>)ᏑDaysIn).ValueSlot;
 
 internal static void empty(any arg, uintptr seq, int64 delta) { }
 
@@ -77,10 +77,10 @@ public static void CheckRuntimeTimerPeriodOverflow() {
 
 public static readonly ж<global::go.time_package.Time> ᏑMinMonoTime = new StaticBox<global::go.time_package.Time>(default(global::go.time_package.Time));
 public static ref global::go.time_package.Time MinMonoTime => ref ((StaticBox<global::go.time_package.Time>)ᏑMinMonoTime).ValueSlot;
-internal static void initᴛMinMonoTime() { MinMonoTime = new Time(wall: ((uint64)1 << 63), ext: -9223372036854775808L, loc: ΔUTC); }
+internal static void initᴛMinMonoTime() { MinMonoTime = new Time(wall: ((uint64)1 << 63), ext: -9223372036854775808L, loc: UTC); }
 public static readonly ж<global::go.time_package.Time> ᏑMaxMonoTime = new StaticBox<global::go.time_package.Time>(default(global::go.time_package.Time));
 public static ref global::go.time_package.Time MaxMonoTime => ref ((StaticBox<global::go.time_package.Time>)ᏑMaxMonoTime).ValueSlot;
-internal static void initᴛMaxMonoTime() { MaxMonoTime = new Time(wall: ((uint64)1 << 63), ext: 9223372036854775807L, loc: ΔUTC); }
+internal static void initᴛMaxMonoTime() { MaxMonoTime = new Time(wall: ((uint64)1 << 63), ext: 9223372036854775807L, loc: UTC); }
 
 public static readonly ж<global::go.time_package.Time> ᏑNotMonoNegativeTime = new StaticBox<global::go.time_package.Time>(new Time(wall: 0, ext: -9223372036854775758L));
 public static ref global::go.time_package.Time NotMonoNegativeTime => ref ((StaticBox<global::go.time_package.Time>)ᏑNotMonoNegativeTime).ValueSlot;

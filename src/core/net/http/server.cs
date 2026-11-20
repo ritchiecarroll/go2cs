@@ -2012,9 +2012,8 @@ internal static void closeWriteAndWait(this ref conn c) {
 // Everything is valid except the empty string and built-in protocol types,
 // so that those can't be overridden with alternate implementations.
 internal static bool validNextProto(@string proto) {
-    var exprᴛ1 = proto;
     switch (ᐧ) {
-    case {} when exprᴛ1 == ""u8 || exprᴛ1 == "http/1.1"u8 || exprᴛ1 == "http/1.0"u8: {
+    case {} when proto == ""u8 || proto == "http/1.1"u8 || proto == "http/1.0"u8: {
         return false;
     }}
     return true;
@@ -3983,16 +3982,15 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
     Protocols have = default;
     var protosʗ1 = protos;
     nextProtos = slices.DeleteFunc(nextProtos, (@string s) => {
-        var exprᴛ1 = s;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "http/1.1"u8: {
+        case {} when s == "http/1.1"u8: {
             if (!protosʗ1.HTTP1()) {
                 return true;
             }
             have.SetHTTP1(true);
             break;
         }
-        case {} when exprᴛ1 == "h2"u8: {
+        case {} when s == "h2"u8: {
             if (!protosʗ1.HTTP2()) {
                 return true;
             }
@@ -4358,15 +4356,15 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        var selᴛ91 = panicChan;
-        var selᴛ92 = done;
+        var panicChanᴛ1 = panicChan;
+        var doneᴛ1 = done;
         var selᴛ93 = ctx.Done();
-        switch (select(ᐸꟷ(selᴛ91, ꓸꓸꓸ), ᐸꟷ(selᴛ92, ꓸꓸꓸ), ᐸꟷ(selᴛ93, ꓸꓸꓸ))) {
-        case 0 when selᴛ91.ꟷᐳ(out var p): {
+        switch (select(ᐸꟷ(panicChanᴛ1, ꓸꓸꓸ), ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ93, ꓸꓸꓸ))) {
+        case 0 when panicChanᴛ1.ꟷᐳ(out var p): {
             throw panic(p);
             break;
         }
-        case 1 when selᴛ92.ꟷᐳ(out _): {
+        case 1 when doneᴛ1.ꟷᐳ(out _): {
             tw.Ꮡmu.Lock();
             var twʗ2 = tw;
             defer(twʗ2.Ꮡmu.Unlock, ref ᒐ);
@@ -4495,6 +4493,8 @@ partial struct onceCloseListener {
     internal error closeErr;
 }
 
+} partial class httpᴛonceCloseListener {
+
 // Go method set entry for the promoted 'Listener.Accept()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
 internal static (net.Conn, error) Accept(this onceCloseListener recvᴛ) => recvᴛ.Listener.Accept();
@@ -4502,8 +4502,6 @@ internal static (net.Conn, error) Accept(this onceCloseListener recvᴛ) => recv
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
 internal static net.Addr Addr(this onceCloseListener recvᴛ) => recvᴛ.Listener.Addr();
-
-} partial class httpᴛonceCloseListener {
 
 internal static error Close(this ж<onceCloseListener> Ꮡoc) {
     ref var oc = ref Ꮡoc.DerefOrNull();
@@ -4584,6 +4582,8 @@ partial struct loggingConn {
     /*embed*/ public net_package.Conn Conn;
 }
 
+} partial class httpᴛloggingConn {
+
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
 internal static net.Addr LocalAddr(this loggingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
@@ -4603,6 +4603,8 @@ internal static error SetReadDeadline(this loggingConn recvᴛ, time.Time t) => 
 // Go method set entry for the promoted 'Conn.SetWriteDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
+
+} partial class http_package {
 
 internal static readonly ж<sync.Mutex> ᏑuniqNameMu = new StaticBox<sync.Mutex>(default(sync.Mutex));
 internal static ref sync.Mutex uniqNameMu => ref ((StaticBox<sync.Mutex>)ᏑuniqNameMu).ValueSlot;

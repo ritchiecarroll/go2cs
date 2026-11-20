@@ -83,6 +83,14 @@ func receiverNamed(info *types.Info, funcDecl *ast.FuncDecl) *types.Named {
 // qualifier and without type arguments. escaped keeps a keyword's `@`, which a class name built from the
 // identifier drops.
 func (v *Visitor) holderTypeName(named *types.Named) (escaped string) {
+	// A generic type is named by its identifier, the spelling getAliasQualifiedTypeName gives a same-package
+	// instantiation. Its origin's string form carries the type parameters with their constraints, and a
+	// constraint from a package whose import path has a slash (Iterator[T stringish.Interface]) lost the
+	// type's own name to that form's last-slash strip, leaving `Interface>`.
+	if typeParams := named.Origin().TypeParams(); typeParams != nil && typeParams.Len() > 0 {
+		return getSanitizedIdentifier(named.Obj().Name())
+	}
+
 	typeName := convertToCSTypeName(v.getCSharpTypeName(named.Origin()))
 
 	if open := strings.Index(typeName, "<"); open != -1 {
@@ -155,9 +163,18 @@ func (v *Visitor) testHolderSuffix(method types.Object, typeObj types.Object) st
 // funcDeclClass names the class funcDecl is emitted into: its receiver type's method holder, or the
 // file's own class for a function.
 func (v *Visitor) funcDeclClass(funcDecl *ast.FuncDecl) string {
-	named := receiverNamed(v.info, funcDecl)
+	if holder := v.useMethodHolder(receiverNamed(v.info, funcDecl), v.info.Defs[funcDecl.Name]); holder != "" {
+		return holder
+	}
 
-	if holder, typeofTarget := v.methodHolderClass(named, v.info.Defs[funcDecl.Name]); holder != "" {
+	return v.fileClassName
+}
+
+// useMethodHolder answers the method holder a method of named's is emitted into, recording the holder for
+// package_info.cs, or "" when the type takes none (methodHolderClass). method is nil for a method the
+// converter writes rather than Go declares: a promoted forwarder.
+func (v *Visitor) useMethodHolder(named *types.Named, method types.Object) string {
+	if holder, typeofTarget := v.methodHolderClass(named, method); holder != "" {
 		// A hand-owned file's Go source may declare a type its C# replacement drops (internal/sync's
 		// hashtriemap.cs keeps HashTrieMap and drops entry, indirect and node). The holder's declaration names
 		// its type in `typeof`, so it is written only where the package's C# sources declare the type.
@@ -172,7 +189,7 @@ func (v *Visitor) funcDeclClass(funcDecl *ast.FuncDecl) string {
 		return holder
 	}
 
-	return v.fileClassName
+	return ""
 }
 
 // csharpTypeDeclaration matches a C# type declaration and captures its name: a struct, class, interface,
@@ -500,8 +517,9 @@ var holderHiddenTypeClasses map[string]string
 // package's namespace hides inside a method holder (namespaceHides), each with the class that declares
 // it, for the method funcDecl. In the package class a nested type is read before the namespace's
 // members; a holder is not nested in it, so there the name binds the namespace or golib's type
-// (`this ref sync s` is CS0118 where `go.sync` is in view). It answers nil where the package has none,
-// which is every package of the standard library.
+// (`this ref sync s` is CS0118 where `go.sync` is in view). A type another class in a `using static`
+// also declares is hidden the same way, since the holder reads both classes' nested types with equal
+// standing (usingStaticAlsoDeclares). It answers nil where the package has none.
 //
 // A name that funcDecl itself declares as a type, as a type parameter of its receiver or as a type
 // declared in its body, is left out: the renderer sees one spelling for both, and the method's own
@@ -518,7 +536,7 @@ func (v *Visitor) holderHiddenTypes(funcDecl *ast.FuncDecl) map[string]string {
 		for _, name := range scope.Names() {
 			typeName, isType := scope.Lookup(name).(*types.TypeName)
 
-			if !isType || typeName.IsAlias() || !v.namespaceHides(name) {
+			if !isType || typeName.IsAlias() || !v.namespaceHides(name) && !v.usingStaticAlsoDeclares(name) {
 				continue
 			}
 
@@ -570,6 +588,17 @@ func holderHiddenTypeName(typeName string) string {
 	}
 
 	return class + "." + getSanitizedIdentifier(getAliasedTypeName(typeName))
+}
+
+// holderUnqualifiedTypeName answers typeName, a rendered type, without the class qualifier
+// holderHiddenTypeName writes in front of a type the current holder cannot name bare, so a receiver's
+// accessibility is judged by the type's own name and not by its class's.
+func holderUnqualifiedTypeName(typeName string) string {
+	for _, class := range holderHiddenTypeClasses {
+		typeName = strings.Replace(typeName, class+".", "", 1)
+	}
+
+	return typeName
 }
 
 // golibNamespaceType reports whether golib declares, in namespace `go`, a type named name that takes no
@@ -716,7 +745,7 @@ func (v *Visitor) holderQualifiedName(ident *ast.Ident) string {
 		return ""
 	}
 
-	if !v.holderHides(obj.Name()) {
+	if !v.holderHides(obj.Name()) && !(obj.Pkg() == v.pkg && v.usingStaticAlsoDeclares(obj.Name())) {
 		return ""
 	}
 
@@ -733,6 +762,44 @@ func (v *Visitor) holderQualifiedName(ident *ast.Ident) string {
 
 	return v.qualifyPackageReference(convertImportPathToNamespace(obj.Pkg().Path(), PackageSuffix)) + "." +
 		getSanitizedIdentifier(v.getIdentName(ident))
+}
+
+// usingStaticAlsoDeclares reports whether a class the file being converted names in a `using static`,
+// other than its own package's, declares a package-level name name. In the package class the class's
+// own member wins; a holder is not nested in the package class, so there both using-statics supply the
+// name with equal standing (CS0229 for a value, CS0104 for a type) where Go binds the file's own
+// package. Two such classes:
+//   - a package the file dot-imports, whose every name the assembly can see arrives, unexported ones
+//     included, where Go brings in none of them (runtime's hashSize in hash_test.go);
+//   - in the external test variant, the package under test's internal-test class, which every
+//     external test file names and which compiles into the same assembly, where Go gives the external
+//     package none of its names (encoding/json's Small, encoding/gob's Point, net/http's dumpConn).
+func (v *Visitor) usingStaticAlsoDeclares(name string) bool {
+	if v.options.testExternalVariant && testInternalDeclaredNames.Contains(name) {
+		return true
+	}
+
+	return v.dotImportDeclares(name)
+}
+
+// dotImportDeclares reports whether a package the file being converted dot-imports declares a
+// package-level name name, exported or not.
+func (v *Visitor) dotImportDeclares(name string) bool {
+	if v.astFile == nil {
+		return false
+	}
+
+	for _, importSpec := range v.astFile.Imports {
+		if importSpec.Name == nil || importSpec.Name.Name != "." {
+			continue
+		}
+
+		if pkgName, ok := v.info.ObjectOf(importSpec.Name).(*types.PkgName); ok && pkgName.Imported().Scope().Lookup(name) != nil {
+			return true
+		}
+	}
+
+	return false
 }
 
 // selectorSelIdents returns the identifiers of the file that are the selected name of a selector

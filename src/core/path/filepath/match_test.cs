@@ -14,6 +14,7 @@ using testing = testing_package;
 using @internal;
 using fs = io.fs_package;
 using static go.path.filepath_internal_test_package;
+using static filepath_test_package;
 
 partial class filepath_test_package {
 
@@ -241,6 +242,8 @@ partial struct globTest {
     internal slice<@string> matches;
 }
 
+} partial class filepath_testᴛglobTest {
+
 internal static slice<@string> buildWant(this ref globTest test, @string root) {
     var want = new slice<@string>(0);
     foreach (var (_, m) in range(test.matches)) {
@@ -282,6 +285,8 @@ internal static error globRel(this ref globTest test, @string root) {
     }
     return fmt.Errorf("Glob(%q) returns %q, but %q expected"u8, p, have, want);
 }
+
+} partial class filepath_test_package {
 
 public static void TestWindowsGlob(ж<testing.T> t) {
     if (runtime.GOOS != "windows"u8) {

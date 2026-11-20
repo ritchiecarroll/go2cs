@@ -806,6 +806,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Env: converterLoaderEnv(
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
+		ParseFile: parseFileUnparenAddressOperands,
 	}
 
 	loaded, err := packages.Load(cfg, ".")
@@ -1361,6 +1362,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 	// class-qualified. Computed from the loaded variants before either converts, and session-scoped
 	// — resetPackageState does not clear it.
 	testAmbiguousLocalTypeNames = ambiguousVariantTypeNames(internal, external)
+	testInternalDeclaredNames = internalTestDeclaredNames(internal)
 
 	// Cleared for every package, filled only by the recompile-model seed below: the alias bindings a
 	// variant must yield to are the ones the seeded production metadata already carries into this
@@ -1783,6 +1785,26 @@ func ambiguousVariantTypeNames(internal, external *packages.Package) hashset.Has
 	}
 
 	return ambiguous
+}
+
+// internalTestDeclaredNames answers the package-level names the internal variant's `_test.go` files
+// declare (see testInternalDeclaredNames).
+func internalTestDeclaredNames(internal *packages.Package) hashset.HashSet[string] {
+	names := hashset.HashSet[string]{}
+
+	if internal == nil || internal.Types == nil || internal.Fset == nil {
+		return names
+	}
+
+	scope := internal.Types.Scope()
+
+	for _, name := range scope.Names() {
+		if strings.HasSuffix(strings.ToLower(internal.Fset.Position(scope.Lookup(name).Pos()).Filename), "_test.go") {
+			names.Add(name)
+		}
+	}
+
+	return names
 }
 
 // referenceModelTestPackageInfoSeed composes package_test_info.cs for a production-reference test
@@ -4094,6 +4116,12 @@ func writeExternalVariantMetadata(testInfoPath, outputPath, productionPackageNam
 		testAnchored.install()
 		metadataAnchorClassPrefix = testAnchor
 		writePackageInfoFile(unitPath, true)
+
+		// The unit now declares the variant's method holders. Both info files compile into the one
+		// tests assembly, so declaring them again in package_test_info.cs is CS0579, a duplicate
+		// [GoMethodHost] (text/tabwriter's buffer and panicWriter); its merge keeps the production and
+		// internal-variant holders already there. Without a unit they are declared there, once.
+		packageMethodHolders = map[string]string{}
 
 		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
 		unitName = externalTestPackageInfoFileName

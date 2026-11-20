@@ -2112,6 +2112,13 @@ One GolibTests run is not in the table. The first whole run, at the first commit
 gate running on the machine, read 2879 passed and 1 failed: `ASpinningThreadsCpuTimeAdvancesWithItsWallTime`, a
 timing arm of the CPU clock that this cut does not touch. It passed in the two runs above.
 
+**Amended 2026-11-16 (P5, COORD's ask of 13:11Z): that arm assumed a whole core, and no longer does.** It bounded
+the spinner's CPU time by 0.8 x its wall time, so it read the machine's load: with one competitor pinned to the
+same core it failed 10 of 10 runs at 41-48% of wall on a linux box, and hosted osx-arm64 read 52%. It now bounds
+the CPU time by the spinner's own work: a fixed count of equal chunks, priced at the fastest chunk's wall time
+(about 0.1 ms there, well under a scheduler slice), since contention only lengthens a chunk. Green 10 of 10 with
+0, 1 and 3 pinned competitors; a seam reading 0 reds it, and a seam reading wall time reds its sleeper twin.
+
 The open-slice probe of 19.7 carried its own two predictions (`reinterpret-box-1115/probe-open/prediction.txt`,
 written before the probe was converted): the three open roots end the process and print no line; the three
 workaround forms print Go's lines. Both MET.

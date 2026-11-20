@@ -149,26 +149,25 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
 
     // Encode the remaining bytes in reverse order.
     var val = (uint32)0;
-    var exprᴛ1 = remain;
     var matchᴛ1 = false;
-    if (exprᴛ1 is 4) { matchᴛ1 = true;
+    if (remain is 4) { matchᴛ1 = true;
         val |= (uint32)((uint32)src[si + 3]);
         dst[di + 6] = enc.encode[(val << 3 & 0x1F)];
         dst[di + 5] = enc.encode[(val >> 2 & 0x1F)];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && remain is 3) { matchᴛ1 = true;
         val |= (uint32)(((uint32)src[si + 2] << 8));
         dst[di + 4] = enc.encode[(val >> 7 & 0x1F)];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
+    if (fallthrough || !matchᴛ1 && remain is 2) {
         val |= (uint32)(((uint32)src[si + 1] << 16));
         dst[di + 3] = enc.encode[(val >> 12 & 0x1F)];
         dst[di + 2] = enc.encode[(val >> 17 & 0x1F)];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && remain is 1) { matchᴛ1 = true;
         val |= (uint32)(((uint32)src[si + 0] << 24));
         dst[di + 1] = enc.encode[(val >> 22 & 0x1F)];
         dst[di + 0] = enc.encode[(val >> 27 & 0x1F)];
@@ -374,29 +373,28 @@ internal static (nint n, bool end, error err) decode(this ref Encoding enc, slic
 
         // Pack 8x 5-bit source blocks into 5 byte destination
         // quantum
-        var exprᴛ1 = dlen;
         var matchᴛ1 = false;
-        if (exprᴛ1 is 8) { matchᴛ1 = true;
+        if (dlen is 8) { matchᴛ1 = true;
             dst[dsti + 4] = (byte)((byte)(dbuf[6] << 5) | dbuf[7]);
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 7) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && dlen is 7) { matchᴛ1 = true;
             dst[dsti + 3] = (byte)((byte)((byte)(dbuf[4] << 7) | (byte)(dbuf[5] << 2)) | dbuf[6] >> 3);
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && dlen is 5) { matchᴛ1 = true;
             dst[dsti + 2] = (byte)((byte)(dbuf[3] << 4) | dbuf[4] >> 1);
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
+        if (fallthrough || !matchᴛ1 && dlen is 4) {
             dst[dsti + 1] = (byte)((byte)((byte)(dbuf[1] << 6) | (byte)(dbuf[2] << 1)) | dbuf[3] >> 4);
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && dlen is 2) { matchᴛ1 = true;
             dst[dsti + 0] = (byte)((byte)(dbuf[0] << 3) | dbuf[1] >> 2);
             n++;
         }

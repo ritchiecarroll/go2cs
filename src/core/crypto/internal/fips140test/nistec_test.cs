@@ -173,7 +173,7 @@ internal static void testEquivalents<P>(ж<testing.T> t, Func<P> newPoint, ellip
     var two = new slice<byte>(elementSize);
     two[len(two) - 1] = 2;
     var nPlusTwo = new slice<byte>(elementSize);
-    @new<bigꓸInt>().Add(c.Params().N, big.NewInt(2)).FillBytes(nPlusTwo);
+    @new<big.Int>().Add(c.Params().N, big.NewInt(2)).FillBytes(nPlusTwo);
 
     var p1 = newPoint().Double(p);
     var p2 = newPoint().Add(p, p);
@@ -240,7 +240,7 @@ internal static void testScalarMult<P>(ж<testing.T> t, Func<P> newPoint, ellipt
             tΔ1.Error(kGScalarBaseMultKˢ);
         }
 
-        var expectInfinity = @new<bigꓸInt>().Mod(@new<bigꓸInt>().SetBytes(scalar), c.Params().N).Sign() == 0;
+        var expectInfinity = @new<big.Int>().Mod(@new<big.Int>().SetBytes(scalar), c.Params().N).Sign() == 0;
         if (expectInfinity) {
             if (!bytes.Equal(p1.Bytes(), newPoint().Bytes())) {
                 tΔ1.Error(scalarBaseMultKˢ);
@@ -257,7 +257,7 @@ internal static void testScalarMult<P>(ж<testing.T> t, Func<P> newPoint, ellipt
             }
         }
 
-        var d = @new<bigꓸInt>().SetBytes(scalar);
+        var d = @new<big.Int>().SetBytes(scalar);
         d.Sub(c.Params().N, d);
         d.Mod(d, c.Params().N);
         (var g1, err) = newPoint().ScalarBaseMult(d.FillBytes(new slice<byte>(len(scalar))));
@@ -280,7 +280,7 @@ internal static void testScalarMult<P>(ж<testing.T> t, Func<P> newPoint, ellipt
     });
     var checkScalarʗ3 = checkScalar;
     t.Run("N-1", (ж<testing.T> tΔ4) => {
-        checkScalarʗ3(tΔ4, @new<bigꓸInt>().Sub(c.Params().N, big.NewInt(1)).Bytes());
+        checkScalarʗ3(tΔ4, @new<big.Int>().Sub(c.Params().N, big.NewInt(1)).Bytes());
     });
     var checkScalarʗ4 = checkScalar;
     t.Run("N", (ж<testing.T> tΔ5) => {
@@ -288,11 +288,11 @@ internal static void testScalarMult<P>(ж<testing.T> t, Func<P> newPoint, ellipt
     });
     var checkScalarʗ5 = checkScalar;
     t.Run("N+1", (ж<testing.T> tΔ6) => {
-        checkScalarʗ5(tΔ6, @new<bigꓸInt>().Add(c.Params().N, big.NewInt(1)).Bytes());
+        checkScalarʗ5(tΔ6, @new<big.Int>().Add(c.Params().N, big.NewInt(1)).Bytes());
     });
     var checkScalarʗ6 = checkScalar;
     t.Run(all1sˢ, (ж<testing.T> tΔ7) => {
-        var s = @new<bigꓸInt>().Lsh(big.NewInt(1), (nuint)bitLen);
+        var s = @new<big.Int>().Lsh(big.NewInt(1), (nuint)bitLen);
         s.Sub(s, big.NewInt(1));
         checkScalarʗ6(tΔ7, s.Bytes());
     });
@@ -303,7 +303,7 @@ internal static void testScalarMult<P>(ж<testing.T> t, Func<P> newPoint, ellipt
         var i = iᴛ1;
         var checkScalarʗ7 = checkScalar;
         t.Run(fmt.Sprintf("1<<%d"u8, i), (ж<testing.T> tΔ8) => {
-            var s = @new<bigꓸInt>().Lsh(big.NewInt(1), (nuint)i);
+            var s = @new<big.Int>().Lsh(big.NewInt(1), (nuint)i);
             checkScalarʗ7(tΔ8, s.FillBytes(new slice<byte>(byteLen)));
         });
     }
@@ -320,7 +320,7 @@ internal static void testScalarMult<P>(ж<testing.T> t, Func<P> newPoint, ellipt
         var i = iᴛ3;
         var checkScalarʗ9 = checkScalar;
         t.Run(fmt.Sprintf("N%+d"u8, i), (ж<testing.T> tΔ10) => {
-            checkScalarʗ9(tΔ10, @new<bigꓸInt>().Add(c.Params().N, big.NewInt(i)).Bytes());
+            checkScalarʗ9(tΔ10, @new<big.Int>().Add(c.Params().N, big.NewInt(i)).Bytes());
         });
     }
 }

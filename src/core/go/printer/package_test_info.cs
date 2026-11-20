@@ -8,7 +8,6 @@ global using static global::go.go.printer_package;
 global using static global::go.go.printer_internal_test_package;
 
 // <ImportedTypeAliases>
-global using tokenꓸPos = go.go.token_package.ΔPos;
 // </ImportedTypeAliases>
 
 using go;

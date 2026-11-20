@@ -409,9 +409,9 @@ and spreading inside the thunk, at every variadic deferred call in the corpus.
 
 An empty variadic call is NOT such a wall: `f()` on `func f(parts ...int)` answers `parts == nil` as `true`, as in
 Go, because the variadic pack's `Span<T>.slice()` keeps a null span nil.
-<!-- src/core/golib/slice.cs:1955 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
+<!-- src/core/golib/slice.cs:1994 `if (IsNilSpan(source))`. history: this was listed here as a second wall (an
      empty slice where Go passes nil); golib's Span-to-slice copy has since kept nil-ness,
-     slice.cs:1925 `NIL-NESS CROSSES THIS BOUNDARY`. -->
+     slice.cs:1964 `NIL-NESS CROSSES THIS BOUNDARY`. -->
 
 ## A ZERO-ARG deferred/spawned call of a NAMED variadic callee keeps the lambda — the group carries `params`
 
@@ -1128,7 +1128,7 @@ decls in at the statement's own start — it records that offset before conversi
 afterwards (`spliceOutput`, the positional twin of `replaceMarker`), because the `foreach` header is
 emitted much further down through a dozen different arms:
 
-<!-- source: src/core/context/x_test.cs:386-387, 391, 394, 421-430, 441 -->
+<!-- source: src/core/context/x_test.cs:391-392, 396, 399, 426-435, 446 -->
 ```csharp
     var bg = Background();
             var bgʗ1 = bg;

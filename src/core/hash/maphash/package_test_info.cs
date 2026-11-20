@@ -17,7 +17,6 @@ using static global::go.hash.maphash_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b6120616e793b206220616e797d", "TestComparable_v1ᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b6120737472696e673b206220737472696e677d", "TestComparable_v1")]
 [assembly: GoDynamicTypeLift("7374727563747b6920696e743b20752075696e743b206220626f6f6c3b206620666c6f617436343b2070202a696e743b206120616e797d", "TestComparable_v")]
-[assembly: GoTypeAlias("Seed", "ΔSeed")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

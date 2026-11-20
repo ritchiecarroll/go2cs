@@ -21,8 +21,8 @@ heap, so any test that counts allocations reads more than Go does.
 allocation reports at least 1, whether or not golib's counter sees it. So parity means removing the allocation. Taking
 it out of the counter changes nothing: an allocation the counter does not charge still fails a want-zero assert on
 its bytes. `AllocsPerRun` also calls the function once before it measures, so storage that is created on first use
-and reused afterwards does not show in the reading. <!-- src/core/testing/testing.cs:1121 (`if (allocated == 0L)`),
-:1104 (`initialization — and JIT compilation here — must not count against f.`). The floor: src/core/testing/testing.cs:1026
+and reused afterwards does not show in the reading. <!-- src/core/testing/testing.cs:1133 (`if (allocated == 0L)`),
+:1116 (`initialization — and JIT compilation here — must not count against f.`). The floor: src/core/testing/testing.cs:1038
 (`nonzero bytes with a nonzero count ⟹ the COUNT is reported, floored at 1;`). -->
 
 **Where Go decides.** Go makes the decision at one of two places:
@@ -116,7 +116,7 @@ positions split into `&T{}` 422, `make` 282, `new` 118, slice literal 34 and `ma
 when methods moved to their receiver's holder), read at master 4efe149858. src/core/math/big/nat.cs:243
 (`Ꮡelem<Word>(x.slice(0, cap(x)), cap(x) - 1) == Ꮡelem<Word>(y.slice(0, cap(y)), cap(y) - 1)`). src/core/math/big/arith.cs:116 (`if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {`).
 Both read `Ꮡ(…)` until 1.26.10.2 seat #10 gave the compare `Ꮡelem` (docs/phase4/DESIGN-element-address-compare.md).
-src/core/golib/builtin.cs:2520-2521 (`AllocationCounter.Count();`…`return new ElemRefBox<T>(target, index);`).
+src/core/golib/builtin.cs:2524-2525 (`AllocationCounter.Count();`…`return new ElemRefBox<T>(target, index);`).
 src/go2cs/escapeAnalysisOperations.go:40-41 (`Phase A never lowers a METHOD's pointer`…`parameters (the §10.1
 boundary in the ref-lowering doc)`). -->
 

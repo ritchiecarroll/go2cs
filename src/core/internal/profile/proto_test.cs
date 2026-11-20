@@ -6,6 +6,7 @@ namespace go.@internal;
 using slices = slices_package;
 using testing = testing_package;
 using static go.@internal.profile_package;
+using static profile_internal_test_package;
 
 partial class profile_internal_test_package {
 
@@ -63,6 +64,8 @@ internal partial struct packedInts {
     internal slice<int64> int64s;
 }
 
+} partial class profile_internal_testᴛpackedInts {
+
 internal static slice<Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>> decoder(this ref packedInts u) {
     return [
         default,
@@ -76,4 +79,4 @@ internal static void encode(this ref packedInts u, ж<global::go.@internal.profi
     encodeInt64s(ref (b).DerefOrNull(), 2, u.int64s);
 }
 
-} // end profile_internal_test_package
+} // end profile_internal_testᴛpackedInts

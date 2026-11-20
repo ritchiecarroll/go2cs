@@ -52,16 +52,15 @@ private static readonly @string gccgoˢᵇ = "gccgo"u8;
 // Deprecated: If lookup is nil, for backwards-compatibility, the importer
 // will attempt to resolve imports in the $GOPATH workspace.
 public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
-    var exprᴛ1 = compiler;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "gc"u8: {
+    case {} when compiler == "gc"u8: {
         return new gcimportsжImporter(Ꮡ(new gcimports(
             fset: fset,
             packages: new map<@string, ж<types.Package>>(),
             lookup: lookup
         )));
     }
-    case {} when exprᴛ1 == "gccgo"u8: {
+    case {} when compiler == "gccgo"u8: {
         gccgoimporter.GccgoInstallation inst = default;
         var err = inst.InitFromDriver(gccgoˢ); if (err != nil) {
             return default;
@@ -72,7 +71,7 @@ public static types.Importer ForCompiler(ж<token.FileSet> fset, @string compile
             lookup: lookup
         )));
     }
-    case {} when exprᴛ1 == "source"u8: {
+    case {} when compiler == "source"u8: {
         if (lookup != nil) {
             throw panic("source importer for custom import path lookup not supported (issue #13847).");
         }

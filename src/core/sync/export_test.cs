@@ -5,6 +5,7 @@ namespace go;
 
 using go.sync;
 using static go.sync_package;
+using static sync_internal_test_package;
 
 partial class sync_internal_test_package {
 
@@ -35,6 +36,8 @@ public static PoolDequeue NewPoolDequeue(nint n) {
     return new sync_internal_test_package.sync_poolDequeueжPoolDequeue(d);
 }
 
+} partial class sync_internal_testᴛpoolDequeue {
+
 internal static bool PushHead(this ж<global::go.sync_package.poolDequeue> Ꮡd, any val) {
     return Ꮡd.pushHead(val);
 }
@@ -47,9 +50,13 @@ internal static (any, bool) PopTail(this ж<global::go.sync_package.poolDequeue>
     return Ꮡd.popTail();
 }
 
+} partial class sync_internal_test_package {
+
 public static PoolDequeue NewPoolChain() {
     return new sync_internal_test_package.sync_poolChainжPoolDequeue(@new<global::go.sync_package.poolChain>());
 }
+
+} partial class sync_internal_testᴛpoolChain {
 
 internal static bool PushHead(this ж<global::go.sync_package.poolChain> Ꮡc, any val) {
     Ꮡc.pushHead(val);
@@ -64,4 +71,4 @@ internal static (any, bool) PopTail(this ж<global::go.sync_package.poolChain> �
     return Ꮡc.popTail();
 }
 
-} // end sync_internal_test_package
+} // end sync_internal_testᴛpoolChain

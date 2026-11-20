@@ -32,8 +32,8 @@ using static go.encoding.csv_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("encoding/csv/fuzz_test.go", "fuzz_test.cs", "AA8egoKUggAIEoKCgoKCgoKCgpSCgpSUgoKCgoKCgpSmlJSCgoKCgoKCgoK4goLcmIKmgg==", "16-95:1;83-85:1.1")]
-[assembly: GoPositionMap("encoding/csv/reader_test.go", "reader_test.cs", "ACdQAPUC3gWCgoKUgpSCgpSUgoKCprKigoKAgoKUgqaClILagoKCuIKCgoKCgoKUgqaCgpSUgIKkgoKUgoKCAAcWsoKCpqaCgoKUgpSCgpSCgoKCAAIUAAkCgoKCkpSCgpSCgrSClLSCtLSCpJQACRSygoKUgoKCgoKClILOwoKCgpSCgoKUggATIoKmgoC2goAADQaCroKAtoKAgLaCgIC2goA=", "408-425:1;428-488:2;625-625:1;629-629:1;641-641:1;645-645:1;649-649:1;653-653:1", "", "40=Repeat/1/5/303,Repeat/2/5/303,Repeat/3/5/303,Repeat/4/5/304,Repeat/5/5/304")]
-[assembly: GoPositionMap("encoding/csv/writer_test.go", "writer_test.cs", "ABYcAB9MgoKCgoKClIKClIKCAAsOgtaCgoKCgpSCpoKCgpSCuNyigoKCgpQ=")]
+[assembly: GoPositionMap("encoding/csv/reader_test.go", "reader_test.cs", "AChQAPUC3gWCgoKUgpSCgpSUgoKCprKigoKAgoKUgqaClILagoKCuIKCgoKCgoKUgqaCgpSUgIKkgoKUgoKCAAcWsoKCpqaCgoKUgpSCgpSCgoKCAAIUAAkCgoKCkpSCgpSCgrSClLSCtLSCpJQACxSygoKUgoKCgoKClILuwoKCgpSCgoKUggATIoKmgoC2goAADQaCroKAtoKAgLaCgIC2goA=", "408-425:1;428-488:2;625-625:1;629-629:1;641-641:1;645-645:1;649-649:1;653-653:1", "", "41=Repeat/1/5/303,Repeat/2/5/303,Repeat/3/5/303,Repeat/4/5/304,Repeat/5/5/304")]
+[assembly: GoPositionMap("encoding/csv/writer_test.go", "writer_test.cs", "ABccAB9MgoKCgoKClIKClIKCAA0OgvaCgoKCgpSCpoKCgpSCuNyigoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -68,3 +68,14 @@ public static partial class csv_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(csv_internal_test_package.errorWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csv_internal_testᴛerrorWriter;
+[GoMethodHost(typeof(csv_internal_test_package.nTimes)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csv_internal_testᴛnTimes;
+// </MethodHolders>

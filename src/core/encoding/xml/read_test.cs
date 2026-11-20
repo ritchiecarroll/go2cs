@@ -13,6 +13,7 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using static go.encoding.xml_package;
+using static xml_internal_test_package;
 
 partial class xml_internal_test_package {
 
@@ -626,6 +627,8 @@ public partial struct MyCharData {
     internal @string body;
 }
 
+} partial class xml_internal_testᴛMyCharData {
+
 public static error UnmarshalXML(this ref MyCharData m, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -644,20 +647,30 @@ public static error UnmarshalXML(this ref MyCharData m, ж<global::go.encoding.x
     return default;
 }
 
+} partial class xml_internal_test_package {
+
 internal static global::go.encoding.xml_package.Unmarshaler _ᴛ3ʗ = new xml_internal_test_package.MyCharDataжUnmarshaler(((ж<MyCharData>)nil));
+
+} partial class xml_internal_testᴛMyCharData {
 
 public static error UnmarshalXMLAttr(this ref MyCharData m, global::go.encoding.xml_package.Attr attr) {
     throw panic("must not call");
 }
 
+} partial class xml_internal_test_package {
+
 public partial struct MyAttr {
     internal @string attr;
 }
+
+} partial class xml_internal_testᴛMyAttr {
 
 public static error UnmarshalXMLAttr(this ref MyAttr m, global::go.encoding.xml_package.Attr attr) {
     m.attr = attr.Value;
     return default;
 }
+
+} partial class xml_internal_test_package {
 
 internal static global::go.encoding.xml_package.UnmarshalerAttr _ᴛ4ʗ = new xml_internal_test_package.MyAttrжUnmarshalerAttr(((ж<MyAttr>)nil));
 
@@ -1204,6 +1217,8 @@ public partial struct recursiveNode {
 
 internal partial struct UnmarshalXML_alias /*recursiveNode*/;
 
+} partial class xml_internal_testᴛrecursiveNode {
+
 public static error UnmarshalXML(this ref recursiveNode n, ж<global::go.encoding.xml_package.Decoder> d, global::go.encoding.xml_package.StartElement startʗp) {
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
@@ -1214,6 +1229,8 @@ public static error UnmarshalXML(this ref recursiveNode n, ж<global::go.encodin
     n = (recursiveNode)a;
     return default;
 }
+
+} partial class xml_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string goBuilderNameˢ => ref goBuilderNameˢᵇ;
@@ -1279,6 +1296,8 @@ public partial struct customUnmarshalerNode {
     public standardNode Body;
 }
 
+} partial class xml_internal_testᴛcustomUnmarshalerNode {
+
 public static error UnmarshalXML(this ref customUnmarshalerNode e, ж<global::go.encoding.xml_package.Decoder> d, global::go.encoding.xml_package.StartElement startʗp) {
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
@@ -1289,6 +1308,8 @@ public static error UnmarshalXML(this ref customUnmarshalerNode e, ж<global::go
     e.Body = body;
     return default;
 }
+
+} partial class xml_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sectionˢ => ref sectionˢᵇ;
@@ -1329,6 +1350,8 @@ public partial struct manualNode {
     public ж<manualNode> Child;
 }
 
+} partial class xml_internal_testᴛmanualNode {
+
 public static error UnmarshalXML(this ref manualNode m, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -1353,6 +1376,8 @@ public static error UnmarshalXML(this ref manualNode m, ж<global::go.encoding.x
     }
 }
 
+} partial class xml_internal_test_package {
+
 public static void TestRecursiveUnmarshalInterfaceDepth(ж<testing.T> t) {
     nint depth = maxUnmarshalDepth + 1;
     var payload = bytes.Join(slice<slice<byte>>([
@@ -1370,12 +1395,16 @@ public static void TestRecursiveUnmarshalInterfaceDepth(ж<testing.T> t) {
 internal partial struct rawTokenNode {
 }
 
+} partial class xml_internal_testᴛrawTokenNode {
+
 internal static error UnmarshalXML(this ref rawTokenNode r, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var (_, err) = d.RawToken();
     return err;
 }
+
+} partial class xml_internal_test_package {
 
 public static void TestUnmarshalXMLRawToken(ж<testing.T> t) {
     ref var node = ref heap(new rawTokenNode(), out var Ꮡnode);

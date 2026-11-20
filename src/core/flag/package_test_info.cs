@@ -8,14 +8,12 @@ global using static global::go.flag_package;
 global using static global::go.flag_internal_test_package;
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
 // </ImportedTypeAliases>
 
 using go;
 using static global::go.flag_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("ErrorHandling", "ΔErrorHandling")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -48,9 +46,9 @@ using static global::go.flag_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("flag/example_test.go", "example_test.cs", "ABEi/oKYggAFEKLsAAgMgpSCgoKUlAAIEqam")]
-[assembly: GoPositionMap("flag/example_value_test.go", "example_value_test.cs", "ABEigoKUpoKClJSmAAkEgoKUgg==")]
-[assembly: GoPositionMap("flag/flag_test.go", "flag_test.cs", "ACAwgoKUADAGgoKCgoKCgoKCgoKUgoKCgoKClLS0tLSkgriCgoKCpoKCgoKCuIKCgoKCgoKCgoKCgoKCgqiSgJKCuIKCgoKCgoKCgpSCgoKCgpSktLS0tLS0tKSCuOaCgoCSgpSCACcIooKUgoKCgoKCgoKCggALGIKUgpSClIKUgpSClIKUgpSClIKUgpSCgoLogoCS5oLcgqaCgvaCgoKCgoKClIKUgoIACAiCgoKCgoKUgIKkgpSCgpaSgoKCpoKCmICCtoCCgoCCAAkIgoKCgJKCggAIEoKmgoKUpoKmgoKCgoKCgoKCuIKmgviCgoKCgoKClIKCgoKUlIKCgoL4goKCgoKCggAJDMKAkoKQkoKCgpSCgoKClIK0ABYGkoKCgJKClIKClIKUgoKmgoKUgpSClpKCgoKClIIAChaCgqaCgpQAUEyCgoKCgoKCgoKCgoKCgoKCgoKCgoKC+pKClIKCgoCCpICCAAgKsoKCgoCSgoKCgrQACASCgoKClIKUgpSCpoKCgoKUgpSClIIACwiCgoKCgoKCgoKClIKCgoKUggAICoLugoKCgoKCgpSCgoKUggASCoKUgoKCgoKUgqYAGDqigrqClIKUgtyigoKktILWtqL0ggAKHLKUgoKUooKUggANCoIAChyClIKClIKUkpSCAAkKgoKCgoKClICCpIKUgoKWkoKCgqaCgpiAgraAgoKAggARCIKUppI=", "41-41:1;42-42:2;46-66:3;103-103:4;120-149:1;155-155:1;231-231:1;273-276:1;297-299:2;315-315:1;403-403:1;405-405:2;426-426:1;566-566:1;725-736:1;762-765:1;797-799:1;810-813:1;834-836:2;855-857:1", "", "1000=Environ/1/1/1", "", "581:21,582:13,826:39,827:13,1021:21,1022:13")]
+[assembly: GoPositionMap("flag/example_test.go", "example_test.cs", "ABIi/oKYggAHEKLsAAgMgpSCgoKUlAAKEqam")]
+[assembly: GoPositionMap("flag/example_value_test.go", "example_value_test.cs", "ABQigoKUpoKClJTGAAkEgoKUgg==")]
+[assembly: GoPositionMap("flag/flag_test.go", "flag_test.cs", "ACEwgoKUADAGgoKCgoKCgoKCgoKUgoKCgoKClLS0tLSkgriCgoKCpoKCgoKCuIKCgoKCgoKCgoKCgoKCgqiSgJKCuIKCgoKCgoKCgpSCgoKCgpSktLS0tLS0tKSCuOaCgoCSgpSCACcIooKUgoKCgoKCgoKCggALGIKUgpSClIKUgpSClIKUgpSClIKUgpSCgoLogoCS5oL8gqaCggAJBoKCgoKCgoKUgpSCggAICIKCgoKCgpSAgqSClIKClpKCgoKmgoKYgIK2gIKCgIIACQiCgoKAkoKCAAoSgqaCgpSmgsaCgoKCgoKCgoK4gqaC+IKCgoKCgoKUgoKCgpSUgoKCgviCgoKCgoKCAAkMwoCSgpCSgoKClIKCgoKUgrQAFgaSgoKAkoKUgoKUgpSCgqaCgpSClIKWkoKCgoKUggAMFoKCpoKClABSTIKCgoKCgoKCgoKCgoKCgoKCgoKCgoL6koKUgoKCgIKkgIIACAqygoKCgJKCgoKCtAAIBIKCgoKUgpSClIKmgoKCgpSClIKUggALCIKCgoKCgoKCgoKUgoKCgpSCAAgKgu6CgoKCgoKClIKCgpSCABIKgpSCgoKCgpSCpgAYOqKCuoKUgpSC3KKCgqS0gta2ovSCAAocspSCgpSigpSCAA0KggAKHIKUgoKUgpSSlIIACQqCgoKCgoKUgIKkgpSCgpaSgoKCpoKCmICCtoCCgoCCABEIgpSmkg==", "41-41:1;42-42:2;46-66:3;103-103:4;120-149:1;155-155:1;231-231:1;273-276:1;297-299:2;315-315:1;403-403:1;405-405:2;426-426:1;566-566:1;725-736:1;762-765:1;797-799:1;810-813:1;834-836:2;855-857:1", "", "1013=Environ/1/1/1", "", "590:21,591:13,839:39,840:13,1034:21,1035:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -107,3 +105,17 @@ public static partial class flag_test_package
         builtin.initPackage(typeof(global::go.flag_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(flag_test_package.URLValue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flag_testᴛURLValue;
+[GoMethodHost(typeof(flag_test_package.boolFlagVar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flag_testᴛboolFlagVar;
+[GoMethodHost(typeof(flag_test_package.flagVar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flag_testᴛflagVar;
+[GoMethodHost(typeof(flag_test_package.interval)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flag_testᴛinterval;
+[GoMethodHost(typeof(flag_test_package.zeroPanicker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flag_testᴛzeroPanicker;
+// </MethodHolders>

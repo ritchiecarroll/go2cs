@@ -102,12 +102,11 @@ internal static Addr opAddr(this ж<TCPAddr> Ꮡa) {
 // See func [Dial] for a description of the network and address
 // parameters.
 public static (ж<TCPAddr>, error) ResolveTCPAddr(@string network, @string address) {
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         break;
     }
-    case {} when exprᴛ1 == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
+    case {} when network == ""u8: { // a hint wildcard for Go 1.0 undocumented behavior
         network = tcpˢ;
         break;
     }
@@ -367,9 +366,8 @@ public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> laddr, �
 internal static (ж<TCPConn>, error) dialTCP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     ref var dialer = ref Ꮡdialer.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         break;
     }
     default: {
@@ -517,9 +515,8 @@ public static (ж<os.File> f, error err) File(this ж<TCPListener> Ꮡl) {
 public static (ж<TCPListener>, error) ListenTCP(@string network, ж<TCPAddr> Ꮡladdr) {
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
-    var exprᴛ1 = network;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+    case {} when network == "tcp"u8 || network == "tcp4"u8 || network == "tcp6"u8: {
         break;
     }
     default: {

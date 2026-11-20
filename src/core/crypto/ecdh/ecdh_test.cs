@@ -28,6 +28,7 @@ using go.os;
 using path;
 using vendor.golang.org.x.crypto;
 using ꓸꓸꓸstring = Span<@string>;
+using static ecdh_test_package;
 
 partial class ecdh_test_package {
 
@@ -37,7 +38,7 @@ partial class ecdh_test_package {
 partial interface _ᴛ1 /*dyn*/ {
     bool Equal(cryptoꓸPublicKey x);
 }
-internal static _ᴛ1 _ᴛ1ʗ = new ecdh_ΔPublicKeyж_ᴛ1(Ꮡ(new ecdhꓸPublicKey()));
+internal static _ᴛ1 _ᴛ1ʗ = new ecdh_PublicKeyж_ᴛ1(Ꮡ(new ecdh.PublicKey()));
 partial interface _ᴛ2 /*dyn*/ {
     cryptoꓸPublicKey Public();
     bool Equal(cryptoꓸPrivateKey x);
@@ -50,7 +51,7 @@ private static readonly object encodedAndDecodedPrivateˢ = (@string)"encoded an
 private static readonly object twoEcdhComputationsCameˢ = (@string)"two ECDH computations came out different"u8;
 
 public static void TestECDH(ж<testing.T> t) {
-    testAllCurves(t, (ж<testing.T> tΔ1, ecdhꓸCurve curve) => {
+    testAllCurves(t, (ж<testing.T> tΔ1, ecdh.Curve curve) => {
         var (aliceKey, err) = curve.GenerateKey(rand.Reader);
         if (err != nil) {
             tΔ1.Fatal(err);
@@ -102,14 +103,18 @@ partial struct countingReader {
     internal nint n;
 }
 
+} partial class ecdh_testᴛcountingReader {
+
 internal static (nint, error) Read(this ref countingReader r, slice<byte> p) {
     var (n, err) = r.r.Read(p);
     r.n += n;
     return (n, err);
 }
 
+} partial class ecdh_test_package {
+
 public static void TestGenerateKey(ж<testing.T> t) {
-    testAllCurves(t, (ж<testing.T> tΔ1, ecdhꓸCurve curve) => {
+    testAllCurves(t, (ж<testing.T> tΔ1, ecdh.Curve curve) => {
         var r = Ꮡ(new countingReader(r: rand.Reader));
         var (k, err) = curve.GenerateKey(new countingReaderжReader(r));
         if (err != nil) {
@@ -133,7 +138,7 @@ partial struct vectorsᴛ1 /*dyn*/ {
     public @string PeerPublicKey;
     public @string SharedSecret;
 }
-internal static map<ecdhꓸCurve, vectorsᴛ1> vectors = new map<ecdhꓸCurve, vectorsᴛ1>{
+internal static map<ecdh.Curve, vectorsᴛ1> vectors = new map<ecdh.Curve, vectorsᴛ1>{
     // NIST vectors from CAVS 14.1, ECC CDH Primitive (SP800-56A).
     [ecdh.P256()] = new(
         PrivateKey: "7d7dc5f71eb29ddaf80d6214632eeae03d9058af1fb6d22ed80badb62bc1a534",
@@ -169,7 +174,7 @@ internal static map<ecdhꓸCurve, vectorsᴛ1> vectors = new map<ecdhꓸCurve, v
 private static readonly object publicKeyDerivedFromTheˢ = (@string)"public key derived from the private key does not match"u8;
 
 public static void TestVectors(ж<testing.T> t) {
-    testAllCurves(t, (ж<testing.T> tΔ1, ecdhꓸCurve curve) => {
+    testAllCurves(t, (ж<testing.T> tΔ1, ecdh.Curve curve) => {
         var v = vectors[curve];
         var (key, err) = curve.NewPrivateKey(hexDecode(tΔ1, v.PrivateKey));
         if (err != nil) {
@@ -205,7 +210,7 @@ internal static slice<byte> hexDecode(ж<testing.T> t, @string s) {
 }
 
 public static void TestString(ж<testing.T> t) {
-    testAllCurves(t, (ж<testing.T> tΔ1, ecdhꓸCurve curve) => {
+    testAllCurves(t, (ж<testing.T> tΔ1, ecdh.Curve curve) => {
         @string s = fmt.Sprintf("%s"u8, curve);
         if (s[..1] != "P" && s[..1] != "X") {
             tΔ1.Errorf("unexpected Curve string encoding: %q", s);
@@ -258,7 +263,7 @@ internal static void testX25519Failure(ж<testing.T> t, slice<byte> @private, sl
     }
 }
 
-internal static map<ecdhꓸCurve, slice<@string>> invalidPrivateKeys = new map<ecdhꓸCurve, slice<@string>>{
+internal static map<ecdh.Curve, slice<@string>> invalidPrivateKeys = new map<ecdh.Curve, slice<@string>>{
     [ecdh.P256()] = slice<@string>([
         // Bad lengths.
         "",
@@ -314,7 +319,7 @@ private static ref readonly @string boringcryptoˢ => ref boringcryptoˢᵇ;
 private static readonly @string boringcryptoˢᵇ = "boringcrypto"u8;
 
 public static void TestNewPrivateKey(ж<testing.T> t) {
-    testAllCurves(t, (ж<testing.T> tΔ1, ecdhꓸCurve curve) => {
+    testAllCurves(t, (ж<testing.T> tΔ1, ecdh.Curve curve) => {
         foreach (var (_, input) in range(invalidPrivateKeys[curve])) {
             var (k, err) = curve.NewPrivateKey(hexDecode(tΔ1, input));
             if (err == nil) {
@@ -328,7 +333,7 @@ public static void TestNewPrivateKey(ж<testing.T> t) {
     });
 }
 
-internal static map<ecdhꓸCurve, slice<@string>> invalidPublicKeys = new map<ecdhꓸCurve, slice<@string>>{
+internal static map<ecdh.Curve, slice<@string>> invalidPublicKeys = new map<ecdh.Curve, slice<@string>>{
     [ecdh.P256()] = slice<@string>([
         // Bad lengths.
         "",
@@ -381,7 +386,7 @@ internal static map<ecdhꓸCurve, slice<@string>> invalidPublicKeys = new map<ec
 private static readonly object publicKeyWasNotNilOnˢ = (@string)"PublicKey was not nil on error"u8;
 
 public static void TestNewPublicKey(ж<testing.T> t) {
-    testAllCurves(t, (ж<testing.T> tΔ1, ecdhꓸCurve curve) => {
+    testAllCurves(t, (ж<testing.T> tΔ1, ecdh.Curve curve) => {
         foreach (var (_, input) in range(invalidPublicKeys[curve])) {
             var (k, err) = curve.NewPublicKey(hexDecode(tΔ1, input));
             if (err == nil) {
@@ -405,7 +410,7 @@ private static readonly @string p521ˢᵇ = "P521"u8;
 private static ref readonly @string x25519ˢ => ref x25519ˢᵇ;
 private static readonly @string x25519ˢᵇ = "X25519"u8;
 
-internal static void testAllCurves(ж<testing.T> t, Action<ж<testing.T>, ecdhꓸCurve> f) {
+internal static void testAllCurves(ж<testing.T> t, Action<ж<testing.T>, ecdh.Curve> f) {
     t.Run(p256ˢ, (ж<testing.T> tΔ1) => {
         f(tΔ1, ecdh.P256());
     });
@@ -421,7 +426,7 @@ internal static void testAllCurves(ж<testing.T> t, Action<ж<testing.T>, ecdh�
 }
 
 public static void BenchmarkECDH(ж<testing.B> b) {
-    benchmarkAllCurves(b, (ж<testing.B> bΔ1, ecdhꓸCurve curve) => {
+    benchmarkAllCurves(b, (ж<testing.B> bΔ1, ecdh.Curve curve) => {
         var (c, err) = chacha20.NewUnauthenticatedCipher(new slice<byte>(32), new slice<byte>(12));
         if (err != nil) {
             bΔ1.Fatal(err);
@@ -459,7 +464,7 @@ public static void BenchmarkECDH(ж<testing.B> b) {
     });
 }
 
-internal static void benchmarkAllCurves(ж<testing.B> b, Action<ж<testing.B>, ecdhꓸCurve> f) {
+internal static void benchmarkAllCurves(ж<testing.B> b, Action<ж<testing.B>, ecdh.Curve> f) {
     b.Run(p256ˢ, (ж<testing.B> bΔ1) => {
         f(bΔ1, ecdh.P256());
     });
@@ -477,11 +482,15 @@ internal static void benchmarkAllCurves(ж<testing.B> b, Action<ж<testing.B>, e
 partial struct zr {
 }
 
+} partial class ecdh_testᴛzr {
+
 // Read replaces the contents of dst with zeros. It is safe for concurrent use.
 internal static (nint n, error err) Read(this zr _, slice<byte> dst) {
     clear(dst);
     return (len(dst), default);
 }
+
+} partial class ecdh_test_package {
 
 internal static zr zeroReader = new zr();
 
@@ -589,7 +598,7 @@ private static readonly @string cryptoEcdhPrivateKeyAndˢᵇ = "crypto/ecdh: pri
 
 internal partial struct TestMismatchedCurves_curves /*dyn*/ {
     internal @string name;
-    internal ecdhꓸCurve curve;
+    internal ecdh.Curve curve;
 }
 
 public static void TestMismatchedCurves(ж<testing.T> t) {

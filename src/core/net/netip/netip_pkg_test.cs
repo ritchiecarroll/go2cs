@@ -12,13 +12,13 @@ using go.encoding;
 
 partial class netip_package {
 
-internal static Func<@string, ΔPrefix> mustPrefix;
+internal static Func<@string, Prefix> mustPrefix;
 internal static void initᴛmustPrefix() { mustPrefix = MustParsePrefix; }
-internal static Func<@string, ΔAddr> mustIP;
+internal static Func<@string, Addr> mustIP;
 internal static void initᴛmustIP() { mustIP = MustParseAddr; }
 
 internal partial struct TestPrefixValid_tests /*dyn*/ {
-    internal ΔPrefix ipp;
+    internal Prefix ipp;
     internal bool want;
 }
 
@@ -39,11 +39,11 @@ public static void TestPrefixValid(ж<testing.T> t) {
         new(PrefixFrom(v6, 128), true),
         new(PrefixFrom(v6, 129), false),
 
-        new(PrefixFrom(new ΔAddr(), -2), false),
-        new(PrefixFrom(new ΔAddr(), -1), false),
-        new(PrefixFrom(new ΔAddr(), 0), false),
-        new(PrefixFrom(new ΔAddr(), 32), false),
-        new(PrefixFrom(new ΔAddr(), 128), false)
+        new(PrefixFrom(new Addr(), -2), false),
+        new(PrefixFrom(new Addr(), -1), false),
+        new(PrefixFrom(new Addr(), 0), false),
+        new(PrefixFrom(new Addr(), 32), false),
+        new(PrefixFrom(new Addr(), 128), false)
     ]);
     foreach (var (_, tt) in range(tests)) {
         var got = tt.ipp.IsValid();
@@ -60,9 +60,9 @@ public static void TestPrefixValid(ж<testing.T> t) {
 }
 
 partial struct nextPrevTestsᴛ1 /*dyn*/ {
-    internal ΔAddr ip;
-    internal ΔAddr next;
-    internal ΔAddr prev;
+    internal Addr ip;
+    internal Addr next;
+    internal Addr prev;
 }
 internal static slice<nextPrevTestsᴛ1> nextPrevTests;
 internal static void initᴛnextPrevTests() { nextPrevTests = slice<nextPrevTestsᴛ1>([
@@ -70,18 +70,18 @@ internal static void initᴛnextPrevTests() { nextPrevTests = slice<nextPrevTest
     new(mustIP("10.0.0.255"), mustIP("10.0.1.0"), mustIP("10.0.0.254")),
     new(mustIP("127.0.0.1"), mustIP("127.0.0.2"), mustIP("127.0.0.0")),
     new(mustIP("254.255.255.255"), mustIP("255.0.0.0"), mustIP("254.255.255.254")),
-    new(mustIP("255.255.255.255"), new ΔAddr(), mustIP("255.255.255.254")),
-    new(mustIP("0.0.0.0"), mustIP("0.0.0.1"), new ΔAddr()),
-    new(mustIP("::"), mustIP("::1"), new ΔAddr()),
-    new(mustIP("::%x"), mustIP("::1%x"), new ΔAddr()),
+    new(mustIP("255.255.255.255"), new Addr(), mustIP("255.255.255.254")),
+    new(mustIP("0.0.0.0"), mustIP("0.0.0.1"), new Addr()),
+    new(mustIP("::"), mustIP("::1"), new Addr()),
+    new(mustIP("::%x"), mustIP("::1%x"), new Addr()),
     new(mustIP("::1"), mustIP("::2"), mustIP("::")),
-    new(mustIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), new ΔAddr(), mustIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe"))
+    new(mustIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), new Addr(), mustIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe"))
 ]); }
 
 public static void TestIPNextPrev(ж<testing.T> t) {
     doNextPrev(new testing_TжTB(t));
 
-    foreach (var (_, ip) in range(slice<ΔAddr>([
+    foreach (var (_, ip) in range(slice<Addr>([
         mustIP("0.0.0.0"),
         mustIP("::")
     ]))) {
@@ -96,7 +96,7 @@ public static void TestIPNextPrev(ж<testing.T> t) {
         allFF[i] = 0xff;
     }
 
-    foreach (var (_, ip) in range(slice<ΔAddr>([
+    foreach (var (_, ip) in range(slice<Addr>([
         mustIP("255.255.255.255"),
         AddrFrom16(allFF)
     ]))) {
@@ -140,13 +140,13 @@ internal static ref readonly @string ffff10001ˢ => ref ffff10001ˢᵇ;
 private static readonly @string ffff10001ˢᵇ = "::ffff:10.0.0.1"u8;
 
 internal partial struct TestIPBitLen_tests /*dyn*/ {
-    internal ΔAddr ip;
+    internal Addr ip;
     internal nint want;
 }
 
 public static void TestIPBitLen(ж<testing.T> t) {
     var tests = slice<TestIPBitLen_tests>([
-        new(new ΔAddr(), 0),
+        new(new Addr(), 0),
         new(mustIP("0.0.0.0"), 32),
         new(mustIP("10.0.0.1"), 32),
         new(mustIP("::"), 128),
@@ -162,8 +162,8 @@ public static void TestIPBitLen(ж<testing.T> t) {
 }
 
 internal partial struct TestPrefixContains_tests /*dyn*/ {
-    internal ΔPrefix ipp;
-    internal ΔAddr ip;
+    internal Prefix ipp;
+    internal Addr ip;
     internal bool want;
 }
 
@@ -183,17 +183,17 @@ public static void TestPrefixContains(ж<testing.T> t) {
         new(mustPrefix("::1/128"), mustIP("::1"), true),
         new(mustPrefix("::1/127"), mustIP("::2"), false),
         // Zones ignored: https://go.dev/issue/51899
-        new(new ΔPrefix(mustIP("1.2.3.4").WithZone("a"), 32), mustIP("1.2.3.4"), true),
-        new(new ΔPrefix(mustIP("::1").WithZone("a"), 128), mustIP("::1"), true),
+        new(new Prefix(mustIP("1.2.3.4").WithZone("a"), 32), mustIP("1.2.3.4"), true),
+        new(new Prefix(mustIP("::1").WithZone("a"), 128), mustIP("::1"), true),
         // invalid IP
-        new(mustPrefix("::1/0"), new ΔAddr(), false),
-        new(mustPrefix("1.2.3.4/0"), new ΔAddr(), false),
+        new(mustPrefix("::1/0"), new Addr(), false),
+        new(mustPrefix("1.2.3.4/0"), new Addr(), false),
         // invalid Prefix
         new(PrefixFrom(mustIP("::1"), 129), mustIP("::1"), false),
         new(PrefixFrom(mustIP("1.2.3.4"), 33), mustIP("1.2.3.4"), false),
-        new(PrefixFrom(new ΔAddr(), 0), mustIP("1.2.3.4"), false),
-        new(PrefixFrom(new ΔAddr(), 32), mustIP("1.2.3.4"), false),
-        new(PrefixFrom(new ΔAddr(), 128), mustIP("::1"), false),
+        new(PrefixFrom(new Addr(), 0), mustIP("1.2.3.4"), false),
+        new(PrefixFrom(new Addr(), 32), mustIP("1.2.3.4"), false),
+        new(PrefixFrom(new Addr(), 128), mustIP("::1"), false),
         // wrong IP family
         new(mustPrefix("::1/0"), mustIP("1.2.3.4"), false),
         new(mustPrefix("1.2.3.4/0"), mustIP("::1"), false)

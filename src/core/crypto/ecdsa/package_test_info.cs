@@ -8,7 +8,6 @@ global using static global::go.crypto.ecdsa_package;
 global using static global::go.crypto.ecdsa_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
 // </ImportedTypeAliases>

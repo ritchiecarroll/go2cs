@@ -15,6 +15,7 @@ using testing = testing_package;
 using global::go.net;
 using static global::go.net.http_internal_test_package;
 using Δhttp = global::go.net.http_package;
+using static http_test_package;
 
 partial class http_test_package {
 
@@ -95,7 +96,7 @@ public static void TestServerContentTypeSniff(ж<testing.T> t) { run<TжTBRun>(t
 internal static void testServerContentTypeSniff(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var (i, _) = strconv.Atoi(r.FormValue("i"));
             var tt = sniffTests[i];
             var (n, err) = w.Write(tt.data);
@@ -141,7 +142,7 @@ internal static void testServerContentTypeSniff(ж<testing.T> t, testMode mode) 
 // even if it's the empty string.
 public static void TestServerIssue5953(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServerIssue5953(Δp0, Δp1)); }
 internal static void testServerIssue5953(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header()[contentTypeˢ] = [""];
         fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "<html><head></head><body>hi</body></html>"u8);
     })));
@@ -163,6 +164,8 @@ partial struct byteAtATimeReader {
     internal slice<byte> buf;
 }
 
+} partial class http_testᴛbyteAtATimeReader {
+
 internal static (nint n, error err) Read(this ref byteAtATimeReader b, slice<byte> p) {
     if (len(p) < 1) {
         return (0, default);
@@ -174,6 +177,8 @@ internal static (nint n, error err) Read(this ref byteAtATimeReader b, slice<byt
     b.buf = b.buf[1..];
     return (1, default);
 }
+
+} partial class http_test_package {
 
 public static void TestContentTypeWithVariousSources(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testContentTypeWithVariousSources(Δp0, Δp1)); }
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -254,7 +259,7 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> t, testMode
 
         var testʗ1 = test;
         t.Run(test.name, (ж<testing.T> tΔ1) => {
-            var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(testʗ1.handler)));
+            var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(testʗ1.handler)));
 
             var (resp, err) = cst.c.Get(cst.ts.URL);
             if (err != nil) {
@@ -284,7 +289,7 @@ internal static ref readonly @string sizeˢ => ref sizeˢᵇ;
 private static readonly @string sizeˢᵇ = "size"u8;
 
 internal static void testSniffWriteSize(ж<testing.T> t, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (size, _) = strconv.Atoi(r.FormValue(sizeˢ));
         var (written, err) = io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), strings.Repeat("a", size));
         if (err != nil) {

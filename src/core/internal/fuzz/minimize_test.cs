@@ -146,7 +146,7 @@ public static void TestMinimizeInput(ж<testing.T> t) {
             tΔ1.Parallel();
                 var tcʗ2 = tcʗ1;
             var ws = Ꮡ(new workerServer(
-                fuzzFn: (CorpusEntry e) => (time.ΔSecond, tcʗ2.fn(e))
+                fuzzFn: (CorpusEntry e) => (time.Second, tcʗ2.fn(e))
             ));
             var mem = Ꮡ(new sharedMem(region: new slice<byte>(100))); // big enough to hold value and header
             var vals = tcʗ1.input;
@@ -176,7 +176,7 @@ internal static readonly object unexpectedSuccessˢ = (@string)"unexpected succe
 // input and a flaky failure occurs, that minimization was not indicated
 // to be successful, and the error isn't returned (since it's flaky).
 public static void TestMinimizeFlaky(ж<testing.T> t) {
-    var ws = Ꮡ(new workerServer(fuzzFn: (CorpusEntry e) => (time.ΔSecond, errors.New(ohnoˢ))
+    var ws = Ꮡ(new workerServer(fuzzFn: (CorpusEntry e) => (time.Second, errors.New(ohnoˢ))
     ));
     var mem = Ꮡ(new sharedMem(region: new slice<byte>(100))); // big enough to hold value and header
     var vals = slice<any>([slice<byte>(default)]);

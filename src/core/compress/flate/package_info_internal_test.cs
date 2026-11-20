@@ -49,13 +49,13 @@ using static go.compress.flate_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/flate/deflate_test.go", "deflate_test.cs", "ACdKABMqAAgSAAoWgoKClKaCgoKClIKCgoKClIKCgoKCgu6CgoKCgoKUgoKCyoKCgoKmgIK2gqaUgIK2gqaCpoIAChaygpSCgoKClIKClKaC1oKClIKCgpSCggAKFoKmwoKCgoKClLiCAAkMsoKCpoKmooKmgoKCpoKCpoKCgoKCgoKUpoKSgpSUgoKClIKCgqaCpoKCgoKCgpSCggALGJSCgoKUgpSmgoKCgpSCgriCgoKCgpSCgoKClIKUgoKCgpSCgoKUpqKCpqaCgoKClLiCgoIACxgADxqCgoKUooKClIKCAAwKgpiCgoKUgoKCgpSCgoKUggALCIKYgoKClIKCgoKUgoKClIK6koKClIKClIKCgqbmgoKCgpSCgpSCgoKUgpSUgoK4goKClIKCpqaCgriCgoK4koKCAAgMgoKCgpSCgqaCpoKCgoKUlIKmgoKUgoKCgpSCgpSCgoKClIKCuK7CgoKClIKUABImgoKUgoKCgoKUgoKClIKCgoKUgpSCgqaCgqaCgoKClJSCggAIDuqCgoKU5oKCgoKUlIKC7qKClIKCgoKUgpSClKbIgoKClIKCgqaUgoKUgoKCmKKCgoKUgoKmgoKmgoKCggAJCqKCAGfUAYKCgoIAFgqCgpKCgpKCuAAJFIKCgpSUgoKCgpSAgoKkgoKmgoKCgoKmgoLupqaCgoLKgpSCpqaCgriCuIKCuIK4gqaCgrjGgpSClIKUgrKCgoKUgpSClKLE", "553-555:1;558-564:2;560-562:2.1;568-580:1;932-935:1;1055-1068:1", "", "60=largeDataChunk/1/1/6")]
+[assembly: GoPositionMap("compress/flate/deflate_test.go", "deflate_test.cs", "AChKABMqAAgSAAoWgoKClKaCgoKClIKCgoKClIKCgoKCgu6CgoKCgoKUgoKCyoKCgoKmgIK2gqaUgIK2gqaCpoIADBaygpSCgoKClIKClKaC9oKClIKCgpSCggAKFoLGwoKCgoKClLiCAAkMsoKCpoKmooKmgoKCxoKCpoKCgoKCgoKUpoKSgpSUgoKClIKCgqaCpoKCgoKCgpSCggALGJSCgoKUgpSmgoKCgpSCgriCgoKCgpSCgoKClIKUgoKCgpSCgoKUpqKCpqaCgoKClLiCgoIACxgADxqCgoKUooKClIKCAAwKgpiCgoKUgoKCgpSCgoKUggALCIKYgoKClIKCgoKUgoKClIK6koKClIKClIKCgqbmgoKCgpSCgpSCgoKUgpSUgoK4goKClIKCpqaCgriCgoK4koKCAAgMgoKCgpSCgqaCpoKCgoKUlIKmgoKUgoKCgpSCgpSCgoKClIKCuK7CgoKClIKUABImgoKUgoKCgoKUgoKClIKCgoKUgpSCgqaCgqaCgoKClJSCggAIDgAICoKCgpQACAaCgoKClJSCgu6igpSCgoKClIKUgpSmyIKCgpSCgoKmlIKClIKCgpiigoKClIKCpoKCpoKCgoIACQqiggBn1AGCgoKCABYKgoKSgoKSgrgACRSCgoKUlIKCgoKUgIKCpIKCpoKCgoKCpoKC7qamgoKCyoKUgqamgoK4griCgriCuIKmgoK4xoKUgpSClIKygoKClIKUgpSixA==", "553-555:1;558-564:2;560-562:2.1;568-580:1;932-935:1;1055-1068:1", "", "61=largeDataChunk/1/1/6")]
 [assembly: GoPositionMap("compress/flate/dict_decoder_test.go", "dict_decoder_test.cs", "AB0aggADPAAXNpKClIKCgoKmgoK4goKCgoKCyoKUgoKClJSUlIKUgoKUgoKUgoKUgoKUgpSCgg==", "75-87:1;88-97:2")]
 [assembly: GoPositionMap("compress/flate/flate_test.go", "flate_test.cs", "ABIokqaCgrqSlIKCupKCgoKClIL4hJKCqJKUgoL4goKCgoKUggAJCAAHEAByrAKCgoKUgoKCpoKClIIACQ6ClIKCgoIABBjyggAJFIKCgriCgoKmgoKUgpSCgoK4gpSUgoKCyoKmgpSClJSC")]
-[assembly: GoPositionMap("compress/flate/huffman_bit_writer_test.go", "huffman_bit_writer_test.cs", "ABMi3NSCgqaCgoKUAAkIgoKCgpSCgoKClIKCgqaCgoKCgoKUpqaCgpSUpoKCgoKCgoKClJSCAAsYADh2ooL8ooLswoKUgoKCgoKCgqaCgoKUkoKmgoKCgpSSgoKmgoKCgoKUgoKClIKClIKCgoKmpoKCgoKCgoKClJSClIKCgoKUgoKUgoKCgpSCgqamgoKCgoKCgoKUlIKipKKktLS2goKmgoKC+pKClIKCgoKCgqaCgqS0tLSkgoKmgoKClIKCgpSCgpQ=", "", "", "", "222:29,234:25")]
+[assembly: GoPositionMap("compress/flate/huffman_bit_writer_test.go", "huffman_bit_writer_test.cs", "ABMi3NSCgqaCgoKUAAkIgoKCgpSCgoKClIKCgqaCgoKCgoKUpqaCgpSUpoKCgoKCgoKClJSCAAsYADh2ooL8ooLswoKUgoKCgoKCgqaCgoKUkoKmgoKCgpSSgoKmgoKCgoKUgoKClIKClIKCgoKmpoKCgoKCgoKClJSClIKCgoKUgoKUgoKCgpSCgqamgoKCgoKCgoKUlIKipKKUtLS2goKmgoKC+pKClIKCgoKCgqaCgpS0tLSkgoKmgoKClIKCgpSCgpQ=", "", "", "", "222:29,234:25")]
 [assembly: GoPositionMap("compress/flate/inflate_test.go", "inflate_test.cs", "AA4egsqCgoKCppSCgoKClIKCAAgKggAMGoKCgoKClILKgoLKgoKCgqaUgoKClJSCggAMCoKClJKCgoKUgoKmooKClIKCpqKCgoKUgoI=", "104-114:1;115-124:2;125-136:3")]
 [assembly: GoPositionMap("compress/flate/reader_test.go", "reader_test.cs", "AA8gpuwACBKCgoKClIKCgpSCgpSUgoKCgoKCAAgKAAoUAAUSgoKCgpSClLKysg==", "35-59:1;92-94:1")]
-[assembly: GoPositionMap("compress/flate/writer_test.go", "writer_test.cs", "ABAggoKClIKCgpSUgoKClIKCgoKCAAkUgoKUggAPCJKCgoKClIKUlIKCtIKCgpSCgpSCgpSClIKClIKCpoKCgpSClIIAChCigpKApIC2goSSgriCgoKokoKCgqaCgoKUmKKCgoKClIKClJSClIK+soKUgpaSgoKCqJKCgriCgoKUgoKCypSUgqaCgoKmgoKUgg==", "17-40:1;118-118:1;120-120:2")]
+[assembly: GoPositionMap("compress/flate/writer_test.go", "writer_test.cs", "ABEggoKClIKCgpSUgoKClIKCgoKCAAsUgoKUggARCJKCgoKClIKUlIKCtIKCgpSCgpSCgpSClIKClIKCpoKCgpSClIIAChCigpKApIC2goSSgriCgoKokoKCgqaCgoKUmKKCgoKClIKClJSClIK+soKUgpaSgoKCqJKCgriCgoKUgoKCypSUgqaCgoKmgoKUgg==", "17-40:1;118-118:1;120-120:2")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
@@ -99,3 +99,16 @@ public static partial class flate_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(flate_internal_test_package.errorWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flate_internal_testᴛerrorWriter;
+[GoMethodHost(typeof(flate_internal_test_package.failWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flate_internal_testᴛfailWriter;
+[GoMethodHost(typeof(flate_internal_test_package.sparseReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flate_internal_testᴛsparseReader;
+[GoMethodHost(typeof(flate_internal_test_package.syncBuffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class flate_internal_testᴛsyncBuffer;
+// </MethodHolders>

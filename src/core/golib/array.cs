@@ -224,7 +224,10 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     {
         checkArrayConversionLength(source.Length, length);
 
+        // Go's `[N]T(s)` copies the elements: one that owns array storage is copied on its own, so the array and the
+        // slice share no inner array.
         m_array = AllocationCounter.CopyOf<T>(source.ToSpan()[..(int)length]);
+        GoElementCopy.CloneElements<T>(m_array);
         m_length = (int)length;
     }
 

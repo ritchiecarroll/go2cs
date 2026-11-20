@@ -40,11 +40,11 @@ partial struct counting {
     internal nint hits;
 }
 
+} partial class mainᴛcounting {
+
 // Go method set entry for the promoted 'Connector.Driver()' - provided ONLY by the embedded
 // interface field in *counting's method set; see the pointer-only satisfaction record.
 internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();
-
-} partial class mainᴛcounting {
 
 internal static @string Name(this ref counting c) {
     c.hits++;
@@ -68,11 +68,11 @@ partial struct fcounting {
     internal nint n;
 }
 
+} partial class mainᴛfcounting {
+
 // Go method set entry for the promoted 'Connector.Driver()' - provided ONLY by the embedded
 // interface field in *fcounting's method set; see the pointer-only satisfaction record.
 internal static driver.Driver Driver(this fcounting recvᴛ) => recvᴛ.Connector.Driver();
-
-} partial class mainᴛfcounting {
 
 internal static (driver.Conn, error) Connect(this ref fcounting c, context.Context ctx) {
     c.n++;

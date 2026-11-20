@@ -29,7 +29,7 @@ using static go.log_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("log/log_test.go", "log_test.cs", "AC9SABcokoKCgoKClJSCgoKCgpSClKaCgriCgoL4goKCgoKCuIKCgqaCgoKCgoKygoKipAAJBoKCgoKClIKCgpSCgpSCgoKmgoKCgpSCuIKCgoKCuIKCgpSCgpSCgriClIKUAAkGgoKCgoKCgIKkgILIgoKCkLaCABsIgoKmgoKCppiioqKioqKioqKioqKiyIKClJSylJKCgoK4qJSCgqaCgpSUqIIABxKigoKCgoKCgoKC+KKCgoKCgoL4ooKCgoKCggAIEIIACAaCgoKCgrKClKKk1qKCgoI=", "119-123:1;211-211:1;234-234:1;235-235:2;236-236:3;237-237:4;238-238:5;239-239:6;240-240:7;241-241:8;242-242:9;243-243:10;244-244:11;245-245:12;246-246:13;247-247:14;258-295:15;348-353:1", "", "206=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;215=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;364=Name/1/1/1,QuoteMeta/1/1/1")]
+[assembly: GoPositionMap("log/log_test.go", "log_test.cs", "ADBSABcokoKCgoKClJSCgoKCgpSClKaCgriCgoL4goKCgoKCuIKCgqaCgoKCgoKygoKipAAJBoKCgoKClIKCgpSCgpSCgoKmgoKCgpSCuIKCgoKCuIKCgpSCgpSCgriClIKUAAkGgoKCgoKCgIKkgILIgoKCkLaCABsIgoKmgoKCppiioqKioqKioqKioqKiyIKClJSylJKCgoK4qJSCgqaCgpSUqIIABxKigoKCgoKCgoKC+KKCgoKCgoL4ooKCgoKCggAKEIIACgaCgoKCgrKClKKk1qKCgoI=", "119-123:1;211-211:1;234-234:1;235-235:2;236-236:3;237-237:4;238-238:5;239-239:6;240-240:7;241-241:8;242-242:9;243-243:10;244-244:11;245-245:12;246-246:13;247-247:14;258-295:15;348-353:1", "", "207=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;216=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;365=Name/1/1/1,QuoteMeta/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,3 +69,13 @@ public static partial class log_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(log_internal_test_package.discard)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class log_internal_testᴛdiscard;
+// </MethodHolders>

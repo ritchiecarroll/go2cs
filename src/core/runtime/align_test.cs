@@ -22,6 +22,7 @@ using fs = global::go.io.fs_package;
 using global::go.go;
 using static global::go.runtime_internal_test_package;
 using Δio = io_package;
+using static runtime_test_package;
 
 partial class runtime_test_package {
 
@@ -101,7 +102,7 @@ public static void TestAtomicAlignment(ж<testing.T> t) {
     }
 
     // Call go/types to analyze the runtime package.
-    ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
+    ref var info = ref heap(new types.Info(), out var Ꮡinfo);
     info.Types = new map<ast.Expr, types.TypeAndValue>{};
     ref var conf = ref heap<types.Config>(new types.Config(Importer: importer.Default()), out var Ꮡconf);
     (_, err) = Ꮡconf.Check(runtimeˢ, fset, files, Ꮡinfo);
@@ -120,6 +121,8 @@ partial struct Visitor {
     internal map<@string, bool> @checked;
     internal ж<testing.T> t;
 }
+
+} partial class runtime_testᴛVisitor {
 
 public static ast.Visitor Visit(this ж<Visitor> Ꮡv, ast.Node n) {
     ref var v = ref Ꮡv.DerefOrNull();
@@ -211,10 +214,12 @@ internal static @string print(this ref Visitor v, ast.Node n) {
     return b.String();
 }
 
+} partial class runtime_test_package {
+
 // buildableFiles returns the list of files in the given directory
 // that are actually used for the build, given GOOS/GOARCH restrictions.
 internal static slice<@string> buildableFiles(ж<testing.T> t, @string dir) {
-    ref var ctxt = ref heap<build.Context>(global::go.go.build_package.Default, out var Ꮡctxt);
+    ref var ctxt = ref heap<build.Context>(build.Default, out var Ꮡctxt);
     ctxt.CgoEnabled = true;
     var (pkg, err) = Ꮡctxt.ImportDir(dir, 0);
     if (err != nil) {

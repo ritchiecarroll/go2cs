@@ -11,6 +11,7 @@ using runtime = runtime_package;
 using testing = testing_package;
 using go.math;
 using static go.compress.flate_package;
+using static flate_internal_test_package;
 
 partial class flate_internal_test_package {
 
@@ -46,6 +47,8 @@ internal partial struct errorWriter {
     public nint N;
 }
 
+} partial class flate_internal_testᴛerrorWriter {
+
 internal static (nint, error) Write(this ref errorWriter e, slice<byte> b) {
     if (e.N <= 0) {
         return (0, io.ErrClosedPipe);
@@ -53,6 +56,8 @@ internal static (nint, error) Write(this ref errorWriter e, slice<byte> b) {
     e.N--;
     return (len(b), default);
 }
+
+} partial class flate_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object levelˢ = (@string)"Level"u8;

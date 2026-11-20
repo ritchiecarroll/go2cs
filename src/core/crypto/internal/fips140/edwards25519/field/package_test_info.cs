@@ -7,8 +7,6 @@
 global using static global::go.crypto.@internal.fips140.edwards25519.field_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,7 +42,7 @@ using static global::go.crypto.@internal.fips140.edwards25519.field_internal_tes
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_alias_test.go", "fe_alias_test.cs", "AAwYgqLGgILIgILIuIKy1oCCyIKAgraCgILIgILIgoCCtoKAgraCgILIAAkcAAoCABAwggALIIKUtKSC", "13-28:1;32-74:1;102-104:1;111-114:2;118-120:3;124-126:4")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_test.go", "fe_test.cs", "ABcogqqigoKUpqKCAAoYAAsYABEmogAIEqKClKrCroLEgoKmgoKCgpSmgriCgoKCgqaCgoKCpoKCgoKCgoKCAAkIgqK4lJSAgraiyoKClICCqAAKHrKCgoLKgoKUpoKylIKClIKmgpSUgrrCgqaCooKClIK4gqaCgoKUqJKUgoKCgpSCuKaCgoIACBLekoKkgoKUgqaUgoKUlIKUgriCgpSCgqaCgriCgoKkgoKUgqaUgoKUlIKClIKmgoKCgoK4goKUpIKUgqaUgqaUgriCkoKCpoKUgoKmpoIACgiEAChcgoKCgoKCyoKCgpSClIKmpoK4goKCgoKUgpSCgqaogriCgoKU", "107-121:1;156-164:1;169-178:2;216-231:1;411-426:1;493-505:1;513-529:1", "", "42=Uint64/1/5/1,Uint64/2/5/2,Uint64/3/5/3,Uint64/4/5/4,Uint64/5/5/5;86=Intn/1/5/1,Intn/2/5/2,Intn/3/5/3,Intn/4/5/4,Intn/5/5/5;109=Len64/2/5/1,Len64/3/5/2,Len64/4/5/3,Len64/5/5/4;560=isInBounds/2/2/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_test.go", "fe_test.cs", "ABoogsqigoKUpqKCAAoYAAsYABEmogAKEqKClMrCroLEgoKmgoKCgpSmgriCgoKCgqaCgoKCpoKCgoKCgoKCAAkIgqK4lJSAgraiyoKClICCqAAKHrKCgoLKgoKUpoKylIKClIKmgpSUgtrCgqaCooKClIK4gqaCgoKUqJKUgoKCgpSCuMaCgoIACBLekoKkgoKUgqaUgoKUlIKUgriCgpSCgqaCgriCgoKkgoKUgqaUgoKUlIKClIKmgoKCgoK4goKUpIKUgqaUgqaUgriCkoKCpoKUgoKmpoIACgiEAChcgoKCgoKCyoKCgpSClIKmpoK4goKCgoKUgpSCgqaogriCgoKU", "107-121:1;156-164:1;169-178:2;216-231:1;411-426:1;493-505:1;513-529:1", "", "47=Uint64/1/5/1,Uint64/2/5/2,Uint64/3/5/3,Uint64/4/5/4,Uint64/5/5/5;91=Intn/1/5/1,Intn/2/5/2,Intn/3/5/3,Intn/4/5/4,Intn/5/5/5;118=Len64/2/5/1,Len64/3/5/2,Len64/4/5/3,Len64/5/5/4;573=isInBounds/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;
@@ -90,3 +88,13 @@ public static partial class field_internal_test_package
         builtin.initPackage(typeof(global::go.crypto.@internal.fips140.edwards25519.field_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(global::go.crypto.@internal.fips140.edwards25519.field_package.Element)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class field_internal_testᴛElement;
+// </MethodHolders>

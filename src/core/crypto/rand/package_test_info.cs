@@ -8,7 +8,6 @@ global using static global::go.crypto.rand_package;
 global using static global::go.crypto.rand_internal_test_package;
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 // </ImportedTypeAliases>
 
 using go;
@@ -48,7 +47,7 @@ using static global::go.crypto.rand_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/rand/text_test.go", "text_test.cs", "AA0agoKCgtyCgoKCgpSCgqaClJSCgoKCpoKmgoK4ooKCgpSCgoKClA==")]
-[assembly: GoPositionMap("crypto/rand/util_test.go", "util_test.cs", "ABMmkoKCgpSClILMkoLogoKCgpSCgoKClIKmppSCgoIACRSygoKqopKCgpSCgpSCgt6SkoKCgpSCgoKClILuooKCpqKmkoKokoKmooKC", "86-97:1;104-119:1;124-128:1", "", "", "", "136:21,137:13")]
+[assembly: GoPositionMap("crypto/rand/util_test.go", "util_test.cs", "ABQmkoKCgpSClILMkoLogoKCgpSCgoKClIKmppSCgoIACxSygoLKopKCgpSCgpSCgt6SkoKCgpSCgoKClILuooKCpqKmkoKokoKmooKC", "86-97:1;104-119:1;124-128:1", "", "", "", "141:21,142:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -96,3 +95,13 @@ public static partial class rand_test_package
         builtin.initPackage(typeof(global::go.crypto.rand_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(rand_test_package.countingReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rand_testᴛcountingReader;
+// </MethodHolders>

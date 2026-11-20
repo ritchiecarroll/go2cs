@@ -32,7 +32,7 @@ using static go.context_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("context/context_test.go", "context_test.cs", "ACZMgoIADgbqgoKSgoKSkqTUtLS0+oKCgoKCgoKCpoKmlICCpICCpICCtpSCgpSmgtakgqaCgoKmgtakgILEpKKCkoKUtLTogoKCpoKCgpSmlIKCgpS41qSAgsik1oCC1gASBIKCgriCgoKCgpSCgoKCgpSCgpKCggAWFoKClKKCgoKCgqaCgoKClKaCgpSCgpSCpIKSlIKCkpSCkpSCkpSCkpSClIKSpoKCgpKi", "54-54:1;106-115:2;194-198:1;216-216:2;236-242:1;243-250:2", "", "", "66:21,70:21,74:21,189:21,373:21,379:21,384:21,389:21,394:21,402:21,410:21")]
+[assembly: GoPositionMap("context/context_test.go", "context_test.cs", "ACdMgoIADgbqgoKSgoKSkqTUtLS0+oKCgoKCgoKCpoKmlICCpICCpICCtpSCgpSmgtakgqaCgoKmgtakgILEpKKCkoKUtLTogoKCpoKCgpSmlIKCgpS41qSAgsik1oCC1gASBIKCgriCgoKCgpSCgoKCgpSCgpKCggAYFoKCxKKCgoKCgqaCgoKClKaCgpSCgpSCpIKSlIKCkpSCkpSCkpSCkpSClIKSpoKCgpKi", "54-54:1;106-115:2;194-198:1;216-216:2;236-242:1;243-250:2", "", "", "67:21,71:21,75:21,190:21,379:21,385:21,390:21,395:21,400:21,408:21,416:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -68,3 +68,13 @@ public static partial class context_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(context_internal_test_package.myDoneCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class context_internal_testᴛmyDoneCtx;
+// </MethodHolders>

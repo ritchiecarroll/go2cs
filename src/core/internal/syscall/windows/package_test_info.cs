@@ -7,7 +7,6 @@
 global using static global::go.@internal.syscall.windows_package;
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
 // </ImportedTypeAliases>
 
 using go;

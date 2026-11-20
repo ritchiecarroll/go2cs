@@ -4,10 +4,13 @@
 namespace go;
 
 using static go.strings_package;
+using static strings_internal_test_package;
 
 partial class strings_internal_test_package {
 
-internal static any ΔReplacer(this ж<global::go.strings_package.Replacer> Ꮡr) {
+} partial class strings_internal_testᴛReplacer {
+
+internal static any Replacer(this ж<global::go.strings_package.Replacer> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
@@ -21,6 +24,8 @@ internal static @string PrintTrie(this ж<global::go.strings_package.Replacer> �
     var gen = r.r._<global::go.strings_package.replacer, ж<global::go.strings_package.genericReplacer>>();
     return gen.printNode(gen.Ꮡroot, 0);
 }
+
+} partial class strings_internal_testᴛgenericReplacer {
 
 internal static @string /*s*/ printNode(this ref global::go.strings_package.genericReplacer r, ж<global::go.strings_package.trieNode> Ꮡt, nint depth) {
     @string s = default;
@@ -46,6 +51,8 @@ internal static @string /*s*/ printNode(this ref global::go.strings_package.gene
     }
     return s;
 }
+
+} partial class strings_internal_test_package {
 
 public static nint StringFind(@string pattern, @string text) {
     return makeStringFinder(pattern).next(text);

@@ -8,8 +8,6 @@ global using static global::go.net.mail_package;
 global using static global::go.net.mail_internal_test_package;
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;

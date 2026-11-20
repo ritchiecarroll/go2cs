@@ -1187,9 +1187,8 @@ break_Path:;
 // Note that if strings of new length (beyond 3-7)
 // are added here, the fast path at the top of autoURL will need updating.
 internal static bool isScheme(@string s) {
-    var exprᴛ1 = s;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "file"u8 || exprᴛ1 == "ftp"u8 || exprᴛ1 == "gopher"u8 || exprᴛ1 == "http"u8 || exprᴛ1 == "https"u8 || exprᴛ1 == "mailto"u8 || exprᴛ1 == "nntp"u8: {
+    case {} when s == "file"u8 || s == "ftp"u8 || s == "gopher"u8 || s == "http"u8 || s == "https"u8 || s == "mailto"u8 || s == "nntp"u8: {
         return true;
     }}
     return false;

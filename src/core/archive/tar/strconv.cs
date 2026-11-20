@@ -349,9 +349,8 @@ internal static bool validPAXRecord(@string k, @string v) {
     if (k == ""u8 || strings.Contains(k, "=")) {
         return false;
     }
-    var exprᴛ1 = k;
     switch (ᐧ) {
-    case {} when exprᴛ1 == paxPath || exprᴛ1 == paxLinkpath || exprᴛ1 == paxUname || exprᴛ1 == paxGname: {
+    case {} when k == paxPath || k == paxLinkpath || k == paxUname || k == paxGname: {
         return !hasNUL(v);
     }
     default: {

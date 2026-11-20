@@ -5237,10 +5237,10 @@ internal static void readFrames(this ref http2serverConn sc) {
         case 1 when selᴛ9.ꟷᐳ(out _): {
             return;
         }}
-        var selᴛ10 = gate;
+        var gateᴛ1 = gate;
         var selᴛ11 = sc.doneServing;
-        switch (select(ᐸꟷ(selᴛ10, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
-        case 0 when selᴛ10.ꟷᐳ(out _): {
+        switch (select(ᐸꟷ(gateᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+        case 0 when gateᴛ1.ꟷᐳ(out _): {
             break;
         }
         case 1 when selᴛ11.ꟷᐳ(out _): {
@@ -5614,12 +5614,12 @@ internal static partial error readPreface(this ж<http2serverConn> Ꮡsc) {
         var timerʗ1 = timer;
         defer(() => timerʗ1.Stop(), ref ᒐ);
         var selᴛ20 = timer.C;
-        var selᴛ21 = errc;
-        switch (select(ᐸꟷ(selᴛ20, ꓸꓸꓸ), ᐸꟷ(selᴛ21, ꓸꓸꓸ))) {
+        var errcᴛ1 = errc;
+        switch (select(ᐸꟷ(selᴛ20, ꓸꓸꓸ), ᐸꟷ(errcᴛ1, ꓸꓸꓸ))) {
         case 0 when selᴛ20.ꟷᐳ(out _): {
             return http2errPrefaceTimeout;
         }
-        case 1 when selᴛ21.ꟷᐳ(out var err): {
+        case 1 when errcᴛ1.ꟷᐳ(out var err): {
             if (err == nil) {
                 if (http2VerboseLogs) {
                     sc.vlogf("http2: server: client %v said hello", sc.conn.RemoteAddr());
@@ -5659,11 +5659,11 @@ internal static error writeDataFromHandler(this ref http2serverConn sc, ж<http2
         return err;
     }
     bool frameWriteDone = default; // the frame write is done (successfully or not)
-    var selᴛ22 = ch;
+    var chᴛ1 = ch;
     var selᴛ23 = sc.doneServing;
     var selᴛ24 = stream.cw;
-    switch (select(ᐸꟷ(selᴛ22, ꓸꓸꓸ), ᐸꟷ(selᴛ23, ꓸꓸꓸ), ᐸꟷ<EmptyStruct>(selᴛ24, ꓸꓸꓸ))) {
-    case 0 when selᴛ22.ꟷᐳ(out err): {
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ23, ꓸꓸꓸ), ᐸꟷ<EmptyStruct>(selᴛ24, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out err): {
         frameWriteDone = true;
         break;
     }
@@ -5678,9 +5678,9 @@ internal static error writeDataFromHandler(this ref http2serverConn sc, ж<http2
         // The writeFrameAsync and serve goroutines guarantee
         // that the ch send will happen before the stream.cw
         // close.
-        var selᴛ25 = ch;
-        switch (trySelect(ᐸꟷ(selᴛ25, ꓸꓸꓸ))) {
-        case 0 when selᴛ25.ꟷᐳ(out err): {
+        var chᴛ2 = ch;
+        switch (trySelect(ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
+        case 0 when chᴛ2.ꟷᐳ(out err): {
             frameWriteDone = true;
             break;
         }
@@ -7236,11 +7236,11 @@ internal static error writeHeaders(this ref http2serverConn sc, ж<http2stream> 
         }
     }
     if (errc != nil) {
-        var selᴛ28 = errc;
+        var errcᴛ1 = errc;
         var selᴛ29 = sc.doneServing;
         var selᴛ30 = st.cw;
-        switch (select(ᐸꟷ(selᴛ28, ꓸꓸꓸ), ᐸꟷ(selᴛ29, ꓸꓸꓸ), ᐸꟷ<EmptyStruct>(selᴛ30, ꓸꓸꓸ))) {
-        case 0 when selᴛ28.ꟷᐳ(out var err): {
+        switch (select(ᐸꟷ(errcᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ29, ꓸꓸꓸ), ᐸꟷ<EmptyStruct>(selᴛ30, ꓸꓸꓸ))) {
+        case 0 when errcᴛ1.ꟷᐳ(out var err): {
             sc.srv.state.putErrChan(errc);
             return err;
         }
@@ -9604,10 +9604,10 @@ public static partial error Shutdown(this ж<http2ClientConn> Ꮡcc, context.Con
         finally { ᒐ.Run(); }
     });
     http2shutdownEnterWaitStateHook();
-    var selᴛ42 = done;
+    var doneᴛ1 = done;
     var selᴛ43 = ctx.Done();
-    switch (select(ᐸꟷ(selᴛ42, ꓸꓸꓸ), ᐸꟷ(selᴛ43, ꓸꓸꓸ))) {
-    case 0 when selᴛ42.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ43, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out _): {
         Ꮡcc.closeConn();
         return default;
     }
@@ -9686,10 +9686,10 @@ internal static partial void goAwayAndClose(this ж<http2ClientConn> Ꮡcc, http
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    var selᴛ44 = done;
+    var doneᴛ1 = done;
     var selᴛ45 = time.After(250 * time.Millisecond);
-    switch (select(ᐸꟷ(selᴛ44, ꓸꓸꓸ), ᐸꟷ(selᴛ45, ꓸꓸꓸ))) {
-    case 0 when selᴛ44.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(doneᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ45, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out _): {
         break;
     }
     case 1 when selᴛ45.ꟷᐳ(out _): {
@@ -10123,19 +10123,19 @@ internal static error /*err*/ writeRequest(this ж<http2clientStream> Ꮡcs, ж<
         // whichever comes first.
         for (;;) {
             var selᴛ65 = cs.peerClosed;
-            var selᴛ66 = respHeaderTimer;
-            var selᴛ67 = respHeaderRecv;
+            var respHeaderTimerᴛ1 = respHeaderTimer;
+            var respHeaderRecvᴛ1 = respHeaderRecv;
             var selᴛ68 = cs.abort;
             var selᴛ69 = ctx.Done();
             var selᴛ70 = cs.reqCancel;
-            switch (select(ᐸꟷ(selᴛ65, ꓸꓸꓸ), ᐸꟷ(selᴛ66, ꓸꓸꓸ), ᐸꟷ(selᴛ67, ꓸꓸꓸ), ᐸꟷ(selᴛ68, ꓸꓸꓸ), ᐸꟷ(selᴛ69, ꓸꓸꓸ), ᐸꟷ(selᴛ70, ꓸꓸꓸ))) {
+            switch (select(ᐸꟷ(selᴛ65, ꓸꓸꓸ), ᐸꟷ(respHeaderTimerᴛ1, ꓸꓸꓸ), ᐸꟷ(respHeaderRecvᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ68, ꓸꓸꓸ), ᐸꟷ(selᴛ69, ꓸꓸꓸ), ᐸꟷ(selᴛ70, ꓸꓸꓸ))) {
             case 0 when selᴛ65.ꟷᐳ(out _): {
                 err = default; goto ᒐdone;
             }
-            case 1 when selᴛ66.ꟷᐳ(out _): {
+            case 1 when respHeaderTimerᴛ1.ꟷᐳ(out _): {
                 err = http2errTimeout; goto ᒐdone;
             }
-            case 2 when selᴛ67.ꟷᐳ(out _): {
+            case 2 when respHeaderRecvᴛ1.ꟷᐳ(out _): {
                 respHeaderRecv = default;
                 respHeaderTimer = default; // keep waiting for END_STREAM
                 break;
@@ -11921,15 +11921,15 @@ public static partial error Ping(this ж<http2ClientConn> Ꮡcc, context.Context
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    var selᴛ84 = c;
-    var selᴛ85 = errc;
+    var cᴛ1 = c;
+    var errcᴛ1 = errc;
     var selᴛ86 = ctx.Done();
     var selᴛ87 = cc.readerDone;
-    switch (select(ᐸꟷ(selᴛ84, ꓸꓸꓸ), ᐸꟷ(selᴛ85, ꓸꓸꓸ), ᐸꟷ(selᴛ86, ꓸꓸꓸ), ᐸꟷ(selᴛ87, ꓸꓸꓸ))) {
-    case 0 when selᴛ84.ꟷᐳ(out _): {
+    switch (select(ᐸꟷ(cᴛ1, ꓸꓸꓸ), ᐸꟷ(errcᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ86, ꓸꓸꓸ), ᐸꟷ(selᴛ87, ꓸꓸꓸ))) {
+    case 0 when cᴛ1.ꟷᐳ(out _): {
         return default;
     }
-    case 1 when selᴛ85.ꟷᐳ(out _): {
+    case 1 when errcᴛ1.ꟷᐳ(out _): {
         return pingError;
     }
     case 2 when selᴛ86.ꟷᐳ(out _): {

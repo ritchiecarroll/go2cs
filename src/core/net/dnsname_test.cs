@@ -34,7 +34,7 @@ internal static slice<dnsNameTest> dnsNameTests = [
 internal static void emitDNSNameTest(channel/*<-*/<dnsNameTest> ch) {
     GoFrame ᒐ = default;
     try {
-        defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+        defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
         @string char63 = ""u8;
         for (nint i = 0; i < 63; i++) {
             char63 += "a"u8;

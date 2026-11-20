@@ -242,20 +242,20 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 minimizeC = c.minimizeC;
             }
 
-            var selᴛ1 = doneC;
-            var selᴛ2 = errC;
+            var doneCᴛ1 = doneC;
+            var errCᴛ1 = errC;
             var selᴛ3 = c.resultC;
-            var selᴛ4 = inputC.ᐸꟷ(input, ꓸꓸꓸ);
-            var selᴛ5 = minimizeC.ᐸꟷ(minimizeInput, ꓸꓸꓸ);
+            var inputCᴛ1 = inputC.ᐸꟷ(input, ꓸꓸꓸ);
+            var minimizeCᴛ1 = minimizeC.ᐸꟷ(minimizeInput, ꓸꓸꓸ);
             var selᴛ6 = statTicker.C;
-            switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ), selᴛ4, selᴛ5, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-            case 0 when selᴛ1.ꟷᐳ(out _): {
+            switch (select(ᐸꟷ(doneCᴛ1, ꓸꓸꓸ), ᐸꟷ(errCᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ), inputCᴛ1, minimizeCᴛ1, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
+            case 0 when doneCᴛ1.ꟷᐳ(out _): {
                 // Interrupted, canceled, or timed out.
                 // stop sets doneC to nil, so we don't busy wait here.
                 stop(ctx.Err());
                 break;
             }
-            case 1 when selᴛ2.ꟷᐳ(out var errΔ5): {
+            case 1 when errCᴛ1.ꟷᐳ(out var errΔ5): {
                 // A worker terminated, possibly after encountering a fatal error.
                 stop(errΔ5);
                 activeWorkers--;

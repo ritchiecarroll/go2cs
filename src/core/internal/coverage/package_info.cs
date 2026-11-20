@@ -55,7 +55,7 @@ using static go.@internal.coverage_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/defs.go", "defs.cs", "ADlwAKcBsgKClKSkpKSUxoKCpLS0tLS0pAAUGoKUpJQAHDYARooBgg==")]
+[assembly: GoPositionMap("internal/coverage/defs.go", "defs.cs", "ADlwAKcBsgKClKSkpKSUxoKClLS0tLS0pAAUGoKUpJQAHDYARooBgg==")]
 [assembly: GoPositionMap("internal/coverage/pkid.go", "pkid.cs", "AC5eACVSsoKCpg==")]
 // </GoSourcePositionMaps>
 

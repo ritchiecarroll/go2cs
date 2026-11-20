@@ -40,24 +40,24 @@ internal static bool eq(float64 x, float64 y) {
 public static void TestMinFloat(ж<testing.T> t) {
     foreach (var (_, tt) in range(tests)) {
         {
-            var z = builtin.min(tt.min, tt.max); if (!eq(z, tt.min)) {
+            var z = min(tt.min, tt.max); if (!eq(z, tt.min)) {
                 t.Errorf("min(%v, %v) = %v, want %v", tt.min, tt.max, z, tt.min);
             }
         }
         {
-            var z = builtin.min(tt.max, tt.min); if (!eq(z, tt.min)) {
+            var z = min(tt.max, tt.min); if (!eq(z, tt.min)) {
                 t.Errorf("min(%v, %v) = %v, want %v", tt.max, tt.min, z, tt.min);
             }
         }
     }
     foreach (var (_, x) in range(all)) {
         {
-            var z = builtin.min(nan, x); if (!Δmath.IsNaN(z)) {
+            var z = min(nan, x); if (!Δmath.IsNaN(z)) {
                 t.Errorf("min(%v, %v) = %v, want %v", nan, x, z, nan);
             }
         }
         {
-            var z = builtin.min(x, nan); if (!Δmath.IsNaN(z)) {
+            var z = min(x, nan); if (!Δmath.IsNaN(z)) {
                 t.Errorf("min(%v, %v) = %v, want %v", nan, x, z, nan);
             }
         }
@@ -67,24 +67,24 @@ public static void TestMinFloat(ж<testing.T> t) {
 public static void TestMaxFloat(ж<testing.T> t) {
     foreach (var (_, tt) in range(tests)) {
         {
-            var z = builtin.max(tt.min, tt.max); if (!eq(z, tt.max)) {
+            var z = max(tt.min, tt.max); if (!eq(z, tt.max)) {
                 t.Errorf("max(%v, %v) = %v, want %v", tt.min, tt.max, z, tt.max);
             }
         }
         {
-            var z = builtin.max(tt.max, tt.min); if (!eq(z, tt.max)) {
+            var z = max(tt.max, tt.min); if (!eq(z, tt.max)) {
                 t.Errorf("max(%v, %v) = %v, want %v", tt.max, tt.min, z, tt.max);
             }
         }
     }
     foreach (var (_, x) in range(all)) {
         {
-            var z = builtin.max(nan, x); if (!Δmath.IsNaN(z)) {
+            var z = max(nan, x); if (!Δmath.IsNaN(z)) {
                 t.Errorf("max(%v, %v) = %v, want %v", nan, x, z, nan);
             }
         }
         {
-            var z = builtin.max(x, nan); if (!Δmath.IsNaN(z)) {
+            var z = max(x, nan); if (!Δmath.IsNaN(z)) {
                 t.Errorf("max(%v, %v) = %v, want %v", nan, x, z, nan);
             }
         }
@@ -107,23 +107,23 @@ internal static void testMinMax<T>(ж<testing.T> t, params Span<T> valsʗp)
             }
 
             {
-                var z = builtin.min(x, y); if (!AreEqual(z, x)) {
+                var z = min(x, y); if (!AreEqual(z, x)) {
                     t.Errorf("min(%v, %v) = %v, want %v", x, y, z, x);
                 }
             }
             {
-                var z = builtin.min(y, x); if (!AreEqual(z, x)) {
+                var z = min(y, x); if (!AreEqual(z, x)) {
                     t.Errorf("min(%v, %v) = %v, want %v", y, x, z, x);
                 }
             }
 
             {
-                var z = builtin.max(x, y); if (!AreEqual(z, y)) {
+                var z = max(x, y); if (!AreEqual(z, y)) {
                     t.Errorf("max(%v, %v) = %v, want %v", x, y, z, y);
                 }
             }
             {
-                var z = builtin.max(y, x); if (!AreEqual(z, y)) {
+                var z = max(y, x); if (!AreEqual(z, y)) {
                     t.Errorf("max(%v, %v) = %v, want %v", y, x, z, y);
                 }
             }
@@ -147,12 +147,12 @@ public static void TestMinMaxStringTies(ж<testing.T> t) {
     var xʗ1 = x;
     void test(nint i, nint j, nint k) {
         {
-            @string z = builtin.min(xʗ1[i], xʗ1[j], xʗ1[k]); if (@unsafe.StringData(z) != @unsafe.StringData(xʗ1[i])) {
+            @string z = min(xʗ1[i], xʗ1[j], xʗ1[k]); if (@unsafe.StringData(z) != @unsafe.StringData(xʗ1[i])) {
                 t.Errorf("min(x[%v], x[%v], x[%v]) = %p, want %p", i, j, k, @unsafe.StringData(z).OrTypedNil(), @unsafe.StringData(xʗ1[i]).OrTypedNil());
             }
         }
         {
-            @string z = builtin.max(xʗ1[i], xʗ1[j], xʗ1[k]); if (@unsafe.StringData(z) != @unsafe.StringData(xʗ1[i])) {
+            @string z = max(xʗ1[i], xʗ1[j], xʗ1[k]); if (@unsafe.StringData(z) != @unsafe.StringData(xʗ1[i])) {
                 t.Errorf("max(x[%v], x[%v], x[%v]) = %p, want %p", i, j, k, @unsafe.StringData(z).OrTypedNil(), @unsafe.StringData(xʗ1[i]).OrTypedNil());
             }
         }
@@ -172,7 +172,7 @@ public static void BenchmarkMinFloat(ж<testing.B> Ꮡb) {
     float64 m = 0D;
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, f) in range(all)) {
-            m = builtin.min(m, f);
+            m = min(m, f);
         }
     }
 }
@@ -183,7 +183,7 @@ public static void BenchmarkMaxFloat(ж<testing.B> Ꮡb) {
     float64 m = 0D;
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, f) in range(all)) {
-            m = builtin.max(m, f);
+            m = max(m, f);
         }
     }
 }

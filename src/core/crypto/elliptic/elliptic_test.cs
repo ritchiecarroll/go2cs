@@ -69,7 +69,7 @@ public static void TestOnCurve(ж<testing.T> t) {
 public static void TestOffCurve(ж<testing.T> t) {
     t.Parallel();
     testAllCurves(t, (ж<testing.T> tΔ1, global::go.crypto.elliptic_package.Curve curve) => {
-        var (x, y) = (@new<bigꓸInt>().SetInt64(1), @new<bigꓸInt>().SetInt64(1));
+        var (x, y) = (@new<big.Int>().SetInt64(1), @new<big.Int>().SetInt64(1));
         if (curve.IsOnCurve(x, y)) {
             tΔ1.Errorf("point off curve is claimed to be on the curve");
         }
@@ -92,7 +92,7 @@ public static void TestInfinity(ж<testing.T> t) {
     testAllCurves(t, testInfinity);
 }
 
-internal static bool isInfinity(ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
+internal static bool isInfinity(ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -100,7 +100,7 @@ internal static bool isInfinity(ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
 }
 
 internal static void testInfinity(ж<testing.T> t, global::go.crypto.elliptic_package.Curve curve) {
-    var (x0, y0) = (@new<bigꓸInt>(), @new<bigꓸInt>());
+    var (x0, y0) = (@new<big.Int>(), @new<big.Int>());
     var (xG, yG) = (curve.Params().Gx, curve.Params().Gy);
 
     var (ᴛ1, ᴛ2) = curve.ScalarMult(xG, yG, curve.Params().N.Bytes());
@@ -137,7 +137,7 @@ internal static void testInfinity(ж<testing.T> t, global::go.crypto.elliptic_pa
     // There is no other point of order two on the NIST curves (as they have
     // cofactor one), so Double can't otherwise return the point at infinity.
 
-    var nMinusOne = @new<bigꓸInt>().Sub(curve.Params().N, big.NewInt(1));
+    var nMinusOne = @new<big.Int>().Sub(curve.Params().N, big.NewInt(1));
     var (x, y) = curve.ScalarMult(xG, yG, nMinusOne.Bytes());
     (x, y) = curve.Add(x, y, xG, yG);
     if (!isInfinity(x, y)) {
@@ -216,7 +216,7 @@ internal static void testUnmarshalToLargeCoordinates(ж<testing.T> t, global::go
     // Set x to be greater than curve's parameter P – specifically, to P+5.
     // Set y to mod_sqrt(x^3 - 3x + B)) so that (x mod P = 5 , y) is on the
     // curve.
-    var x = @new<bigꓸInt>().Add(p, big.NewInt(5));
+    var x = @new<big.Int>().Add(p, big.NewInt(5));
     var y = curve.Params().polynomial(x);
     y.ModSqrt(y, p);
 
@@ -234,8 +234,8 @@ internal static void testUnmarshalToLargeCoordinates(ж<testing.T> t, global::go
     if (AreEqual(curve, p256)) {
         // This is a point on the curve with a small y value, small enough that
         // we can add p and still be within 32 bytes.
-        (x, _) = @new<bigꓸInt>().SetString("31931927535157963707678568152204072984517581467226068221761862915403492091210", 10);
-        (y, _) = @new<bigꓸInt>().SetString("5208467867388784005506817585327037698770365050895731383201516607147", 10);
+        (x, _) = @new<big.Int>().SetString("31931927535157963707678568152204072984517581467226068221761862915403492091210", 10);
+        (y, _) = @new<big.Int>().SetString("5208467867388784005506817585327037698770365050895731383201516607147", 10);
         y.Add(y, p);
 
         if (p.Cmp(y) > 0 || y.BitLen() != 256) {
@@ -276,7 +276,7 @@ private static readonly @string xY2ˢᵇ = "x, y+2⁵³⁵"u8;
 internal static readonly object modSqrtBIsNotOnTheCurveˢ = (@string)"(0, mod_sqrt(B)) is not on the curve?"u8;
 
 internal static void testInvalidCoordinates(ж<testing.T> t, global::go.crypto.elliptic_package.Curve curve) {
-    void checkIsOnCurveFalse(@string name, ж<bigꓸInt> xΔ1, ж<bigꓸInt> yΔ1) {
+    void checkIsOnCurveFalse(@string name, ж<big.Int> xΔ1, ж<big.Int> yΔ1) {
         if (curve.IsOnCurve(xΔ1, yΔ1)) {
             t.Errorf("IsOnCurve(%s) unexpectedly returned true", name);
         }
@@ -284,7 +284,7 @@ internal static void testInvalidCoordinates(ж<testing.T> t, global::go.crypto.e
 
     var p = curve.Params().P;
     var (_, x, y, _) = GenerateKey(curve, rand.Reader);
-    var (xx, yy) = (@new<bigꓸInt>(), @new<bigꓸInt>());
+    var (xx, yy) = (@new<big.Int>(), @new<big.Int>());
 
     // Check if the sign is getting dropped.
     xx.Neg(x);
@@ -305,9 +305,9 @@ internal static void testInvalidCoordinates(ж<testing.T> t, global::go.crypto.e
     checkIsOnCurveFalse(xYPˢ2, x, yy);
 
     // Check if the overflow is dropped.
-    xx.Add(x, @new<bigꓸInt>().Lsh(big.NewInt(1), 535));
+    xx.Add(x, @new<big.Int>().Lsh(big.NewInt(1), 535));
     checkIsOnCurveFalse(x2Yˢ, xx, y);
-    yy.Add(y, @new<bigꓸInt>().Lsh(big.NewInt(1), 535));
+    yy.Add(y, @new<big.Int>().Lsh(big.NewInt(1), 535));
     checkIsOnCurveFalse(xY2ˢ, x, yy);
 
     // Check if P is treated like zero (if possible).
@@ -315,7 +315,7 @@ internal static void testInvalidCoordinates(ж<testing.T> t, global::go.crypto.e
     // y = mod_sqrt(x^3 - 3x + B)
     // y = mod_sqrt(B) if x = 0
     // If there is no modsqrt, there is no point with x = 0, can't test x = P.
-    var yyΔ1 = @new<bigꓸInt>().ModSqrt(curve.Params().B, p); if (yyΔ1 != nil) {
+    var yyΔ1 = @new<big.Int>().ModSqrt(curve.Params().B, p); if (yyΔ1 != nil) {
         if (!curve.IsOnCurve(big.NewInt(0), yyΔ1)) {
             t.Fatal(modSqrtBIsNotOnTheCurveˢ);
         }
@@ -337,14 +337,14 @@ public static void TestMarshalCompressed(ж<testing.T> t) {
     t.Parallel();
     t.Run(p25603ˢ, (ж<testing.T> tΔ1) => {
         var (data, _) = hex.DecodeString("031e3987d9f9ea9d7dd7155a56a86b2009e1e0ab332f962d10d8beb6406ab1ad79");
-        var (x, _) = @new<bigꓸInt>().SetString("13671033352574878777044637384712060483119675368076128232297328793087057702265", 10);
-        var (y, _) = @new<bigꓸInt>().SetString("66200849279091436748794323380043701364391950689352563629885086590854940586447", 10);
+        var (x, _) = @new<big.Int>().SetString("13671033352574878777044637384712060483119675368076128232297328793087057702265", 10);
+        var (y, _) = @new<big.Int>().SetString("66200849279091436748794323380043701364391950689352563629885086590854940586447", 10);
         testMarshalCompressed(tΔ1, P256(), x, y, data);
     });
     t.Run(p25602ˢ, (ж<testing.T> tΔ2) => {
         var (data, _) = hex.DecodeString("021e3987d9f9ea9d7dd7155a56a86b2009e1e0ab332f962d10d8beb6406ab1ad79");
-        var (x, _) = @new<bigꓸInt>().SetString("13671033352574878777044637384712060483119675368076128232297328793087057702265", 10);
-        var (y, _) = @new<bigꓸInt>().SetString("49591239931264812013903123569363872165694192725937750565648544718012157267504", 10);
+        var (x, _) = @new<big.Int>().SetString("13671033352574878777044637384712060483119675368076128232297328793087057702265", 10);
+        var (y, _) = @new<big.Int>().SetString("49591239931264812013903123569363872165694192725937750565648544718012157267504", 10);
         testMarshalCompressed(tΔ2, P256(), x, y, data);
     });
 
@@ -373,7 +373,7 @@ public static void TestMarshalCompressed(ж<testing.T> t) {
 internal static readonly object invalidTestPointˢ = (@string)"invalid test point"u8;
 internal static readonly object unmarshalCompressedˢ = (@string)"UnmarshalCompressed returned a point not on the curve"u8;
 
-internal static void testMarshalCompressed(ж<testing.T> t, global::go.crypto.elliptic_package.Curve curve, ж<bigꓸInt> x, ж<bigꓸInt> y, slice<byte> want) {
+internal static void testMarshalCompressed(ж<testing.T> t, global::go.crypto.elliptic_package.Curve curve, ж<big.Int> x, ж<big.Int> y, slice<byte> want) {
     if (!curve.IsOnCurve(x, y)) {
         t.Fatal(invalidTestPointˢ);
     }

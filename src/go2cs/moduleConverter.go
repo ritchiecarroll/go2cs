@@ -55,6 +55,7 @@ type ModuleConverter struct {
 	lockedModules        map[string]moduleLockEntry // module-cache dependency modules in the convert-set (modulesLock.go)
 	includeTestClosure   bool                       // -tests -recurse: widen the convert-set by the module's test closure (moduleTestsDriver.go)
 	importerSeeds        map[string][]string        // import path -> the inline-array seeds its importers demand (inlineArrayImporterSeed.go)
+	testClosures         map[string]map[string]bool // -tests -recurse: tested package -> every import path its test variants reach (moduleTestsDriver.go)
 	refused              []refusedPackage           // packages refused at a pre-emission gate and skipped (recurseRefusal.go)
 	failed               []string                   // packages that failed to load or panicked, and were skipped (recurseRefusal.go)
 
@@ -267,6 +268,7 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 		Dir:        moduleDir,
 		BuildFlags: m.options.loaderBuildFlags(),
 		Env:        converterLoaderEnv(),
+		ParseFile:  parseFileUnparenAddressOperands,
 	}
 
 	targetParts := strings.Split(m.options.targetPlatform, "/")
@@ -603,9 +605,9 @@ func (m *ModuleConverter) convertAll() {
 			packageOptions.programDependencies = m.sortedThirdPartyModules()
 			packageOptions.inlineArrays = withImporterSeeds(m.options.inlineArrays, pkgPath, setOf(m.importerSeeds[pkgPath]))
 
-			// A refused package is skipped and the run goes on (recurseRefusal.go). Not under -tests -recurse, whose
-			// phase A stays fatal at a refusal, as before.
-			packageOptions.skipRefusedPackages = !m.includeTestClosure
+			// A refused package is skipped and the run goes on (recurseRefusal.go), under -tests -recurse too: its
+			// phase B then names each tested package the refusal reaches (moduleTestsDriver.go).
+			packageOptions.skipRefusedPackages = true
 
 			return processConversion(pkg.Dir, true, outputDir, packageOptions)
 		})

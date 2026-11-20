@@ -7,10 +7,6 @@
 global using static global::go.errors_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,9 +53,9 @@ using static global::go.errors_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("errors/errors_test.go", "errors_test.cs", "ABIYlIKUgriCgriCgoI=")]
-[assembly: GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKCAAgKgoKCAAgKgqaUguyygoKClIKCgoIADRiikoKCABAKgoKCgoKClIKUAA0SgoKClAALGIKUguqigoIACQ6CgoKClAAHEIKCgpQAChaClIKCgpTK+qKCgpSCgoIACBaigoKUgoIADBKCgoKC", "", "", "26=Date/1/1/1;226=New/1/1/3")]
+[assembly: GoPositionMap("errors/example_test.go", "example_test.cs", "ABcqgsaC3IKCAAgKgoKCAAgKgqaUguyygoKClIKCgoIADRiikoKCABAKgoKCgoKClIKUAA0SgoKClAANGIKUggAICqKCggAJDoKCgoKUAAcQgoKClAAMFoKUgoKClMoACQqigoKUgoKCAAgWooKClIKCAAwSgoKCgg==", "", "", "31=Date/1/1/1;237=New/1/1/3")]
 [assembly: GoPositionMap("errors/join_test.go", "join_test.cs", "AAsagoCCpICCpICCAA0IgoKCggANIIKClIIACQqCgoIAChqCgg==")]
-[assembly: GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKClJTIAB9IspKCAAoWlIKCgpS0tMSUABEGgoKCgoKClABbwAGylIKCooKClIKUggAJDIKC3IKCwoKUgoKUogAKCIKCgoqUurq6urq6urq6uLq6urq6uroAChiCgoKCgoL6ooKUgoL6ooKCgoL6ooKCggAJCoKClAAGFIKCAAgO7oL4ggAJDIKmgoI=", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1;351-356:1", "", "34=New/1/1/27;132=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81;327=New/1/1/1;343=New/1/1/1;347=New/1/1/1;355=New/1/1/1", "", "268:29,269:21")]
+[assembly: GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABYggoKClJTIAB9IspKCAAoWtIKCgpS0tMSUABMGgoKCgoKClABbwAGylIKCooKClIKUggAJDIKC3IKCwoKUgoKUogAKCIKCgoqUurq6urq6urq6uLq6urq6uroAChiCgoKCgoL6ooKUgoL6ooKCgoL6ooKCggAJCoKClAAGFIKCAAoOAAoOggALCIIADQyCpoKC", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1;351-356:1", "", "35=New/1/1/27;137=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81;332=New/1/1/1;348=New/1/1/1;352=New/1/1/1;360=New/1/1/1", "", "273:29,274:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -116,3 +112,20 @@ public static partial class errors_test_package
         builtin.initPackage(typeof(global::go.errors_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(errors_test_package.MyAsError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errors_testᴛMyAsError;
+[GoMethodHost(typeof(errors_test_package.MyError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errors_testᴛMyError;
+[GoMethodHost(typeof(errors_test_package.MyIsError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errors_testᴛMyIsError;
+[GoMethodHost(typeof(errors_test_package.errorT)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errors_testᴛerrorT;
+[GoMethodHost(typeof(errors_test_package.errorUncomparable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errors_testᴛerrorUncomparable;
+[GoMethodHost(typeof(errors_test_package.multiErr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errors_testᴛmultiErr;
+[GoMethodHost(typeof(errors_test_package.poser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errors_testᴛposer;
+[GoMethodHost(typeof(errors_test_package.wrapped)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errors_testᴛwrapped;
+// </MethodHolders>

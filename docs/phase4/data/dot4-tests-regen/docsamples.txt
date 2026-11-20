@@ -1,0 +1,13 @@
+REWRITTEN docs/ConversionStrategies-Reference/defer-panic-recover.md:1131
+REWRITTEN docs/ConversionStrategies-Reference/generic-constraints.md:56
+REWRITTEN docs/ConversionStrategies-Reference/interfaces.md:1910
+REWRITTEN docs/ConversionStrategies-Reference/labels-and-loop-variables.md:410
+REWRITTEN docs/ConversionStrategies-Reference/named-numeric-types.md:110
+REWRITTEN docs/ConversionStrategies-Reference/package-conversion.md:1642
+REWRITTEN docs/ConversionStrategies-Reference/pointers.md:1479
+REWRITTEN docs/ConversionStrategies-Reference/pointers.md:1641
+REWRITTEN docs/ConversionStrategies-Reference/pointers.md:2571
+REWRITTEN docs/ConversionStrategies-Reference/struct-embedding.md:649
+REWRITTEN docs/ConversionStrategies-Reference/struct-types.md:521
+REWRITTEN docs/ConversionStrategies.md:1554
+docsamples: base b63418fafc, target HEAD: 382 page(s) read, 1128 source comment(s): 1090 the same, 12 rewritten, 24 refused (0 error(s), 24 note(s)), 2 not checked; 0 unlabelled csharp block(s); 10 page(s) changed

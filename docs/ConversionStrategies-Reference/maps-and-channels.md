@@ -552,7 +552,7 @@ has no dot), yielding `public io_package.ReaderFrom ReaderFrom;`. io's own test 
 (`io_test.go`'s `import . "io"`), and its converted test file carries both the field and the
 `using Δio = io_package;` alias.
 <!-- history: this paragraph said the io test suite remained blocked by import . "io" using-alias resolution issues (the
-Δio namespace emitted but never aliased); at 3e3f18925a src/core/io/io_test.cs:19 `using Δio = io_package;` and :26
+Δio namespace emitted but never aliased); at 3e3f18925a src/core/io/io_test.cs:19 `using Δio = io_package;` and :27
 `/*embed*/ public io_package.ReaderFrom ReaderFrom;`, and io is a validated row. -->
 
 ## Select statement lowering (terminating and empty clauses)
@@ -619,8 +619,8 @@ default:   // send but do not block for it
 
 <!-- source: src/core/os/signal/signal.cs:274-281 -->
 ```csharp
-var selᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
-switch (trySelect(selᴛ1)) {
+var cᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
+switch (trySelect(cᴛ1)) {
 case 0: {
     break;
 }
@@ -709,14 +709,14 @@ case took = <-ch:
 
 <!-- source: src/tests/Behavioral/SelectSendRecvMix/main.cs:33-42 -->
 ```csharp
-var selᴛ3 = ch.ᐸꟷ(8, ꓸꓸꓸ);
-var selᴛ4 = ch;
-switch (select(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+var chᴛ1 = ch.ᐸꟷ(8, ꓸꓸꓸ);
+var chᴛ2 = ch;
+switch (select(chᴛ1, ᐸꟷ(chᴛ2, ꓸꓸꓸ))) {
 case 0: {
     fmt.Println("send fired on full channel (wrong)");
     break;
 }
-case 1 when selᴛ4.ꟷᐳ(out took): {
+case 1 when chᴛ2.ꟷᐳ(out took): {
     break;
 }}
 ```

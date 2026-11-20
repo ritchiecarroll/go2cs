@@ -136,14 +136,15 @@ func refuseSliceWideningWrites(pkg *packages.Package) *sliceWideningRefusal {
 	return &sliceWideningRefusal{pkgPath: pkg.PkgPath, sites: refused}
 }
 
-// sliceWideningSites is every argument in the package that elementWiseSliceWidening names, in source order, each with
-// its verdict.
+// sliceWideningSites is every argument in the package that elementWiseSliceWidening names and the call copies, in source
+// order, each with its verdict. An argument whose type parameter renders as the box (sliceWideningRoute's wideningNone)
+// passes the caller's slice itself, so there is no copy to refuse.
 func sliceWideningSites(pkg *packages.Package) []sliceWideningSite {
 	if pkg.TypesInfo == nil {
 		return nil
 	}
 
-	v := &Visitor{info: pkg.TypesInfo}
+	v := newGenericRouteVisitor(pkg)
 	analysis := newSliceWriteAnalysis(pkg)
 
 	var sites []sliceWideningSite
@@ -159,7 +160,7 @@ func sliceWideningSites(pkg *packages.Package) []sliceWideningSite {
 			for i, arg := range callExpr.Args {
 				tp, _ := v.elementWiseSliceWidening(callExpr, i)
 
-				if tp == nil {
+				if tp == nil || v.sliceWideningRoute(callExpr, tp) == wideningNone {
 					continue
 				}
 

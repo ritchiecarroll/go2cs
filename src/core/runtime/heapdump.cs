@@ -410,9 +410,8 @@ internal static void dumpgs() {
     // goroutines & stacks
     forEachG((ж<g> gp) => {
         var status = readgstatus(gp); // The world is stopped so gp will not be in a scan state.
-        var exprᴛ1 = status;
-        var matchᴛ2 = exprᴛ1 == _Grunning || (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) || (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting);
-        if (exprᴛ1 == _Grunning) {
+        var matchᴛ2 = status == _Grunning || (status == _Gdead || status == _Gdeadextra) || (status == _Grunnable || status == _Gsyscall || status == _Gwaiting);
+        if (status == _Grunning) {
             // Dump goroutine if it's _Grunning only during a syscall. This is safe
             // because the goroutine will just park without mutating its stack, since
             // the world is stopped.
@@ -425,10 +424,10 @@ internal static void dumpgs() {
             print((@string)"runtime: unexpected G.status ", (hex)(uint64)status, (@string)"\n");
             @throw(dumpgsInStwBadStatusˢ);
         }
-        else if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
+        else if (status == _Gdead || status == _Gdeadextra) {
             // ok
         }
-        else if (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting) {
+        else if (status == _Grunnable || status == _Gsyscall || status == _Gwaiting) {
             dumpgoroutine(gp);
         }
     });

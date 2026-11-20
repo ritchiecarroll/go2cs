@@ -78,7 +78,7 @@ public static partial class drbg_package
 
     // <TypeAccessibility>
     public partial interface DefaultReader {}
-    public partial struct Counter {}
+    [GoValueClone("c")] public partial struct Counter {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

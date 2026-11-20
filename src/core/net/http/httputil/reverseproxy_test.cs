@@ -34,6 +34,7 @@ using go.net.http;
 using go.net.http.@internal;
 using iter = iter_package;
 using static go.net.http.httputil_package;
+using static httputil_internal_test_package;
 
 partial class httputil_internal_test_package {
 
@@ -48,14 +49,18 @@ private static readonly @string fakeHopHeaderᵇ = "X-Fake-Hop-Header-For-Test"u
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string modeˢ => ref modeˢᵇ;
 private static readonly @string modeˢᵇ = "mode"u8;
+internal static ref readonly @string xForwardedForˢ => ref xForwardedForˢᵇ;
+private static readonly @string xForwardedForˢᵇ = "X-Forwarded-For"u8;
 internal static ref readonly @string proxyConnectionˢ => ref proxyConnectionˢᵇ;
 private static readonly @string proxyConnectionˢᵇ = "Proxy-Connection"u8;
 internal static ref readonly @string someNameˢ => ref someNameˢᵇ;
 private static readonly @string someNameˢᵇ = "some-name"u8;
-internal static ref readonly @string trailersˢ2 => ref trailersˢ2ᵇ;
-private static readonly @string trailersˢ2ᵇ = "Trailers"u8;
+internal static ref readonly @string trailersˢ => ref trailersˢᵇ;
+private static readonly @string trailersˢᵇ = "Trailers"u8;
 internal static ref readonly @string notASpecialHeaderFieldˢ => ref notASpecialHeaderFieldˢᵇ;
 private static readonly @string notASpecialHeaderFieldˢᵇ = "not a special header field name"u8;
+internal static ref readonly @string trailerˢ => ref trailerˢᵇ;
+private static readonly @string trailerˢᵇ = "Trailer"u8;
 internal static ref readonly @string xTrailerˢ => ref xTrailerˢᵇ;
 private static readonly @string xTrailerˢᵇ = "X-Trailer"u8;
 internal static ref readonly @string xFooˢ => ref xFooˢᵇ;
@@ -90,7 +95,7 @@ public static void TestReverseProxy(ж<testing.T> t) {
     try {
         @string backendResponse = backendResponseᶜ;
         const nint backendStatus = 404;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             if (r.Method == "GET"u8 && r.FormValue(modeˢ) == "hangup"u8) {
                 var (c, _, _) = w._<http.Hijacker>().Hijack();
                 c.Close();
@@ -126,14 +131,14 @@ public static void TestReverseProxy(ж<testing.T> t) {
             @string e = someNameˢ; if (g != e) {
                 t.Errorf("backend got Host header %q, want %q", g, e);
             }
-            w.Header().Set(trailersˢ2, notASpecialHeaderFieldˢ);
+            w.Header().Set(trailersˢ, notASpecialHeaderFieldˢ);
             w.Header().Set(trailerˢ, xTrailerˢ);
             w.Header().Set(xFooˢ, barˢ);
             w.Header().Set(upgradeˢ, fooˢ);
             w.Header().Set(fakeHopHeader, fooˢ);
             w.Header().Add(xMultiValueˢ, fooˢ);
             w.Header().Add(xMultiValueˢ, barˢ);
-            http.SetCookie(w, Ꮡ(new httpꓸCookie(Name: "flavor", Value: "chocolateChip")));
+            http.SetCookie(w, Ꮡ(new http.Cookie(Name: "flavor", Value: "chocolateChip")));
             w.WriteHeader(backendStatus);
             w.Write(slice<byte>(backendResponse));
             w.Header().Set(xTrailerˢ, trailerValueˢ);
@@ -147,7 +152,7 @@ public static void TestReverseProxy(ж<testing.T> t) {
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
@@ -182,7 +187,7 @@ public static void TestReverseProxy(ж<testing.T> t) {
             }
         }
         {
-            @string g = res.Header.Get(trailersˢ2);
+            @string g = res.Header.Get(trailersˢ);
             @string e = notASpecialHeaderFieldˢ; if (g != e) {
                 t.Errorf("header Trailers = %q; want %q", g, e);
             }
@@ -200,7 +205,7 @@ public static void TestReverseProxy(ж<testing.T> t) {
             }
         }
         {
-            var (g, e) = (res.Trailer, (new httpꓸHeader(new map<@string, slice<@string>>{["X-Trailer"] = default}))); if (!reflect.DeepEqual(g, e)) {
+            var (g, e) = (res.Trailer, (new http.Header(new map<@string, slice<@string>>{["X-Trailer"] = default}))); if (!reflect.DeepEqual(g, e)) {
                 t.Errorf("before reading body, Trailer = %#v; want %#v", g, e);
             }
         }
@@ -269,7 +274,7 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
         // in the Request's Connection header.
         @string someConnHeader = someConnHeaderᶜ;
 
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             {
                 @string c = r.Header.Get(connectionˢ); if (c != ""u8) {
                     t.Errorf("handler got header %q = %q; want empty", connectionˢ, c);
@@ -299,7 +304,7 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         var proxyHandlerʗ1 = proxyHandler;
-        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             proxyHandlerʗ1.ServeHTTP(w, r);
             @string cΔ1 = r.Header.Get(someConnHeader); if (cΔ1 != "should be deleted"u8) {
                 t.Errorf("handler modified header %q = %q; want %q", someConnHeader, cΔ1, shouldBeDeletedˢ);
@@ -384,7 +389,7 @@ public static void TestReverseProxyStripEmptyConnection(ж<testing.T> t) {
         // in the Request's Connection header.
         @string someConnHeader = someConnHeaderᶜ1;
 
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             {
                 var c = r.Header.Values(connectionˢ); if (len(c) != 0) {
                     t.Errorf("handler got header %q = %v; want empty", connectionˢ, c);
@@ -408,7 +413,7 @@ public static void TestReverseProxyStripEmptyConnection(ж<testing.T> t) {
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         var proxyHandlerʗ1 = proxyHandler;
-        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             proxyHandlerʗ1.ServeHTTP(w, r);
             @string c = r.Header.Get(someConnHeader); if (c != "should be deleted"u8) {
                 t.Errorf("handler modified header %q = %q; want %q", someConnHeader, c, shouldBeDeletedˢ);
@@ -468,7 +473,7 @@ public static void TestXForwardedFor(ж<testing.T> t) {
         @string prevForwardedFor = prevForwardedForᶜ;
         @string backendResponse = backendResponseᶜ3;
         const nint backendStatus = 404;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             if (r.Header.Get(xForwardedForˢ) == ""u8) {
                 t.Errorf("didn't get X-Forwarded-For header");
             }
@@ -485,7 +490,7 @@ public static void TestXForwardedFor(ж<testing.T> t) {
             t.Fatal(err);
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -521,7 +526,7 @@ public static void TestXForwardedFor(ж<testing.T> t) {
 public static void TestXForwardedFor_Omit(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             @string v = r.Header.Get(xForwardedForˢ); if (v != ""u8) {
                 t.Errorf("got X-Forwarded-For header: %q", v);
             }
@@ -534,7 +539,7 @@ public static void TestXForwardedFor_Omit(ж<testing.T> t) {
             t.Fatal(err);
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -568,7 +573,7 @@ public static void TestReverseProxyRewriteStripsForwarded(ж<testing.T> t) {
             "X-Forwarded-Proto"
         ]);
         var headersʗ1 = headers;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             foreach (var (_, h) in range(headersʗ1)) {
                 @string v = r.Header.Get(h); if (v != ""u8) {
                     t.Errorf("got %v header: %q", h, v);
@@ -587,7 +592,7 @@ public static void TestReverseProxyRewriteStripsForwarded(ж<testing.T> t) {
                 r.SetURL(backendURLʗ1);
             }
         ));
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -626,7 +631,7 @@ private static readonly @string xGotQueryˢᵇ = "X-Got-Query"u8;
 public static void TestReverseProxyQuery(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Header().Set(xGotQueryˢ, r.URL.RawQuery);
             w.Write(slice<byte>("hi"u8));
         })));
@@ -638,7 +643,7 @@ public static void TestReverseProxyQuery(ж<testing.T> t) {
             if (err != nil) {
                 t.Fatal(err);
             }
-            var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(NewSingleHostReverseProxy(backendURL)));
+            var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(NewSingleHostReverseProxy(backendURL)));
             var (req, _) = http.NewRequest(getˢ, frontend.URL + tt.reqSuffix, default);
             req.Close = true;
             (var res, err) = frontend.Client().Do(req);
@@ -665,7 +670,7 @@ public static void TestReverseProxyFlushInterval(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         @string expected = expectedᶜ;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(expected));
         })));
         var backendʗ1 = backend;
@@ -679,7 +684,7 @@ public static void TestReverseProxyFlushInterval(ж<testing.T> t) {
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.FlushInterval = time.Microsecond;
 
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -704,17 +709,25 @@ internal partial struct mockFlusher {
     internal bool flushed;
 }
 
+} partial class httputil_internal_testᴛmockFlusher {
+
 internal static void Flush(this ref mockFlusher m) {
     m.flushed = true;
 }
+
+} partial class httputil_internal_test_package {
 
 internal partial struct wrappedRW {
     /*embed*/ public go.net.http_package.ResponseWriter ResponseWriter;
 }
 
+} partial class httputil_internal_testᴛwrappedRW {
+
 internal static http.ResponseWriter Unwrap(this ref wrappedRW w) {
     return w.ResponseWriter;
 }
+
+} partial class httputil_internal_test_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string expectedᶜ1 => ref expectedᶜ1ᵇ;
@@ -724,7 +737,7 @@ public static void TestReverseProxyResponseControllerFlushInterval(ж<testing.T>
     GoFrame ᒐ = default;
     try {
         @string expected = expectedᶜ1;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(expected));
         })));
         var backendʗ1 = backend;
@@ -746,7 +759,7 @@ public static void TestReverseProxyResponseControllerFlushInterval(ж<testing.T>
             proxyHandlerʗ1.ServeHTTP(w, r);
         });
 
-        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(proxyWithMiddleware));
+        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(proxyWithMiddleware));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -783,7 +796,7 @@ public static void TestReverseProxyFlushIntervalHeaders(ж<testing.T> t) {
         @string expected = expectedᶜ2;
         var stopCh = new channel<EmptyStruct>(0);
         var stopChʗ1 = stopCh;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Header().Add(myHeaderˢ, expected);
             w.WriteHeader(200);
             w._<http.Flusher>().Flush();
@@ -801,7 +814,7 @@ public static void TestReverseProxyFlushIntervalHeaders(ж<testing.T> t) {
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.FlushInterval = time.Microsecond;
 
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -843,7 +856,7 @@ public static partial void TestReverseProxyCancellation(ж<testing.T> t) {
 
         var reqInFlight = new channel<EmptyStruct>(0);
         var reqInFlightʗ1 = reqInFlight;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             close(reqInFlightʗ1); // cause the client to cancel its request
 
             var selᴛ3 = time.After((time.Duration)(10000000000L));
@@ -879,7 +892,7 @@ public static partial void TestReverseProxyCancellation(ж<testing.T> t) {
         // http: proxy error: read tcp 127.0.0.1:44643: use of closed network connection
         proxyHandler.ErrorLog = log.New(io.Discard, ""u8, 0);
 
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
@@ -923,14 +936,14 @@ private static readonly @string getHttp10ˢᵇ = "GET / HTTP/1.0\r\n\r\n"u8;
 public static void TestNilBody(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>("hi"u8));
         })));
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
 
         var backendʗ2 = backend;
-        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> _Δp1) => {
+        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> _Δp1) => {
             var (backURL, _) = url.Parse(backendʗ2.URL);
             var rp = NewSingleHostReverseProxy(backURL);
             var r = req(t, getHttp10ˢ);
@@ -958,12 +971,16 @@ public static void TestNilBody(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string userAgentˢ => ref userAgentˢᵇ;
+private static readonly @string userAgentˢᵇ = "User-Agent"u8;
+
 // Issue 15524
 public static void TestUserAgentHeader(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         @string gotUA = default;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             gotUA = r.Header.Get(userAgentˢ);
         })));
         var backendʗ1 = backend;
@@ -979,7 +996,7 @@ public static void TestUserAgentHeader(ж<testing.T> t) {
         proxyHandler.Director = (ж<http.Request> req) => {
             req.URL = backendURLʗ1;
         };
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
@@ -1008,8 +1025,12 @@ internal partial struct bufferPool {
     internal Action<slice<byte>> put;
 }
 
+} partial class httputil_internal_testᴛbufferPool {
+
 internal static slice<byte> Get(this bufferPool bp) { return bp.get(); }
 internal static void Put(this bufferPool bp, slice<byte> v) { bp.put(v); }
+
+} partial class httputil_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string getBufˢ => ref getBufˢᵇ;
@@ -1023,7 +1044,7 @@ public static void TestReverseProxyGetPutBuffer(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         @string msg = msgᶜ;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             io.WriteString(new httputil_test_package.http_ResponseWriterᴠWriter(w), msg);
         })));
         var backendʗ1 = backend;
@@ -1060,7 +1081,7 @@ public static void TestReverseProxyGetPutBuffer(ж<testing.T> t) {
                 addLogʗ2("putBuf-"u8 + strconv.Itoa(len(p)));
             }
         );
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(rp));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(rp));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -1105,7 +1126,7 @@ public static void TestReverseProxy_Post(ж<testing.T> t) {
         const nint backendStatus = 200;
         slice<byte> requestBody = bytes.Repeat(slice<byte>("a"u8), 1 << 20);
         var requestBodyʗ1 = requestBody;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             var (slurp, errΔ1) = io.ReadAll(r.Body);
             if (errΔ1 != nil) {
                 t.Errorf("Backend body read = %v", errΔ1);
@@ -1125,7 +1146,7 @@ public static void TestReverseProxy_Post(ж<testing.T> t) {
             t.Fatal(err);
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -1156,9 +1177,13 @@ public static void TestReverseProxy_Post(ж<testing.T> t) {
 
 public delegate (ж<http.Response>, error) RoundTripperFunc(ж<http.Request> _Δp0);
 
+} partial class httputil_internal_testᴛRoundTripperFunc {
+
 public static partial (ж<http.Response>, error) RoundTrip(this RoundTripperFunc fn, ж<http.Request> req) {
     return fn(req);
 }
+
+} partial class httputil_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpFakeTldˢ => ref httpFakeTldˢᵇ;
@@ -1180,7 +1205,7 @@ public static void TestReverseProxy_NilBody(ж<testing.T> t) {
             }
             return (default, errors.New(doneTestingTheˢ));
         }));
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -1236,7 +1261,7 @@ internal partial struct TestReverseProxyModifyResponse_tests /*dyn*/ {
 public static void TestReverseProxyModifyResponse(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Header().Add(xHitModˢ, fmt.Sprintf("%v"u8, r.URL.Path == "/mod"u8));
         })));
         var backendServerʗ1 = backendServer;
@@ -1252,7 +1277,7 @@ public static void TestReverseProxyModifyResponse(ж<testing.T> t) {
             return default;
         };
 
-        var frontendProxy = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(rproxy));
+        var frontendProxy = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(rproxy));
         var frontendProxyʗ1 = frontendProxy;
         defer(frontendProxyʗ1.Close, ref ᒐ);
 
@@ -1280,6 +1305,8 @@ public static void TestReverseProxyModifyResponse(ж<testing.T> t) {
 internal partial struct failingRoundTripper {
 }
 
+} partial class httputil_internal_testᴛfailingRoundTripper {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string someErrorˢ => ref someErrorˢᵇ;
 private static readonly @string someErrorˢᵇ = "some error"u8;
@@ -1288,13 +1315,19 @@ internal static (ж<http.Response>, error) RoundTrip(this failingRoundTripper _�
     return (default, errors.New(someErrorˢ));
 }
 
+} partial class httputil_internal_test_package {
+
 internal partial struct staticResponseRoundTripper {
     internal ж<http.Response> res;
 }
 
+} partial class httputil_internal_testᴛstaticResponseRoundTripper {
+
 internal static (ж<http.Response>, error) RoundTrip(this staticResponseRoundTripper rt, ж<http.Request> _) {
     return (rt.res, default);
 }
+
+} partial class httputil_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string someErrorToTriggerˢ => ref someErrorToTriggerˢᵇ;
@@ -1374,7 +1407,7 @@ public static void TestReverseProxyErrorHandler(ж<testing.T> t) {
                 if (ttʗ1.errorHandler != nil) {
                     rproxy.ErrorHandler = ttʗ1.errorHandler;
                 }
-                var frontendProxy = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(rproxy));
+                var frontendProxy = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(rproxy));
                 var frontendProxyʗ1 = frontendProxy;
                 defer(frontendProxyʗ1.Close, ref ᒐ);
 
@@ -1404,7 +1437,7 @@ private static readonly @string contentLengthˢᵇ = "Content-Length"u8;
 public static void TestReverseProxy_CopyBuffer(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             @string @out = thisCallWasRelayedByTheˢ;
             // Coerce a wrong content length to induce io.UnexpectedEOF
             w.Header().Set(contentLengthˢ, fmt.Sprintf("%d"u8, len(@out) * 2));
@@ -1424,7 +1457,7 @@ public static void TestReverseProxy_CopyBuffer(ж<testing.T> t) {
         var donec = new channel<bool>(1);
         var donecʗ1 = donec;
         var rproxyʗ1 = rproxy;
-        var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             GoFrame ᒐ = default;
             try {
                 var donecʗ2 = donecʗ1;
@@ -1466,9 +1499,13 @@ internal partial struct staticTransport {
     internal ж<http.Response> res;
 }
 
+} partial class httputil_internal_testᴛstaticTransport {
+
 internal static (ж<http.Response>, error) RoundTrip(this ref staticTransport t, ж<http.Request> r) {
     return (t.res, default);
 }
+
+} partial class httputil_internal_test_package {
 
 public static void BenchmarkServeHTTP(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1499,7 +1536,7 @@ internal partial struct TestServeHTTPDeepCopy_result /*dyn*/ {
 public static void TestServeHTTPDeepCopy(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>("Hello Gopher!"u8));
         })));
         var backendʗ1 = backend;
@@ -1513,7 +1550,7 @@ public static void TestServeHTTPDeepCopy(ж<testing.T> t) {
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         var proxyHandlerʗ1 = proxyHandler;
         var resultChanʗ1 = resultChan;
-        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             @string before = r.URL.String();
             proxyHandlerʗ1.ServeHTTP(w, r);
             @string after = r.URL.String();
@@ -1582,9 +1619,13 @@ public static void TestClonesRequestHeaders(ж<testing.T> t) {
 
 internal delegate (ж<http.Response>, error) roundTripperFunc(ж<http.Request> req);
 
+} partial class httputil_internal_testᴛroundTripperFunc {
+
 internal static partial (ж<http.Response>, error) RoundTrip(this roundTripperFunc fn, ж<http.Request> req) {
     return fn(req);
 }
+
+} partial class httputil_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string modifyResponseErrorˢ => ref modifyResponseErrorˢᵇ;
@@ -1632,6 +1673,8 @@ internal partial struct checkCloser {
     internal bool closed;
 }
 
+} partial class httputil_internal_testᴛcheckCloser {
+
 internal static error Close(this ref checkCloser cc) {
     cc.closed = true;
     return default;
@@ -1640,6 +1683,8 @@ internal static error Close(this ref checkCloser cc) {
 internal static (nint, error) Read(this ref checkCloser cc, slice<byte> b) {
     return (len(b), default);
 }
+
+} partial class httputil_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object handlerShouldHaveˢ = (@string)"handler should have panicked"u8;
@@ -1651,7 +1696,7 @@ public static void TestReverseProxy_PanicBodyError(ж<testing.T> t) {
     try {
         log.SetOutput(io.Discard);
         defer(log.SetOutput, new os.FileжWriter(os.Stderr), ref ᒐ);
-        var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             @string @out = thisCallWasRelayedByTheˢ;
             // Coerce a wrong content length to induce io.ErrUnexpectedEOF
             w.Header().Set(contentLengthˢ, fmt.Sprintf("%d"u8, len(@out) * 2));
@@ -1689,7 +1734,7 @@ public static void TestReverseProxy_PanicBodyError(ж<testing.T> t) {
 public static partial void TestReverseProxy_PanicClosesIncomingBody(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             @string @out = thisCallWasRelayedByTheˢ;
             // Coerce a wrong content length to induce io.ErrUnexpectedEOF
             w.Header().Set(contentLengthˢ, fmt.Sprintf("%d"u8, len(@out) * 2));
@@ -1703,7 +1748,7 @@ public static partial void TestReverseProxy_PanicClosesIncomingBody(ж<testing.T
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
@@ -1756,7 +1801,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
         new(
             name: "server-sent events overrides non-zero",
             res: Ꮡ(new http.Response(
-                Header: new httpꓸHeader(new map<@string, slice<@string>>{
+                Header: new http.Header(new map<@string, slice<@string>>{
                     ["Content-Type"] = ["text/event-stream"]
                 })
             )),
@@ -1766,7 +1811,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
         new(
             name: "server-sent events overrides zero",
             res: Ꮡ(new http.Response(
-                Header: new httpꓸHeader(new map<@string, slice<@string>>{
+                Header: new http.Header(new map<@string, slice<@string>>{
                     ["Content-Type"] = ["text/event-stream"]
                 })
             )),
@@ -1776,7 +1821,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
         new(
             name: "server-sent events with media-type parameters overrides non-zero",
             res: Ꮡ(new http.Response(
-                Header: new httpꓸHeader(new map<@string, slice<@string>>{
+                Header: new http.Header(new map<@string, slice<@string>>{
                     ["Content-Type"] = ["text/event-stream;charset=utf-8"]
                 })
             )),
@@ -1786,7 +1831,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
         new(
             name: "server-sent events with media-type parameters overrides zero",
             res: Ꮡ(new http.Response(
-                Header: new httpꓸHeader(new map<@string, slice<@string>>{
+                Header: new http.Header(new map<@string, slice<@string>>{
                     ["Content-Type"] = ["text/event-stream;charset=utf-8"]
                 })
             )),
@@ -1848,7 +1893,7 @@ private static readonly @string backendGotHelloˢᵇ = @"backend got ""Hello"""u
 public static void TestReverseProxyWebSocket(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             GoFrame ᒐ = default;
             try {
                 if (upgradeType(r.Header) != "websocket"u8) {
@@ -1895,7 +1940,7 @@ public static void TestReverseProxyWebSocket(ж<testing.T> t) {
             }
         });
 
-        var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(handler));
+        var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(handler));
         var frontendProxyʗ1 = frontendProxy;
         defer(frontendProxyʗ1.Close, ref ᒐ);
 
@@ -1964,7 +2009,7 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> t) {
 
         var nthResponseʗ1 = nthResponse;
         var triggerCancelChʗ1 = triggerCancelCh;
-        var cst = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var cst = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             GoFrame ᒐ = default;
             try {
                 @string g = upgradeType(r.Header);
@@ -1994,9 +2039,9 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> t) {
                 for (nint i = 0; i < n; i++) {
                     {
                         var (_, errΔ4) = bufrw.Value.Writer.Value.WriteString(nthResponseʗ1(i)); if (errΔ4 != nil) {
-                            var selᴛ5 = triggerCancelChʗ1;
-                            switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
-                            case 0 when selᴛ5.ꟷᐳ(out _): {
+                            var triggerCancelChᴛ1 = triggerCancelChʗ1;
+                            switch (trySelect(ᐸꟷ(triggerCancelChᴛ1, ꓸꓸꓸ))) {
+                            case 0 when triggerCancelChᴛ1.ꟷᐳ(out _): {
                                 break;
                             }
                             default: {
@@ -2007,13 +2052,13 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> t) {
                         }
                     }
                     bufrw.Value.Writer.Value.Flush();
-                    time.Sleep(time.ΔSecond);
+                    time.Sleep(time.Second);
                 }
                 {
                     var (_, errΔ5) = bufrw.Value.Writer.Value.WriteString(terminalMsg); if (errΔ5 != nil) {
-                        var selᴛ6 = triggerCancelChʗ1;
-                        switch (trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
-                        case 0 when selᴛ6.ꟷᐳ(out _): {
+                        var triggerCancelChᴛ2 = triggerCancelChʗ1;
+                        switch (trySelect(ᐸꟷ(triggerCancelChᴛ2, ꓸꓸꓸ))) {
+                        case 0 when triggerCancelChᴛ2.ꟷᐳ(out _): {
                             break;
                         }
                         default: {
@@ -2052,7 +2097,7 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> t) {
             rproxyʗ1.ServeHTTP(rw, reqΔ1.WithContext(ctx));
         });
 
-        var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(handler));
+        var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(handler));
         var frontendProxyʗ1 = frontendProxy;
         defer(frontendProxyʗ1.Close, ref ᒐ);
 
@@ -2239,7 +2284,7 @@ public static void TestReverseProxyWebSocketHalfTCP(ж<testing.T> t) {
             try {
                 ref var srv = ref heap<ж<net.TCPConn>>(out var Ꮡsrv);
 
-                var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+                var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
                     @string g = upgradeType(r.Header);
                     @string ws = websocketˢ; if (g != ws) {
                         tΔ10.Fatalf("Unexpected upgrade type %q, want %q", g, ws);
@@ -2270,7 +2315,7 @@ public static void TestReverseProxyWebSocketHalfTCP(ж<testing.T> t) {
                 var rproxy = NewSingleHostReverseProxy(backendURL);
                 rproxy.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
                 var rproxyʗ1 = rproxy;
-                var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter rw, ж<http.Request> reqΔ1) => {
+                var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter rw, ж<http.Request> reqΔ1) => {
                     rproxyʗ1.ServeHTTP(rw, reqΔ1);
                 })));
                 var frontendProxyʗ1 = frontendProxy;
@@ -2334,7 +2379,7 @@ public static void TestReverseProxyUpgradeNoCloseWrite(ж<testing.T> t) {
         // and returns.
         var backendDone = new channel<EmptyStruct>(0);
         var backendDoneʗ1 = backendDone;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Header().Set(connectionˢ, upgradeˢ2);
             w.Header().Set(upgradeˢ, "u");
             w.WriteHeader(101);
@@ -2357,7 +2402,7 @@ public static void TestReverseProxyUpgradeNoCloseWrite(ж<testing.T> t) {
             respΔ1.Body = new TestReverseProxyUpgradeNoCloseWrite_readWriteCloserOnly(respΔ1.Body._<io.ReadWriteCloser>());
             return default;
         };
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -2381,7 +2426,7 @@ public static void TestReverseProxyUpgradeNoCloseWrite(ж<testing.T> t) {
 public static void TestUnannouncedTrailer(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.WriteHeader(http.StatusOK);
             w._<http.Flusher>().Flush();
             w.Header().Set(http.TrailerPrefix + "X-Unannounced-Trailer", unannouncedTrailerValueˢ);
@@ -2394,7 +2439,7 @@ public static void TestUnannouncedTrailer(ж<testing.T> t) {
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
@@ -2420,7 +2465,7 @@ public static void TestUnannouncedTrailer(ж<testing.T> t) {
 public static void TestSetURL(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(r.Host));
         })));
         var backendʗ1 = backend;
@@ -2435,7 +2480,7 @@ public static void TestSetURL(ж<testing.T> t) {
                 r.SetURL(backendURLʗ1);
             }
         ));
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
@@ -2523,7 +2568,7 @@ public static void TestReverseProxyRewriteReplacesOut(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         @string content = contentᶜ;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(content));
         })));
         var backendʗ1 = backend;
@@ -2534,7 +2579,7 @@ public static void TestReverseProxyRewriteReplacesOut(ж<testing.T> t) {
                 (r.Out, _) = http.NewRequest(getˢ, backendʗ2.URL, default);
             }
         ));
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -2565,7 +2610,7 @@ public static void Test1xxHeadersNotModifiedAfterRoundTrip(ж<testing.T> t) {
         // and proxy them. httptrace handlers can execute after RoundTrip returns, in particular
         // after experiencing connection errors. When this happens, we shouldn't modify the
         // ResponseWriter headers after ReverseProxy.ServeHTTP returns.
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             for (nint i = 0; i < 5; i++) {
                 w.WriteHeader(103);
             }
@@ -2628,7 +2673,7 @@ internal static readonly object unexpected1xxResponseˢ = (@string)"Unexpected 1
 public static void Test1xxResponses(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             var h = w.Header();
             h.Add(linkˢ, styleCssRelPreloadAsˢ);
             h.Add(linkˢ, scriptJsRelPreloadAsˢ);
@@ -2647,7 +2692,7 @@ public static void Test1xxResponses(ж<testing.T> t) {
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
@@ -2779,7 +2824,7 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> t, bo
     GoFrame ᒐ = default;
     try {
         @string content = contentᶜ1;
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(r.URL.RawQuery));
         })));
         var backendʗ1 = backend;
@@ -2789,7 +2834,7 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> t, bo
             t.Fatal(err);
         }
         var proxyHandler = newProxy(backendURL);
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 
@@ -2845,7 +2890,7 @@ private static readonly @string httpExampleTldˢᵇ = "http://example.tld/"u8;
 public static void TestReverseProxyHijackCopyError(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
+        var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Header().Set(upgradeˢ, someprotoˢ);
             w.WriteHeader(http.StatusSwitchingProtocols);
         })));
@@ -2912,7 +2957,7 @@ public static void TestReverseProxyInvalidUpstream100ContinueDoNotHang(ж<testin
         var handler = new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter w, ж<http.Request> r) => {
             Ꮡproxy.ServeHTTP(w, r);
         });
-        var upstreamServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(handler));
+        var upstreamServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠHandler(handler));
         var upstreamServerʗ1 = upstreamServer;
         defer(upstreamServerʗ1.Close, ref ᒐ);
 
@@ -2939,15 +2984,17 @@ public static void TestReverseProxyInvalidUpstream100ContinueDoNotHang(ж<testin
 }
 
 internal partial struct testResponseWriter {
-    internal httpꓸHeader h;
+    internal http.Header h;
     internal Action<nint> writeHeader;
     internal Func<slice<byte>, (nint, error)> write;
     internal Func<(net.Conn, ж<bufio.ReadWriter>, error)> hijack;
 }
 
-internal static httpꓸHeader Header(this ref testResponseWriter rw) {
+} partial class httputil_internal_testᴛtestResponseWriter {
+
+internal static http.Header Header(this ref testResponseWriter rw) {
     if (rw.h == nil) {
-        rw.h = new httpꓸHeader(0);
+        rw.h = new http.Header(0);
     }
     return rw.h;
 }
@@ -2972,11 +3019,15 @@ internal static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref testResp
     return (default, default, errors.ErrUnsupported);
 }
 
+} partial class httputil_internal_test_package {
+
 internal partial struct testReadWriteCloser {
     internal Func<slice<byte>, (nint, error)> read;
     internal Func<slice<byte>, (nint, error)> write;
     internal Func<error> close;
 }
+
+} partial class httputil_internal_testᴛtestReadWriteCloser {
 
 internal static (nint, error) Read(this ref testReadWriteCloser rc, slice<byte> p) {
     if (rc.read != nil) {
@@ -2999,6 +3050,8 @@ internal static error Close(this ref testReadWriteCloser rc) {
     return default;
 }
 
+} partial class httputil_internal_test_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpBackendTldˢ => ref httpBackendTldˢᵇ;
 private static readonly @string httpBackendTldˢᵇ = "http://backend.tld/"u8;
@@ -3016,7 +3069,7 @@ public static void TestReverseProxyCONNECT(ж<testing.T> t) {
                 r.SetURL(backendURL);
             }
         ));
-        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxy));
+        var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжHandler(proxy));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
 

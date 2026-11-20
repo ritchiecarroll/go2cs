@@ -356,11 +356,11 @@ partial struct dataCloser {
     /*embed*/ public io_package.WriteCloser WriteCloser;
 }
 
+} partial class smtpᴛdataCloser {
+
 // Go method set entry for the promoted 'WriteCloser.Write()' - provided ONLY by the embedded
 // interface field in *dataCloser's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Write(this dataCloser recvᴛ, slice<byte> p) => recvᴛ.WriteCloser.Write(p);
-
-} partial class smtpᴛdataCloser {
 
 internal static error Close(this ref dataCloser d) {
     d.WriteCloser.Close();

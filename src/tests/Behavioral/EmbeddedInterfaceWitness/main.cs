@@ -115,11 +115,11 @@ partial struct pointerOnly {
     /*embed*/ internal pointerBase pointerBase;
 }
 
+} partial class mainᴛpointerOnly {
+
 // Go method set entry for the promoted 'ReadWriter.Read()' - provided ONLY by the embedded
 // interface field in *pointerOnly's method set; see the pointer-only satisfaction record.
 internal static @string Read(this pointerOnly recvᴛ) => recvᴛ.ReadWriter.Read();
-
-} partial class mainᴛpointerOnly {
 
 internal static @string Write(this ref pointerOnly p, @string s) { return "po:"u8 + s; }
 

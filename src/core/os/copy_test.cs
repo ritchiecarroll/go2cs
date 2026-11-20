@@ -18,6 +18,7 @@ using math.rand;
 using static go.os_internal_test_package;
 using time = time_package;
 using vendor.golang.org.x.net;
+using static os_test_package;
 
 partial class os_test_package {
 
@@ -243,10 +244,14 @@ internal static error compareReaders(Δio.Reader a, Δio.Reader b) {
 partial struct zeroReader {
 }
 
+} partial class os_testᴛzeroReader {
+
 internal static (nint, error) Read(this zeroReader r, slice<byte> p) {
     clear(p);
     return (len(p), default);
 }
+
+} partial class os_test_package {
 
 partial struct randReader {
     internal ж<rand.Rand> rand;
@@ -256,12 +261,16 @@ internal static ж<randReader> newRandReader() {
     return Ꮡ(new randReader(rand.New(new rand.PCGжSource(rand.NewPCG(0, 0)))));
 }
 
+} partial class os_testᴛrandReader {
+
 internal static (nint, error) Read(this ref randReader r, slice<byte> p) {
     foreach (var i in range(len(p))) {
         p[i] = (byte)(r.rand.Uint32() & 0xff);
     }
     return (len(p), default);
 }
+
+} partial class os_test_package {
 
 internal static partial (Δnet.Conn client, Δnet.Conn server) createSocketPair(ж<Δtesting.T> t, @string proto) {
     Δnet.Conn client = default;

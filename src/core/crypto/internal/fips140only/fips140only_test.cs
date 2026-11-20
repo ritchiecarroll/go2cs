@@ -306,7 +306,7 @@ internal static void testFIPS140Only(ж<testing.T> t) {
     expectErr(t, errRet2(ᴛ56, ᴛ57));
     var (ᴛ58, ᴛ59) = ecdh.X25519().NewPublicKey(new slice<byte>(32));
     expectErr(t, errRet2(ᴛ58, ᴛ59));
-    foreach (var (_, curve) in range(slice<ecdhꓸCurve>([ecdh.P256(), ecdh.P384(), ecdh.P521()]))) {
+    foreach (var (_, curve) in range(slice<ecdh.Curve>([ecdh.P256(), ecdh.P384(), ecdh.P521()]))) {
         var (ᴛ60, ᴛ61) = curve.GenerateKey(new readerWrap(rand.Reader));
         expectErrIfCustomRand(t, errRet2(ᴛ60, ᴛ61));
         var (kΔ1, errΔ1) = curve.GenerateKey(rand.Reader);
@@ -479,7 +479,7 @@ internal static void testFIPS140Only(ж<testing.T> t) {
     var (ᴛ155, ᴛ156, ᴛ157) = mlkemtest.Encapsulate1024(k1024.EncapsulationKey(), new slice<byte>(32));
     expectErr(t, errRet3(ᴛ155, ᴛ156, ᴛ157));
 
-    foreach (var (_, kem) in range(slice<hpkeꓸKEM>([hpke.DHKEM(ecdh.P256()), hpke.DHKEM(ecdh.P384()), hpke.DHKEM(ecdh.P521()), hpke.MLKEM768(), hpke.MLKEM1024(), hpke.MLKEM768P256(), hpke.MLKEM1024P384(), hpke.MLKEM768X25519()
+    foreach (var (_, kem) in range(slice<hpke.KEM>([hpke.DHKEM(ecdh.P256()), hpke.DHKEM(ecdh.P384()), hpke.DHKEM(ecdh.P521()), hpke.MLKEM768(), hpke.MLKEM1024(), hpke.MLKEM768P256(), hpke.MLKEM1024P384(), hpke.MLKEM768X25519()
     ]))) {
         // allowed as hybrid
         var kemʗ1 = kem;

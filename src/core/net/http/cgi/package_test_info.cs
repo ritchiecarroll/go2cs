@@ -7,8 +7,6 @@
 global using static global::go.net.http.cgi_package;
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
 // </ImportedTypeAliases>
 
 using go;
@@ -20,9 +18,9 @@ using static global::go.net.http.cgi_internal_test_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<customWriterRecorder, go.net.http_package.ResponseWriter>(Pointer = true)]
-[assembly: GoImplement<global::go.net.http.cgi_package.Handler, go.net.http_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<global::go.net.http.cgi_package.Handler, go.net.http_package.Handler>(Pointer = true)]
 [assembly: GoImplement<go.net.http.httptest_package.ResponseRecorder, go.net.http_package.ResponseWriter>(Pointer = true)]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 [assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
 [assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
 [assembly: GoImplement<limitWriter, io_package.Writer>(Pointer = true)]
@@ -59,8 +57,8 @@ using static global::go.net.http.cgi_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ACMkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICSAAgIggAJFIKClJKUgviC7oKClIKUkviCAAgSgoKUgpSSuIIABxCCgpSSvKK4goKUgpSClIIADQiCABQyspKCyoKClIKUgoKClII=", "206-228:1", "", "250=Repeat/1/2/16,Repeat/2/2/21;278=NewRequest/1/1/1,NewWriter/1/1/3")]
-[assembly: GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACI6tIKCpqaCgoKClIKmpoKCgoLmxoKCgoKCgpS0pIKCgoKmxoKClIKCgqaCpoIACQiCgrgAEiaUgJKkgJIACAiCgrgAEyiCgoKCpoKSgpSCuMrmgoK4AAcQ5oKCuO6mgoKm3AAHGLKCpsqsggAICoKCuO4ADQaCgoy47qaCAAgIkoIACA64goKSAAoKgoK4goCSpICSAAgIgoKCgpTKuAAIEPKUuIKkgoKUgoKClIKClJKCgoKmgpSClIKCgoKClLToooKCgoKCuPiCgpLKppSCgrim5oKClJIACBLcAAgGgoKC3IKCgpIACAiCAAkagoKC", "260-264:1;348-351:1", "", "368=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5", "477:21")]
-[assembly: GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "ACA2opS4ABImlICSpICSAAkSggALELKClIKClIKU6qKUuIKCgoKUgoL8opS4poKSAAkMopS4poIACAaClLgAFDKyooKCgoIACQ6AwsKUgrimgoI=", "179-186:1", "", "195=Repeat/1/2/16,Repeat/2/2/21")]
+[assembly: GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACI6tIKCpqaCgoKClIKmpoKCgoLmxoKCgoKCgpS0pIKCgoKmxoKClIKCgqaCpoIACQiCgrgAEiaUgJKkgJIACAiCgrgAEyiCgoKCpoKSgpSCuMrmgoK4AAcQ5oKCuO6mgoKm3AAHGLKCpsqsggAICoKCuO4ADQaCgoy47qaCAAgIkoIACA64goKSAAwKgoK4goCSpICSAAgIgoKCgpTKuAAIEPKUuIKkgoKUgoKClIKClJKCgoKmgpSClIKCgoKClLToooKCgoKCuPiCgpLKppSCgrim5oKClJIACBLcAAgGgoKC3IKCgpIACAiCAAkagoKC", "260-264:1;348-351:1", "", "368=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5", "479:21")]
+[assembly: GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "ACE2opS4ABImlICSpICSAAsSggAPELKClIKClIKUAAgKopS4goKCgpSCgvyilLimgpIACQyilLimggAIBoKUuAAUMrKigoKCggAJDoDCwpSCuKaCgg==", "179-186:1", "", "204=Repeat/1/2/16,Repeat/2/2/21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -111,3 +109,14 @@ public static partial class cgi_internal_test_package
         builtin.initPackage(typeof(global::go.net.http.cgi_package));
     }
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cgi_internal_test_package.customWriterRecorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgi_internal_testᴛcustomWriterRecorder;
+[GoMethodHost(typeof(cgi_internal_test_package.limitWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgi_internal_testᴛlimitWriter;
+// </MethodHolders>

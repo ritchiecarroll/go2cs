@@ -17,6 +17,7 @@ using @internal;
 using fmt = fmt_package;
 using static go.fmt_internal_test_package;
 using ꓸꓸꓸany = Span<any>;
+using static fmt_test_package;
 
 partial class fmt_test_package {
 
@@ -91,7 +92,11 @@ partial struct A {
 
 partial struct I /*num:nint*/;
 
+} partial class fmt_testᴛI {
+
 public static @string String(this I i) { return Sprintf("<%d>"u8, (nint)i); }
+
+} partial class fmt_test_package {
 
 partial struct B {
     public I I;
@@ -105,15 +110,23 @@ partial struct C {
 
 partial struct F /*num:nint*/;
 
+} partial class fmt_testᴛF {
+
 public static void Format(this F f, fmt.State s, rune c) {
     Fprintf(new fmt_test_package.fmt_StateᴠWriter(s), "<%c=F(%d)>"u8, c, (nint)f);
 }
 
+} partial class fmt_test_package {
+
 partial struct G /*num:nint*/;
+
+} partial class fmt_testᴛG {
 
 public static @string GoString(this G g) {
     return Sprintf("GoString(%d)"u8, (nint)g);
 }
+
+} partial class fmt_test_package {
 
 partial struct S {
     public F F; // a struct field that Formats
@@ -130,6 +143,8 @@ partial struct P /*num:nint*/;
 internal static readonly ж<P> ᏑpValue = new StaticBox<P>(default(P));
 internal static ref P pValue => ref ((StaticBox<P>)ᏑpValue).ValueSlot;
 
+} partial class fmt_testᴛP {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stringPˢ => ref stringPˢᵇ;
 private static readonly @string stringPˢᵇ = "String(p)"u8;
@@ -138,10 +153,16 @@ public static @string String(this ref P p) {
     return stringPˢ;
 }
 
+} partial class fmt_test_package {
+
 // Fn is a function type with a String method.
 public delegate nint Fn();
 
+} partial class fmt_testᴛFn {
+
 public static @string String(this Fn fn) { return "String(fn)"; }
+
+} partial class fmt_test_package {
 
 internal static Fn fnValue;
 
@@ -158,27 +179,39 @@ internal static ref slice<renamedUint8> bslice => ref ((StaticBox<slice<renamedU
 
 partial struct byteStringer /*num:byte*/;
 
+} partial class fmt_testᴛbyteStringer {
+
 internal static @string String(this byteStringer _) {
     return "X";
 }
+
+} partial class fmt_test_package {
 
 internal static slice<byteStringer> byteStringerSlice = [(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'];
 
 partial struct byteFormatter /*num:byte*/;
 
+} partial class fmt_testᴛbyteFormatter {
+
 internal static void Format(this byteFormatter _Δp0, fmt.State f, rune _Δp2) {
     Fprint(new fmt_test_package.fmt_StateᴠWriter(f), "X");
 }
 
+} partial class fmt_test_package {
+
 internal static slice<byteFormatter> byteFormatterSlice = [(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'];
 
 partial struct writeStringFormatter /*@string*/;
+
+} partial class fmt_testᴛwriteStringFormatter {
 
 internal static void Format(this writeStringFormatter sf, fmt.State f, rune c) {
     var (sw, ok) = f._<Δio.StringWriter>(ᐧ); if (ok) {
         sw.WriteString("***"u8 + ((@string)sf) + "***"u8);
     }
 }
+
+} partial class fmt_test_package {
 
 partial struct fmtTestsᴛ1 /*dyn*/ {
     internal @string fmt;
@@ -781,13 +814,13 @@ internal static slice<fmtTestsᴛ1> fmtTests = slice<fmtTestsᴛ1>([
     // functions
     new("%v", TestFmtInterface, "0xPTR"), // simple function
     new("%v", reflect.ValueOf(TestFmtInterface), "0xPTR"),
-    new("%v", ((Func<G, @string>)(GoString)), "0xPTR"), // method expression
-    new("%v", reflect.ValueOf(((Func<G, @string>)(GoString))), "0xPTR"),
+    new("%v", ((Func<G, @string>)(fmt_testᴛG.GoString)), "0xPTR"), // method expression
+    new("%v", reflect.ValueOf(((Func<G, @string>)(fmt_testᴛG.GoString))), "0xPTR"),
     new("%v", () => ((G)23).GoString(), "0xPTR"), // method value
     new("%v", reflect.ValueOf(() => ((G)23).GoString()), "0xPTR"),
     new("%v", reflect.ValueOf((G)23).Method(0), "0xPTR"),
-    new("%v", ((Func<Fn, @string>)(String)), "0xPTR"), // method of function type
-    new("%v", reflect.ValueOf(((Func<Fn, @string>)(String))), "0xPTR"),
+    new("%v", ((Func<Fn, @string>)(fmt_testᴛFn.String)), "0xPTR"), // method of function type
+    new("%v", reflect.ValueOf(((Func<Fn, @string>)(fmt_testᴛFn.String))), "0xPTR"),
     new("%v", (fnValue).OrTypedNilFunc(), "String(fn)"), // variable of function type with String method
     new("%v", reflect.ValueOf((fnValue).OrTypedNilFunc()), "String(fn)"),
     new("%v", new Fn[]{fnValue}.array(), "[String(fn)]"), // array of function type with String method
@@ -805,13 +838,13 @@ internal static slice<fmtTestsᴛ1> fmtTests = slice<fmtTestsᴛ1>([
     // functions with go syntax
     new("%#v", TestFmtInterface, "(func(*testing.T))(0xPTR)"), // simple function
     new("%#v", reflect.ValueOf(TestFmtInterface), "(func(*testing.T))(0xPTR)"),
-    new("%#v", ((Func<G, @string>)(GoString)), "(func(fmt_test.G) string)(0xPTR)"), // method expression
-    new("%#v", reflect.ValueOf(((Func<G, @string>)(GoString))), "(func(fmt_test.G) string)(0xPTR)"),
+    new("%#v", ((Func<G, @string>)(fmt_testᴛG.GoString)), "(func(fmt_test.G) string)(0xPTR)"), // method expression
+    new("%#v", reflect.ValueOf(((Func<G, @string>)(fmt_testᴛG.GoString))), "(func(fmt_test.G) string)(0xPTR)"),
     new("%#v", () => ((G)23).GoString(), "(func() string)(0xPTR)"), // method value
     new("%#v", reflect.ValueOf(() => ((G)23).GoString()), "(func() string)(0xPTR)"),
     new("%#v", reflect.ValueOf((G)23).Method(0), "(func() string)(0xPTR)"),
-    new("%#v", ((Func<Fn, @string>)(String)), "(func(fmt_test.Fn) string)(0xPTR)"), // method of function type
-    new("%#v", reflect.ValueOf(((Func<Fn, @string>)(String))), "(func(fmt_test.Fn) string)(0xPTR)"),
+    new("%#v", ((Func<Fn, @string>)(fmt_testᴛFn.String)), "(func(fmt_test.Fn) string)(0xPTR)"), // method of function type
+    new("%#v", reflect.ValueOf(((Func<Fn, @string>)(fmt_testᴛFn.String))), "(func(fmt_test.Fn) string)(0xPTR)"),
     new("%#v", (fnValue).OrTypedNilFunc(), "(fmt_test.Fn)(nil)"), // variable of function type with String method
     new("%#v", reflect.ValueOf((fnValue).OrTypedNilFunc()), "(fmt_test.Fn)(nil)"),
     new("%#v", new Fn[]{fnValue}.array(), "[1]fmt_test.Fn{(fmt_test.Fn)(nil)}"), // array of function type with String method
@@ -1145,9 +1178,9 @@ internal static slice<fmtTestsᴛ1> fmtTests = slice<fmtTestsᴛ1>([
     new("%#04x", reflect.ValueOf((nint)256), "0x0100"),
 
     // invalid reflect.Value doesn't crash.
-    new("%v", new reflectꓸValue(), "<invalid reflect.Value>"),
-    new("%v", Ꮡ(new reflectꓸValue()), "<invalid Value>"),
-    new("%v", new SI(new reflectꓸValue()), "{<invalid Value>}"),
+    new("%v", new reflect.Value(), "<invalid reflect.Value>"),
+    new("%v", Ꮡ(new reflect.Value()), "<invalid Value>"),
+    new("%v", new SI(new reflect.Value()), "{<invalid Value>}"),
 
     // Tests to check that not supported verbs generate an error string.
     new("%☠", default, "%!☠(<nil>)"),
@@ -1171,7 +1204,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = slice<fmtTestsᴛ1>([
     new("%☠", new SI((renamedInt)0), "{%!☠(fmt_test.renamedInt=0)}"),
     new("%☠", Ꮡ(slice<any>([(I)1, (G)2])), "&[%!☠(fmt_test.I=1) %!☠(fmt_test.G=2)]"),
     new("%☠", new SI(Ꮡ(slice<any>([(I)1, (G)2]))), "{%!☠(*[]interface {}=&[1 2])}"),
-    new("%☠", new reflectꓸValue(), "<invalid reflect.Value>"),
+    new("%☠", new reflect.Value(), "<invalid reflect.Value>"),
     new("%☠", new map<float64, nint>{[NaN] = 1}, "map[%!☠(float64=NaN):%!☠(int=1)]")
 ]);
 
@@ -1691,6 +1724,8 @@ public static void TestCountMallocs(ж<Δtesting.T> t) {
 partial struct flagPrinter {
 }
 
+} partial class fmt_testᴛflagPrinter {
+
 internal static void Format(this flagPrinter _, fmt.State f, rune c) {
     @string s = "%";
     for (nint i = 0; i < 128; i++) {
@@ -1711,6 +1746,8 @@ internal static void Format(this flagPrinter _, fmt.State f, rune c) {
     s += ((@string)c);
     Δio.WriteString(new fmt_test_package.fmt_StateᴠWriter(f), "["u8 + s + "]"u8);
 }
+
+} partial class fmt_test_package {
 
 partial struct flagtestsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -1950,30 +1987,42 @@ partial struct PanicS {
     internal any message;
 }
 
+} partial class fmt_testᴛPanicS {
+
 // Value receiver.
 public static @string String(this PanicS p) {
     throw panic(p.message);
 }
+
+} partial class fmt_test_package {
 
 // PanicGo is a type that panics in GoString.
 partial struct PanicGo {
     internal any message;
 }
 
+} partial class fmt_testᴛPanicGo {
+
 // Value receiver.
 public static @string GoString(this PanicGo p) {
     throw panic(p.message);
 }
+
+} partial class fmt_test_package {
 
 // PanicF is a type that panics in Format.
 partial struct PanicF {
     internal any message;
 }
 
+} partial class fmt_testᴛPanicF {
+
 // Value receiver.
 public static void Format(this PanicF p, fmt.State f, rune c) {
     throw panic(p.message);
 }
+
+} partial class fmt_test_package {
 
 partial struct panictestsᴛ1 /*dyn*/ {
     internal @string fmt;
@@ -2014,6 +2063,8 @@ partial struct Recur {
     internal ж<bool> failed;
 }
 
+} partial class fmt_testᴛRecur {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string failˢ => ref failˢᵇ;
 private static readonly @string failˢᵇ = "FAIL"u8;
@@ -2030,6 +2081,8 @@ public static @string String(this ж<Recur> Ꮡr) {
     // during an error.
     return Sprintf("recur@%p value: %d"u8, Ꮡr.OrTypedNil(), r.i);
 }
+
+} partial class fmt_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object failWithPointerˢ = (@string)"fail with pointer"u8;

@@ -13,7 +13,6 @@ using go;
 using static global::go.crypto.@internal.fips140.ecdh_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

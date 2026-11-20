@@ -166,7 +166,7 @@ internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     var p = @unsafe.ArrayPointer<byte>.Of(Ꮡsa.Ꮡraw.Ꮡport, 2);
     p.ElementRef(0) = (byte)(sa.port >> 8);
     p.ElementRef(1) = (byte)sa.port;
-    sa.raw.addr = sa.addr.Clone();
+    sa.raw.addr.Assign(sa.addr);
 }
 
 } partial class main_package {
@@ -197,7 +197,7 @@ internal static uint16 packageRoot() {
 
 internal static @string arrayFieldOfVariable() {
     ref var raw = ref heap(new rawInet4(), out var Ꮡraw);
-    raw.addr = new byte[]{0x7f, 0xff, 0, 1}.array();
+    raw.addr.Assign(new byte[]{0x7f, 0xff, 0, 1}.array());
     var p = @unsafe.ArrayPointer<int8>.Of(Ꮡraw.Ꮡaddr, 4);
     p.ElementRef(3) = (int8)(-2);
     var s = @unsafe.ArrayPointer<int8>.Of(Ꮡraw.Ꮡaddr, 4).slice();

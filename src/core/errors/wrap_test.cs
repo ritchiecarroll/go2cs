@@ -10,6 +10,7 @@ using os = os_package;
 using reflect = reflect_package;
 using testing = testing_package;
 using io;
+using static errors_test_package;
 
 partial class errors_test_package {
 
@@ -83,6 +84,8 @@ partial struct poser {
 
 internal static ж<fs.PathError> poserPathErr = Ꮡ(new fs.PathError(Op: "poser"));
 
+} partial class errors_testᴛposer {
+
 internal static @string Error(this ref poser p) { return p.msg; }
 internal static bool Is(this ref poser p, error err) { return p.f(err); }
 internal static bool As(this ж<poser> Ꮡp, any err) {
@@ -105,6 +108,8 @@ internal static bool As(this ж<poser> Ꮡp, any err) {
     }}
     return true;
 }
+
+} partial class errors_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string errˢ => ref errˢᵇ;
@@ -227,7 +232,7 @@ public static void TestAs(ж<testing.T> t) {
 
         @string name = fmt.Sprintf("%d:As(Errorf(..., %v), %v)"u8, i, tc.err, tc.target);
         // Clear the target pointer, in case it was set in a previous test.
-        ref var rtarget = ref heap<reflectꓸValue>(reflect.ValueOf(tc.target), out var Ꮡrtarget);
+        ref var rtarget = ref heap<reflect.Value>(reflect.ValueOf(tc.target), out var Ꮡrtarget);
         rtarget.Elem().Set(reflect.Zero(reflect.TypeOf(tc.target).Elem()));
         var rtargetʗ1 = rtarget;
         var tcʗ1 = tc;
@@ -454,17 +459,27 @@ partial struct errorT {
     internal @string s;
 }
 
+} partial class errors_testᴛerrorT {
+
 internal static @string Error(this errorT e) { return fmt.Sprintf("errorT(%s)"u8, e.s); }
+
+} partial class errors_test_package {
 
 partial struct wrapped {
     internal @string msg;
     internal error err;
 }
 
+} partial class errors_testᴛwrapped {
+
 internal static @string Error(this wrapped e) { return e.msg; }
 internal static error Unwrap(this wrapped e) { return e.err; }
 
+} partial class errors_test_package {
+
 partial struct multiErr /*[]error*/;
+
+} partial class errors_testᴛmultiErr {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string multiErrorˢ => ref multiErrorˢᵇ;
@@ -473,9 +488,13 @@ private static readonly @string multiErrorˢᵇ = "multiError"u8;
 internal static @string Error(this multiErr m) { return multiErrorˢ; }
 internal static slice<error> Unwrap(this multiErr m) { return (slice<error>)m; }
 
+} partial class errors_test_package {
+
 partial struct errorUncomparable {
     internal slice<@string> f;
 }
+
+} partial class errors_testᴛerrorUncomparable {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string uncomparableErrorˢ => ref uncomparableErrorˢᵇ;
@@ -490,4 +509,4 @@ internal static bool Is(this errorUncomparable _Δp0, error target) {
     return ok;
 }
 
-} // end errors_test_package
+} // end errors_testᴛerrorUncomparable

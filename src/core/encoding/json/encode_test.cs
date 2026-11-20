@@ -22,6 +22,7 @@ using go.testing;
 using io = io_package;
 using static go.encoding.json_package;
 using ꓸꓸꓸany = Span<any>;
+using static json_internal_test_package;
 
 partial class json_internal_test_package {
 
@@ -84,17 +85,25 @@ public static void TestOmitEmpty(ж<testing.T> t) {
 public partial struct NonZeroStruct {
 }
 
+} partial class json_internal_testᴛNonZeroStruct {
+
 public static bool IsZero(this NonZeroStruct nzs) {
     return false;
 }
+
+} partial class json_internal_test_package {
 
 public partial struct NoPanicStruct {
     public nint Int; /*`json:"int,omitzero"`*/
 }
 
+} partial class json_internal_testᴛNoPanicStruct {
+
 public static bool IsZero(this ref NoPanicStruct nps) {
     return nps.Int != 0;
 }
+
+} partial class json_internal_test_package {
 
 public partial struct OptionalsZero {
     public @string Sr; /*`json:"sr"`*/
@@ -160,7 +169,7 @@ public static void TestOmitZero(ж<testing.T> t) {
     o.Mo = new map<@string, any>{};
 
     o.Foo = -0D;
-    o.Foo2 = new float64[]{+0D, -0D}.array();
+    o.Foo2.Assign(new float64[]{+0D, -0D}.array());
 
     o.TimeLocal = new time.Time().Local();
 
@@ -323,7 +332,7 @@ public static void TestRoundtripStringTag(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestRoundtripStringTag_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var (got, err) = MarshalIndent(Ꮡtt.of(TestRoundtripStringTag_tests.Ꮡin), ""u8, "\t");
@@ -446,7 +455,7 @@ public static void TestUnsupportedValues(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnsupportedValues_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -484,6 +493,8 @@ public static void TestMarshalTextFloatMap(ж<testing.T> t) {
 // Ref has Marshaler and Unmarshaler methods with pointer receiver.
 public partial struct Ref /*num:nint*/;
 
+} partial class json_internal_testᴛRef {
+
 public static (slice<byte>, error) MarshalJSON(this ref Ref _) {
     return (slice<byte>(@"""ref"""u8), default);
 }
@@ -493,15 +504,23 @@ public static error UnmarshalJSON(this ref Ref r, slice<byte> _) {
     return default;
 }
 
+} partial class json_internal_test_package {
+
 // Val has Marshaler methods with value receiver.
 public partial struct Val /*num:nint*/;
+
+} partial class json_internal_testᴛVal {
 
 public static (slice<byte>, error) MarshalJSON(this Val _) {
     return (slice<byte>(@"""val"""u8), default);
 }
 
+} partial class json_internal_test_package {
+
 // RefText has Marshaler and Unmarshaler methods with pointer receiver.
 public partial struct RefText /*num:nint*/;
+
+} partial class json_internal_testᴛRefText {
 
 public static (slice<byte>, error) MarshalText(this ref RefText _) {
     return (slice<byte>(@"""ref"""u8), default);
@@ -512,12 +531,18 @@ public static error UnmarshalText(this ref RefText r, slice<byte> _) {
     return default;
 }
 
+} partial class json_internal_test_package {
+
 // ValText has Marshaler methods with value receiver.
 public partial struct ValText /*num:nint*/;
+
+} partial class json_internal_testᴛValText {
 
 public static (slice<byte>, error) MarshalText(this ValText _) {
     return (slice<byte>(@"""val"""u8), default);
 }
+
+} partial class json_internal_test_package {
 
 internal partial struct TestRefValMarshal_type /*dyn*/ {
     public Ref R0;
@@ -560,16 +585,24 @@ public static void TestRefValMarshal(ж<testing.T> t) {
 // C implements Marshaler and returns unescaped JSON.
 public partial struct C /*num:nint*/;
 
+} partial class json_internal_testᴛC {
+
 public static (slice<byte>, error) MarshalJSON(this C _) {
     return (slice<byte>(@"""<&>"""u8), default);
 }
 
+} partial class json_internal_test_package {
+
 // CText implements Marshaler and returns unescaped text.
 public partial struct CText /*num:nint*/;
+
+} partial class json_internal_testᴛCText {
 
 public static (slice<byte>, error) MarshalText(this CText _) {
     return (slice<byte>(@"""<&>"""u8), default);
 }
+
+} partial class json_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string u003cU0026U003eˢ => ref u003cU0026U003eˢᵇ;
@@ -833,7 +866,7 @@ public static void TestAnonymousFields(ж<testing.T> t) {
 
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestAnonymousFields_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -873,6 +906,8 @@ public partial struct BugX {
 // it implements Marshaler, it should be marshaled.
 internal partial struct nilJSONMarshaler /*@string*/;
 
+} partial class json_internal_testᴛnilJSONMarshaler {
+
 internal static (slice<byte>, error) MarshalJSON(this ж<nilJSONMarshaler> Ꮡnm) {
     ref var nm = ref Ꮡnm.DerefOrNull();
 
@@ -882,10 +917,14 @@ internal static (slice<byte>, error) MarshalJSON(this ж<nilJSONMarshaler> Ꮡnm
     return Marshal("zenil:" + ((@string)(nm)));
 }
 
+} partial class json_internal_test_package {
+
 // golang.org/issue/34235.
 // Even if a nil interface value is passed in, as long as
 // it implements encoding.TextMarshaler, it should be marshaled.
 internal partial struct nilTextMarshaler /*@string*/;
+
+} partial class json_internal_testᴛnilTextMarshaler {
 
 internal static (slice<byte>, error) MarshalText(this ж<nilTextMarshaler> Ꮡnm) {
     ref var nm = ref Ꮡnm.DerefOrNull();
@@ -895,6 +934,8 @@ internal static (slice<byte>, error) MarshalText(this ж<nilTextMarshaler> Ꮡnm
     }
     return (slice<byte>("zenil:" + ((@string)(nm))), default);
 }
+
+} partial class json_internal_test_package {
 
 internal partial struct TestNilMarshal_tests /*dyn*/ {
     /*embed*/ public CaseName CaseName;
@@ -937,7 +978,7 @@ public static void TestNilMarshal(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestNilMarshal_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -1208,13 +1249,19 @@ public static void TestEncodeString(ж<testing.T> t) {
 
 internal partial struct jsonbyte /*num:byte*/;
 
+} partial class json_internal_testᴛjsonbyte {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string jbDˢ => ref jbDˢᵇ;
 private static readonly @string jbDˢᵇ = @"{""JB"":%d}"u8;
 
 internal static (slice<byte>, error) MarshalJSON(this jsonbyte b) { return tenc(jbDˢ, b); }
 
+} partial class json_internal_test_package {
+
 internal partial struct textbyte /*num:byte*/;
+
+} partial class json_internal_testᴛtextbyte {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tbDˢ => ref tbDˢᵇ;
@@ -1222,7 +1269,11 @@ private static readonly @string tbDˢᵇ = @"TB:%d"u8;
 
 internal static (slice<byte>, error) MarshalText(this textbyte b) { return tenc(tbDˢ, b); }
 
+} partial class json_internal_test_package {
+
 internal partial struct jsonint /*num:nint*/;
+
+} partial class json_internal_testᴛjsonint {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string jiDˢ => ref jiDˢᵇ;
@@ -1230,13 +1281,19 @@ private static readonly @string jiDˢᵇ = @"{""JI"":%d}"u8;
 
 internal static (slice<byte>, error) MarshalJSON(this jsonint i) { return tenc(jiDˢ, i); }
 
+} partial class json_internal_test_package {
+
 internal partial struct textint /*num:nint*/;
+
+} partial class json_internal_testᴛtextint {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tiDˢ => ref tiDˢᵇ;
 private static readonly @string tiDˢᵇ = @"TI:%d"u8;
 
 internal static (slice<byte>, error) MarshalText(this textint i) { return tenc(tiDˢ, i); }
+
+} partial class json_internal_test_package {
 
 internal static (slice<byte>, error) tenc(@string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
@@ -1248,11 +1305,15 @@ internal static (slice<byte>, error) tenc(@string format, params ꓸꓸꓸany a�
 
 internal partial struct textfloat /*num:float64*/;
 
+} partial class json_internal_testᴛtextfloat {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tf02fˢ => ref tf02fˢᵇ;
 private static readonly @string tf02fˢᵇ = @"TF:%0.2f"u8;
 
 internal static (slice<byte>, error) MarshalText(this textfloat f) { return tenc(tf02fˢ, f); }
+
+} partial class json_internal_test_package {
 
 internal partial struct TestEncodeBytekind_tests /*dyn*/ {
     /*embed*/ public CaseName CaseName;
@@ -1279,7 +1340,7 @@ public static void TestEncodeBytekind(ж<testing.T> t) {
     ]);
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestEncodeBytekind_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -1548,7 +1609,7 @@ public static void TestMarshalRawMessageValue(ж<testing.T> t) {
 
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMarshalRawMessageValue_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -1570,7 +1631,11 @@ public static void TestMarshalRawMessageValue(ж<testing.T> t) {
 internal partial struct marshalPanic {
 }
 
+} partial class json_internal_testᴛmarshalPanic {
+
 internal static (slice<byte>, error) MarshalJSON(this marshalPanic _) { throw panic((nint)0xdead); }
+
+} partial class json_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object marshalShouldHaveˢ = (@string)"Marshal should have panicked"u8;
@@ -1643,7 +1708,7 @@ public static void TestMarshalerError(ж<testing.T> t) {
 
     foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMarshalerError_tests(), out var Ꮡtt);
-        tt = vᴛ1;
+        tt = vᴛ1.ΔClone();
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
@@ -1657,9 +1722,13 @@ public static void TestMarshalerError(ж<testing.T> t) {
 
 internal partial struct marshaledValue /*@string*/;
 
+} partial class json_internal_testᴛmarshaledValue {
+
 internal static (slice<byte>, error) MarshalJSON(this marshaledValue v) {
     return (slice<byte>((@string)v), default);
 }
+
+} partial class json_internal_test_package {
 
 public static void TestIssue63379(ж<testing.T> t) {
     foreach (var (_, v) in range(slice<@string>([

@@ -165,7 +165,7 @@ internal static ref readonly @string go125SyncTestˢ => ref go125SyncTestˢᵇ;
 private static readonly @string go125SyncTestˢᵇ = "go125-sync.test"u8;
 
 internal partial struct TestTraceGenSync_sync /*dyn*/ {
-    public traceꓸTime Time;
+    public Δtrace.Time Time;
     public ж<Δtrace.ClockSnapshot> ClockSnapshot;
 }
 
@@ -182,7 +182,7 @@ public static void TestTraceGenSync(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Fatalf("malformed test %s: bad trace file: %v", testPath, err);
             }
-            slice<traceꓸEvent> syncEvents = default;
+            slice<Δtrace.Event> syncEvents = default;
             for (;;) {
                 var (ev, errΔ1) = tr.ReadEvent();
                 if (AreEqual(errΔ1, io.EOF)) {
@@ -235,9 +235,9 @@ public static void TestTraceGenSync(ж<testing.T> t) {
     ]);
 
     runTest(go125SyncTestˢ, slice<TestTraceGenSync_sync>([
-        new(9, Ꮡ(new Δtrace.ClockSnapshot(Trace: 10, Mono: 99, Wall: time.Date(2025, 2, 28, 15, 4, 9, 123, time.ΔUTC)))),
-        new(38, Ꮡ(new Δtrace.ClockSnapshot(Trace: 40, Mono: 199, Wall: time.Date(2025, 2, 28, 15, 4, 10, 123, time.ΔUTC)))),
-        new(58, Ꮡ(new Δtrace.ClockSnapshot(Trace: 60, Mono: 299, Wall: time.Date(2025, 2, 28, 15, 4, 11, 123, time.ΔUTC)))),
+        new(9, Ꮡ(new Δtrace.ClockSnapshot(Trace: 10, Mono: 99, Wall: time.Date(2025, 2, 28, 15, 4, 9, 123, time.UTC)))),
+        new(38, Ꮡ(new Δtrace.ClockSnapshot(Trace: 40, Mono: 199, Wall: time.Date(2025, 2, 28, 15, 4, 10, 123, time.UTC)))),
+        new(58, Ꮡ(new Δtrace.ClockSnapshot(Trace: 60, Mono: 299, Wall: time.Date(2025, 2, 28, 15, 4, 11, 123, time.UTC)))),
         new(83, nil)
     ]));
 }

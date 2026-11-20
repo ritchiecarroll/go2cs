@@ -14,7 +14,6 @@ using go;
 using static global::go.crypto.@internal.fips140.aes_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("BlockSize", "const:ΔBlockSize")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

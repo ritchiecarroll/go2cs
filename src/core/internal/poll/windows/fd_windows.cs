@@ -484,21 +484,20 @@ public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
         return initErr;
     }
 
-    var exprᴛ1 = net;
     switch (ᐧ) {
-    case {} when exprᴛ1 == "file"u8: {
+    case {} when net == "file"u8: {
         fd.kind = kindFile;
         break;
     }
-    case {} when exprᴛ1 == "console"u8: {
+    case {} when net == "console"u8: {
         fd.kind = kindConsole;
         break;
     }
-    case {} when exprᴛ1 == "pipe"u8: {
+    case {} when net == "pipe"u8: {
         fd.kind = kindPipe;
         break;
     }
-    case {} when exprᴛ1 == "file+net"u8: {
+    case {} when net == "file+net"u8: {
         fd.kind = kindFileNet;
         break;
     }

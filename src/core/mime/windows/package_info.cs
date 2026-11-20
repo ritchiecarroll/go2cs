@@ -59,7 +59,7 @@ using static go.mime_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABs6vLKClMaCgoKmyJK4lIKClJSUAAsYtpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClILakoKktLSCgvySgoKCgsiSyJKCggAIBoIAEiK2gpSmgoKUgoKmgoKmgoKUqrSCgqaUgpSCgoKClJSCgpSClIKUgpSClJSCgpSClIKCgoKCyoKmgqaCpoKmxoKUpKQADQiClLSCxoKClNiClIKClIK2yqKC6qaokoKCgqS0gpSCgpSCtLSUpqiSkoKClIKUpoKUpLaU")]
 [assembly: GoPositionMap("mime/grammar.go", "grammar.cs", "AAsSAAISABgg7AACEAAcKqyigpSCgqY=")]
-[assembly: GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABMq0oKCgpSUgpSCgqaCgoKCgpSUgpSUlIKUgoKmiIKUgoKmgqaCgqaCgoKCgoKCpoKUpoKCgpSClIKClIKClIKUqIKCgswAARgADgKClIKCpprEgoKCgpSCgqampoKCgpSCgqaUlIKqooKCgoKUpoKCgoKCgoKUgoKClIKCgqaCpoK4ppSCgoLKgoKUguiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgqaCgoKCpoKClIKCgpSCppSCgoKClIKClJSCpoKCgpSCgrSCgramgpSkpJSmgpSkpJQ=", "", "", "65=isTSpecial/1/1/2")]
+[assembly: GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABMq0oKCgpSUgpSCgqaCgoKCgpSUgpSUlIKUgoKmiIKUgoKmgqaCgqaCgoKCgoKCpoKUpoKCgpSClIKClIKClIKUqIKCgswAARgADgKClIKCpprEgoKCgpSCgqampoKCgpSCgqaUlIKqooKCgoKUpoKCgoKCgoKUgoKClIKCgqaCpoK4ppSCgoLKgoKUgtiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgqaCgoKCpoKClIKCgpSCppSCgoKClIKClJSCpoKCgpSCgrSCgramgpSkpJSmgpSkpJQ=", "", "", "65=isTSpecial/1/1/2")]
 [assembly: GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgpS0AA0aAEiOAYKClIIAAzAAFgKmgqyygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSCAAoGooKClIKClJSClIKCgoKUgoKmgg==")]
 [assembly: GoPositionMap("mime/type_windows.go", "type_windows.cs", "AAoWguaCgoKUgoKUgoKUgoKCAAgSgqa4gg==")]
 // </GoSourcePositionMaps>

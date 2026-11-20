@@ -379,6 +379,8 @@ partial struct wrapper {
     internal Action<ж<slog.Record>> mod;
 }
 
+} partial class slogtestᴛwrapper {
+
 // Go method set entry for the promoted 'Handler.Enabled()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
 internal static bool Enabled(this wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
@@ -390,8 +392,6 @@ internal static slog.Handler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> at
 // Go method set entry for the promoted 'Handler.WithGroup()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
 internal static slog.Handler WithGroup(this wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
-
-} partial class slogtestᴛwrapper {
 
 internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) {
     ref var r = ref heap(rʗp.ΔClone(), out var Ꮡr);

@@ -33,7 +33,7 @@ using static go.hash.maphash_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("hash/maphash/maphash_test.go", "maphash_test.cs", "ABQogoKCgpSCuIKCgoKCgpSCuIKCgoKUgpSClIKCgqaCgoKmgoKCuIKCgoKUlIKClLiCgoK4gIK2gIIACAiCgoKCgoKCgpSCgpSCuISSgoKCgpSC+IKCgpSCgpSCpoKCgpSCuIKCgoKCgoKCgriCgoKCgoKCgoKCuIKCgoKCgoKCgoK4goKCgoKCgoKCgoK4ooKCABcGgoKCgoKCgoKCgoIAABCIgoKUgpSCgoKCgoKCgoKCgoKmgoKCuJSC1qKSsoKUgoKClIKCgoIABhCSgpSUgoLmgoKCgoKCgoKCgoIAABCIgoKUgpSCgoKCgoKCpoKCgoKCgoKC6qKSsoKUgoKCgoKCgoKUgoKCgoKCAAgKooKCgoKCgpSCgqai5IKCkoKUgoKClIIADAiCgpSClIKCkoKUgpaagpSCyoKUggAKBoKCgpSigoKCgriigoKCuJKCgoLKgoKCgsqCgoKCAA0KggAAEoKCgoKCgoKCgg==", "56-61:1;62-67:2;68-73:3;284-300:1;371-394:1;400-410:1;439-442:1;451-454:2;465-465:1;473-480:1;482-488:2;490-496:3;502-504:1;509-514:1", "", "", "", "443:21,444:13")]
-[assembly: GoPositionMap("hash/maphash/smhasher_test.go", "smhasher_test.cs", "ABs4mrKCgoKCgoKCgoKCgoKCgoLugoKCgpSCgoKCyoIABxCClIKUgpSClIKCgoKUgoKClIKCgqaUgoKCgoKmqJKCgoKClKiSgoKCgoKCgoKCgoKCyqiSgoKClIKCgpTokoKUgpSCgoKUlKKmpoKCgoLKgoKCgoKCgqbMkoKUgoKCgoKCgoKCgoKCgoKUlLqSgpSClIKCgoKCgoKCgpSigoKCqLKCgpSCgoK8ooKUgpSCgoKCgoKUooKCgpSigoKUgoKCgoIAECKClIKUgpSClIKUgqiSgpSClIKCgoKCgpSCgoKCuJSUgqaCgoKmgoKCAAkUgpSUgoKCgoKCgoKC3pKClIKClIKUlIKCgoKCgqaUAAsKkoKUgoKCgtSigoKCgoKCgoKCgoKCgoKCgsr4koKUgoKCgoKClA==")]
+[assembly: GoPositionMap("hash/maphash/smhasher_test.go", "smhasher_test.cs", "ABw4mrKCgoKCgoKCgoKCgoKCgoLugoKCgpSCgoKCyoIABxCCxIKUgpSClIKCgoKUgoKClIKCgqaUgoKCgoKmyJKCgoKClKiSgoKCgoKCgoKCgoKCyqiSgoKClIKCgpTokoKUgpSCgoKUlKKmpoKCgoLKgoKCgoKCgqbMkoKUgoKCgoKCgoKCgoKCgoKUlLqSgpSClIKCgoKCgoKCgpSigoKCqLKCgpSCgoK8ooKUgpSCgoKCgoKUooKCgpSigoKUgoKCgoIAEiKClIKUgpSClIKUgsiSgpSClIKCgoKCgpSCgoKCuJSUgqaCgoKmgoKCAAkUgpSUgoKCgoKCgoKC3pKClIKClIKUlIKCgoKCgqaUAAsKkoKUgoKCgtSigoKCgoKCgoKCgoKCgoKCgsr4koKUgoKCgoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -76,3 +76,14 @@ public static partial class maphash_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(maphash_internal_test_package.bytesKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class maphash_internal_testᴛbytesKey;
+[GoMethodHost(typeof(maphash_internal_test_package.hashSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class maphash_internal_testᴛhashSet;
+// </MethodHolders>

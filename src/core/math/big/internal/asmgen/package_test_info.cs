@@ -13,12 +13,6 @@ using go;
 using static global::go.math.big.@internal.asmgen_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("AltCarry", "const:ΔAltCarry")]
-[assembly: GoTypeAlias("Carry", "ΔCarry")]
-[assembly: GoTypeAlias("Func", "ΔFunc")]
-[assembly: GoTypeAlias("Pipe", "ΔPipe")]
-[assembly: GoTypeAlias("Reg", "ΔReg")]
-[assembly: GoTypeAlias("RegsUsed", "ΔRegsUsed")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>

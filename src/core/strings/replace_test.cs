@@ -10,6 +10,7 @@ using testing = testing_package;
 using static go.strings_internal_test_package;
 using strings = strings_package;
 using Δio = io_package;
+using static strings_test_package;
 
 partial class strings_test_package {
 
@@ -385,7 +386,7 @@ internal static slice<algorithmTestCasesᴛ1> algorithmTestCases = slice<algorit
 // TestPickAlgorithm tests that NewReplacer picks the correct algorithm.
 public static void TestPickAlgorithm(ж<testing.T> t) {
     foreach (var (i, tc) in range(algorithmTestCases)) {
-        @string got = fmt.Sprintf("%T"u8, tc.r.ΔReplacer());
+        @string got = fmt.Sprintf("%T"u8, tc.r.Replacer());
         if (got != tc.want) {
             t.Errorf("%d. algorithm = %s, want %s", i, got, tc.want);
         }
@@ -395,9 +396,13 @@ public static void TestPickAlgorithm(ж<testing.T> t) {
 partial struct errWriter {
 }
 
+} partial class strings_testᴛerrWriter {
+
 internal static (nint n, error err) Write(this errWriter _, slice<byte> p) {
     return (0, fmt.Errorf("unwritable"u8));
 }
+
+} partial class strings_test_package {
 
 // TestWriteStringError tests that WriteString returns an error
 // received from the underlying io.Writer.

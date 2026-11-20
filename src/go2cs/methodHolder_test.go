@@ -760,3 +760,179 @@ func TestGolibFriendTypesFollowTheAssemblyName(t *testing.T) {
 		t.Errorf("fmt's assembly go.fmt is not golib's friend, so %s is not golib's there", friendType)
 	}
 }
+
+const promotedForwarderHolderSource = `package main
+
+import "fmt"
+
+type Driver struct{ name string }
+
+type Connector interface {
+	Driver() Driver
+	Name() string
+}
+
+type base struct{}
+
+func (base) Driver() Driver { return Driver{name: "base"} }
+func (base) Name() string   { return "base" }
+
+type (
+	counting struct {
+		Connector
+		hits int
+	}
+	after struct{ n int }
+)
+
+func (c *counting) Name() string {
+	c.hits++
+	return "counting"
+}
+
+func main() {
+	var k Connector = &counting{Connector: base{}}
+	fmt.Println(k.Name(), k.Driver().name, after{n: 1}.n)
+}
+`
+
+// A promoted forwarder the converter writes for a struct (a method its pointer gets only through an
+// embedded interface) is one of the struct's methods, so it is a member of the struct's holder, beside the
+// methods Go declares on it. In the package class it shared a class with the type of its name: CS0102,
+// `Driver` beside `Driver`. The next type of a grouped declaration is back in the package class.
+func TestPromotedForwarderIsEmittedInItsStructsHolder(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": promotedForwarderHolderSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"\n} partial class mainᴛcounting {\n\n// Go method set entry for the promoted 'Connector.Driver()'",
+		"internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();\n\n} partial class main_package {\n\npartial struct after {",
+		"\n} partial class mainᴛcounting {\n\ninternal static @string Name(this ref counting c)",
+	}, []string{
+		"Δ",
+	})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"[GoMethodHost(typeof(main_package.counting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
+	}, nil)
+}
+
+const dotImportHolderLibSource = `package lib
+
+const size = 64
+
+var shared = 1
+
+type pair struct{ a, b int }
+
+func Exported() int { return size + shared + pair{1, 2}.a }
+`
+
+const dotImportHolderMainSource = `package main
+
+import (
+	"fmt"
+
+	. "example.com/app/lib"
+)
+
+const size = 32
+
+var shared = 2
+
+var alone = 3
+
+type Set struct{ n int }
+
+type pair struct{ x int }
+
+type single struct{ y int }
+
+func (s Set) Bits() int { return s.n + size + shared + alone }
+
+func (p pair) Sum(q single) int { return p.x + q.y + pair{x: 1}.x }
+
+func plain() int { return size + shared + alone }
+
+func main() {
+	fmt.Println(Set{n: 1}.Bits(), plain(), Exported(), pair{}.Sum(single{}))
+}
+`
+
+// A dot import (`. "runtime"`) is written `using static runtime_package;`, which in C# brings in every name
+// of the class the assembly can see, unexported ones included, where Go brings in none of them. In the
+// package class the class's own member wins; a method holder is not nested in the package class, so there
+// the two using-statics supply a name both packages declare with equal standing (CS0229, runtime's
+// hashSize in hash_test.go; for a type, net/http's dumpConn, CS0104). The holder writes such a name through
+// its own package's class, which is the binding Go gives it. A name only the package declares, and every
+// name outside a holder, stays bare.
+func TestHolderQualifiesAnOwnNameADotImportedPackageAlsoDeclares(t *testing.T) {
+	emitted := convertMethodHolderTree(t, "example.com/app",
+		map[string]string{"main.go": dotImportHolderMainSource},
+		map[string]string{"lib/lib.go": dotImportHolderLibSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"using static go.example.com.app.lib_package;\n",
+		"return s.n + (nint)main.size + main.shared + alone;",
+		"return (nint)size + shared + alone;",
+		"Sum(this main_package.pair p, single q) { return p.x + q.y + new main_package.pair(x: 1).x; }",
+	}, []string{
+		"main.alone",
+		"lib_package.size",
+	})
+}
+
+const foreignConstraintHolderLibSource = `package lib
+
+type Text interface{ ~[]byte | ~string }
+`
+
+const foreignConstraintHolderMainSource = `package main
+
+import (
+	"fmt"
+
+	"example.com/app/lib"
+)
+
+type Iterator[T lib.Text] struct{ data T }
+
+func (it *Iterator[T]) SetText(data T) { it.data = data }
+
+type Window[K comparable, T lib.Text] struct {
+	key  K
+	data T
+}
+
+func (w Window[K, T]) Len() int { return len(w.data) }
+
+func main() {
+	it := &Iterator[string]{}
+	it.SetText("go")
+	fmt.Println(len(it.data), Window[int, []byte]{data: []byte("abc")}.Len())
+}
+`
+
+// A generic type's holder is named by the type's identifier alone, whatever its type parameters' constraints
+// are. A constraint from a package whose import path has a slash (example.com/app/lib) used to reach the
+// holder's name through the type's string form, where the last-slash strip left the constraint's own name and
+// the closing bracket: `mainᴛText>` for every such type, two types sharing one broken holder (CS1022), the
+// emission of github.com/clipperhouse/uax29/v2's iterators package.
+func TestGenericHolderIsNamedByTheTypeWhateverItsConstraint(t *testing.T) {
+	emitted := convertMethodHolderTree(t, "example.com/app",
+		map[string]string{"main.go": foreignConstraintHolderMainSource},
+		map[string]string{"lib/lib.go": foreignConstraintHolderLibSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"\n} partial class mainᴛIterator {\n",
+		"\n} partial class mainᴛWindow {\n",
+	}, []string{
+		"Text>",
+	})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"[GoMethodHost(typeof(main_package.Iterator<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛIterator;\n",
+		"[GoMethodHost(typeof(main_package.Window<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛWindow;\n",
+	}, []string{
+		"Text>",
+	})
+}

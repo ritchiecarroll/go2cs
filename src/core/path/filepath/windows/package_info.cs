@@ -55,7 +55,7 @@ using static go.path.filepath_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("path/filepath/match.go", "match.cs", "ABQkAAE4ABoCgoKCgoKUpriCgpSClKaCgpSClIKUgri0qsKCgpSCgqaCxrS0gsisAAgIgoKCppKCgoKUlIKCgqaCgoKCgpSSgpSCgoKmgpSmgoKClKaCgoKmpoKClKaClKjSgoKUgoKCgqaCgpSCgpQAAhYACAKmtJKCuIKUgoKUpoKCgpSmgriCpoKCgpSCgoKmqJKktqS6koKUtqSkgpQAAxAACAKCgoKUgpSCgpSkgpSCgoKUgqbaooKClA==", "", "", "", "369:21")]
+[assembly: GoPositionMap("path/filepath/match.go", "match.cs", "ABQkAAE4ABoCgoKCgoKUpriCgpSClKaCgpSClIKUgri0qsKCgpSCgqaCxrS0gsisAAgIgoKCppKCgoKUlIKCgqaCgoKCgpSSgpSCgoKmgpSmgoKClKaCgoKmpoKClKaClKjSgoKUgoKCgqaCgpSCgpQAAhYACAKmtJKCuIKUgoKUpoKCgpSmgriCpoKCgpSCgoKmqJKUtqS6koKUtqSkgpQAAxAACAKCgoKUgpSCgpSkgpSCgoKUgqbaooKClA==", "", "", "", "368:21")]
 [assembly: GoPositionMap("path/filepath/path.go", "path.cs", "ABxuABsCAAIiAA4CAAIWAAgCrLIAAhLirsIAAhDSAAIUAAkCrsIAAhDSqJIAAhDSpoKClIKClAACGAAJAoKCgoKClIKCgoKkuIKCgqaCgrKCgpSClIKUgpSClIKUgpSUgoKClIKCgoKClIKClJTcygApVKaSgpSUpoKUgoKClLiCgoKClKaokoKmgrjKpoKCgoKCpoKCgsoAAiQADwKCgpSUgpQAAiIADgKCgpSUgpSqooKClIKCgpSCrsIAAhLirsI=")]
 [assembly: GoPositionMap("path/filepath/path_windows.go", "path_windows.cs", "AAsiwoKUpriCuIKCgoKktIK2poKmpoK4lIKClKaCgoKiAAwWgsqCAA4WgqSCgqaClKaC")]
 [assembly: GoPositionMap("path/filepath/symlink.go", "symlink.cs", "ABQggoKUgpSCgoKCgpSCgtymlIKUgryigoKmyoKUppTKgqa4goKmgoKUyoKCpoKCpqamlIKUgpSCgoKUgoKCmKKCgqaClJSm")]

@@ -420,9 +420,8 @@ public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
         if (err != nil) {
             return (default, err);
         }
-        var exprᴛ1 = c;
         var matchᴛ1 = false;
-        if (exprᴛ1 is (byte)'[') { matchᴛ1 = true;
+        if (c is (byte)'[') { matchᴛ1 = true;
             if (!dec.tokenValueAllowed()) {
                 return dec.tokenError(c);
             }
@@ -431,7 +430,7 @@ public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = tokenArrayStart;
             return ((Delim)(rune)'[', default);
         }
-        if (exprᴛ1 is (byte)']') { matchᴛ1 = true;
+        if (c is (byte)']') { matchᴛ1 = true;
             if (dec.tokenState != tokenArrayStart && dec.tokenState != tokenArrayComma) {
                 return dec.tokenError(c);
             }
@@ -441,7 +440,7 @@ public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenValueEnd();
             return ((Delim)(rune)']', default);
         }
-        if (exprᴛ1 is (byte)'{') { matchᴛ1 = true;
+        if (c is (byte)'{') { matchᴛ1 = true;
             if (!dec.tokenValueAllowed()) {
                 return dec.tokenError(c);
             }
@@ -450,7 +449,7 @@ public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = tokenObjectStart;
             return ((Delim)(rune)'{', default);
         }
-        if (exprᴛ1 is (byte)'}') { matchᴛ1 = true;
+        if (c is (byte)'}') { matchᴛ1 = true;
             if (dec.tokenState != tokenObjectStart && dec.tokenState != tokenObjectComma) {
                 return dec.tokenError(c);
             }
@@ -460,7 +459,7 @@ public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenValueEnd();
             return ((Delim)(rune)'}', default);
         }
-        if (exprᴛ1 is (byte)':') { matchᴛ1 = true;
+        if (c is (byte)':') { matchᴛ1 = true;
             if (dec.tokenState != tokenObjectColon) {
                 return dec.tokenError(c);
             }
@@ -468,7 +467,7 @@ public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
             dec.tokenState = tokenObjectValue;
             continue;
         }
-        else if (exprᴛ1 is (byte)',') { matchᴛ1 = true;
+        else if (c is (byte)',') { matchᴛ1 = true;
             if (dec.tokenState == tokenArrayComma) {
                 dec.scanp++;
                 dec.tokenState = tokenArrayValue;
@@ -481,7 +480,7 @@ public static (Token, error) Token(this ж<Decoder> Ꮡdec) {
             }
             return dec.tokenError(c);
         }
-        else if (exprᴛ1 is (byte)'"') { matchᴛ1 = true;
+        else if (c is (byte)'"') { matchᴛ1 = true;
             if (dec.tokenState == tokenObjectStart || dec.tokenState == tokenObjectKey) {
                 ref var x = ref heap(new @string(), out var Ꮡx);
                 nint old = dec.tokenState;

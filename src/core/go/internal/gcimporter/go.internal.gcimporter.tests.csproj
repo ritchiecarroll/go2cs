@@ -144,7 +144,6 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/ast/go.ast.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/build/go.build.csproj" />
@@ -154,7 +153,6 @@
     <ProjectReference Include="$(go2csPath)core/go/types/go.types.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/pkgbits/internal.pkgbits.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />

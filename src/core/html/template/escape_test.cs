@@ -17,23 +17,32 @@ using static go.html.template_package;
 using text;
 using text.template;
 using ꓸꓸꓸany = Span<any>;
+using static template_internal_test_package;
 
 partial class template_internal_test_package {
 
 internal partial struct badMarshaler {
 }
 
+} partial class template_internal_testᴛbadMarshaler {
+
 internal static (slice<byte>, error) MarshalJSON(this ref badMarshaler x) {
     // Keys in valid JSON must be double quoted as must all strings.
     return (slice<byte>("{ foo: 'not quite valid JSON' }"u8), default);
 }
 
+} partial class template_internal_test_package {
+
 internal partial struct goodMarshaler {
 }
+
+} partial class template_internal_testᴛgoodMarshaler {
 
 internal static (slice<byte>, error) MarshalJSON(this ref goodMarshaler x) {
     return (slice<byte>(@"{ ""<foo>"": ""O'Reilly"" }"u8), default);
 }
+
+} partial class template_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iexclBClassFooHelloBˢ => ref iexclBClassFooHelloBˢᵇ;
@@ -2038,8 +2047,8 @@ public static void TestEnsurePipelineContains(ж<testing.T> t) {
         )
     ]);
     foreach (var (i, test) in range(tests)) {
-        var (ᴛ5, ᴛ6) = text.template_package.New(testˢ).Parse(test.input);
-        var tmpl = text.template_package.Must(ᴛ5, ᴛ6);
+        var (ᴛ5, ᴛ6) = template.New(testˢ).Parse(test.input);
+        var tmpl = template.Must(ᴛ5, ᴛ6);
         var (action, ok) = (tmpl.Tree.Root.Nodes[0]._<ж<parse.ActionNode>>(ᐧ));
         if (!ok) {
             t.Errorf("First node is not an action: %s", test.input);
@@ -2185,9 +2194,13 @@ public static void TestEmptyTemplateHTML(ж<testing.T> t) {
 
 public partial struct Issue7379 /*num:nint*/;
 
+} partial class template_internal_testᴛIssue7379 {
+
 public static @string SomeMethod(this Issue7379 _, nint x) {
     return fmt.Sprintf("<%d>"u8, x);
 }
+
+} partial class template_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string html0SomeMethodHtmlˢ => ref html0SomeMethodHtmlˢᵇ;

@@ -285,7 +285,7 @@ internal static void runTest(ж<testing.T> t, slice<@string> args, Action f, @st
 
 public static void TestNow(ж<testing.T> t) {
     synctest.Test(t, (ж<testing.T> tΔ1) => {
-        var (got, want) = (time.Now(), time.Date(2000, time.January, 1, 0, 0, 0, 0, time.ΔUTC)); if (!got.Equal(want)) {
+        var (got, want) = (time.Now(), time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)); if (!got.Equal(want)) {
             tΔ1.Errorf("time.Now() = %v, want %v", got, want);
         }
     });

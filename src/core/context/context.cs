@@ -491,11 +491,11 @@ partial struct cancelCtx {
     internal error cause;                         // set to non-nil by the first cancel call
 }
 
+} partial class contextᴛcancelCtx {
+
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *cancelCtx's method set; see the pointer-only satisfaction record.
 internal static (time.Time, bool) Deadline(this cancelCtx recvᴛ) => recvᴛ.Context.Deadline();
-
-} partial class contextᴛcancelCtx {
 
 internal static any Value(this ж<cancelCtx> Ꮡc, any key) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -551,9 +551,9 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
         return; // parent is never canceled
     }
 
-    var selᴛ1 = done;
-    switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out _): {
+    var doneᴛ1 = done;
+    switch (trySelect(ᐸꟷ(doneᴛ1, ꓸꓸꓸ))) {
+    case 0 when doneᴛ1.ꟷᐳ(out _): {
         // parent is already canceled
         child.cancel(false, parent.Err(), Cause(parent));
         return;
@@ -858,6 +858,8 @@ partial struct valueCtx {
     internal any key, val;
 }
 
+} partial class contextᴛvalueCtx {
+
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
 internal static (time.Time, bool) Deadline(this valueCtx recvᴛ) => recvᴛ.Context.Deadline();
@@ -869,6 +871,8 @@ internal static /*<-*/channel<EmptyStruct> Done(this valueCtx recvᴛ) => recv�
 // Go method set entry for the promoted 'Context.Err()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
 internal static error Err(this valueCtx recvᴛ) => recvᴛ.Context.Err();
+
+} partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;

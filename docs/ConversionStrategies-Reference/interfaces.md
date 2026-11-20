@@ -62,19 +62,23 @@ bool global::go.main_package.ΔHandler.Enabled(nint level) => m_box.Value.Handle
 
 An overridden member is untouched (it forwards to the struct's own method, `this.Handle(…)` / `m_box.Value.Handle(…)`), and a non-renamed interface's simple name has no marker to strip, so every other promotion emits byte-identical code. (Guarded by `ShadowedInterfaceEmbed` — a `Handler` interface Δ-renamed by a `Logger.Handler()` method collision, value-embedded in a `wrapper` struct that overrides one of its three methods, cast to the interface by BOTH value and pointer, promoted and overridden members runtime-verified vs Go.)<!-- cleared testing/slogtest's 6 errors at the time -->
 
-**A converter-emitted promoted forwarder takes the METHOD's spelling, never the colliding TYPE's.** When a struct satisfies an interface only through its pointer, the converter writes a forwarder for each method the embedded interface field still promotes into the VALUE method set (`// Go method set entry for the promoted 'Connector.Driver()'`). A package that declares a type and a method of one name renames the TYPE (`ΔDriver`, [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)) and keeps the method's own name, which is how the interface declares the member and how every call site reads it. So the forwarder's name and the member it calls come from the method spelling (`getSanitizedFunctionName`), not the collision-aware identifier spelling:
+**A converter-emitted promoted forwarder is one of its struct's methods: it takes the METHOD's spelling and stands in the struct's method holder.** When a struct satisfies an interface only through its pointer, the converter writes a forwarder for each method the embedded interface field still promotes into the VALUE method set (`// Go method set entry for the promoted 'Connector.Driver()'`). The forwarder's name and the member it calls come from the method spelling (`getSanitizedFunctionName`), which is how the interface declares the member and how every call site reads it. A package-level struct's forwarders are written into the struct's method holder, beside the methods Go declares on it ([Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)), and go2cs-gen writes their pointer-receiver overloads there too. A package's types and its methods are then members of different classes, so a type and a method of one name keep both names:
 
-<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:36 -->
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:43-47 -->
 ```csharp
-internal static ΔDriver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();
+} partial class mainᴛcounting {
+
+// Go method set entry for the promoted 'Connector.Driver()' - provided ONLY by the embedded
+// interface field in *counting's method set; see the pointer-only satisfaction record.
+internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();
 ```
 
-<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:56 -->
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:75 -->
 ```csharp
 internal static driver.Driver Driver(this fcounting recvᴛ) => recvᴛ.Connector.Driver();
 ```
 
-Named after the type, the forwarder was `ΔDriver(…) => recvᴛ.Connector.ΔDriver()`: CS0102 beside the nested type in the same package, and CS1929 against a foreign interface's `Driver()` (modernc.org/sqlite's tests, through `database/sql/driver.Connector`). (Guarded by `PromotedForwarderTypeNameCollision` — `Driver` is a type and a `Connector` method, `*counting` overrides `Name`, and the promoted `Driver` is reached through the interface, directly, as a method value and through reflect's method sets, all compared with Go; its second arm is the TS probe's `t3` repro, `fcounting` embedding the foreign `driver.Connector` and overriding `Connect` through its pointer.)
+Each earlier placement failed. When a type and a method of one name renamed the TYPE (`ΔDriver`), a forwarder named after the type was `ΔDriver(…) => recvᴛ.Connector.ΔDriver()`: CS0102 beside the nested type in the same package, and CS1929 against a foreign interface's `Driver()` (modernc.org/sqlite's tests, through `database/sql/driver.Connector`). Once the method-holder rule kept the type's name, a forwarder still written in the package class stood beside the type `Driver` there: CS0102 in `main.cs` and in go2cs-gen's two overloads (batch 311). A function-local struct keeps its forwarders beside it, in the package class: Go declares no method on a local type, so it has no holder. (Guarded by `PromotedForwarderTypeNameCollision` — `Driver` is a type and a `Connector` method, `*counting` overrides `Name`, and the promoted `Driver` is reached through the interface, directly, as a method value and through reflect's method sets, all compared with Go; its second arm is the TS probe's `t3` repro, `fcounting` embedding the foreign `driver.Connector` and overriding `Connect` through its pointer — and by the converter test `TestPromotedForwarderIsEmittedInItsStructsHolder`.)
 
 **A FOREIGN struct's adapter forwards a PROMOTED interface method through the box value, not a phantom static.** When the pointer adapter is generated in an assembly OTHER than the struct's — the struct's package class lives in a different namespace segment, so its extension methods are invisible to extension-method lookup — the `ImplementGenerator` forwards each interface member through a package-class STATIC call (`xcoff_package.ReadAt(m_box, …)`). But this only works for a method the struct **declares directly** (whose `RecvGenerator` ж/ref static exists). A **promoted** interface method — debug/buildinfo's `*xcoff.Section` → `io.ReaderAt`, where `Section` embeds the `io.ReaderAt` interface so `ReadAt` is promoted, not declared — has no such static, so the forward targets a nonexistent overload (CS1501, "no overload takes 3 arguments"). The static forward is gated on a real box/ref-bound static existing; when absent, the adapter forwards through the box VALUE — `m_box.Value.ReadAt(…)` — invoking the struct's own PUBLIC promoted method (the same promotion `File.ReadAt` etc. rely on). A directly-declared method keeps the static forward. (Validated by the `core/debug/buildinfo` build — its `*os.File → io.ReaderAt` [direct `ReadAt`, static] and `*xcoff.Section → io.ReaderAt` [promoted, box-value] adapters — plus the full behavioral suite + tar/math-big/net corpus; a single-assembly behavioral guard cannot host it — the shape needs a struct embedding a THIRD package's interface, cast cross-assembly, so no behavioral test guards it.)<!-- GUARD OWED -->
 
@@ -1903,7 +1907,7 @@ In `package_info_internal_test.cs`, anchored at the internal test bridge class:
 
 In `package_test_info.cs`, anchored at the external test class:
 
-<!-- source: src/core/encoding/gob/package_test_info.cs:27 -->
+<!-- source: src/core/encoding/gob/package_test_info.cs:24 -->
 ```csharp
 [assembly: GoImplement<go.encoding.gob_test_package.Point, Pythagoras>]
 ```
@@ -2039,6 +2043,43 @@ foreign types could not be hosted in either of their assemblies from here in any
 `ForeignPairNumericConv` behavioral test — a sibling library declaring two
 named numerics and never converting between them, converted across in `main`, with the
 foreign→local and local→foreign directions as the live controls for the records that are still needed.)
+
+### ...and a STRUCT pair of two foreign types is served by a FUNCTION, which needs no host
+The decline above rests on the explicit cast still compiling, which holds for a numeric pair and not for a struct
+pair: `lib.Pitch(o)` with `o` an `other.Pitch` has no cast to fall back on, because a conversion operator must be
+declared by one of its two types and both are closed assemblies (CS0030). The converter records that pair anyway,
+outside `checkForImplicitConversion` (`foreignPairStructConversion`), and go2cs-gen answers a record whose BOTH
+sides are referenced-assembly structs with one static function in this package's class instead of an operator,
+named as Go names the target, package then type. The site calls it. No type is extended, so no phantom can be
+minted; the numeric arms keep the rule above unchanged.
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.go:60-61 -->
+```go
+lp := lib.Pitch(o)
+op := other.Pitch(p)
+```
+
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:49-50 -->
+```csharp
+var lp = libꓸPitch(o);
+var op = otherꓸPitch(p);
+```
+
+and go2cs-gen writes, for the first:
+
+<!-- illustration: go2cs-gen output, written into Generated/ at build time and not committed -->
+```csharp
+internal static lib.Pitch libꓸPitch(other.Pitch src) => new lib.Pitch(src.Hz);
+```
+
+The route is taken only where the function can be written and no operator already converts: both types are
+declared with a struct type literal (a type written over another named type keeps its own operator), neither is
+generic or this package's own, every field is exported (an unexported field is `internal` to its assembly), and no
+field's type holds an unnamed struct type (each package lifts its own C# type for one). Any other pair keeps the
+cast. Detail and limits: struct-types.md, *A struct conversion between two types of OTHER packages calls a
+generated function*. (Guarded by the `ForeignPairStructConversion` behavioral test,
+`TestAStructConversionBetweenTwoForeignTypesCallsItsFunction` in the converter and the
+`ForeignPairStructConversionTests` generator tests.)
 
 ### ...but the POINTER-BOXING route needs none, and a whitebox-production operand still counts
 The rule above is about HOSTING, so it stops where hosting does. A record of the form `T` → `ж<T>` —

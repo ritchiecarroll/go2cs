@@ -15,11 +15,11 @@ partial struct cached {
     internal nint hits;
 }
 
+} partial class mainᴛcached {
+
 // Go method set entry for the promoted 'Host.Trace()' - provided ONLY by the embedded
 // interface field in *cached's method set; see the pointer-only satisfaction record.
 internal static @string Trace(this cached recvᴛ, @string format, params ꓸꓸꓸany argsʗp) => recvᴛ.Host.Trace(format, argsʗp);
-
-} partial class mainᴛcached {
 
 internal static @string Name(this ref cached c) {
     c.hits++;

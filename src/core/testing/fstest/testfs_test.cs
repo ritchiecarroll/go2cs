@@ -15,6 +15,7 @@ using @internal;
 using go.io;
 using go.path;
 using static go.testing.fstest_package;
+using static fstest_internal_test_package;
 
 partial class fstest_internal_test_package {
 
@@ -69,6 +70,8 @@ public static void TestDash(ж<testing.T> t) {
 
 internal partial struct shuffledFS /*global::go.testing.fstest_package.MapFS*/;
 
+} partial class fstest_internal_testᴛshuffledFS {
+
 internal static (fs.File, error) Open(this shuffledFS fsys, @string name) {
     var (f, err) = ((global::go.testing.fstest_package.MapFS)fsys).Open(name);
     if (err != nil) {
@@ -77,9 +80,13 @@ internal static (fs.File, error) Open(this shuffledFS fsys, @string name) {
     return (new fstest_internal_test_package.shuffledFileжFile(Ꮡ(new shuffledFile(File: f))), default);
 }
 
+} partial class fstest_internal_test_package {
+
 internal partial struct shuffledFile {
     /*embed*/ public go.io.fs_package.File File;
 }
+
+} partial class fstest_internal_testᴛshuffledFile {
 
 internal static (slice<fs.DirEntry>, error) ReadDir(this ref shuffledFile f, nint n) {
     var (dirents, err) = f.File._<fs.ReadDirFile>().ReadDir(n);
@@ -91,6 +98,8 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref shuffledFile f, nin
     slices.SortFunc(dirents, (fs.DirEntry a, fs.DirEntry b) => strings.Compare(b.Name(), a.Name()));
     return (dirents, err);
 }
+
+} partial class fstest_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tmpOneˢ => ref tmpOneˢᵇ;
@@ -115,12 +124,16 @@ public static void TestShuffledFS(ж<testing.T> t) {
 internal partial struct failPermFS {
 }
 
+} partial class fstest_internal_testᴛfailPermFS {
+
 internal static (fs.File, error) Open(this failPermFS f, @string name) {
     if (!fs.ValidPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrInvalid))));
     }
     return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrPermission))));
 }
+
+} partial class fstest_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorExpectedˢ = (@string)"error expected"u8;

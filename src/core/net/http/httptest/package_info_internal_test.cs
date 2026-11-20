@@ -33,8 +33,8 @@ using static go.net.http.httptest_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/http/httptest/httptest_test.go", "httptest_test.cs", "ABMkgoIAChaCgoIAEwiCAJUBtgKSgoKClIKUgoKClIKUgpSC", "194-217:1")]
-[assembly: GoPositionMap("net/http/httptest/recorder_test.go", "recorder_test.cs", "AEsggoKQpAAFEAAFEAAFEAAKGgAFEAAFEAAFEAAFEJKSgoKCpqYABRCSkoKCgoKmpgAGEgAXGoKC7oKC7gAKGILu7oL+ggAJFILugoKC7oKCgoKCgoKCAA4g3AALGoKCgoIAChiCgoLuggAIDJKCgoKCgoIADA6CgoKUgoKmgoKmkgAICpIAFzaCggAJDqKmgqKCgriClIKCog==", "18-18:1;20-27:2;21-26:2.1;28-35:3;29-34:3.1;36-43:4;37-42:4.1;44-56:5;45-55:5.1;57-64:6;58-63:6.1;65-72:7;66-71:7.1;73-80:8;74-79:8.1;81-88:9;82-87:9.1;89-99:10;90-98:10.1;100-107:11;101-106:11.1;108-119:12;109-118:12.1;120-127:13;121-126:13.1;136-136:14;141-145:15;150-154:16;159-161:17;171-174:18;179-181:19;186-189:20;194-197:21;202-208:22;213-218:23;223-233:24;247-255:25;266-272:26;282-287:27;292-295:28;300-310:29;377-390:1;378-382:1.1;384-386:1.2", "", "", "", "453:29,454:21")]
-[assembly: GoPositionMap("net/http/httptest/server_test.go", "server_test.cs", "ABYk7oKCpoKCAA0IgoKCgpCSkJKQkpCSkLaCgoKQkpDaooKUkoKClIKCgpSCtKaSgqaCgpSCgoKUgqaUgoKCuKKClJKCgpS4graCkoKCgqaiprKCgpSCgoKCtKjCgpSSgoKClIKCgpSCtKjClJKCgrSowpSSgoK07JiiytqigrKCgoKUgoKUoqSCgrKCgoKWkoKCgpSipIKCsqaCoqSCsoKikgALBoIABBCysoKmpIK0tqSCgpSAksQADQiCAAYUsrKClKSCtLakgoKUkrQ=", "38-45:1;40-40:1.1;41-41:1.2;42-42:1.3;43-43:1.4;44-44:1.5;48-52:2;50-50:2.1;51-51:2.2;57-59:1;77-79:1;104-106:1;107-113:2;134-136:1;148-150:1;170-171:1;182-183:1;212-223:1;227-241:2;245-251:3;254-257:4;271-293:1;272-274:1.1;309-330:1;310-312:1.1", "", "", "163:21,168:21,292:25")]
+[assembly: GoPositionMap("net/http/httptest/recorder_test.go", "recorder_test.cs", "AFMggoKQpAAFEAAFEAAFEAAKGgAFEAAFEAAFEAAFEJKSgoKCpqYABRCSkoKCgoKmpgAGEgAXGoKC7oKC7gAKGILu7oL+ggAJFILugoKC7oKCgoKCgoKCAA4g3AALGoKCgoIAChiCgoLuggAIDJKCgoKCgoIADA6CgoKUgoKmgoKmkgAICpIAFzaCggAJDqKmgqKCgriClIKCog==", "18-18:1;20-27:2;21-26:2.1;28-35:3;29-34:3.1;36-43:4;37-42:4.1;44-56:5;45-55:5.1;57-64:6;58-63:6.1;65-72:7;66-71:7.1;73-80:8;74-79:8.1;81-88:9;82-87:9.1;89-99:10;90-98:10.1;100-107:11;101-106:11.1;108-119:12;109-118:12.1;120-127:13;121-126:13.1;136-136:14;141-145:15;150-154:16;159-161:17;171-174:18;179-181:19;186-189:20;194-197:21;202-208:22;213-218:23;223-233:24;247-255:25;266-272:26;282-287:27;292-295:28;300-310:29;377-390:1;378-382:1.1;384-386:1.2", "", "", "", "461:29,462:21")]
+[assembly: GoPositionMap("net/http/httptest/server_test.go", "server_test.cs", "ABck7oKCpoKCAA0IgoKCgpCSkJKQkpCSkLaCgoKQkpDaooKUkoKClIKCgpSCtKaSgqaCgpSCgoKUgqaUgoKCuKKClJKCgpS4graCkoKCgqaiprKCgpSCgoKCtKjCgpSSgoKClIKCgpSCtKjClJKCgrSowpSSgoK0AAgMuKLK2qKCsoKCgpSCgpSipIKCsoKCgpaSgoKClKKkgoKypoKipIKygqKSAAsGggAEELKygqakgrS2pIKClICSxAANCIIABhSysoKUpIK0tqSCgpSStA==", "38-45:1;40-40:1.1;41-41:1.2;42-42:1.3;43-43:1.4;44-44:1.5;48-52:2;50-50:2.1;51-51:2.2;57-59:1;77-79:1;104-106:1;107-113:2;134-136:1;148-150:1;170-171:1;182-183:1;212-223:1;227-241:2;245-251:3;254-257:4;271-293:1;272-274:1.1;309-330:1;310-312:1.1", "", "", "164:21,169:21,297:25")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -74,3 +74,13 @@ public static partial class httptest_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(httptest_internal_test_package.onlyCloseListener)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptest_internal_testᴛonlyCloseListener;
+// </MethodHolders>
