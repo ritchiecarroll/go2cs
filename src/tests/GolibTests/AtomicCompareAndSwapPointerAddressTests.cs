@@ -76,6 +76,57 @@ public class AtomicCompareAndSwapPointerAddressTests
         Assert.IsFalse(atomic.CompareAndSwapPointer(slot, (@unsafe.Pointer)nil, new @unsafe.Pointer((uintptr)0x9999)), "a second swap from nil fails");
     }
 
+    // A nil addr panics as Go's nil dereference does, and writes nothing: a nil *unsafe.Pointer is the process-wide
+    // ж<unsafe.Pointer>.NilBox, so a swap into its slot would hand p to every nil *unsafe.Pointer (P3 20261120T204953Z).
+    [TestMethod]
+    public void ANilAddrPanicsAndLeavesTheSharedNilBoxEmpty()
+    {
+        ж<@unsafe.Pointer> nilAddr = nil;
+        @unsafe.Pointer installed = new((uintptr)0x5678);
+
+        PanicException panic = Assert.ThrowsException<PanicException>(() => atomic.CompareAndSwapPointer(nilAddr, (@unsafe.Pointer)nil, installed));
+
+        StringAssert.Contains(panic.Message, "nil pointer dereference");
+        Assert.IsNull(ж<@unsafe.Pointer>.NilBox.ValueSlot, "the shared nil box's slot still holds nothing");
+    }
+
+    // Pointers minted from Go variables, as converted code mints `unsafe.Pointer(&x)`: their equality is the referent's
+    // identity (unsafe.Pointer.Equals), and the CAS compares their numbers. The two must agree: one variable is one
+    // pointer, two variables are two. Once for a reference-free pointee (a pinned address) and once for a pointee that
+    // holds a reference (a token number).
+    private struct HoldsReference
+    {
+        public @string s;
+        public nint n;
+    }
+
+    [TestMethod]
+    public void TwoMintsOfOneReferenceFreeVariableSwapAndOfTwoVariablesDoNot() =>
+        AssertVariablePointersCompareAsTheirReferents(builtin.@new<long>(), builtin.@new<long>());
+
+    [TestMethod]
+    public void TwoMintsOfOneReferenceHoldingVariableSwapAndOfTwoVariablesDoNot() =>
+        AssertVariablePointersCompareAsTheirReferents(builtin.@new<HoldsReference>(), builtin.@new<HoldsReference>());
+
+    private static void AssertVariablePointersCompareAsTheirReferents<T>(ж<T> x, ж<T> y)
+    {
+        @unsafe.Pointer stored = @unsafe.Pointer.FromPinnedBox(x);
+        @unsafe.Pointer sameVariable = @unsafe.Pointer.FromPinnedBox(x);
+        @unsafe.Pointer otherVariable = @unsafe.Pointer.FromPinnedBox(y);
+
+        Assert.AreNotSame(stored, sameVariable, "two mints of one variable are two objects");
+        Assert.IsTrue(stored.Equals(sameVariable), "and one pointer by unsafe.Pointer's own equality");
+        Assert.IsFalse(stored.Equals(otherVariable), "two variables are two pointers by it");
+
+        heap(stored, out ж<@unsafe.Pointer> slot);
+        @unsafe.Pointer installed = new((uintptr)0x5678);
+
+        Assert.IsFalse(atomic.CompareAndSwapPointer(slot, otherVariable, installed), "another variable does not swap");
+        Assert.AreSame(stored, slot.ValueSlot);
+        Assert.IsTrue(atomic.CompareAndSwapPointer(slot, sameVariable, installed), "the same variable, minted again, swaps");
+        Assert.AreSame(installed, slot.ValueSlot);
+    }
+
     // The loop under contention: every successful swap is a real one, so N increments of an address counter through
     // read-then-CAS, each comparing against a FRESH object over the address it read, lose none.
     [TestMethod]
