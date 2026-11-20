@@ -21,11 +21,15 @@
                  go2cs package that names them, which goes last
       resume-foreign  release-nuget.ps1 -ResumePush over a folder holding a package of another version -> refused by
                  name, nothing PUT, version.props untouched
+      resume-off-record  release-nuget.ps1 -ResumePush with HEAD a revert of the record commit (its subject contains
+                 the record's) -> refused at Phase 3 before the confirmation, nothing PUT, nothing published
+      resume-amended  release-nuget.ps1 -ResumePush with HEAD the record AMENDED (same subject, another hash than the
+                 go2cs-record-commit.txt beside the packages) -> refused at Phase 3, nothing PUT, nothing published
       resume-release  release-nuget.ps1 -ResumePush, end to end, over three packages of the release (one published, a
                  403 with Retry-After 1 on the first PUT) -> exit 0, 2 pushed + 1 skipped + 1 wait, version.props
                  byte-identical (no re-bump), the published one never PUT
 
-    The two release-nuget cases run a scratch copy of release-nuget.ps1 and the files it reads (global.json,
+    The four release-nuget cases run a scratch copy of release-nuget.ps1 and the files it reads (global.json,
     _paths.ps1, Directory.Build.props, _nugetpush.ps1, version.props, and a no-op gencorpusrelease for Phase 4) in a
     child of this PowerShell, so they need dotnet and go on PATH, as a release does.
 
@@ -284,6 +288,20 @@ try {
     Set-Content -Path (Join-Path $src 'go2cs/go.mod') -Value "module stub`n`ngo 1.21`n"
     Set-Content -Path (Join-Path $src 'go2cs/internal/gencorpusrelease/main.go') -Value "package main`n`nfunc main() {}`n"
 
+    # A resumed push follows Phase 1b's local record commit, and Phase 4 refuses unless HEAD is that commit; so the
+    # scratch root is a repository whose HEAD is the release's record commit, as on the release machine.
+    $recordGroup = ([xml](Get-Content -Raw (Join-Path $src 'version.props'))).Project.PropertyGroup
+    $recordVersion = "$($recordGroup.GoStdLibVersion).$($recordGroup.GoBuildNumber)".Trim()
+    $gitSaved = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try {
+        & git -C $root init -q 2>&1 | Out-Null
+        & git -C $root add -A 2>&1 | Out-Null
+        & git -C $root -c user.name=selftest -c user.email=selftest@invalid -c commit.gpgsign=false commit -q -m "release: go2cs converted stdlib $recordVersion" 2>&1 | Out-Null
+        $recordCode = $LASTEXITCODE
+    }
+    finally { $ErrorActionPreference = $gitSaved }
+    Check ($recordCode -eq 0) "release cases: the scratch record commit failed (git exit $recordCode)"
+
     $propsPath = Join-Path $src 'version.props'
     $propsBefore = [System.IO.File]::ReadAllBytes($propsPath)
     $group = ([xml](Get-Content -Raw $propsPath)).Project.PropertyGroup
@@ -314,8 +332,20 @@ try {
         Check ([System.Convert]::ToBase64String($after) -eq [System.Convert]::ToBase64String($propsBefore)) "${Case}: version.props changed (re-bumped)"
     }
 
+    # Phase 1b writes the record commit's hash beside the packages; Phase 3 and Phase 4 refuse a HEAD that is not it.
+    function Invoke-ScratchGit([string[]] $GitArgs) {
+        $saved = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+        try { $out = @(& git -C $root -c user.name=selftest -c user.email=selftest@invalid -c commit.gpgsign=false @GitArgs 2>&1 | ForEach-Object { "$_" }); $c = $LASTEXITCODE }
+        finally { $ErrorActionPreference = $saved }
+        [pscustomobject]@{ Code = $c; Text = ($out -join "`n") }
+    }
+    $recordHash = (Invoke-ScratchGit @('rev-parse', 'HEAD')).Text.Trim()
+    Check ($recordHash -match '^[0-9a-f]{40,64}$') "release cases: could not read the scratch record hash ('$recordHash')"
+    function Write-RecordHash([string] $Dir) { Set-Content -LiteralPath (Join-Path $Dir 'go2cs-record-commit.txt') -Value $recordHash -Encoding ascii }
+
     $foreignDir = Join-Path $work 'out-foreign'
     New-Item -ItemType Directory -Path $foreignDir | Out-Null
+    Write-RecordHash $foreignDir
     [void](New-FakePackage 'go.lib' $release $foreignDir)
     [void](New-FakePackage 'go.stale' '1.0.0.9' $foreignDir)
     $state.Puts.Clear(); $state.Script.Clear()
@@ -325,8 +355,58 @@ try {
     Check ($state.Puts.Count -eq 0) "resume-foreign: PUT $(@($state.Puts) -join ', ')"
     Test-PropsUntouched 'resume-foreign'
 
+    # A record commit undone or replaced after Phase 1b must refuse BEFORE the publish, with nothing sent. HEAD here is
+    # a revert of the record: its subject CONTAINS the record subject, so this arm also holds the whole-subject compare.
+    $offDir = Join-Path $work 'out-off-record'
+    New-Item -ItemType Directory -Path $offDir | Out-Null
+    Write-RecordHash $offDir
+    foreach ($id in 'go.x', 'go.lib') { [void](New-FakePackage $id $release $offDir) }
+    $gitSaved = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try {
+        & git -C $root -c user.name=selftest -c user.email=selftest@invalid -c commit.gpgsign=false commit -q --allow-empty -m "Revert `"release: go2cs converted stdlib $recordVersion`"" 2>&1 | Out-Null
+        $offCode = $LASTEXITCODE
+    }
+    finally { $ErrorActionPreference = $gitSaved }
+    Check ($offCode -eq 0) "resume-off-record: the scratch revert commit failed (git exit $offCode)"
+    $state.Puts.Clear(); $state.Script.Clear()
+    $run = Invoke-Release $offDir
+    Check ($run.Code -eq 1) "resume-off-record: exit $($run.Code); want 1:`n$($run.Text)"
+    Check ($run.Text -match 'Phase 3: HEAD is not the record commit' -and $run.Text -match 'NOTHING was published') "resume-off-record: no Phase 3 refusal before the publish:`n$($run.Text)"
+    Check ($run.Text -notmatch 'Phase 3: publish to') "resume-off-record: the publish phase started:`n$($run.Text)"
+    Check ($state.Puts.Count -eq 0) "resume-off-record: PUT $(@($state.Puts) -join ', ')"
+    Check (@($state.Published.Keys | Where-Object { $_ -like "*/$flat" }).Count -eq 0) "resume-off-record: the mock holds a package of $release"
+    Test-PropsUntouched 'resume-off-record'
+    $gitSaved = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try { & git -C $root reset -q --soft HEAD~1 2>&1 | Out-Null; $offCode = $LASTEXITCODE }
+    finally { $ErrorActionPreference = $gitSaved }
+    Check ($offCode -eq 0) "resume-off-record: putting HEAD back on the scratch record failed (git exit $offCode)"
+
+    # An AMENDED record keeps the subject and changes the hash: the published tool would name a commit that is not the
+    # one pushed. It must refuse before the publish, nothing sent. The committer date is pinned so the hash differs.
+    $amendDir = Join-Path $work 'out-amended'
+    New-Item -ItemType Directory -Path $amendDir | Out-Null
+    Write-RecordHash $amendDir
+    foreach ($id in 'go.x', 'go.lib') { [void](New-FakePackage $id $release $amendDir) }
+    $env:GIT_COMMITTER_DATE = '2001-01-01T00:00:00Z'
+    try { $amend = Invoke-ScratchGit @('commit', '-q', '--amend', '--allow-empty', '-m', "release: go2cs converted stdlib $recordVersion") }
+    finally { Remove-Item Env:GIT_COMMITTER_DATE -ErrorAction SilentlyContinue }
+    $amendedHash = (Invoke-ScratchGit @('rev-parse', 'HEAD')).Text.Trim()
+    $amendedSubject = (Invoke-ScratchGit @('log', '-1', '--format=%s')).Text.Trim()
+    Check ($amend.Code -eq 0 -and $amendedHash -ne $recordHash -and $amendedSubject -ceq "release: go2cs converted stdlib $recordVersion") "resume-amended: the scratch amend did not give the same subject at a new hash (git exit $($amend.Code), $amendedHash, '$amendedSubject')"
+    $state.Puts.Clear(); $state.Script.Clear()
+    $run = Invoke-Release $amendDir
+    Check ($run.Code -eq 1) "resume-amended: exit $($run.Code); want 1:`n$($run.Text)"
+    Check ($run.Text -match 'Phase 3: HEAD is not the record commit' -and $run.Text -match 'NOTHING was published') "resume-amended: no Phase 3 refusal before the publish:`n$($run.Text)"
+    Check ($run.Text -notmatch 'Phase 3: publish to') "resume-amended: the publish phase started:`n$($run.Text)"
+    Check ($state.Puts.Count -eq 0) "resume-amended: PUT $(@($state.Puts) -join ', ')"
+    Check (@($state.Published.Keys | Where-Object { $_ -like "*/$flat" }).Count -eq 0) "resume-amended: the mock holds a package of $release"
+    Test-PropsUntouched 'resume-amended'
+    $back = Invoke-ScratchGit @('reset', '-q', '--soft', $recordHash)
+    Check ($back.Code -eq 0 -and (Invoke-ScratchGit @('rev-parse', 'HEAD')).Text.Trim() -eq $recordHash) "resume-amended: putting HEAD back on the scratch record failed (git exit $($back.Code))"
+
     $releaseDir = Join-Path $work 'out-release'
     New-Item -ItemType Directory -Path $releaseDir | Out-Null
+    Write-RecordHash $releaseDir
     foreach ($id in 'go.x', 'go.gen', 'go.lib') { [void](New-FakePackage $id $release $releaseDir) }
     $state.Published["go.gen/$flat"] = $true
     $state.Puts.Clear()
@@ -349,5 +429,5 @@ finally {
 }
 
 if ($failures.Count -gt 0) { $failures | ForEach-Object { Write-Host "FAIL: $_" }; exit 1 }
-Write-Host 'nuget-push selftest: PASS (the go2cs tool pointer pushed last; quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -StopOnRateLimit stopped with a resume time and resumed; 503 waited, 500 refused; -ResumePush refused a foreign version, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
+Write-Host 'nuget-push selftest: PASS (the go2cs tool pointer pushed last; quota waited 7 s and resumed, 4 pushed + 1 skipped; re-run PUT nothing; x.y.z.0 found as x.y.z; 409 counted published; 403 without Retry-After refused by name; -StopOnRateLimit stopped with a resume time and resumed; 503 waited, 500 refused; -ResumePush refused a foreign version, refused a HEAD off the record and an amended record before publishing anything, then pushed 2 + skipped 1 + waited 1 without re-bumping)'
 exit 0

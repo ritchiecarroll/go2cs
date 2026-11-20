@@ -18,8 +18,10 @@
          use, in one signtool process (one PIN prompt);
       4. packs the seven packages into -OutDir, where sign-nupkgs.ps1 then signs them with the go.* packages.
 
-    In the release ritual, release-nuget.ps1 runs it after Phase 1 has packed the go.* packages, so the tree it
-    builds from is the release's record: version.props bumped, the proof frozen and corpus-release.txt regenerated.
+    In the release ritual, release-nuget.ps1 runs it after Phase 1b has committed the release's record locally
+    (version.props bumped, the proof frozen, corpus-release.txt regenerated), so it builds from that clean commit.
+    A signed pack (and any pack given -RequireCleanTree) refuses binaries whose build information is not the
+    checked-out commit, unmodified: their -version would print vcs.modified=true, as 1.26.11.1's did.
 
 .PARAMETER Version
     The packages' version. Defaults to the release src/version.props names. Without a prerelease suffix it must equal
@@ -38,6 +40,10 @@
     Leave the Windows executables unsigned, for a smoke that never publishes. It refuses the default -OutDir, so
     unsigned executables cannot land in the folder the ritual signs and pushes.
 
+.PARAMETER RequireCleanTree
+    Apply the signed pack's clean-tree check to an -Unsigned pack too: the binary built for this machine must report
+    vcs.revision = HEAD and vcs.modified=false. A dry run of the release ritual uses it.
+
 .EXAMPLE
     .\pack-go2cs-tool.ps1
     In the release ritual: build, sign (one PIN prompt) and pack the release's tool packages.
@@ -55,7 +61,8 @@ param(
     [string] $CertificateFile,
     [string] $KeyFile,
     [switch] $NoTimestamp,
-    [switch] $Unsigned
+    [switch] $Unsigned,
+    [switch] $RequireCleanTree
 )
 
 $ErrorActionPreference = 'Stop'
@@ -138,6 +145,22 @@ try {
              "(go run ./internal/gencorpusrelease in src/go2cs); otherwise pass the -Version of the release the tree records.")
     }
     Write-Host "pack-go2cs-tool: go2cs.release=$reported"
+
+    # A go build stamps the commit and git status (untracked files included) into each binary, and -version prints
+    # them. A published tool must name the commit it was built from, unmodified (1.26.11.1's read the tag commit and
+    # vcs.modified=true: release-nuget.ps1 packed it before the record was committed).
+    $revision = ($report | Where-Object { $_ -like 'vcs.revision=*' } | Select-Object -First 1) -replace '^vcs\.revision=', ''
+    $modified = ($report | Where-Object { $_ -like 'vcs.modified=*' } | Select-Object -First 1) -replace '^vcs\.modified=', ''
+    Write-Host "pack-go2cs-tool: vcs.revision=$revision vcs.modified=$modified"
+    if (-not $Unsigned -or $RequireCleanTree) {
+        $head = (Invoke-Native 'git' @('rev-parse', 'HEAD') $ConverterSrc | Select-Object -Last 1).Trim()
+        if ($revision -ne $head -or $modified -ne 'false') {
+            $dirty = @(Invoke-Native 'git' @('status', '--porcelain') $ConverterSrc)
+            $dirty | Select-Object -First 8 | ForEach-Object { Write-Host "    $_" }
+            Die ("the binaries report vcs.revision=$revision vcs.modified=$modified; a release tool must report HEAD ($head), " +
+                 "unmodified. Commit the release's record first (release-nuget.ps1 Phase 1b does) and pack from the clean tree.")
+        }
+    }
 
     # ---- 3. sign the Windows executables -------------------------------------------------------------------------
     $windowsExes = @($platforms | Where-Object { $_[0] -eq 'windows' } | ForEach-Object { Join-Path $work "$($_[2])/go2cs.exe" })
