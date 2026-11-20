@@ -3440,17 +3440,21 @@ public static partial class builtin
             return false;
         }
 
-        Type typeOfT = typeof(T);
-
-        switch (target)
+        // The per-T facts are fields (AssertFacts<T>), so no Type is materialised here: typeof(T) in a shared generic
+        // body is a run-time handle lookup and conversion, paid by every assert that reaches this body (AssertHit misses).
+        if (AssertFacts<T>.IsGoString && target is string str)
         {
-            case string str when typeOfT == typeof(@string):
-                value = (T)(object)new @string(str);
-                return true;
-            case T typedTarget:
-                value = typedTarget;
-                return true;
+            value = (T)(object)new @string(str);
+            return true;
         }
+
+        if (target is T typedTarget)
+        {
+            value = typedTarget;
+            return true;
+        }
+
+        Type typeOfT = AssertFacts<T>.Type;
 
         // A value adapter over a null func that is not itself a T stands for its typed nil func too
         // (GoReflect.NilFuncOf): asserted to its own func type or to ANOTHER interface, the carried
@@ -3668,6 +3672,8 @@ public static partial class builtin
     // reasoning) as Cache<TInterface> below.
     private static class AssertFacts<T>
     {
+        internal static readonly Type Type = typeof(T);
+        internal static readonly bool IsGoString = typeof(T) == typeof(@string);
         internal static readonly bool IsInterface = typeof(T).IsInterface;
         internal static readonly bool IsValueType = typeof(T).IsValueType;
         internal static readonly bool IsDynamic = typeof(T).IsDynamicType();
