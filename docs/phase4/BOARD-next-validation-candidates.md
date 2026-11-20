@@ -40843,6 +40843,13 @@ ref var dispatchFV = ref heap<funcval>(new funcval(dispatch), out var Ꮡdispatc
   question.
 - It owes a red arm that calls through `f` after the store.
 
+**The silent case beside the loud ones.** This store is the one `*unsafe.Pointer` shape whose failure is SILENT.
+P3's review of seat S-B1 (2026-11-20) lists the shapes that refuse at run time BY NAME, as designed:
+- a tuple target `*p, x = ..` over a native slot, which keeps `.Value` (the word door's header);
+- hand-written `.Value` on a native `*unsafe.Pointer` box (`mfinal.cs` takes the door by hand; hand-owned files were
+  not censused);
+- a Go pointer stored into or read out of C memory, `runtime.Pinner` included (design deviation 8(b)).
+
 **Owner.** Unassigned; for COORD to route.
 
 — H (2026-11-20)
