@@ -195,6 +195,7 @@ NuGet packages. Wondering which Go modules make good conversions? The
 * **Why convert Go to C#?** [To use Go code inside .NET](FAQ.md#why-convert-go-to-c).
 * **Is it slower than Go?** [Usually, and sometimes not](FAQ.md#is-converted-code-slower-than-go).
 * **Does it behave like Go?** [Measured against Go's own tests](FAQ.md#does-converted-code-really-behave-like-go).
+* **Did AI write this?** [Not the foundation, but AI closed the gap](FAQ.md#did-ai-write-this).
 * **What does not convert?** [Most of cgo, assembly, newer Go](FAQ.md#what-does-not-convert).
 * **What does the C# look like?** [Like the Go](FAQ.md#what-does-the-generated-c-look-like). [See examples](#real-standard-library-conversions-side-by-side).
 * **How do I call it from C#?** [Like any other library](FAQ.md#how-do-i-call-a-converted-go-package-from-c).

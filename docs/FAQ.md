@@ -43,6 +43,23 @@ report it. A goroutine's stack does not grow.
 [What converts, but doesn't behave exactly like Go](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)
 lists them all.
 
+## Did AI write this?
+
+Not the foundation. I started go2cs in 2018 as a one-person, nights-and-weekends project, believing that Go's
+simplicity could be brought to .NET. The runtime library, the conversion strategies and the shape of the generated
+C# all come from that hand-built groundwork.
+
+What changed recently is pace. Leaning on Claude took go2cs from an experiment to a tool in a matter of months — the
+entire Go standard library now converts and compiles clean, and
+[every package that can be validated](ValidatedTestPackages.md) passes its own Go test suite in C#.
+
+The bar is the same whether I wrote the code or Claude did, and nothing lands because it looked right. More than a
+thousand converted programs are compiled and their output compared against `go run`, every converter change is
+measured by re-transpiling the corpus and byte-comparing the result, and each validated package carries a proof page
+showing Go's verdicts beside C#'s.
+
+Read about the journey: [How AI is used in this project](AIAssistance.md).
+
 ## What does not convert?
 
 - **Most of cgo.** `go2cs -cgo` converts a package whose C uses are calls of C library functions, on
