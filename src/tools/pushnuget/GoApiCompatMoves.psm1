@@ -53,7 +53,9 @@
     CP0002 for the old method, and CP0006 for the new one where an interface declares it; the new method must be one
     the baseline lacks. A get-only property whose type went from System.Span<X> to go.variadic<X> under the same id
     (the spread property of golib's slice<T> and of a named slice type) is a CP0002 by its getter, and a CP0006 too
-    where an interface declares it. A METHOD whose return type made that change is refused (P3 145156Z, COORD
+    where an interface declares it; a get-only property an interface ADDS that hides a base interface's spread
+    property of the baseline, with that change and nothing else (golib's ISlice<T> over IArray<T>), is a CP0006.
+    A METHOD whose return type made that change is refused (P3 145156Z, COORD
     inbox/P2/20261120T145250Z-COORD.md).
 
     Only a move, a rename, a clone drop or a variadic tail gets an entry. Every other removed or changed member is returned as REFUSED with its
@@ -574,6 +576,8 @@ namespace Go2cs.ApiCompatMoves
                 {
                     if (inInterface && !(now is INamedTypeSymbol) && before.ContainsKey(Id(now.ContainingType)) && removedByStripped.ContainsKey(entry.Key))
                         result.Renames.Add(new Rename { DiagnosticId = "CP0006", Target = entry.Key, Now = entry.Key });
+                    else if (inInterface && before.ContainsKey(Id(now.ContainingType)) && HidesSpread(now, before))
+                        result.Variadics.Add(new Rename { DiagnosticId = "CP0006", Target = entry.Key, Now = entry.Key });
 
                     continue;
                 }
@@ -673,6 +677,29 @@ namespace Go2cs.ApiCompatMoves
 
         // A get-only property's Shape with a System.Span<X> type made go.variadic<X>, the spread property's change;
         // null for anything else, a method returning a span included (P3 145156Z, COORD 145250Z).
+        // The variadic tail's spread property added to an interface: a get-only property that hides, under its own name,
+        // a base interface's spread property the baseline declared, and is that property with System.Span<X> made
+        // go.variadic<X> and nothing else (golib's ISlice<T> hides IArray<T>'s Span<T> spread with a variadic<T> one).
+        // The engine reports the added interface member, CP0006; the base property is unchanged and reports nothing.
+        private static bool HidesSpread(ISymbol added, Dictionary<string, ISymbol> before)
+        {
+            IPropertySymbol property = added as IPropertySymbol;
+
+            if (property == null || property.GetMethod == null || property.SetMethod != null || property.IsIndexer)
+                return false;
+
+            string shape = Shape(property);
+
+            foreach (INamedTypeSymbol baseInterface in property.ContainingType.AllInterfaces)
+                foreach (IPropertySymbol hidden in baseInterface.GetMembers(property.Name).OfType<IPropertySymbol>())
+                    // A generic base is reached constructed (IArray<T> of ISlice<T>'s T): its member is named by its
+                    // definition, and its shape read constructed, in the hiding interface's own type parameters.
+                    if (before.ContainsKey(Id(hidden.OriginalDefinition)) && PackShape(hidden) == shape)
+                        return true;
+
+            return false;
+        }
+
         private static string PackShape(ISymbol symbol)
         {
             IPropertySymbol property = symbol as IPropertySymbol;

@@ -325,7 +325,23 @@ namespace go
 {
     public static class vat_package
     {
+        public interface ISpread
+        {
+            System.Span<int> Elems { get; }
+        }
+
+        public interface ISpreadOf<T>
+        {
+            System.Span<T> Elems { get; }
+        }
+
 #if !MOVED
+        public interface IHides : ISpread { }
+
+        public interface IHidesOf<T> : ISpreadOf<T> { }
+
+        public interface IWidens : ISpread { }
+
         public static int Print(params System.Span<object> a) => a.Length;
 
         public static int Insert<T>(int i, params System.Span<T> v) => i + v.Length;
@@ -360,6 +376,21 @@ namespace go
 
         public static int Overloaded(params variadic<object> a) => a.Length;
 #else
+        public interface IHides : ISpread
+        {
+            new variadic<int> Elems { get; }
+        }
+
+        public interface IHidesOf<T> : ISpreadOf<T>
+        {
+            new variadic<T> Elems { get; }
+        }
+
+        public interface IWidens : ISpread
+        {
+            new System.ReadOnlySpan<int> Elems { get; }
+        }
+
         public static int Print(params variadic<object> a) => a.Length;
 
         public static int Insert<T>(int i, params variadic<T> v) => i + v.Length;

@@ -10,8 +10,8 @@
 .DESCRIPTION
     The fixtures are two builds of one assembly (testdata/apicompat, moves-base.dll and moves-moved.dll, built by
     build-apicompat-fixtures.ps1 from src/Moves.cs). Seven forwarders and two methods of a method holder moved as the
-    release announced; seven left the package class another way, each a break nobody announced. Seven variadic-tail
-    entries and eight members changed some other way test the fourth kind. The generated file is then handed to the guard
+    release announced; seven left the package class another way, each a break nobody announced. Nine variadic-tail
+    entries and ten members changed some other way test the fourth kind. The generated file is then handed to the guard
     (GoApiCompat.psm1) as push-nuget.ps1 hands it one: every entry must suppress exactly one diagnostic, none may be
     unnecessary, and the six other members must still read red.
 
@@ -198,12 +198,13 @@ try {
         $tailLib = @($tails | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { "$($_.DiagnosticId) $($_.Target)" } | Sort-Object -CaseSensitive -Culture '')
         $wantTails = @('CP0002 M:go.vat_package.ILogger.Log(System.Span{System.Object})', 'CP0006 M:go.vat_package.ILogger.Log(go.variadic{System.Object})',
                        'CP0002 M:go.vat_package.Insert``1(System.Int32,System.Span{``0})', 'CP0002 M:go.vat_package.Ints.get_Spread',
+                       'CP0006 P:go.vat_package.IHides.Elems', 'CP0006 P:go.vat_package.IHidesOf`1.Elems',
                        'CP0002 M:go.vat_package.Logf.BeginInvoke(System.String,System.Span{System.Object},System.AsyncCallback,System.Object)',
                        'CP0002 M:go.vat_package.Logf.Invoke(System.String,System.Span{System.Object})', 'CP0002 M:go.vat_package.Print(System.Span{System.Object})') |
             Sort-Object -CaseSensitive -Culture ''
-        Check 'seven: a function, a generic one, a delegate''s Invoke and BeginInvoke, an interface method (CP0002 and CP0006) and a spread property by its getter' (
+        Check 'nine: a function, a generic one, a delegate''s Invoke and BeginInvoke, an interface method (CP0002 and CP0006), a spread property by its getter, and a spread property an interface adds over its base''s, plain and generic (CP0006)' (
             ($tailLib -join ' | ') -ceq ($wantTails -join ' | ')) ($tailLib -join ' | ')
-        Check 'each asset has the same seven' ($tails.Count -eq 14) "$($tails.Count) variadic-tail entries"
+        Check 'each asset has the same nine' ($tails.Count -eq 18) "$($tails.Count) variadic-tail entries"
         $print = @($tails | Where-Object { $_.Asset -ceq $lib -and $_.Target.Contains('.Print(') })
         Check 'each names the member that replaced it' ($print.Count -eq 1 -and $print[0].Host -ceq 'M:go.vat_package.Print(go.variadic{System.Object})') "$(@($print | ForEach-Object { $_.Host }) -join ', ')"
         $tailNegatives = @('M:go.vat_package.Narrowed(System.Span{System.Object})', 'M:go.vat_package.Recast(System.Span{System.Object})',
@@ -212,7 +213,7 @@ try {
                            'M:go.vat_package.Fixedf.BeginInvoke(System.Span{System.Object},System.Int32,System.AsyncCallback,System.Object)', 'M:go.vat_package.Packed', 'M:go.vat_package.Overloaded(System.Span{System.Object})')
         Check 'NEGATIVE CONTROL: another span type, another element type, a second parameter changed, a span that is not params (in a method and in a delegate''s Invoke and BeginInvoke), a property that became another span type, a method whose span return became a pack, and a span overload removed beside a variadic one the baseline already had are refused' (
             @($tailNegatives | Where-Object { $refusedTargets -ccontains $_ }).Count -eq 9) "refused: $(@($tailNegatives | Where-Object { $refusedTargets -ccontains $_ }) -join ' | ')"
-        Check 'NEGATIVE CONTROL: no entry names any of them' (@($found.Entries | Where-Object { $_.Target -match '\.(Narrowed|Recast|Widened|Fixed|Packed)\(|Window|Fixedf|\.Packed$|Overloaded' }).Count -eq 0) 'an entry'
+        Check 'NEGATIVE CONTROL: no entry names any of them, nor IWidens, whose added property hides the base spread with another span type' (@($found.Entries | Where-Object { $_.Target -match '\.(Narrowed|Recast|Widened|Fixed|Packed)\(|Window|Fixedf|\.Packed$|Overloaded|IWidens' }).Count -eq 0) 'an entry'
 
         $same = Get-GoApiCompatPackageMoves -Baseline $base -Current $base -WorkDir $work
         Check 'the same surface has no move and no refusal' (@($same.Entries).Count -eq 0 -and @($same.Refused).Count -eq 0) "$(@($same.Entries).Count) entries, $(@($same.Refused).Count) refused"
@@ -230,8 +231,8 @@ try {
         $paired = Get-GoApiCompatPackageMoves -Baseline $base -Current $renamedMoved -WorkDir $work -Successors $rename.Successors
         $pairedMoves = @($paired.Entries | Where-Object { $_.Kind -ceq 'move' })
         $pairedTargets = @($pairedMoves | Where-Object { $_.Asset -ceq $lib } | ForEach-Object { $_.Target } | Sort-Object -CaseSensitive -Culture '')
-        Check 'paired, the same nine moves, ten renames, two clone entries and seven variadic-tail entries on each asset, each entry naming the baseline asset' (
-            @($paired.Entries).Count -eq 56 -and $pairedMoves.Count -eq 18 -and @($paired.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 28 -and
+        Check 'paired, the same nine moves, ten renames, two clone entries and nine variadic-tail entries on each asset, each entry naming the baseline asset' (
+            @($paired.Entries).Count -eq 60 -and $pairedMoves.Count -eq 18 -and @($paired.Entries | Where-Object { $_.Asset -ceq $linux }).Count -eq 30 -and
             ($pairedTargets -join ' | ') -ceq ($want -join ' | ')) "$(@($paired.Entries).Count) entries: $(@($paired.Entries | ForEach-Object { $_.Asset } | Sort-Object -Unique) -join ', ')"
         Check 'another release declares no rename' (-not (Get-GoApiCompatRenameSuccessors -Id 'go.Moves' -Assets @($lib) -CurrentAssets @('lib/net10.0/go.Moves.dll') -ReleaseVersion '1.26.12.1').Declared) 'declared'
         Check 'go.lib keeps its assembly name: no successor' ((Get-GoApiCompatRenameSuccessors -Id 'go.lib' -Assets @('lib/net10.0/golib.dll') -CurrentAssets @('lib/net10.0/go.lib.dll') -ReleaseVersion '1.26.11.1').Successors.Count -eq 0) 'a successor'
@@ -242,15 +243,16 @@ try {
         Check 'the pinned tool restores from the manifest' ([bool]$pinned) "$why"
         if ($pinned) {
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $null -RepoRoot $repoRoot -WorkDir $work
-            Check 'unsuppressed, the guard names all fifty-two breaks on each asset' ($r.Failures.Count -eq 104 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
+            Check 'unsuppressed, the guard names all fifty-five breaks on each asset' ($r.Failures.Count -eq 110 -and $r.Compared -eq 2) "$($r.Failures.Count) failures, compared $($r.Compared)"
 
             $generated = Join-Path $work 'generated.xml'
             Write-GoApiCompatMoveSuppressions -Entries $found.Entries -Path $generated -Comment $comment
             $r = Test-GoApiCompatPackage -Id 'fixture.moves' -Baseline $base -Current $moved -SuppressionFile $generated -RepoRoot $repoRoot -WorkDir $work
             Check 'no generated entry is unnecessary' (@($r.Failures | Where-Object { $_.Contains('unnecessary') }).Count -eq 0) "$(@($r.Failures | Where-Object { $_.Contains('unnecessary') }) -join '; ')"
-            Check 'the forty-eight refused breaks still read red (the negative controls among them), and nothing else does' (
-                $r.Failures.Count -eq 48 -and @($r.Failures | Where-Object { $_.Contains('CP0002') }).Count -eq 44 -and
-                @($r.Failures | Where-Object { $_.Contains('CP0001') }).Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('CP0008') }).Count -eq 2 -and $r.Compared -eq 2) "$($r.Failures.Count) failures: $($r.Failures -join '; ')"
+            Check 'the fifty unsuppressed breaks still read red (the negative controls among them), and nothing else does' (
+                $r.Failures.Count -eq 50 -and @($r.Failures | Where-Object { $_.Contains('CP0002') }).Count -eq 44 -and
+                @($r.Failures | Where-Object { $_.Contains('CP0001') }).Count -eq 2 -and @($r.Failures | Where-Object { $_.Contains('CP0008') }).Count -eq 2 -and
+                @($r.Failures | Where-Object { $_.Contains('CP0006') }).Count -eq 2 -and $r.Compared -eq 2) "$($r.Failures.Count) failures: $($r.Failures -join '; ')"
             foreach ($member in 'Changed', 'Unmarked', 'Kind', 'Elsewhere', 'Misfiled', 'Gone', 'Only', 'Orphan', 'Shifted', 'Retyped', 'Spun', 'Narrowed', 'Recast', 'Widened', 'Fixed', 'Overloaded') {
                 $needle = '.' + $member + '('
                 $named = @($r.Failures | Where-Object { $_.Contains($needle) }).Count
@@ -262,10 +264,11 @@ try {
                 Check "the guard still names $member" ($named -eq $want) "$named of $want"
             }
             Check 'and no longer names Event' (@($r.Failures | Where-Object { $_.Contains('cln_package.Event') }).Count -eq 0) 'named'
+            Check 'the guard still names IWidens''s added property' (@($r.Failures | Where-Object { $_.Contains('CP0006') -and $_.Contains('IWidens.Elems') }).Count -eq 2) "$(@($r.Failures | Where-Object { $_.Contains('IWidens') }) -join '; ')"
             Check 'the guard still names Window by its getter' (@($r.Failures | Where-Object { $_.Contains('Ints.Window.get') }).Count -eq 2) 'not named twice'
             Check 'the guard still names Fixedf''s Invoke and BeginInvoke, and Packed' (
                 @($r.Failures | Where-Object { $_.Contains('Fixedf.Invoke(') -or $_.Contains('Fixedf.BeginInvoke(') -or $_.Contains('vat_package.Packed(') }).Count -eq 6) "$(@($r.Failures | Where-Object { $_.Contains('Fixedf') -or $_.Contains('Packed') }) -join '; ')"
-            $suppressedTails = @($r.Failures | Where-Object { $_ -match 'vat_package\.(Print|Insert|Logf|ILogger|Ints\.Spread)' })
+            $suppressedTails = @($r.Failures | Where-Object { $_ -match 'vat_package\.(Print|Insert|Logf|ILogger|Ints\.Spread|IHides)' })
             Check 'and names no variadic tail it was given an entry for' ($suppressedTails.Count -eq 0) ($suppressedTails -join '; ')
         }
     }

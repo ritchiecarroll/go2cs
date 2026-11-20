@@ -20,7 +20,8 @@
                 the struct no longer implementing go.IGoValueClone, CP0002 its Delta-named Clone().
       a variadic tail  a params System.Span<X> that became go.variadic<X> (wall E, the .5 release): CP0002 the method
                 (a delegate's Invoke and BeginInvoke among them), CP0006 too for an interface method, and CP0002 by its
-                getter for a spread property whose System.Span<X> became go.variadic<X>.
+                getter for a spread property whose System.Span<X> became go.variadic<X>, and CP0006 for a spread property
+                an interface adds over its base's (golib's ISlice<T> over IArray<T>).
 
     Nothing is written for a member that left any other way. Each is listed with its reason, and the script exits 1:
     the guard will read it red, as it should, until someone announces it or puts it back.
