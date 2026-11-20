@@ -4,6 +4,8 @@ I've been programming in C# for many years, and I still like to keep an eye on n
 
 The converter took two tries to get right. The first was written in C# and read Go through an ANTLR grammar. It got surprisingly far, but a grammar only knows what Go code *looks like*, and a faithful conversion needs to know what it *means*: every type, every method set, every interface a value satisfies. So I did what every developer dreads and started over. Today's converter is written in Go and reads code with the same packages Go's own tools use (`go/ast` and `go/types`). Turns out nobody understands Go quite like Go does.
 
+The second try eventually had help: AI coding agents joined the project in June 2026. How they took it from an experiment to a tool in five months, and why you don't have to take that on trust, is its own page: [Did AI write this?](AIAssistance.md)
+
 ## Why convert Go to C#?
 
 **To use Go code from inside .NET.** Plenty of shops are all-in on .NET. When the library they need is written in Go, the usual options are a separate process, a native wrapper, or a hand rewrite kept in sync forever. go2cs adds a fourth: convert it and reference it like any other .NET assembly. The converted standard library ships on [NuGet](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll), and one command (`-recurse=nuget`) turns a whole Go app, dependencies and all, into a solution you can build and run. The README [walks through one](README.md#converting-a-real-world-module), and on every platform the packages ship for (Windows, Linux on x64 and Arm64, macOS on Intel and Apple silicon) the converted app's output matches `go run`.
