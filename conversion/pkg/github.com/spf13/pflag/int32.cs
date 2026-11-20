@@ -1,0 +1,96 @@
+// Converted from Go source: "int32.go" in module github.com/spf13/pflag@v1.0.9.
+// Modified from the original by conversion to C# with go2cs 1.26.11.1.
+
+namespace go.github.com.spf13;
+
+using strconv = strconv_package;
+using static pflag_package;
+
+partial class pflag_package {
+
+partial struct int32Value /*num:int32*/;
+
+internal static ж<int32Value> newInt32Value(int32 val, ж<int32> Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    p = val;
+    return Ꮡp.Reinterpret<int32, int32Value>();
+}
+
+} partial class pflagᴛint32Value {
+
+internal static error Set(this ref int32Value i, @string s) {
+    var (v, err) = strconv.ParseInt(s, 0, 32);
+    i = (int32Value)(int32)v;
+    return err;
+}
+
+internal static @string Type(this ref int32Value i) {
+    return "int32";
+}
+
+internal static @string String(this ref int32Value i) { return strconv.FormatInt((int64)(i), 10); }
+
+} partial class pflag_package {
+
+internal static (any, error) int32Conv(@string sval) {
+    var (v, err) = strconv.ParseInt(sval, 0, 32);
+    if (err != nil) {
+        return ((nint)0, err);
+    }
+    return ((int32)v, default);
+}
+
+} partial class pflagᴛFlagSet {
+
+public static (int32, error) GetInt32(this ж<FlagSet> Ꮡf, @string name) {
+    var (val, err) = Ꮡf.getFlagType(name, "int32", int32Conv);
+    if (err != nil) {
+        return (0, err);
+    }
+    return (val._<int32>(), default);
+}
+
+public static void Int32Var(this ж<FlagSet> Ꮡf, ж<int32> p, @string name, int32 value, @string usage) {
+    Ꮡf.VarP(new int32ValueжValue(newInt32Value(value, p)), name, "", usage);
+}
+
+public static void Int32VarP(this ж<FlagSet> Ꮡf, ж<int32> p, @string name, @string shorthand, int32 value, @string usage) {
+    Ꮡf.VarP(new int32ValueжValue(newInt32Value(value, p)), name, shorthand, usage);
+}
+
+} partial class pflag_package {
+
+public static void Int32Var(ж<int32> p, @string name, int32 value, @string usage) {
+    CommandLine.VarP(new int32ValueжValue(newInt32Value(value, p)), name, "", usage);
+}
+
+public static void Int32VarP(ж<int32> p, @string name, @string shorthand, int32 value, @string usage) {
+    CommandLine.VarP(new int32ValueжValue(newInt32Value(value, p)), name, shorthand, usage);
+}
+
+} partial class pflagᴛFlagSet {
+
+public static ж<int32> Int32(this ж<FlagSet> Ꮡf, @string name, int32 value, @string usage) {
+    var p = @new<int32>();
+    Ꮡf.Int32VarP(p, name, "", value, usage);
+    return p;
+}
+
+public static ж<int32> Int32P(this ж<FlagSet> Ꮡf, @string name, @string shorthand, int32 value, @string usage) {
+    var p = @new<int32>();
+    Ꮡf.Int32VarP(p, name, shorthand, value, usage);
+    return p;
+}
+
+} partial class pflag_package {
+
+public static ж<int32> Int32(@string name, int32 value, @string usage) {
+    return CommandLine.Int32P(name, "", value, usage);
+}
+
+public static ж<int32> Int32P(@string name, @string shorthand, int32 value, @string usage) {
+    return CommandLine.Int32P(name, shorthand, value, usage);
+}
+
+} // end pflag_package
