@@ -182,8 +182,17 @@ func oracleTagGoList(t *testing.T, dir, goos string, tags, patterns []string) ma
 		t.Fatalf("go %s (%s): %v\n%s", strings.Join(args, " "), goos, err, output)
 	}
 
+	// The child's stderr shares the stream: drop the go command's own progress lines (`go: downloading …`).
+	var jsonLines []string
+
+	for _, line := range strings.Split(output, "\n") {
+		if !strings.HasPrefix(line, "go: ") {
+			jsonLines = append(jsonLines, line)
+		}
+	}
+
 	result := map[string]oracleTagPackage{}
-	decoder := json.NewDecoder(strings.NewReader(output))
+	decoder := json.NewDecoder(strings.NewReader(strings.Join(jsonLines, "\n")))
 
 	for decoder.More() {
 		var pkg oracleTagPackage
