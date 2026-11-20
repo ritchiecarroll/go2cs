@@ -1,0 +1,3 @@
+# go2cs.nuget.lock -- the -nuget-map mappings this output root resolved; written by go2cs, do not edit.
+# module	version	nuget-id	status	layer	package-version	content-hash
+github.com/google/uuid	v1.6.0	nugetgo.github.com.google.uuid	community	https://nugetgo.net/v1/mappings.txt	1.6.0.4	sha512-+83D1P2T1QET8z/vVrh+BUGVf5E0gmIJrYwr+HisVAr3riv0EVJFYugiBhmjgz9U/kkz9BRoMs/tCIQRJPm5QQ==

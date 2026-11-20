@@ -1,0 +1,63 @@
+# go2cs: per-file warning entries, written by every conversion of this package -- do not edit
+# Each section turns off one C# warning in one converted file, for a reason the converter
+# derived from the Go source; the comment above it names the GOOS flavours that hold it.
+
+[/sqlite.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+# CS0649: windows
+dotnet_diagnostic.CS0649.severity = none
+
+[/sqlite_g_000000000004000b.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000047d6b.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000058948.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000005894b.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000007bd68.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000007fd68.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000007fd6b.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000c0000.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000c7fff.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000d89cf.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000fbfff.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000fffdf.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_windows.cs]
+# CS0219: windows
+dotnet_diagnostic.CS0219.severity = none
+# CS0675: windows
+dotnet_diagnostic.CS0675.severity = none

@@ -1,0 +1,29 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/pkg/">
+    <Project Path="../../../github.com/dustin/go-humanize/github.com.dustin.go-humanize.csproj" />
+    <Project Path="../../../github.com/mattn/go-isatty/github.com.mattn.go-isatty.csproj" />
+    <Project Path="../../../github.com/ncruces/go-strftime/github.com.ncruces.go-strftime.csproj" />
+    <Project Path="../../../github.com/remyoudompheng/bigfft/github.com.remyoudompheng.bigfft.csproj" />
+    <Project Path="../../../golang.org/x/sys/cpu/golang.org.x.sys.cpu.csproj" />
+    <Project Path="../../../golang.org/x/sys/windows/golang.org.x.sys.windows.csproj" />
+    <Project Path="../../libc/errno/modernc.org.libc.errno.csproj" />
+    <Project Path="../../libc/fcntl/modernc.org.libc.fcntl.csproj" />
+    <Project Path="../../libc/limits/modernc.org.libc.limits.csproj" />
+    <Project Path="../../libc/modernc.org.libc.csproj" />
+    <Project Path="../../libc/pthread/modernc.org.libc.pthread.csproj" />
+    <Project Path="../../libc/signal/modernc.org.libc.signal.csproj" />
+    <Project Path="../../libc/stdio/modernc.org.libc.stdio.csproj" />
+    <Project Path="../../libc/sys/stat/modernc.org.libc.sys.stat.csproj" />
+    <Project Path="../../libc/sys/types/modernc.org.libc.sys.types.csproj" />
+    <Project Path="../../libc/time/modernc.org.libc.time.csproj" />
+    <Project Path="../../libc/unistd/modernc.org.libc.unistd.csproj" />
+    <Project Path="../../mathutil/modernc.org.mathutil.csproj" />
+    <Project Path="../../memory/modernc.org.memory.csproj" />
+    <Project Path="modernc.org.sqlite.lib.csproj" DefaultStartup="true" />
+  </Folder>
+</Solution>

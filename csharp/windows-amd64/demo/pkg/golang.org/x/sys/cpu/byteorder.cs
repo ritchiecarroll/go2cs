@@ -1,0 +1,61 @@
+// Copyright 2019 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+namespace go.golang.org.x.sys;
+
+using runtime = runtime_package;
+using static cpu_package;
+
+partial class cpu_package {
+
+partial interface byteOrder {
+    uint32 Uint32(slice<byte> _);
+    uint64 Uint64(slice<byte> _);
+}
+
+partial struct littleEndian {
+}
+partial struct bigEndian {
+}
+
+} partial class cpuᴛlittleEndian {
+
+internal static uint32 Uint32(this littleEndian _Δp0, slice<byte> b) {
+    _ = b[3];
+    return (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16 | (uint32)b[3] << 24;
+}
+
+internal static uint64 Uint64(this littleEndian _Δp0, slice<byte> b) {
+    _ = b[7];
+    return (uint64)b[0] | (uint64)b[1] << 8 | (uint64)b[2] << 16 | (uint64)b[3] << 24 | (uint64)b[4] << 32 | (uint64)b[5] << 40 | (uint64)b[6] << 48 | (uint64)b[7] << 56;
+}
+
+} partial class cpuᴛbigEndian {
+
+internal static uint32 Uint32(this bigEndian _Δp0, slice<byte> b) {
+    _ = b[3];
+    return (uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24;
+}
+
+internal static uint64 Uint64(this bigEndian _Δp0, slice<byte> b) {
+    _ = b[7];
+    return (uint64)b[7] | (uint64)b[6] << 8 | (uint64)b[5] << 16 | (uint64)b[4] << 24 | (uint64)b[3] << 32 | (uint64)b[2] << 40 | (uint64)b[1] << 48 | (uint64)b[0] << 56;
+}
+
+} partial class cpu_package {
+
+internal static byteOrder hostByteOrder() {
+    var exprᴛ1 = runtime.GOARCH;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8 || exprᴛ1 == "amd64p32"u8 || exprᴛ1 == "alpha"u8 || exprᴛ1 == "arm"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "mips64p32le"u8 || exprᴛ1 == "nios2"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "sh"u8: {
+        return new littleEndian();
+    }
+    case {} when exprᴛ1 == "armbe"u8 || exprᴛ1 == "arm64be"u8 || exprᴛ1 == "m68k"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64p32"u8 || exprᴛ1 == "ppc"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "s390"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "shbe"u8 || exprᴛ1 == "sparc"u8 || exprᴛ1 == "sparc64"u8: {
+        return new bigEndian();
+    }}
+
+    throw panic("unknown architecture");
+}
+
+} // end cpu_package

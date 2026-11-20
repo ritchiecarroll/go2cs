@@ -1,0 +1,23 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="sqlitecs.demo.csproj" DefaultStartup="true" />
+  </Folder>
+  <Folder Name="/pkg/">
+    <Project Path="../../../pkg/github.com/dustin/go-humanize/github.com.dustin.go-humanize.csproj" />
+    <Project Path="../../../pkg/github.com/remyoudompheng/bigfft/github.com.remyoudompheng.bigfft.csproj" />
+    <Project Path="../../../pkg/golang.org/x/sys/unix/golang.org.x.sys.unix.csproj" />
+    <Project Path="../../../pkg/modernc.org/libc/modernc.org.libc.csproj" />
+    <Project Path="../../../pkg/modernc.org/libc/sys/types/modernc.org.libc.sys.types.csproj" />
+    <Project Path="../../../pkg/modernc.org/libc/uuid/uuid/modernc.org.libc.uuid.uuid.csproj" />
+    <Project Path="../../../pkg/modernc.org/mathutil/modernc.org.mathutil.csproj" />
+    <Project Path="../../../pkg/modernc.org/memory/modernc.org.memory.csproj" />
+    <Project Path="../../../pkg/modernc.org/sqlite/lib/modernc.org.sqlite.lib.csproj" />
+    <Project Path="../../../pkg/modernc.org/sqlite/modernc.org.sqlite.csproj" />
+    <Project Path="../../../pkg/modernc.org/sqlite/vtab/modernc.org.sqlite.vtab.csproj" />
+  </Folder>
+</Solution>

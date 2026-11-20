@@ -1,0 +1,34 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="sqlitecs.demo.file.csproj" DefaultStartup="true" />
+  </Folder>
+  <Folder Name="/pkg/">
+    <Project Path="../../../../pkg/github.com/dustin/go-humanize/github.com.dustin.go-humanize.csproj" />
+    <Project Path="../../../../pkg/github.com/mattn/go-isatty/github.com.mattn.go-isatty.csproj" />
+    <Project Path="../../../../pkg/github.com/ncruces/go-strftime/github.com.ncruces.go-strftime.csproj" />
+    <Project Path="../../../../pkg/github.com/remyoudompheng/bigfft/github.com.remyoudompheng.bigfft.csproj" />
+    <Project Path="../../../../pkg/golang.org/x/sys/cpu/golang.org.x.sys.cpu.csproj" />
+    <Project Path="../../../../pkg/golang.org/x/sys/windows/golang.org.x.sys.windows.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/errno/modernc.org.libc.errno.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/fcntl/modernc.org.libc.fcntl.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/limits/modernc.org.libc.limits.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/modernc.org.libc.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/pthread/modernc.org.libc.pthread.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/signal/modernc.org.libc.signal.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/stdio/modernc.org.libc.stdio.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/sys/stat/modernc.org.libc.sys.stat.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/sys/types/modernc.org.libc.sys.types.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/time/modernc.org.libc.time.csproj" />
+    <Project Path="../../../../pkg/modernc.org/libc/unistd/modernc.org.libc.unistd.csproj" />
+    <Project Path="../../../../pkg/modernc.org/mathutil/modernc.org.mathutil.csproj" />
+    <Project Path="../../../../pkg/modernc.org/memory/modernc.org.memory.csproj" />
+    <Project Path="../../../../pkg/modernc.org/sqlite/lib/modernc.org.sqlite.lib.csproj" />
+    <Project Path="../../../../pkg/modernc.org/sqlite/modernc.org.sqlite.csproj" />
+    <Project Path="../../../../pkg/modernc.org/sqlite/vtab/modernc.org.sqlite.vtab.csproj" />
+  </Folder>
+</Solution>

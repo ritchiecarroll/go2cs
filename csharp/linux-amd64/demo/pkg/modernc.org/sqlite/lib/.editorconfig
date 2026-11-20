@@ -1,0 +1,147 @@
+# go2cs: per-file warning entries, written by every conversion of this package -- do not edit
+# Each section turns off one C# warning in one converted file, for a reason the converter
+# derived from the Go source; the comment above it names the GOOS flavours that hold it.
+
+[/sqlite.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+# CS0649: linux
+dotnet_diagnostic.CS0649.severity = none
+
+[/sqlite_g_0000000000000900.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+# CS0675: linux
+dotnet_diagnostic.CS0675.severity = none
+
+[/sqlite_g_0000000000000948.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000000980.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000003d00.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000003f80.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000005100.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000007d00.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000007d68.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000007d6b.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000007f00.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000007f80.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000018948.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+# CS0675: linux
+dotnet_diagnostic.CS0675.severity = none
+
+[/sqlite_g_000000000001894b.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+# CS0675: linux
+dotnet_diagnostic.CS0675.severity = none
+
+[/sqlite_g_00000000000189cf.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000037fe8.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000003bd68.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000003bd6b.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000003bfff.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000003fd48.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000003fd4b.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000003fd68.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000003fd6b.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000003ffff.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000047d6b.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_0000000000058948.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000005894b.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000007bd68.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000007fd68.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_000000000007fd6b.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000c7fff.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000d89cf.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000fbfff.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none
+
+[/sqlite_g_00000000000fffdf.cs]
+# CS0219: linux
+dotnet_diagnostic.CS0219.severity = none

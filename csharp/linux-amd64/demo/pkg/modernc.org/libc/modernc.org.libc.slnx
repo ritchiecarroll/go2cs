@@ -1,0 +1,16 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/pkg/">
+    <Project Path="../../github.com/dustin/go-humanize/github.com.dustin.go-humanize.csproj" />
+    <Project Path="../../github.com/remyoudompheng/bigfft/github.com.remyoudompheng.bigfft.csproj" />
+    <Project Path="../../golang.org/x/sys/unix/golang.org.x.sys.unix.csproj" />
+    <Project Path="../mathutil/modernc.org.mathutil.csproj" />
+    <Project Path="../memory/modernc.org.memory.csproj" />
+    <Project Path="modernc.org.libc.csproj" DefaultStartup="true" />
+    <Project Path="uuid/uuid/modernc.org.libc.uuid.uuid.csproj" />
+  </Folder>
+</Solution>
