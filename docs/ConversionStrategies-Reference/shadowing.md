@@ -441,25 +441,14 @@ The same rule applies to an **escaping local** whose address is taken — `var p
 ### A generic type's holder is named by the type alone
 
 A method holder's name is the package's class name, the marker and the receiver type's identifier, and for a
-generic type that identifier carries no type parameters and no constraints. `Iterator[T text.Text]` and
-`Window[K comparable, T text.Text]`, both constrained by a type of a package whose import path has a slash,
-take the holders `mainᴛIterator` and `mainᴛWindow`, each declared once with its open generic type
-(`[GoMethodHost(typeof(main_package.Iterator<>))]`, `typeof(main_package.Window<,>)`):
-
-<!-- source: src/tests/Behavioral/GenericHolderForeignConstraint/main.cs.target:17-20, 51-54 -->
-```csharp
-} partial class mainᴛIterator {
-
-public static void SetText<T>(this ref Iterator<T> it, T data)
-    where T : /* text.Text */ IByteSeq<T, byte>, new()
-…
-} partial class mainᴛWindow {
-
-public static nint Len<K, T>(this Window<K, T> w)
-    where T : /* text.Text */ IByteSeq<T, byte>, new()
-```
-(Guarded by the `GenericHolderForeignConstraint` behavioral test, output-compared against `go run`, and by the
-converter test `TestGenericHolderIsNamedByTheTypeWhateverItsConstraint`.)
+generic type that identifier carries no type parameters and no constraints. In a library package `iterators`,
+`Iterator[T text.Text]` and `Window[K comparable, T text.Text]`, both constrained by a type of a package whose
+import path has a slash, take the holders `iteratorsᴛIterator` and `iteratorsᴛWindow`, each declared once with
+its open generic type (`[GoMethodHost(typeof(iterators_package.Iterator<>))]`,
+`typeof(iterators_package.Window<,>)`). Package `main` writes a holder only when a method name clashes (see
+[Functions and Methods](../ConversionStrategies.md#functions-and-methods)); otherwise its generic types' methods
+stay in `main_package` and no holder is named at all.
+(Guarded by the converter test `TestGenericHolderIsNamedByTheTypeWhateverItsConstraint`, a library fixture.)
 <!-- Until 2026-11-19 the holder's name was cut from the type's generic ORIGIN as rendered through
      getCSharpTypeName, whose string form carries each type parameter with its constraint. For a constraint
      from a slash-path package the string path's last-slash strip ate the type's own name, so
