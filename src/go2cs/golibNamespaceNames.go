@@ -208,6 +208,7 @@ var golibFriendNamespaceTypes = nameSet(
 	"ISelectableChannel",
 	"ISliceBacking",
 	"IUntypedSlotAccess",
+	"KeptArrayDoorCensus",
 	"MainGoexitMarker",
 	"NativeBoxDereferenceCensus",
 	"NativeDerivation",

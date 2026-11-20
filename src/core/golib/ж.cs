@@ -1375,7 +1375,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (arrayOpener is not null && value.Value != 0 && !aliasesAnOrderToken && !ManagedPointerTokens.NamesNoUserMemory((nuint)value.Value))
         {
             if (KeptArrayDoorCensus.Enabled)
-                KeptArrayDoorCensus.NativeArm(resolved is null);
+                KeptArrayDoorCensus.NativeArm(resolved is null, (nuint)value.Value, typeof(T));
 
             return arrayOpener((nuint)value.Value, arrayLength, NativeDerivation.KeptResolved(resolved, aliasesAnOrderToken: false) ?? NativeDerivation.Kept(carried));
         }
