@@ -145,6 +145,12 @@ internal static class PackageAncestry
     public const string ModuleRootEnvironmentVariable = "GO2CS_MODULE_ROOT";
 
     /// <summary>
+    /// The <see cref="ModuleRootEnvironmentVariable"/> value that runs a MODULE host without its module copy, on
+    /// purpose. A module host with the variable unset refuses instead (TestHost.ModuleRootForStaging).
+    /// </summary>
+    public const string ModuleRootNone = "none";
+
+    /// <summary>
     /// The environment variable through which the converter's run hands over the go.mod of a module
     /// that ships NONE (a module-cache release that predates modules): the file <c>go</c> itself reads
     /// for it, cache/download/&lt;path&gt;/@v/&lt;version&gt;.mod. <see cref="TryStageModule"/> stages it
@@ -177,7 +183,10 @@ internal static class PackageAncestry
     /// </remarks>
     /// <param name="goMod">The module's go.mod when it ships none (<see cref="ModuleGoModEnvironmentVariable"/>);
     /// ignored when the module root holds its own.</param>
-    /// <returns>true when the module was staged; false when it was skipped and the sandbox is unchanged.</returns>
+    /// <returns>true when the module was staged; false when there is nothing to stage (no root, no module path, a
+    /// package outside the module, no go.mod) and the sandbox is unchanged.</returns>
+    /// <exception cref="IOException">The copy failed part-way. The tests would run in a partial sandbox, which is
+    /// neither the module nor the plain sandbox, so the host reports it and exits rather than continue.</exception>
     public static bool TryStageModule(string? moduleRoot, string modulePath, string importPath, string runRoot, string workingDirectory, string? goMod = null)
     {
         if (string.IsNullOrWhiteSpace(moduleRoot) || string.IsNullOrEmpty(modulePath))
@@ -210,8 +219,11 @@ internal static class PackageAncestry
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
-            // A partially copied module is still a superset of the empty sandbox, so the run continues.
-            return false;
+            // Not "a superset of the empty sandbox, so the run continues", as this was until 2026-11-20: a test that
+            // reads the part that did not copy fails here and passes under Go, and nothing said why
+            // (ModuleStagingRefusalTests).
+            throw new IOException($"staging module {modulePath} failed: copying {moduleRoot} to {mirrorRoot} did not complete " +
+                $"({ex.Message}); the tests would run in a partial copy of the module", ex);
         }
     }
 

@@ -284,9 +284,13 @@ public static class TestHost
                 PackageAncestry.TryStage(Environment.GetEnvironmentVariable("GOROOT"), registry.Package, runRoot, workingDirectory);
 
                 // A package outside the standard library stages its MODULE instead: a real copy of the
-                // module tree, from the root the converter's run hands over in the environment.
+                // module tree, from the root the converter's run hands over in the environment. A module
+                // host never runs in a sandbox that is silently not the module (ModuleStagingRefusalTests):
+                // with no root it refuses, through the infrastructure-error path below, and a copy that
+                // fails part-way throws from TryStageModule the same way. GO2CS_MODULE_ROOT=none runs
+                // unstaged on purpose, and says so.
                 bool moduleStaged = PackageAncestry.TryStageModule(
-                    Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable),
+                    ModuleRootForStaging(registry),
                     registry.ModulePath, registry.Package, runRoot, workingDirectory,
                     Environment.GetEnvironmentVariable(PackageAncestry.ModuleGoModEnvironmentVariable));
 
@@ -665,13 +669,45 @@ public static class TestHost
     {
         string? moduleRoot = Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable);
 
-        if (string.IsNullOrWhiteSpace(moduleRoot) || string.IsNullOrEmpty(modulePath))
+        if (string.IsNullOrWhiteSpace(moduleRoot) || moduleRoot == PackageAncestry.ModuleRootNone || string.IsNullOrEmpty(modulePath))
             return;
 
         string mirrorRoot = PackageAncestry.ModuleMirrorRoot(runRoot, modulePath);
 
         if (Directory.Exists(mirrorRoot))
             global::go.runtime_package.GoModuleSourceRemap = (Path.GetFullPath(moduleRoot), mirrorRoot);
+    }
+
+    // The module root a fresh (not re-exec'd) host stages its module copy from. A host whose registry names a module
+    // and that has no GO2CS_MODULE_ROOT REFUSES: `go test` runs a module's package inside the module tree, and the
+    // plain sandbox holds only the package's own files, its fixtures and empty named directories, so a test that reads
+    // a package-root data file or a sibling package's content fails here where Go's passes (P5's by-hand sqlite run,
+    // 2026-11-20: TestVendorStamp). The pipeline always hands the root over (the converter's testHostModuleEnv); a
+    // by-hand run sets it, or sets it to `none` to run unstaged on purpose, which is said on stderr. A
+    // standard-library host has no module and is unchanged.
+    private static string? ModuleRootForStaging(TestRegistry registry)
+    {
+        string? moduleRoot = Environment.GetEnvironmentVariable(PackageAncestry.ModuleRootEnvironmentVariable);
+
+        if (string.IsNullOrEmpty(registry.ModulePath))
+            return moduleRoot;
+
+        if (string.IsNullOrWhiteSpace(moduleRoot))
+            throw new InvalidOperationException(
+                $"{registry.Package} is a package of module {registry.ModulePath}, and {PackageAncestry.ModuleRootEnvironmentVariable} " +
+                "is not set: the host stages a copy of the module from it, as `go test` runs the package inside the module tree. " +
+                $"Set it to the module's directory, or to {PackageAncestry.ModuleRootNone} to run without the module, which a test " +
+                "that reads a package-root file or a sibling package's content cannot pass.");
+
+        if (moduleRoot == PackageAncestry.ModuleRootNone)
+        {
+            Console.Error.WriteLine($"{registry.Package}: module {registry.ModulePath} not staged " +
+                $"({PackageAncestry.ModuleRootEnvironmentVariable}={PackageAncestry.ModuleRootNone}); the tests run without the module tree.");
+
+            return null;
+        }
+
+        return moduleRoot;
     }
 
     // Planted in the host's own environment the moment its sandbox exists, so every descendant
