@@ -218,14 +218,12 @@ internal static class PackageAncestry
             return false;
 
         // The package must belong to the module the root claims, and the root must BE a module: its own
-        // go.mod, or the one go reads for a module that ships none.
-        if (importPath != modulePath && !importPath.StartsWith(modulePath + "/", StringComparison.Ordinal))
+        // go.mod, or the one go reads for a module that ships none. ONE predicate, the one a module host
+        // refuses on (ModuleStagingRefusal), so a precondition added there cannot reopen a silent false here.
+        if (ModuleStagingRefusal(moduleRoot, modulePath, importPath, goMod) is not null)
             return false;
 
         bool ownGoMod = File.Exists(Path.Combine(moduleRoot, "go.mod"));
-
-        if (!ownGoMod && (string.IsNullOrWhiteSpace(goMod) || !File.Exists(goMod)))
-            return false;
 
         string mirrorRoot = ModuleMirrorRoot(runRoot, modulePath);
 
