@@ -23,20 +23,20 @@ on Windows, on Linux (x64 and Arm64) and on macOS (Intel and Apple silicon); the
      reading; every row but the two Windows-only ones (internal/syscall/windows and its registry child) carries a linux-arm64
      reading and a darwin reading, each chip shown where Intel and Apple silicon differ. -->
 
-## 📰 NEWS — Faster Native AOT, and a Release standard library from source
+## 📰 NEWS — Go 1.26.11, cgo conversion, linux-arm64 packages, and TypeScript's compiler and SQLite in C#
 
-<!-- HELD for release day with the NEWS.md entry (the .2 precedent): "November XX" and the anchor's "november-xx" both
-     become the publish date as the last change before the release tag. The gojq sentence is PENDING on the publish
-     (the nugetgo wave); drop it if gojq misses the wave. This block quotes no roster figure (check-roster-format 2e).
-     Flipped 2026-11-09 by COORD: gojq 0.12.19 published in the nugetgo .3 wave (post-publish smoke 9 of 9 PASS). -->
-**November 8, 2026, NuGet 1.26.10.3.** The second fix release on the Go 1.26 line, still built from Go 1.26.10.
-Native AOT now inlines a slice read as the JIT does, so the same programs run faster there, and the P-256, P-384 and
-P-521 curves are faster under ReadyToRun (both measured on `win-x64`). A program converted against local standard-library sources builds and
-publishes in Release, and a plain single-file publish starts fast (measured on `win-x64`). A slice's `foreach` now gives its values, so an
-assembly built against 1.26.10.2 must be rebuilt; from this release, revisions within one Go release stay
-compatible except for a break the notes announce. gojq, a jq implementation in Go, ships
-as a NuGet package.
-[Full announcement](NEWS.md#november-8-2026--faster-native-aot-and-a-release-standard-library-from-source).
+<!-- HELD for release day with the NEWS.md entry (the .2 and .3 precedent): "November XX" and the anchor's "november-xx"
+     both become the publish date as the last change before the release tag. This block quotes no roster figure
+     (check-roster-format 2e). Written by the 1.26.11.1 release-controls batch (claude/p4-release-controls-12611). -->
+**November 19, 2026, NuGet 1.26.11.1.** The fourth release on the Go 1.26 line, converted from Go 1.26.11, a patch
+release with security fixes. `go2cs -cgo` converts a package that calls C, the packages ship a linux-arm64 build,
+Microsoft's TypeScript compiler, written in Go, converts, compiles and type-checks
+([typescript-go-cs](https://github.com/ritchiecarroll/typescript-go-cs)), and a modernc.org/sqlite program that writes
+and reads a database file prints exactly what native Go prints, on Windows and on Linux
+([sqlite-cs](https://github.com/ritchiecarroll/sqlite-cs)). Each Go method
+now lives in a class of its type's own, so assemblies built against 1.26.10.3 must be rebuilt, and the build now says
+so by name instead of failing at run time.
+[Full announcement](NEWS.md#november-19-2026--go-12611-cgo-conversion-linux-arm64-packages-and-typescripts-compiler-and-sqlite-in-c).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
@@ -197,7 +197,8 @@ NuGet packages. Wondering which Go modules make good conversions? The
 * **Why convert Go to C#?** [To use Go code inside .NET](FAQ.md#why-convert-go-to-c).
 * **Is it slower than Go?** [Usually, and sometimes not](FAQ.md#is-converted-code-slower-than-go).
 * **Does it behave like Go?** [Measured against Go's own tests](FAQ.md#does-converted-code-really-behave-like-go).
-* **What does not convert?** [Most of cgo, assembly, newer Go](FAQ.md#what-does-not-convert).
+* **Did AI write this?** [Not the foundation, but AI closed the gap](FAQ.md#did-ai-write-this).
+* **What does not convert?** [Parts of cgo, assembly, newer Go](FAQ.md#what-does-not-convert).
 * **What does the C# look like?** [Like the Go](FAQ.md#what-does-the-generated-c-look-like). [See examples](#real-standard-library-conversions-side-by-side).
 * **How do I call it from C#?** [Like any other library](FAQ.md#how-do-i-call-a-converted-go-package-from-c).
 * **Why not a native library?** [You can; here is the trade](FAQ.md#why-not-call-go-through-a-native-library-instead).

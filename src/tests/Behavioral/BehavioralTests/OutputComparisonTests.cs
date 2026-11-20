@@ -878,6 +878,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
 
     [TestMethod]
+    public void CheckGenericHolderForeignConstraint() => CheckTarget("GenericHolderForeignConstraint");
+
+    [TestMethod]
     public void CheckGenericInstClosedIface() => CheckTarget("GenericInstClosedIface");
 
     [TestMethod]
@@ -2460,6 +2463,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSliceAliasing() => CheckTarget("SliceAliasing");
+
+    [TestMethod]
+    public void CheckSliceArrayElementCopies() => CheckTarget("SliceArrayElementCopies");
 
     [TestMethod]
     public void CheckSliceBoundsEscapeRoutes() => CheckTarget("SliceBoundsEscapeRoutes");

@@ -1,0 +1,11 @@
+# .4 FINAL RE-BANK at the freeze tip 280a01952c (COORD FLEET 2026-11-19 03:07Z), shard R-S: crypto/tls windows full count on R-LAPTOP, solo (nothing else on the box).
+start 2026-11-19T03:17:13Z head=280a01952c go version go1.26.11 windows/amd64 free=123G cores=16
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 4920 expected verdicts, timeout 10m, test-config Release
+==> building the converter
+  PASS  crypto/tls                         4920 [test-deadline=30m] [1439s]
+
+sweep: 1 pass / 0 fail  (1440s)
+
+per-row wall times: 1 row(s) -> C:\go2cs-tmp\r-rebank-final\scratchpad\sweep-row-walltimes\20261118-211747-sweep.tsv
+exit=0 end 2026-11-19T03:41:47Z free=120G

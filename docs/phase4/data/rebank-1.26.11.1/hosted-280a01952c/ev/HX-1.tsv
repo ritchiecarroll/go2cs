@@ -1,0 +1,2 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	absent	divergent_names	run	wall_s	cells	same_names
+HX-1	os	linux-x64	3842	3840	2	2	0	validated	-	-	TestRemoveAllNoFcntl;TestWriteStringAlloc	44449785789	283	read	yes
