@@ -142,8 +142,32 @@ func TestReadyToRunPublishLeavesTheProgramsOwnCodeILOnly(t *testing.T) {
 	check("GoReadyToRunUserCode=true", publish("all", "-p:GoReadyToRunUserCode=true"),
 		map[string]bool{"r2rguard.dll": true, "modlib.dll": true, "corelib.dll": true})
 
-	// The crossgen pack is the SDK's bundled one: no floating version.
-	assertBundledCrossgenPack(t, dotnet, app, rid)
+	// The crossgen pack is the target framework's, pinned exactly: no floating version.
+	assertTargetFrameworkCrossgenPack(t, dotnet, app, rid)
+}
+
+// The crossgen-pack decision on every host, without an SDK. The two passing rows are SDK 10.0.404 (bundled 10.0.15)
+// and SDK 11.0.100 (bundled 11.0.0), each restoring the net10.0 pack 10.0.15 as measured. The second is the row the
+// bundled-only predicate this replaced refused.
+func TestCrossgenPackDecisionIsMajorAware(t *testing.T) {
+	cases := []struct {
+		name, resolved, known, bundled, framework string
+		ok                                        bool
+	}{
+		{"same-major SDK, bundled pack", "[10.0.15, 10.0.15]", "10.0.15", "10.0.15", "v10.0", true},
+		{"newer-major SDK, framework pack", "[10.0.15, 10.0.15]", "10.0.15", "11.0.0", "v10.0", true},
+		{"floating range", "[10.0.15, )", "10.0.15", "10.0.15", "v10.0", false},
+		{"bare minimum", "10.0.15", "10.0.15", "10.0.15", "v10.0", false},
+		{"another patch", "[10.0.14, 10.0.14]", "10.0.15", "10.0.15", "v10.0", false},
+		{"same-major SDK whose framework pack is not its bundled one", "[10.0.14, 10.0.14]", "10.0.14", "10.0.15", "v10.0", false},
+		{"the SDK's own major instead of the framework's", "[11.0.0, 11.0.0]", "11.0.0", "11.0.0", "v10.0", false},
+	}
+
+	for _, c := range cases {
+		if problem := crossgenPackProblem(c.resolved, c.known, c.bundled, c.framework); (problem == "") != c.ok {
+			t.Errorf("%s: crossgenPackProblem(%q, %q, %q, %q) = %q, want ok=%v", c.name, c.resolved, c.known, c.bundled, c.framework, problem, c.ok)
+		}
+	}
 }
 
 // The reader's own arm, run on every host and without an SDK: a ReadyToRun image built for a non-Windows OS carries that
@@ -416,16 +440,49 @@ func readRVA(f *pe.File, rva uint32, n int) ([]byte, error) {
 	return nil, fmt.Errorf("RVA %#x is in no section", rva)
 }
 
-// assertBundledCrossgenPack holds the restore's Crossgen2 pack to the SDK's bundled runtime version.
-func assertBundledCrossgenPack(t *testing.T, dotnet, app, rid string) {
+// assertTargetFrameworkCrossgenPack holds the restore's Crossgen2 pack to the TARGET FRAMEWORK's pack, pinned exactly.
+// The SDK names that version in its KnownCrossgen2Pack item for the framework. It is the SDK's bundled runtime version
+// only when the SDK's major is the framework's: global.json admits a newer major (latestMajor), and an 11.x SDK
+// publishing a net10.0 program restores the net10.0 pack at the latest 10.0 patch it knows, not its own 11.0 runtime.
+func assertTargetFrameworkCrossgenPack(t *testing.T, dotnet, app, rid string) {
 	t.Helper()
 
-	output, err := exec.Command(dotnet, "msbuild", app, "-getProperty:BundledNETCoreAppPackageVersion", "-nodeReuse:false").Output()
+	output, err := exec.Command(dotnet, "msbuild", app, "-getItem:KnownCrossgen2Pack", "-getProperty:BundledNETCoreAppPackageVersion",
+		"-getProperty:TargetFramework", "-getProperty:TargetFrameworkVersion", "-nodeReuse:false").Output()
 	if err != nil {
-		t.Fatalf("R2R guard: reading the SDK's BundledNETCoreAppPackageVersion failed: %v", err)
+		t.Fatalf("R2R guard: reading the SDK's KnownCrossgen2Pack items failed: %v", err)
 	}
 
-	bundled := strings.TrimSpace(string(output))
+	var sdk struct {
+		Properties struct {
+			BundledNETCoreAppPackageVersion string
+			TargetFramework                 string
+			TargetFrameworkVersion          string
+		}
+		Items struct {
+			KnownCrossgen2Pack []struct {
+				TargetFramework      string
+				Crossgen2PackVersion string
+			}
+		}
+	}
+
+	if err := json.Unmarshal(output, &sdk); err != nil {
+		t.Fatalf("R2R guard: the SDK's msbuild answer is not JSON: %v\n%s", err, lastLines(string(output), 10))
+	}
+
+	var known []string
+
+	for _, item := range sdk.Items.KnownCrossgen2Pack {
+		if strings.EqualFold(item.TargetFramework, sdk.Properties.TargetFramework) {
+			known = append(known, item.Crossgen2PackVersion)
+		}
+	}
+
+	if len(known) != 1 {
+		t.Fatalf("R2R guard: the SDK names %d Crossgen2 packs for %s (%v), want exactly one", len(known), sdk.Properties.TargetFramework, known)
+	}
+
 	assets, err := os.ReadFile(filepath.Join(filepath.Dir(app), "obj", "project.assets.json"))
 	if err != nil {
 		t.Fatalf("R2R guard: %v", err)
@@ -451,12 +508,9 @@ func assertBundledCrossgenPack(t *testing.T, dotnet, app, rid string) {
 	for _, framework := range parsed.Project.Frameworks {
 		for _, dependency := range framework.DownloadDependencies {
 			if strings.EqualFold(dependency.Name, pack) {
-				// The restore records an exact range, "[10.0.11, 10.0.11]": every bound must be the bundled version.
-				for _, bound := range strings.Split(strings.Trim(dependency.Version, "[]"), ",") {
-					if strings.TrimSpace(bound) != bundled {
-						t.Errorf("R2R guard: %s resolved %s, not the SDK's bundled %s", pack, dependency.Version, bundled)
-						break
-					}
+				if problem := crossgenPackProblem(dependency.Version, known[0], sdk.Properties.BundledNETCoreAppPackageVersion,
+					sdk.Properties.TargetFrameworkVersion); problem != "" {
+					t.Errorf("R2R guard: %s %s", pack, problem)
 				}
 
 				return
@@ -465,6 +519,35 @@ func assertBundledCrossgenPack(t *testing.T, dotnet, app, rid string) {
 	}
 
 	t.Errorf("R2R guard: the restore downloaded no %s", pack)
+}
+
+// crossgenPackProblem is the decision assertTargetFrameworkCrossgenPack makes, apart from the SDK so that every host
+// runs it. resolved is the restore's range ("[10.0.15, 10.0.15]"), known the SDK's KnownCrossgen2Pack version for the
+// framework, bundled the SDK's own runtime version, frameworkVersion the TargetFrameworkVersion ("v10.0"). It returns
+// "" when the pack is the framework's, pinned exactly, and the bundled one whenever the SDK's major is the framework's.
+func crossgenPackProblem(resolved, known, bundled, frameworkVersion string) string {
+	major := func(version string) string { return strings.SplitN(strings.TrimPrefix(version, "v"), ".", 2)[0] }
+
+	// A bare version is a NuGet MINIMUM, not a pin, so the brackets are part of "pinned exactly".
+	if !strings.HasPrefix(resolved, "[") || !strings.HasSuffix(resolved, "]") {
+		return fmt.Sprintf("resolved %s, not an exact pin", resolved)
+	}
+
+	for _, bound := range strings.Split(strings.Trim(resolved, "[]"), ",") {
+		if strings.TrimSpace(bound) != known {
+			return fmt.Sprintf("resolved %s, not the framework's pack %s pinned exactly", resolved, known)
+		}
+	}
+
+	if major(known) != major(frameworkVersion) {
+		return fmt.Sprintf("resolved %s, which is not a pack of the target framework %s", resolved, frameworkVersion)
+	}
+
+	if major(bundled) == major(frameworkVersion) && known != bundled {
+		return fmt.Sprintf("resolved %s, not the SDK's bundled %s (the SDK's major is the framework's)", resolved, bundled)
+	}
+
+	return ""
 }
 
 func lastLines(text string, n int) string {

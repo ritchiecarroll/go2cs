@@ -76,6 +76,10 @@ explained set of golden updates, and a passing converter test suite
 owes a full behavioral compile. Corpus regenerations are separate from converter
 fixes so a fix is reviewable on its own.
 
+Any .NET SDK from 10.0.400 up builds the repository, newer majors included: `global.json` takes the highest one
+installed. On a machine whose only runtime is newer than .NET 10, run the tests with `DOTNET_ROLL_FORWARD=Major`.
+The project's own gates are measured on a 10.0.4xx SDK.
+
 A change that alters what a C# consumer can bind to (emitted code, go2cs-gen output, golib's public API, package or
 assembly identity, diagnostic codes, MSBuild properties) states which tier of
 [docs/PublicSurface.md](docs/PublicSurface.md) it touches. A tier-1 or tier-2 break follows that page's single
