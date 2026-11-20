@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -161,8 +160,6 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static nint plus(this ref counter c, nint a, nint b) { return c.n + a + b; }
 
-} // end mainᴛcounter
+} // end main_package

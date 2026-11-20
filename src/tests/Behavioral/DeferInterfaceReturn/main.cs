@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -13,21 +12,13 @@ partial struct Circle {
     public nint R;
 }
 
-} partial class mainᴛCircle {
-
 public static nint Area(this Circle c) { return 3 * c.R * c.R; }
-
-} partial class main_package {
 
 partial struct Square {
     public nint S;
 }
 
-} partial class mainᴛSquare {
-
 public static nint Area(this Square s) { return s.S * s.S; }
-
-} partial class main_package {
 
 internal static Shape pick(nint kind) {
     GoFrame ᒐ = default;

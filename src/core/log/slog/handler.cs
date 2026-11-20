@@ -718,4 +718,4 @@ internal static error Handle(this discardHandler dh, context.Context _Δp1, Reco
 internal static Handler WithAttrs(this discardHandler dh, slice<Attr> attrs) { return dh; }
 internal static Handler WithGroup(this discardHandler dh, @string name) { return dh; }
 
-} // end slogᴛdiscardHandler
+}

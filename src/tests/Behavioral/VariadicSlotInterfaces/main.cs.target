@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using ꓸꓸꓸShape = Span<main_package.Shape>;
 using ꓸꓸꓸany = Span<any>;
-using static main_package;
 
 partial class main_package {
 
@@ -15,25 +14,17 @@ partial struct Rect {
     internal nint w, h;
 }
 
-} partial class mainᴛRect {
-
 public static nint Area(this ref Rect r) {
     return r.w * r.h;
 }
-
-} partial class main_package {
 
 partial struct Circle {
     internal nint r;
 }
 
-} partial class mainᴛCircle {
-
 public static nint Area(this ref Circle c) {
     return 3 * c.r * c.r;
 }
-
-} partial class main_package {
 
 internal static ж<Rect> newRect(nint w, nint h) {
     return Ꮡ(new Rect(w: w, h: h));

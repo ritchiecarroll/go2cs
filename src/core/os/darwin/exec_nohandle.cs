@@ -14,4 +14,4 @@ internal static void closeHandle(this ref processHandle ph) {
     throw panic("internal error: unexpected call to closeHandle");
 }
 
-} // end osᴛprocessHandle
+}

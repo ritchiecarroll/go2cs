@@ -422,4 +422,4 @@ internal static @string String(this ref replace r) {
     return fmt.Sprintf("<replace(%v)>"u8, r.v);
 }
 
-} // end slogtestᴛreplace
+}

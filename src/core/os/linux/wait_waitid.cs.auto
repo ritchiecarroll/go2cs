@@ -41,4 +41,4 @@ internal static (bool, error) blockUntilWaitable(this ж<Process> Ꮡp) {
     return (true, default);
 }
 
-} // end osᴛProcess
+}

@@ -305,4 +305,4 @@ public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, sl
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
 
-} // end gcmᴛGCMWithXORCounterNonce
+}

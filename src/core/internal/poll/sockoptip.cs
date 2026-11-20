@@ -45,4 +45,4 @@ public static error SetsockoptIPv6Mreq(this ж<FD> Ꮡfd, nint level, nint name,
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

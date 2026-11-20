@@ -771,4 +771,4 @@ public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) 
     finally { ᒐ.Run(); }
 }
 
-} // end pngᴛEncoder
+}

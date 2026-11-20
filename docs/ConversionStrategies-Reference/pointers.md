@@ -290,7 +290,7 @@ A lowered parameter forwarded into another lowered position is `ref p` — it al
 
 **Row 1 — the parameter *is* the alias, and it survives generic instantiation** (`GenericReceiverFieldAddress`; the callee's `ж<T> Ꮡp` box and its `DerefOrNull()` preamble are gone, and the caller's 128-byte-per-evaluation field box becomes free):
 
-<!-- source: src/tests/Behavioral/GenericReceiverFieldAddress/main.cs:12, 17-21 -->
+<!-- source: src/tests/Behavioral/GenericReceiverFieldAddress/main.cs:11, 14-18 -->
 ```csharp
 internal static void setT<T>(ref T p, T val) { p = val; }
 …
@@ -333,7 +333,7 @@ The same row, dereferenced per call rather than bound once, is what keeps a **re
 
 **Row 5 — two boxes become one temp** (`NamedArrayWrapper`; the wrapper's `Value` yields an `array<T>` header whose `T[]` backing is SHARED, so element writes flow through and whole-header writes are lost in *both* emissions equally — byte-parity, not a new behavior. Type-gated by `refConvPairingSupported` to the identical-underlying-array family; a string or numeric wrapper's value is a plain copy and keeps its identity box end to end):
 
-<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:123-127 -->
+<!-- source: src/tests/Behavioral/NamedArrayWrapper/main.cs:116-120 -->
 ```csharp
 scal sm = new();
 var ᴛ1 = sm.s.Value;
@@ -470,7 +470,7 @@ The same edge covers **mutually** recursive closures (`even`/`odd`, each literal
 ## A nested closure's capture snapshot reads the enclosing closure's snapshot
 When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and captured by NESTED closures, it is not box-ref'd — it is snapshot-copied: the converter declares `var mʗ1 = m;` before the closure and the closure uses `mʗ1`, so the uncapturable `ref`-local `m` is never referenced inside the lambda. The snapshot chain must be threaded through each level. A capture generated for an **inner** closure that lands inside an **outer** closure's body must read the outer closure's snapshot, not the enclosing method's ref-local — the shape testing/fuzz.go's `run` closure has, capturing `fn := reflect.ValueOf(ff)` (a heap-boxed `reflect.Value`) and spawning `go tRunner(t, func(t){ … fn.Call(args) })` from inside itself, where the method-level `fn` is a ref-local uncapturable inside a closure (CS8175). The guard's own shape emits it:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:43-53 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:37-47 -->
 ```csharp
 ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
 var @out = new channel<nint>(1);
@@ -1196,7 +1196,7 @@ func readU32(p ptr, o uintptr) uint32 {
 	return *(*uint32)(unsafe.Add(p, o))
 }
 ```
-<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:20-22 -->
+<!-- source: src/tests/Behavioral/UnsafePointerTypeAlias/main.cs.target:19-21 -->
 ```csharp
 internal static uint32 readU32(ptr p, uintptr o) {
     return ~@unsafe.Pointer.To<uint32>(@unsafe.Add(p, o));
@@ -1396,7 +1396,7 @@ func callR1(x uintptr, a, b int) int {
 	return (*(*func(int, int) int)(unsafe.Pointer(&struct{ uintptr }{x})))(a, b)
 }
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:19-23 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:18-22 -->
 ```csharp
 internal static uintptr ccgoFP(any fʗp) {
     ref var f = ref heap(fʗp, out var Ꮡf);
@@ -1404,7 +1404,7 @@ internal static uintptr ccgoFP(any fʗp) {
     return (uintptr)GoFuncCookie.Of((Delegate)f);
 }
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:45-47 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:44-46 -->
 ```csharp
 internal static nint callR1(uintptr x, nint a, nint b) {
     return GoFuncCookie.Func<Func<nint, nint, nint>>(x)(a, b);
@@ -1422,7 +1422,7 @@ method table this way: a func stored at a computed address inside a variable of 
 ```go
 	*(*func(int, int) int)(unsafe.Add(unsafe.Pointer(&gwords), 8)) = add
 ```
-<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:99 -->
+<!-- source: src/tests/Behavioral/FuncWordShapes/main.cs:98 -->
 ```csharp
     @unsafe.Pointer.StoreFunc(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡgwords), 8), (Func<nint, nint, nint>)add);
 ```
@@ -2324,7 +2324,7 @@ func (n *AttrNode) Mode(def int) (int, bool) {
 `Mode` is a method of `Node`, callable on a nil `*Node`. It is emitted exactly as it would be under the
 type's own name, with the alias kept in the signature as Go wrote it:
 
-<!-- source: src/tests/Behavioral/AliasReceiverForms/main.cs:24-31 -->
+<!-- source: src/tests/Behavioral/AliasReceiverForms/main.cs:21-28 -->
 ```csharp
 public static (nint, bool) Mode(this ж<AttrNode> Ꮡn, nint def) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -3605,7 +3605,7 @@ func decodePort(raw *rawInet4) int {
 	return int(p[0])<<8 + int(p[1])
 }
 ```
-<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:32-41 -->
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:31-40 -->
 ```csharp
 internal static void encodePort(ж<rawInet4> raw, nint port) {
     var p = @unsafe.ArrayPointer<byte>.Of(raw.Ꮡport, 2);
@@ -3634,7 +3634,7 @@ func (sa *sockInet4) sockaddr() {
 	sa.raw.addr = sa.addr
 }
 ```
-<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:163-170 -->
+<!-- source: src/tests/Behavioral/FieldViewOverReferenceStruct/main.cs.target:160-167 -->
 ```csharp
 internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
@@ -3787,7 +3787,7 @@ or index whose base is such a dereference now renders the conversion and reads i
 	(*(*frame)(ptr(bp))).Read += 3
 	(*(*frame)(ptr(bp))).bump()
 ```
-<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:26-28 -->
+<!-- source: src/tests/Behavioral/ExplicitDerefConversionStore/main.cs.target:21-23 -->
 ```csharp
     (@unsafe.Pointer.To<frame>(ptr(bp))).Value.Pgno = 7;
     (@unsafe.Pointer.To<frame>(ptr(bp))).Value.Read += 3;
@@ -4029,7 +4029,7 @@ program. Both a pointer RECEIVER and a plain `*T` PARAMETER take the box:
 func (p *pp) free()  { poolPut(p) }   // p is *pp (pointer receiver); poolPut(x any)
 func keep(q *pp)     { poolPut(q) }   // a plain *T parameter, same shape
 ```
-<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:34-43 -->
+<!-- source: src/tests/Behavioral/PointerValueToInterfaceArg/main.cs:31-38 -->
 ```csharp
 internal static void free(this ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -4037,8 +4037,6 @@ internal static void free(this ж<pp> Ꮡp) {
     p.buf = p.buf[..0];
     poolPut(Ꮡp.OrTypedNil());
 }
-
-} partial class main_package {
 
 internal static void keep(ж<pp> q) { poolPut(q.OrTypedNil()); }
 ```

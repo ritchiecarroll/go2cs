@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0ggICitIaCgoKCgpqCloKCmoKCgpqCkpqCAAkKtIKCgpTq/A==", "36-36:1", "52=main.reader.sum;59=main.shifter.shift")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAoggICilIaCgoKCgpqCloKCmoKCgpqCkpqC+pSCgoKUytw=", "36-36:1", "52=main.reader.sum;59=main.shifter.shift")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -88,7 +88,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounter;
-[GoMethodHost(typeof(main_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛreader;
-[GoMethodHost(typeof(main_package.shifter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛshifter;
 // </MethodHolders>

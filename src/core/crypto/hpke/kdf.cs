@@ -179,4 +179,4 @@ internal static (slice<byte>, error) labeledExpand(this ref shakeKDF kdf, slice<
     return (default, errors.New(hpkeInternalErrorˢ3));
 }
 
-} // end hpkeᴛshakeKDF
+}

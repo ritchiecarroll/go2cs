@@ -269,4 +269,4 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     return digest.Clone();
 }
 
-} // end sha256ᴛDigest
+}

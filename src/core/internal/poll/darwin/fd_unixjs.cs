@@ -121,4 +121,4 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

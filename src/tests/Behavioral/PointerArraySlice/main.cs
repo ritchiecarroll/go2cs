@@ -1,13 +1,10 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct grid /*[4]nint*/;
-
-} partial class mainᴛgrid {
 
 internal static nint firstTwo(this ref grid b) {
     nint total = 0;
@@ -16,8 +13,6 @@ internal static nint firstTwo(this ref grid b) {
     }
     return total;
 }
-
-} partial class main_package {
 
 internal static nint sumParam(ж<grid> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -79,12 +74,10 @@ internal static void rangeIndexOnly() {
     fmt.Println("receiver ranges", g);
 }
 
-} partial class mainᴛgrid {
-
 internal static void fill(this ref grid b) {
     foreach (var i in range(4)) {
         b.Value[i] = i * 10;
     }
 }
 
-} // end mainᴛgrid
+} // end main_package

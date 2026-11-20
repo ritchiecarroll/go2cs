@@ -111,4 +111,4 @@ public static @string String(this ExtKeyUsage i) {
     return _ExtKeyUsage_name.slice(_ExtKeyUsage_index[idx], _ExtKeyUsage_index[idx + 1]);
 }
 
-} // end x509ᴛExtKeyUsage
+}

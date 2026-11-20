@@ -895,4 +895,4 @@ internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase
     s.UserTime = s.TotalTime - (s.GCTotalTime + s.ScavengeTotalTime + s.IdleTime);
 }
 
-} // end runtimeᴛcpuStats
+}

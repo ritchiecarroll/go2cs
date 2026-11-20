@@ -28,7 +28,6 @@ namespace go;
 
 using fmt = fmt_package;
 using Δio = io_package;
-using static main_package;
 
 partial class main_package {
 
@@ -37,11 +36,7 @@ partial struct Header {
     public int64 Size;
 }
 
-} partial class mainᴛHeader {
-
 public static @string String(this Header h) { return fmt.Sprint(h.Name, "/", h.Size); }
-
-} partial class main_package {
 
 partial interface Stringish {
     @string String();
@@ -59,11 +54,7 @@ partial struct zed {
     internal nint v;
 }
 
-} partial class mainᴛzed {
-
 internal static nint Zed(this zed z) { return z.v; }
-
-} partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object twoˢ = (@string)"two"u8;

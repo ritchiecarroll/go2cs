@@ -43,7 +43,7 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 72, 5, 0)]
+[assembly: GoBoundedGoroutine("main.cs", 67, 5, 0)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAsegqqCqILsgoKCgoKUgoKClIKUgpSCgpSCgoKCgoKUlIKCpLqCgpCS", "76-76:1")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAgegqqCqILMgoKCgoKUgoKClIKUgpSCgpSCgoKCgoKUlIKCpLqCgpCS", "76-76:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -91,5 +91,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.closeWaiter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcloseWaiter;
 // </MethodHolders>

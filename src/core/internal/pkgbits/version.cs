@@ -85,4 +85,4 @@ public static bool Has(this Version v, Field f) {
     return introduced[f] <= v && (v < removed[f] || removed[f] == V0);
 }
 
-} // end pkgbitsᴛVersion
+}

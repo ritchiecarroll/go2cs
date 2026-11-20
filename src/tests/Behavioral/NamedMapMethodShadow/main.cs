@@ -16,17 +16,11 @@ public static void Set(this Env e, @string k, @string v) { e[strings.ToLower(k)]
 
 partial struct Bag /*map[@string, nint]*/;
 
-} partial class mainᴛBag {
-
 public static void Add(this Bag b, @string k, nint v) { b[k] += v; }
-
-} partial class main_package {
 
 partial struct Cache /*map[@string, nint]*/;
 
 internal static nint cleared;
-
-} partial class mainᴛCache {
 
 public static bool Remove(this Cache c, @string k) {
     var (_, ok) = c[k, ꟷ];
@@ -43,8 +37,6 @@ public static void Clear(this Cache c) {
 
 public static bool ContainsKey(this Cache c, @string k) { return k == "always"u8; }
 
-} partial class main_package {
-
 partial struct PEnv /*map[@string, @string]*/;
 
 } partial class mainᴛPEnv {
@@ -55,28 +47,20 @@ public static void Set(this ref PEnv p, @string k, @string v) { (p)[strings.ToUp
 
 partial struct Uniq<T> /*map[T, EmptyStruct]*/;
 
-} partial class mainᴛUniq {
-
 public static bool Remove<T>(this Uniq<T> u, T item) {
     var (_, ok) = u[item, ꟷ];
     delete(u, item);
     return !ok;
 }
 
-} partial class main_package {
-
 partial struct Pipe /*chan nint*/;
 
 internal static nint sends;
-
-} partial class mainᴛPipe {
 
 public static void Send(this Pipe p, nint v) {
     sends++;
     p.ᐸꟷ(v * 10);
 }
-
-} partial class main_package {
 
 partial struct Set /*map[@string, nint]*/;
 

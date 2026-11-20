@@ -1152,4 +1152,4 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
     });
 }
 
-} // end typesᴛChecker
+}

@@ -86,4 +86,4 @@ public static @string String(this ref Package pkg) {
     return fmt.Sprintf("package %s (%q)"u8, pkg.name, pkg.path);
 }
 
-} // end typesᴛPackage
+}

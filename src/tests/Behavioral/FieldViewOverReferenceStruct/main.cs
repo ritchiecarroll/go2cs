@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -158,8 +157,6 @@ partial struct sockInet4 {
     internal rawInet4 raw;
 }
 
-} partial class mainᴛsockInet4 {
-
 internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
@@ -168,8 +165,6 @@ internal static void sockaddr(this ж<sockInet4> Ꮡsa) {
     p.ElementRef(1) = (byte)sa.port;
     sa.raw.addr.Assign(sa.addr);
 }
-
-} partial class main_package {
 
 internal static nint anyToPort(ж<sockInet4> sa) {
     var p = @unsafe.ArrayPointer<byte>.Of(sa.Ꮡraw.Ꮡport, 2);

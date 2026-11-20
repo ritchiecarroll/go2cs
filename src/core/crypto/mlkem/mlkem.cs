@@ -234,4 +234,4 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this r
     return ek.key.Encapsulate();
 }
 
-} // end mlkemᴛEncapsulationKey1024
+}

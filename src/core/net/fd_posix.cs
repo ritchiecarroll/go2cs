@@ -220,4 +220,4 @@ internal static error SetWriteDeadline(this ж<netFD> Ꮡfd, time.Time t) {
     return Ꮡfd.Ꮡpfd.SetWriteDeadline(t);
 }
 
-} // end netᴛnetFD
+}

@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -12,8 +11,6 @@ internal static partial uintptr readViaParam(ж<uintptr> p) {
     var q = p;
     return q.Value;
 }
-
-} partial class mainᴛutp {
 
 internal static uintptr read(this ж<utp> Ꮡr) {
     var q = Ꮡr.Reinterpret<utp, uintptr>();
@@ -29,8 +26,6 @@ internal static uintptr tricky(this ж<utp> Ꮡr) {
         return q.Value;
     }
 }
-
-} partial class main_package {
 
 partial struct holder {
     internal uintptr v;

@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,11 +8,7 @@ partial struct box {
     internal nint n;
 }
 
-} partial class mainᴛbox {
-
 internal static ж<box> get(this ж<box> Ꮡb) { return Ꮡb; }
-
-} partial class main_package {
 
 internal static partial nint run() {
     ref var arr = ref heap(new array<box>(3), out var Ꮡarr);

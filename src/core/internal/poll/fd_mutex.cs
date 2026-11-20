@@ -192,4 +192,4 @@ internal static bool closing(this ж<FD> Ꮡfd) {
     return (atomic.LoadUint64(Ꮡfd.Ꮡfdmu.Ꮡstate) & (uint64)mutexClosed) != 0;
 }
 
-} // end pollᴛFD
+}

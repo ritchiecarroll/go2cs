@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -11,11 +10,7 @@ partial struct frame {
     public int32 Read;
 }
 
-} partial class mainᴛframe {
-
 internal static void bump(this ref frame f) { f.Read++; }
-
-} partial class main_package {
 
 internal static @unsafe.Pointer ptr(uintptr p) { return (@unsafe.Pointer)p; }
 

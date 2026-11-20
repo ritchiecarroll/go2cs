@@ -13,4 +13,4 @@ partial struct Outer {
 
 public static nint Sum(this Outer o) { return o.Exported + o.unexported; }
 
-} // end fieldlibᴛOuter
+}

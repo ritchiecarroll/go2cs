@@ -95,4 +95,4 @@ public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> 
     (c.i, c.j) = (i, j);
 }
 
-} // end rc4ᴛCipher
+}

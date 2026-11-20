@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -15,8 +14,6 @@ partial struct p224 {
     internal nint v;
 }
 
-} partial class mainᴛp224 {
-
 internal static @string label(this ref p224 p) { return "p224"; }
 
 internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
@@ -27,8 +24,6 @@ internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
 
 internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) { return (Ꮡ(new p224(v: (nint)b[0])), default); }
 
-} partial class main_package {
-
 internal static ж<p224> newP224() { return Ꮡ(new p224(v: 1)); }
 
 partial struct curve<Point>
@@ -38,8 +33,6 @@ partial struct curve<Point>
     internal Func<Point> newPoint;
     internal Point seed;
 }
-
-} partial class mainᴛcurve {
 
 internal static @string Tag<Point>(this ref curve<Point> c)
     where Point : point<Point>
@@ -60,8 +53,6 @@ internal static @string Fresh<Point>(this ref curve<Point> c)
     var (r, _) = p.restore(slice<byte>([7]));
     return r.label();
 }
-
-} partial class main_package {
 
 partial interface Named {
     @string Tag();

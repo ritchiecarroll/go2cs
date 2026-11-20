@@ -280,4 +280,4 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     return default;
 }
 
-} // end sha3ᴛDigest
+}

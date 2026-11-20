@@ -91,4 +91,4 @@ internal static void XORKeyStream(this ref ofb x, slice<byte> dst, slice<byte> s
     }
 }
 
-} // end cipherᴛofb
+}
