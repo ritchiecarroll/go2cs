@@ -2140,6 +2140,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPromotedTargetParam() => CheckTarget("PromotedTargetParam");
 
     [TestMethod]
+    public void CheckPromotedUnexportedEmbedChain() => CheckTarget("PromotedUnexportedEmbedChain");
+
+    [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
 
     [TestMethod]
