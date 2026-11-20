@@ -593,6 +593,10 @@ type Visitor struct {
 	// from (`c` → `Ꮡc.DerefOrNull()`). The alias is declared INSIDE the frame's try, so the finally
 	// cannot name it and a lowered defer's call is re-rooted on the box instead.
 	entryAliasBoxPaths map[string]string
+	// closureRepointedParams holds the current declaration's pointer parameters that a func literal
+	// assigns: they keep their box, take no entry alias, and every value read renders `Ꮡp.Value`
+	// (see closureRepointedPointerParams).
+	closureRepointedParams map[types.Object]bool
 	// blankResultNames interns the generated slot name for each BLANK (`_`) result of a
 	// namedReturnDefer signature — Go allows mixing blank and named results
 	// (`func parse(…) (_ *Regexp, err error)`), and the blank slot still needs a C# local so

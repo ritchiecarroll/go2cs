@@ -1902,7 +1902,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// re-aliased (`p = ref Ꮡp.Value`). A write *through* the box (`Ꮡp.Value = …`, emitted
 				// for `*p = …` inside a lambda — see convStarExpr) has member access and must not
 				// trigger this; it is a plain value assignment.
-				if strings.HasPrefix(leftExpr, AddressPrefix) && !strings.Contains(leftExpr, ".") && !insideLambda {
+				// A parameter a func literal repoints has no alias to re-alias: it reads through its box
+				// everywhere (see closureRepointedPointerParams).
+				if strings.HasPrefix(leftExpr, AddressPrefix) && !strings.Contains(leftExpr, ".") && !insideLambda && !v.boxNameReadsThroughBox(leftExpr) {
 					// This is a special case for pointer reassignments which should be extended
 					// to also update local deference variable as well, e.g.: `x = ref Ꮡx.Value`
 					boxBaseName := leftExpr[len(AddressPrefix):]
