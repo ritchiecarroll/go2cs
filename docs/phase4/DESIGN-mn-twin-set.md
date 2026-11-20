@@ -1,0 +1,180 @@
+# DESIGN — M:N: the twin-set rule as text, with the closed definition of "signature admits a twin"
+
+> **STATUS: PROPOSED (lane G, 2026-11-20; branch `claude/g-mn-proto-b1`).** Design only: the rule text to freeze,
+> the decisions it asks, and the census that gates it. No code lands from this document. It answers item 3 of the
+> re-sized M:N plan (record 10.4's SHOULD-1, written last per 10.9) on top of the pin design
+> ([DESIGN-mn-pin](DESIGN-mn-pin.md)), N2 ([DESIGN-mn-box-twin](DESIGN-mn-box-twin.md)) and stage (c)
+> ([DATA-mn-stage-c](DATA-mn-stage-c.md)). Amended by dated blocks, never rewritten.
+
+## 1. What the text must hold
+
+From [DATA-mn-spike-2](DATA-mn-spike-2.md), as ruled:
+
+- **M1**: "the twin surface of a package is a function of its exported Go API and never of the park analysis."
+  Every exported function and method whose signature admits a twin has one, always; where the body cannot park it
+  is a forwarder with a mark. Refusals that read the BODY give a forwarder, not an absence.
+- **10.3**: the SURFACE and the PARK SET are two sets; only the surface is frozen. The park mark is data beside it.
+- **10.4**: the definition is a closed list of exclusions, **each stated on the signature alone**, with one rule:
+  the list can only get shorter (lifting adds twins, which is safe; narrowing removes them, which is M1's break).
+  Generic functions are decided before the freeze.
+- **10.8**: for a hand-owned file the generator emits the forwarder; an author-written twin wins.
+
+## 2. The finding that shapes the text: three lowerings
+
+The generator decides on the **C#** signature. The C# signature of a converted Go function is not a function of its
+Go signature alone. Three lowerings move it, read on this branch:
+
+| Go form | plain C# lowering | decided by | today's refusal |
+|---|---|---|---|
+| `*T` receiver | `this ref T`, or `this ж<T>` where the body needs the pointer itself (a nil check, an escape); RecvGenerator adds the `ж<T>` overload beside a `ref` form | the BODY (`bytes.Buffer.Bytes` is `this ref Buffer`, `Buffer.String` is `this ж<Buffer>`) | `byref-recv` (the box twin lifts it, N2) |
+| `string` parameter | an `sstring` member (a `ref struct` view) carrying the body, beside a generated `@string` member at `[OverloadResolutionPriority(-1)]` | an EXPLICIT converter list, the sstring-twin pilot (`sstringTwinOperations.go`); `fmt.Printf` is on it | `reflike`, on the `sstring` member |
+| `...T` parameter | `params ꓸꓸꓸT` = `params Span<T>` (`params Span<T>` for a generic) | always | `reflike` |
+
+A `*T` PARAMETER of an exported function is always `ж<T>`: the ref-lowering pass lowers only unexported functions
+(DESIGN-mn-box-twin 12), which R6 leaves to the analysis anyway.
+
+The first row flips with a body edit (a Go patch that adds `if b == nil` turns `this ref T` into `this ж<T>`), and
+the second with a converter list that can change between releases. A definition read off the C# signature would
+let either add or remove a twin, which is exactly what M1 forbids. The third refuses **every exported variadic
+function**: `fmt.Printf`, `fmt.Fprintf`, `log.Printf`, `errors.Join`, `filepath.Join` have no twin today, by
+signature.
+
+Source read of the converted (not hand-owned, not golib, not test) public methods on this branch, one-line
+declarations only, so each is a floor (positive control `fmt.Printf` counted, negative `strings.Contains` not):
+
+| lowering on a public method | count (of 7,653 read) |
+|---|---|
+| `this ref T` receiver | 1,832 (beside 1,598 `this ж<T>`) |
+| variadic `params Span` | 217 |
+| `ref T` parameter | 0 from a Go declaration (the regex's 24: bodies on the same line, synthesized native helpers, hand-written helpers) |
+| `sstring` parameter | 9: the pilot's `sstring` members, each beside a generated `@string` member |
+| generic method | 132 (1 of them variadic) |
+| `unsafe` modifier (a body property) | 124 |
+| a C# pointer type in the signature | 20, all converter-SYNTHESIZED native helpers (`GoWriteNativeSockaddrInet4`), no Go declaration |
+
+**So the text is stated on the Go signature, and the twin's own C# signature is a function of the Go signature.**
+
+## 3. The rule (the text to freeze)
+
+> **R1. Population.** The twin set of a package built with twins is every Go function and method whose declaration
+> the conversion emits as a public C# member: package functions, methods (on any receiver the conversion makes
+> public), promoted-method forwarders, and the members of every public interface. One Go declaration is ONE
+> member of the population however many C# overloads it has (a `ref`/`ж` receiver pair, an `sstring`/`@string`
+> pair). A member the converter synthesizes with no Go declaration (native helpers, adapters) is not in it.
+>
+> **R2. One twin, Go-shaped.** Each member of the population has exactly one twin, `<name>ꞏtwin`, whose parameters
+> are the **canonical lowering** of its Go parameters (section 4) and whose result is `GoTask` for no result,
+> `GoTask<T>` for one, `GoTask<(T1, …)>` for several. The twin's signature depends on the Go signature only.
+>
+> **R3. Body.** The twin is a state machine where the generator can rewrite the body for the park set, and
+> otherwise a **forwarder**: it calls the plain member, converting each canonical parameter to the plain lowering,
+> and returns a completed task. A forwarder carries `[GoParkForwarder]` (golib's `GoTwinForwarder` name is taken,
+> by the sstring twin's value delegate), and a caller's build may bind the plain
+> member through it. Every refusal that reads the body, the plain lowering or the park analysis produces a
+> forwarder. None produces an absence.
+>
+> **R4. Exclusions.** A member is outside the twin set only by an entry of the closed list E (section 5). Each
+> entry is stated on the Go signature alone. E can only get shorter.
+>
+> **R5. Hand-owned.** For a hand-owned member that stands for a Go declaration the generator emits the forwarder
+> (10.8). An author-written `<name>ꞏtwin` replaces it; the generator then emits nothing for that member.
+>
+> **R6. Unexported.** Unexported members stay analysis-driven: twinned where the park set needs them, never frozen.
+>
+> **R7. Interfaces.** Every public interface has a hidden twin interface with one slot per member in the twin set,
+> and every implementer the conversion records implements it (a forwarder where the implementer does not park).
+> Whether a call through the interface AWAITS the slot is the park mark of 10.3, data beside the surface.
+>
+> **Contract sentence.** Within a Go line (from the first release that carries twins), a twin member never
+> disappears and never changes shape; E only gets shorter.
+
+## 4. The canonical lowering
+
+The twin takes each parameter in the form that holds across an await and that the plain lowering converts from:
+
+| Go parameter | plain lowering (any of) | canonical in the twin | forwarder's conversion |
+|---|---|---|---|
+| `*T` receiver | `this ref T`, `this ж<T>` | `this ж<T>` | `ref Ꮡt.DerefOrNull()` (N2's prologue) |
+| `*T` parameter (exported) | `ж<T>` | `ж<T>` | none |
+| `string` | `@string`; for the pilot list also `sstring` | `@string` | none: it calls the `@string` member |
+| `...T` | `params Span<T>` | `slice<T>` (Go's own view: `...T` is a `[]T` in the body) | `args.ꓸꓸꓸ` (shares storage, as Go's `f(s...)`) |
+| value receiver `T` | `this T`; a `[GoCopyBound]` `this ref T` forwarder | `T` | none |
+| any other type | unchanged | unchanged | none |
+
+Results: Go results always escape, so they are never lowered; the twin's result types are the plain ones.
+
+A nil receiver through the `*T` row keeps Go's behaviour: `DerefOrNull` yields a null ref that faults at the first
+dereference, as the plain method does, so a method that never dereferences its receiver runs (DESIGN-mn-box-twin
+section 4, item 6).
+
+## 5. The closed list E, decided
+
+| entry | stated on the Go signature | decision asked | why |
+|---|---|---|---|
+| E1 | a generic function, a method of a generic type, or a member of a generic interface | EXCLUDE at the freeze; lifting is owed and additive | no generic arm was built (4.10); the generator refuses `generic-interface`, `generic-method`, `generic-host`, and leaves `generic-unfollowed` box calls plain. A forwarder is easy; a real generic twin is an arm. Source read: 132 public generic methods; few park (census, P2) |
+
+Nothing else. Each remaining generator refusal maps to R3 (a forwarder), to a corpus decision, or to a fix, as
+section 6 shows. In particular **variadic functions are in** (canonical `slice<T>`): excluding them would put
+`fmt.Fprintf` and `log.Printf` outside the surface for a whole Go line, and a forwarder costs one method.
+
+## 6. Every generator refusal, mapped
+
+| generator reason | reads | under the rule |
+|---|---|---|
+| `byref-recv` | the plain lowering (the body chose `this ref T`) | box twin where N2 built it; else a canonical forwarder (R3) |
+| `byref-param`, `byref-mixed`, `byref-out` | the ref-lowering of UNEXPORTED functions, and hand-owned `out` | outside the frozen surface (R6); an `out` in a hand-owned file is R5's author decision |
+| `reflike` | the plain lowering (the pilot's `sstring` member, variadic `Span`) | `sstring`: the twin hangs on the `@string` member (R1), a forwarder to it until the rewriter twins the body; variadic: a canonical forwarder; a real twin needs the rewriter to retype the parameter (owed, park-set work) |
+| `unsafe` | the `unsafe` modifier (body); pointer types only on synthesized members | forwarder; synthesized members are outside R1 |
+| `native`, `iterator`, `await-in-lock`, `ref-unrederivable`, `ref-shared-member`, refuse rows | the body | forwarder |
+| `host-not-partial` | the hand-owned file, not the signature | **decision asked**: make those hosts `partial` (stage (c) counted 94 methods and 2 interface members on the closure); otherwise they need a file-level exclusion, which the text cannot state on a signature |
+| `async-shaped` | a result type NAMED `Task`, `ValueTask` or `GoTask` | **fix before the freeze**: key it on the BCL and golib symbols. Keyed on a name it excludes a Go type that happens to be called `Task`, a signature exclusion nobody chose. Narrowing it adds twins |
+| `instance`, `interface-member`, `explicit-impl`, `ref-return`, iface `static` | C# shapes no Go declaration converts to | outside R1 (hand-written C# only); the census asserts zero in converted files |
+| iface `byref-param` for `params` | a variadic interface member | canonical `slice<T>` slot (generator gap to close) |
+| `generic-*` | the Go signature | E1 |
+| `has-twin` | an author-written twin | R5 |
+
+## 7. What the freeze needs built (item 7a's work, priced here)
+
+| piece | lane-days |
+|---|---|
+| canonical forwarders: the three lowerings, body refusals emitting a forwarder instead of nothing, `[GoParkForwarder]` and the caller's plain bind | 2-3 |
+| variadic interface slots; `async-shaped` keyed on symbols; E1 as one named rule | 0.5 |
+| the guard (section 8) | 0.5-1 |
+| the census arms (section 9) | 0.5-1 |
+| **total** | **3.5-5.5**, beside this text's 1-1.5 |
+
+Hosts made `partial` is a hand-owned corpus edit for its owners, not counted here. Whether the published stdlib
+packages are built with twins at all is the owner's open landing shape (L-min opt-in twins vs L-on); the rule is
+the same either way, and applies to a package when it is built with twins.
+
+## 8. The guard
+
+A generator check over the compilation: every member in R1's population is twinned, forwarded, or excluded by an
+E entry; any other outcome is a build error naming the member and the reason (a new GO2CS diagnostic). A GenTests
+unit per row of section 6. Made to fail before it is trusted (floor 13): drop the forwarder for one body refusal
+and the guard must name that member; key `async-shaped` on the name again and the guard must name a Go type called
+`Task`. The binary-compatibility guard already compares every public member, so it covers twin members (M1).
+
+## 9. Census arms and predictions (written before any arm runs)
+
+Arms: MnHttpClosure (stage (c)'s closure, arm B's rule) and the whole stdlib conversion, each with a report row
+per public member: `twin | forwarder:<reason> | E1 | GUARD`.
+
+| # | prediction | stop line |
+|---|---|---|
+| P1 | rows reading GUARD after section 7's build: 0 in converted files | any: the rule misses a case; the text waits |
+| P2 | E1 on the stdlib: 130-330 public generic members; of them parkers (the generator's analysis, arm B) under 25 | over 50 parkers: E1 needs a generic arm before the freeze, a ruling |
+| P3 | forwarders on the closure: 60-75% of R1's population (the park set is 22.2% of candidates in arm B) | none: a reading |
+| P4 | closure go.*.dll bytes over arm B's +6.1%: a further +2% to +5% | over +10%: a ruling (for example, forwarders only where a park is possible in any Go version) |
+| P5 | build wall over arm B: within 1.2x | over 1.5x: a ruling |
+| P6 | variadic members gain twins or forwarders: 217 or more converted public methods (the source floor) | fewer than 217 |
+| P7 | `instance`, `interface-member`, `explicit-impl`, `ref-return` on converted public members: 0 | any |
+
+## 10. Asked of COORD
+
+1. Rule R1-R7 and the canonical lowering (section 4) as the twin-set text.
+2. E = {E1} at the freeze: generics excluded, lift owed and additive.
+3. `host-not-partial`: the hosts are made `partial` (recommended), or a file-level exclusion is accepted outside
+   the signature rule.
+4. `async-shaped` keyed on symbols before the freeze.
+5. Section 7's build as item 7a's scope, and section 9's stop lines as written.
