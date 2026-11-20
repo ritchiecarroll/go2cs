@@ -17,7 +17,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime.syscall;
 using go.sync;
-using ꓸꓸꓸuintptr = Span<uintptr>;
+using ꓸꓸꓸuintptr = variadic<uintptr>;
 using static syscall_package;
 
 partial class syscall_package {
