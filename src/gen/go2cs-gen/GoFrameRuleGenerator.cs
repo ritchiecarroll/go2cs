@@ -7,7 +7,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -37,16 +39,37 @@ namespace go2cs;
 /// compilation, converted or hand-written, that names <c>GoFrame</c>. A frame VALUE can reach a file that never names the
 /// type in one way only: a typeless lambda parameter with a modifier, <c>(ref f) =&gt; ...</c>, whose delegate is
 /// declared elsewhere, so such a file is read too. A <c>global using</c> alias of <c>GoFrame</c> would be the other way,
-/// and it is refused at the alias. What the rule cannot see: code another generator writes (a generator never reads
-/// another's output, so a twin body is checked only as the plain body it was rewritten from), and F# or Visual Basic.
+/// and it is refused at the alias.
+/// </para>
+/// <para>
+/// SYNTAX FIRST. A generator binds the compilation WITHOUT the other generators' output, and converted code names their
+/// members (a field box, <c>g.ᏑcgoCtxt</c>), so a call that is sound can fail to bind here. The three allowed shapes are
+/// positions, so they are read from syntax: a <c>ref</c> argument, the receiver of a member access, and <c>nameof</c>.
+/// Binding only narrows them, to a refusal, where it binds: a <c>ref</c> argument that infers a generic argument, a
+/// receiver that is a by-value extension's argument or a method group. A use in any other position is refused, named
+/// from binding where it binds and as a copy where it does not. An allowed-by-syntax use whose call does not bind is
+/// DEFERRED: the generator lists it in a comment-only generated file (<see cref="DeferredHintPrefix"/>), and
+/// <see cref="GoFrameRuleAnalyzer"/>, which sees every generator's output, binds it fully and reports it if it refuses.
+/// A project that sets <c>RunAnalyzers</c> to false loses that second net, not the rule.
+/// </para>
+/// <para>
+/// What the rule does not see: code another generator writes (a twin body is TwinGenerator's rewrite of a plain body this
+/// rule checked, and a frame hoisted into a twin's state machine is 9.8's sanctioned home for it across an await), and
+/// F# or Visual Basic.
 /// </para>
 /// </remarks>
 [Generator]
 public sealed class GoFrameRuleGenerator : IIncrementalGenerator
 {
-    private const string GoFrameMetadataName = "go.GoFrame";
+    internal const string GoFrameMetadataName = "go.GoFrame";
 
     private const string GoFrameName = "GoFrame";
+
+    /// <summary>The hint-name prefix of the comment-only files that list the uses the generator could not bind.</summary>
+    public const string DeferredHintPrefix = "GoFrameRule.Deferred.";
+
+    // The prefix of each listed use in such a file: `// GO2CS0016-deferred <start> <length> <path>`.
+    internal const string DeferredLinePrefix = "// GO2CS0016-deferred ";
 
     /// <summary>The tracking name of the semantic transform.</summary>
     public const string TransformStepName = "GoFrameRuleTransform";
@@ -59,12 +82,15 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
             .Combine(context.CompilationProvider)
             .Select(static (input, cancellationToken) => Check(input.Right, input.Left, cancellationToken))
             .WithTrackingName(TransformStepName)
-            .Where(static output => output.Records.Length > 0);
+            .Where(static output => output.Records.Length > 0 || output.Deferred.Length > 0);
 
         context.RegisterSourceOutput(files, static (productionContext, output) =>
         {
             foreach (DiagnosticRecord record in output.Records)
                 productionContext.ReportDiagnostic(record.ToDiagnostic());
+
+            if (output.Deferred.Length > 0)
+                productionContext.AddSource(output.DeferredHintName, output.DeferredSource());
         });
     }
 
@@ -99,6 +125,65 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
         return new Checker(compilation.GetSemanticModel(root.SyntaxTree), frame, cancellationToken).Run(root);
     }
 
+    // What binding says of one use of a frame: Known is false where the use's operation is missing or sits under an
+    // invalid operation (the generator's partial view); Use is null where binding allows it, else what it does.
+    internal readonly record struct Bound(bool Known, string? Use)
+    {
+        public static readonly Bound Unknown = new(false, null);
+    }
+
+    /// <summary>
+    /// The syntax half of the rule: whether <paramref name="identifier"/>, a use of a frame, stands where 9.8 allows one.
+    /// </summary>
+    internal static bool IsAllowedPosition(IdentifierNameSyntax identifier) => identifier.Parent switch
+    {
+        ArgumentSyntax argument => argument.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || IsNameOfArgument(argument),
+        MemberAccessExpressionSyntax access => access.Expression == identifier,
+        _ => false
+    };
+
+    private static bool IsNameOfArgument(ArgumentSyntax argument) =>
+        argument.Parent is ArgumentListSyntax { Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } } };
+
+    /// <summary>
+    /// The binding half of the rule, shared with <see cref="GoFrameRuleAnalyzer"/>: what <paramref name="identifier"/>, a
+    /// use of a frame, does by its operation.
+    /// </summary>
+    internal static Bound Classify(SemanticModel model, IdentifierNameSyntax identifier, INamedTypeSymbol frame, CancellationToken cancellationToken)
+    {
+        if (model.GetOperation(identifier, cancellationToken) is not { Parent: { } parent } operation)
+            return Bound.Unknown;
+
+        for (IOperation? ancestor = parent; ancestor is not null; ancestor = ancestor.Parent)
+        {
+            if (ancestor is IInvalidOperation)
+                return Bound.Unknown;
+        }
+
+        bool IsFrame(ITypeSymbol? type) => SymbolEqualityComparer.Default.Equals(type, frame);
+
+        return new Bound(true, parent switch
+        {
+            IInvocationOperation invocation when invocation.Instance == operation => null,
+            IPropertyReferenceOperation property when property.Instance == operation => null,
+            IFieldReferenceOperation field when field.Instance == operation => null,
+            INameOfOperation => null,
+            IArgumentOperation { Parent: IInvocationOperation invocation } when invocation.TargetMethod.TypeArguments.Any(IsFrame) => "is passed as a generic argument",
+            IArgumentOperation { Parent: IObjectCreationOperation { Type: INamedTypeSymbol created } } when created.TypeArguments.Any(IsFrame) => "is passed as a generic argument",
+            IArgumentOperation argument when argument.Parameter?.RefKind == RefKind.Ref => null,
+            IArgumentOperation => "is passed by value",
+            ISimpleAssignmentOperation assignment when assignment.Target == operation => "is assigned",
+            IConversionOperation conversion when !IsFrame(conversion.Type) => "is boxed",
+            IReturnOperation => "is returned",
+            IAddressOfOperation => "has its address taken",
+            IMethodReferenceOperation method when method.Instance == operation => "gives a method group, whose delegate holds a copy",
+            IVariableInitializerOperation { Parent: IVariableDeclaratorOperation { Symbol.IsRef: true } } => null,
+            _ => "is copied"
+        });
+    }
+
+    internal static string Describe(string name, string use) => $"The frame '{name}' {use}";
+
     private sealed class Checker(SemanticModel model, INamedTypeSymbol frame, CancellationToken cancellationToken)
     {
         // The simple names that can spell the type in this file: GoFrame, and any file-local alias of it.
@@ -109,6 +194,8 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
         private readonly HashSet<string> m_valueNames = [];
 
         private readonly List<DiagnosticRecord> m_records = [];
+
+        private readonly List<TextSpan> m_deferred = [];
 
         private readonly HashSet<(TextSpan, string)> m_reported = [];
 
@@ -136,7 +223,9 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
                 }
             }
 
-            return m_records.Count == 0 ? FileRefusals.Empty : new FileRefusals([.. m_records]);
+            return m_records.Count == 0 && m_deferred.Count == 0
+                ? FileRefusals.Empty
+                : new FileRefusals([.. m_records], [.. m_deferred], root.SyntaxTree.FilePath);
         }
 
         private bool IsFrame(ITypeSymbol? type) => SymbolEqualityComparer.Default.Equals(type, frame);
@@ -331,53 +420,86 @@ public sealed class GoFrameRuleGenerator : IIncrementalGenerator
                 _ => null
             };
 
-            if (!IsFrame(type) || model.GetOperation(identifier, cancellationToken) is not { } operation)
+            if (symbol is null || !IsFrame(type))
                 return;
 
-            ISymbol? enclosing = model.GetEnclosingSymbol(identifier.SpanStart, cancellationToken);
+            // `ref GoFrame alias = ref ᒐ;` is refused at the ref local's declaration.
+            if (identifier.Parent is RefExpressionSyntax)
+                return;
 
-            if (operation.Parent is not INameOfOperation && !SymbolEqualityComparer.Default.Equals(enclosing, symbol!.ContainingSymbol))
+            bool allowed = IsAllowedPosition(identifier);
+            bool inNameOf = identifier.Parent is ArgumentSyntax argument && IsNameOfArgument(argument);
+
+            if (!inNameOf && !SymbolEqualityComparer.Default.Equals(model.GetEnclosingSymbol(identifier.SpanStart, cancellationToken), symbol.ContainingSymbol))
             {
-                Report(identifier, $"The frame '{symbol.Name}' is captured by a lambda or local function");
+                Report(identifier, Describe(symbol.Name, "is captured by a lambda or local function"));
                 return;
             }
 
-            string? use = operation.Parent switch
-            {
-                IInvocationOperation invocation when invocation.Instance == operation => null,
-                IPropertyReferenceOperation property when property.Instance == operation => null,
-                IFieldReferenceOperation field when field.Instance == operation => null,
-                INameOfOperation => null,
-                IArgumentOperation { Parent: IInvocationOperation invocation } when invocation.TargetMethod.TypeArguments.Any(IsFrame) => "is passed as a generic argument",
-                IArgumentOperation { Parent: IObjectCreationOperation { Type: INamedTypeSymbol created } } when created.TypeArguments.Any(IsFrame) => "is passed as a generic argument",
-                IArgumentOperation argument when argument.Parameter?.RefKind == RefKind.Ref => null,
-                IArgumentOperation => "is passed by value",
-                ISimpleAssignmentOperation assignment when assignment.Target == operation => "is assigned",
-                IConversionOperation conversion when !IsFrame(conversion.Type) => "is boxed",
-                IReturnOperation => "is returned",
-                IAddressOfOperation => "has its address taken",
-                IMethodReferenceOperation method when method.Instance == operation => "gives a method group, whose delegate holds a copy",
-                IVariableInitializerOperation { Parent: IVariableDeclaratorOperation { Symbol.IsRef: true } } => null,
-                _ => "is copied"
-            };
+            Bound bound = Classify(model, identifier, frame, cancellationToken);
 
-            if (use is not null)
-                Report(identifier, $"The frame '{symbol!.Name}' {use}");
+            if (allowed)
+            {
+                // Syntax allows it; binding narrows it to a refusal where it binds, and defers it where it does not.
+                if (!bound.Known)
+                    m_deferred.Add(identifier.Span);
+                else if (bound.Use is not null)
+                    Report(identifier, Describe(symbol.Name, bound.Use));
+            }
+            else if (!bound.Known || bound.Use is not null)
+            {
+                Report(identifier, Describe(symbol.Name, bound.Use ?? "is copied"));
+            }
         }
     }
 
-    // One file's refusals, equal by value so the incremental pipeline re-reports only a file whose refusals changed.
-    private sealed class FileRefusals(ImmutableArray<DiagnosticRecord> records) : IEquatable<FileRefusals>
+    // One file's refusals and deferred uses, equal by value so the incremental pipeline re-reports only a file that changed.
+    private sealed class FileRefusals(ImmutableArray<DiagnosticRecord> records, ImmutableArray<TextSpan> deferred, string filePath) : IEquatable<FileRefusals>
     {
-        public static readonly FileRefusals Empty = new([]);
+        public static readonly FileRefusals Empty = new([], [], string.Empty);
 
         public ImmutableArray<DiagnosticRecord> Records { get; } = records;
 
-        public bool Equals(FileRefusals? other) => other is not null && Records.SequenceEqual(other.Records);
+        public ImmutableArray<TextSpan> Deferred { get; } = deferred;
+
+        public string FilePath { get; } = filePath;
+
+        // One file per source file: its name and a stable hash of its full path, so two files of one name stay apart.
+        public string DeferredHintName
+        {
+            get
+            {
+                uint hash = 2166136261;
+
+                foreach (char c in FilePath)
+                    hash = (hash ^ c) * 16777619;
+
+                string name = new([.. System.IO.Path.GetFileNameWithoutExtension(FilePath).Where(char.IsLetterOrDigit)]);
+                return DeferredHintPrefix + name + "." + hash.ToString("x8", CultureInfo.InvariantCulture) + ".g.cs";
+            }
+        }
+
+        // Comments only: the file adds no type and no member, and only GoFrameRuleAnalyzer reads it.
+        public string DeferredSource()
+        {
+            StringBuilder source = new();
+            source.Append("// <auto-generated/>\r\n");
+            source.Append("// go2cs-gen GoFrameRuleGenerator: uses of a GoFrame in an allowed position whose call did not bind in the\r\n");
+            source.Append("// generator's view (it does not see the other generators' output). GoFrameRuleAnalyzer binds each one fully.\r\n");
+
+            foreach (TextSpan span in Deferred)
+                source.Append(DeferredLinePrefix).Append(span.Start.ToString(CultureInfo.InvariantCulture)).Append(' ')
+                    .Append(span.Length.ToString(CultureInfo.InvariantCulture)).Append(' ').Append(FilePath).Append("\r\n");
+
+            return source.ToString();
+        }
+
+        public bool Equals(FileRefusals? other) =>
+            other is not null && FilePath == other.FilePath && Records.SequenceEqual(other.Records) && Deferred.SequenceEqual(other.Deferred);
 
         public override bool Equals(object? obj) => Equals(obj as FileRefusals);
 
-        public override int GetHashCode() => Records.Length;
+        public override int GetHashCode() => Records.Length ^ (Deferred.Length << 16);
     }
 
     // A diagnostic as plain data (a Location holds a syntax tree, which the incremental cache must not retain).
