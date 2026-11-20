@@ -60,6 +60,9 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+# release-binaries.yml writes the release archives here; untracked, they would mark every go2cs built
+# after them vcs.modified=true (the published 1.26.11.1 linux and macOS archives, 2026-11-20)
+/dist/
 **/Properties/launchSettings.json
 
 # StyleCop
