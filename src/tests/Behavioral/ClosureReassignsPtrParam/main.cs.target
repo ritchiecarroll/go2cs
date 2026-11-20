@@ -9,14 +9,14 @@ internal static nint accumulate(ж<nint> counter, slice<nint> vals) {
         if (counter == nil) {
             counter = @new<nint>();
         }
-        counter.Value += v;
+        counter.DerefOrNull() += v;
     }
 
     foreach (var (_, v) in range(vals)) {
         add(v);
     }
 
-    return counter.Value;
+    return counter.DerefOrNull();
 }
 
 internal static void main() {

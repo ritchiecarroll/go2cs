@@ -25,10 +25,10 @@ internal static bool each(this ref node n, Func<ж<node>, bool> f) {
 
 internal static nint deepest(ж<node> n) {
     for (nint i = 0; i < 10; i++) {
-        if (len(n.Value.kids) == 0) {
-            return n.Value.val;
+        if (len(n.DerefOrNull().kids) == 0) {
+            return n.DerefOrNull().val;
         }
-        n.Value.each((ж<node> k) => {
+        n.DerefOrNull().each((ж<node> k) => {
             n = k;
             return true;
         });
@@ -38,29 +38,29 @@ internal static nint deepest(ж<node> n) {
 
 internal static nint afterCall(ж<node> n) {
     void step() {
-        n = n.Value.kids[0];
+        n = n.DerefOrNull().kids[0];
     }
     step();
-    return n.Value.val;
+    return n.DerefOrNull().val;
 }
 
 internal static void writeAfter(ж<node> n) {
     var root = n;
     void step() {
-        n = n.Value.kids[0];
+        n = n.DerefOrNull().kids[0];
     }
     step();
-    n.Value.val += 10;
-    fmt.Println("writeAfter:", root.val, n.Value.val);
-    n.Value.val -= 10;
+    n.DerefOrNull().val += 10;
+    fmt.Println("writeAfter:", root.val, n.DerefOrNull().val);
+    n.DerefOrNull().val -= 10;
 }
 
 internal static nint copyAfter(ж<node> n) {
     void step() {
-        n = n.Value.kids[0];
+        n = n.DerefOrNull().kids[0];
     }
     step();
-    var c = n.Value;
+    var c = n.DerefOrNull();
     return c.val;
 }
 
@@ -68,11 +68,11 @@ internal static partial nint goMoved(ж<node> n) {
     var done = new channel<bool>(0);
     var doneʗ1 = done;
     goǃ(() => {
-        n = n.Value.kids[0];
+        n = n.DerefOrNull().kids[0];
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
-    return n.Value.val;
+    return n.DerefOrNull().val;
 }
 
 internal static nint /*v*/ deferMoved(ж<node> n) {
@@ -80,12 +80,12 @@ internal static nint /*v*/ deferMoved(ж<node> n) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            v = n.Value.val;
+            v = n.DerefOrNull().val;
         }, ref ᒐ);
         defer(() => {
-            n = n.Value.kids[0];
+            n = n.DerefOrNull().kids[0];
         }, ref ᒐ);
-        v = n.Value.val;
+        v = n.DerefOrNull().val;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -94,13 +94,13 @@ internal static nint /*v*/ deferMoved(ж<node> n) {
 
 internal static nint rangeMoved(ж<node> n) {
     void f() {
-        foreach (var (_, vᴛ1) in range(n.Value.kids)) {
+        foreach (var (_, vᴛ1) in range(n.DerefOrNull().kids)) {
             n = vᴛ1;
 
         }
     }
     f();
-    return n.Value.val;
+    return n.DerefOrNull().val;
 }
 
 internal static nint rangeBody(ж<node> Ꮡn) {
@@ -130,22 +130,22 @@ internal static nint lastKid(this ж<node> Ꮡn) {
 } partial class main_package {
 
 internal static nint mixed(ж<node> n) {
-    n = n.Value.kids[0];
+    n = n.DerefOrNull().kids[0];
     void step() {
-        n = n.Value.kids[0];
+        n = n.DerefOrNull().kids[0];
     }
     step();
-    return n.Value.val;
+    return n.DerefOrNull().val;
 }
 
 } partial class mainᴛnode {
 
 internal static nint last(this ж<node> Ꮡn) {
-    Ꮡn.Value.each((ж<node> k) => {
+    Ꮡn.DerefOrNull().each((ж<node> k) => {
         Ꮡn = k;
         return false;
     });
-    return Ꮡn.Value.val;
+    return Ꮡn.DerefOrNull().val;
 }
 
 } partial class main_package {
@@ -156,7 +156,7 @@ internal static bool errAfter(ж<error> e) {
         e = Ꮡother;
     }
     set();
-    return e.ValueSlot == nil;
+    return e.DerefOrNull() == nil;
 }
 
 internal static (nint, nint) sliceAfter(ж<slice<nint>> s) {
@@ -165,7 +165,54 @@ internal static (nint, nint) sliceAfter(ж<slice<nint>> s) {
         s = Ꮡother;
     }
     set();
-    return (len(s.ValueSlot), (s.ValueSlot)[0]);
+    return (len(s.DerefOrNull()), (s.DerefOrNull())[0]);
+}
+
+} partial class mainᴛnode {
+
+internal static nint count(this ж<node> Ꮡn) {
+    if (Ꮡn == nil) {
+        return 0;
+    }
+    return 1;
+}
+
+internal static nint tag(this ref node n) {
+    fmt.Println("tag runs before its deref");
+    return n.val;
+}
+
+} partial class main_package {
+
+internal static nint nilCount(ж<node> n) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            n = default;
+        }, ref ᒐ);
+        return n.count();
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
+    finally { ᒐ.Run(); }
+}
+
+internal static nint /*v*/ nilTag(ж<node> n) {
+    nint v = default;
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            if (recover() != nil) {
+                v = -1;
+            }
+        }, ref ᒐ);
+        defer(() => {
+            n = default;
+        }, ref ᒐ);
+        v = n.DerefOrNull().tag();
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return v;
 }
 
 internal static nint gotoWalk(ж<node> Ꮡn) {
@@ -198,6 +245,8 @@ internal static void main() {
     fmt.Println("errAfter:", errAfter(Ꮡfailed));
     var (ᴛ1, ᴛ2) = sliceAfter(Ꮡ(slice<nint>([1, 2, 3])));
     fmt.Println("sliceAfter:", fmt.Sprint(ᴛ1, ᴛ2));
+    fmt.Println("nilCount:", nilCount(nil), nilCount(leaf));
+    fmt.Println("nilTag:", nilTag(nil));
     fmt.Println("gotoWalk:", gotoWalk(root));
     fmt.Println("root:", root.val, root.kids[0].val, leaf.val);
 }
