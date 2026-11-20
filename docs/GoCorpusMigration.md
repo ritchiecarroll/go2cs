@@ -4121,7 +4121,9 @@ release published nothing: §2, AMENDED
    the SDK it resolved. It refuses a go whose `GOVERSION`, read with `GOTOOLCHAIN=local`, is not the release
    `src/go2cs/go.mod` names, and prints it *(added 2026-10-27, 1.26.10.2 seat #11: Phase 1b builds the go2cs dotnet
    tool with that Go, and a go2cs built with any other Go downloads none)*; the read-back above stays the
-   operator's own check. <!-- Before 2026-10-27 this read: "The script has no gate on the Go pin, so `go version`
+   operator's own check. A release box with an 11.x SDK beside 10.0.4xx builds with the 11.x one under the
+   `latestMajor` pin, so before a release the `dotnet --version` read from the repository root must print the
+   10.0.4xx SDK, not 11.x (11.0.100, say) *(added 2026-11-20 with the `latestMajor` pin)*. <!-- Before 2026-10-27 this read: "The script has no gate on the Go pin, so `go version`
    here is the only check of it (the repository root carries no `go.mod`, so `GOTOOLCHAIN=local` reads the bare
    toolchain)." -->
    **The go2cs dotnet tool** *(added 2026-10-27, 1.26.10.2 seat #11; [PLAN-dotnet-tool-installer.md](PLAN-dotnet-tool-installer.md) §11 OQ-3)*:
