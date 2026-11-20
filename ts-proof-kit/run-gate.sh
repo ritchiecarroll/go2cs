@@ -71,5 +71,6 @@ rm -rf "$T/stage" "$T/proof-report"; mkdir -p "$T/proof-report"
 python3 -I "$KIT/layout.py" stage --tree "$OUT" --tsc "$MODC" --ts-root "$TS" --proof "$KIT" --dest "$T/stage" >> "$log" 2>&1 || die stage
 python3 -I "$KIT/layout.py" fill --dest "$T/stage" --proof "$KIT" --results "$R" --converter "$sha" --gostdlib "${gsv:-local}" \
   --sdk "$(dotnet --version)" --platform "$(go env GOOS)/$(go env GOARCH)" --goversion "$(go version | cut -d' ' -f3)" ${OWNER_README:+--owner-readme "$OWNER_README"} >> "$log" 2>&1 || die fill
+python3 -I "$KIT/check_includes.py" "$T/stage" 2>&1 | tee -a "$log"; [ "${PIPESTATUS[0]}" -eq 0 ] || die "staged tree misses a file a project names"
 python3 -I "$KIT/layout.py" census --dest "$T/stage" --mode "$mode" ${DENY:+--deny "$DENY"} 2>&1 | tee -a "$log"; crc=${PIPESTATUS[0]}
 step "done; census rc=$crc"; exit $crc

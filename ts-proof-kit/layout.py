@@ -44,6 +44,27 @@ def copy_files(src, dst, with_subdirs=()):
     return n
 
 
+TUNED = ["    <!-- Tuned change, not go2cs output: server garbage collection on and dynamic adaptation (DATAS) off. The converted",
+         "         compiler allocates heavily, and this setting shortened type-check time at the cost of more memory. See",
+         "         https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#net-runtime-settings -->",
+         "    <ServerGarbageCollection>true</ServerGarbageCollection>",
+         "    <GarbageCollectionAdaptationMode>0</GarbageCollectionAdaptationMode>"]
+
+
+def copy_embedded(src, dst):
+    """The go:embed data a package's project names (TypeScript's lib.*.d.ts, the diagnostics loc/*.json.gz). They sit
+    in subdirectories that copy_files skips as other packages, and without them the project does not build."""
+    n = 0
+    for f in os.listdir(src):
+        if not f.endswith(".csproj"): continue
+        for v in re.findall(r'<EmbeddedResource\s+Include="([^"$%*]+)"', open(os.path.join(src, f), encoding="utf-8").read()):
+            v = v.replace("\\", "/"); s, d = os.path.join(src, v), os.path.join(dst, v)
+            if not os.path.isfile(s):
+                sys.exit(f"embedded resource missing in the converted tree: {os.path.join(src, v)}")
+            os.makedirs(os.path.dirname(d), exist_ok=True); shutil.copy2(s, d); n += 1
+    return n
+
+
 def stage(A):
     if os.path.exists(A.dest):
         sys.exit(f"refusing: {A.dest} exists")
@@ -55,6 +76,7 @@ def stage(A):
         if not os.path.isdir(src):
             sys.exit(f"missing in the converted tree: {rel}")
         n = copy_files(src, os.path.join(A.dest, rel), with_subdirs=("Properties",))
+        n += copy_embedded(src, os.path.join(A.dest, rel))
         report["packages"].append({"import": imp, "path": rel, "files": n})
         if mod != MOD and mod not in report["modules"]:
             mroot = os.path.join(A.tree, "pkg", mod)
@@ -101,6 +123,16 @@ def stage(A):
                     report["positionmap_rewrites"] += k
     if report["positionmap_rewrites"]:  # MODIFICATIONS.md says no path was rewritten; keep it true
         sys.exit(f"{report['positionmap_rewrites']} GoPositionMap paths needed a rewrite; MODIFICATIONS.md must say so")
+    # The tuned change (owner ruling 2026-11-13): server GC on, DATAS off, in each demo executable's project, marked by
+    # a comment and stated in MODIFICATIONS.md. It changes speed and memory, never output.
+    for name in DEMOS:
+        p = os.path.join(A.dest, "src", MOD, "cmd", name, name + ".csproj")
+        s = open(p, encoding="utf-8", newline="").read()
+        if "ServerGarbageCollection" in s:
+            sys.exit(f"{p}: already carries a GC setting; the tuned change would duplicate it")
+        i = s.index("<GoInputDigest>"); j = s.index("\n", i) + 1
+        nl = "\r\n" if s[j - 2:j] == "\r\n" else "\n"
+        open(p, "w", encoding="utf-8", newline="").write(s[:j] + nl.join(TUNED) + nl + s[j:])
     # solution
     projs = sorted(os.path.relpath(os.path.join(r, f), A.dest).replace("\\", "/")
                    for r, _, fs in os.walk(A.dest) for f in fs if f.endswith(".csproj"))
@@ -284,6 +316,10 @@ PUBLIC = [r"https://github\.com/ritchiecarroll/go2cs[\w./#?=&%-]*"]
 # fallback, a host path by design. In local mode that one element is reported and exempted; any other hit still
 # fails. A nuget-mode tree carries no such element, and there it is a hit like any other.
 LOCAL_PATH = re.compile(r"<go2csPath>[^<]*</go2csPath>")
+# URL (2026-11-20, the first staging with the go:embed data): TypeScript's verbatim lib.es2020.bigint.d.ts links a web
+# page whose URL path has a /home/ segment. A PATHS match that lies wholly inside a URL is part of an address, not a
+# local path; deny patterns and INTERNAL still count there.
+URL = re.compile(r"\b(?:https?|ftp)://[^\s'\"<>()\]]+")
 
 
 def census(A):
@@ -305,12 +341,15 @@ def census(A):
             # there, only the drive-letter rule is relaxed.
             paths = [x for x in PATHS if not (rel.startswith("proof/") and not rel.endswith(".py") and x.startswith(r"\b[A-Z]"))]
             public = [m.span() for u in PUBLIC for m in re.finditer(u, s)]
+            urls = [m.span() for m in URL.finditer(s)]
             local = [m.span() for m in LOCAL_PATH.finditer(s)] if A.mode == "local" and f == "Directory.Build.props" else []
             for pat in paths + deny + (INTERNAL if AUTHORED.match(rel) else []):
                 for m in re.finditer(pat, s):
                     line = s.count("\n", 0, m.start()) + 1
                     where = f"{rel}:{line}: {pat}: {s[max(0, m.start() - 40):m.end() + 40]!r}"
                     if pat in deny and any(a <= m.start() and m.end() <= b for a, b in public):
+                        continue
+                    if pat in PATHS and any(a <= m.start() and m.end() <= b for a, b in urls):
                         continue
                     if any(a <= m.start() and m.end() <= b for a, b in local):
                         exempt.append(where)
