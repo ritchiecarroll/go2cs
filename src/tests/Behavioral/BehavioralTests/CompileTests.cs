@@ -2911,6 +2911,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");
 
     [TestMethod]
+    public void CheckUnsafePointerWordNilSlot() => CheckTarget("UnsafePointerWordNilSlot");
+
+    [TestMethod]
     public void CheckUnsafePointerWordRead() => CheckTarget("UnsafePointerWordRead");
 
     [TestMethod]

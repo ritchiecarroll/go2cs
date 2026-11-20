@@ -514,4 +514,25 @@ public unsafe class UnsafePointerWordTests
             NativeMemory.Free((void*)memory);
         }
     }
+
+    // P3's MUST (review of 780e8c97e0): a MANAGED slot that holds nil. Go's `p := new(unsafe.Pointer)` then `*p = v` and
+    // `*p` store and read; the doors' managed arm must not read the held value first. Before the fix it read `p.Value`,
+    // which throws a nil dereference on a standard box whose reference-typed value is null (ж.StandardBox.cs). The alias
+    // the door replaced took ValueSlot, as DerefOrNull does, and did not throw.
+    [TestMethod]
+    public void W1W2_AManagedSlotHoldingNilLoadsNilAndTakesAStore()
+    {
+        ж<@unsafe.Pointer> slot = new StandardBox<@unsafe.Pointer>((@unsafe.Pointer)null!);
+
+        Assert.IsNull(Load(slot), "a managed slot holding nil loads nil, as Go's *p does");
+
+        @unsafe.Pointer v = new @unsafe.Pointer((uintptr)0x5678);
+        Store(slot, v);
+
+        Assert.AreSame(v, Load(slot), "the store lands in the managed slot and the load reads it back");
+
+        Store(slot, null);
+
+        Assert.IsNull(Load(slot), "a nil store into a managed slot reads back nil");
+    }
 }
