@@ -105,7 +105,7 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
     var argType = abi.TypeOf((arg).OrTypedNilOf());
     var kind = argType.Kind();
     if (kind == abi.Pointer || kind == abi.UnsafePointer) {
-        if (@unsafe.Pointer.FromPinnedBox(Ꮡptr) == @unsafe.Pointer.LoadWord((Ꮡ(new @unsafe.Pointer((uintptr)Ꮡarg))))) {
+        if (@unsafe.Pointer.FromPinnedBox(Ꮡptr) == (Ꮡ(new @unsafe.Pointer((uintptr)Ꮡarg))).Value) {
             throw panic("runtime.AddCleanup: ptr is equal to arg, cleanup will never run");
         }
     }
@@ -150,7 +150,7 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
 
     // Check that arg is not within ptr.
     if (kind == abi.Pointer || kind == abi.UnsafePointer) {
-        var argPtr = (uintptr)(@unsafe.Pointer.LoadWord(Ꮡ(new @unsafe.Pointer((uintptr)Ꮡarg))));
+        var argPtr = (uintptr)(~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡarg)));
         if (argPtr >= @base && argPtr < @base + span.elemsize) {
             // It's possible that both pointers are separate
             // parts of a tiny allocation, which is OK.
