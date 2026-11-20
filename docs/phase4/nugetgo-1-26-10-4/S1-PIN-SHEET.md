@@ -1,9 +1,9 @@
 # PIN session S1: sign and push six nugetgo packages built on go.* 1.26.11.1 (runbook section 4)
 
 > **TEMPLATE (C2, 2026-11-10), for the nugetgo wave against go.* 1.26.11.1 (`docs/PLAN-nugetgo-wave-1-26-10-4.md`).** It is not pasted as
-> it stands. On release day C2 fills its placeholders, all in block 1: `<<SIGNER_SHA>>`, the full SHA of the master
+> it stands. On release day C2 fills its placeholders, all in block 1: `5dd5cafd5b60b9e2d454cec5ac1a7c147b4a838c`, the full SHA of the master
 > commit whose `src/sign-nupkgs.ps1` signs and whose `src/_nugetpush.ps1` pushes; and each kit's full commit on its
-> `claude/c2-nugetgo-1261004-<name>` ref, the one COORD ruled green: hashset `<<KIT_SHA_HASHSET>>`, uuid `<<KIT_SHA_UUID>>`, jwt `<<KIT_SHA_JWT>>`, xsync `<<KIT_SHA_XSYNC>>`, pflag `<<KIT_SHA_PFLAG>>`, mousetrap `<<KIT_SHA_MOUSETRAP>>`. C2 then re-runs
+> `claude/c2-nugetgo-1261004-<name>` ref, the one COORD ruled green: hashset `826962acb3ca745f3b9ff32bef90bb5d59cca554`, uuid `4bfd807acb1d86c6dd5abbba93ffbbb4c2618cee`, jwt `afdc62b4f1ef530f54d4749ca28429bcd3a230a4`, xsync `80fe00e531583ef5dc755d8956a0c454d26aaa84`, pflag `d354622401d5b598bfe31320512308286fadba74`, mousetrap `46133ede3decdabf4384460fed50bcab38b710ef`. C2 then re-runs
 > `Test-SheetPaste.ps1` on the filled copy and posts it to COORD. Block 1 refuses while any placeholder is left, and
 > refuses a kit ref that has moved since the ruling.
 
@@ -91,18 +91,18 @@ This block uses only Windows PowerShell 5.1 syntax, so it runs (and refuses) in 
     if ((dotnet --version) -notlike '10.*') { throw 'dotnet is not .NET 10: check DOTNET_ROOT' }
 
     $Release = '1.26.11.1'
-    $Signer  = '<<SIGNER_SHA>>'
+    $Signer  = '5dd5cafd5b60b9e2d454cec5ac1a7c147b4a838c'
     if ($Signer -like '*<<*' -or $Signer -notmatch '^[0-9a-f]{40}$') { throw 'this sheet is the TEMPLATE: the signer SHA is not filled in. Ask COORD for the filled copy.' }
     $Org     = 'https://api.nuget.org/v3/index.json'
     $Pub     = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-1261004-s1'
     # In push order. PV is Base, plus ".Rev" when Rev is not 0 (B3). Requires: the kits this one depends on.
     $Kits = @(
-        [ordered]@{ Name = 'hashset';   Base = '1.0.0';  Rev = '6'; Id = 'nugetgo.github.com.ritchiecarroll.hashset';    CsRepo = 'ritchiecarroll/hashset-cs'; Sha = '<<KIT_SHA_HASHSET>>';   Requires = @() }
-        [ordered]@{ Name = 'uuid';      Base = '1.6.0';  Rev = '4'; Id = 'nugetgo.github.com.google.uuid';               CsRepo = 'ritchiecarroll/uuid-cs'; Sha = '<<KIT_SHA_UUID>>';      Requires = @() }
-        [ordered]@{ Name = 'jwt';       Base = '5.3.1';  Rev = '4'; Id = 'nugetgo.github.com.golang-jwt.jwt.v5';         CsRepo = 'ritchiecarroll/jwt-cs'; Sha = '<<KIT_SHA_JWT>>';       Requires = @() }
-        [ordered]@{ Name = 'xsync';     Base = '0.19.0'; Rev = '4'; Id = 'nugetgo.golang.org.x.sync';                    CsRepo = 'ritchiecarroll/sync-cs'; Sha = '<<KIT_SHA_XSYNC>>';      Requires = @() }
-        [ordered]@{ Name = 'pflag';     Base = '1.0.9';  Rev = '4'; Id = 'nugetgo.github.com.spf13.pflag';               CsRepo = 'ritchiecarroll/pflag-cs'; Sha = '<<KIT_SHA_PFLAG>>';     Requires = @() }
-        [ordered]@{ Name = 'mousetrap'; Base = '1.1.0';  Rev = '3'; Id = 'nugetgo.github.com.inconshreveable.mousetrap'; CsRepo = 'ritchiecarroll/mousetrap-cs'; Sha = '<<KIT_SHA_MOUSETRAP>>'; Requires = @() }
+        [ordered]@{ Name = 'hashset';   Base = '1.0.0';  Rev = '6'; Id = 'nugetgo.github.com.ritchiecarroll.hashset';    CsRepo = 'ritchiecarroll/hashset-cs'; Sha = '826962acb3ca745f3b9ff32bef90bb5d59cca554';   Requires = @() }
+        [ordered]@{ Name = 'uuid';      Base = '1.6.0';  Rev = '4'; Id = 'nugetgo.github.com.google.uuid';               CsRepo = 'ritchiecarroll/uuid-cs'; Sha = '4bfd807acb1d86c6dd5abbba93ffbbb4c2618cee';      Requires = @() }
+        [ordered]@{ Name = 'jwt';       Base = '5.3.1';  Rev = '4'; Id = 'nugetgo.github.com.golang-jwt.jwt.v5';         CsRepo = 'ritchiecarroll/jwt-cs'; Sha = 'afdc62b4f1ef530f54d4749ca28429bcd3a230a4';       Requires = @() }
+        [ordered]@{ Name = 'xsync';     Base = '0.19.0'; Rev = '4'; Id = 'nugetgo.golang.org.x.sync';                    CsRepo = 'ritchiecarroll/sync-cs'; Sha = '80fe00e531583ef5dc755d8956a0c454d26aaa84';      Requires = @() }
+        [ordered]@{ Name = 'pflag';     Base = '1.0.9';  Rev = '4'; Id = 'nugetgo.github.com.spf13.pflag';               CsRepo = 'ritchiecarroll/pflag-cs'; Sha = 'd354622401d5b598bfe31320512308286fadba74';     Requires = @() }
+        [ordered]@{ Name = 'mousetrap'; Base = '1.1.0';  Rev = '3'; Id = 'nugetgo.github.com.inconshreveable.mousetrap'; CsRepo = 'ritchiecarroll/mousetrap-cs'; Sha = '46133ede3decdabf4384460fed50bcab38b710ef'; Requires = @() }
     )
     foreach ($k in $Kits) {
         $k.PV  = if ([int]$k.Rev) { "$($k.Base).$($k.Rev)" } else { $k.Base }

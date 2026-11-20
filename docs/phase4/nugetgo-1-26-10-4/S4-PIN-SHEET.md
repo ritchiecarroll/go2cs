@@ -1,9 +1,9 @@
 # PIN session S4: sign and push gojq, built on go.* 1.26.11.1 (runbook section 4)
 
 > **TEMPLATE (C2, 2026-11-10), for the nugetgo wave against go.* 1.26.11.1 (`docs/PLAN-nugetgo-wave-1-26-10-4.md`).** It is not pasted as
-> it stands. On release day C2 fills its placeholders, all in block 1: `<<SIGNER_SHA>>`, the full SHA of the master
+> it stands. On release day C2 fills its placeholders, all in block 1: `5dd5cafd5b60b9e2d454cec5ac1a7c147b4a838c`, the full SHA of the master
 > commit whose `src/sign-nupkgs.ps1` signs and whose `src/_nugetpush.ps1` pushes; and each kit's full commit on its
-> `claude/c2-nugetgo-1261004-<name>` ref, the one COORD ruled green: gojq `<<KIT_SHA_GOJQ>>`. C2 then re-runs
+> `claude/c2-nugetgo-1261004-<name>` ref, the one COORD ruled green: gojq `504d06ff003d8cf00c5bcaa927c932d9d1caa9ba`. C2 then re-runs
 > `Test-SheetPaste.ps1` on the filled copy and posts it to COORD. Block 1 refuses while any placeholder is left, and
 > refuses a kit ref that has moved since the ruling.
 
@@ -87,13 +87,13 @@ This block uses only Windows PowerShell 5.1 syntax, so it runs (and refuses) in 
     if ((dotnet --version) -notlike '10.*') { throw 'dotnet is not .NET 10: check DOTNET_ROOT' }
 
     $Release = '1.26.11.1'
-    $Signer  = '<<SIGNER_SHA>>'
+    $Signer  = '5dd5cafd5b60b9e2d454cec5ac1a7c147b4a838c'
     if ($Signer -like '*<<*' -or $Signer -notmatch '^[0-9a-f]{40}$') { throw 'this sheet is the TEMPLATE: the signer SHA is not filled in. Ask COORD for the filled copy.' }
     $Org     = 'https://api.nuget.org/v3/index.json'
     $Pub     = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-1261004-s4'
     # PV is Base, plus ".Rev" when Rev is not 0 (B3). Requires: the published packages this one depends on.
     $Kits = @(
-        [ordered]@{ Name = 'gojq'; Base = '0.12.19'; Rev = '1'; Id = 'nugetgo.github.com.itchyny.gojq'; CsRepo = 'ritchiecarroll/gojq-cs'; Sha = '<<KIT_SHA_GOJQ>>'
+        [ordered]@{ Name = 'gojq'; Base = '0.12.19'; Rev = '1'; Id = 'nugetgo.github.com.itchyny.gojq'; CsRepo = 'ritchiecarroll/gojq-cs'; Sha = '504d06ff003d8cf00c5bcaa927c932d9d1caa9ba'
             Requires = @(@{ Id = 'nugetgo.github.com.itchyny.timefmt-go'; PV = '0.1.8.1' }) }
     )
     foreach ($k in $Kits) {
