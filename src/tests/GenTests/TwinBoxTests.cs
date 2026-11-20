@@ -280,6 +280,50 @@ public class TwinBoxTests
         }
         """;
 
+    // P3's read of 80c099ee33: a referenced assembly whose twins are INTERNAL, with a friend grant to the caller (as
+    // InternalsVisibleTo hands sync's and time's internal hand twins to a friend). The caller must bind plain: a twin
+    // outside the compilation's own assembly binds only when it is public. TWINS is replaced by the twins' accessibility.
+    private const string LibraryFriendTwins = """
+        using System;
+
+        [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("twinbox")]
+
+        namespace go;
+
+        public static partial class lib_package
+        {
+            public partial struct M
+            {
+                public nint v;
+
+                public static bool operator ==(M a, M b) => a.v == b.v;
+                public static bool operator !=(M a, M b) => a.v != b.v;
+                public override bool Equals(object? obj) => obj is M other && other == this;
+                public override int GetHashCode() => v.GetHashCode();
+            }
+
+            public static void wt() { }
+            TWINS static global::go.golib.GoTask wtꞏtwin() => default;
+
+            public static void bk(this ref M m) { }
+            public static void bk(this ж<M> Ꮡm) { }
+            TWINS static global::go.golib.GoTask bkꞏtwin(this ж<M> Ꮡm) => default;
+        }
+        """;
+
+    private const string UsesFriendTwins = """
+            public partial struct F { public lib_package.M m; }
+
+            public static void useFriend(ж<F> Ꮡf)
+            {
+                ref var f = ref Ꮡf.DerefOrNull();
+                lib_package.wt();
+                f.m.bk();
+                ᐸꟷ(ch);
+            }
+
+        """;
+
     private const string UsesBadTwin = """
             public partial struct H { public lib_package.M m; }
 
@@ -910,6 +954,26 @@ public class TwinBoxTests
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.IsFalse(twins.Contains(".rtꞏtwin()", StringComparison.Ordinal), "never awaited");
+    }
+
+    [TestMethod]
+    public void R6b_AnInternalTwinOfAReferencedAssemblyIsNotBoundThroughAFriendGrant()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(LibraryFriendTwins.Replace("TWINS", "internal"), null, UsesFriendTwins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("wtꞏtwin(", StringComparison.Ordinal), "an internal function twin of another assembly is never awaited");
+        Assert.IsFalse(twins.Contains("bkꞏtwin(", StringComparison.Ordinal), "an internal box twin of another assembly is never awaited");
+    }
+
+    [TestMethod]
+    public void R6c_APublicTwinOfAReferencedAssemblyIsBound_TheControl()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(LibraryFriendTwins.Replace("TWINS", "public"), null, UsesFriendTwins);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "wtꞏtwin(", "the same shape, public, is awaited");
+        StringAssert.Contains(twins, "bkꞏtwin(", "the same box shape, public, is awaited");
     }
 
     [TestMethod]

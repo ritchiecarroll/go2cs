@@ -460,6 +460,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
             return definition.PartialDefinitionPart ?? definition;
         }
 
+        // P3's read of 80c099ee33: a twin outside this compilation's own assembly binds only when it is PUBLIC. A friend grant
+        // (InternalsVisibleTo) must not hand a caller a twin that is not that assembly's surface: sync's and time's hand
+        // twins are internal by ruling (FREEZE-SHEET.md, 7b), and a twin is part of the frozen surface or not bound at all.
+        internal bool TwinVisible(IMethodSymbol twin) =>
+            SymbolEqualityComparer.Default.Equals(twin.ContainingAssembly, m_augmented.Assembly) || twin.DeclaredAccessibility == Accessibility.Public;
+
         // Whether the method's type holds a twin of it: a hand-written golib twin, or a generated twin of a
         // referenced assembly, which is how a call crosses assemblies.
         private bool HasTwinMember(IMethodSymbol definition)
@@ -471,7 +477,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
             {
                 foreach (IMethodSymbol twin in type.GetMembers(definition.Name + Suffix).OfType<IMethodSymbol>())
                 {
-                    if (twin.IsStatic != definition.IsStatic || twin.Parameters.Length != definition.Parameters.Length ||
+                    if (!TwinVisible(twin) || twin.IsStatic != definition.IsStatic || twin.Parameters.Length != definition.Parameters.Length ||
                         twin.TypeParameters.Length != definition.TypeParameters.Length)
                         continue;
 

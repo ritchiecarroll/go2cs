@@ -285,7 +285,7 @@ public sealed partial class TwinGenerator
             if (definition is { IsExtensionMethod: true, Parameters.Length: > 0 } && definition.Parameters[0].RefKind == RefKind.Ref &&
                 definition.ContainingType is { } type && !m_candidates.ContainsKey(definition))
             {
-                has = type.GetMembers(definition.Name + Suffix).OfType<IMethodSymbol>().Any(twin => IsBoxTwinOf(twin, definition));
+                has = type.GetMembers(definition.Name + Suffix).OfType<IMethodSymbol>().Any(twin => TwinVisible(twin) && IsBoxTwinOf(twin, definition));
             }
 
             return m_hasBoxTwin[definition] = has;
