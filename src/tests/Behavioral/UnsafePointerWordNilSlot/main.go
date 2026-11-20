@@ -17,6 +17,20 @@ func Set(dst *unsafe.Pointer, v unsafe.Pointer) { *dst = v }
 
 func Get(src *unsafe.Pointer) unsafe.Pointer { return *src }
 
+// A store through the identity round trip over a LOCAL that holds nil (the narrowing's shape (b)): the slot is the
+// local's own heap box, and the store writes it as every other held reference is written, through the slot.
+func StoreThroughLocal(v unsafe.Pointer) unsafe.Pointer {
+	var l unsafe.Pointer
+	*(*unsafe.Pointer)(unsafe.Pointer(&l)) = v
+	return l
+}
+
+// The same over a PARAMETER that holds nil.
+func StoreThroughParam(u, v unsafe.Pointer) unsafe.Pointer {
+	*(*unsafe.Pointer)(unsafe.Pointer(&u)) = v
+	return u
+}
+
 func main() {
 	p := new(unsafe.Pointer)
 	fmt.Println("fresh slot loads nil:", Get(p) == nil)
@@ -31,4 +45,7 @@ func main() {
 	var l unsafe.Pointer
 	Set(&l, v)
 	fmt.Println("escaped local:", l == v, Get(&l) == v)
+
+	fmt.Println("store through &local:", StoreThroughLocal(v) == v)
+	fmt.Println("store through &param:", StoreThroughParam(nil, v) == v)
 }

@@ -12,6 +12,19 @@ public static void Set(ж<@unsafe.Pointer> dst, @unsafe.Pointer v) { @unsafe.Poi
 
 public static @unsafe.Pointer Get(ж<@unsafe.Pointer> src) { return @unsafe.Pointer.LoadWord(src); }
 
+public static @unsafe.Pointer StoreThroughLocal(@unsafe.Pointer v) {
+    ref var l = ref heap<@unsafe.Pointer>(out var Ꮡl);
+    (Ꮡl).Value = v;
+    return l;
+}
+
+public static @unsafe.Pointer StoreThroughParam(@unsafe.Pointer uʗp, @unsafe.Pointer v) {
+    ref var u = ref heap(uʗp, out var Ꮡu);
+
+    (Ꮡu).Value = v;
+    return u;
+}
+
 internal static void main() {
     var p = @new<@unsafe.Pointer>();
     fmt.Println("fresh slot loads nil:", Get(p) == nil);
@@ -26,6 +39,9 @@ internal static void main() {
     ref var l = ref heap<@unsafe.Pointer>(out var Ꮡl);
     Set(Ꮡl, v);
     fmt.Println("escaped local:", l == v, Get(Ꮡl) == v);
+
+    fmt.Println("store through &local:", StoreThroughLocal(v) == v);
+    fmt.Println("store through &param:", StoreThroughParam(nil, v) == v);
 }
 
 } // end main_package
