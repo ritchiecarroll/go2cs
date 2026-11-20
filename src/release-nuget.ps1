@@ -4,7 +4,7 @@
     Publish a signed release of the go2cs NuGet packages, end to end, on ONE machine.
 
 .DESCRIPTION
-    Pack -> sign -> push -> record, as four phases of one ritual. It supersedes the
+    Pack -> commit the record -> sign -> push, as one ritual. It supersedes the
     offline-signing flow (`-OfflineSigning` keeps that path for a machine whose signing
     certificate lives elsewhere), and it exists because the certificate now lives HERE: the
     file-shuttle between machines was the only reason the release was ever two commands.
@@ -14,6 +14,13 @@
     invocation and one prompt unlocks it (measured: 6 packages, one prompt, 9 s). Phase 1b asks
     once before that, for the go2cs dotnet tool: its Windows executables are Authenticode-signed
     by one signtool process before they are packed.
+
+    THE RECORD IS COMMITTED BEFORE THE TOOL IS BUILT (2026-11-20). Phase 1b commits the release's
+    record (version.props, the frozen proof, the retargeted badges, corpus-release.txt) LOCALLY,
+    signed, and builds the go2cs dotnet tool from that clean commit, so each binary's -version reads
+    vcs.revision=<the record commit> and vcs.modified=false. Nothing is pushed before Phase 4, and the
+    tag Phase 1 minted stays where it was. (1.26.11.1's tool, built from the tag commit over the
+    uncommitted record, read the tag's revision and vcs.modified=true.)
 
     SIGNING IS MANDATORY, NOT OPTIONAL. The owner's code-signing certificate is REGISTERED with
     nuget.org (2026-08-24), and registration is an enforcement switch: nuget.org rejects any
@@ -25,8 +32,9 @@
     WHAT IS IRREVERSIBLE, AND WHERE. Phase 3 publishes to nuget.org, and a published version can
     be unlisted but never deleted. Everything before it is recoverable: -WhatIf stops after the
     census, a failed pack leaves only a bumped version.props (restore with
-    `git checkout src/version.props` and delete the tag), and a failed sign leaves unsigned
-    packages in the artifacts folder. The push is therefore gated on an explicit confirmation
+    `git checkout src/version.props` and delete the tag), the record commit is local until Phase 4
+    (undo it with `git reset --soft HEAD~1`), and a failed sign leaves unsigned packages in the
+    artifacts folder. The push is therefore gated on an explicit confirmation
     unless -Yes is passed, and the gate prints exactly what is about to become permanent.
 
     PHASE 3 IS RESUMABLE (2026-10-26). nuget.org caps pushes per API key per window: the 1.26.10.1
@@ -39,8 +47,8 @@
 .PARAMETER ResumePush
     Finish a Phase 3 that stopped: push the signed packages already in the artifacts folder at the
     version src\version.props names, skipping every one the feed already has. Nothing is bumped,
-    packed, signed or tagged, so the working tree is EXPECTED to carry the release's uncommitted
-    record and the signing certificate is not needed. Every package in the folder must carry that
+    packed, signed or tagged, and the signing certificate is not needed. HEAD is EXPECTED to be the
+    release's local record commit (Phase 1b), not yet pushed. Every package in the folder must carry that
     version, or nothing is pushed. Refused with -OfflineSigning.
 
 .PARAMETER Source
@@ -83,13 +91,13 @@
 
 .EXAMPLE
     .\release-nuget.ps1
-    The full ritual: pack, sign (one PIN), confirm, push, then print the record-the-release
-    commands.
+    The full ritual: pack, commit the record, sign (one PIN), confirm, push, then print the
+    commands that push the record commit and the tag.
 
 .EXAMPLE
     .\release-nuget.ps1 -ResumePush
     Finish a publish whose Phase 3 stopped: push what the feed does not have yet, then print the
-    record-the-release commands.
+    commands that push the record commit and the tag.
 #>
 [CmdletBinding(SupportsShouldProcess)]
 param(
@@ -171,11 +179,11 @@ Write-Phase 'Phase 0: preflight'
 
 if ($ResumePush -and $OfflineSigning) { Die '-ResumePush pushes packages that are already signed; it takes no -OfflineSigning.' }
 
-# A resumed push follows a Phase 1 whose record (version.props, the frozen proof, the retargeted badges) is
-# committed only in Phase 4, so its tree is dirty by construction.
+# A resumed push follows a Phase 1b that committed the record locally, so its tree is normally clean; it is
+# not checked, because a resume moves nothing but the push.
 $dirty = @(git -C $RepoRoot status --porcelain 2>$null)
 if ($ResumePush) {
-    Write-Host "  working tree     : not checked (-ResumePush; $($dirty.Count) uncommitted path(s), the release's own record)"
+    Write-Host "  working tree     : not checked (-ResumePush; $($dirty.Count) uncommitted path(s); HEAD $(git -C $RepoRoot log -1 --format='%h %s' 2>$null))"
 }
 elseif ($dirty.Count -gt 0) {
     Write-Host 'Working tree is not clean:' -ForegroundColor Red
@@ -297,34 +305,57 @@ $p = $x.Project.PropertyGroup
 $ver = "$($p.GoStdLibVersion).$($p.GoBuildNumber)".Trim()
 Write-Host "  version          : $ver"
 
-# ---- Phase 1b: the go2cs dotnet tool -----------------------------------------------------------
+# ---- Phase 1b: commit the record, then the go2cs dotnet tool -------------------------------------
 # Seven more packages for Phase 2 to sign and Phase 3 to push: go2cs.<rid> for the six platforms and the go2cs
 # package that names them (docs/PLAN-dotnet-tool-installer.md, OQ-3). Their binaries are cross-compiled HERE, from
-# this tree, which after Phase 1 is the release's record apart from corpus-release.txt; regenerating that now, as
-# Phase 4 does again for the record commit, makes src/go2cs what the record commit will hold, so each binary
-# reports this release. The Windows executables are Authenticode-signed before packing, by one signtool process:
-# a PIN prompt of its own, ahead of Phase 2's.
+# the release's RECORD COMMIT, made first: corpus-release.txt is regenerated (it names this release from here on),
+# and it is committed with version.props, the frozen proof and the retargeted badges, LOCALLY and signed. A go build
+# stamps the commit and git status into each binary, so a tool built from the tag commit over the uncommitted
+# record reported the tag's revision and vcs.modified=true (1.26.11.1, 2026-11-20); built from the record commit it
+# reports that commit, clean, and pack-go2cs-tool.ps1 refuses a signed pack that reports otherwise. Nothing is
+# pushed until Phase 4, and the tag Phase 1 minted stays on the commit before the record. The Windows executables
+# are Authenticode-signed before packing, by one signtool process: a PIN prompt of its own, ahead of Phase 2's.
+
+$recordPaths = @('src/version.props', "docs/validation/$ver", 'src/core', 'src/go2cs/corpus-release.txt')
+$recordSubject = "release: go2cs converted stdlib $ver"
+
+function Save-GoReleaseRecord {
+    Push-Location (Join-Path $PSScriptRoot 'go2cs')
+    try { & go run ./internal/gencorpusrelease } finally { Pop-Location }
+    if ($LASTEXITCODE -ne 0) { Die "Phase 1b: regenerating src/go2cs/corpus-release.txt FAILED. Nothing was committed, signed or published. version.props was already bumped -- either re-run (it advances again) or restore it: git checkout src/version.props, and delete the tag if one was minted." }
+
+    & git -C $RepoRoot add -- @recordPaths
+    if ($LASTEXITCODE -ne 0) { Die "Phase 1b: git add of the record FAILED. Nothing was committed, signed or published." }
+    & git -C $RepoRoot commit -S -m $recordSubject
+    if ($LASTEXITCODE -ne 0) { Die "Phase 1b: the record commit FAILED (is the commit-signing key available?). Nothing was signed or published; the record is staged, not committed. To abandon the release: git reset; git checkout src/version.props src/go2cs/corpus-release.txt, and delete the tag if one was minted." }
+
+    $left = @(git -C $RepoRoot status --porcelain 2>$null)
+    if ($left.Count -gt 0) {
+        $left | Select-Object -First 8 | ForEach-Object { Write-Host "    $_" }
+        Die "Phase 1b: the tree is not clean after the record commit, so the go2cs tool would report vcs.modified=true. Nothing was signed or published. The record commit is local: undo it with git reset --soft HEAD~1, find what Phase 1 wrote outside $($recordPaths -join ', '), and re-run."
+    }
+    Write-Host "  record commit    : $(git -C $RepoRoot log -1 --format='%h %s') (local, not pushed)"
+}
 
 $toolPack = Join-Path $PSScriptRoot 'tools/go2cs-tool/pack-go2cs-tool.ps1'
 if ($ResumePush) {
     # Packed and signed by the run that stopped.
 }
 elseif ($OfflineSigning) {
-    Write-Phase 'Phase 1b: the go2cs dotnet tool is NOT packed (-OfflineSigning)'
+    Write-Phase 'Phase 1b: commit the record; the go2cs dotnet tool is NOT packed (-OfflineSigning)'
+    Save-GoReleaseRecord
     Write-Host '  Its Windows executables are signed before they are packed, so it is packed where the certificate is:'
-    Write-Host "  on the signing machine, at this tree, run tools\go2cs-tool\pack-go2cs-tool.ps1 -Version $ver -OutDir <the"
+    Write-Host "  on the signing machine, at this record commit, run tools\go2cs-tool\pack-go2cs-tool.ps1 -Version $ver -OutDir <the"
     Write-Host '  copied package folder> before signing; or publish the tool with a later release.'
 }
 else {
-    Write-Phase 'Phase 1b: pack the go2cs dotnet tool (one PIN prompt for its Windows executables)'
-    Push-Location (Join-Path $PSScriptRoot 'go2cs')
-    try { & go run ./internal/gencorpusrelease } finally { Pop-Location }
-    if ($LASTEXITCODE -ne 0) { Die "Phase 1b: regenerating src/go2cs/corpus-release.txt FAILED. Nothing was signed or published. version.props was already bumped -- either re-run (it advances again) or restore it: git checkout src/version.props, and delete the tag if one was minted." }
+    Write-Phase 'Phase 1b: commit the record, then pack the go2cs dotnet tool (one PIN prompt for its Windows executables)'
+    Save-GoReleaseRecord
 
     $tool = Invoke-Sibling -Script $toolPack -Arguments @('-Version', $ver, '-OutDir', $OutDir) -Passthru
     if ($tool.ExitCode -ne 0) {
         Write-Host ''
-        Die "Phase 1b (go2cs tool) FAILED. Nothing was signed or published. version.props was already bumped -- either re-run (it advances again) or restore it: git checkout src/version.props src/go2cs/corpus-release.txt, and delete the tag if one was minted."
+        Die "Phase 1b (go2cs tool) FAILED. Nothing was signed or published. The record commit is local: either fix and re-run from Phase 2 by hand, or undo it with git reset --soft HEAD~1, then restore: git reset; git checkout src/version.props src/go2cs/corpus-release.txt, and delete the tag if one was minted."
     }
 }
 
@@ -392,23 +423,30 @@ Write-Host "  pushed           : $($result.Pushed); already published: $($result
 
 # ---- Phase 4: record --------------------------------------------------------------------------
 # The published version, its frozen proof snapshot and the badge links pointing at it are ONE
-# fact: commit them together or a published badge links a directory that is not in the
-# repository. The tag already exists (Phase 1 minted it signed, before anything was packed), and
-# every published README's C# Source badge links it -- until it reaches GitHub those links 404.
+# fact, committed together in Phase 1b (the record commit) so a published badge never links a
+# directory that is not in the repository. The tag already exists (Phase 1 minted it signed,
+# before anything was packed), and every published README's C# Source badge links it -- until it
+# reaches GitHub those links 404.
 
 Write-Phase 'Phase 4: record the release'
 
-# The converter's corpus-release constant (src/go2cs/corpus-release.txt) names the last PUBLISHED release,
-# which is now $ver; it is regenerated here, after the irreversible push, and joins the record commit.
+# The converter's corpus-release constant (src/go2cs/corpus-release.txt) names the last PUBLISHED release, which
+# is now $ver. Phase 1b regenerated and committed it; regenerating it again must change nothing.
 Push-Location (Join-Path $PSScriptRoot 'go2cs')
 try { & go run ./internal/gencorpusrelease } finally { Pop-Location }
-if ($LASTEXITCODE -ne 0) { Die "Phase 4: regenerating src/go2cs/corpus-release.txt FAILED. $ver IS published; run 'go run ./internal/gencorpusrelease' in src/go2cs before committing the record." }
+if ($LASTEXITCODE -ne 0) { Die "Phase 4: regenerating src/go2cs/corpus-release.txt FAILED. $ver IS published; run 'go run ./internal/gencorpusrelease' in src/go2cs and check it matches the record commit before pushing." }
+# A string, never git's raw output: a failed git writes nothing to stdout, and an empty result compared with
+# -notmatch yields an empty array, which reads as false and would let this check pass without a commit at all.
+$head = "$(git -C $RepoRoot log -1 --format='%h %s' 2>$null)"
+$moved = @(git -C $RepoRoot status --porcelain -- src/go2cs/corpus-release.txt 2>$null)
+if ($moved.Count -gt 0 -or $head -notmatch [regex]::Escape($recordSubject)) {
+    Write-Host "  HEAD is $head" -ForegroundColor Yellow
+    Die "Phase 4: HEAD is not the record commit for $ver, or corpus-release.txt moved after it. $ver IS published; amend nothing -- make a commit on top that records it, then push."
+}
 
-Write-Host '  Commit the version, the frozen proof and the retargeted badges TOGETHER, then push'
-Write-Host '  the commit and the tag Phase 1 already minted:'
+Write-Host "  The record commit ($head) was made in Phase 1b. Push it and the tag"
+Write-Host '  Phase 1 already minted:'
 Write-Host ''
-Write-Host "    git add src/version.props docs/validation/$ver src/core src/go2cs/corpus-release.txt" -ForegroundColor DarkGray
-Write-Host "    git commit -S -m `"release: go2cs converted stdlib $ver`"" -ForegroundColor DarkGray
 Write-Host "    git push && git push origin nuget-$ver" -ForegroundColor DarkGray
 Write-Host ''
 Write-Host "  docs/validation/$ver is FROZEN from here -- it is the proof every $ver package's"

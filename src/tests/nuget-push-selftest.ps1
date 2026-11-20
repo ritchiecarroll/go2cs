@@ -284,6 +284,20 @@ try {
     Set-Content -Path (Join-Path $src 'go2cs/go.mod') -Value "module stub`n`ngo 1.21`n"
     Set-Content -Path (Join-Path $src 'go2cs/internal/gencorpusrelease/main.go') -Value "package main`n`nfunc main() {}`n"
 
+    # A resumed push follows Phase 1b's local record commit, and Phase 4 refuses unless HEAD is that commit; so the
+    # scratch root is a repository whose HEAD is the release's record commit, as on the release machine.
+    $recordGroup = ([xml](Get-Content -Raw (Join-Path $src 'version.props'))).Project.PropertyGroup
+    $recordVersion = "$($recordGroup.GoStdLibVersion).$($recordGroup.GoBuildNumber)".Trim()
+    $gitSaved = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try {
+        & git -C $root init -q 2>&1 | Out-Null
+        & git -C $root add -A 2>&1 | Out-Null
+        & git -C $root -c user.name=selftest -c user.email=selftest@invalid -c commit.gpgsign=false commit -q -m "release: go2cs converted stdlib $recordVersion" 2>&1 | Out-Null
+        $recordCode = $LASTEXITCODE
+    }
+    finally { $ErrorActionPreference = $gitSaved }
+    Check ($recordCode -eq 0) "release cases: the scratch record commit failed (git exit $recordCode)"
+
     $propsPath = Join-Path $src 'version.props'
     $propsBefore = [System.IO.File]::ReadAllBytes($propsPath)
     $group = ([xml](Get-Content -Raw $propsPath)).Project.PropertyGroup
