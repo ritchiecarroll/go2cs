@@ -27,6 +27,11 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return emission
 	}
 
+	// A *unsafe.Pointer dereference read for its value is the word door's load (unsafePointerWordDoor.go, W1).
+	if load, ok := v.unsafePointerWordLoad(starExpr, context); ok {
+		return load
+	}
+
 	// A dereference of `(*A)(p)` read for its value, p an unsafe.Pointer and A an unnamed array, is the array
 	// load door (arrayPointerElementDoor.go).
 	if door, ok := v.arrayPointerLoadDoor(starExpr); ok {

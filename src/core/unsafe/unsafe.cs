@@ -1243,6 +1243,211 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         return IsNull ? null : ManagedPointerTokens.Resolve(Value.Value);
     }
 
+    // ---- W1 / W2 / W3: a *unsafe.Pointer load and store over a WORD (docs/phase4/DESIGN-cgo-phase3-marshaling.md,
+    //      18.3 to 18.7, seat S-B1) ----
+    //
+    // The converter emits `*p` as LoadWord(p) and `*p = v` as StoreWord(p, v) when p's static type is *unsafe.Pointer, and
+    // the hand-owned atomic doors take SwapWord and CompareAndSwapWord over a native slot. Over a box that holds a CLR
+    // Pointer slot (a variable, a field or an element typed unsafe.Pointer) the slot is the value, as before. Over a native
+    // box, the slot is a WORD:
+    //
+    //   GO MEMORY (a word of a Go value a pin holds still: the reinterpret `(*unsafe.Pointer)(unsafe.Pointer(&w))`): the
+    //   store writes the referent's number, taken through the PINNING projection (BaseOf: a pinned address, or an order
+    //   token), never a FromBox mint's transient number; golib's word table records the referent for the slot, which
+    //   keeps it alive and pinned while the word is published (GoPointerWords). The load answers the referent whose
+    //   entry matches the word, and a number where none does.
+    //
+    //   C MEMORY alone: the word is a number. A Go pointer stored there is refused by name (C memory must not hold a Go
+    //   pointer), and a word read there that names Go memory is refused by name (its storage may have moved).
+    //
+    // Before this, `p.Value` went through the reference floor's exemption and stored a CLR REFERENCE in the word, which
+    // the collector does not trace (the .5 BOARD row of 2026-11-16); the exemption is deleted with this door (W4).
+
+    private const string StoreUnheldText = "unsafe.Pointer store: the stored pointer's storage can be neither pinned nor tokened";
+    private const string StoreIntoCText = "unsafe.Pointer store: storing a Go pointer into C memory is refused (C memory must not hold a Go pointer)";
+    private const string LoadFromCText = "unsafe.Pointer load: a Go pointer read out of C memory is refused (C memory must not hold a Go pointer)";
+    private const string UnheldSlotText = "unsafe.Pointer word: the slot is a native box over Go storage that nothing holds still";
+
+    // The projection: the number a store writes for v, and the referent the word's entry keeps. A pointer with no referent
+    // is a number and keeps nothing. With `check`, a referent whose number names nothing held still is refused by name.
+    private static nuint ProjectWord(Pointer? v, out object? referent, bool check)
+    {
+        referent = null;
+
+        if (v is null || v.IsNull)
+            return 0;
+
+        nuint word = (nuint)BaseOf(v).Value;
+        referent = v.ResolveReferent();
+
+        if (referent is null || word == 0)
+        {
+            referent = null;
+            return word;
+        }
+
+        if (!GoPointerWords.NamesHeldStorage(referent, word))
+        {
+            if (check)
+                throw RuntimeErrorPanic.RuntimeRaised(StoreUnheldText);
+
+            referent = null;
+        }
+
+        return word;
+    }
+
+    // Whether v names Go memory, for a store into C memory: a referent other than C memory alone, or a number the
+    // registry, a live pin or the tag calls Go memory.
+    private static bool NamesGoMemory(object? referent, nuint word) =>
+        (referent is not null && !GoPointerWords.IsCMemoryAlone(referent)) || GoPointerWords.NamesGoMemory(word);
+
+    private static Pointer FromWord(nuint word, object? referent) =>
+        word == 0 ? Nil : referent is null ? new Pointer((uintptr)word) : new Pointer((uintptr)word, referent);
+
+    private static void RequireSlot(ж<Pointer>? p)
+    {
+        if (p is null || p.IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+    }
+
+    /// <summary>W1: Go's <c>*p</c> for <c>p</c> a <c>*unsafe.Pointer</c>.</summary>
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static Pointer LoadWord(ж<Pointer>? p)
+    {
+        RequireSlot(p);
+
+        switch (GoPointerWords.Classify(p!))
+        {
+            case GoPointerWords.SlotKind.GoMemory:
+            {
+                nuint word = GoPointerWords.Load(p!, out object? referent);
+                return FromWord(word, referent);
+            }
+
+            case GoPointerWords.SlotKind.CMemory:
+            {
+                nuint word = p!.ReadPointerWord();
+
+                if (GoPointerWords.NamesGoMemory(word))
+                    throw RuntimeErrorPanic.RuntimeRaised(LoadFromCText);
+
+                return FromWord(word, null);
+            }
+
+            case GoPointerWords.SlotKind.Unheld:
+                throw RuntimeErrorPanic.RuntimeRaised(UnheldSlotText);
+
+            default:
+                return p!.Value;
+        }
+    }
+
+    /// <summary>W2: Go's <c>*p = v</c> for <c>p</c> a <c>*unsafe.Pointer</c>.</summary>
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static void StoreWord(ж<Pointer>? p, Pointer? v)
+    {
+        RequireSlot(p);
+
+        switch (GoPointerWords.Classify(p!))
+        {
+            case GoPointerWords.SlotKind.GoMemory:
+            {
+                nuint word = ProjectWord(v, out object? referent, check: true);
+                GoPointerWords.Store(p!, word, referent);
+                return;
+            }
+
+            case GoPointerWords.SlotKind.CMemory:
+            {
+                nuint word = ProjectWord(v, out object? referent, check: false);
+
+                if (NamesGoMemory(referent, word))
+                    throw RuntimeErrorPanic.RuntimeRaised(StoreIntoCText);
+
+                p!.ExchangePointerWord(word);
+                return;
+            }
+
+            case GoPointerWords.SlotKind.Unheld:
+                throw RuntimeErrorPanic.RuntimeRaised(UnheldSlotText);
+
+            default:
+                p!.Value = v!;
+                return;
+        }
+    }
+
+    /// <summary>W3's swap over a NATIVE slot: the store, answering the word it displaced as a pointer.</summary>
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static Pointer SwapWord(ж<Pointer> p, Pointer? v)
+    {
+        RequireSlot(p);
+
+        switch (GoPointerWords.Classify(p))
+        {
+            case GoPointerWords.SlotKind.GoMemory:
+            {
+                nuint word = ProjectWord(v, out object? referent, check: true);
+                nuint displaced = GoPointerWords.Swap(p, word, referent, out object? previous);
+                return FromWord(displaced, previous);
+            }
+
+            case GoPointerWords.SlotKind.CMemory:
+            {
+                nuint word = ProjectWord(v, out object? referent, check: false);
+
+                if (NamesGoMemory(referent, word))
+                    throw RuntimeErrorPanic.RuntimeRaised(StoreIntoCText);
+
+                return FromWord(p.ExchangePointerWord(word), null);
+            }
+
+            case GoPointerWords.SlotKind.Unheld:
+                throw RuntimeErrorPanic.RuntimeRaised(UnheldSlotText);
+
+            default:
+                // A native kind the table does not classify: the word is a number, as the atomics always read it.
+                return FromWord(p.ExchangePointerWord(ProjectWord(v, out _, check: false)), null);
+        }
+    }
+
+    /// <summary>
+    /// W3's compare-and-swap over a NATIVE slot. <paramref name="old"/> is taken through the same projection as a store,
+    /// so two FromBox mints whose transient numbers coincide never match each other's word.
+    /// </summary>
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public static bool CompareAndSwapWord(ж<Pointer> p, Pointer? old, Pointer? @new)
+    {
+        RequireSlot(p);
+
+        switch (GoPointerWords.Classify(p))
+        {
+            case GoPointerWords.SlotKind.GoMemory:
+            {
+                nuint oldWord = ProjectWord(old, out object? oldReferent, check: false);
+                nuint newWord = ProjectWord(@new, out object? newReferent, check: true);
+                return GoPointerWords.CompareAndSwap(p, oldWord, oldReferent, newWord, newReferent);
+            }
+
+            case GoPointerWords.SlotKind.CMemory:
+            {
+                nuint newWord = ProjectWord(@new, out object? newReferent, check: false);
+
+                if (NamesGoMemory(newReferent, newWord))
+                    throw RuntimeErrorPanic.RuntimeRaised(StoreIntoCText);
+
+                return p.CompareExchangePointerWord(ProjectWord(old, out _, check: false), newWord);
+            }
+
+            case GoPointerWords.SlotKind.Unheld:
+                throw RuntimeErrorPanic.RuntimeRaised(UnheldSlotText);
+
+            default:
+                return p.CompareExchangePointerWord(ProjectWord(old, out _, check: false), ProjectWord(@new, out _, check: false));
+        }
+    }
+
     /// <summary>
     /// Performs Go's <c>*(*unsafe.Pointer)(ptr) = val</c> — the store the bare-Pointer atomic
     /// primitives (<c>StorepNoWB</c>) are defined as. Panics, loudly and by name, when this
@@ -1254,6 +1459,14 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         if (ResolveReferent() is not IUntypedSlotAccess slot)
             throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer store-through: the pointer carries no recoverable managed referent (raw-address stores are not part of the managed model)");
+
+        // A WORD of Go memory (a slot that holds a uintptr): the W2 door, so the word is the projected number and its
+        // entry keeps the referent (seat S-B1). Before, the raw number arm below wrote a FromBox mint's transient number.
+        if (WordSlotForThrough(slot) is { } word)
+        {
+            StoreWord(word, val);
+            return;
+        }
 
         if (val is null || val.IsNull)
         {
@@ -1283,6 +1496,17 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer store-through: the named slot cannot hold the stored pointer value");
     }
 
+    // The store-through and load-through doors' WORD case: the slot this pointer names holds a uintptr, and the
+    // reinterpret over it is a word of Go memory a pin holds still. Any other slot keeps its own arms.
+    private ж<Pointer>? WordSlotForThrough(IUntypedSlotAccess slot)
+    {
+        if (!slot.TryLoadThrough(out object? current) || current is not uintptr)
+            return null;
+
+        ж<Pointer> word = To<Pointer>(this);
+        return GoPointerWords.Classify(word) == GoPointerWords.SlotKind.GoMemory ? word : null;
+    }
+
     /// <summary>
     /// Performs Go's <c>*(*unsafe.Pointer)(ptr)</c> — the load the bare-Pointer atomic primitives
     /// (<c>Loadp</c>) are defined as. Same recovery, same loud residual, as
@@ -1292,6 +1516,10 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     {
         if (ResolveReferent() is not IUntypedSlotAccess slot)
             throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer load-through: the pointer carries no recoverable managed referent (raw-address loads are not part of the managed model)");
+
+        // A WORD of Go memory: the W1 door (seat S-B1).
+        if (WordSlotForThrough(slot) is { } word)
+            return LoadWord(word);
 
         if (!slot.TryLoadThrough(out object? value))
             throw go.golib.RuntimeErrorPanic.RuntimeRaised("unsafe.Pointer load-through: nil pointer dereference");

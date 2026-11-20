@@ -32,6 +32,14 @@ internal interface IHeldStorage
     // DERIVED from this box (an offset, an element of a view of it): its address is inside the storage and is no
     // address the registry knows, so the box cannot be asked about that address alone (design 13.2).
     bool TryHeldExtent(out nuint start, out nuint end);
+
+    // TryHeldExtent's storage together with the OBJECT that holds it: the pinned array, which does not move while the pin
+    // is held. The key of the unsafe.Pointer word table (GoPointerWords): two views of one Go word reach one object and
+    // one byte offset from its start, whichever box each was derived from.
+    bool TryHeldTarget(out object target, out nuint start, out nuint end);
+
+    // Whether `address` is inside the storage this box holds still (TryHeldExtent).
+    bool HeldBytesFromExtent(nuint address) => TryHeldExtent(out nuint start, out nuint end) && address >= start && address < end;
 }
 
 // A view of memory that keeps a root: an element of a native-backed slice, or a window over a native array. The root

@@ -30,11 +30,11 @@ namespace GolibTests;
 [TestClass]
 public unsafe class UnsafePointerWordTests
 {
-    // ---- the emitted shapes (the converter's W1/W2 door) ----
+    // ---- the emitted shapes (the converter's W1/W2 door: before the cure, `p.Value`) ----
 
-    private static @unsafe.Pointer Load(ж<@unsafe.Pointer> p) => p.Value;
+    private static @unsafe.Pointer Load(ж<@unsafe.Pointer> p) => @unsafe.Pointer.LoadWord(p);
 
-    private static void Store(ж<@unsafe.Pointer> p, @unsafe.Pointer v) => p.Value = v;
+    private static void Store(ж<@unsafe.Pointer> p, @unsafe.Pointer v) => @unsafe.Pointer.StoreWord(p, v);
 
     // ---- fixtures ----
 
