@@ -392,6 +392,13 @@ internal static partial void main() {
     bumpCell(ref sv);
     fmt.Println("param-stack", sv.v);
 
+    goǃ(writer2, () => {
+    }, () => {
+    });
+    var si = new cell(v: parkK());
+    bumpCell(ref si);
+    fmt.Println("param-stack-init", si.v);
+
     var aʗ3 = a;
     goǃ(writer, () => {
         aʗ3.bal = 50;

@@ -555,6 +555,29 @@ public class TwinBoxTests
                 bump(ref nm);
             }
 
+            internal static nint parksI() { ᐸꟷ(ch); return 3; }
+
+            public static nint runParkingInit()
+            {
+                nint pi = parksI();
+                bump(ref pi);
+                return pi;
+            }
+
+            public static void runShadow(bool f)
+            {
+                if (f)
+                {
+                    nint sh = default;
+                    bump(ref sh);
+                }
+                else
+                {
+                    nint sh = 1;
+                    sh++;
+                }
+            }
+
         """;
 
     // A hand-written `this ref` method with another `ref` parameter (the converter emits none: ref-lowering skips methods).
@@ -1307,6 +1330,27 @@ public class TwinBoxTests
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.IsFalse(twins.Contains("heap<nint>(default, out var Ꮡnm)", StringComparison.Ordinal), "Ꮡnm is taken");
         StringAssert.Contains(twins, "|bump|nm (name)", "named, with the reason");
+    }
+
+    [TestMethod]
+    public void P41_APromotedLocalWhoseInitializerParksAwaitsItInTheHeapDeclaration()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "ref var pi = ref global::go.builtin.heap<nint>((await parksIꞏtwin()), out var Ꮡpi);", "the parking initializer awaits inside the heap declaration, before the ref exists");
+        StringAssert.Contains(twins, "await bumpꞏtwin(Ꮡpi)", "the call hands the box");
+        StringAssert.Contains(twins, "pi = ref Ꮡpi.ValueSlot;", "Rule R derives it again after the await");
+    }
+
+    [TestMethod]
+    public void P42_AShadowedLocalStaysPlainWithItsReason()
+    {
+        (string twins, Diagnostic[] errors) = Run(null, StackLocals);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.IsFalse(twins.Contains("Ꮡsh", StringComparison.Ordinal), "two locals named sh in sibling scopes: neither becomes a heap local");
+        StringAssert.Contains(twins, "|bump|sh (shadow)", "named, with the reason");
     }
 
     [TestMethod]

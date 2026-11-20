@@ -557,6 +557,18 @@ under a package variable), and the 8 refused above.
 - The f(p, <-ch) divergence (MnLaterArg): gc reads p after the receive, the converter before; byref-param equals plain.
 - RecvGenerator CS1620 on a hand-written `this ref` method with another `ref` parameter (byref-mixed).
 
+**G's review of 12.4 and 12.5 (dated block, 2026-11-20).** G concurred with both blocks and named two unit gaps; no
+design changed. Both are closed with units that went red when their mechanism was neutered and green when it was restored
+byte-identical:
+- GAP 1, a promoted local whose initializer parks (`x := parks(); bumpCell(&x)`). P41: the twin declares
+  `ref var pi = ref global::go.builtin.heap<nint>((await parksIꞏtwin()), out var Ꮡpi);`, so the await completes before
+  the ref exists, hands `Ꮡpi`, and Rule R derives the ref again after the call's await. Red when the declaration took
+  the unvisited initializer (a plain `parksI()`). Probe row `param-stack-init` in MnBoxAlias (`si := cell{v: parkK()};
+  bumpCell(&si)`): Go 23; twins 23 and plain 23 (3 of 3 equal to Go's whole output); GoTwinsBoxCopy and
+  GoTwinsBoxArgCopy 3, as predicted.
+- GAP 2, the `shadow` refusal. P42: two locals named `sh` in sibling scopes, one handed to the box twin; neither becomes a
+  heap local and the P row reads `|bump|sh (shadow)`. Red when the refusal returned null: the twin then promoted `sh`.
+
 ## 13. HANDOFF to P4, a brief (dated block, 2026-11-16)
 
 Owner ruling, as amended: M:N works on account B until account A's reset (2026-11-20 06:00Z), then comes back to G,

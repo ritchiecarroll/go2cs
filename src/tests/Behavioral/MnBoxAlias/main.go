@@ -307,6 +307,12 @@ func main() {
 	bumpCell(&sv)
 	fmt.Println("param-stack", sv.v)
 
+	// The promoted local's INITIALIZER parks (G's 12.5 review, gap 1): the twin awaits it inside the heap declaration.
+	go writer2(func() {}, func() {})
+	si := cell{v: parkK()}
+	bumpCell(&si)
+	fmt.Println("param-stack-init", si.v)
+
 	go writer(func() { a.bal = 50 })
 	value := a.valueRead()
 	fmt.Println("value", value)
