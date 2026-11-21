@@ -283,11 +283,9 @@ type Visitor struct {
 	emittedClassName string
 	// fileClassName is the class this file's own class block names, and openClassName the class whose
 	// block is open where the file's emission stands: fileClassName, or the method holder of the
-	// receiver type whose methods are being emitted (methodHolder.go). fileHasMethodHolder records
-	// that the file wrote a holder's block, which is what makes it import its own class's names.
-	fileClassName       string
-	openClassName       string
-	fileHasMethodHolder bool
+	// receiver type whose methods are being emitted (methodHolder.go).
+	fileClassName string
+	openClassName string
 	// astFile is the Go file being converted. fileUsesSelfAlias records that a method of the file named
 	// the package's own class through the self-alias, which the file then declares; the two fields after
 	// it cache whether the file may take that alias at all (fileSelfAliasBlocked).
@@ -295,11 +293,6 @@ type Visitor struct {
 	fileUsesSelfAlias      bool
 	fileSelfAliasDecided   bool
 	fileSelfAliasIsBlocked bool
-	fileSelectorSels       map[*ast.Ident]bool // selectorSelIdents: the selected names of the file's selector expressions
-	// currentHolderNamed is the receiver type of the method being emitted, whose holder its body stands
-	// in, and nil in a function; currentHolderInTestFile says which half of a -tests unit declares it.
-	currentHolderNamed      *types.Named
-	currentHolderInTestFile bool
 	// namespaceHiddenTypes is the package's types a method holder cannot name bare, each with its
 	// declaring class (holderHiddenTypes), read once per file.
 	namespaceHiddenTypes map[string]string

@@ -65,10 +65,6 @@ func isNarrowIntegerKind(kind types.BasicKind) bool {
 // `new nint()`, CS1503/CS1929). go/types has already resolved the name for us: a genuine built-in
 // is the universe *types.Builtin object, anything else is a shadowing declaration and must fall
 // through to the ordinary call path.
-//
-// This is the opposite direction from holderDeclares, which handles a method of the current holder
-// whose name collides with a built-in the call still MEANS (there the call is a real built-in and
-// gets QUALIFIED as `builtin.<name>`); here the call is not a built-in at all.
 func (v *Visitor) identIsUniverseBuiltin(ident *ast.Ident) bool {
 	_, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin)
 
@@ -3056,13 +3052,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if ident.Name == "close" && len(callExpr.Args) == 1 {
 			if _, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin); isBuiltin {
 				if typeArgs := v.namedChanElemTypeArg(callExpr.Args[0]); typeArgs != "" {
-					funcName := ident.Name
-
-					if v.holderDeclares(ident.Name) {
-						funcName = "builtin." + funcName
-					}
-
-					return fmt.Sprintf("%s%s(%s)", funcName, typeArgs, v.convExpr(callExpr.Args[0], nil))
+					return fmt.Sprintf("%s%s(%s)", ident.Name, typeArgs, v.convExpr(callExpr.Args[0], nil))
 				}
 			}
 		}
@@ -3103,13 +3093,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 				}
 
-				funcName := ident.Name
-
-				if v.holderDeclares(ident.Name) {
-					funcName = "builtin." + funcName
-				}
-
-				return fmt.Sprintf("%s(%s)", funcName, strings.Join(args, ", "))
+				return fmt.Sprintf("%s(%s)", ident.Name, strings.Join(args, ", "))
 			}
 		}
 
@@ -3496,20 +3480,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// `defer recover()` is never called by a deferred function. Every other recover() is direct and stays as is.
 		if ident.Name == "recover" {
 			if site, ok := packageRecoverForms[callExpr]; ok {
-				// A holder that declares its own `recover` method qualifies the built-in (Phase 7a below).
-				qualifier := ""
-
-				if v.holderDeclares(ident.Name) {
-					qualifier = "builtin."
-				}
-
 				switch site.form {
 				case recoverFormFlagged:
-					return fmt.Sprintf("%srecover(%s)", qualifier, site.local)
+					return fmt.Sprintf("recover(%s)", site.local)
 				case recoverFormChecked:
-					return qualifier + "recoverChecked()"
+					return "recoverChecked()"
 				case recoverFormNeverDeferred:
-					return fmt.Sprintf("%srecover(%s: false)", qualifier, recoverFlagLocalName)
+					return fmt.Sprintf("recover(%s: false)", recoverFlagLocalName)
 				}
 			}
 		}
@@ -4029,18 +4006,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
-	// ---- Phase 7a: built-in name shadowing, and min/max argument typing ----
-
-	// A Go built-in call (`clear(s)`, `len(s)`, …) written inside a method whose holder ALSO declares
-	// a method of that name: the holder's own `<name>(this ref T)` hides the using-static
-	// `go.builtin.<name>` (C# member lookup stops at the class → CS1620/CS1503). Qualify it as
-	// `builtin.<name>` there. Every other class of the package reads the built-in bare: a method is a
-	// member of its receiver type's holder alone (methodHolder.go).
-	if ident, ok := callExpr.Fun.(*ast.Ident); ok && funcName == ident.Name && v.holderDeclares(ident.Name) {
-		if _, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin); isBuiltin {
-			funcName = "builtin." + funcName
-		}
-	}
+	// ---- Phase 7a: min/max argument typing ----
 
 	// Go's min/max builtins type every argument to the call's single result type. An argument that
 	// renders as an UntypedInt (BigInteger) static — a NAMED UNTYPED CONSTANT, or a FOLDED

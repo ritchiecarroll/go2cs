@@ -159,7 +159,7 @@ func collectCSReservedTypeNameDecls(file *ast.File, found map[string]bool) {
 // a valid method name in Go, so it is not included in the reserved list.
 // `builtin` and `sstring` are golib names the emitted C# references unqualified even when the
 // Go source never spells them: `builtin` is the target of qualified `builtin.<name>(...)` calls
-// (holderDeclares) and `sstring` is the zero-copy view type emitted by the string([]byte)
+// and `sstring` is the zero-copy view type emitted by the string([]byte)
 // elision pass. A same-named user identifier (a nested type especially) would shadow the golib
 // name inside the package class, so it is renamed. Names the EMITTER itself spells — UNIVERSE
 // names (`any`, `rune`, the numeric alias names, ...) and the MAPPED C# spellings (`nint`,

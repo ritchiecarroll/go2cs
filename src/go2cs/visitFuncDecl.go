@@ -610,7 +610,6 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// extension method its holder declares is a forwarder package_info.cs carries (recordMethodForwarder).
 	// No body is emitted in a holder, so no body reads names against a holder's methods.
 	suffixHolder := v.suffixMethodHolder(funcDecl)
-	v.currentHolderNamed = nil
 
 	defer v.leaveHolder()
 

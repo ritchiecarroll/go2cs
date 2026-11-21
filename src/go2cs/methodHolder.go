@@ -123,8 +123,7 @@ func receiverNamed(info *types.Info, funcDecl *ast.FuncDecl) *types.Named {
 
 // methodsStayInPackageClass reports whether named's methods are emitted into its package class, as functions are,
 // rather than into a holder: so for a type of package main, unless one of its methods is named like something a
-// file of the package reads bare, which the method would hide from every file of the package, as a holder's
-// method hides it in its own holder only (holderDeclares):
+// file of the package reads bare, which the method would hide from every file of the package:
 //   - a package-level name of main (a type, function, constant or variable);
 //   - a name of the universe (`len`, `string`, `nil`), whose built-ins arrive through `using static go.builtin`;
 //   - a name a file imports (`sort`), or a name a dot-imported package declares, exported or not;
@@ -318,9 +317,8 @@ const testHolderMark = TempVarMarker + "test"
 // testHolderSuffix returns the mark a method's holder takes when a `_test.go` file declares the method on a
 // type a production file declares, for the case where both emit into one package class (the recompile model
 // of -tests, and a plain conversion that includes test files). The production holder then never gains a
-// member from a test file: a production method's body reads its package's names against the methods of its
-// own holder (holderHides), and those are the same whether or not the tests are compiled beside it. Where the
-// test file emits into its own class (the white-box bridge) the holder's name already differs.
+// member from a test file, so its forwarders are the same whether or not the tests are compiled beside it. Where
+// the test file emits into its own class (the white-box bridge) the holder's name already differs.
 func (v *Visitor) testHolderSuffix(method types.Object, typeObj types.Object) string {
 	if method != nil && v.declaredInTestFile(method) && !v.declaredInTestFile(typeObj) {
 		return testHolderMark
@@ -364,7 +362,7 @@ func (v *Visitor) suffixHolderOfMethod(named *types.Named, method types.Object) 
 
 	// A hand-owned file's Go source may declare a type its C# replacement drops; the holder's declaration names
 	// its type in `typeof`, so it is written only where the package's C# sources declare the type (as
-	// useMethodHolder).
+	// as for every holder).
 	if v.handOwnedTypeNames == nil || v.handOwnedTypeNames[named.Obj().Name()] {
 		packageLock.Lock()
 		packageMethodHolders[holder] = typeofTarget
@@ -372,28 +370,6 @@ func (v *Visitor) suffixHolderOfMethod(named *types.Named, method types.Object) 
 	}
 
 	return holder
-}
-
-// useMethodHolder answers the method holder a method of named's is emitted into, recording the holder for
-// package_info.cs, or "" when the type takes none (methodHolderClass). method is nil for a method the
-// converter writes rather than Go declares: a promoted forwarder.
-func (v *Visitor) useMethodHolder(named *types.Named, method types.Object) string {
-	if holder, typeofTarget := v.methodHolderClass(named, method); holder != "" {
-		// A hand-owned file's Go source may declare a type its C# replacement drops (internal/sync's
-		// hashtriemap.cs keeps HashTrieMap and drops entry, indirect and node). The holder's declaration names
-		// its type in `typeof`, so it is written only where the package's C# sources declare the type.
-		if v.handOwnedTypeNames == nil || v.handOwnedTypeNames[named.Obj().Name()] {
-			packageLock.Lock()
-			packageMethodHolders[holder] = typeofTarget
-			packageLock.Unlock()
-		}
-
-		v.fileHasMethodHolder = true
-
-		return holder
-	}
-
-	return ""
 }
 
 // csharpTypeDeclaration matches a C# type declaration and captures its name: a struct, class, interface,
@@ -650,53 +626,6 @@ func computeSelfAlias(pkg *types.Package, packageNS string) {
 	walk(pkg)
 }
 
-// holderDeclares reports whether the holder the current method is emitted into declares a method of
-// the given Go name: a method of the same receiver type that the same class of this emission unit holds.
-func (v *Visitor) holderDeclares(name string) bool {
-	named := v.currentHolderNamed
-
-	if named == nil {
-		return false
-	}
-
-	for i := 0; i < named.NumMethods(); i++ {
-		method := named.Method(i)
-
-		if method.Name() == name && v.declaredInTestFile(method) == v.currentHolderInTestFile {
-			return true
-		}
-	}
-
-	return false
-}
-
-// holderDeclaresTypeName is holderDeclares for a type's C# spelling: the name without a keyword's `@`
-// and without type arguments.
-func (v *Visitor) holderDeclaresTypeName(typeName string) bool {
-	if open := strings.Index(typeName, "<"); open != -1 {
-		typeName = typeName[:open]
-	}
-
-	return v.holderDeclares(strings.TrimPrefix(typeName, "@"))
-}
-
-// holderHides reports whether a package-level name of the package being converted, written bare inside
-// the current method's holder, binds something other than the package's member. The holder reads the
-// package's names through `using static`, behind:
-//   - the holder's own methods;
-//   - in the root namespace, golib's types of that name with no type parameter;
-//   - a child namespace, in view, of the package's namespace.
-//
-// The members of `go.builtin` are not in that list: they arrive through a global using, and the file's
-// own `using static` stands inside its namespace, where C# reads it first.
-func (v *Visitor) holderHides(name string) bool {
-	if v.currentHolderNamed == nil {
-		return false
-	}
-
-	return v.holderDeclares(name) || v.namespaceHides(name)
-}
-
 // namespaceHides reports whether the package's own namespace declares something named name that a
 // method holder reads before the package's members: in the root namespace, a golib type of that name
 // with no type parameter; a child namespace in view. Unlike a method of the holder, which hides a name
@@ -776,8 +705,6 @@ func (v *Visitor) holderHiddenTypes(funcDecl *ast.FuncDecl) map[string]string {
 
 // leaveHolder ends the emission of a method in its holder: what follows stands in the package class.
 func (v *Visitor) leaveHolder() {
-	v.currentHolderNamed = nil
-	v.currentHolderInTestFile = false
 	holderHiddenTypeClasses = nil
 }
 
@@ -843,8 +770,8 @@ func (v *Visitor) selfQualifier(obj types.Object) string {
 	}
 
 	// A variable of the function named like the package is what the name means for the whole of its
-	// C# block, and a method of the holder is a member of the class the body stands in.
-	if v.funcScopeVarNames.Contains(packageName) || v.holderDeclares(packageName) {
+	// C# block.
+	if v.funcScopeVarNames.Contains(packageName) {
 		return class
 	}
 
@@ -920,54 +847,6 @@ func importSpecIdent(info *types.Info, importSpec *ast.ImportSpec) *ast.Ident {
 	return nil
 }
 
-// holderQualifiedName answers the qualified spelling of ident inside the current method's holder, when
-// ident names a package-level constant, variable or function of the package being converted that the
-// bare name would not bind there, or a type of the package the namespace hides there, and "" otherwise.
-func (v *Visitor) holderQualifiedName(ident *ast.Ident) string {
-	if !v.inFunction || v.currentHolderNamed == nil || v.pkg == nil {
-		return ""
-	}
-
-	obj := v.info.ObjectOf(ident)
-
-	if obj == nil || obj.Pkg() == nil || obj.Parent() != obj.Pkg().Scope() {
-		return ""
-	}
-
-	switch obj.(type) {
-	case *types.Const, *types.Var, *types.Func:
-	case *types.TypeName:
-		// A type is hidden by the namespace alone (a method of the holder hides it only where an
-		// expression is read, which convUnaryExpr and the type switch handle), and is written as the
-		// type-name renderer writes it.
-		if obj.Pkg() != v.pkg {
-			return ""
-		}
-
-		return holderHiddenTypeName(obj.Name())
-	default:
-		return ""
-	}
-
-	if !v.holderHides(obj.Name()) && !(obj.Pkg() == v.pkg && v.usingStaticAlsoDeclares(obj.Name())) {
-		return ""
-	}
-
-	if obj.Pkg() == v.pkg {
-		return v.selfQualifier(obj) + "." + getSanitizedIdentifier(v.getIdentName(ident))
-	}
-
-	// A name a dot import brings (`. "time"`) is written bare in Go and reaches the file through
-	// `using static <pkg>_package`, behind the holder's own members as the package's own names are. It
-	// is written through its package's class. A name written `pkg.Name` in Go already is.
-	if v.selectorSelIdents()[ident] {
-		return ""
-	}
-
-	return v.qualifyPackageReference(convertImportPathToNamespace(obj.Pkg().Path(), PackageSuffix)) + "." +
-		getSanitizedIdentifier(v.getIdentName(ident))
-}
-
 // usingStaticAlsoDeclares reports whether a class the file being converted names in a `using static`,
 // other than its own package's, declares a package-level name name. In the package class the class's
 // own member wins; a holder is not nested in the package class, so there both using-statics supply the
@@ -1004,26 +883,6 @@ func (v *Visitor) dotImportDeclares(name string) bool {
 	}
 
 	return false
-}
-
-// selectorSelIdents returns the identifiers of the file that are the selected name of a selector
-// expression (`x.Sel`), read once per file.
-func (v *Visitor) selectorSelIdents() map[*ast.Ident]bool {
-	if v.fileSelectorSels == nil {
-		v.fileSelectorSels = map[*ast.Ident]bool{}
-
-		if v.astFile != nil {
-			ast.Inspect(v.astFile, func(node ast.Node) bool {
-				if selector, ok := node.(*ast.SelectorExpr); ok {
-					v.fileSelectorSels[selector.Sel] = true
-				}
-
-				return true
-			})
-		}
-	}
-
-	return v.fileSelectorSels
 }
 
 // methodHolderRef names the class that holds fn, a method a named type declares, for a static-form

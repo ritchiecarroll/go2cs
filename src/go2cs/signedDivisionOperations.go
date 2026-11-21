@@ -170,8 +170,7 @@ func (v *Visitor) signedDividendCannotOverflow(dividend ast.Expr) bool {
 // local is in scope in its whole block, including before its declaration, so `r := a % b; const rem =
 // 10` needs the qualification even though Go's scope for rem starts after it.
 func (v *Visitor) signedDivisionHelperName(name string) string {
-	shadowed := v.holderDeclares(name) ||
-		v.funcScopeVarNames.Contains(name) ||
+	shadowed := v.funcScopeVarNames.Contains(name) ||
 		v.pkg != nil && v.pkg.Scope().Lookup(name) != nil ||
 		v.funcDeclaresName(name)
 

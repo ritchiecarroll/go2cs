@@ -112,9 +112,8 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	// A package-level type, constant or variable named like a METHOD of the package is no collision: a
 	// method is a member of its receiver type's holder, beside the package class, and never of the class
 	// that declares the element (methodHolder.go). Until 2026-11-11 both were members of the package
-	// class, and the element took the rename here. For the same reason no method hides a Go built-in or
-	// an import's alias anywhere but in its own holder: the two package-wide name sets that qualified
-	// those references are gone, and each reference asks its holder (holderDeclares).
+	// class, and the element took the rename here. Nor does a method hide a Go built-in or an import's
+	// alias: its body is `<Name>⁔` in the package class, and only its forwarder is named like it.
 }
 
 // heapIntrinsicIdent is the Go identifier that shadows golib's heap-boxing intrinsic. Unlike the
