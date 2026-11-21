@@ -1186,11 +1186,11 @@ func (v *Visitor) recordForwarder(pos token.Pos, holder string, access string, i
 		call = "ref " + call
 	}
 
-	// The call reads the body's own parameter names, so the declaration is respelled for namespace scope after it.
-	typeParamNames := forwarderTypeParameterNames(typeParams)
-	result = v.qualifyForwarderLocalTypes(result, typeParamNames, true)
-	params = v.qualifyForwarderLocalTypes(params, typeParamNames, false)
-	constraints = v.qualifyForwarderLocalTypes(flattenConstraints(constraints), typeParamNames, false)
+	// The forwarder repeats the body's spelling: package_info.cs reads the package's types as the body's file does
+	// (forwarderAliasDirectives). unsafe.Pointer alone is spelled through a file alias it does not declare.
+	result = respellForwarderUnsafe(result)
+	params = respellForwarderUnsafe(params)
+	constraints = respellForwarderUnsafe(flattenConstraints(constraints))
 
 	line := fmt.Sprintf("[%s] %s %s %s%s(%s)%s => %s;", methodForwarderAttributes, modifiers, result, name, typeParams, params, constraints, call)
 
@@ -1204,123 +1204,12 @@ func (v *Visitor) recordForwarder(pos token.Pos, holder string, access string, i
 	packageLock.Unlock()
 }
 
-// forwarderTypeParameterNames answers the names a declaration's type parameter list (`<T, [GoType] U>`) declares.
-func forwarderTypeParameterNames(typeParams string) map[string]bool {
-	names := map[string]bool{}
-
-	for _, name := range strings.Split(strings.Trim(forwarderTypeArguments(typeParams), "<> "), ",") {
-		if name = strings.TrimSpace(name); name != "" {
-			names[name] = true
-		}
-	}
-
-	return names
+// respellForwarderUnsafe spells unsafe.Pointer through its package class (`unsafe_package.Pointer`), as an assembly
+// attribute and a GoType string do (visitTypeSpec.go): a body reads it through its file's `using @unsafe =
+// unsafe_package;`, an alias package_info.cs does not declare.
+func respellForwarderUnsafe(text string) string {
+	return strings.ReplaceAll(text, "@unsafe.", "unsafe_package.")
 }
-
-// qualifyForwarderLocalTypes respells a forwarder's result, parameter list or constraint clauses for package_info.cs.
-// A body reads its package's types bare: it is a member of the package class, whose nested types its lookup finds
-// first. A forwarder stands at namespace scope, where a bare name is looked up in the enclosing namespaces before any
-// using (a type named like one of the root namespace's binds to that one) and then among the usings, where System's
-// `Buffer` or `Type` makes the package's own ambiguous (CS0104). So the forwarder names each of its package's types
-// through the class that declares it, as the holder's typeof does, and unsafe.Pointer through unsafe_package. A name
-// already qualified, a type parameter, an alias (declared at namespace scope already) and a parameter's or a tuple
-// element's own name are left as written.
-func (v *Visitor) qualifyForwarderLocalTypes(text string, typeParamNames map[string]bool, isResult bool) string {
-	if v.pkg == nil || strings.TrimSpace(text) == "" {
-		return text
-	}
-
-	qualify := func(typeText string) string {
-		var result strings.Builder
-		last := 0
-
-		for _, bounds := range packageQualifiedNameRegex.FindAllStringIndex(typeText, -1) {
-			match := typeText[bounds[0]:bounds[1]]
-			result.WriteString(typeText[last:bounds[0]])
-			last = bounds[1]
-
-			// unsafe.Pointer is spelled through each file's `using @unsafe = unsafe_package;`, which package_info.cs
-			// does not declare; the package class is the spelling an assembly attribute takes for the same reason.
-			if member, ok := strings.CutPrefix(match, "@unsafe."); ok {
-				result.WriteString("unsafe_package." + member)
-				continue
-			}
-
-			if !strings.Contains(match, ".") && !typeParamNames[match] {
-				// A name is the package's type only where its use is as generic as the type: runtime's `slice` and
-				// `Func` leave golib's `slice<T>` and System's `Func<…>` as written.
-				if typeName, ok := v.pkg.Scope().Lookup(strings.TrimPrefix(match, "@")).(*types.TypeName); ok && !typeName.IsAlias() {
-					named, _ := typeName.Type().(*types.Named)
-					generic := named != nil && named.TypeParams().Len() > 0
-
-					if generic == strings.HasPrefix(typeText[bounds[1]:], "<") {
-						match = v.packageScopeClassName(typeName) + "." + match
-					}
-				}
-			}
-
-			result.WriteString(match)
-		}
-
-		result.WriteString(typeText[last:])
-
-		return result.String()
-	}
-
-	// A named element (`ref Buffer b`, a tuple's `Buffer b`) ends in its name, after the last space outside any
-	// bracket; an unnamed tuple element (`map<@string, nint>`) has none. Leading attributes are not types.
-	qualifyNamed := func(element string) string {
-		attributes := forwarderLeadingAttributes.FindString(element)
-		rest := element[len(attributes):]
-		split, depth := -1, 0
-
-		for i, r := range strings.TrimRight(rest, " \t") {
-			switch r {
-			case '<', '(', '[', '{':
-				depth++
-			case '>', ')', ']', '}':
-				depth--
-			case ' ', '\t':
-				if depth == 0 && strings.TrimSpace(rest[:i]) != "" {
-					split = i
-				}
-			}
-		}
-
-		if split < 0 {
-			return attributes + qualify(rest)
-		}
-
-		return attributes + qualify(rest[:split]) + rest[split:]
-	}
-
-	qualifyList := func(list string) string {
-		parts := splitTopLevelParameters(list)
-
-		for i, part := range parts {
-			parts[i] = qualifyNamed(part)
-		}
-
-		return strings.Join(parts, ",")
-	}
-
-	if !isResult {
-		if strings.HasPrefix(strings.TrimSpace(text), "where ") {
-			return qualify(text)
-		}
-
-		return qualifyList(text)
-	}
-
-	// A tuple result may name its elements.
-	if inner, isTuple := strings.CutPrefix(text, "("); isTuple && strings.HasSuffix(inner, ")") {
-		return "(" + qualifyList(strings.TrimSuffix(inner, ")")) + ")"
-	}
-
-	return qualify(text)
-}
-
-var forwarderLeadingAttributes = regexp.MustCompile(`^\s*(?:\[[^\[\]]*\]\s*)*`)
 
 // forwarderFileAliases answers the file-local aliases of the converting file a forwarder line names, with their
 // referents: a variadic parameter's `ꓸꓸꓸT` (variadicParamType), whose referent is written for namespace scope.
@@ -1347,10 +1236,10 @@ func (v *Visitor) forwarderFileAliases(line string) map[string]string {
 	return aliases
 }
 
-// forwarderAliasDirectives takes out of package_info.cs the alias directives an earlier write put after its namespace
-// declaration (insertForwarderAliasDirectives), and answers the ones this write declares: those a merging write found,
-// and those its forwarders name (forwarderAliasUsings). A name already bound to another referent is one more that
-// this write's forwarders spell through its referent.
+// forwarderAliasDirectives takes out of package_info.cs the directives an earlier write put after its namespace
+// declaration (insertForwarderAliasDirectives), and answers the aliases this write declares: those a merging write
+// found, and those its forwarders name (forwarderAliasUsings). A name already bound to another referent is one more
+// that this write's forwarders spell through its referent.
 func forwarderAliasDirectives(packageInfoLines []string, mergeExisting bool) ([]string, []string, map[string]bool) {
 	usings, inline := forwarderAliasUsings()
 	declared := map[string]string{}
@@ -1359,7 +1248,9 @@ func forwarderAliasDirectives(packageInfoLines []string, mergeExisting bool) ([]
 	if namespaceIndex >= 0 {
 		end := namespaceIndex + 1
 
-		for end < len(packageInfoLines) && (forwarderAliasDirective.MatchString(packageInfoLines[end]) || strings.TrimSpace(packageInfoLines[end]) == "" && end+1 < len(packageInfoLines) && forwarderAliasDirective.MatchString(packageInfoLines[end+1])) {
+		isDirective := func(i int) bool { return i < len(packageInfoLines) && strings.HasPrefix(packageInfoLines[i], "using ") }
+
+		for isDirective(end) || strings.TrimSpace(packageInfoLines[end]) == "" && isDirective(end+1) {
 			if match := forwarderAliasDirective.FindStringSubmatch(packageInfoLines[end]); match != nil && mergeExisting {
 				declared[match[1]] = match[2]
 			}
@@ -1390,18 +1281,29 @@ func forwarderAliasDirectives(packageInfoLines []string, mergeExisting bool) ([]
 	return packageInfoLines, lines, inline
 }
 
-// insertForwarderAliasDirectives writes the alias directives the forwarders read right after package_info.cs's
-// namespace declaration, as each converted file declares its own: there a referent resolves as in the body's file
-// (`Span<runtime_package.traceArg>` through the namespace and the project's global usings), which it does not among
-// the compilation unit's directives above the namespace.
-func insertForwarderAliasDirectives(packageInfoLines []string, aliasLines []string) []string {
+// insertForwarderAliasDirectives writes, right after package_info.cs's namespace declaration, the directives its
+// forwarders read their signatures through, as each converted file declares its own after its namespace: the file's
+// `using static <pkg>_package;` lines, repeated, then the aliases the forwarders name. A forwarder repeats its body's
+// spelling (`this ref Buffer b`), which in the package class finds the package's nested type first; at the
+// compilation unit's level the project's global `using System;` makes that name ambiguous (CS0104), and a
+// declaration's own usings are searched before the enclosing levels'. An alias's referent resolves there as in the
+// body's file too (`Span<runtime_package.traceArg>`), which it does not among the compilation unit's directives.
+func insertForwarderAliasDirectives(packageInfoLines []string, aliasLines []string, hasForwarders bool) []string {
 	namespaceIndex := packageInfoNamespaceLine(packageInfoLines)
 
-	if len(aliasLines) == 0 || namespaceIndex < 0 {
+	if !hasForwarders || namespaceIndex < 0 {
 		return packageInfoLines
 	}
 
-	inserted := append([]string{""}, aliasLines...)
+	inserted := []string{""}
+
+	for _, line := range packageInfoLines[:namespaceIndex] {
+		if strings.HasPrefix(line, "using static ") {
+			inserted = append(inserted, line)
+		}
+	}
+
+	inserted = append(inserted, aliasLines...)
 
 	return append(packageInfoLines[:namespaceIndex+1:namespaceIndex+1], append(inserted, packageInfoLines[namespaceIndex+1:]...)...)
 }
@@ -1702,7 +1604,7 @@ func applyMethodForwarderSection(packageInfoLines []string, mergeExisting bool) 
 		packageInfoLines = append(packageInfoLines[:from:from], packageInfoLines[endLineIndex+1:]...)
 	}
 
-	packageInfoLines = insertForwarderAliasDirectives(packageInfoLines, aliasLines)
+	packageInfoLines = insertForwarderAliasDirectives(packageInfoLines, aliasLines, len(byHolder) > 0)
 
 	if len(byHolder) == 0 {
 		return packageInfoLines

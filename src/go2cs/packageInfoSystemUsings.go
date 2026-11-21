@@ -38,8 +38,9 @@ var packageInfoSystemClashes []string
 //
 // `using static <pkg>_package;` and a namespace using resolve at the same stage, so a package-scope TYPE named like a
 // type of System.ComponentModel, System.Diagnostics or System.Runtime.CompilerServices is ambiguous wherever the file
-// spells the name bare (CS0104: an interface record's `GoImplement<StackTrace, …>`; a forwarder names its package's
-// types through the package class, qualifyForwarderLocalTypes), and a type named like an attribute's short form
+// spells the name bare at the compilation unit's level (CS0104: an interface record's `GoImplement<StackTrace, …>`;
+// the forwarders read it through the namespace's own `using static`, insertForwarderAliasDirectives), and a type
+// named like an attribute's short form
 // counts too, since `[MethodImpl]` looks up MethodImpl as well as MethodImplAttribute. A name that is not a type matters only where the file spells it in an expression: the two enums the attribute
 // arguments read, MethodImplOptions and EditorBrowsableState. A method of either name is one too: its forwarder is a
 // member of the holder class whose attributes read the enum, and a member is found before any using.

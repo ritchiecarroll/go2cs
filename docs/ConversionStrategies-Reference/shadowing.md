@@ -494,15 +494,17 @@ using System.Runtime.CompilerServices;
 [GoMethodHost(typeof(app_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛBox;
 …
 partial class appᴛBox {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this app_package.Box b) => app_package.Get⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this Box b) => app_package.Get⁔(b);
 }
 ```
 
-A forwarder names its own package's types through the package class (`this app_package.Box b`), as the holder's
-`typeof` does: it stands at namespace scope, where a bare name is looked up in the enclosing namespaces before any
-`using`, and then among the usings, where the project's `using System;` makes a package's `Buffer` or `Type`
-ambiguous with System's (CS0104). The rest of the file still names the package's types bare: an interface record
-reads `[assembly: GoImplement<StackTrace, …>]`. `using static <pkg>_package;` and a namespace `using` are searched at
+A forwarder repeats its body's spelling (`this Box b`), which in the package class finds the package's nested type
+first. At the compilation unit's level of `package_info.cs` the project's `using System;` would make a package's
+`Buffer` or `Type` ambiguous with System's (CS0104), so the file repeats its `using static <pkg>_package;` right after
+its namespace declaration, as each converted file declares it, where a declaration's own usings are searched before
+the enclosing levels'; the aliases the forwarders name follow it (a variadic parameter's `ꓸꓸꓸT`). The interface
+records above the namespace declaration still read the package's types through the compilation unit's
+`using static`: `[assembly: GoImplement<StackTrace, …>]`. `using static <pkg>_package;` and a namespace `using` are searched at
 the same stage, so a package-scope type named like a type of one of those three namespaces would be ambiguous there,
 and a type named like an attribute's short name counts too, since `[MethodImpl]` looks up `MethodImpl` as well as
 `MethodImplAttribute`. A package that declares such a type keeps
@@ -514,7 +516,7 @@ under both of its names); an external test package's file also counts the names 
 class it reads through `using static` as well. A merging write (`-tests`) respells every holder and forwarder line in
 whichever direction the decision takes, so a file is never left with both spellings.
 
-<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:91-94 -->
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:93-96 -->
 ```csharp
 // <MethodHolders>
 [GoMethodHost(typeof(clashlib_package.MethodImpl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class clashlibᴛMethodImpl;
@@ -522,12 +524,12 @@ whichever direction the decision takes, so a file is never left with both spelli
 // </MethodHolders>
 ```
 
-<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:100-104 -->
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:102-106 -->
 ```csharp
 // <MethodForwarders>
 partial class clashlibᴛMethodImpl {
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Get(this clashlib_package.MethodImpl m) => clashlib_package.Get⁔(m);
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Bump(this ref clashlib_package.MethodImpl m, nint by) => clashlib_package.Bump⁔(ref m, by);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Get(this MethodImpl m) => clashlib_package.Get⁔(m);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Bump(this ref MethodImpl m, nint by) => clashlib_package.Bump⁔(ref m, by);
 }
 ```
 

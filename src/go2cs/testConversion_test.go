@@ -4108,7 +4108,7 @@ func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
 	if strings.Contains(exportCs, "partial class pinned"+TempVarMarker) {
 		t.Fatalf("no file switches into a holder:\n%s", exportCs)
 	}
-	requireRecordedForwarder(t, "pinned"+TempVarMarker+"Replacer"+testHolderMark, " Replacer(this ref pinned_package.Replacer r) => pinned_package.Replacer⁔(ref r);")
+	requireRecordedForwarder(t, "pinned"+TempVarMarker+"Replacer"+testHolderMark, " Replacer(this ref Replacer r) => pinned_package.Replacer⁔(ref r);")
 	if !strings.Contains(exportCs, "r.Replacer()") {
 		t.Fatalf("the internal-variant call site must name the method as Go does:\n%s", exportCs)
 	}
@@ -4172,7 +4172,7 @@ func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) 
 	if !strings.Contains(valueCs, "internal static void Sort⁔(/*this*/ By by) { Sort(by); }") {
 		t.Fatalf("the test method's body must call the dot-imported function bare:\n%s", valueCs)
 	}
-	requireRecordedForwarder(t, "value_test"+TempVarMarker+"By", " Sort(this value_test_package.By by) => value_test_package.Sort⁔(by);")
+	requireRecordedForwarder(t, "value_test"+TempVarMarker+"By", " Sort(this By by) => value_test_package.Sort⁔(by);")
 	if !strings.Contains(valueCs, "by.Sort();") {
 		t.Fatalf("the test method's call site must name the method as Go does:\n%s", valueCs)
 	}
