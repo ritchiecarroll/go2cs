@@ -2459,13 +2459,17 @@ it.
 
 ### 21.1 The guard, and its controls
 
-Behavioral `ArrayViewWholeAssign`, 23 lines, each taking a window (or, for the last, an element through the result's
+Behavioral `ArrayViewWholeAssign`, 30 lines, each taking a window (or, for a named result, an element through the result's
 address), assigning the whole value and printing the value's first element and the window's element 2, compared to Go:
 a variable from a variable, from a literal, from a call, a tuple, a swap, an array field, a whole struct (the field
 view), an element of an array of arrays, the outer array, `*p`, a package variable, an element of a slice of structs;
 the for init, for post and for-clause field tuples; if-init and switch-init tuples; a multi-value right side
 (`a, err = f()`); a range that assigns (`for _, a = range arrs`); a struct inside a struct; `*ph = holder{...}`; a named
-array type; and an index through an escaping named result in a function with a defer. All four phases pass.
+array type; an index through an escaping named result in a function with a defer; a select receive and a comma-ok
+receive (`a, ok = <-ch`); a single assignment in a for init and in a for post (`for a = b; ...`, `...; a = b`, the
+one-operand path); a labelled `continue outer` from an inner loop into a loop whose post was lowered; and an index
+through an escaping named result of a struct holding an array, and of an alias of an array type (`type A = [8]uint64`),
+each in a function with a defer. All four phases pass.
 
 Controls, each a scratch build, the converter source restored sha-identical:
 
@@ -2475,6 +2479,10 @@ Controls, each a scratch build, the converter source restored sha-identical:
 - The converter before bb687e3e32: the three for-clause lines red (`for cl  : 101 0 1`, `for post: 171 0 2`,
   `for fld : 181 0 1`), the other seven new lines green, as predicted before the run.
 - The converter before 901eb8fbf2: the named-result line panics, `index out of range [1] with length 0`.
+- The converter at 10a8a1b325, before the alias fold (P3's review, COORD 144923Z): the alias-of-array result line
+  panics the same way, since `type A = [8]uint64` is a `*types.Alias` and missed the array test; the other four new
+  lines (both single assignments, the labelled continue, the struct result) green, all five as predicted before the run.
+  The fold unaliases the result type first.
 
 ### 21.2 The standard library census
 

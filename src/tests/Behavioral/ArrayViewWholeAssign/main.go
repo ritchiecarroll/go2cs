@@ -27,6 +27,8 @@ type outerHolder struct {
 
 type named [8]uint64
 
+type aliasArr = [8]uint64
+
 var global [8]uint64
 
 func mk() [8]uint64 { return [8]uint64{11, 12} }
@@ -262,6 +264,60 @@ func namedResultIndex() (a [8]uint64) {
 	return
 }
 
+func forSingle() {
+	var a [8]uint64
+	b := [8]uint64{201, 202}
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	n := 0
+	for a = b; n < 1; n++ {
+		f[0] = 0xAAAA
+	}
+	fmt.Println("for one :", a[0], f[2], n)
+}
+
+func forSinglePost() {
+	var a [8]uint64
+	b := [8]uint64{211, 212}
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	n := 0
+	for ; n < 2; a = b {
+		n++
+	}
+	f[0] = 0xAAAA
+	fmt.Println("for 1pst:", a[0], f[2], n)
+}
+
+func forLabelled() {
+	var a [8]uint64
+	b := [8]uint64{221, 222}
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	n := 0
+outer:
+	for ; n < 2; a, n = b, n+1 {
+		for k := 0; k < 2; k++ {
+			if k == 0 {
+				continue outer
+			}
+		}
+	}
+	f[0] = 0xAAAA
+	fmt.Println("for lbl :", a[0], f[2], n)
+}
+
+func namedStructResultIndex() (h holder) {
+	p := &h
+	defer func() { h.x[0] = 0xDDDD }()
+	p.x[1] = 404
+	return
+}
+
+func aliasedResultIndex() (a aliasArr) {
+	p := &a
+	defer func() { a[0] = 0xCCCC }()
+	p[1] = 303
+	return
+}
+
 func main() {
 	variable()
 	literal()
@@ -289,4 +345,11 @@ func main() {
 	recvOk()
 	r := namedResultIndex()
 	fmt.Println("res idx :", r[0], r[1], len(r))
+	forSingle()
+	forSinglePost()
+	forLabelled()
+	h := namedStructResultIndex()
+	fmt.Println("res sidx:", h.x[0], h.x[1], len(h.x))
+	ra := aliasedResultIndex()
+	fmt.Println("res aidx:", ra[0], ra[1], len(ra))
 }
